@@ -7,7 +7,7 @@
 # <bitbar.desc>List package updates available from Homebrew, Cask, Python's pip2 and pip3, Node's npm, Atom's apm, Rebuy's gem and Mac AppStore via mas CLI. Allows individual or full upgrades (if available).</bitbar.desc>
 # <bitbar.dependencies>python,homebrew,cask,pip,npm,apm,gem,mas</bitbar.dependencies>
 # <bitbar.image>https://i.imgur.com/CiQpQ42.png</bitbar.image>
-# <bitbar.abouturl>https://github.com/kdeldycke/dotfiles/blob/master/dotfiles-osx/.bitbar/package_manager.7h.py</bitbar.abouturl>
+# <bitbar.abouturl>https://github.com/kdeldycke/package-manager</bitbar.abouturl>
 
 """
 Default update cycle is set to 7 hours so we have a chance to get user's

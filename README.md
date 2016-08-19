@@ -81,3 +81,10 @@ Changelog
 
 * Initial public release.
 * Add support for Homebrew and Cask.
+
+
+Contributors
+------------
+
+* [Kevin Deldycke](https://github.com/kdeldycke)
+* [Brian Hartvigsen](https://github.com/tresni)

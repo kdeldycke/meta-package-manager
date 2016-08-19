@@ -36,6 +36,7 @@ Changelog
 
 * Move the plugin to its own repository.
 * Add a `README.md` file.
+* License under GPLv2+.
 
 ### [**1.7** (2016-08-16)](https://github.com/kdeldycke/package-manager/compare/v1.6...v1.7)
 
@@ -89,3 +90,21 @@ Contributors
 
 * [Kevin Deldycke](https://github.com/kdeldycke)
 * [Brian Hartvigsen](https://github.com/tresni)
+
+
+License
+-------
+
+The content of this repository is copyrighted (c) 2016 Kevin Deldycke.
+
+This code is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, version 2, or any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+For full details, please see the file named COPYING in the top directory of the
+source tree. You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.

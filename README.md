@@ -13,14 +13,14 @@ Supported
 
 Package manager | Individual upgrade | Full upgrade
 :--- |:---: |:---:
-Homebrew | :white_check_mark: | :white_check_mark:
-Cask | :white_check_mark: | :white_check_mark:
-Python 2 `pip` | :white_check_mark: | :white_check_mark:
-Python 3 `pip` | :white_check_mark: | :white_check_mark:
-Node's `npm` | :white_check_mark: | :white_check_mark:
-Atom's `apm` | :white_check_mark: | :white_check_mark:
-Ruby's `gem` | :white_check_mark: | :white_check_mark:
-Mac AppStore via `mas` | :white_check_mark: | :white_check_mark:
+[Homebrew](http://brew.sh) | :white_check_mark: | :white_check_mark:
+[Cask](https://caskroom.github.io) | :white_check_mark: | :white_check_mark:
+[Python 2 `pip`](https://pypi.org) | :white_check_mark: | :white_check_mark:
+[Python 3 `pip`](https://pypi.org) | :white_check_mark: | :white_check_mark:
+[Node's `npm`](https://www.npmjs.com) | :white_check_mark: | :white_check_mark:
+[Atom's `apm`](https://atom.io/packages) | :white_check_mark: | :white_check_mark:
+[Ruby's `gem`](https://rubygems.org) | :white_check_mark: | :white_check_mark:
+[Mac AppStore](https://apple.com/osx/apps/app-store/) via [`mas`](https://github.com/argon/mas) | :white_check_mark: | :white_check_mark:
 
 
 History

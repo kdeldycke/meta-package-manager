@@ -1,12 +1,26 @@
 Package Manager
 ===============
 
-A bitbar plugin to list package updates available from Homebrew, Cask, Python's
-pip2 and pip3, Node's npm, Atom's apm, Rebuy's gem and Mac AppStore via mas
-CLI. Allows individual or full upgrades (if available).
+A [BitBar](https://getbitbar.com) plugin to simplify software upgrades from
+several package managers.
 
 ![Bitbar plugin screenshot
 ](https://raw.githubusercontent.com/kdeldycke/package-manager/develop/screenshot.png)
+
+
+Supported
+---------
+
+Package manager | Individual upgrade | Full upgrade
+:--- |:---: |:---:
+Homebrew | :white_check_mark: | :white_check_mark:
+Cask | :white_check_mark: | :white_check_mark:
+Python 2 `pip` | :white_check_mark: | :white_check_mark:
+Python 3 `pip` | :white_check_mark: | :white_check_mark:
+Node's `npm` | :white_check_mark: | :white_check_mark:
+Atom's `apm` | :white_check_mark: | :white_check_mark:
+Ruby's `gem` | :white_check_mark: | :white_check_mark:
+Mac AppStore via `mas` | :white_check_mark: | :white_check_mark:
 
 
 History

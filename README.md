@@ -34,7 +34,8 @@ Changelog
 
 ### [**1.8.dev** (unreleased)](https://github.com/kdeldycke/package-manager/compare/v1.7...develop)
 
-* No changes yet.
+* Move the plugin to its own repository.
+* Add a `README.md` file.
 
 ### [**1.7** (2016-08-16)](https://github.com/kdeldycke/package-manager/compare/v1.6...v1.7)
 

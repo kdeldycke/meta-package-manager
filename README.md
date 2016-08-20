@@ -77,6 +77,7 @@ Changelog
 * Move the plugin to its own repository.
 * Add a `README.md` file.
 * License under GPLv2+.
+* Add `.gitignore` config.
 
 ### [**1.7** (2016-08-16)](https://github.com/kdeldycke/package-manager/compare/v1.6...v1.7)
 

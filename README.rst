@@ -4,6 +4,32 @@ Package Manager
 A `BitBar <https://getbitbar.com>`_ plugin to simplify software upgrades from
 several package managers.
 
+Stable release: |release| |versions| |license| |dependencies|
+
+Development: |build| |coverage| |quality|
+
+.. |release| image:: https://img.shields.io/pypi/v/package-manager.svg
+    :target: https://pypi.python.org/pypi/package-manager
+    :alt: Last release
+.. |versions| image:: https://img.shields.io/pypi/pyversions/package-manager.svg
+    :target: https://pypi.python.org/pypi/package-manager
+    :alt: Python versions
+.. |license| image:: https://img.shields.io/pypi/l/package-manager.svg
+    :target: https://www.gnu.org/licenses/gpl-2.0.html
+    :alt: Software license
+.. |dependencies| image:: https://img.shields.io/requires/github/kdeldycke/package-manager/master.svg
+    :target: https://requires.io/github/kdeldycke/package-manager/requirements/?branch=master
+    :alt: Requirements freshness
+.. |build| image:: https://img.shields.io/travis/kdeldycke/package-manager/develop.svg
+    :target: https://travis-ci.org/kdeldycke/package-manager
+    :alt: Unit-tests status
+.. |coverage| image:: https://codecov.io/github/kdeldycke/package-manager/coverage.svg?branch=develop
+    :target: https://codecov.io/github/kdeldycke/package-manager?branch=develop
+    :alt: Coverage Status
+.. |quality| image:: https://img.shields.io/scrutinizer/g/kdeldycke/package-manager.svg
+    :target: https://scrutinizer-ci.com/g/kdeldycke/package-manager/?branch=develop
+    :alt: Code Quality
+
 .. image:: https://raw.githubusercontent.com/kdeldycke/package-manager/develop/screenshot.png
     :alt: Bitbar plugin screenshot.
     :align: center

@@ -5,8 +5,8 @@ A `BitBar <https://getbitbar.com>`_ plugin to simplify software upgrades from
 several package managers.
 
 .. image:: https://raw.githubusercontent.com/kdeldycke/package-manager/develop/screenshot.png
-   :alt: Bitbar plugin screenshot.
-   :align: center
+    :alt: Bitbar plugin screenshot.
+    :align: center
 
 
 Supported
@@ -47,7 +47,7 @@ __ https://atom.io/packages
    Ruby's ``gem``
 __ https://rubygems.org
 .. |mas| replace::
-  Mac AppStore via `mas``
+   Mac AppStore via ``mas``
 __ https://github.com/argon/mas
 
 

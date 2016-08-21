@@ -80,9 +80,9 @@ __ https://github.com/argon/mas
 History
 -------
 
-The ``package_manager.py`` script `started its life in my *dotfile* repository
+The ``package_manager.py`` script `started its life in my 'dotfile' repository
 <https://github.com/kdeldycke/dotfiles/commit/bfcc51e318b40c4283974548cfa1712d082be121#diff-c8127ac6af9d4a21e366ff740db2eeb5>`_,
-as a rewrite from Bash to Python of the `*brew-updates.sh* script
+as a rewrite from Bash to Python of the `'brew-updates.sh' script
 <https://getbitbar.com/plugins/Dev/Homebrew/brew-updates.1h.sh>`_.
 
 I then `merged both Homebrew and Cask

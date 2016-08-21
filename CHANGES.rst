@@ -10,6 +10,7 @@ Changelog
 * Add ``.gitignore`` config.
 * Add Python package skeleton. Closes #1.
 * Split changelog out of readme.
+* Add Travis CI configuration.
 
 
 `1.7 (2016-08-16) <https://github.com/kdeldycke/package-manager/compare/v1.6...v1.7>`_

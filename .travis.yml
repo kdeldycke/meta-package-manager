@@ -1,0 +1,32 @@
+# After changing this file, check it on: http://lint.travis-ci.org/
+language: python
+sudo: false
+
+python:
+  - "2.7"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - pypy
+  - pypy3
+
+before_install:
+  # Check default Python version installed.
+  - python --version
+
+before_script:
+  - pip install codecov
+
+script:
+  # Laucnh unittests.
+  - pip install -e .[tests]
+  - coverage run ./setup.py test
+  - coverage report -m
+  # Check coding style.
+  - pycodestyle
+  # Test that building packages works.
+  - pip install -e .[develop]
+  - ./setup.py sdist bdist_egg bdist_wheel
+
+after_script:
+  - codecov

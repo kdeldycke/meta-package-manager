@@ -8,29 +8,29 @@ Stable release: |release| |versions| |license| |dependencies|
 
 Development: |build| |coverage| |quality|
 
-.. |release| image:: https://img.shields.io/pypi/v/package-manager.svg
-    :target: https://pypi.python.org/pypi/package-manager
+.. |release| image:: https://img.shields.io/pypi/v/meta-package-manager.svg
+    :target: https://pypi.python.org/pypi/meta-package-manager
     :alt: Last release
-.. |versions| image:: https://img.shields.io/pypi/pyversions/package-manager.svg
-    :target: https://pypi.python.org/pypi/package-manager
+.. |versions| image:: https://img.shields.io/pypi/pyversions/meta-package-manager.svg
+    :target: https://pypi.python.org/pypi/meta-package-manager
     :alt: Python versions
-.. |license| image:: https://img.shields.io/pypi/l/package-manager.svg
+.. |license| image:: https://img.shields.io/pypi/l/meta-package-manager.svg
     :target: https://www.gnu.org/licenses/gpl-2.0.html
     :alt: Software license
-.. |dependencies| image:: https://img.shields.io/requires/github/kdeldycke/package-manager/master.svg
-    :target: https://requires.io/github/kdeldycke/package-manager/requirements/?branch=master
+.. |dependencies| image:: https://img.shields.io/requires/github/kdeldycke/meta-package-manager/master.svg
+    :target: https://requires.io/github/kdeldycke/meta-package-manager/requirements/?branch=master
     :alt: Requirements freshness
-.. |build| image:: https://img.shields.io/travis/kdeldycke/package-manager/develop.svg
-    :target: https://travis-ci.org/kdeldycke/package-manager
+.. |build| image:: https://img.shields.io/travis/kdeldycke/meta-package-manager/develop.svg
+    :target: https://travis-ci.org/kdeldycke/meta-package-manager
     :alt: Unit-tests status
-.. |coverage| image:: https://codecov.io/github/kdeldycke/package-manager/coverage.svg?branch=develop
-    :target: https://codecov.io/github/kdeldycke/package-manager?branch=develop
+.. |coverage| image:: https://codecov.io/github/kdeldycke/meta-package-manager/coverage.svg?branch=develop
+    :target: https://codecov.io/github/kdeldycke/meta-package-manager?branch=develop
     :alt: Coverage Status
-.. |quality| image:: https://img.shields.io/scrutinizer/g/kdeldycke/package-manager.svg
-    :target: https://scrutinizer-ci.com/g/kdeldycke/package-manager/?branch=develop
+.. |quality| image:: https://img.shields.io/scrutinizer/g/kdeldycke/meta-package-manager.svg
+    :target: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/?branch=develop
     :alt: Code Quality
 
-.. image:: https://raw.githubusercontent.com/kdeldycke/package-manager/develop/screenshot.png
+.. image:: https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/screenshot.png
     :alt: Bitbar plugin screenshot.
     :align: center
 
@@ -101,7 +101,7 @@ for a couple of weeks and saw a huge amount of contributions by the community.
 
 With its complexity increasing, it was `decided to move the plugin
 <https://github.com/matryer/bitbar-plugins/issues/525>`_ to `its own repository
-<https://github.com/kdeldycke/package-manager>`_. For details, see the
+<https://github.com/kdeldycke/meta-package-manager>`_. For details, see the
 `migration script
 <https://gist.github.com/kdeldycke/13712cb70e9c1cf4f338eb10dcc059f0>`_.
 
@@ -139,4 +139,4 @@ License
 
 This software is licensed under the `GNU General Public License v2 or later
 (GPLv2+)
-<https://github.com/kdeldycke/package-manager/blob/master/LICENSE>`_.
+<https://github.com/kdeldycke/meta-package-manager/blob/master/LICENSE>`_.

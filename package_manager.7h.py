@@ -13,10 +13,6 @@
 Default update cycle is set to 7 hours so we have a chance to get user's
 attention once a day. Higher frequency might ruin the system as all checks are
 quite resource intensive, and Homebrew might hit GitHub's API calls quota.
-
-If you're bored, feel free to add support for new package manager. A list of
-good candidates is available at:
-https://en.wikipedia.org/wiki/List_of_software_package_management_systems
 """
 
 from __future__ import print_function, unicode_literals

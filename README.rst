@@ -76,6 +76,10 @@ __ https://rubygems.org
    Mac AppStore via ``mas``
 __ https://github.com/argon/mas
 
+If you're bored, feel free to add support for new package manager. See the
+`list of good candidates
+<https://en.wikipedia.org/wiki/List_of_software_package_management_systems>`_.
+
 
 History
 -------

@@ -101,7 +101,9 @@ for a couple of weeks and saw a huge amount of contributions by the community.
 
 With its complexity increasing, it was `decided to move the plugin
 <https://github.com/matryer/bitbar-plugins/issues/525>`_ to `its own repository
-<https://github.com/kdeldycke/package-manager>`_.
+<https://github.com/kdeldycke/package-manager>`_. For details, see the
+`migration script
+<https://gist.github.com/kdeldycke/13712cb70e9c1cf4f338eb10dcc059f0>`_.
 
 
 Current status

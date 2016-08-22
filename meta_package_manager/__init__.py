@@ -20,5 +20,38 @@
 
 """ Expose package-wide elements. """
 
+import logging
+import os
+import sys
+
+
+# We only support macOS for now.
+assert sys.platform == 'darwin'
+
 
 __version__ = '1.8.0'
+
+
+logger = logging.getLogger(__name__)
+
+
+# OS X does not put /usr/local/bin or /opt/local/bin in the PATH for GUI apps.
+# For some package managers this is a problem. Additioanlly Homebrew and
+# Macports are using different pathes.  So, to make sure we can always get to
+# the necessary binaries, we overload the path.  Current preference order would
+# equate to Homebrew, Macports, then System.
+os.environ['PATH'] = ':'.join(['/usr/local/bin',
+                               '/usr/local/sbin',
+                               '/opt/local/bin',
+                               '/opt/local/sbin',
+                               os.environ.get('PATH', '')])
+
+
+# List of supported package managers.
+from .gem import Gems
+from .mas import MAS
+from .pip import Pip2, Pip3
+from .apm import APM
+from .homebrew import Homebrew, Cask
+from .npm import NPM
+PACKAGE_MANAGERS = frozenset([Homebrew, Cask, Pip2, Pip3, APM, NPM, Gems, MAS])

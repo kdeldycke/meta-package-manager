@@ -23,11 +23,7 @@ from __future__ import absolute_import, division, print_function
 import click
 import click_log
 
-from . import (
-    __version__,
-    logger,
-    PACKAGE_MANAGERS
-)
+from . import PACKAGE_MANAGERS, __version__, logger
 
 
 @click.group(invoke_without_command=True)

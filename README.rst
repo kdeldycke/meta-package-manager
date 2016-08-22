@@ -38,6 +38,8 @@ Development: |build| |coverage| |quality|
 Supported
 ---------
 
+Only macOS platform is supported.
+
 ================  ===================  =============
 Package manager   Individual upgrade   Full upgrade
 ================  ===================  =============

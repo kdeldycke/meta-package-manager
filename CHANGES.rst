@@ -4,7 +4,8 @@ Changelog
 `1.8.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.8.0...develop>`_
 --------------------------------------------------------------------------------------------------
 
-* No changes yet.
+* Fix ``bumpversion`` configuration to target ``CHANGES.rst`` instead of
+  ``README.rst``.
 
 
 `1.8.0 (2016-08-22) <https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...v1.8.0>`_

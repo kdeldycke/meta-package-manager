@@ -1,8 +1,8 @@
 Changelog
 =========
 
-`1.8.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...develop>`_
---------------------------------------------------------------------------------------------------
+`1.8.0 (2016-08-22) <https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...v1.8.0>`_
+-------------------------------------------------------------------------------------------------
 
 * Move the plugin to its own repository.
 * Add a ``README.md`` file.

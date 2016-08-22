@@ -36,6 +36,8 @@ MODULE_NAME = 'meta_package_manager'
 PACKAGE_NAME = MODULE_NAME.replace('_', '-')
 
 DEPENDENCIES = [
+    'click >= 5.0',
+    'click_log',
 ]
 
 EXTRA_DEPENDENCIES = {
@@ -128,4 +130,9 @@ setup(
         'Topic :: Utilities',
     ],
 
+    entry_points={
+        'console_scripts': [
+            'mpm={}.cli:cli'.format(MODULE_NAME),
+        ],
+    }
 )

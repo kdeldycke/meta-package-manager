@@ -32,7 +32,7 @@ import re
 
 from setuptools import find_packages, setup
 
-MODULE_NAME = 'package_manager'
+MODULE_NAME = 'meta_package_manager'
 PACKAGE_NAME = MODULE_NAME.replace('_', '-')
 
 DEPENDENCIES = [

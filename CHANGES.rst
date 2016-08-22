@@ -11,6 +11,12 @@ Changelog
 * Add Python package skeleton. Closes #1.
 * Split changelog out of readme.
 * Add Travis CI configuration.
+* Use semver-like 3-cmoponents version number.
+* Copy all BitBat plugin code to Python module.
+* Give each supported package manager its own file.
+* Add minimal ``mpm`` meta CLI to list supported package managers.
+* Add default ``bumpversion``, ``isort``, ``nosetests``, ``coverage``, ``pep8``
+  and ``pylint`` default configuration.
 
 
 `1.7.0 (2016-08-16) <https://github.com/kdeldycke/meta-package-manager/compare/v1.6.0...v1.7.0>`_

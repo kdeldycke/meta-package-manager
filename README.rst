@@ -83,6 +83,54 @@ If you're bored, feel free to add support for new package manager. See the
 <https://en.wikipedia.org/wiki/List_of_software_package_management_systems>`_.
 
 
+Usage
+-----
+
+List global options and commands:
+
+.. code-block:: bash
+
+    $ mpm
+    Usage: mpm [OPTIONS] COMMAND [ARGS]...
+
+      CLI for multi-package manager updates and upgrades.
+
+    Options:
+      -v, --verbosity LEVEL  Either CRITICAL, ERROR, WARNING, INFO or DEBUG
+      --version              Show the version and exit.
+      --help                 Show this message and exit.
+
+    Commands:
+      list      List available updates.
+      managers  List supported package managers and their location.
+
+
+List all supported package managers and their status on current system:
+
+.. code-block:: bash
+
+    $ mpm managers
+    ╒═══════════════════╤══════════╤═════════════════════╕
+    │ Package manager   │ Active   │ Location            │
+    ╞═══════════════════╪══════════╪═════════════════════╡
+    │ Cask              │ ✅        │ /usr/local/bin/brew │
+    ├───────────────────┼──────────┼─────────────────────┤
+    │ Homebrew          │ ✅        │ /usr/local/bin/brew │
+    ├───────────────────┼──────────┼─────────────────────┤
+    │ Mac AppStore      │ ✅        │ /usr/local/bin/mas  │
+    ├───────────────────┼──────────┼─────────────────────┤
+    │ Python 2 pip      │ ✅        │ /usr/local/bin/pip2 │
+    ├───────────────────┼──────────┼─────────────────────┤
+    │ Python 3 pip      │ ✅        │ /usr/local/bin/pip3 │
+    ├───────────────────┼──────────┼─────────────────────┤
+    │ Ruby Gems         │ ✅        │ /usr/local/bin/gem  │
+    ├───────────────────┼──────────┼─────────────────────┤
+    │ apm               │ ✅        │ /usr/local/bin/apm  │
+    ├───────────────────┼──────────┼─────────────────────┤
+    │ npm               │ ✅        │ /usr/local/bin/npm  │
+    ╘═══════════════════╧══════════╧═════════════════════╛
+
+
 History
 -------
 

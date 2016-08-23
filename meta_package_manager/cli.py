@@ -20,8 +20,11 @@
 
 from __future__ import absolute_import, division, print_function
 
+from operator import itemgetter
+
 import click
 import click_log
+from tabulate import tabulate
 
 from . import PACKAGE_MANAGERS, __version__, logger
 
@@ -46,12 +49,15 @@ def cli(ctx):
 def managers(ctx):
     """ List all supported package managers and their presence on the system.
     """
+    table = []
     for klass in PACKAGE_MANAGERS:
         manager = klass()
-        logger.info('{}: {} ({}).'.format(
+        table.append([
             manager.name,
-            'Active' if manager.active else 'Not found',
-            manager.cli))
+            u'✅' if manager.active else '',
+            manager.cli])
+    table = [['Package manager', 'Active', 'Location']] + sorted(table)
+    logger.info(tabulate(table, tablefmt='fancy_grid', headers='firstrow'))
 
 
 @cli.command(short_help='List available updates.')

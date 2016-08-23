@@ -6,6 +6,7 @@ Changelog
 
 * Fix ``bumpversion`` configuration to target ``CHANGES.rst`` instead of
   ``README.rst``.
+* Render list of detected managers in a table.
 
 
 `1.8.0 (2016-08-22) <https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...v1.8.0>`_

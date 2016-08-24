@@ -32,11 +32,13 @@ import os
 import sys
 
 
-# We only support macOS for now.
-assert sys.platform == 'darwin'
-
-
 __version__ = '1.8.1'
+
+
+# We only support macOS for now.
+if sys.platform != 'darwin':
+    raise NotImplementedError(
+        "{} platform is not supported. Only macOS is.".format(sys.platform))
 
 
 logger = logging.getLogger(__name__)

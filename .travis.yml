@@ -2,16 +2,116 @@
 language: python
 sudo: false
 
-python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
-  - "3.5"
-  - pypy
-  - pypy3
+# We need to explicitely set all combination of the test matrix because Travis
+# OSX images do not support Python. See:
+# https://docs.travis-ci.com/user/multi-os/#Python-example-(unsupported-languages)
+matrix:
+  include:
 
+    # We're not directly using the Python distribution provided by Travis, but
+    # this variable will be fed to Conda to install the right version.
+    - python: "2.7"
+      env: PYTHON_DIST="2.7"
+    - python: "3.3"
+      env: PYTHON_DIST="3.3"
+    - python: "3.4"
+      env: PYTHON_DIST="3.4"
+    - python: "3.5"
+      env: PYTHON_DIST="3.5"
+
+    # Xcode to OSX version matrix is available at:
+    # https://docs.travis-ci.com/user/osx-ci-environment/#OS-X-Version
+
+    # Xcode 6.2-beta is OSX 10.9.
+    - language: generic
+      os: osx
+      osx_image: beta-xcode6.2
+      env: PYTHON_DIST="2.7"
+    - language: generic
+      os: osx
+      osx_image: beta-xcode6.2
+      env: PYTHON_DIST="3.3"
+    - language: generic
+      os: osx
+      osx_image: beta-xcode6.2
+      env: PYTHON_DIST="3.4"
+    - language: generic
+      os: osx
+      osx_image: beta-xcode6.2
+      env: PYTHON_DIST="3.5"
+
+    # Xcode 7.1 is OSX 10.10.
+    - language: generic
+      os: osx
+      osx_image: xcode7.1
+      env: PYTHON_DIST="2.7"
+    - language: generic
+      os: osx
+      osx_image: xcode7.1
+      env: PYTHON_DIST="3.3"
+    - language: generic
+      os: osx
+      osx_image: xcode7.1
+      env: PYTHON_DIST="3.4"
+    - language: generic
+      os: osx
+      osx_image: xcode7.1
+      env: PYTHON_DIST="3.5"
+
+    # Xcode 8 is OSX 10.11.
+    - language: generic
+      os: osx
+      osx_image: xcode8
+      env: PYTHON_DIST="2.7"
+    - language: generic
+      os: osx
+      osx_image: xcode8
+      env: PYTHON_DIST="3.3"
+    - language: generic
+      os: osx
+      osx_image: xcode8
+      env: PYTHON_DIST="3.4"
+    - language: generic
+      os: osx
+      osx_image: xcode8
+      env: PYTHON_DIST="3.5"
+
+# Update the system and setup a fresh Anaconda ecosystem.
 before_install:
   # Check default Python version installed.
+  - python --version
+  # Explicitly download the Miniconda dedicated to the Python version we
+  # target, to ensure stability in case the default change in the future. Also
+  # speed things up a little bit by only installing the minimal requirements.
+  - if [[ "$PYTHON_DIST" == "2.7" ]]; then
+      MINICONDA_DIST="Miniconda2-latest";
+    else
+      MINICONDA_DIST="Miniconda3-latest";
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      MINICONDA_DIST="$MINICONDA_DIST-MacOSX-x86_64.sh";
+    else
+      MINICONDA_DIST="$MINICONDA_DIST-Linux-x86_64.sh";
+    fi
+  - wget https://repo.continuum.io/miniconda/$MINICONDA_DIST -O ./miniconda.sh
+  - bash ./miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update --all
+  # Useful for debugging any issues with Conda.
+  - conda info --all
+  # The next couple lines fix a crash with multiprocessing on Travis and are
+  # not specific to using Miniconda.
+  - sudo rm -rf /dev/shm
+  - sudo ln -s /run/shm /dev/shm
+
+install:
+  # Create an Anaconda virtual env in a particular Python version.
+  - conda create --name test_env python=$PYTHON_DIST
+  - conda env update --name test_env
+  - source activate test_env
+  # Check we installed the right Python version.
   - python --version
 
 before_script:

@@ -9,6 +9,7 @@ Changelog
 * Render list of detected managers in a table.
 * Use ``conda`` in Travis tests to install specific versions of Python across
   the range of OSX workers.
+* Drop support for PyPy while we search a way to install it on OSX with Travis.
 
 
 `1.8.0 (2016-08-22) <https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...v1.8.0>`_

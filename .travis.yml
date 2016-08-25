@@ -109,7 +109,6 @@ before_install:
 install:
   # Create an Anaconda virtual env in a particular Python version.
   - conda create --name test_env python=$PYTHON_DIST
-  - conda env update --name test_env
   - source activate test_env
   # Check we installed the right Python version.
   - python --version

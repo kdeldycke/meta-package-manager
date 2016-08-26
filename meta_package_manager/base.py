@@ -31,7 +31,7 @@ from subprocess import PIPE, Popen
 
 
 class PackageManager(object):
-    """ Generic class for a package manager. """
+    """ Package manager definition. """
 
     cli = None
 

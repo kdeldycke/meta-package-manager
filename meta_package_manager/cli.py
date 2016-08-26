@@ -25,7 +25,7 @@ import click_log
 from tabulate import tabulate
 
 from . import __version__, logger
-from .common import list_package_managers
+from .common import package_managers
 
 
 @click.group(invoke_without_command=True)
@@ -49,11 +49,10 @@ def managers(ctx):
     """ List all supported package managers and their presence on the system.
     """
     table = []
-    for klass_id, klass in list_package_managers().items():
-        manager = klass()
+    for manager_id, manager in package_managers().items():
         table.append([
             manager.name,
-            klass_id,
+            manager_id,
             u'✅' if manager.active else '',
             manager.cli])
     table = [['Package manager', 'ID', 'Active', 'Location']] + sorted(table)

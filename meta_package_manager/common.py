@@ -35,22 +35,23 @@ from os import path
 from . import logger
 from .base import PackageManager
 
-
-def list_package_managers():
+_package_managers = {}
+def package_managers():
     """ Search for package manager definitions locally and return a dict. """
+    if not _package_managers:
 
-    package_managers = {}
+        here = path.dirname(path.abspath(__file__))
 
-    here = path.dirname(path.abspath(__file__))
+        for py_file in glob(path.join(here, '*.py')):
+            module_name = path.splitext(path.basename(py_file))[0]
+            logger.debug(
+                "Search for package manager definitions in {}".format(py_file))
+            module = import_module(
+                '.{}'.format(module_name), package=__package__)
+            for klass_id, klass in inspect.getmembers(module, inspect.isclass):
+                if issubclass(
+                        klass, PackageManager) and klass is not PackageManager:
+                    manager = klass()
+                    _package_managers[manager.id] = manager
 
-    for py_file in glob(path.join(here, '*.py')):
-        module_name = path.splitext(path.basename(py_file))[0]
-        logger.debug(
-            "Search for package manager definitions in {}".format(py_file))
-        module = import_module('.{}'.format(module_name), package=__package__)
-        for klass_id, klass in inspect.getmembers(module, inspect.isclass):
-            if issubclass(
-                    klass, PackageManager) and klass is not PackageManager:
-                package_managers[klass_id] = klass
-
-    return package_managers
+    return _package_managers

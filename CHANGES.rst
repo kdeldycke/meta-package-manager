@@ -16,6 +16,7 @@ Changelog
   ``meta_package_manager.7h.py``.
 * Give each package manager its own dedicated short string ID.
 * Keep a cache of instanciated package manager.
+* Add unittests around package manager definitions.
 
 
 `1.8.0 (2016-08-22) <https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...v1.8.0>`_

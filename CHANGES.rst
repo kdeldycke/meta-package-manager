@@ -12,6 +12,8 @@ Changelog
 * Drop support for PyPy while we search a way to install it on OSX with Travis.
 * Let ``mpm`` auto-detect package manager definitions.
 * Show package manager IDs in ``mpm managers`` CLI output.
+* Rename ``package_manager.7h.py`` BitBar plugin to
+  ``meta_package_manager.7h.py``.
 
 
 `1.8.0 (2016-08-22) <https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...v1.8.0>`_

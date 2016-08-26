@@ -1,5 +1,5 @@
 # https://docs.python.org/2.7/distutils/sourcedist.html#the-manifest-in-template
 include LICENSE
 include MANIFEST.in
-include package_manager.7h.py
+include meta_package_manager.7h.py
 include setup.cfg

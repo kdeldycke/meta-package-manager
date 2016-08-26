@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# <bitbar.title>Package Manager</bitbar.title>
+# <bitbar.title>Meta Package Manager</bitbar.title>
 # <bitbar.version>v1.8.1</bitbar.version>
 # <bitbar.author>Kevin Deldycke</bitbar.author>
 # <bitbar.author.github>kdeldycke</bitbar.author.github>
 # <bitbar.desc>List package updates from several managers.</bitbar.desc>
 # <bitbar.dependencies>python</bitbar.dependencies>
 # <bitbar.image>https://i.imgur.com/CiQpQ42.png</bitbar.image>
-# <bitbar.abouturl>https://github.com/kdeldycke/package-manager</bitbar.abouturl>
+# <bitbar.abouturl>https://github.com/kdeldycke/meta-package-manager</bitbar.abouturl>
 
 """
 Default update cycle is set to 7 hours so we have a chance to get user's

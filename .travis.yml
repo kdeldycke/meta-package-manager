@@ -101,10 +101,6 @@ before_install:
   - conda update --all
   # Useful for debugging any issues with Conda.
   - conda info --all
-  # The next couple lines fix a crash with multiprocessing on Travis and are
-  # not specific to using Miniconda.
-  - sudo rm -rf /dev/shm
-  - sudo ln -s /run/shm /dev/shm
 
 install:
   # Create an Anaconda virtual env in a particular Python version.

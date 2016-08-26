@@ -4,8 +4,8 @@
 # <bitbar.version>v1.8.1</bitbar.version>
 # <bitbar.author>Kevin Deldycke</bitbar.author>
 # <bitbar.author.github>kdeldycke</bitbar.author.github>
-# <bitbar.desc>List package updates available from Homebrew, Cask, Python's pip2 and pip3, Node's npm, Atom's apm, Rebuy's gem and Mac AppStore via mas CLI. Allows individual or full upgrades (if available).</bitbar.desc>
-# <bitbar.dependencies>python,homebrew,cask,pip,npm,apm,gem,mas</bitbar.dependencies>
+# <bitbar.desc>List package updates from several managers.</bitbar.desc>
+# <bitbar.dependencies>python</bitbar.dependencies>
 # <bitbar.image>https://i.imgur.com/CiQpQ42.png</bitbar.image>
 # <bitbar.abouturl>https://github.com/kdeldycke/package-manager</bitbar.abouturl>
 

@@ -18,15 +18,16 @@ Changelog
 -------------------------------------------------------------------------------------------------
 
 * Move the plugin to its own repository.
-* Add a ``README.md`` file.
+* Rename ``package-manager`` project to ``meta-package-manager``.
+* Add a ``README.rst`` file.
 * License under GPLv2+.
 * Add ``.gitignore`` config.
 * Add Python package skeleton. Closes #1.
-* Split changelog out of readme.
+* Split ``CHANGES.rst`` out of ``README.rst``.
 * Add Travis CI configuration.
-* Use semver-like 3-cmoponents version number.
-* Copy all BitBat plugin code to Python module.
-* Give each supported package manager its own file.
+* Use semver-like 3-components version number.
+* Copy all BitBar plugin code to Python module.
+* Give each supported package manager its own module file.
 * Add minimal ``mpm`` meta CLI to list supported package managers.
 * Add default ``bumpversion``, ``isort``, ``nosetests``, ``coverage``, ``pep8``
   and ``pylint`` default configuration.

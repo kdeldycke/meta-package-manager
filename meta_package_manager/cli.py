@@ -20,8 +20,6 @@
 
 from __future__ import absolute_import, division, print_function
 
-from operator import itemgetter
-
 import click
 import click_log
 from tabulate import tabulate

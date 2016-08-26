@@ -30,7 +30,7 @@ import re
 from .base import PackageManager
 
 
-class Pip(PackageManager):
+class Pip(object):
 
     def sync(self):
         """ List outdated packages and their metadata.
@@ -88,7 +88,7 @@ class Pip(PackageManager):
                  shell=True)
 
 
-class Pip2(Pip):
+class Pip2(PackageManager, Pip):
 
     cli = '/usr/local/bin/pip2'
 
@@ -97,7 +97,7 @@ class Pip2(Pip):
         return "Python 2 pip"
 
 
-class Pip3(Pip):
+class Pip3(PackageManager, Pip):
 
     cli = '/usr/local/bin/pip3'
 

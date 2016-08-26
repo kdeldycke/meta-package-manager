@@ -54,13 +54,3 @@ os.environ['PATH'] = ':'.join(['/usr/local/bin',
                                '/opt/local/bin',
                                '/opt/local/sbin',
                                os.environ.get('PATH', '')])
-
-
-# List of supported package managers.
-from .gem import Gems
-from .mas import MAS
-from .pip import Pip2, Pip3
-from .apm import APM
-from .homebrew import Homebrew, Cask
-from .npm import NPM
-PACKAGE_MANAGERS = frozenset([Homebrew, Cask, Pip2, Pip3, APM, NPM, Gems, MAS])

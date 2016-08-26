@@ -35,6 +35,10 @@ class Homebrew(PackageManager):
 
     cli = '/usr/local/bin/brew'
 
+    @property
+    def id(self):
+        return "brew"
+
     def sync(self):
         """ Fetch latest Homebrew formulas.
 
@@ -90,6 +94,10 @@ class Homebrew(PackageManager):
 
 
 class Cask(Homebrew):
+
+    @property
+    def name(self):
+        return "Homebrew Cask"
 
     @property
     def active(self):

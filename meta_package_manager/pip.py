@@ -94,7 +94,7 @@ class Pip2(PackageManager, Pip):
 
     @property
     def name(self):
-        return "Python 2 pip"
+        return "Python 2's Pip"
 
 
 class Pip3(PackageManager, Pip):
@@ -103,4 +103,4 @@ class Pip3(PackageManager, Pip):
 
     @property
     def name(self):
-        return "Python 3 pip"
+        return "Python 3's Pip"

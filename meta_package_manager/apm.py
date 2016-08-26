@@ -38,6 +38,10 @@ class APM(PackageManager):
     def name(self):
         return "apm"
 
+    @property
+    def name(self):
+        return "Atom's apm"
+
     def sync(self):
         output = self.run(self.cli, 'outdated', '--compatible', '--json')
         if not output:

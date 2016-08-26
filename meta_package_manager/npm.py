@@ -36,7 +36,7 @@ class NPM(PackageManager):
 
     @property
     def name(self):
-        return "npm"
+        return "Node's npm"
 
     def sync(self):
         """

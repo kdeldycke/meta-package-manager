@@ -41,6 +41,15 @@ class PackageManager(object):
         self.error = None
 
     @property
+    def id(self):
+        """ Return package manager's ID. Defaults based on class name.
+
+        This ID must be unique among all package manager definitions and
+        lower-case as they're used as feature flags for the mpm CLI.
+        """
+        return self.__class__.__name__.lower()
+
+    @property
     def name(self):
         """ Return package manager's common name. Defaults based on class name.
         """

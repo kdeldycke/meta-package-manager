@@ -14,6 +14,7 @@ Changelog
 * Show package manager IDs in ``mpm managers`` CLI output.
 * Rename ``package_manager.7h.py`` BitBar plugin to
   ``meta_package_manager.7h.py``.
+* Give each package manager its own dedicated short string ID.
 
 
 `1.8.0 (2016-08-22) <https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...v1.8.0>`_

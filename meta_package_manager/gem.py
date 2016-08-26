@@ -31,20 +31,20 @@ import re
 from .base import PackageManager
 
 
-class Gems(PackageManager):
+class Gem(PackageManager):
 
     HOMEBREW_PATH = '/usr/local/bin/gem'
     SYSTEM_PATH = '/usr/bin/gem'
 
     def __init__(self):
-        super(Gems, self).__init__()
+        super(Gem, self).__init__()
 
         self.system = True
-        if os.path.exists(Gems.HOMEBREW_PATH):
+        if os.path.exists(Gem.HOMEBREW_PATH):
             self.system = False
-            self._cli = Gems.HOMEBREW_PATH
+            self._cli = Gem.HOMEBREW_PATH
         else:
-            self._cli = Gems.SYSTEM_PATH
+            self._cli = Gem.SYSTEM_PATH
 
     @property
     def cli(self):

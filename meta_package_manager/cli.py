@@ -20,6 +20,8 @@
 
 from __future__ import absolute_import, division, print_function
 
+from operator import itemgetter
+
 import click
 import click_log
 from tabulate import tabulate
@@ -55,7 +57,8 @@ def managers(ctx):
             manager_id,
             u'✅' if manager.active else '',
             manager.cli])
-    table = [['Package manager', 'ID', 'Active', 'Location']] + sorted(table)
+    table = [['Package manager', 'ID', 'Active', 'Location']] + sorted(
+        table, key=itemgetter(1))
     logger.info(tabulate(table, tablefmt='fancy_grid', headers='firstrow'))
 
 

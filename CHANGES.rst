@@ -1,7 +1,7 @@
 Changelog
 =========
 
-`1.8.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.8.0...develop>`_
+`1.9.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.8.0...develop>`_
 --------------------------------------------------------------------------------------------------
 
 * Fix ``bumpversion`` configuration to target ``CHANGES.rst`` instead of

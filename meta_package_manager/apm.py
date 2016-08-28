@@ -36,10 +36,6 @@ class APM(PackageManager):
 
     @property
     def name(self):
-        return "apm"
-
-    @property
-    def name(self):
         return "Atom's apm"
 
     def sync(self):

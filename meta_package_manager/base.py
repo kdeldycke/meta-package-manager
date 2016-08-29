@@ -29,6 +29,8 @@ import os
 import sys
 from subprocess import PIPE, Popen
 
+from . import logger
+
 
 class PackageManager(object):
     """ Package manager definition. """
@@ -61,7 +63,13 @@ class PackageManager(object):
 
         Returns True is the main CLI exists and is executable.
         """
-        return os.path.isfile(self.cli) and os.access(self.cli, os.X_OK)
+        if not os.path.isfile(self.cli):
+            logger.debug("{} not found.".format(self.cli))
+            return False
+        if not os.access(self.cli, os.X_OK):
+            logger.debug("{} not executable.".format(self.cli))
+            return False
+        return True
 
     def run(self, *args):
         """ Run a shell command, return the output and keep error message.

@@ -17,6 +17,7 @@ Changelog
 * Give each package manager its own dedicated short string ID.
 * Keep a cache of instanciated package manager.
 * Add unittests around package manager definitions.
+* Do not display location of inactive managers, even if hard-coded.
 
 
 `1.8.0 (2016-08-22) <https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...v1.8.0>`_

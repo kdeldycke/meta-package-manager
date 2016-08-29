@@ -56,7 +56,7 @@ def managers(ctx):
             manager.name,
             manager_id,
             u'✅' if manager.active else '',
-            manager.cli])
+            manager.cli if manager.active else ''])
     table = [['Package manager', 'ID', 'Active', 'Location']] + sorted(
         table, key=itemgetter(1))
     logger.info(tabulate(table, tablefmt='fancy_grid', headers='firstrow'))

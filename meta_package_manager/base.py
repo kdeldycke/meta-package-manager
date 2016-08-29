@@ -90,6 +90,32 @@ class PackageManager(object):
         """
         raise NotImplementedError
 
+    def update_cli(self, package_name=None):
+        """ Return a bash-compatible full-CLI to update a package. """
+        raise NotImplementedError
+
+    def update(self, package_name=None):
+        """ Effectively perform an update of provided package. """
+        return self.run(self.update_cli(package_name))
+
+    def update_all_cli(self):
+        """ Return a bash-compatible full-CLI to update all packages. """
+        raise NotImplementedError
+
+    def update_all(self):
+        """ Effectively perform a full update of all outdated packages.
+
+        If the manager doesn't implements a full update one-liner, then
+        fall-back to calling single-package update one by one.
+        """
+        try:
+            return self.run(self.update_all_cli())
+        except NotImplementedError:
+            output = []
+            for package in self.updates:
+                output.append(self.update(package['name']))
+            return '\n'.join(output)
+
     @staticmethod
     def bitbar_cli_format(full_cli):
         """ Format a bash-runnable full-CLI with parameters into bitbar schema.
@@ -99,17 +125,3 @@ class PackageManager(object):
         for index, param in enumerate(params.split(' ')):
             bitbar_cli += " param{}={}".format(index + 1, param)
         return bitbar_cli
-
-    def update_cli(self, package_name):
-        """ Return a bitbar-compatible full-CLI to update a package. """
-        raise NotImplementedError
-
-    def update_all_cli(self):
-        """ Return a bitbar-compatible full-CLI to update all packages. """
-        raise NotImplementedError
-
-    def _update_all_cmd(self):
-        return '{} upgrade {}'.format(sys.argv[0], self.__class__.__name__)
-
-    def update_all_cmd(self):
-        pass

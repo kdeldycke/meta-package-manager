@@ -62,9 +62,7 @@ class MAS(PackageManager):
     def update_cli(self, package_name):
         if package_name not in self.map:
             return None
-        cmd = "{} install {}".format(self.cli, self.map[package_name])
-        return self.bitbar_cli_format(cmd)
+        return "{} install {}".format(self.cli, self.map[package_name])
 
     def update_all_cli(self):
-        cmd = "{} upgrade".format(self.cli)
-        return self.bitbar_cli_format(cmd)
+        return "{} upgrade".format(self.cli)

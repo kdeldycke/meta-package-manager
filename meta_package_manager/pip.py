@@ -70,22 +70,14 @@ class Pip(object):
                 'latest_version': latest_version})
 
     def update_cli(self, package_name):
-        return self.bitbar_cli_format(
-            "{} install --upgrade {}".format(self.cli, package_name))
+        return "{} install --upgrade {}".format(self.cli, package_name)
 
     def update_all_cli(self):
-        """ Produce a long CLI with all upgradeable package names.
+        """ Pip lacks support of a proper full upgrade command.
 
-        This work around the lack of proper full upgrade command in Pip.
         See: https://github.com/pypa/pip/issues/59
         """
-        return self.bitbar_cli_format(self._update_all_cmd())
-
-    def update_all_cmd(self):
-        self.sync()
-        for package in self.updates:
-            call("{} install -U {}".format(self.cli, package["name"]),
-                 shell=True)
+        raise NotImplementedError
 
 
 class Pip2(PackageManager, Pip):

@@ -87,7 +87,7 @@ class Homebrew(PackageManager):
         cmd = "{} upgrade --cleanup".format(self.cli)
         if package_name:
             cmd += " {}".format(package_name)
-        return self.bitbar_cli_format(cmd)
+        return cmd
 
     def update_all_cli(self):
         return self.update_cli()
@@ -210,18 +210,11 @@ class Cask(Homebrew):
         so we can force a cleanup in one go, as we do above with vanilla
         Homebrew.
         """
-        return self.bitbar_cli_format(
-            "{} cask install {}".format(self.cli, package_name))
+        return "{} cask install {}".format(self.cli, package_name)
 
     def update_all_cli(self):
         """ Cask has no way to update all outdated packages.
 
         See: https://github.com/caskroom/homebrew-cask/issues/4678
         """
-        return self.bitbar_cli_format(self._update_all_cmd())
-
-    def update_all_cmd(self):
-        self.sync()
-        for package in self.updates:
-            call("{} cask install {}".format(self.cli, package['name']),
-                 shell=True)
+        raise NotImplementedError

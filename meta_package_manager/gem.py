@@ -88,7 +88,7 @@ class Gem(PackageManager):
             self.cli)
         if package_name:
             cmd += " {}".format(package_name)
-        return self.bitbar_cli_format(cmd)
+        return cmd
 
     def update_all_cli(self):
         return self.update_cli()

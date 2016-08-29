@@ -68,3 +68,21 @@ def list(ctx):
     """ List available package updates.
     """
     logger.error('Not implemented yet.')
+
+
+@cli.command(short_help='Update all packages.')
+@click.pass_context
+def update(ctx):
+    """ Perform a full package update.
+    """
+    for manager_id, manager in package_managers().items():
+
+        if not manager.active:
+            logger.warning(
+                'Skipping inactive {} manager.'.format(manager.name))
+            continue
+
+        logger.info(
+            'Updating all outdated packages from {}...'.format(manager.name))
+        output = manager.update_all()
+        logger.info(output)

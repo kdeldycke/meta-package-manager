@@ -35,7 +35,10 @@ from os import path
 from . import logger
 from .base import PackageManager
 
+
 _package_managers = {}
+
+
 def package_managers():
     """ Search for package manager definitions locally and return a dict. """
     if not _package_managers:

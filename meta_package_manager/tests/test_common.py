@@ -27,7 +27,7 @@ from __future__ import (
 
 import unittest
 
-from meta_package_manager.common import package_managers
+from meta_package_manager.managers import pool
 
 
 class TestDefinition(unittest.TestCase):
@@ -36,9 +36,9 @@ class TestDefinition(unittest.TestCase):
 
     def test_ascii_id(self):
         """ All package manager IDs should be short ASCII strings. """
-        for pm_id in package_managers():
+        for pm_id in pool():
             self.assertRegexpMatches(pm_id, r'[a-z0-9]+')
 
     def test_number(self):
         """ Check all supported package managers are accounted for. """
-        self.assertEqual(len(package_managers()), 8)
+        self.assertEqual(len(pool()), 8)

@@ -47,13 +47,13 @@ def package_managers():
 
         for py_file in glob(path.join(here, '*.py')):
             module_name = path.splitext(path.basename(py_file))[0]
-            logger.debug(
-                "Search for package manager definitions in {}".format(py_file))
+            logger.debug("Search manager definitions in {}".format(py_file))
             module = import_module(
                 '.{}'.format(module_name), package=__package__)
             for klass_id, klass in inspect.getmembers(module, inspect.isclass):
                 if issubclass(
                         klass, PackageManager) and klass is not PackageManager:
+                    logger.debug("Found {!r}".format(klass))
                     manager = klass()
                     _package_managers[manager.id] = manager
 

@@ -85,7 +85,7 @@ def sync(ctx):
 
 @cli.command(short_help='List available updates.')
 @click.pass_context
-def list(ctx):
+def outdated(ctx):
     """ List available package updates and their versions for each manager. """
     logger.error('Not implemented yet.')
 

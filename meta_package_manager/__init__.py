@@ -37,7 +37,7 @@ __version__ = '1.9.0'
 
 # We only support macOS for now.
 if sys.platform != 'darwin':
-    raise NotImplementedError(
+    raise RuntimeError(
         "{} platform is not supported. Only macOS is.".format(sys.platform))
 
 

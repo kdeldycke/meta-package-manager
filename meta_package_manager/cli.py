@@ -27,7 +27,7 @@ import click_log
 from tabulate import tabulate
 
 from . import __version__, logger
-from .common import package_managers
+from .managers import pool
 
 
 @click.group(invoke_without_command=True)
@@ -51,7 +51,7 @@ def managers(ctx):
     """ List all supported package managers and their presence on the system.
     """
     table = []
-    for manager_id, manager in package_managers().items():
+    for manager_id, manager in pool().items():
         table.append([
             manager.name,
             manager_id,
@@ -66,7 +66,7 @@ def managers(ctx):
 @click.pass_context
 def sync(ctx):
     """ Sync local package metadata and info from external sources. """
-    for manager_id, manager in package_managers().items():
+    for manager_id, manager in pool().items():
 
         if not manager.available:
             logger.warning(
@@ -88,7 +88,7 @@ def list(ctx):
 @click.pass_context
 def update(ctx):
     """ Perform a full package update on all available managers. """
-    for manager_id, manager in package_managers().items():
+    for manager_id, manager in pool().items():
 
         if not manager.available:
             logger.warning(

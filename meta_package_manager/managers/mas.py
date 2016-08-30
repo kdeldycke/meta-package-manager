@@ -25,36 +25,44 @@ from __future__ import (
     unicode_literals
 )
 
-import json
+import re
 
-from .base import PackageManager
+from ..base import PackageManager
 
 
-class APM(PackageManager):
+class MAS(PackageManager):
 
-    cli = '/usr/local/bin/apm'
+    cli = '/usr/local/bin/mas'
+
+    def __init__(self):
+        super(MAS, self).__init__()
+        self.map = {}
 
     @property
     def name(self):
-        return "Atom's apm"
+        return "Mac AppStore"
 
     def sync(self):
-        output = self.run(self.cli, 'outdated', '--compatible', '--json')
+        output = self.run(self.cli, 'outdated')
         if not output:
             return
 
-        for package in json.loads(output):
+        regexp = re.compile(r'(\d+) (.*) \((\S+)\)$')
+        for application in output.split('\n'):
+            if not application:
+                continue
+            _id, name, version = regexp.match(application).groups()
+            self.map[name] = _id
             self.updates.append({
-                'name': package['name'],
-                'installed_version': package['version'],
-                'latest_version': package['latestVersion']
+                'name': name,
+                'latest_version': version,
+                'installed_version': ''
             })
 
-    def update_cli(self, package_name=None):
-        cmd = "{} update --no-confirm".format(self.cli)
-        if package_name:
-            cmd += " {}".format(package_name)
-        return cmd
+    def update_cli(self, package_name):
+        if package_name not in self.map:
+            return None
+        return "{} install {}".format(self.cli, self.map[package_name])
 
     def update_all_cli(self):
-        return self.update_cli()
+        return "{} upgrade".format(self.cli)

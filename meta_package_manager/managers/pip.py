@@ -27,7 +27,7 @@ from __future__ import (
 
 import re
 
-from .base import PackageManager
+from ..base import PackageManager
 
 
 class Pip(object):

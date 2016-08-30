@@ -28,7 +28,7 @@ from __future__ import (
 import os
 import re
 
-from .base import PackageManager
+from ..base import PackageManager
 
 
 class Gem(PackageManager):

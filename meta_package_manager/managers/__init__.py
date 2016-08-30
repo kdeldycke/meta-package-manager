@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-""" Common operations to all package managers. """
+""" Registration, indexing and cache of package manager definitions. """
 
 from __future__ import (
     absolute_import,
@@ -32,16 +32,17 @@ from glob import glob
 from importlib import import_module
 from os import path
 
-from . import logger
-from .base import PackageManager
+from .. import logger
+from ..base import PackageManager
 
 
-_package_managers = {}
+# Global pool of registered manager definitions. Serves as a cache.
+_POOL = {}
 
 
-def package_managers():
+def pool():
     """ Search for package manager definitions locally and return a dict. """
-    if not _package_managers:
+    if not _POOL:
 
         here = path.dirname(path.abspath(__file__))
 
@@ -50,11 +51,11 @@ def package_managers():
             logger.debug("Search manager definitions in {}".format(py_file))
             module = import_module(
                 '.{}'.format(module_name), package=__package__)
-            for klass_id, klass in inspect.getmembers(module, inspect.isclass):
+            for _, klass in inspect.getmembers(module, inspect.isclass):
                 if issubclass(
                         klass, PackageManager) and klass is not PackageManager:
                     logger.debug("Found {!r}".format(klass))
                     manager = klass()
-                    _package_managers[manager.id] = manager
+                    _POOL[manager.id] = manager
 
-    return _package_managers
+    return _POOL

@@ -27,54 +27,31 @@ from __future__ import (
 
 import json
 
-from .base import PackageManager
+from ..base import PackageManager
 
 
-class NPM(PackageManager):
+class APM(PackageManager):
 
-    cli = '/usr/local/bin/npm'
+    cli = '/usr/local/bin/apm'
 
     @property
     def name(self):
-        return "Node's npm"
+        return "Atom's apm"
 
     def sync(self):
-        """
-        Sample of npm output:
-
-            $ npm -g --progress=false --json outdated
-            {
-              "my-linked-package": {
-                "current": "0.0.0-development",
-                "wanted": "linked",
-                "latest": "linked",
-                "location": "/Users/..."
-              },
-              "npm": {
-                "current": "3.10.3",
-                "wanted": "3.10.5",
-                "latest": "3.10.5",
-                "location": "/Users/..."
-              }
-            }
-        """
-        output = self.run(
-            self.cli, '-g', '--progress=false', '--json', 'outdated')
+        output = self.run(self.cli, 'outdated', '--compatible', '--json')
         if not output:
             return
 
-        for package, values in json.loads(output).iteritems():
-            if values['wanted'] == 'linked':
-                continue
+        for package in json.loads(output):
             self.updates.append({
-                'name': package,
-                'installed_version':
-                    values['current'] if 'current' in values else '',
-                'latest_version': values['latest']
+                'name': package['name'],
+                'installed_version': package['version'],
+                'latest_version': package['latestVersion']
             })
 
     def update_cli(self, package_name=None):
-        cmd = "{} -g --progress=false update".format(self.cli)
+        cmd = "{} update --no-confirm".format(self.cli)
         if package_name:
             cmd += " {}".format(package_name)
         return cmd

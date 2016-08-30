@@ -28,7 +28,7 @@ from __future__ import (
 import json
 from subprocess import PIPE, Popen, call
 
-from .base import PackageManager
+from ..base import PackageManager
 
 
 class Homebrew(PackageManager):

@@ -34,7 +34,7 @@ Development: |build| |coverage| |quality|
     :alt: Obligatory XKCD.
     :align: right
     
-    `XKCD #1654 <https://xkcd.com/1654/>`_.
+    Source: `XKCD #1654 <https://xkcd.com/1654/>`_.
 
 
 Supported

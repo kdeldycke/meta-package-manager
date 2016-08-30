@@ -30,6 +30,10 @@ Development: |build| |coverage| |quality|
     :target: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/?branch=develop
     :alt: Code Quality
 
+.. image:: http://imgs.xkcd.com/comics/universal_install_script.png
+    :alt: Obligatory XKCD.
+    :align: center
+
 .. image:: https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/screenshot.png
     :alt: Bitbar plugin screenshot.
     :align: center

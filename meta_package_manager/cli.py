@@ -55,9 +55,9 @@ def managers(ctx):
         table.append([
             manager.name,
             manager_id,
-            u'✅' if manager.active else '',
-            manager.cli if manager.active else ''])
-    table = [['Package manager', 'ID', 'Active', 'Location']] + sorted(
+            u'✅' if manager.available else '',
+            manager.cli if manager.available else ''])
+    table = [['Package manager', 'ID', 'Available', 'Location']] + sorted(
         table, key=itemgetter(1))
     logger.info(tabulate(table, tablefmt='fancy_grid', headers='firstrow'))
 
@@ -68,9 +68,9 @@ def sync(ctx):
     """ Sync local package metadata and info from external sources. """
     for manager_id, manager in package_managers().items():
 
-        if not manager.active:
+        if not manager.available:
             logger.warning(
-                'Skipping inactive {} manager.'.format(manager.name))
+                'Skipping unavailable {} manager.'.format(manager.name))
             continue
 
         logger.info('Sync local package info of {}...'.format(manager.name))
@@ -90,9 +90,9 @@ def update(ctx):
     """ Perform a full package update on all available managers. """
     for manager_id, manager in package_managers().items():
 
-        if not manager.active:
+        if not manager.available:
             logger.warning(
-                'Skipping inactive {} manager.'.format(manager.name))
+                'Skipping unavailable {} manager.'.format(manager.name))
             continue
 
         logger.info(

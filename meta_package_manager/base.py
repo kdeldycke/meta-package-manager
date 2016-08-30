@@ -58,7 +58,7 @@ class PackageManager(object):
         return self.__class__.__name__
 
     @property
-    def active(self):
+    def available(self):
         """ Is the package manager available on the system?
 
         Returns True is the main CLI exists and is executable.

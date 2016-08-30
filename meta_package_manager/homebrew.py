@@ -100,9 +100,9 @@ class Cask(Homebrew):
         return "Homebrew Cask"
 
     @property
-    def active(self):
+    def available(self):
         """ Cask depends on vanilla Homebrew. """
-        if super(Cask, self).active:
+        if super(Cask, self).available:
             cask = Popen([self.cli, 'cask'], stdout=PIPE, stderr=PIPE)
             cask.communicate()
             return cask.returncode == 0

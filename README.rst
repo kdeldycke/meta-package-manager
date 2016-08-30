@@ -30,13 +30,11 @@ Development: |build| |coverage| |quality|
     :target: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/?branch=develop
     :alt: Code Quality
 
-.. image:: http://imgs.xkcd.com/comics/universal_install_script.png
+.. figure:: http://imgs.xkcd.com/comics/universal_install_script.png
     :alt: Obligatory XKCD.
-    :align: center
-
-.. image:: https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/screenshot.png
-    :alt: Bitbar plugin screenshot.
-    :align: center
+    :align: right
+    
+    `XKCD #1654 <https://xkcd.com/1654/>`_.
 
 
 Supported
@@ -90,6 +88,8 @@ If you're bored, feel free to add support for new package manager. See the
 Usage
 -----
 
+Examples of the package's ``mpm`` CLI.
+
 List global options and commands:
 
 .. code-block:: bash
@@ -133,6 +133,14 @@ List all supported package managers and their status on current system:
     ├───────────────────┼──────────┼─────────────────────┤
     │ npm               │ ✅        │ /usr/local/bin/npm  │
     ╘═══════════════════╧══════════╧═════════════════════╛
+
+
+BitBar plugin
+-------------
+
+.. image:: https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/screenshot.png
+    :alt: Bitbar plugin screenshot.
+    :align: left
 
 
 History

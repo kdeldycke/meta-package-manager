@@ -80,7 +80,7 @@ class Pip(object):
         raise NotImplementedError
 
 
-class Pip2(PackageManager, Pip):
+class Pip2(Pip, PackageManager):
 
     cli = '/usr/local/bin/pip2'
 
@@ -89,7 +89,7 @@ class Pip2(PackageManager, Pip):
         return "Python 2's Pip"
 
 
-class Pip3(PackageManager, Pip):
+class Pip3(Pip, PackageManager):
 
     cli = '/usr/local/bin/pip3'
 

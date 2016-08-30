@@ -59,7 +59,7 @@ class PackageManager(object):
 
     @property
     def available(self):
-        """ Is the package manager available on the system?
+        """ Is the package manager available and ready-to-use on the system?
 
         Returns True is the main CLI exists and is executable.
         """

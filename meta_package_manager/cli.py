@@ -65,16 +65,14 @@ def managers(ctx):
 @cli.command(short_help='List available updates.')
 @click.pass_context
 def list(ctx):
-    """ List available package updates.
-    """
+    """ List available package updates and their versions for each manager. """
     logger.error('Not implemented yet.')
 
 
 @cli.command(short_help='Update all packages.')
 @click.pass_context
 def update(ctx):
-    """ Perform a full package update.
-    """
+    """ Perform a full package update on all available managers. """
     for manager_id, manager in package_managers().items():
 
         if not manager.active:

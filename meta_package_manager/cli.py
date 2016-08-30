@@ -20,6 +20,7 @@
 
 from __future__ import absolute_import, division, print_function
 
+import logging
 from operator import itemgetter
 
 import click
@@ -37,10 +38,15 @@ from .managers import pool
 @click.pass_context
 def cli(ctx):
     """ CLI for multi-package manager updates and upgrades. """
+    level = click_log.get_level()
+    logger.debug('Verbosity set to {}.'.format(
+        logging._levelNames.get(level, level)))
+
     # Print help screen and exit if no sub-commands provided.
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
         ctx.exit()
+
     # Load up global options to the context.
     ctx.obj = {}
 

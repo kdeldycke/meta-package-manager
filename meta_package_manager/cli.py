@@ -62,6 +62,21 @@ def managers(ctx):
     logger.info(tabulate(table, tablefmt='fancy_grid', headers='firstrow'))
 
 
+@cli.command(short_help='Sync local package info.')
+@click.pass_context
+def sync(ctx):
+    """ Sync local package metadata and info from external sources. """
+    for manager_id, manager in package_managers().items():
+
+        if not manager.active:
+            logger.warning(
+                'Skipping inactive {} manager.'.format(manager.name))
+            continue
+
+        logger.info('Sync local package info of {}...'.format(manager.name))
+        manager.sync()
+
+
 @cli.command(short_help='List available updates.')
 @click.pass_context
 def list(ctx):

@@ -21,6 +21,7 @@ Changelog
 * Split-up CLI-producing methods and CLI running methods in ``PackageManager``
   base class.
 * Add a new ``update`` CLI sub-command.
+* Add a new ``sync`` CLI sub-command.
 
 
 `1.8.0 (2016-08-22) <https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...v1.8.0>`_

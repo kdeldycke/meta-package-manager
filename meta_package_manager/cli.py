@@ -57,14 +57,18 @@ def managers(ctx):
     """ List all supported package managers and their presence on the system.
     """
     table = []
+
+    # Filters-out inactive managers.
     for manager_id, manager in pool().items():
         table.append([
             manager.name,
             manager_id,
             u'✅' if manager.available else '',
             manager.cli if manager.available else ''])
+
     table = [['Package manager', 'ID', 'Available', 'Location']] + sorted(
         table, key=itemgetter(1))
+
     logger.info(tabulate(table, tablefmt='fancy_grid', headers='firstrow'))
 
 
@@ -74,12 +78,12 @@ def sync(ctx):
     """ Sync local package metadata and info from external sources. """
     for manager_id, manager in pool().items():
 
+        # Filters-out inactive managers.
         if not manager.available:
-            logger.warning(
-                'Skipping unavailable {} manager.'.format(manager.name))
+            logger.warning('Skip unavailable {} manager.'.format(manager_id))
             continue
 
-        logger.info('Sync local package info of {}...'.format(manager.name))
+        logger.info('Sync package info of {}...'.format(manager_id))
         manager.sync()
 
 
@@ -138,12 +142,12 @@ def update(ctx):
     """ Perform a full package update on all available managers. """
     for manager_id, manager in pool().items():
 
+        # Filters-out inactive managers.
         if not manager.available:
-            logger.warning(
-                'Skipping unavailable {} manager.'.format(manager.name))
+            logger.warning('Skip unavailable {} manager.'.format(manager_id))
             continue
 
         logger.info(
-            'Updating all outdated packages from {}...'.format(manager.name))
+            'Updating all outdated packages from {}...'.format(manager_id))
         output = manager.update_all()
         logger.info(output)

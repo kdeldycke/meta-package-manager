@@ -21,7 +21,7 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
-from operator import itemgetter, methodcaller
+from operator import itemgetter
 
 import click
 import click_log

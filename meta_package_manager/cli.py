@@ -21,7 +21,7 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
-from operator import itemgetter
+from operator import itemgetter, methodcaller
 
 import click
 import click_log
@@ -87,7 +87,49 @@ def sync(ctx):
 @click.pass_context
 def outdated(ctx):
     """ List available package updates and their versions for each manager. """
-    logger.error('Not implemented yet.')
+    table = []
+
+    for manager_id, manager in pool().items():
+
+        # Filters-out inactive managers.
+        if not manager.available:
+            logger.warning('Skip unavailable {} manager.'.format(manager_id))
+            continue
+
+        logger.info('Sync {}...'.format(manager_id))
+        manager.sync()
+
+        if manager.error:
+            logger.error(manager.error)
+
+        for pkg_info in manager.updates:
+            table.append([
+                pkg_info['name'],
+                pkg_info['name'],
+                manager_id,
+                pkg_info['installed_version'],
+                pkg_info['latest_version'],
+            ])
+
+    # Sort table by package ID, then manager ID.
+    table = [[
+        'Package name', 'ID', 'Manager', 'Installed version',
+        'Latest version']] + sorted(table, key=itemgetter(1, 2))
+    logger.info(tabulate(table, tablefmt='fancy_grid', headers='firstrow'))
+
+    # Print statistics.
+    manager_stats = {
+        manager_id: len(manager.updates)
+        for manager_id, manager in pool().items() if manager.updates}
+    total_outdated = sum(manager_stats.values())
+    per_manager_totals = ', '.join([
+        '{} from {}'.format(v, k) for k, v in sorted(manager_stats.items())])
+    if per_manager_totals:
+        per_manager_totals = ' ({})'.format(per_manager_totals)
+    logger.info('{} outdated package{} found{}.'.format(
+        total_outdated,
+        's' if total_outdated > 1 else '',
+        per_manager_totals))
 
 
 @cli.command(short_help='Update all packages.')

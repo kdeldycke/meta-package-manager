@@ -39,12 +39,15 @@ class Gem(PackageManager):
     def __init__(self):
         super(Gem, self).__init__()
 
-        self.system = True
+        # Check if the gem CLI is the original one from the system or was
+        # installed via Homebrew.
+        self.system_install = True
         if os.path.exists(Gem.HOMEBREW_PATH):
-            self.system = False
-            self.cli_path = Gem.HOMEBREW_PATH
-        else:
-            self.cli_path = Gem.SYSTEM_PATH
+            self.system_install = False
+
+    @property
+    def cli_path(self):
+        return Gem.SYSTEM_PATH if self.system_install else Gem.HOMEBREW_PATH
 
     @property
     def name(self):
@@ -80,8 +83,7 @@ class Gem(PackageManager):
     def update_cli(self, package_name=None):
         # installs require sudo on system ruby
         cmd = "{}{} update".format(
-            '/usr/bin/sudo ' if self.system else '',
-            self.cli_path)
+            '/usr/bin/sudo ' if self.system_install else '', self.cli_path)
         if package_name:
             cmd += " {}".format(package_name)
         return cmd

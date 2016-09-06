@@ -31,12 +31,21 @@ from . import __version__, logger
 from .managers import pool
 
 
+# Mapping of table formatiing options to tabulate's parameters.
+TABLE_FORMAT = {
+    'plain': 'plain',
+    'simple': 'simple',
+    'fancy': 'fancy_grid'}
+
+
 @click.group(invoke_without_command=True)
 @click_log.init(logger)
-@click_log.simple_verbosity_option(default='INFO', metavar='LEVEL')
+@click.option(
+    '-t', '--table-format', type=click.Choice(TABLE_FORMAT), default='fancy',
+    help="Rendering format of tables. Defaults to fancy.")
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx):
+def cli(ctx, table_format):
     """ CLI for multi-package manager updates and upgrades. """
     level = click_log.get_level()
     logger.debug('Verbosity set to {}.'.format(
@@ -48,7 +57,8 @@ def cli(ctx):
         ctx.exit()
 
     # Load up global options to the context.
-    ctx.obj = {}
+    ctx.obj = {
+        'table_format': TABLE_FORMAT[table_format]}
 
 
 @cli.command(short_help='List supported package managers and their location.')
@@ -69,7 +79,8 @@ def managers(ctx):
     table = [['Package manager', 'ID', 'Available', 'Location']] + sorted(
         table, key=itemgetter(1))
 
-    logger.info(tabulate(table, tablefmt='fancy_grid', headers='firstrow'))
+    logger.info(tabulate(
+        table, tablefmt=ctx.obj['table_format'], headers='firstrow'))
 
 
 @cli.command(short_help='Sync local package info.')
@@ -119,7 +130,8 @@ def outdated(ctx):
     table = [[
         'Package name', 'ID', 'Manager', 'Installed version',
         'Latest version']] + sorted(table, key=itemgetter(1, 2))
-    logger.info(tabulate(table, tablefmt='fancy_grid', headers='firstrow'))
+    logger.info(tabulate(
+        table, tablefmt=ctx.obj['table_format'], headers='firstrow'))
 
     # Print statistics.
     manager_stats = {

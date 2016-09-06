@@ -26,6 +26,7 @@ Changelog
 * Move all package manager definitions in a dedicated folder.
 * Add simple CLI unittests. Closes #2.
 * Implement ``outdated`` CLI sub-command.
+* Allow selection of table rendering.
 
 
 `1.8.0 (2016-08-22) <https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...v1.8.0>`_

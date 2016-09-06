@@ -81,7 +81,7 @@ class Gem(PackageManager):
             })
 
     def update_cli(self, package_name=None):
-        # installs require sudo on system ruby
+        # Installs require sudo on system ruby.
         cmd = "{}{} update".format(
             '/usr/bin/sudo ' if self.system_install else '', self.cli_path)
         if package_name:

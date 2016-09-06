@@ -43,6 +43,7 @@ class MAS(PackageManager):
         return "Mac AppStore"
 
     def sync(self):
+        super(MAS, self).sync()
         output = self.run(self.cli_path, 'outdated')
         if not output:
             return

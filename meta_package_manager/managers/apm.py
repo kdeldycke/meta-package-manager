@@ -39,6 +39,7 @@ class APM(PackageManager):
         return "Atom's apm"
 
     def sync(self):
+        super(APM, self).sync()
         output = self.run(self.cli_path, 'outdated', '--compatible', '--json')
         if not output:
             return

@@ -97,7 +97,6 @@ def sync(ctx):
             logger.warning('Skip unavailable {} manager.'.format(manager_id))
             continue
 
-        logger.info('Sync package info of {}...'.format(manager_id))
         manager.sync()
 
 
@@ -114,7 +113,6 @@ def outdated(ctx):
             logger.warning('Skip unavailable {} manager.'.format(manager_id))
             continue
 
-        logger.info('Sync {}...'.format(manager_id))
         manager.sync()
 
         if manager.error:

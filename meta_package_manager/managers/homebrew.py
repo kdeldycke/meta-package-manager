@@ -69,6 +69,8 @@ class Homebrew(PackageManager):
               }
             ]
         """
+        super(Homebrew, self).sync()
+
         self.run(self.cli_path, 'update')
 
         # List available updates.
@@ -165,6 +167,8 @@ class Cask(PackageManager):
             ==> Contents
               Übersicht.app (app)
         """
+        super(Cask, self).sync()
+
         # `brew cask update` is just an alias to `brew update`. Perform the
         # action anyway to make it future proof.
         self.run(self.cli_path, 'update')

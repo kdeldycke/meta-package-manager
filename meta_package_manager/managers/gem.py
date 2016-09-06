@@ -65,7 +65,9 @@ class Gem(PackageManager):
             power_assert (0.2.6 < 0.3.0)
             psych (2.0.17 < 2.1.0)
         """
-        # outdated does not require sudo privileges on homebrew or system
+        super(Gem, self).sync()
+
+        # Outdated does not require sudo privileges on homebrew or system.
         output = self.run(self.cli_path, 'outdated')
 
         regexp = re.compile(r'(\S+) \((\S+) < (\S+)\)')

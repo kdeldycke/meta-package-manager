@@ -90,7 +90,7 @@ class PackageManager(object):
         Returns a list of dict with package name, current installed version and
         latest upgradeable version.
         """
-        raise NotImplementedError
+        logger.info('Sync {} package info...'.format(self.id))
 
     def update_cli(self, package_name=None):
         """ Return a bash-compatible full-CLI to update a package. """

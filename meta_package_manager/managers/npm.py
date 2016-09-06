@@ -58,6 +58,8 @@ class NPM(PackageManager):
               }
             }
         """
+        super(NPM, self).sync()
+
         output = self.run(
             self.cli_path, '-g', '--progress=false', '--json', 'outdated')
         if not output:

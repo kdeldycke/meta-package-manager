@@ -30,7 +30,7 @@ import re
 from ..base import PackageManager
 
 
-class Pip(object):
+class Pip(PackageManager):
 
     def sync(self):
         """ List outdated packages and their metadata.
@@ -46,6 +46,8 @@ class Pip(object):
             mercurial (3.8.3) - Latest: 3.8.4 [sdist]
             pylint (1.5.6) - Latest: 1.6.1 [wheel]
         """
+        super(Pip, self).sync()
+
         output = self.run(self.cli_path, 'list', '--outdated').strip()
         if not output:
             return
@@ -80,7 +82,7 @@ class Pip(object):
         raise NotImplementedError
 
 
-class Pip2(Pip, PackageManager):
+class Pip2(Pip):
 
     cli_path = '/usr/local/bin/pip2'
 
@@ -89,7 +91,7 @@ class Pip2(Pip, PackageManager):
         return "Python 2's Pip"
 
 
-class Pip3(Pip, PackageManager):
+class Pip3(Pip):
 
     cli_path = '/usr/local/bin/pip3'
 

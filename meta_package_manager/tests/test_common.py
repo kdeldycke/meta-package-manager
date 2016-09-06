@@ -27,7 +27,12 @@ from __future__ import (
 
 import unittest
 
+from meta_package_manager import PY3
 from meta_package_manager.managers import pool
+
+
+if PY3:
+    basestring = (str, bytes)
 
 
 class TestDefinition(unittest.TestCase):
@@ -42,3 +47,13 @@ class TestDefinition(unittest.TestCase):
     def test_number(self):
         """ Check all supported package managers are accounted for. """
         self.assertEqual(len(pool()), 8)
+
+    def test_cli_path_type(self):
+        """ Check that definitions returns the CLI path as a string. """
+        for manager in pool().values():
+            self.assertIsInstance(manager.cli_path, basestring)
+
+    def test_cli_args_type(self):
+        """ Check that definitions returns CLI args as a list. """
+        for manager in pool().values():
+            self.assertIsInstance(manager.cli_args, list)

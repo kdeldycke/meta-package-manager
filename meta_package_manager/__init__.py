@@ -35,6 +35,10 @@ import sys
 __version__ = '1.9.0'
 
 
+PY2 = sys.version_info[0] == 2
+PY3 = sys.version_info[0] == 3
+
+
 # We only support macOS for now.
 if sys.platform != 'darwin':
     raise RuntimeError(

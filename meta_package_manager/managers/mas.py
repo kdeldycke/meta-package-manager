@@ -32,7 +32,7 @@ from ..base import PackageManager
 
 class MAS(PackageManager):
 
-    cli = '/usr/local/bin/mas'
+    cli_path = '/usr/local/bin/mas'
 
     def __init__(self):
         super(MAS, self).__init__()
@@ -43,7 +43,7 @@ class MAS(PackageManager):
         return "Mac AppStore"
 
     def sync(self):
-        output = self.run(self.cli, 'outdated')
+        output = self.run(self.cli_path, 'outdated')
         if not output:
             return
 
@@ -62,7 +62,7 @@ class MAS(PackageManager):
     def update_cli(self, package_name):
         if package_name not in self.map:
             return None
-        return "{} install {}".format(self.cli, self.map[package_name])
+        return "{} install {}".format(self.cli_path, self.map[package_name])
 
     def update_all_cli(self):
-        return "{} upgrade".format(self.cli)
+        return "{} upgrade".format(self.cli_path)

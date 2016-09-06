@@ -32,7 +32,7 @@ from ..base import PackageManager
 
 class NPM(PackageManager):
 
-    cli = '/usr/local/bin/npm'
+    cli_path = '/usr/local/bin/npm'
 
     @property
     def name(self):
@@ -59,7 +59,7 @@ class NPM(PackageManager):
             }
         """
         output = self.run(
-            self.cli, '-g', '--progress=false', '--json', 'outdated')
+            self.cli_path, '-g', '--progress=false', '--json', 'outdated')
         if not output:
             return
 
@@ -74,7 +74,7 @@ class NPM(PackageManager):
             })
 
     def update_cli(self, package_name=None):
-        cmd = "{} -g --progress=false update".format(self.cli)
+        cmd = "{} -g --progress=false update".format(self.cli_path)
         if package_name:
             cmd += " {}".format(package_name)
         return cmd

@@ -32,14 +32,14 @@ from ..base import PackageManager
 
 class APM(PackageManager):
 
-    cli = '/usr/local/bin/apm'
+    cli_path = '/usr/local/bin/apm'
 
     @property
     def name(self):
         return "Atom's apm"
 
     def sync(self):
-        output = self.run(self.cli, 'outdated', '--compatible', '--json')
+        output = self.run(self.cli_path, 'outdated', '--compatible', '--json')
         if not output:
             return
 
@@ -51,7 +51,7 @@ class APM(PackageManager):
             })
 
     def update_cli(self, package_name=None):
-        cmd = "{} update --no-confirm".format(self.cli)
+        cmd = "{} update --no-confirm".format(self.cli_path)
         if package_name:
             cmd += " {}".format(package_name)
         return cmd

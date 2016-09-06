@@ -77,7 +77,7 @@ def managers(ctx):
             manager.name,
             manager_id,
             u'✅' if manager.available else '',
-            manager.cli if manager.available else ''])
+            manager.cli_path if manager.available else ''])
 
     table = [['Package manager', 'ID', 'Available', 'Location']] + sorted(
         table, key=itemgetter(1))

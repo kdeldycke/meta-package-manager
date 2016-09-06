@@ -35,7 +35,10 @@ from . import logger
 class PackageManager(object):
     """ Package manager definition. """
 
-    cli = None
+    # Fully qualified path to the package manager CLI.
+    cli_path = None
+    # Systematic options passed to package manager CLI.
+    cli_args = []
 
     def __init__(self):
         # List all available updates and their versions.
@@ -63,11 +66,11 @@ class PackageManager(object):
 
         Returns True is the main CLI exists and is executable.
         """
-        if not os.path.isfile(self.cli):
-            logger.debug("{} not found.".format(self.cli))
+        if not os.path.isfile(self.cli_path):
+            logger.debug("{} not found.".format(self.cli_path))
             return False
-        if not os.access(self.cli, os.X_OK):
-            logger.debug("{} not executable.".format(self.cli))
+        if not os.access(self.cli_path, os.X_OK):
+            logger.debug("{} not executable.".format(self.cli_path))
             return False
         return True
 

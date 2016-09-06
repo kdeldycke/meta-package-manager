@@ -42,13 +42,9 @@ class Gem(PackageManager):
         self.system = True
         if os.path.exists(Gem.HOMEBREW_PATH):
             self.system = False
-            self._cli = Gem.HOMEBREW_PATH
+            self.cli_path = Gem.HOMEBREW_PATH
         else:
-            self._cli = Gem.SYSTEM_PATH
-
-    @property
-    def cli(self):
-        return self._cli
+            self.cli_path = Gem.SYSTEM_PATH
 
     @property
     def name(self):
@@ -67,7 +63,7 @@ class Gem(PackageManager):
             psych (2.0.17 < 2.1.0)
         """
         # outdated does not require sudo privileges on homebrew or system
-        output = self.run(self.cli, 'outdated')
+        output = self.run(self.cli_path, 'outdated')
 
         regexp = re.compile(r'(\S+) \((\S+) < (\S+)\)')
         for package in output.split('\n'):
@@ -85,7 +81,7 @@ class Gem(PackageManager):
         # installs require sudo on system ruby
         cmd = "{}{} update".format(
             '/usr/bin/sudo ' if self.system else '',
-            self.cli)
+            self.cli_path)
         if package_name:
             cmd += " {}".format(package_name)
         return cmd

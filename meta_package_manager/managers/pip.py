@@ -46,7 +46,7 @@ class Pip(object):
             mercurial (3.8.3) - Latest: 3.8.4 [sdist]
             pylint (1.5.6) - Latest: 1.6.1 [wheel]
         """
-        output = self.run(self.cli, 'list', '--outdated').strip()
+        output = self.run(self.cli_path, 'list', '--outdated').strip()
         if not output:
             return
 
@@ -70,7 +70,7 @@ class Pip(object):
                 'latest_version': latest_version})
 
     def update_cli(self, package_name):
-        return "{} install --upgrade {}".format(self.cli, package_name)
+        return "{} install --upgrade {}".format(self.cli_path, package_name)
 
     def update_all_cli(self):
         """ Pip lacks support of a proper full upgrade command.
@@ -82,7 +82,7 @@ class Pip(object):
 
 class Pip2(Pip, PackageManager):
 
-    cli = '/usr/local/bin/pip2'
+    cli_path = '/usr/local/bin/pip2'
 
     @property
     def name(self):
@@ -91,7 +91,7 @@ class Pip2(Pip, PackageManager):
 
 class Pip3(Pip, PackageManager):
 
-    cli = '/usr/local/bin/pip3'
+    cli_path = '/usr/local/bin/pip3'
 
     @property
     def name(self):

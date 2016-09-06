@@ -40,6 +40,9 @@ TABLE_FORMAT = {
 
 @click.group(invoke_without_command=True)
 @click_log.init(logger)
+@click_log.simple_verbosity_option(
+    default='INFO', metavar='LEVEL',
+    help='Either CRITICAL, ERROR, WARNING, INFO or DEBUG. Defaults to INFO.')
 @click.option(
     '-t', '--table-format', type=click.Choice(TABLE_FORMAT), default='fancy',
     help="Rendering format of tables. Defaults to fancy.")

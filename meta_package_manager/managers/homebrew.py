@@ -26,7 +26,7 @@ from __future__ import (
 )
 
 import json
-from subprocess import PIPE, Popen, call
+from subprocess import PIPE, Popen
 
 from ..base import PackageManager
 

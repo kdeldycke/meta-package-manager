@@ -41,7 +41,13 @@ _POOL = {}
 
 
 def pool():
-    """ Search for package manager definitions locally and return a dict. """
+    """ Search for package manager definitions locally and return a dict.
+
+    Is considered valid package manager definitions classes which:
+        1 - are sub-classes of PackageManager, and
+        2 - are located in files at the same level or below this one, and
+        3 - have a defined cli_path property.
+    """
     if not _POOL:
 
         here = path.dirname(path.abspath(__file__))
@@ -52,10 +58,14 @@ def pool():
             module = import_module(
                 '.{}'.format(module_name), package=__package__)
             for _, klass in inspect.getmembers(module, inspect.isclass):
-                if issubclass(
-                        klass, PackageManager) and klass is not PackageManager:
+                if issubclass(klass, PackageManager) and (
+                        klass.cli_path is not None):
                     logger.debug("Found {!r}".format(klass))
                     manager = klass()
                     _POOL[manager.id] = manager
+                else:
+                    logger.debug(
+                        "{!r} is not a valid manager definition".format(klass))
+
 
     return _POOL

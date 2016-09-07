@@ -44,7 +44,9 @@ class MAS(PackageManager):
 
     def sync(self):
         super(MAS, self).sync()
-        output = self.run(self.cli_path, 'outdated')
+
+        output = self.run([self.cli_path] + self.cli_args + ['outdated'])
+
         if not output:
             return
 
@@ -63,7 +65,8 @@ class MAS(PackageManager):
     def update_cli(self, package_name):
         if package_name not in self.map:
             return None
-        return "{} install {}".format(self.cli_path, self.map[package_name])
+        return [self.cli_path] + self.cli_args + [
+            'install', self.map[package_name]]
 
     def update_all_cli(self):
-        return "{} upgrade".format(self.cli_path)
+        return [self.cli_path] + self.cli_args + ['upgrade']

@@ -40,7 +40,11 @@ class APM(PackageManager):
 
     def sync(self):
         super(APM, self).sync()
-        output = self.run(self.cli_path, 'outdated', '--compatible', '--json')
+
+        outdated_cmd = [self.cli_path] + self.cli_args + [
+            'outdated', '--compatible', '--json']
+        output = self.run(outdated_cmd)
+
         if not output:
             return
 
@@ -52,9 +56,9 @@ class APM(PackageManager):
             })
 
     def update_cli(self, package_name=None):
-        cmd = "{} update --no-confirm".format(self.cli_path)
+        cmd = [self.cli_path] + self.cli_args + ['update', '--no-confirm']
         if package_name:
-            cmd += " {}".format(package_name)
+            cmd.append(package_name)
         return cmd
 
     def update_all_cli(self):

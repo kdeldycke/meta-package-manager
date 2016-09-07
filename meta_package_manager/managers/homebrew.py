@@ -71,10 +71,11 @@ class Homebrew(PackageManager):
         """
         super(Homebrew, self).sync()
 
-        self.run(self.cli_path, 'update')
+        self.run([self.cli_path] + self.cli_args + ['update'])
 
         # List available updates.
-        output = self.run(self.cli_path, 'outdated', '--json=v1')
+        output = self.run(
+            [self.cli_path] + self.cli_args + ['outdated', '--json=v1'])
         if not output:
             return
 
@@ -86,9 +87,9 @@ class Homebrew(PackageManager):
                 'latest_version': pkg_info['current_version']})
 
     def update_cli(self, package_name=None):
-        cmd = "{} upgrade --cleanup".format(self.cli_path)
+        cmd = [self.cli_path] + self.cli_args + ['upgrade', '--cleanup']
         if package_name:
-            cmd += " {}".format(package_name)
+            cmd.append(package_name)
         return cmd
 
     def update_all_cli(self):
@@ -100,6 +101,8 @@ class Cask(PackageManager):
     # Cask extends Homebrew.
     cli_path = Homebrew.cli_path
 
+    cli_args = ['cask']
+
     @property
     def name(self):
         return "Homebrew Cask"
@@ -108,7 +111,9 @@ class Cask(PackageManager):
     def available(self):
         """ Cask depends on vanilla Homebrew. """
         if Homebrew().available:
-            cask = Popen([self.cli_path, 'cask'], stdout=PIPE, stderr=PIPE)
+            # TODO: call self.run instead of Popen?
+            cask = Popen(
+                [self.cli_path] + self.cli_args, stdout=PIPE, stderr=PIPE)
             cask.communicate()
             return cask.returncode == 0
         return False
@@ -171,10 +176,11 @@ class Cask(PackageManager):
 
         # `brew cask update` is just an alias to `brew update`. Perform the
         # action anyway to make it future proof.
-        self.run(self.cli_path, 'update')
+        self.run([self.cli_path] + self.cli_args + ['update'])
 
         # List installed packages.
-        output = self.run(self.cli_path, 'list', '--versions')
+        output = self.run(
+            [self.cli_path] + self.cli_args + ['list', '--versions'])
 
         # Inspect package one by one as `brew cask list` is not reliable. See:
         # https://github.com/caskroom/homebrew-cask/blob/master/doc
@@ -197,7 +203,7 @@ class Cask(PackageManager):
             # /uninstall_wrongly_reports_cask_as_not_installed.md
 
             # Inspect the package closer to evaluate its state.
-            output = self.run(self.cli_path, 'info', name)
+            output = self.run([self.cli_path] + self.cli_args + ['info', name])
 
             # Consider package as up-to-date if installed.
             if output.find('Not installed') == -1:
@@ -217,7 +223,7 @@ class Cask(PackageManager):
         so we can force a cleanup in one go, as we do above with vanilla
         Homebrew.
         """
-        return "{} install {}".format(self.cli_path, package_name)
+        return [self.cli_path] + self.cli_args + ['install', package_name]
 
     def update_all_cli(self):
         """ Cask has no way to update all outdated packages.

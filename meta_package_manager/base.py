@@ -36,7 +36,9 @@ class PackageManager(object):
 
     # Fully qualified path to the package manager CLI.
     cli_path = None
-    # Systematic options passed to package manager CLI.
+
+    # Systematic options passed to package manager CLI. Might be of use to
+    # force silencing or high verbosity for instance.
     cli_args = []
 
     def __init__(self):
@@ -73,11 +75,12 @@ class PackageManager(object):
             return False
         return True
 
-    def run(self, *args):
+    def run(self, cmd):
         """ Run a shell command, return the output and keep error message. """
         self.error = None
-        process = Popen(
-            args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+        assert isinstance(cmd, list)
+        logger.debug("Running `{}`...".format(' '.join(cmd)))
+        process = Popen(cmd, stdout=PIPE, stderr=PIPE, universal_newlines=True)
         output, error = process.communicate()
         if process.returncode != 0 and error:
             self.error = error.decode('utf-8')

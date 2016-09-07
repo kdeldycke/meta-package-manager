@@ -68,7 +68,7 @@ class Gem(PackageManager):
         super(Gem, self).sync()
 
         # Outdated does not require sudo privileges on homebrew or system.
-        output = self.run(self.cli_path, 'outdated')
+        output = self.run([self.cli_path] + self.cli_args + ['outdated'])
 
         regexp = re.compile(r'(\S+) \((\S+) < (\S+)\)')
         for package in output.split('\n'):
@@ -83,11 +83,12 @@ class Gem(PackageManager):
             })
 
     def update_cli(self, package_name=None):
+        cmd = [self.cli_path] + self.cli_args + ['update']
         # Installs require sudo on system ruby.
-        cmd = "{}{} update".format(
-            '/usr/bin/sudo ' if self.system_install else '', self.cli_path)
+        if self.system_install:
+            cmd.insert(0, '/usr/bin/sudo')
         if package_name:
-            cmd += " {}".format(package_name)
+            cmd.append(package_name)
         return cmd
 
     def update_all_cli(self):

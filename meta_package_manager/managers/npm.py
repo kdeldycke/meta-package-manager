@@ -60,8 +60,10 @@ class NPM(PackageManager):
         """
         super(NPM, self).sync()
 
-        output = self.run(
-            self.cli_path, '-g', '--progress=false', '--json', 'outdated')
+        output = self.run([
+            self.cli_path] + self.cli_args + [
+                '-g', '--progress=false', '--json', 'outdated'])
+
         if not output:
             return
 
@@ -76,9 +78,10 @@ class NPM(PackageManager):
             })
 
     def update_cli(self, package_name=None):
-        cmd = "{} -g --progress=false update".format(self.cli_path)
+        cmd = [self.cli_path] + self.cli_args + [
+            '-g', '--progress=false', 'update']
         if package_name:
-            cmd += " {}".format(package_name)
+            cmd.append(package_name)
         return cmd
 
     def update_all_cli(self):

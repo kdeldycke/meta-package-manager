@@ -48,7 +48,9 @@ class Pip(PackageManager):
         """
         super(Pip, self).sync()
 
-        output = self.run(self.cli_path, 'list', '--outdated').strip()
+        output = self.run([
+            self.cli_path] + self.cli_args + ['list', '--outdated']).strip()
+
         if not output:
             return
 
@@ -72,7 +74,9 @@ class Pip(PackageManager):
                 'latest_version': latest_version})
 
     def update_cli(self, package_name):
-        return "{} install --upgrade {}".format(self.cli_path, package_name)
+        return [
+            self.cli_path] + self.cli_args + [
+                'install', '--upgrade', package_name]
 
     def update_all_cli(self):
         """ Pip lacks support of a proper full upgrade command.

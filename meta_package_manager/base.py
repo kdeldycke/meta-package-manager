@@ -26,7 +26,6 @@ from __future__ import (
 )
 
 import os
-import sys
 from subprocess import PIPE, Popen
 
 from . import logger

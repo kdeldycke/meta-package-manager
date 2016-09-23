@@ -240,9 +240,11 @@ class Cask(Homebrew):
         for installed_pkg in output.strip().split('\n'):
             if not installed_pkg:
                 continue
-            name, versions = installed_pkg.split(' ', 1)
+            infos = installed_pkg.split(' ', 1)
+            name = infos[0]
 
             # Use heuristics to guess installed version.
+            versions = infos[1] if len(infos) > 1 else ''
             versions = sorted([
                 v.strip() for v in versions.split(',') if v.strip()])
             if len(versions) > 1 and 'latest' in versions:

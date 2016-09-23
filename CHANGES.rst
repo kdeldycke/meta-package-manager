@@ -1,8 +1,8 @@
 Changelog
 =========
 
-`1.9.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.8.0...develop>`_
---------------------------------------------------------------------------------------------------
+`1.9.0 (2016-09-23) <https://github.com/kdeldycke/meta-package-manager/compare/v1.8.0...v1.9.0>`_
+-------------------------------------------------------------------------------------------------
 
 * Fix ``bumpversion`` configuration to target ``CHANGES.rst`` instead of
   ``README.rst``.

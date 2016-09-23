@@ -33,7 +33,7 @@ Development: |build| |coverage| |quality|
 .. figure:: http://imgs.xkcd.com/comics/universal_install_script.png
     :alt: Obligatory XKCD.
     :align: right
-    
+
     Source: `XKCD #1654 <https://xkcd.com/1654/>`_.
 
 
@@ -100,14 +100,19 @@ List global options and commands:
       CLI for multi-package manager updates and upgrades.
 
     Options:
-      -v, --verbosity LEVEL  Either CRITICAL, ERROR, WARNING, INFO or DEBUG
-      --version              Show the version and exit.
-      --help                 Show this message and exit.
+      -v, --verbosity LEVEL           Either CRITICAL, ERROR, WARNING, INFO or
+                                      DEBUG. Defaults to INFO.
+      -t, --table-format [simple|plain|fancy]
+                                      Rendering format of tables. Defaults to
+                                      fancy.
+      --version                       Show the version and exit.
+      --help                          Show this message and exit.
 
     Commands:
-      list      List available updates.
       managers  List supported package managers and their location.
-
+      outdated  List available updates.
+      sync      Sync local package info.
+      update    Update all packages.
 
 List all supported package managers and their status on current system:
 

@@ -143,6 +143,12 @@ List all supported package managers and their status on current system:
 BitBar plugin
 -------------
 
+A copy of the latest stable version of the Meta Package Manager BitBar plugin
+is always `available on BitBar website
+<https://getbitbar.com/plugins/Dev/MetaPackageManager/meta_package_manager.7h.py>`_
+and `plugin repository
+<https://github.com/matryer/bitbar-plugins/tree/master/Dev/MetaPackageManager>`_.
+
 .. image:: https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/screenshot.png
     :alt: Bitbar plugin screenshot.
     :align: left

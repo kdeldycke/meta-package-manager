@@ -14,8 +14,9 @@ Changelog
   ``README.rst``.
 * Render list of detected managers in a table.
 * Use ``conda`` in Travis tests to install specific versions of Python across
-  the range of OSX workers.
-* Drop support for PyPy while we search a way to install it on OSX with Travis.
+  the range of macOS workers.
+* Drop support for PyPy while we search a way to install it on macOS with
+  Travis.
 * Let ``mpm`` auto-detect package manager definitions.
 * Show package manager IDs in ``mpm managers`` CLI output.
 * Rename ``package_manager.7h.py`` BitBar plugin to

@@ -45,7 +45,7 @@ docs/html/
 *~
 *.swp
 
-### OSX ###
+### macOS ###
 .DS_Store
 .AppleDouble
 .LSOverride

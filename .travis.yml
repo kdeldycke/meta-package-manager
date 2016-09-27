@@ -3,7 +3,7 @@ language: python
 sudo: false
 
 # We need to explicitely set all combination of the test matrix because Travis
-# OSX images do not support Python. See:
+# macOS images do not support Python. See:
 # https://docs.travis-ci.com/user/multi-os/#Python-example-(unsupported-languages)
 matrix:
   include:
@@ -19,7 +19,7 @@ matrix:
     - python: "3.5"
       env: PYTHON_DIST="3.5"
 
-    # Xcode to OSX version matrix is available at:
+    # Xcode to macOS version matrix is available at:
     # https://docs.travis-ci.com/user/osx-ci-environment/#OS-X-Version
 
     # Xcode 6.2-beta is OSX 10.9.

@@ -27,6 +27,7 @@ from __future__ import (
 
 import re
 
+from boltons.cacheutils import cachedproperty
 from packaging.version import parse as parse_version
 
 from ..base import PackageManager
@@ -44,11 +45,11 @@ class MAS(PackageManager):
         super(MAS, self).__init__()
         self.map = {}
 
-    @property
+    @cachedproperty
     def name(self):
         return "Mac AppStore"
 
-    @property
+    @cachedproperty
     def version(self):
         return parse_version(self.run([self.cli_path, 'version']))
 

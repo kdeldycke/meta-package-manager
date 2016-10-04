@@ -28,6 +28,7 @@ from __future__ import (
 import os
 from subprocess import PIPE, Popen
 
+from boltons.cacheutils import cachedproperty
 from packaging.specifiers import SpecifierSet
 
 from . import logger
@@ -60,7 +61,7 @@ class PackageManager(object):
         """
         return None
 
-    @property
+    @cachedproperty
     def id(self):
         """ Return package manager's ID. Defaults based on class name.
 
@@ -69,7 +70,7 @@ class PackageManager(object):
         """
         return self.__class__.__name__.lower()
 
-    @property
+    @cachedproperty
     def name(self):
         """ Return package manager's common name. Defaults based on class name.
         """

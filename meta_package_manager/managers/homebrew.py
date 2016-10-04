@@ -28,6 +28,8 @@ from __future__ import (
 import json
 from subprocess import PIPE, Popen
 
+from boltons.cacheutils import cachedproperty
+
 from ..base import PackageManager
 
 
@@ -35,7 +37,7 @@ class Homebrew(PackageManager):
 
     cli_path = '/usr/local/bin/brew'
 
-    @property
+    @cachedproperty
     def id(self):
         return "brew"
 
@@ -103,11 +105,11 @@ class Cask(PackageManager):
 
     cli_args = ['cask']
 
-    @property
+    @cachedproperty
     def name(self):
         return "Homebrew Cask"
 
-    @property
+    @cachedproperty
     def available(self):
         """ Cask depends on vanilla Homebrew. """
         if Homebrew().available:

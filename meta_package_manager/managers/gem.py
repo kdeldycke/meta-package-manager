@@ -28,6 +28,8 @@ from __future__ import (
 import os
 import re
 
+from boltons.cacheutils import cachedproperty
+
 from ..base import PackageManager
 
 
@@ -45,11 +47,11 @@ class Gem(PackageManager):
         if os.path.exists(Gem.HOMEBREW_PATH):
             self.system_install = False
 
-    @property
+    @cachedproperty
     def cli_path(self):
         return Gem.SYSTEM_PATH if self.system_install else Gem.HOMEBREW_PATH
 
-    @property
+    @cachedproperty
     def name(self):
         return "Ruby Gems"
 

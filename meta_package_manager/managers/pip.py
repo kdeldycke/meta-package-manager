@@ -27,6 +27,8 @@ from __future__ import (
 
 import re
 
+from boltons.cacheutils import cachedproperty
+
 from ..base import PackageManager
 
 
@@ -90,7 +92,7 @@ class Pip2(Pip):
 
     cli_path = '/usr/local/bin/pip2'
 
-    @property
+    @cachedproperty
     def name(self):
         return "Python 2's Pip"
 
@@ -99,6 +101,6 @@ class Pip3(Pip):
 
     cli_path = '/usr/local/bin/pip3'
 
-    @property
+    @cachedproperty
     def name(self):
         return "Python 3's Pip"

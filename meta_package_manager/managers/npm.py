@@ -27,6 +27,8 @@ from __future__ import (
 
 import json
 
+from boltons.cacheutils import cachedproperty
+
 from ..base import PackageManager
 
 
@@ -34,7 +36,7 @@ class NPM(PackageManager):
 
     cli_path = '/usr/local/bin/npm'
 
-    @property
+    @cachedproperty
     def name(self):
         return "Node's npm"
 

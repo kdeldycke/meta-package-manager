@@ -9,6 +9,7 @@ Changelog
 * Let ``mas`` report its own version.
 * Bump minimal requirement of ``mas`` to 1.3.1.
 * Fix parsing of ``mas`` package versions after the 1.3.1 release.
+* Cache lazy properties to speed metadata computation.
 
 
 `1.9.0 (2016-09-23) <https://github.com/kdeldycke/meta-package-manager/compare/v1.8.0...v1.9.0>`_

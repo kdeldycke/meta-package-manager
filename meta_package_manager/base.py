@@ -85,11 +85,11 @@ class PackageManager(object):
             3 - match the version requirement.
         """
         if not os.path.isfile(self.cli_path):
-            logger.debug("{} not found.".format(self.cli_path))
+            logger.warning("{} not found.".format(self.cli_path))
             return False
 
         if not os.access(self.cli_path, os.X_OK):
-            logger.debug("{} not executable.".format(self.cli_path))
+            logger.warning("{} not executable.".format(self.cli_path))
             return False
 
         if self.version and self.requirement:

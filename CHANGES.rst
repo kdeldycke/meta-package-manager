@@ -14,6 +14,7 @@ Changelog
 * Allow each package manager to set requirement on its own version.
 * Let ``mas`` report its own version.
 * Bump minimal requirement of ``mas`` to 1.3.1.
+* Fetch currently installed version from ``mas``. Closes #4.
 * Fix parsing of ``mas`` package versions after the 1.3.1 release.
 * Cache lazy properties to speed metadata computation.
 * Shows detailed state of package managers in CLI.

@@ -36,6 +36,10 @@ class MAS(PackageManager):
 
     cli_path = '/usr/local/bin/mas'
 
+    # 'mas outdated' output has been changed in 1.3.1: https://github.com
+    # /mas-cli/mas/commit/ca72ee42b1c5f482513b1d2fbf780b0bf3d9618b
+    requirement = '>= 1.3.1'
+
     def __init__(self):
         super(MAS, self).__init__()
         self.map = {}
@@ -56,17 +60,21 @@ class MAS(PackageManager):
         if not output:
             return
 
-        regexp = re.compile(r'(\d+) (.*) \((\S+)\)$')
+        regexp = re.compile(r'(\d+) (.*) \((\S+) -> (\S+)\)$')
         for application in output.split('\n'):
             if not application:
                 continue
-            _id, name, latest_version = regexp.match(application).groups()
+            _id, name, installed_version, latest_version = regexp.match(
+                application).groups()
             self.map[name] = _id
             self.updates.append({
                 'name': name,
                 'latest_version': latest_version,
-                'installed_version': ''
-            })
+                # Normalize unknown version. See: https://github.com/mas-cli
+                # /mas/commit/1859eaedf49f6a1ebefe8c8d71ec653732674341
+                'installed_version': (
+                    installed_version if installed_version != 'unknown'
+                    else '')})
 
     def update_cli(self, package_name):
         if package_name not in self.map:

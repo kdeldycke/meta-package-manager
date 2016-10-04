@@ -28,6 +28,8 @@ from __future__ import (
 import os
 from subprocess import PIPE, Popen
 
+from packaging.specifiers import SpecifierSet
+
 from . import logger
 
 
@@ -40,6 +42,9 @@ class PackageManager(object):
     # Systematic options passed to package manager CLI. Might be of use to
     # force silencing or high verbosity for instance.
     cli_args = []
+
+    # Version requirement specifier.
+    requirement = None
 
     def __init__(self):
         # List all available updates and their versions.
@@ -74,14 +79,26 @@ class PackageManager(object):
     def available(self):
         """ Is the package manager available and ready-to-use on the system?
 
-        Returns True is the main CLI exists and is executable.
+        Returns True only if the main CLI:
+            1 - exists,
+            2 - is executable, and
+            3 - match the version requirement.
         """
         if not os.path.isfile(self.cli_path):
             logger.debug("{} not found.".format(self.cli_path))
             return False
+
         if not os.access(self.cli_path, os.X_OK):
             logger.debug("{} not executable.".format(self.cli_path))
             return False
+
+        if self.version and self.requirement:
+            if self.version not in SpecifierSet(self.requirement):
+                logger.warning(
+                    "{} {} doesn't fit the {!r} version requirement.".format(
+                        self.id, self.version, self.requirement))
+                return False
+
         return True
 
     def run(self, cmd):

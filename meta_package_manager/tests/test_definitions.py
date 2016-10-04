@@ -56,3 +56,8 @@ class TestDefinition(unittest.TestCase):
         """ Check that definitions returns CLI args as a list. """
         for manager in pool().values():
             self.assertIsInstance(manager.cli_args, list)
+
+    def test_cli_type(self):
+        """ Check that all methods returning a CLI is a list. """
+        for manager in pool().values():
+            self.assertIsInstance(manager.update_cli('dummy_package_id'), list)

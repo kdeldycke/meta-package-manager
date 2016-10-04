@@ -79,7 +79,7 @@ class MAS(PackageManager):
 
     def update_cli(self, package_name):
         if package_name not in self.map:
-            return None
+            return []
         return [self.cli_path] + self.cli_args + [
             'install', self.map[package_name]]
 

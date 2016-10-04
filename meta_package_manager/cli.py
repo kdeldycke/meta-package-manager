@@ -75,13 +75,16 @@ def managers(ctx):
         table.append([
             manager.name,
             manager_id,
-            u'✅' if manager.available else '',
-            manager.cli_path if manager.available else '',
-            manager.version])
+            manager.cli_path,
+            u'✅' if manager.exists else '',
+            u'✅' if manager.executable else '',
+            u"{}  {}".format(
+                u'✅' if manager.check_version else u'❌',
+                manager.version if manager.version else '')])
 
     table = [[
-        'Package manager', 'ID', 'Available', 'Location', 'Version']] + sorted(
-            table, key=itemgetter(1))
+        'Package manager', 'ID', 'CLI path', 'Found', 'Executable', 'Version'
+    ]] + sorted(table, key=itemgetter(1))
 
     logger.info(tabulate(
         table, tablefmt=ctx.obj['table_format'], headers='firstrow'))

@@ -76,7 +76,34 @@ class PackageManager(object):
         """
         return self.__class__.__name__
 
-    @property
+    @cachedproperty
+    def exists(self):
+        """ Is the package manager CLI exist on the system? """
+        if not os.path.isfile(self.cli_path):
+            logger.debug("{} not found.".format(self.cli_path))
+            return False
+        return True
+
+    @cachedproperty
+    def executable(self):
+        """ Is the package manager CLI can be executed by the current user? """
+        if not os.access(self.cli_path, os.X_OK):
+            logger.debug("{} not executable.".format(self.cli_path))
+            return False
+        return True
+
+    @cachedproperty
+    def check_version(self):
+        """ Is the package manager match the version requirement? """
+        if self.version and self.requirement:
+            if self.version not in SpecifierSet(self.requirement):
+                logger.debug(
+                    "{} {} doesn't fit the '{}' version requirement.".format(
+                        self.id, self.version, self.requirement))
+                return False
+        return True
+
+    @cachedproperty
     def available(self):
         """ Is the package manager available and ready-to-use on the system?
 
@@ -85,22 +112,7 @@ class PackageManager(object):
             2 - is executable, and
             3 - match the version requirement.
         """
-        if not os.path.isfile(self.cli_path):
-            logger.warning("{} not found.".format(self.cli_path))
-            return False
-
-        if not os.access(self.cli_path, os.X_OK):
-            logger.warning("{} not executable.".format(self.cli_path))
-            return False
-
-        if self.version and self.requirement:
-            if self.version not in SpecifierSet(self.requirement):
-                logger.warning(
-                    "{} {} doesn't fit the {!r} version requirement.".format(
-                        self.id, self.version, self.requirement))
-                return False
-
-        return True
+        return self.exists and self.executable and self.check_version
 
     def run(self, cmd):
         """ Run a shell command, return the output and keep error message. """

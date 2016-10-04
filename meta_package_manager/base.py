@@ -52,7 +52,7 @@ class PackageManager(object):
         self.updates = []
         self.error = None
 
-    @property
+    @cachedproperty
     def version(self):
         """ Parsed and normalized package manager's own version.
 

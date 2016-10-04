@@ -30,7 +30,6 @@ import unittest
 from meta_package_manager import PY3
 from meta_package_manager.managers import pool
 
-
 if PY3:
     basestring = (str, bytes)
 

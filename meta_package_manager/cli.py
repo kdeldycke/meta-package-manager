@@ -30,7 +30,6 @@ from tabulate import tabulate
 from . import __version__, logger
 from .managers import pool
 
-
 # Mapping of table formatiing options to tabulate's parameters.
 TABLE_FORMAT = {
     'plain': 'plain',

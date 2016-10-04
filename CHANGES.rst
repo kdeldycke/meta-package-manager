@@ -1,8 +1,8 @@
 Changelog
 =========
 
-`1.9.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.9.0...develop>`_
---------------------------------------------------------------------------------------------------
+`1.10.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.9.0...develop>`_
+---------------------------------------------------------------------------------------------------
 
 * Add optionnal ``version`` property on package manager definitions.
 * Allow each package manager to set requirement on its own version.

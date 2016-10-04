@@ -6,6 +6,7 @@ Changelog
 
 * Add optionnal ``version`` property on package manager definitions.
 * Allow each package manager to set requirement on its own version.
+* Let ``mas`` report its own version.
 
 
 `1.9.0 (2016-09-23) <https://github.com/kdeldycke/meta-package-manager/compare/v1.8.0...v1.9.0>`_

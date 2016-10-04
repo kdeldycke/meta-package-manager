@@ -32,14 +32,15 @@ from glob import glob
 from importlib import import_module
 from os import path
 
+from boltons.cacheutils import LRI, cached
+
 from .. import logger
 from ..base import PackageManager
 
 
-# Global pool of registered manager definitions. Serves as a cache.
-_POOL = {}
-
-
+# Use a cache to keep re-computing the global pool of registered manager
+# definitions.
+@cached(LRI(max_size=1))
 def pool():
     """ Search for package manager definitions locally and return a dict.
 
@@ -48,24 +49,23 @@ def pool():
         2 - are located in files at the same level or below this one, and
         3 - have a defined cli_path property.
     """
-    if not _POOL:
+    register = {}
 
-        here = path.dirname(path.abspath(__file__))
+    here = path.dirname(path.abspath(__file__))
 
-        for py_file in glob(path.join(here, '*.py')):
-            module_name = path.splitext(path.basename(py_file))[0]
-            logger.debug("Search manager definitions in {}".format(py_file))
-            module = import_module(
-                '.{}'.format(module_name), package=__package__)
-            for _, klass in inspect.getmembers(module, inspect.isclass):
-                if issubclass(klass, PackageManager) and (
-                        klass.cli_path is not None):
-                    logger.debug("Found {!r}".format(klass))
-                    manager = klass()
-                    _POOL[manager.id] = manager
-                else:
-                    logger.debug(
-                        "{!r} is not a valid manager definition".format(klass))
+    for py_file in glob(path.join(here, '*.py')):
+        module_name = path.splitext(path.basename(py_file))[0]
+        logger.debug("Search manager definitions in {}".format(py_file))
+        module = import_module('.{}'.format(module_name), package=__package__)
 
+        for _, klass in inspect.getmembers(module, inspect.isclass):
+            if issubclass(klass, PackageManager) and (
+                    klass.cli_path is not None):
+                logger.debug("Found {!r}".format(klass))
+                manager = klass()
+                register[manager.id] = manager
+            else:
+                logger.debug(
+                    "{!r} is not a valid manager definition".format(klass))
 
-    return _POOL
+    return register

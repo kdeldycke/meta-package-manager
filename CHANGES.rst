@@ -1,7 +1,7 @@
 Changelog
 =========
 
-`1.10.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.10.0...develop>`_
+`1.11.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.10.0...develop>`_
 ----------------------------------------------------------------------------------------------------
 
 * Allow rendering of output data into ``json``.

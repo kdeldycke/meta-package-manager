@@ -62,6 +62,11 @@ class PackageManager(object):
         return None
 
     @cachedproperty
+    def version_string(self):
+        """ String representation of the canonical version. """
+        return "{}".format(self.version) if self.version else None
+
+    @cachedproperty
     def id(self):
         """ Return package manager's ID. Defaults based on class name.
 

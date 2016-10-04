@@ -38,6 +38,7 @@ PACKAGE_NAME = MODULE_NAME.replace('_', '-')
 DEPENDENCIES = [
     'click >= 5.0',
     'click_log',
+    'packaging',
     'tabulate',
 ]
 

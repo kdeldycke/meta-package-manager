@@ -47,6 +47,15 @@ class PackageManager(object):
         self.error = None
 
     @property
+    def version(self):
+        """ Parsed and normalized package manager's own version.
+
+        Returns an instance of packaging.Version or None if version doesn't
+        matter.
+        """
+        return None
+
+    @property
     def id(self):
         """ Return package manager's ID. Defaults based on class name.
 

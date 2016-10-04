@@ -536,11 +536,11 @@ class MAS(PackageManager):
         for application in output.split('\n'):
             if not application:
                 continue
-            _id, name, version = regexp.match(application).groups()
+            _id, name, latest_version = regexp.match(application).groups()
             self.map[name] = _id
             self.updates.append({
                 'name': name,
-                'latest_version': version,
+                'latest_version': latest_version,
                 'installed_version': ''
             })
 

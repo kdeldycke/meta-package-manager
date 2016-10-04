@@ -155,7 +155,7 @@ class PackageManager(object):
             return self.run(self.update_all_cli())
         except NotImplementedError:
             logger.warning(
-                "{} doesn't seems to implement a full update subcommand. Call"
+                "{} doesn't seems to implement a full update subcommand. Call "
                 "single-package update CLI one by one.".format(self.id))
             output = []
             for package in self.updates:

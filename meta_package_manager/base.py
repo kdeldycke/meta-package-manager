@@ -93,7 +93,7 @@ class PackageManager(object):
         return True
 
     @cachedproperty
-    def check_version(self):
+    def supported(self):
         """ Is the package manager match the version requirement? """
         if self.version and self.requirement:
             if self.version not in SpecifierSet(self.requirement):
@@ -112,7 +112,7 @@ class PackageManager(object):
             2 - is executable, and
             3 - match the version requirement.
         """
-        return self.exists and self.executable and self.check_version
+        return self.exists and self.executable and self.supported
 
     def run(self, cmd):
         """ Run a shell command, return the output and keep error message. """

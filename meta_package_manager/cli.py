@@ -79,9 +79,9 @@ def managers(ctx):
             u'✅' if manager.exists else '',
             u'✅' if manager.executable else '',
             u"{}  {}".format(
-                u'✅' if manager.check_version else u'❌',
-                manager.version if manager.version else '')])
-
+                u'✅' if manager.supported else u'❌',
+                manager.version if manager.version else '')
+            if manager.exists else ''])
     table = [[
         'Package manager', 'ID', 'CLI path', 'Found', 'Executable', 'Version'
     ]] + sorted(table, key=itemgetter(1))

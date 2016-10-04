@@ -27,6 +27,8 @@ from __future__ import (
 
 import re
 
+from packaging.version import parse as parse_version
+
 from ..base import PackageManager
 
 
@@ -41,6 +43,10 @@ class MAS(PackageManager):
     @property
     def name(self):
         return "Mac AppStore"
+
+    @property
+    def version(self):
+        return parse_version(self.run([self.cli_path, 'version']))
 
     def sync(self):
         super(MAS, self).sync()

@@ -5,6 +5,7 @@ Changelog
 ----------------------------------------------------------------------------------------------------
 
 * Allow rendering of output data into ``json``.
+* Sort list of outdated packages by lower-cased package IDs.
 
 
 `1.10.0 (2016-10-04) <https://github.com/kdeldycke/meta-package-manager/compare/v1.9.0...develop>`_

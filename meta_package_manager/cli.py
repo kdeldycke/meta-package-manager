@@ -175,11 +175,11 @@ def outdated(ctx):
             pkg_info['latest_version']]
             for pkg_info in outdated_pkg['packages']]
 
-    # Sort table by package ID, then manager ID.
-    # TODO: ignore package ID case on sort.
+    # Sort table by lower-cased package ID, then manager ID.
+    sort_method = lambda line: (line[1].lower(), line[2])
     table = [[
         'Package name', 'ID', 'Manager', 'Installed version',
-        'Latest version']] + sorted(table, key=itemgetter(1, 2))
+        'Latest version']] + sorted(table, key=sort_method)
     logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
     # Print statistics.
     manager_stats = {

@@ -109,17 +109,6 @@ class Cask(PackageManager):
     def name(self):
         return "Homebrew Cask"
 
-    @cachedproperty
-    def available(self):
-        """ Cask depends on vanilla Homebrew. """
-        if Homebrew().available:
-            # TODO: call self.run instead of Popen?
-            cask = Popen(
-                [self.cli_path] + self.cli_args, stdout=PIPE, stderr=PIPE)
-            cask.communicate()
-            return cask.returncode == 0
-        return False
-
     def sync(self):
         """ Fetch latest formulas and their metadata.
 

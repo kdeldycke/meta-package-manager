@@ -106,6 +106,11 @@ class Cask(PackageManager):
 
     cli_args = ['cask']
 
+    # Cask CLI output and version reporting look more reliable its integration
+    # with Homebrew's core. Can't really pinpoint the exact version so I
+    # arbitrarily set it to the last major release.
+    requirement = '>= 1.0.0'
+
     @cachedproperty
     def name(self):
         return "Homebrew Cask"

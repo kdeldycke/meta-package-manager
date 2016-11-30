@@ -26,7 +26,6 @@ from __future__ import (
 )
 
 import json
-from subprocess import PIPE, Popen
 
 from boltons.cacheutils import cachedproperty
 from packaging.version import parse as parse_version

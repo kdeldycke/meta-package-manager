@@ -52,7 +52,7 @@ def json(data):
     help='Either CRITICAL, ERROR, WARNING, INFO or DEBUG. Defaults to INFO.')
 @click.option(
     '-o', '--output-format', type=click.Choice(RENDERING_MODES),
-    default='fancy', help="Rendering mode of the format. Defaults to fancy.")
+    default='fancy', help="Rendering mode of the output. Defaults to fancy.")
 @click.version_option(__version__)
 @click.pass_context
 def cli(ctx, output_format):

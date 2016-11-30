@@ -102,8 +102,8 @@ List global options and commands:
     Options:
       -v, --verbosity LEVEL           Either CRITICAL, ERROR, WARNING, INFO or
                                       DEBUG. Defaults to INFO.
-      -t, --table-format [simple|plain|fancy]
-                                      Rendering format of tables. Defaults to
+      -o, --output-format [simple|plain|json|fancy]
+                                      Rendering mode of the output. Defaults to
                                       fancy.
       --version                       Show the version and exit.
       --help                          Show this message and exit.

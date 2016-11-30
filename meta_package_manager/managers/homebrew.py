@@ -214,11 +214,11 @@ class HomebrewCask(Homebrew):
             # Inspect the package closer to evaluate its state.
             output = self.run([self.cli_path] + self.cli_args + ['info', name])
 
-            # Consider package as up-to-date if installed.
-            if output.find('Not installed') == -1:
-                continue
-
             latest_version = output.split('\n')[0].split(' ')[1]
+
+            # Skip already installed packages.
+            if version == latest_version:
+                continue
 
             self.updates.append({
                 'name': name,

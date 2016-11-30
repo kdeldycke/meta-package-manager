@@ -285,7 +285,7 @@ class HomebrewCask(Homebrew):
         Homebrew.
         """
         return self.bitbar_cli_format(
-            "{} cask install {}".format(self.cli, package_name))
+            "{} cask reinstall {}".format(self.cli, package_name))
 
     def update_all_cli(self):
         """ Cask has no way to update all outdated packages.
@@ -297,7 +297,7 @@ class HomebrewCask(Homebrew):
     def update_all_cmd(self):
         self.sync()
         for package in self.updates:
-            call("{} cask install {}".format(self.cli, package['name']),
+            call("{} cask reinstall {}".format(self.cli, package['name']),
                  shell=True)
 
 

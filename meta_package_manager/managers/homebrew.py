@@ -111,6 +111,10 @@ class HomebrewCask(Homebrew):
 
     cli_args = ['cask']
 
+    # 'cask install' doesn't update to the latest package version, we need to
+    # call 'cask reinstall' instead since 1.1.0.
+    requirement = '>= 1.1.0'
+
     @cachedproperty
     def id(self):
         return "cask"
@@ -232,7 +236,7 @@ class HomebrewCask(Homebrew):
         so we can force a cleanup in one go, as we do above with vanilla
         Homebrew.
         """
-        return [self.cli_path] + self.cli_args + ['install', package_name]
+        return [self.cli_path] + self.cli_args + ['reinstall', package_name]
 
     def update_all_cli(self):
         """ Cask has no way to update all outdated packages.

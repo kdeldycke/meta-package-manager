@@ -6,9 +6,9 @@ Changelog
 
 * Allow rendering of output data into ``json``.
 * Sort list of outdated packages by lower-cased package IDs.
-* Fetch currently installed version from ``cask``.
-* Bump minimal requirement of ``brew`` and ``cask`` to 1.0.0.
+* Bump minimal requirement of ``brew`` to 1.0.0 and ``cask`` to 1.1.0.
 * Fix fetching of outdated ``cask`` packages.
+* Fix update of ``cask`` packages.
 
 
 `1.10.0 (2016-10-04) <https://github.com/kdeldycke/meta-package-manager/compare/v1.9.0...develop>`_

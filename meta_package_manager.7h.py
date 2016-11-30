@@ -162,12 +162,12 @@ class Homebrew(PackageManager):
         return self.update_cli()
 
 
-class Cask(Homebrew):
+class HomebrewCask(Homebrew):
 
     @property
     def active(self):
         """ Cask depends on vanilla Homebrew. """
-        if super(Cask, self).active:
+        if super(HomebrewCask, self).active:
             cask = Popen([self.cli, 'cask'], stdout=PIPE, stderr=PIPE)
             cask.communicate()
             return cask.returncode == 0
@@ -565,7 +565,8 @@ def print_menu():
     See: https://github.com/matryer/bitbar#plugin-api
     """
     # Instantiate all available package manager.
-    managers = [k() for k in [Homebrew, Cask, Pip2, Pip3, APM, NPM, Gems, MAS]]
+    managers = [k() for k in [
+        Homebrew, HomebrewCask, Pip2, Pip3, APM, NPM, Gems, MAS]]
 
     # Filters-out inactive managers.
     managers = [m for m in managers if m.active]

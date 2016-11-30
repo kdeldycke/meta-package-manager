@@ -29,6 +29,7 @@ import json
 from subprocess import PIPE, Popen
 
 from boltons.cacheutils import cachedproperty
+from packaging.version import parse as parse_version
 
 from ..base import PackageManager
 
@@ -108,6 +109,11 @@ class Cask(PackageManager):
     @cachedproperty
     def name(self):
         return "Homebrew Cask"
+
+    @cachedproperty
+    def version(self):
+        metadata = self.run([self.cli_path] + self.cli_args + ['--version'])
+        return parse_version(metadata.split()[1])
 
     def sync(self):
         """ Fetch latest formulas and their metadata.

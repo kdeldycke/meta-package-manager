@@ -128,6 +128,7 @@ class PackageManager(object):
         output, error = process.communicate()
         if process.returncode != 0 and error:
             self.error = error.decode('utf-8')
+            logger.warning(self.error)
         return output.decode('utf-8')
 
     def sync(self):

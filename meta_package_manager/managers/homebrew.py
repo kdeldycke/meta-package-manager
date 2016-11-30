@@ -37,9 +37,16 @@ class Homebrew(PackageManager):
 
     cli_path = '/usr/local/bin/brew'
 
+    requirement = '>= 1.0.0'
+
     @cachedproperty
     def id(self):
         return "brew"
+
+    @cachedproperty
+    def version(self):
+        metadata = self.run([self.cli_path] + self.cli_args + ['--version'])
+        return parse_version(metadata.split()[1])
 
     def sync(self):
         """ Fetch latest Homebrew formulas.
@@ -98,26 +105,19 @@ class Homebrew(PackageManager):
         return self.update_cli()
 
 
-class Cask(PackageManager):
+class HomebrewCask(Homebrew):
 
-    # Cask extends Homebrew.
-    cli_path = Homebrew.cli_path
+    """ Cask is now part of Homebrew's core and extend it. """
 
     cli_args = ['cask']
 
-    # Cask CLI output and version reporting look more reliable its integration
-    # with Homebrew's core. Can't really pinpoint the exact version so I
-    # arbitrarily set it to the last major release.
-    requirement = '>= 1.0.0'
+    @cachedproperty
+    def id(self):
+        return "cask"
 
     @cachedproperty
     def name(self):
         return "Homebrew Cask"
-
-    @cachedproperty
-    def version(self):
-        metadata = self.run([self.cli_path] + self.cli_args + ['--version'])
-        return parse_version(metadata.split()[1])
 
     def sync(self):
         """ Fetch latest formulas and their metadata.
@@ -180,10 +180,9 @@ class Cask(PackageManager):
             ==> Artifacts
             Übersicht.app (app)
         """
-        super(Cask, self).sync()
+        PackageManager().sync()
 
-        # `brew cask update` is just an alias to `brew update`. Perform the
-        # action anyway to make it future proof.
+        # `brew cask update` is just an alias to `brew update`.
         self.run([self.cli_path] + self.cli_args + ['update'])
 
         # List installed packages.

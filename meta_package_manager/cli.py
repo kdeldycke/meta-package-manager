@@ -150,11 +150,11 @@ def outdated(ctx):
             'id': manager_id,
             'name': manager.name,
             'packages': [{
-                'name': pkg_info['name'],
-                'id': pkg_info['name'],
-                'installed_version': pkg_info['installed_version'],
-                'latest_version': pkg_info['latest_version']}
-                for pkg_info in manager.updates]}
+                'name': info['name'],
+                'id': info['name'],
+                'installed_version': info['installed_version'],
+                'latest_version': info['latest_version']}
+                for info in manager.updates]}
 
     rendering = ctx.obj['rendering']
 

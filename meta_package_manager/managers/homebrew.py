@@ -203,7 +203,7 @@ class HomebrewCask(Homebrew):
             ==> Artifacts
             Übersicht.app (app)
         """
-        PackageManager().sync()
+        super(Homebrew, self).sync()
 
         # `brew cask update` is just an alias to `brew update`.
         self.run([self.cli_path] + self.cli_args + ['update'])

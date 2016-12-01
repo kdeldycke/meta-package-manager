@@ -4,6 +4,8 @@ Changelog
 `1.11.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.11.0...develop>`_
 ----------------------------------------------------------------------------------------------------
 
+* Allow restriction to only one package manager for each sub-command.
+  Closes #12.
 * Fix parsing of multiple versions of ``cask`` installed packages.
 * Fix lexicographical sorting of ``brew`` and ``cask`` package versions.
 

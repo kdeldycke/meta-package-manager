@@ -51,11 +51,14 @@ def json(data):
     default='INFO', metavar='LEVEL',
     help='Either CRITICAL, ERROR, WARNING, INFO or DEBUG. Defaults to INFO.')
 @click.option(
+    '-m', '--manager', type=click.Choice(pool()),
+    help="Restrict sub-command to one package manager. Defaults to all.")
+@click.option(
     '-o', '--output-format', type=click.Choice(RENDERING_MODES),
     default='fancy', help="Rendering mode of the output. Defaults to fancy.")
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx, output_format):
+def cli(ctx, manager, output_format):
     """ CLI for multi-package manager updates and upgrades. """
     level = click_log.get_level()
     level_name = logging._levelNames.get(level, level)
@@ -66,13 +69,18 @@ def cli(ctx, output_format):
         click.echo(ctx.get_help())
         ctx.exit()
 
-    # Load up global options to the context.
-    ctx.obj = {
-        'rendering': RENDERING_MODES[output_format]}
+    # Filters out the list of considered managers depending on user choices.
+    target_managers = {manager: pool()[manager]} if manager else pool()
 
     # Silent all log message in JSON rendering mode unless it's at debug level.
-    if ctx.obj['rendering'] == 'json' and level_name != 'DEBUG':
+    rendering = RENDERING_MODES[output_format]
+    if rendering == 'json' and level_name != 'DEBUG':
         click_log.set_level(logging.CRITICAL * 2)
+
+    # Load up global options to the context.
+    ctx.obj = {
+        'target_managers': target_managers,
+        'rendering': rendering}
 
 
 @cli.command(short_help='List supported package managers and their location.')
@@ -80,6 +88,7 @@ def cli(ctx, output_format):
 def managers(ctx):
     """ List all supported package managers and their presence on the system.
     """
+    target_managers = ctx.obj['target_managers']
     rendering = ctx.obj['rendering']
 
     # Machine-friendly data rendering.
@@ -90,12 +99,12 @@ def managers(ctx):
         # JSON mode use print to output data because the logger is disabled.
         print(json({
             manager_id: {fid: getattr(manager, fid) for fid in fields}
-            for manager_id, manager in pool().items()}))
+            for manager_id, manager in target_managers.items()}))
         return
 
     # Human-friendly content rendering.
     table = []
-    for manager_id, manager in pool().items():
+    for manager_id, manager in target_managers.items():
         table.append([
             manager.name,
             manager_id,
@@ -116,7 +125,9 @@ def managers(ctx):
 @click.pass_context
 def sync(ctx):
     """ Sync local package metadata and info from external sources. """
-    for manager_id, manager in pool().items():
+    target_managers = ctx.obj['target_managers']
+
+    for manager_id, manager in target_managers.items():
 
         # Filters-out inactive managers.
         if not manager.available:
@@ -130,10 +141,13 @@ def sync(ctx):
 @click.pass_context
 def outdated(ctx):
     """ List available package updates and their versions for each manager. """
+    target_managers = ctx.obj['target_managers']
+    rendering = ctx.obj['rendering']
+
     # Build-up a global list of outdated packages per manager.
     outdated = {}
 
-    for manager_id, manager in pool().items():
+    for manager_id, manager in target_managers.items():
 
         # Filters-out inactive managers.
         if not manager.available:
@@ -155,8 +169,6 @@ def outdated(ctx):
                 'installed_version': info['installed_version'],
                 'latest_version': info['latest_version']}
                 for info in manager.updates]}
-
-    rendering = ctx.obj['rendering']
 
     # Machine-friendly data rendering.
     if rendering == 'json':
@@ -202,7 +214,9 @@ def outdated(ctx):
 @click.pass_context
 def update(ctx):
     """ Perform a full package update on all available managers. """
-    for manager_id, manager in pool().items():
+    target_managers = ctx.obj['target_managers']
+
+    for manager_id, manager in target_managers.items():
 
         # Filters-out inactive managers.
         if not manager.available:

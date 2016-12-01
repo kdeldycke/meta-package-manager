@@ -32,7 +32,7 @@ import os
 import sys
 
 
-__version__ = '1.11.1'
+__version__ = '1.12.0'
 
 
 PY2 = sys.version_info[0] == 2

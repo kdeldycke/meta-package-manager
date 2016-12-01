@@ -1,7 +1,7 @@
 Changelog
 =========
 
-`1.11.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.11.0...develop>`_
+`1.12.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.11.0...develop>`_
 ----------------------------------------------------------------------------------------------------
 
 * Allow restriction to only one package manager for each sub-command.

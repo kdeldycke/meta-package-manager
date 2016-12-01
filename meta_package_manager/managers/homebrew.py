@@ -89,10 +89,16 @@ class Homebrew(PackageManager):
             return
 
         for pkg_info in json.loads(output):
+
+            # Parse versions to avoid lexicographic sorting gotchas.
+            version = None
+            versions = set(pkg_info['installed_versions'])
+            if versions:
+                _, version = max([(parse_version(v), v) for v in versions])
+
             self.updates.append({
                 'name': pkg_info['name'],
-                # Only keeps the highest installed version.
-                'installed_version': max(pkg_info['installed_versions']),
+                'installed_version': version,
                 'latest_version': pkg_info['current_version']})
 
     def update_cli(self, package_name=None):
@@ -214,12 +220,17 @@ class HomebrewCask(Homebrew):
                 continue
             infos = installed_pkg.split()
             name = infos[0]
-            versions = sorted(infos[1:])
 
-            # Use heuristics to guess installed version.
-            if len(versions) > 1 and 'latest' in versions:
-                versions.remove('latest')
-            version = versions[-1] if versions else '?'
+            # Guess latest installed version.
+            versions = set(infos[1:])
+            # Discard generic 'latest' symbolic version if others are
+            # available.
+            if len(versions) > 1:
+                versions.discard('latest')
+            # Parse versions to avoid lexicographic sorting gotchas.
+            version = None
+            if versions:
+                _, version = max([(parse_version(v), v) for v in versions])
 
             # TODO: Support packages removed from repository (reported with a
             # `(!)` flag). See: https://github.com/caskroom/homebrew-cask/blob

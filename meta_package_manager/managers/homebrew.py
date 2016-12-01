@@ -142,7 +142,7 @@ class HomebrewCask(Homebrew):
             aerial: 1.2beta5
             https://github.com/JohnCoates/Aerial
             /usr/local/Caskroom/aerial/1.2beta5 (18 files, 6.6M)
-            From: https://github.com/caskroom/homebrew-cask/blob/master/Casks/aerial.rb
+            From: https://github.com/(...)/blob/master/Casks/aerial.rb
             ==> Name
             Aerial Screensaver
             ==> Artifacts
@@ -152,7 +152,7 @@ class HomebrewCask(Homebrew):
             firefox: 50.0.1
             https://www.mozilla.org/firefox/
             /usr/local/Caskroom/firefox/49.0.1 (107 files, 185.3M)
-            From: https://github.com/caskroom/homebrew-cask/blob/master/Casks/firefox.rb
+            From: https://github.com/(...)/blob/master/Casks/firefox.rb
             ==> Name
             Mozilla Firefox
             ==> Artifacts
@@ -162,7 +162,7 @@ class HomebrewCask(Homebrew):
             prey: 1.6.3
             https://preyproject.com/
             Not installed
-            From: https://github.com/caskroom/homebrew-cask/blob/master/Casks/prey.rb
+            From: https://github.com/(...)/blob/master/Casks/prey.rb
             ==> Name
             Prey
             ==> Artifacts
@@ -178,7 +178,7 @@ class HomebrewCask(Homebrew):
             ubersicht: 1.0.44
             http://tracesof.net/uebersicht/
             Not installed
-            From: https://github.com/caskroom/homebrew-cask/blob/master/Casks/ubersicht.rb
+            From: https://github.com/(...)/blob/master/Casks/ubersicht.rb
             ==> Name
             Übersicht
             ==> Artifacts

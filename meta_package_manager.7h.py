@@ -68,8 +68,8 @@ class PackageManager(object):
             args, stdout=PIPE, stderr=PIPE, universal_newlines=True)
         output, error = process.communicate()
         if process.returncode != 0 and error:
-            self.error = error.decode('utf-8')
-        return output.decode('utf-8')
+            self.error = error.decode('utf-8').strip()
+        return output.decode('utf-8').strip()
 
     def sync(self):
         """ Fetch latest versions of installed packages.
@@ -257,7 +257,7 @@ class HomebrewCask(Homebrew):
         # Inspect package one by one as `brew cask list` is not reliable. See:
         # https://github.com/caskroom/homebrew-cask/blob/master/doc
         # /reporting_bugs/brew_cask_list_shows_wrong_information.md
-        for installed_pkg in output.strip().split('\n'):
+        for installed_pkg in output.split('\n'):
             if not installed_pkg:
                 continue
             infos = installed_pkg.split()
@@ -328,7 +328,7 @@ class Pip(PackageManager):
             mercurial (3.8.3) - Latest: 3.8.4 [sdist]
             pylint (1.5.6) - Latest: 1.6.1 [wheel]
         """
-        output = self.run(self.cli, 'list', '--outdated').strip()
+        output = self.run(self.cli, 'list', '--outdated')
         if not output:
             return
 
@@ -605,7 +605,7 @@ def print_menu():
         print("---")
 
         if manager.error:
-            for line in manager.error.strip().split("\n"):
+            for line in manager.error.split("\n"):
                 print("{} | color=red".format(line))
 
         print("{} {} package{}".format(

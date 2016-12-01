@@ -51,7 +51,7 @@ class Pip(PackageManager):
         super(Pip, self).sync()
 
         output = self.run([
-            self.cli_path] + self.cli_args + ['list', '--outdated']).strip()
+            self.cli_path] + self.cli_args + ['list', '--outdated'])
 
         if not output:
             return

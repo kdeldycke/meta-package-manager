@@ -209,7 +209,7 @@ class HomebrewCask(Homebrew):
         # Inspect package one by one as `brew cask list` is not reliable. See:
         # https://github.com/caskroom/homebrew-cask/blob/master/doc
         # /reporting_bugs/brew_cask_list_shows_wrong_information.md
-        for installed_pkg in output.strip().split('\n'):
+        for installed_pkg in output.split('\n'):
             if not installed_pkg:
                 continue
             infos = installed_pkg.split()

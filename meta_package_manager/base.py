@@ -127,9 +127,9 @@ class PackageManager(object):
         process = Popen(cmd, stdout=PIPE, stderr=PIPE, universal_newlines=True)
         output, error = process.communicate()
         if process.returncode != 0 and error:
-            self.error = error.decode('utf-8')
+            self.error = error.decode('utf-8').strip()
             logger.warning(self.error)
-        return output.decode('utf-8')
+        return output.decode('utf-8').strip()
 
     def sync(self):
         """ Fetch latest versions of installed packages.

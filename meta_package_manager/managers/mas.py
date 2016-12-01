@@ -75,7 +75,7 @@ class MAS(PackageManager):
                 # /mas/commit/1859eaedf49f6a1ebefe8c8d71ec653732674341
                 'installed_version': (
                     installed_version if installed_version != 'unknown'
-                    else '')})
+                    else None)})
 
     def update_cli(self, package_name):
         if package_name not in self.map:

@@ -168,12 +168,12 @@ def outdated(ctx):
     table = []
     for manager_id, outdated_pkg in outdated.items():
         table += [[
-            pkg_info['name'],
-            pkg_info['id'],
+            info['name'],
+            info['id'],
             manager_id,
-            pkg_info['installed_version'],
-            pkg_info['latest_version']]
-            for pkg_info in outdated_pkg['packages']]
+            info['installed_version'] if info['installed_version'] else '?',
+            info['latest_version']]
+            for info in outdated_pkg['packages']]
 
     def sort_method(line):
         """ Force sorting by lower-cased package ID first, then manager ID. """

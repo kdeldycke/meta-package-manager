@@ -75,7 +75,7 @@ class NPM(PackageManager):
             self.updates.append({
                 'name': package,
                 'installed_version':
-                    values['current'] if 'current' in values else '',
+                    values['current'] if 'current' in values else None,
                 'latest_version': values['latest']
             })
 

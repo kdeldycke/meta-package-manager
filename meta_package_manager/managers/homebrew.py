@@ -131,12 +131,14 @@ class HomebrewCask(Homebrew):
             $ brew cask list --versions
             aerial 1.2beta5
             android-file-transfer latest
-            audacity 2.1.2
+            audacity 2.1.2-1453294898 2.1.2
             bitbar 1.9.2
             firefox 49.0.1
             flux 37.7
             gimp 2.8.18-x86_64
             java 1.8.0_112-b16
+            tunnelblick 3.6.8_build_4625 3.6.9_build_4685
+            virtualbox 5.1.8-111374 5.1.10-112026
 
             $ brew cask info aerial
             aerial: 1.2beta5
@@ -157,6 +159,17 @@ class HomebrewCask(Homebrew):
             Mozilla Firefox
             ==> Artifacts
             Firefox.app (app)
+
+            $ brew cask info virtualbox
+            virtualbox: 5.1.10-112026
+            https://www.virtualbox.org
+            /usr/local/Caskroom/virtualbox/5.1.8-111374 (3 files, 88.8M)
+            /usr/local/Caskroom/virtualbox/5.1.10-112026 (3 files, 89.3M)
+            From: https://github.com/(...)/blob/master/Casks/virtualbox.rb
+            ==> Name
+            Oracle VirtualBox
+            ==> Artifacts
+            VirtualBox.pkg (pkg)
 
             $ brew cask info prey
             prey: 1.6.3
@@ -199,13 +212,11 @@ class HomebrewCask(Homebrew):
         for installed_pkg in output.strip().split('\n'):
             if not installed_pkg:
                 continue
-            infos = installed_pkg.split(' ', 1)
+            infos = installed_pkg.split()
             name = infos[0]
+            versions = sorted(infos[1:])
 
             # Use heuristics to guess installed version.
-            versions = infos[1] if len(infos) > 1 else ''
-            versions = sorted([
-                v.strip() for v in versions.split(',') if v.strip()])
             if len(versions) > 1 and 'latest' in versions:
                 versions.remove('latest')
             version = versions[-1] if versions else '?'

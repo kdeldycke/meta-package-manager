@@ -4,7 +4,8 @@ Changelog
 `1.11.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.11.0...develop>`_
 ----------------------------------------------------------------------------------------------------
 
-* No changes yet.
+* Fix parsing of multiple versions of ``cask`` installed packages.
+
 
 `1.11.0 (2016-11-30) <https://github.com/kdeldycke/meta-package-manager/compare/v1.10.0...v1.11.1>`_
 ----------------------------------------------------------------------------------------------------

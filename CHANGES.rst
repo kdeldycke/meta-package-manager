@@ -11,7 +11,7 @@ Changelog
 * Fix fall-back to iterative full upgrade command.
 
 
-`1.11.0 (2016-11-30) <https://github.com/kdeldycke/meta-package-manager/compare/v1.10.0...v1.11.1>`_
+`1.11.0 (2016-11-30) <https://github.com/kdeldycke/meta-package-manager/compare/v1.10.0...v1.11.0>`_
 ----------------------------------------------------------------------------------------------------
 
 * Allow rendering of output data into ``json``.
@@ -21,7 +21,7 @@ Changelog
 * Fix update of ``cask`` packages.
 
 
-`1.10.0 (2016-10-04) <https://github.com/kdeldycke/meta-package-manager/compare/v1.9.0...develop>`_
+`1.10.0 (2016-10-04) <https://github.com/kdeldycke/meta-package-manager/compare/v1.9.0...v1.10.0>`_
 ---------------------------------------------------------------------------------------------------
 
 * Add optionnal ``version`` property on package manager definitions.

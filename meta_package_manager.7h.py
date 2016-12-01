@@ -613,6 +613,7 @@ def print_menu():
                     cli=manager.update_cli(pkg_info['name']),
                     **pkg_info)).encode('utf-8'))
 
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()

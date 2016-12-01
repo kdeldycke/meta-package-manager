@@ -8,6 +8,7 @@ Changelog
   Closes #12.
 * Fix parsing of multiple versions of ``cask`` installed packages.
 * Fix lexicographical sorting of ``brew`` and ``cask`` package versions.
+* Fix fall-back to iterative full upgrade command.
 
 
 `1.11.0 (2016-11-30) <https://github.com/kdeldycke/meta-package-manager/compare/v1.10.0...v1.11.1>`_

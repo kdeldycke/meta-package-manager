@@ -164,6 +164,7 @@ class PackageManager(object):
                 "{} doesn't seems to implement a full update subcommand. Call "
                 "single-package update CLI one by one.".format(self.id))
             output = []
+            self.sync()
             for package in self.updates:
                 output.append(self.update(package['name']))
             return '\n'.join(output)

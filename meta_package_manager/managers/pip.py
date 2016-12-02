@@ -61,7 +61,7 @@ class Pip(PackageManager):
             if not outdated_pkg:
                 continue
 
-            name, installed_info, latest_version = regexp.match(
+            package_id, installed_info, latest_version = regexp.match(
                 outdated_pkg).groups()
 
             # Extract current non-standard location if found.
@@ -71,14 +71,15 @@ class Pip(PackageManager):
                 installed_info[1].strip()) if len(installed_info) > 1 else ''
 
             self.updates.append({
-                'name': name + special_location,
+                'id': package_id,
+                'name': package_id + special_location,
                 'installed_version': version,
                 'latest_version': latest_version})
 
-    def update_cli(self, package_name):
+    def update_cli(self, package_id):
         return [
             self.cli_path] + self.cli_args + [
-                'install', '--upgrade', package_name]
+                'install', '--upgrade', package_id]
 
     def update_all_cli(self):
         """ Pip lacks support of a proper full upgrade command.

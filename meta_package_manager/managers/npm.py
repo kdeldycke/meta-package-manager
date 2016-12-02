@@ -69,21 +69,22 @@ class NPM(PackageManager):
         if not output:
             return
 
-        for package, values in json.loads(output).iteritems():
+        for package_id, values in json.loads(output).iteritems():
             if values['wanted'] == 'linked':
                 continue
             self.updates.append({
-                'name': package,
+                'id': package_id,
+                'name': package_id,
                 'installed_version':
                     values['current'] if 'current' in values else None,
                 'latest_version': values['latest']
             })
 
-    def update_cli(self, package_name=None):
+    def update_cli(self, package_id=None):
         cmd = [self.cli_path] + self.cli_args + [
             '-g', '--progress=false', 'update']
-        if package_name:
-            cmd.append(package_name)
+        if package_id:
+            cmd.append(package_id)
         return cmd
 
     def update_all_cli(self):

@@ -76,21 +76,22 @@ class Gem(PackageManager):
         for package in output.split('\n'):
             if not package:
                 continue
-            name, current_version, latest_version = regexp.match(
+            package_id, current_version, latest_version = regexp.match(
                 package).groups()
             self.updates.append({
-                'name': name,
+                'id': package_id,
+                'name': package_id,
                 'installed_version': current_version,
                 'latest_version': latest_version
             })
 
-    def update_cli(self, package_name=None):
+    def update_cli(self, package_id=None):
         cmd = [self.cli_path] + self.cli_args + ['update']
         # Installs require sudo on system ruby.
         if self.system_install:
             cmd.insert(0, '/usr/bin/sudo')
-        if package_name:
-            cmd.append(package_name)
+        if package_id:
+            cmd.append(package_id)
         return cmd
 
     def update_all_cli(self):

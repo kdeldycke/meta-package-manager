@@ -97,14 +97,15 @@ class Homebrew(PackageManager):
                 _, version = max([(parse_version(v), v) for v in versions])
 
             self.updates.append({
+                'id': pkg_info['name'],
                 'name': pkg_info['name'],
                 'installed_version': version,
                 'latest_version': pkg_info['current_version']})
 
-    def update_cli(self, package_name=None):
+    def update_cli(self, package_id=None):
         cmd = [self.cli_path] + self.cli_args + ['upgrade', '--cleanup']
-        if package_name:
-            cmd.append(package_name)
+        if package_id:
+            cmd.append(package_id)
         return cmd
 
     def update_all_cli(self):
@@ -219,7 +220,7 @@ class HomebrewCask(Homebrew):
             if not installed_pkg:
                 continue
             infos = installed_pkg.split()
-            name = infos[0]
+            package_id = infos[0]
 
             # Guess latest installed version.
             versions = set(infos[1:])
@@ -238,27 +239,30 @@ class HomebrewCask(Homebrew):
             # /uninstall_wrongly_reports_cask_as_not_installed.md
 
             # Inspect the package closer to evaluate its state.
-            output = self.run([self.cli_path] + self.cli_args + ['info', name])
+            output = self.run([
+                self.cli_path] + self.cli_args + ['info', package_id])
 
             latest_version = output.split('\n')[0].split(' ')[1]
+            package_name = output.split('==> Name\n')[1].split('\n')[0]
 
             # Skip already installed packages.
             if version == latest_version:
                 continue
 
             self.updates.append({
-                'name': name,
+                'id': package_id,
+                'name': package_name,
                 'installed_version': version,
                 'latest_version': latest_version})
 
-    def update_cli(self, package_name):
+    def update_cli(self, package_id):
         """ Install a package.
 
         TODO: wait for https://github.com/caskroom/homebrew-cask/issues/22647
         so we can force a cleanup in one go, as we do above with vanilla
         Homebrew.
         """
-        return [self.cli_path] + self.cli_args + ['reinstall', package_name]
+        return [self.cli_path] + self.cli_args + ['reinstall', package_id]
 
     def update_all_cli(self):
         """ Cask has no way to update all outdated packages.

@@ -139,13 +139,13 @@ class PackageManager(object):
         """
         logger.info('Sync {} package info...'.format(self.id))
 
-    def update_cli(self, package_name=None):
+    def update_cli(self, package_id=None):
         """ Return a bash-compatible full-CLI to update a package. """
         raise NotImplementedError
 
-    def update(self, package_name=None):
+    def update(self, package_id=None):
         """ Effectively perform an update of provided package. """
-        return self.run(self.update_cli(package_name))
+        return self.run(self.update_cli(package_id))
 
     def update_all_cli(self):
         """ Return a bash-compatible full-CLI to update all packages. """
@@ -166,7 +166,7 @@ class PackageManager(object):
             output = []
             self.sync()
             for package in self.updates:
-                output.append(self.update(package['name']))
+                output.append(self.update(package['id']))
             return '\n'.join(output)
 
     @staticmethod

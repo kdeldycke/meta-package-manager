@@ -165,7 +165,7 @@ def outdated(ctx):
             'name': manager.name,
             'packages': [{
                 'name': info['name'],
-                'id': info['name'],
+                'id': info['id'],
                 'installed_version': info['installed_version'],
                 'latest_version': info['latest_version']}
                 for info in manager.updates]}

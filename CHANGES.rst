@@ -6,6 +6,7 @@ Changelog
 
 * Allow restriction to only one package manager for each sub-command.
   Closes #12.
+* Differentiate packages names and IDs. Closes #11.
 * Fix parsing of multiple versions of ``cask`` installed packages.
 * Fix lexicographical sorting of ``brew`` and ``cask`` package versions.
 * Fix fall-back to iterative full upgrade command.

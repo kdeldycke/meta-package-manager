@@ -11,6 +11,7 @@ Changelog
 * Fix parsing of multiple versions of ``cask`` installed packages.
 * Fix lexicographical sorting of ``brew`` and ``cask`` package versions.
 * Fix fall-back to iterative full upgrade command.
+* Fix computation of outdated packages statistics.
 
 
 `1.11.0 (2016-11-30) <https://github.com/kdeldycke/meta-package-manager/compare/v1.10.0...v1.11.0>`_

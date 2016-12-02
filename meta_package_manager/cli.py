@@ -201,7 +201,7 @@ def outdated(ctx):
     logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
     # Print statistics.
     manager_stats = {
-        manager_id: len(packages) for manager_id, packages in outdated.items()}
+        infos['id']: len(infos['packages']) for infos in outdated.values()}
     total_outdated = sum(manager_stats.values())
     per_manager_totals = ', '.join([
         '{} from {}'.format(v, k) for k, v in sorted(manager_stats.items())])

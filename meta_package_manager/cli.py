@@ -188,8 +188,11 @@ def outdated(ctx):
             for info in outdated_pkg['packages']]
 
     def sort_method(line):
-        """ Force sorting by lower-cased package ID first, then manager ID. """
-        return line[1].lower(), line[2]
+        """ Force sorting of table.
+
+        By lower-cased package name and ID first, then manager ID.
+        """
+        return line[0].lower(), line[1].lower(), line[2]
 
     # Sort and print table.
     table = [[

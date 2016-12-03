@@ -105,7 +105,7 @@ setup(
 
     classifiers=[
         # See: https://pypi.python.org/pypi?:action=list_classifiers
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
         'Environment :: MacOS X',
         'Environment :: Plugins',

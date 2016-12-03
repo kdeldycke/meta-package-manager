@@ -26,14 +26,16 @@ from __future__ import (
     unicode_literals
 )
 
-import codecs
-import os
+
+import io
 import re
+from os import path
 
 from setuptools import find_packages, setup
 
 MODULE_NAME = 'meta_package_manager'
 PACKAGE_NAME = MODULE_NAME.replace('_', '-')
+
 
 DEPENDENCIES = [
     'boltons >= 16.3.0',

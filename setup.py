@@ -49,9 +49,9 @@ EXTRA_DEPENDENCIES = {
     # Extra dependencies are made available through the
     # `$ pip install .[keyword]` command.
     'tests': [
-        'nose',
         'coverage',
-        'pycodestyle',
+        'nose',
+        'pycodestyle >= 2.1.0',
         'pylint'],
     'develop': [
         'isort',

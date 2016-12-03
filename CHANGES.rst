@@ -8,6 +8,9 @@ Changelog
 * Render errors with a monospaced font in BitBar plugin.
 * Add missing ``CHANGES.rst`` in ``MANIFEST.in``.
 * Make wheels generated under Python 2 environnment available for Python 3 too.
+* Only show latest changes in the long description of the package instead of
+  the full changelog.
+* Add link to full changelog in package's long description.
 * Bump trove classifiers status out of beta.
 * Fix package keywords.
 

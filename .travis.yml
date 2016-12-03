@@ -122,6 +122,8 @@ script:
   # Test that building packages works.
   - pip install -e .[develop]
   - ./setup.py sdist bdist_egg bdist_wheel
+  # Validates package metadata.
+  - ./setup.py check -m -r -s
 
 after_script:
   - codecov

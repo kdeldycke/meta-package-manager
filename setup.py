@@ -54,10 +54,10 @@ EXTRA_DEPENDENCIES = {
         'pycodestyle >= 2.1.0',
         'pylint'],
     'develop': [
+        'bumpversion',
         'isort',
-        'wheel',
         'setuptools >= 24.2.1',
-        'bumpversion'],
+        'wheel'],
 }
 
 

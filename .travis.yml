@@ -113,7 +113,7 @@ before_script:
   - pip install codecov
 
 script:
-  # Laucnh unittests.
+  # Launch unittests.
   - pip install -e .[tests]
   - coverage run ./setup.py test
   - coverage report -m

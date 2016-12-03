@@ -9,6 +9,7 @@ Changelog
 * Add missing ``CHANGES.rst`` in ``MANIFEST.in``.
 * Make wheels generated under Python 2 environnment available for Python 3 too.
 * Bump trove classifiers status out of beta.
+* Fix package keywords.
 
 
 `1.12.0 (2016-12-03) <https://github.com/kdeldycke/meta-package-manager/compare/v1.11.0...v1.12.0>`_

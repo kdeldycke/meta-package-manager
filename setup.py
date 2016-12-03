@@ -85,8 +85,10 @@ setup(
     version=get_version(),
     description="Unified API to handle several package managers.",
     long_description=get_long_description(),
-    keywords="CLI package pip apm npm homebrew brew cask osx macos node atom "
-             "ruby gem appstore mas bitbar plugin",
+    keywords=[
+        'CLI', 'package', 'pip', 'apm', 'npm', 'homebrew', 'brew', 'cask',
+        'osx', 'macos', 'node', 'atom', 'ruby', 'gem', 'appstore', 'mas',
+        'bitbar', 'plugin'],
 
     author='Kevin Deldycke',
     author_email='kevin@deldycke.com',

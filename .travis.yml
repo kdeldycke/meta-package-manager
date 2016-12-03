@@ -22,7 +22,7 @@ matrix:
     # Xcode to macOS version matrix is available at:
     # https://docs.travis-ci.com/user/osx-ci-environment/#OS-X-Version
 
-    # Xcode 6.2-beta is OSX 10.9.
+    # Xcode 6.2-beta is Mac OS X 10.9.
     - language: generic
       os: osx
       osx_image: beta-xcode6.2
@@ -40,7 +40,7 @@ matrix:
       osx_image: beta-xcode6.2
       env: PYTHON_DIST="3.5"
 
-    # Xcode 7.1 is OSX 10.10.
+    # Xcode 7.1 is Mac OS X 10.10.
     - language: generic
       os: osx
       osx_image: xcode7.1
@@ -58,7 +58,7 @@ matrix:
       osx_image: xcode7.1
       env: PYTHON_DIST="3.5"
 
-    # Xcode 8 is OSX 10.11.
+    # Xcode 8 is Mac OS X 10.11.
     - language: generic
       os: osx
       osx_image: xcode8

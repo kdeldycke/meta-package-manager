@@ -168,7 +168,8 @@ def outdated(ctx):
                 'id': info['id'],
                 'installed_version': info['installed_version'],
                 'latest_version': info['latest_version']}
-                for info in manager.updates]}
+                for info in manager.updates],
+            'error': manager.error}
 
     # Machine-friendly data rendering.
     if rendering == 'json':

@@ -1,8 +1,8 @@
 Changelog
 =========
 
-`1.12.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...develop>`_
-----------------------------------------------------------------------------------------------------
+`2.0.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...develop>`_
+---------------------------------------------------------------------------------------------------
 
 * Rewrite BitBar plugin based on ``mpm``. Closes #13.
 

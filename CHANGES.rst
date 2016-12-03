@@ -6,6 +6,7 @@ Changelog
 
 * Rewrite BitBar plugin based on ``mpm``. Closes #13.
 * Render errors with a monospaced font in BitBar plugin.
+* Add missing ``CHANGES.rst`` in ``MANIFEST.in``.
 
 
 `1.12.0 (2016-12-03) <https://github.com/kdeldycke/meta-package-manager/compare/v1.11.0...v1.12.0>`_

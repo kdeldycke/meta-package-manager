@@ -4,7 +4,7 @@
 # <bitbar.version>v2.0.0</bitbar.version>
 # <bitbar.author>Kevin Deldycke</bitbar.author>
 # <bitbar.author.github>kdeldycke</bitbar.author.github>
-# <bitbar.desc>List outdated packages on system and allow upgrades.</bitbar.desc>
+# <bitbar.desc>List outdated packages and manage upgrades.</bitbar.desc>
 # <bitbar.dependencies>python</bitbar.dependencies>
 # <bitbar.image>https://i.imgur.com/CiQpQ42.png</bitbar.image>
 # <bitbar.abouturl>https://github.com/kdeldycke/meta-package-manager</bitbar.abouturl>

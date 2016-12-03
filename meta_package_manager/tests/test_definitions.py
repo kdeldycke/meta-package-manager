@@ -60,7 +60,8 @@ class TestDefinition(unittest.TestCase):
     def test_cli_type(self):
         """ Check that all methods returning a CLI is a list. """
         for manager in pool().values():
-            self.assertIsInstance(manager.upgrade_cli('dummy_package_id'), list)
+            self.assertIsInstance(
+                manager.upgrade_cli('dummy_package_id'), list)
 
             # Upgrade-all CLI are allowed to raise a particular error.
             try:

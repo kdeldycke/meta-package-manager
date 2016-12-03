@@ -1,6 +1,12 @@
 Changelog
 =========
 
+`1.12.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...develop>`_
+----------------------------------------------------------------------------------------------------
+
+* No changes yet.
+
+
 `1.12.0 (2016-12-03) <https://github.com/kdeldycke/meta-package-manager/compare/v1.11.0...v1.12.0>`_
 ----------------------------------------------------------------------------------------------------
 

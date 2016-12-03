@@ -25,7 +25,7 @@ Changelog
 * Sort list of outdated packages by lower-cased package IDs.
 * Bump minimal requirement of ``brew`` to 1.0.0 and ``cask`` to 1.1.0.
 * Fix fetching of outdated ``cask`` packages.
-* Fix update of ``cask`` packages.
+* Fix upgrade of ``cask`` packages.
 
 
 `1.10.0 (2016-10-04) <https://github.com/kdeldycke/meta-package-manager/compare/v1.9.0...v1.10.0>`_
@@ -96,7 +96,7 @@ Changelog
 * Fix issues with ``$PATH`` not having Homebrew/Macports.
 * New workaround for full ``pip`` upgrade command.
 * Workaround for Homebrew Cask full upgrade command.
-* Grammar fix when 0 packages need updated.
+* Grammar fix when 0 packages need to be upgraded.
 
 
 `1.6.0 (2016-08-10) <https://github.com/kdeldycke/meta-package-manager/compare/v1.5.0...v1.6.0>`_

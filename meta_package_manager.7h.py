@@ -32,6 +32,20 @@ def mpm_available():
     return True
 
 
+def run(cmd):
+    """ Run a shell command, return error code, output and error message. """
+    assert isinstance(cmd, list)
+    try:
+        process = Popen(cmd, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    except OSError:
+        return None, None, "`{}` executable not found.".format(cmd[0])
+    output, error = process.communicate()
+    return (
+        process.returncode,
+        output.decode('utf-8').strip(),
+        error.decode('utf-8').strip())
+
+
 def print_error_header():
     """ Generic header for blockng error. """
     print("❌ | dropdown=false".encode('utf-8'))
@@ -49,22 +63,22 @@ def print_menu():
 
     See: https://github.com/matryer/bitbar#plugin-api
     """
-    # Check availability of mpm.
-    if not mpm_available():
-        # mpm can't be found. Stop right away and propose to install it.
+    # Search for generic mpm CLI on system.
+    retcode, _, error = run(['mpm'])
+    if retcode or error:
         print_error_header()
         print(
-            "`mpm` CLI not found. Click here to install. | bash=pip "
+            "{} Click here to install it. | bash=pip "
+            # TODO: Add minimal requirement on Python package.
             "param1=install param2=--upgrade param3=meta-package-manager "
-            "terminal=true refresh=true color=red")
+            "terminal=true refresh=true color=red".format(error))
         return
 
     # Fetch list of all outdated packages from all package manager available on
     # the system.
-    process = Popen([
-        'mpm', '--output-format', 'json', 'outdated', '--cli-format',
-        'bitbar'], stdout=PIPE, stderr=PIPE)
-    output, error = process.communicate()
+    _, output, error = run([
+        'mpm', '--output-format', 'json',
+        'outdated', '--cli-format', 'bitbar'])
 
     if error:
         print_error_header()

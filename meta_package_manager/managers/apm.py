@@ -51,18 +51,18 @@ class APM(PackageManager):
             return
 
         for package in json.loads(output):
-            self.updates.append({
+            self.outdated.append({
                 'id': package['name'],
                 'name': package['name'],
                 'installed_version': package['version'],
                 'latest_version': package['latestVersion']
             })
 
-    def update_cli(self, package_id=None):
+    def upgrade_cli(self, package_id=None):
         cmd = [self.cli_path] + self.cli_args + ['update', '--no-confirm']
         if package_id:
             cmd.append(package_id)
         return cmd
 
-    def update_all_cli(self):
-        return self.update_cli()
+    def upgrade_all_cli(self):
+        return self.upgrade_cli()

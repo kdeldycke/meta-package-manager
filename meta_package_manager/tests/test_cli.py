@@ -118,22 +118,22 @@ class TestCLIOutdated(CLITestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-class TestCLIUpdate(CLITestCase):
+class TestCLIUpgrade(CLITestCase):
 
     def test_main_help(self):
-        result = self.runner.invoke(cli, ['update', '--help'])
+        result = self.runner.invoke(cli, ['upgrade', '--help'])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("--help", result.output)
 
     def test_verbosity(self):
-        result = self.runner.invoke(cli, ['--verbosity', 'DEBUG', 'update'])
+        result = self.runner.invoke(cli, ['--verbosity', 'DEBUG', 'upgrade'])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("debug:", result.output)
 
-        result = self.runner.invoke(cli, ['--verbosity', 'INFO', 'update'])
+        result = self.runner.invoke(cli, ['--verbosity', 'INFO', 'upgrade'])
         self.assertEqual(result.exit_code, 0)
         self.assertNotIn("debug:", result.output)
 
     def test_simple_call(self):
-        result = self.runner.invoke(cli, ['update'])
+        result = self.runner.invoke(cli, ['upgrade'])
         self.assertEqual(result.exit_code, 0)

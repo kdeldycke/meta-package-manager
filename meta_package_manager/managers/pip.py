@@ -70,18 +70,18 @@ class Pip(PackageManager):
             special_location = " ({})".format(
                 installed_info[1].strip()) if len(installed_info) > 1 else ''
 
-            self.updates.append({
+            self.outdated.append({
                 'id': package_id,
                 'name': package_id + special_location,
                 'installed_version': version,
                 'latest_version': latest_version})
 
-    def update_cli(self, package_id):
+    def upgrade_cli(self, package_id):
         return [
             self.cli_path] + self.cli_args + [
                 'install', '--upgrade', package_id]
 
-    def update_all_cli(self):
+    def upgrade_all_cli(self):
         """ Pip lacks support of a proper full upgrade command.
 
         See: https://github.com/pypa/pip/issues/59

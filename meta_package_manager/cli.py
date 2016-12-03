@@ -59,7 +59,7 @@ def json(data):
 @click.version_option(__version__)
 @click.pass_context
 def cli(ctx, manager, output_format):
-    """ CLI for multi-package manager updates and upgrades. """
+    """ CLI for multi-package manager upgrades. """
     level = click_log.get_level()
     level_name = logging._levelNames.get(level, level)
     logger.debug('Verbosity set to {}.'.format(level_name))
@@ -137,10 +137,11 @@ def sync(ctx):
         manager.sync()
 
 
-@cli.command(short_help='List available updates.')
+@cli.command(short_help='List outdated packages.')
 @click.pass_context
 def outdated(ctx):
-    """ List available package updates and their versions for each manager. """
+    """ List available package upgrades and their versions for each manager.
+    """
     target_managers = ctx.obj['target_managers']
     rendering = ctx.obj['rendering']
 
@@ -154,7 +155,7 @@ def outdated(ctx):
             logger.warning('Skip unavailable {} manager.'.format(manager_id))
             continue
 
-        # Force a sync to get the freshest updates.
+        # Force a sync to get the freshest upgrades.
         manager.sync()
 
         if manager.error:
@@ -168,8 +169,8 @@ def outdated(ctx):
                 'id': info['id'],
                 'installed_version': info['installed_version'],
                 'latest_version': info['latest_version'],
-                'update_cli': manager.update_cli(info['id'])}
-                for info in manager.updates],
+                'upgrade_cli': manager.upgrade_cli(info['id'])}
+                for info in manager.outdated],
             'error': manager.error}
 
     # Machine-friendly data rendering.
@@ -215,10 +216,10 @@ def outdated(ctx):
         per_manager_totals))
 
 
-@cli.command(short_help='Update all packages.')
+@cli.command(short_help='Upgrade all packages.')
 @click.pass_context
-def update(ctx):
-    """ Perform a full package update on all available managers. """
+def upgrade(ctx):
+    """ Perform a full package upgrade on all available managers. """
     target_managers = ctx.obj['target_managers']
 
     for manager_id, manager in target_managers.items():
@@ -230,5 +231,5 @@ def update(ctx):
 
         logger.info(
             'Updating all outdated packages from {}...'.format(manager_id))
-        output = manager.update_all()
+        output = manager.upgrade_all()
         logger.info(output)

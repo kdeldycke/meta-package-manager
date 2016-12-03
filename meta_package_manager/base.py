@@ -48,8 +48,9 @@ class PackageManager(object):
     requirement = None
 
     def __init__(self):
-        # List all available updates and their versions.
-        self.updates = []
+        # List all outdated packages intalled on the system.
+        self.outdated = []
+        # Keep errors return by the manager's CLI.
         self.error = None
 
     @cachedproperty
@@ -139,34 +140,34 @@ class PackageManager(object):
         """
         logger.info('Sync {} package info...'.format(self.id))
 
-    def update_cli(self, package_id=None):
-        """ Return a bash-compatible full-CLI to update a package. """
+    def upgrade_cli(self, package_id=None):
+        """ Return a bash-compatible full-CLI to upgrade a package. """
         raise NotImplementedError
 
-    def update(self, package_id=None):
-        """ Effectively perform an update of provided package. """
-        return self.run(self.update_cli(package_id))
+    def upgrade(self, package_id=None):
+        """ Perform the upgrade of the provided package to latest version. """
+        return self.run(self.upgrade_cli(package_id))
 
-    def update_all_cli(self):
-        """ Return a bash-compatible full-CLI to update all packages. """
+    def upgrade_all_cli(self):
+        """ Return a bash-compatible full-CLI to upgrade all packages. """
         raise NotImplementedError
 
-    def update_all(self):
-        """ Effectively perform a full update of all outdated packages.
+    def upgrade_all(self):
+        """ Perform a full upgrade of all outdated packages to latest versions.
 
-        If the manager doesn't implements a full update one-liner, then
-        fall-back to calling single-package update one by one.
+        If the manager doesn't implements a full upgrade one-liner, then
+        fall-back to calling single-package upgrade one by one.
         """
         try:
-            return self.run(self.update_all_cli())
+            return self.run(self.upgrade_all_cli())
         except NotImplementedError:
             logger.warning(
-                "{} doesn't seems to implement a full update subcommand. Call "
-                "single-package update CLI one by one.".format(self.id))
+                "{} doesn't seems to implement a full upgrade subcommand. "
+                "Call single-package upgrade CLI one by one.".format(self.id))
             output = []
             self.sync()
-            for package in self.updates:
-                output.append(self.update(package['id']))
+            for package in self.outdated:
+                output.append(self.upgrade(package['id']))
             return '\n'.join(output)
 
     @staticmethod

@@ -4,6 +4,7 @@ Changelog
 `1.12.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v1.11.0...develop>`_
 ----------------------------------------------------------------------------------------------------
 
+* Rename ``mpm update`` command to ``mpm upgrade``.
 * Allow restriction to only one package manager for each sub-command.
   Closes #12.
 * Differentiate packages names and IDs. Closes #11.

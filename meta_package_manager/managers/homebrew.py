@@ -96,20 +96,20 @@ class Homebrew(PackageManager):
             if versions:
                 _, version = max([(parse_version(v), v) for v in versions])
 
-            self.updates.append({
+            self.outdated.append({
                 'id': pkg_info['name'],
                 'name': pkg_info['name'],
                 'installed_version': version,
                 'latest_version': pkg_info['current_version']})
 
-    def update_cli(self, package_id=None):
+    def upgrade_cli(self, package_id=None):
         cmd = [self.cli_path] + self.cli_args + ['upgrade', '--cleanup']
         if package_id:
             cmd.append(package_id)
         return cmd
 
-    def update_all_cli(self):
-        return self.update_cli()
+    def upgrade_all_cli(self):
+        return self.upgrade_cli()
 
 
 class HomebrewCask(Homebrew):
@@ -118,7 +118,7 @@ class HomebrewCask(Homebrew):
 
     cli_args = ['cask']
 
-    # 'cask install' doesn't update to the latest package version, we need to
+    # 'cask install' doesn't upgrade to the latest package version, we need to
     # call 'cask reinstall' instead since 1.1.0.
     requirement = '>= 1.1.0'
 
@@ -249,13 +249,13 @@ class HomebrewCask(Homebrew):
             if version == latest_version:
                 continue
 
-            self.updates.append({
+            self.outdated.append({
                 'id': package_id,
                 'name': package_name,
                 'installed_version': version,
                 'latest_version': latest_version})
 
-    def update_cli(self, package_id):
+    def upgrade_cli(self, package_id):
         """ Install a package.
 
         TODO: wait for https://github.com/caskroom/homebrew-cask/issues/22647
@@ -264,8 +264,8 @@ class HomebrewCask(Homebrew):
         """
         return [self.cli_path] + self.cli_args + ['reinstall', package_id]
 
-    def update_all_cli(self):
-        """ Cask has no way to update all outdated packages.
+    def upgrade_all_cli(self):
+        """ Cask has no way to upgrade all outdated packages.
 
         See: https://github.com/caskroom/homebrew-cask/issues/4678
         """

@@ -8,6 +8,7 @@ Changelog
   Closes #12.
 * Differentiate packages names and IDs. Closes #11.
 * Sort list of outdated packages by lower-cased package names first.
+* Add update CLI field for each outdated packages in JSON output.
 * Include errors reported by each manager in JSON output of ``mpm outdated``
   command.
 * Fix parsing of multiple versions of ``cask`` installed packages.

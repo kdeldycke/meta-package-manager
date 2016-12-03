@@ -29,6 +29,7 @@ import click_log
 from tabulate import tabulate
 
 from . import __version__, logger
+from .base import PackageManager
 from .managers import pool
 
 # Output rendering modes. Sorted from most machine-readable to fanciest
@@ -39,6 +40,9 @@ RENDERING_MODES = {
     'plain': 'plain',
     'simple': 'simple',
     'fancy': 'fancy_grid'}
+
+# Rendering format of CLI in JSON fields.
+CLI_FORMATS = frozenset(['plain', 'fragments', 'bitbar'])
 
 
 def json(data):
@@ -139,8 +143,11 @@ def sync(ctx):
 
 
 @cli.command(short_help='List outdated packages.')
+@click.option(
+    '-c', '--cli-format', type=click.Choice(CLI_FORMATS), default='plain',
+    help="Format of CLI fields in JSON output. Defaults to plain.")
 @click.pass_context
-def outdated(ctx):
+def outdated(ctx, cli_format):
     """ List available package upgrades and their versions for each manager.
     """
     target_managers = ctx.obj['target_managers']
@@ -162,16 +169,26 @@ def outdated(ctx):
         if manager.error:
             logger.error(manager.error)
 
-        outdated[manager_id] = {
-            'id': manager_id,
-            'name': manager.name,
-            'packages': [{
+        packages = []
+        for info in manager.outdated:
+            # Format the CLI.
+            upgrade_cli = manager.upgrade_cli(info['id'])
+            if cli_format != 'fragments':
+                upgrade_cli = ' '.join(upgrade_cli)
+                if cli_format == 'bitbar':
+                    upgrade_cli = PackageManager.bitbar_cli_format(upgrade_cli)
+
+            packages.append({
                 'name': info['name'],
                 'id': info['id'],
                 'installed_version': info['installed_version'],
                 'latest_version': info['latest_version'],
-                'upgrade_cli': manager.upgrade_cli(info['id'])}
-                for info in manager.outdated],
+                'upgrade_cli': upgrade_cli})
+
+        outdated[manager_id] = {
+            'id': manager_id,
+            'name': manager.name,
+            'packages': packages,
             'error': manager.error}
 
     # Machine-friendly data rendering.

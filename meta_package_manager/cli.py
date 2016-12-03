@@ -31,7 +31,8 @@ from tabulate import tabulate
 from . import __version__, logger
 from .managers import pool
 
-# Output rendering modes. From machine to human-readable.
+# Output rendering modes. Sorted from most machine-readable to fanciest
+# human-readable.
 RENDERING_MODES = {
     'json': 'json',
     # Mapping of table formating options to tabulate's parameters.

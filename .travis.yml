@@ -58,6 +58,24 @@ matrix:
       osx_image: xcode8
       env: PYTHON_DIST="3.5"
 
+    # Xcode 8.2 is macOS 10.12.
+    - language: generic
+      os: osx
+      osx_image: xcode8.2
+      env: PYTHON_DIST="2.7"
+    - language: generic
+      os: osx
+      osx_image: xcode8.2
+      env: PYTHON_DIST="3.3"
+    - language: generic
+      os: osx
+      osx_image: xcode8.2
+      env: PYTHON_DIST="3.4"
+    - language: generic
+      os: osx
+      osx_image: xcode8.2
+      env: PYTHON_DIST="3.5"
+
 # Update the system and setup a fresh Anaconda ecosystem.
 before_install:
   # Check default Python version installed.

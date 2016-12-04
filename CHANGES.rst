@@ -4,7 +4,8 @@ Changelog
 `2.0.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v2.0.0...develop>`_
 --------------------------------------------------------------------------------------------------
 
-* No changes yet.
+* Adjust rendering of BitBar plugin errors.
+
 
 `2.0.0 (2016-12-04) <https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...v2.0.0>`_
 --------------------------------------------------------------------------------------------------

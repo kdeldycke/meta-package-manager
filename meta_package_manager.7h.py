@@ -57,11 +57,14 @@ def print_menu():
     retcode, _, error = run(['mpm'])
     if retcode or error:
         print_error_header()
-        print(
-            "{} Click here to install it. | bash=pip "
-            # TODO: Add minimal requirement on Python package.
-            "param1=install param2=--upgrade param3=meta-package-manager "
-            "terminal=true refresh=true color=red".format(error))
+        if retcode is None:
+            print(
+                "{} Click here to install it. | bash=pip "
+                # TODO: Add minimal requirement on Python package.
+                "param1=install param2=--upgrade param3=meta-package-manager "
+                "terminal=true refresh=true color=red".format(error))
+        else:
+            print_error(error)
         return
 
     # Fetch list of all outdated packages from all package manager available on

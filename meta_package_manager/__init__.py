@@ -48,7 +48,7 @@ if sys.platform != 'darwin':
 logger = logging.getLogger(__name__)
 
 
-# OS X does not put /usr/local/bin or /opt/local/bin in the PATH for GUI apps.
+# macOS does not put /usr/local/bin or /opt/local/bin in the PATH for GUI apps.
 # For some package managers this is a problem. Additioanlly Homebrew and
 # Macports are using different pathes.  So, to make sure we can always get to
 # the necessary binaries, we overload the path.  Current preference order would

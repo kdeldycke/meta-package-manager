@@ -19,17 +19,7 @@ from __future__ import print_function, unicode_literals
 
 import json
 from operator import itemgetter
-from subprocess import PIPE, CalledProcessError, Popen, check_call
-
-
-def mpm_available():
-    """ Search for generic mpm CLI on system. """
-    try:
-        # Do not reprint CLI output on screen but errors.
-        check_call(['mpm'], stdout=PIPE)
-    except (CalledProcessError, OSError):
-        return False
-    return True
+from subprocess import PIPE, Popen
 
 
 def run(cmd):

@@ -64,7 +64,12 @@ def json(data):
 def cli(ctx, manager, output_format):
     """ CLI for multi-package manager upgrades. """
     level = click_log.get_level()
-    level_name = logging._levelNames.get(level, level)
+    try:
+        level_to_name = logging._levelToName
+    # Fallback to pre-Python 3.4 internals.
+    except AttributeError:
+        level_to_name = logging._levelNames
+    level_name = level_to_name.get(level, level)
     logger.debug('Verbosity set to {}.'.format(level_name))
 
     # Print help screen and exit if no sub-commands provided.

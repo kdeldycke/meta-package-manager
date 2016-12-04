@@ -110,10 +110,9 @@ def print_menu():
             manager['name'],
             's' if len(manager['packages']) != 1 else ''))
 
-        # TODO: Re-implement full upgrade.
-        # if manager.upgrade_all_cli() and manager.outdated:
-        #     print("Upgrade all | {} terminal=false refresh=true".format(
-        #         manager.upgrade_all_cli()))
+        if manager['upgrade_all_cli']:
+            print("Upgrade all | {} terminal=false refresh=true".format(
+                manager['upgrade_all_cli']))
 
         for pkg_info in manager['packages']:
             print((

@@ -21,6 +21,7 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
+from functools import partial
 from json import dumps as json_dumps
 from operator import itemgetter
 
@@ -29,7 +30,7 @@ import click_log
 from tabulate import tabulate
 
 from . import __version__, logger
-from .base import PackageManager
+from .base import CLI_FORMATS, PackageManager
 from .managers import pool
 
 # Output rendering modes. Sorted from most machine-readable to fanciest
@@ -40,9 +41,6 @@ RENDERING_MODES = {
     'plain': 'plain',
     'simple': 'simple',
     'fancy': 'fancy_grid'}
-
-# Rendering format of CLI in JSON fields.
-CLI_FORMATS = frozenset(['plain', 'fragments', 'bitbar'])
 
 
 def json(data):
@@ -153,6 +151,8 @@ def outdated(ctx, cli_format):
     target_managers = ctx.obj['target_managers']
     rendering = ctx.obj['rendering']
 
+    render_cli = partial(PackageManager.render_cli, cli_format=cli_format)
+
     # Build-up a global list of outdated packages per manager.
     outdated = {}
 
@@ -171,25 +171,28 @@ def outdated(ctx, cli_format):
 
         packages = []
         for info in manager.outdated:
-            # Format the CLI.
-            upgrade_cli = manager.upgrade_cli(info['id'])
-            if cli_format != 'fragments':
-                upgrade_cli = ' '.join(upgrade_cli)
-                if cli_format == 'bitbar':
-                    upgrade_cli = PackageManager.bitbar_cli_format(upgrade_cli)
-
             packages.append({
                 'name': info['name'],
                 'id': info['id'],
                 'installed_version': info['installed_version'],
                 'latest_version': info['latest_version'],
-                'upgrade_cli': upgrade_cli})
+                'upgrade_cli': render_cli(manager.upgrade_cli(info['id']))})
 
         outdated[manager_id] = {
             'id': manager_id,
             'name': manager.name,
             'packages': packages,
             'error': manager.error}
+
+        if manager.outdated:
+            try:
+                upgrade_all_cli = manager.upgrade_all_cli()
+            except NotImplementedError:
+                # Fallback on mpm itself which is capable of simulating a full
+                # upgrade.
+                upgrade_all_cli = ['mpm', '--manager', manager_id, 'upgrade']
+            outdated[manager_id]['upgrade_all_cli'] = render_cli(
+                upgrade_all_cli)
 
     # Machine-friendly data rendering.
     if rendering == 'json':

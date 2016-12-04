@@ -15,6 +15,8 @@ Changelog
 * Fix package keywords.
 * Bump minimal ``pycodestyle`` requirement to 2.1.0.
 * Always check for package metadata in Travis CI jobs.
+* Add ``upgrade_all_cli`` field for each package manager in JSON output of
+  ``mpm outdated`` command.
 
 
 `1.12.0 (2016-12-03) <https://github.com/kdeldycke/meta-package-manager/compare/v1.11.0...v1.12.0>`_

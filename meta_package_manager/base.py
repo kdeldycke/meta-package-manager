@@ -33,6 +33,9 @@ from packaging.specifiers import SpecifierSet
 
 from . import logger
 
+# Rendering format of CLI in JSON fields.
+CLI_FORMATS = frozenset(['plain', 'fragments', 'bitbar'])
+
 
 class PackageManager(object):
     """ Package manager definition. """
@@ -171,7 +174,18 @@ class PackageManager(object):
             return '\n'.join(output)
 
     @staticmethod
-    def bitbar_cli_format(full_cli):
+    def render_cli(cmd, cli_format='plain'):
+        """ Returns a formatted CLI in the provided format. """
+        assert isinstance(cmd, list)
+        assert cli_format in CLI_FORMATS
+        if cli_format != 'fragments':
+            cmd = ' '.join(cmd)
+            if cli_format == 'bitbar':
+                cmd = PackageManager.render_bitbar_cli(cmd)
+        return cmd
+
+    @staticmethod
+    def render_bitbar_cli(full_cli):
         """ Format a bash-runnable full-CLI with parameters into bitbar schema.
         """
         cmd, params = full_cli.strip().split(' ', 1)

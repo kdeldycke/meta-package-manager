@@ -2,5 +2,4 @@
 include CHANGES.rst
 include LICENSE
 include MANIFEST.in
-include meta_package_manager.7h.py
 include setup.cfg

@@ -18,8 +18,26 @@ quite resource intensive, and Homebrew might hit GitHub's API calls quota.
 from __future__ import print_function, unicode_literals
 
 import json
+import os
 from operator import itemgetter
 from subprocess import PIPE, Popen
+
+
+def expand_cli_search_scope():
+    """ Tweak environment variable to find non-default system-wide binaries.
+
+    macOS does not put ``/usr/local/bin`` or ``/opt/local/bin`` in the ``PATH``
+    for GUI apps. For some package managers this is a problem. Additioanlly
+    Homebrew and Macports are using different pathes. So, to make sure we can
+    always get to the necessary binaries, we overload the path. Current
+    preference order would equate to Homebrew, Macports, then system.
+    """
+    os.environ['PATH'] = ':'.join([
+        '/usr/local/bin',
+        '/usr/local/sbin',
+        '/opt/local/bin',
+        '/opt/local/sbin',
+        os.environ.get('PATH', '')])
 
 
 def run(cmd):
@@ -115,4 +133,5 @@ def print_menu():
 
 
 if __name__ == '__main__':
+    expand_cli_search_scope()
     print_menu()

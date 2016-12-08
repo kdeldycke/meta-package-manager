@@ -17,3 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+import imp
+from os import path
+
+# Manually import BitBar plugin content because of its non Python-compliant
+# name with a double extension.
+here = path.dirname(path.abspath(__file__))
+bitbar_plugin = path.join(here, 'meta_package_manager.7h.py')
+imp.load_source(__name__, bitbar_plugin)

@@ -28,14 +28,14 @@ from __future__ import (
 import unittest
 from subprocess import PIPE, Popen
 
-import meta_package_manager
+from meta_package_manager import bitbar
 
 
 class TestBitBarPlugin(unittest.TestCase):
 
     def test_simple_call(self):
         process = Popen(
-            [meta_package_manager.bitbar.__file__],
+            [bitbar.__file__],
             stdout=PIPE, stderr=PIPE, universal_newlines=True)
         output, error = process.communicate()
         print(output)

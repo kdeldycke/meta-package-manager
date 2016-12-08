@@ -44,7 +44,7 @@ def run(cmd):
     """ Run a shell command, return error code, output and error message. """
     assert isinstance(cmd, list)
     try:
-        process = Popen(cmd, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+        process = Popen(cmd, stdout=PIPE, stderr=PIPE)
     except OSError:
         return None, None, "`{}` executable not found.".format(cmd[0])
     output, error = process.communicate()

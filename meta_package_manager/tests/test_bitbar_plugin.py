@@ -35,7 +35,7 @@ class TestBitBarPlugin(unittest.TestCase):
 
     def test_simple_call(self):
         process = Popen(
-            [ meta_package_manager.bitbar.__file__  ],
+            [meta_package_manager.bitbar.__file__],
             stdout=PIPE, stderr=PIPE, universal_newlines=True)
         output, error = process.communicate()
         print(output)

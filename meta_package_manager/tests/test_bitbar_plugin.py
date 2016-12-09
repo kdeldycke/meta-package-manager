@@ -40,4 +40,4 @@ class TestBitBarPlugin(unittest.TestCase):
         print(error)
         self.assertEqual(process.returncode, 0)
         self.assertFalse(error)
-        self.assertIn("❌ | dropdown=false\n---\n", output.decode('utf-8'))
+        self.assertIn(" | dropdown=false\n---\n", output.decode('utf-8'))

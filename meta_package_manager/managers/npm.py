@@ -72,13 +72,12 @@ class NPM(PackageManager):
         for package_id, values in json.loads(output).iteritems():
             if values['wanted'] == 'linked':
                 continue
-            self.outdated.append({
+            self.outdated[package_id] = {
                 'id': package_id,
                 'name': package_id,
                 'installed_version':
                     values['current'] if 'current' in values else None,
-                'latest_version': values['latest']
-            })
+                'latest_version': values['latest']}
 
     def upgrade_cli(self, package_id=None):
         cmd = [self.cli_path] + self.cli_args + [

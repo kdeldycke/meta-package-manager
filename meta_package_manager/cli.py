@@ -180,7 +180,7 @@ def outdated(ctx, cli_format):
             logger.error(manager.error)
 
         packages = []
-        for info in manager.outdated:
+        for info in manager.outdated.values():
             packages.append({
                 'name': info['name'],
                 'id': info['id'],

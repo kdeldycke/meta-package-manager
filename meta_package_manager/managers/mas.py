@@ -63,7 +63,7 @@ class MAS(PackageManager):
                 continue
             package_id, package_name, installed_version, latest_version = \
                 regexp.match(application).groups()
-            self.outdated.append({
+            self.outdated[package_id] = {
                 'id': package_id,
                 'name': package_name,
                 'latest_version': latest_version,
@@ -71,7 +71,7 @@ class MAS(PackageManager):
                 # /mas/commit/1859eaedf49f6a1ebefe8c8d71ec653732674341
                 'installed_version': (
                     installed_version if installed_version != 'unknown'
-                    else None)})
+                    else None)}
 
     def upgrade_cli(self, package_id):
         return [self.cli_path] + self.cli_args + ['install', package_id]

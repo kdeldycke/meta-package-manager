@@ -96,11 +96,12 @@ class Homebrew(PackageManager):
             if versions:
                 _, version = max([(parse_version(v), v) for v in versions])
 
-            self.outdated.append({
-                'id': pkg_info['name'],
-                'name': pkg_info['name'],
+            package_id = pkg_info['name']
+            self.outdated[package_id] = {
+                'id': package_id,
+                'name': package_id,
                 'installed_version': version,
-                'latest_version': pkg_info['current_version']})
+                'latest_version': pkg_info['current_version']}
 
     def upgrade_cli(self, package_id=None):
         cmd = [self.cli_path] + self.cli_args + ['upgrade', '--cleanup']
@@ -249,11 +250,11 @@ class HomebrewCask(Homebrew):
             if version == latest_version:
                 continue
 
-            self.outdated.append({
+            self.outdated[package_id] = {
                 'id': package_id,
                 'name': package_name,
                 'installed_version': version,
-                'latest_version': latest_version})
+                'latest_version': latest_version}
 
     def upgrade_cli(self, package_id):
         """ Install a package.

@@ -78,12 +78,11 @@ class Gem(PackageManager):
                 continue
             package_id, current_version, latest_version = regexp.match(
                 package).groups()
-            self.outdated.append({
+            self.outdated[package_id] = {
                 'id': package_id,
                 'name': package_id,
                 'installed_version': current_version,
-                'latest_version': latest_version
-            })
+                'latest_version': latest_version}
 
     def upgrade_cli(self, package_id=None):
         cmd = [self.cli_path] + self.cli_args + ['update']

@@ -51,8 +51,8 @@ class PackageManager(object):
     requirement = None
 
     def __init__(self):
-        # List all outdated packages intalled on the system.
-        self.outdated = []
+        # Outdated packages intalled on the system.
+        self.outdated = {}
         # Keep errors return by the manager's CLI.
         self.error = None
 
@@ -169,8 +169,8 @@ class PackageManager(object):
                 "Call single-package upgrade CLI one by one.".format(self.id))
             output = []
             self.sync()
-            for package in self.outdated:
-                output.append(self.upgrade(package['id']))
+            for package_id in self.outdated:
+                output.append(self.upgrade(package_id))
             return '\n'.join(output)
 
     @staticmethod

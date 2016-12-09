@@ -70,11 +70,11 @@ class Pip(PackageManager):
             special_location = " ({})".format(
                 installed_info[1].strip()) if len(installed_info) > 1 else ''
 
-            self.outdated.append({
+            self.outdated[package_id] = {
                 'id': package_id,
                 'name': package_id + special_location,
                 'installed_version': version,
-                'latest_version': latest_version})
+                'latest_version': latest_version}
 
     def upgrade_cli(self, package_id):
         return [

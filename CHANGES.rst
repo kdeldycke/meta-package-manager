@@ -13,6 +13,8 @@ Changelog
 * Move BitBar plugin within the Python module.
 * Show unmet version requirements in table output for ``mpm managers``
   sub-command.
+* Fix duplicates in outdated packages by indexing them by ID.
+* Unittest simple call of BitBar plugin.
 
 
 `2.0.0 (2016-12-04) <https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...v2.0.0>`_

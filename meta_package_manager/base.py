@@ -96,6 +96,8 @@ class PackageManager(object):
     @cachedproperty
     def executable(self):
         """ Is the package manager CLI can be executed by the current user? """
+        if not self.exists:
+            return False
         if not os.access(self.cli_path, os.X_OK):
             logger.debug("{} not executable.".format(self.cli_path))
             return False
@@ -104,6 +106,8 @@ class PackageManager(object):
     @cachedproperty
     def supported(self):
         """ Is the package manager match the version requirement? """
+        if not self.executable:
+            return False
         if self.version and self.requirement:
             if self.version not in SpecifierSet(self.requirement):
                 logger.debug(

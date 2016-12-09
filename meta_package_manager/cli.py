@@ -114,11 +114,13 @@ def managers(ctx):
     table = []
     for manager_id, manager in target_managers.items():
 
-        version_infos = [u'✅ ' if manager.supported else u'❌ ']
-        if manager.version:
-            version_infos.append(manager.version_string)
-            if not manager.supported:
-                version_infos.append(manager.requirement)
+        version_infos = ''
+        if manager.exists:
+            version_infos = u'✅' if manager.supported else u'❌'
+            if manager.version:
+                version_infos += "  {}".format(manager.version_string)
+                if not manager.supported:
+                    version_infos += " {}".format(manager.requirement)
 
         table.append([
             manager.name,
@@ -126,7 +128,7 @@ def managers(ctx):
             manager.cli_path,
             u'✅' if manager.exists else '',
             u'✅' if manager.executable else '',
-            ' '.join(version_infos) if manager.exists else ''])
+            version_infos])
 
     table = [[
         'Package manager', 'ID', 'CLI path', 'Found', 'Executable',

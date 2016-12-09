@@ -69,7 +69,7 @@ class NPM(PackageManager):
         if not output:
             return
 
-        for package_id, values in json.loads(output).iteritems():
+        for package_id, values in json.loads(output).items():
             if values['wanted'] == 'linked':
                 continue
             self.outdated[package_id] = {

@@ -97,9 +97,7 @@ def print_menu():
         return
 
     # Sort outdated packages by manager's name.
-    managers = sorted(
-        json.loads(output.decode('utf-8')).values(),
-        key=itemgetter('name'))
+    managers = sorted(json.loads(output).values(), key=itemgetter('name'))
 
     # Print menu bar icon with number of available upgrades.
     total_outdated = sum([len(m['packages']) for m in managers])

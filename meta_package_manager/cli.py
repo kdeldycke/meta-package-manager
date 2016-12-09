@@ -113,16 +113,21 @@ def managers(ctx):
     # Human-friendly content rendering.
     table = []
     for manager_id, manager in target_managers.items():
+
+        version_infos = [u'✅ ' if manager.supported else u'❌ ']
+        if manager.version:
+            version_infos.append(manager.version_string)
+            if not manager.supported:
+                version_infos.append(manager.requirement)
+
         table.append([
             manager.name,
             manager_id,
             manager.cli_path,
             u'✅' if manager.exists else '',
             u'✅' if manager.executable else '',
-            u"{}  {}".format(
-                u'✅' if manager.supported else u'❌',
-                manager.version if manager.version else '')
-            if manager.exists else ''])
+            ' '.join(version_infos) if manager.exists else ''])
+
     table = [[
         'Package manager', 'ID', 'CLI path', 'Found', 'Executable',
         'Version']] + sorted(table, key=itemgetter(1))

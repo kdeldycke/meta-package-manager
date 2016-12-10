@@ -47,8 +47,7 @@ class Gem(PackageManager):
         if os.path.exists(Gem.HOMEBREW_PATH):
             self.system_install = False
 
-    @cachedproperty
-    def version_string(self):
+    def get_version(self):
         return self.run([self.cli_path, '--version'])
 
     @cachedproperty

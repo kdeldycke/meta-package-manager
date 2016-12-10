@@ -39,6 +39,18 @@ from .bitbar import run
 CLI_FORMATS = frozenset(['plain', 'fragments', 'bitbar'])
 
 
+class CLIError(Exception):
+
+    """ An error occured when running package manager CLI. """
+
+    def __init__(self, code, output, error):
+        """ The exception keeps internally the result of CLI execution. """
+        super(CLIError, self).__init__()
+        self.code = code
+        self.output = output
+        self.error = error
+
+
 class PackageManager(object):
     """ Package manager definition. """
 
@@ -55,15 +67,22 @@ class PackageManager(object):
     def __init__(self):
         # Outdated packages intalled on the system.
         self.outdated = {}
-        # Keep the return code and error message returned by the last CLI call.
-        self.code = None
-        self.error = None
+
+    def get_version(self):
+        """ Invoke the manager and extract its own reported version. """
+        raise NotImplementedError
 
     @cachedproperty
     def version_string(self):
-        """ Raw and unparsed string of the version as returned by the manager.
+        """ Raw but cleaned string of the package manager version.
+
+        Returns `None` if the manager had an issue extracting its version.
         """
-        raise NotImplementedError
+        try:
+            return self.get_version()
+        except CLIError as expt:
+            logger.warning(expt.error)
+            return None
 
     @cachedproperty
     def version(self):
@@ -142,18 +161,18 @@ class PackageManager(object):
         assert isinstance(args, list)
         logger.debug("Running `{}`...".format(' '.join(args)))
 
-        self.code, output, self.error = run(*args)
+        code, output, error = run(*args)
 
         # Normalize messages.
-        if self.error:
-            self.error = strip_ansi(self.error).strip()
-            self.error = self.error if self.error else None
+        if error:
+            error = strip_ansi(error).strip()
+            error = error if error else None
         if output:
             output = strip_ansi(output).strip()
             output = output if output else None
 
-        if self.code and self.error:
-            logger.warning(self.error)
+        if code and error:
+            raise CLIError(code, output, error)
 
         return output
 

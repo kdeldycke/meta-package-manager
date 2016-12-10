@@ -44,8 +44,7 @@ class MAS(PackageManager):
     def name(self):
         return "Mac AppStore"
 
-    @cachedproperty
-    def version_string(self):
+    def get_version(self):
         return self.run([self.cli_path, 'version'])
 
     def sync(self):

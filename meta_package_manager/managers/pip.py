@@ -34,8 +34,7 @@ from ..base import PackageManager
 
 class Pip(PackageManager):
 
-    @cachedproperty
-    def version_string(self):
+    def get_version(self):
         return self.run([self.cli_path, '--version']).split()[1]
 
     def sync(self):

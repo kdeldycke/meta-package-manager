@@ -43,10 +43,9 @@ class Homebrew(PackageManager):
     def id(self):
         return "brew"
 
-    @cachedproperty
-    def version_string(self):
-        metadata = self.run([self.cli_path] + self.cli_args + ['--version'])
-        return metadata.split()[1]
+    def get_version(self):
+        return self.run(
+            [self.cli_path] + self.cli_args + ['--version']).split()[1]
 
     def sync(self):
         """ Fetch latest Homebrew formulas.

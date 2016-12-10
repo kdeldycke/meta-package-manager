@@ -30,7 +30,7 @@ import click_log
 from tabulate import tabulate
 
 from . import __version__, logger
-from .base import CLI_FORMATS, PackageManager
+from .base import CLI_FORMATS, PackageManager, CLIError
 from .managers import pool
 
 # Output rendering modes. Sorted from most machine-readable to fanciest
@@ -176,10 +176,13 @@ def outdated(ctx, cli_format):
             continue
 
         # Force a sync to get the freshest upgrades.
-        manager.sync()
-
-        if manager.error:
-            logger.error(manager.error)
+        error = None
+        try:
+            manager.sync()
+        except CLIError as expt:
+            error = expt.error
+            if rendering != 'json':
+                logger.error(error)
 
         packages = []
         for info in manager.outdated.values():
@@ -194,7 +197,7 @@ def outdated(ctx, cli_format):
             'id': manager_id,
             'name': manager.name,
             'packages': packages,
-            'error': manager.error}
+            'error': error}
 
         if manager.outdated:
             try:

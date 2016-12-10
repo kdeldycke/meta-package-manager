@@ -36,8 +36,7 @@ class NPM(PackageManager):
 
     cli_path = '/usr/local/bin/npm'
 
-    @cachedproperty
-    def version_string(self):
+    def get_version(self):
         return self.run([self.cli_path, '--version'])
 
     @cachedproperty

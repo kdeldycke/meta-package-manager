@@ -68,7 +68,7 @@ class CLITestCase(unittest.TestCase):
         """ Executes Click's CLI, print output and return results. """
         result = self.runner.invoke(cli, args)
 
-        self.print_cli_output(['mpm'] + args, result.output)
+        self.print_cli_output(['mpm'] + list(args), result.output)
 
         # Print some more debug info.
         print(result)

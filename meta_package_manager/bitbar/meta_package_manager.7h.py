@@ -44,7 +44,12 @@ def run(*args):
     """ Run a shell command, return error code, output and error message. """
     assert isinstance(args, tuple)
     try:
-        process = Popen(args, stdout=PIPE, stderr=PIPE)
+        process = Popen(args, stdout=PIPE, stderr=PIPE, env={
+            # Python 3 Surrogate Handling. See:
+            # http://click.pocoo.org/6/python3/#python-3-surrogate-handling
+            'LANG': 'en_US.UTF-8',
+            # Explicit reference to path search.
+            'PATH': os.environ['PATH']})
     except OSError:
         return None, None, "`{}` executable not found.".format(args[0])
     output, error = process.communicate()

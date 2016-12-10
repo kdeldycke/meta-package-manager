@@ -115,7 +115,7 @@ def managers(ctx):
     for manager_id, manager in target_managers.items():
 
         version_infos = ''
-        if manager.exists:
+        if manager.executable:
             version_infos = u'✅' if manager.supported else u'❌'
             if manager.version:
                 version_infos += "  {}".format(manager.version_string)

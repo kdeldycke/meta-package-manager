@@ -48,10 +48,12 @@ def run(*args):
     except OSError:
         return None, None, "`{}` executable not found.".format(args[0])
     output, error = process.communicate()
+    output = output.decode('utf-8').strip()
+    error = error.decode('utf-8').strip()
     return (
         process.returncode,
-        output.decode('utf-8').strip(),
-        error.decode('utf-8').strip())
+        output if output else None,
+        error if error else None)
 
 
 def print_error_header():

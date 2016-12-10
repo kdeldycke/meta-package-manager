@@ -144,13 +144,18 @@ class PackageManager(object):
 
         self.code, output, self.error = run(*args)
 
+        # Normalize messages.
         if self.error:
             self.error = strip_ansi(self.error).strip()
+            self.error = self.error if self.error else None
+        if output:
+            output = strip_ansi(output).strip()
+            output = output if output else None
 
         if self.code and self.error:
             logger.warning(self.error)
 
-        return strip_ansi(output).strip()
+        return output
 
     def sync(self):
         """ Fetch latest versions of installed packages.

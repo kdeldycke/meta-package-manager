@@ -65,7 +65,7 @@ def print_error_header():
 def print_error(message):
     """ Print a formatted error line by line, in red. """
     for line in message.strip().split("\n"):
-        print("{} | color=red font=Menlo".format(line))
+        print("{} | color=red font=Menlo size=10".format(line))
 
 
 def print_menu():

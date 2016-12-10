@@ -23,7 +23,7 @@ from operator import itemgetter
 from subprocess import PIPE, Popen
 
 
-def expand_cli_search_scope():
+def fix_environment():
     """ Tweak environment variable to find non-default system-wide binaries.
 
     macOS does not put ``/usr/local/bin`` or ``/opt/local/bin`` in the ``PATH``
@@ -39,17 +39,16 @@ def expand_cli_search_scope():
         '/opt/local/sbin',
         os.environ.get('PATH', '')])
 
+    # Python 3 Surrogate Handling. See:
+    # http://click.pocoo.org/6/python3/#python-3-surrogate-handling
+    os.environ['LANG'] = 'en_US.UTF-8'
+
 
 def run(*args):
     """ Run a shell command, return error code, output and error message. """
     assert isinstance(args, tuple)
     try:
-        process = Popen(args, stdout=PIPE, stderr=PIPE, env={
-            # Python 3 Surrogate Handling. See:
-            # http://click.pocoo.org/6/python3/#python-3-surrogate-handling
-            'LANG': 'en_US.UTF-8',
-            # Explicit reference to path search.
-            'PATH': os.environ['PATH']})
+        process = Popen(args, stdout=PIPE, stderr=PIPE)
     except OSError:
         return None, None, "`{}` executable not found.".format(args[0])
     output, error = process.communicate()
@@ -137,5 +136,5 @@ def print_menu():
 
 
 if __name__ == '__main__':
-    expand_cli_search_scope()
+    fix_environment()
     print_menu()

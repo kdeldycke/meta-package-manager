@@ -31,7 +31,7 @@ import logging
 import os
 import sys
 
-from .bitbar import expand_cli_search_scope
+from .bitbar import fix_environment
 
 
 __version__ = '2.1.0'
@@ -49,4 +49,4 @@ if sys.platform != 'darwin':
 
 logger = logging.getLogger(__name__)
 
-expand_cli_search_scope()
+fix_environment()

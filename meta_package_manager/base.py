@@ -29,6 +29,7 @@ import os
 from subprocess import PIPE, Popen
 
 from boltons.cacheutils import cachedproperty
+from boltons.strutils import strip_ansi
 from packaging.specifiers import SpecifierSet
 from packaging.version import parse as parse_version
 
@@ -129,12 +130,15 @@ class PackageManager(object):
         return self.exists and self.executable and self.supported
 
     def run(self, cmd):
-        """ Run a shell command, return the output and keep error message. """
+        """ Run a shell command, return the output and keep error message.
+
+        Removes ANSI escape codes, and returns ready-to-use strings.
+        """
         self.error = None
         assert isinstance(cmd, list)
         logger.debug("Running `{}`...".format(' '.join(cmd)))
         process = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        output, error = process.communicate()
+        output, error = map(strip_ansi, process.communicate())
         if process.returncode != 0 and error:
             self.error = error.decode('utf-8').strip()
             logger.warning(self.error)

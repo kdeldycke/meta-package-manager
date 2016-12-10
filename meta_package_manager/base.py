@@ -138,11 +138,11 @@ class PackageManager(object):
         assert isinstance(cmd, list)
         logger.debug("Running `{}`...".format(' '.join(cmd)))
         process = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        output, error = map(strip_ansi, process.communicate())
+        output, error = process.communicate()
         if process.returncode != 0 and error:
-            self.error = error.decode('utf-8').strip()
+            self.error = strip_ansi(error.decode('utf-8')).strip()
             logger.warning(self.error)
-        return output.decode('utf-8').strip()
+        return strip_ansi(output.decode('utf-8')).strip()
 
     def sync(self):
         """ Fetch latest versions of installed packages.

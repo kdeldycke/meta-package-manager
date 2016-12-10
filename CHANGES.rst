@@ -15,6 +15,8 @@ Changelog
   sub-command.
 * Fix duplicates in outdated packages by indexing them by ID.
 * Unittest simple call of BitBar plugin.
+* Always print the raw, un-normalized version of managers, as reported by
+  themselves.
 
 
 `2.0.0 (2016-12-04) <https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...v2.0.0>`_

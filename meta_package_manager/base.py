@@ -30,6 +30,7 @@ from subprocess import PIPE, Popen
 
 from boltons.cacheutils import cachedproperty
 from packaging.specifiers import SpecifierSet
+from packaging.version import parse as parse_version
 
 from . import logger
 
@@ -57,18 +58,21 @@ class PackageManager(object):
         self.error = None
 
     @cachedproperty
-    def version(self):
-        """ Parsed and normalized package manager's own version.
+    def version_string(self):
+        """ Raw and unparsed string of the version as returned by the manager.
 
-        Returns an instance of packaging.Version or None if version doesn't
-        matter.
+        Returns a string or None.
         """
         return None
 
     @cachedproperty
-    def version_string(self):
-        """ String representation of the canonical version. """
-        return "{}".format(self.version) if self.version else None
+    def version(self):
+        """ Parsed and normalized package manager's own version.
+
+        Returns an instance of ``packaging.Version`` or None.
+        """
+        return parse_version(
+            self.version_string) if self.version_string else None
 
     @cachedproperty
     def id(self):

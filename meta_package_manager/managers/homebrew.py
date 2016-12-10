@@ -28,7 +28,6 @@ from __future__ import (
 import json
 
 from boltons.cacheutils import cachedproperty
-from packaging.version import parse as parse_version
 
 from ..base import PackageManager
 
@@ -44,9 +43,9 @@ class Homebrew(PackageManager):
         return "brew"
 
     @cachedproperty
-    def version(self):
+    def version_string(self):
         metadata = self.run([self.cli_path] + self.cli_args + ['--version'])
-        return parse_version(metadata.split()[1])
+        return metadata.split()[1]
 
     def sync(self):
         """ Fetch latest Homebrew formulas.

@@ -26,7 +26,6 @@ from __future__ import (
 )
 
 import os
-from subprocess import PIPE, Popen
 
 from boltons.cacheutils import cachedproperty
 from boltons.strutils import strip_ansi

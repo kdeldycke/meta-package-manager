@@ -111,7 +111,10 @@ class PackageManager(object):
         """ Is the package manager match the version requirement? """
         if not self.executable:
             return False
-        if self.version and self.requirement:
+        # Version is mandatory.
+        if not self.version:
+            return False
+        if self.requirement:
             if self.version not in SpecifierSet(self.requirement):
                 logger.debug(
                     "{} {} doesn't fit the '{}' version requirement.".format(

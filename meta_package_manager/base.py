@@ -60,10 +60,8 @@ class PackageManager(object):
     @cachedproperty
     def version_string(self):
         """ Raw and unparsed string of the version as returned by the manager.
-
-        Returns a string or None.
         """
-        return None
+        raise NotImplementedError
 
     @cachedproperty
     def version(self):
@@ -71,8 +69,7 @@ class PackageManager(object):
 
         Returns an instance of ``packaging.Version`` or None.
         """
-        return parse_version(
-            self.version_string) if self.version_string else None
+        return parse_version(self.version_string)
 
     @cachedproperty
     def id(self):

@@ -18,6 +18,7 @@ Changelog
 * Always print the raw, un-normalized version of managers, as reported by
   themselves.
 * Fetch version of all managers.
+* Make manager version mandatory.
 
 
 `2.0.0 (2016-12-04) <https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...v2.0.0>`_

@@ -39,7 +39,7 @@ PACKAGE_NAME = MODULE_NAME.replace('_', '-')
 DEPENDENCIES = [
     'boltons >= 16.3.0',
     'click >= 5.0',
-    'click_log',
+    'click_log >= 0.1.4-dev',
     'packaging',
     'tabulate',
 ]
@@ -142,6 +142,10 @@ setup(
     tests_require=DEPENDENCIES + EXTRA_DEPENDENCIES['tests'],
     extras_require=EXTRA_DEPENDENCIES,
     dependency_links=[
+        # XXX Waiting for https://github.com/click-contrib/click-log/pull/2
+        # merge upstream and click_log 0.1.5.dev0 release.
+        'git+https://github.com/kdeldycke/click-log.git'
+        '@fix-unicode-logs#egg=click_log-0.1.4-dev',
     ],
     test_suite='{}.tests'.format(MODULE_NAME),
 

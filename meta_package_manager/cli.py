@@ -181,8 +181,7 @@ def outdated(ctx, cli_format):
             manager.sync()
         except CLIError as expt:
             error = expt.error
-            if rendering != 'json':
-                logger.error(error)
+            logger.error(error)
 
         packages = []
         for info in manager.outdated.values():

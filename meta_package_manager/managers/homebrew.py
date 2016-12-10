@@ -28,6 +28,7 @@ from __future__ import (
 import json
 
 from boltons.cacheutils import cachedproperty
+from packaging.version import parse as parse_version
 
 from ..base import PackageManager
 

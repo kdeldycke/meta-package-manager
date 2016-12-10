@@ -48,6 +48,10 @@ class Gem(PackageManager):
             self.system_install = False
 
     @cachedproperty
+    def version_string(self):
+        return self.run([self.cli_path, '--version'])
+
+    @cachedproperty
     def cli_path(self):
         return Gem.SYSTEM_PATH if self.system_install else Gem.HOMEBREW_PATH
 

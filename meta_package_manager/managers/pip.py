@@ -34,6 +34,10 @@ from ..base import PackageManager
 
 class Pip(PackageManager):
 
+    @cachedproperty
+    def version_string(self):
+        return self.run([self.cli_path, '--version']).split()[1]
+
     def sync(self):
         """ List outdated packages and their metadata.
 

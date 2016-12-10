@@ -37,6 +37,10 @@ class APM(PackageManager):
     cli_path = '/usr/local/bin/apm'
 
     @cachedproperty
+    def version_string(self):
+        return self.run([self.cli_path, '--version']).split('\n')[0].split()[1]
+
+    @cachedproperty
     def name(self):
         return "Atom's apm"
 

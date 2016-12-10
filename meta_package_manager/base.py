@@ -70,7 +70,8 @@ class PackageManager(object):
 
         Returns an instance of ``packaging.Version`` or None.
         """
-        return parse_version(self.version_string)
+        return parse_version(
+            self.version_string) if self.version_string else None
 
     @cachedproperty
     def id(self):

@@ -26,18 +26,17 @@ from __future__ import (
 )
 
 import unittest
-from subprocess import PIPE, Popen
 
 from meta_package_manager import bitbar
 
+from .case import CLITestCase
 
-class TestBitBarPlugin(unittest.TestCase):
+
+class TestBitBarPlugin(CLITestCase):
 
     def test_simple_call(self):
-        process = Popen([bitbar.__file__], stdout=PIPE, stderr=PIPE)
-        output, error = process.communicate()
-        print(output)
-        print(error)
-        self.assertEqual(process.returncode, 0)
+        code, output, error = self.run_cmd(bitbar.__file__)
+
+        self.assertEqual(code, 0)
         self.assertFalse(error)
-        self.assertIn(" | dropdown=false\n---\n", output.decode('utf-8'))
+        self.assertIn(" | dropdown=false\n---\n", output)

@@ -34,6 +34,7 @@ from packaging.specifiers import SpecifierSet
 from packaging.version import parse as parse_version
 
 from . import logger
+from .bitbar import run
 
 # Rendering format of CLI in JSON fields.
 CLI_FORMATS = frozenset(['plain', 'fragments', 'bitbar'])
@@ -55,7 +56,8 @@ class PackageManager(object):
     def __init__(self):
         # Outdated packages intalled on the system.
         self.outdated = {}
-        # Keep errors return by the manager's CLI.
+        # Keep the return code and error message returned by the last CLI call.
+        self.code = None
         self.error = None
 
     @cachedproperty
@@ -133,20 +135,23 @@ class PackageManager(object):
         """
         return self.exists and self.executable and self.supported
 
-    def run(self, cmd):
+    def run(self, args):
         """ Run a shell command, return the output and keep error message.
 
         Removes ANSI escape codes, and returns ready-to-use strings.
         """
-        self.error = None
-        assert isinstance(cmd, list)
-        logger.debug("Running `{}`...".format(' '.join(cmd)))
-        process = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        output, error = process.communicate()
-        if process.returncode != 0 and error:
-            self.error = strip_ansi(error.decode('utf-8')).strip()
+        assert isinstance(args, list)
+        logger.debug("Running `{}`...".format(' '.join(args)))
+
+        self.code, output, self.error = run(*args)
+
+        if self.error:
+            self.error = strip_ansi(self.error).strip()
+
+        if self.code and self.error:
             logger.warning(self.error)
-        return strip_ansi(output.decode('utf-8')).strip()
+
+        return strip_ansi(output).strip()
 
     def sync(self):
         """ Fetch latest versions of installed packages.

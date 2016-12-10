@@ -25,38 +25,7 @@ from __future__ import (
     unicode_literals
 )
 
-import unittest
-
-from boltons.tbutils import ExceptionInfo
-from click.testing import CliRunner
-
-from meta_package_manager.cli import cli
-
-
-class CLITestCase(unittest.TestCase):
-
-    """ Utilities and helpers to easely write unit-tests. """
-
-    def setUp(self):
-        self.runner = CliRunner()
-
-    def invoke(self, *args):
-        """ Executes CLI, print output and return results. """
-        result = self.runner.invoke(cli, args)
-
-        # Simulate CLI output.
-        print('-' * 70)
-        print("$ mpm {}".format(' '.join(args)))
-        print(result.output)
-        print('-' * 70)
-
-        # Print some more debug info.
-        print(result)
-        if result.exception:
-            print(ExceptionInfo.from_exc_info(
-                *result.exc_info).get_formatted())
-
-        return result
+from .case import CLITestCase
 
 
 class TestCLI(CLITestCase):

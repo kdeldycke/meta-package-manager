@@ -40,13 +40,13 @@ def expand_cli_search_scope():
         os.environ.get('PATH', '')])
 
 
-def run(cmd):
+def run(*args):
     """ Run a shell command, return error code, output and error message. """
-    assert isinstance(cmd, list)
+    assert isinstance(args, tuple)
     try:
-        process = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        process = Popen(args, stdout=PIPE, stderr=PIPE)
     except OSError:
-        return None, None, "`{}` executable not found.".format(cmd[0])
+        return None, None, "`{}` executable not found.".format(args[0])
     output, error = process.communicate()
     return (
         process.returncode,
@@ -72,10 +72,10 @@ def print_menu():
     See: https://github.com/matryer/bitbar#plugin-api
     """
     # Search for generic mpm CLI on system.
-    retcode, _, error = run(['mpm'])
-    if retcode or error:
+    code, _, error = run('mpm')
+    if code or error:
         print_error_header()
-        if retcode is None:
+        if code is None:
             print(
                 "{} Click here to install it. | bash=pip "
                 # TODO: Add minimal requirement on Python package.
@@ -87,9 +87,8 @@ def print_menu():
 
     # Fetch list of all outdated packages from all package manager available on
     # the system.
-    _, output, error = run([
-        'mpm', '--output-format', 'json',
-        'outdated', '--cli-format', 'bitbar'])
+    _, output, error = run(
+        'mpm', '--output-format', 'json', 'outdated', '--cli-format', 'bitbar')
 
     if error:
         print_error_header()

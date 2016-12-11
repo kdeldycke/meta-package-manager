@@ -20,6 +20,11 @@ Changelog
 * Fetch version of all managers.
 * Make manager version mandatory.
 * Bump requirement to ``readme_renderer >= 16.0``.
+* Always remove ANSI codes from CLI output.
+* Fix rendering of unicode logs.
+* Bump requirement to ``click_log > 0.1.4``.
+* Force ``LANG`` environment variable to ``en_US.UTF-8``.
+* Share same code path for CLI execution between ``mpm`` and BitBar plugin.
 
 
 `2.0.0 (2016-12-04) <https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...v2.0.0>`_

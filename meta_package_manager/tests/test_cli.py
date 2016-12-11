@@ -27,7 +27,7 @@ from __future__ import (
 
 import json
 
-from meta_package_manager import PY_VERSION
+from meta_package_manager import PY_VERSION, PY2
 from .case import CLITestCase
 
 
@@ -91,13 +91,13 @@ class TestCLIManagers(CLITestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertIn("debug:", result.output)
         if PY_VERSION >= (3, 5):
-            with self.assertRaises(json.decoder.JSONDecodeError) as expt:
+            with self.assertRaises(json.decoder.JSONDecodeError):
                 json.loads(result.output)
         else:
             with self.assertRaises(ValueError) as expt:
                 json.loads(result.output)
-            self.assertEqual(
-                expt.exception.message, 'No JSON object could be decoded')
+            message = expt.exception.message if PY2 else expt.exception.msg
+            self.assertEqual(message, 'No JSON object could be decoded')
 
     def test_sub_manager_scope(self):
         result = self.invoke('--manager', 'npm', 'managers')
@@ -182,13 +182,13 @@ class TestCLIOutdated(CLITestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertIn("debug:", result.output)
         if PY_VERSION >= (3, 5):
-            with self.assertRaises(json.decoder.JSONDecodeError) as expt:
+            with self.assertRaises(json.decoder.JSONDecodeError):
                 json.loads(result.output)
         else:
             with self.assertRaises(ValueError) as expt:
                 json.loads(result.output)
-            self.assertEqual(
-                expt.exception.message, 'No JSON object could be decoded')
+            message = expt.exception.message if PY2 else expt.exception.msg
+            self.assertEqual(message, 'No JSON object could be decoded')
 
     def test_sub_manager_scope(self):
         result = self.invoke('--manager', 'npm', 'outdated')

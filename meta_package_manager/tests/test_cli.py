@@ -94,6 +94,15 @@ class TestCLIManagers(CLITestCase):
         self.assertEqual(
             expt.exception.message, 'No JSON object could be decoded')
 
+    def test_sub_manager_scope(self):
+        result = self.invoke('--manager', 'npm', 'managers')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("npm", result.output)
+        self.assertNotIn("apm", result.output)
+        self.assertNotIn("brew", result.output)
+        self.assertNotIn("pip", result.output)
+        self.assertNotIn("gem", result.output)
+
 
 class TestCLISync(CLITestCase):
 
@@ -162,6 +171,15 @@ class TestCLIOutdated(CLITestCase):
             json.loads(result.output)
         self.assertEqual(
             expt.exception.message, 'No JSON object could be decoded')
+
+    def test_sub_manager_scope(self):
+        result = self.invoke('--manager', 'npm', 'outdated')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("npm", result.output)
+        self.assertNotIn("apm", result.output)
+        self.assertNotIn("brew", result.output)
+        self.assertNotIn("pip", result.output)
+        self.assertNotIn("gem", result.output)
 
 
 class TestCLIUpgrade(CLITestCase):

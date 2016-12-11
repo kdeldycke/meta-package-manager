@@ -25,6 +25,8 @@ from __future__ import (
     unicode_literals
 )
 
+import json
+
 from .case import CLITestCase
 
 
@@ -64,6 +66,33 @@ class TestCLIManagers(CLITestCase):
     def test_simple_call(self):
         result = self.invoke('managers')
         self.assertEqual(result.exit_code, 0)
+        self.assertIn("═════", result.output)
+
+    def test_simple_table_rendering(self):
+        result = self.invoke('--output-format', 'simple', 'managers')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("-----", result.output)
+
+    def test_plain_table_rendering(self):
+        result = self.invoke('--output-format', 'plain', 'managers')
+        self.assertEqual(result.exit_code, 0)
+        self.assertNotIn("═════", result.output)
+        self.assertNotIn("-----", result.output)
+
+    def test_json_output(self):
+        result = self.invoke('--output-format', 'json', 'managers')
+        self.assertEqual(result.exit_code, 0)
+        json.loads(result.output)
+
+    def test_json_debug_output(self):
+        result = self.invoke(
+            '--output-format', 'json', '--verbosity', 'DEBUG', 'managers')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("debug:", result.output)
+        with self.assertRaises(ValueError) as expt:
+            json.loads(result.output)
+        self.assertEqual(
+            expt.exception.message, 'No JSON object could be decoded')
 
 
 class TestCLISync(CLITestCase):
@@ -106,6 +135,33 @@ class TestCLIOutdated(CLITestCase):
     def test_simple_call(self):
         result = self.invoke('outdated')
         self.assertEqual(result.exit_code, 0)
+        self.assertIn("═════", result.output)
+
+    def test_simple_table_rendering(self):
+        result = self.invoke('--output-format', 'simple', 'outdated')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("-----", result.output)
+
+    def test_plain_table_rendering(self):
+        result = self.invoke('--output-format', 'plain', 'outdated')
+        self.assertEqual(result.exit_code, 0)
+        self.assertNotIn("═════", result.output)
+        self.assertNotIn("-----", result.output)
+
+    def test_json_output(self):
+        result = self.invoke('--output-format', 'json', 'outdated')
+        self.assertEqual(result.exit_code, 0)
+        json.loads(result.output)
+
+    def test_json_debug_output(self):
+        result = self.invoke(
+            '--output-format', 'json', '--verbosity', 'DEBUG', 'outdated')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("debug:", result.output)
+        with self.assertRaises(ValueError) as expt:
+            json.loads(result.output)
+        self.assertEqual(
+            expt.exception.message, 'No JSON object could be decoded')
 
 
 class TestCLIUpgrade(CLITestCase):

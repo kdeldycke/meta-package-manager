@@ -254,8 +254,11 @@ def outdated(ctx, cli_format):
 
 
 @cli.command(short_help='Upgrade all packages.')
+@click.option(
+    '-d', '--dry-run', is_flag=True, default=False,
+    help='Do not actually perform any upgrade, just simulate CLI calls.')
 @click.pass_context
-def upgrade(ctx):
+def upgrade(ctx, dry_run):
     """ Perform a full package upgrade on all available managers. """
     target_managers = ctx.obj['target_managers']
 
@@ -268,5 +271,11 @@ def upgrade(ctx):
 
         logger.info(
             'Updating all outdated packages from {}...'.format(manager_id))
-        output = manager.upgrade_all()
-        logger.info(output)
+
+        try:
+            output = manager.upgrade_all(dry_run=dry_run)
+        except CLIError as expt:
+            logger.error(expt.error)
+
+        if output:
+            logger.info(output)

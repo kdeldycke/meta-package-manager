@@ -158,7 +158,7 @@ class PackageManager(object):
         """
         return self.exists and self.executable and self.supported
 
-    def run(self, args):
+    def run(self, args, dry_run=False):
         """ Run a shell command, return the output and keep error message.
 
         Removes ANSI escape codes, and returns ready-to-use strings.
@@ -166,7 +166,14 @@ class PackageManager(object):
         assert isinstance(args, list)
         logger.debug("Running `{}`...".format(' '.join(args)))
 
-        code, output, error = run(*args)
+        if not dry_run:
+            code, output, error = run(*args)
+        else:
+            logger.warning("Dry-run mode active: skip execution of command.")
+            # Returns dummy results.
+            code = 0
+            output = None
+            error = None
 
         # Normalize messages.
         if error:
@@ -193,31 +200,34 @@ class PackageManager(object):
         """ Return a bash-compatible full-CLI to upgrade a package. """
         raise NotImplementedError
 
-    def upgrade(self, package_id=None):
+    def upgrade(self, package_id=None, dry_run=False):
         """ Perform the upgrade of the provided package to latest version. """
-        return self.run(self.upgrade_cli(package_id))
+        return self.run(self.upgrade_cli(package_id), dry_run=dry_run)
 
     def upgrade_all_cli(self):
         """ Return a bash-compatible full-CLI to upgrade all packages. """
         raise NotImplementedError
 
-    def upgrade_all(self):
+    def upgrade_all(self, dry_run=False):
         """ Perform a full upgrade of all outdated packages to latest versions.
 
         If the manager doesn't implements a full upgrade one-liner, then
         fall-back to calling single-package upgrade one by one.
         """
         try:
-            return self.run(self.upgrade_all_cli())
+            return self.run(self.upgrade_all_cli(), dry_run=dry_run)
         except NotImplementedError:
             logger.warning(
                 "{} doesn't seems to implement a full upgrade subcommand. "
                 "Call single-package upgrade CLI one by one.".format(self.id))
-            output = []
+            log = []
             self.sync()
             for package_id in self.outdated:
-                output.append(self.upgrade(package_id))
-            return '\n'.join(output)
+                output = self.upgrade(package_id, dry_run=dry_run)
+                if output:
+                    log.append(output)
+            if log:
+                return '\n'.join(log)
 
     @staticmethod
     def render_cli(cmd, cli_format='plain'):

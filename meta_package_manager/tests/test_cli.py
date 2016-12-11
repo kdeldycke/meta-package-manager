@@ -233,20 +233,20 @@ class TestCLIUpgrade(CLITestCase):
         self.assertIn("--help", result.output)
 
     def test_verbosity(self):
-        result = self.invoke('--verbosity', 'DEBUG', 'upgrade')
+        result = self.invoke('--verbosity', 'DEBUG', 'upgrade', '--dry-run')
         self.assertEqual(result.exit_code, 0)
         self.assertIn("debug:", result.output)
 
-        result = self.invoke('--verbosity', 'INFO', 'upgrade')
+        result = self.invoke('--verbosity', 'INFO', 'upgrade', '--dry-run')
         self.assertEqual(result.exit_code, 0)
         self.assertNotIn("debug:", result.output)
 
     def test_simple_call(self):
-        result = self.invoke('upgrade')
+        result = self.invoke('upgrade', '--dry-run')
         self.assertEqual(result.exit_code, 0)
 
     def test_sub_manager_scope(self):
-        result = self.invoke('--manager', 'npm', 'upgrade')
+        result = self.invoke('--manager', 'npm', 'upgrade', '--dry-run')
         self.assertEqual(result.exit_code, 0)
         self.assertIn("npm", result.output)
         self.assertNotIn("apm", result.output)

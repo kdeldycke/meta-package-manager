@@ -25,6 +25,7 @@ Changelog
 * Bump requirement to ``click_log > 0.1.4``.
 * Force ``LANG`` environment variable to ``en_US.UTF-8``.
 * Share same code path for CLI execution between ``mpm`` and BitBar plugin.
+* Add a ``-d/--dry-run`` option to ``mpm upgrade`` sub-command.
 
 
 `2.0.0 (2016-12-04) <https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...v2.0.0>`_

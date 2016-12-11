@@ -81,14 +81,13 @@ def print_menu():
     code, _, error = run('mpm')
     if code or error:
         print_error_header()
-        if code is None:
-            print(
-                "{} Click here to install it. | bash=pip "
-                # TODO: Add minimal requirement on Python package.
-                "param1=install param2=--upgrade param3=meta-package-manager "
-                "terminal=true refresh=true color=red".format(error))
-        else:
-            print_error(error)
+        print_error(error)
+        print("---")
+        print(
+            "Install / upgrade Meta Package Manager. | bash=pip "
+            # TODO: Add minimal requirement on Python package.
+            "param1=install param2=--upgrade param3=meta-package-manager "
+            "terminal=true refresh=true".format(error))
         return
 
     # Fetch list of all outdated packages from all package manager available on

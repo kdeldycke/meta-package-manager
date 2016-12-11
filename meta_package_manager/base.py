@@ -90,8 +90,8 @@ class PackageManager(object):
 
         Returns an instance of ``packaging.Version`` or None.
         """
-        return parse_version(
-            self.version_string) if self.version_string else None
+        if self.version_string:
+            return parse_version(self.version_string)
 
     @cachedproperty
     def id(self):
@@ -129,8 +129,6 @@ class PackageManager(object):
     @cachedproperty
     def supported(self):
         """ Is the package manager match the version requirement? """
-        if not self.executable:
-            return False
         # Version is mandatory.
         if not self.version:
             return False

@@ -50,6 +50,13 @@ class CLIError(Exception):
         self.output = output
         self.error = error
 
+    def __str__(self):
+        """ Human-readable error. """
+        return (
+            "Return code: {}\n"
+            "Output:\n{}\n"
+            "Error:\n{}\n").format(self.code, self.output, self.error)
+
 
 class PackageManager(object):
     """ Package manager definition. """

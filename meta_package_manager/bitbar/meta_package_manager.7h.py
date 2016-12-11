@@ -123,7 +123,7 @@ def print_menu():
             manager['name'],
             's' if len(manager['packages']) != 1 else ''))
 
-        if manager['upgrade_all_cli']:
+        if manager.get('upgrade_all_cli'):
             print("Upgrade all | {} terminal=false refresh=true".format(
                 manager['upgrade_all_cli']))
 

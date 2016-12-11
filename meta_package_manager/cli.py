@@ -198,6 +198,8 @@ def outdated(ctx, cli_format):
             'packages': packages,
             'error': error}
 
+        # Do not include the full-upgrade CLI if we did not detect any outdated
+        # package.
         if manager.outdated:
             try:
                 upgrade_all_cli = manager.upgrade_all_cli()

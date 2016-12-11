@@ -27,6 +27,7 @@ from __future__ import (
 
 import json
 
+from meta_package_manager import PY_VERSION
 from .case import CLITestCase
 
 
@@ -89,8 +90,12 @@ class TestCLIManagers(CLITestCase):
             '--output-format', 'json', '--verbosity', 'DEBUG', 'managers')
         self.assertEqual(result.exit_code, 0)
         self.assertIn("debug:", result.output)
-        with self.assertRaises(ValueError) as expt:
-            json.loads(result.output)
+        if PY_VERSION >= (3, 5):
+            with self.assertRaises(json.decoder.JSONDecodeError) as expt:
+                json.loads(result.output)
+        else:
+            with self.assertRaises(ValueError) as expt:
+                json.loads(result.output)
         self.assertEqual(
             expt.exception.message, 'No JSON object could be decoded')
 
@@ -176,8 +181,12 @@ class TestCLIOutdated(CLITestCase):
             '--output-format', 'json', '--verbosity', 'DEBUG', 'outdated')
         self.assertEqual(result.exit_code, 0)
         self.assertIn("debug:", result.output)
-        with self.assertRaises(ValueError) as expt:
-            json.loads(result.output)
+        if PY_VERSION >= (3, 5):
+            with self.assertRaises(json.decoder.JSONDecodeError) as expt:
+                json.loads(result.output)
+        else:
+            with self.assertRaises(ValueError) as expt:
+                json.loads(result.output)
         self.assertEqual(
             expt.exception.message, 'No JSON object could be decoded')
 

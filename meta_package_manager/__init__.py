@@ -37,8 +37,9 @@ from .bitbar import fix_environment
 __version__ = '2.1.0'
 
 
-PY2 = sys.version_info[0] == 2
-PY3 = sys.version_info[0] == 3
+PY_VERSION = sys.version_info
+PY2 = PY_VERSION[0] == 2
+PY3 = PY_VERSION[0] == 3
 
 
 # We only support macOS for now.

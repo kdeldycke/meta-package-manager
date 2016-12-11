@@ -34,7 +34,7 @@ if PY3:
     basestring = (str, bytes)
 
 
-class TestDefinition(unittest.TestCase):
+class TestManagerDefinitions(unittest.TestCase):
 
     """ Test the definition of all package managers. """
 

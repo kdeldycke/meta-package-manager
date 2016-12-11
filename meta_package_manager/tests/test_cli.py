@@ -27,8 +27,11 @@ from __future__ import (
 
 import json
 
-from meta_package_manager import PY_VERSION, PY2
+from meta_package_manager import PY_VERSION, PY2, PY3
 from .case import CLITestCase
+
+if PY3:
+    basestring = (str, bytes)
 
 
 class TestCLI(CLITestCase):

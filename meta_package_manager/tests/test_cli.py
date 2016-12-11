@@ -190,6 +190,28 @@ class TestCLIOutdated(CLITestCase):
         self.assertNotIn("pip", result.output)
         self.assertNotIn("gem", result.output)
 
+    def test_cli_format_plain(self):
+        result = self.invoke(
+            '--output-format', 'json', 'outdated', '--cli-format', 'plain')
+        for outdated in json.loads(result.output).values():
+            for infos in outdated['packages']:
+                self.assertIsInstance(infos['upgrade_cli'], basestring)
+
+    def test_cli_format_fragments(self):
+        result = self.invoke(
+            '--output-format', 'json', 'outdated', '--cli-format', 'fragments')
+        for outdated in json.loads(result.output).values():
+            for infos in outdated['packages']:
+                self.assertIsInstance(infos['upgrade_cli'], list)
+
+    def test_cli_format_bitbar(self):
+        result = self.invoke(
+            '--output-format', 'json', 'outdated', '--cli-format', 'bitbar')
+        for outdated in json.loads(result.output).values():
+            for infos in outdated['packages']:
+                self.assertIsInstance(infos['upgrade_cli'], basestring)
+                self.assertIn('param1=', infos['upgrade_cli'])
+
 
 class TestCLIUpgrade(CLITestCase):
 

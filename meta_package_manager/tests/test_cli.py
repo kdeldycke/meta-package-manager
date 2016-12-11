@@ -124,6 +124,15 @@ class TestCLISync(CLITestCase):
         result = self.invoke('sync')
         self.assertEqual(result.exit_code, 0)
 
+    def test_sub_manager_scope(self):
+        result = self.invoke('--manager', 'npm', 'sync')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("npm", result.output)
+        self.assertNotIn("apm", result.output)
+        self.assertNotIn("brew", result.output)
+        self.assertNotIn("pip", result.output)
+        self.assertNotIn("gem", result.output)
+
 
 class TestCLIOutdated(CLITestCase):
 
@@ -201,3 +210,12 @@ class TestCLIUpgrade(CLITestCase):
     def test_simple_call(self):
         result = self.invoke('upgrade')
         self.assertEqual(result.exit_code, 0)
+
+    def test_sub_manager_scope(self):
+        result = self.invoke('--manager', 'npm', 'upgrade')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("npm", result.output)
+        self.assertNotIn("apm", result.output)
+        self.assertNotIn("brew", result.output)
+        self.assertNotIn("pip", result.output)
+        self.assertNotIn("gem", result.output)

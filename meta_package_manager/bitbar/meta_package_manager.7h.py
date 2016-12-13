@@ -41,7 +41,7 @@ def fix_environment():
 
     # Python 3 Surrogate Handling. See:
     # http://click.pocoo.org/6/python3/#python-3-surrogate-handling
-    os.environ['LANG'] = 'en_US.UTF-8'
+    os.environ['LC_ALL'] = os.environ['LANG'] = 'en_US.UTF-8'
 
 
 def run(*args):

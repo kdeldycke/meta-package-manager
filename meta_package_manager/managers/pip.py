@@ -64,8 +64,11 @@ class Pip(PackageManager):
             if not outdated_pkg:
                 continue
 
-            package_id, installed_info, latest_version = regexp.match(
-                outdated_pkg).groups()
+            matches = regexp.match(outdated_pkg)
+            if not matches:
+                continue
+
+            package_id, installed_info, latest_version = matches.groups()
 
             # Extract current non-standard location if found.
             installed_info = installed_info.split(',', 1)

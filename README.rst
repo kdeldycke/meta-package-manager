@@ -45,14 +45,14 @@ Only macOS platform is supported.
 =================  ====================  ==============
 Package manager    Individual upgrade    Full upgrade
 =================  ====================  ==============
-|brew|__           ✅                    ✅
-|cask|__           ✅                    ✅
-|pip2|__           ✅                    ✅
-|pip3|__           ✅                    ✅
-|npm|__            ✅                    ✅
-|apm|__            ✅                    ✅
-|gem|__            ✅                    ✅
-|mas|__            ✅                    ✅
+|brew|__           ✅                     ✅
+|cask|__           ✅                     ✅
+|pip2|__           ✅                     ✅
+|pip3|__           ✅                     ✅
+|npm|__            ✅                     ✅
+|apm|__            ✅                     ✅
+|gem|__            ✅                     ✅
+|mas|__            ✅                     ✅
 =================  ====================  ==============
 
 .. |brew| replace::

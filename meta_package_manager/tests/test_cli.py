@@ -27,7 +27,7 @@ from __future__ import (
 
 import json
 
-from meta_package_manager import PY_VERSION, PY3
+from meta_package_manager import PY_VERSION, PY3, __version__
 from .case import CLITestCase
 
 if PY3:
@@ -40,6 +40,11 @@ class TestCLI(CLITestCase):
         result = self.invoke('--help')
         self.assertEqual(result.exit_code, 0)
         self.assertIn("--help", result.output)
+
+    def test_version(self):
+        result = self.invoke('--version')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn(__version__), result.output)
 
     def test_verbosity(self):
         result = self.invoke('--verbosity', 'DEBUG')

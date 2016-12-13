@@ -36,6 +36,11 @@ if PY3:
 
 class TestCLI(CLITestCase):
 
+    def test_bare_call(self):
+        result = self.invoke()
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("--help", result.output)
+
     def test_main_help(self):
         result = self.invoke('--help')
         self.assertEqual(result.exit_code, 0)

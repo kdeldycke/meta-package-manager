@@ -42,12 +42,7 @@ PY2 = PY_VERSION[0] == 2
 PY3 = PY_VERSION[0] == 3
 
 
-# We only support macOS for now.
-if sys.platform != 'darwin':
-    raise RuntimeError(
-        "{} platform is not supported. Only macOS is.".format(sys.platform))
-
-
 logger = logging.getLogger(__name__)
+
 
 fix_environment()

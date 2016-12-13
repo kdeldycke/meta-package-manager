@@ -30,7 +30,7 @@ import click_log
 from tabulate import tabulate
 
 from . import __version__, logger
-from .base import CLI_FORMATS, PackageManager, CLIError
+from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
 
 # Output rendering modes. Sorted from most machine-readable to fanciest

@@ -25,8 +25,8 @@ import unittest
 from boltons.tbutils import ExceptionInfo
 from click.testing import CliRunner
 
-from meta_package_manager.bitbar import run
-from meta_package_manager.cli import cli
+from ..bitbar import run
+from ..cli import cli
 
 
 class CLITestCase(unittest.TestCase):

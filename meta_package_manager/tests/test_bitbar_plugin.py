@@ -27,8 +27,7 @@ from __future__ import (
 
 import unittest
 
-from meta_package_manager import bitbar
-
+from .. import bitbar
 from .case import CLITestCase
 
 

@@ -22,7 +22,7 @@ Changelog
 * Bump requirement to ``readme_renderer >= 16.0``.
 * Always remove ANSI codes from CLI output.
 * Fix rendering of unicode logs.
-* Bump requirement to ``click_log > 0.1.4``.
+* Bump requirement to ``click_log >= 0.1.5``.
 * Force ``LANG`` environment variable to ``en_US.UTF-8``.
 * Share same code path for CLI execution between ``mpm`` and BitBar plugin.
 * Add a ``-d/--dry-run`` option to ``mpm upgrade`` sub-command.

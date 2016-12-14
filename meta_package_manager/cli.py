@@ -104,8 +104,8 @@ def managers(ctx):
         fields = [
             'name', 'id', 'cli_path', 'exists', 'executable', 'version_string',
             'supported', 'available']
-        # JSON mode use print to output data because the logger is disabled.
-        print(json({
+        # JSON mode use echo to output data because the logger is disabled.
+        click.echo(json({
             manager_id: {fid: getattr(manager, fid) for fid in fields}
             for manager_id, manager in target_managers.items()}))
         return
@@ -212,8 +212,8 @@ def outdated(ctx, cli_format):
 
     # Machine-friendly data rendering.
     if rendering == 'json':
-        # JSON mode use print to output data because the logger is disabled.
-        print(json(outdated))
+        # JSON mode use echo to output data because the logger is disabled.
+        click.echo(json(outdated))
         return
 
     # Human-friendly content rendering.

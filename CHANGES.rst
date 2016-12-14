@@ -1,8 +1,14 @@
 Changelog
 =========
 
-`2.1.0 (2016-12-14) <https://github.com/kdeldycke/meta-package-manager/compare/v2.0.0...develop>`_
+`2.1.1 (2016-12-14) <https://github.com/kdeldycke/meta-package-manager/compare/v2.1.0...develop>`_
 --------------------------------------------------------------------------------------------------
+
+* No changes yet.
+
+
+`2.1.0 (2016-12-14) <https://github.com/kdeldycke/meta-package-manager/compare/v2.0.0...v2.1.0>`_
+-------------------------------------------------------------------------------------------------
 
 * Adjust rendering of BitBar plugin errors.
 * Fix fetching of log level names in Python 3.4+.

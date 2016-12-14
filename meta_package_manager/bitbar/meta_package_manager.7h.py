@@ -19,8 +19,11 @@ from __future__ import print_function, unicode_literals
 
 import json
 import os
+import sys
 from operator import itemgetter
 from subprocess import PIPE, Popen
+
+PY2 = sys.version_info[0] == 2
 
 
 def fix_environment():
@@ -60,16 +63,28 @@ def run(*args):
         error if error else None)
 
 
+def echo(message):
+    """ Print message to the output.
+
+    Not unlike ``click.echo()``, this method is required to support
+    discrepencies in the way strings are handled in different Python versions
+    and platforms.
+    """
+    if PY2:
+        message = message.encode('utf-8')
+    print(message)
+
+
 def print_error_header():
     """ Generic header for blockng error. """
-    print(u"❌ | dropdown=false")
-    print("---")
+    echo("❌ | dropdown=false")
+    echo("---")
 
 
 def print_error(message):
     """ Print a formatted error line by line, in red. """
     for line in message.strip().split("\n"):
-        print(u"{} | color=red font=Menlo size=10".format(line))
+        echo("{} | color=red font=Menlo size=10".format(line))
 
 
 def print_menu():
@@ -82,8 +97,8 @@ def print_menu():
     if code or error:
         print_error_header()
         print_error(error)
-        print("---")
-        print(
+        echo("---")
+        echo(
             "Install / upgrade Meta Package Manager. | bash=pip "
             # TODO: Add minimal requirement on Python package.
             "param1=install param2=--upgrade param3=meta-package-manager "
@@ -106,29 +121,29 @@ def print_menu():
     # Print menu bar icon with number of available upgrades.
     total_outdated = sum([len(m['packages']) for m in managers])
     total_errors = len([True for m in managers if m['error']])
-    print(u"↑{}{} | dropdown=false".format(
+    echo("↑{}{} | dropdown=false".format(
         total_outdated,
-        u" ⚠️{}".format(total_errors) if total_errors else ""))
+        " ⚠️{}".format(total_errors) if total_errors else ""))
 
     # Print a full detailed section for each manager.
     for manager in managers:
-        print("---")
+        echo("---")
 
         if manager['error']:
             print_error(manager['error'])
 
-        print("{} outdated {} package{}".format(
+        echo("{} outdated {} package{}".format(
             len(manager['packages']),
             manager['name'],
             's' if len(manager['packages']) != 1 else ''))
 
         if manager.get('upgrade_all_cli'):
-            print("Upgrade all | {} terminal=false refresh=true".format(
+            echo("Upgrade all | {} terminal=false refresh=true".format(
                 manager['upgrade_all_cli']))
 
         for pkg_info in manager['packages']:
-            print(
-                u"{name} {installed_version} → {latest_version} | "
+            echo(
+                "{name} {installed_version} → {latest_version} | "
                 "{upgrade_cli} terminal=false refresh=true".format(**pkg_info))
 
 

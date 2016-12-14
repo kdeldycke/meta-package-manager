@@ -109,8 +109,11 @@ class TestCLIManagers(CLITestCase):
         else:
             with self.assertRaises(ValueError) as expt:
                 json.loads(result.output)
-                self.assertEqual(
-                    expt.exception.args[0], 'No JSON object could be decoded')
+            message = expt.exception.args[0]
+            if PY_VERSION >= (3, 4):
+                self.assertIn('Expecting value: line ', message)
+            else:
+                self.assertEqual(message, 'No JSON object could be decoded')
 
     def test_sub_manager_scope(self):
         result = self.invoke('--manager', 'npm', 'managers')
@@ -200,8 +203,11 @@ class TestCLIOutdated(CLITestCase):
         else:
             with self.assertRaises(ValueError) as expt:
                 json.loads(result.output)
-            self.assertEqual(
-                expt.exception.args[0], 'No JSON object could be decoded')
+            message = expt.exception.args[0]
+            if PY_VERSION >= (3, 4):
+                self.assertIn('Expecting value: line ', message)
+            else:
+                self.assertEqual(message, 'No JSON object could be decoded')
 
     def test_sub_manager_scope(self):
         result = self.invoke('--manager', 'npm', 'outdated')

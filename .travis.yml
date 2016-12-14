@@ -111,6 +111,14 @@ install:
 
 before_script:
   - pip install codecov
+  # Python 3.3 environments built by Anaconda are not capable of installing a
+  # fresh setuptools on macOS. To fix this issue we manually upgrade setuptools
+  # instead of waiting for the `pip install -e .[develop]` invocation below.
+  # More details at: https://github.com/ContinuumIO/anaconda-issues/issues/542
+  # XXX This hack can be removed once Python 3.3 gets deprecated.
+  - if [[ "$PYTHON_DIST" == "3.3"  ]] && [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      curl https://bootstrap.pypa.io/ez_setup.py -o - | python
+    fi
 
 script:
   # Launch unittests.

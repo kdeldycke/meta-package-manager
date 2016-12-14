@@ -27,6 +27,7 @@ Changelog
 * Share same code path for CLI execution between ``mpm`` and BitBar plugin.
 * Add a ``-d/--dry-run`` option to ``mpm upgrade`` sub-command.
 * Remove hard-requirement on ``macOS`` platform. Refs #7.
+* Fix upgrade of ``setuptools`` in ``macOS`` + Python 3.3 Travis jobs.
 
 
 `2.0.0 (2016-12-04) <https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...v2.0.0>`_

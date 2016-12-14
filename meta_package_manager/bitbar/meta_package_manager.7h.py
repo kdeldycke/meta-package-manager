@@ -62,14 +62,14 @@ def run(*args):
 
 def print_error_header():
     """ Generic header for blockng error. """
-    print("❌ | dropdown=false")
+    print(u'❌ | dropdown=false")
     print("---")
 
 
 def print_error(message):
     """ Print a formatted error line by line, in red. """
     for line in message.strip().split("\n"):
-        print("{} | color=red font=Menlo size=10".format(line))
+        print(u"{} | color=red font=Menlo size=10".format(line))
 
 
 def print_menu():
@@ -106,9 +106,9 @@ def print_menu():
     # Print menu bar icon with number of available upgrades.
     total_outdated = sum([len(m['packages']) for m in managers])
     total_errors = len([True for m in managers if m['error']])
-    print("↑{}{} | dropdown=false".format(
+    print(u"↑{}{} | dropdown=false".format(
         total_outdated,
-        " ⚠️{}".format(total_errors) if total_errors else ""))
+        u" ⚠️{}".format(total_errors) if total_errors else ""))
 
     # Print a full detailed section for each manager.
     for manager in managers:
@@ -128,7 +128,7 @@ def print_menu():
 
         for pkg_info in manager['packages']:
             print(
-                "{name} {installed_version} → {latest_version} | "
+                u"{name} {installed_version} → {latest_version} | "
                 "{upgrade_cli} terminal=false refresh=true".format(**pkg_info))
 
 

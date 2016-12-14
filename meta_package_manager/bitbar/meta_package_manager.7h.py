@@ -62,7 +62,7 @@ def run(*args):
 
 def print_error_header():
     """ Generic header for blockng error. """
-    print(u'❌ | dropdown=false")
+    print(u"❌ | dropdown=false")
     print("---")
 
 

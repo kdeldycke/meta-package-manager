@@ -5,7 +5,7 @@
 # <bitbar.author>Kevin Deldycke</bitbar.author>
 # <bitbar.author.github>kdeldycke</bitbar.author.github>
 # <bitbar.desc>List outdated packages and manage upgrades.</bitbar.desc>
-# <bitbar.dependencies>python, mpm</bitbar.dependencies>
+# <bitbar.dependencies>python,mpm</bitbar.dependencies>
 # <bitbar.image>https://i.imgur.com/CiQpQ42.png</bitbar.image>
 # <bitbar.abouturl>https://github.com/kdeldycke/meta-package-manager</bitbar.abouturl>
 

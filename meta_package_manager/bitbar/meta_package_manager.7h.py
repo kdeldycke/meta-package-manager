@@ -84,7 +84,9 @@ def print_error_header():
 def print_error(message):
     """ Print a formatted error line by line, in red. """
     for line in message.strip().split("\n"):
-        echo("{} | color=red font=Menlo size=10 emojize=false".format(line))
+        echo(
+            "{} | color=red font=Menlo size=10 trim=false "
+            "emojize=false".format(line))
 
 
 def print_menu():

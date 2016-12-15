@@ -166,14 +166,14 @@ class PackageManager(object):
         assert isinstance(args, list)
         logger.debug("Running `{}`...".format(' '.join(args)))
 
+        code = 0
+        output = None
+        error = None
+
         if not dry_run:
             code, output, error = run(*args)
         else:
             logger.warning("Dry-run mode active: skip execution of command.")
-            # Returns dummy results.
-            code = 0
-            output = None
-            error = None
 
         # Normalize messages.
         if error:

@@ -177,10 +177,10 @@ class PackageManager(object):
 
         # Normalize messages.
         if error:
-            error = strip_ansi(error).strip()
+            error = strip_ansi(error)
             error = error if error else None
         if output:
-            output = strip_ansi(output).strip()
+            output = strip_ansi(output)
             output = output if output else None
 
         if code and error:

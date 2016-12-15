@@ -55,12 +55,10 @@ def run(*args):
     except OSError:
         return None, None, "`{}` executable not found.".format(args[0])
     output, error = process.communicate()
-    output = output.decode('utf-8').strip()
-    error = error.decode('utf-8').strip()
     return (
         process.returncode,
-        output if output else None,
-        error if error else None)
+        output.decode('utf-8') if output else None,
+        error.decode('utf-8') if error else None)
 
 
 def echo(message):

@@ -37,7 +37,7 @@ class Homebrew(PackageManager):
 
     cli_path = '/usr/local/bin/brew'
 
-    requirement = '>= 1.0.0'
+    requirement = '>= 1.0.*'
 
     @cachedproperty
     def id(self):
@@ -120,7 +120,7 @@ class HomebrewCask(Homebrew):
 
     # 'cask install' doesn't upgrade to the latest package version, we need to
     # call 'cask reinstall' instead since 1.1.0.
-    requirement = '>= 1.1.0'
+    requirement = '>= 1.1.*'
 
     @cachedproperty
     def id(self):

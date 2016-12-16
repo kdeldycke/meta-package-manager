@@ -4,6 +4,8 @@ Changelog
 `2.1.1 (2016-12-14) <https://github.com/kdeldycke/meta-package-manager/compare/v2.1.0...develop>`_
 --------------------------------------------------------------------------------------------------
 
+* Fix parsing of non-point releases of ``brew`` and ``cask`` versions.
+  Closes #15.
 * Do not render emoji in BitBar plugin menu entries.
 * Do not trim error messages rendered in BitBar plugin.
 * Do not strip CLI output. Keep original format.

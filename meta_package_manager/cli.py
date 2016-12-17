@@ -121,6 +121,10 @@ def managers(ctx):
             platform_infos += "  {} only".format(', '.join(sorted([
                 os_labels[os_id] for os_id in manager.platforms])))
 
+        # Build up the CLI path column content.
+        cli_infos = u'✅' if manager.exists else u'❌'
+        cli_infos += "  {}".format(manager.cli_path)
+
         # Build up the version column content.
         version_infos = ''
         if manager.executable:
@@ -134,14 +138,13 @@ def managers(ctx):
             manager.name,
             manager_id,
             platform_infos,
-            manager.cli_path,
-            u'✅' if manager.exists else '',
+            cli_infos,
             u'✅' if manager.executable else '',
             version_infos])
 
     table = [[
-        'Package manager', 'ID', 'Supported', 'CLI path', 'Found',
-        'Executable', 'Version']] + sorted(table, key=itemgetter(1))
+        'Package manager', 'ID', 'Supported', 'CLI', 'Executable',
+        'Version']] + sorted(table, key=itemgetter(1))
     logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
 
 

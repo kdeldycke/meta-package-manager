@@ -34,7 +34,7 @@ import sys
 from .bitbar import fix_environment
 
 
-__version__ = '2.1.2'
+__version__ = '2.2.0'
 
 
 PY_VERSION = sys.version_info

@@ -103,7 +103,7 @@ def managers(ctx):
     if rendering == 'json':
         fields = [
             'name', 'id', 'cli_path', 'exists', 'executable', 'version_string',
-            'supported', 'available']
+            'fresh', 'available']
         # JSON mode use echo to output data because the logger is disabled.
         click.echo(json({
             manager_id: {fid: getattr(manager, fid) for fid in fields}
@@ -116,10 +116,10 @@ def managers(ctx):
 
         version_infos = ''
         if manager.executable:
-            version_infos = u'✅' if manager.supported else u'❌'
+            version_infos = u'✅' if manager.fresh else u'❌'
             if manager.version:
                 version_infos += "  {}".format(manager.version_string)
-                if not manager.supported:
+                if not manager.fresh:
                     version_infos += " {}".format(manager.requirement)
 
         table.append([

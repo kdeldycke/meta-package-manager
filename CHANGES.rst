@@ -4,7 +4,7 @@ Changelog
 `2.1.2 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v2.1.1...develop>`_
 --------------------------------------------------------------------------------------------------
 
-* No changes yet.
+* Rename ``supported`` property of managers to ``fresh``.
 
 
 `2.1.1 (2016-12-17) <https://github.com/kdeldycke/meta-package-manager/compare/v2.1.0...v2.1.2>`_

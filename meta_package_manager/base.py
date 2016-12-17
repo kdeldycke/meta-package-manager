@@ -134,8 +134,8 @@ class PackageManager(object):
         return True
 
     @cachedproperty
-    def supported(self):
-        """ Is the package manager match the version requirement? """
+    def fresh(self):
+        """ Does the package manager match the version requirement? """
         # Version is mandatory.
         if not self.version:
             return False
@@ -156,7 +156,7 @@ class PackageManager(object):
             2 - is executable, and
             3 - match the version requirement.
         """
-        return self.exists and self.executable and self.supported
+        return self.exists and self.executable and self.fresh
 
     def run(self, args, dry_run=False):
         """ Run a shell command, return the output and keep error message.

@@ -30,11 +30,14 @@ import json
 from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
+from ..platform import MACOS
 
 
 class APM(PackageManager):
 
     cli_path = '/usr/local/bin/apm'
+
+    platforms = frozenset([MACOS])
 
     def get_version(self):
         return self.run([self.cli_path, '--version']).split('\n')[0].split()[1]

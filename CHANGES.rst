@@ -5,6 +5,7 @@ Changelog
 --------------------------------------------------------------------------------------------------
 
 * Rename ``supported`` property of managers to ``fresh``.
+* Allow restriction of package managers to a platform. Closes #7.
 
 
 `2.1.1 (2016-12-17) <https://github.com/kdeldycke/meta-package-manager/compare/v2.1.0...v2.1.1>`_

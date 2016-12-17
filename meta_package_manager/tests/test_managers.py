@@ -47,6 +47,12 @@ class TestManagerDefinitions(unittest.TestCase):
         """ Check all implemented package managers are accounted for. """
         self.assertEqual(len(pool()), 8)
 
+    def test_platforms_type(self):
+        """ Check that definitions returns supported platforms as a frozenset.
+        """
+        for manager in pool().values():
+            self.assertIsInstance(manager.platforms, frozenset)
+
     def test_cli_path_type(self):
         """ Check that definitions returns the CLI path as a string. """
         for manager in pool().values():

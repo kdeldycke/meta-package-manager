@@ -34,6 +34,7 @@ from packaging.version import parse as parse_version
 
 from . import logger
 from .bitbar import run
+from .platform import current_platform
 
 # Rendering format of CLI in JSON fields.
 CLI_FORMATS = frozenset(['plain', 'fragments', 'bitbar'])
@@ -67,6 +68,9 @@ class PackageManager(object):
     # Systematic options passed to package manager CLI. Might be of use to
     # force silencing or high verbosity for instance.
     cli_args = []
+
+    # List of platforms supported by the manager.
+    platforms = frozenset()
 
     # Version requirement specifier.
     requirement = None
@@ -116,6 +120,11 @@ class PackageManager(object):
         return self.__class__.__name__
 
     @cachedproperty
+    def supported(self):
+        """ Is the package manager supported on that platform? """
+        return True if current_platform() in self.platforms else False
+
+    @cachedproperty
     def exists(self):
         """ Is the package manager CLI exist on the system? """
         if not os.path.isfile(self.cli_path):
@@ -152,11 +161,13 @@ class PackageManager(object):
         """ Is the package manager available and ready-to-use on the system?
 
         Returns True only if the main CLI:
-            1 - exists,
-            2 - is executable, and
-            3 - match the version requirement.
+            1 - is supported on the current platform,
+            2 - exists on the system,
+            3 - is executable, and
+            4 - match the version requirement.
         """
-        return self.exists and self.executable and self.fresh
+        return (
+            self.supported and self.exists and self.executable and self.fresh)
 
     def run(self, args, dry_run=False):
         """ Run a shell command, return the output and keep error message.

@@ -30,11 +30,14 @@ import re
 from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
+from ..platform import MACOS
 
 
 class MAS(PackageManager):
 
     cli_path = '/usr/local/bin/mas'
+
+    platforms = frozenset([MACOS])
 
     # 'mas outdated' output has been changed in 1.3.1: https://github.com
     # /mas-cli/mas/commit/ca72ee42b1c5f482513b1d2fbf780b0bf3d9618b

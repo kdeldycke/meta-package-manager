@@ -31,11 +31,14 @@ from boltons.cacheutils import cachedproperty
 from packaging.version import parse as parse_version
 
 from ..base import PackageManager
+from ..platform import MACOS
 
 
 class Homebrew(PackageManager):
 
     cli_path = '/usr/local/bin/brew'
+
+    platforms = frozenset([MACOS])
 
     requirement = '>= 1.0.*'
 

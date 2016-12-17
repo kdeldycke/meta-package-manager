@@ -31,12 +31,15 @@ import re
 from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
+from ..platform import MACOS
 
 
 class Gem(PackageManager):
 
     HOMEBREW_PATH = '/usr/local/bin/gem'
     SYSTEM_PATH = '/usr/bin/gem'
+
+    platforms = frozenset([MACOS])
 
     def __init__(self):
         super(Gem, self).__init__()

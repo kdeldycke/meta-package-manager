@@ -30,9 +30,12 @@ import re
 from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
+from ..platform import MACOS
 
 
 class Pip(PackageManager):
+
+    platforms = frozenset([MACOS])
 
     def get_version(self):
         return self.run([self.cli_path, '--version']).split()[1]

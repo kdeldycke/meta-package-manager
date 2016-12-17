@@ -44,7 +44,7 @@ class TestManagerDefinitions(unittest.TestCase):
             self.assertRegexpMatches(manager_id, r'[a-z0-9]+')
 
     def test_number(self):
-        """ Check all supported package managers are accounted for. """
+        """ Check all implemented package managers are accounted for. """
         self.assertEqual(len(pool()), 8)
 
     def test_cli_path_type(self):

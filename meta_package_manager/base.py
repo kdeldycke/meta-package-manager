@@ -231,7 +231,7 @@ class PackageManager(object):
 
     @staticmethod
     def render_cli(cmd, cli_format='plain'):
-        """ Returns a formatted CLI in the provided format. """
+        """ Return a formatted CLI in the provided format. """
         assert isinstance(cmd, list)
         assert cli_format in CLI_FORMATS
         if cli_format != 'fragments':

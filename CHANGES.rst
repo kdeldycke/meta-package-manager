@@ -1,8 +1,8 @@
 Changelog
 =========
 
-`2.1.1 (2016-12-14) <https://github.com/kdeldycke/meta-package-manager/compare/v2.1.0...develop>`_
---------------------------------------------------------------------------------------------------
+`2.1.1 (2016-12-17) <https://github.com/kdeldycke/meta-package-manager/compare/v2.1.0...v2.1.1>`_
+-------------------------------------------------------------------------------------------------
 
 * Fix parsing of non-point releases of ``brew`` and ``cask`` versions.
   Closes #15.

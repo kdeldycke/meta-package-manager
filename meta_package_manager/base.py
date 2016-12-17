@@ -91,7 +91,7 @@ class PackageManager(object):
         """
         if self.executable:
             try:
-                return self.get_version()
+                return self.get_version().strip()
             except CLIError as expt:
                 logger.warning(expt.error)
 

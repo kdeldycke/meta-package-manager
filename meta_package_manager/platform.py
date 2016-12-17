@@ -35,6 +35,13 @@ LINUX = 'linux2'
 WINDOWS = 'win32'
 
 
+# OS labels for user-friendly output.
+os_labels = {
+    MACOS: 'macOS',
+    LINUX: 'Linux',
+    WINDOWS: 'Windows'}
+
+
 def current_platform():
     """ Return ID of current platform. """
     return sys.platform

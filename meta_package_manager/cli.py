@@ -32,6 +32,7 @@ from tabulate import tabulate
 from . import __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
+from .platform import os_labels
 
 # Output rendering modes. Sorted from most machine-readable to fanciest
 # human-readable.
@@ -102,8 +103,8 @@ def managers(ctx):
     # Machine-friendly data rendering.
     if rendering == 'json':
         fields = [
-            'name', 'id', 'cli_path', 'exists', 'executable', 'version_string',
-            'fresh', 'available']
+            'name', 'id', 'supported', 'cli_path', 'exists', 'executable',
+            'version_string', 'fresh', 'available']
         # JSON mode use echo to output data because the logger is disabled.
         click.echo(json({
             manager_id: {fid: getattr(manager, fid) for fid in fields}
@@ -114,6 +115,13 @@ def managers(ctx):
     table = []
     for manager_id, manager in target_managers.items():
 
+        # Build up the platform column content.
+        platform_infos = u'✅' if manager.supported else u'❌'
+        if not manager.supported:
+            platform_infos += "  {} only".format(', '.join(sorted([
+                os_labels[os_id] for os_id in manager.platforms])))
+
+        # Build up the version column content.
         version_infos = ''
         if manager.executable:
             version_infos = u'✅' if manager.fresh else u'❌'
@@ -125,14 +133,15 @@ def managers(ctx):
         table.append([
             manager.name,
             manager_id,
+            platform_infos,
             manager.cli_path,
             u'✅' if manager.exists else '',
             u'✅' if manager.executable else '',
             version_infos])
 
     table = [[
-        'Package manager', 'ID', 'CLI path', 'Found', 'Executable',
-        'Version']] + sorted(table, key=itemgetter(1))
+        'Package manager', 'ID', 'Supported', 'CLI path', 'Found',
+        'Executable', 'Version']] + sorted(table, key=itemgetter(1))
     logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
 
 

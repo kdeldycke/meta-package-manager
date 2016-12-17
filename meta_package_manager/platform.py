@@ -29,6 +29,12 @@ from __future__ import (
 
 import sys
 
+# Python version constants.
+PY_VERSION = sys.version_info
+PY2 = PY_VERSION[0] == 2
+PY3 = PY_VERSION[0] == 3
+
+
 # OS identification constants.
 MACOS = 'darwin'
 LINUX = 'linux2'

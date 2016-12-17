@@ -28,18 +28,11 @@ from __future__ import (
 )
 
 import logging
-import os
-import sys
 
 from .bitbar import fix_environment
 
 
 __version__ = '2.2.0'
-
-
-PY_VERSION = sys.version_info
-PY2 = PY_VERSION[0] == 2
-PY3 = PY_VERSION[0] == 3
 
 
 logger = logging.getLogger(__name__)

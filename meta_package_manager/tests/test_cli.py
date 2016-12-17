@@ -27,7 +27,8 @@ from __future__ import (
 
 import json
 
-from .. import PY3, PY_VERSION, __version__
+from .. import __version__
+from ..platform import PY3, PY_VERSION
 from .case import CLITestCase
 
 if PY3:

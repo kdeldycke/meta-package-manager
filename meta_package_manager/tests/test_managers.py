@@ -27,8 +27,8 @@ from __future__ import (
 
 import unittest
 
-from .. import PY3
 from ..managers import pool
+from ..platform import PY3
 
 if PY3:
     basestring = (str, bytes)

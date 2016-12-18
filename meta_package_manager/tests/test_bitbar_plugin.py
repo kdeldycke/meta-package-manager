@@ -38,4 +38,4 @@ class TestBitBarPlugin(CLITestCase):
 
         self.assertEqual(code, 0)
         self.assertFalse(error)
-        self.assertIn(" | dropdown=false\n---\n", output)
+        self.assertIn(" | dropdown=false\n", output)

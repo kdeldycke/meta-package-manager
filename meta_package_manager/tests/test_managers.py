@@ -57,7 +57,7 @@ class TestManagerDefinitions(unittest.TestCase):
         """ Check that definitions returns platforms with a registered label.
         """
         for manager in pool().values():
-            self.assertIn(manager.platforms, set(os_labels))
+            self.assertTrue(manager.platforms.issubset(os_labels))
 
     def test_cli_path_type(self):
         """ Check that definitions returns the CLI path as a string. """

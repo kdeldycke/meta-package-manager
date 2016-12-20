@@ -104,11 +104,14 @@ List global options and commands:
     $ mpm
     Usage: mpm [OPTIONS] COMMAND [ARGS]...
 
-      CLI for multi-package manager updates and upgrades.
+      CLI for multi-package manager upgrades.
 
     Options:
       -v, --verbosity LEVEL           Either CRITICAL, ERROR, WARNING, INFO or
                                       DEBUG. Defaults to INFO.
+      -m, --manager [npm|mas|pip3|pip2|cask|apm|brew|gem]
+                                      Restrict sub-command to one package manager.
+                                      Defaults to all.
       -o, --output-format [simple|plain|json|fancy]
                                       Rendering mode of the output. Defaults to
                                       fancy.
@@ -117,9 +120,9 @@ List global options and commands:
 
     Commands:
       managers  List supported package managers and their location.
-      outdated  List available updates.
+      outdated  List outdated packages.
       sync      Sync local package info.
-      update    Update all packages.
+      upgrade   Upgrade all packages.
 
 List all supported package managers and their status on current system:
 

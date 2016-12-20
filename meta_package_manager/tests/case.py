@@ -20,6 +20,7 @@
 
 from __future__ import absolute_import, division, print_function
 
+import os
 import unittest
 
 from boltons.tbutils import ExceptionInfo
@@ -27,6 +28,10 @@ from click.testing import CliRunner
 
 from ..bitbar import run
 from ..cli import cli
+
+
+# Are we allowed to run destructive unittests in this environment?
+destructive_tests = os.environ.get('DESTRUCTIVE_TESTS', False) == 1
 
 
 class CLITestCase(unittest.TestCase):

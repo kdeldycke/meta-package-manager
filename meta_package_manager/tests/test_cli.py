@@ -26,10 +26,12 @@ from __future__ import (
 )
 
 import json
+import unittest
 
 from .. import __version__
 from ..platform import PY3, PY_VERSION
-from .case import CLITestCase
+from .case import CLITestCase, destructive_tests
+
 
 if PY3:
     basestring = (str, bytes)
@@ -270,3 +272,8 @@ class TestCLIUpgrade(CLITestCase):
         self.assertNotIn("brew", result.output)
         self.assertNotIn("pip", result.output)
         self.assertNotIn("gem", result.output)
+
+    @unittest.skipUnless(destructive_tests, "Destructive tests not allowed.")
+    def test_full_upgrade(self):
+        result = self.invoke('upgrade')
+        self.assertEqual(result.exit_code, 0)

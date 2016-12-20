@@ -121,7 +121,8 @@ before_script:
     fi
 
 script:
-  # Launch unittests.
+  # Launch unittests in destructive mode.
+  - export DESTRUCTIVE_TESTS=true
   - pip install -e .[tests]
   - coverage run ./setup.py test
   - coverage report -m

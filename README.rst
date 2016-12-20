@@ -37,21 +37,30 @@ Development: |build| |coverage| |quality|
     Source: `XKCD #1654 <https://xkcd.com/1654/>`_.
 
 
-Supported
+Features
 ---------
 
-=================  ====================  ==============
-Package manager    Individual upgrade    Full upgrade
-=================  ====================  ==============
-|brew|__           ✅                     ✅
-|cask|__           ✅                     ✅
-|pip2|__           ✅                     ✅
-|pip3|__           ✅                     ✅
-|npm|__            ✅                     ✅
-|apm|__            ✅                     ✅
-|gem|__            ✅                     ✅
-|mas|__            ✅                     ✅
-=================  ====================  ==============
+* Search and list all package managers on the system.
+* List outdated packages.
+* Sync local package infos.
+* Upgrade all outdated packages.
+
+
+Supported package managers
+--------------------------
+
+=============== ===== ===== ======= ========
+Package manager macOS Linux Windows Version
+=============== ===== ===== ======= ========
+|brew|__        ✅                  >= 1.0.*
+|cask|__        ✅                  >= 1.0.*
+|pip2|__        ✅     ✅
+|pip3|__        ✅     ✅
+|npm|__         ✅
+|apm|__         ✅
+|gem|__         ✅
+|mas|__         ✅                  >= 1.3.1
+=============== ===== ===== ======= ========
 
 .. |brew| replace::
    Homebrew

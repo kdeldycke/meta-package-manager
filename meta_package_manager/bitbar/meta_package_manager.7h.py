@@ -126,27 +126,30 @@ def print_menu():
         " ⚠️{}".format(total_errors) if total_errors else ""))
 
     # Print a full detailed section for each manager.
+    echo("---")
     for manager in managers:
-        echo("---")
+
 
         if manager['error']:
-            print_error(manager['error'])
-
-        echo("{} outdated {} package{} | emojize=false".format(
-            len(manager['packages']),
-            manager['name'],
-            's' if len(manager['packages']) != 1 else ''))
-
-        if manager.get('upgrade_all_cli'):
-            echo("Upgrade all | {} terminal=false refresh=true".format(
-                manager['upgrade_all_cli']))
+          # for line in manager['error'].strip().split("\n"):
+          #     echo("{:<23} {} | color=red font=Menlo size=10 trim=false emojize=false".format(manager.name + ':', line))
+          print_error(manager['error'])
+        else:
+          echo("{:<23} {:>2} package{} | size=13 font=NotoMono emojize=false".format(
+              manager['name'] + ':',
+              len(manager['packages']),
+              's' if len(manager['packages']) != 1 else ''))
 
         for pkg_info in manager['packages']:
             echo(
-                "{name} {installed_version} → {latest_version} | {upgrade_cli}"
+                "--{name} {installed_version} → {latest_version} | {upgrade_cli}"
                 " terminal=false refresh=true emojize=false".format(
                     **pkg_info))
 
+        if manager.get('upgrade_all_cli'):
+            echo("-----")
+            echo("--Upgrade all | {} terminal=false refresh=true".format(
+                manager['upgrade_all_cli']))
 
 if __name__ == '__main__':
     fix_environment()

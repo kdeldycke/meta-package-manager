@@ -32,7 +32,7 @@ from tabulate import tabulate
 from . import __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
-from .platform import os_labels
+from .platform import platform_label
 
 # Output rendering modes. Sorted from most machine-readable to fanciest
 # human-readable.
@@ -119,7 +119,7 @@ def managers(ctx):
         platform_infos = u'✅' if manager.supported else u'❌'
         if not manager.supported:
             platform_infos += "  {} only".format(', '.join(sorted([
-                os_labels[os_id] for os_id in manager.platforms])))
+                platform_label(os_id) for os_id in manager.platforms])))
 
         # Build up the CLI path column content.
         cli_infos = u'✅' if manager.exists else u'❌'

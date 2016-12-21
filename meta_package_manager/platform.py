@@ -29,6 +29,9 @@ from __future__ import (
 
 import sys
 
+from . import logger
+
+
 # Python version constants.
 PY_VERSION = sys.version_info
 PY2 = PY_VERSION[0] == 2
@@ -41,8 +44,8 @@ LINUX = 'linux2'
 WINDOWS = 'win32'
 
 
-# OS labels for user-friendly output.
-os_labels = {
+# Map platform IDs to OS labels.
+OS_LABELS = {
     MACOS: 'macOS',
     LINUX: 'Linux',
     WINDOWS: 'Windows'}
@@ -50,4 +53,12 @@ os_labels = {
 
 def current_platform():
     """ Return ID of current platform. """
-    return sys.platform
+    platform_id = sys.platform
+    logger.debug("Current platform: {} (ID: {}).".format(
+        platform_label(platform_id), platform_id))
+    return platform_id
+
+
+def platform_label(platform_id):
+    """ Return platform label for user-friendly output. """
+    return OS_LABELS.get(platform_id, 'unrecognized')

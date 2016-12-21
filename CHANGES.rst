@@ -9,6 +9,7 @@ Changelog
 * Include ``supported`` property in ``mpm managers`` sub-command.
 * Allow destructive unittests in Travis CI jobs.
 * Allow usage of ``pip2`` and ``pip3`` managers on Linux.
+* Print current platform in debug messages.
 
 
 `2.1.1 (2016-12-17) <https://github.com/kdeldycke/meta-package-manager/compare/v2.1.0...v2.1.1>`_

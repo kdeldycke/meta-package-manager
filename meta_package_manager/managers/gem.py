@@ -92,7 +92,12 @@ class Gem(PackageManager):
 
     def upgrade_cli(self, package_id=None):
         cmd = [self.cli_path] + self.cli_args + ['update']
-        # Installs require sudo on system ruby.
+        # Installs require `sudo` on system ruby.
+        # I (@tresni) recommend doing something like:
+        #     $ sudo dseditgroup -o edit -a -t user wheel
+        # And then do `visudo` to make it so the `wheel` group does not require
+        # a password. There is a line already there for it, you just need to
+        # uncomment it and save.)
         if self.system_install:
             cmd.insert(0, '/usr/bin/sudo')
         if package_id:

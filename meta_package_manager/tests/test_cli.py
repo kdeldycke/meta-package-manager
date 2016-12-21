@@ -32,7 +32,6 @@ from .. import __version__
 from ..platform import PY3, PY_VERSION
 from .case import CLITestCase, skip_destructive
 
-
 if PY3:
     basestring = (str, bytes)
 

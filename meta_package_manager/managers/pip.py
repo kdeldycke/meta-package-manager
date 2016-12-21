@@ -30,7 +30,7 @@ import re
 from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
-from ..platform import MACOS, LINUX
+from ..platform import LINUX, MACOS
 
 
 class Pip(PackageManager):

@@ -39,26 +39,43 @@ PY3 = PY_VERSION[0] == 3
 
 
 # OS identification constants.
-MACOS = 'darwin'
-LINUX = 'linux2'
-WINDOWS = 'win32'
+MACOS = 'macos'
+LINUX = 'linux'
+WINDOWS = 'windows'
 
 
-# Map platform IDs to OS labels.
-OS_LABELS = {
-    MACOS: 'macOS',
-    LINUX: 'Linux',
-    WINDOWS: 'Windows'}
+def is_linux():
+    """ Return True only if current platform is Linux. """
+    return sys.platform.startswith('linux')
 
 
-def current_platform():
-    """ Return ID of current platform. """
+def is_macos():
+    """ Return True only if current platform is macOS. """
+    return sys.platform == 'darwin'
+
+
+def is_windows():
+    """ Return True only if current platform is Windows. """
+    return sys.platform in ['win32', 'cygwin']
+
+
+# Map OS IDs to evaluation function and OS labels.
+OS_DEFINITIONS = {
+    MACOS: ('macOS', is_macos),
+    LINUX: ('Linux', is_linux),
+    WINDOWS: ('Windows', is_windows)}
+
+
+def current_os():
+    """ Return ID and label of current OS. """
     platform_id = sys.platform
-    logger.debug("Current platform: {} (ID: {}).".format(
-        platform_label(platform_id), platform_id))
-    return platform_id
+    logger.debug("Raw platform ID: {}.".format(platform_id))
+    for os_id, (os_label, eval_func) in OS_DEFINITIONS.items():
+        if eval_func():
+            return os_id, os_label
+    raise SystemError("Unrecognized {} platform.".format(platform_id))
 
 
-def platform_label(platform_id):
+def os_label(os_id):
     """ Return platform label for user-friendly output. """
-    return OS_LABELS.get(platform_id, 'unrecognized')
+    return OS_DEFINITIONS[os_id][0]

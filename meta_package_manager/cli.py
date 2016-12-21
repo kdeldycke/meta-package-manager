@@ -32,7 +32,7 @@ from tabulate import tabulate
 from . import __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
-from .platform import platform_label
+from .platform import os_label
 
 # Output rendering modes. Sorted from most machine-readable to fanciest
 # human-readable.
@@ -115,11 +115,11 @@ def managers(ctx):
     table = []
     for manager_id, manager in target_managers.items():
 
-        # Build up the platform column content.
-        platform_infos = u'✅' if manager.supported else u'❌'
+        # Build up the OS column content.
+        os_infos = u'✅' if manager.supported else u'❌'
         if not manager.supported:
-            platform_infos += "  {} only".format(', '.join(sorted([
-                platform_label(os_id) for os_id in manager.platforms])))
+            os_infos += "  {} only".format(', '.join(sorted([
+                os_label(os_id) for os_id in manager.platforms])))
 
         # Build up the CLI path column content.
         cli_infos = u'✅' if manager.exists else u'❌'
@@ -137,7 +137,7 @@ def managers(ctx):
         table.append([
             manager.name,
             manager_id,
-            platform_infos,
+            os_infos,
             cli_infos,
             u'✅' if manager.executable else '',
             version_infos])

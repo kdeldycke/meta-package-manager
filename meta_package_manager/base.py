@@ -34,7 +34,7 @@ from packaging.version import parse as parse_version
 
 from . import logger
 from .bitbar import run
-from .platform import current_platform
+from .platform import current_os
 
 # Rendering format of CLI in JSON fields.
 CLI_FORMATS = frozenset(['plain', 'fragments', 'bitbar'])
@@ -122,7 +122,7 @@ class PackageManager(object):
     @cachedproperty
     def supported(self):
         """ Is the package manager supported on that platform? """
-        return True if current_platform() in self.platforms else False
+        return current_os()[0] in self.platforms
 
     @cachedproperty
     def exists(self):

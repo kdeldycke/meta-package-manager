@@ -28,7 +28,7 @@ from __future__ import (
 import unittest
 
 from ..managers import pool
-from ..platform import OS_LABELS, PY3
+from ..platform import OS_DEFINITIONS, PY3
 
 if PY3:
     basestring = (str, bytes)
@@ -57,7 +57,7 @@ class TestManagerDefinitions(unittest.TestCase):
         """ Check that definitions returns platforms with a registered label.
         """
         for manager in pool().values():
-            self.assertTrue(manager.platforms.issubset(OS_LABELS))
+            self.assertTrue(manager.platforms.issubset(OS_DEFINITIONS))
 
     def test_cli_path_type(self):
         """ Check that definitions returns the CLI path as a string. """

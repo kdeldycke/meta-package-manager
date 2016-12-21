@@ -30,7 +30,7 @@ import unittest
 
 from .. import __version__
 from ..platform import PY3, PY_VERSION
-from .case import CLITestCase, destructive_tests
+from .case import CLITestCase, skip_destructive
 
 
 if PY3:
@@ -273,7 +273,7 @@ class TestCLIUpgrade(CLITestCase):
         self.assertNotIn("pip", result.output)
         self.assertNotIn("gem", result.output)
 
-    @unittest.skipUnless(destructive_tests, "Destructive tests not allowed.")
+    @skip_destructive()
     def test_full_upgrade(self):
         result = self.invoke('upgrade')
         self.assertEqual(result.exit_code, 0)

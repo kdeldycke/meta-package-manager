@@ -30,8 +30,17 @@ from ..bitbar import run
 from ..cli import cli
 
 
-# Are we allowed to run destructive unittests in this environment?
-destructive_tests = os.environ.get('DESTRUCTIVE_TESTS', False) == 1
+def skip_destructive():
+    """ Decorator to skip a test unless destructive mode is allowed.
+
+    Destructive mode is activated by the presence of a ``DESTRUCTIVE_TESTS``
+    environment variable set to ``True``.
+    """
+    destructive_tests = os.environ.get('DESTRUCTIVE_TESTS', False) in [True, 1]
+    if destructive_tests:
+        # Destructive mode is ON. Let the test run anyway.
+        return lambda func: func
+    return unittest.skip("Destructive tests not allowed.")
 
 
 class CLITestCase(unittest.TestCase):

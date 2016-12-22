@@ -7,6 +7,7 @@ Changelog
 * Rename ``supported`` property of managers to ``fresh``.
 * Allow restriction of package managers to a platform. Closes #7.
 * Include ``supported`` property in ``mpm managers`` sub-command.
+* Add optional sub-menu rendering in BitBar plugin. Closes #23.
 * Allow destructive unittests in Travis CI jobs.
 * Allow usage of ``pip2`` and ``pip3`` managers on Linux.
 * Print current platform in debug messages.

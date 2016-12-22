@@ -87,18 +87,21 @@ def print_error_header():
     echo("---")
 
 
-def print_error(message, manager="", submenu=""):
-    """ Print a formatted error line by line, in red. """
-    if manager:
-        manager = manager + ": "
+def print_error(message, manager_name=None, submenu=""):
+    """ Print a formatted error line by line.
+
+    A red, fixed-width font is used to preserve traceback and exception layout.
+    """
+    error_prefix = "{}: ".format(manager_name) if manager_name else ""
     for line in message.strip().split("\n"):
         echo(
             "{}{}{} | color=red font=Menlo size=12 trim=false "
-            "emojize=false".format(submenu, manager, line))
+            "emojize=false".format(submenu, error_prefix, line))
 
 
-def print_pkg_info(packages, submenu=""):
-    """ Print package information """
+def print_package_items(packages, submenu=""):
+    """ Print a menu entry for each outdated packages available for upgrade.
+    """
     for pkg_info in packages:
         echo(
             "{}{name} {installed_version} → {latest_version} | {upgrade_cli}"
@@ -106,7 +109,8 @@ def print_pkg_info(packages, submenu=""):
                 submenu, **pkg_info))
 
 
-def print_upgrade_all(manager, submenu=""):
+def print_upgrade_all_item(manager, submenu=""):
+    """ Print the menu entry to upgrade all outdated package of a manager. """
     if manager.get('upgrade_all_cli'):
         if recursive_menu:
             echo("-----")
@@ -172,8 +176,8 @@ def print_menu():
                 len(manager['packages']),
                 manager['name'],
                 's' if len(manager['packages']) != 1 else ''))
-            print_upgrade_all(manager, submenu)
-            print_pkg_info(manager['packages'], submenu)
+            print_upgrade_all_item(manager, submenu)
+            print_package_items(manager['packages'], submenu)
         else:
             # Alternate font font=NotoMono size=13
             echo("{:<16} {:>2} package{} | font=Menlo size=12 "
@@ -181,8 +185,8 @@ def print_menu():
                      manager['name'] + ':',
                      len(manager['packages']),
                      's' if len(manager['packages']) != 1 else ''))
-            print_pkg_info(manager['packages'], submenu)
-            print_upgrade_all(manager, submenu)
+            print_package_items(manager['packages'], submenu)
+            print_upgrade_all_item(manager, submenu)
 
 
 if __name__ == '__main__':

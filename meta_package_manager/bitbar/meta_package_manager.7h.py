@@ -32,6 +32,7 @@ recursive_menu = True
 # and somewhat different wording
 OldLayout = False
 
+
 def fix_environment():
     """ Tweak environment variable to find non-default system-wide binaries.
 
@@ -88,7 +89,7 @@ def print_error_header():
 def print_error(message, manager=""):
     """ Print a formatted error line by line, in red. """
     if manager:
-      manager = manager + ": "
+        manager = manager + ": "
     for line in message.strip().split("\n"):
         echo(
             "{}{} | color=red font=Menlo size=12 trim=false "
@@ -101,7 +102,7 @@ def print_pkg_info(packages, submenu=""):
         echo(
             "{}{name} {installed_version} → {latest_version} | {upgrade_cli}"
             " terminal=false refresh=true emojize=false".format(
-            submenu, **pkg_info))
+                submenu, **pkg_info))
 
 
 def print_upgrade_all(manager, submenu=""):
@@ -152,9 +153,9 @@ def print_menu():
 
     # Print a full detailed section for each manager.
     if recursive_menu:
-      submenu="--"
+        submenu = "--"
     else:
-      submenu=""
+        submenu = ""
 
     if recursive_menu:
         echo("---")
@@ -167,17 +168,18 @@ def print_menu():
         else:
             if OldLayout:
                 echo("{} outdated {} package{} | emojize=false".format(
-                  len(manager['packages']),
-                  manager['name'],
-                  's' if len(manager['packages']) != 1 else ''))
+                    len(manager['packages']),
+                    manager['name'],
+                    's' if len(manager['packages']) != 1 else ''))
                 print_upgrade_all(manager, submenu)
                 print_pkg_info(manager['packages'], submenu)
             else:
                 # Alternate font font=NotoMono size=13
-                echo("{:<16} {:>2} package{} | font=Menlo size=12 emojize=false".format(
-                  manager['name'] + ':',
-                  len(manager['packages']),
-                  's' if len(manager['packages']) != 1 else ''))
+                echo("{:<16} {:>2} package{} | font=Menlo size=12 "
+                    "emojize=false".format(
+                        manager['name'] + ':',
+                        len(manager['packages']),
+                        's' if len(manager['packages']) != 1 else ''))
                 print_pkg_info(manager['packages'], submenu)
                 print_upgrade_all(manager, submenu)
 

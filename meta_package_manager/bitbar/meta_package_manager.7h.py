@@ -26,11 +26,11 @@ from subprocess import PIPE, Popen
 PY2 = sys.version_info[0] == 2
 
 # Put package information in a submenu
-# Change to False to use the old flat menu structure
-recursive_menu = True
-# Change to True to use the "old" layout with Upgrade all before package info,
+# Change to True to use the new recursive menu structure
+recursive_menu = False
+# Change to False to use the "new" layout with Upgrade all after package info,
 # and somewhat different wording
-OldLayout = False
+old_layout = True
 
 
 def fix_environment():
@@ -166,7 +166,7 @@ def print_menu():
         if manager['error']:
             print_error(manager['error'], manager['name'])
         else:
-            if OldLayout:
+            if old_layout:
                 echo("{} outdated {} package{} | emojize=false".format(
                     len(manager['packages']),
                     manager['name'],

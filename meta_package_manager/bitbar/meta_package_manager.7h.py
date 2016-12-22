@@ -156,10 +156,7 @@ def print_menu():
         " ⚠️{}".format(total_errors) if total_errors else ""))
 
     # Print a full detailed section for each manager.
-    if recursive_menu:
-        submenu = "--"
-    else:
-        submenu = ""
+    submenu = "--" if recursive_menu else ""
 
     if recursive_menu:
         echo("---")

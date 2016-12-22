@@ -93,7 +93,7 @@ def print_error(message, manager="", submenu=""):
     for line in message.strip().split("\n"):
         echo(
             "{}{}{} | color=red font=Menlo size=12 trim=false "
-            "emojize=false".format(submenu,manager, line))
+            "emojize=false".format(submenu, manager, line))
 
 
 def print_pkg_info(packages, submenu=""):

@@ -25,6 +25,12 @@ from subprocess import PIPE, Popen
 
 PY2 = sys.version_info[0] == 2
 
+# Put package information in a submenu
+# Change to False to use the old flat menu structure
+recursive_menu = True
+# Change to True to use the "old" layout with Upgrade all before package info,
+# and somewhat different wording
+OldLayout = False
 
 def fix_environment():
     """ Tweak environment variable to find non-default system-wide binaries.
@@ -79,12 +85,31 @@ def print_error_header():
     echo("---")
 
 
-def print_error(message):
+def print_error(message, manager=""):
     """ Print a formatted error line by line, in red. """
+    if manager:
+      manager = manager + ": "
     for line in message.strip().split("\n"):
         echo(
-            "{} | color=red font=Menlo size=10 trim=false "
-            "emojize=false".format(line))
+            "{}{} | color=red font=Menlo size=12 trim=false "
+            "emojize=false".format(manager, line))
+
+
+def print_pkg_info(packages, submenu=""):
+    """ Print package information """
+    for pkg_info in packages:
+        echo(
+            "{}{name} {installed_version} → {latest_version} | {upgrade_cli}"
+            " terminal=false refresh=true emojize=false".format(
+            submenu, **pkg_info))
+
+
+def print_upgrade_all(manager, submenu=""):
+    if manager.get('upgrade_all_cli'):
+        if recursive_menu:
+            echo("-----")
+        echo("{}Upgrade all | {} terminal=false refresh=true".format(
+            submenu, manager['upgrade_all_cli']))
 
 
 def print_menu():
@@ -126,30 +151,36 @@ def print_menu():
         " ⚠️{}".format(total_errors) if total_errors else ""))
 
     # Print a full detailed section for each manager.
-    echo("---")
-    for manager in managers:
+    if recursive_menu:
+      submenu="--"
+    else:
+      submenu=""
 
+    if recursive_menu:
+        echo("---")
+    for manager in managers:
+        if not recursive_menu:
+            echo("---")
 
         if manager['error']:
-          # for line in manager['error'].strip().split("\n"):
-          #     echo("{:<23} {} | color=red font=Menlo size=10 trim=false emojize=false".format(manager.name + ':', line))
-          print_error(manager['error'])
+            print_error(manager['error'], manager['name'])
         else:
-          echo("{:<23} {:>2} package{} | size=13 font=NotoMono emojize=false".format(
-              manager['name'] + ':',
-              len(manager['packages']),
-              's' if len(manager['packages']) != 1 else ''))
+            if OldLayout:
+                echo("{} outdated {} package{} | emojize=false".format(
+                  len(manager['packages']),
+                  manager['name'],
+                  's' if len(manager['packages']) != 1 else ''))
+                print_upgrade_all(manager, submenu)
+                print_pkg_info(manager['packages'], submenu)
+            else:
+                # Alternate font font=NotoMono size=13
+                echo("{:<16} {:>2} package{} | font=Menlo size=12 emojize=false".format(
+                  manager['name'] + ':',
+                  len(manager['packages']),
+                  's' if len(manager['packages']) != 1 else ''))
+                print_pkg_info(manager['packages'], submenu)
+                print_upgrade_all(manager, submenu)
 
-        for pkg_info in manager['packages']:
-            echo(
-                "--{name} {installed_version} → {latest_version} | {upgrade_cli}"
-                " terminal=false refresh=true emojize=false".format(
-                    **pkg_info))
-
-        if manager.get('upgrade_all_cli'):
-            echo("-----")
-            echo("--Upgrade all | {} terminal=false refresh=true".format(
-                manager['upgrade_all_cli']))
 
 if __name__ == '__main__':
     fix_environment()

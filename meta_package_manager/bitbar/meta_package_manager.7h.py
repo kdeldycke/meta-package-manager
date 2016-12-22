@@ -176,8 +176,6 @@ def print_menu():
                 len(manager['packages']),
                 manager['name'],
                 's' if len(manager['packages']) != 1 else ''))
-            print_upgrade_all_item(manager, submenu)
-            print_package_items(manager['packages'], submenu)
         else:
             # Alternate font font=NotoMono size=13
             echo("{:<16} {:>2} package{} | font=Menlo size=12 "
@@ -185,8 +183,9 @@ def print_menu():
                      manager['name'] + ':',
                      len(manager['packages']),
                      's' if len(manager['packages']) != 1 else ''))
-            print_package_items(manager['packages'], submenu)
-            print_upgrade_all_item(manager, submenu)
+
+        print_package_items(manager['packages'], submenu)
+        print_upgrade_all_item(manager, submenu)
 
 
 if __name__ == '__main__':

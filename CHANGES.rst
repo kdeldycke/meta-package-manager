@@ -8,6 +8,8 @@ Changelog
 * Allow restriction of package managers to a platform. Closes #7.
 * Include ``supported`` property in ``mpm managers`` sub-command.
 * Add optional sub-menu rendering in BitBar plugin. Closes #23.
+* Move ``Upgrade all`` menu entry to the bottom of earch section in BitBar
+  plugin.
 * Allow destructive unittests in Travis CI jobs.
 * Allow usage of ``pip2`` and ``pip3`` managers on Linux.
 * Print current platform in debug messages.

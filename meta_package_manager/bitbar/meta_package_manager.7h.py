@@ -25,11 +25,12 @@ from subprocess import PIPE, Popen
 
 PY2 = sys.version_info[0] == 2
 
-# Put package information in a submenu
-# Change to True to use the new recursive menu structure
+# Put all package information in a submenu. Change to ``True`` to use the new
+# recursive menu structure.
 recursive_menu = False
-# Change to False to use the "new" layout with Upgrade all after package info,
-# and somewhat different wording
+
+# Change to ``False`` to use an alternative layout with "Upgrade all" menu
+# entry placed after outdated package entries.
 old_layout = True
 
 
@@ -120,6 +121,8 @@ def print_menu():
     """
     # Search for generic mpm CLI on system.
     code, _, error = run('mpm')
+    # mpm CLI hasn't been found on the system. Propose to the user to install
+    # or upgrade it.
     if code or error:
         print_error_header()
         print_error(error)
@@ -136,6 +139,7 @@ def print_menu():
     _, output, error = run(
         'mpm', '--output-format', 'json', 'outdated', '--cli-format', 'bitbar')
 
+    # Bail-out immediately on errors related to mpm self-execution.
     if error:
         print_error_header()
         print_error(error)

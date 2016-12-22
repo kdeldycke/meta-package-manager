@@ -176,10 +176,10 @@ def print_menu():
             else:
                 # Alternate font font=NotoMono size=13
                 echo("{:<16} {:>2} package{} | font=Menlo size=12 "
-                    "emojize=false".format(
-                        manager['name'] + ':',
-                        len(manager['packages']),
-                        's' if len(manager['packages']) != 1 else ''))
+                     "emojize=false".format(
+                         manager['name'] + ':',
+                         len(manager['packages']),
+                         's' if len(manager['packages']) != 1 else ''))
                 print_pkg_info(manager['packages'], submenu)
                 print_upgrade_all(manager, submenu)
 

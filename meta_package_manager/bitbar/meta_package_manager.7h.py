@@ -152,7 +152,7 @@ def print_menu():
 
     # Print menu bar icon with number of available upgrades.
     total_outdated = sum([len(m['packages']) for m in managers])
-    total_errors = len([True for m in managers if m['error']])
+    total_errors = len([True for m in managers if m.get('error', None)])
     echo("↑{}{} | dropdown=false".format(
         total_outdated,
         " ⚠️{}".format(total_errors) if total_errors else ""))
@@ -172,7 +172,7 @@ def print_menu():
         if FLAT_LAYOUT:
             echo("---")
 
-        if manager['error']:
+        if manager.get('error', None):
             print_error(manager['error'], manager['name'], submenu)
 
         if FLAT_LAYOUT:

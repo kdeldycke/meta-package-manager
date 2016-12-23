@@ -29,7 +29,7 @@ PY2 = sys.version_info[0] == 2
 # Set to ``False`` to replace the default flat layout with an alternative
 # structure where all upgrade actions are put into submenus, one for each
 # manager.
-FLAT_LAYOUT = False
+FLAT_LAYOUT = True
 
 
 def fix_environment():

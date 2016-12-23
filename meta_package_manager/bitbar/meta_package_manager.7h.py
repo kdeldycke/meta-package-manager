@@ -161,7 +161,13 @@ def print_menu():
     submenu = "--" if not FLAT_LAYOUT else ""
 
     if not FLAT_LAYOUT:
+        # Compute maximal manager's name length.
+        label_max_length = max([len(manager['name']) for manager in managers])
+        max_outdated = max([len(manager['packages']) for manager in managers])
+
+    if not FLAT_LAYOUT:
         echo("---")
+
     for manager in managers:
         if FLAT_LAYOUT:
             echo("---")
@@ -170,17 +176,21 @@ def print_menu():
             print_error(manager['error'], manager['name'], submenu)
 
         if FLAT_LAYOUT:
-            echo("{} outdated {} package{} | emojize=false".format(
+            echo("{0} outdated {1} package{2} | emojize=false".format(
                 len(manager['packages']),
                 manager['name'],
                 's' if len(manager['packages']) != 1 else ''))
         else:
-            # Alternate font font=NotoMono size=13
-            echo("{:<16} {:>2} package{} | font=Menlo size=12 "
-                 "emojize=false".format(
-                     manager['name'] + ':',
-                     len(manager['packages']),
-                     's' if len(manager['packages']) != 1 else ''))
+            # Non-flat layout use a compact table-like rendering of manager
+            # summary.
+            echo(
+                "{0:<{max_length}} {1:>{max_outdated}} package{2} | "
+                "font=Menlo size=12 emojize=false".format(
+                    manager['name'] + ':',
+                    len(manager['packages']),
+                    's' if len(manager['packages']) != 1 else '',
+                    max_length=label_max_length + 1,
+                    max_outdated=len(str(max_outdated))))
 
         print_package_items(manager['packages'], submenu)
         print_upgrade_all_item(manager, submenu)

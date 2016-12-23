@@ -162,8 +162,8 @@ def print_menu():
 
     if not FLAT_LAYOUT:
         # Compute maximal manager's name length.
-        label_max_length = max([len(manager['name']) for manager in managers])
-        max_outdated = max([len(manager['packages']) for manager in managers])
+        label_max_length = max([len(m['name']) for m in managers])
+        max_outdated = max([len(m['packages']) for m in managers])
 
     if not FLAT_LAYOUT:
         echo("---")

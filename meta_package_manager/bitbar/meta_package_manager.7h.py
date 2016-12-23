@@ -25,13 +25,11 @@ from subprocess import PIPE, Popen
 
 PY2 = sys.version_info[0] == 2
 
-# Put all package information in a submenu. Change to ``True`` to use the new
-# recursive menu structure.
-recursive_menu = False
 
-# Change to ``False`` to use an alternative layout with "Upgrade all" menu
-# entry placed after outdated package entries.
-old_layout = True
+# Set to ``False`` to replace the default flat layout with an alternative
+# structure where all upgrade actions are put into submenus, one for each
+# manager.
+FLAT_LAYOUT = False
 
 
 def fix_environment():
@@ -112,7 +110,7 @@ def print_package_items(packages, submenu=""):
 def print_upgrade_all_item(manager, submenu=""):
     """ Print the menu entry to upgrade all outdated package of a manager. """
     if manager.get('upgrade_all_cli'):
-        if recursive_menu:
+        if not FLAT_LAYOUT:
             echo("-----")
         echo("{}Upgrade all | {} terminal=false refresh=true".format(
             submenu, manager['upgrade_all_cli']))
@@ -160,18 +158,18 @@ def print_menu():
         " ⚠️{}".format(total_errors) if total_errors else ""))
 
     # Print a full detailed section for each manager.
-    submenu = "--" if recursive_menu else ""
+    submenu = "--" if not FLAT_LAYOUT else ""
 
-    if recursive_menu:
+    if not FLAT_LAYOUT:
         echo("---")
     for manager in managers:
-        if not recursive_menu:
+        if FLAT_LAYOUT:
             echo("---")
 
         if manager['error']:
             print_error(manager['error'], manager['name'], submenu)
 
-        if old_layout:
+        if FLAT_LAYOUT:
             echo("{} outdated {} package{} | emojize=false".format(
                 len(manager['packages']),
                 manager['name'],

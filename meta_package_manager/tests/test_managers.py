@@ -89,16 +89,16 @@ class TestManagerPlatform(unittest.TestCase):
 
     @unless_macos()
     def test_macos(self):
-        supported_managers = [m.id for m in pool().values() if m.supported]
-        self.assertItemsEqual(supported_managers, [
-            'apm', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2', 'pip3'])
+        supported_managers = {m.id for m in pool().values() if m.supported}
+        self.assertSetEqual(supported_managers, set([
+            'apm', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2', 'pip3']))
 
     @unless_linux()
     def test_linux(self):
-        supported_managers = [m.id for m in pool().values() if m.supported]
-        self.assertItemsEqual(supported_managers, ['pip2', 'pip3'])
+        supported_managers = {m.id for m in pool().values() if m.supported}
+        self.assertSetEqual(supported_managers, set(['pip2', 'pip3']))
 
     @unless_windows()
     def test_windows(self):
-        supported_managers = [m.id for m in pool().values() if m.supported]
-        self.assertItemsEqual(supported_managers, [])
+        supported_managers = {m.id for m in pool().values() if m.supported}
+        self.assertSetEqual(supported_managers, set())

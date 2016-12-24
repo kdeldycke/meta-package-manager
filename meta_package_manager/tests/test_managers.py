@@ -29,6 +29,7 @@ import unittest
 
 from ..managers import pool
 from ..platform import OS_DEFINITIONS, PY3
+from .case import unless_linux, unless_macos, unless_windows
 
 if PY3:
     basestring = (str, bytes)
@@ -82,3 +83,22 @@ class TestManagerDefinitions(unittest.TestCase):
                 self.assertIsInstance(excpt, NotImplementedError)
             else:
                 self.assertIsInstance(result, list)
+
+
+class TestManagerPlatform(unittest.TestCase):
+
+    @unless_macos()
+    def test_macos(self):
+        supported_managers = [m.id for m in pool().values() if m.supported]
+        self.assertItemsEqual(supported_managers, [
+            'apm', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2', 'pip3'])
+
+    @unless_linux()
+    def test_linux(self):
+        supported_managers = [m.id for m in pool().values() if m.supported]
+        self.assertItemsEqual(supported_managers, ['pip2', 'pip3'])
+
+    @unless_windows()
+    def test_windows(self):
+        supported_managers = [m.id for m in pool().values() if m.supported]
+        self.assertItemsEqual(supported_managers, [])

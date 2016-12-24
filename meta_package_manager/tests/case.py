@@ -28,6 +28,7 @@ from click.testing import CliRunner
 
 from ..bitbar import run
 from ..cli import cli
+from ..platform import is_linux, is_macos, is_windows
 
 
 def skip_destructive():
@@ -41,6 +42,30 @@ def skip_destructive():
         # Destructive mode is ON. Let the test run anyway.
         return lambda func: func
     return unittest.skip("Destructive tests not allowed.")
+
+
+def unless_linux():
+    """ Decorator to skip a test unless it is run on a Linux system. """
+    if is_linux():
+        # Run the test.
+        return lambda func: func
+    return unittest.skip("Test requires Linux.")
+
+
+def unless_macos():
+    """ Decorator to skip a test unless it is run on a macOS system. """
+    if is_macos():
+        # Run the test.
+        return lambda func: func
+    return unittest.skip("Test requires macOS.")
+
+
+def unless_windows():
+    """ Decorator to skip a test unless it is run on a Windows system. """
+    if is_windows():
+        # Run the test.
+        return lambda func: func
+    return unittest.skip("Test requires Windows.")
 
 
 class CLITestCase(unittest.TestCase):

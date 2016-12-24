@@ -85,16 +85,15 @@ def print_error_header():
     echo("---")
 
 
-def print_error(message, manager_name=None, submenu=""):
+def print_error(message, submenu=""):
     """ Print a formatted error line by line.
 
     A red, fixed-width font is used to preserve traceback and exception layout.
     """
-    error_prefix = "{}: ".format(manager_name) if manager_name else ""
     for line in message.strip().split("\n"):
         echo(
-            "{}{}{} | color=red font=Menlo size=12 trim=false "
-            "emojize=false".format(submenu, error_prefix, line))
+            "{}{} | color=red font=Menlo size=12 trim=false emojize=false"
+            "".format(submenu, line))
 
 
 def print_package_items(packages, submenu=""):
@@ -172,28 +171,35 @@ def print_menu():
         if FLAT_LAYOUT:
             echo("---")
 
-        if manager.get('error', None):
-            print_error(manager['error'], manager['name'], submenu)
+        package_label = "package{}".format(
+            's' if len(manager['packages']) != 1 else '')
 
         if FLAT_LAYOUT:
-            echo("{0} outdated {1} package{2} | emojize=false".format(
+            echo("{0} outdated {1} {2} | emojize=false".format(
                 len(manager['packages']),
                 manager['name'],
-                's' if len(manager['packages']) != 1 else ''))
+                package_label))
+
         else:
             # Non-flat layout use a compact table-like rendering of manager
             # summary.
             echo(
-                "{0:<{max_length}} {1:>{max_outdated}} package{2} | "
+                "{0:<{max_length}} {1:>{max_outdated}} {2:<8} {3} | "
                 "font=Menlo size=12 emojize=false".format(
                     manager['name'] + ':',
                     len(manager['packages']),
-                    's' if len(manager['packages']) != 1 else '',
+                    package_label,
+                    "⚠️" if manager.get('error', None) else '',
                     max_length=label_max_length + 1,
                     max_outdated=len(str(max_outdated))))
 
         print_package_items(manager['packages'], submenu)
+
         print_upgrade_all_item(manager, submenu)
+
+        if manager.get('error', None):
+            echo("---" if FLAT_LAYOUT else "-----")
+            print_error(manager['error'], submenu)
 
 
 if __name__ == '__main__':

@@ -7,6 +7,7 @@ Changelog
 .. note:: This version is not yet released and is under active development.
 
 * Add Sphinx documentation. Closes #24.
+* Add installation instructions. Closes #19.
 
 
 `2.2.0 (2016-12-25) <https://github.com/kdeldycke/meta-package-manager/compare/v2.1.1...v2.2.0>`_

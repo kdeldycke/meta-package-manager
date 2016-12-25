@@ -7,6 +7,7 @@ Contents
    :maxdepth: 2
 
    readme
+   install
    meta_package_manager
    development
    changelog

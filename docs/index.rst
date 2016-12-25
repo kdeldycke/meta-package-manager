@@ -10,6 +10,7 @@ Contents
    meta_package_manager
    development
    changelog
+   history
    license
 
 

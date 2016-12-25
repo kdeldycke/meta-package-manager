@@ -118,8 +118,8 @@ def long_description():
     return "\n\n\n".join([
         read_file('README.rst'),
         '\n'.join(changes),
-        "`Full changelog <https://github.com/kdeldycke/{}/blob/develop/"
-        "CHANGES.rst#changelog>`_.".format(PACKAGE_NAME),
+        "`Full changelog <https://{}.readthedocs.io/en/develop/changelog.html"
+        "#changelog>`_.".format(PACKAGE_NAME),
     ])
 
 

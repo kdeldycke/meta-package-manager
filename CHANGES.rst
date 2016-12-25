@@ -1,8 +1,8 @@
 Changelog
 =========
 
-`2.2.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v2.1.1...develop>`_
---------------------------------------------------------------------------------------------------
+`2.2.0 (2016-12-25) <https://github.com/kdeldycke/meta-package-manager/compare/v2.1.1...v2.2.0>`_
+-------------------------------------------------------------------------------------------------
 
 * Rename ``supported`` property of managers to ``fresh``.
 * Allow restriction of package managers to a platform. Closes #7.

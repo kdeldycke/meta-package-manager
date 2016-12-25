@@ -208,18 +208,3 @@ a bare BitBar-plugin depending on the library alone.
 In the mean time we have to temporarily manage duplicate code. But at least the
 whole project is kept in one centralized place, trying to tackle the same
 issues.
-
-
-Contributors
-------------
-
-* `Kevin Deldycke <https://github.com/kdeldycke>`_
-* `Brian Hartvigsen <https://github.com/tresni>`_
-
-
-License
--------
-
-This software is licensed under the `GNU General Public License v2 or later
-(GPLv2+)
-<https://github.com/kdeldycke/meta-package-manager/blob/master/LICENSE>`_.

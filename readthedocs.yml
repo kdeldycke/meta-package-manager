@@ -1,0 +1,10 @@
+# Source: http://docs.readthedocs.io/en/latest/yaml-config.html
+
+# Don't build any extra formats
+formats:
+    - none
+
+python:
+    pip_install: true
+    extra_requirements:
+        - docs

@@ -1,0 +1,8 @@
+{% extends "!footer.html" %}
+{% block extrafooter %}
+    <div role="contentinfo">
+        <p>
+            {% trans copyright=copyright %}&copy; Copyright {{ copyright }}.{% endtrans %}
+        </p>
+    </div>
+{% endblock %}

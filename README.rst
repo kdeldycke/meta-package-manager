@@ -6,7 +6,7 @@ upgrades from several package managers.
 
 Stable release: |release| |versions| |license| |dependencies|
 
-Development: |build| |coverage| |quality|
+Development: |build| |docs| |coverage| |quality|
 
 .. |release| image:: https://img.shields.io/pypi/v/meta-package-manager.svg
     :target: https://pypi.python.org/pypi/meta-package-manager
@@ -23,6 +23,9 @@ Development: |build| |coverage| |quality|
 .. |build| image:: https://img.shields.io/travis/kdeldycke/meta-package-manager/develop.svg
     :target: https://travis-ci.org/kdeldycke/meta-package-manager
     :alt: Unit-tests status
+.. |docs| image:: https://readthedocs.org/projects/meta-package-manager/badge/?version=develop
+    :target: http://meta-package-manager.readthedocs.io/en/develop/
+    :alt: Documentation Status
 .. |coverage| image:: https://codecov.io/github/kdeldycke/meta-package-manager/coverage.svg?branch=develop
     :target: https://codecov.io/github/kdeldycke/meta-package-manager?branch=develop
     :alt: Coverage Status

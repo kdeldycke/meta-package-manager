@@ -198,12 +198,12 @@ def print_menu():
             # Non-flat layout use a compact table-like rendering of manager
             # summary.
             echo(
-                "{0:<{max_length}} {1:>{max_outdated}} {2:<8} {3} | "
+                "{error}{0:<{max_length}} {1:>{max_outdated}} {2:<8} | "
                 "{f_summary} emojize=false".format(
                     manager['name'] + ':',
                     len(manager['packages']),
                     package_label,
-                    "⚠️" if manager.get('error', None) else '',
+                    error="⚠️ " if manager.get('error', None) else '',
                     max_length=label_max_length + 1,
                     max_outdated=len(str(max_outdated)),
                     f_summary=FONTS['summary']))

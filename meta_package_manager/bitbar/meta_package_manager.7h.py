@@ -36,14 +36,15 @@ FLAT_LAYOUT = True
 # An alternate "good looking" font is "font=NotoMono size=13" (not installed
 # on MacOS by default though) that matches the system font quite well.
 FONTS = {
-    'normal':  '',                             # Use default system font
-    'summary': '',                             # Package summary
-    'package': '',                             # Indiviual packages
-    'error':   'color=red font=Menlo size=12', # Errors
+    'normal':  '',                              # Use default system font
+    'summary': '',                              # Package summary
+    'package': '',                              # Indiviual packages
+    'error':   'color=red font=Menlo size=12',  # Errors
 }
 # Use a monospaced font when using submenus
 if not FLAT_LAYOUT:
-    FONTS['summary'] =  'font=Menlo size=12'
+    FONTS['summary'] = 'font=Menlo size=12'
+
 
 def fix_environment():
     """ Tweak environment variable to find non-default system-wide binaries.
@@ -106,7 +107,7 @@ def print_error(message, submenu=""):
     for line in message.strip().split("\n"):
         echo(
             "{}{} | {f_error} trim=false emojize=false"
-            "".format(submenu, line, f_error = FONTS['error']))
+            "".format(submenu, line, f_error=FONTS['error']))
 
 
 def print_package_items(packages, submenu=""):
@@ -124,8 +125,9 @@ def print_upgrade_all_item(manager, submenu=""):
     if manager.get('upgrade_all_cli'):
         if not FLAT_LAYOUT:
             echo("-----")
-        echo("{}Upgrade all | {} terminal=false refresh=true {f_normal}".format(
-            submenu, manager['upgrade_all_cli'], f_normal=FONTS['normal']))
+        echo("{}Upgrade all | {} terminal=false refresh=true "
+             "{f_normal}".format(
+                submenu, manager['upgrade_all_cli'], f_normal=FONTS['normal']))
 
 
 def print_menu():

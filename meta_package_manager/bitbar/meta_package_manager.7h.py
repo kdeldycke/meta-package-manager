@@ -10,6 +10,8 @@
 # <bitbar.abouturl>https://github.com/kdeldycke/meta-package-manager</bitbar.abouturl>
 
 """
+Bitbar plugin for meta-package-manager.
+
 Default update cycle is set to 7 hours so we have a chance to get user's
 attention once a day. Higher frequency might ruin the system as all checks are
 quite resource intensive, and Homebrew might hit GitHub's API calls quota.
@@ -33,7 +35,7 @@ FLAT_LAYOUT = True
 
 
 def fix_environment():
-    """ Tweak environment variable to find non-default system-wide binaries.
+    """Tweak environment variable to find non-default system-wide binaries.
 
     macOS does not put ``/usr/local/bin`` or ``/opt/local/bin`` in the ``PATH``
     for GUI apps. For some package managers this is a problem. Additioanlly
@@ -54,7 +56,7 @@ def fix_environment():
 
 
 def run(*args):
-    """ Run a shell command, return error code, output and error message. """
+    """Run a shell command, return error code, output and error message."""
     assert isinstance(args, tuple)
     try:
         process = Popen(args, stdout=PIPE, stderr=PIPE)
@@ -68,7 +70,7 @@ def run(*args):
 
 
 def echo(message):
-    """ Print message to the output.
+    """Print message to the output.
 
     Not unlike ``click.echo()``, this method is required to support
     discrepencies in the way strings are handled in different Python versions
@@ -80,13 +82,13 @@ def echo(message):
 
 
 def print_error_header():
-    """ Generic header for blockng error. """
+    """Generic header for blockng error."""
     echo("❌ | dropdown=false")
     echo("---")
 
 
 def print_error(message, submenu=""):
-    """ Print a formatted error line by line.
+    """Print a formatted error line by line.
 
     A red, fixed-width font is used to preserve traceback and exception layout.
     """
@@ -97,8 +99,7 @@ def print_error(message, submenu=""):
 
 
 def print_package_items(packages, submenu=""):
-    """ Print a menu entry for each outdated packages available for upgrade.
-    """
+    """Print a menu entry for each outdated packages available for upgrade."""
     for pkg_info in packages:
         echo(
             "{}{name} {installed_version} → {latest_version} | {upgrade_cli}"
@@ -107,7 +108,7 @@ def print_package_items(packages, submenu=""):
 
 
 def print_upgrade_all_item(manager, submenu=""):
-    """ Print the menu entry to upgrade all outdated package of a manager. """
+    """Print the menu entry to upgrade all outdated package of a manager."""
     if manager.get('upgrade_all_cli'):
         if not FLAT_LAYOUT:
             echo("-----")
@@ -116,7 +117,7 @@ def print_upgrade_all_item(manager, submenu=""):
 
 
 def print_menu():
-    """ Print menu structure using BitBar's plugin API.
+    """Print menu structure using BitBar's plugin API.
 
     See: https://github.com/matryer/bitbar#plugin-api
     """

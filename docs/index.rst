@@ -8,6 +8,7 @@ Contents
 
    readme
    install
+   falsehoods
    meta_package_manager
    development
    changelog

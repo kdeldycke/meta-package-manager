@@ -51,7 +51,8 @@ Package Managers
 24. Package managers `tracks installed versions
     <https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/homebrew.py#L219-L221>`_.
 25. Package managers `can track removed packages
-    <https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/homebrew.py#L239-L242>`_.
+    <https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/homebrew.py#L239-L242>`_
+    (see #17).
 26. Package managers are documented.
 27. A package manager has a version.
 28. A package manager check package integrity.

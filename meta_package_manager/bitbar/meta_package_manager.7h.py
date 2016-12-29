@@ -33,6 +33,7 @@ PY2 = sys.version_info[0] == 2
 # manager.
 FLAT_LAYOUT = True
 
+
 # Make it easier to change font, sizes and colors of the output
 # See https://github.com/matryer/bitbar#writing-plugins for details
 # An alternate "good looking" font is "font=NotoMono size=13" (not installed
@@ -126,8 +127,8 @@ def print_upgrade_all_item(manager, submenu=""):
     if manager.get('upgrade_all_cli'):
         if not FLAT_LAYOUT:
             echo("-----")
-        echo("{}Upgrade all | {} terminal=false refresh=true "
-             "{f_normal}".format(
+        echo(
+            "{}Upgrade all | {} terminal=false refresh=true {f_normal}".format(
                 submenu, manager['upgrade_all_cli'], f_normal=FONTS['normal']))
 
 

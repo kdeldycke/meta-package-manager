@@ -33,6 +33,20 @@ PY2 = sys.version_info[0] == 2
 # manager.
 FLAT_LAYOUT = True
 
+# Make it easier to change font, sizes and colors of the output
+# See https://github.com/matryer/bitbar#writing-plugins for details
+# An alternate "good looking" font is "font=NotoMono size=13" (not installed
+# on MacOS by default though) that matches the system font quite well.
+FONTS = {
+    'normal':  '',                              # Use default system font
+    'summary': '',                              # Package summary
+    'package': '',                              # Indiviual packages
+    'error':   'color=red font=Menlo size=12',  # Errors
+}
+# Use a monospaced font when using submenus
+if not FLAT_LAYOUT:
+    FONTS['summary'] = 'font=Menlo size=12'
+
 
 def fix_environment():
     """Tweak environment variable to find non-default system-wide binaries.
@@ -94,8 +108,8 @@ def print_error(message, submenu=""):
     """
     for line in message.strip().split("\n"):
         echo(
-            "{}{} | color=red font=Menlo size=12 trim=false emojize=false"
-            "".format(submenu, line))
+            "{}{} | {f_error} trim=false emojize=false"
+            "".format(submenu, line, f_error=FONTS['error']))
 
 
 def print_package_items(packages, submenu=""):
@@ -103,8 +117,8 @@ def print_package_items(packages, submenu=""):
     for pkg_info in packages:
         echo(
             "{}{name} {installed_version} → {latest_version} | {upgrade_cli}"
-            " terminal=false refresh=true emojize=false".format(
-                submenu, **pkg_info))
+            " terminal=false refresh=true {f_package} emojize=false".format(
+                submenu, f_package=FONTS['package'], **pkg_info))
 
 
 def print_upgrade_all_item(manager, submenu=""):
@@ -112,8 +126,9 @@ def print_upgrade_all_item(manager, submenu=""):
     if manager.get('upgrade_all_cli'):
         if not FLAT_LAYOUT:
             echo("-----")
-        echo("{}Upgrade all | {} terminal=false refresh=true".format(
-            submenu, manager['upgrade_all_cli']))
+        echo("{}Upgrade all | {} terminal=false refresh=true "
+             "{f_normal}".format(
+                submenu, manager['upgrade_all_cli'], f_normal=FONTS['normal']))
 
 
 def print_menu():
@@ -133,7 +148,7 @@ def print_menu():
             "Install / upgrade `mpm` CLI. | bash=pip param1=install "
             # TODO: Add minimal requirement on Python package.
             "param2=--upgrade param3=meta-package-manager terminal=true "
-            "refresh=true".format(error))
+            "refresh=true {f_error}".format(error, f_error=FONTS['error']))
         return
 
     # Fetch list of all outdated packages from all package manager available on
@@ -176,23 +191,25 @@ def print_menu():
             's' if len(manager['packages']) != 1 else '')
 
         if FLAT_LAYOUT:
-            echo("{0} outdated {1} {2} | emojize=false".format(
+            echo("{0} outdated {1} {2} | {f_summary} emojize=false".format(
                 len(manager['packages']),
                 manager['name'],
-                package_label))
+                package_label,
+                f_summary=FONTS['summary']))
 
         else:
             # Non-flat layout use a compact table-like rendering of manager
             # summary.
             echo(
-                "{0:<{max_length}} {1:>{max_outdated}} {2:<8} {3} | "
-                "font=Menlo size=12 emojize=false".format(
+                "{error}{0:<{max_length}} {1:>{max_outdated}} {2:<8} | "
+                "{f_summary} emojize=false".format(
                     manager['name'] + ':',
                     len(manager['packages']),
                     package_label,
-                    "⚠️" if manager.get('error', None) else '',
+                    error="⚠️ " if manager.get('error', None) else '',
                     max_length=label_max_length + 1,
-                    max_outdated=len(str(max_outdated))))
+                    max_outdated=len(str(max_outdated)),
+                    f_summary=FONTS['summary']))
 
         print_package_items(manager['packages'], submenu)
 

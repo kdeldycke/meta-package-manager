@@ -9,6 +9,7 @@ Changelog
 * Add Sphinx documentation. Closes #24.
 * Add installation instructions. Closes #19.
 * Add a list of *Falsehoods Programmers Believe About Package Managers*.
+* Add a `.mailmap` config file to consolidate contributor's identity.
 
 
 `2.2.0 (2016-12-25) <https://github.com/kdeldycke/meta-package-manager/compare/v2.1.1...v2.2.0>`_

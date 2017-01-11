@@ -206,6 +206,17 @@ class HomebrewCask(Homebrew):
             Übersicht
             ==> Artifacts
             Übersicht.app (app)
+
+            $ brew cask info xld
+            xld: 2016.10.07
+            http://tmkk.undo.jp/xld/index_e.html
+            /usr/local/Caskroom/xld/2016.10.07 (45 files, 221.6K)
+            From: https://github.com/(...)/blob/master/Casks/xld.rb
+            ==> Names
+            X Lossless Decoder
+            XLD
+            ==> Artifacts
+            XLD.app (app)
         """
         super(Homebrew, self).sync()
 

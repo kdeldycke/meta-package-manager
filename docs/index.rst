@@ -9,6 +9,7 @@ Contents
    readme
    install
    falsehoods
+   bitbar
    meta_package_manager
    development
    changelog

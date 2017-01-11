@@ -151,38 +151,3 @@ List all supported package managers and their status on current system:
     ├───────────────────┼──────┼─────────────────────┼─────────┼──────────────┼───────────┤
     │ Python 3's Pip    │ pip3 │ /usr/local/bin/pip3 │ ✅       │ ✅            │ ✅         │
     ╘═══════════════════╧══════╧═════════════════════╧═════════╧══════════════╧═══════════╛
-
-
-BitBar plugin
--------------
-
-A copy of the latest stable version of the Meta Package Manager BitBar plugin
-is always `available on BitBar website
-<https://getbitbar.com/plugins/Dev/MetaPackageManager/meta_package_manager.7h.py>`_
-and `plugin repository
-<https://github.com/matryer/bitbar-plugins/tree/master/Dev/MetaPackageManager>`_.
-
-.. image:: https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/screenshot.png
-    :alt: Bitbar plugin screenshot.
-    :align: left
-
-
-Current status
---------------
-
-Active development of the script is continuing here, in the exact same
-conditions as we were before moving the repository, like nothing happened.
-
-Each time we reach a releaseable script, we simply tag it and push a copy to
-the BitBar plugin repository. Plain and simple.
-
-At the same time we maintain a Python library on the side. The library is going
-to handle all idiosyncracies of supported package managers under a unified API.
-
-Once the library is good enough, we'll evaluate rebasing the original plugin on
-it, and lay out a plan for a painless transition, from the standalone script to
-a bare BitBar-plugin depending on the library alone.
-
-In the mean time we have to temporarily manage duplicate code. But at least the
-whole project is kept in one centralized place, trying to tackle the same
-issues.

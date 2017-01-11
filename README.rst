@@ -47,6 +47,10 @@ Features
 * List outdated packages.
 * Sync local package infos.
 * Upgrade all outdated packages.
+* Apply commands per-package manager or to all of them.
+* Provides a `BitBar plugin
+  <https://meta-package-manager.readthedocs.io/en/develop/bitbar.html>`_ for
+  friendly macOS integration.
 
 
 Supported package managers

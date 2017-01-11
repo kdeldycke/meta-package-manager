@@ -246,7 +246,14 @@ class HomebrewCask(Homebrew):
                 self.cli_path] + self.cli_args + ['info', package_id])
 
             latest_version = output.split('\n')[0].split(' ')[1]
-            package_name = output.split('==> Name\n')[1].split('\n')[0]
+
+            # Casks are allowed to provide several names. See:
+            # https://github.com/kdeldycke/meta-package-manager/issues/26 .
+            package_names = re.search(
+                '==> Names?(.*?)(==>|$)', output, re.DOTALL).groups(
+                    )[0].strip().split('\n')
+            # Choose the longuest name as canonical.
+            package_name = max(package_names)
 
             # Skip already installed packages.
             if version == latest_version:

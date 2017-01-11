@@ -44,6 +44,7 @@ Features
 ---------
 
 * Search and list all package managers on the system.
+* Supports macOS and Linux.
 * List outdated packages.
 * Sync local package infos.
 * Upgrade all outdated packages.

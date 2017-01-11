@@ -220,8 +220,10 @@ class HomebrewCask(Homebrew):
         """
         super(Homebrew, self).sync()
 
-        # `brew cask update` is just an alias to `brew update`.
-        self.run([self.cli_path] + self.cli_args + ['update'])
+        # `brew cask update` is just an alias to `brew update` and is
+        # deprecated. See:
+        # https://github.com/kdeldycke/meta-package-manager/issues/28
+        self.run([self.cli_path] + ['update'])
 
         # List installed packages.
         output = self.run(

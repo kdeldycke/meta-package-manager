@@ -61,22 +61,22 @@ Package Managers
 31. Package managers `can upgrade all outdated packages
     <https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/pip.py#L94-L97>`_.
 32. Package managers are forbidden to upgrade other package managers.
-34. Packages are only managed by one package manager.
-35. Installing a package doesn't require a reboot.
-36. Package manager `output is consistent
+33. Packages are only managed by one package manager.
+34. Installing a package doesn't require a reboot.
+35. Package manager `output is consistent
     <https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/mas.py#L42-L44>`_.
-37. A package manager can upgrade a package installed by the user.
-38. All `users on the system have access to the package manager
+36. A package manager can upgrade a package installed by the user.
+37. All `users on the system have access to the package manager
     <https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/gem.py#L95-L100>`_.
-39. Package managers do not remove user data.
-40. Package managers `can bootstrap themselves
+38. Package managers do not remove user data.
+39. Package managers `can bootstrap themselves
     <https://github.com/Homebrew/brew/blob/master/docs/Common-Issues.md#brew-complains-about-absence-of-command-line-tools>`_.
-41. Package managers supports maultiple architectures.
-42. You only need one package manager.
+40. Package managers supports maultiple architectures.
+41. You only need one package manager.
 
 
 Meta
 ----
 
-43. Implementing a meta package manager `is not a futile pursuit
+42. Implementing a meta package manager `is not a futile pursuit
     <https://xkcd.com/1654/>`_.

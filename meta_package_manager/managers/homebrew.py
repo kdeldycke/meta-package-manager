@@ -228,6 +228,10 @@ class HomebrewCask(Homebrew):
         # List installed packages.
         output = self.run(
             [self.cli_path] + self.cli_args + ['list', '--versions'])
+        
+        # If there are no packages installed, then don't attempt to parse
+        if not output:
+            return
 
         # Inspect package one by one as `brew cask list` is not reliable. See:
         # https://github.com/caskroom/homebrew-cask/blob/master/doc

@@ -126,7 +126,7 @@ def long_description():
 setup(
     name=PACKAGE_NAME,
     version=version(),
-    description="Unified API to handle several package managers.",
+    description="CLI providing unifying interface to all package managers.",
     long_description=long_description(),
     keywords=[
         'CLI', 'package', 'pip', 'apm', 'npm', 'homebrew', 'brew', 'cask',

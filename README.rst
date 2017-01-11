@@ -1,8 +1,7 @@
 Meta Package Manager
 ====================
 
-A CLI and a `BitBar <https://getbitbar.com>`_ plugin to simplify software
-upgrades from several package managers.
+CLI providing unifying interface to all package managers.
 
 Stable release: |release| |versions| |license| |dependencies|
 

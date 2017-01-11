@@ -12,7 +12,7 @@ Changelog
 * Add a `.mailmap` config file to consolidate contributor's identity.
 * Make it easier to change the font, size and color of text in BitBar plugin.
 * Move error icon in BitBar plugin to the front of manager name.
-* Fix parsing of Cask packages with multiple names. Closes #26.
+* Fix parsing of ``cask`` packages with multiple names. Closes #26.
 * Move BitBar plugin documentation to dedicated page.
 * Fix exception when ``gem`` gives no output. Closes #29.
 

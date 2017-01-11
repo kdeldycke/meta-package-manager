@@ -78,6 +78,9 @@ class Gem(PackageManager):
         # Outdated does not require sudo privileges on homebrew or system.
         output = self.run([self.cli_path] + self.cli_args + ['outdated'])
 
+        if not output:
+            return
+
         regexp = re.compile(r'(\S+) \((\S+) < (\S+)\)')
         for package in output.split('\n'):
             if not package:

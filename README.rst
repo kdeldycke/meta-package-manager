@@ -24,7 +24,7 @@ Development: |build| |docs| |coverage| |quality|
     :target: https://travis-ci.org/kdeldycke/meta-package-manager
     :alt: Unit-tests status
 .. |docs| image:: https://readthedocs.org/projects/meta-package-manager/badge/?version=develop
-    :target: http://meta-package-manager.readthedocs.io/en/develop/
+    :target: https://meta-package-manager.readthedocs.io/en/develop/
     :alt: Documentation Status
 .. |coverage| image:: https://codecov.io/github/kdeldycke/meta-package-manager/coverage.svg?branch=develop
     :target: https://codecov.io/github/kdeldycke/meta-package-manager?branch=develop
@@ -33,7 +33,7 @@ Development: |build| |docs| |coverage| |quality|
     :target: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/?branch=develop
     :alt: Code Quality
 
-.. figure:: http://imgs.xkcd.com/comics/universal_install_script.png
+.. figure:: https://imgs.xkcd.com/comics/universal_install_script.png
     :alt: Obligatory XKCD.
     :align: right
 
@@ -67,7 +67,7 @@ Package manager  macOS  Linux  Windows  Version
 
 .. |brew| replace::
    Homebrew
-__ http://brew.sh
+__ https://brew.sh
 .. |cask| replace::
    Homebrew Cask
 __ https://caskroom.github.io

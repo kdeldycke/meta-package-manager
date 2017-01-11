@@ -66,7 +66,7 @@ def fix_environment():
         os.environ.get('PATH', '')])
 
     # Python 3 Surrogate Handling. See:
-    # http://click.pocoo.org/6/python3/#python-3-surrogate-handling
+    # https://click.pocoo.org/6/python3/#python-3-surrogate-handling
     os.environ['LC_ALL'] = os.environ['LANG'] = 'en_US.UTF-8'
 
 

@@ -1,4 +1,4 @@
-# Source: http://docs.readthedocs.io/en/latest/yaml-config.html
+# Source: https://docs.readthedocs.io/en/latest/yaml-config.html
 
 # Don't build any extra formats
 formats:

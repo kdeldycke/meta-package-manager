@@ -1,4 +1,4 @@
-# After changing this file, check it on: http://lint.travis-ci.org/
+# After changing this file, check it on: https://lint.travis-ci.org/
 language: python
 sudo: false
 

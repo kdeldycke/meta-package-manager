@@ -26,6 +26,7 @@ from __future__ import (
 )
 
 import json
+import re
 
 from boltons.cacheutils import cachedproperty
 from packaging.version import parse as parse_version

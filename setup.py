@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2016 Kevin Deldycke <kevin@deldycke.com>
-#                    and contributors.
+# Copyright (c) 2016-2017 Kevin Deldycke <kevin@deldycke.com>
+#                         and contributors.
 # All Rights Reserved.
 #
 # This program is Free Software; you can redistribute it and/or

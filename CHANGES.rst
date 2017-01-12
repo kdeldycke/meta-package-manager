@@ -14,7 +14,7 @@ Changelog
 * Move error icon in BitBar plugin to the front of manager name.
 * Fix parsing of ``cask`` packages with multiple names. Closes #26.
 * Move BitBar plugin documentation to dedicated page.
-* Fix exception when ``gem`` gives no output. Closes #29.
+* Fix exceptions when commands gives no output. Closes #29 and #31.
 * Fix ``cask update`` deprecation warning. Closes #28.
 
 

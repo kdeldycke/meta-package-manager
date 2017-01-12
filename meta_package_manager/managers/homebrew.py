@@ -228,8 +228,6 @@ class HomebrewCask(Homebrew):
         # List installed packages.
         output = self.run(
             [self.cli_path] + self.cli_args + ['list', '--versions'])
-        
-        # If there are no packages installed, then don't attempt to parse
         if not output:
             return
 

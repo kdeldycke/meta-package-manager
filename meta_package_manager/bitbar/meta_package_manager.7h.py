@@ -157,8 +157,9 @@ def print_menu():
     _, output, error = run(
         'mpm', '--output-format', 'json', 'outdated', '--cli-format', 'bitbar')
 
-    # Bail-out immediately on errors related to mpm self-execution.
-    if error:
+    # Bail-out immediately on errors related to mpm self-execution or if mpm is
+    # not able to produce any output.
+    if error or not output:
         print_error_header()
         print_error(error)
         return

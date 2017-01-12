@@ -71,7 +71,6 @@ class NPM(PackageManager):
         output = self.run([
             self.cli_path] + self.cli_args + [
                 '-g', '--progress=false', '--json', 'outdated'])
-
         if not output:
             return
 

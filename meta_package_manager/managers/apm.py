@@ -52,7 +52,6 @@ class APM(PackageManager):
         outdated_cmd = [self.cli_path] + self.cli_args + [
             'outdated', '--compatible', '--json']
         output = self.run(outdated_cmd)
-
         if not output:
             return
 

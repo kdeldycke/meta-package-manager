@@ -54,7 +54,6 @@ class MAS(PackageManager):
         super(MAS, self).sync()
 
         output = self.run([self.cli_path] + self.cli_args + ['outdated'])
-
         if not output:
             return
 

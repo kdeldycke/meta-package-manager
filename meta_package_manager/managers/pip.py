@@ -58,7 +58,6 @@ class Pip(PackageManager):
 
         output = self.run([
             self.cli_path] + self.cli_args + ['list', '--outdated'])
-
         if not output:
             return
 

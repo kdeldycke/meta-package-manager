@@ -16,6 +16,7 @@ Changelog
 * Move BitBar plugin documentation to dedicated page.
 * Fix exceptions when commands gives no output. Closes #29 and #31.
 * Fix ``cask update`` deprecation warning. Closes #28.
+* Activate unittests in Python 3.6.
 
 
 `2.2.0 (2016-12-25) <https://github.com/kdeldycke/meta-package-manager/compare/v2.1.1...v2.2.0>`_

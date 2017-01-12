@@ -18,6 +18,8 @@ matrix:
       env: PYTHON_DIST="3.4"
     - python: "3.5"
       env: PYTHON_DIST="3.5"
+    - python: "3.6"
+      env: PYTHON_DIST="3.6"
 
     # Xcode to macOS version matrix is available at:
     # https://docs.travis-ci.com/user/osx-ci-environment/#OS-X-Version
@@ -39,6 +41,10 @@ matrix:
       os: osx
       osx_image: xcode6.4
       env: PYTHON_DIST="3.5"
+    - language: generic
+      os: osx
+      osx_image: xcode6.4
+      env: PYTHON_DIST="3.6"
 
     # Xcode 8 is Mac OS X 10.11.
     - language: generic
@@ -57,6 +63,10 @@ matrix:
       os: osx
       osx_image: xcode8
       env: PYTHON_DIST="3.5"
+    - language: generic
+      os: osx
+      osx_image: xcode8
+      env: PYTHON_DIST="3.6"
 
     # Xcode 8.2 is macOS 10.12.
     - language: generic
@@ -75,6 +85,10 @@ matrix:
       os: osx
       osx_image: xcode8.2
       env: PYTHON_DIST="3.5"
+    - language: generic
+      os: osx
+      osx_image: xcode8.2
+      env: PYTHON_DIST="3.6"
 
 # Update the system and setup a fresh Anaconda ecosystem.
 before_install:

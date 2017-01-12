@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2016 Kevin Deldycke <kevin@deldycke.com>
+# Copyright (c) 2016 Kevin Deldycke <kevin@deldycke.com>
 #                    and contributors.
 # All Rights Reserved.
 #

@@ -92,6 +92,8 @@ matrix:
 
 # Update the system and setup a fresh Anaconda ecosystem.
 before_install:
+  # Show environment variables for debugging.
+  - env
   # Check default Python version installed.
   - python --version
   # Explicitly download the Miniconda dedicated to the Python version we

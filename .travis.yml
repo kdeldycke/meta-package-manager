@@ -135,6 +135,13 @@ before_script:
   - if [[ "$PYTHON_DIST" == "3.3"  ]] && [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       curl https://bootstrap.pypa.io/ez_setup.py -o - | python;
     fi
+  # Default Travis images came with a very outdated Homebrew requiring
+  # unconventional upgrade to work properly. This only concerns xcode6.4,
+  # xcode8 and xcode8.2 images. We still match on all macOS environments as we
+  # only have this variable available.
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew migrate cloog018;
+    fi
 
 script:
   # Launch unittests in destructive mode.

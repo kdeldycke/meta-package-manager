@@ -140,7 +140,7 @@ before_script:
   # xcode8 and xcode8.2 images. We still match on all macOS environments as we
   # only have this variable available.
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      brew doctor; brew update;
+      brew doctor; brew update; brew install gdbm pcre python;
     fi
 
 script:

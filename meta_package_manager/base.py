@@ -200,6 +200,14 @@ class PackageManager(object):
         logger.info('Sync {} package info...'.format(self.id))
 
     @property
+    def installed(self):
+        """ List packaages currently installed on the system.
+
+        Returns a list of dict with package ID, name and version.
+        """
+        raise NotImplementedError
+
+    @property
     def outdated(self):
         """ List currently installed packages having a new version available.
 

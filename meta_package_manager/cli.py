@@ -169,6 +169,86 @@ def sync(ctx):
         manager.sync()
 
 
+@cli.command(short_help='List installed packages.')
+@click.pass_context
+def list(ctx):
+    """ List installed packages installed on the system from all managers. """
+    target_managers = ctx.obj['target_managers']
+    rendering = ctx.obj['rendering']
+
+    # Build-up a global list of installed packages per manager.
+    installed = {}
+
+    for manager_id, manager in target_managers.items():
+
+        # Filters-out inactive managers.
+        if not manager.available:
+            logger.warning('Skip unavailable {} manager.'.format(manager_id))
+            continue
+
+        # Force a sync to get the freshest upgrades.
+        error = None
+        try:
+            manager.sync()
+        except CLIError as expt:
+            error = expt.error
+            logger.error(error)
+
+        packages = []
+        for info in manager.installed.values():
+            packages.append({
+                'name': info['name'],
+                'id': info['id'],
+                'installed_version': info['installed_version']})
+
+        installed[manager_id] = {
+            'id': manager_id,
+            'name': manager.name,
+            'packages': packages,
+            'error': error}
+
+    # Machine-friendly data rendering.
+    if rendering == 'json':
+        # JSON mode use echo to output data because the logger is disabled.
+        click.echo(json(installed))
+        return
+
+    # Human-friendly content rendering.
+    table = []
+    for manager_id, installed_pkg in installed.items():
+        table += [[
+            info['name'],
+            info['id'],
+            manager_id,
+            info['installed_version'] if info['installed_version'] else '?']
+            for info in installed_pkg['packages']]
+
+    def sort_method(line):
+        """ Force sorting of table.
+
+        By lower-cased package name and ID first, then manager ID.
+        """
+        return line[0].lower(), line[1].lower(), line[2]
+
+    # Sort and print table.
+    table = [['Package name', 'ID', 'Manager', 'Installed version']] + sorted(
+        table, key=sort_method)
+    logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
+    # Print statistics.
+    manager_stats = {
+        infos['id']: len(infos['packages']) for infos in installed.values()}
+    total_installed = sum(manager_stats.values())
+    per_manager_totals = ', '.join([
+        '{} from {}'.format(v, k)
+        for k, v in sorted(manager_stats.items()) if v])
+    if per_manager_totals:
+        per_manager_totals = ' ({})'.format(per_manager_totals)
+    logger.info('{} installed package{} found{}.'.format(
+        total_installed,
+        's' if total_installed > 1 else '',
+        per_manager_totals))
+
+
 @cli.command(short_help='List outdated packages.')
 @click.option(
     '-c', '--cli-format', type=click.Choice(CLI_FORMATS), default='plain',

@@ -41,6 +41,51 @@ class Pip(PackageManager):
         return self.run([self.cli_path, '--version']).split()[1]
 
     @cachedproperty
+    def installed(self):
+        """ List installed packages on the system.
+
+        Raw CLI output sample:
+
+            $ pip list
+            configparser (3.5.0)
+            docutils (0.13.1)
+            html5lib (0.9999999)
+            imagesize (0.7.1)
+            MarkupSafe (0.23)
+            mccabe (0.5.3)
+            meta-package-manager (2.4.0, /home/kev/venvs/meta-package-manager)
+            nose (1.3.7)
+        """
+        installed = {}
+
+        output = self.run([self.cli_path] + self.cli_args + ['list'])
+
+        if output:
+            regexp = re.compile(r'(\S+) \((.*)\)')
+            for outdated_pkg in output.split('\n'):
+                if not outdated_pkg:
+                    continue
+
+                matches = regexp.match(outdated_pkg)
+                if not matches:
+                    continue
+
+                package_id, installed_info = matches.groups()
+
+                # Extract current non-standard location if found.
+                installed_info = installed_info.split(',', 1)
+                version = installed_info[0]
+                special_location = " ({})".format(installed_info[1].strip()) \
+                    if len(installed_info) > 1 else ''
+
+                installed[package_id] = {
+                    'id': package_id,
+                    'name': package_id + special_location,
+                    'installed_version': version}
+
+        return installed
+
+    @cachedproperty
     def outdated(self):
         """ List outdated packages and their metadata.
 

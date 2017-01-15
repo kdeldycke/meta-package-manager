@@ -28,6 +28,7 @@ from __future__ import (
 import json
 
 from boltons.cacheutils import cachedproperty
+from boltons.iterutils import remap
 
 from ..base import PackageManager
 from ..platform import MACOS
@@ -45,6 +46,67 @@ class NPM(PackageManager):
     @cachedproperty
     def name(self):
         return "Node's npm"
+
+    @cachedproperty
+    def installed(self):
+        """ List installed packages on the system.
+
+        Raw CLI output sample:
+
+            $ npm list -g --json
+            {
+              "dependencies": {
+                "npm": {
+                  "version": "4.0.5",
+                  "dependencies": {
+                    "JSONStream": {
+                      "version": "1.2.1",
+                      "from": "JSONStream@latest",
+                      "resolved": "https://(...)/JSONStream-1.2.1.tgz",
+                      "dependencies": {
+                        "jsonparse": {
+                          "version": "1.2.0",
+                          "from": "jsonparse@>=1.2.0 <2.0.0",
+                          "resolved": "https://(...)/jsonparse-1.2.0.tgz"
+                        },
+                        "through": {
+                          "version": "2.3.8",
+                          "from": "through@>=2.2.7 <3.0.0",
+                          "resolved": "https://(...)/through-2.3.8.tgz"
+                        }
+                      }
+                    },
+                    "abbrev": {
+                      "version": "1.0.9",
+                      "from": "abbrev@1.0.9",
+                      "resolved": "https://(...)/abbrev-1.0.9.tgz"
+                    },
+                    "ansi-regex": {
+                      "version": "2.0.0",
+                      "from": "ansi-regex@2.0.0",
+                      "resolved": "https://(...)/ansi-regex-2.0.0.tgz"
+                    },
+            (...)
+        """
+        installed = {}
+
+        output = self.run([self.cli_path] + self.cli_args + [
+            '-g', '--json', 'list'])
+
+        if output:
+
+            def visit(path, key, value):
+                if key == 'version':
+                    package_id = path[-1]
+                    installed[package_id] = {
+                        'id': package_id,
+                        'name': package_id,
+                        'installed_version': value}
+                return True
+
+            remap(json.loads(output), visit=visit)
+
+        return installed
 
     @cachedproperty
     def outdated(self):

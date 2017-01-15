@@ -51,6 +51,39 @@ class MAS(PackageManager):
         return self.run([self.cli_path, 'version'])
 
     @cachedproperty
+    def installed(self):
+        """ List installed packages on the system.
+
+        Raw CLI output sample:
+
+            $ mas list
+            408981434 iMovie (10.1.4)
+            747648890 Telegram (2.30)
+        """
+        installed = {}
+
+        output = self.run([self.cli_path] + self.cli_args + ['list'])
+
+        if output:
+            regexp = re.compile(r'(\d+) (.*) \((\S+)\)$')
+            for application in output.split('\n'):
+                if not application:
+                    continue
+                package_id, package_name, installed_version = regexp.match(
+                    application).groups()
+                installed[package_id] = {
+                    'id': package_id,
+                    'name': package_name,
+                    # Normalize unknown version. See:
+                    # https://github.com/mas-cli/mas/commit
+                    # /1859eaedf49f6a1ebefe8c8d71ec653732674341
+                    'installed_version': (
+                        installed_version if installed_version != 'unknown'
+                        else None)}
+
+        return installed
+
+    @cachedproperty
     def outdated(self):
         outdated = {}
 

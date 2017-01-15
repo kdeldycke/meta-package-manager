@@ -47,6 +47,25 @@ class APM(PackageManager):
         return "Atom's apm"
 
     @cachedproperty
+    def installed(self):
+        """ List installed packages on the system. """
+        installed = {}
+
+        installed_cmd = [self.cli_path] + self.cli_args + ['list', '--json']
+        output = self.run(installed_cmd)
+
+        if output:
+            for package_list in json.loads(output).values():
+                for package in package_list:
+                    package_id = package['name']
+                    installed[package_id] = {
+                        'id': package_id,
+                        'name': package_id,
+                        'installed_version': package['version']}
+
+        return installed
+
+    @cachedproperty
     def outdated(self):
         outdated = {}
 

@@ -56,6 +56,46 @@ class Homebrew(PackageManager):
         self.run([self.cli_path] + self.cli_args + ['update'])
 
     @cachedproperty
+    def installed(self):
+        """ List installed packages on the system.
+
+        Shared by brew and cask.
+
+        Raw CLI output sample:
+
+            $ brew list --versions
+            ack 2.14
+            apg 2.2.3
+            audacity (!) 2.1.2
+            apple-gcc42 4.2.1-5666.3
+            atk 2.22.0
+            bash 4.4.5
+            bash-completion 1.3_1
+            boost 1.63.0
+            c-ares 1.12.0
+            quicklook-json latest
+        """
+        installed = {}
+
+        output = self.run(
+            [self.cli_path] + self.cli_args + ['list', '--versions'])
+
+        if output:
+            regexp = re.compile(r'(\S+)( \(!\))? (\S+)')
+            for pkg_info in output.split('\n'):
+                if not pkg_info:
+                    continue
+                package_id, removed, version = regexp.match(pkg_info).groups()
+                # TODO: Use `removed` to detect removed packages. See:
+                # https://github.com/kdeldycke/meta-package-manager/issues/17
+                installed[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'installed_version': version}
+
+        return installed
+
+    @cachedproperty
     def outdated(self):
         """ Fetch latest Homebrew formulas.
 

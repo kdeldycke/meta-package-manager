@@ -62,6 +62,48 @@ class Gem(PackageManager):
         return "Ruby Gems"
 
     @cachedproperty
+    def installed(self):
+        """ List installed packages on the system.
+
+        Raw CLI output sample:
+
+            $ gem list
+
+            *** LOCAL GEMS ***
+
+            bigdecimal (1.2.0)
+            CFPropertyList (2.2.8)
+            io-console (0.4.2)
+            json (1.7.7)
+            libxml-ruby (2.6.0)
+            minitest (4.3.2)
+            nokogiri (1.5.6)
+            psych (2.0.0)
+            rake (0.9.6)
+            rdoc (4.0.0)
+            sqlite3 (1.3.7)
+            test-unit (2.0.0.0)
+        """
+        installed = {}
+
+        # `list` operation does not require sudo privileges on homebrew or
+        # system.
+        output = self.run([self.cli_path] + self.cli_args + ['list'])
+
+        if output:
+            regexp = re.compile(r'(\S+) \((\S+)\)')
+            for package in output.split('\n'):
+                if not package or package.startswith('***'):
+                    continue
+                package_id, current_version = regexp.match(package).groups()
+                installed[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'installed_version': current_version}
+
+        return installed
+
+    @cachedproperty
     def outdated(self):
         """
         Sample of gem output:
@@ -76,7 +118,8 @@ class Gem(PackageManager):
         """
         outdated = {}
 
-        # Outdated does not require sudo privileges on homebrew or system.
+        # `outdated` operation does not require sudo privileges on homebrew or
+        # system.
         output = self.run([self.cli_path] + self.cli_args + ['outdated'])
 
         if output:

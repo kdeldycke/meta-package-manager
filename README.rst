@@ -44,6 +44,7 @@ Features
 
 * Search and list all package managers on the system.
 * Supports macOS and Linux.
+* List installed packages.
 * List outdated packages.
 * Sync local package infos.
 * Upgrade all outdated packages.
@@ -60,14 +61,14 @@ Supported package managers
 ================ ========== ====== ====== ======== ========= ========= =========== ============ ============= ============
 Package manager  Version    macOS  Linux  Windows  ``sync``  ``list``  ``search``  ``install``  ``outdated``  ``upgrade``
 ================ ========== ====== ====== ======== ========= ========= =========== ============ ============= ============
-|brew|__          >= 1.0.*   ✅                     ✅                                           ✅             ✅
-|cask|__          >= 1.0.*   ✅                     ✅                                           ✅             ✅
-|pip2|__                     ✅     ✅                                                           ✅             ✅
-|pip3|__                     ✅     ✅                                                           ✅             ✅
-|npm|__                      ✅                                                                  ✅             ✅
-|apm|__                      ✅                                                                  ✅             ✅
-|gem|__                      ✅                                                                  ✅             ✅
-|mas|__           >= 1.3.1   ✅                                                                  ✅             ✅
+|brew|__          >= 1.0.*   ✅                     ✅          ✅                               ✅             ✅
+|cask|__          >= 1.0.*   ✅                     ✅          ✅                               ✅             ✅
+|pip2|__                     ✅     ✅                          ✅                               ✅             ✅
+|pip3|__                     ✅     ✅                          ✅                               ✅             ✅
+|npm|__                      ✅                                 ✅                               ✅             ✅
+|apm|__                      ✅                                 ✅                               ✅             ✅
+|gem|__                      ✅                                 ✅                               ✅             ✅
+|mas|__           >= 1.3.1   ✅                                 ✅                               ✅             ✅
 ================ ========== ====== ====== ======== ========= ========= =========== ============ ============= ============
 
 .. |brew| replace::

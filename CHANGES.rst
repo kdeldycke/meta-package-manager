@@ -6,6 +6,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* Fix upgrade of ``mas`` packages. Closes #32.
 * Document BitBar plugin release process.
 * Colorize check-marks in CLI output.
 

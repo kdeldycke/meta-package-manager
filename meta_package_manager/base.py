@@ -203,8 +203,8 @@ class PackageManager(object):
     def outdated(self):
         """ List currently installed packages having a new version available.
 
-        Returns a list of dict with package name, current installed version and
-        latest upgradeable version.
+        Returns a list of dict with package ID, name, current installed version
+        and latest upgradeable version.
         """
         raise NotImplementedError
 

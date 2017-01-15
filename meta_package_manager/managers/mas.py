@@ -73,8 +73,11 @@ class MAS(PackageManager):
                     installed_version if installed_version != 'unknown'
                     else None)}
 
-    def upgrade_cli(self, package_id):
-        return [self.cli_path] + self.cli_args + ['upgrade', package_id]
+    def upgrade_cli(self, package_id=None):
+        cmd = [self.cli_path] + self.cli_args + ['upgrade']
+        if package_id:
+            cmd.append(package_id)
+        return cmd
 
     def upgrade_all_cli(self):
-        return [self.cli_path] + self.cli_args + ['upgrade']
+        return self.upgrade_cli()

@@ -1,10 +1,8 @@
 Changelog
 =========
 
-`2.3.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v2.2.0...develop>`_
---------------------------------------------------------------------------------------------------
-
-.. note:: This version is not yet released and is under active development.
+`2.3.0 (2017-12-15) <https://github.com/kdeldycke/meta-package-manager/compare/v2.2.0...v2.3.0>`_
+-------------------------------------------------------------------------------------------------
 
 * Add Sphinx documentation. Closes #24.
 * Add installation instructions. Closes #19.

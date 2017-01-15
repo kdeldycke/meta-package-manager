@@ -261,7 +261,8 @@ def outdated(ctx, cli_format):
         infos['id']: len(infos['packages']) for infos in outdated.values()}
     total_outdated = sum(manager_stats.values())
     per_manager_totals = ', '.join([
-        '{} from {}'.format(v, k) for k, v in sorted(manager_stats.items())])
+        '{} from {}'.format(v, k)
+        for k, v in sorted(manager_stats.items()) if v])
     if per_manager_totals:
         per_manager_totals = ' ({})'.format(per_manager_totals)
     logger.info('{} outdated package{} found{}.'.format(

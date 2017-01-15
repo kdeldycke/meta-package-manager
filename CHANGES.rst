@@ -7,6 +7,7 @@ Changelog
 .. note:: This version is not yet released and is under active development.
 
 * Document BitBar plugin release process.
+* Colorize check-marks in CLI output.
 
 
 `2.3.0 (2017-01-15) <https://github.com/kdeldycke/meta-package-manager/compare/v2.2.0...v2.3.0>`_

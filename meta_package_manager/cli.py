@@ -44,6 +44,11 @@ RENDERING_MODES = {
     'fancy': 'fancy_grid'}
 
 
+# Pre-rendered UI-elements.
+OK = click.style(u'✓', fg='green')
+KO = click.style(u'✘', fg='red')
+
+
 def json(data):
     """ Utility function to render data structure into pretty printed JSON. """
     return json_dumps(data, sort_keys=True, indent=4, separators=(',', ': '))
@@ -116,19 +121,19 @@ def managers(ctx):
     for manager_id, manager in target_managers.items():
 
         # Build up the OS column content.
-        os_infos = u'✓' if manager.supported else u'✘'
+        os_infos = OK if manager.supported else KO
         if not manager.supported:
             os_infos += "  {} only".format(', '.join(sorted([
                 os_label(os_id) for os_id in manager.platforms])))
 
         # Build up the CLI path column content.
-        cli_infos = u'✓' if manager.exists else u'✘'
+        cli_infos = OK if manager.exists else KO
         cli_infos += "  {}".format(manager.cli_path)
 
         # Build up the version column content.
         version_infos = ''
         if manager.executable:
-            version_infos = u'✓' if manager.fresh else u'✘'
+            version_infos = OK if manager.fresh else KO
             if manager.version:
                 version_infos += "  {}".format(manager.version_string)
                 if not manager.fresh:
@@ -139,7 +144,7 @@ def managers(ctx):
             manager_id,
             os_infos,
             cli_infos,
-            u'✓' if manager.executable else '',
+            OK if manager.executable else '',
             version_infos])
 
     table = [[

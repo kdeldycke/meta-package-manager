@@ -9,7 +9,7 @@ Changelog
 * No changes yet.
 
 
-`2.3.0 (2017-12-15) <https://github.com/kdeldycke/meta-package-manager/compare/v2.2.0...v2.3.0>`_
+`2.3.0 (2017-01-15) <https://github.com/kdeldycke/meta-package-manager/compare/v2.2.0...v2.3.0>`_
 -------------------------------------------------------------------------------------------------
 
 * Add Sphinx documentation. Closes #24.

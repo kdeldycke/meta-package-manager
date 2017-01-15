@@ -138,7 +138,7 @@ before_script:
   # Default Travis images came with an outdated Homebrew requiring
   # unconventional upgrade to work properly. This only concerns xcode6.4 and
   # xcode8 images.
-  - if [[ "$_system_version" != "10.12" ]]; then
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] && [[ "$_system_version" != "10.12" ]]; then
       brew reinstall cloog; brew link --overwrite cloog018;
     fi
 

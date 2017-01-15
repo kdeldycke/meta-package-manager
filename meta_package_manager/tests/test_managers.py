@@ -84,6 +84,12 @@ class TestManagerDefinitions(unittest.TestCase):
             else:
                 self.assertIsInstance(result, list)
 
+    def test_outdated_type(self):
+        """ Check that all outdated operations returns a dict. """
+        for manager in pool().values():
+            if manager.available:
+                self.assertIsInstance(manager.outdated, dict)
+
 
 class TestManagerPlatform(unittest.TestCase):
 

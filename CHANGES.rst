@@ -1,7 +1,7 @@
 Changelog
 =========
 
-`2.3.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v2.3.0...develop>`_
+`2.4.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v2.3.0...develop>`_
 --------------------------------------------------------------------------------------------------
 
 .. note:: This version is not yet released and is under active development.

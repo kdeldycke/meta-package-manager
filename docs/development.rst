@@ -92,7 +92,7 @@ Setup a development environment
 
 Check out latest development branch:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ git clone git@github.com:kdeldycke/meta-package-manager.git
     $ cd ./meta-package-manager
@@ -100,7 +100,7 @@ Check out latest development branch:
 
 Install package in editable mode with all development dependencies:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ pip install -e .[develop]
 
@@ -112,7 +112,7 @@ Unit-tests
 
 Install test dependencies and run unit-tests:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ pip install -e .[tests]
     $ nosetests
@@ -124,7 +124,7 @@ Coding style
 Run `isort <https://github.com/timothycrosley/isort>`_ utility to sort Python
 imports:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ pip install -e .[develop]
     $ isort --apply
@@ -132,7 +132,7 @@ imports:
 Then run `pycodestyle <https://pycodestyle.readthedocs.io>`_ and `Pylint
 <https://docs.pylint.org>`_ code style checks:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ pip install -e .[tests]
     $ pycodestyle meta_package_manager
@@ -145,7 +145,7 @@ Build documentation
 The documentation you're currently reading can be built locally with `Sphinx
 <https://www.sphinx-doc.org>`_:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ pip install -e .[docs]
     $ sphinx-apidoc -f -o ./docs .
@@ -154,7 +154,7 @@ The documentation you're currently reading can be built locally with `Sphinx
 For a smooth release, you also need to validate the rendering of package's long
 description on PyPi, as well as metadata:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ pip install -e .[develop]
     $ ./setup.py check -m -r -s
@@ -165,7 +165,7 @@ Release process
 
 Start from the ``develop`` branch:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ git clone git@github.com:kdeldycke/meta-package-manager.git
     $ cd ./meta-package-manager
@@ -173,20 +173,20 @@ Start from the ``develop`` branch:
 
 Install development dependencies:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ pip install -e .[develop]
 
 Revision should already be set to the next version, so we just need to set the
 released date in the changelog:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ vi ./CHANGES.rst
 
 Create a release commit, tag it and merge it back to ``master`` branch:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ git add ./meta_package_manager/__init__.py ./CHANGES.rst
     $ git commit -m "Release vX.Y.Z"
@@ -201,7 +201,7 @@ Create a release commit, tag it and merge it back to ``master`` branch:
 Push packaging to the `test cheeseshop
 <https://wiki.python.org/moin/TestPyPI>`_:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ ./setup.py register -r testpypi
     $ ./setup.py clean --all
@@ -209,7 +209,7 @@ Push packaging to the `test cheeseshop
 
 Publish packaging to `PyPi <https://pypi.python.org>`_:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ ./setup.py register -r pypi
     $ ./setup.py clean --all
@@ -218,7 +218,7 @@ Publish packaging to `PyPi <https://pypi.python.org>`_:
 Update revision with `bumpversion <https://github.com/peritus/bumpversion>`_
 and set it back to development state by increasing the ``patch`` level.
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ git checkout develop
     $ bumpversion --verbose patch
@@ -229,7 +229,7 @@ and set it back to development state by increasing the ``patch`` level.
 Now if the next revision is no longer bug-fix only, bump the ``minor``
 revision level instead:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ bumpversion --verbose minor
     $ git add ./meta_package_manager/__init__.py ./CHANGES.rst

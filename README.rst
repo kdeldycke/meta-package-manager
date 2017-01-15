@@ -107,7 +107,7 @@ Examples of the package's ``mpm`` CLI.
 
 List global options and commands:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ mpm
     Usage: mpm [OPTIONS] COMMAND [ARGS]...
@@ -134,7 +134,7 @@ List global options and commands:
 
 List all supported package managers and their status on current system:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ mpm managers
     ╒═══════════════════╤══════╤═════════════╤════════════════════════╤══════════════╤═════════════╕

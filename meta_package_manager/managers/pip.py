@@ -75,8 +75,8 @@ class Pip(PackageManager):
                 # Extract current non-standard location if found.
                 installed_info = installed_info.split(',', 1)
                 version = installed_info[0]
-                special_location = " ({})".format(
-                    installed_info[1].strip()) if len(installed_info) > 1 else ''
+                special_location = " ({})".format(installed_info[1].strip()) \
+                    if len(installed_info) > 1 else ''
 
                 outdated[package_id] = {
                     'id': package_id,

@@ -75,10 +75,6 @@ class PackageManager(object):
     # Version requirement specifier.
     requirement = None
 
-    def __init__(self):
-        # Outdated packages intalled on the system.
-        self.outdated = {}
-
     def get_version(self):
         """ Invoke the manager and extract its own reported version. """
         raise NotImplementedError
@@ -200,12 +196,17 @@ class PackageManager(object):
         return output
 
     def sync(self):
-        """ Fetch latest versions of installed packages.
+        """ Fetch latest versions of installed packages. """
+        logger.info('Sync {} package info...'.format(self.id))
+
+    @property
+    def outdated(self):
+        """ List currently installed packages having a new version available.
 
         Returns a list of dict with package name, current installed version and
         latest upgradeable version.
         """
-        logger.info('Sync {} package info...'.format(self.id))
+        raise NotImplementedError
 
     def upgrade_cli(self, package_id=None):
         """ Return a bash-compatible full-CLI to upgrade a package. """
@@ -232,7 +233,6 @@ class PackageManager(object):
                 "{} doesn't seems to implement a full upgrade subcommand. "
                 "Call single-package upgrade CLI one by one.".format(self.id))
             log = []
-            self.sync()
             for package_id in self.outdated:
                 output = self.upgrade(package_id, dry_run=dry_run)
                 if output:

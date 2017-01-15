@@ -50,28 +50,31 @@ class MAS(PackageManager):
     def get_version(self):
         return self.run([self.cli_path, 'version'])
 
-    def sync(self):
-        super(MAS, self).sync()
+    @cachedproperty
+    def outdated(self):
+        outdated = {}
 
         output = self.run([self.cli_path] + self.cli_args + ['outdated'])
-        if not output:
-            return
 
-        regexp = re.compile(r'(\d+) (.*) \((\S+) -> (\S+)\)$')
-        for application in output.split('\n'):
-            if not application:
-                continue
-            package_id, package_name, installed_version, latest_version = \
-                regexp.match(application).groups()
-            self.outdated[package_id] = {
-                'id': package_id,
-                'name': package_name,
-                'latest_version': latest_version,
-                # Normalize unknown version. See: https://github.com/mas-cli
-                # /mas/commit/1859eaedf49f6a1ebefe8c8d71ec653732674341
-                'installed_version': (
-                    installed_version if installed_version != 'unknown'
-                    else None)}
+        if output:
+            regexp = re.compile(r'(\d+) (.*) \((\S+) -> (\S+)\)$')
+            for application in output.split('\n'):
+                if not application:
+                    continue
+                package_id, package_name, installed_version, latest_version = \
+                    regexp.match(application).groups()
+                outdated[package_id] = {
+                    'id': package_id,
+                    'name': package_name,
+                    'latest_version': latest_version,
+                    # Normalize unknown version. See:
+                    # https://github.com/mas-cli/mas/commit
+                    # /1859eaedf49f6a1ebefe8c8d71ec653732674341
+                    'installed_version': (
+                        installed_version if installed_version != 'unknown'
+                        else None)}
+
+        return outdated
 
     def upgrade_cli(self, package_id=None):
         cmd = [self.cli_path] + self.cli_args + ['upgrade']

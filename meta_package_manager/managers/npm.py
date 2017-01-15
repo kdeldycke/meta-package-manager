@@ -46,7 +46,8 @@ class NPM(PackageManager):
     def name(self):
         return "Node's npm"
 
-    def sync(self):
+    @cachedproperty
+    def outdated(self):
         """
         Sample of npm output:
 
@@ -66,23 +67,23 @@ class NPM(PackageManager):
               }
             }
         """
-        super(NPM, self).sync()
+        outdated = {}
 
-        output = self.run([
-            self.cli_path] + self.cli_args + [
-                '-g', '--progress=false', '--json', 'outdated'])
-        if not output:
-            return
+        output = self.run([self.cli_path] + self.cli_args + [
+            '-g', '--progress=false', '--json', 'outdated'])
 
-        for package_id, values in json.loads(output).items():
-            if values['wanted'] == 'linked':
-                continue
-            self.outdated[package_id] = {
-                'id': package_id,
-                'name': package_id,
-                'installed_version':
-                    values['current'] if 'current' in values else None,
-                'latest_version': values['latest']}
+        if output:
+            for package_id, values in json.loads(output).items():
+                if values['wanted'] == 'linked':
+                    continue
+                outdated[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'installed_version':
+                        values['current'] if 'current' in values else None,
+                    'latest_version': values['latest']}
+
+        return outdated
 
     def upgrade_cli(self, package_id=None):
         cmd = [self.cli_path] + self.cli_args + [

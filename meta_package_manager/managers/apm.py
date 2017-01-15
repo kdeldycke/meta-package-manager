@@ -46,22 +46,24 @@ class APM(PackageManager):
     def name(self):
         return "Atom's apm"
 
-    def sync(self):
-        super(APM, self).sync()
+    @cachedproperty
+    def outdated(self):
+        outdated = {}
 
         outdated_cmd = [self.cli_path] + self.cli_args + [
             'outdated', '--compatible', '--json']
         output = self.run(outdated_cmd)
-        if not output:
-            return
 
-        for package in json.loads(output):
-            package_id = package['name']
-            self.outdated[package_id] = {
-                'id': package_id,
-                'name': package_id,
-                'installed_version': package['version'],
-                'latest_version': package['latestVersion']}
+        if output:
+            for package in json.loads(output):
+                package_id = package['name']
+                outdated[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'installed_version': package['version'],
+                    'latest_version': package['latestVersion']}
+
+        return outdated
 
     def upgrade_cli(self, package_id=None):
         cmd = [self.cli_path] + self.cli_args + ['update', '--no-confirm']

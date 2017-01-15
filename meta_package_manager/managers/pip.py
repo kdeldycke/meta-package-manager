@@ -40,7 +40,8 @@ class Pip(PackageManager):
     def get_version(self):
         return self.run([self.cli_path, '--version']).split()[1]
 
-    def sync(self):
+    @cachedproperty
+    def outdated(self):
         """ List outdated packages and their metadata.
 
         Sample of pip output:
@@ -54,35 +55,36 @@ class Pip(PackageManager):
             mercurial (3.8.3) - Latest: 3.8.4 [sdist]
             pylint (1.5.6) - Latest: 1.6.1 [wheel]
         """
-        super(Pip, self).sync()
+        outdated = {}
 
         output = self.run([
             self.cli_path] + self.cli_args + ['list', '--outdated'])
-        if not output:
-            return
 
-        regexp = re.compile(r'(\S+) \((.*)\) - Latest: (\S+)')
-        for outdated_pkg in output.split('\n'):
-            if not outdated_pkg:
-                continue
+        if output:
+            regexp = re.compile(r'(\S+) \((.*)\) - Latest: (\S+)')
+            for outdated_pkg in output.split('\n'):
+                if not outdated_pkg:
+                    continue
 
-            matches = regexp.match(outdated_pkg)
-            if not matches:
-                continue
+                matches = regexp.match(outdated_pkg)
+                if not matches:
+                    continue
 
-            package_id, installed_info, latest_version = matches.groups()
+                package_id, installed_info, latest_version = matches.groups()
 
-            # Extract current non-standard location if found.
-            installed_info = installed_info.split(',', 1)
-            version = installed_info[0]
-            special_location = " ({})".format(
-                installed_info[1].strip()) if len(installed_info) > 1 else ''
+                # Extract current non-standard location if found.
+                installed_info = installed_info.split(',', 1)
+                version = installed_info[0]
+                special_location = " ({})".format(
+                    installed_info[1].strip()) if len(installed_info) > 1 else ''
 
-            self.outdated[package_id] = {
-                'id': package_id,
-                'name': package_id + special_location,
-                'installed_version': version,
-                'latest_version': latest_version}
+                outdated[package_id] = {
+                    'id': package_id,
+                    'name': package_id + special_location,
+                    'installed_version': version,
+                    'latest_version': latest_version}
+
+        return outdated
 
     def upgrade_cli(self, package_id):
         return [

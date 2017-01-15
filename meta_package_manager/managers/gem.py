@@ -61,7 +61,8 @@ class Gem(PackageManager):
     def name(self):
         return "Ruby Gems"
 
-    def sync(self):
+    @cachedproperty
+    def outdated(self):
         """
         Sample of gem output:
 
@@ -73,25 +74,25 @@ class Gem(PackageManager):
             power_assert (0.2.6 < 0.3.0)
             psych (2.0.17 < 2.1.0)
         """
-        super(Gem, self).sync()
+        outdated = {}
 
         # Outdated does not require sudo privileges on homebrew or system.
         output = self.run([self.cli_path] + self.cli_args + ['outdated'])
 
-        if not output:
-            return
+        if output:
+            regexp = re.compile(r'(\S+) \((\S+) < (\S+)\)')
+            for package in output.split('\n'):
+                if not package:
+                    continue
+                package_id, current_version, latest_version = regexp.match(
+                    package).groups()
+                outdated[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'installed_version': current_version,
+                    'latest_version': latest_version}
 
-        regexp = re.compile(r'(\S+) \((\S+) < (\S+)\)')
-        for package in output.split('\n'):
-            if not package:
-                continue
-            package_id, current_version, latest_version = regexp.match(
-                package).groups()
-            self.outdated[package_id] = {
-                'id': package_id,
-                'name': package_id,
-                'installed_version': current_version,
-                'latest_version': latest_version}
+        return outdated
 
     def upgrade_cli(self, package_id=None):
         cmd = [self.cli_path] + self.cli_args + ['update']

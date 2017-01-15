@@ -52,6 +52,11 @@ class Homebrew(PackageManager):
             [self.cli_path] + self.cli_args + ['--version']).split()[1]
 
     def sync(self):
+        super(Homebrew, self).sync()
+        self.run([self.cli_path] + self.cli_args + ['update'])
+
+    @cachedproperty
+    def outdated(self):
         """ Fetch latest Homebrew formulas.
 
         Sample of brew output:
@@ -81,30 +86,29 @@ class Homebrew(PackageManager):
               }
             ]
         """
-        super(Homebrew, self).sync()
-
-        self.run([self.cli_path] + self.cli_args + ['update'])
+        outdated = {}
 
         # List available updates.
         output = self.run(
             [self.cli_path] + self.cli_args + ['outdated', '--json=v1'])
-        if not output:
-            return
 
-        for pkg_info in json.loads(output):
+        if output:
+            for pkg_info in json.loads(output):
 
-            # Parse versions to avoid lexicographic sorting gotchas.
-            version = None
-            versions = set(pkg_info['installed_versions'])
-            if versions:
-                _, version = max([(parse_version(v), v) for v in versions])
+                # Parse versions to avoid lexicographic sorting gotchas.
+                version = None
+                versions = set(pkg_info['installed_versions'])
+                if versions:
+                    _, version = max([(parse_version(v), v) for v in versions])
 
-            package_id = pkg_info['name']
-            self.outdated[package_id] = {
-                'id': package_id,
-                'name': package_id,
-                'installed_version': version,
-                'latest_version': pkg_info['current_version']}
+                package_id = pkg_info['name']
+                outdated[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'installed_version': version,
+                    'latest_version': pkg_info['current_version']}
+
+        return outdated
 
     def upgrade_cli(self, package_id=None):
         cmd = [self.cli_path] + self.cli_args + ['upgrade', '--cleanup']
@@ -134,7 +138,13 @@ class HomebrewCask(Homebrew):
     def name(self):
         return "Homebrew Cask"
 
-    def sync(self):
+    # Call homebrew own update: `brew cask update` is just an alias to
+    # `brew update` and is deprecated. See:
+    # https://github.com/kdeldycke/meta-package-manager/issues/28
+    sync = Homebrew().sync
+
+    @cachedproperty
+    def outdated(self):
         """ Fetch latest formulas and their metadata.
 
         Sample of brew cask output:
@@ -219,67 +229,63 @@ class HomebrewCask(Homebrew):
             ==> Artifacts
             XLD.app (app)
         """
-        super(Homebrew, self).sync()
-
-        # `brew cask update` is just an alias to `brew update` and is
-        # deprecated. See:
-        # https://github.com/kdeldycke/meta-package-manager/issues/28
-        self.run([self.cli_path] + ['update'])
+        outdated = {}
 
         # List installed packages.
         output = self.run(
             [self.cli_path] + self.cli_args + ['list', '--versions'])
-        if not output:
-            return
 
-        # Inspect package one by one as `brew cask list` is not reliable. See:
-        # https://github.com/caskroom/homebrew-cask/blob/master/doc
-        # /reporting_bugs/brew_cask_list_shows_wrong_information.md
-        for installed_pkg in output.split('\n'):
-            if not installed_pkg:
-                continue
-            infos = installed_pkg.split()
-            package_id = infos[0]
+        if output:
+            # Inspect package one by one as `brew cask list` is not reliable.
+            # See: https://github.com/caskroom/homebrew-cask/blob/master/doc
+            # /reporting_bugs/brew_cask_list_shows_wrong_information.md
+            for installed_pkg in output.split('\n'):
+                if not installed_pkg:
+                    continue
+                infos = installed_pkg.split()
+                package_id = infos[0]
 
-            # Guess latest installed version.
-            versions = set(infos[1:])
-            # Discard generic 'latest' symbolic version if others are
-            # available.
-            if len(versions) > 1:
-                versions.discard('latest')
-            # Parse versions to avoid lexicographic sorting gotchas.
-            version = None
-            if versions:
-                _, version = max([(parse_version(v), v) for v in versions])
+                # Guess latest installed version.
+                versions = set(infos[1:])
+                # Discard generic 'latest' symbolic version if others are
+                # available.
+                if len(versions) > 1:
+                    versions.discard('latest')
+                # Parse versions to avoid lexicographic sorting gotchas.
+                version = None
+                if versions:
+                    _, version = max([(parse_version(v), v) for v in versions])
 
-            # TODO: Support packages removed from repository (reported with a
-            # `(!)` flag). See: https://github.com/caskroom/homebrew-cask/blob
-            # /master/doc/reporting_bugs
-            # /uninstall_wrongly_reports_cask_as_not_installed.md
+                # TODO: Support packages removed from repository (reported with
+                # a `(!)` flag). See: https://github.com/caskroom/homebrew-cask
+                # /blob/master/doc/reporting_bugs
+                # /uninstall_wrongly_reports_cask_as_not_installed.md
 
-            # Inspect the package closer to evaluate its state.
-            output = self.run([
-                self.cli_path] + self.cli_args + ['info', package_id])
+                # Inspect the package closer to evaluate its state.
+                output = self.run([
+                    self.cli_path] + self.cli_args + ['info', package_id])
 
-            latest_version = output.split('\n')[0].split(' ')[1]
+                latest_version = output.split('\n')[0].split(' ')[1]
 
-            # Casks are allowed to provide several names. See:
-            # https://github.com/kdeldycke/meta-package-manager/issues/26 .
-            package_names = re.search(
-                '==> Names?(.*?)(==>|$)', output, re.DOTALL).groups(
-                    )[0].strip().split('\n')
-            # Choose the longuest name as canonical.
-            package_name = max(package_names)
+                # Casks are allowed to provide several names. See:
+                # https://github.com/kdeldycke/meta-package-manager/issues/26 .
+                package_names = re.search(
+                    '==> Names?(.*?)(==>|$)', output, re.DOTALL).groups(
+                        )[0].strip().split('\n')
+                # Choose the longuest name as canonical.
+                package_name = max(package_names)
 
-            # Skip already installed packages.
-            if version == latest_version:
-                continue
+                # Skip already installed packages.
+                if version == latest_version:
+                    continue
 
-            self.outdated[package_id] = {
-                'id': package_id,
-                'name': package_name,
-                'installed_version': version,
-                'latest_version': latest_version}
+                outdated[package_id] = {
+                    'id': package_id,
+                    'name': package_name,
+                    'installed_version': version,
+                    'latest_version': latest_version}
+
+        return outdated
 
     def upgrade_cli(self, package_id):
         """ Install a package.

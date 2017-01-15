@@ -141,7 +141,7 @@ before_script:
   # only have this variable available.
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew doctor; brew update; brew upgrade; brew install gdbm pcre python; brew reinstall cloog; brew doctor;
-      brew link cloog018; brew install apr apr-util;
+      brew link --overwrite cloog018; brew install apr apr-util;
     fi
 
 script:

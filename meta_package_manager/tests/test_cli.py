@@ -157,6 +157,36 @@ class TestCLISync(CLITestCase):
         self.assertNotIn("gem", result.output)
 
 
+class TestCLIList(CLITestCase):
+
+    def test_main_help(self):
+        result = self.invoke('list', '--help')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("--help", result.output)
+
+    def test_verbosity(self):
+        result = self.invoke('--verbosity', 'DEBUG', 'list')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("debug:", result.output)
+
+        result = self.invoke('--verbosity', 'INFO', 'list')
+        self.assertEqual(result.exit_code, 0)
+        self.assertNotIn("debug:", result.output)
+
+    def test_simple_call(self):
+        result = self.invoke('list')
+        self.assertEqual(result.exit_code, 0)
+
+    def test_sub_manager_scope(self):
+        result = self.invoke('--manager', 'npm', 'list')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("npm", result.output)
+        self.assertNotIn("apm", result.output)
+        self.assertNotIn("brew", result.output)
+        self.assertNotIn("pip", result.output)
+        self.assertNotIn("gem", result.output)
+
+
 class TestCLIOutdated(CLITestCase):
 
     def test_main_help(self):

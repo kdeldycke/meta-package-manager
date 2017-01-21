@@ -12,6 +12,7 @@ Changelog
 * Colorize check-marks in CLI output.
 * Decouple ``sync`` and ``outdated`` actions in all managers.
 * Cache output of ``outdated`` command.
+* Add global todo list in documentation.
 
 
 `2.3.0 (2017-01-15) <https://github.com/kdeldycke/meta-package-manager/compare/v2.2.0...v2.3.0>`_

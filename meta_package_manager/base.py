@@ -45,7 +45,7 @@ class CLIError(Exception):
     """ An error occured when running package manager CLI. """
 
     def __init__(self, code, output, error):
-        """ The exception keeps internally the result of CLI execution. """
+        """ The exception internally keeps the result of CLI execution. """
         super(CLIError, self).__init__()
         self.code = code
         self.output = output

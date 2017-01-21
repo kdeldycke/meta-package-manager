@@ -333,9 +333,10 @@ class HomebrewCask(Homebrew):
     def upgrade_cli(self, package_id):
         """ Install a package.
 
-        TODO: wait for https://github.com/caskroom/homebrew-cask/issues/22647
-        so we can force a cleanup in one go, as we do above with vanilla
-        Homebrew.
+        .. todo::
+            Wait for https://github.com/caskroom/homebrew-cask/issues/22647
+            so we can force a cleanup in one go, as we do above with vanilla
+            Homebrew.
         """
         return [self.cli_path] + self.cli_args + ['reinstall', package_id]
 

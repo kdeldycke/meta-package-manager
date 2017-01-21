@@ -54,6 +54,9 @@ needs_sphinx = '1.4'
 html_last_updated_fmt = 'YYYY-MM-dd'
 templates_path = ['templates']
 
+# Both the class’ and the __init__ method’s docstring are concatenated and
+# inserted.
+autoclass_content = "both"
 # Keep the same ordering as in original source code.
 autodoc_member_order = 'bysource'
 

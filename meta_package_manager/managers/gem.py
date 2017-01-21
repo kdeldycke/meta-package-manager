@@ -57,9 +57,7 @@ class Gem(PackageManager):
     def cli_path(self):
         return Gem.SYSTEM_PATH if self.system_install else Gem.HOMEBREW_PATH
 
-    @cachedproperty
-    def name(self):
-        return "Ruby Gems"
+    name = "Ruby Gems"
 
     @cachedproperty
     def installed(self):

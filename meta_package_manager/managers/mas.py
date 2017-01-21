@@ -43,9 +43,7 @@ class MAS(PackageManager):
     # /mas-cli/mas/commit/ca72ee42b1c5f482513b1d2fbf780b0bf3d9618b
     requirement = '>= 1.3.1'
 
-    @cachedproperty
-    def name(self):
-        return "Mac AppStore"
+    name = "Mac AppStore"
 
     def get_version(self):
         return self.run([self.cli_path, 'version'])

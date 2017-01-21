@@ -42,9 +42,7 @@ class APM(PackageManager):
     def get_version(self):
         return self.run([self.cli_path, '--version']).split('\n')[0].split()[1]
 
-    @cachedproperty
-    def name(self):
-        return "Atom's apm"
+    name = "Atom's apm"
 
     @cachedproperty
     def installed(self):

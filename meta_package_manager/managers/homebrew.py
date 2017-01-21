@@ -43,9 +43,7 @@ class Homebrew(PackageManager):
 
     requirement = '>= 1.0.*'
 
-    @cachedproperty
-    def id(self):
-        return "brew"
+    id = "brew"
 
     def get_version(self):
         return self.run(
@@ -187,13 +185,9 @@ class HomebrewCask(Homebrew):
     # call 'cask reinstall' instead since 1.1.0.
     requirement = '>= 1.1.*'
 
-    @cachedproperty
-    def id(self):
-        return "cask"
+    id = "cask"
 
-    @cachedproperty
-    def name(self):
-        return "Homebrew Cask"
+    name = "Homebrew Cask"
 
     # Call homebrew own update: `brew cask update` is just an alias to
     # `brew update` and is deprecated. See:

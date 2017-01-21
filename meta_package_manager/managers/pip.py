@@ -148,15 +148,11 @@ class Pip2(Pip):
 
     cli_path = '/usr/local/bin/pip2'
 
-    @cachedproperty
-    def name(self):
-        return "Python 2's Pip"
+    name = "Python 2's Pip"
 
 
 class Pip3(Pip):
 
     cli_path = '/usr/local/bin/pip3'
 
-    @cachedproperty
-    def name(self):
-        return "Python 3's Pip"
+    name = "Python 3's Pip"

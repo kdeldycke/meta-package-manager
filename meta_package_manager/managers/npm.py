@@ -43,9 +43,7 @@ class NPM(PackageManager):
     def get_version(self):
         return self.run([self.cli_path, '--version'])
 
-    @cachedproperty
-    def name(self):
-        return "Node's npm"
+    name = "Node's npm"
 
     @cachedproperty
     def installed(self):

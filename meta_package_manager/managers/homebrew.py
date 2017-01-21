@@ -90,6 +90,14 @@ class Homebrew(PackageManager):
             java 1.8.0_112-b16
             tunnelblick 3.6.8_build_4625 3.6.9_build_4685
             virtualbox 5.1.8-111374 5.1.10-112026
+
+        .. todo
+
+            Use the ``removed`` variable to detect removed packages (which are
+            reported with a ``(!)`` flag). See:
+            https://github.com/caskroom/homebrew-cask/blob/master/doc
+            /reporting_bugs/uninstall_wrongly_reports_cask_as_not_installed.md
+            and https://github.com/kdeldycke/meta-package-manager/issues/17 .
         """
         installed = {}
 
@@ -103,12 +111,6 @@ class Homebrew(PackageManager):
                     continue
 
                 package_id, removed, versions = regexp.match(pkg_info).groups()
-
-                # TODO: Use `removed` to detect removed packages (reported with
-                # a `(!)` flag). See: https://github.com/caskroom/homebrew-cask
-                # /blob/master/doc/reporting_bugs
-                # /uninstall_wrongly_reports_cask_as_not_installed.md and
-                # https://github.com/kdeldycke/meta-package-manager/issues/17
 
                 # Guess latest installed version.
                 versions = set(versions.split())

@@ -91,7 +91,9 @@ class MAS(PackageManager):
 
         .. code-block:: shell-session
             $ mas outdated
-            TODO
+
+        .. todo
+            An example of ``mas outdated`` output is missing above.
         """
         outdated = {}
 

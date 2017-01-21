@@ -46,6 +46,7 @@ class Homebrew(PackageManager):
     id = "brew"
 
     def get_version(self):
+        """ Fetch version from ``brew --version`` output."""
         return self.run(
             [self.cli_path] + self.cli_args + ['--version']).split()[1]
 
@@ -55,12 +56,15 @@ class Homebrew(PackageManager):
 
     @cachedproperty
     def installed(self):
-        """ List installed packages on the system.
+        """ Fetch installed packages from ``brew list`` output.
 
-        Shared by brew and cask.
+        .. note::
+            This method is shared by ``brew`` and ``cask``, only that the latter
+            adds its ``cask`` subcommand to the CLI call.
 
         Raw CLI output sample:
 
+        .. code-block:: shell-session
             $ brew list --versions
             ack 2.14
             apg 2.2.3
@@ -71,7 +75,21 @@ class Homebrew(PackageManager):
             bash-completion 1.3_1
             boost 1.63.0
             c-ares 1.12.0
+            graphviz 2.40.1 2.40.20161221.0239
             quicklook-json latest
+
+        .. code-block:: shell-session
+            $ brew cask list --versions
+            aerial 1.2beta5
+            android-file-transfer latest
+            audacity (!) 2.1.2
+            bitbar 1.9.2
+            firefox 49.0.1
+            flux 37.7
+            gimp 2.8.18-x86_64
+            java 1.8.0_112-b16
+            tunnelblick 3.6.8_build_4625 3.6.9_build_4685
+            virtualbox 5.1.8-111374 5.1.10-112026
         """
         installed = {}
 
@@ -112,10 +130,11 @@ class Homebrew(PackageManager):
 
     @cachedproperty
     def outdated(self):
-        """ Fetch latest Homebrew formulas.
+        """ Fetch outdated packages from ``brew outdated`` output.
 
-        Sample of brew output:
+        Raw CLI output sample:
 
+        .. code-block:: shell-session
             $ brew outdated --json=v1
             [
               {
@@ -196,21 +215,20 @@ class HomebrewCask(Homebrew):
 
     @cachedproperty
     def outdated(self):
-        """ Fetch latest formulas and their metadata.
+        """ Search for outdated packages among installed one.
 
-        Sample of brew cask output:
+        Cask doesn't provides an ``outdated`` subcommand contrary to ``brew``.
+        We have no other alternative but to fetch the list of currently
+        installed packages and inspect them one by one to search for outdated
+        ones.
 
-            $ brew cask list --versions
-            aerial 1.2beta5
-            android-file-transfer latest
-            audacity 2.1.2-1453294898 2.1.2
-            bitbar 1.9.2
-            firefox 49.0.1
-            flux 37.7
-            gimp 2.8.18-x86_64
-            java 1.8.0_112-b16
-            tunnelblick 3.6.8_build_4625 3.6.9_build_4685
-            virtualbox 5.1.8-111374 5.1.10-112026
+        # Inspect package one by one as `brew cask list` is not reliable.
+        # See: https://github.com/caskroom/homebrew-cask/blob/master/doc
+        # /reporting_bugs/brew_cask_list_shows_wrong_information.md
+
+        Raw CLI output sample:
+
+        .. code-block:: shell-session
 
             $ brew cask info aerial
             aerial: 1.2beta5

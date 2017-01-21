@@ -51,6 +51,7 @@ class Gem(PackageManager):
             self.system_install = False
 
     def get_version(self):
+        """ Fetch version from ``gem --version`` output."""
         return self.run([self.cli_path, '--version'])
 
     @cachedproperty
@@ -61,10 +62,11 @@ class Gem(PackageManager):
 
     @cachedproperty
     def installed(self):
-        """ List installed packages on the system.
+        """ Fetch installed packages from ``gem list`` output.
 
         Raw CLI output sample:
 
+        .. code-block:: shell-session
             $ gem list
 
             *** LOCAL GEMS ***
@@ -103,9 +105,11 @@ class Gem(PackageManager):
 
     @cachedproperty
     def outdated(self):
-        """
-        Sample of gem output:
+        """ Fetch outdated packages from ``gem outdated`` output.
 
+        Raw CLI output sample:
+
+        .. code-block:: shell-session
             $ gem outdated
             did_you_mean (1.0.0 < 1.0.2)
             io-console (0.4.5 < 0.4.6)

@@ -38,14 +38,16 @@ class Pip(PackageManager):
     platforms = frozenset([MACOS, LINUX])
 
     def get_version(self):
+        """ Fetch version from ``pip --version`` output."""
         return self.run([self.cli_path, '--version']).split()[1]
 
     @cachedproperty
     def installed(self):
-        """ List installed packages on the system.
+        """ Fetch installed packages from ``pip list`` output.
 
         Raw CLI output sample:
 
+        .. code-block:: shell-session
             $ pip list
             configparser (3.5.0)
             docutils (0.13.1)
@@ -87,10 +89,11 @@ class Pip(PackageManager):
 
     @cachedproperty
     def outdated(self):
-        """ List outdated packages and their metadata.
+        """ Fetch outdated packages from ``pip list --outdated`` output.
 
-        Sample of pip output:
+        Raw CLI output sample:
 
+        .. code-block:: shell-session
             $ pip list --outdated
             ccm (2.1.8, /Users/kdeldycke/ccm) - Latest: 2.1.11 [sdist]
             coverage (4.0.3) - Latest: 4.1 [wheel]

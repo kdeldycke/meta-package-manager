@@ -40,13 +40,108 @@ class APM(PackageManager):
     platforms = frozenset([MACOS])
 
     def get_version(self):
+        """ Fetch version from ``apm --version`` output."""
         return self.run([self.cli_path, '--version']).split('\n')[0].split()[1]
 
     name = "Atom's apm"
 
     @cachedproperty
     def installed(self):
-        """ List installed packages on the system. """
+        """ Fetch installed packages from ``apm list`` output.
+
+        Raw CLI output sample:
+
+        .. code-block:: shell-session
+            $ apm list --json | jq
+            {
+              "core": [
+                {
+                  "_args": [
+                    [
+                      {
+                        "raw": "/private/var/folders/jm/fw86rxds0xn69sk40d18y69m0000gp/T/d-116109-34686-t88dqy/package.tgz",
+                        "scope": null,
+                        "escapedName": null,
+                        "name": null,
+                        "rawSpec": "/private/var/folders/jm/fw86rxds0xn69sk40d18y69m0000gp/T/d-116109-34686-t88dqy/package.tgz",
+                        "spec": "/private/var/folders/jm/fw86rxds0xn69sk40d18y69m0000gp/T/d-116109-34686-t88dqy/package.tgz",
+                        "type": "local"
+                      },
+                      "/Users/distiller/atom"
+                    ]
+                  ],
+                  "_inCache": true,
+                  "_installable": true,
+                  "_location": "/background-tips",
+                  "_phantomChildren": {},
+                  "_requested": {
+                    "raw": "/private/var/folders/jm/fw86rxds0xn69sk40d18y69m0000gp/T/d-116109-34686-t88dqy/package.tgz",
+                    "scope": null,
+                    "escapedName": null,
+                    "name": null,
+                    "rawSpec": "/private/var/folders/jm/fw86rxds0xn69sk40d18y69m0000gp/T/d-116109-34686-t88dqy/package.tgz",
+                    "spec": "/private/var/folders/jm/fw86rxds0xn69sk40d18y69m0000gp/T/d-116109-34686-t88dqy/package.tgz",
+                    "type": "local"
+                  },
+                  "_requiredBy": [
+                    "#USER"
+                  ],
+                  "_resolved": "file:../../../private/var/folders/jm/fw86rxds0xn69sk40d18y69m0000gp/T/d-116109-34686-t88dqy/package.tgz",
+                  "_shasum": "7978e4fdab3b162d93622fc64d012df7a92aa569",
+                  "_shrinkwrap": null,
+                  "_spec": "/private/var/folders/jm/fw86rxds0xn69sk40d18y69m0000gp/T/d-116109-34686-t88dqy/package.tgz",
+                  "_where": "/Users/distiller/atom",
+                  "bugs": {
+                    "url": "https://github.com/atom/background-tips/issues"
+                  },
+                  "dependencies": {
+                    "underscore-plus": "1.x"
+                  },
+                  "description": "Displays tips about Atom in the background when there are no editors open.",
+                  "devDependencies": {
+                    "coffeelint": "^1.9.7"
+                  },
+                  "engines": {
+                    "atom": ">0.42.0"
+                  },
+                  "homepage": "https://github.com/atom/background-tips#readme",
+                  "license": "MIT",
+                  "main": "./lib/background-tips",
+                  "name": "background-tips",
+                  "optionalDependencies": {},
+                  "private": true,
+                  "repository": {
+                    "type": "git",
+                    "url": "https://github.com/atom/background-tips.git"
+                  },
+                  "version": "0.26.1",
+                  "_atomModuleCache": {
+                    "version": 1,
+                    "dependencies": [],
+                    "extensions": {
+                      ".js": [
+                        "lib/background-tips-view.js",
+                        "lib/background-tips.js",
+                        "lib/tips.js"
+                      ]
+                    },
+                    "folders": [
+                      {
+                        "paths": [
+                          "lib",
+                          ""
+                        ],
+                        "dependencies": {
+                          "underscore-plus": "1.x"
+                        }
+                      }
+                    ]
+                  }
+                },
+                (...)
+              ]
+            }
+        """
         installed = {}
 
         installed_cmd = [self.cli_path] + self.cli_args + ['list', '--json']
@@ -65,6 +160,14 @@ class APM(PackageManager):
 
     @cachedproperty
     def outdated(self):
+        """ Fetch outdated packages from ``apm outdated`` output.
+
+        Raw CLI output sample:
+
+        .. code-block:: shell-session
+            $ apm outdated --compatible --json | jq
+            TODO
+        """
         outdated = {}
 
         outdated_cmd = [self.cli_path] + self.cli_args + [

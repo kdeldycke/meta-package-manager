@@ -41,16 +41,18 @@ class NPM(PackageManager):
     platforms = frozenset([MACOS])
 
     def get_version(self):
+        """ Fetch version from ``npm --version`` output."""
         return self.run([self.cli_path, '--version'])
 
     name = "Node's npm"
 
     @cachedproperty
     def installed(self):
-        """ List installed packages on the system.
+        """ Fetch installed packages from ``npm list`` output.
 
         Raw CLI output sample:
 
+        .. code-block:: shell-session
             $ npm list -g --json
             {
               "dependencies": {
@@ -108,9 +110,11 @@ class NPM(PackageManager):
 
     @cachedproperty
     def outdated(self):
-        """
-        Sample of npm output:
+        """ Fetch outdated packages from ``npm outdated`` output.
 
+        Raw CLI output sample:
+
+        .. code-block:: shell-session
             $ npm -g --progress=false --json outdated
             {
               "my-linked-package": {

@@ -46,14 +46,16 @@ class MAS(PackageManager):
     name = "Mac AppStore"
 
     def get_version(self):
+        """ Fetch version from ``mas version`` output."""
         return self.run([self.cli_path, 'version'])
 
     @cachedproperty
     def installed(self):
-        """ List installed packages on the system.
+        """ Fetch installed packages from ``mas list`` output.
 
         Raw CLI output sample:
 
+        .. code-block:: shell-session
             $ mas list
             408981434 iMovie (10.1.4)
             747648890 Telegram (2.30)
@@ -83,6 +85,14 @@ class MAS(PackageManager):
 
     @cachedproperty
     def outdated(self):
+        """ Fetch outdated packages from ``mas outdated`` output.
+
+        Raw CLI output sample:
+
+        .. code-block:: shell-session
+            $ mas outdated
+            TODO
+        """
         outdated = {}
 
         output = self.run([self.cli_path] + self.cli_args + ['outdated'])

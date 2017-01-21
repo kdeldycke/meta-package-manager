@@ -152,7 +152,7 @@ def print_menu():
         echo(
             "Install / upgrade `mpm` CLI. | bash=pip param1=install "
             "param2=--upgrade param3=meta-package-manager terminal=true "
-            "refresh=true {f_error}".format(error, f_error=FONTS['error']))
+            "refresh=true {f_error}".format(f_error=FONTS['error']))
         return
 
     # Fetch list of all outdated packages from all package manager available on

@@ -33,8 +33,7 @@ from .bitbar import fix_environment
 
 
 __version__ = '2.4.0'
-""" Examples of valid version strings according `PEP-440
-<https://www.python.org/dev/peps/pep-0440/#version-scheme>`_:
+""" Examples of valid version strings according :pep:`440#version-scheme`:
 
 .. code-block:: python
     __version__ = '1.2.3.dev1'   # Development release 1

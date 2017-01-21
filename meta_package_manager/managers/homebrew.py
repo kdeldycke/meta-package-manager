@@ -81,13 +81,30 @@ class Homebrew(PackageManager):
             [self.cli_path] + self.cli_args + ['list', '--versions'])
 
         if output:
-            regexp = re.compile(r'(\S+)( \(!\))? (\S+)')
+            regexp = re.compile(r'(\S+)( \(!\))? (.+)')
             for pkg_info in output.split('\n'):
                 if not pkg_info:
                     continue
-                package_id, removed, version = regexp.match(pkg_info).groups()
-                # TODO: Use `removed` to detect removed packages. See:
+
+                package_id, removed, versions = regexp.match(pkg_info).groups()
+
+                # TODO: Use `removed` to detect removed packages (reported with
+                # a `(!)` flag). See: https://github.com/caskroom/homebrew-cask
+                # /blob/master/doc/reporting_bugs
+                # /uninstall_wrongly_reports_cask_as_not_installed.md and
                 # https://github.com/kdeldycke/meta-package-manager/issues/17
+
+                # Guess latest installed version.
+                versions = set(versions.split())
+                # Discard generic 'latest' symbolic version if others are
+                # available.
+                if len(versions) > 1:
+                    versions.discard('latest')
+                # Parse versions to avoid lexicographic sorting gotchas.
+                version = None
+                if versions:
+                    _, version = max([(parse_version(v), v) for v in versions])
+
                 installed[package_id] = {
                     'id': package_id,
                     'name': package_id,
@@ -271,59 +288,33 @@ class HomebrewCask(Homebrew):
         """
         outdated = {}
 
-        # List installed packages.
-        output = self.run(
-            [self.cli_path] + self.cli_args + ['list', '--versions'])
+        for installed_pkg in self.installed.values():
+            package_id = installed_pkg['id']
+            version = installed_pkg['installed_version']
 
-        if output:
-            # Inspect package one by one as `brew cask list` is not reliable.
-            # See: https://github.com/caskroom/homebrew-cask/blob/master/doc
-            # /reporting_bugs/brew_cask_list_shows_wrong_information.md
-            for installed_pkg in output.split('\n'):
-                if not installed_pkg:
-                    continue
-                infos = installed_pkg.split()
-                package_id = infos[0]
+            # Inspect the package closer to evaluate its state.
+            output = self.run([
+                self.cli_path] + self.cli_args + ['info', package_id])
 
-                # Guess latest installed version.
-                versions = set(infos[1:])
-                # Discard generic 'latest' symbolic version if others are
-                # available.
-                if len(versions) > 1:
-                    versions.discard('latest')
-                # Parse versions to avoid lexicographic sorting gotchas.
-                version = None
-                if versions:
-                    _, version = max([(parse_version(v), v) for v in versions])
+            latest_version = output.split('\n')[0].split(' ')[1]
 
-                # TODO: Support packages removed from repository (reported with
-                # a `(!)` flag). See: https://github.com/caskroom/homebrew-cask
-                # /blob/master/doc/reporting_bugs
-                # /uninstall_wrongly_reports_cask_as_not_installed.md
+            # Skip already installed packages.
+            if version == latest_version:
+                continue
 
-                # Inspect the package closer to evaluate its state.
-                output = self.run([
-                    self.cli_path] + self.cli_args + ['info', package_id])
+            # Casks are allowed to provide several names. See:
+            # https://github.com/kdeldycke/meta-package-manager/issues/26 .
+            package_names = re.search(
+                '==> Names?(.*?)(==>|$)', output, re.DOTALL).groups(
+                    )[0].strip().split('\n')
+            # Choose the longuest name as canonical.
+            package_name = max(package_names)
 
-                latest_version = output.split('\n')[0].split(' ')[1]
-
-                # Casks are allowed to provide several names. See:
-                # https://github.com/kdeldycke/meta-package-manager/issues/26 .
-                package_names = re.search(
-                    '==> Names?(.*?)(==>|$)', output, re.DOTALL).groups(
-                        )[0].strip().split('\n')
-                # Choose the longuest name as canonical.
-                package_name = max(package_names)
-
-                # Skip already installed packages.
-                if version == latest_version:
-                    continue
-
-                outdated[package_id] = {
-                    'id': package_id,
-                    'name': package_name,
-                    'installed_version': version,
-                    'latest_version': latest_version}
+            outdated[package_id] = {
+                'id': package_id,
+                'name': package_name,
+                'installed_version': version,
+                'latest_version': latest_version}
 
         return outdated
 

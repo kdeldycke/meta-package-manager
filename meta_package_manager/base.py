@@ -60,7 +60,8 @@ class CLIError(Exception):
 
 
 class PackageManager(object):
-    """ Package manager definition. """
+    """ Base class from which all package manager definition should inherits.
+    """
 
     # Fully qualified path to the package manager CLI.
     cli_path = None

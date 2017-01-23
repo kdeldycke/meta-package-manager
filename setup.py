@@ -37,7 +37,7 @@ PACKAGE_NAME = MODULE_NAME.replace('_', '-')
 
 
 DEPENDENCIES = [
-    'boltons >= 17.1.0.dev',
+    'boltons >= 16.5.2dev',
     'click >= 5.0',
     'click_log >= 0.1.5',
     'packaging',
@@ -146,7 +146,7 @@ setup(
     extras_require=EXTRA_DEPENDENCIES,
     dependency_links=[
         'git+git://github.com/mahmoud/boltons.git@develop'
-        '#egg=boltons-17.1.0.dev',
+        '#egg=boltons-16.5.2dev',
     ],
     test_suite='{}.tests'.format(MODULE_NAME),
 

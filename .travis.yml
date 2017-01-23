@@ -133,7 +133,7 @@ before_script:
   # More details at: https://github.com/ContinuumIO/anaconda-issues/issues/542
   # XXX This hack can be removed once Python 3.3 gets deprecated.
   - if [[ "$PYTHON_DIST" == "3.3"  ]] && [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      curl https://bootstrap.pypa.io/ez_setup.py -o - | python;
+      pip install --upgrade pip setuptools;
     fi
   # Default Travis images came with an outdated Homebrew requiring
   # unconventional upgrade to work properly. This only concerns xcode6.4 and

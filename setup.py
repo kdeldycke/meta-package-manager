@@ -145,7 +145,9 @@ setup(
     tests_require=DEPENDENCIES + EXTRA_DEPENDENCIES['tests'],
     extras_require=EXTRA_DEPENDENCIES,
     dependency_links=[
-        'git+git://github.com/mahmoud/boltons.git@develop'
+        # XXX Waiting for boltons 17.1.0+ release.
+-       'git+https://github.com/mahmoud/boltons.git'
+-       '@3a0ca88dca4d3e9409eb2f7d97a08a799f861f7d'
         '#egg=boltons-16.5.2dev',
     ],
     test_suite='{}.tests'.format(MODULE_NAME),

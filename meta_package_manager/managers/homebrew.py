@@ -59,8 +59,8 @@ class Homebrew(PackageManager):
         """ Fetch installed packages from ``brew list`` output.
 
         .. note::
-            This method is shared by ``brew`` and ``cask``, only that the latter
-            adds its ``cask`` subcommand to the CLI call.
+            This method is shared by ``brew`` and ``cask``, only that the
+            latter adds its ``cask`` subcommand to the CLI call.
 
         Raw CLI output sample:
 

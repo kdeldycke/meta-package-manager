@@ -13,7 +13,7 @@ Changelog
 * Decouple ``sync`` and ``outdated`` actions in all managers.
 * Cache output of ``outdated`` command.
 * Add global todo list in documentation.
-* Bump requirement to ``boltons >= 17.1.0``.
+* Bump requirement to ``boltons >= 17.0.0`` for Python 3.3 compatibility.
 
 
 `2.3.0 (2017-01-15) <https://github.com/kdeldycke/meta-package-manager/compare/v2.2.0...v2.3.0>`_

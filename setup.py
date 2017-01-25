@@ -37,7 +37,7 @@ PACKAGE_NAME = MODULE_NAME.replace('_', '-')
 
 
 DEPENDENCIES = [
-    'boltons >= 16.5.2dev',
+    'boltons >= 17.0.0',
     'click >= 5.0',
     'click_log >= 0.1.5',
     'packaging',
@@ -144,12 +144,7 @@ setup(
     install_requires=DEPENDENCIES,
     tests_require=DEPENDENCIES + EXTRA_DEPENDENCIES['tests'],
     extras_require=EXTRA_DEPENDENCIES,
-    dependency_links=[
-        # XXX Waiting for boltons 17.1.0+ release.
-        'git+https://github.com/mahmoud/boltons.git'
-        '@3a0ca88dca4d3e9409eb2f7d97a08a799f861f7d'
-        '#egg=boltons-16.5.2dev',
-    ],
+    dependency_links=[],
     test_suite='{}.tests'.format(MODULE_NAME),
 
     classifiers=[

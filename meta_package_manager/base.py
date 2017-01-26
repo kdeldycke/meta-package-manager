@@ -194,6 +194,8 @@ class PackageManager(object):
         if code and error:
             raise CLIError(code, output, error)
 
+        logger.debug(output)
+
         return output
 
     def sync(self):

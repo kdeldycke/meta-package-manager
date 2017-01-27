@@ -123,7 +123,8 @@ class TestCLIManagers(CLITestCase):
         self.assertIn("npm", result.output)
         self.assertNotIn("apm", result.output)
         self.assertNotIn("brew", result.output)
-        self.assertNotIn("pip", result.output)
+        self.assertNotIn("pip2", result.output)
+        self.assertNotIn("pip3", result.output)
         self.assertNotIn("gem", result.output)
 
 
@@ -153,7 +154,8 @@ class TestCLISync(CLITestCase):
         self.assertIn("npm", result.output)
         self.assertNotIn("apm", result.output)
         self.assertNotIn("brew", result.output)
-        self.assertNotIn("pip", result.output)
+        self.assertNotIn("pip2", result.output)
+        self.assertNotIn("pip3", result.output)
         self.assertNotIn("gem", result.output)
 
 
@@ -183,7 +185,8 @@ class TestCLIList(CLITestCase):
         self.assertIn("npm", result.output)
         self.assertNotIn("apm", result.output)
         self.assertNotIn("brew", result.output)
-        self.assertNotIn("pip", result.output)
+        self.assertNotIn("pip2", result.output)
+        self.assertNotIn("pip3", result.output)
         self.assertNotIn("gem", result.output)
 
 
@@ -247,7 +250,8 @@ class TestCLIOutdated(CLITestCase):
         self.assertIn("npm", result.output)
         self.assertNotIn("apm", result.output)
         self.assertNotIn("brew", result.output)
-        self.assertNotIn("pip", result.output)
+        self.assertNotIn("pip2", result.output)
+        self.assertNotIn("pip3", result.output)
         self.assertNotIn("gem", result.output)
 
     def test_cli_format_plain(self):
@@ -299,7 +303,8 @@ class TestCLIUpgrade(CLITestCase):
         self.assertIn("npm", result.output)
         self.assertNotIn("apm", result.output)
         self.assertNotIn("brew", result.output)
-        self.assertNotIn("pip", result.output)
+        self.assertNotIn("pip2", result.output)
+        self.assertNotIn("pip3", result.output)
         self.assertNotIn("gem", result.output)
 
     @skip_destructive()

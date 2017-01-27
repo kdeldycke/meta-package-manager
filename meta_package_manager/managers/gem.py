@@ -29,6 +29,7 @@ import os
 import re
 
 from boltons.cacheutils import cachedproperty
+from packaging.version import parse as parse_version
 
 from ..base import PackageManager
 from ..platform import MACOS
@@ -76,7 +77,7 @@ class Gem(PackageManager):
             io-console (0.4.2)
             json (1.7.7)
             libxml-ruby (2.6.0)
-            minitest (4.3.2)
+            molinillo (0.5.4, 0.4.5, 0.2.3)
             nokogiri (1.5.6)
             psych (2.0.0)
             rake (0.9.6)
@@ -91,15 +92,24 @@ class Gem(PackageManager):
         output = self.run([self.cli_path] + self.cli_args + ['list'])
 
         if output:
-            regexp = re.compile(r'(\S+) \((\S+)\)')
+            regexp = re.compile(r'(\S+) \((.+)\)')
             for package in output.split('\n'):
                 if not package or package.startswith('***'):
                     continue
-                package_id, current_version = regexp.match(package).groups()
+
+                package_id, versions = regexp.match(package).groups()
+
+                # Guess latest installed version.
+                versions = set([v.strip() for v in versions.split(',')])
+                # Parse versions to avoid lexicographic sorting gotchas.
+                version = None
+                if versions:
+                    _, version = max([(parse_version(v), v) for v in versions])
+
                 installed[package_id] = {
                     'id': package_id,
                     'name': package_id,
-                    'installed_version': current_version}
+                    'installed_version': version}
 
         return installed
 

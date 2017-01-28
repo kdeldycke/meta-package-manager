@@ -49,7 +49,7 @@ class APM(PackageManager):
     def installed(self):
         """ Fetch installed packages from ``apm list`` output.
 
-        Raw CLI output sample:
+        Raw CLI output samples:
 
         .. code-block:: shell-session
 
@@ -163,7 +163,7 @@ class APM(PackageManager):
     def outdated(self):
         """ Fetch outdated packages from ``apm outdated`` output.
 
-        Raw CLI output sample:
+        Raw CLI output samples:
 
         .. code-block:: shell-session
 

@@ -53,7 +53,7 @@ class MAS(PackageManager):
     def installed(self):
         """ Fetch installed packages from ``mas list`` output.
 
-        Raw CLI output sample:
+        Raw CLI output samples:
 
         .. code-block:: shell-session
 
@@ -88,7 +88,7 @@ class MAS(PackageManager):
     def outdated(self):
         """ Fetch outdated packages from ``mas outdated`` output.
 
-        Raw CLI output sample:
+        Raw CLI output samples:
 
         .. code-block:: shell-session
 

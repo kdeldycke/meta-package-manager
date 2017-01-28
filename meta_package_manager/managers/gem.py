@@ -65,7 +65,7 @@ class Gem(PackageManager):
     def installed(self):
         """ Fetch installed packages from ``gem list`` output.
 
-        Raw CLI output sample:
+        Raw CLI output samples:
 
         .. code-block:: shell-session
 
@@ -118,7 +118,7 @@ class Gem(PackageManager):
     def outdated(self):
         """ Fetch outdated packages from ``gem outdated`` output.
 
-        Raw CLI output sample:
+        Raw CLI output samples:
 
         .. code-block:: shell-session
 

@@ -63,7 +63,7 @@ class Homebrew(PackageManager):
             This method is shared by ``brew`` and ``cask``, only that the
             latter adds its ``cask`` subcommand to the CLI call.
 
-        Raw CLI output sample:
+        Raw CLI output samples:
 
         .. code-block:: shell-session
 
@@ -137,7 +137,7 @@ class Homebrew(PackageManager):
     def outdated(self):
         """ Fetch outdated packages from ``brew outdated`` output.
 
-        Raw CLI output sample:
+        Raw CLI output samples:
 
         .. code-block:: shell-session
 
@@ -232,7 +232,7 @@ class HomebrewCask(Homebrew):
         /homebrew-cask/blob/master/doc/reporting_bugs
         /brew_cask_list_shows_wrong_information.md>`_.
 
-        Raw CLI output sample:
+        Raw CLI output samples:
 
         .. code-block:: shell-session
 
@@ -246,6 +246,8 @@ class HomebrewCask(Homebrew):
             ==> Artifacts
             Aerial.saver (screen_saver)
 
+        .. code-block:: shell-session
+
             $ brew cask info firefox
             firefox: 50.0.1
             https://www.mozilla.org/firefox/
@@ -255,6 +257,8 @@ class HomebrewCask(Homebrew):
             Mozilla Firefox
             ==> Artifacts
             Firefox.app (app)
+
+        .. code-block:: shell-session
 
             $ brew cask info virtualbox
             virtualbox: 5.1.10-112026
@@ -266,6 +270,8 @@ class HomebrewCask(Homebrew):
             Oracle VirtualBox
             ==> Artifacts
             VirtualBox.pkg (pkg)
+
+        .. code-block:: shell-session
 
             $ brew cask info prey
             prey: 1.6.3
@@ -283,6 +289,8 @@ class HomebrewCask(Homebrew):
 
               API_KEY="abcdef123456" brew cask install prey
 
+        .. code-block:: shell-session
+
             $ brew cask info ubersicht
             ubersicht: 1.0.44
             http://tracesof.net/uebersicht/
@@ -292,6 +300,8 @@ class HomebrewCask(Homebrew):
             Übersicht
             ==> Artifacts
             Übersicht.app (app)
+
+        .. code-block:: shell-session
 
             $ brew cask info xld
             xld: 2016.10.07

@@ -60,7 +60,8 @@ class CLIError(Exception):
 
 
 class PackageManager(object):
-    """ Base class from which all package manager definition should inherits.
+
+    """ Base class from which all package manager definitions should inherits.
     """
 
     # Fully qualified path to the package manager CLI.
@@ -106,7 +107,7 @@ class PackageManager(object):
         """ Return package manager's ID. Defaults based on class name.
 
         This ID must be unique among all package manager definitions and
-        lower-case as they're used as feature flags for the mpm CLI.
+        lower-case as they're used as feature flags for the :command:`mpm` CLI.
         """
         return self.__class__.__name__.lower()
 

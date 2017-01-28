@@ -50,7 +50,7 @@ class NPM(PackageManager):
     def installed(self):
         """ Fetch installed packages from ``npm list`` output.
 
-        Raw CLI output sample:
+        Raw CLI output samples:
 
         .. code-block:: shell-session
 
@@ -113,7 +113,7 @@ class NPM(PackageManager):
     def outdated(self):
         """ Fetch outdated packages from ``npm outdated`` output.
 
-        Raw CLI output sample:
+        Raw CLI output samples:
 
         .. code-block:: shell-session
 

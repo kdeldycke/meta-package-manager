@@ -10,7 +10,7 @@
 # <bitbar.abouturl>https://github.com/kdeldycke/meta-package-manager</bitbar.abouturl>
 
 """
-Bitbar plugin for Meta Package Manager (a.k.a. the mpm CLI).
+Bitbar plugin for Meta Package Manager (a.k.a. the :command:`mpm` CLI).
 
 Default update cycle is set to 7 hours so we have a chance to get user's
 attention once a day. Higher frequency might ruin the system as all checks are
@@ -28,10 +28,13 @@ from subprocess import PIPE, Popen
 PY2 = sys.version_info[0] == 2
 
 
-# Set to ``False`` to replace the default flat layout with an alternative
-# structure where all upgrade actions are put into submenus, one for each
-# manager.
 FLAT_LAYOUT = True
+""" Define the rendering mode of outdated packages list.
+
+Set this constant to ``False`` to replace the default flat layout with an
+alternative structure where all upgrade actions are put into submenus, one for
+each manager.
+"""
 
 
 # Make it easier to change font, sizes and colors of the output

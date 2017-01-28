@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-""" Helpers and utilities to handle platform idiosyncracies. """
+""" Helpers and utilities to identify and handle platform idiosyncracies. """
 
 from __future__ import (
     absolute_import,
@@ -44,17 +44,17 @@ WINDOWS = 'windows'
 
 
 def is_linux():
-    """ Return True only if current platform is Linux. """
+    """ Return `True` only if current platform is of the Linux family. """
     return sys.platform.startswith('linux')
 
 
 def is_macos():
-    """ Return True only if current platform is macOS. """
+    """ Return `True` only if current platform is of the macOS family. """
     return sys.platform == 'darwin'
 
 
 def is_windows():
-    """ Return True only if current platform is Windows. """
+    """ Return `True` only if current platform is of the Windows family. """
     return sys.platform in ['win32', 'cygwin']
 
 
@@ -66,7 +66,7 @@ OS_DEFINITIONS = {
 
 
 def current_os():
-    """ Return ID and label of current OS. """
+    """ Return a 2-items `tuple` with ID and label of current OS. """
     platform_id = sys.platform
     logger.debug("Raw platform ID: {}.".format(platform_id))
     for os_id, (os_label, eval_func) in OS_DEFINITIONS.items():

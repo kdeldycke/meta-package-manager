@@ -45,7 +45,7 @@ class Pip(PackageManager):
     def installed(self):
         """ Fetch installed packages from ``pip list`` output.
 
-        Raw CLI output sample:
+        Raw CLI output samples:
 
         .. code-block:: shell-session
 
@@ -92,7 +92,7 @@ class Pip(PackageManager):
     def outdated(self):
         """ Fetch outdated packages from ``pip list --outdated`` output.
 
-        Raw CLI output sample:
+        Raw CLI output samples:
 
         .. code-block:: shell-session
 

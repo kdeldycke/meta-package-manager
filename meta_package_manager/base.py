@@ -204,7 +204,7 @@ class PackageManager(object):
 
     @property
     def installed(self):
-        """ List packaages currently installed on the system.
+        """ List packages currently installed on the system.
 
         Returns a list of dict with package ID, name and version.
         """

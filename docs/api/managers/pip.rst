@@ -1,7 +1,4 @@
-meta_package_manager.managers.pip module
+:mod:`meta_package_manager.managers.pip`
 ========================================
 
 .. automodule:: meta_package_manager.managers.pip
-    :members:
-    :undoc-members:
-    :show-inheritance:

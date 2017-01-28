@@ -1,13 +1,7 @@
-meta_package_manager.managers package
-=====================================
+:mod:`meta_package_manager.managers` - Managers implementation
+==============================================================
 
 .. automodule:: meta_package_manager.managers
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-Submodules
-----------
 
 .. toctree::
 

@@ -1,7 +1,4 @@
-meta_package_manager.managers.apm module
+:mod:`meta_package_manager.managers.apm`
 ========================================
 
 .. automodule:: meta_package_manager.managers.apm
-    :members:
-    :undoc-members:
-    :show-inheritance:

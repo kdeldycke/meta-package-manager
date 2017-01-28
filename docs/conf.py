@@ -56,9 +56,13 @@ templates_path = ['templates']
 
 # Both the class’ and the __init__ method’s docstring are concatenated and
 # inserted.
-autoclass_content = "both"
+autoclass_content = 'both'
 # Keep the same ordering as in original source code.
 autodoc_member_order = 'bysource'
+autodoc_default_flags = [
+    'members',
+    'undoc-members',
+    'show-inheritance']
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True

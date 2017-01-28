@@ -16,7 +16,7 @@ Development workflow
 --------------------
 
 Active development of the plugin is happening here, as a side-project of
-``mpm`` itself.
+:command:`mpm` itself.
 
 Releases of the plugin is synchronized with the package. Both share the exact
 same version to simplify management. This explain why the plugin could appears

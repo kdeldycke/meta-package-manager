@@ -1,7 +1,4 @@
-meta_package_manager.managers.gem module
+:mod:`meta_package_manager.managers.gem`
 ========================================
 
 .. automodule:: meta_package_manager.managers.gem
-    :members:
-    :undoc-members:
-    :show-inheritance:

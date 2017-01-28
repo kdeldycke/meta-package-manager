@@ -1,7 +1,4 @@
-meta_package_manager.managers.homebrew module
+:mod:`meta_package_manager.managers.homebrew`
 =============================================
 
 .. automodule:: meta_package_manager.managers.homebrew
-    :members:
-    :undoc-members:
-    :show-inheritance:

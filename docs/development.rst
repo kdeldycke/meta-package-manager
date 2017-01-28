@@ -148,7 +148,6 @@ The documentation you're currently reading can be built locally with `Sphinx
 .. code-block:: shell-session
 
     $ pip install -e .[docs]
-    $ sphinx-apidoc -f -o ./docs .
     $ sphinx-build -b html ./docs ./docs/html
 
 For a smooth release, you also need to validate the rendering of package's long

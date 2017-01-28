@@ -56,6 +56,7 @@ class MAS(PackageManager):
         Raw CLI output sample:
 
         .. code-block:: shell-session
+
             $ mas list
             408981434 iMovie (10.1.4)
             747648890 Telegram (2.30)
@@ -90,9 +91,11 @@ class MAS(PackageManager):
         Raw CLI output sample:
 
         .. code-block:: shell-session
+
             $ mas outdated
 
         .. todo
+
             An example of ``mas outdated`` output is missing above.
         """
         outdated = {}

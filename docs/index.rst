@@ -6,11 +6,10 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   readme
    install
    falsehoods
    bitbar
-   meta_package_manager
+   api/index
    development
    changelog
    todolist

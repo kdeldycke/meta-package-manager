@@ -48,6 +48,7 @@ class Pip(PackageManager):
         Raw CLI output sample:
 
         .. code-block:: shell-session
+
             $ pip list
             configparser (3.5.0)
             docutils (0.13.1)
@@ -94,6 +95,7 @@ class Pip(PackageManager):
         Raw CLI output sample:
 
         .. code-block:: shell-session
+
             $ pip list --outdated
             ccm (2.1.8, /Users/kdeldycke/ccm) - Latest: 2.1.11 [sdist]
             coverage (4.0.3) - Latest: 4.1 [wheel]

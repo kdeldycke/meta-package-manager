@@ -1,5 +1,8 @@
-meta_package_manager package
-============================
+API Documentation
+=================
+
+.. toctree::
+   :maxdepth: 2
 
 Subpackages
 -----------
@@ -36,7 +39,6 @@ meta_package_manager.platform module
     :members:
     :undoc-members:
     :show-inheritance:
-
 
 Module contents
 ---------------

@@ -138,6 +138,7 @@ def print_menu():
     See: https://github.com/matryer/bitbar#plugin-api
 
     .. todo
+
         Add minimal requirement on ``meta-package-manager`` module in the
         invoked ``pip`` command.
     """

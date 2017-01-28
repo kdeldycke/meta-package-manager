@@ -59,12 +59,14 @@ class Homebrew(PackageManager):
         """ Fetch installed packages from ``brew list`` output.
 
         .. note::
+
             This method is shared by ``brew`` and ``cask``, only that the
             latter adds its ``cask`` subcommand to the CLI call.
 
         Raw CLI output sample:
 
         .. code-block:: shell-session
+
             $ brew list --versions
             ack 2.14
             apg 2.2.3
@@ -79,6 +81,7 @@ class Homebrew(PackageManager):
             quicklook-json latest
 
         .. code-block:: shell-session
+
             $ brew cask list --versions
             aerial 1.2beta5
             android-file-transfer latest
@@ -137,6 +140,7 @@ class Homebrew(PackageManager):
         Raw CLI output sample:
 
         .. code-block:: shell-session
+
             $ brew outdated --json=v1
             [
               {
@@ -224,9 +228,9 @@ class HomebrewCask(Homebrew):
         installed packages and inspect them one by one to search for outdated
         ones.
 
-        # Inspect package one by one as `brew cask list` is not reliable.
-        # See: https://github.com/caskroom/homebrew-cask/blob/master/doc
-        # /reporting_bugs/brew_cask_list_shows_wrong_information.md
+        Also, `brew cask list` is `not reliable <https://github.com/caskroom
+        /homebrew-cask/blob/master/doc/reporting_bugs
+        /brew_cask_list_shows_wrong_information.md>`_.
 
         Raw CLI output sample:
 
@@ -336,6 +340,7 @@ class HomebrewCask(Homebrew):
         """ Install a package.
 
         .. todo::
+
             Wait for https://github.com/caskroom/homebrew-cask/issues/22647
             so we can force a cleanup in one go, as we do above with vanilla
             Homebrew.

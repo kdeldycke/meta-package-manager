@@ -52,6 +52,7 @@ class APM(PackageManager):
         Raw CLI output sample:
 
         .. code-block:: shell-session
+
             $ apm list --json | jq
             {
               "core": [
@@ -165,6 +166,7 @@ class APM(PackageManager):
         Raw CLI output sample:
 
         .. code-block:: shell-session
+
             $ apm outdated --compatible --json | jq
             [
               {

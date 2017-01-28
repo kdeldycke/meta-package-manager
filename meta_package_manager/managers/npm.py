@@ -53,6 +53,7 @@ class NPM(PackageManager):
         Raw CLI output sample:
 
         .. code-block:: shell-session
+
             $ npm list -g --json
             {
               "dependencies": {
@@ -115,6 +116,7 @@ class NPM(PackageManager):
         Raw CLI output sample:
 
         .. code-block:: shell-session
+
             $ npm -g --progress=false --json outdated
             {
               "my-linked-package": {

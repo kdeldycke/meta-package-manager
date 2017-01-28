@@ -68,6 +68,7 @@ class Gem(PackageManager):
         Raw CLI output sample:
 
         .. code-block:: shell-session
+
             $ gem list
 
             *** LOCAL GEMS ***
@@ -120,6 +121,7 @@ class Gem(PackageManager):
         Raw CLI output sample:
 
         .. code-block:: shell-session
+
             $ gem outdated
             did_you_mean (1.0.0 < 1.0.2)
             io-console (0.4.5 < 0.4.6)

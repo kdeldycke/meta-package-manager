@@ -186,7 +186,6 @@ def list(ctx):
     installed = {}
 
     for manager in active_managers:
-
         installed[manager.id] = {
             'id': manager.id,
             'name': manager.name,

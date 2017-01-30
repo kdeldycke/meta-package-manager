@@ -84,11 +84,28 @@ class TestManagerDefinitions(unittest.TestCase):
             else:
                 self.assertIsInstance(result, list)
 
+    def test_installed_type(self):
+        """ Check that all installed operations returns a dict of dicts. """
+        for manager in pool().values():
+            if manager.available:
+                self.assertIsInstance(manager.installed, dict)
+                for pkg in manager.installed.values():
+                    self.assertIsInstance(pkg, dict)
+                    self.assertIn('id', pkg)
+                    self.assertIn('name', pkg)
+                    self.assertIn('installed_version', pkg)
+
     def test_outdated_type(self):
-        """ Check that all outdated operations returns a dict. """
+        """ Check that all outdated operations returns a dict of dicts. """
         for manager in pool().values():
             if manager.available:
                 self.assertIsInstance(manager.outdated, dict)
+                for pkg in manager.outdated.values():
+                    self.assertIsInstance(pkg, dict)
+                    self.assertIn('id', pkg)
+                    self.assertIn('name', pkg)
+                    self.assertIn('installed_version', pkg)
+                    self.assertIn('latest_version', pkg)
 
 
 class TestManagerPlatform(unittest.TestCase):

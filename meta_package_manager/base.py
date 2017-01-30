@@ -28,7 +28,7 @@ from __future__ import (
 import os
 
 from boltons.cacheutils import cachedproperty
-from boltons.strutils import strip_ansi
+from boltons.strutils import strip_ansi, indent
 from packaging.specifiers import SpecifierSet
 from packaging.version import parse as parse_version
 
@@ -53,10 +53,14 @@ class CLIError(Exception):
 
     def __str__(self):
         """ Human-readable error. """
-        return (
-            "Return code: {}\n"
+        margin = ' ' * 2
+        return indent((
+            "\nReturn code: {}\n"
             "Output:\n{}\n"
-            "Error:\n{}\n").format(self.code, self.output, self.error)
+            "Error:\n{}").format(
+                self.code,
+                indent(str(self.output), margin),
+                indent(str(self.error), margin)), margin)
 
 
 class PackageManager(object):

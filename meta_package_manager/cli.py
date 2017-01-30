@@ -20,6 +20,7 @@
 
 from __future__ import absolute_import, division, print_function
 
+from itertools import ifilter
 import logging
 from functools import partial
 from json import dumps as json_dumps
@@ -84,9 +85,19 @@ def cli(ctx, manager, output_format):
         ctx.exit()
 
     # Filters out the list of considered managers depending on user choices.
-    target_managers = {manager: pool()[manager]} if manager else pool()
+    # TODO: allow multiple repetitions.
+    target_managers = [pool()[manager]] if manager else pool().values()
 
-    # Silent all log message in JSON rendering mode unless it's at debug level.
+    # Pre-filters inactive managers.
+    def keep_available(manager):
+        if manager.available:
+            return True
+        logger.warning('Skip unavailable {} manager.'.format(manager.id))
+    # Use an iterator to not trigger log messages for subcommands not using this
+    # variable.
+    active_managers = ifilter(keep_available, target_managers)
+
+    # Silence all log message for JSON rendering unless in debug mode.
     rendering = RENDERING_MODES[output_format]
     if rendering == 'json' and level_name != 'DEBUG':
         click_log.set_level(logging.CRITICAL * 2)
@@ -94,6 +105,7 @@ def cli(ctx, manager, output_format):
     # Load up global options to the context.
     ctx.obj = {
         'target_managers': target_managers,
+        'active_managers': active_managers,
         'rendering': rendering}
 
 
@@ -112,13 +124,13 @@ def managers(ctx):
             'version_string', 'fresh', 'available']
         # JSON mode use echo to output data because the logger is disabled.
         click.echo(json({
-            manager_id: {fid: getattr(manager, fid) for fid in fields}
-            for manager_id, manager in target_managers.items()}))
+            manager.id: {fid: getattr(manager, fid) for fid in fields}
+            for manager in target_managers}))
         return
 
     # Human-friendly content rendering.
     table = []
-    for manager_id, manager in target_managers.items():
+    for manager in target_managers:
 
         # Build up the OS column content.
         os_infos = OK if manager.supported else KO
@@ -141,7 +153,7 @@ def managers(ctx):
 
         table.append([
             manager.name,
-            manager_id,
+            manager.id,
             os_infos,
             cli_infos,
             OK if manager.executable else '',
@@ -157,47 +169,30 @@ def managers(ctx):
 @click.pass_context
 def sync(ctx):
     """ Sync local package metadata and info from external sources. """
-    target_managers = ctx.obj['target_managers']
+    active_managers = ctx.obj['active_managers']
 
-    for manager_id, manager in target_managers.items():
-
-        # Filters-out inactive managers.
-        if not manager.available:
-            logger.warning('Skip unavailable {} manager.'.format(manager_id))
-            continue
-
+    for manager in active_managers:
         manager.sync()
 
 
 @cli.command(short_help='List installed packages.')
 @click.pass_context
 def list(ctx):
-    """ List installed packages installed on the system from all managers. """
-    target_managers = ctx.obj['target_managers']
+    """ List all packages installed on the system from all managers. """
+    active_managers = ctx.obj['active_managers']
     rendering = ctx.obj['rendering']
 
     # Build-up a global list of installed packages per manager.
     installed = {}
 
-    for manager_id, manager in target_managers.items():
+    for manager in active_managers:
 
-        # Filters-out inactive managers.
-        if not manager.available:
-            logger.warning('Skip unavailable {} manager.'.format(manager_id))
-            continue
-
-        packages = []
-        for info in manager.installed.values():
-            packages.append({
-                'name': info['name'],
-                'id': info['id'],
-                'installed_version': info['installed_version']})
-
-        installed[manager_id] = {
-            'id': manager_id,
+        installed[manager.id] = {
+            'id': manager.id,
             'name': manager.name,
-            'packages': packages,
-            'error': error}
+            'packages': manager.installed.values(),
+            # TODO: Catch and report errors.
+            'error': None}
 
     # Machine-friendly data rendering.
     if rendering == 'json':
@@ -249,7 +244,7 @@ def list(ctx):
 def outdated(ctx, cli_format):
     """ List available package upgrades and their versions for each manager.
     """
-    target_managers = ctx.obj['target_managers']
+    active_managers = ctx.obj['active_managers']
     rendering = ctx.obj['rendering']
 
     render_cli = partial(PackageManager.render_cli, cli_format=cli_format)
@@ -257,12 +252,7 @@ def outdated(ctx, cli_format):
     # Build-up a global list of outdated packages per manager.
     outdated = {}
 
-    for manager_id, manager in target_managers.items():
-
-        # Filters-out inactive managers.
-        if not manager.available:
-            logger.warning('Skip unavailable {} manager.'.format(manager_id))
-            continue
+    for manager in active_managers:
 
         # Force a sync to get the freshest upgrades.
         error = None
@@ -272,17 +262,13 @@ def outdated(ctx, cli_format):
             error = expt.error
             logger.error(error)
 
-        packages = []
-        for info in manager.outdated.values():
-            packages.append({
-                'name': info['name'],
-                'id': info['id'],
-                'installed_version': info['installed_version'],
-                'latest_version': info['latest_version'],
+        packages = manager.outdated.values()
+        for info in packages:
+            info.update({
                 'upgrade_cli': render_cli(manager.upgrade_cli(info['id']))})
 
-        outdated[manager_id] = {
-            'id': manager_id,
+        outdated[manager.id] = {
+            'id': manager.id,
             'name': manager.name,
             'packages': packages,
             'error': error}
@@ -295,8 +281,8 @@ def outdated(ctx, cli_format):
             except NotImplementedError:
                 # Fallback on mpm itself which is capable of simulating a full
                 # upgrade.
-                upgrade_all_cli = ['mpm', '--manager', manager_id, 'upgrade']
-            outdated[manager_id]['upgrade_all_cli'] = render_cli(
+                upgrade_all_cli = ['mpm', '--manager', manager.id, 'upgrade']
+            outdated[manager.id]['upgrade_all_cli'] = render_cli(
                 upgrade_all_cli)
 
     # Machine-friendly data rendering.
@@ -350,17 +336,12 @@ def outdated(ctx, cli_format):
 @click.pass_context
 def upgrade(ctx, dry_run):
     """ Perform a full package upgrade on all available managers. """
-    target_managers = ctx.obj['target_managers']
+    active_managers = ctx.obj['active_managers']
 
-    for manager_id, manager in target_managers.items():
-
-        # Filters-out inactive managers.
-        if not manager.available:
-            logger.warning('Skip unavailable {} manager.'.format(manager_id))
-            continue
+    for manager in active_managers:
 
         logger.info(
-            'Updating all outdated packages from {}...'.format(manager_id))
+            'Updating all outdated packages from {}...'.format(manager.id))
 
         try:
             output = manager.upgrade_all(dry_run=dry_run)

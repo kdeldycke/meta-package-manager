@@ -186,14 +186,6 @@ def list(ctx):
             logger.warning('Skip unavailable {} manager.'.format(manager_id))
             continue
 
-        # Force a sync to get the freshest upgrades.
-        error = None
-        try:
-            manager.sync()
-        except CLIError as expt:
-            error = expt.error
-            logger.error(error)
-
         packages = []
         for info in manager.installed.values():
             packages.append({

@@ -11,14 +11,45 @@ matrix:
     # We're not directly using the Python distribution provided by Travis, but
     # this variable will be fed to Conda to install the right version.
     - python: "2.7"
+      os: linux
+      dist: trusty
       env: PYTHON_DIST="2.7"
     - python: "3.3"
+      os: linux
+      dist: trusty
       env: PYTHON_DIST="3.3"
     - python: "3.4"
+      os: linux
+      dist: trusty
       env: PYTHON_DIST="3.4"
     - python: "3.5"
+      os: linux
+      dist: trusty
       env: PYTHON_DIST="3.5"
     - python: "3.6"
+      os: linux
+      dist: trusty
+      env: PYTHON_DIST="3.6"
+
+    - python: "2.7"
+      os: linux
+      dist: precise
+      env: PYTHON_DIST="2.7"
+    - python: "3.3"
+      os: linux
+      dist: precise
+      env: PYTHON_DIST="3.3"
+    - python: "3.4"
+      os: linux
+      dist: precise
+      env: PYTHON_DIST="3.4"
+    - python: "3.5"
+      os: linux
+      dist: precise
+      env: PYTHON_DIST="3.5"
+    - python: "3.6"
+      os: linux
+      dist: precise
       env: PYTHON_DIST="3.6"
 
     # Xcode to macOS version matrix is available at:

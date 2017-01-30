@@ -93,8 +93,8 @@ def cli(ctx, manager, output_format):
         if manager.available:
             return True
         logger.warning('Skip unavailable {} manager.'.format(manager.id))
-    # Use an iterator to not trigger log messages for subcommands not using this
-    # variable.
+    # Use an iterator to not trigger log messages for subcommands not using
+    # this variable.
     active_managers = ifilter(keep_available, target_managers)
 
     # Silence all log message for JSON rendering unless in debug mode.

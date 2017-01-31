@@ -91,9 +91,11 @@ class TestManagerDefinitions(unittest.TestCase):
                 self.assertIsInstance(manager.installed, dict)
                 for pkg in manager.installed.values():
                     self.assertIsInstance(pkg, dict)
-                    self.assertIn('id', pkg)
-                    self.assertIn('name', pkg)
-                    self.assertIn('installed_version', pkg)
+                    self.assertItemsEqual(pkg, [
+                        'id', 'name', 'installed_version'])
+                    self.assertIsInstance(pkg['id'], basestring)
+                    self.assertIsInstance(pkg['name'], basestring)
+                    self.assertIsInstance(pkg['installed_version'], basestring)
 
     def test_outdated_type(self):
         """ Check that all outdated operations returns a dict of dicts. """
@@ -102,10 +104,12 @@ class TestManagerDefinitions(unittest.TestCase):
                 self.assertIsInstance(manager.outdated, dict)
                 for pkg in manager.outdated.values():
                     self.assertIsInstance(pkg, dict)
-                    self.assertIn('id', pkg)
-                    self.assertIn('name', pkg)
-                    self.assertIn('installed_version', pkg)
-                    self.assertIn('latest_version', pkg)
+                    self.assertItemsEqual(pkg, [
+                        'id', 'name', 'installed_version', 'latest_version'])
+                    self.assertIsInstance(pkg['id'], basestring)
+                    self.assertIsInstance(pkg['name'], basestring)
+                    self.assertIsInstance(pkg['installed_version'], basestring)
+                    self.assertIsInstance(pkg['latest_version'], basestring)
 
 
 class TestManagerPlatform(unittest.TestCase):

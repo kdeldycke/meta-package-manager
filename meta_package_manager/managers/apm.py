@@ -145,8 +145,8 @@ class APM(PackageManager):
         """
         installed = {}
 
-        installed_cmd = [self.cli_path] + self.cli_args + ['list', '--json']
-        output = self.run(installed_cmd)
+        output = self.run([self.cli_path] + self.cli_args + [
+            'list', '--json'])
 
         if output:
             for package_list in json.loads(output).values():
@@ -314,9 +314,8 @@ class APM(PackageManager):
         """
         outdated = {}
 
-        outdated_cmd = [self.cli_path] + self.cli_args + [
-            'outdated', '--compatible', '--json']
-        output = self.run(outdated_cmd)
+        output = self.run([self.cli_path] + self.cli_args + [
+            'outdated', '--compatible', '--json'])
 
         if output:
             for package in json.loads(output):

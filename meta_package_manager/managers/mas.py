@@ -67,11 +67,11 @@ class MAS(PackageManager):
 
         if output:
             regexp = re.compile(r'(\d+) (.*) \((\S+)\)$')
-            for application in output.split('\n'):
-                if not application:
+            for package in output.split('\n'):
+                if not package:
                     continue
                 package_id, package_name, installed_version = regexp.match(
-                    application).groups()
+                    package).groups()
                 installed[package_id] = {
                     'id': package_id,
                     'name': package_name,
@@ -104,11 +104,11 @@ class MAS(PackageManager):
 
         if output:
             regexp = re.compile(r'(\d+) (.*) \((\S+) -> (\S+)\)$')
-            for application in output.split('\n'):
-                if not application:
+            for package in output.split('\n'):
+                if not package:
                     continue
                 package_id, package_name, installed_version, latest_version = \
-                    regexp.match(application).groups()
+                    regexp.match(package).groups()
                 outdated[package_id] = {
                     'id': package_id,
                     'name': package_name,

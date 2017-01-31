@@ -211,7 +211,8 @@ class PackageManager(object):
     def installed(self):
         """ List packages currently installed on the system.
 
-        Returns a list of dict with package ID, name and version.
+        Returns a dict indexed by package IDs. Each item is a dict with
+        package ID, name and version.
         """
         raise NotImplementedError
 
@@ -219,8 +220,9 @@ class PackageManager(object):
     def outdated(self):
         """ List currently installed packages having a new version available.
 
-        Returns a list of dict with package ID, name, current installed version
-        and latest upgradeable version.
+        Returns a dict indexed by package IDs. Each item is a dict with
+        package ID, name, current installed version and latest upgradeable
+        version.
         """
         raise NotImplementedError
 

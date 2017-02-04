@@ -95,7 +95,24 @@ class TestManagerDefinitions(unittest.TestCase):
                         'id', 'name', 'installed_version'])
                     self.assertIsInstance(pkg['id'], basestring)
                     self.assertIsInstance(pkg['name'], basestring)
-                    self.assertIsInstance(pkg['installed_version'], basestring)
+                    self.assertIsInstance(
+                        pkg['installed_version'], (basestring, None))
+
+    def test_search_type(self):
+        """ Check that all search operations returns a dict of dicts. """
+        for manager in pool().values():
+            if manager.available:
+                matches = manager.search('python')
+                self.assertIsInstance(matches, dict)
+                for pkg in matches.values():
+                    self.assertIsInstance(pkg, dict)
+                    self.assertItemsEqual(pkg, [
+                        'id', 'name', 'latest_version', 'exact'])
+                    self.assertIsInstance(pkg['id'], basestring)
+                    self.assertIsInstance(pkg['name'], basestring)
+                    self.assertIsInstance(
+                        pkg['latest_version'], (basestring, None))
+                    self.assertIsInstance(pkg['exact'], bool)
 
     def test_outdated_type(self):
         """ Check that all outdated operations returns a dict of dicts. """
@@ -109,7 +126,8 @@ class TestManagerDefinitions(unittest.TestCase):
                         'upgrade_cli'])
                     self.assertIsInstance(pkg['id'], basestring)
                     self.assertIsInstance(pkg['name'], basestring)
-                    self.assertIsInstance(pkg['installed_version'], basestring)
+                    self.assertIsInstance(
+                        pkg['installed_version'], (basestring, None))
                     self.assertIsInstance(pkg['latest_version'], basestring)
                     self.assertIsInstance(pkg['upgrade_cli'], basestring)
 

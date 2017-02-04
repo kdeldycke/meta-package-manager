@@ -88,6 +88,45 @@ class Pip(PackageManager):
 
         return installed
 
+    def search(self, query):
+        """ Fetch matching packages from ``pip search`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            $ pip search abc
+            ABC (0.0.0)                 - UNKNOWN
+            micropython-abc (0.0.1)     - Dummy abc module for MicroPython
+            abc1 (1.2.0)                - a list about my think
+            abcd (0.3.0)                - AeroGear Build Cli for Digger
+            abcyui (1.0.0)              - Sorry ,This is practice!
+            astroabc (1.4.2)            - A Python implementation of an
+                                          Approximate Bayesian Computation
+                                          Sequential Monte Carlo (ABC SMC)
+                                          sampler for parameter estimation.
+            collective.js.abcjs (1.10)  - UNKNOWN
+            cosmoabc (1.0.5)            - Python ABC sampler
+        """
+        matches = {}
+
+        output = self.run([self.cli_path] + self.cli_args + [
+            'search', query])
+
+        if output:
+            regexp = re.compile(r'(\S+) \((.*?)\).*')
+            for package in output.split('\n'):
+                match = regexp.match(package)
+                if match:
+                    package_id, version = match.groups()
+                    matches[package_id] = {
+                        'id': package_id,
+                        'name': package_id,
+                        'latest_version': version,
+                        'exact': self.exact_match(query, package_id)}
+
+        return matches
+
     @cachedproperty
     def outdated(self):
         """ Fetch outdated packages from ``pip list --outdated`` output.

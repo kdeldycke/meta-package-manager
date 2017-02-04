@@ -159,6 +159,104 @@ class APM(PackageManager):
 
         return installed
 
+    def search(self, query):
+        """ Fetch matching packages from ``apm search`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            $ apm search python --json | jq
+            [
+              {
+                "name": "atom-python-run",
+                "main": "./lib/atom-python-run.js",
+                "version": "0.7.3",
+                "description": "Run a python source file.",
+                "keywords": [
+                  "python"
+                ],
+                "repository": "https://github.com/foreshadow/atom-python-run",
+                "license": "MIT",
+                "engines": {
+                  "atom": ">=1.0.0 <2.0.0"
+                },
+                "dependencies": {},
+                "readme": "Blah blah",
+                "downloads": 41379,
+                "stargazers_count": 16
+              },
+              {
+                "name": "build-python",
+                "version": "0.6.3",
+                "description": "Atom Build provider for python/python3",
+                "repository": "https://github.com/idleberg/atom-build-python",
+                "license": "MIT",
+                "keywords": [
+                  "buildprovider",
+                  "compile",
+                  "python",
+                  "python3",
+                  "linter",
+                  "lint"
+                ],
+                "main": "lib/provider.js",
+                "engines": {
+                  "atom": ">=1.0.0 <2.0.0"
+                },
+                "providedServices": {
+                  "builder": {
+                    "description": "Compiles Python",
+                    "versions": {
+                      "2.0.0": "provideBuilder"
+                    }
+                  }
+                },
+                "package-deps": [
+                  "build"
+                ],
+                "dependencies": {
+                  "atom-package-deps": "^4.3.1"
+                },
+                "devDependencies": {
+                  "babel-eslint": "^7.1.1",
+                  "coffeelint-stylish": "^0.1.2",
+                  "eslint": "^3.13.1",
+                  "eslint-config-atom-build": "^4.0.0",
+                  "gulp": "github:gulpjs/gulp#4.0",
+                  "gulp-coffeelint": "^0.6.0",
+                  "gulp-debug": "^3.0.0",
+                  "gulp-jshint": "^2.0.4",
+                  "gulp-jsonlint": "^1.2.0",
+                  "gulp-lesshint": "^2.1.0",
+                  "jshint": "^2.9.4"
+                },
+                "scripts": {
+                  "test": "gulp lint"
+                },
+                "readme": "Blah blah",
+                "downloads": 2838,
+                "stargazers_count": 0
+              },
+              (...)
+            ]
+        """
+        matches = {}
+
+        output = self.run([self.cli_path] + self.cli_args + [
+            'search', query, '--json'])
+
+        if output:
+            for package in json.loads(output):
+                package_id = package['name']
+                matches[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'latest_version': package['version'],
+                    'exact': self.exact_match(query, package_id)}
+
+        return matches
+
     @cachedproperty
     def outdated(self):
         """ Fetch outdated packages from ``apm outdated`` output.

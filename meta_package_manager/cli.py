@@ -240,6 +240,68 @@ def list(ctx):
         per_manager_totals))
 
 
+@cli.command(short_help='Search packages.')
+@click.argument('query', type=click.STRING, required=True)
+@click.pass_context
+def search(ctx, query):
+    """ Search packages from all managers. """
+    active_managers = ctx.obj['active_managers']
+    rendering = ctx.obj['rendering']
+
+    # Build-up a global list of package matches per manager.
+    matches = {}
+
+    for manager in active_managers:
+        matches[manager.id] = {
+            'id': manager.id,
+            'name': manager.name,
+            'packages': manager.search(query).values(),
+            # TODO: Catch and report errors.
+            'error': None}
+
+    # Machine-friendly data rendering.
+    if rendering == 'json':
+        # JSON mode use echo to output data because the logger is disabled.
+        click.echo(json(matches))
+        return
+
+    # Human-friendly content rendering.
+    table = []
+    for manager_id, matching_pkg in matches.items():
+        table += [[
+            info['name'],
+            info['id'],
+            manager_id,
+            info['latest_version'] if info['latest_version'] else '?']
+            for info in matching_pkg['packages']]
+
+    def sort_method(line):
+        """ Force sorting of table.
+
+        By lower-cased package name and ID first, then manager ID.
+        """
+        return line[0].lower(), line[1].lower(), line[2]
+
+    # Sort and print table.
+    # TODO: highlight exact matches.
+    table = [['Package name', 'ID', 'Manager', 'Latest version']] + sorted(
+        table, key=sort_method)
+    logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
+    # Print statistics.
+    manager_stats = {
+        infos['id']: len(infos['packages']) for infos in matches.values()}
+    total_installed = sum(manager_stats.values())
+    per_manager_totals = ', '.join([
+        '{} from {}'.format(v, k)
+        for k, v in sorted(manager_stats.items()) if v])
+    if per_manager_totals:
+        per_manager_totals = ' ({})'.format(per_manager_totals)
+    logger.info('{} matching package{} found{}.'.format(
+        total_installed,
+        's' if total_installed > 1 else '',
+        per_manager_totals))
+
+
 @cli.command(short_help='List outdated packages.')
 @click.option(
     '-c', '--cli-format', type=click.Choice(CLI_FORMATS), default='plain',

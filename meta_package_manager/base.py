@@ -216,6 +216,27 @@ class PackageManager(object):
         """
         raise NotImplementedError
 
+    def exact_match(self, query, result):
+        """ Compare search query and matching result.
+
+        Returns `True` if the matching result exactly match the search query.
+
+        Still pplies a light normalization and tokenization of strings before
+        comparison to make the "exactiness" in the human sense instead of
+        strictly machine sense.
+        """
+        # TODO: tokenize.
+        return query.lower() == result.lower()
+
+    def search(self, query):
+        """ Search packages whose ID contain exact or partial query.
+
+        Returns a dict indexed by package IDs. Each item is a dict with
+        package ID, name, version and a boolean indicating if the match is
+        exact or partial.
+        """
+        raise NotImplementedError
+
     @property
     def outdated(self):
         """ List currently installed packages having a new version available.

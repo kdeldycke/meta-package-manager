@@ -84,6 +84,40 @@ class MAS(PackageManager):
 
         return installed
 
+    def search(self, query):
+        """ Fetch matching packages from ``mas search`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            $ mas search python
+            689176796 Python Runner
+            630736088 Learning Python
+            945397020 Run Python
+            891162632 Python Lint
+            1025391371 Tutorial for Python
+            1164498373 PythonGames
+        """
+        matches = {}
+
+        output = self.run([self.cli_path] + self.cli_args + [
+            'search', query])
+
+        if output:
+            regexp = re.compile(r'(\d+) (.*)$')
+            for package in output.split('\n'):
+                match = regexp.match(package)
+                if match:
+                    package_id, package_name = match.groups()
+                    matches[package_id] = {
+                        'id': package_id,
+                        'name': package_name,
+                        'latest_version': None,
+                        'exact': self.exact_match(query, package_name)}
+
+        return matches
+
     @cachedproperty
     def outdated(self):
         """ Fetch outdated packages from ``mas outdated`` output.

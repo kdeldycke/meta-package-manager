@@ -133,6 +133,34 @@ class Homebrew(PackageManager):
 
         return installed
 
+    def search(self, query):
+        """ Fetch matching packages from ``brew search`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            $ brew search sed
+            gnu-sed ✔                    libxdg-basedir               minised
+            Caskroom/cask/focused                  Caskroom/cask/marsedit
+            Caskroom/cask/licensed                 Caskroom/cask/physicseditor
+        """
+        matches = {}
+
+        output = self.run([self.cli_path] + self.cli_args + [
+            'search', query])
+
+        if output:
+            for package_id in re.compile(r'[\s✔]+').split(output):
+                if package_id:
+                    matches[package_id] = {
+                        'id': package_id,
+                        'name': package_id,
+                        'latest_version': None,
+                        'exact': self.exact_match(query, package_id)}
+
+        return matches
+
     @cachedproperty
     def outdated(self):
         """ Fetch outdated packages from ``brew outdated`` output.
@@ -218,6 +246,36 @@ class HomebrewCask(Homebrew):
     # `brew update` and is deprecated. See:
     # https://github.com/kdeldycke/meta-package-manager/issues/28
     sync = Homebrew().sync
+
+    def search(self, query):
+        """ Fetch matching packages from ``brew cask search`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            $ brew cask search tableau
+            ==> Exact match
+            tableau
+            ==> Partial matches
+            tableau-public           tableau-reader
+        """
+        matches = {}
+
+        output = self.run([self.cli_path] + self.cli_args + [
+            'search', query])
+
+        if output:
+            lines = [
+                l for l in output.split('\n') if l and not l.startswith('==>')]
+            for package_id in re.compile(r'\s+').split('\n'.join(lines)):
+                matches[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'latest_version': None,
+                    'exact': self.exact_match(query, package_id)}
+
+        return matches
 
     @cachedproperty
     def outdated(self):

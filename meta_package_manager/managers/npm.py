@@ -109,6 +109,129 @@ class NPM(PackageManager):
 
         return installed
 
+    def search(self, query):
+        """ Fetch matching packages from ``npm search`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            $ npm search python --json | jq
+            [
+              {
+                "name": "angularjs-simplest-structure",
+                "time": {
+                  "modified": "2016-06-01T09:15:16.502Z"
+                }
+              },
+              (...)
+              {
+                "name": "zip-array",
+                "description": "A javascript equivalent of Python's zip",
+                "dist-tags": {
+                  "latest": "1.0.1"
+                },
+                "maintainers": [
+                  {
+                    "name": "vikramcse",
+                    "email": "vikramcse.10@gmail.com"
+                  }
+                ],
+                "homepage": "https://github.com/vikramcse/zip-array#readme",
+                "keywords": [
+                  "zip",
+                  "combine",
+                  "array",
+                  "python",
+                  "merge",
+                  "longest",
+                  "shortest"
+                ],
+                "repository": {
+                  "type": "git",
+                  "url": "git+https://github.com/vikramcse/zip-array.git"
+                },
+                "author": {
+                  "name": "Vikram",
+                  "email": "vikramcse.10@gmail.com"
+                },
+                "bugs": {
+                  "url": "https://github.com/vikramcse/zip-array/issues"
+                },
+                "license": "ISC",
+                "readmeFilename": "README.md",
+                "time": {
+                  "modified": "2016-02-12T06:45:17.083Z"
+                },
+                "versions": {
+                  "1.0.1": "latest"
+                }
+              },
+              {
+                "name": "zpt",
+                "description": "Zenon Page Templates - JS (ZPT-JS)",
+                "dist-tags": {
+                  "latest": "0.6.0"
+                },
+                "maintainers": [
+                  {
+                    "name": "davidcana",
+                    "email": "david.javapagetemplates@gmail.com"
+                  }
+                ],
+                "homepage": "https://github.com/davidcana/ZPT-JS",
+                "keywords": [
+                  "jquery-plugin",
+                  "ecosystem:jquery",
+                  "template",
+                  "templates",
+                  "templating",
+                  "python",
+                  "zpt",
+                  "zope",
+                  "page"
+                ],
+                "contributors": [
+                  {}
+                ],
+                "author": {
+                  "name": "David Cana Lopez"
+                },
+                "bugs": {
+                  "email": "david.javapagetemplates@gmail.com"
+                },
+                "license": "AGPL-3.0",
+                "readmeFilename": "README.md",
+                "repository": {
+                  "type": "git",
+                  "url": "git+https://github.com/davidcana/ZPT-JS.git"
+                },
+                "time": {
+                  "modified": "2016-11-16T17:55:29.646Z"
+                },
+                "versions": {
+                  "0.6.0": "latest"
+                }
+              }
+            ]
+        """
+        matches = {}
+
+        output = self.run([self.cli_path] + self.cli_args + [
+            'search', query, '--json'])
+
+        if output:
+            for package in json.loads(output):
+                package_id = package['name']
+                matches[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'latest_version': package.get(
+                        'dist-tags', {}).get('latest', None),
+                    'exact': self.exact_match(query, package_id)}
+
+        return matches
+
     @cachedproperty
     def outdated(self):
         """ Fetch outdated packages from ``npm outdated`` output.

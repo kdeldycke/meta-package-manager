@@ -6,6 +6,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* Add new ``search`` operation. Closes #22.
 * Do not force a ``sync`` before listing installed packages in CLI.
 * Rework API documentation.
 

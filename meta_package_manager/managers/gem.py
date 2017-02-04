@@ -88,8 +88,6 @@ class Gem(PackageManager):
         """
         installed = {}
 
-        # `list` operation does not require sudo privileges on homebrew or
-        # system.
         output = self.run([self.cli_path] + self.cli_args + ['list'])
 
         if output:
@@ -114,6 +112,43 @@ class Gem(PackageManager):
 
         return installed
 
+    def search(self, query):
+        """ Fetch matching packages from ``gem search`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            $ gem search python
+
+            *** REMOTE GEMS ***
+
+            bee_python (0.2.3)
+            fluent-plugin-airbrake-python (0.2)
+            logstash-filter-python (0.0.1 java)
+            pythonconfig (1.0.1)
+            rabbit-slide-niku-erlangvm-for-pythonista (2015.09.12)
+            RubyToPython (0.0)
+        """
+        matches = {}
+
+        output = self.run([self.cli_path] + self.cli_args + [
+            'search', query])
+
+        if output:
+            regexp = re.compile(r'(\S+) \((.+)\)')
+            for package in output.split('\n'):
+                match = regexp.match(package)
+                if match:
+                    package_id, version = match.groups()
+                    matches[package_id] = {
+                        'id': package_id,
+                        'name': package_id,
+                        'latest_version': version.split()[0],
+                        'exact': self.exact_match(query, package_id)}
+
+        return matches
+
     @cachedproperty
     def outdated(self):
         """ Fetch outdated packages from ``gem outdated`` output.
@@ -132,8 +167,6 @@ class Gem(PackageManager):
         """
         outdated = {}
 
-        # `outdated` operation does not require sudo privileges on homebrew or
-        # system.
         output = self.run([self.cli_path] + self.cli_args + ['outdated'])
 
         if output:

@@ -60,7 +60,7 @@ def json(data):
     return json_dumps(data, sort_keys=True, indent=4, separators=(',', ': '))
 
 
-def stats(data):
+def print_stats(data):
     """ Print statistics. """
     manager_stats = {
         infos['id']: len(infos['packages']) for infos in data.values()}
@@ -87,9 +87,12 @@ def stats(data):
 @click.option(
     '-o', '--output-format', type=click.Choice(RENDERING_MODES),
     default='fancy', help="Rendering mode of the output. Defaults to fancy.")
+@click.option(
+    '--stats/--no-stats', default=True, help="Print statistics or not at the "
+    "end of output. Active by default.")
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx, manager, output_format):
+def cli(ctx, manager, output_format, stats):
     """ CLI for multi-package manager upgrades. """
     level = click_log.get_level()
     try:
@@ -127,7 +130,8 @@ def cli(ctx, manager, output_format):
     ctx.obj = {
         'target_managers': target_managers,
         'active_managers': active_managers,
-        'rendering': rendering}
+        'rendering': rendering,
+        'stats': stats}
 
 
 @cli.command(short_help='List supported package managers and their location.')
@@ -202,6 +206,7 @@ def list(ctx):
     """ List all packages installed on the system from all managers. """
     active_managers = ctx.obj['active_managers']
     rendering = ctx.obj['rendering']
+    stats = ctx.obj['stats']
 
     # Build-up a global list of installed packages per manager.
     installed = {}
@@ -242,7 +247,8 @@ def list(ctx):
         table, key=sort_method)
     logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
 
-    stats(installed)
+    if stats:
+        print_stats(installed)
 
 
 @cli.command(short_help='Search packages.')
@@ -252,6 +258,7 @@ def search(ctx, query):
     """ Search packages from all managers. """
     active_managers = ctx.obj['active_managers']
     rendering = ctx.obj['rendering']
+    stats = ctx.obj['stats']
 
     # Build-up a global list of package matches per manager.
     matches = {}
@@ -293,7 +300,8 @@ def search(ctx, query):
         table, key=sort_method)
     logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
 
-    stats(matches)
+    if stats:
+        print_stats(matches)
 
 
 @cli.command(short_help='List outdated packages.')
@@ -306,6 +314,7 @@ def outdated(ctx, cli_format):
     """
     active_managers = ctx.obj['active_managers']
     rendering = ctx.obj['rendering']
+    stats = ctx.obj['stats']
 
     render_cli = partial(PackageManager.render_cli, cli_format=cli_format)
 
@@ -375,7 +384,8 @@ def outdated(ctx, cli_format):
         'Latest version']] + sorted(table, key=sort_method)
     logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
 
-    stats(outdated)
+    if stats:
+        print_stats(outdated)
 
 
 @cli.command(short_help='Upgrade all packages.')

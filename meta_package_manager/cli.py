@@ -60,6 +60,22 @@ def json(data):
     return json_dumps(data, sort_keys=True, indent=4, separators=(',', ': '))
 
 
+def stats(data):
+    """ Print statistics. """
+    manager_stats = {
+        infos['id']: len(infos['packages']) for infos in data.values()}
+    total_installed = sum(manager_stats.values())
+    per_manager_totals = ', '.join([
+        '{} from {}'.format(v, k)
+        for k, v in sorted(manager_stats.items()) if v])
+    if per_manager_totals:
+        per_manager_totals = ' ({})'.format(per_manager_totals)
+    logger.info('{} package{} found{}.'.format(
+        total_installed,
+        's' if total_installed > 1 else '',
+        per_manager_totals))
+
+
 @click.group(invoke_without_command=True)
 @click_log.init(logger)
 @click_log.simple_verbosity_option(
@@ -225,19 +241,8 @@ def list(ctx):
     table = [['Package name', 'ID', 'Manager', 'Installed version']] + sorted(
         table, key=sort_method)
     logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
-    # Print statistics.
-    manager_stats = {
-        infos['id']: len(infos['packages']) for infos in installed.values()}
-    total_installed = sum(manager_stats.values())
-    per_manager_totals = ', '.join([
-        '{} from {}'.format(v, k)
-        for k, v in sorted(manager_stats.items()) if v])
-    if per_manager_totals:
-        per_manager_totals = ' ({})'.format(per_manager_totals)
-    logger.info('{} installed package{} found{}.'.format(
-        total_installed,
-        's' if total_installed > 1 else '',
-        per_manager_totals))
+
+    stats(installed)
 
 
 @cli.command(short_help='Search packages.')
@@ -287,19 +292,8 @@ def search(ctx, query):
     table = [['Package name', 'ID', 'Manager', 'Latest version']] + sorted(
         table, key=sort_method)
     logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
-    # Print statistics.
-    manager_stats = {
-        infos['id']: len(infos['packages']) for infos in matches.values()}
-    total_installed = sum(manager_stats.values())
-    per_manager_totals = ', '.join([
-        '{} from {}'.format(v, k)
-        for k, v in sorted(manager_stats.items()) if v])
-    if per_manager_totals:
-        per_manager_totals = ' ({})'.format(per_manager_totals)
-    logger.info('{} matching package{} found{}.'.format(
-        total_installed,
-        's' if total_installed > 1 else '',
-        per_manager_totals))
+
+    stats(matches)
 
 
 @cli.command(short_help='List outdated packages.')
@@ -380,19 +374,8 @@ def outdated(ctx, cli_format):
         'Package name', 'ID', 'Manager', 'Installed version',
         'Latest version']] + sorted(table, key=sort_method)
     logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
-    # Print statistics.
-    manager_stats = {
-        infos['id']: len(infos['packages']) for infos in outdated.values()}
-    total_outdated = sum(manager_stats.values())
-    per_manager_totals = ', '.join([
-        '{} from {}'.format(v, k)
-        for k, v in sorted(manager_stats.items()) if v])
-    if per_manager_totals:
-        per_manager_totals = ' ({})'.format(per_manager_totals)
-    logger.info('{} outdated package{} found{}.'.format(
-        total_outdated,
-        's' if total_outdated > 1 else '',
-        per_manager_totals))
+
+    stats(outdated)
 
 
 @cli.command(short_help='Upgrade all packages.')

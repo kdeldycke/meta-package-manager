@@ -37,10 +37,14 @@ PY2 = PY_VERSION[0] == 2
 PY3 = PY_VERSION[0] == 3
 
 
-# OS identification constants.
 MACOS = 'macos'
+""" Constant used to identify OSes of the macOS family. """
+
 LINUX = 'linux'
+""" Constant used to identify OSes of the Linux family. """
+
 WINDOWS = 'windows'
+""" Constant used to identify OSes of the Windows family. """
 
 
 def is_linux():

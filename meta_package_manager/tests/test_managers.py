@@ -105,11 +105,13 @@ class TestManagerDefinitions(unittest.TestCase):
                 for pkg in manager.outdated.values():
                     self.assertIsInstance(pkg, dict)
                     self.assertItemsEqual(pkg, [
-                        'id', 'name', 'installed_version', 'latest_version'])
+                        'id', 'name', 'installed_version', 'latest_version',
+                        'upgrade_cli'])
                     self.assertIsInstance(pkg['id'], basestring)
                     self.assertIsInstance(pkg['name'], basestring)
                     self.assertIsInstance(pkg['installed_version'], basestring)
                     self.assertIsInstance(pkg['latest_version'], basestring)
+                    self.assertIsInstance(pkg['upgrade_cli'], basestring)
 
 
 class TestManagerPlatform(unittest.TestCase):

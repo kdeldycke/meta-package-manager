@@ -32,9 +32,7 @@ from tabulate import tabulate
 from . import __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
-from .platform import os_label
-
-from . import PY2
+from .platform import os_label, PY2
 
 if PY2:
     from itertools import ifilter

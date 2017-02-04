@@ -20,7 +20,6 @@
 
 from __future__ import absolute_import, division, print_function
 
-from itertools import ifilter
 import logging
 from functools import partial
 from json import dumps as json_dumps
@@ -34,6 +33,14 @@ from . import __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
 from .platform import os_label
+
+from . import PY2
+
+if PY2:
+    from itertools import ifilter
+else:
+    ifilter = filter
+
 
 # Output rendering modes. Sorted from most machine-readable to fanciest
 # human-readable.

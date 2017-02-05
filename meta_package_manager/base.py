@@ -203,8 +203,9 @@ class PackageManager(object):
 
         return output
 
+    @property
     def sync(self):
-        """ Fetch latest versions of installed packages. """
+        """ Refresh local manager metadata from remote repository. """
         logger.info('Sync {} package info...'.format(self.id))
 
     @property

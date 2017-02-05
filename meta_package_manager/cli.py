@@ -197,7 +197,7 @@ def sync(ctx):
     active_managers = ctx.obj['active_managers']
 
     for manager in active_managers:
-        manager.sync()
+        manager.sync
 
 
 @cli.command(short_help='List installed packages.')

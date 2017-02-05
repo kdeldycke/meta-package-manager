@@ -50,8 +50,9 @@ class Homebrew(PackageManager):
         return self.run(
             [self.cli_path] + self.cli_args + ['--version']).split()[1]
 
+    @cachedproperty
     def sync(self):
-        super(Homebrew, self).sync()
+        super(Homebrew, self).sync
         self.run([self.cli_path] + self.cli_args + ['update'])
 
     @cachedproperty
@@ -230,7 +231,12 @@ class Homebrew(PackageManager):
 
 class HomebrewCask(Homebrew):
 
-    """ Cask is now part of Homebrew's core and extend it. """
+    """ Cask is now part of Homebrew's core and extend it.
+
+    We do not define a ``sync()`` method here as `brew cask update` is just an
+    alias to `brew update` and is deprecated. See:
+    https://github.com/kdeldycke/meta-package-manager/issues/28
+    """
 
     cli_args = ['cask']
 
@@ -241,11 +247,6 @@ class HomebrewCask(Homebrew):
     id = "cask"
 
     name = "Homebrew Cask"
-
-    # Call homebrew own update: `brew cask update` is just an alias to
-    # `brew update` and is deprecated. See:
-    # https://github.com/kdeldycke/meta-package-manager/issues/28
-    sync = Homebrew().sync
 
     def search(self, query):
         """ Fetch matching packages from ``brew cask search`` output.

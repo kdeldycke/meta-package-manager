@@ -166,8 +166,9 @@ def managers(ctx):
                 os_label(os_id) for os_id in manager.platforms])))
 
         # Build up the CLI path column content.
-        cli_infos = OK if manager.exists else KO
-        cli_infos += "  {}".format(manager.cli_path)
+        cli_infos = u"{}  {}".format(
+            OK if manager.exists else KO,
+            manager.cli_path)
 
         # Build up the version column content.
         version_infos = ''

@@ -326,7 +326,7 @@ def outdated(ctx, cli_format):
         # Force a sync to get the freshest upgrades.
         error = None
         try:
-            manager.sync()
+            manager.sync
         except CLIError as expt:
             error = expt.error
             logger.error(error)

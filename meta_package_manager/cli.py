@@ -82,8 +82,9 @@ def print_stats(data):
     default='INFO', metavar='LEVEL',
     help='Either CRITICAL, ERROR, WARNING, INFO or DEBUG. Defaults to INFO.')
 @click.option(
-    '-m', '--manager', type=click.Choice(pool()),
-    help="Restrict sub-command to one package manager. Defaults to all.")
+    '-m', '--manager', type=click.Choice(pool()), multiple=True,
+    help="Restrict sub-command to a subset of package managers. Repeat to "
+    "select multiple managers. Defaults to all.")
 @click.option(
     '-o', '--output-format', type=click.Choice(RENDERING_MODES),
     default='fancy', help="Rendering mode of the output. Defaults to fancy.")
@@ -108,9 +109,10 @@ def cli(ctx, manager, output_format, stats):
         click.echo(ctx.get_help())
         ctx.exit()
 
-    # Filters out the list of considered managers depending on user choices.
-    # TODO: allow multiple repetitions.
-    target_managers = [pool()[manager]] if manager else pool().values()
+    # Filters out the subset of managers selected by the user.
+    target_managers = [
+        m for mid, m in pool().items()
+        if mid in set(manager)] if manager else pool().values()
 
     # Pre-filters inactive managers.
     def keep_available(manager):

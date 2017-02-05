@@ -8,6 +8,7 @@ Changelog
 
 * Add new ``search`` operation. Closes #22.
 * Add new ``--stats``/``--no-stats`` boolean flags. Closes #8.
+* Allow selection of a subset of managers.
 * Do not force a ``sync`` before listing installed packages in CLI.
 * Rework API documentation.
 

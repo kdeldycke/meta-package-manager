@@ -392,16 +392,19 @@ class HomebrewCask(Homebrew):
             # Casks are allowed to provide several names. See:
             # https://github.com/kdeldycke/meta-package-manager/issues/26 .
             package_names = re.search(
-                '==> Names?(.*?)(==>|$)', output, re.DOTALL).groups(
-                    )[0].strip().split('\n')
-            # Choose the longuest name as canonical.
-            package_name = max(package_names)
+                '==> Names?(.*?)(==>|$)', output, re.DOTALL)
+            if package_names:
+                # Choose the longuest name as canonical.
+                package_name = None
+                for name in package_names.groups()[0].strip().split('\n'):
+                    if not package_name or len(name) > len(package_name):
+                        package_name = name
 
-            outdated[package_id] = {
-                'id': package_id,
-                'name': package_name,
-                'installed_version': version,
-                'latest_version': latest_version}
+                outdated[package_id] = {
+                    'id': package_id,
+                    'name': package_name,
+                    'installed_version': version,
+                    'latest_version': latest_version}
 
         return outdated
 

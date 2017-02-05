@@ -95,8 +95,9 @@ class TestManagerDefinitions(unittest.TestCase):
                         'id', 'name', 'installed_version'])
                     self.assertIsInstance(pkg['id'], basestring)
                     self.assertIsInstance(pkg['name'], basestring)
-                    self.assertIsInstance(
-                        pkg['installed_version'], (basestring, None))
+                    if pkg['installed_version'] is not None:
+                        self.assertIsInstance(
+                            pkg['installed_version'], basestring)
 
     def test_search_type(self):
         """ Check that all search operations returns a dict of dicts. """
@@ -110,8 +111,9 @@ class TestManagerDefinitions(unittest.TestCase):
                         'id', 'name', 'latest_version', 'exact'])
                     self.assertIsInstance(pkg['id'], basestring)
                     self.assertIsInstance(pkg['name'], basestring)
-                    self.assertIsInstance(
-                        pkg['latest_version'], (basestring, None))
+                    if pkg['latest_version'] is not None:
+                        self.assertIsInstance(
+                            pkg['latest_version'], basestring)
                     self.assertIsInstance(pkg['exact'], bool)
 
     def test_outdated_type(self):
@@ -126,8 +128,9 @@ class TestManagerDefinitions(unittest.TestCase):
                         'upgrade_cli'])
                     self.assertIsInstance(pkg['id'], basestring)
                     self.assertIsInstance(pkg['name'], basestring)
-                    self.assertIsInstance(
-                        pkg['installed_version'], (basestring, None))
+                    if pkg['installed_version'] is not None:
+                        self.assertIsInstance(
+                            pkg['installed_version'], basestring)
                     self.assertIsInstance(pkg['latest_version'], basestring)
                     self.assertIsInstance(pkg['upgrade_cli'], basestring)
 

@@ -91,8 +91,8 @@ class TestManagerDefinitions(unittest.TestCase):
                 self.assertIsInstance(manager.installed, dict)
                 for pkg in manager.installed.values():
                     self.assertIsInstance(pkg, dict)
-                    self.assertItemsEqual(pkg, [
-                        'id', 'name', 'installed_version'])
+                    self.assertEqual(set(pkg), set([
+                        'id', 'name', 'installed_version']))
                     self.assertIsInstance(pkg['id'], basestring)
                     self.assertIsInstance(pkg['name'], basestring)
                     if pkg['installed_version'] is not None:
@@ -107,8 +107,8 @@ class TestManagerDefinitions(unittest.TestCase):
                 self.assertIsInstance(matches, dict)
                 for pkg in matches.values():
                     self.assertIsInstance(pkg, dict)
-                    self.assertItemsEqual(pkg, [
-                        'id', 'name', 'latest_version', 'exact'])
+                    self.assertEqual(set(pkg), set([
+                        'id', 'name', 'latest_version', 'exact']))
                     self.assertIsInstance(pkg['id'], basestring)
                     self.assertIsInstance(pkg['name'], basestring)
                     if pkg['latest_version'] is not None:
@@ -123,9 +123,9 @@ class TestManagerDefinitions(unittest.TestCase):
                 self.assertIsInstance(manager.outdated, dict)
                 for pkg in manager.outdated.values():
                     self.assertIsInstance(pkg, dict)
-                    self.assertItemsEqual(pkg, [
+                    self.assertEqual(set(pkg), set([
                         'id', 'name', 'installed_version', 'latest_version',
-                        'upgrade_cli'])
+                        'upgrade_cli']))
                     self.assertIsInstance(pkg['id'], basestring)
                     self.assertIsInstance(pkg['name'], basestring)
                     if pkg['installed_version'] is not None:

@@ -324,7 +324,7 @@ class TestCLIOutdated(CLITestCase):
     def test_unicode_name(self):
         """ See #16. """
         # Install an old version of a package with a unicode name.
-        # Old Cask formula for ubersicht: 1.0.44.
+        # Old Cask formula for ubersicht 1.0.44.
         formula_url = (
             "https://raw.githubusercontent.com/caskroom/homebrew-cask"
             "/51add049f53225ac2c98f59bbeee5e19c29e6557/Casks/ubersicht.rb")

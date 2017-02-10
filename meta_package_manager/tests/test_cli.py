@@ -220,6 +220,20 @@ class TestCLISearch(CLITestCase):
         self.assertNotIn("pip3", result.output)
         self.assertNotIn("gem", result.output)
 
+    def test_unicode_search(self):
+        """ See #16. """
+        result = self.invoke('search', 'ubersicht')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("ubersicht", result.output)
+        # XXX search command is not fetching details package infos like names
+        # for now.
+        # self.assertIn("Übersicht", result.output)
+
+        result = self.invoke('search', 'Übersicht')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("ubersicht", result.output)
+        # self.assertIn("Übersicht", result.output)
+
 
 class TestCLIOutdated(CLITestCase):
 

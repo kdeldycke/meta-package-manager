@@ -12,6 +12,7 @@ Changelog
 * Do not force a ``sync`` before listing installed packages in CLI.
 * Rework API documentation.
 * Add unittest to cover unicode names for Cask packages. Closes #16.
+* Add unittest to cover Cask packages with multiple names. Refs #26.
 
 
 `2.4.0 (2017-01-28) <https://github.com/kdeldycke/meta-package-manager/compare/v2.3.0...v2.4.0>`_

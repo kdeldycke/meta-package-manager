@@ -340,6 +340,26 @@ class TestCLIOutdated(CLITestCase):
         self.assertIn("ubersicht", result.output)
         self.assertIn("Übersicht", result.output)
 
+    @skip_destructive()
+    def test_multiple_names(self):
+        """ See #26. """
+        # Install an old version of a package with multiple names.
+        # Old Cask formula for xld 2016.09.20.
+        formula_url = (
+            "https://raw.githubusercontent.com/caskroom/homebrew-cask"
+            "/9e6ca52ab7846c82471df586a930fb60231d63ee/Casks/xld.rb")
+        code, output, error = self.run_cmd(
+            'brew', 'cask', 'install', formula_url)
+        self.assertEqual(code, 0)
+        self.assertIn('xld-20160920.dmg', output)
+        self.assertFalse(error)
+
+        # Look for reported available upgrade.
+        result = self.invoke('--manager', 'cask', 'outdated')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("xld", result.output)
+        self.assertIn("X Lossless Decoder", result.output)
+
 
 class TestCLIUpgrade(CLITestCase):
 

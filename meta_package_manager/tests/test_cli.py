@@ -307,6 +307,26 @@ class TestCLIOutdated(CLITestCase):
                 self.assertIsInstance(infos['upgrade_cli'], basestring)
                 self.assertIn('param1=', infos['upgrade_cli'])
 
+    @skip_destructive()
+    def test_unicode_name(self):
+        """ See #16. """
+        # Install an old version of a package with a unicode name.
+        # Old Cask formula for ubersicht: 1.0.44.
+        formula_url = (
+            "https://raw.githubusercontent.com/caskroom/homebrew-cask"
+            "/51add049f53225ac2c98f59bbeee5e19c29e6557/Casks/ubersicht.rb")
+        code, output, error = self.run_cmd(
+            'brew', 'cask', 'install', formula_url)
+        self.assertEqual(code, 0)
+        self.assertIn('Uebersicht-1.0.44.app', output)
+        self.assertFalse(error)
+
+        # Look for reported available upgrade.
+        result = self.invoke('--manager', 'cask', 'outdated')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("ubersicht", result.output)
+        self.assertIn("Übersicht", result.output)
+
 
 class TestCLIUpgrade(CLITestCase):
 

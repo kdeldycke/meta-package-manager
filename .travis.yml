@@ -172,6 +172,8 @@ before_script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] && [[ "$_system_version" != "10.12" ]]; then
       brew reinstall cloog; brew link --overwrite cloog018;
     fi
+  # Install latest pip and setuptools.
+  - pip install --upgrade pip setuptools
 
 script:
   # Launch unittests in destructive mode.

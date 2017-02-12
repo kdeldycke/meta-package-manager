@@ -32,7 +32,7 @@ from boltons.cacheutils import cachedproperty
 from packaging.version import parse as parse_version
 
 from ..base import PackageManager
-from ..platform import MACOS
+from ..platform import LINUX, MACOS
 
 
 class Gem(PackageManager):
@@ -40,7 +40,7 @@ class Gem(PackageManager):
     HOMEBREW_PATH = '/usr/local/bin/gem'
     SYSTEM_PATH = '/usr/bin/gem'
 
-    platforms = frozenset([MACOS])
+    platforms = frozenset([LINUX, MACOS])
 
     def __init__(self):
         super(Gem, self).__init__()

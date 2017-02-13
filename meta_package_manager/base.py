@@ -227,7 +227,8 @@ class PackageManager(object):
         """
         raise NotImplementedError
 
-    def exact_match(self, query, result):
+    @staticmethod
+    def exact_match(query, result):
         """ Compare search query and matching result.
 
         Returns `True` if the matching result exactly match the search query.

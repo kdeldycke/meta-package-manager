@@ -89,11 +89,14 @@ def print_stats(data):
     '-o', '--output-format', type=click.Choice(RENDERING_MODES),
     default='fancy', help="Rendering mode of the output. Defaults to fancy.")
 @click.option(
-    '--stats/--no-stats', default=True, help="Print statistics or not at the "
-    "end of output. Active by default.")
+    '--stats/--no-stats', default=True,
+    help="Print statistics or not at the end of output. Active by default.")
+@click.option(
+    '--stop-on-error/--continue-on-error', default=True, help="Stop right "
+    "away or continue operations on manager CLI error. Defaults to stop.")
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx, manager, output_format, stats):
+def cli(ctx, manager, output_format, stats, stop_on_error):
     """ CLI for multi-package manager upgrades. """
     level = click_log.get_level()
     try:
@@ -113,6 +116,10 @@ def cli(ctx, manager, output_format, stats):
     target_managers = [
         m for mid, m in pool().items()
         if mid in set(manager)] if manager else pool().values()
+
+    # Apply manager-level option to either raise on error or not.
+    for m in target_managers:
+        m.raise_on_error = stop_on_error
 
     # Pre-filters inactive managers.
     def keep_available(manager):
@@ -146,13 +153,20 @@ def managers(ctx):
 
     # Machine-friendly data rendering.
     if rendering == 'json':
+        manager_data = {}
+        # Build up the data structure of manager metadata.
         fields = [
             'name', 'id', 'supported', 'cli_path', 'exists', 'executable',
             'version_string', 'fresh', 'available']
+        for manager in target_managers:
+            manager_data[manager.id] = {
+                fid: getattr(manager, fid) for fid in fields}
+            # Serialize errors at the last minute to gather all we encountered.
+            manager_data[manager.id]['errors'] = [
+                expt.error for expt in manager.cli_errors]
+
         # JSON mode use echo to output data because the logger is disabled.
-        click.echo(json({
-            manager.id: {fid: getattr(manager, fid) for fid in fields}
-            for manager in target_managers}))
+        click.echo(json(manager_data))
         return
 
     # Human-friendly content rendering.
@@ -218,9 +232,11 @@ def list(ctx):
         installed[manager.id] = {
             'id': manager.id,
             'name': manager.name,
-            'packages': manager.installed.values(),
-            # TODO: Catch and report errors.
-            'error': None}
+            'packages': manager.installed.values()}
+
+        # Serialize errors at the last minute to gather all we encountered.
+        installed[manager.id]['errors'] = [
+            expt.error for expt in manager.cli_errors]
 
     # Machine-friendly data rendering.
     if rendering == 'json':
@@ -270,9 +286,11 @@ def search(ctx, query):
         matches[manager.id] = {
             'id': manager.id,
             'name': manager.name,
-            'packages': manager.search(query).values(),
-            # TODO: Catch and report errors.
-            'error': None}
+            'packages': manager.search(query).values()}
+
+        # Serialize errors at the last minute to gather all we encountered.
+        matches[manager.id]['errors'] = [
+            expt.error for expt in manager.cli_errors]
 
     # Machine-friendly data rendering.
     if rendering == 'json':
@@ -327,12 +345,7 @@ def outdated(ctx, cli_format):
     for manager in active_managers:
 
         # Force a sync to get the freshest upgrades.
-        error = None
-        try:
-            manager.sync
-        except CLIError as expt:
-            error = expt.error
-            logger.error(error)
+        manager.sync
 
         packages = manager.outdated.values()
         for info in packages:
@@ -342,8 +355,7 @@ def outdated(ctx, cli_format):
         outdated[manager.id] = {
             'id': manager.id,
             'name': manager.name,
-            'packages': packages,
-            'error': error}
+            'packages': packages}
 
         # Do not include the full-upgrade CLI if we did not detect any outdated
         # package.
@@ -356,6 +368,10 @@ def outdated(ctx, cli_format):
                 upgrade_all_cli = ['mpm', '--manager', manager.id, 'upgrade']
             outdated[manager.id]['upgrade_all_cli'] = render_cli(
                 upgrade_all_cli)
+
+        # Serialize errors at the last minute to gather all we encountered.
+        outdated[manager.id]['errors'] = [
+            expt.error for expt in manager.cli_errors]
 
     # Machine-friendly data rendering.
     if rendering == 'json':

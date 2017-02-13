@@ -176,7 +176,7 @@ def print_menu():
 
     # Print menu bar icon with number of available upgrades.
     total_outdated = sum([len(m['packages']) for m in managers])
-    total_errors = len([True for m in managers if m.get('error', None)])
+    total_errors = sum([len(m.get('errors', [])) for m in managers])
     echo("↑{}{} | dropdown=false".format(
         total_outdated,
         " ⚠️{}".format(total_errors) if total_errors else ""))
@@ -215,7 +215,7 @@ def print_menu():
                     manager['name'] + ':',
                     len(manager['packages']),
                     package_label,
-                    error="⚠️ " if manager.get('error', None) else '',
+                    error="⚠️ " if manager.get('errors', None) else '',
                     max_length=label_max_length + 1,
                     max_outdated=len(str(max_outdated)),
                     f_summary=FONTS['summary']))
@@ -224,9 +224,9 @@ def print_menu():
 
         print_upgrade_all_item(manager, submenu)
 
-        if manager.get('error', None):
+        for error_msg in manager.get('errors', []):
             echo("---" if FLAT_LAYOUT else "-----")
-            print_error(manager['error'], submenu)
+            print_error(error_msg, submenu)
 
 
 if __name__ == '__main__':

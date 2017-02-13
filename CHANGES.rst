@@ -9,6 +9,9 @@ Changelog
 * Add new ``search`` operation. Closes #22.
 * Allow use of ``gem`` manager on Linux.
 * Add new ``--stats``/``--no-stats`` boolean flags. Closes #8.
+* Add new ``--stop-on-error``/``--continue-on-error`` parameters to make CLI
+  errors either blocking or non-blocking.
+* Allow reporting of several CLI errors by managers.
 * Allow selection of a subset of managers.
 * Do not force a ``sync`` before listing installed packages in CLI.
 * Rework API documentation.

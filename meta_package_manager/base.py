@@ -81,6 +81,11 @@ class PackageManager(object):
     # Version requirement specifier.
     requirement = None
 
+    def __init__(self):
+        self.raise_on_cli_error = False
+        # Log of encountered CLI errors.
+        self.cli_errors = []
+
     def get_version(self):
         """ Invoke the manager and extract its own reported version. """
         raise NotImplementedError
@@ -197,7 +202,12 @@ class PackageManager(object):
             output = output if output else None
 
         if code and error:
-            raise CLIError(code, output, error)
+            exception = CLIError(code, output, error)
+            if self.raise_on_cli_error:
+                raise exception
+            else:
+                logger.error(error)
+                self.cli_errors.append(exception)
 
         logger.debug(output)
 

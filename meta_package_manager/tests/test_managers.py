@@ -63,7 +63,9 @@ class TestManagerDefinitions(unittest.TestCase):
     def test_cli_path_type(self):
         """ Check that definitions returns the CLI path as a string. """
         for manager in pool().values():
-            self.assertIsInstance(manager.cli_path, basestring)
+            self.assertIsInstance(manager.cli_name, basestring)
+            if manager.cli_path is not None:
+                self.assertIsInstance(manager.cli_path, basestring)
 
     def test_cli_args_type(self):
         """ Check that definitions returns CLI args as a list. """

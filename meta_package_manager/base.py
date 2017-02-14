@@ -28,18 +28,19 @@ from __future__ import (
 import os
 
 from boltons.cacheutils import cachedproperty
-from boltons.strutils import strip_ansi, indent
+from boltons.strutils import indent, strip_ansi
 from packaging.specifiers import SpecifierSet
 from packaging.version import parse as parse_version
+
+from . import logger
+from .bitbar import run
+from .platform import current_os
 
 try:
     from shutil import which
 except ImportError:
     from backports.shutil_which import which
 
-from . import logger
-from .bitbar import run
-from .platform import current_os
 
 # Rendering format of CLI in JSON fields.
 CLI_FORMATS = frozenset(['plain', 'fragments', 'bitbar'])

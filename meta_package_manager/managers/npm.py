@@ -31,7 +31,7 @@ from boltons.cacheutils import cachedproperty
 from boltons.iterutils import remap
 
 from ..base import PackageManager
-from ..platform import MACOS, LINUX
+from ..platform import LINUX, MACOS
 
 
 class NPM(PackageManager):

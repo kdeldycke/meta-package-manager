@@ -12,7 +12,6 @@ import subprocess
 import sys
 import time
 
-
 # Fetch general information about the project.
 # Source: https://github.com/jaraco/skeleton/blob/skeleton/docs/conf.py
 root = os.path.join(os.path.dirname(__file__), '..')

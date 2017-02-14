@@ -182,7 +182,8 @@ def managers(ctx):
         # Build up the CLI path column content.
         cli_infos = u"{}  {}".format(
             OK if manager.cli_path else KO,
-            manager.cli_path)
+            manager.cli_path if manager.cli_path
+            else "{} CLI not found.".format(manager.cli_name))
 
         # Build up the version column content.
         version_infos = ''

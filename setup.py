@@ -45,7 +45,7 @@ DEPENDENCIES = [
     # shutil.which() is only available starting with Pythoin 3.3. Use backports
     # for Python 2. See marker usage at: https://setuptools.readthedocs.io/en
     # /latest/setuptools.html#declaring-platform-specific-dependencies
-    'backports.shutil_which; python_version < "3.3"',
+    'backports.shutil_which;python_version<"3.3"',
 ]
 
 EXTRA_DEPENDENCIES = {

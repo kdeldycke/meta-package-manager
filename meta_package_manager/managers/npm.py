@@ -31,12 +31,12 @@ from boltons.cacheutils import cachedproperty
 from boltons.iterutils import remap
 
 from ..base import PackageManager
-from ..platform import MACOS
+from ..platform import MACOS, LINUX
 
 
 class NPM(PackageManager):
 
-    platforms = frozenset([MACOS])
+    platforms = frozenset([LINUX, MACOS])
 
     def get_version(self):
         """ Fetch version from ``npm --version`` output."""

@@ -172,8 +172,9 @@ before_script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] && [[ "$_system_version" != "10.12" ]]; then
       brew reinstall cloog; brew link --overwrite cloog018;
     fi
-  # Install latest pip.
-  - pip install --upgrade pip
+  # Install latest pips.
+  - pip2 install --upgrade pip
+  - pip3 install --upgrade pip
   # Install latest npm.
   - npm install -g npm
   # Install latest brew and cask.

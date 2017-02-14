@@ -177,6 +177,8 @@ before_script:
   - pip3 install --upgrade pip
   # Install latest npm.
   - npm install -g npm
+  # Install latest gem.
+  - gem update --system
   # Install latest brew and cask.
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew tap caskroom/cask;

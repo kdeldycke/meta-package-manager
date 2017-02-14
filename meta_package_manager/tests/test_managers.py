@@ -146,7 +146,8 @@ class TestManagerPlatform(unittest.TestCase):
     @unless_linux()
     def test_linux(self):
         supported_managers = {m.id for m in pool().values() if m.supported}
-        self.assertSetEqual(supported_managers, set(['gem', 'pip2', 'pip3']))
+        self.assertSetEqual(supported_managers, set([
+            'apm', 'gem', 'npm', 'pip2', 'pip3']))
 
     @unless_windows()
     def test_windows(self):

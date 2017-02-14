@@ -82,8 +82,9 @@ class PackageManager(object):
     requirement = None
 
     def __init__(self):
+        # Tell the manager either to raise or continue on errors.
         self.raise_on_cli_error = False
-        # Log of encountered CLI errors.
+        # Log of all encountered CLI errors.
         self.cli_errors = []
 
     def get_version(self):

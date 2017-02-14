@@ -156,7 +156,7 @@ def managers(ctx):
         manager_data = {}
         # Build up the data structure of manager metadata.
         fields = [
-            'name', 'id', 'supported', 'cli_path', 'exists', 'executable',
+            'name', 'id', 'supported', 'cli_path', 'executable',
             'version_string', 'fresh', 'available']
         for manager in target_managers:
             manager_data[manager.id] = {
@@ -181,7 +181,7 @@ def managers(ctx):
 
         # Build up the CLI path column content.
         cli_infos = u"{}  {}".format(
-            OK if manager.exists else KO,
+            OK if manager.cli_path else KO,
             manager.cli_path)
 
         # Build up the version column content.

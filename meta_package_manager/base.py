@@ -102,8 +102,9 @@ class PackageManager(object):
     def cli_path(self):
         """ Fully qualified path to the package manager CLI.
 
-        Automaticcaly search the location of the CLI in the system. The CLI
-        executable name is derived from the manager's ID.
+        Automaticcaly search the location of the CLI in the system.
+
+        Returns `None` if CLI is not found or is not a file.
         """
         cli_path = which(self.cli_name, mode=os.F_OK)
         logger.debug(
@@ -157,16 +158,9 @@ class PackageManager(object):
         return current_os()[0] in self.platforms
 
     @cachedproperty
-    def exists(self):
-        """ Is the package manager CLI exist on the system? """
-        if self.cli_path and os.path.isfile(self.cli_path):
-            return True
-        return False
-
-    @cachedproperty
     def executable(self):
         """ Is the package manager CLI can be executed by the current user? """
-        if not self.exists:
+        if not self.cli_path:
             return False
         if not os.access(self.cli_path, os.X_OK):
             logger.debug("{} not executable.".format(self.cli_path))
@@ -193,12 +187,15 @@ class PackageManager(object):
 
         Returns True only if the main CLI:
             1 - is supported on the current platform,
-            2 - exists on the system,
+            2 - was found on the system,
             3 - is executable, and
             4 - match the version requirement.
         """
         return (
-            self.supported and self.exists and self.executable and self.fresh)
+            self.supported and
+            self.cli_path and
+            self.executable and
+            self.fresh)
 
     def run(self, args, dry_run=False):
         """ Run a shell command, return the output and keep error message.

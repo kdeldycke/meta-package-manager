@@ -37,8 +37,6 @@ from ..platform import MACOS
 
 class Homebrew(PackageManager):
 
-    cli_path = '/usr/local/bin/brew'
-
     platforms = frozenset([MACOS])
 
     requirement = '>= 1.0.*'
@@ -247,6 +245,8 @@ class HomebrewCask(Homebrew):
     id = "cask"
 
     name = "Homebrew Cask"
+
+    cli_name = "brew"
 
     def search(self, query):
         """ Fetch matching packages from ``brew cask search`` output.

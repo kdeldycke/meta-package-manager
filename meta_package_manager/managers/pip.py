@@ -37,6 +37,10 @@ class Pip(PackageManager):
 
     platforms = frozenset([MACOS, LINUX])
 
+    # Deny this manager to be tied to a CLI, as we only use this class as a
+    # common skeleton for pip2 and pip3.
+    cli_name = None
+
     def get_version(self):
         """ Fetch version from ``pip --version`` output."""
         return self.run([self.cli_path, '--version']).split()[1]
@@ -190,13 +194,11 @@ class Pip(PackageManager):
 
 class Pip2(Pip):
 
-    cli_path = '/usr/local/bin/pip2'
-
     name = "Python 2's Pip"
+    cli_name = 'pip2'
 
 
 class Pip3(Pip):
 
-    cli_path = '/usr/local/bin/pip3'
-
     name = "Python 3's Pip"
+    cli_name = 'pip3'

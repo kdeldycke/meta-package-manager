@@ -42,6 +42,8 @@ DEPENDENCIES = [
     'click_log >= 0.1.5',
     'packaging',
     'tabulate',
+    # https://setuptools.readthedocs.io/en/latest/setuptools.html#declaring-platform-specific-dependencies
+    'backports.shutil_which; python_version < "3.3"',
 ]
 
 EXTRA_DEPENDENCIES = {

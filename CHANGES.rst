@@ -6,6 +6,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* Auto-detect location of manager CLI on the system.
 * Add new ``search`` operation. Closes #22.
 * Allow use of ``gem`` manager on Linux.
 * Add new ``--stats``/``--no-stats`` boolean flags. Closes #8.

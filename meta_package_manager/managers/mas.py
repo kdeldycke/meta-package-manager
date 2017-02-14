@@ -35,8 +35,6 @@ from ..platform import MACOS
 
 class MAS(PackageManager):
 
-    cli_path = '/usr/local/bin/mas'
-
     platforms = frozenset([MACOS])
 
     # 'mas outdated' output has been changed in 1.3.1: https://github.com

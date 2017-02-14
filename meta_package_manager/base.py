@@ -32,6 +32,11 @@ from boltons.strutils import strip_ansi, indent
 from packaging.specifiers import SpecifierSet
 from packaging.version import parse as parse_version
 
+try:
+    from shutil import which
+except ImportError:
+    from backports.shutil_which import which
+
 from . import logger
 from .bitbar import run
 from .platform import current_os
@@ -68,9 +73,6 @@ class PackageManager(object):
     """ Base class from which all package manager definitions should inherits.
     """
 
-    # Fully qualified path to the package manager CLI.
-    cli_path = None
-
     # Systematic options passed to package manager CLI. Might be of use to
     # force silencing or high verbosity for instance.
     cli_args = []
@@ -86,6 +88,27 @@ class PackageManager(object):
         self.raise_on_cli_error = False
         # Log of all encountered CLI errors.
         self.cli_errors = []
+
+    @cachedproperty
+    def cli_name(self):
+        """ Package manager's CLI name.
+
+        Is derived by default from the manager's ID.
+        """
+        return self.id
+
+    @cachedproperty
+    def cli_path(self):
+        """ Fully qualified path to the package manager CLI.
+
+        Automaticcaly search the location of the CLI in the system. The CLI
+        executable name is derived from the manager's ID.
+        """
+        cli_path = which(self.cli_name, mode=os.F_OK)
+        logger.debug(
+            "CLI found at {}".format(cli_path) if cli_path
+            else "{} CLI not found.".format(self.cli_name))
+        return cli_path
 
     def get_version(self):
         """ Invoke the manager and extract its own reported version. """
@@ -135,10 +158,9 @@ class PackageManager(object):
     @cachedproperty
     def exists(self):
         """ Is the package manager CLI exist on the system? """
-        if not os.path.isfile(self.cli_path):
-            logger.debug("{} not found.".format(self.cli_path))
-            return False
-        return True
+        if self.cli_path and os.path.isfile(self.cli_path):
+            return True
+        return False
 
     @cachedproperty
     def executable(self):

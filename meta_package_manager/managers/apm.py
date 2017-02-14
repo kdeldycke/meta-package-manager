@@ -35,8 +35,6 @@ from ..platform import MACOS
 
 class APM(PackageManager):
 
-    cli_path = '/usr/local/bin/apm'
-
     platforms = frozenset([MACOS])
 
     def get_version(self):

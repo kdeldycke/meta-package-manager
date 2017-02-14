@@ -46,8 +46,9 @@ def pool():
 
     Is considered valid package manager definitions classes which:
         1 - are sub-classes of PackageManager, and
-        2 - are located in files at the same level or below this one, and
-        3 - have a defined cli_path property.
+        2 - is not PackageManager itself, and
+        3 - are located in files at the same level or below this one, and
+        4 - have a non null cli_name property.
     """
     register = {}
 
@@ -60,7 +61,7 @@ def pool():
 
         for _, klass in inspect.getmembers(module, inspect.isclass):
             if issubclass(klass, PackageManager) and (
-                    klass.cli_path is not None):
+                    klass != PackageManager) and klass.cli_name:
                 logger.debug("Found {!r}".format(klass))
                 manager = klass()
                 register[manager.id] = manager

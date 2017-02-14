@@ -25,7 +25,6 @@ from __future__ import (
     unicode_literals
 )
 
-import os
 import re
 
 from boltons.cacheutils import cachedproperty
@@ -37,27 +36,11 @@ from ..platform import LINUX, MACOS
 
 class Gem(PackageManager):
 
-    HOMEBREW_PATH = '/usr/local/bin/gem'
-    SYSTEM_PATH = '/usr/bin/gem'
-
     platforms = frozenset([LINUX, MACOS])
-
-    def __init__(self):
-        super(Gem, self).__init__()
-
-        # Check if the gem CLI is the original one from the system or was
-        # installed via Homebrew.
-        self.system_install = True
-        if os.path.exists(Gem.HOMEBREW_PATH):
-            self.system_install = False
 
     def get_version(self):
         """ Fetch version from ``gem --version`` output."""
         return self.run([self.cli_path, '--version'])
-
-    @cachedproperty
-    def cli_path(self):
-        return Gem.SYSTEM_PATH if self.system_install else Gem.HOMEBREW_PATH
 
     name = "Ruby Gems"
 
@@ -192,7 +175,7 @@ class Gem(PackageManager):
         # And then do `visudo` to make it so the `wheel` group does not require
         # a password. There is a line already there for it, you just need to
         # uncomment it and save.)
-        if self.system_install:
+        if self.cli_path == '/usr/bin/gem':
             cmd.insert(0, '/usr/bin/sudo')
         if package_id:
             cmd.append(package_id)

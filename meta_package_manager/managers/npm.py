@@ -36,8 +36,6 @@ from ..platform import MACOS
 
 class NPM(PackageManager):
 
-    cli_path = '/usr/local/bin/npm'
-
     platforms = frozenset([MACOS])
 
     def get_version(self):

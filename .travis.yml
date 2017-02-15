@@ -1,6 +1,6 @@
 # After changing this file, check it on: https://lint.travis-ci.org/
 language: python
-sudo: false
+sudo: required
 
 # We need to explicitely set all combination of the test matrix because Travis
 # macOS images do not support Python. See:

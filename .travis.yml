@@ -14,10 +14,6 @@ matrix:
       os: linux
       dist: trusty
       env: PYTHON_DIST="2.7"
-    - python: "3.3"
-      os: linux
-      dist: trusty
-      env: PYTHON_DIST="3.3"
     - python: "3.4"
       os: linux
       dist: trusty
@@ -35,10 +31,6 @@ matrix:
       os: linux
       dist: precise
       env: PYTHON_DIST="2.7"
-    - python: "3.3"
-      os: linux
-      dist: precise
-      env: PYTHON_DIST="3.3"
     - python: "3.4"
       os: linux
       dist: precise
@@ -63,10 +55,6 @@ matrix:
     - language: generic
       os: osx
       osx_image: xcode6.4
-      env: PYTHON_DIST="3.3"
-    - language: generic
-      os: osx
-      osx_image: xcode6.4
       env: PYTHON_DIST="3.4"
     - language: generic
       os: osx
@@ -85,10 +73,6 @@ matrix:
     - language: generic
       os: osx
       osx_image: xcode8
-      env: PYTHON_DIST="3.3"
-    - language: generic
-      os: osx
-      osx_image: xcode8
       env: PYTHON_DIST="3.4"
     - language: generic
       os: osx
@@ -104,10 +88,6 @@ matrix:
       os: osx
       osx_image: xcode8.2
       env: PYTHON_DIST="2.7"
-    - language: generic
-      os: osx
-      osx_image: xcode8.2
-      env: PYTHON_DIST="3.3"
     - language: generic
       os: osx
       osx_image: xcode8.2
@@ -158,14 +138,6 @@ install:
 
 before_script:
   - pip install codecov
-  # Python 3.3 environments built by Anaconda are not capable of installing a
-  # fresh setuptools. To fix this issue we manually upgrade setuptools instead
-  # of waiting for the `pip install -e .[develop]` invocation below. More
-  # details at: https://github.com/ContinuumIO/anaconda-issues/issues/542
-  # XXX This hack can be removed once Python 3.3 gets deprecated.
-  - if [[ "$PYTHON_DIST" == "3.3"  ]]; then
-      curl https://bootstrap.pypa.io/ez_setup.py -o - | python;
-    fi
   # Default Travis images came with an outdated Homebrew requiring
   # unconventional upgrade to work properly. This only concerns xcode6.4 and
   # xcode8 images.

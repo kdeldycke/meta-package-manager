@@ -144,7 +144,7 @@ setup(
 
     packages=find_packages(),
     # https://www.python.org/dev/peps/pep-0345/#version-specifiers
-    python_requires='>= 2.7, != 3.0.*, != 3.1.*, != 3.2.*',
+    python_requires='>= 2.7, != 3.0.*, != 3.1.*, != 3.2.*, != 3.3.*',
     install_requires=DEPENDENCIES,
     tests_require=DEPENDENCIES + EXTRA_DEPENDENCIES['tests'],
     extras_require=EXTRA_DEPENDENCIES,
@@ -169,7 +169,6 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',

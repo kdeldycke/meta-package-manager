@@ -81,7 +81,7 @@ class CLITestCase(unittest.TestCase):
         Used to print debug traces in test suites.
         """
         print('-' * 70)
-        print("$ {}".format(' '.join(cmd)))
+        print(u"$ {}".format(' '.join(cmd)))
         print(output)
         print('-' * 70)
 

@@ -180,9 +180,9 @@ before_script:
   # https://helloflu.wordpress.com/2015/12/29/python-insecure-ssl-issue/
   # https://github.com/pypa/pip/issues/4098
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ "$_system_version" == "14.04" ]]; then
-      pip install requests[security];
-      apt install libffi-dev libssl-dev;
-      pip install pyopenssl ndg-httpsclient pyasn1;
+      pip install --upgrade requests[security];
+      sudo apt install libffi-dev libssl-dev;
+      pip install --upgrade ndg-httpsclient;
     fi
   # Install latest npm.
   - npm install -g npm

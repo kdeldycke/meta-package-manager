@@ -175,6 +175,15 @@ before_script:
   # Install latest pips.
   - pip2 install --upgrade pip
   - pip3 install --upgrade pip
+  # Travis CI trusty instances needs some modules to be reinstalled to fix
+  # SNIMissingWarning and InsecurePlatformWarning errors. See:
+  # https://helloflu.wordpress.com/2015/12/29/python-insecure-ssl-issue/
+  # https://github.com/pypa/pip/issues/4098
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ "$_system_version" != "14.04" ]]; then
+      pip install requests[security];
+      apt install libffi-dev libssl-dev;
+      pip install pyopenssl ndg-httpsclient pyasn1;
+    fi
   # Install latest npm.
   - npm install -g npm
   # Install latest gem.

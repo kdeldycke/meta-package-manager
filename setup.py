@@ -42,7 +42,7 @@ DEPENDENCIES = [
     'click_log >= 0.1.5',
     'packaging',
     'tabulate',
-    # shutil.which() is only available starting with Pythoin 3.3. Use backports
+    # shutil.which() is only available starting with Python 3.3. Use backports
     # for Python 2. See marker usage at: https://setuptools.readthedocs.io/en
     # /latest/setuptools.html#declaring-platform-specific-dependencies
     'backports.shutil_which>=3.5.1;python_version<"3.3"',

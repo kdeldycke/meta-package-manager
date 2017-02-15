@@ -119,12 +119,12 @@ class TestCLIManagers(CLITestCase):
     def test_sub_manager_scope(self):
         result = self.invoke('--manager', 'npm', 'managers')
         self.assertEqual(result.exit_code, 0)
-        self.assertIn("npm", result.output)
-        self.assertNotIn("apm", result.output)
-        self.assertNotIn("brew", result.output)
-        self.assertNotIn("pip2", result.output)
-        self.assertNotIn("pip3", result.output)
-        self.assertNotIn("gem", result.output)
+        self.assertIn(" npm ", result.output)
+        self.assertNotIn(" apm ", result.output)
+        self.assertNotIn(" brew ", result.output)
+        self.assertNotIn(" pip2 ", result.output)
+        self.assertNotIn(" pip3 ", result.output)
+        self.assertNotIn(" gem ", result.output)
 
 
 class TestCLISync(CLITestCase):

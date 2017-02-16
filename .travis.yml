@@ -145,8 +145,13 @@ before_script:
       brew reinstall cloog; brew link --overwrite cloog018;
     fi
   # Install latest pips.
-  - pip2 install --upgrade pip
-  - pip3 install --upgrade pip
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      pip2 install --upgrade pip;
+      pip3 install --upgrade pip;
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      pip install --upgrade pip;
+    fi
   # Travis CI Linux instances needs some modules to be reinstalled to fix
   # SNIMissingWarning and InsecurePlatformWarning errors. See:
   # https://helloflu.wordpress.com/2015/12/29/python-insecure-ssl-issue/

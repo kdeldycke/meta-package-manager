@@ -29,7 +29,7 @@ import json
 
 from .. import __version__
 from ..platform import PY3, PY_VERSION
-from .case import CLITestCase, skip_destructive
+from .case import CLITestCase, skip_destructive, unless_macos
 
 if PY3:
     basestring = (str, bytes)
@@ -219,6 +219,7 @@ class TestCLISearch(CLITestCase):
         self.assertNotIn(" pip3 ", result.output)
         self.assertNotIn(" gem ", result.output)
 
+    @unless_macos()
     def test_unicode_search(self):
         """ See #16. """
         result = self.invoke('search', 'ubersicht')

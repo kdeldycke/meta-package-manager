@@ -123,7 +123,9 @@ class PackageManager(object):
         Returns `None` if the manager had an issue extracting its version.
         """
         if self.executable:
-            return self.get_version().strip()
+            version = self.get_version()
+            if version:
+                return version.strip()
 
     @cachedproperty
     def version(self):

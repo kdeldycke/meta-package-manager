@@ -385,7 +385,7 @@ class TestCLIUpgrade(CLITestCase):
     def test_sub_manager_scope(self):
         result = self.invoke('--manager', 'npm', 'upgrade', '--dry-run')
         self.assertEqual(result.exit_code, 0)
-        self.assertIn(" npm ", result.output)
+        self.assertIn(" npm", result.output)
         self.assertNotIn(" apm ", result.output)
         self.assertNotIn(" brew ", result.output)
         self.assertNotIn(" pip2 ", result.output)

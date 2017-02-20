@@ -133,7 +133,6 @@ class TestManagerDefinitions(unittest.TestCase):
                         self.assertIsInstance(
                             pkg['installed_version'], basestring)
                     self.assertIsInstance(pkg['latest_version'], basestring)
-                    self.assertIsInstance(pkg['upgrade_cli'], basestring)
 
 
 class TestManagerPlatform(unittest.TestCase):

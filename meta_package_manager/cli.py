@@ -220,7 +220,7 @@ def sync(ctx):
 
 @cli.command(short_help='List installed packages.')
 @click.pass_context
-def list(ctx):
+def installed(ctx):
     """ List all packages installed on the system from all managers. """
     active_managers = ctx.obj['active_managers']
     rendering = ctx.obj['rendering']

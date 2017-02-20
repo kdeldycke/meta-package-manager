@@ -158,28 +158,28 @@ class TestCLISync(CLITestCase):
         self.assertNotIn("gem", result.output)
 
 
-class TestCLIList(CLITestCase):
+class TestCLIInstalled(CLITestCase):
 
     def test_main_help(self):
-        result = self.invoke('list', '--help')
+        result = self.invoke('installed', '--help')
         self.assertEqual(result.exit_code, 0)
         self.assertIn("--help", result.output)
 
     def test_verbosity(self):
-        result = self.invoke('--verbosity', 'DEBUG', 'list')
+        result = self.invoke('--verbosity', 'DEBUG', 'installed')
         self.assertEqual(result.exit_code, 0)
         self.assertIn("debug:", result.output)
 
-        result = self.invoke('--verbosity', 'INFO', 'list')
+        result = self.invoke('--verbosity', 'INFO', 'installed')
         self.assertEqual(result.exit_code, 0)
         self.assertNotIn("debug:", result.output)
 
     def test_simple_call(self):
-        result = self.invoke('list')
+        result = self.invoke('installed')
         self.assertEqual(result.exit_code, 0)
 
     def test_sub_manager_scope(self):
-        result = self.invoke('--manager', 'npm', 'list')
+        result = self.invoke('--manager', 'npm', 'installed')
         self.assertEqual(result.exit_code, 0)
         self.assertIn(" npm ", result.output)
         self.assertNotIn(" apm ", result.output)

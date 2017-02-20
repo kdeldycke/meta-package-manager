@@ -9,6 +9,7 @@ Changelog
 * Auto-detect location of manager CLI on the system.
 * Add new ``search`` operation. Closes #22.
 * Bump minimal requirement of ``npm`` to ``4.0.*``.
+* Rename ``list`` operation to ``installed``.
 * Allow use of ``gem``, ``npm`` and ``apm`` managers on Linux.
 * Add new ``--stats``/``--no-stats`` boolean flags. Closes #8.
 * Add new ``--stop-on-error``/``--continue-on-error`` parameters to make CLI

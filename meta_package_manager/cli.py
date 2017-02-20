@@ -348,7 +348,7 @@ def outdated(ctx, cli_format):
         # Force a sync to get the freshest upgrades.
         manager.sync
 
-        packages = map(dict, manager.outdated.values())
+        packages = list(map(dict, manager.outdated.values()))
         for info in packages:
             info.update({
                 'upgrade_cli': render_cli(manager.upgrade_cli(info['id']))})

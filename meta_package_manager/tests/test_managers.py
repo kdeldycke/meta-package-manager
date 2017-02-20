@@ -126,8 +126,7 @@ class TestManagerDefinitions(unittest.TestCase):
                 for pkg in manager.outdated.values():
                     self.assertIsInstance(pkg, dict)
                     self.assertEqual(set(pkg), set([
-                        'id', 'name', 'installed_version', 'latest_version',
-                        'upgrade_cli']))
+                        'id', 'name', 'installed_version', 'latest_version']))
                     self.assertIsInstance(pkg['id'], basestring)
                     self.assertIsInstance(pkg['name'], basestring)
                     if pkg['installed_version'] is not None:

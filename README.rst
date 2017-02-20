@@ -66,7 +66,7 @@ Package manager  Version    macOS  Linux  Windows  ``sync``  ``list``  ``search`
 |cask|__          >= 1.0.*   ✅                     ✅          ✅         ✅                        ✅             ✅
 |pip2|__                     ✅     ✅                          ✅         ✅                        ✅             ✅
 |pip3|__                     ✅     ✅                          ✅         ✅                        ✅             ✅
-|npm|__                      ✅     ✅                          ✅         ✅                        ✅             ✅
+|npm|__           >= 4.0.*   ✅     ✅                          ✅         ✅                        ✅             ✅
 |apm|__                      ✅     ✅                          ✅         ✅                        ✅             ✅
 |gem|__                      ✅     ✅                          ✅         ✅                        ✅             ✅
 |mas|__           >= 1.3.1   ✅                                 ✅         ✅                        ✅             ✅

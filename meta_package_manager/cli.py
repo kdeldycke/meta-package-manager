@@ -233,7 +233,7 @@ def list(ctx):
         installed[manager.id] = {
             'id': manager.id,
             'name': manager.name,
-            'packages': manager.installed.values()}
+            'packages': list(manager.installed.values())}
 
         # Serialize errors at the last minute to gather all we encountered.
         installed[manager.id]['errors'] = [
@@ -287,7 +287,7 @@ def search(ctx, query):
         matches[manager.id] = {
             'id': manager.id,
             'name': manager.name,
-            'packages': manager.search(query).values()}
+            'packages': list(manager.search(query).values())}
 
         # Serialize errors at the last minute to gather all we encountered.
         matches[manager.id]['errors'] = [
@@ -348,7 +348,7 @@ def outdated(ctx, cli_format):
         # Force a sync to get the freshest upgrades.
         manager.sync
 
-        packages = manager.outdated.values()
+        packages = list(manager.outdated.values())
         for info in packages:
             info.update({
                 'upgrade_cli': render_cli(manager.upgrade_cli(info['id']))})

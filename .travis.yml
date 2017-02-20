@@ -172,7 +172,7 @@ before_script:
     fi
   # Install latest mas.
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      brew install mas;
+      wget -O - "https://github.com/mas-cli/mas/releases/download/v1.3.1/mas-cli.zip " | tar -xz --directory /usr/local/bin -f -;
     fi
 
 script:

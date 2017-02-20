@@ -39,7 +39,9 @@ class APM(PackageManager):
 
     def get_version(self):
         """ Fetch version from ``apm --version`` output."""
-        return self.run([self.cli_path, '--version']).split('\n')[0].split()[1]
+        output = self.run([self.cli_path, '--version'])
+        if output:
+            return output.split('\n')[0].split()[1]
 
     name = "Atom's apm"
 

@@ -45,8 +45,9 @@ class Homebrew(PackageManager):
 
     def get_version(self):
         """ Fetch version from ``brew --version`` output."""
-        return self.run(
-            [self.cli_path] + self.cli_args + ['--version']).split()[1]
+        output = self.run([self.cli_path] + self.cli_args + ['--version'])
+        if output:
+            return output.split()[1]
 
     @cachedproperty
     def sync(self):

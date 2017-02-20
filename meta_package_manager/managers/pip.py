@@ -43,7 +43,9 @@ class Pip(PackageManager):
 
     def get_version(self):
         """ Fetch version from ``pip --version`` output."""
-        return self.run([self.cli_path, '--version']).split()[1]
+        output = self.run([self.cli_path, '--version'])
+        if output:
+            return output.split()[1]
 
     @cachedproperty
     def installed(self):

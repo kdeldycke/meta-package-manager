@@ -169,7 +169,6 @@ before_script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew tap caskroom/cask;
       brew update;
-      brew upgrade;
     fi
   # Install latest mas.
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then

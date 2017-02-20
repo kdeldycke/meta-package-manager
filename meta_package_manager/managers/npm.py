@@ -38,6 +38,8 @@ class NPM(PackageManager):
 
     platforms = frozenset([LINUX, MACOS])
 
+    requirement = '>= 4.0.*'
+
     def get_version(self):
         """ Fetch version from ``npm --version`` output."""
         return self.run([self.cli_path, '--version'])
@@ -117,100 +119,67 @@ class NPM(PackageManager):
             $ npm search python --json | jq
             [
               {
-                "name": "angularjs-simplest-structure",
-                "time": {
-                  "modified": "2016-06-01T09:15:16.502Z"
-                }
+                "name": "python",
+                "description": "Interact with a python child process",
+                "maintainers": [
+                  {
+                    "username": "drderidder",
+                    "email": "drderidder@gmail.com"
+                  }
+                ],
+                "version": "0.0.4",
+                "date": "2015-01-25T02:48:07.820Z"
+              },
+              {
+                "name": "raven",
+                "description": "A standalone (Node.js) client for Sentry",
+                "maintainers": [
+                  {
+                    "username": "benvinegar",
+                    "email": "ben@benv.ca"
+                  },
+                  {
+                    "username": "lewisjellis",
+                    "email": "me@lewisjellis.com"
+                  },
+                  {
+                    "username": "mattrobenolt",
+                    "email": "m@robenolt.com"
+                  },
+                  {
+                    "username": "zeeg",
+                    "email": "dcramer@gmail.com"
+                  }
+                ],
+                "keywords": [
+                  "raven",
+                  "sentry",
+                  "python",
+                  "errors",
+                  "debugging",
+                  "exceptions"
+                ],
+                "version": "1.1.2",
+                "date": "2017-02-09T02:54:07.723Z"
+              },
+              {
+                "name": "brush-python",
+                "description": "Python brush module for SyntaxHighlighter.",
+                "maintainers": [
+                  {
+                    "username": "alexgorbatchev",
+                    "email": "alex.gorbatchev@gmail.com"
+                  }
+                ],
+                "keywords": [
+                  "syntaxhighlighter",
+                  "brush",
+                  "python"
+                ],
+                "version": "4.0.0",
+                "date": "2016-02-07T21:32:39.597Z"
               },
               (...)
-              {
-                "name": "zip-array",
-                "description": "A javascript equivalent of Python's zip",
-                "dist-tags": {
-                  "latest": "1.0.1"
-                },
-                "maintainers": [
-                  {
-                    "name": "vikramcse",
-                    "email": "vikramcse.10@gmail.com"
-                  }
-                ],
-                "homepage": "https://github.com/vikramcse/zip-array#readme",
-                "keywords": [
-                  "zip",
-                  "combine",
-                  "array",
-                  "python",
-                  "merge",
-                  "longest",
-                  "shortest"
-                ],
-                "repository": {
-                  "type": "git",
-                  "url": "git+https://github.com/vikramcse/zip-array.git"
-                },
-                "author": {
-                  "name": "Vikram",
-                  "email": "vikramcse.10@gmail.com"
-                },
-                "bugs": {
-                  "url": "https://github.com/vikramcse/zip-array/issues"
-                },
-                "license": "ISC",
-                "readmeFilename": "README.md",
-                "time": {
-                  "modified": "2016-02-12T06:45:17.083Z"
-                },
-                "versions": {
-                  "1.0.1": "latest"
-                }
-              },
-              {
-                "name": "zpt",
-                "description": "Zenon Page Templates - JS (ZPT-JS)",
-                "dist-tags": {
-                  "latest": "0.6.0"
-                },
-                "maintainers": [
-                  {
-                    "name": "davidcana",
-                    "email": "david.javapagetemplates@gmail.com"
-                  }
-                ],
-                "homepage": "https://github.com/davidcana/ZPT-JS",
-                "keywords": [
-                  "jquery-plugin",
-                  "ecosystem:jquery",
-                  "template",
-                  "templates",
-                  "templating",
-                  "python",
-                  "zpt",
-                  "zope",
-                  "page"
-                ],
-                "contributors": [
-                  {}
-                ],
-                "author": {
-                  "name": "David Cana Lopez"
-                },
-                "bugs": {
-                  "email": "david.javapagetemplates@gmail.com"
-                },
-                "license": "AGPL-3.0",
-                "readmeFilename": "README.md",
-                "repository": {
-                  "type": "git",
-                  "url": "git+https://github.com/davidcana/ZPT-JS.git"
-                },
-                "time": {
-                  "modified": "2016-11-16T17:55:29.646Z"
-                },
-                "versions": {
-                  "0.6.0": "latest"
-                }
-              }
             ]
         """
         matches = {}
@@ -224,8 +193,7 @@ class NPM(PackageManager):
                 matches[package_id] = {
                     'id': package_id,
                     'name': package_id,
-                    'latest_version': package.get(
-                        'dist-tags', {}).get('latest', None),
+                    'latest_version': package['version'],
                     'exact': self.exact_match(query, package_id)}
 
         return matches

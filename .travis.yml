@@ -173,10 +173,11 @@ before_script:
       sudo add-apt-repository -y ppa:webupd8team/atom;
       if [[ "$_system_version" == "12.04" ]]; then
         sudo apt-get update;
+        sudo apt-get install -y atom;
       else
         sudo apt update;
+        sudo apt install -y atom;
       fi;
-      sudo apt install -y atom;
     fi
   # Install latest brew and cask.
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then

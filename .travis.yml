@@ -171,7 +171,12 @@ before_script:
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       sudo add-apt-repository -y ppa:webupd8team/atom;
-      sudo apt update;
+      # Ubuntu Precise needs to be called with legacy apt-get CLI.
+      if [[ "$_system_version" == "12.04" ]]; then
+        sudo apt-get update;
+      else
+        sudo apt update;
+      fi;
       sudo apt install -y atom;
     fi
   # Install latest brew and cask.

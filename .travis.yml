@@ -158,7 +158,7 @@ before_script:
   # https://github.com/pypa/pip/issues/4098
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       pip install --upgrade requests[security];
-      sudo apt install libffi-dev libssl-dev;
+      sudo apt install -y libffi-dev libssl-dev;
       pip install --upgrade ndg-httpsclient;
     fi
   # Install latest npm.
@@ -170,9 +170,9 @@ before_script:
       brew install Caskroom/cask/atom;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      sudo add-apt-repository ppa:webupd8team/atom;
+      sudo add-apt-repository -y ppa:webupd8team/atom;
       sudo apt update;
-      sudo apt install atom;
+      sudo apt install -y atom;
     fi
   # Install latest brew and cask.
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then

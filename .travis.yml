@@ -170,7 +170,9 @@ before_script:
       brew install Caskroom/cask/atom;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      sudo apt install https://github.com/atom/atom/releases/download/v1.14.3/atom-amd64.deb;
+      sudo add-apt-repository ppa:webupd8team/atom;
+      sudo apt update;
+      sudo apt install atom;
     fi
   # Install latest brew and cask.
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then

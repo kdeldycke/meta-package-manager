@@ -93,6 +93,16 @@ class TestCLISubcommand(CLITestCase):
         self.assertEqual(result.exit_code, 0)
         return result
 
+    def test_sub_manager_scope(self):
+        result = self.invoke('--manager', 'npm', *self.subcommand_args)
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn(" npm", result.output)
+        self.assertNotIn(" apm", result.output)
+        self.assertNotIn(" brew", result.output)
+        self.assertNotIn(" pip2", result.output)
+        self.assertNotIn(" pip3", result.output)
+        self.assertNotIn(" gem", result.output)
+
 
 class TestCLITableRendering(TestCLISubcommand):
 
@@ -149,60 +159,20 @@ class TestCLIManagers(TestCLITableRendering):
 
     subcommand_args = ['managers']
 
-    def test_sub_manager_scope(self):
-        result = self.invoke('--manager', 'npm', 'managers')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn(" npm ", result.output)
-        self.assertNotIn(" apm ", result.output)
-        self.assertNotIn(" brew ", result.output)
-        self.assertNotIn(" pip2 ", result.output)
-        self.assertNotIn(" pip3 ", result.output)
-        self.assertNotIn(" gem ", result.output)
-
 
 class TestCLISync(TestCLISubcommand):
 
     subcommand_args = ['sync']
-
-    def test_sub_manager_scope(self):
-        result = self.invoke('--manager', 'npm', 'sync')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("npm", result.output)
-        self.assertNotIn("apm", result.output)
-        self.assertNotIn("brew", result.output)
-        self.assertNotIn("pip2", result.output)
-        self.assertNotIn("pip3", result.output)
-        self.assertNotIn("gem", result.output)
 
 
 class TestCLIInstalled(TestCLITableRendering):
 
     subcommand_args = ['installed']
 
-    def test_sub_manager_scope(self):
-        result = self.invoke('--manager', 'npm', 'installed')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn(" npm ", result.output)
-        self.assertNotIn(" apm ", result.output)
-        self.assertNotIn(" brew ", result.output)
-        self.assertNotIn(" pip2 ", result.output)
-        self.assertNotIn(" pip3 ", result.output)
-        self.assertNotIn(" gem ", result.output)
-
 
 class TestCLISearch(TestCLITableRendering):
 
     subcommand_args = ['search', 'abc']
-
-    def test_sub_manager_scope(self):
-        result = self.invoke('--manager', 'npm', 'search', 'abc')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn(" npm ", result.output)
-        self.assertNotIn(" apm ", result.output)
-        self.assertNotIn(" brew ", result.output)
-        self.assertNotIn(" pip2 ", result.output)
-        self.assertNotIn(" pip3 ", result.output)
-        self.assertNotIn(" gem ", result.output)
 
     @unless_macos()
     def test_unicode_search(self):
@@ -223,16 +193,6 @@ class TestCLISearch(TestCLITableRendering):
 class TestCLIOutdated(TestCLITableRendering):
 
     subcommand_args = ['outdated']
-
-    def test_sub_manager_scope(self):
-        result = self.invoke('--manager', 'npm', 'outdated')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn(" npm ", result.output)
-        self.assertNotIn(" apm ", result.output)
-        self.assertNotIn(" brew ", result.output)
-        self.assertNotIn(" pip2 ", result.output)
-        self.assertNotIn(" pip3 ", result.output)
-        self.assertNotIn(" gem ", result.output)
 
     def test_cli_format_plain(self):
         result = self.invoke(
@@ -300,16 +260,6 @@ class TestCLIOutdated(TestCLITableRendering):
 class TestCLIUpgrade(TestCLISubcommand):
 
     subcommand_args = ['upgrade', '--dry-run']
-
-    def test_sub_manager_scope(self):
-        result = self.invoke('--manager', 'npm', 'upgrade', '--dry-run')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn(" npm", result.output)
-        self.assertNotIn(" apm ", result.output)
-        self.assertNotIn(" brew ", result.output)
-        self.assertNotIn(" pip2 ", result.output)
-        self.assertNotIn(" pip3 ", result.output)
-        self.assertNotIn(" gem ", result.output)
 
     @skip_destructive()
     def test_full_upgrade(self):

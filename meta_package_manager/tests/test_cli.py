@@ -103,6 +103,16 @@ class TestCLISubcommand(CLITestCase):
         self.assertNotIn(" pip3", result.output)
         self.assertNotIn(" gem", result.output)
 
+        result = self.invoke(
+            '--manager', 'npm', '--manager', 'gem', *self.subcommand_args)
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn(" npm", result.output)
+        self.assertIn(" gem", result.output)
+        self.assertNotIn(" apm", result.output)
+        self.assertNotIn(" brew", result.output)
+        self.assertNotIn(" pip2", result.output)
+        self.assertNotIn(" pip3", result.output)
+
 
 class TestCLITableRendering(TestCLISubcommand):
 

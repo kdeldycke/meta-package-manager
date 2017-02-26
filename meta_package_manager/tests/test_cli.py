@@ -25,6 +25,7 @@ from __future__ import (
     unicode_literals
 )
 
+import unittest
 import json
 
 from .. import __version__
@@ -62,46 +63,73 @@ class TestCLI(CLITestCase):
         self.assertNotIn("debug:", result.output)
 
 
-class TestCLIManagers(CLITestCase):
+class TestCLISubcommand(CLITestCase):
+
+    """ Base class to define tests common to each subcommands. """
+
+    subcommand_args = []
+
+    @classmethod
+    def setUpClass(klass):
+        if not klass.subcommand_args:
+            raise unittest.SkipTest('Skip generic test class.')
 
     def test_main_help(self):
-        result = self.invoke('managers', '--help')
+        result = self.invoke(*(self.subcommand_args + ['--help']))
         self.assertEqual(result.exit_code, 0)
         self.assertIn("--help", result.output)
 
     def test_verbosity(self):
-        result = self.invoke('--verbosity', 'DEBUG', 'managers')
+        result = self.invoke('--verbosity', 'DEBUG', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.assertIn("debug:", result.output)
 
-        result = self.invoke('--verbosity', 'INFO', 'managers')
+        result = self.invoke('--verbosity', 'INFO', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.assertNotIn("debug:", result.output)
 
     def test_simple_call(self):
-        result = self.invoke('managers')
+        result = self.invoke(*self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
+        return result
+
+
+class TestCLITableRendering(TestCLISubcommand):
+
+    """ Test subcommands whose output is a configurable table.
+
+    A table output is also allowed to be rendered as JSON.
+    """
+
+    def test_simple_call(self):
+        result = super(TestCLITableRendering, self).test_simple_call()
         self.assertIn("═════", result.output)
 
     def test_simple_table_rendering(self):
-        result = self.invoke('--output-format', 'simple', 'managers')
+        result = self.invoke(
+            '--output-format', 'simple', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.assertIn("-----", result.output)
 
     def test_plain_table_rendering(self):
-        result = self.invoke('--output-format', 'plain', 'managers')
+        result = self.invoke('--output-format', 'plain', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.assertNotIn("═════", result.output)
         self.assertNotIn("-----", result.output)
 
     def test_json_output(self):
-        result = self.invoke('--output-format', 'json', 'managers')
+        result = self.invoke('--output-format', 'json', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         json.loads(result.output)
 
     def test_json_debug_output(self):
+        """ Debug output is expected to be unpareable.
+
+        Because of interleaved debug messages and JSON output.
+        """
         result = self.invoke(
-            '--output-format', 'json', '--verbosity', 'DEBUG', 'managers')
+            '--output-format', 'json', '--verbosity', 'DEBUG',
+            *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.assertIn("debug:", result.output)
         if PY_VERSION >= (3, 5):
@@ -116,6 +144,11 @@ class TestCLIManagers(CLITestCase):
             else:
                 self.assertEqual(message, 'No JSON object could be decoded')
 
+
+class TestCLIManagers(TestCLITableRendering):
+
+    subcommand_args = ['managers']
+
     def test_sub_manager_scope(self):
         result = self.invoke('--manager', 'npm', 'managers')
         self.assertEqual(result.exit_code, 0)
@@ -127,25 +160,9 @@ class TestCLIManagers(CLITestCase):
         self.assertNotIn(" gem ", result.output)
 
 
-class TestCLISync(CLITestCase):
+class TestCLISync(TestCLISubcommand):
 
-    def test_main_help(self):
-        result = self.invoke('sync', '--help')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("--help", result.output)
-
-    def test_verbosity(self):
-        result = self.invoke('--verbosity', 'DEBUG', 'sync')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("debug:", result.output)
-
-        result = self.invoke('--verbosity', 'INFO', 'sync')
-        self.assertEqual(result.exit_code, 0)
-        self.assertNotIn("debug:", result.output)
-
-    def test_simple_call(self):
-        result = self.invoke('sync')
-        self.assertEqual(result.exit_code, 0)
+    subcommand_args = ['sync']
 
     def test_sub_manager_scope(self):
         result = self.invoke('--manager', 'npm', 'sync')
@@ -158,25 +175,9 @@ class TestCLISync(CLITestCase):
         self.assertNotIn("gem", result.output)
 
 
-class TestCLIInstalled(CLITestCase):
+class TestCLIInstalled(TestCLITableRendering):
 
-    def test_main_help(self):
-        result = self.invoke('installed', '--help')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("--help", result.output)
-
-    def test_verbosity(self):
-        result = self.invoke('--verbosity', 'DEBUG', 'installed')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("debug:", result.output)
-
-        result = self.invoke('--verbosity', 'INFO', 'installed')
-        self.assertEqual(result.exit_code, 0)
-        self.assertNotIn("debug:", result.output)
-
-    def test_simple_call(self):
-        result = self.invoke('installed')
-        self.assertEqual(result.exit_code, 0)
+    subcommand_args = ['installed']
 
     def test_sub_manager_scope(self):
         result = self.invoke('--manager', 'npm', 'installed')
@@ -189,25 +190,9 @@ class TestCLIInstalled(CLITestCase):
         self.assertNotIn(" gem ", result.output)
 
 
-class TestCLISearch(CLITestCase):
+class TestCLISearch(TestCLITableRendering):
 
-    def test_main_help(self):
-        result = self.invoke('search', '--help')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("--help", result.output)
-
-    def test_verbosity(self):
-        result = self.invoke('--verbosity', 'DEBUG', 'search', 'abc')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("debug:", result.output)
-
-        result = self.invoke('--verbosity', 'INFO', 'search', 'abc')
-        self.assertEqual(result.exit_code, 0)
-        self.assertNotIn("debug:", result.output)
-
-    def test_simple_call(self):
-        result = self.invoke('search', 'abc')
-        self.assertEqual(result.exit_code, 0)
+    subcommand_args = ['search', 'abc']
 
     def test_sub_manager_scope(self):
         result = self.invoke('--manager', 'npm', 'search', 'abc')
@@ -235,59 +220,9 @@ class TestCLISearch(CLITestCase):
         # self.assertIn("Übersicht", result.output)
 
 
-class TestCLIOutdated(CLITestCase):
+class TestCLIOutdated(TestCLITableRendering):
 
-    def test_main_help(self):
-        result = self.invoke('outdated', '--help')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("--help", result.output)
-
-    def test_verbosity(self):
-        result = self.invoke('--verbosity', 'DEBUG', 'outdated')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("debug:", result.output)
-
-        result = self.invoke('--verbosity', 'INFO', 'outdated')
-        self.assertEqual(result.exit_code, 0)
-        self.assertNotIn("debug:", result.output)
-
-    def test_simple_call(self):
-        result = self.invoke('outdated')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("═════", result.output)
-
-    def test_simple_table_rendering(self):
-        result = self.invoke('--output-format', 'simple', 'outdated')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("-----", result.output)
-
-    def test_plain_table_rendering(self):
-        result = self.invoke('--output-format', 'plain', 'outdated')
-        self.assertEqual(result.exit_code, 0)
-        self.assertNotIn("═════", result.output)
-        self.assertNotIn("-----", result.output)
-
-    def test_json_output(self):
-        result = self.invoke('--output-format', 'json', 'outdated')
-        self.assertEqual(result.exit_code, 0)
-        json.loads(result.output)
-
-    def test_json_debug_output(self):
-        result = self.invoke(
-            '--output-format', 'json', '--verbosity', 'DEBUG', 'outdated')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("debug:", result.output)
-        if PY_VERSION >= (3, 5):
-            with self.assertRaises(json.decoder.JSONDecodeError):
-                json.loads(result.output)
-        else:
-            with self.assertRaises(ValueError) as expt:
-                json.loads(result.output)
-            message = expt.exception.args[0]
-            if PY_VERSION >= (3, 4):
-                self.assertIn('Expecting value: line ', message)
-            else:
-                self.assertEqual(message, 'No JSON object could be decoded')
+    subcommand_args = ['outdated']
 
     def test_sub_manager_scope(self):
         result = self.invoke('--manager', 'npm', 'outdated')
@@ -362,25 +297,9 @@ class TestCLIOutdated(CLITestCase):
         self.assertIn("X Lossless Decoder", result.output)
 
 
-class TestCLIUpgrade(CLITestCase):
+class TestCLIUpgrade(TestCLISubcommand):
 
-    def test_main_help(self):
-        result = self.invoke('upgrade', '--help')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("--help", result.output)
-
-    def test_verbosity(self):
-        result = self.invoke('--verbosity', 'DEBUG', 'upgrade', '--dry-run')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("debug:", result.output)
-
-        result = self.invoke('--verbosity', 'INFO', 'upgrade', '--dry-run')
-        self.assertEqual(result.exit_code, 0)
-        self.assertNotIn("debug:", result.output)
-
-    def test_simple_call(self):
-        result = self.invoke('upgrade', '--dry-run')
-        self.assertEqual(result.exit_code, 0)
+    subcommand_args = ['upgrade', '--dry-run']
 
     def test_sub_manager_scope(self):
         result = self.invoke('--manager', 'npm', 'upgrade', '--dry-run')

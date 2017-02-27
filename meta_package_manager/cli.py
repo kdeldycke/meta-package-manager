@@ -162,8 +162,8 @@ def managers(ctx):
             manager_data[manager.id] = {
                 fid: getattr(manager, fid) for fid in fields}
             # Serialize errors at the last minute to gather all we encountered.
-            manager_data[manager.id]['errors'] = [
-                expt.error for expt in manager.cli_errors]
+            manager_data[manager.id]['errors'] = list({
+                expt.error for expt in manager.cli_errors})
 
         # JSON mode use echo to output data because the logger is disabled.
         click.echo(json(manager_data))
@@ -236,8 +236,8 @@ def installed(ctx):
             'packages': list(manager.installed.values())}
 
         # Serialize errors at the last minute to gather all we encountered.
-        installed[manager.id]['errors'] = [
-            expt.error for expt in manager.cli_errors]
+        installed[manager.id]['errors'] = list({
+            expt.error for expt in manager.cli_errors})
 
     # Machine-friendly data rendering.
     if rendering == 'json':
@@ -290,8 +290,8 @@ def search(ctx, query):
             'packages': list(manager.search(query).values())}
 
         # Serialize errors at the last minute to gather all we encountered.
-        matches[manager.id]['errors'] = [
-            expt.error for expt in manager.cli_errors]
+        matches[manager.id]['errors'] = list({
+            expt.error for expt in manager.cli_errors})
 
     # Machine-friendly data rendering.
     if rendering == 'json':
@@ -371,8 +371,8 @@ def outdated(ctx, cli_format):
                 upgrade_all_cli)
 
         # Serialize errors at the last minute to gather all we encountered.
-        outdated[manager.id]['errors'] = [
-            expt.error for expt in manager.cli_errors]
+        outdated[manager.id]['errors'] = list({
+            expt.error for expt in manager.cli_errors})
 
     # Machine-friendly data rendering.
     if rendering == 'json':

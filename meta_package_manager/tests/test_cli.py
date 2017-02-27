@@ -233,9 +233,9 @@ class TestCLIInstalled(TestCLITableRendering):
                 self.assertSetEqual(set(pkg), set([
                     'id', 'installed_version', 'name']))
 
-                self.assertIsInstance(info['id'], basestring)
-                self.assertIsInstance(info['installed_version'], basestring)
-                self.assertIsInstance(info['name'], basestring)
+                self.assertIsInstance(pkg['id'], basestring)
+                self.assertIsInstance(pkg['installed_version'], basestring)
+                self.assertIsInstance(pkg['name'], basestring)
 
 
 class TestCLISearch(TestCLITableRendering):

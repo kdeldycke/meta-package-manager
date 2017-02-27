@@ -184,7 +184,8 @@ class TestCLIManagers(TestCLITableRendering):
                 'name', 'supported', 'version_string']))
 
             self.assertIsInstance(info['available'], bool)
-            self.assertIsInstance(info['cli_path'], basestring)
+            if info['cli_path'] is not None:
+                self.assertIsInstance(info['cli_path'], basestring)
             self.assertIsInstance(info['errors'], list)
             self.assertIsInstance(info['executable'], bool)
             self.assertIsInstance(info['fresh'], bool)

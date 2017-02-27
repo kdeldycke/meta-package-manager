@@ -190,7 +190,7 @@ class PackageManager(object):
             3 - is executable, and
             4 - match the version requirement.
         """
-        return (
+        return bool(
             self.supported and
             self.cli_path and
             self.executable and

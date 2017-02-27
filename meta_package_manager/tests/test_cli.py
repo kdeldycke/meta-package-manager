@@ -192,7 +192,8 @@ class TestCLIManagers(TestCLITableRendering):
             self.assertIsInstance(info['id'], basestring)
             self.assertIsInstance(info['name'], basestring)
             self.assertIsInstance(info['supported'], bool)
-            self.assertIsInstance(info['version_string'], basestring)
+            if info['version_string'] is not None:
+                self.assertIsInstance(info['version_string'], basestring)
 
             self.assertEqual(info['id'], manager_id)
 

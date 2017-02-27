@@ -176,6 +176,7 @@ class TestCLIManagers(TestCLITableRendering):
             'apm', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2', 'pip3']))
 
         for manager_id, info in result.items():
+            self.assertIsInstance(manager_id, basestring)
             self.assertIsInstance(info, dict)
 
             self.assertSetEqual(set(info), set([
@@ -203,6 +204,36 @@ class TestCLISync(TestCLISubcommand):
 class TestCLIInstalled(TestCLITableRendering):
 
     subcommand_args = ['installed']
+
+    def test_json_output(self):
+        result = super(TestCLIInstalled, self).test_json_output()
+
+        self.assertIn(set(result), set([
+            'apm', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2', 'pip3']))
+
+        for manager_id, info in result.items():
+            self.assertIsInstance(manager_id, basestring)
+            self.assertIsInstance(info, dict)
+
+            self.assertSetEqual(set(info), set([
+                'errors', 'id', 'name', 'packages']))
+
+            self.assertIsInstance(info['errors'], list)
+            self.assertIsInstance(info['id'], basestring)
+            self.assertIsInstance(info['name'], basestring)
+            self.assertIsInstance(info['packages'], list)
+
+            self.assertEqual(info['id'], manager_id)
+
+            for pkg in info['packages']:
+                self.assertIsInstance(pkg, dict)
+
+                self.assertSetEqual(set(pkg), set([
+                    'id', 'installed_version', 'name']))
+
+                self.assertIsInstance(info['id'], basestring)
+                self.assertIsInstance(info['installed_version'], basestring)
+                self.assertIsInstance(info['name'], basestring)
 
 
 class TestCLISearch(TestCLITableRendering):

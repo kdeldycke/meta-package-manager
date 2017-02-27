@@ -210,7 +210,7 @@ class TestCLIInstalled(TestCLITableRendering):
     def test_json_output(self):
         result = super(TestCLIInstalled, self).test_json_output()
 
-        self.assertIn(set(result), set([
+        self.assertTrue(set(result).issubset([
             'apm', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2', 'pip3']))
 
         for manager_id, info in result.items():

@@ -140,7 +140,7 @@ class TestCLITableRendering(TestCLISubcommand):
     def test_json_output(self):
         result = self.invoke('--output-format', 'json', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        json.loads(result.output)
+        return json.loads(result.output)
 
     def test_json_debug_output(self):
         """ Debug output is expected to be unpareable.
@@ -168,6 +168,31 @@ class TestCLITableRendering(TestCLISubcommand):
 class TestCLIManagers(TestCLITableRendering):
 
     subcommand_args = ['managers']
+
+    def test_json_output(self):
+        result = super(TestCLIManagers, self).test_json_output()
+
+        self.assertSetEqual(set(result), set([
+            'apm', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2', 'pip3']))
+
+        for manager_id, info in result.items():
+            self.assertIsInstance(info, dict)
+
+            self.assertSetEqual(set(info), set([
+                'available', 'cli_path', 'errors', 'executable', 'fresh', 'id',
+                'name', 'supported', 'version_string']))
+
+            self.assertIsInstance(info['available'], bool)
+            self.assertIsInstance(info['cli_path'], basestring)
+            self.assertIsInstance(info['errors'], list)
+            self.assertIsInstance(info['executable'], bool)
+            self.assertIsInstance(info['fresh'], bool)
+            self.assertIsInstance(info['id'], basestring)
+            self.assertIsInstance(info['name'], basestring)
+            self.assertIsInstance(info['supported'], bool)
+            self.assertIsInstance(info['version_string'], basestring)
+
+            self.assertEqual(info['id'], manager_id)
 
 
 class TestCLISync(TestCLISubcommand):

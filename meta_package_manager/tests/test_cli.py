@@ -270,7 +270,8 @@ class TestCLISearch(TestCLITableRendering):
 
                 self.assertIsInstance(pkg['exact'], bool)
                 self.assertIsInstance(pkg['id'], basestring)
-                self.assertIsInstance(pkg['latest_version'], basestring)
+                if pkg['latest_version'] is not None:
+                    self.assertIsInstance(pkg['latest_version'], basestring)
                 self.assertIsInstance(pkg['name'], basestring)
 
     @unless_macos()

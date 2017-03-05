@@ -305,13 +305,18 @@ class TestCLIOutdated(TestCLITableRendering):
             self.assertIsInstance(info, dict)
 
             self.assertSetEqual(set(info), set([
-                'errors', 'id', 'name', 'packages', 'upgrade_all_cli']))
+                'errors', 'id', 'name', 'packages']))
 
             self.assertIsInstance(info['errors'], list)
             self.assertIsInstance(info['id'], basestring)
             self.assertIsInstance(info['name'], basestring)
             self.assertIsInstance(info['packages'], list)
-            self.assertIsInstance(info['upgrade_all_cli'], basestring)
+
+            if 'upgrade_all_cli' in info:
+                self.assertIsInstance(info['upgrade_all_cli'], basestring)
+                self.assertGreater(len(info['packages']), 0)
+            else:
+                self.assertEqual(len(info['packages']), 0)
 
             self.assertEqual(info['id'], manager_id)
 

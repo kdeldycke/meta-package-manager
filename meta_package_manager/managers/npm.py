@@ -54,7 +54,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            $ npm list -g --json
+            $ npm list -g --json | jq
             {
               "dependencies": {
                 "npm": {

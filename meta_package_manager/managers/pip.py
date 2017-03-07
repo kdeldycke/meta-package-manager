@@ -25,6 +25,7 @@ from __future__ import (
     unicode_literals
 )
 
+import json
 import re
 
 from boltons.cacheutils import cachedproperty
@@ -36,6 +37,8 @@ from ..platform import LINUX, MACOS
 class Pip(PackageManager):
 
     platforms = frozenset([MACOS, LINUX])
+
+    requirement = '>= 9.0.0'
 
     # Deny this manager to be tied to a CLI, as we only use this class as a
     # common skeleton for pip2 and pip3.
@@ -55,42 +58,35 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pip list
-            configparser (3.5.0)
-            docutils (0.13.1)
-            html5lib (0.9999999)
-            imagesize (0.7.1)
-            MarkupSafe (0.23)
-            mccabe (0.5.3)
-            meta-package-manager (2.4.0, /home/kev/venvs/meta-package-manager)
-            nose (1.3.7)
+            $ pip list --format=json | jq
+            [
+             {
+                "version": "1.3",
+                "name": "backports.functools-lru-cache"
+              },
+              {
+                "version": "0.9999999",
+                "name": "html5lib"
+              },
+              {
+                "version": "2.8",
+                "name": "Jinja2"
+              },
+              (...)
+            ]
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.cli_args + ['list'])
+        output = self.run(
+            [self.cli_path] + self.cli_args + ['list', '--format=json'])
 
         if output:
-            regexp = re.compile(r'(\S+) \((.*)\)')
-            for outdated_pkg in output.split('\n'):
-                if not outdated_pkg:
-                    continue
-
-                matches = regexp.match(outdated_pkg)
-                if not matches:
-                    continue
-
-                package_id, installed_info = matches.groups()
-
-                # Extract current non-standard location if found.
-                installed_info = installed_info.split(',', 1)
-                version = installed_info[0]
-                special_location = " ({})".format(installed_info[1].strip()) \
-                    if len(installed_info) > 1 else ''
-
+            for package in json.loads(output):
+                package_id = package['name']
                 installed[package_id] = {
                     'id': package_id,
-                    'name': package_id + special_location,
-                    'installed_version': version}
+                    'name': package_id,
+                    'installed_version': package['version']}
 
         return installed
 
@@ -141,43 +137,59 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pip list --outdated
-            ccm (2.1.8, /Users/kdeldycke/ccm) - Latest: 2.1.11 [sdist]
-            coverage (4.0.3) - Latest: 4.1 [wheel]
-            IMAPClient (0.13) - Latest: 1.0.1 [wheel]
-            Logbook (0.10.1) - Latest: 1.0.0 [sdist]
-            mccabe (0.4.0) - Latest: 0.5.0 [wheel]
-            mercurial (3.8.3) - Latest: 3.8.4 [sdist]
-            pylint (1.5.6) - Latest: 1.6.1 [wheel]
+            $ pip list --format=json --outdated | jq
+            [
+              {
+                "latest_filetype": "wheel",
+                "version": "0.7.9",
+                "name": "alabaster",
+                "latest_version": "0.7.10"
+              },
+              {
+                "latest_filetype": "wheel",
+                "version": "0.9999999",
+                "name": "html5lib",
+                "latest_version": "0.999999999"
+              },
+              {
+                "latest_filetype": "wheel",
+                "version": "2.8",
+                "name": "Jinja2",
+                "latest_version": "2.9.5"
+              },
+              {
+                "latest_filetype": "wheel",
+                "version": "0.5.3",
+                "name": "mccabe",
+                "latest_version": "0.6.1"
+              },
+              {
+                "latest_filetype": "wheel",
+                "version": "2.2.0",
+                "name": "pycodestyle",
+                "latest_version": "2.3.1"
+              },
+              {
+                "latest_filetype": "wheel",
+                "version": "2.1.3",
+                "name": "Pygments",
+                "latest_version": "2.2.0"
+              }
+            ]
         """
         outdated = {}
 
-        output = self.run([
-            self.cli_path] + self.cli_args + ['list', '--outdated'])
+        output = self.run([self.cli_path] + self.cli_args + [
+            'list', '--format=json', '--outdated'])
 
         if output:
-            regexp = re.compile(r'(\S+) \((.*)\) - Latest: (\S+)')
-            for outdated_pkg in output.split('\n'):
-                if not outdated_pkg:
-                    continue
-
-                matches = regexp.match(outdated_pkg)
-                if not matches:
-                    continue
-
-                package_id, installed_info, latest_version = matches.groups()
-
-                # Extract current non-standard location if found.
-                installed_info = installed_info.split(',', 1)
-                version = installed_info[0]
-                special_location = " ({})".format(installed_info[1].strip()) \
-                    if len(installed_info) > 1 else ''
-
+            for package in json.loads(output):
+                package_id = package['name']
                 outdated[package_id] = {
                     'id': package_id,
-                    'name': package_id + special_location,
-                    'installed_version': version,
-                    'latest_version': latest_version}
+                    'name': package_id,
+                    'installed_version': package['version'],
+                    'latest_version': package['latest_version']}
 
         return outdated
 

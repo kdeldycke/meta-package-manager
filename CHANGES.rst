@@ -6,7 +6,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
-* No changes yet.
+* Use pip 9.0 JSON output. Closes #18.
+* Bump minimal requirement of ``pip`` to ``9.0.*``.
 
 
 `2.5.0 (2017-03-01) <https://github.com/kdeldycke/meta-package-manager/compare/v2.4.0...v2.5.0>`_

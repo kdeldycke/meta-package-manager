@@ -66,19 +66,19 @@ class MAS(PackageManager):
         if output:
             regexp = re.compile(r'(\d+) (.*) \((\S+)\)$')
             for package in output.split('\n'):
-                if not package:
-                    continue
-                package_id, package_name, installed_version = regexp.match(
-                    package).groups()
-                installed[package_id] = {
-                    'id': package_id,
-                    'name': package_name,
-                    # Normalize unknown version. See:
-                    # https://github.com/mas-cli/mas/commit
-                    # /1859eaedf49f6a1ebefe8c8d71ec653732674341
-                    'installed_version': (
-                        installed_version if installed_version != 'unknown'
-                        else None)}
+                match = regexp.match(package)
+                if match:
+                    package_id, package_name, installed_version = \
+                        match.groups()
+                    installed[package_id] = {
+                        'id': package_id,
+                        'name': package_name,
+                        # Normalize unknown version. See:
+                        # https://github.com/mas-cli/mas/commit
+                        # /1859eaedf49f6a1ebefe8c8d71ec653732674341
+                        'installed_version': (
+                            installed_version if installed_version != 'unknown'
+                            else None)}
 
         return installed
 
@@ -137,20 +137,20 @@ class MAS(PackageManager):
         if output:
             regexp = re.compile(r'(\d+) (.*) \((\S+) -> (\S+)\)$')
             for package in output.split('\n'):
-                if not package:
-                    continue
-                package_id, package_name, installed_version, latest_version = \
-                    regexp.match(package).groups()
-                outdated[package_id] = {
-                    'id': package_id,
-                    'name': package_name,
-                    'latest_version': latest_version,
-                    # Normalize unknown version. See:
-                    # https://github.com/mas-cli/mas/commit
-                    # /1859eaedf49f6a1ebefe8c8d71ec653732674341
-                    'installed_version': (
-                        installed_version if installed_version != 'unknown'
-                        else None)}
+                match = regexp.match(package)
+                if match:
+                    package_id, package_name, installed_version, \
+                        latest_version = match.groups()
+                    outdated[package_id] = {
+                        'id': package_id,
+                        'name': package_name,
+                        'latest_version': latest_version,
+                        # Normalize unknown version. See:
+                        # https://github.com/mas-cli/mas/commit
+                        # /1859eaedf49f6a1ebefe8c8d71ec653732674341
+                        'installed_version': (
+                            installed_version if installed_version != 'unknown'
+                            else None)}
 
         return outdated
 

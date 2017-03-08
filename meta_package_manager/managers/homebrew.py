@@ -110,26 +110,26 @@ class Homebrew(PackageManager):
         if output:
             regexp = re.compile(r'(\S+)( \(!\))? (.+)')
             for pkg_info in output.split('\n'):
-                if not pkg_info:
-                    continue
+                match = regexp.match(pkg_info)
+                if match:
+                    package_id, removed, versions = match.groups()
 
-                package_id, removed, versions = regexp.match(pkg_info).groups()
+                    # Guess latest installed version.
+                    versions = set(versions.split())
+                    # Discard generic 'latest' symbolic version if others are
+                    # available.
+                    if len(versions) > 1:
+                        versions.discard('latest')
+                    # Parse versions to avoid lexicographic sorting gotchas.
+                    version = None
+                    if versions:
+                        _, version = max(
+                            [(parse_version(v), v) for v in versions])
 
-                # Guess latest installed version.
-                versions = set(versions.split())
-                # Discard generic 'latest' symbolic version if others are
-                # available.
-                if len(versions) > 1:
-                    versions.discard('latest')
-                # Parse versions to avoid lexicographic sorting gotchas.
-                version = None
-                if versions:
-                    _, version = max([(parse_version(v), v) for v in versions])
-
-                installed[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'installed_version': version}
+                    installed[package_id] = {
+                        'id': package_id,
+                        'name': package_id,
+                        'installed_version': version}
 
         return installed
 

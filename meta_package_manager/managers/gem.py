@@ -76,22 +76,22 @@ class Gem(PackageManager):
         if output:
             regexp = re.compile(r'(\S+) \((.+)\)')
             for package in output.split('\n'):
-                if not package or package.startswith('***'):
-                    continue
+                match = regexp.match(package)
+                if match:
+                    package_id, versions = match.groups()
 
-                package_id, versions = regexp.match(package).groups()
+                    # Guess latest installed version.
+                    versions = set([v.strip() for v in versions.split(',')])
+                    # Parse versions to avoid lexicographic sorting gotchas.
+                    version = None
+                    if versions:
+                        _, version = max(
+                            [(parse_version(v), v) for v in versions])
 
-                # Guess latest installed version.
-                versions = set([v.strip() for v in versions.split(',')])
-                # Parse versions to avoid lexicographic sorting gotchas.
-                version = None
-                if versions:
-                    _, version = max([(parse_version(v), v) for v in versions])
-
-                installed[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'installed_version': version}
+                    installed[package_id] = {
+                        'id': package_id,
+                        'name': package_id,
+                        'installed_version': version}
 
         return installed
 
@@ -155,15 +155,15 @@ class Gem(PackageManager):
         if output:
             regexp = re.compile(r'(\S+) \((\S+) < (\S+)\)')
             for package in output.split('\n'):
-                if not package:
-                    continue
-                package_id, current_version, latest_version = regexp.match(
-                    package).groups()
-                outdated[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'installed_version': current_version,
-                    'latest_version': latest_version}
+                match = regexp.match(package)
+                if match:
+                    package_id, current_version, latest_version = \
+                        match.groups()
+                    outdated[package_id] = {
+                        'id': package_id,
+                        'name': package_id,
+                        'installed_version': current_version,
+                        'latest_version': latest_version}
 
         return outdated
 

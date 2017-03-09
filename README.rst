@@ -70,6 +70,7 @@ Package manager  Version    macOS  Linux  Windows  ``sync``  ``installed``  ``se
 |apm|__                     ✓      ✓                         ✓              ✓                        ✓             ✓
 |gem|__                     ✓      ✓                         ✓              ✓                        ✓             ✓
 |mas|__           >= 1.3.1  ✓                                ✓              ✓                        ✓             ✓
+|apt|__           >= 1.0.0         ✓               ✓         ✓              ✓                        ✓             ✓
 ================ ========== ====== ====== ======== ========= ============== =========== ============ ============= ============
 
 .. |brew| replace::
@@ -96,6 +97,9 @@ __ https://rubygems.org
 .. |mas| replace::
    Mac AppStore via ``mas``
 __ https://github.com/argon/mas
+.. |apt| replace::
+   ``apt``
+__ https://wiki.debian.org/Apt
 
 If you're bored, feel free to add support for new package manager. See the
 `list of good candidates

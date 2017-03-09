@@ -6,6 +6,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* Add support for ``apt`` on Linux systems.
 * Use pip 9.0 JSON output. Closes #18.
 * Bump minimal requirement of ``pip`` to ``9.0.*``.
 

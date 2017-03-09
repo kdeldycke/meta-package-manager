@@ -98,6 +98,7 @@ class TestCLISubcommand(CLITestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertIn(" npm", result.output)
         self.assertNotIn(" apm", result.output)
+        self.assertNotIn(" apt", result.output)
         self.assertNotIn(" brew", result.output)
         self.assertNotIn(" pip2", result.output)
         self.assertNotIn(" pip3", result.output)
@@ -109,6 +110,7 @@ class TestCLISubcommand(CLITestCase):
         self.assertIn(" npm", result.output)
         self.assertIn(" gem", result.output)
         self.assertNotIn(" apm", result.output)
+        self.assertNotIn(" apt", result.output)
         self.assertNotIn(" brew", result.output)
         self.assertNotIn(" pip2", result.output)
         self.assertNotIn(" pip3", result.output)
@@ -173,7 +175,8 @@ class TestCLIManagers(TestCLITableRendering):
         result = super(TestCLIManagers, self).test_json_output()
 
         self.assertSetEqual(set(result), set([
-            'apm', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2', 'pip3']))
+            'apm', 'apt', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2',
+            'pip3']))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, basestring)
@@ -211,7 +214,8 @@ class TestCLIInstalled(TestCLITableRendering):
         result = super(TestCLIInstalled, self).test_json_output()
 
         self.assertTrue(set(result).issubset([
-            'apm', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2', 'pip3']))
+            'apm', 'apt', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2',
+            'pip3']))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, basestring)
@@ -246,7 +250,8 @@ class TestCLISearch(TestCLITableRendering):
         result = super(TestCLISearch, self).test_json_output()
 
         self.assertTrue(set(result).issubset([
-            'apm', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2', 'pip3']))
+            'apm', 'apt', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2',
+            'pip3']))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, basestring)
@@ -298,7 +303,8 @@ class TestCLIOutdated(TestCLITableRendering):
         result = super(TestCLIOutdated, self).test_json_output()
 
         self.assertTrue(set(result).issubset([
-            'apm', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2', 'pip3']))
+            'apm', 'apt', 'brew', 'cask', 'gem', 'mas', 'npm', 'pip2',
+            'pip3']))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, basestring)

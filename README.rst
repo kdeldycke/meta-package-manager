@@ -106,6 +106,25 @@ If you're bored, feel free to add support for new package manager. See the
 <https://en.wikipedia.org/wiki/List_of_software_package_management_systems>`_.
 
 
+Installation
+------------
+
+This package is `available on PyPi
+<https://pypi.python.org/pypi/meta-package-manager>`_, so you can install the
+latest stable release and its dependencies with a simple ``pip`` call:
+
+.. code-block:: shell-session
+
+    $ pip install meta-package-manager
+
+
+Documentation
+-------------
+
+Docs are `hosted on Read the Docs
+<https://meta-package-manager.readthedocs.io>`_.
+
+
 Usage
 -----
 

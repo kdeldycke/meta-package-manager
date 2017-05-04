@@ -394,9 +394,9 @@ def outdated(ctx, cli_format):
     def sort_method(line):
         """ Force sorting of table.
 
-        By lower-cased package name and ID first, then manager ID.
+        By manager ID, then lower-cased package name and ID .
         """
-        return line[0].lower(), line[1].lower(), line[2]
+        return line[2], line[0].lower(), line[1].lower()
 
     # Sort and print table.
     table = [[

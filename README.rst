@@ -103,10 +103,11 @@ __ https://wiki.debian.org/Apt
 
 If you're bored, feel free to add support for new package manager. See
 good candidates at:
-* `Wikipedia list of package managers 
-<https://en.wikipedia.org/wiki/List_of_software_package_management_systems>`_
+
+* `Wikipedia list of package managers
+  <https://en.wikipedia.org/wiki/List_of_software_package_management_systems>`_
 * `Awesome list of package managers 
-<https://github.com/k4m4/terminals-are-sexy#package-managers>`_
+  <https://github.com/k4m4/terminals-are-sexy#package-managers>`_
 
 
 Installation

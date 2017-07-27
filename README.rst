@@ -63,7 +63,7 @@ Supported package managers
 Package manager  Version    macOS  Linux  Windows  ``sync``  ``installed``  ``search``  ``install``  ``outdated``  ``upgrade``
 ================ ========== ====== ====== ======== ========= ============== =========== ============ ============= ============
 |brew|__          >= 1.0.*  ✓                      ✓         ✓              ✓                        ✓             ✓
-|cask|__          >= 1.0.*  ✓                      ✓         ✓              ✓                        ✓             ✓
+|cask|__          >= 1.1.6  ✓                      ✓         ✓              ✓                        ✓             ✓
 |pip2|__          >= 9.0.0  ✓      ✓                         ✓              ✓                        ✓             ✓
 |pip3|__          >= 9.0.0  ✓      ✓                         ✓              ✓                        ✓             ✓
 |npm|__           >= 4.0.*  ✓      ✓                         ✓              ✓                        ✓             ✓

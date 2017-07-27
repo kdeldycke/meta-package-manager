@@ -231,23 +231,25 @@ class Homebrew(PackageManager):
 class HomebrewCask(Homebrew):
 
     """ Cask is now part of Homebrew's core and extend it.
-
-    We do not define a ``sync()`` method here as `brew cask update` is just an
-    alias to `brew update` and is deprecated. See:
-    https://github.com/kdeldycke/meta-package-manager/issues/28
     """
 
     cli_args = ['cask']
 
     # 'cask install' doesn't upgrade to the latest package version, we need to
     # call 'cask reinstall' instead since 1.1.0.
-    requirement = '>= 1.1.*'
+    # 1.1.6 is the lowest requirement as it is the version from which `brew
+    # cask update` command gets properly deprecated.
+    requirement = '>= 1.1.6'
 
     id = "cask"
 
     name = "Homebrew Cask"
 
     cli_name = "brew"
+
+    # Call homebrew's own update: `brew cask update` is now deprecated. See:
+    # https://github.com/kdeldycke/meta-package-manager/issues/28
+    sync = Homebrew().sync
 
     def search(self, query):
         """ Fetch matching packages from ``brew cask search`` output.

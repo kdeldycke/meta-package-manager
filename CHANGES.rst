@@ -9,6 +9,8 @@ Changelog
 * Add support for ``apt`` on Linux systems.
 * Use pip 9.0 JSON output. Closes #18.
 * Bump minimal requirement of ``pip`` to ``9.0.*``.
+* Remove usage of deprecated ``brew cask update`` command.
+* Bump minimal requirement of ``cask`` to ``1.1.6``.
 
 
 `2.5.0 (2017-03-01) <https://github.com/kdeldycke/meta-package-manager/compare/v2.4.0...v2.5.0>`_

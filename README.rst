@@ -148,42 +148,52 @@ List global options and commands:
     Options:
       -v, --verbosity LEVEL           Either CRITICAL, ERROR, WARNING, INFO or
                                       DEBUG. Defaults to INFO.
-      -m, --manager [npm|mas|pip3|pip2|cask|apm|brew|gem]
-                                      Restrict sub-command to one package manager.
-                                      Defaults to all.
+      -m, --manager [npm|mas|pip3|pip2|cask|apt|apm|brew|gem]
+                                      Restrict sub-command to a subset of package
+                                      managers. Repeat to select multiple
+                                      managers. Defaults to all.
       -o, --output-format [simple|plain|json|fancy]
                                       Rendering mode of the output. Defaults to
                                       fancy.
+      --stats / --no-stats            Print statistics or not at the end of
+                                      output. Active by default.
+      --stop-on-error / --continue-on-error
+                                      Stop right away or continue operations on
+                                      manager CLI error. Defaults to stop.
       --version                       Show the version and exit.
       --help                          Show this message and exit.
 
     Commands:
-      managers  List supported package managers and their location.
-      outdated  List outdated packages.
-      sync      Sync local package info.
-      upgrade   Upgrade all packages.
+      installed  List installed packages.
+      managers   List supported package managers and their location.
+      outdated   List outdated packages.
+      search     Search packages.
+      sync       Sync local package info.
+      upgrade    Upgrade all packages.
 
-List all supported package managers and their status on current system:
+List all supported package managers and their status on current system (macOS):
 
 .. code-block:: shell-session
 
     $ mpm managers
-    ╒═══════════════════╤══════╤═════════════╤════════════════════════╤══════════════╤═════════════╕
-    │ Package manager   │ ID   │ Supported   │ CLI                    │ Executable   │ Version     │
-    ╞═══════════════════╪══════╪═════════════╪════════════════════════╪══════════════╪═════════════╡
-    │ Atom's apm        │ apm  │ ✓           │ ✓  /usr/local/bin/apm  │ ✓            │ ✓  1.12.9   │
-    ├───────────────────┼──────┼─────────────┼────────────────────────┼──────────────┼─────────────┤
-    │ Homebrew          │ brew │ ✓           │ ✓  /usr/local/bin/brew │ ✓            │ ✓  1.1.7    │
-    ├───────────────────┼──────┼─────────────┼────────────────────────┼──────────────┼─────────────┤
-    │ Homebrew Cask     │ cask │ ✓           │ ✓  /usr/local/bin/brew │ ✓            │ ✓  1.1.7    │
-    ├───────────────────┼──────┼─────────────┼────────────────────────┼──────────────┼─────────────┤
-    │ Ruby Gems         │ gem  │ ✓           │ ✓  /usr/bin/gem        │ ✓            │ ✓  2.0.14.1 │
-    ├───────────────────┼──────┼─────────────┼────────────────────────┼──────────────┼─────────────┤
-    │ Mac AppStore      │ mas  │ ✓           │ ✓  /usr/local/bin/mas  │ ✓            │ ✓  1.3.1    │
-    ├───────────────────┼──────┼─────────────┼────────────────────────┼──────────────┼─────────────┤
-    │ Node's npm        │ npm  │ ✓           │ ✓  /usr/local/bin/npm  │ ✓            │ ✓  4.0.5    │
-    ├───────────────────┼──────┼─────────────┼────────────────────────┼──────────────┼─────────────┤
-    │ Python 2's Pip    │ pip2 │ ✓           │ ✓  /usr/local/bin/pip2 │ ✓            │ ✓  9.0.1    │
-    ├───────────────────┼──────┼─────────────┼────────────────────────┼──────────────┼─────────────┤
-    │ Python 3's Pip    │ pip3 │ ✓           │ ✓  /usr/local/bin/pip3 │ ✓            │ ✓  9.0.1    │
-    ╘═══════════════════╧══════╧═════════════╧════════════════════════╧══════════════╧═════════════╛
+    ╒═══════════════════╤══════╤═══════════════╤════════════════════════╤══════════════╤═════════════╕
+    │ Package manager   │ ID   │ Supported     │ CLI                    │ Executable   │ Version     │
+    ╞═══════════════════╪══════╪═══════════════╪════════════════════════╪══════════════╪═════════════╡
+    │ Atom's apm        │ apm  │ ✓             │ ✓  /usr/local/bin/apm  │ ✓            │ ✓  1.18.1   │
+    ├───────────────────┼──────┼───────────────┼────────────────────────┼──────────────┼─────────────┤
+    │ APT               │ apt  │ ✘  Linux only │ ✓  /usr/bin/apt        │ ✓            │ ✘           │
+    ├───────────────────┼──────┼───────────────┼────────────────────────┼──────────────┼─────────────┤
+    │ Homebrew          │ brew │ ✓             │ ✓  /usr/local/bin/brew │ ✓            │ ✓  1.2.5    │
+    ├───────────────────┼──────┼───────────────┼────────────────────────┼──────────────┼─────────────┤
+    │ Homebrew Cask     │ cask │ ✓             │ ✓  /usr/local/bin/brew │ ✓            │ ✓  1.2.5    │
+    ├───────────────────┼──────┼───────────────┼────────────────────────┼──────────────┼─────────────┤
+    │ Ruby Gems         │ gem  │ ✓             │ ✓  /usr/bin/gem        │ ✓            │ ✓  2.0.14.1 │
+    ├───────────────────┼──────┼───────────────┼────────────────────────┼──────────────┼─────────────┤
+    │ Mac AppStore      │ mas  │ ✓             │ ✓  /usr/local/bin/mas  │ ✓            │ ✓  1.3.1    │
+    ├───────────────────┼──────┼───────────────┼────────────────────────┼──────────────┼─────────────┤
+    │ Node's npm        │ npm  │ ✓             │ ✓  /usr/local/bin/npm  │ ✓            │ ✓  5.3.0    │
+    ├───────────────────┼──────┼───────────────┼────────────────────────┼──────────────┼─────────────┤
+    │ Python 2's Pip    │ pip2 │ ✓             │ ✓  /usr/local/bin/pip2 │ ✓            │ ✓  9.0.1    │
+    ├───────────────────┼──────┼───────────────┼────────────────────────┼──────────────┼─────────────┤
+    │ Python 3's Pip    │ pip3 │ ✓             │ ✓  /usr/local/bin/pip3 │ ✓            │ ✓  9.0.1    │
+    ╘═══════════════════╧══════╧═══════════════╧════════════════════════╧══════════════╧═════════════╛

@@ -247,9 +247,14 @@ class HomebrewCask(Homebrew):
 
     cli_name = "brew"
 
-    # Call homebrew's own update: `brew cask update` is now deprecated. See:
-    # https://github.com/kdeldycke/meta-package-manager/issues/28
-    sync = Homebrew().sync
+    @cachedproperty
+    def sync(self):
+        """ Call same CLI as homebrew's own update: `brew update`.
+
+        This is necessary now that `brew update` is deprecated. See:
+        https://github.com/kdeldycke/meta-package-manager/issues/28
+        """
+        self.run([self.cli_path] + ['update'])
 
     def search(self, query):
         """ Fetch matching packages from ``brew cask search`` output.

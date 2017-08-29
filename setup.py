@@ -39,7 +39,7 @@ PACKAGE_NAME = MODULE_NAME.replace('_', '-')
 DEPENDENCIES = [
     'boltons >= 17.0.0',
     'click >= 5.0',
-    'click_log >= 0.1.5',
+    'click_log >= 0.2.0',
     'packaging',
     'tabulate',
     # shutil.which() is only available starting with Python 3.3. Use backports

@@ -77,9 +77,8 @@ def print_stats(data):
 
 
 @click.group(invoke_without_command=True)
-@click_log.init(logger)
 @click_log.simple_verbosity_option(
-    default='INFO', metavar='LEVEL',
+    logger, default='INFO', metavar='LEVEL',
     help='Either CRITICAL, ERROR, WARNING, INFO or DEBUG. Defaults to INFO.')
 @click.option(
     '-m', '--manager', type=click.Choice(pool()), multiple=True,

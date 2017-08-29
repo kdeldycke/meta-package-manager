@@ -135,7 +135,7 @@ def cli(ctx, manager, output_format, stats, stop_on_error):
     # Silence all log message for JSON rendering unless in debug mode.
     rendering = RENDERING_MODES[output_format]
     if rendering == 'json' and level_name != 'DEBUG':
-        click_log.set_level(logging.CRITICAL * 2)
+        logger.setLevel(logging.CRITICAL * 2)
 
     # Load up global options to the context.
     ctx.obj = {

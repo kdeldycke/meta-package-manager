@@ -97,7 +97,7 @@ def print_stats(data):
 @click.pass_context
 def cli(ctx, manager, output_format, stats, stop_on_error):
     """ CLI for multi-package manager upgrades. """
-    level = click_log.get_level()
+    level = logger.get_level()
     try:
         level_to_name = logging._levelToName
     # Fallback to pre-Python 3.4 internals.

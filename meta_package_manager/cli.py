@@ -55,6 +55,9 @@ OK = click.style(u'✓', fg='green')
 KO = click.style(u'✘', fg='red')
 
 
+click_log.basic_config(logger)
+
+
 def json(data):
     """ Utility function to render data structure into pretty printed JSON. """
     return json_dumps(data, sort_keys=True, indent=4, separators=(',', ': '))

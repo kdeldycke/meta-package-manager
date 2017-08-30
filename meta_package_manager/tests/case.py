@@ -80,10 +80,8 @@ class CLITestCase(unittest.TestCase):
 
         Used to print debug traces in test suites.
         """
-        print('-' * 70)
         print(u"$ {}".format(' '.join(cmd)))
         print(output)
-        print('-' * 70)
 
     def run_cmd(self, *args):
         """ Run a system command, print output and return results. """

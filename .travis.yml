@@ -180,9 +180,7 @@ before_script:
       fi;
     fi
   # Install latest brew and cask.
-  # Reset GitHub credentials in the macOS keychain.
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      printf "protocol=https\nhost=github.com\n" | git credential-osxkeychain erase;
       brew tap caskroom/cask;
       brew update;
     fi

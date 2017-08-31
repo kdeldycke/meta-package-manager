@@ -142,8 +142,8 @@ class Homebrew(PackageManager):
 
             $ brew search sed
             gnu-sed ✔                    libxdg-basedir               minised
-            Caskroom/cask/focused                  Caskroom/cask/marsedit
-            Caskroom/cask/licensed                 Caskroom/cask/physicseditor
+            caskroom/cask/focused                  caskroom/cask/marsedit
+            caskroom/cask/licensed                 caskroom/cask/physicseditor
         """
         matches = {}
 

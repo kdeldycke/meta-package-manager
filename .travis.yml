@@ -207,3 +207,8 @@ script:
 
 after_script:
   - codecov
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always

@@ -138,6 +138,9 @@ install:
 
 before_script:
   - pip install codecov
+  # Let homebrew use personal token to access GitHub to bypass global rate
+  # limiting.
+  - export HOMEBREW_GITHUB_API_TOKEN="19c2e038eb096930278a89818b334d2adbd00bb5"
   # Default Travis images came with an outdated Homebrew requiring
   # unconventional upgrade to work properly. This only concerns xcode6.4 and
   # xcode8 images.

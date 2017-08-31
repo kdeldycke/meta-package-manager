@@ -9,8 +9,9 @@ Changelog
 * Add support for ``apt`` on Linux systems.
 * Use pip 9.0 JSON output. Closes #18.
 * Bump minimal requirement of ``pip`` to ``9.0.*``.
+* Use new ``brew cask outdated`` command.
 * Remove usage of deprecated ``brew cask update`` command.
-* Bump minimal requirement of ``cask`` to ``1.1.6``.
+* Bump minimal requirement of ``cask`` to ``1.1.12``.
 * Bump requirement to ``click_log >= 0.2.0``. Closes #39.
 * Replace ``nose`` by ``pytest``.
 * Only notify by mail of test failures.

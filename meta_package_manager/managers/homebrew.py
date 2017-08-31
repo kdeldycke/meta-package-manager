@@ -235,11 +235,8 @@ class HomebrewCask(Homebrew):
 
     cli_args = ['cask']
 
-    # 'cask install' doesn't upgrade to the latest package version, we need to
-    # call 'cask reinstall' instead since 1.1.0.
-    # 1.1.6 is the lowest requirement as it is the version from which `brew
-    # cask update` command gets properly deprecated.
-    requirement = '>= 1.1.6'
+    # 1.1.12 is the first to introduce `brew cask outdated`.
+    requirement = '>= 1.1.12'
 
     id = "cask"
 
@@ -290,127 +287,49 @@ class HomebrewCask(Homebrew):
     def outdated(self):
         """ Search for outdated packages among installed one.
 
-        Cask doesn't provides an ``outdated`` subcommand contrary to ``brew``.
-        We have no other alternative but to fetch the list of currently
-        installed packages and inspect them one by one to search for outdated
-        ones.
-
-        Also, `brew cask list` is `not reliable <https://github.com/caskroom
-        /homebrew-cask/blob/master/doc/reporting_bugs
-        /brew_cask_list_shows_wrong_information.md>`_.
-
         Raw CLI output samples:
 
         .. code-block:: shell-session
 
-            $ brew cask info aerial
-            aerial: 1.2beta5
-            https://github.com/JohnCoates/Aerial
-            /usr/local/Caskroom/aerial/1.2beta5 (18 files, 6.6M)
-            From: https://github.com/(...)/blob/master/Casks/aerial.rb
-            ==> Name
-            Aerial Screensaver
-            ==> Artifacts
-            Aerial.saver (screen_saver)
+            $ brew cask outdated
+            google-play-music-desktop-player (4.4.0) != 4.4.1
 
         .. code-block:: shell-session
 
-            $ brew cask info firefox
-            firefox: 50.0.1
-            https://www.mozilla.org/firefox/
-            /usr/local/Caskroom/firefox/49.0.1 (107 files, 185.3M)
-            From: https://github.com/(...)/blob/master/Casks/firefox.rb
-            ==> Name
-            Mozilla Firefox
-            ==> Artifacts
-            Firefox.app (app)
-
-        .. code-block:: shell-session
-
-            $ brew cask info virtualbox
-            virtualbox: 5.1.10-112026
-            https://www.virtualbox.org
-            /usr/local/Caskroom/virtualbox/5.1.8-111374 (3 files, 88.8M)
-            /usr/local/Caskroom/virtualbox/5.1.10-112026 (3 files, 89.3M)
-            From: https://github.com/(...)/blob/master/Casks/virtualbox.rb
-            ==> Name
-            Oracle VirtualBox
-            ==> Artifacts
-            VirtualBox.pkg (pkg)
-
-        .. code-block:: shell-session
-
-            $ brew cask info prey
-            prey: 1.6.3
-            https://preyproject.com/
-            Not installed
-            From: https://github.com/(...)/blob/master/Casks/prey.rb
-            ==> Name
-            Prey
-            ==> Artifacts
-            prey-mac-1.6.3-x86.pkg (pkg)
-            ==> Caveats
-            Prey requires your API key, found in the bottom-left corner of
-            the Prey web account Settings page, to complete installation.
-            The API key may be set as an environment variable as follows:
-
-              API_KEY="abcdef123456" brew cask install prey
-
-        .. code-block:: shell-session
-
-            $ brew cask info ubersicht
-            ubersicht: 1.0.44
-            http://tracesof.net/uebersicht/
-            Not installed
-            From: https://github.com/(...)/blob/master/Casks/ubersicht.rb
-            ==> Name
-            Übersicht
-            ==> Artifacts
-            Übersicht.app (app)
-
-        .. code-block:: shell-session
-
-            $ brew cask info xld
-            xld: 2016.10.07
-            http://tmkk.undo.jp/xld/index_e.html
-            /usr/local/Caskroom/xld/2016.10.07 (45 files, 221.6K)
-            From: https://github.com/(...)/blob/master/Casks/xld.rb
-            ==> Names
-            X Lossless Decoder
-            XLD
-            ==> Artifacts
-            XLD.app (app)
+            $ brew cask outdated --greedy --verbose
+            android-file-transfer (latest) != latest
+            atom (1.19.3) != 1.19.4
+            dropbox (latest) != latest
+            google-chrome (latest) != latest
+            google-drive (latest) != latest
+            google-play-music-desktop-player (4.4.0) != 4.4.1
+            karabiner-elements (0.90.92) != 0.91.13
+            osxfuse (3.5.6) != 3.6.3
+            qlimagesize (latest) != latest
+            qlrest (latest) != latest
+            quicklook-json (latest) != latest
+            steam (latest) != latest
         """
         outdated = {}
 
-        for installed_pkg in self.installed.values():
-            package_id = installed_pkg['id']
-            version = installed_pkg['installed_version']
+        # List available updates.
+        output = self.run(
+            [self.cli_path] + self.cli_args + [
+                'outdated', '--greedy', '--verbose'])
 
-            # Inspect the package closer to evaluate its state.
-            output = self.run([
-                self.cli_path] + self.cli_args + ['info', package_id])
+        if output:
+            regexp = re.compile(r'(\S+) \((.*)\) != (.*)')
+            for outdated_pkg in output.strip().split('\n'):
+                package_id, version, latest_version = regexp.match(
+                    outdated_pkg).groups()
 
-            latest_version = output.split('\n')[0].split(' ')[1]
-
-            # Skip already installed packages.
-            if version == latest_version:
-                continue
-
-            # Casks are allowed to provide several names. See:
-            # https://github.com/kdeldycke/meta-package-manager/issues/26 .
-            package_names = re.search(
-                '==> Names?(.*?)(==>|$)', output, re.DOTALL)
-            if package_names:
-                # Choose the longuest name as canonical.
-                package_name = None
-                for name in package_names.groups()[0].strip().split('\n'):
-                    if not package_name or len(name) > len(package_name):
-                        package_name = name
+                # Skip packages in undetermined state.
+                if version == latest_version:
+                    continue
 
                 outdated[package_id] = {
                     'id': package_id,
-                    'name': package_name,
+                    'name': package_id,
                     'installed_version': version,
                     'latest_version': latest_version}
 

@@ -6,6 +6,12 @@ sudo: required
 # macOS images do not support Python. See:
 # https://docs.travis-ci.com/user/multi-os/#Python-example-(unsupported-languages)
 matrix:
+
+  # Concurrency is set to 1 (see https://docs.travis-ci.com/user
+  # /customizing-the-build/#Limiting-Concurrent-Builds) to not reach GitHub API
+  # rate limits. As a result, we speed up jobs by allowing fast finish.
+  fast_finish: true
+
   include:
 
     # We're not directly using the Python distribution provided by Travis, but

@@ -45,7 +45,7 @@ matrix:
       env: PYTHON_DIST="3.6"
 
     # Xcode to macOS version matrix is available at:
-    # https://docs.travis-ci.com/user/osx-ci-environment/#OS-X-Version
+    # https://docs.travis-ci.com/user/reference/osx/#os-x-version
 
     # xcode6.4 is Mac OS X 10.10.
     - language: generic

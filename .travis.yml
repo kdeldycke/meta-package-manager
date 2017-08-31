@@ -10,48 +10,48 @@ matrix:
 
     # We're not directly using the Python distribution provided by Travis, but
     # this variable will be fed to Conda to install the right version.
-    - python: "2.7"
-      os: linux
-      dist: trusty
-      env: PYTHON_DIST="2.7"
-    - python: "3.4"
-      os: linux
-      dist: trusty
-      env: PYTHON_DIST="3.4"
-    - python: "3.5"
-      os: linux
-      dist: trusty
-      env: PYTHON_DIST="3.5"
-    - python: "3.6"
-      os: linux
-      dist: trusty
-      env: PYTHON_DIST="3.6"
+    #- python: "2.7"
+    #  os: linux
+    #  dist: trusty
+    #  env: PYTHON_DIST="2.7"
+    #- python: "3.4"
+    #  os: linux
+    #  dist: trusty
+    #  env: PYTHON_DIST="3.4"
+    #- python: "3.5"
+    #  os: linux
+    #  dist: trusty
+    #  env: PYTHON_DIST="3.5"
+    #- python: "3.6"
+    #  os: linux
+    #  dist: trusty
+    #  env: PYTHON_DIST="3.6"
 
-    - python: "2.7"
-      os: linux
-      dist: precise
-      env: PYTHON_DIST="2.7"
-    - python: "3.4"
-      os: linux
-      dist: precise
-      env: PYTHON_DIST="3.4"
-    - python: "3.5"
-      os: linux
-      dist: precise
-      env: PYTHON_DIST="3.5"
-    - python: "3.6"
-      os: linux
-      dist: precise
-      env: PYTHON_DIST="3.6"
+    #- python: "2.7"
+    #  os: linux
+    #  dist: precise
+    #  env: PYTHON_DIST="2.7"
+    #- python: "3.4"
+    #  os: linux
+    #  dist: precise
+    #  env: PYTHON_DIST="3.4"
+    #- python: "3.5"
+    #  os: linux
+    #  dist: precise
+    #  env: PYTHON_DIST="3.5"
+    #- python: "3.6"
+    #  os: linux
+    #  dist: precise
+    #  env: PYTHON_DIST="3.6"
 
     # Xcode to macOS version matrix is available at:
     # https://docs.travis-ci.com/user/osx-ci-environment/#OS-X-Version
 
     # xcode6.4 is Mac OS X 10.10.
-    - language: generic
-      os: osx
-      osx_image: xcode6.4
-      env: PYTHON_DIST="2.7"
+    #- language: generic
+    #  os: osx
+    #  osx_image: xcode6.4
+    #  env: PYTHON_DIST="2.7"
     - language: generic
       os: osx
       osx_image: xcode6.4
@@ -60,20 +60,20 @@ matrix:
       os: osx
       osx_image: xcode6.4
       env: PYTHON_DIST="3.5"
-    - language: generic
-      os: osx
-      osx_image: xcode6.4
-      env: PYTHON_DIST="3.6"
+    #- language: generic
+    #- os: osx
+    #- osx_image: xcode6.4
+    #- env: PYTHON_DIST="3.6"
 
     # xcode8 is Mac OS X 10.11.
-    - language: generic
-      os: osx
-      osx_image: xcode8
-      env: PYTHON_DIST="2.7"
-    - language: generic
-      os: osx
-      osx_image: xcode8
-      env: PYTHON_DIST="3.4"
+    #- language: generic
+    #  os: osx
+    #  osx_image: xcode8
+    #  env: PYTHON_DIST="2.7"
+    #- language: generic
+    #  os: osx
+    #  osx_image: xcode8
+    #  env: PYTHON_DIST="3.4"
     - language: generic
       os: osx
       osx_image: xcode8
@@ -84,22 +84,22 @@ matrix:
       env: PYTHON_DIST="3.6"
 
     # xcode8.2 is macOS 10.12.
-    - language: generic
-      os: osx
-      osx_image: xcode8.2
-      env: PYTHON_DIST="2.7"
-    - language: generic
-      os: osx
-      osx_image: xcode8.2
-      env: PYTHON_DIST="3.4"
-    - language: generic
-      os: osx
-      osx_image: xcode8.2
-      env: PYTHON_DIST="3.5"
-    - language: generic
-      os: osx
-      osx_image: xcode8.2
-      env: PYTHON_DIST="3.6"
+    #- language: generic
+    #  os: osx
+    #  osx_image: xcode8.2
+    #  env: PYTHON_DIST="2.7"
+    #- language: generic
+    #  os: osx
+    #  osx_image: xcode8.2
+    #  env: PYTHON_DIST="3.4"
+    #- language: generic
+    #  os: osx
+    #  osx_image: xcode8.2
+    #  env: PYTHON_DIST="3.5"
+    #- language: generic
+    #  os: osx
+    #  osx_image: xcode8.2
+    #  env: PYTHON_DIST="3.6"
 
 # Update the system and setup a fresh Anaconda ecosystem.
 before_install:

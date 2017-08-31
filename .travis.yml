@@ -48,10 +48,10 @@ matrix:
     # https://docs.travis-ci.com/user/osx-ci-environment/#OS-X-Version
 
     # xcode6.4 is Mac OS X 10.10.
-    #- language: generic
-    #  os: osx
-    #  osx_image: xcode6.4
-    #  env: PYTHON_DIST="2.7"
+    - language: generic
+      os: osx
+      osx_image: xcode6.4
+      env: PYTHON_DIST="2.7"
     - language: generic
       os: osx
       osx_image: xcode6.4
@@ -60,20 +60,20 @@ matrix:
       os: osx
       osx_image: xcode6.4
       env: PYTHON_DIST="3.5"
-    #- language: generic
-    #- os: osx
-    #- osx_image: xcode6.4
-    #- env: PYTHON_DIST="3.6"
+    - language: generic
+      os: osx
+      osx_image: xcode6.4
+      env: PYTHON_DIST="3.6"
 
     # xcode8 is Mac OS X 10.11.
-    #- language: generic
-    #  os: osx
-    #  osx_image: xcode8
-    #  env: PYTHON_DIST="2.7"
-    #- language: generic
-    #  os: osx
-    #  osx_image: xcode8
-    #  env: PYTHON_DIST="3.4"
+    - language: generic
+      os: osx
+      osx_image: xcode8
+      env: PYTHON_DIST="2.7"
+    - language: generic
+      os: osx
+      osx_image: xcode8
+      env: PYTHON_DIST="3.4"
     - language: generic
       os: osx
       osx_image: xcode8
@@ -84,22 +84,22 @@ matrix:
       env: PYTHON_DIST="3.6"
 
     # xcode8.2 is macOS 10.12.
-    #- language: generic
-    #  os: osx
-    #  osx_image: xcode8.2
-    #  env: PYTHON_DIST="2.7"
-    #- language: generic
-    #  os: osx
-    #  osx_image: xcode8.2
-    #  env: PYTHON_DIST="3.4"
-    #- language: generic
-    #  os: osx
-    #  osx_image: xcode8.2
-    #  env: PYTHON_DIST="3.5"
-    #- language: generic
-    #  os: osx
-    #  osx_image: xcode8.2
-    #  env: PYTHON_DIST="3.6"
+    - language: generic
+      os: osx
+      osx_image: xcode8.2
+      env: PYTHON_DIST="2.7"
+    - language: generic
+      os: osx
+      osx_image: xcode8.2
+      env: PYTHON_DIST="3.4"
+    - language: generic
+      os: osx
+      osx_image: xcode8.2
+      env: PYTHON_DIST="3.5"
+    - language: generic
+      os: osx
+      osx_image: xcode8.2
+      env: PYTHON_DIST="3.6"
 
 # Update the system and setup a fresh Anaconda ecosystem.
 before_install:

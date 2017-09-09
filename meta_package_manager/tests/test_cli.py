@@ -145,7 +145,7 @@ class TestCLITableRendering(TestCLISubcommand):
         return json.loads(result.output)
 
     def test_json_debug_output(self):
-        """ Debug output is expected to be unpareable.
+        """ Debug output is expected to be unparseable.
 
         Because of interleaved debug messages and JSON output.
         """

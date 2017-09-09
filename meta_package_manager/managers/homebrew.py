@@ -25,7 +25,7 @@ from __future__ import (
     unicode_literals
 )
 
-import json
+import simplejson as json
 import re
 
 from boltons.cacheutils import cachedproperty

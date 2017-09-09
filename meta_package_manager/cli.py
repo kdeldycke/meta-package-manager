@@ -22,7 +22,7 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 from functools import partial
-from json import dumps as json_dumps
+from simplejson import dumps as json_dumps
 from operator import itemgetter
 
 import click

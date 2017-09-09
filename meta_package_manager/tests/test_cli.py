@@ -26,7 +26,7 @@ from __future__ import (
 )
 
 import unittest
-import json
+import simplejson as json
 
 from .. import __version__
 from ..platform import PY3, PY_VERSION

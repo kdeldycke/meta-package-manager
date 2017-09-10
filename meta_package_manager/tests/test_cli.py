@@ -161,10 +161,7 @@ class TestCLITableRendering(TestCLISubcommand):
             with self.assertRaises(ValueError) as expt:
                 json.loads(result.output)
             message = expt.exception.args[0]
-            if PY_VERSION >= (3, 4):
-                self.assertIn('Expecting value: line ', message)
-            else:
-                self.assertEqual(message, 'No JSON object could be decoded')
+            self.assertIn('Expecting value: line ', message)
 
 
 class TestCLIManagers(TestCLITableRendering):

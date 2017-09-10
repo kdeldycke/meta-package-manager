@@ -1,10 +1,8 @@
 Changelog
 =========
 
-`2.6.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v2.5.0...develop>`_
---------------------------------------------------------------------------------------------------
-
-.. note:: This version is not yet released and is under active development.
+`2.6.0 (2017-09-11) <https://github.com/kdeldycke/meta-package-manager/compare/v2.5.0...v2.6.0>`_
+-------------------------------------------------------------------------------------------------
 
 * Add support for ``apt`` on Linux systems.
 * Use pip 9.0 JSON output. Closes #18.

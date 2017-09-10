@@ -1,6 +1,15 @@
 Changelog
 =========
 
+
+`2.6.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v2.6.0...develop>`_
+--------------------------------------------------------------------------------------------------
+
+.. note:: This version is not yet released and is under active development.
+
+* No changes yet.
+
+
 `2.6.0 (2017-09-11) <https://github.com/kdeldycke/meta-package-manager/compare/v2.5.0...v2.6.0>`_
 -------------------------------------------------------------------------------------------------
 

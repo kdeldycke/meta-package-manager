@@ -161,7 +161,11 @@ before_script:
   # Install latest pips.
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       pip2 install --upgrade pip;
-      pip3 install --upgrade pip;
+      if [[ "$_system_version" == "12.04" ]]; then
+        pip3 install --upgrade pip;
+      else
+        pip3.5 install --upgrade pip;
+      fi;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       pip install --upgrade pip;

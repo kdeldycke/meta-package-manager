@@ -26,6 +26,7 @@ from __future__ import (
 )
 
 import unittest
+
 import simplejson as json
 
 from .. import __version__

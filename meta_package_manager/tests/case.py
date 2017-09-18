@@ -24,6 +24,7 @@ import os
 import unittest
 
 from boltons.tbutils import ExceptionInfo
+
 from click.testing import CliRunner
 
 from ..bitbar import run

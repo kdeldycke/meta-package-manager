@@ -25,9 +25,9 @@ from __future__ import (
     unicode_literals
 )
 
-import simplejson as json
-
 from boltons.cacheutils import cachedproperty
+
+import simplejson as json
 
 from ..base import PackageManager
 from ..platform import LINUX, MACOS

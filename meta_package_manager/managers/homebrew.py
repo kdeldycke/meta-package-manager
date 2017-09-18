@@ -25,10 +25,11 @@ from __future__ import (
     unicode_literals
 )
 
-import simplejson as json
 import re
 
 from boltons.cacheutils import cachedproperty
+
+import simplejson as json
 from packaging.version import parse as parse_version
 
 from ..base import PackageManager

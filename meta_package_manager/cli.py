@@ -22,11 +22,12 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 from functools import partial
-from simplejson import dumps as json_dumps
 from operator import itemgetter
 
-import click
 import click_log
+
+import click
+from simplejson import dumps as json_dumps
 from tabulate import tabulate
 
 from . import __version__, logger

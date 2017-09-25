@@ -118,8 +118,6 @@ before_install:
   - env
   # Check default Python version installed.
   - python --version
-  - pip --version
-  - pip freeze
   # Explicitly download the Miniconda dedicated to the Python version we
   # target, to ensure stability in case the default change in the future. Also
   # speed things up a little bit by only installing the minimal requirements.
@@ -148,6 +146,8 @@ install:
   - source activate test_env
   # Check we installed the right Python version.
   - python --version
+  - pip --version
+  - pip freeze
 
 before_script:
   - pip install codecov

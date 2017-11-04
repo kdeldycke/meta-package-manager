@@ -89,11 +89,6 @@ matrix:
       osx_image: xcode8
       env: PYTHON_DIST="3.6"
 
-  # Temporarily allow failures while we search for the root of cause of output
-  # truncation. See:
-  # https://travis-ci.org/kdeldycke/meta-package-manager/jobs/273974680#L3919
-  allow_failures:
-
     # Xcode 9.0 is macOS 10.12.
     - language: generic
       os: osx

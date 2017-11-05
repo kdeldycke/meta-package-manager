@@ -155,6 +155,11 @@ before_script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]] && [[ "$_system_version" != "10.12" ]]; then
       brew reinstall cloog; brew link --overwrite cloog018;
     fi
+  # Install latest brew and cask.
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew update;
+      brew tap caskroom/cask;
+    fi
   # Install latest pips.
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       if [[ "$PYTHON_DIST" == "2.7" ]]; then
@@ -192,11 +197,6 @@ before_script:
         sudo apt update;
         sudo apt install -y atom;
       fi;
-    fi
-  # Install latest brew and cask.
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      brew update;
-      brew tap caskroom/cask;
     fi
   # Install latest mas.
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then

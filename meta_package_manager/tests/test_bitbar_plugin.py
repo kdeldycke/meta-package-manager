@@ -25,10 +25,7 @@ from __future__ import (
     unicode_literals
 )
 
-import unittest
-
 from .. import bitbar
-from .. import platform
 from .case import CLITestCase, unless_macos
 
 @unless_macos()

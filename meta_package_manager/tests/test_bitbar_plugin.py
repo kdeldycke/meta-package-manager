@@ -28,9 +28,10 @@ from __future__ import (
 import unittest
 
 from .. import bitbar
-from .case import CLITestCase
+from .. import platform
+from .case import CLITestCase, unless_macos
 
-
+@unless_macos()
 class TestBitBarPlugin(CLITestCase):
 
     def test_simple_call(self):

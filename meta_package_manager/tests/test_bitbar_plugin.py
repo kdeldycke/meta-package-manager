@@ -28,6 +28,7 @@ from __future__ import (
 from .. import bitbar
 from .case import CLITestCase, unless_macos
 
+
 @unless_macos()
 class TestBitBarPlugin(CLITestCase):
 

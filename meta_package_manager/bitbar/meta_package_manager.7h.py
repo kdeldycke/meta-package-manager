@@ -72,21 +72,6 @@ def fix_environment():
     # https://click.pocoo.org/6/python3/#python-3-surrogate-handling
     os.environ['LC_ALL'] = os.environ['LANG'] = 'en_US.UTF-8'
 
-
-def run(*args):
-    """Run a shell command, return error code, output and error message."""
-    assert isinstance(args, tuple)
-    try:
-        process = Popen(args, stdout=PIPE, stderr=PIPE)
-    except OSError:
-        return None, None, "`{}` executable not found.".format(args[0])
-    output, error = process.communicate()
-    return (
-        process.returncode,
-        output.decode('utf-8') if output else None,
-        error.decode('utf-8') if error else None)
-
-
 def echo(message):
     """Print message to the output.
 

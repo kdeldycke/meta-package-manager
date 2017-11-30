@@ -27,7 +27,7 @@ from boltons.tbutils import ExceptionInfo
 
 from click.testing import CliRunner
 
-from ..bitbar import run
+from ..runner import run
 from ..cli import cli
 from ..platform import is_linux, is_macos, is_windows
 

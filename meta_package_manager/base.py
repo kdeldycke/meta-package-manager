@@ -34,8 +34,8 @@ from packaging.specifiers import SpecifierSet
 from packaging.version import parse as parse_version
 
 from . import logger
-from .bitbar import run
 from .platform import current_os
+from .runner import run
 
 try:
     from shutil import which

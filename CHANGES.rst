@@ -7,7 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
-* No changes yet.
+* Do not run BitBar plugin unittests but on macOS.
 
 
 `2.6.1 (2017-11-05) <https://github.com/kdeldycke/meta-package-manager/compare/v2.6.0...v2.6.1>`_

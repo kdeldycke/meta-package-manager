@@ -12,6 +12,19 @@ and `plugin repository
     :align: left
 
 
+Development constraints
+-----------------------
+
+BitBar plugins are self-contained scripts. As such, the
+``meta_package_manager.7h.py`` needs to be able to run without any extra
+dependency, on the pre-installed Python distribution that ships with macOS.
+
+BitBar itself `requires Mac OS X Lion or newer (>= 10.7)
+<https://github.com/matryer/bitbar/commit/f9525901049a7cb33b0765fe8d082bd2d3b502f9>`_.
+So this plugin is supposed to run smoothly with `Python 2.7.1 or newer
+<https://mail.python.org/pipermail/pythonmac-sig/2011-December/023422.html>`_.
+
+
 Development workflow
 --------------------
 

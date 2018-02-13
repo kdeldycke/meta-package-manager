@@ -24,20 +24,21 @@ from .platform import is_windows
 
 
 # Default encoding for all platforms
-ENCODING='utf-8'
+ENCODING = 'utf-8'
 
 if is_windows():
-  ENCODING='latin-1'
+    ENCODING = 'latin-1'
+
 
 def run(*args):
-  """Run a shell command, return error code, output and error message."""
-  assert isinstance(args, tuple)
-  try:
-      process = Popen(args, stdout=PIPE, stderr=PIPE)
-  except OSError:
-      return None, None, "`{}` executable not found.".format(args[0])
-  output, error = process.communicate()
-  return (
-      process.returncode,
-      output.decode(ENCODING) if output else None,
-      error.decode(ENCODING) if error else None)
+    """Run a shell command, return error code, output and error message."""
+    assert isinstance(args, tuple)
+    try:
+        process = Popen(args, stdout=PIPE, stderr=PIPE)
+    except OSError:
+        return None, None, "`{}` executable not found.".format(args[0])
+    output, error = process.communicate()
+    return (
+        process.returncode,
+        output.decode(ENCODING) if output else None,
+        error.decode(ENCODING) if error else None)

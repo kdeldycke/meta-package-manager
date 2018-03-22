@@ -237,7 +237,7 @@ class HomebrewCask(Homebrew):
     cli_args = ['cask']
 
     # 1.1.12 is the first to introduce `brew cask outdated`.
-    requirement = '>= 1.1.12'
+    requirement = '>= 1.1.12-*'
 
     id = "cask"
 

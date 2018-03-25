@@ -40,9 +40,9 @@ DEPENDENCIES = [
     'boltons >= 17.0.0',
     'click >= 5.0',
     'click_log >= 0.2.0',
+    'cli-helpers',
     'packaging',
     'simplejson',
-    'tabulate',
     # shutil.which() is only available starting with Python 3.3. Use backports
     # for Python 2. See marker usage at: https://setuptools.readthedocs.io/en
     # /latest/setuptools.html#declaring-platform-specific-dependencies

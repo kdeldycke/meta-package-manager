@@ -27,8 +27,8 @@ from operator import itemgetter
 import click_log
 
 import click
+from cli_helpers.tabular_output import TabularOutputFormatter
 from simplejson import dumps as json_dumps
-from tabulate import tabulate
 
 from . import __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
@@ -41,14 +41,13 @@ else:
     ifilter = filter
 
 
-# Output rendering modes. Sorted from most machine-readable to fanciest
-# human-readable.
-RENDERING_MODES = {
-    'json': 'json',
-    # Mapping of table formating options to tabulate's parameters.
-    'plain': 'plain',
-    'simple': 'simple',
-    'fancy': 'fancy_grid'}
+# Initialize the table formatter.
+table_formatter = TabularOutputFormatter()
+
+
+# Register all rendering modes for table data.
+RENDERING_MODES = set(['json'])
+RENDERING_MODES.update(table_formatter.supported_formats)
 
 
 # Pre-rendered UI-elements.
@@ -62,6 +61,12 @@ click_log.basic_config(logger)
 def json(data):
     """ Utility function to render data structure into pretty printed JSON. """
     return json_dumps(data, sort_keys=True, indent=4, separators=(',', ': '))
+
+
+def print_table(headers, rows):
+    """ Utility to handle printing of a table. """
+    for line in table_formatter.format_output(rows, headers):
+        logger.info(line)
 
 
 def print_stats(data):
@@ -89,8 +94,9 @@ def print_stats(data):
     help="Restrict sub-command to a subset of package managers. Repeat to "
     "select multiple managers. Defaults to all.")
 @click.option(
-    '-o', '--output-format', type=click.Choice(RENDERING_MODES),
-    default='fancy', help="Rendering mode of the output. Defaults to fancy.")
+    '-o', '--output-format', type=click.Choice(sorted(RENDERING_MODES)),
+    default='fancy_grid',
+    help="Rendering mode of the output. Defaults to fancy-grid.")
 @click.option(
     '--stats/--no-stats', default=True,
     help="Print statistics or not at the end of output. Active by default.")
@@ -134,15 +140,18 @@ def cli(ctx, manager, output_format, stats, stop_on_error):
     active_managers = ifilter(keep_available, target_managers)
 
     # Silence all log message for JSON rendering unless in debug mode.
-    rendering = RENDERING_MODES[output_format]
-    if rendering == 'json' and level_name != 'DEBUG':
+    if output_format == 'json' and level_name != 'DEBUG':
         logger.setLevel(logging.CRITICAL * 2)
+
+    # Setup the table formatter.
+    if output_format != 'json':
+        table_formatter.format_name = output_format
 
     # Load up global options to the context.
     ctx.obj = {
         'target_managers': target_managers,
         'active_managers': active_managers,
-        'rendering': rendering,
+        'output_format': output_format,
         'stats': stats}
 
 
@@ -152,10 +161,10 @@ def managers(ctx):
     """ List all supported package managers and their presence on the system.
     """
     target_managers = ctx.obj['target_managers']
-    rendering = ctx.obj['rendering']
+    output_format = ctx.obj['output_format']
 
     # Machine-friendly data rendering.
-    if rendering == 'json':
+    if output_format == 'json':
         manager_data = {}
         # Build up the data structure of manager metadata.
         fields = [
@@ -205,10 +214,9 @@ def managers(ctx):
             OK if manager.executable else '',
             version_infos])
 
-    table = [[
-        'Package manager', 'ID', 'Supported', 'CLI', 'Executable',
-        'Version']] + sorted(table, key=itemgetter(1))
-    logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
+    print_table(
+        ['Package manager', 'ID', 'Supported', 'CLI', 'Executable', 'Version'],
+        sorted(table, key=itemgetter(1)))
 
 
 @cli.command(short_help='Sync local package info.')
@@ -226,7 +234,7 @@ def sync(ctx):
 def installed(ctx):
     """ List all packages installed on the system from all managers. """
     active_managers = ctx.obj['active_managers']
-    rendering = ctx.obj['rendering']
+    output_format = ctx.obj['output_format']
     stats = ctx.obj['stats']
 
     # Build-up a global list of installed packages per manager.
@@ -243,7 +251,7 @@ def installed(ctx):
             expt.error for expt in manager.cli_errors})
 
     # Machine-friendly data rendering.
-    if rendering == 'json':
+    if output_format == 'json':
         # JSON mode use echo to output data because the logger is disabled.
         click.echo(json(installed))
         return
@@ -266,9 +274,9 @@ def installed(ctx):
         return line[0].lower(), line[1].lower(), line[2]
 
     # Sort and print table.
-    table = [['Package name', 'ID', 'Manager', 'Installed version']] + sorted(
-        table, key=sort_method)
-    logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
+    print_table(
+        ['Package name', 'ID', 'Manager', 'Installed version'],
+        sorted(table, key=sort_method))
 
     if stats:
         print_stats(installed)
@@ -280,7 +288,7 @@ def installed(ctx):
 def search(ctx, query):
     """ Search packages from all managers. """
     active_managers = ctx.obj['active_managers']
-    rendering = ctx.obj['rendering']
+    output_format = ctx.obj['output_format']
     stats = ctx.obj['stats']
 
     # Build-up a global list of package matches per manager.
@@ -297,7 +305,7 @@ def search(ctx, query):
             expt.error for expt in manager.cli_errors})
 
     # Machine-friendly data rendering.
-    if rendering == 'json':
+    if output_format == 'json':
         # JSON mode use echo to output data because the logger is disabled.
         click.echo(json(matches))
         return
@@ -321,9 +329,9 @@ def search(ctx, query):
 
     # Sort and print table.
     # TODO: highlight exact matches.
-    table = [['Package name', 'ID', 'Manager', 'Latest version']] + sorted(
-        table, key=sort_method)
-    logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
+    print_table(
+       ['Package name', 'ID', 'Manager', 'Latest version'],
+        sorted(table, key=sort_method))
 
     if stats:
         print_stats(matches)
@@ -338,7 +346,7 @@ def outdated(ctx, cli_format):
     """ List available package upgrades and their versions for each manager.
     """
     active_managers = ctx.obj['active_managers']
-    rendering = ctx.obj['rendering']
+    output_format = ctx.obj['output_format']
     stats = ctx.obj['stats']
 
     render_cli = partial(PackageManager.render_cli, cli_format=cli_format)
@@ -378,7 +386,7 @@ def outdated(ctx, cli_format):
             expt.error for expt in manager.cli_errors})
 
     # Machine-friendly data rendering.
-    if rendering == 'json':
+    if output_format == 'json':
         # JSON mode use echo to output data because the logger is disabled.
         click.echo(json(outdated))
         return
@@ -402,10 +410,10 @@ def outdated(ctx, cli_format):
         return line[0].lower(), line[1].lower(), line[2]
 
     # Sort and print table.
-    table = [[
-        'Package name', 'ID', 'Manager', 'Installed version',
-        'Latest version']] + sorted(table, key=sort_method)
-    logger.info(tabulate(table, tablefmt=rendering, headers='firstrow'))
+    print_table(
+        ['Package name', 'ID', 'Manager', 'Installed version',
+         'Latest version'],
+        sorted(table, key=sort_method))
 
     if stats:
         print_stats(outdated)

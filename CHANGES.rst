@@ -7,6 +7,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* Depends on ``cli-helpers`` package to render tables.
+* Removes direct dependency on ``tabulate``.
 * Fix minimal version check for ``cask``. Closes #41 and #44.
 * Do not run BitBar plugin unittests but on macOS.
 

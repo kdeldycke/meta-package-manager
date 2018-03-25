@@ -237,6 +237,10 @@ class HomebrewCask(Homebrew):
     cli_args = ['cask']
 
     # 1.1.12 is the first to introduce `brew cask outdated`.
+    # The somewhat artificial catch-all start at the end of the version number
+    # is a workaround to force comparison betweem `packaging.LegacyVersion`
+    # objects. See: https://github.com/kdeldycke/meta-package-manager/issues
+    # /41#issuecomment-375386991 .
     requirement = '>= 1.1.12-*'
 
     id = "cask"

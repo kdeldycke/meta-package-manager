@@ -7,6 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* Fix minimal version check for ``cask``. Closes #41 and #44.
 * Do not run BitBar plugin unittests but on macOS.
 
 

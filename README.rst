@@ -148,13 +148,13 @@ List global options and commands:
     Options:
       -v, --verbosity LEVEL           Either CRITICAL, ERROR, WARNING, INFO or
                                       DEBUG. Defaults to INFO.
-      -m, --manager [npm|mas|pip3|pip2|cask|apt|apm|brew|gem]
+      -m, --manager [npm|mas|pip3|pip2|apt|cask|apm|brew|gem]
                                       Restrict sub-command to a subset of package
                                       managers. Repeat to select multiple
                                       managers. Defaults to all.
-      -o, --output-format [simple|plain|json|fancy]
+      -o, --output-format [ascii|csv|double|fancy_grid|github|grid|html|jira|json|latex|latex_booktabs|mediawiki|moinmoin|orgtbl|pipe|plain|psql|rst|simple|textile|tsv|vertical]
                                       Rendering mode of the output. Defaults to
-                                      fancy.
+                                      fancy-grid.
       --stats / --no-stats            Print statistics or not at the end of
                                       output. Active by default.
       --stop-on-error / --continue-on-error

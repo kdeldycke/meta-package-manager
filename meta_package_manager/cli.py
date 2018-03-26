@@ -330,7 +330,7 @@ def search(ctx, query):
     # Sort and print table.
     # TODO: highlight exact matches.
     print_table(
-       ['Package name', 'ID', 'Manager', 'Latest version'],
+        ['Package name', 'ID', 'Manager', 'Latest version'],
         sorted(table, key=sort_method))
 
     if stats:

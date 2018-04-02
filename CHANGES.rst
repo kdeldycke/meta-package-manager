@@ -2,10 +2,8 @@ Changelog
 =========
 
 
-`2.7.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v2.6.1...develop>`_
---------------------------------------------------------------------------------------------------
-
-.. note:: This version is not yet released and is under active development.
+`2.7.0 (2018-04-02) <https://github.com/kdeldycke/meta-package-manager/compare/v2.6.1...v2.7.0>`_
+-------------------------------------------------------------------------------------------------
 
 * Add new ``--ignore-auto-updates`` and ``--include-auto-updates`` boolean
   flags.

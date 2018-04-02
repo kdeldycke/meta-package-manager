@@ -7,6 +7,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* Add new ``--ignore-auto-updates`` and ``--include-auto-updates`` boolean
+  flags.
 * Support even fancier table output rendering, including ``csv`` and ``html``.
 * Depends on ``cli-helpers`` package to render tables.
 * Removes direct dependency on ``tabulate``.

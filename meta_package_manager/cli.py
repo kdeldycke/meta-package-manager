@@ -94,6 +94,11 @@ def print_stats(data):
     help="Restrict sub-command to a subset of package managers. Repeat to "
     "select multiple managers. Defaults to all.")
 @click.option(
+    '--ignore-auto-updates/--include-auto-updates', default=True,
+    help="Report all outdated packages, including those tagged as "
+    "auto-updating. Defaults to include all packages. Only applies for "
+    "'outdated' and 'upgrade' commands.")
+@click.option(
     '-o', '--output-format', type=click.Choice(sorted(RENDERING_MODES)),
     default='fancy_grid',
     help="Rendering mode of the output. Defaults to fancy-grid.")
@@ -105,7 +110,8 @@ def print_stats(data):
     "away or continue operations on manager CLI error. Defaults to stop.")
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx, manager, output_format, stats, stop_on_error):
+def cli(ctx, manager, ignore_auto_updates, output_format, stats,
+        stop_on_error):
     """ CLI for multi-package manager upgrades. """
     level = logger.level
     try:
@@ -126,9 +132,12 @@ def cli(ctx, manager, output_format, stats, stop_on_error):
         m for mid, m in pool().items()
         if mid in set(manager)] if manager else pool().values()
 
-    # Apply manager-level option to either raise on error or not.
+    # Apply manager-level options.
     for m in target_managers:
+        # Does the manager should raise on error or not.
         m.raise_on_error = stop_on_error
+        # Should we include auto-update packages or not?
+        m.ignore_auto_updates = ignore_auto_updates
 
     # Pre-filters inactive managers.
     def keep_available(manager):

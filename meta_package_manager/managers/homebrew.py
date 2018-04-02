@@ -301,6 +301,14 @@ class HomebrewCask(Homebrew):
 
         .. code-block:: shell-session
 
+            $ brew cask outdated --verbose
+            java (9.0.1,11) != 10,46:76eac37278c24557a3c4199677f19b62
+            prey (1.7.2) != 1.7.3
+            qlvideo (1.90) != 1.91
+            virtualbox (5.2.4-119785) != 5.2.8,121009
+
+        .. code-block:: shell-session
+
             $ brew cask outdated --greedy --verbose
             android-file-transfer (latest) != latest
             atom (1.19.3) != 1.19.4
@@ -317,10 +325,15 @@ class HomebrewCask(Homebrew):
         """
         outdated = {}
 
+        # Build up the list of CLI options.
+        options = ['--verbose']
+        # Includes auto-update packages or not.
+        if not self.ignore_auto_updates:
+            options.append('--greedy')
+
         # List available updates.
         output = self.run(
-            [self.cli_path] + self.cli_args + [
-                'outdated', '--greedy', '--verbose'])
+            [self.cli_path] + self.cli_args + ['outdated'] + options)
 
         if output:
             regexp = re.compile(r'(\S+) \((.*)\) != (.*)')

@@ -152,6 +152,11 @@ List global options and commands:
                                       Restrict sub-command to a subset of package
                                       managers. Repeat to select multiple
                                       managers. Defaults to all.
+      --ignore-auto-updates / --include-auto-updates
+                                      Report all outdated packages, including
+                                      those tagged as auto-updating. Defaults to
+                                      include all packages. Only applies for
+                                      'outdated' and 'upgrade' commands.
       -o, --output-format [ascii|csv|double|fancy_grid|github|grid|html|jira|json|latex|latex_booktabs|mediawiki|moinmoin|orgtbl|pipe|plain|psql|rst|simple|textile|tsv|vertical]
                                       Rendering mode of the output. Defaults to
                                       fancy-grid.

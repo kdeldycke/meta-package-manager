@@ -90,7 +90,7 @@ def print_stats(data):
     logger, default='INFO', metavar='LEVEL',
     help='Either CRITICAL, ERROR, WARNING, INFO or DEBUG. Defaults to INFO.')
 @click.option(
-    '-m', '--manager', type=click.Choice(pool()), multiple=True,
+    '-m', '--manager', type=click.Choice(sorted(pool())), multiple=True,
     help="Restrict sub-command to a subset of package managers. Repeat to "
     "select multiple managers. Defaults to all.")
 @click.option(

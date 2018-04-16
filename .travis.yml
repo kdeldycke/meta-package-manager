@@ -33,23 +33,6 @@ matrix:
       dist: trusty
       env: PYTHON_DIST="3.6"
 
-    - python: "2.7"
-      os: linux
-      dist: precise
-      env: PYTHON_DIST="2.7"
-    - python: "3.4"
-      os: linux
-      dist: precise
-      env: PYTHON_DIST="3.4"
-    - python: "3.5"
-      os: linux
-      dist: precise
-      env: PYTHON_DIST="3.5"
-    - python: "3.6"
-      os: linux
-      dist: precise
-      env: PYTHON_DIST="3.6"
-
     # Xcode to macOS version matrix is available at:
     # https://docs.travis-ci.com/user/reference/osx/#os-x-version
 

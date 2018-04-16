@@ -7,7 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
-* No changes yet.
+* Drop the Travis unittests on deprecated Ubuntu Precise target.
 
 
 `2.7.0 (2018-04-02) <https://github.com/kdeldycke/meta-package-manager/compare/v2.6.1...v2.7.0>`_

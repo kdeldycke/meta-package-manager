@@ -8,6 +8,7 @@ Changelog
 .. note:: This version is not yet released and is under active development.
 
 * Drop the Travis unittests on deprecated Ubuntu Precise target.
+* Use latest macOS 10.11, 10.12 and 10.13 Travis images.
 
 
 `2.7.0 (2018-04-02) <https://github.com/kdeldycke/meta-package-manager/compare/v2.6.1...v2.7.0>`_

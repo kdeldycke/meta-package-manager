@@ -36,7 +36,7 @@ matrix:
     # Xcode to macOS version matrix is available at:
     # https://docs.travis-ci.com/user/reference/osx/#os-x-version
 
-    # Xcode 6.4 is Mac OS X 10.10.
+    # Mac OS X 10.10 latest image is Xcode 6.4.
     - language: generic
       os: osx
       osx_image: xcode6.4
@@ -54,7 +54,7 @@ matrix:
       osx_image: xcode6.4
       env: PYTHON_DIST="3.6"
 
-    # Xcode 8 is Mac OS X 10.11.
+    # Mac OS X 10.11 latest image is Xcode 8.
     - language: generic
       os: osx
       osx_image: xcode8
@@ -72,22 +72,40 @@ matrix:
       osx_image: xcode8
       env: PYTHON_DIST="3.6"
 
-    # Xcode 9.0 is macOS 10.12.
+    # macOS 10.12 latest image is Xcode 9.2.
     - language: generic
       os: osx
-      osx_image: xcode9
+      osx_image: xcode9.2
       env: PYTHON_DIST="2.7"
     - language: generic
       os: osx
-      osx_image: xcode9
+      osx_image: xcode9.2
       env: PYTHON_DIST="3.4"
     - language: generic
       os: osx
-      osx_image: xcode9
+      osx_image: xcode9.2
       env: PYTHON_DIST="3.5"
     - language: generic
       os: osx
-      osx_image: xcode9
+      osx_image: xcode9.2
+      env: PYTHON_DIST="3.6"
+
+    # macOS 10.13 latest image is Xcode 9.3.
+    - language: generic
+      os: osx
+      osx_image: xcode9.3
+      env: PYTHON_DIST="2.7"
+    - language: generic
+      os: osx
+      osx_image: xcode9.3
+      env: PYTHON_DIST="3.4"
+    - language: generic
+      os: osx
+      osx_image: xcode9.3
+      env: PYTHON_DIST="3.5"
+    - language: generic
+      os: osx
+      osx_image: xcode9.3
       env: PYTHON_DIST="3.6"
 
 # Update the system and setup a fresh Anaconda ecosystem.

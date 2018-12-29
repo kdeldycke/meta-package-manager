@@ -7,6 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* Add support for ``composer``.
 * Drop the Travis unittests on deprecated Ubuntu Precise target.
 * Use latest macOS 10.11, 10.12 and 10.13 Travis images.
 

@@ -7,6 +7,10 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* Remove ``cask``-specific ``version``, ``sync`` and ``search`` command.
+  Closes #47.
+* Vanilla brew and cask CLIs now shares the same version requirements.
+* Bump minimal requirement of ``brew`` and ``cask`` to ``1.7.4``.
 * Drop the Travis unittests on deprecated Ubuntu Precise target.
 * Use latest macOS 10.11, 10.12 and 10.13 Travis images.
 

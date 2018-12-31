@@ -32,6 +32,10 @@ matrix:
       os: linux
       dist: trusty
       env: PYTHON_DIST="3.6"
+    - python: "3.7"
+      os: linux
+      dist: trusty
+      env: PYTHON_DIST="3.7"
 
     # Xcode to macOS version matrix is available at:
     # https://docs.travis-ci.com/user/reference/osx/#os-x-version
@@ -53,6 +57,10 @@ matrix:
       os: osx
       osx_image: xcode6.4
       env: PYTHON_DIST="3.6"
+    - language: generic
+      os: osx
+      osx_image: xcode6.4
+      env: PYTHON_DIST="3.7"
 
     # Mac OS X 10.11 latest image is Xcode 8.
     - language: generic
@@ -71,6 +79,10 @@ matrix:
       os: osx
       osx_image: xcode8
       env: PYTHON_DIST="3.6"
+    - language: generic
+      os: osx
+      osx_image: xcode8
+      env: PYTHON_DIST="3.7"
 
     # macOS 10.12 latest image is Xcode 9.2.
     - language: generic
@@ -89,6 +101,10 @@ matrix:
       os: osx
       osx_image: xcode9.2
       env: PYTHON_DIST="3.6"
+    - language: generic
+      os: osx
+      osx_image: xcode9.2
+      env: PYTHON_DIST="3.7"
 
     # macOS 10.13 latest image is Xcode 10.1.
     - language: generic
@@ -107,6 +123,10 @@ matrix:
       os: osx
       osx_image: xcode10.1
       env: PYTHON_DIST="3.6"
+    - language: generic
+      os: osx
+      osx_image: xcode10.1
+      env: PYTHON_DIST="3.7"
 
 # Update the system and setup a fresh Anaconda ecosystem.
 before_install:

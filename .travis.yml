@@ -42,50 +42,6 @@ matrix:
     # Xcode to macOS version matrix is available at:
     # https://docs.travis-ci.com/user/reference/osx/#os-x-version
 
-    # Mac OS X 10.10 latest image is Xcode 6.4.
-    - language: generic
-      os: osx
-      osx_image: xcode6.4
-      env: PYTHON_DIST="2.7"
-    - language: generic
-      os: osx
-      osx_image: xcode6.4
-      env: PYTHON_DIST="3.4"
-    - language: generic
-      os: osx
-      osx_image: xcode6.4
-      env: PYTHON_DIST="3.5"
-    - language: generic
-      os: osx
-      osx_image: xcode6.4
-      env: PYTHON_DIST="3.6"
-    - language: generic
-      os: osx
-      osx_image: xcode6.4
-      env: PYTHON_DIST="3.7"
-
-    # Mac OS X 10.11 latest image is Xcode 8.
-    - language: generic
-      os: osx
-      osx_image: xcode8
-      env: PYTHON_DIST="2.7"
-    - language: generic
-      os: osx
-      osx_image: xcode8
-      env: PYTHON_DIST="3.4"
-    - language: generic
-      os: osx
-      osx_image: xcode8
-      env: PYTHON_DIST="3.5"
-    - language: generic
-      os: osx
-      osx_image: xcode8
-      env: PYTHON_DIST="3.6"
-    - language: generic
-      os: osx
-      osx_image: xcode8
-      env: PYTHON_DIST="3.7"
-
     # macOS 10.12 latest image is Xcode 9.2.
     - language: generic
       os: osx

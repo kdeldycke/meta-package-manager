@@ -7,6 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* Add support for PHP ``composer``.
 * Remove ``cask``-specific ``version``, ``sync`` and ``search`` command.
   Closes #47.
 * Vanilla brew and cask CLIs now shares the same version requirements.

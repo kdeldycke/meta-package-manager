@@ -32,45 +32,15 @@ matrix:
       os: linux
       dist: trusty
       env: PYTHON_DIST="3.6"
+    # We need to switch to Xenial for Python 3.7 support. See:
+    # https://github.com/travis-ci/travis-ci/issues/9069#issuecomment-425720905
+    - python: "3.7"
+      os: linux
+      dist: xenial
+      env: PYTHON_DIST="3.7"
 
     # Xcode to macOS version matrix is available at:
     # https://docs.travis-ci.com/user/reference/osx/#os-x-version
-
-    # Mac OS X 10.10 latest image is Xcode 6.4.
-    - language: generic
-      os: osx
-      osx_image: xcode6.4
-      env: PYTHON_DIST="2.7"
-    - language: generic
-      os: osx
-      osx_image: xcode6.4
-      env: PYTHON_DIST="3.4"
-    - language: generic
-      os: osx
-      osx_image: xcode6.4
-      env: PYTHON_DIST="3.5"
-    - language: generic
-      os: osx
-      osx_image: xcode6.4
-      env: PYTHON_DIST="3.6"
-
-    # Mac OS X 10.11 latest image is Xcode 8.
-    - language: generic
-      os: osx
-      osx_image: xcode8
-      env: PYTHON_DIST="2.7"
-    - language: generic
-      os: osx
-      osx_image: xcode8
-      env: PYTHON_DIST="3.4"
-    - language: generic
-      os: osx
-      osx_image: xcode8
-      env: PYTHON_DIST="3.5"
-    - language: generic
-      os: osx
-      osx_image: xcode8
-      env: PYTHON_DIST="3.6"
 
     # macOS 10.12 latest image is Xcode 9.2.
     - language: generic
@@ -89,24 +59,32 @@ matrix:
       os: osx
       osx_image: xcode9.2
       env: PYTHON_DIST="3.6"
-
-    # macOS 10.13 latest image is Xcode 9.3.
     - language: generic
       os: osx
-      osx_image: xcode9.3
+      osx_image: xcode9.2
+      env: PYTHON_DIST="3.7"
+
+    # macOS 10.13 latest image is Xcode 10.1.
+    - language: generic
+      os: osx
+      osx_image: xcode10.1
       env: PYTHON_DIST="2.7"
     - language: generic
       os: osx
-      osx_image: xcode9.3
+      osx_image: xcode10.1
       env: PYTHON_DIST="3.4"
     - language: generic
       os: osx
-      osx_image: xcode9.3
+      osx_image: xcode10.1
       env: PYTHON_DIST="3.5"
     - language: generic
       os: osx
-      osx_image: xcode9.3
+      osx_image: xcode10.1
       env: PYTHON_DIST="3.6"
+    - language: generic
+      os: osx
+      osx_image: xcode10.1
+      env: PYTHON_DIST="3.7"
 
 # Update the system and setup a fresh Anaconda ecosystem.
 before_install:

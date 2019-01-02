@@ -40,12 +40,25 @@ class Homebrew(PackageManager):
 
     platforms = frozenset([MACOS])
 
-    requirement = '>= 1.0.*'
+    # Vanilla brew and cask CLIs now shares the same version.
+    # 1.7.4 is the first release to deprecate dedicated cask versionning.
+    requirement = '>= 1.7.4'
 
     id = "brew"
 
     def get_version(self):
-        """ Fetch version from ``brew --version`` output."""
+        """ Fetch version from ``brew --version`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            $ brew --version
+            Homebrew 1.8.6
+            Homebrew/homebrew-core (git revision 533d; last commit 2018-12-28)
+            Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
+
+        """
         output = self.run([self.cli_path] + self.cli_args + ['--version'])
         if output:
             return output.split()[1]
@@ -142,9 +155,19 @@ class Homebrew(PackageManager):
         .. code-block:: shell-session
 
             $ brew search sed
+            ==> Formulae
             gnu-sed ✔                    libxdg-basedir               minised
-            caskroom/cask/focused                  caskroom/cask/marsedit
-            caskroom/cask/licensed                 caskroom/cask/physicseditor
+
+            ==> Casks
+            eclipse-dsl                       marsedit
+            focused                           physicseditor
+            google-adwords-editor             prefs-editor
+            licensed                          subclassed-mnemosyne
+
+        .. todo
+
+            Tag search results between vanilla formulae and casks.
+
         """
         matches = {}
 
@@ -152,7 +175,9 @@ class Homebrew(PackageManager):
             'search', query])
 
         if output:
-            for package_id in re.compile(r'[\s✔]+').split(output):
+            lines = [
+                l for l in output.split('\n') if l and not l.startswith('==>')]
+            for package_id in re.compile(r'[\s✔]+').split(' '.join(lines)):
                 if package_id:
                     matches[package_id] = {
                         'id': package_id,
@@ -234,59 +259,11 @@ class HomebrewCask(Homebrew):
     """ Cask is now part of Homebrew's core and extend it.
     """
 
-    cli_args = ['cask']
-
-    # 1.1.12 is the first to introduce `brew cask outdated`.
-    # The somewhat artificial catch-all start at the end of the version number
-    # is a workaround to force comparison betweem `packaging.LegacyVersion`
-    # objects. See: https://github.com/kdeldycke/meta-package-manager/issues
-    # /41#issuecomment-375386991 .
-    requirement = '>= 1.1.12-*'
-
     id = "cask"
 
     name = "Homebrew Cask"
 
     cli_name = "brew"
-
-    @cachedproperty
-    def sync(self):
-        """ Call same CLI as homebrew's own update: `brew update`.
-
-        This is necessary now that `brew update` is deprecated. See:
-        https://github.com/kdeldycke/meta-package-manager/issues/28
-        """
-        self.run([self.cli_path] + ['update'])
-
-    def search(self, query):
-        """ Fetch matching packages from ``brew cask search`` output.
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            $ brew cask search tableau
-            ==> Exact match
-            tableau
-            ==> Partial matches
-            tableau-public           tableau-reader
-        """
-        matches = {}
-
-        output = self.run([self.cli_path] + self.cli_args + [
-            'search', query])
-
-        if output:
-            lines = [
-                l for l in output.split('\n') if l and not l.startswith('==>')]
-            for package_id in re.compile(r'\s+').split('\n'.join(lines)):
-                matches[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'latest_version': None,
-                    'exact': self.exact_match(query, package_id)}
-
-        return matches
 
     @cachedproperty
     def outdated(self):
@@ -333,7 +310,8 @@ class HomebrewCask(Homebrew):
 
         # List available updates.
         output = self.run(
-            [self.cli_path] + self.cli_args + ['outdated'] + options)
+            [self.cli_path, 'cask'] + self.cli_args + ['outdated'] +
+            options)
 
         if output:
             regexp = re.compile(r'(\S+) \((.*)\) != (.*)')
@@ -362,7 +340,8 @@ class HomebrewCask(Homebrew):
             so we can force a cleanup in one go, as we do above with vanilla
             Homebrew.
         """
-        return [self.cli_path] + self.cli_args + ['reinstall', package_id]
+        return [self.cli_path, 'cask'] + self.cli_args + [
+            'reinstall', package_id]
 
     def upgrade_all_cli(self):
         """ Cask has no way to upgrade all outdated packages.

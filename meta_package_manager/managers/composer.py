@@ -131,11 +131,11 @@ class Composer(PackageManager):
             for package in output.split('\n'):
                 match = regexp.match(package)
                 if match:
-                    package_id = match[1]
+                    package_id = match.group(1)
                     matches[package_id] = {
                         'id': package_id,
                         'name': package_id,
-                        'latest_version': 'N/A in composer',
+                        'latest_version': None,
                         'exact': self.exact_match(query, package_id)}
 
         return matches

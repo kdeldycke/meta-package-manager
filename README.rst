@@ -152,7 +152,7 @@ List global options and commands:
     Options:
       -v, --verbosity LEVEL           Either CRITICAL, ERROR, WARNING, INFO or
                                       DEBUG. Defaults to INFO.
-      -m, --manager [apm|apt|brew|cask|gem|mas|npm|pip2|pip3]
+      -m, --manager [apm|apt|brew|cask|composer|gem|mas|npm|pip2|pip3]
                                       Restrict sub-command to a subset of package
                                       managers. Repeat to select multiple
                                       managers. Defaults to all.

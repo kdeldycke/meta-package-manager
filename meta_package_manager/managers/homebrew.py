@@ -61,7 +61,7 @@ class Homebrew(PackageManager):
         """
         output = self.run([self.cli_path] + self.cli_args + ['--version'])
         if output:
-            return output.split()[1]
+            return output.split()[1].split('-')[0]
 
     @cachedproperty
     def sync(self):

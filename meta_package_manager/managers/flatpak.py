@@ -63,12 +63,13 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            $ flatpak list --app --columns=name,application,version --ostree-verbose
-            Name                      Application ID                    Version
-            Peek                      com.uploadedlobster.peek          1.3.1
-            Fragments                 de.haeckerfelix.Fragments         1.4
-            GNOME MPV                 io.github.GnomeMpv                0.16
-            Syncthing GTK             me.kozec.syncthingtk              v0.9.4.3
+            $ flatpak list --app --columns=name,application,version \
+            > --ostree-verbose
+            Name                      Application ID                   Version
+            Peek                      com.uploadedlobster.peek         1.3.1
+            Fragments                 de.haeckerfelix.Fragments        1.4
+            GNOME MPV                 io.github.GnomeMpv               0.16
+            Syncthing GTK             me.kozec.syncthingtk             v0.9.4.3
             Builder                   org.flatpak.Builder
         """
         installed = {}
@@ -78,8 +79,8 @@ class Flatpak(PackageManager):
             '--ostree-verbose'])
 
         if output:
-            regexp = re.compile(r'(?P<name>.+?)\t(?P<package_id>\S+)'
-                                 '\t?(?P<latest_version>.*)')
+            regexp = re.compile(
+                r'(?P<name>.+?)\t(?P<package_id>\S+)\t?(?P<latest_version>.*)')
             for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
@@ -98,7 +99,7 @@ class Flatpak(PackageManager):
         .. code-block:: shell-session
 
             $ flatpak search gitg --ostree-verbose
-            gitg    Graphical user interface for git        org.gnome.gitg  3.32.1  stable  flathub
+            gitg    GUI for git        org.gnome.gitg  3.32.1  stable  flathub
         """
         matches = {}
 
@@ -128,7 +129,7 @@ class Flatpak(PackageManager):
         .. code-block:: shell-session
 
             $ flatpak remote-ls --app --updates --ostree-verbose
-            GNOME Dictionary        org.gnome.Dictionary    3.26.0  stable  x86_64
+            GNOME Dictionary    org.gnome.Dictionary    3.26.0  stable  x86_64
         """
         outdated = {}
 
@@ -137,21 +138,22 @@ class Flatpak(PackageManager):
             '--columns=name,application,version', '--ostree-verbose'])
 
         if output:
-            regexp = re.compile(r'(?P<name>.+?)\t(?P<package_id>\S+)'
-                                 '\t?(?P<latest_version>.*)')
+            regexp = re.compile(
+                r'(?P<name>.+?)\t(?P<package_id>\S+)\t?(?P<latest_version>.*)')
             for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     name, package_id, latest_version = match.groups()
 
-                    info_installed__output = self.run([self.cli_path] + \
-                            self.cli_args + ['info', '--ostree-verbose',
-                                             package_id])
-                    current_version = re.search(r'version:\s(?P<version>\S.*?)\n',
-                            info_installed__output, re.IGNORECASE)
+                    info_installed__output = self.run(
+                        [self.cli_path] + self.cli_args +
+                        ['info', '--ostree-verbose', package_id])
+                    current_version = re.search(
+                        r'version:\s(?P<version>\S.*?)\n',
+                        info_installed__output, re.IGNORECASE)
 
-                    installed_version = current_version.group('version') \
-                            if current_version else 'unknow'
+                    installed_version = current_version.group(
+                        'version') if current_version else 'unknow'
 
                     outdated[package_id] = {
                         'id': package_id,

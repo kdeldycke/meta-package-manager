@@ -148,7 +148,8 @@ class TestManagerPlatform(unittest.TestCase):
     def test_linux(self):
         supported_managers = {m.id for m in pool().values() if m.supported}
         self.assertSetEqual(supported_managers, set([
-            'apm', 'apt', 'composer', 'gem', 'npm', 'pip2', 'pip3', 'flatpak']))
+            'apm', 'apt', 'composer', 'gem', 'npm', 'pip2', 'pip3',
+            'flatpak']))
 
     @unless_windows()
     def test_windows(self):

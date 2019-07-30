@@ -72,6 +72,7 @@ Package manager  Version     macOS  Linux  Windows  ``sync``  ``installed``  ``s
 |mas|__           >= 1.3.1   ✓                                ✓              ✓                        ✓             ✓
 |apt|__           >= 1.0.0          ✓               ✓         ✓              ✓                        ✓             ✓
 |composer|__      >= 1.4.0   ✓      ✓               ✓         ✓              ✓                        ✓             ✓
+|flatpack|__      >= 1.2.*          ✓                         ✓              ✓                        ✓             ✓
 ================ =========== ====== ====== ======== ========= ============== =========== ============ ============= ============
 
 .. |brew| replace::
@@ -104,6 +105,10 @@ __ https://wiki.debian.org/Apt
 .. |composer| replace::
    ``composer``
 __ https://getcomposer.org
+.. |flatpak| replace::
+   Flatpak
+__ https://flatpak.org
+
 
 If you're bored, feel free to add support for new package manager. See
 good candidates at:

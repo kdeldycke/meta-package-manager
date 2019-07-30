@@ -105,6 +105,7 @@ class TestCLISubcommand(CLITestCase):
         self.assertNotIn(" pip2", result.output)
         self.assertNotIn(" pip3", result.output)
         self.assertNotIn(" gem", result.output)
+        self.assertNotIn(" flatpak", result.output)
 
         result = self.invoke(
             '--manager', 'npm', '--manager', 'gem', *self.subcommand_args)
@@ -117,6 +118,7 @@ class TestCLISubcommand(CLITestCase):
         self.assertNotIn(" composer", result.output)
         self.assertNotIn(" pip2", result.output)
         self.assertNotIn(" pip3", result.output)
+        self.assertNotIn(" flatpak", result.output)
 
 
 class TestCLITableRendering(TestCLISubcommand):
@@ -176,7 +178,7 @@ class TestCLIManagers(TestCLITableRendering):
 
         self.assertSetEqual(set(result), set([
             'apm', 'apt', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm',
-            'pip2', 'pip3']))
+            'pip2', 'pip3', 'flatpak']))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, basestring)
@@ -215,7 +217,7 @@ class TestCLIInstalled(TestCLITableRendering):
 
         self.assertTrue(set(result).issubset([
             'apm', 'apt', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm',
-            'pip2', 'pip3']))
+            'pip2', 'pip3', 'flatpak']))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, basestring)
@@ -251,7 +253,7 @@ class TestCLISearch(TestCLITableRendering):
 
         self.assertTrue(set(result).issubset([
             'apm', 'apt', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm',
-            'pip2', 'pip3']))
+            'pip2', 'pip3', 'flatpak']))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, basestring)
@@ -304,7 +306,7 @@ class TestCLIOutdated(TestCLITableRendering):
 
         self.assertTrue(set(result).issubset([
             'apm', 'apt', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm',
-            'pip2', 'pip3']))
+            'pip2', 'pip3', 'flatpak']))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, basestring)

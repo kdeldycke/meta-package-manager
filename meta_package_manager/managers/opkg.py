@@ -48,8 +48,8 @@ class OPKG(PackageManager):
 
         .. code-block:: shell-session
 
-            $ apt --version
-            apt 1.2.15 (amd64)
+            $ opkg --version
+            opkg version 0.3.6 (libsolv 0.7.5)
         """
         output = self.run([self.cli_path, '--version'])
         if output:

@@ -46,7 +46,7 @@ class TestManagerDefinitions(unittest.TestCase):
 
     def test_number(self):
         """ Check all implemented package managers are accounted for. """
-        self.assertEqual(len(pool()), 11)
+        self.assertEqual(len(pool()), 12)
 
     def test_platforms_type(self):
         """ Check that definitions returns supported platforms as a frozenset.
@@ -149,7 +149,7 @@ class TestManagerPlatform(unittest.TestCase):
         supported_managers = {m.id for m in pool().values() if m.supported}
         self.assertSetEqual(supported_managers, set([
             'apm', 'apt', 'composer', 'gem', 'npm', 'pip2', 'pip3',
-            'flatpak']))
+            'flatpak', 'opkg']))
 
     @unless_windows()
     def test_windows(self):

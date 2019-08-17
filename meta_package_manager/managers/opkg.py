@@ -37,7 +37,7 @@ class OPKG(PackageManager):
 
     platforms = frozenset([LINUX])
 
-    requirement = '>= 1.0.0'
+    requirement = '>= 0.2.0'
 
     name = "OPKG"
 

@@ -73,6 +73,7 @@ Package manager  Version     macOS  Linux  Windows  ``sync``  ``installed``  ``s
 |apt|__           >= 1.0.0          ✓               ✓         ✓              ✓                        ✓             ✓
 |composer|__      >= 1.4.0   ✓      ✓               ✓         ✓              ✓                        ✓             ✓
 |flatpak|__       >= 1.2.*          ✓                         ✓              ✓                        ✓             ✓
+|opkg|__          >= 0.2.0          ✓               ✓         ✓              ✓                        ✓             ✓
 ================ =========== ====== ====== ======== ========= ============== =========== ============ ============= ============
 
 .. |brew| replace::
@@ -108,6 +109,9 @@ __ https://getcomposer.org
 .. |flatpak| replace::
    Flatpak
 __ https://flatpak.org
+.. |opkg| replace::
+   opkg
+__ https://git.yoctoproject.org/cgit/cgit.cgi/opkg/
 
 
 If you're bored, feel free to add support for new package manager. See

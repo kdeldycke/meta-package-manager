@@ -147,11 +147,11 @@ class OPKG(PackageManager):
         .. code-block:: shell-session
 
             $ opkg list-upgradable
-            enigma2-plugin-extensions-mediascanner - 2.7+git17720+55c6b34-r0 - 2.7+git17722+daf2f52-r0
+            enigma2-mediascanner - 2.7+git17720+55c6b34-r0 - 2.7+git17722+daf2f52-r0
             openpli-bootlogo - 20190717-r0 - 20190718-r0
-            enigma2-plugin-extensions-pictureplayer - 2.7+git17720+55c6b34-r0 - 2.7+git17722+daf2f52-r0
-            enigma2-plugin-systemplugins-fastscan - 2.7+git17720+55c6b34-r0 - 2.7+git17722+daf2f52-r0
-            enigma2-plugin-systemplugins-hotplug - 2.7+git17720+55c6b34-r0 - 2.7+git17722+daf2f52-r0
+            enigma2-pictureplayer - 2.7+git17720+55c6b34-r0 - 2.7+git17722+daf2f52-r0
+            enigma2-fastscan - 2.7+git17720+55c6b34-r0 - 2.7+git17722+daf2f52-r0
+            enigma2-hotplug - 2.7+git17720+55c6b34-r0 - 2.7+git17722+daf2f52-r0
         """
         outdated = {}
 

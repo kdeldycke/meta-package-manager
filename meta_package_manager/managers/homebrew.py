@@ -245,7 +245,7 @@ class Homebrew(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.cli_args + ['upgrade', '--cleanup']
+        cmd = [self.cli_path] + self.cli_args + ['upgrade']
         if package_id:
             cmd.append(package_id)
         return cmd
@@ -331,7 +331,7 @@ class HomebrewCask(Homebrew):
 
         return outdated
 
-    def upgrade_cli(self, package_id):
+    def upgrade_cli(self, package_id=None):
         """ Install a package.
 
         .. todo::
@@ -340,12 +340,10 @@ class HomebrewCask(Homebrew):
             so we can force a cleanup in one go, as we do above with vanilla
             Homebrew.
         """
-        return [self.cli_path, 'cask'] + self.cli_args + [
-            'reinstall', package_id]
+        cmd = [self.cli_path, 'cask'] + self.cli_args + ['upgrade']
+        if package_id:
+            cmd.append(package_id)
+        return cmd
 
     def upgrade_all_cli(self):
-        """ Cask has no way to upgrade all outdated packages.
-
-        See: https://github.com/caskroom/homebrew-cask/issues/4678
-        """
-        raise NotImplementedError
+        return self.upgrade_cli()

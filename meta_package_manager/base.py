@@ -106,7 +106,7 @@ class PackageManager(object):
     def cli_path(self):
         """ Fully qualified path to the package manager CLI.
 
-        Automaticcaly search the location of the CLI in the system.
+        Automaticaly search the location of the CLI in the system.
 
         Returns `None` if CLI is not found or is not a file.
         """

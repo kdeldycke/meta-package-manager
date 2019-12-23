@@ -85,6 +85,12 @@ class PackageManager(object):
     # Version requirement specifier.
     requirement = None
 
+    raise_on_cli_error = False
+
+    ignore_auto_updates = True
+
+    cli_errors = []
+
     def __init__(self):
         # Tell the manager either to raise or continue on errors.
         self.raise_on_cli_error = False

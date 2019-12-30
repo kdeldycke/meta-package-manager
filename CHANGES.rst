@@ -8,6 +8,8 @@ Changelog
 .. note:: This version is not yet released and is under active development.
 
 * Add support for `Flatpak` and `opkg` package managers on Linux.
+* [NPM]: 'install package@version' instead of 'update package’
+* [NPM]: skip update notifier
 
 
 `2.8.0 (2019-01-03) <https://github.com/kdeldycke/meta-package-manager/compare/v2.7.0...v2.8.0>`_

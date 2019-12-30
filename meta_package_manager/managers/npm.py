@@ -225,14 +225,14 @@ class NPM(PackageManager):
         outdated = {}
 
         output = self.run([self.cli_path] + self.cli_args + [
-            '-g', '--progress=false', '--json', 'outdated'])
+            '-g', '--progress=false', '--json', '--no-update-notifier', 'outdated'])
 
         if output:
             for package_id, values in json.loads(output).items():
                 if values['wanted'] == 'linked':
                     continue
                 outdated[package_id] = {
-                    'id': package_id,
+                    'id': package_id + '@' + values['latest'],
                     'name': package_id,
                     'installed_version':
                         values['current'] if 'current' in values else None,
@@ -240,12 +240,16 @@ class NPM(PackageManager):
 
         return outdated
 
-    def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.cli_args + [
-            '-g', '--progress=false', 'update']
+    def upgrade_cli(self, package_id=None, version=None):
+        cmd = [self.cli_path] + self.cli_args
+        cmd_args = ['-g', '--progress=false', '--no-update-notifier']
         if package_id:
-            cmd.append(package_id)
-        return cmd
+            cmd_args.append('install')
+            cmd_args.append(package_id + '@' + version if version else package_id)
+        else:
+            cmd_args.append('update')
+
+        return cmd + cmd_args
 
     def upgrade_all_cli(self):
         return self.upgrade_cli()

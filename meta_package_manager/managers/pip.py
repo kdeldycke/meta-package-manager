@@ -194,17 +194,23 @@ class Pip(PackageManager):
 
         return outdated
 
-    def upgrade_cli(self, package_id):
-        return [
-            self.cli_path] + self.cli_args + [
-                'install', '--upgrade', package_id]
+    def upgrade_cli(self, package_id=None):
+        cmd = [self.cli_path] + self.cli_args
+        cmd_args = ['install', '--upgrade']
+
+        if package_id:
+            cmd_args.append(package_id)
+
+        return cmd + cmd_args
 
     def upgrade_all_cli(self):
-        """ Pip lacks support of a proper full upgrade command.
+        cmd = self.upgrade_cli()
+        for package in self.outdated.values():
+            cmd.append(str(package['name']))
 
-        See: https://github.com/pypa/pip/issues/59
-        """
-        raise NotImplementedError
+        return cmd
+
+
 
 
 class Pip2(Pip):

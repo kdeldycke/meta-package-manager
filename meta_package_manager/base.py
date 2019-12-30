@@ -110,7 +110,15 @@ class PackageManager(object):
 
         Returns `None` if CLI is not found or is not a file.
         """
-        cli_path = which(self.cli_name, mode=os.F_OK)
+
+        if not self.cli_name:
+            return None
+        env_path = "/usr/local/bin:{}".format(os.environ.get("PATH"))
+        cli_path = which(self.cli_name, mode=os.F_OK, path=env_path)
+        if not cli_path:
+            return None
+        cli_path = which(cli_path, mode=os.F_OK, path=env_path)
+
         logger.debug(
             "CLI found at {}".format(cli_path) if cli_path
             else "{} CLI not found.".format(self.cli_name))

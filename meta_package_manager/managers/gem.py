@@ -26,14 +26,20 @@ from __future__ import (
 )
 
 import re
+import os
 
 from boltons.cacheutils import cachedproperty
-
 from packaging.version import parse as parse_version
 
 from ..base import PackageManager
 from ..platform import LINUX, MACOS
 
+try:
+    from shutil import which
+except ImportError:
+    from backports.shutil_which import which # pylint disable-line
+
+from . import logger
 
 class Gem(PackageManager):
 
@@ -44,6 +50,34 @@ class Gem(PackageManager):
         return self.run([self.cli_path, '--version'])
 
     name = "Ruby Gems"
+
+    @cachedproperty
+    def cli_path(self):
+        """ Fully qualified path to the package manager CLI.
+
+        Automaticaly search the location of the CLI in the system.
+
+        Returns `None` if CLI is not found or is not a file.
+        """
+
+        if not self.cli_name:
+            return None
+        env_path = ":".join([
+            "/usr/local/opt/ruby/bin/gem",
+            "/usr/local/opt/ruby/bin",
+            "/usr/local/bin",
+            os.environ.get("PATH")
+        ])
+        cli_path = which(self.cli_name, mode=os.F_OK, path=env_path)
+        if not cli_path:
+            return None
+        cli_path = which(cli_path, mode=os.F_OK, path=env_path)
+
+        logger.debug(
+            "CLI found at {}".format(cli_path) if cli_path
+            else "{} CLI not found.".format(self.cli_name))
+        return cli_path
+
 
     @cachedproperty
     def installed(self):

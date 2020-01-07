@@ -56,7 +56,7 @@ Release process
    .. code-block:: shell-session
 
         $ git clone https://github.com/kdeldycke/bitbar-plugins
-        $ cd bitbat-plugins
+        $ cd bitbar-plugins
 
 3. Create a new branch and switch to it:
 

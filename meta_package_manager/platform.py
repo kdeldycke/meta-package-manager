@@ -31,11 +31,6 @@ import sys
 
 from . import logger
 
-# Python version constants.
-PY_VERSION = sys.version_info
-PY2 = PY_VERSION[0] == 2
-PY3 = PY_VERSION[0] == 3
-
 
 MACOS = 'macos'
 """ Constant used to identify OSes of the macOS family. """

@@ -16,14 +16,6 @@ matrix:
 
     # We're not directly using the Python distribution provided by Travis, but
     # this variable will be fed to Conda to install the right version.
-    - python: "2.7"
-      os: linux
-      dist: trusty
-      env: PYTHON_DIST="2.7"
-    - python: "3.4"
-      os: linux
-      dist: trusty
-      env: PYTHON_DIST="3.4"
     - python: "3.5"
       os: linux
       dist: trusty
@@ -38,6 +30,10 @@ matrix:
       os: linux
       dist: xenial
       env: PYTHON_DIST="3.7"
+    - python: "3.8"
+      os: linux
+      dist: xenial
+      env: PYTHON_DIST="3.8"
 
     # Xcode to macOS version matrix is available at:
     # https://docs.travis-ci.com/user/reference/osx/#os-x-version
@@ -46,14 +42,6 @@ matrix:
     - language: generic
       os: osx
       osx_image: xcode9.2
-      env: PYTHON_DIST="2.7"
-    - language: generic
-      os: osx
-      osx_image: xcode9.2
-      env: PYTHON_DIST="3.4"
-    - language: generic
-      os: osx
-      osx_image: xcode9.2
       env: PYTHON_DIST="3.5"
     - language: generic
       os: osx
@@ -63,19 +51,15 @@ matrix:
       os: osx
       osx_image: xcode9.2
       env: PYTHON_DIST="3.7"
+    - language: generic
+      os: osx
+      osx_image: xcode9.2
+      env: PYTHON_DIST="3.8"
 
     # macOS 10.13 latest image is Xcode 10.1.
     - language: generic
       os: osx
       osx_image: xcode10.1
-      env: PYTHON_DIST="2.7"
-    - language: generic
-      os: osx
-      osx_image: xcode10.1
-      env: PYTHON_DIST="3.4"
-    - language: generic
-      os: osx
-      osx_image: xcode10.1
       env: PYTHON_DIST="3.5"
     - language: generic
       os: osx
@@ -85,6 +69,10 @@ matrix:
       os: osx
       osx_image: xcode10.1
       env: PYTHON_DIST="3.7"
+    - language: generic
+      os: osx
+      osx_image: xcode10.1
+      env: PYTHON_DIST="3.8"
 
 # Update the system and setup a fresh Anaconda ecosystem.
 before_install:
@@ -95,15 +83,10 @@ before_install:
   # Explicitly download the Miniconda dedicated to the Python version we
   # target, to ensure stability in case the default change in the future. Also
   # speed things up a little bit by only installing the minimal requirements.
-  - if [[ "$PYTHON_DIST" == "2.7" ]]; then
-      MINICONDA_DIST="Miniconda2-latest";
-    else
-      MINICONDA_DIST="Miniconda3-latest";
-    fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      MINICONDA_DIST="$MINICONDA_DIST-MacOSX-x86_64.sh";
+      MINICONDA_DIST="Miniconda3-latest-MacOSX-x86_64.sh";
     else
-      MINICONDA_DIST="$MINICONDA_DIST-Linux-x86_64.sh";
+      MINICONDA_DIST="Miniconda3-latest-Linux-x86_64.sh";
     fi
   - wget https://repo.continuum.io/miniconda/$MINICONDA_DIST -O ./miniconda.sh
   - bash ./miniconda.sh -b -p $HOME/miniconda
@@ -141,11 +124,7 @@ before_script:
     fi
   # Install latest pips.
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      if [[ "$PYTHON_DIST" == "2.7" ]]; then
-        pip2 install --upgrade pip;
-      else
-        pip3 install --upgrade pip;
-      fi;
+      pip3 install --upgrade pip;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       pip install --upgrade pip;

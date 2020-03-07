@@ -33,12 +33,7 @@ from simplejson import dumps as json_dumps
 from . import __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
-from .platform import PY2, os_label
-
-if PY2:
-    from itertools import ifilter
-else:
-    ifilter = filter
+from .platform import os_label
 
 
 # Initialize the table formatter.
@@ -146,7 +141,7 @@ def cli(ctx, manager, ignore_auto_updates, output_format, stats,
         logger.warning('Skip unavailable {} manager.'.format(manager.id))
     # Use an iterator to not trigger log messages for subcommands not using
     # this variable.
-    active_managers = ifilter(keep_available, target_managers)
+    active_managers = filter(keep_available, target_managers)
 
     # Silence all log message for JSON rendering unless in debug mode.
     if output_format == 'json' and level_name != 'DEBUG':

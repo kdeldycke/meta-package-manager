@@ -7,11 +7,13 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* Drop support of Python 2.7 and 3.4. Add support of 3.8.
 * Add support for `Flatpak` and `opkg` package managers on Linux.
 * Force Ruby ``gem`` to install packages to user-install by default. Refs #58.
 * Force Python ``pip`` upgrade to user-installed packages. Refs #58.
 * Fix call to ``brew upgrade --cleanup``. Refs #50.
 * Fix parsing of ``brew`` version. Closes #49 and #51.
+* Remove ``backports.shutil_which`` dependency.
 
 
 `2.8.0 (2019-01-03) <https://github.com/kdeldycke/meta-package-manager/compare/v2.7.0...v2.8.0>`_

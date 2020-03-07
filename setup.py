@@ -43,10 +43,6 @@ DEPENDENCIES = [
     'cli-helpers',
     'packaging',
     'simplejson',
-    # shutil.which() is only available starting with Python 3.3. Use backports
-    # for Python 2. See marker usage at: https://setuptools.readthedocs.io/en
-    # /latest/setuptools.html#declaring-platform-specific-dependencies
-    'backports.shutil_which >= 3.5.1 ; python_version < "3.3"',
 ]
 
 EXTRA_DEPENDENCIES = {
@@ -146,7 +142,7 @@ setup(
 
     packages=find_packages(),
     # https://www.python.org/dev/peps/pep-0345/#version-specifiers
-    python_requires='>= 2.7, != 3.0.*, != 3.1.*, != 3.2.*, != 3.3.*',
+    python_requires='>= 3.5',
     install_requires=DEPENDENCIES,
     tests_require=DEPENDENCIES + EXTRA_DEPENDENCIES['tests'],
     extras_require=EXTRA_DEPENDENCIES,
@@ -168,13 +164,11 @@ setup(
         # List of python versions and their support status:
         # https://en.wikipedia.org/wiki/CPython#Version_history
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: System :: Archiving :: Packaging',

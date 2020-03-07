@@ -28,11 +28,10 @@ from __future__ import (
 import unittest
 
 from ..managers import pool
-from ..platform import OS_DEFINITIONS, PY3
+from ..platform import OS_DEFINITIONS
 from .case import unless_linux, unless_macos, unless_windows
 
-if PY3:
-    basestring = (str, bytes)
+basestring = (str, bytes)
 
 
 class TestManagerDefinitions(unittest.TestCase):

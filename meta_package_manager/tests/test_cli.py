@@ -30,11 +30,10 @@ import unittest
 import simplejson as json
 
 from .. import __version__
-from ..platform import PY3, PY_VERSION
+from ..platform import PY_VERSION
 from .case import CLITestCase, skip_destructive, unless_macos
 
-if PY3:
-    basestring = (str, bytes)
+basestring = (str, bytes)
 
 
 class TestCLI(CLITestCase):

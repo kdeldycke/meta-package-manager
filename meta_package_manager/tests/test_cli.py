@@ -30,7 +30,6 @@ import unittest
 import simplejson as json
 
 from .. import __version__
-from ..platform import PY_VERSION
 from .case import CLITestCase, skip_destructive, unless_macos
 
 basestring = (str, bytes)
@@ -160,14 +159,8 @@ class TestCLITableRendering(TestCLISubcommand):
             *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.assertIn("debug:", result.output)
-        if PY_VERSION >= (3, 5):
-            with self.assertRaises(json.decoder.JSONDecodeError):
-                json.loads(result.output)
-        else:
-            with self.assertRaises(ValueError) as expt:
-                json.loads(result.output)
-            message = expt.exception.args[0]
-            self.assertIn('Expecting value: line ', message)
+        with self.assertRaises(json.decoder.JSONDecodeError):
+            json.loads(result.output)
 
 
 class TestCLIManagers(TestCLITableRendering):

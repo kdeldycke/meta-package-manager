@@ -54,7 +54,7 @@ class Homebrew(PackageManager):
         .. code-block:: shell-session
 
             $ brew --version
-            Homebrew 1.8.6
+            Homebrew 1.8.6-124-g6cd4c31
             Homebrew/homebrew-core (git revision 533d; last commit 2018-12-28)
             Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
 

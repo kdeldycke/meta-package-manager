@@ -42,8 +42,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Check building package works
       run: |
-      pip install -e .[develop]
-      ./setup.py sdist bdist_egg bdist_wheel
+        pip install -e .[develop]
+        ./setup.py sdist bdist_egg bdist_wheel
     - name: Validates package metadata
       run: |
-      ./setup.py check -m -r -s
+        ./setup.py check -m -r -s

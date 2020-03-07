@@ -115,7 +115,8 @@ class OPKG(PackageManager):
 
     def search(self, query):
         """ opkg doesn't have a working 'search', so get all packages and
-        filter the packages
+        filter the packages.
+
         Raw CLI output samples:
 
         .. code-block:: shell-session

@@ -169,15 +169,15 @@ class Gem(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.cli_args + ['update']
+        cmd = [self.cli_path] + self.cli_args + ['update', '--user-install']
         # Installs require `sudo` on system ruby.
         # I (@tresni) recommend doing something like:
         #     $ sudo dseditgroup -o edit -a -t user wheel
         # And then do `visudo` to make it so the `wheel` group does not require
         # a password. There is a line already there for it, you just need to
         # uncomment it and save.)
-        if self.cli_path == '/usr/bin/gem':
-            cmd.insert(0, '/usr/bin/sudo')
+        # if self.cli_path == '/usr/bin/gem':
+        #     cmd.insert(0, '/usr/bin/sudo')
         if package_id:
             cmd.append(package_id)
         return cmd

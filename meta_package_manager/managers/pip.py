@@ -197,7 +197,7 @@ class Pip(PackageManager):
     def upgrade_cli(self, package_id):
         return [
             self.cli_path] + self.cli_args + [
-                'install', '--upgrade', package_id]
+                'install', '--user', '--upgrade', package_id]
 
     def upgrade_all_cli(self):
         """ Pip lacks support of a proper full upgrade command.

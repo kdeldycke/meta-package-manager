@@ -17,7 +17,7 @@ jobs:
       with:
         python-version: ${{matrix.python-version}}
     - name: Upgrade Homebrew
-      if: os == 'macOS'
+      if: runner.os == 'macOS'
       run: |
         brew update
     - name: Upgrade Pip

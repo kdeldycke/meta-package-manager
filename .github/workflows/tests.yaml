@@ -20,28 +20,28 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         brew update
-    - name: macOS: install npm
+    - name: macOS - install npm
       if: runner.os == 'macOS'
       run: |
         brew install npm
-    - name: Linux: install npm
+    - name: Linux - install npm
       if: runner.os == 'Linux'
       run: |
         sudo apt install -y npm
     - name: Install gem
       run: |
         gem update --system
-    - name: macOS: install Atom
+    - name: macOS - install Atom
       if: runner.os == 'macOS'
       run: |
         brew install Caskroom/cask/atom
-    - name: Linux: install Atom
+    - name: Linux - install Atom
       if: runner.os == 'Linux'
       run: |
         sudo add-apt-repository -y ppa:webupd8team/atom
         sudo apt update
         sudo apt install -y atom
-    - name: macOS: install mas
+    - name: macOS - install mas
       if: runner.os == 'macOS'
       run: |
         brew install mas

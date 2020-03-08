@@ -16,11 +16,17 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{matrix.python-version}}
-    - name: Install dependencies
+    - name: Upgrade Homebrew
+      if: ${{matrix.os}} == 'macos-latest'
+      run: |
+        brew update
+    - name: Upgrade Pip
       run: |
         python -m pip install --upgrade pip
+    - name: Install mpm and its dependencies
+      run: |
         pip install -e .[tests]
-    - name: Display context for debugging
+    - name: mpm CLI output for debugging
       run: |
         mpm managers
     - name: Launch unittests in destructive mode

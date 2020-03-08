@@ -88,11 +88,15 @@ jobs:
     - name: mpm CLI output for debugging
       run: |
         mpm managers
-    - name: Launch unittests in destructive mode
+    - name: Unittests and coverage report in destructive mode
       env:
         DESTRUCTIVE_TESTS: true
       run: |
-        pytest
+        pytest --cov=./ --cov-report=xml
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        fail_ci_if_error: true
 
   lint:
     name: Lint

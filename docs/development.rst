@@ -51,12 +51,12 @@ __ https://github.com/kdeldycke/meta-package-manager/tree/master
    ``develop``
 __ https://github.com/kdeldycke/meta-package-manager/tree/develop
 
-.. |build-stable| image:: https://travis-ci.org/kdeldycke/meta-package-manager.svg?branch=master
-    :target: https://travis-ci.org/kdeldycke/meta-package-manager
-    :alt: Unit-tests status
-.. |build-dev| image:: https://travis-ci.org/kdeldycke/meta-package-manager.svg?branch=develop
-    :target: https://travis-ci.org/kdeldycke/meta-package-manager
-    :alt: Unit-tests status
+.. |build-stable| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Unittests/badge.svg?branch=master
+    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3AUnittests+branch%3Amaster
+    :alt: Unittests status
+.. |build-dev| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Unittests/badge.svg?branch=develop
+    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3AUnittests+branch%3Adevelop
+    :alt: Unittests status
 
 .. |coverage-stable| image:: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/master

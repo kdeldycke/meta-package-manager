@@ -108,7 +108,7 @@ Changelog
 * Add Sphinx documentation. Closes #24.
 * Add installation instructions. Closes #19.
 * Add a list of *Falsehoods Programmers Believe About Package Managers*.
-* Add a `.mailmap` config file to consolidate contributor's identity.
+* Add a ``.mailmap`` config file to consolidate contributor's identity.
 * Make it easier to change the font, size and color of text in BitBar plugin.
 * Move error icon in BitBar plugin to the front of manager name.
 * Fix parsing of ``cask`` packages with multiple names. Closes #26.

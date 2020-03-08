@@ -66,12 +66,8 @@ jobs:
       run: |
         sudo apt install flatpak
     # Upgrade all additional package managers.
-    - name: macOS - Upgrade npm
-      if: runner.os == 'macOS'
-      run: |
-        brew upgrade npm
-    - name: Linux - Upgrade npm
-      if: runner.os == 'Linux'
+    - name: macOS and Linux - Upgrade npm
+      if: runner.os != 'Windows'
       run: |
         sudo npm install -g npm
     - name: Windows - Upgrade npm

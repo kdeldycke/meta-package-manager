@@ -69,7 +69,7 @@ jobs:
     - name: macOS and Linux - Upgrade npm
       if: runner.os != 'Windows'
       run: |
-        sudo npm install -g npm
+        sudo npm install -g --force npm
     - name: Windows - Upgrade npm
       if: runner.os == 'Windows'
       run: |

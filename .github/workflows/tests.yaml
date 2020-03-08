@@ -61,6 +61,10 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         brew install mas
+    - name: Linux - Install Flatpak
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt install flatpak
     # Upgrade all additional package managers.
     - name: macOS - Upgrade npm
       if: runner.os == 'macOS'

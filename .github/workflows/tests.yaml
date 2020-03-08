@@ -62,7 +62,12 @@ jobs:
       run: |
         brew install mas
     # Upgrade all additional package managers.
-    - name: Upgrade npm
+    - name: Linux - Upgrade npm
+      if: runner.os == 'Linux'
+      run: |
+        sudo npm install -g npm
+    - name: macOS and Windows - Upgrade npm
+      if: runner.os != 'Linux'
       run: |
         npm install -g npm
     - name: Upgrade gem

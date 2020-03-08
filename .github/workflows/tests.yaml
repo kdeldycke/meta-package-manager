@@ -64,7 +64,8 @@ jobs:
     - name: Linux - Install Flatpak
       if: runner.os == 'Linux'
       run: |
-        sudo apt install flatpak
+        sudo add-apt-repository -y ppa:alexlarsson/flatpak
+        sudo apt install -y flatpak
     # Upgrade all additional package managers.
     - name: macOS and Linux - Upgrade npm
       if: runner.os != 'Windows'

@@ -153,4 +153,5 @@ class TestManagerPlatform(unittest.TestCase):
     @unless_windows()
     def test_windows(self):
         supported_managers = {m.id for m in pool().values() if m.supported}
-        self.assertSetEqual(supported_managers, set())
+        self.assertSetEqual(supported_managers, set([
+            'apm', 'composer', 'gem', 'npm', 'pip2', 'pip3'))

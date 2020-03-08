@@ -31,14 +31,14 @@ import simplejson as json
 from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
-from ..platform import LINUX, MACOS
+from ..platform import LINUX, MACOS, WINDOWS
 
 
 class Composer(PackageManager):
 
     name = "PHP's Composer"
     cli_args = ['global']
-    platforms = frozenset([LINUX, MACOS])
+    platforms = frozenset([LINUX, MACOS, WINDOWS])
     requirement = '>= 1.4.*'
 
     def get_version(self):

@@ -7,12 +7,18 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
-* Drop support of Python 2.7 and 3.4. Add support of 3.8.
-* Add support for `Flatpak` and `opkg` package managers on Linux.
+* Drop support of Python 2.7 and 3.4. Add support for Python 3.8 and Pypy3.
+* Add support for ``apm``, ``composer``, ``gem``, ``npm`` and ``pip2`` on
+  Windows.
+* Add support for ``Flatpak`` and ``opkg`` package managers on Linux.
 * Force Ruby ``gem`` to install packages to user-install by default. Refs #58.
 * Force Python ``pip`` upgrade to user-installed packages. Refs #58.
 * Fix call to ``brew upgrade --cleanup``. Refs #50.
 * Fix parsing of ``brew`` version. Closes #49 and #51.
+* Switch from Travis to GitHub actions.
+* Install ``composer`` in all platforms CI runners.
+* Install ``flatpak`` in Linux CI runner.
+* Install ``apm`` in Windows CI runner.
 * Remove ``backports.shutil_which`` dependency.
 
 

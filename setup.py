@@ -150,7 +150,7 @@ setup(
     test_suite='{}.tests'.format(MODULE_NAME),
 
     classifiers=[
-        # See: https://pypi.python.org/pypi?:action=list_classifiers
+        # See: https://pypi.org/pypi?%3Aaction=list_classifiers
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
         'Environment :: MacOS X',
@@ -161,6 +161,8 @@ setup(
         'License :: OSI Approved :: '
         'GNU General Public License v2 or later (GPLv2+)',
         'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Microsoft :: Windows',
+        'Operating System :: POSIX :: Linux',
         # List of python versions and their support status:
         # https://en.wikipedia.org/wiki/CPython#Version_history
         'Programming Language :: Python',
@@ -169,7 +171,9 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: System :: Archiving :: Packaging',
         'Topic :: System :: Installation/Setup',

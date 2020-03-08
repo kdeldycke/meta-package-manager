@@ -32,12 +32,12 @@ from boltons.cacheutils import cachedproperty
 from packaging.version import parse as parse_version
 
 from ..base import PackageManager
-from ..platform import LINUX, MACOS
+from ..platform import LINUX, MACOS, WINDOWS
 
 
 class Gem(PackageManager):
 
-    platforms = frozenset([LINUX, MACOS])
+    platforms = frozenset([LINUX, MACOS, WINDOWS])
 
     def get_version(self):
         """ Fetch version from ``gem --version`` output."""

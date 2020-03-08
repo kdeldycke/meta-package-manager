@@ -19,9 +19,9 @@ Development: |build| |docs| |coverage| |quality|
 .. |dependencies| image:: https://img.shields.io/requires/github/kdeldycke/meta-package-manager/master.svg
     :target: https://requires.io/github/kdeldycke/meta-package-manager/requirements/?branch=master
     :alt: Requirements freshness
-.. |build| image:: https://img.shields.io/travis/kdeldycke/meta-package-manager/develop.svg
-    :target: https://travis-ci.org/kdeldycke/meta-package-manager
-    :alt: Unit-tests status
+.. |build| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Unittests/badge.svg
+    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3AUnittests
+    :alt: Unittests status
 .. |docs| image:: https://readthedocs.org/projects/meta-package-manager/badge/?version=develop
     :target: https://meta-package-manager.readthedocs.io/en/develop/
     :alt: Documentation Status
@@ -64,14 +64,14 @@ Package manager  Version     macOS  Linux  Windows  ``sync``  ``installed``  ``s
 ================ =========== ====== ====== ======== ========= ============== =========== ============ ============= ============
 |brew|__          >= 1.7.4   ✓                      ✓         ✓              ✓                        ✓             ✓
 |cask|__          >= 1.7.4   ✓                      ✓         ✓              ✓                        ✓             ✓
-|pip2|__          >= 9.0.0   ✓      ✓                         ✓              ✓                        ✓             ✓
-|pip3|__          >= 9.0.0   ✓      ✓                         ✓              ✓                        ✓             ✓
-|npm|__           >= 4.0.*   ✓      ✓                         ✓              ✓                        ✓             ✓
-|apm|__                      ✓      ✓                         ✓              ✓                        ✓             ✓
-|gem|__                      ✓      ✓                         ✓              ✓                        ✓             ✓
+|pip2|__          >= 9.0.0   ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
+|pip3|__          >= 9.0.0   ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
+|npm|__           >= 4.0.*   ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
+|apm|__                      ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
+|gem|__                      ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
 |mas|__           >= 1.3.1   ✓                                ✓              ✓                        ✓             ✓
 |apt|__           >= 1.0.0          ✓               ✓         ✓              ✓                        ✓             ✓
-|composer|__      >= 1.4.0   ✓      ✓               ✓         ✓              ✓                        ✓             ✓
+|composer|__      >= 1.4.0   ✓      ✓      ✓        ✓         ✓              ✓                        ✓             ✓
 |flatpak|__       >= 1.2.*          ✓                         ✓              ✓                        ✓             ✓
 |opkg|__          >= 0.2.0          ✓               ✓         ✓              ✓                        ✓             ✓
 ================ =========== ====== ====== ======== ========= ============== =========== ============ ============= ============

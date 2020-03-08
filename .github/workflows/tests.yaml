@@ -24,8 +24,9 @@ jobs:
       run: |
         mpm managers
     - name: Launch unittests in destructive mode
+      env:
+        DESTRUCTIVE_TESTS: true
       run: |
-        export DESTRUCTIVE_TESTS=true
         pytest
 
   lint:

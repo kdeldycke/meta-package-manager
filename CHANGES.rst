@@ -20,6 +20,7 @@ Changelog
 * Install ``flatpak`` in Linux CI runner.
 * Install ``apm`` in Windows CI runner.
 * Remove ``backports.shutil_which`` dependency.
+* Update ``.gitignore``.
 
 
 `2.8.0 (2019-01-03) <https://github.com/kdeldycke/meta-package-manager/compare/v2.7.0...v2.8.0>`_

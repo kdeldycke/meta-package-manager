@@ -16,7 +16,7 @@ Development: |build| |docs| |coverage| |quality|
 .. |license| image:: https://img.shields.io/pypi/l/meta-package-manager.svg
     :target: https://www.gnu.org/licenses/gpl-2.0.html
     :alt: Software license
-.. |dependencies| image:: https://img.shields.io/requires/github/kdeldycke/meta-package-manager/master.svg
+.. |dependencies| image:: https://requires.io/github/kdeldycke/meta-package-manager/requirements.svg?branch=master
     :target: https://requires.io/github/kdeldycke/meta-package-manager/requirements/?branch=master
     :alt: Requirements freshness
 .. |build| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Unittests/badge.svg
@@ -25,10 +25,10 @@ Development: |build| |docs| |coverage| |quality|
 .. |docs| image:: https://readthedocs.org/projects/meta-package-manager/badge/?version=develop
     :target: https://meta-package-manager.readthedocs.io/en/develop/
     :alt: Documentation Status
-.. |coverage| image:: https://codecov.io/github/kdeldycke/meta-package-manager/coverage.svg?branch=develop
+.. |coverage| image:: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop/graph/badge.svg
     :target: https://codecov.io/github/kdeldycke/meta-package-manager?branch=develop
     :alt: Coverage Status
-.. |quality| image:: https://img.shields.io/scrutinizer/g/kdeldycke/meta-package-manager.svg
+.. |quality| image:: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/badges/quality-score.png?b=develop
     :target: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/?branch=develop
     :alt: Code Quality
 

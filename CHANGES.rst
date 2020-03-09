@@ -20,6 +20,7 @@ Changelog
 * Install ``flatpak`` in Linux CI runner.
 * Install ``apm`` in Windows CI runner.
 * Check for conflicting dependencies in CI.
+* Switch to ``twine`` for package upload.
 * Remove ``backports.shutil_which`` dependency.
 * Update ``.gitignore``.
 * Drop all Python 3.0 ``__future__`` imports.

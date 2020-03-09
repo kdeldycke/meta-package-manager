@@ -223,7 +223,8 @@ Push packaging to the `test cheeseshop
 
     $ ./setup.py register -r testpypi
     $ ./setup.py clean --all
-    $ ./setup.py sdist bdist_egg bdist_wheel upload -r testpypi
+    $ ./setup.py sdist bdist_egg bdist_wheel
+    $ twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 Publish packaging to `PyPi <https://pypi.python.org>`_:
 
@@ -231,7 +232,8 @@ Publish packaging to `PyPi <https://pypi.python.org>`_:
 
     $ ./setup.py register -r pypi
     $ ./setup.py clean --all
-    $ ./setup.py sdist bdist_egg bdist_wheel upload -r pypi
+    $ ./setup.py sdist bdist_egg bdist_wheel
+    $ twine upload dist/*
 
 Update revision with `bumpversion <https://github.com/peritus/bumpversion>`_
 and set it back to development state by increasing the ``patch`` level.

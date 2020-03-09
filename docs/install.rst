@@ -18,3 +18,13 @@ See also `pip installation instructions
     the same as ``meta-package-manager``. Only the later provides the
     :command:`mpm` CLI *per-se*. The former has nothing to do with the
     current project.
+
+
+Python dependencies
+-------------------
+
+FYI, here is a graph of Python package dependencies:
+
+.. image:: dependencies.png
+   :alt: Package dependency graph
+   :align: center

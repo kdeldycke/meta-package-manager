@@ -118,6 +118,25 @@ Install test dependencies and run unit-tests:
     $ pytest
 
 
+Dependencies
+------------
+
+Because `pip doesn't have true dependency resolution yet
+<https://github.com/pypa/pip/issues/988>`_ we need to check we do not have any
+conflicting dependencies:
+
+.. code-block:: shell-session
+
+    $ pip install -e .[tests]
+    $ pipdeptree
+
+And once in a while, it's good to upgrade the graph of package dependencies:
+
+.. code-block:: shell-session
+
+    $ pipdeptree --packages meta_package_manager --graph-output png > ./docs/dependencies.png
+
+
 Coding style
 ------------
 

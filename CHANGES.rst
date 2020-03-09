@@ -19,6 +19,7 @@ Changelog
 * Install ``composer`` in all platforms CI runners.
 * Install ``flatpak`` in Linux CI runner.
 * Install ``apm`` in Windows CI runner.
+* Check for conflicting dependencies in CI.
 * Remove ``backports.shutil_which`` dependency.
 * Update ``.gitignore``.
 

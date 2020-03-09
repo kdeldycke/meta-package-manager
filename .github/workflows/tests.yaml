@@ -111,6 +111,9 @@ jobs:
       run: |
         pip install -e .[tests]
         pycodestyle
+    - name: Check for conflicting dependencies
+      run: |
+        pipdeptree --warn fail
 
   packaging:
     name: Packaging tests

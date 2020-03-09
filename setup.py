@@ -133,8 +133,8 @@ setup(
     long_description=long_description(),
     keywords=[
         'CLI', 'package', 'pip', 'apm', 'npm', 'homebrew', 'brew', 'cask',
-        'osx', 'macos', 'node', 'atom', 'ruby', 'gem', 'appstore', 'mas',
-        'bitbar', 'plugin'],
+        'macos', 'node', 'atom', 'ruby', 'gem', 'mac app store', 'mas',
+        'bitbar', 'plugin', 'flatpak', 'opkg', 'php composer'],
 
     author='Kevin Deldycke',
     author_email='kevin@deldycke.com',

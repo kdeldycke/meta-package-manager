@@ -43,7 +43,7 @@ Features
 ---------
 
 * Search and list all package managers on the system.
-* Supports macOS and Linux.
+* Supports macOS, Linux and Windows.
 * List installed packages.
 * Search for packages.
 * List outdated packages.

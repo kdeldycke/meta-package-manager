@@ -22,6 +22,7 @@ Changelog
 * Check for conflicting dependencies in CI.
 * Remove ``backports.shutil_which`` dependency.
 * Update ``.gitignore``.
+* Drop all Python 3.0 ``__future__`` imports.
 
 
 `2.8.0 (2019-01-03) <https://github.com/kdeldycke/meta-package-manager/compare/v2.7.0...v2.8.0>`_

@@ -27,7 +27,8 @@ from setuptools import find_packages, setup
 
 MODULE_NAME = 'meta_package_manager'
 PACKAGE_NAME = MODULE_NAME.replace('_', '-')
-
+REPOSITORY_URL = 'https://github.com/kdeldycke/{}'.format(PACKAGE_NAME)
+DOCUMENTATION_URL = 'https://{}.readthedocs.io'.format(PACKAGE_NAME)
 
 DEPENDENCIES = [
     'boltons >= 17.0.0',
@@ -35,8 +36,7 @@ DEPENDENCIES = [
     'click_log >= 0.2.0',
     'cli-helpers',
     'packaging',
-    'simplejson',
-]
+    'simplejson']
 
 EXTRA_DEPENDENCIES = {
     # Extra dependencies are made available through the
@@ -55,9 +55,9 @@ EXTRA_DEPENDENCIES = {
         'bumpversion',
         'isort',
         'readme_renderer >= 17.0',
-        'setuptools >= 24.2.1',
-        'wheel'],
-}
+        'setuptools >= 38.3.0',
+        'twine',
+        'wheel']}
 
 
 def read_file(*relative_path_elements):
@@ -114,9 +114,8 @@ def long_description():
     return "\n\n\n".join([
         read_file('README.rst'),
         '\n'.join(changes),
-        "`Full changelog <https://{}.readthedocs.io/en/develop/changelog.html"
-        "#changelog>`_.".format(PACKAGE_NAME),
-    ])
+        "`Full changelog <{}/en/develop/changelog.html#changelog>`_.".format(
+            DOCUMENTATION_URL)])
 
 
 setup(
@@ -131,7 +130,11 @@ setup(
 
     author='Kevin Deldycke',
     author_email='kevin@deldycke.com',
-    url='https://github.com/kdeldycke/meta-package-manager',
+    url=REPOSITORY_URL,
+    project_urls={
+        'Source Code': REPOSITORY_URL,
+        'Documentation': DOCUMENTATION_URL,
+        'Bug Tracker': '{}/issues'.format(REPOSITORY_URL)},
     license='GPLv2+',
 
     packages=find_packages(),

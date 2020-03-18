@@ -25,7 +25,7 @@ import logging
 from .bitbar import fix_environment
 
 
-__version__ = '2.9.0'
+__version__ = '2.9.1'
 """ Examples of valid version strings according :pep:`440#version-scheme`:
 
 .. code-block:: python

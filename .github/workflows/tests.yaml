@@ -78,6 +78,10 @@ jobs:
     - name: Upgrade gem
       run: |
         gem update --system
+    - name: Linux - Fix Runner permissions
+      if: runner.os == 'Linux'
+      run: |
+        sudo chown -R runner /home/runner/.cache/pip
     - name: Upgrade Pip
       run: |
         python -m pip install --upgrade pip

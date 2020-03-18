@@ -82,3 +82,14 @@ build-backend = "poetry.masonry.api"
 [tool.isort]
 # https://github.com/timothycrosley/isort#configuring-isort
 multi_line_output = 3
+
+# https://coverage.readthedocs.io/en/latest/config.html
+[tool.coverage.paths]
+source = meta_package_manager
+[tool.coverage.run]
+source = meta_package_manager
+branch = True
+omit = */tests/*
+[tool.coverage.report]
+omit = */tests/*
+precision = 2

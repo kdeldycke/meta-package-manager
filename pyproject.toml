@@ -58,7 +58,7 @@ simplejson = "*"
 bumpversion = "*"
 isort = "*"
 pycodestyle = "^2"
-pylint = "*"
+pylint = "^2.4"
 pytest = "^5.2"
 # More pytest plugins at: http://plugincompat.herokuapp.com .
 pytest-cov = "*"

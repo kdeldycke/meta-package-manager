@@ -20,6 +20,7 @@ Changelog
 * Install ``composer`` in all platforms CI runners.
 * Install ``flatpak`` in Linux CI runner.
 * Install ``apm`` in Windows CI runner.
+* Bump requirement to ``click-log >= 0.3``.
 * Add non-blocking Pylint code quality checks in CI.
 * Check for conflicting dependencies in CI.
 * Use Poetry for package and virtualenv management.

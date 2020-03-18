@@ -25,6 +25,25 @@ Python dependencies
 
 FYI, here is a graph of Python package dependencies:
 
-.. image:: dependencies.png
-   :alt: Package dependency graph
-   :align: center
+.. code-block:: shell-session
+
+    $ poetry show --all --no-dev --tree
+    boltons 17.2.0 When they're not builtins, they're boltons.
+    cli-helpers 1.2.1 Helpers for building command-line apps
+    ├── backports.csv >=1.0.0
+    ├── configobj >=5.0.5
+    │   └── six *
+    ├── tabulate >=0.8.2
+    │   └── wcwidth *
+    └── terminaltables >=3.0.0
+    click 5.1 A simple wrapper around optparse for powerful command line utilities.
+    click-log 0.2.1 Logging integration for Click
+    └── click *
+    packaging 20.3 Core utilities for Python packages
+    ├── pyparsing >=2.0.2
+    └── six *
+    simplejson 3.17.0 Simple, fast, extensible JSON encoder/decoder for Python
+
+.. todo
+
+    Have the CLI above run automatticaly and update documentation.

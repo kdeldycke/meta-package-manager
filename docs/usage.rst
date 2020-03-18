@@ -1,6 +1,10 @@
 Usage
 =====
 
+.. todo
+
+    Have the CLIs below run automatticaly and update documentation.
+
 
 ``mpm``
 -------

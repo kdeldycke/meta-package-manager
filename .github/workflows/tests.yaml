@@ -84,7 +84,8 @@ jobs:
     # mpm steps.
     - name: Install mpm and its dependencies
       run: |
-        pip install -e .[tests]
+        pip install poetry
+        poetry install
     - name: mpm CLI output for debugging
       run: |
         mpm managers
@@ -92,7 +93,7 @@ jobs:
       env:
         DESTRUCTIVE_TESTS: true
       run: |
-        pytest --cov=./ --cov-report=xml
+        poetry run pytest --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
@@ -109,11 +110,10 @@ jobs:
         python-version: '3.x'
     - name: Check coding style
       run: |
-        pip install -e .[tests]
-        pycodestyle
-    - name: Check for conflicting dependencies
-      run: |
-        pipdeptree --warn fail
+        pip install poetry
+        poetry install
+        poetry run pycodestyle
+        poetry run pylint --rcfile=setup.cfg meta_package_manager
 
   packaging:
     name: Packaging tests
@@ -126,8 +126,8 @@ jobs:
         python-version: '3.x'
     - name: Check building package works
       run: |
-        pip install -e .[develop]
-        ./setup.py sdist bdist_egg bdist_wheel
+        poetry install
+        poetry build
     - name: Validates package metadata
       run: |
-        ./setup.py check -m -r -s
+        poetry check

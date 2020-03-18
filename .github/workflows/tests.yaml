@@ -81,10 +81,10 @@ jobs:
     - name: Upgrade Pip
       run: |
         python -m pip install --upgrade pip
-    - name: Linux - Fix runner Pip permissions
+    - name: Linux - Fix runner cache folder permissions
       if: runner.os == 'Linux'
       run: |
-        sudo chown -R runner /home/runner/.cache/pip
+        sudo chown -R runner /home/runner/.cache
     # mpm steps.
     - name: Install mpm and its dependencies
       run: |

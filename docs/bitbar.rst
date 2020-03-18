@@ -7,7 +7,7 @@ A copy of the latest stable version of the BitBar plugin for ``mpm`` is always
 and `plugin repository
 <https://github.com/matryer/bitbar-plugins/tree/master/Dev/MetaPackageManager>`_.
 
-.. image:: https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/screenshot.png
+.. image:: screenshot.png
     :alt: Bitbar plugin screenshot.
     :align: left
 
@@ -56,7 +56,7 @@ Release process
    .. code-block:: shell-session
 
         $ git clone https://github.com/kdeldycke/bitbar-plugins
-        $ cd bitbat-plugins
+        $ cd bitbar-plugins
 
 3. Create a new branch and switch to it:
 

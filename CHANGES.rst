@@ -2,14 +2,40 @@ Changelog
 =========
 
 
-`2.9.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v2.8.0...develop>`_
+`2.9.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v2.9.0...develop>`_
 --------------------------------------------------------------------------------------------------
 
 .. note:: This version is not yet released and is under active development.
 
-* Add support for `Flatpak` and `opkg` package managers on Linux.
 * [NPM]: 'install package@version' instead of 'update package’
 * [NPM]: skip update notifier
+* Fallback on ``apt version apt`` when looking for version. Closes #57 and #52.
+
+
+`2.9.0 (2020-03-18) <https://github.com/kdeldycke/meta-package-manager/compare/v2.8.0...v2.9.0>`_
+-------------------------------------------------------------------------------------------------
+
+* Drop support of Python 2.7, 3.4 and 3.5. Add support for Python 3.8.
+* Add support for ``apm``, ``composer``, ``gem``, ``npm`` and ``pip2`` on
+  Windows.
+* Add support for ``Flatpak`` and ``opkg`` package managers on Linux.
+* Force Ruby ``gem`` to install packages to user-install by default. Refs #58.
+* Force Python ``pip`` upgrade to user-installed packages. Refs #58.
+* Fix call to ``brew upgrade --cleanup``. Refs #50.
+* Fix parsing of ``brew`` version. Closes #49 and #51.
+* Switch from Travis to GitHub actions.
+* Install ``composer`` in all platforms CI runners.
+* Install ``flatpak`` in Linux CI runner.
+* Install ``apm`` in Windows CI runner.
+* Bump requirement to ``click-log >= 0.3``.
+* Add non-blocking Pylint code quality checks in CI.
+* Check for conflicting dependencies in CI.
+* Use Poetry for package and virtualenv management.
+* Replace ``pipdeptree`` by Poetry CLI output.
+* Remove ``backports.shutil_which`` dependency.
+* Update ``.gitignore``.
+* Drop all Python 3.0 ``__future__`` imports.
+* Add detailed usage CLI page in documentation.
 
 
 `2.8.0 (2019-01-03) <https://github.com/kdeldycke/meta-package-manager/compare/v2.7.0...v2.8.0>`_
@@ -98,7 +124,7 @@ Changelog
 * Add Sphinx documentation. Closes #24.
 * Add installation instructions. Closes #19.
 * Add a list of *Falsehoods Programmers Believe About Package Managers*.
-* Add a `.mailmap` config file to consolidate contributor's identity.
+* Add a ``.mailmap`` config file to consolidate contributor's identity.
 * Make it easier to change the font, size and color of text in BitBar plugin.
 * Move error icon in BitBar plugin to the front of manager name.
 * Fix parsing of ``cask`` packages with multiple names. Closes #26.

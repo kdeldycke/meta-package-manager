@@ -20,21 +20,9 @@
 
 """ Helpers and utilities to identify and handle platform idiosyncracies. """
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals
-)
-
 import sys
 
 from . import logger
-
-# Python version constants.
-PY_VERSION = sys.version_info
-PY2 = PY_VERSION[0] == 2
-PY3 = PY_VERSION[0] == 3
 
 
 MACOS = 'macos'

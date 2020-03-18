@@ -16,19 +16,19 @@ Development: |build| |docs| |coverage| |quality|
 .. |license| image:: https://img.shields.io/pypi/l/meta-package-manager.svg
     :target: https://www.gnu.org/licenses/gpl-2.0.html
     :alt: Software license
-.. |dependencies| image:: https://img.shields.io/requires/github/kdeldycke/meta-package-manager/master.svg
+.. |dependencies| image:: https://requires.io/github/kdeldycke/meta-package-manager/requirements.svg?branch=master
     :target: https://requires.io/github/kdeldycke/meta-package-manager/requirements/?branch=master
     :alt: Requirements freshness
-.. |build| image:: https://img.shields.io/travis/kdeldycke/meta-package-manager/develop.svg
-    :target: https://travis-ci.org/kdeldycke/meta-package-manager
-    :alt: Unit-tests status
+.. |build| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Unittests/badge.svg
+    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3AUnittests
+    :alt: Unittests status
 .. |docs| image:: https://readthedocs.org/projects/meta-package-manager/badge/?version=develop
     :target: https://meta-package-manager.readthedocs.io/en/develop/
     :alt: Documentation Status
-.. |coverage| image:: https://codecov.io/github/kdeldycke/meta-package-manager/coverage.svg?branch=develop
+.. |coverage| image:: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop/graph/badge.svg
     :target: https://codecov.io/github/kdeldycke/meta-package-manager?branch=develop
     :alt: Coverage Status
-.. |quality| image:: https://img.shields.io/scrutinizer/g/kdeldycke/meta-package-manager.svg
+.. |quality| image:: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/badges/quality-score.png?b=develop
     :target: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/?branch=develop
     :alt: Code Quality
 
@@ -43,7 +43,7 @@ Features
 ---------
 
 * Search and list all package managers on the system.
-* Supports macOS and Linux.
+* Supports macOS, Linux and Windows.
 * List installed packages.
 * Search for packages.
 * List outdated packages.
@@ -64,14 +64,14 @@ Package manager  Version     macOS  Linux  Windows  ``sync``  ``installed``  ``s
 ================ =========== ====== ====== ======== ========= ============== =========== ============ ============= ============
 |brew|__          >= 1.7.4   ✓                      ✓         ✓              ✓                        ✓             ✓
 |cask|__          >= 1.7.4   ✓                      ✓         ✓              ✓                        ✓             ✓
-|pip2|__          >= 9.0.0   ✓      ✓                         ✓              ✓                        ✓             ✓
-|pip3|__          >= 9.0.0   ✓      ✓                         ✓              ✓                        ✓             ✓
-|npm|__           >= 4.0.*   ✓      ✓                         ✓              ✓                        ✓             ✓
-|apm|__                      ✓      ✓                         ✓              ✓                        ✓             ✓
-|gem|__                      ✓      ✓                         ✓              ✓                        ✓             ✓
+|pip2|__          >= 9.0.0   ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
+|pip3|__          >= 9.0.0   ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
+|npm|__           >= 4.0.*   ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
+|apm|__                      ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
+|gem|__                      ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
 |mas|__           >= 1.3.1   ✓                                ✓              ✓                        ✓             ✓
 |apt|__           >= 1.0.0          ✓               ✓         ✓              ✓                        ✓             ✓
-|composer|__      >= 1.4.0   ✓      ✓               ✓         ✓              ✓                        ✓             ✓
+|composer|__      >= 1.4.0   ✓      ✓      ✓        ✓         ✓              ✓                        ✓             ✓
 |flatpak|__       >= 1.2.*          ✓                         ✓              ✓                        ✓             ✓
 |opkg|__          >= 0.2.0          ✓               ✓         ✓              ✓                        ✓             ✓
 ================ =========== ====== ====== ======== ========= ============== =========== ============ ============= ============
@@ -161,7 +161,7 @@ List global options and commands:
     Options:
       -v, --verbosity LEVEL           Either CRITICAL, ERROR, WARNING, INFO or
                                       DEBUG. Defaults to INFO.
-      -m, --manager [apm|apt|brew|cask|composer|gem|mas|npm|pip2|pip3]
+      -m, --manager [apm|apt|brew|cask|composer|flatpak|gem|mas|npm|opkg|pip2|pip3]
                                       Restrict sub-command to a subset of package
                                       managers. Repeat to select multiple
                                       managers. Defaults to all.
@@ -170,7 +170,7 @@ List global options and commands:
                                       those tagged as auto-updating. Defaults to
                                       include all packages. Only applies for
                                       'outdated' and 'upgrade' commands.
-      -o, --output-format [ascii|csv|double|fancy_grid|github|grid|html|jira|json|latex|latex_booktabs|mediawiki|moinmoin|orgtbl|pipe|plain|psql|rst|simple|textile|tsv|vertical]
+      -o, --output-format [ascii|csv|csv-tab|double|fancy_grid|github|grid|html|jira|json|latex|latex_booktabs|mediawiki|moinmoin|orgtbl|pipe|plain|psql|rst|simple|textile|tsv|vertical]
                                       Rendering mode of the output. Defaults to
                                       fancy-grid.
       --stats / --no-stats            Print statistics or not at the end of
@@ -194,26 +194,30 @@ List all supported package managers and their status on current system (macOS):
 .. code-block:: shell-session
 
     $ mpm managers
-    ╒═══════════════════╤══════════╤═══════════════╤════════════════════════════╤══════════════╤═════════════╕
-    │ Package manager   │ ID       │ Supported     │ CLI                        │ Executable   │ Version     │
-    ╞═══════════════════╪══════════╪═══════════════╪════════════════════════════╪══════════════╪═════════════╡
-    │ Atom's apm        │ apm      │ ✓             │ ✓  /usr/local/bin/apm      │ ✓            │ ✓  1.18.1   │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ APT               │ apt      │ ✘  Linux only │ ✓  /usr/bin/apt            │ ✓            │ ✘           │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ PHP's Composer    │ composer │ ✓             │ ✓  /usr/local/bin/composer │ ✓            │ ✓  1.8.0    │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ Homebrew          │ brew     │ ✓             │ ✓  /usr/local/bin/brew     │ ✓            │ ✓  1.2.5    │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ Homebrew Cask     │ cask     │ ✓             │ ✓  /usr/local/bin/brew     │ ✓            │ ✓  1.2.5    │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ Ruby Gems         │ gem      │ ✓             │ ✓  /usr/bin/gem            │ ✓            │ ✓  2.0.14.1 │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ Mac AppStore      │ mas      │ ✓             │ ✓  /usr/local/bin/mas      │ ✓            │ ✓  1.3.1    │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ Node's npm        │ npm      │ ✓             │ ✓  /usr/local/bin/npm      │ ✓            │ ✓  5.3.0    │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ Python 2's Pip    │ pip2     │ ✓             │ ✓  /usr/local/bin/pip2     │ ✓            │ ✓  9.0.1    │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ Python 3's Pip    │ pip3     │ ✓             │ ✓  /usr/local/bin/pip3     │ ✓            │ ✓  9.0.1    │
-    ╘═══════════════════╧══════════╧═══════════════╧════════════════════════════╧══════════════╧═════════════╛
+    ╒═══════════════════╤══════════╤═══════════════╤════════════════════════════╤══════════════╤═══════════╕
+    │ Package manager   │ ID       │ Supported     │ CLI                        │ Executable   │ Version   │
+    ╞═══════════════════╪══════════╪═══════════════╪════════════════════════════╪══════════════╪═══════════╡
+    │ Atom's apm        │ apm      │ ✓             │ ✘  apm CLI not found.      │              │           │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ APT               │ apt      │ ✘  Linux only │ ✓  /usr/bin/apt            │ ✓            │ ✘         │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Homebrew          │ brew     │ ✓             │ ✓  /usr/local/bin/brew     │ ✓            │ ✓  2.2.10 │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Homebrew Cask     │ cask     │ ✓             │ ✓  /usr/local/bin/brew     │ ✓            │ ✓  2.2.10 │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ PHP's Composer    │ composer │ ✓             │ ✘  composer CLI not found. │              │           │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Flatpak           │ flatpak  │ ✘  Linux only │ ✘  flatpak CLI not found.  │              │           │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Ruby Gems         │ gem      │ ✓             │ ✓  /usr/bin/gem            │ ✓            │ ✓  3.0.3  │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Mac AppStore      │ mas      │ ✓             │ ✓  /usr/local/bin/mas      │ ✓            │ ✓  1.6.3  │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Node's npm        │ npm      │ ✓             │ ✓  /usr/local/bin/npm      │ ✓            │ ✓  6.13.7 │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ OPKG              │ opkg     │ ✘  Linux only │ ✘  opkg CLI not found.     │              │           │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Python 2's Pip    │ pip2     │ ✓             │ ✘  pip2 CLI not found.     │              │           │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Python 3's Pip    │ pip3     │ ✓             │ ✓  /usr/local/bin/pip3     │ ✓            │ ✓  20.0.2 │
+    ╘═══════════════════╧══════════╧═══════════════╧════════════════════════════╧══════════════╧═══════════╛

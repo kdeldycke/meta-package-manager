@@ -1,0 +1,9 @@
+# Source: https://docs.readthedocs.io/en/latest/config-file/v2.html
+version: 2
+
+python:
+    install:
+      - method: pip
+        path: .
+        extra_requirements:
+          - docs

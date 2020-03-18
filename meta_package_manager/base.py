@@ -18,13 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals
-)
-
 import os
 
 from boltons.cacheutils import cachedproperty
@@ -85,14 +78,15 @@ class PackageManager(object):
     # Version requirement specifier.
     requirement = None
 
-    def __init__(self):
-        # Tell the manager either to raise or continue on errors.
-        self.raise_on_cli_error = False
-        # Some managers have the ability to report or ignore packages
-        # possessing their own auto-update mecanism.
-        self.ignore_auto_updates = True
-        # Log of all encountered CLI errors.
-        self.cli_errors = []
+    # Tell the manager either to raise or continue on errors.
+    raise_on_cli_error = False
+
+    # Some managers have the ability to report or ignore packages
+    # possessing their own auto-update mecanism.
+    ignore_auto_updates = True
+
+    # Log of all encountered CLI errors.
+    cli_errors = []
 
     @cachedproperty
     def cli_name(self):
@@ -106,7 +100,7 @@ class PackageManager(object):
     def cli_path(self):
         """ Fully qualified path to the package manager CLI.
 
-        Automaticcaly search the location of the CLI in the system.
+        Automaticaly search the location of the CLI in the system.
 
         Returns `None` if CLI is not found or is not a file.
         """

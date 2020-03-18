@@ -18,13 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals
-)
-
 import re
 
 from boltons.cacheutils import cachedproperty
@@ -32,12 +25,12 @@ from boltons.cacheutils import cachedproperty
 import simplejson as json
 
 from ..base import PackageManager
-from ..platform import LINUX, MACOS
+from ..platform import LINUX, MACOS, WINDOWS
 
 
 class Pip(PackageManager):
 
-    platforms = frozenset([MACOS, LINUX])
+    platforms = frozenset([MACOS, LINUX, WINDOWS])
 
     requirement = '>= 9.0.0'
 
@@ -197,7 +190,7 @@ class Pip(PackageManager):
     def upgrade_cli(self, package_id):
         return [
             self.cli_path] + self.cli_args + [
-                'install', '--upgrade', package_id]
+                'install', '--user', '--upgrade', package_id]
 
     def upgrade_all_cli(self):
         """ Pip lacks support of a proper full upgrade command.

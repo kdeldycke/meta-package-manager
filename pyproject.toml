@@ -85,11 +85,11 @@ multi_line_output = 3
 
 # https://coverage.readthedocs.io/en/latest/config.html
 [tool.coverage.paths]
-source = meta_package_manager
+source = "meta_package_manager"
 [tool.coverage.run]
-source = meta_package_manager
+source = "meta_package_manager"
 branch = True
-omit = */tests/*
+omit = "*/tests/*"
 [tool.coverage.report]
-omit = */tests/*
+omit = "*/tests/*"
 precision = 2

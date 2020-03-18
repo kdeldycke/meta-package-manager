@@ -78,20 +78,15 @@ class PackageManager(object):
     # Version requirement specifier.
     requirement = None
 
+    # Tell the manager either to raise or continue on errors.
     raise_on_cli_error = False
 
+    # Some managers have the ability to report or ignore packages
+    # possessing their own auto-update mecanism.
     ignore_auto_updates = True
 
+    # Log of all encountered CLI errors.
     cli_errors = []
-
-    def __init__(self):
-        # Tell the manager either to raise or continue on errors.
-        self.raise_on_cli_error = False
-        # Some managers have the ability to report or ignore packages
-        # possessing their own auto-update mecanism.
-        self.ignore_auto_updates = True
-        # Log of all encountered CLI errors.
-        self.cli_errors = []
 
     @cachedproperty
     def cli_name(self):

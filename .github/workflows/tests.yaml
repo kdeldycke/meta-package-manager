@@ -117,7 +117,7 @@ jobs:
         pip install poetry
         poetry install
         poetry run pycodestyle
-        poetry run pylint --rcfile=setup.cfg meta_package_manager
+        poetry run pylint --exit-zero --rcfile=setup.cfg meta_package_manager
 
   packaging:
     name: Packaging tests

@@ -140,8 +140,8 @@ Then run `pycodestyle <https://pycodestyle.readthedocs.io>`_ and `Pylint
     $ poetry run pylint --rcfile=setup.cfg meta_package_manager
 
 
-Build documentation
--------------------
+Documentation
+-------------
 
 The documentation you're currently reading can be built locally with `Sphinx
 <https://www.sphinx-doc.org>`_:
@@ -150,14 +150,8 @@ The documentation you're currently reading can be built locally with `Sphinx
 
     $ poetry run sphinx-build -b html ./docs ./docs/html
 
-For a smooth release, you also need to validate the rendering of package's long
-description on PyPi, as well as metadata:
-
-.. code-block:: shell-session
-
-    $ poetry check
-
-And once in a while, it's good to upgrade the graph of package dependencies:
+And once in a while, it's good to upgrade the `graph of package dependencies
+<./install.html#python-dependencies>`_:
 
 .. code-block:: shell-session
 
@@ -199,6 +193,16 @@ Build packages:
 .. code-block:: shell-session
 
     $ poetry build
+
+For a smooth release, you also need to `validate the rendering of package's
+long description on PyPi
+<https://packaging.python.org/guides/making-a-pypi-friendly-readme/#validating-restructuredtext-markup>`_,
+as well as metadata:
+
+.. code-block:: shell-session
+
+    $ poetry check
+    $ poetry run twine check ./dist/*
 
 Publish packaging to `PyPi <https://pypi.python.org>`_:
 

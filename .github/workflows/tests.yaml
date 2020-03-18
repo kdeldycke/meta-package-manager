@@ -131,3 +131,4 @@ jobs:
     - name: Validates package metadata
       run: |
         poetry check
+        poetry run twine check ./dist/*

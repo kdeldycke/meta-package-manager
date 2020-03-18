@@ -62,9 +62,9 @@ pylint = "*"
 pytest = "^5.2"
 # More pytest plugins at: http://plugincompat.herokuapp.com .
 pytest-cov = "*"
-readme_renderer = "^17.0"
 sphinx = "^1"
 sphinx-rtd-theme = "^0.4.3"
+twine = "^3.1"
 
 [tool.poetry.scripts]
 mpm = 'meta_package_manager.cli:cli'

@@ -21,6 +21,7 @@ jobs:
     - name: Linux - Fix runner cache folder permissions
       if: runner.os == 'Linux'
       run: |
+        mkdir -p /home/runner/.cache
         sudo chown -R runner /home/runner/.cache
     # Upgrade default packagers on each platform.
     - name: macOS - Upgrade Homebrew

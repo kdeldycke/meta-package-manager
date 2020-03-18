@@ -62,9 +62,13 @@ pylint = "^2.4"
 pytest = "^5.2"
 # More pytest plugins at: http://plugincompat.herokuapp.com .
 pytest-cov = "*"
-sphinx = "^1"
-sphinx-rtd-theme = "^0.4.3"
+sphinx = {version = "^1.4", optional = true}
+sphinx_rtd_theme = {version = "^0.4.3", optional = true}
 twine = "^3.1"
+
+[tool.poetry.extras]
+# Workaround lacks of Poetry support by RTD: https://stackoverflow.com/a/58163431
+docs = ["sphinx", "sphinx_rtd_theme"]
 
 [tool.poetry.scripts]
 mpm = 'meta_package_manager.cli:cli'

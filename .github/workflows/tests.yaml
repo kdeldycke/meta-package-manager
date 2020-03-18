@@ -92,7 +92,7 @@ jobs:
         poetry install
     - name: mpm CLI output for debugging
       run: |
-        mpm managers
+        poetry run mpm managers
     - name: Unittests and coverage report in destructive mode
       env:
         DESTRUCTIVE_TESTS: true

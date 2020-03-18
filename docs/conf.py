@@ -1,19 +1,25 @@
 # -*- coding: utf-8 -*-
 
+import io
 import os
 import subprocess
 import sys
 import time
 
-# Fetch general information about the project.
-# Source: https://github.com/jaraco/skeleton/blob/skeleton/docs/conf.py
-root = os.path.join(os.path.dirname(__file__), '..')
-setup_script = os.path.join(root, 'setup.py')
-fields = ['--name', '--version', '--url', '--author']
-dist_info_cmd = [sys.executable, setup_script] + fields
-output_bytes = subprocess.check_output(dist_info_cmd, cwd=root)
-project_id, version, url, author = output_bytes.decode(
-    'utf-8').strip().split('\n')
+import tomlkit
+
+
+# Fetch general information about the project from pyproject.toml.
+toml_path = os.path.join(os.path.dirname(__file__), '..', 'pyproject.toml')
+with io.open(toml_path, 'r') as toml_file:
+    toml_config = tomlkit.loads(toml_file.read())
+
+# Redistribute pyproject.toml config to Sphinx.
+project_id = toml_config['tool']['poetry']['name']
+version = toml_config['tool']['poetry']['version']
+url = toml_config['tool']['poetry']['homepage']
+author = ', '.join([
+    a.split('<')[0].strip() for a in toml_config['tool']['poetry']['authors']])
 
 # Title-case each word of the project ID.
 project = ' '.join([word.title() for word in project_id.split('-')])
@@ -42,7 +48,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 nitpicky = True
 
 # We need a recent sphinx because of the last update format.
-needs_sphinx = '1.4'
+needs_sphinx = '2.4'
 html_last_updated_fmt = 'YYYY-MM-dd'
 templates_path = ['templates']
 

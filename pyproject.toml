@@ -55,8 +55,9 @@ packaging = "*"
 simplejson = "*"
 # SHould have been put in dev-dependencies but extras only works from main
 # section.
-sphinx = {version = "^1.4", optional = true}
+sphinx = {version = "^2.4", optional = true}
 sphinx_rtd_theme = {version = "^0.4.3", optional = true}
+tomlkit = {version = "^0.5", optional = true}
 
 [tool.poetry.dev-dependencies]
 bumpversion = "*"
@@ -70,7 +71,7 @@ twine = "^3.1"
 
 [tool.poetry.extras]
 # Workaround lacks of Poetry support by RTD: https://stackoverflow.com/a/58163431
-docs = ["sphinx", "sphinx_rtd_theme"]
+docs = ["sphinx", "sphinx_rtd_theme", "tomlkit"]
 
 [tool.poetry.scripts]
 mpm = 'meta_package_manager.cli:cli'

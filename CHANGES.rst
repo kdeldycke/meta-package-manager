@@ -2,10 +2,8 @@ Changelog
 =========
 
 
-`2.9.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v2.8.0...develop>`_
---------------------------------------------------------------------------------------------------
-
-.. note:: This version is not yet released and is under active development.
+`2.9.0 (2020-03-18) <https://github.com/kdeldycke/meta-package-manager/compare/v2.8.0...v2.9.0>`_
+-------------------------------------------------------------------------------------------------
 
 * Drop support of Python 2.7, 3.4 and 3.5. Add support for Python 3.8.
 * Add support for ``apm``, ``composer``, ``gem``, ``npm`` and ``pip2`` on

@@ -7,8 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
-* Drop support of Python 2.7, 3.4 and 3.5. Add support for Python 3.8 and
-  Pypy3.
+* Drop support of Python 2.7, 3.4 and 3.5. Add support for Python 3.8.
 * Add support for ``apm``, ``composer``, ``gem``, ``npm`` and ``pip2`` on
   Windows.
 * Add support for ``Flatpak`` and ``opkg`` package managers on Linux.

@@ -217,7 +217,7 @@ and set it back to development state by increasing the ``patch`` level.
 .. code-block:: shell-session
 
     $ git checkout develop
-    $ bumpversion --verbose patch
+    $ poetry run bumpversion --verbose patch
     $ git add ./meta_package_manager/__init__.py ./CHANGES.rst
     $ git commit -m "Post release version bump."
     $ git push
@@ -227,7 +227,7 @@ revision level instead:
 
 .. code-block:: shell-session
 
-    $ bumpversion --verbose minor
+    $ poetry run bumpversion --verbose minor
     $ git add ./meta_package_manager/__init__.py ./CHANGES.rst
     $ git commit -m "Next release no longer bug-fix only. Bump revision."
     $ git push

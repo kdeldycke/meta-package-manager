@@ -161,7 +161,7 @@ List global options and commands:
     Options:
       -v, --verbosity LEVEL           Either CRITICAL, ERROR, WARNING, INFO or
                                       DEBUG. Defaults to INFO.
-      -m, --manager [apm|apt|brew|cask|composer|gem|mas|npm|pip2|pip3]
+      -m, --manager [apm|apt|brew|cask|composer|flatpak|gem|mas|npm|opkg|pip2|pip3]
                                       Restrict sub-command to a subset of package
                                       managers. Repeat to select multiple
                                       managers. Defaults to all.
@@ -170,7 +170,7 @@ List global options and commands:
                                       those tagged as auto-updating. Defaults to
                                       include all packages. Only applies for
                                       'outdated' and 'upgrade' commands.
-      -o, --output-format [ascii|csv|double|fancy_grid|github|grid|html|jira|json|latex|latex_booktabs|mediawiki|moinmoin|orgtbl|pipe|plain|psql|rst|simple|textile|tsv|vertical]
+      -o, --output-format [ascii|csv|csv-tab|double|fancy_grid|github|grid|html|jira|json|latex|latex_booktabs|mediawiki|moinmoin|orgtbl|pipe|plain|psql|rst|simple|textile|tsv|vertical]
                                       Rendering mode of the output. Defaults to
                                       fancy-grid.
       --stats / --no-stats            Print statistics or not at the end of
@@ -194,26 +194,30 @@ List all supported package managers and their status on current system (macOS):
 .. code-block:: shell-session
 
     $ mpm managers
-    ╒═══════════════════╤══════════╤═══════════════╤════════════════════════════╤══════════════╤═════════════╕
-    │ Package manager   │ ID       │ Supported     │ CLI                        │ Executable   │ Version     │
-    ╞═══════════════════╪══════════╪═══════════════╪════════════════════════════╪══════════════╪═════════════╡
-    │ Atom's apm        │ apm      │ ✓             │ ✓  /usr/local/bin/apm      │ ✓            │ ✓  1.18.1   │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ APT               │ apt      │ ✘  Linux only │ ✓  /usr/bin/apt            │ ✓            │ ✘           │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ PHP's Composer    │ composer │ ✓             │ ✓  /usr/local/bin/composer │ ✓            │ ✓  1.8.0    │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ Homebrew          │ brew     │ ✓             │ ✓  /usr/local/bin/brew     │ ✓            │ ✓  1.2.5    │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ Homebrew Cask     │ cask     │ ✓             │ ✓  /usr/local/bin/brew     │ ✓            │ ✓  1.2.5    │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ Ruby Gems         │ gem      │ ✓             │ ✓  /usr/bin/gem            │ ✓            │ ✓  2.0.14.1 │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ Mac AppStore      │ mas      │ ✓             │ ✓  /usr/local/bin/mas      │ ✓            │ ✓  1.3.1    │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ Node's npm        │ npm      │ ✓             │ ✓  /usr/local/bin/npm      │ ✓            │ ✓  5.3.0    │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ Python 2's Pip    │ pip2     │ ✓             │ ✓  /usr/local/bin/pip2     │ ✓            │ ✓  9.0.1    │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼─────────────┤
-    │ Python 3's Pip    │ pip3     │ ✓             │ ✓  /usr/local/bin/pip3     │ ✓            │ ✓  9.0.1    │
-    ╘═══════════════════╧══════════╧═══════════════╧════════════════════════════╧══════════════╧═════════════╛
+    ╒═══════════════════╤══════════╤═══════════════╤════════════════════════════╤══════════════╤═══════════╕
+    │ Package manager   │ ID       │ Supported     │ CLI                        │ Executable   │ Version   │
+    ╞═══════════════════╪══════════╪═══════════════╪════════════════════════════╪══════════════╪═══════════╡
+    │ Atom's apm        │ apm      │ ✓             │ ✘  apm CLI not found.      │              │           │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ APT               │ apt      │ ✘  Linux only │ ✓  /usr/bin/apt            │ ✓            │ ✘         │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Homebrew          │ brew     │ ✓             │ ✓  /usr/local/bin/brew     │ ✓            │ ✓  2.2.10 │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Homebrew Cask     │ cask     │ ✓             │ ✓  /usr/local/bin/brew     │ ✓            │ ✓  2.2.10 │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ PHP's Composer    │ composer │ ✓             │ ✘  composer CLI not found. │              │           │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Flatpak           │ flatpak  │ ✘  Linux only │ ✘  flatpak CLI not found.  │              │           │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Ruby Gems         │ gem      │ ✓             │ ✓  /usr/bin/gem            │ ✓            │ ✓  3.0.3  │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Mac AppStore      │ mas      │ ✓             │ ✓  /usr/local/bin/mas      │ ✓            │ ✓  1.6.3  │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Node's npm        │ npm      │ ✓             │ ✓  /usr/local/bin/npm      │ ✓            │ ✓  6.13.7 │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ OPKG              │ opkg     │ ✘  Linux only │ ✘  opkg CLI not found.     │              │           │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Python 2's Pip    │ pip2     │ ✓             │ ✘  pip2 CLI not found.     │              │           │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Python 3's Pip    │ pip3     │ ✓             │ ✓  /usr/local/bin/pip3     │ ✓            │ ✓  20.0.2 │
+    ╘═══════════════════╧══════════╧═══════════════╧════════════════════════════╧══════════════╧═══════════╛

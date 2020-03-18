@@ -24,7 +24,6 @@ import sys
 
 from . import logger
 
-
 MACOS = 'macos'
 """ Constant used to identify OSes of the macOS family. """
 

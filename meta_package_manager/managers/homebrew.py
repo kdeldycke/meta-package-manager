@@ -20,9 +20,8 @@
 
 import re
 
-from boltons.cacheutils import cachedproperty
-
 import simplejson as json
+from boltons.cacheutils import cachedproperty
 from packaging.version import parse as parse_version
 
 from ..base import PackageManager

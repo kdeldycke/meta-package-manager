@@ -8,7 +8,6 @@ import time
 
 import tomlkit
 
-
 # Fetch general information about the project from pyproject.toml.
 toml_path = os.path.join(os.path.dirname(__file__), '..', 'pyproject.toml')
 with io.open(toml_path, 'r') as toml_file:

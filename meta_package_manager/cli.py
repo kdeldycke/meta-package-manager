@@ -22,9 +22,8 @@ import logging
 from functools import partial
 from operator import itemgetter
 
-import click_log
-
 import click
+import click_log
 from cli_helpers.tabular_output import TabularOutputFormatter
 from simplejson import dumps as json_dumps
 
@@ -32,7 +31,6 @@ from . import __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
 from .platform import os_label
-
 
 # Initialize the table formatter.
 table_formatter = TabularOutputFormatter()

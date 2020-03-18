@@ -130,6 +130,7 @@ jobs:
         python-version: '3.x'
     - name: Check building package works
       run: |
+        pip install poetry
         poetry install
         poetry build
     - name: Validates package metadata

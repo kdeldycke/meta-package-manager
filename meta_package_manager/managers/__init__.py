@@ -31,7 +31,7 @@ from .. import logger
 from ..base import PackageManager
 
 
-# Use a cache to keep re-computing the global pool of registered manager
+# Use a cache to keep the global pool of registered manager
 # definitions.
 @cached(LRI(max_size=1))
 def pool():

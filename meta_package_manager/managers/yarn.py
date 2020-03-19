@@ -18,11 +18,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from os import chdir, path
-
 import simplejson as json
 from boltons.cacheutils import cachedproperty
-from boltons.iterutils import remap
 
 from ..base import PackageManager
 

@@ -217,7 +217,8 @@ class NPM(PackageManager):
         outdated = {}
 
         output = self.run([self.cli_path] + self.cli_args + [
-            '-g', '--progress=false', '--json', '--no-update-notifier', 'outdated'])
+            '-g', '--progress=false', '--json', '--no-update-notifier',
+            'outdated'])
 
         if output:
             for package_id, values in json.loads(output).items():
@@ -237,7 +238,8 @@ class NPM(PackageManager):
         cmd_args = ['-g', '--progress=false', '--no-update-notifier']
         if package_id:
             cmd_args.append('install')
-            cmd_args.append(package_id + '@' + version if version else package_id)
+            cmd_args.append(
+                package_id + '@' + version if version else package_id)
         else:
             cmd_args.append('update')
 

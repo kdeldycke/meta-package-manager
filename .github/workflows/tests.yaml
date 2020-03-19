@@ -53,6 +53,7 @@ jobs:
     - name: macOS - Install npm
       if: runner.os == 'macOS'
       run: |
+        brew unlink node && brew link node
         brew install node
         brew link --overwrite node
         brew install npm

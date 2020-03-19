@@ -150,50 +150,62 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pip list --format=json --outdated | jq
+            $ pip list --format=json --outdated --verbose --quiet | jq
             [
               {
                 "latest_filetype": "wheel",
                 "version": "0.7.9",
                 "name": "alabaster",
-                "latest_version": "0.7.10"
+                "latest_version": "0.7.10",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": "pip"
               },
               {
                 "latest_filetype": "wheel",
                 "version": "0.9999999",
                 "name": "html5lib",
-                "latest_version": "0.999999999"
-              },
+                "latest_version": "0.999999999",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": "pip"
+               },
               {
                 "latest_filetype": "wheel",
                 "version": "2.8",
                 "name": "Jinja2",
-                "latest_version": "2.9.5"
-              },
+                "latest_version": "2.9.5",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": "pip"
+               },
               {
                 "latest_filetype": "wheel",
                 "version": "0.5.3",
                 "name": "mccabe",
-                "latest_version": "0.6.1"
-              },
+                "latest_version": "0.6.1",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": "pip"
+               },
               {
                 "latest_filetype": "wheel",
                 "version": "2.2.0",
                 "name": "pycodestyle",
-                "latest_version": "2.3.1"
-              },
+                "latest_version": "2.3.1",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": "pip"
+               },
               {
                 "latest_filetype": "wheel",
                 "version": "2.1.3",
                 "name": "Pygments",
-                "latest_version": "2.2.0"
-              }
+                "latest_version": "2.2.0",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": ""
+               }
             ]
         """
         outdated = {}
 
         output = self.run([self.cli_path] + self.cli_args + [
-            'list', '--format=json', '--outdated'])
+            'list', '--format=json', '--outdated', '--verbose', '--quiet'])
 
         if output:
             for package in json.loads(output):

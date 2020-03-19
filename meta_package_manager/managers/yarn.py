@@ -23,7 +23,7 @@ from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
 
-from ..platform import LINUX, MACOS
+from ..platform import LINUX, MACOS, WINDOWS
 
 
 class YARN(PackageManager):
@@ -35,7 +35,7 @@ class YARN(PackageManager):
         '--skip-integrity-check'
     ]
 
-    platforms = frozenset([LINUX, MACOS])
+    platforms = frozenset([LINUX, MACOS, WINDOWS])
 
     requirement = '>= 1.0.*'
 

@@ -7,6 +7,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* Add support for ``yarn`` package manager for Linux, macOS and Windows.
+* Install yarn on all unittest platforms.
 * [Pip] Collect installer metadata on listing.
 * [Pip] Bump minimal requirement of ``pip`` to ``10.0.*``.
 * [BASE,GEM]: prepend /usr/local/bin to cli search path
@@ -39,7 +41,6 @@ Changelog
 * Update ``.gitignore``.
 * Drop all Python 3.0 ``__future__`` imports.
 * Add detailed usage CLI page in documentation.
-* Add support for ``yarn`` package manager.
 
 
 `2.8.0 (2019-01-03) <https://github.com/kdeldycke/meta-package-manager/compare/v2.7.0...v2.8.0>`_

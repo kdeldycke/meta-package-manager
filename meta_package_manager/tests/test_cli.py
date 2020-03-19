@@ -86,10 +86,10 @@ class TestCLISubcommand(CLITestCase):
         return result
 
     def test_sub_manager_scope(self):
-        result = self.invoke('--manager', 'npm', *self.subcommand_args)
+        result = self.invoke('--manager', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertIn(" npm", result.output)
-        self.assertNotIn(" apm", result.output)
+        self.assertIn(" apm", result.output)
+        self.assertNotIn(" npm", result.output)
         self.assertNotIn(" apt", result.output)
         self.assertNotIn(" brew", result.output)
         self.assertNotIn(" composer", result.output)
@@ -101,11 +101,11 @@ class TestCLISubcommand(CLITestCase):
         self.assertNotIn(" yarn", result.output)
 
         result = self.invoke(
-            '--manager', 'npm', '--manager', 'gem', *self.subcommand_args)
+            '--manager', 'apm', '--manager', 'gem', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertIn(" npm", result.output)
+        self.assertIn(" apm", result.output)
         self.assertIn(" gem", result.output)
-        self.assertNotIn(" apm", result.output)
+        self.assertNotIn(" npm", result.output)
         self.assertNotIn(" apt", result.output)
         self.assertNotIn(" brew", result.output)
         self.assertNotIn(" composer", result.output)
@@ -113,6 +113,7 @@ class TestCLISubcommand(CLITestCase):
         self.assertNotIn(" pip3", result.output)
         self.assertNotIn(" flatpak", result.output)
         self.assertNotIn(" opkg", result.output)
+        self.assertNotIn(" yarn", result.output)
 
 
 class TestCLITableRendering(TestCLISubcommand):

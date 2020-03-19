@@ -97,7 +97,7 @@ multi_line_output = 3
 source = "meta_package_manager"
 [tool.coverage.run]
 source = "meta_package_manager"
-branch = "True"
+branch = true
 omit = "*/tests/*"
 [tool.coverage.report]
 omit = "*/tests/*"

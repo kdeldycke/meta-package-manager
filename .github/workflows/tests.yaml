@@ -50,10 +50,10 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt install -y npm
-    - name: macOS - Upgrade npm
+    - name: macOS - Install npm
       if: runner.os == 'macOS'
       run: |
-        brew upgrade npm
+        brew install npm
     - name: Windows - Upgrade npm
       if: runner.os == 'Windows'
       run: |

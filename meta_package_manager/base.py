@@ -29,10 +29,7 @@ from . import logger
 from .bitbar import run
 from .platform import current_os
 
-try:
-    from shutil import which
-except ImportError:
-    from backports.shutil_which import which
+from shutil import which
 
 
 # Rendering format of CLI in JSON fields.

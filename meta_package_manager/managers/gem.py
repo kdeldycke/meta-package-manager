@@ -27,10 +27,7 @@ from packaging.version import parse as parse_version
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
 
-try:
-    from shutil import which
-except ImportError:
-    from backports.shutil_which import which # pylint disable-line
+from shutil import which
 
 from . import logger
 

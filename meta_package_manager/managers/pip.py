@@ -18,26 +18,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals
-)
-
 import re
 
+import simplejson as json
 from boltons.cacheutils import cachedproperty
 
-import simplejson as json
-
 from ..base import PackageManager
-from ..platform import LINUX, MACOS
+from ..platform import LINUX, MACOS, WINDOWS
 
 
 class Pip(PackageManager):
 
-    platforms = frozenset([MACOS, LINUX])
+    platforms = frozenset([MACOS, LINUX, WINDOWS])
 
     requirement = '>= 9.0.0'
 

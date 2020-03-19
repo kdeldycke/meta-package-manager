@@ -18,27 +18,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals
-)
-
 import re
 
 import simplejson as json
 from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
-from ..platform import LINUX, MACOS
+from ..platform import LINUX, MACOS, WINDOWS
 
 
 class Composer(PackageManager):
 
     name = "PHP's Composer"
     cli_args = ['global']
-    platforms = frozenset([LINUX, MACOS])
+    platforms = frozenset([LINUX, MACOS, WINDOWS])
     requirement = '>= 1.4.*'
 
     def get_version(self):

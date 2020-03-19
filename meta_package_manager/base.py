@@ -18,30 +18,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals
-)
-
 import os
+from shutil import which
 
 from boltons.cacheutils import cachedproperty
 from boltons.strutils import indent, strip_ansi
-
 from packaging.specifiers import SpecifierSet
 from packaging.version import parse as parse_version
 
 from . import logger
 from .bitbar import run
 from .platform import current_os
-
-try:
-    from shutil import which
-except ImportError:
-    from backports.shutil_which import which
-
 
 # Rendering format of CLI in JSON fields.
 CLI_FORMATS = frozenset(['plain', 'fragments', 'bitbar'])
@@ -85,14 +72,15 @@ class PackageManager(object):
     # Version requirement specifier.
     requirement = None
 
-    def __init__(self):
-        # Tell the manager either to raise or continue on errors.
-        self.raise_on_cli_error = False
-        # Some managers have the ability to report or ignore packages
-        # possessing their own auto-update mecanism.
-        self.ignore_auto_updates = True
-        # Log of all encountered CLI errors.
-        self.cli_errors = []
+    # Tell the manager either to raise or continue on errors.
+    raise_on_cli_error = False
+
+    # Some managers have the ability to report or ignore packages
+    # possessing their own auto-update mecanism.
+    ignore_auto_updates = True
+
+    # Log of all encountered CLI errors.
+    cli_errors = []
 
     @cachedproperty
     def cli_name(self):
@@ -106,11 +94,19 @@ class PackageManager(object):
     def cli_path(self):
         """ Fully qualified path to the package manager CLI.
 
-        Automaticcaly search the location of the CLI in the system.
+        Automaticaly search the location of the CLI in the system.
 
         Returns `None` if CLI is not found or is not a file.
         """
-        cli_path = which(self.cli_name, mode=os.F_OK)
+
+        if not self.cli_name:
+            return None
+        env_path = "/usr/local/bin:{}".format(os.environ.get("PATH"))
+        cli_path = which(self.cli_name, mode=os.F_OK, path=env_path)
+        if not cli_path:
+            return None
+        cli_path = which(cli_path, mode=os.F_OK, path=env_path)
+
         logger.debug(
             "CLI found at {}".format(cli_path) if cli_path
             else "{} CLI not found.".format(self.cli_name))

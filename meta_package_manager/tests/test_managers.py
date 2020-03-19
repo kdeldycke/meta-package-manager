@@ -18,21 +18,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals
-)
-
 import unittest
 
 from ..managers import pool
-from ..platform import OS_DEFINITIONS, PY3
+from ..platform import OS_DEFINITIONS
 from .case import unless_linux, unless_macos, unless_windows
 
-if PY3:
-    basestring = (str, bytes)
+basestring = (str, bytes)
 
 
 class TestManagerDefinitions(unittest.TestCase):
@@ -142,7 +134,7 @@ class TestManagerPlatform(unittest.TestCase):
         supported_managers = {m.id for m in pool().values() if m.supported}
         self.assertSetEqual(supported_managers, set([
             'apm', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm',
-            'pip2', 'pip3', 'flatpak']))
+            'pip2', 'pip3']))
 
     @unless_linux()
     def test_linux(self):
@@ -154,4 +146,5 @@ class TestManagerPlatform(unittest.TestCase):
     @unless_windows()
     def test_windows(self):
         supported_managers = {m.id for m in pool().values() if m.supported}
-        self.assertSetEqual(supported_managers, set())
+        self.assertSetEqual(supported_managers, set([
+            'apm', 'composer', 'gem', 'npm', 'pip2', 'pip3']))

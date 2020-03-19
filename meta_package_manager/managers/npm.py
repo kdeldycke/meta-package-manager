@@ -18,25 +18,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals
-)
-
+import simplejson as json
 from boltons.cacheutils import cachedproperty
 from boltons.iterutils import remap
 
-import simplejson as json
-
 from ..base import PackageManager
-from ..platform import LINUX, MACOS
+from ..platform import LINUX, MACOS, WINDOWS
 
 
 class NPM(PackageManager):
 
-    platforms = frozenset([LINUX, MACOS])
+    platforms = frozenset([LINUX, MACOS, WINDOWS])
 
     requirement = '>= 4.0.*'
 
@@ -225,14 +217,15 @@ class NPM(PackageManager):
         outdated = {}
 
         output = self.run([self.cli_path] + self.cli_args + [
-            '-g', '--progress=false', '--json', 'outdated'])
+            '-g', '--progress=false', '--json', '--no-update-notifier',
+            'outdated'])
 
         if output:
             for package_id, values in json.loads(output).items():
                 if values['wanted'] == 'linked':
                     continue
                 outdated[package_id] = {
-                    'id': package_id,
+                    'id': package_id + '@' + values['latest'],
                     'name': package_id,
                     'installed_version':
                         values['current'] if 'current' in values else None,
@@ -240,12 +233,17 @@ class NPM(PackageManager):
 
         return outdated
 
-    def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.cli_args + [
-            '-g', '--progress=false', 'update']
+    def upgrade_cli(self, package_id=None, version=None):
+        cmd = [self.cli_path] + self.cli_args
+        cmd_args = ['-g', '--progress=false', '--no-update-notifier']
         if package_id:
-            cmd.append(package_id)
-        return cmd
+            cmd_args.append('install')
+            cmd_args.append(
+                package_id + '@' + version if version else package_id)
+        else:
+            cmd_args.append('update')
+
+        return cmd + cmd_args
 
     def upgrade_all_cli(self):
         return self.upgrade_cli()

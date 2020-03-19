@@ -18,18 +18,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals
-)
-
 import re
 
-from boltons.cacheutils import cachedproperty
-
 import simplejson as json
+from boltons.cacheutils import cachedproperty
 from packaging.version import parse as parse_version
 
 from ..base import PackageManager
@@ -54,14 +46,14 @@ class Homebrew(PackageManager):
         .. code-block:: shell-session
 
             $ brew --version
-            Homebrew 1.8.6
+            Homebrew 1.8.6-124-g6cd4c31
             Homebrew/homebrew-core (git revision 533d; last commit 2018-12-28)
             Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
 
         """
         output = self.run([self.cli_path] + self.cli_args + ['--version'])
         if output:
-            return output.split()[1]
+            return output.split()[1].split('-')[0]
 
     @cachedproperty
     def sync(self):
@@ -245,7 +237,7 @@ class Homebrew(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.cli_args + ['upgrade', '--cleanup']
+        cmd = [self.cli_path] + self.cli_args + ['upgrade']
         if package_id:
             cmd.append(package_id)
         return cmd
@@ -331,7 +323,7 @@ class HomebrewCask(Homebrew):
 
         return outdated
 
-    def upgrade_cli(self, package_id):
+    def upgrade_cli(self, package_id=None):
         """ Install a package.
 
         .. todo::
@@ -340,12 +332,10 @@ class HomebrewCask(Homebrew):
             so we can force a cleanup in one go, as we do above with vanilla
             Homebrew.
         """
-        return [self.cli_path, 'cask'] + self.cli_args + [
-            'reinstall', package_id]
+        cmd = [self.cli_path, 'cask'] + self.cli_args + ['upgrade']
+        if package_id:
+            cmd.append(package_id)
+        return cmd
 
     def upgrade_all_cli(self):
-        """ Cask has no way to upgrade all outdated packages.
-
-        See: https://github.com/caskroom/homebrew-cask/issues/4678
-        """
-        raise NotImplementedError
+        return self.upgrade_cli()

@@ -18,13 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals
-)
-
 import re
 
 from boltons.cacheutils import cachedproperty
@@ -50,10 +43,23 @@ class APT(PackageManager):
 
             $ apt --version
             apt 1.2.15 (amd64)
+
+        In Linux Mint, another command has to be used:
+
+        .. code-block:: shell-session
+
+            $ apt version apt
+            1.6.11
         """
         output = self.run([self.cli_path, '--version'])
         if output:
-            return output.split('\n')[0].split()[1]
+            output = output.split('\n')[0].split()
+            if len(output) > 1:
+                return output[1]
+            else:
+                output = self.run([self.cli_path, 'version', 'apt'])
+                if output:
+                    return output
 
     @cachedproperty
     def sync(self):

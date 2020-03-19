@@ -18,32 +18,54 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals
-)
-
+import os
 import re
+from shutil import which
 
 from boltons.cacheutils import cachedproperty
-
 from packaging.version import parse as parse_version
 
 from ..base import PackageManager
-from ..platform import LINUX, MACOS
+from ..platform import LINUX, MACOS, WINDOWS
+from . import logger
 
 
 class Gem(PackageManager):
 
-    platforms = frozenset([LINUX, MACOS])
+    platforms = frozenset([LINUX, MACOS, WINDOWS])
 
     def get_version(self):
         """ Fetch version from ``gem --version`` output."""
         return self.run([self.cli_path, '--version'])
 
     name = "Ruby Gems"
+
+    @cachedproperty
+    def cli_path(self):
+        """ Fully qualified path to the package manager CLI.
+
+        Automaticaly search the location of the CLI in the system.
+
+        Returns `None` if CLI is not found or is not a file.
+        """
+
+        if not self.cli_name:
+            return None
+        env_path = ":".join([
+            "/usr/local/opt/ruby/bin/gem",
+            "/usr/local/opt/ruby/bin",
+            "/usr/local/bin",
+            os.environ.get("PATH")
+        ])
+        cli_path = which(self.cli_name, mode=os.F_OK, path=env_path)
+        if not cli_path:
+            return None
+        cli_path = which(cli_path, mode=os.F_OK, path=env_path)
+
+        logger.debug(
+            "CLI found at {}".format(cli_path) if cli_path
+            else "{} CLI not found.".format(self.cli_name))
+        return cli_path
 
     @cachedproperty
     def installed(self):
@@ -169,15 +191,15 @@ class Gem(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.cli_args + ['update']
+        cmd = [self.cli_path] + self.cli_args + ['update', '--user-install']
         # Installs require `sudo` on system ruby.
         # I (@tresni) recommend doing something like:
         #     $ sudo dseditgroup -o edit -a -t user wheel
         # And then do `visudo` to make it so the `wheel` group does not require
         # a password. There is a line already there for it, you just need to
         # uncomment it and save.)
-        if self.cli_path == '/usr/bin/gem':
-            cmd.insert(0, '/usr/bin/sudo')
+        # if self.cli_path == '/usr/bin/gem':
+        #     cmd.insert(0, '/usr/bin/sudo')
         if package_id:
             cmd.append(package_id)
         return cmd

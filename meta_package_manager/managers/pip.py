@@ -45,7 +45,7 @@ class Pip(PackageManager):
         .. code-block:: shell-session
 
             $ pip --version
-            pip 20.0.2 from /usr/local/lib/python3.7/site-packages/pip (python 3.7)
+            pip 2.0.2 from /usr/local/lib/python/site-packages/pip (python 3.7)
         """
         output = self.run([self.cli_path, '--version'])
         if output:

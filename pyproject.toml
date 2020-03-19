@@ -76,10 +76,6 @@ docs = ["sphinx", "sphinx_rtd_theme", "tomlkit"]
 [tool.poetry.scripts]
 mpm = 'meta_package_manager.cli:cli'
 
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
-
 [tool.isort]
 # https://github.com/timothycrosley/isort#configuring-isort
 multi_line_output = 3
@@ -106,3 +102,7 @@ omit = "*/tests/*"
 [tool.coverage.report]
 omit = "*/tests/*"
 precision = 2
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

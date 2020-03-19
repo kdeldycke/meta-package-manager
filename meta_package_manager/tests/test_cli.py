@@ -241,7 +241,7 @@ class TestCLISearch(TestCLITableRendering):
 
         self.assertTrue(set(result).issubset([
             'apm', 'apt', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm',
-            'pip2', 'pip3', 'flatpak', 'opkg']))
+            'pip2', 'pip3', 'flatpak', 'opkg', 'yarn']))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, basestring)

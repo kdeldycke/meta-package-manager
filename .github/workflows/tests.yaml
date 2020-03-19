@@ -55,7 +55,6 @@ jobs:
       run: |
         sudo chown -R $(whoami) $(brew --prefix)/*
         brew unlink node@12
-        brew install node
         brew install npm
     - name: Windows - Upgrade npm
       if: runner.os == 'Windows'
@@ -66,7 +65,7 @@ jobs:
     - name: macOS - Install Yarn
       if: runner.os == 'macOS'
       run: |
-        sudo brew install yarn
+        brew install yarn
     - name: Linux - Install Yarn
       if: runner.os == 'Linux'
       run: |

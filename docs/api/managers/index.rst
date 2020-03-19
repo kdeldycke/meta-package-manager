@@ -10,4 +10,5 @@
    homebrew
    mas
    npm
+   yarn
    pip

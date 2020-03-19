@@ -98,6 +98,7 @@ class TestCLISubcommand(CLITestCase):
         self.assertNotIn(" gem", result.output)
         self.assertNotIn(" flatpak", result.output)
         self.assertNotIn(" opkg", result.output)
+        self.assertNotIn(" yarn", result.output)
 
         result = self.invoke(
             '--manager', 'npm', '--manager', 'gem', *self.subcommand_args)
@@ -165,7 +166,7 @@ class TestCLIManagers(TestCLITableRendering):
 
         self.assertSetEqual(set(result), set([
             'apm', 'apt', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm',
-            'pip2', 'pip3', 'flatpak', 'opkg']))
+            'pip2', 'pip3', 'flatpak', 'opkg', 'yarn']))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, basestring)
@@ -204,7 +205,7 @@ class TestCLIInstalled(TestCLITableRendering):
 
         self.assertTrue(set(result).issubset([
             'apm', 'apt', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm',
-            'pip2', 'pip3', 'flatpak', 'opkg']))
+            'pip2', 'pip3', 'flatpak', 'opkg', 'yarn']))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, basestring)
@@ -293,7 +294,7 @@ class TestCLIOutdated(TestCLITableRendering):
 
         self.assertTrue(set(result).issubset([
             'apm', 'apt', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm',
-            'pip2', 'pip3', 'flatpak', 'opkg']))
+            'pip2', 'pip3', 'flatpak', 'opkg', 'yarn']))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, basestring)

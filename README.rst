@@ -67,6 +67,7 @@ Package manager  Version     macOS  Linux  Windows  ``sync``  ``installed``  ``s
 |pip2|__          >= 9.0.0   ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
 |pip3|__          >= 9.0.0   ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
 |npm|__           >= 4.0.*   ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
+|yarn|__          >= 1.21.*  ✓      ✓                         ✓              ✓                        ✓             ✓
 |apm|__                      ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
 |gem|__                      ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
 |mas|__           >= 1.3.1   ✓                                ✓              ✓                        ✓             ✓
@@ -91,6 +92,9 @@ __ https://pypi.org
 .. |npm| replace::
    Node's ``npm``
 __ https://www.npmjs.com
+.. |yarn| replace::
+   Node's ``yarn``
+__ https://yarnpkg.com
 .. |apm| replace::
    Atom's ``apm``
 __ https://atom.io/packages
@@ -214,6 +218,8 @@ List all supported package managers and their status on current system (macOS):
     │ Mac AppStore      │ mas      │ ✓             │ ✓  /usr/local/bin/mas      │ ✓            │ ✓  1.6.3  │
     ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
     │ Node's npm        │ npm      │ ✓             │ ✓  /usr/local/bin/npm      │ ✓            │ ✓  6.13.7 │
+    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
+    │ Node's yarn       │ yarn     │ ✓             │ ✓  /usr/local/bin/yarn     │ ✓            │ ✓  1.21.0 │
     ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
     │ OPKG              │ opkg     │ ✘  Linux only │ ✘  opkg CLI not found.     │              │           │
     ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤

@@ -39,6 +39,7 @@ Changelog
 * Update ``.gitignore``.
 * Drop all Python 3.0 ``__future__`` imports.
 * Add detailed usage CLI page in documentation.
+* Add support for ``yarn`` package manager.
 
 
 `2.8.0 (2019-01-03) <https://github.com/kdeldycke/meta-package-manager/compare/v2.7.0...v2.8.0>`_

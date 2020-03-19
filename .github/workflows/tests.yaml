@@ -41,6 +41,21 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt install -y npm
+    - name: macOS - Install Yarn
+      if: runner.os == 'macOS'
+      run: |
+        brew install yarn
+    - name: Linux - Install Yarn
+      if: runner.os == 'Linux'
+      run: |
+        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+        echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+        sudo apt update
+        sudo apt install -y yarn
+    - name: Windows - Install Yarn
+      if: runner.os == 'Windows'
+      run: |
+        choco install yarn
     - name: macOS - Install PHP Composer
       if: runner.os == 'macOS'
       run: |

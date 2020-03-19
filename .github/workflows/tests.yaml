@@ -53,6 +53,8 @@ jobs:
     - name: macOS - Install npm
       if: runner.os == 'macOS'
       run: |
+        brew install node
+        brew link --overwrite node
         brew install npm
     - name: Windows - Upgrade npm
       if: runner.os == 'Windows'

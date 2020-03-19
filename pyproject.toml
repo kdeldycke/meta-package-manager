@@ -60,6 +60,7 @@ tomlkit = {version = "^0.5", optional = true}
 
 [tool.poetry.dev-dependencies]
 bumpversion = "*"
+coverage = {extras = ["toml"], version = "^5.0.4"}
 isort = "^4.3.5"
 pycodestyle = "^2"
 pylint = "^2.4"

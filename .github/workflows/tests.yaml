@@ -53,7 +53,8 @@ jobs:
     - name: macOS - Install npm
       if: runner.os == 'macOS'
       run: |
-        sudo chown -R $(whoami) $(brew --prefix)/*
+        brew doctor
+        sudo chown -R $(whoami) $(brew --prefix)
         brew install npm
     - name: Windows - Upgrade npm
       if: runner.os == 'Windows'

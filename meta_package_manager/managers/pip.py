@@ -38,7 +38,15 @@ class Pip(PackageManager):
     cli_name = None
 
     def get_version(self):
-        """ Fetch version from ``pip --version`` output."""
+        """ Fetch version from ``pip --version`` output.
+        
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+        
+        $ pip --version
+        pip 20.0.2 from /usr/local/lib/python3.7/site-packages/pip (python 3.7)        
+        """
         output = self.run([self.cli_path, '--version'])
         if output:
             return output.split()[1]

@@ -19,6 +19,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import os
+from shutil import which
 
 from boltons.cacheutils import cachedproperty
 from boltons.strutils import indent, strip_ansi
@@ -28,9 +29,6 @@ from packaging.version import parse as parse_version
 from . import logger
 from .bitbar import run
 from .platform import current_os
-
-from shutil import which
-
 
 # Rendering format of CLI in JSON fields.
 CLI_FORMATS = frozenset(['plain', 'fragments', 'bitbar'])

@@ -18,18 +18,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import re
 import os
+import re
+from shutil import which
 
 from boltons.cacheutils import cachedproperty
 from packaging.version import parse as parse_version
 
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
-
-from shutil import which
-
 from . import logger
+
 
 class Gem(PackageManager):
 
@@ -67,7 +66,6 @@ class Gem(PackageManager):
             "CLI found at {}".format(cli_path) if cli_path
             else "{} CLI not found.".format(self.cli_name))
         return cli_path
-
 
     @cachedproperty
     def installed(self):

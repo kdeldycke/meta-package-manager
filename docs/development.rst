@@ -51,12 +51,12 @@ __ https://github.com/kdeldycke/meta-package-manager/tree/master
    ``develop``
 __ https://github.com/kdeldycke/meta-package-manager/tree/develop
 
-.. |build-stable| image:: https://travis-ci.org/kdeldycke/meta-package-manager.svg?branch=master
-    :target: https://travis-ci.org/kdeldycke/meta-package-manager
-    :alt: Unit-tests status
-.. |build-dev| image:: https://travis-ci.org/kdeldycke/meta-package-manager.svg?branch=develop
-    :target: https://travis-ci.org/kdeldycke/meta-package-manager
-    :alt: Unit-tests status
+.. |build-stable| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Unittests/badge.svg?branch=master
+    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3AUnittests+branch%3Amaster
+    :alt: Unittests status
+.. |build-dev| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Unittests/badge.svg?branch=develop
+    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3AUnittests+branch%3Adevelop
+    :alt: Unittests status
 
 .. |coverage-stable| image:: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/master
@@ -90,6 +90,8 @@ __ https://github.com/kdeldycke/meta-package-manager/tree/develop
 Setup a development environment
 -------------------------------
 
+This **step is required** for all the other sections from this page.
+
 Check out latest development branch:
 
 .. code-block:: shell-session
@@ -102,7 +104,8 @@ Install package in editable mode with all development dependencies:
 
 .. code-block:: shell-session
 
-    $ pip install -e .[develop]
+    $ pip install poetry
+    $ poetry install
 
 Now you're ready to hack and abuse git!
 
@@ -114,8 +117,7 @@ Install test dependencies and run unit-tests:
 
 .. code-block:: shell-session
 
-    $ pip install -e .[tests]
-    $ pytest
+    $ poetry run pytest
 
 
 Coding style
@@ -126,55 +128,45 @@ imports:
 
 .. code-block:: shell-session
 
-    $ pip install -e .[develop]
-    $ isort --apply
+    $ poetry run isort --apply
+
 
 Then run `pycodestyle <https://pycodestyle.readthedocs.io>`_ and `Pylint
 <https://docs.pylint.org>`_ code style checks:
 
 .. code-block:: shell-session
 
-    $ pip install -e .[tests]
-    $ pycodestyle meta_package_manager
-    $ pylint --rcfile=setup.cfg meta_package_manager
+    $ poetry run pycodestyle
+    $ poetry run pylint --rcfile=setup.cfg meta_package_manager
 
 
-Build documentation
--------------------
+Documentation
+-------------
 
 The documentation you're currently reading can be built locally with `Sphinx
 <https://www.sphinx-doc.org>`_:
 
 .. code-block:: shell-session
 
-    $ pip install -e .[docs]
-    $ sphinx-build -b html ./docs ./docs/html
+    $ poetry install --extras docs
+    $ poetry run sphinx-build -b html ./docs ./docs/html
 
-For a smooth release, you also need to validate the rendering of package's long
-description on PyPi, as well as metadata:
+And once in a while, it's good to upgrade the `graph of package dependencies
+<./install.html#python-dependencies>`_:
 
 .. code-block:: shell-session
 
-    $ pip install -e .[develop]
-    $ ./setup.py check -m -r -s
+    $ poetry show --all --no-dev --tree
 
 
 Release process
 ---------------
 
-Start from the ``develop`` branch:
+Check your starting from a clean ``develop`` branch:
 
 .. code-block:: shell-session
 
-    $ git clone git@github.com:kdeldycke/meta-package-manager.git
-    $ cd ./meta-package-manager
     $ git checkout develop
-
-Install development dependencies:
-
-.. code-block:: shell-session
-
-    $ pip install -e .[develop]
 
 Revision should already be set to the next version, so we just need to set the
 released date in the changelog:
@@ -197,22 +189,27 @@ Create a release commit, tag it and merge it back to ``master`` branch:
     $ git merge "vX.Y.Z"
     $ git push
 
-Push packaging to the `test cheeseshop
-<https://wiki.python.org/moin/TestPyPI>`_:
+Build packages:
 
 .. code-block:: shell-session
 
-    $ ./setup.py register -r testpypi
-    $ ./setup.py clean --all
-    $ ./setup.py sdist bdist_egg bdist_wheel upload -r testpypi
+    $ poetry build
+
+For a smooth release, you also need to `validate the rendering of package's
+long description on PyPi
+<https://packaging.python.org/guides/making-a-pypi-friendly-readme/#validating-restructuredtext-markup>`_,
+as well as metadata:
+
+.. code-block:: shell-session
+
+    $ poetry check
+    $ poetry run twine check ./dist/*
 
 Publish packaging to `PyPi <https://pypi.python.org>`_:
 
 .. code-block:: shell-session
 
-    $ ./setup.py register -r pypi
-    $ ./setup.py clean --all
-    $ ./setup.py sdist bdist_egg bdist_wheel upload -r pypi
+    $ poetry publish
 
 Update revision with `bumpversion <https://github.com/peritus/bumpversion>`_
 and set it back to development state by increasing the ``patch`` level.
@@ -220,7 +217,7 @@ and set it back to development state by increasing the ``patch`` level.
 .. code-block:: shell-session
 
     $ git checkout develop
-    $ bumpversion --verbose patch
+    $ poetry run bumpversion --verbose patch
     $ git add ./meta_package_manager/__init__.py ./CHANGES.rst
     $ git commit -m "Post release version bump."
     $ git push
@@ -230,7 +227,7 @@ revision level instead:
 
 .. code-block:: shell-session
 
-    $ bumpversion --verbose minor
+    $ poetry run bumpversion --verbose minor
     $ git add ./meta_package_manager/__init__.py ./CHANGES.rst
     $ git commit -m "Next release no longer bug-fix only. Bump revision."
     $ git push

@@ -18,13 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals
-)
-
 import re
 import os
 
@@ -32,7 +25,7 @@ from boltons.cacheutils import cachedproperty
 from packaging.version import parse as parse_version
 
 from ..base import PackageManager
-from ..platform import LINUX, MACOS
+from ..platform import LINUX, MACOS, WINDOWS
 
 try:
     from shutil import which
@@ -43,7 +36,7 @@ from . import logger
 
 class Gem(PackageManager):
 
-    platforms = frozenset([LINUX, MACOS])
+    platforms = frozenset([LINUX, MACOS, WINDOWS])
 
     def get_version(self):
         """ Fetch version from ``gem --version`` output."""
@@ -203,15 +196,15 @@ class Gem(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.cli_args + ['update']
+        cmd = [self.cli_path] + self.cli_args + ['update', '--user-install']
         # Installs require `sudo` on system ruby.
         # I (@tresni) recommend doing something like:
         #     $ sudo dseditgroup -o edit -a -t user wheel
         # And then do `visudo` to make it so the `wheel` group does not require
         # a password. There is a line already there for it, you just need to
         # uncomment it and save.)
-        if self.cli_path == '/usr/bin/gem':
-            cmd.insert(0, '/usr/bin/sudo')
+        # if self.cli_path == '/usr/bin/gem':
+        #     cmd.insert(0, '/usr/bin/sudo')
         if package_id:
             cmd.append(package_id)
         return cmd

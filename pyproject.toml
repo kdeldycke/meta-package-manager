@@ -1,0 +1,108 @@
+[tool.poetry]
+# Docs: https://python-poetry.org/docs/pyproject/
+name = "meta-package-manager"
+version = "2.9.1"
+description = "CLI providing unifying interface to all package managers."
+license = 'GPL-2.0-or-later'
+authors = ["Kevin Deldycke <kevin@deldycke.com>"]
+readme = "README.rst"
+homepage = 'https://github.com/kdeldycke/meta-package-manager'
+repository = 'https://github.com/kdeldycke/meta-package-manager'
+documentation = 'https://meta-package-manager.readthedocs.io'
+keywords = [
+    'CLI', 'package', 'pip', 'apm', 'npm', 'homebrew', 'brew', 'cask',
+    'macos', 'node', 'atom', 'ruby', 'gem', 'mac app store', 'mas',
+    'bitbar', 'plugin', 'flatpak', 'opkg', 'php composer']
+classifiers = [
+    # See: https://pypi.org/pypi?%3Aaction=list_classifiers
+    'Development Status :: 5 - Production/Stable',
+    'Environment :: Console',
+    'Environment :: MacOS X',
+    'Environment :: Plugins',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Information Technology',
+    'Intended Audience :: System Administrators',
+    'Operating System :: MacOS :: MacOS X',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX :: Linux',
+    'Programming Language :: Python :: Implementation :: CPython',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+    'Topic :: System :: Archiving :: Packaging',
+    'Topic :: System :: Installation/Setup',
+    'Topic :: System :: Software Distribution',
+    'Topic :: Utilities']
+include = [
+    "docs/**/*",
+    "CHANGES.rst",
+    "README.rst",
+    "screenshot.png",
+    "setup.cfg"]
+
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/kdeldycke/meta-package-manager/issues"
+
+[tool.poetry.dependencies]
+# List of python versions and their support status:
+# https://en.wikipedia.org/wiki/CPython#Version_history
+python = "^3.6"
+boltons = "^17.0"
+click = "^5"
+click-log = "^0.3"
+cli-helpers = "^1.0.2"
+packaging = "*"
+simplejson = "*"
+# SHould have been put in dev-dependencies but extras only works from main
+# section.
+sphinx = {version = "^2.4", optional = true}
+sphinx_rtd_theme = {version = "^0.4.3", optional = true}
+tomlkit = {version = "^0.5", optional = true}
+
+[tool.poetry.dev-dependencies]
+bumpversion = "*"
+coverage = {extras = ["toml"], version = "^5.0.4"}
+isort = "^4.3.5"
+pycodestyle = "^2"
+pylint = "^2.4"
+pytest = "^5.2"
+# More pytest plugins at: http://plugincompat.herokuapp.com .
+pytest-cov = "*"
+twine = "^3.1"
+
+[tool.poetry.extras]
+# Workaround lacks of Poetry support by RTD: https://stackoverflow.com/a/58163431
+docs = ["sphinx", "sphinx_rtd_theme", "tomlkit"]
+
+[tool.poetry.scripts]
+mpm = 'meta_package_manager.cli:cli'
+
+[tool.isort]
+# https://github.com/timothycrosley/isort#configuring-isort
+multi_line_output = 3
+
+# XXX In anticipation of unreleased Pylint 2.5. Once release  remove section
+# from setup.cfg.
+#[tool.pylint]
+# http://pylint.pycqa.org/en/latest/technical_reference/features.html
+#output-format = colorized
+#fail-under = 9
+# List messages with: $ pylint --list-msgs
+# C0111: Missing docstring
+# W0142: Used * or ** magic
+# W0511: Warning notes in code comments
+#disable = C0111,W0142,W0511
+
+# https://coverage.readthedocs.io/en/latest/config.html
+[tool.coverage.paths]
+source = ["meta_package_manager"]
+[tool.coverage.run]
+source = ["meta_package_manager"]
+branch = true
+omit = ["*/tests/*"]
+[tool.coverage.report]
+omit = ["*/tests/*"]
+precision = 2
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

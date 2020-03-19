@@ -57,7 +57,7 @@ class CLIError(Exception):
                 indent(str(self.error), margin)), margin)
 
 
-class PackageManager(object):
+class PackageManager():
 
     """ Base class from which all package manager definitions should inherits.
     """

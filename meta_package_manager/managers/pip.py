@@ -31,7 +31,7 @@ class Pip(PackageManager):
 
     platforms = frozenset([MACOS, LINUX, WINDOWS])
 
-    requirement = '>= 9.0.0'
+    requirement = '>= 10.0.0'
 
     # Deny this manager to be tied to a CLI, as we only use this class as a
     # common skeleton for pip2 and pip3.
@@ -39,13 +39,13 @@ class Pip(PackageManager):
 
     def get_version(self):
         """ Fetch version from ``pip --version`` output.
-        
+
         Raw CLI output samples:
 
         .. code-block:: shell-session
-        
+
             $ pip --version
-            pip 20.0.2 from /usr/local/lib/python3.7/site-packages/pip (python 3.7)        
+            pip 20.0.2 from /usr/local/lib/python3.7/site-packages/pip (python 3.7)
         """
         output = self.run([self.cli_path, '--version'])
         if output:
@@ -59,27 +59,39 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            $ pip list --format=json | jq
+            $ pip list --format=json --verbose | jq
             [
              {
                 "version": "1.3",
-                "name": "backports.functools-lru-cache"
+                "name": "backports.functools-lru-cache",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": "pip"
               },
               {
                 "version": "0.9999999",
-                "name": "html5lib"
+                "name": "html5lib",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": "pip"
+              },
+              {
+                "name": "setuptools",
+                "version": "46.0.0",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": ""
               },
               {
                 "version": "2.8",
-                "name": "Jinja2"
+                "name": "Jinja2",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": ""
               },
               (...)
             ]
         """
         installed = {}
 
-        output = self.run(
-            [self.cli_path] + self.cli_args + ['list', '--format=json'])
+        output = self.run([self.cli_path] + self.cli_args + [
+            'list', '--format=json', '--verbose'])
 
         if output:
             for package in json.loads(output):

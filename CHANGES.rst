@@ -7,6 +7,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [Pip] Collect installer metadata on listing.
+* [Pip] Bump minimal requirement of ``pip`` to ``10.0.*``.
 * [BASE,GEM]: prepend /usr/local/bin to cli search path
 * [NPM]: 'install package@version' instead of 'update package’
 * [NPM]: skip update notifier

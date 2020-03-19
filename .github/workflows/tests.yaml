@@ -53,8 +53,9 @@ jobs:
     - name: macOS - Install npm
       if: runner.os == 'macOS'
       run: |
-        brew doctor
         sudo chown -R $(whoami) $(brew --prefix)
+        rm '/usr/local/include/node/config.gypi'
+        brew install node
         brew install npm
     - name: Windows - Upgrade npm
       if: runner.os == 'Windows'

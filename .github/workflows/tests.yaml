@@ -54,7 +54,7 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         sudo chown -R $(whoami) $(brew --prefix)/*
-        rm '/usr/local/include/node/config.gypi'
+        brew unlink node@12
         brew install node
         brew install npm
     - name: Windows - Upgrade npm

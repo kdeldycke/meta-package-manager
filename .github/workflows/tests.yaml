@@ -53,10 +53,7 @@ jobs:
     - name: macOS - Install npm
       if: runner.os == 'macOS'
       run: |
-        brew unlink node && brew link node
-        brew install node
-        brew link --overwrite node
-        brew install npm
+        sudo npm install -g npm
     - name: Windows - Upgrade npm
       if: runner.os == 'Windows'
       run: |
@@ -66,7 +63,7 @@ jobs:
     - name: macOS - Install Yarn
       if: runner.os == 'macOS'
       run: |
-        brew install yarn
+        sudo brew install yarn
     - name: Linux - Install Yarn
       if: runner.os == 'Linux'
       run: |

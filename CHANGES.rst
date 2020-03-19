@@ -7,6 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [BASE,GEM]: prepend /usr/local/bin to cli search path
 * [NPM]: 'install package@version' instead of 'update package’
 * [NPM]: skip update notifier
 * Fallback on ``apt version apt`` when looking for version. Closes #57 and #52.

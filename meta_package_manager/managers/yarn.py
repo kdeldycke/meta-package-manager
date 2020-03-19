@@ -22,7 +22,6 @@ import simplejson as json
 from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
-
 from ..platform import LINUX, MACOS, WINDOWS
 
 

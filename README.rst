@@ -67,7 +67,7 @@ Package manager  Version     macOS  Linux  Windows  ``sync``  ``installed``  ``s
 |pip2|__          >= 9.0.0   ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
 |pip3|__          >= 9.0.0   ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
 |npm|__           >= 4.0.*   ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
-|yarn|__          >= 1.21.*  ✓      ✓                         ✓              ✓                        ✓             ✓
+|yarn|__          >= 1.21.*  ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
 |apm|__                      ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
 |gem|__                      ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
 |mas|__           >= 1.3.1   ✓                                ✓              ✓                        ✓             ✓

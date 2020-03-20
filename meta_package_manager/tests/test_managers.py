@@ -34,7 +34,7 @@ class TestManagerDefinitions(unittest.TestCase):
     def test_ascii_id(self):
         """ All package manager IDs should be short ASCII strings. """
         for manager_id in pool():
-            self.assertRegexpMatches(manager_id, r'[a-z0-9]+')
+            self.assertRegex(manager_id, r'[a-z0-9]+')
 
     def test_number(self):
         """ Check all implemented package managers are accounted for. """

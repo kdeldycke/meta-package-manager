@@ -122,9 +122,13 @@ def cli(ctx, manager, exclude, ignore_auto_updates, output_format, stats,
         click.echo(ctx.get_help())
         ctx.exit()
 
-    # Target all available managers by default, then only keeps the subset of
-    # selected by the user, then remove those excluded by the user.
-    target_ids = set(pool()).intersection(manager).difference(exclude)
+    # Target all available managers by default.
+    target_ids = set(pool())
+    # Only keeps the subset of selected by the user.
+    if manager:
+        target_ids = target_ids.intersection(manager)
+    # Remove managers excluded by the user.
+    target_ids = target_ids.difference(exclude)
     target_managers = [m for mid, m in pool().items() if mid in target_ids]
 
     # Apply manager-level options.

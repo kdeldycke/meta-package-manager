@@ -16,6 +16,7 @@ Changelog
 * [NPM]: 'install package@version' instead of 'update package’
 * [NPM]: skip update notifier
 * Fallback on ``apt version apt`` when looking for version. Closes #57 and #52.
+* Raise requirement to ``boltons >= 20.0``.
 
 
 `2.9.0 (2020-03-18) <https://github.com/kdeldycke/meta-package-manager/compare/v2.8.0...v2.9.0>`_

@@ -47,7 +47,7 @@ include = [
 # List of python versions and their support status:
 # https://en.wikipedia.org/wiki/CPython#Version_history
 python = "^3.6"
-boltons = "^17.0"
+boltons = "^20.0"
 click = "^5"
 click-log = "^0.3"
 cli-helpers = "^1.0.2"

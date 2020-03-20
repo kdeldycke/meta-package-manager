@@ -103,7 +103,7 @@ class TestCLISubcommand(CLITestCase):
 
         # Test selection deduplication.
         result = self.invoke(
-            '--manager', 'apm','--manager', 'apm', *self.subcommand_args)
+            '--manager', 'apm', '--manager', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.assertIn(" apm", result.output)
         self.assertNotIn(" npm", result.output)

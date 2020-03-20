@@ -61,7 +61,6 @@ class APT(PackageManager):
                 if output:
                     return output
 
-    @cachedproperty
     def sync(self):
         """
 
@@ -79,7 +78,7 @@ class APT(PackageManager):
             Building dependency tree...
             Reading state information...
         """
-        super(APT, self).sync
+        super(APT, self).sync()
         self.run([self.cli_path] + self.cli_args + ['update', '--quiet'])
 
     @cachedproperty

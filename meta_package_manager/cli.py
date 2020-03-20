@@ -234,7 +234,7 @@ def sync(ctx):
     active_managers = ctx.obj['active_managers']
 
     for manager in active_managers:
-        manager.sync
+        manager.sync()
 
 
 @cli.command(short_help='List installed packages.')
@@ -365,7 +365,7 @@ def outdated(ctx, cli_format):
     for manager in active_managers:
 
         # Force a sync to get the freshest upgrades.
-        manager.sync
+        manager.sync()
 
         packages = list(map(dict, manager.outdated.values()))
         for info in packages:

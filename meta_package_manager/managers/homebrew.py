@@ -56,7 +56,7 @@ class Homebrew(PackageManager):
             return output.split()[1].split('-')[0]
 
     def sync(self):
-        super(Homebrew, self).sync
+        super(Homebrew, self).sync()
         self.run([self.cli_path] + self.cli_args + ['update'])
 
     @cachedproperty

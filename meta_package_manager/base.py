@@ -233,7 +233,6 @@ class PackageManager():
 
         return output
 
-    @property
     def sync(self):
         """ Refresh local manager metadata from remote repository. """
         logger.info('Sync {} package info...'.format(self.id))

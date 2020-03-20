@@ -48,7 +48,6 @@ class OPKG(PackageManager):
         if output:
             return output.split('\n')[0].split()[2]
 
-    @cachedproperty
     def sync(self):
         """
 
@@ -56,7 +55,7 @@ class OPKG(PackageManager):
 
         .. code-block:: shell-session
         """
-        super(OPKG, self).sync
+        super(OPKG, self).sync()
         self.run([self.cli_path] + self.cli_args + ['update'])
 
     @cachedproperty

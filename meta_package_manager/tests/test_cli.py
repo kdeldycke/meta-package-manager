@@ -86,6 +86,7 @@ class TestCLISubcommand(CLITestCase):
         return result
 
     def test_sub_manager_scope(self):
+        # Test selecting one manager only.
         result = self.invoke('--manager', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.assertIn(" apm", result.output)
@@ -100,11 +101,91 @@ class TestCLISubcommand(CLITestCase):
         self.assertNotIn(" opkg", result.output)
         self.assertNotIn(" yarn", result.output)
 
+        # Test selection deduplication.
+        result = self.invoke(
+            '--manager', 'apm','--manager', 'apm', *self.subcommand_args)
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn(" apm", result.output)
+        self.assertNotIn(" npm", result.output)
+        self.assertNotIn(" apt", result.output)
+        self.assertNotIn(" brew", result.output)
+        self.assertNotIn(" composer", result.output)
+        self.assertNotIn(" pip2", result.output)
+        self.assertNotIn(" pip3", result.output)
+        self.assertNotIn(" gem", result.output)
+        self.assertNotIn(" flatpak", result.output)
+        self.assertNotIn(" opkg", result.output)
+        self.assertNotIn(" yarn", result.output)
+
+        # Test multiple selection.
         result = self.invoke(
             '--manager', 'apm', '--manager', 'gem', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.assertIn(" apm", result.output)
         self.assertIn(" gem", result.output)
+        self.assertNotIn(" npm", result.output)
+        self.assertNotIn(" apt", result.output)
+        self.assertNotIn(" brew", result.output)
+        self.assertNotIn(" composer", result.output)
+        self.assertNotIn(" pip2", result.output)
+        self.assertNotIn(" pip3", result.output)
+        self.assertNotIn(" flatpak", result.output)
+        self.assertNotIn(" opkg", result.output)
+        self.assertNotIn(" yarn", result.output)
+
+        # Test exclusion.
+        result = self.invoke('--exclude', 'apm', *self.subcommand_args)
+        self.assertEqual(result.exit_code, 0)
+        self.assertNotIn(" apm", result.output)
+        self.assertIn(" gem", result.output)
+        self.assertIn(" npm", result.output)
+        self.assertIn(" apt", result.output)
+        self.assertIn(" brew", result.output)
+        self.assertIn(" composer", result.output)
+        self.assertIn(" pip2", result.output)
+        self.assertIn(" pip3", result.output)
+        self.assertIn(" flatpak", result.output)
+        self.assertIn(" opkg", result.output)
+        self.assertIn(" yarn", result.output)
+
+        # Test exclusion deduplication.
+        result = self.invoke(
+            '--exclude', 'apm', '--exclude', 'apm', *self.subcommand_args)
+        self.assertEqual(result.exit_code, 0)
+        self.assertNotIn(" apm", result.output)
+        self.assertIn(" gem", result.output)
+        self.assertIn(" npm", result.output)
+        self.assertIn(" apt", result.output)
+        self.assertIn(" brew", result.output)
+        self.assertIn(" composer", result.output)
+        self.assertIn(" pip2", result.output)
+        self.assertIn(" pip3", result.output)
+        self.assertIn(" flatpak", result.output)
+        self.assertIn(" opkg", result.output)
+        self.assertIn(" yarn", result.output)
+
+        # Test double exclusion.
+        result = self.invoke(
+            '--exclude', 'apm', '--exclude', 'gem', *self.subcommand_args)
+        self.assertEqual(result.exit_code, 0)
+        self.assertNotIn(" apm", result.output)
+        self.assertNotIn(" gem", result.output)
+        self.assertIn(" npm", result.output)
+        self.assertIn(" apt", result.output)
+        self.assertIn(" brew", result.output)
+        self.assertIn(" composer", result.output)
+        self.assertIn(" pip2", result.output)
+        self.assertIn(" pip3", result.output)
+        self.assertIn(" flatpak", result.output)
+        self.assertIn(" opkg", result.output)
+        self.assertIn(" yarn", result.output)
+
+        # Test selection and exclusion.
+        result = self.invoke(
+            '--manager', 'apm', '--exclude', 'gem', *self.subcommand_args)
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn(" apm", result.output)
+        self.assertNotIn(" gem", result.output)
         self.assertNotIn(" npm", result.output)
         self.assertNotIn(" apt", result.output)
         self.assertNotIn(" brew", result.output)

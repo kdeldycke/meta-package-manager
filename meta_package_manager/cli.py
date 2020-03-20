@@ -85,6 +85,10 @@ def print_stats(data):
     help="Restrict sub-command to a subset of package managers. Repeat to "
     "select multiple managers. Defaults to all.")
 @click.option(
+    '-e', '--exclude', type=click.Choice(sorted(pool())), multiple=True,
+    help="Exclude a package manager. Repeat to select multiple managers. "
+    "Defaults to none.")
+@click.option(
     '--ignore-auto-updates/--include-auto-updates', default=True,
     help="Report all outdated packages, including those tagged as "
     "auto-updating. Defaults to include all packages. Only applies for "
@@ -101,7 +105,7 @@ def print_stats(data):
     "away or continue operations on manager CLI error. Defaults to stop.")
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx, manager, ignore_auto_updates, output_format, stats,
+def cli(ctx, manager, exclude, ignore_auto_updates, output_format, stats,
         stop_on_error):
     """ CLI for multi-package manager upgrades. """
     level = logger.level
@@ -118,10 +122,10 @@ def cli(ctx, manager, ignore_auto_updates, output_format, stats,
         click.echo(ctx.get_help())
         ctx.exit()
 
-    # Filters out the subset of managers selected by the user.
-    target_managers = [
-        m for mid, m in pool().items()
-        if mid in set(manager)] if manager else pool().values()
+    # Target all available managers by default, then only keeps the subset of
+    # selected by the user, then remove those excluded by the user.
+    target_ids = set(pool()).intersection(manager).difference(exclude)
+    target_managers = [m for mid, m in pool().items() if mid in target_ids]
 
     # Apply manager-level options.
     for m in target_managers:

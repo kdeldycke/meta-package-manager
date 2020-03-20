@@ -9,6 +9,7 @@ Changelog
 
 * Add support for ``yarn`` package manager for Linux, macOS and Windows.
 * Install yarn on all unittest platforms.
+* Allow exclusion of a subset of package managers. Closes #45.
 * [Pip] Collect installer metadata on listing.
 * [Pip] Bump minimal requirement of ``pip`` to ``10.0.*``.
 * [BASE,GEM]: prepend /usr/local/bin to cli search path

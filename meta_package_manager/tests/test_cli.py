@@ -85,8 +85,7 @@ class TestCLISubcommand(CLITestCase):
         self.assertEqual(result.exit_code, 0)
         return result
 
-    def test_sub_manager_scope(self):
-        # Test selecting one manager only.
+    def test_manager_selection(self):
         result = self.invoke('--manager', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.assertIn(" apm", result.output)
@@ -101,7 +100,7 @@ class TestCLISubcommand(CLITestCase):
         self.assertNotIn(" opkg", result.output)
         self.assertNotIn(" yarn", result.output)
 
-        # Test selection deduplication.
+    def test_manager_duplicate_selection(self):
         result = self.invoke(
             '--manager', 'apm', '--manager', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
@@ -117,7 +116,7 @@ class TestCLISubcommand(CLITestCase):
         self.assertNotIn(" opkg", result.output)
         self.assertNotIn(" yarn", result.output)
 
-        # Test multiple selection.
+    def test_manager_multiple_selection(self):
         result = self.invoke(
             '--manager', 'apm', '--manager', 'gem', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
@@ -133,7 +132,7 @@ class TestCLISubcommand(CLITestCase):
         self.assertNotIn(" opkg", result.output)
         self.assertNotIn(" yarn", result.output)
 
-        # Test exclusion.
+    def test_manager_exclusion(self):
         result = self.invoke('--exclude', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.assertNotIn(" apm", result.output)
@@ -148,7 +147,7 @@ class TestCLISubcommand(CLITestCase):
         self.assertIn(" opkg", result.output)
         self.assertIn(" yarn", result.output)
 
-        # Test exclusion deduplication.
+    def test_manager_duplicate_exclusion(self):
         result = self.invoke(
             '--exclude', 'apm', '--exclude', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
@@ -164,7 +163,7 @@ class TestCLISubcommand(CLITestCase):
         self.assertIn(" opkg", result.output)
         self.assertIn(" yarn", result.output)
 
-        # Test double exclusion.
+    def test_manager_multiple_exclusion(self):
         result = self.invoke(
             '--exclude', 'apm', '--exclude', 'gem', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
@@ -180,11 +179,27 @@ class TestCLISubcommand(CLITestCase):
         self.assertIn(" opkg", result.output)
         self.assertIn(" yarn", result.output)
 
-        # Test selection and exclusion.
+    def test_manager_selection_priority(self):
         result = self.invoke(
             '--manager', 'apm', '--exclude', 'gem', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.assertIn(" apm", result.output)
+        self.assertNotIn(" gem", result.output)
+        self.assertNotIn(" npm", result.output)
+        self.assertNotIn(" apt", result.output)
+        self.assertNotIn(" brew", result.output)
+        self.assertNotIn(" composer", result.output)
+        self.assertNotIn(" pip2", result.output)
+        self.assertNotIn(" pip3", result.output)
+        self.assertNotIn(" flatpak", result.output)
+        self.assertNotIn(" opkg", result.output)
+        self.assertNotIn(" yarn", result.output)
+
+    def test_manager_selection_exclusion_override(self):
+        result = self.invoke(
+            '--manager', 'apm', '--exclude', 'apm', *self.subcommand_args)
+        self.assertEqual(result.exit_code, 0)
+        self.assertNotIn(" apm", result.output)
         self.assertNotIn(" gem", result.output)
         self.assertNotIn(" npm", result.output)
         self.assertNotIn(" apt", result.output)

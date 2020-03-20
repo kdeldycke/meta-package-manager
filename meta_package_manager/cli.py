@@ -86,7 +86,7 @@ def print_stats(data):
     "select multiple managers. Defaults to all.")
 @click.option(
     '-e', '--exclude', type=click.Choice(sorted(pool())), multiple=True,
-    help="Exclude a package manager. Repeat to select multiple managers. "
+    help="Exclude a package manager. Repeat to exclude multiple managers. "
     "Defaults to none.")
 @click.option(
     '--ignore-auto-updates/--include-auto-updates', default=True,

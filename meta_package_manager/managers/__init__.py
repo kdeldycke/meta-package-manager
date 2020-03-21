@@ -37,11 +37,10 @@ from ..base import PackageManager
 def pool():
     """ Search for package manager definitions locally and return a dict.
 
-    Is considered valid package manager definitions classes which:
+    Is considered valid package manager, definitions classes which:
         1 - are sub-classes of PackageManager, and
-        2 - is not PackageManager itself, and
-        3 - are located in files at the same level or below this one, and
-        4 - have a non null cli_name property.
+        2 - are located in files at the same level or below this one, and
+        3 - are not virtual (i.e. have a non null cli_name property).
     """
     register = {}
 
@@ -53,8 +52,7 @@ def pool():
         module = import_module('.{}'.format(module_name), package=__package__)
 
         for _, klass in inspect.getmembers(module, inspect.isclass):
-            if issubclass(klass, PackageManager) and (
-                    klass != PackageManager) and klass.cli_name:
+            if issubclass(klass, PackageManager) and not klass.virtual:
                 logger.debug("Found {!r}".format(klass))
                 manager = klass()
                 register[manager.id] = manager

@@ -23,6 +23,7 @@ from shutil import which
 
 from boltons.cacheutils import cachedproperty
 from boltons.strutils import indent, strip_ansi
+from boltons.typeutils import classproperty
 from packaging.specifiers import SpecifierSet
 from packaging.version import parse as parse_version
 
@@ -82,13 +83,37 @@ class PackageManager():
     # Log of all encountered CLI errors.
     cli_errors = []
 
-    @cachedproperty
-    def cli_name(self):
+    @classproperty
+    def id(cls):
+        """ Return package manager's ID. Defaults based on class name.
+
+        This ID must be unique among all package manager definitions and
+        lower-case as they're used as feature flags for the :command:`mpm` CLI.
+        """
+        return cls.__name__.lower()
+
+    @classproperty
+    def name(cls):
+        """ Return package manager's common name. Defaults based on class name.
+        """
+        return cls.__name__
+
+    @classproperty
+    def cli_name(cls):
         """ Package manager's CLI name.
 
         Is derived by default from the manager's ID.
         """
-        return self.id
+        return cls.id
+
+    @classproperty
+    def virtual(cls):
+        """ Should we expose the package manager to the user?
+
+        Virtual package manager are just skeleton classes used to factorize
+        code among managers of the same family.
+        """
+        return cls.__name__ == 'PackageManager' or not cls.cli_name
 
     @cachedproperty
     def cli_path(self):
@@ -135,21 +160,6 @@ class PackageManager():
         """
         if self.version_string:
             return parse_version(self.version_string)
-
-    @cachedproperty
-    def id(self):
-        """ Return package manager's ID. Defaults based on class name.
-
-        This ID must be unique among all package manager definitions and
-        lower-case as they're used as feature flags for the :command:`mpm` CLI.
-        """
-        return self.__class__.__name__.lower()
-
-    @cachedproperty
-    def name(self):
-        """ Return package manager's common name. Defaults based on class name.
-        """
-        return self.__class__.__name__
 
     @cachedproperty
     def supported(self):

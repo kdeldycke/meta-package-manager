@@ -19,6 +19,7 @@ Changelog
 * [brew,cask]: Bump minimal requirement of to ``2.2.9``.
 * [mpm]: Do not force sync when calling outdated. Closes #36.
 * Fallback on ``apt version apt`` when looking for version. Closes #57 and #52.
+* Raise requirement to ``click 7``.
 * Raise requirement to ``boltons >= 20.0``.
 
 

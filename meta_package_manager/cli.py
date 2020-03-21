@@ -364,9 +364,6 @@ def outdated(ctx, cli_format):
 
     for manager in active_managers:
 
-        # Force a sync to get the freshest upgrades.
-        manager.sync()
-
         packages = list(map(dict, manager.outdated.values()))
         for info in packages:
             info.update({

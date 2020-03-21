@@ -369,14 +369,14 @@ class TestCLISearch(TestCLITableRendering):
     @unless_macos()
     def test_unicode_search(self):
         """ See #16. """
-        result = self.invoke('search', 'ubersicht')
+        result = self.invoke('--manager', 'cask', 'search', 'ubersicht')
         self.assertEqual(result.exit_code, 0)
         self.assertIn("ubersicht", result.output)
         # XXX search command is not fetching details package infos like names
         # for now.
         # self.assertIn("Übersicht", result.output)
 
-        result = self.invoke('search', 'Übersicht')
+        result = self.invoke('--manager', 'cask', 'search', 'Übersicht')
         self.assertEqual(result.exit_code, 0)
         self.assertIn("ubersicht", result.output)
         # self.assertIn("Übersicht", result.output)

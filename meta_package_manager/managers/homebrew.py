@@ -30,13 +30,20 @@ from ..platform import MACOS
 
 class Homebrew(PackageManager):
 
+    """ Virutal package manager shared by brew and cask CLI defined below.
+
+    Homebrew is the umbrella project providing both brew and brew cask
+    commands.
+    """
+
     platforms = frozenset([MACOS])
 
     # Vanilla brew and cask CLIs now shares the same version.
-    # 1.7.4 is the first release to deprecate dedicated cask versionning.
-    requirement = '>= 1.7.4'
+    # 2.2.9 is the first release to support --formulae option in search.
+    requirement = '>= 2.2.9'
 
-    id = "brew"
+    # Declare this manager as virtual, i.e. not tied to a real CLI.
+    cli_name = None
 
     def get_version(self):
         """ Fetch version from ``brew --version`` output.
@@ -148,22 +155,30 @@ class Homebrew(PackageManager):
             $ brew search sed
             ==> Formulae
             gnu-sed ✔                    libxdg-basedir               minised
-
             ==> Casks
             eclipse-dsl                       marsedit
             focused                           physicseditor
             google-adwords-editor             prefs-editor
             licensed                          subclassed-mnemosyne
 
-        .. todo
+        .. code-block:: shell-session
 
-            Tag search results between vanilla formulae and casks.
+            $ brew search --formulae sed
+            ==> Formulae
+            gnu-sed ✔                    libxdg-basedir               minised
 
+        .. code-block:: shell-session
+
+            $ brew search --cask sed
+            ==> Casks
+            eclipse-dsl                       marsedit
+            focused                           physicseditor
+            google-adwords-editor             prefs-editor
+            licensed                          subclassed-mnemosyne
         """
         matches = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
-            'search', query])
+        output = self.run(self.search_cli + [query])
 
         if output:
             lines = [
@@ -245,16 +260,50 @@ class Homebrew(PackageManager):
         return self.upgrade_cli()
 
 
-class HomebrewCask(Homebrew):
+class Brew(Homebrew):
+
+    name = "Homebrew Formulae"
+    cli_name = 'brew'
+
+    @cachedproperty
+    def search_cli(self):
+        """ Returns the CLI to run search on Homebrew formulae.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            $ brew search --formulae sed
+            ==> Formulae
+            gnu-sed ✔                    libxdg-basedir               minised
+        """
+        return [self.cli_path] + self.cli_args + ['search', '--formulae']
+
+
+class Cask(Homebrew):
 
     """ Cask is now part of Homebrew's core and extend it.
     """
 
-    id = "cask"
-
     name = "Homebrew Cask"
+    cli_name = 'brew'
 
-    cli_name = "brew"
+    @cachedproperty
+    def search_cli(self):
+        """ Returns the CLI to run search on Homebrew casks.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            $ brew search --cask sed
+            ==> Casks
+            eclipse-dsl                       marsedit
+            focused                           physicseditor
+            google-adwords-editor             prefs-editor
+            licensed                          subclassed-mnemosyne
+        """
+        return [self.cli_path] + self.cli_args + ['search', '--cask']
 
     @cachedproperty
     def outdated(self):
@@ -335,6 +384,3 @@ class HomebrewCask(Homebrew):
         if package_id:
             cmd.append(package_id)
         return cmd
-
-    def upgrade_all_cli(self):
-        return self.upgrade_cli()

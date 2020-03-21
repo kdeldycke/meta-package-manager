@@ -15,6 +15,8 @@ Changelog
 * [BASE,GEM]: prepend /usr/local/bin to cli search path
 * [NPM]: 'install package@version' instead of 'update package’
 * [NPM]: skip update notifier
+* [brew,cask]: Allow independent search for each manager.
+* [brew,cask]: Bump minimal requirement of to ``2.2.9``.
 * Fallback on ``apt version apt`` when looking for version. Closes #57 and #52.
 * Raise requirement to ``boltons >= 20.0``.
 

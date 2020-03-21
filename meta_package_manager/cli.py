@@ -67,7 +67,7 @@ def print_stats(data):
     total_installed = sum(manager_stats.values())
     per_manager_totals = ', '.join([
         '{} from {}'.format(v, k)
-        for k, v in sorted(manager_stats.items()) if v])
+        for k, v in sorted(manager_stats.items())])
     if per_manager_totals:
         per_manager_totals = ' ({})'.format(per_manager_totals)
     logger.info('{} package{} found{}.'.format(

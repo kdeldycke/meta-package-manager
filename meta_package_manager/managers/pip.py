@@ -29,12 +29,14 @@ from ..platform import LINUX, MACOS, WINDOWS
 
 class Pip(PackageManager):
 
+    """ Virutal package manager shared by pip2 and pip3 CLI defined below.
+    """
+
     platforms = frozenset([MACOS, LINUX, WINDOWS])
 
     requirement = '>= 10.0.0'
 
-    # Deny this manager to be tied to a CLI, as we only use this class as a
-    # common skeleton for pip2 and pip3.
+    # Declare this manager as virtual, i.e. not tied to a CLI.
     cli_name = None
 
     def get_version(self):

@@ -109,12 +109,7 @@ def cli(ctx, manager, exclude, ignore_auto_updates, output_format, stats,
         stop_on_error):
     """ CLI for multi-package manager upgrades. """
     level = logger.level
-    try:
-        level_to_name = logging._levelToName
-    # Fallback to pre-Python 3.4 internals.
-    except AttributeError:
-        level_to_name = logging._levelNames
-    level_name = level_to_name.get(level, level)
+    level_name = logging._levelToName.get(level, level)
     logger.debug('Verbosity set to {}.'.format(level_name))
 
     # Print help screen and exit if no sub-commands provided.

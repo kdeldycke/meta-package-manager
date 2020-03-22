@@ -494,18 +494,15 @@ class TestCLIBackup(TestCLISubcommand):
     subcommand_args = ['backup', 'mpm-packages.toml']
 
     def test_export_all_packages_to_file(self):
-        with self.runner.isolated_filesystem():
-            result = self.invoke('backup', 'mpm-packages.toml')
-            self.assertEqual(result.exit_code, 0)
-            self.assertIn('mpm-packages.toml', result.output)
+        result = self.invoke('backup', 'mpm-packages.toml')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn('mpm-packages.toml', result.output)
 
     def test_backup_single_manager(self):
-        with self.runner.isolated_filesystem():
-            result = self.invoke(
-                '--manager', 'npm', 'backup', 'npm-packages.toml')
-            self.assertEqual(result.exit_code, 0)
-            with open('npm-packages.toml', 'r') as doc:
-                # Check only [npm] section appears in TOML file.
-                self.assertSetEqual(
-                    {l for l in doc.read().split() if l.startswith('[')},
-                    set(['[npm]']))
+        result = self.invoke('--manager', 'npm', 'backup', 'npm-packages.toml')
+        self.assertEqual(result.exit_code, 0)
+        with open('npm-packages.toml', 'r') as doc:
+            # Check only [npm] section appears in TOML file.
+            self.assertSetEqual(
+                {l for l in doc.read().split() if l.startswith('[')},
+                set(['[npm]']))

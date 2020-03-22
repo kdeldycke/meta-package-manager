@@ -136,6 +136,11 @@ jobs:
     - name: Unittests and coverage report in destructive mode
       env:
         DESTRUCTIVE_TESTS: true
+      # pyproject.toml config file is specified at CLI level instead of letting
+      # coverage find it because of this bug:
+      # https://github.com/nedbat/coveragepy/issues/512#issuecomment-399707938
+      # https://github.com/pytest-dev/pytest-cov/issues/168#issuecomment-327533847
+      # https://github.com/pytest-dev/pytest-cov/issues/243
       run: |
         poetry run pytest --cov-config=pyproject.toml --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov

@@ -70,21 +70,21 @@ class CLITestCase(unittest.TestCase):
 
     """ Utilities and helpers to easely write unit-tests. """
 
-    def run(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs):
         """ Force running all unittests within an isolated filesystem.
 
-        Intercepts the `run()` method to have an oportunity to decorate
-        manually the test method before `run()` itself try to inspect it, and
-        before the call to `setUp()`. See:
-        https://github.com/python/cpython/blob/v3.6.0/Lib/unittest/case.py#L576
+        Intercepts `__call__()` to have an oportunity to decorate manually the
+        whole `run()` method itself, so each test method and calls to `setUp()`
+        are wrap by the isolated filesystem decoartor. See:
+        https://github.com/python/cpython/blob/v3.6.0/Lib/unittest/case.py#L648-L649
         """
         self.runner = CliRunner()
 
-        test_method = getattr(self, self._testMethodName)
-        test_method = self.runner.isolated_filesystem()(test_method)
-        setattr(self, self._testMethodName, test_method)
+        run_method = self.run
+        decorated_run = self.runner.isolated_filesystem()(run_method)
+        self.run = decorated_run
 
-        super(CLITestCase, self).run(*args, **kwargs)
+        super(CLITestCase, self).__call__(*args, **kwargs)
 
     def print_cli_output(self, cmd, output):
         """ Simulate CLI output.

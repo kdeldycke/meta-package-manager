@@ -65,7 +65,7 @@ coverage = {extras = ["toml"], version = "^5.0.4"}
 isort = "^4.3.5"
 pycodestyle = "^2"
 pylint = "^2.4"
-pytest = "^5.2"
+pytest = "^5.4"
 # More pytest plugins at: http://plugincompat.herokuapp.com .
 pytest-cov = "*"
 twine = "^3.1"

@@ -24,8 +24,6 @@ from ..managers import pool
 from ..platform import OS_DEFINITIONS
 from .case import unless_linux, unless_macos, unless_windows
 
-basestring = (str, bytes)
-
 
 class TestManagerDefinitions(unittest.TestCase):
 
@@ -55,9 +53,9 @@ class TestManagerDefinitions(unittest.TestCase):
     def test_cli_path_type(self):
         """ Check that definitions returns the CLI path as a string. """
         for manager in pool().values():
-            self.assertIsInstance(manager.cli_name, basestring)
+            self.assertIsInstance(manager.cli_name, str)
             if manager.cli_path is not None:
-                self.assertIsInstance(manager.cli_path, basestring)
+                self.assertIsInstance(manager.cli_path, str)
 
     def test_cli_args_type(self):
         """ Check that definitions returns CLI args as a list. """
@@ -87,11 +85,11 @@ class TestManagerDefinitions(unittest.TestCase):
                     self.assertIsInstance(pkg, dict)
                     self.assertEqual(set(pkg), set([
                         'id', 'name', 'installed_version']))
-                    self.assertIsInstance(pkg['id'], basestring)
-                    self.assertIsInstance(pkg['name'], basestring)
+                    self.assertIsInstance(pkg['id'], str)
+                    self.assertIsInstance(pkg['name'], str)
                     if pkg['installed_version'] is not None:
                         self.assertIsInstance(
-                            pkg['installed_version'], basestring)
+                            pkg['installed_version'], str)
 
     def test_search_type(self):
         """ Check that all search operations returns a dict of dicts. """
@@ -103,11 +101,11 @@ class TestManagerDefinitions(unittest.TestCase):
                     self.assertIsInstance(pkg, dict)
                     self.assertEqual(set(pkg), set([
                         'id', 'name', 'latest_version', 'exact']))
-                    self.assertIsInstance(pkg['id'], basestring)
-                    self.assertIsInstance(pkg['name'], basestring)
+                    self.assertIsInstance(pkg['id'], str)
+                    self.assertIsInstance(pkg['name'], str)
                     if pkg['latest_version'] is not None:
                         self.assertIsInstance(
-                            pkg['latest_version'], basestring)
+                            pkg['latest_version'], str)
                     self.assertIsInstance(pkg['exact'], bool)
 
     def test_outdated_type(self):
@@ -119,12 +117,12 @@ class TestManagerDefinitions(unittest.TestCase):
                     self.assertIsInstance(pkg, dict)
                     self.assertEqual(set(pkg), set([
                         'id', 'name', 'installed_version', 'latest_version']))
-                    self.assertIsInstance(pkg['id'], basestring)
-                    self.assertIsInstance(pkg['name'], basestring)
+                    self.assertIsInstance(pkg['id'], str)
+                    self.assertIsInstance(pkg['name'], str)
                     if pkg['installed_version'] is not None:
                         self.assertIsInstance(
-                            pkg['installed_version'], basestring)
-                    self.assertIsInstance(pkg['latest_version'], basestring)
+                            pkg['installed_version'], str)
+                    self.assertIsInstance(pkg['latest_version'], str)
 
 
 class TestManagerPlatform(unittest.TestCase):

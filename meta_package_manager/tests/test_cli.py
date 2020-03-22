@@ -25,8 +25,6 @@ import simplejson as json
 from .. import __version__
 from .case import CLITestCase, skip_destructive, unless_macos
 
-basestring = (str, bytes)
-
 
 class TestCLI(CLITestCase):
 
@@ -266,7 +264,7 @@ class TestCLIManagers(TestCLITableRendering):
             'pip2', 'pip3', 'flatpak', 'opkg', 'yarn']))
 
         for manager_id, info in result.items():
-            self.assertIsInstance(manager_id, basestring)
+            self.assertIsInstance(manager_id, str)
             self.assertIsInstance(info, dict)
 
             self.assertSetEqual(set(info), set([
@@ -275,15 +273,15 @@ class TestCLIManagers(TestCLITableRendering):
 
             self.assertIsInstance(info['available'], bool)
             if info['cli_path'] is not None:
-                self.assertIsInstance(info['cli_path'], basestring)
+                self.assertIsInstance(info['cli_path'], str)
             self.assertIsInstance(info['errors'], list)
             self.assertIsInstance(info['executable'], bool)
             self.assertIsInstance(info['fresh'], bool)
-            self.assertIsInstance(info['id'], basestring)
-            self.assertIsInstance(info['name'], basestring)
+            self.assertIsInstance(info['id'], str)
+            self.assertIsInstance(info['name'], str)
             self.assertIsInstance(info['supported'], bool)
             if info['version_string'] is not None:
-                self.assertIsInstance(info['version_string'], basestring)
+                self.assertIsInstance(info['version_string'], str)
 
             self.assertEqual(info['id'], manager_id)
 
@@ -305,15 +303,15 @@ class TestCLIInstalled(TestCLITableRendering):
             'pip2', 'pip3', 'flatpak', 'opkg', 'yarn']))
 
         for manager_id, info in result.items():
-            self.assertIsInstance(manager_id, basestring)
+            self.assertIsInstance(manager_id, str)
             self.assertIsInstance(info, dict)
 
             self.assertSetEqual(set(info), set([
                 'errors', 'id', 'name', 'packages']))
 
             self.assertIsInstance(info['errors'], list)
-            self.assertIsInstance(info['id'], basestring)
-            self.assertIsInstance(info['name'], basestring)
+            self.assertIsInstance(info['id'], str)
+            self.assertIsInstance(info['name'], str)
             self.assertIsInstance(info['packages'], list)
 
             self.assertEqual(info['id'], manager_id)
@@ -324,9 +322,9 @@ class TestCLIInstalled(TestCLITableRendering):
                 self.assertSetEqual(set(pkg), set([
                     'id', 'installed_version', 'name']))
 
-                self.assertIsInstance(pkg['id'], basestring)
-                self.assertIsInstance(pkg['installed_version'], basestring)
-                self.assertIsInstance(pkg['name'], basestring)
+                self.assertIsInstance(pkg['id'], str)
+                self.assertIsInstance(pkg['installed_version'], str)
+                self.assertIsInstance(pkg['name'], str)
 
 
 class TestCLISearch(TestCLITableRendering):
@@ -341,15 +339,15 @@ class TestCLISearch(TestCLITableRendering):
             'pip2', 'pip3', 'flatpak', 'opkg', 'yarn']))
 
         for manager_id, info in result.items():
-            self.assertIsInstance(manager_id, basestring)
+            self.assertIsInstance(manager_id, str)
             self.assertIsInstance(info, dict)
 
             self.assertSetEqual(set(info), set([
                 'errors', 'id', 'name', 'packages']))
 
             self.assertIsInstance(info['errors'], list)
-            self.assertIsInstance(info['id'], basestring)
-            self.assertIsInstance(info['name'], basestring)
+            self.assertIsInstance(info['id'], str)
+            self.assertIsInstance(info['name'], str)
             self.assertIsInstance(info['packages'], list)
 
             self.assertEqual(info['id'], manager_id)
@@ -361,10 +359,10 @@ class TestCLISearch(TestCLITableRendering):
                     'exact', 'id', 'latest_version', 'name']))
 
                 self.assertIsInstance(pkg['exact'], bool)
-                self.assertIsInstance(pkg['id'], basestring)
+                self.assertIsInstance(pkg['id'], str)
                 if pkg['latest_version'] is not None:
-                    self.assertIsInstance(pkg['latest_version'], basestring)
-                self.assertIsInstance(pkg['name'], basestring)
+                    self.assertIsInstance(pkg['latest_version'], str)
+                self.assertIsInstance(pkg['name'], str)
 
     @unless_macos()
     def test_unicode_search(self):
@@ -394,17 +392,17 @@ class TestCLIOutdated(TestCLITableRendering):
             'pip2', 'pip3', 'flatpak', 'opkg', 'yarn']))
 
         for manager_id, info in result.items():
-            self.assertIsInstance(manager_id, basestring)
+            self.assertIsInstance(manager_id, str)
             self.assertIsInstance(info, dict)
 
             self.assertIsInstance(info['errors'], list)
-            self.assertIsInstance(info['id'], basestring)
-            self.assertIsInstance(info['name'], basestring)
+            self.assertIsInstance(info['id'], str)
+            self.assertIsInstance(info['name'], str)
             self.assertIsInstance(info['packages'], list)
 
             keys = set(['errors', 'id', 'name', 'packages'])
             if 'upgrade_all_cli' in info:
-                self.assertIsInstance(info['upgrade_all_cli'], basestring)
+                self.assertIsInstance(info['upgrade_all_cli'], str)
                 self.assertGreater(len(info['packages']), 0)
                 keys.add('upgrade_all_cli')
             else:
@@ -421,18 +419,18 @@ class TestCLIOutdated(TestCLITableRendering):
                     'id', 'installed_version', 'latest_version', 'name',
                     'upgrade_cli']))
 
-                self.assertIsInstance(pkg['id'], basestring)
-                self.assertIsInstance(pkg['installed_version'], basestring)
-                self.assertIsInstance(pkg['latest_version'], basestring)
-                self.assertIsInstance(pkg['name'], basestring)
-                self.assertIsInstance(pkg['upgrade_cli'], basestring)
+                self.assertIsInstance(pkg['id'], str)
+                self.assertIsInstance(pkg['installed_version'], str)
+                self.assertIsInstance(pkg['latest_version'], str)
+                self.assertIsInstance(pkg['name'], str)
+                self.assertIsInstance(pkg['upgrade_cli'], str)
 
     def test_cli_format_plain(self):
         result = self.invoke(
             '--output-format', 'json', 'outdated', '--cli-format', 'plain')
         for outdated in json.loads(result.output).values():
             for infos in outdated['packages']:
-                self.assertIsInstance(infos['upgrade_cli'], basestring)
+                self.assertIsInstance(infos['upgrade_cli'], str)
 
     def test_cli_format_fragments(self):
         result = self.invoke(
@@ -446,7 +444,7 @@ class TestCLIOutdated(TestCLITableRendering):
             '--output-format', 'json', 'outdated', '--cli-format', 'bitbar')
         for outdated in json.loads(result.output).values():
             for infos in outdated['packages']:
-                self.assertIsInstance(infos['upgrade_cli'], basestring)
+                self.assertIsInstance(infos['upgrade_cli'], str)
                 self.assertIn('param1=', infos['upgrade_cli'])
 
     @skip_destructive()

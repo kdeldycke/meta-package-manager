@@ -533,10 +533,11 @@ class TestCLIRestore(TestCLISubcommand):
         result = self.invoke('restore', 'dummy.toml')
         self.assertEqual(result.exit_code, 0)
         self.assertIn('dummy.toml', result.output)
+        self.assertNotIn('dummy_manager', result.output)
 
     def test_restore_single_manager(self):
         toml_content = textwrap.dedent("""\
-            [apm]
+            [pip3]
             fancy_package = "0.0.1"
 
             [npm]
@@ -549,12 +550,12 @@ class TestCLIRestore(TestCLISubcommand):
         result = self.invoke('--manager', 'npm', 'restore', 'packages.toml')
         self.assertEqual(result.exit_code, 0)
         self.assertIn('packages.toml', result.output)
-        self.assertNotIn('Restore apm', result.output)
+        self.assertNotIn('Restore pip3', result.output)
         self.assertIn('Restore npm', result.output)
 
     def test_restore_excluded_manager(self):
         toml_content = textwrap.dedent("""\
-            [apm]
+            [pip3]
             fancy_package = "0.0.1"
 
             [npm]
@@ -567,5 +568,5 @@ class TestCLIRestore(TestCLISubcommand):
         result = self.invoke('--exclude', 'npm', 'restore', 'packages.toml')
         self.assertEqual(result.exit_code, 0)
         self.assertIn('packages.toml', result.output)
-        self.assertIn('Restore apm', result.output)
+        self.assertIn('Restore pip3', result.output)
         self.assertNotIn('Restore npm', result.output)

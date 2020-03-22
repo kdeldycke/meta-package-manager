@@ -502,7 +502,6 @@ def restore(ctx, toml_files):
     them.
     """
     active_managers = ctx.obj['active_managers']
-    active_manager_ids = [m.id for m in active_managers]
 
     for toml_input in toml_files:
 
@@ -514,10 +513,13 @@ def restore(ctx, toml_files):
 
         doc = tomlkit.parse(toml_input.read())
 
-        for manager_id, packages in doc.items():
-            if manager_id not in active_manager_ids:
+        for manager in active_managers:
+            if manager.id not in doc:
+                logger.warning(
+                    'Skip {} packages: no section found in TOML file.'.format(
+                        manager.id))
                 continue
-            logger.info('Restore {} packages...'.format(manager_id))
+            logger.info('Restore {} packages...'.format(manager.id))
             logger.warning("Installation of packages not supported yet.")
-            # for package_id, version in packages.items():
+            # for package_id, version in doc[manager.id].items():
             #    raise NotImplemented

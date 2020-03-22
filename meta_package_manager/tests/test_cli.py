@@ -43,15 +43,6 @@ class TestCLI(CLITestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertIn(__version__, result.output)
 
-    def test_verbosity(self):
-        result = self.invoke('--verbosity', 'DEBUG')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("debug:", result.output)
-
-        result = self.invoke('--verbosity', 'INFO')
-        self.assertEqual(result.exit_code, 0)
-        self.assertNotIn("debug:", result.output)
-
 
 class TestCLISubcommand(CLITestCase):
 

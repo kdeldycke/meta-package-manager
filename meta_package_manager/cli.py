@@ -80,7 +80,7 @@ def print_stats(data):
         per_manager_totals))
 
 
-@click.group(invoke_without_command=True)
+@click.group()
 @click_log.simple_verbosity_option(
     logger, default='INFO', metavar='LEVEL',
     help='Either CRITICAL, ERROR, WARNING, INFO or DEBUG. Defaults to INFO.')
@@ -115,11 +115,6 @@ def cli(ctx, manager, exclude, ignore_auto_updates, output_format, stats,
     level = logger.level
     level_name = logging._levelToName.get(level, level)
     logger.debug('Verbosity set to {}.'.format(level_name))
-
-    # Print help screen and exit if no sub-commands provided.
-    if ctx.invoked_subcommand is None:
-        click.echo(ctx.get_help())
-        ctx.exit()
 
     # Target all available managers by default.
     target_ids = set(pool())

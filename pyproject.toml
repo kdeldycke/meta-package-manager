@@ -51,8 +51,8 @@ boltons = "^20.0"
 click = "^7.1"
 click-log = "^0.3"
 cli-helpers = "^1.0.2"
-packaging = "*"
-simplejson = "*"
+packaging = "^20.3"
+simplejson = "^3.17.0"
 tomlkit = "^0.5"
 # Should have been put in dev-dependencies but extras only works from main
 # section.
@@ -60,14 +60,14 @@ sphinx = {version = "^2.4", optional = true}
 sphinx_rtd_theme = {version = "^0.4.3", optional = true}
 
 [tool.poetry.dev-dependencies]
-bumpversion = "*"
+bumpversion = "^0.5.3"
 coverage = {extras = ["toml"], version = "^5.0.4"}
 isort = "^4.3.5"
 pycodestyle = "^2"
 pylint = "^2.4"
 pytest = "^5.4"
 # More pytest plugins at: http://plugincompat.herokuapp.com .
-pytest-cov = "*"
+pytest-cov = "^2.8.1"
 twine = "^3.1"
 
 [tool.poetry.extras]

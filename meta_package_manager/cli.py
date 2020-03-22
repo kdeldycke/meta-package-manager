@@ -23,7 +23,7 @@ from datetime import datetime
 from functools import partial
 from operator import itemgetter
 from os import path
-from sys import __stdout__, __stdin__
+from sys import __stdin__, __stdout__
 
 import click
 import click_log
@@ -451,6 +451,8 @@ def backup(ctx, toml_output):
     output. So `mpm backup` is the same as a call to `mpm backup -`. To have
     the result written in a file on disk, specify the output file like so:
     `mpm backup ./mpm-packages.toml`.
+
+    The TOML file can then be safely consumed by the `mpm restore` command.
     """
     active_managers = ctx.obj['active_managers']
 
@@ -489,3 +491,33 @@ def backup(ctx, toml_output):
         doc.add(manager.id, manager_section)
 
     toml_output.write(tomlkit.dumps(doc))
+
+
+@cli.command(
+    short_help='Install packages in batch as specified by TOML files.')
+@click.argument('toml_files', type=click.File('r'), required=True, nargs=-1)
+@click.pass_context
+def restore(ctx, toml_files):
+    """ Read TOML files then install or upgrade each package referenced in
+    them.
+    """
+    active_managers = ctx.obj['active_managers']
+    active_manager_ids = [m.id for m in active_managers]
+
+    for toml_input in toml_files:
+
+        toml_filepath = (
+            toml_input.name if toml_input is __stdin__
+            else path.abspath(toml_input.name))
+        logger.info(
+            'Load list of packages to install from: {}'.format(toml_filepath))
+
+        doc = tomlkit.parse(toml_input.read())
+
+        for manager_id, packages in doc.items():
+            if manager_id not in active_manager_ids:
+                continue
+            logger.info('Restore {} packages...'.format(manager_id))
+            logger.warning("Installation of packages not supported yet.")
+            # for package_id, version in packages.items():
+            #    raise NotImplemented

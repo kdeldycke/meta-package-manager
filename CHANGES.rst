@@ -7,8 +7,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
-* [mpm]: Add new ``backup`` command to dump list of installed packages to a
-  TOML file. Refs #38.
+* [mpm]: Add new ``backup`` and dummy ``restore`` commands to respectively dump
+  and load up list of installed packages to/from a TOML file. Refs #38.
 * [mpm]: Add dependency on ``tomlkit``.
 * Add support for ``yarn`` package manager for Linux, macOS and Windows.
 * Install yarn on all unittest platforms.

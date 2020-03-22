@@ -75,7 +75,8 @@ class CLITestCase(unittest.TestCase):
 
         Intercepts the `run()` method to have an oportunity to decorate
         manually the test method before `run()` itself try to inspect it, and
-        before the call to `setUp()`.
+        before the call to `setUp()`. See:
+        https://github.com/python/cpython/blob/v3.6.0/Lib/unittest/case.py#L576
         """
         self.runner = CliRunner()
 

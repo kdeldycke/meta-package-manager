@@ -504,8 +504,8 @@ class TestCLIBackup(TestCLISubcommand):
             result = self.invoke(
                 '--manager', 'npm', 'backup', 'npm-packages.toml')
             self.assertEqual(result.exit_code, 0)
-            with open('npm-packages.toml', 'r') as f:
+            with open('npm-packages.toml', 'r') as doc:
                 # Check only [npm] section appears in TOML file.
                 self.assertSetEqual(
-                    {l for l in f.read().split() if l.startswith('[')},
+                    {l for l in doc.read().split() if l.startswith('[')},
                     set(['[npm]']))

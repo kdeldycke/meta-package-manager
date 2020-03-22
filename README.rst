@@ -42,14 +42,16 @@ Development: |build| |docs| |coverage| |quality|
 Features
 ---------
 
-* Search and list all package managers on the system.
+* Inventory and list all package managers available the system.
 * Supports macOS, Linux and Windows.
 * List installed packages.
 * Search for packages.
 * List outdated packages.
 * Sync local package infos.
 * Upgrade all outdated packages.
-* Apply commands per-package manager or to all of them.
+* Backup list of installed packages to TOML files.
+* Pin-point commands to a subset of package managers (include/exclude
+  selectors).
 * Export results in JSON or user-friendly tables.
 * Provides a `BitBar plugin
   <https://meta-package-manager.readthedocs.io/en/develop/bitbar.html>`_ for

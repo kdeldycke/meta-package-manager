@@ -7,6 +7,9 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm]: Add new ``backup`` command to dump list of installed packages to a
+  TOML file. Refs #38.
+* [mpm]: Add dependency on ``tomlkit``.
 * Add support for ``yarn`` package manager for Linux, macOS and Windows.
 * Install yarn on all unittest platforms.
 * Allow exclusion of a subset of package managers. Closes #45.
@@ -19,7 +22,7 @@ Changelog
 * [brew,cask]: Bump minimal requirement of to ``2.2.9``.
 * [mpm]: Do not force sync when calling outdated. Closes #36.
 * Fallback on ``apt version apt`` when looking for version. Closes #57 and #52.
-* Raise requirement to ``click 7``.
+* Raise requirement to ``click 7.1``.
 * Raise requirement to ``boltons >= 20.0``.
 
 

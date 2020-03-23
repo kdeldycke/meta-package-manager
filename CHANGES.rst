@@ -20,6 +20,8 @@ Changelog
 * [NPM]: skip update notifier
 * [brew,cask]: Allow independent search for each manager.
 * [brew,cask]: Bump minimal requirement of to ``2.2.9``.
+* [mpm]: Allow sorting restuls by packages, managers or version. Closes #35
+  and #37.
 * [mpm]: Do not force sync when calling outdated. Closes #36.
 * Fallback on ``apt version apt`` when looking for version. Closes #57 and #52.
 * Raise requirement to ``click 7.1``.

@@ -44,6 +44,13 @@ table_formatter = TabularOutputFormatter()
 RENDERING_MODES = set(['json'])
 RENDERING_MODES.update(table_formatter.supported_formats)
 
+# List of fields IDs allowed to be sorted.
+SORTABLE_FIELDS = {
+    'manager_id',
+    'manager_name',
+    'package_id',
+    'package_name',
+    'version'}
 
 # Pre-rendered UI-elements.
 OK = click.style(u'✓', fg='green')
@@ -58,9 +65,32 @@ def json(data):
     return json_dumps(data, sort_keys=True, indent=4, separators=(',', ': '))
 
 
-def print_table(headers, rows):
-    """ Utility to handle printing of a table. """
-    for line in table_formatter.format_output(rows, headers):
+def print_table(header_defs, rows, sort_key=None):
+    """ Utility to print a table and sort its content. """
+    header_labels = [label for label, _ in header_defs]
+
+    # Check there is no duplicate column IDs.
+    header_ids = [col_id for _, col_id in header_defs if col_id]
+    assert len(header_ids) == len(set(header_ids))
+
+    # Default sorting follows the order of headers.
+    sort_order = list(range(len(header_defs)))
+
+    # Move the sorting key's index in the front of priority.
+    if sort_key:
+        # Build an index of column id's position.
+        col_index = {
+            col_id: i for i, (_, col_id) in enumerate(header_defs) if col_id}
+        sort_column_index = col_index[sort_key]
+        sort_order.remove(sort_column_index)
+        sort_order.insert(0, sort_column_index)
+
+    sort_method = itemgetter(*sort_order)
+
+    for line in table_formatter.format_output(
+            sorted(rows, key=sort_method),
+            header_labels,
+            disable_numparse=True):
         logger.info(line)
 
 
@@ -102,6 +132,10 @@ def print_stats(data):
     default='fancy_grid',
     help="Rendering mode of the output. Defaults to fancy-grid.")
 @click.option(
+    '-s', '--sort-by', type=click.Choice(SORTABLE_FIELDS),
+    default='manager_id',
+    help="Sort results. Defaults to manager_id.")
+@click.option(
     '--stats/--no-stats', default=True,
     help="Print statistics or not at the end of output. Active by default.")
 @click.option(
@@ -109,8 +143,8 @@ def print_stats(data):
     "away or continue operations on manager CLI error. Defaults to stop.")
 @click.version_option(__version__)
 @click.pass_context
-def cli(ctx, manager, exclude, ignore_auto_updates, output_format, stats,
-        stop_on_error):
+def cli(ctx, manager, exclude, ignore_auto_updates, output_format, sort_by,
+        stats, stop_on_error):
     """ CLI for multi-package manager upgrades. """
     level = logger.level
     level_name = logging._levelToName.get(level, level)
@@ -154,6 +188,7 @@ def cli(ctx, manager, exclude, ignore_auto_updates, output_format, stats,
         'target_managers': target_managers,
         'active_managers': active_managers,
         'output_format': output_format,
+        'sort_by': sort_by,
         'stats': stats}
 
 
@@ -164,6 +199,7 @@ def managers(ctx):
     """
     target_managers = ctx.obj['target_managers']
     output_format = ctx.obj['output_format']
+    sort_by = ctx.obj['sort_by']
 
     # Machine-friendly data rendering.
     if output_format == 'json':
@@ -216,9 +252,14 @@ def managers(ctx):
             OK if manager.executable else '',
             version_infos])
 
-    print_table(
-        ['Package manager', 'ID', 'Supported', 'CLI', 'Executable', 'Version'],
-        sorted(table, key=itemgetter(1)))
+    print_table([
+        ('Package manager', 'manager_name'),
+        ('ID', 'manager_id'),
+        ('Supported', None),
+        ('CLI', None),
+        ('Executable', None),
+        ('Version', 'version')],
+                table, sort_by)
 
 
 @cli.command(short_help='Sync local package info.')
@@ -237,51 +278,48 @@ def installed(ctx):
     """ List all packages installed on the system from all managers. """
     active_managers = ctx.obj['active_managers']
     output_format = ctx.obj['output_format']
+    sort_by = ctx.obj['sort_by']
     stats = ctx.obj['stats']
 
-    # Build-up a global list of installed packages per manager.
-    installed_list = {}
+    # Build-up a global dict of installed packages per manager.
+    installed_data = {}
 
     for manager in active_managers:
-        installed_list[manager.id] = {
+        installed_data[manager.id] = {
             'id': manager.id,
             'name': manager.name,
             'packages': list(manager.installed.values())}
 
         # Serialize errors at the last minute to gather all we encountered.
-        installed_list[manager.id]['errors'] = list({
+        installed_data[manager.id]['errors'] = list({
             expt.error for expt in manager.cli_errors})
 
     # Machine-friendly data rendering.
     if output_format == 'json':
         # JSON mode use echo to output data because the logger is disabled.
-        click.echo(json(installed_list))
+        click.echo(json(installed_data))
         return
 
     # Human-friendly content rendering.
     table = []
-    for manager_id, installed_pkg in installed_list.items():
+    for manager_id, installed_pkg in installed_data.items():
         table += [[
             info['name'],
             info['id'],
             manager_id,
             info['installed_version'] if info['installed_version'] else '?']
-            for info in installed_pkg['packages']]
-
-    def sort_method(line):
-        """ Force sorting of table.
-
-        By lower-cased package name and ID first, then manager ID.
-        """
-        return line[0].lower(), line[1].lower(), line[2]
+                for info in installed_pkg['packages']]
 
     # Sort and print table.
-    print_table(
-        ['Package name', 'ID', 'Manager', 'Installed version'],
-        sorted(table, key=sort_method))
+    print_table([
+        ('Package name', 'package_name'),
+        ('ID', 'package_id'),
+        ('Manager', 'manager_id'),
+        ('Installed version', 'version')],
+                table, sort_by)
 
     if stats:
-        print_stats(installed_list)
+        print_stats(installed_data)
 
 
 @cli.command(short_help='Search packages.')
@@ -291,6 +329,7 @@ def search(ctx, query):
     """ Search packages from all managers. """
     active_managers = ctx.obj['active_managers']
     output_format = ctx.obj['output_format']
+    sort_by = ctx.obj['sort_by']
     stats = ctx.obj['stats']
 
     # Build-up a global list of package matches per manager.
@@ -322,18 +361,14 @@ def search(ctx, query):
             info['latest_version'] if info['latest_version'] else '?']
             for info in matching_pkg['packages']]
 
-    def sort_method(line):
-        """ Force sorting of table.
-
-        By lower-cased package name and ID first, then manager ID.
-        """
-        return line[0].lower(), line[1].lower(), line[2]
-
     # Sort and print table.
     # TODO: highlight exact matches.
-    print_table(
-        ['Package name', 'ID', 'Manager', 'Latest version'],
-        sorted(table, key=sort_method))
+    print_table([
+        ('Package name', 'package_name'),
+        ('ID', 'package_id'),
+        ('Manager', 'manager_id'),
+        ('Latest version', 'version')],
+                table, sort_by)
 
     if stats:
         print_stats(matches)
@@ -349,12 +384,13 @@ def outdated(ctx, cli_format):
     """
     active_managers = ctx.obj['active_managers']
     output_format = ctx.obj['output_format']
+    sort_by = ctx.obj['sort_by']
     stats = ctx.obj['stats']
 
     render_cli = partial(PackageManager.render_cli, cli_format=cli_format)
 
     # Build-up a global list of outdated packages per manager.
-    outdated = {}
+    outdated_data = {}
 
     for manager in active_managers:
 
@@ -363,7 +399,7 @@ def outdated(ctx, cli_format):
             info.update({
                 'upgrade_cli': render_cli(manager.upgrade_cli(info['id']))})
 
-        outdated[manager.id] = {
+        outdated_data[manager.id] = {
             'id': manager.id,
             'name': manager.name,
             'packages': packages}
@@ -377,22 +413,22 @@ def outdated(ctx, cli_format):
                 # Fallback on mpm itself which is capable of simulating a full
                 # upgrade.
                 upgrade_all_cli = ['mpm', '--manager', manager.id, 'upgrade']
-            outdated[manager.id]['upgrade_all_cli'] = render_cli(
+            outdated_data[manager.id]['upgrade_all_cli'] = render_cli(
                 upgrade_all_cli)
 
         # Serialize errors at the last minute to gather all we encountered.
-        outdated[manager.id]['errors'] = list({
+        outdated_data[manager.id]['errors'] = list({
             expt.error for expt in manager.cli_errors})
 
     # Machine-friendly data rendering.
     if output_format == 'json':
         # JSON mode use echo to output data because the logger is disabled.
-        click.echo(json(outdated))
+        click.echo(json(outdated_data))
         return
 
     # Human-friendly content rendering.
     table = []
-    for manager_id, outdated_pkg in outdated.items():
+    for manager_id, outdated_pkg in outdated_data.items():
         table += [[
             info['name'],
             info['id'],
@@ -401,21 +437,17 @@ def outdated(ctx, cli_format):
             info['latest_version']]
             for info in outdated_pkg['packages']]
 
-    def sort_method(line):
-        """ Force sorting of table.
-
-        By lower-cased package name and ID first, then manager ID.
-        """
-        return line[0].lower(), line[1].lower(), line[2]
-
     # Sort and print table.
-    print_table(
-        ['Package name', 'ID', 'Manager', 'Installed version',
-         'Latest version'],
-        sorted(table, key=sort_method))
+    print_table([
+        ('Package name', 'package_name'),
+        ('ID', 'package_id'),
+        ('Manager', 'manager_id'),
+        ('Installed version', 'version'),
+        ('Latest version', None)],
+                table, sort_by)
 
     if stats:
-        print_stats(outdated)
+        print_stats(outdated_data)
 
 
 @cli.command(short_help='Upgrade all packages.')

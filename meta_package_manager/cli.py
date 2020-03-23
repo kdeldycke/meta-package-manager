@@ -240,27 +240,27 @@ def installed(ctx):
     stats = ctx.obj['stats']
 
     # Build-up a global list of installed packages per manager.
-    installed = {}
+    installed_list = {}
 
     for manager in active_managers:
-        installed[manager.id] = {
+        installed_list[manager.id] = {
             'id': manager.id,
             'name': manager.name,
             'packages': list(manager.installed.values())}
 
         # Serialize errors at the last minute to gather all we encountered.
-        installed[manager.id]['errors'] = list({
+        installed_list[manager.id]['errors'] = list({
             expt.error for expt in manager.cli_errors})
 
     # Machine-friendly data rendering.
     if output_format == 'json':
         # JSON mode use echo to output data because the logger is disabled.
-        click.echo(json(installed))
+        click.echo(json(installed_list))
         return
 
     # Human-friendly content rendering.
     table = []
-    for manager_id, installed_pkg in installed.items():
+    for manager_id, installed_pkg in installed_list.items():
         table += [[
             info['name'],
             info['id'],
@@ -281,7 +281,7 @@ def installed(ctx):
         sorted(table, key=sort_method))
 
     if stats:
-        print_stats(installed)
+        print_stats(installed_list)
 
 
 @cli.command(short_help='Search packages.')

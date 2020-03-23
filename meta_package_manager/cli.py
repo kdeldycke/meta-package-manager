@@ -30,6 +30,7 @@ import click_log
 import tomlkit
 from cli_helpers.tabular_output import TabularOutputFormatter
 from simplejson import dumps as json_dumps
+from boltons import strutils
 
 from . import __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
@@ -65,6 +66,12 @@ def json(data):
     return json_dumps(data, sort_keys=True, indent=4, separators=(',', ': '))
 
 
+def tokenize(string):
+    """ Tokenize a string for user-friendly sorting, by ignoring case and
+    special characters. """
+    return strutils.slugify(string, '-', ascii=True)
+
+
 def print_table(header_defs, rows, sort_key=None):
     """ Utility to print a table and sort its content. """
     header_labels = [label for label, _ in header_defs]
@@ -77,7 +84,7 @@ def print_table(header_defs, rows, sort_key=None):
     sort_order = list(range(len(header_defs)))
 
     # Move the sorting key's index in the front of priority.
-    if sort_key:
+    if sort_key and sort_key in header_ids:
         # Build an index of column id's position.
         col_index = {
             col_id: i for i, (_, col_id) in enumerate(header_defs) if col_id}
@@ -85,7 +92,8 @@ def print_table(header_defs, rows, sort_key=None):
         sort_order.remove(sort_column_index)
         sort_order.insert(0, sort_column_index)
 
-    sort_method = itemgetter(*sort_order)
+    def sort_method(line):
+        return list(map(tokenize, itemgetter(*sort_order)(line)))
 
     for line in table_formatter.format_output(
             sorted(rows, key=sort_method),

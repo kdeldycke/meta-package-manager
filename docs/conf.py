@@ -36,9 +36,8 @@ master_doc = 'index'
 # HTML content.
 html_show_copyright = False
 copyright = (
-    "2016-{}, <a href='https://kevin.deldycke.com'>{}</a> and <a href='{}"
-    "/graphs/contributors'>contributors</a>").format(
-        time.strftime('%Y'), author, url)
+    "<a href='https://kevin.deldycke.com'>{}</a> and <a href='{}"
+    "/graphs/contributors'>contributors</a>").format(author, url)
 
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 

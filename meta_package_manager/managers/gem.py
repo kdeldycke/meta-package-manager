@@ -78,11 +78,12 @@ class Gem(PackageManager):
 
             *** LOCAL GEMS ***
 
-            bigdecimal (1.2.0)
-            CFPropertyList (2.2.8)
-            io-console (0.4.2)
-            json (1.7.7)
-            libxml-ruby (2.6.0)
+            bigdecimal (default: 1.4.1)
+            bundler (default: 1.17.2)
+            CFPropertyList (2.3.6)
+            cmath (default: 1.0.0)
+            csv (default: 3.0.9)
+            date (default: 2.0.0)
             molinillo (0.5.4, 0.4.5, 0.2.3)
             nokogiri (1.5.6)
             psych (2.0.0)
@@ -96,11 +97,11 @@ class Gem(PackageManager):
         output = self.run([self.cli_path] + self.cli_args + ['list'])
 
         if output:
-            regexp = re.compile(r'(\S+) \((.+)\)')
+            regexp = re.compile(r'(\S+) \((default: )?(.+)\)')
             for package in output.split('\n'):
                 match = regexp.match(package)
                 if match:
-                    package_id, versions = match.groups()
+                    package_id, _, versions = match.groups()
 
                     # Guess latest installed version.
                     versions = set([v.strip() for v in versions.split(',')])

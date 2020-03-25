@@ -2,6 +2,12 @@ Changelog
 =========
 
 
+`3.0.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v3.0.0...develop>`_
+--------------------------------------------------------------------------------------------------
+
+.. note:: This version is not yet released and is under active development.
+
+
 `3.0.0 (2020-03-25) <https://github.com/kdeldycke/meta-package-manager/compare/v2.9.0...v3.0.0>`_
 -------------------------------------------------------------------------------------------------
 

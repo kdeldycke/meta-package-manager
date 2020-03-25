@@ -2,10 +2,8 @@ Changelog
 =========
 
 
-`3.0.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v2.9.0...develop>`_
---------------------------------------------------------------------------------------------------
-
-.. note:: This version is not yet released and is under active development.
+`3.0.0 (2020-03-25) <https://github.com/kdeldycke/meta-package-manager/compare/v2.9.0...v3.0.0>`_
+-------------------------------------------------------------------------------------------------
 
 * [mpm]: Add new ``backup`` and dummy ``restore`` commands to respectively dump
   and load up list of installed packages to/from a TOML file. Refs #38.

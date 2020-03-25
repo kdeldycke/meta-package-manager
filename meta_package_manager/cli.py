@@ -27,9 +27,9 @@ from sys import __stdin__, __stdout__
 import click
 import click_log
 import tomlkit
+from boltons import strutils
 from cli_helpers.tabular_output import TabularOutputFormatter
 from simplejson import dumps as json_dumps
-from boltons import strutils
 
 from . import __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager

@@ -20,6 +20,73 @@ See also `pip installation instructions
     current project.
 
 
+Shell completion
+----------------
+
+Completion for popular shell `rely on Click feature
+<https://click.palletsprojects.com/en/7.x/bashcomplete/>`_.
+
+Bash
+^^^^
+
+Add this to ``~/.bashrc``:
+
+.. code-block:: bash
+
+    eval "$(_MPM_COMPLETE=source_bash mpm)"
+
+Alternatively, export the generated completion code as a static script to be
+executed:
+
+.. code-block:: shell-session
+
+    $ _MPM_COMPLETE=source_bash mpm > mpm-complete.sh
+
+Then source it from ``~/.bashrc``:
+
+.. code-block:: bash
+
+   . /path/to/mpm-complete.sh
+
+Zsh
+^^^
+
+Add this to ``~/.zshrc``:
+
+.. code-block:: zsh
+
+    eval "$(_MPM_COMPLETE=source_zsh mpm)"
+
+Alternatively, export the generated completion code as a static script to be
+executed:
+
+.. code-block:: shell-session
+
+    $ _MPM_COMPLETE=source_zsh mpm > mpm-complete.sh
+
+Then source it from ``~/.zshrc``:
+
+.. code-block:: zsh
+
+   . /path/to/mpm-complete.sh
+
+Fish
+^^^^
+
+Add this to ``~/.config/fish/completions/mpm.fish``:
+
+.. code-block:: fish
+
+    eval (env _MPM_COMPLETE=source_fish mpm)
+
+Alternatively, export the generated completion code as a static script to be
+executed:
+
+.. code-block:: fish
+
+   _MPM_COMPLETE=source_fish mpm > ~/.config/fish/completions/mpm-complete.fish
+
+
 Python dependencies
 -------------------
 

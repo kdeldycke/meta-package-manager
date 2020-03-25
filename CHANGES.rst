@@ -22,6 +22,7 @@ Changelog
 * [brew,cask]: Bump minimal requirement of to ``2.2.9``.
 * [mpm]: Allow sorting restuls by packages, managers or version. Closes #35
   and #37.
+* [mpm]: Add shell completion for Bash, Zsh and Fish.
 * [mpm]: Do not force sync when calling outdated. Closes #36.
 * Fallback on ``apt version apt`` when looking for version. Closes #57 and #52.
 * Removes all copyright dates.

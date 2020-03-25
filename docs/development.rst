@@ -211,7 +211,7 @@ Publish packaging to `PyPi <https://pypi.python.org>`_:
 
     $ poetry publish
 
-Update revision with `bumpversion <https://github.com/peritus/bumpversion>`_
+Update revision with `bump2version <https://github.com/c4urself/bump2version>`_
 and set it back to development state by increasing the ``patch`` level.
 
 .. code-block:: shell-session

@@ -180,3 +180,4 @@ jobs:
       run: |
         poetry check
         poetry run twine check ./dist/*
+        poetry run bumpversion --verbose patch

@@ -60,7 +60,7 @@ sphinx = {version = "^2.4", optional = true}
 sphinx_rtd_theme = {version = "^0.4.3", optional = true}
 
 [tool.poetry.dev-dependencies]
-bumpversion = "^0.5.3"
+bump2version = "^1.0.0"
 coverage = {extras = ["toml"], version = "^5.0.4"}
 isort = "^4.3.5"
 pycodestyle = "^2"

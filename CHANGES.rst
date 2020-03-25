@@ -25,6 +25,7 @@ Changelog
 * [mpm]: Do not force sync when calling outdated. Closes #36.
 * Fallback on ``apt version apt`` when looking for version. Closes #57 and #52.
 * Removes all copyright dates.
+* Replace unmaintained ``bumpversion`` by ``bump2version``.
 * Raise requirement to ``click 7.1``.
 * Raise requirement to ``boltons >= 20.0``.
 

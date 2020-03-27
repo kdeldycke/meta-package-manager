@@ -36,7 +36,6 @@ from .managers import pool
 from .platform import os_label
 from .version import tokenize
 
-
 # Initialize the table formatter.
 table_formatter = TabularOutputFormatter()
 

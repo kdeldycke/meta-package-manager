@@ -23,7 +23,7 @@ import operator
 import re
 
 from boltons import strutils
-from boltons.cacheutils import cached, LRI
+from boltons.cacheutils import LRI, cached
 
 
 class Token():

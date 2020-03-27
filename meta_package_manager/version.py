@@ -145,7 +145,6 @@ def tokenize(string):
     tokens = []
     normalized_str = strutils.asciify(string).lower().decode()
 
-
     for segment in ALNUM_EXTRACTOR.split(normalized_str):
         if segment.isalnum():
             tokens.append(Token(segment))

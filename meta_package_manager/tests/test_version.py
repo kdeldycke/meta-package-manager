@@ -56,6 +56,8 @@ eq_values = [
     [Token('0'), 0],
     [Token('abc'), 'abc'],
     [Token('abc'), Token('abc')]]
+
+
 ne_values = [
     [Token('2345'), Token('45')],
     [Token('2345'), Token(45)],
@@ -66,6 +68,8 @@ ne_values = [
     [Token('abc'), 'def'],
     [Token('Z'), 'z'],
     [Token('acb'), 123]]
+
+
 gt_values = [
     [Token('9999'), Token('12')],
     [Token('9999'), Token('000000099')],
@@ -80,6 +84,8 @@ gt_values = [
     [Token('a'), 'Z'],
     [Token('z'), 'Z'],
     [Token('a'), Token('Z')]]
+
+
 lt_values = [
     [Token('12'), Token('9999')],
     [Token('0000012'), Token('9999')],
@@ -91,32 +97,38 @@ lt_values = [
     [Token('Z'), 'z'],
     [Token(1234), 1234]]
 
+
 @pytest.mark.parametrize('token,value', eq_values)
 def test_token_eq(token, value):
     assert token == value
+
 
 @pytest.mark.parametrize('token,value', ne_values)
 def test_token_ne(token, value):
     assert token != value
 
+
 @pytest.mark.parametrize('token,value', gt_values)
 def test_token_gt(token, value):
     assert token > value
+
 
 @pytest.mark.parametrize('token,value', lt_values)
 def test_token_lt(token, value):
     assert token < value
 
+
 @pytest.mark.parametrize('token,value', gt_values + eq_values)
 def test_token_ge(token, value):
     assert token >= value
+
 
 @pytest.mark.parametrize('token,value', lt_values + eq_values)
 def test_token_le(token, value):
     assert token <= value
 
 
-version_list =[
+version_list = [
     ['r2917_1', ('r', 2917, 1)],
     ['2020.03.24', (2020, 3, 24)],
     ['4.2.1-5666.3', (4, 2, 1, 5666, 3)],
@@ -147,6 +159,7 @@ version_list =[
     ['3.113+nmu3ubuntu4', (3, 113, 'nmu', 3, 'ubuntu', 4)],
     ['1.01+20150706hgc3698e0+dfsg-2',
      (1, 1, 20150706, 'hgc', 3698, 'e', 0, 'dfsg', 2)]]
+
 
 @pytest.mark.parametrize('v_string,v_tuple', version_list)
 def test_version_tokenizer(v_string, v_tuple):

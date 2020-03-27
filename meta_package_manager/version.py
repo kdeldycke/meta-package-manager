@@ -25,7 +25,9 @@ from boltons import strutils
 
 
 class Token():
-    """A token is a normalized word, that is persisting its integer variant.
+    """A token is a normalized word, persisting its lossless integer variant.
+
+    Support natural comparison with `str` and `int` types.
 
     We mainly use them here to compare versions and package IDs.
     """
@@ -37,8 +39,9 @@ class Token():
     def str_to_int(string):
         """ Convert a string or an integer to a `(string, integer)` couple.
 
-        Return together the original string and its integer representation if
-        convertion successful. Else returns the string and `None`."""
+        Returns together the original string and its integer representation if
+        convertion is successful and lossless. Else returns the original string
+        and `None`."""
         try:
             integer = int(string)
         except ValueError:
@@ -53,10 +56,10 @@ class Token():
         return string, integer
 
     def __init__(self, value):
+        """ Instantiates a Token from alphanumeric strings or non-negative
+        integers.
         """
-        We have to call `__new__` because `str` is an immutable type, and have
-        to initialize it early, at creation).
-        """
+        # Check provided value.
         if isinstance(value, str):
             if not value.isalnum():
                 raise TypeError('Only alphanumeric characters are allowed.')
@@ -66,11 +69,11 @@ class Token():
         else:
             raise TypeError('Only string and integer allowed.')
 
-        # Parse the token to store its integer representation
+        # Parse user-value and stores its string and integer representations.
         self.string, self.integer = self.str_to_int(value)
 
     def __repr__(self):
-        """ Prints internal string and number values. """
+        """ Prints internal string and number values for debug. """
         return '<Token:{}>'.format(','.join(
             ['{}={!r}'.format(k, v) for k, v in self.__dict__.items()]))
 
@@ -82,22 +85,23 @@ class Token():
 
     @property
     def isint(self):
+        """ Does the Token got a pure integer representation? """
         return self.integer is not None
-
-    def _match_type(self, other):
-        """ Returns the safe type to compare the two values. """
-        if self.isint:
-            if isinstance(other, int):
-                return int
-            if isinstance(other, Token) and other.isint:
-                return int
-        return str
 
     """ In the best case, try to comparison Token to integers.
 
     If one or the two is an integer but not the other, we convert all to
     string to allow comparison.
     """
+
+    def _match_type(self, other):
+        """ Returns the safe type with which we can compare two values. """
+        if self.isint:
+            if isinstance(other, int):
+                return int
+            if isinstance(other, Token) and other.isint:
+                return int
+        return str
 
     def __eq__(self, other):
         return operator.eq(*map(self._match_type(other), [self, other]))
@@ -120,11 +124,11 @@ class Token():
 
 def tokenize(string):
     """ Tokenize a string for user-friendly sorting, by ignoring case and
-    special characters.
+    splitting at each non-alphanumeric characters.
 
-    Also transforn each integer-like part from string to true int by the way of
-    the `Token` class. That way we get natural, user-friendly sorting of
-    version numbers. See:
+    Returns a tuple of Token instances. Which allows for comparison between
+    strings and integers. That way we get natural, user-friendly sorting of
+    version numbers. That we can get with simple Python, see:
 
         >>> '2019.0.1' > '9.3'
         False
@@ -137,13 +141,13 @@ def tokenize(string):
     normalized_str = strutils.slugify(string, '-', ascii=True).decode()
 
     token = ''
-
     i = 0
     while i < len(normalized_str) + 1:
 
         char = ''
-        if i < len (normalized_str):
+        if i < len(normalized_str):
             char = normalized_str[i]
+
         # If we already started accumulated characters, we continue to do so as
         # long as the token being constructed and the new character are of the
         # same kind.
@@ -171,9 +175,8 @@ def tokenize(string):
             tokens.append(Token(token))
             token = ''
 
-
-        # Skpi the current char from the iteration as it is not recognized.
+        # Skip the current char from the iteration as it is not recognized.
         if not char.isalnum():
-
             i += 1
+
     return tuple(tokens)

@@ -7,6 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm]: Improve table sorting with new version-aware tokenizer.
 * [gem]: Ignore ``default:`` prefix on package version parsing.
 
 

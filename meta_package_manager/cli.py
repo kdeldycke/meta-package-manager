@@ -27,7 +27,6 @@ from sys import __stdin__, __stdout__
 import click
 import click_log
 import tomlkit
-from boltons import strutils
 from cli_helpers.tabular_output import TabularOutputFormatter
 from simplejson import dumps as json_dumps
 
@@ -35,6 +34,8 @@ from . import __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
 from .platform import os_label
+from .version import tokenize
+
 
 # Initialize the table formatter.
 table_formatter = TabularOutputFormatter()
@@ -63,12 +64,6 @@ click_log.basic_config(logger)
 def json(data):
     """ Utility function to render data structure into pretty printed JSON. """
     return json_dumps(data, sort_keys=True, indent=4, separators=(',', ': '))
-
-
-def tokenize(string):
-    """ Tokenize a string for user-friendly sorting, by ignoring case and
-    special characters. """
-    return strutils.slugify(string, '-', ascii=True)
 
 
 def print_table(header_defs, rows, sort_key=None):

@@ -1,0 +1,153 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright Kevin Deldycke <kevin@deldycke.com> and contributors.
+# All Rights Reserved.
+#
+# This program is Free Software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+import unittest
+import pytest
+
+from ..version import Token, tokenize
+
+
+@pytest.mark.parametrize('value', [
+    0,
+    123,
+    '0',
+    '123',
+    'abc',
+    'ABC',
+    '123abc'])
+def test_token_allowed_instanciation(value):
+    Token(value)
+
+
+@pytest.mark.parametrize('value', [
+    None,
+    -1,
+    'a-b-c',
+    1.0])
+def test_token_unauthorized_instanciation(value):
+    with pytest.raises(TypeError):
+        Token(value)
+
+
+eq_values = [
+    [Token('2345'), Token('2345')],
+    [Token('2345'), Token(2345)],
+    [Token('02345'), Token(2345)],
+    [Token('02345'), '02345'],
+    [Token('2345'), 2345],
+    [Token('2345'), '2345'],
+    [Token('0'), '0'],
+    [Token('0'), 0],
+    [Token('abc'), 'abc'],
+    [Token('abc'), Token('abc')]]
+ne_values = [
+    [Token('2345'), Token('45')],
+    [Token('2345'), Token(45)],
+    [Token('2345'), Token(0)],
+    [Token('2345'), Token('0')],
+    [Token('2'), -2],
+    [Token('2'), 0],
+    [Token('abc'), 'def'],
+    [Token('Z'), 'z'],
+    [Token('acb'), 123]]
+gt_values = [
+    [Token('9999'), Token('12')],
+    [Token('9999'), Token('000000099')],
+    [Token(9999), Token('12')],
+    [Token(9999), Token(12)],
+    [Token(9999), '0'],
+    [Token(9999), 0],
+    [Token(0), -2],
+    [Token('0'), -2],
+    [Token('abc'), -2],
+    [Token('abc'), 'ab'],
+    [Token('a'), 'Z'],
+    [Token('z'), 'Z'],
+    [Token('a'), Token('Z')]]
+lt_values = [
+    [Token('12'), Token('9999')],
+    [Token('0000012'), Token('9999')],
+    [Token('12'), Token(9999)],
+    [Token(12), Token(9999)],
+    [Token('12'), 9999],
+    [Token('0'), 9999],
+    [Token('ab'), 'abc'],
+    [Token('Z'), 'z'],
+    [Token(1234), 1234]]
+
+@pytest.mark.parametrize('token,value', eq_values)
+def test_token_eq(token, value):
+    assert token == value
+
+@pytest.mark.parametrize('token,value', ne_values)
+def test_token_ne(token, value):
+    assert token != value
+
+@pytest.mark.parametrize('token,value', gt_values)
+def test_token_gt(token, value):
+    assert token > value
+
+@pytest.mark.parametrize('token,value', lt_values)
+def test_token_lt(token, value):
+    assert token < value
+
+@pytest.mark.parametrize('token,value', gt_values + eq_values)
+def test_token_ge(token, value):
+    assert token >= value
+
+@pytest.mark.parametrize('token,value', lt_values + eq_values)
+def test_token_le(token, value):
+    assert token <= value
+
+
+version_list =[
+    ['r2917_1', ('r', 2917, 1)],
+    ['2020.03.24', (2020, 3, 24)],
+    ['4.2.1-5666.3', (4, 2, 1, 5666, 3)],
+    ['4.2.1-5666..3', (4, 2, 1, 5666, 3)],
+    ['4.2.1-5666.3.', (4, 2, 1, 5666, 3)],
+    ['.4.2.1-5666.3', (4, 2, 1, 5666, 3)],
+    ['4.2.1--5666.3', (4, 2, 1, 5666, 3)],
+    ['4.2.1-#-5666.3', (4, 2, 1, 5666, 3)],
+    ['1.3_1', (1, 3, 1)],
+    ['2.40.20161221.0239', (2, 40, 20161221, 239)],
+    ['latest', ('latest',)],
+    ['1.2beta5', (1, 2, 'beta', 5)],
+    ['2.8.18-x86_64', (2, 8, 18, 'x', 86, 64)],
+    ['1.8.0_112-b16', (1, 8, 0, 112, 'b', 16)],
+    ['3.6.9_build_4685', (3, 6, 9, 'build', 4685)],
+    ['1.8.6-124-g6cd4c31', (1, 8, 6, 124, 'g', 6, 'cd', 4, 'c', 31)],
+    ['0.9999999', (0, 9999999)],
+    ['0.0.0', (0, 0, 0)],
+    ['1.0+git71+c79e264-r0', (1, 0, 'git', 71, 'c', 79, 'e', 264, 'r', 0)],
+    ['20190718-r0', (20190718, 'r', 0)],
+    ['0.0.0-development', (0, 0, 0, 'development')],
+    ['v0.9.4.3', ('v', 0, 9, 4, 3)],
+    ['6.0.1-0ubuntu1', (6, 0, 1, 0, 'ubuntu', 1)],
+    ['4.6.0+git+20160126-2', (4, 6, 0, 'git', 20160126, 2)],
+    ['1:5.25-2ubuntu1', (1, 5, 25, 2, 'ubuntu', 1)],
+    ['1.18.4ubuntu1.1', (1, 18, 4, 'ubuntu', 1, 1)],
+    ['20160104ubuntu1', (20160104, 'ubuntu', 1)],
+    ['3.113+nmu3ubuntu4', (3, 113, 'nmu', 3, 'ubuntu', 4)],
+    ['1.01+20150706hgc3698e0+dfsg-2',
+     (1, 1, 20150706, 'hgc', 3698, 'e', 0, 'dfsg', 2)]]
+
+@pytest.mark.parametrize('v_string,v_tuple', version_list)
+def test_version_tokenizer(v_string, v_tuple):
+    assert tokenize(v_string) == v_tuple

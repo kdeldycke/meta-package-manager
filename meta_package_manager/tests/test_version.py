@@ -175,3 +175,18 @@ version_list = [
 @pytest.mark.parametrize('v_string,v_tuple', version_list)
 def test_version_tokenizer(v_string, v_tuple):
     assert tokenize(v_string) == v_tuple
+
+
+compared_gt = [
+    ['2.0', '1.0'],
+    ['0.1', '0'],
+    ['0.1', '0.0'],
+    ['0.1', '0.0.0.0.0'],
+    ['2.0', '1.0'],
+    ['2.0', '1'],
+]
+
+
+@pytest.mark.parametrize('v1,v2', compared_gt)
+def test_version_comparison_gt(v1, v2):
+    assert tokenize(v1) > tokenize(v2)

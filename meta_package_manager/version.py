@@ -58,7 +58,7 @@ class Token():
         str_int = string
         if str_int != '0':
             str_int = string.lstrip('0')
-        assert str(integer) == str_int
+        #assert str(integer) == str_int
 
         return string, integer
 

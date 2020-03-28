@@ -221,7 +221,6 @@ class TokenizedString():
             return tuple(self) <= tuple(other)
 
 
-
 """ Utility method tweaking TokenizedString for dot-based serialization. """
 parse_version = partial(TokenizedString, separator='.')
 

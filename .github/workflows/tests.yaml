@@ -142,6 +142,7 @@ jobs:
       # https://github.com/pytest-dev/pytest-cov/issues/168#issuecomment-327533847
       # https://github.com/pytest-dev/pytest-cov/issues/243
       run: |
+        rm .coverage*
         poetry run pytest --cov-config=pyproject.toml --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1

@@ -128,6 +128,14 @@ def test_token_le(token, value):
     assert token <= value
 
 
+def test_token_hash():
+    assert hash(Token('9999')) == hash(Token('9999'))
+    assert hash(Token('9999')) == hash(Token(9999))
+    assert hash(Token(9999)) == hash(Token(9999))
+    assert hash(Token('09999')) != hash(Token('9999'))
+    assert hash(Token('09999')) != hash(Token(9999))
+
+
 version_list = [
     ['r2917_1', ('r', 2917, 1)],
     ['2020.03.24', (2020, 3, 24)],

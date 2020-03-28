@@ -37,6 +37,11 @@ class Token():
     string = None
     integer = None
 
+    def __hash__(self):
+        """ A Token is made unique by a tuple of its immutable internal data.
+        """
+        return hash((self.string, self.integer))
+
     @staticmethod
     def str_to_int(string):
         """ Convert a string or an integer to a `(string, integer)` couple.

@@ -61,7 +61,7 @@ class Token():
             str_int = string.lstrip('0')
         if str(integer) != str_int:
             raise TypeError(
-                "{!r} string is not equivalent to {!r} integer".fornmat(
+                "{!r} string is not equivalent to {!r} integer".format(
                     string, integer))
 
         return string, integer

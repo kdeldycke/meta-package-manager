@@ -34,7 +34,15 @@ class NPM(PackageManager):
     name = "Node's npm"
 
     def get_version(self):
-        """ Fetch version from ``npm --version`` output."""
+        """ Fetch version from ``npm --version`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            $ npm --version
+            6.13.7
+        """
         return self.run([self.cli_path, '--version'])
 
     @cachedproperty

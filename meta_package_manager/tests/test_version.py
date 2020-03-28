@@ -58,6 +58,7 @@ eq_values = [
     [Token('2345'), '2345'],
     [Token('0'), '0'],
     [Token('0'), 0],
+    [Token('000'), 0],
     [Token('abc'), 'abc'],
     [Token('abc'), Token('abc')]]
 

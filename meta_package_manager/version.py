@@ -56,9 +56,9 @@ class Token():
         string = str(string)
 
         # Double-check the string <> integer lossless transform.
-        str_int = string
-        if str_int != '0':
-            str_int = string.lstrip('0')
+        str_int = string.lstrip('0')
+        if not str_int:
+            str_int = '0'
         if str(integer) != str_int:
             raise TypeError(
                 "{!r} string is not equivalent to {!r} integer".format(

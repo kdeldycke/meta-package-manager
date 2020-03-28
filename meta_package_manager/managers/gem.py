@@ -34,7 +34,15 @@ class Gem(PackageManager):
     platforms = frozenset([LINUX, MACOS, WINDOWS])
 
     def get_version(self):
-        """ Fetch version from ``gem --version`` output."""
+        """ Fetch version from ``gem --version`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            $ gem --version
+            3.0.3
+        """
         return self.run([self.cli_path, '--version'])
 
     name = "Ruby Gems"

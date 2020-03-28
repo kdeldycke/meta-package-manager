@@ -31,7 +31,7 @@ class Composer(PackageManager):
     name = "PHP's Composer"
     cli_args = ['global']
     platforms = frozenset([LINUX, MACOS, WINDOWS])
-    requirement = '>= 1.4.*'
+    requirement = '1.4.0'
 
     def get_version(self):
         """ Fetch version from ``composer --version`` output."""

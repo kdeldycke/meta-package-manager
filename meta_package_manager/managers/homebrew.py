@@ -21,10 +21,10 @@ import re
 
 import simplejson as json
 from boltons.cacheutils import cachedproperty
-from packaging.version import parse as parse_version
 
 from ..base import PackageManager
 from ..platform import MACOS
+from ..version import parse_version
 
 
 class Homebrew(PackageManager):
@@ -39,7 +39,7 @@ class Homebrew(PackageManager):
 
     # Vanilla brew and cask CLIs now shares the same version.
     # 2.2.9 is the first release to support --formulae option in search.
-    requirement = '>= 2.2.9'
+    requirement = '2.2.9'
 
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     cli_name = None
@@ -59,7 +59,7 @@ class Homebrew(PackageManager):
         """
         output = self.run([self.cli_path] + self.cli_args + ['--version'])
         if output:
-            return output.split()[1].split('-')[0]
+            return output.split()[1]
 
     def sync(self):
         super(Homebrew, self).sync()
@@ -126,16 +126,8 @@ class Homebrew(PackageManager):
                     package_id, removed, versions = match.groups()
 
                     # Guess latest installed version.
-                    versions = set(versions.split())
-                    # Discard generic 'latest' symbolic version if others are
-                    # available.
-                    if len(versions) > 1:
-                        versions.discard('latest')
-                    # Parse versions to avoid lexicographic sorting gotchas.
-                    version = None
-                    if versions:
-                        _, version = max(
-                            [(parse_version(v), v) for v in versions])
+                    _, version = max(
+                        [(parse_version(v), v) for v in versions.split()])
 
                     installed[package_id] = {
                         'id': package_id,
@@ -235,10 +227,9 @@ class Homebrew(PackageManager):
             for pkg_info in json.loads(output):
 
                 # Parse versions to avoid lexicographic sorting gotchas.
-                version = None
-                versions = set(pkg_info['installed_versions'])
-                if versions:
-                    _, version = max([(parse_version(v), v) for v in versions])
+                _, version = max([
+                    (parse_version(v), v)
+                    for v in pkg_info['installed_versions']])
 
                 package_id = pkg_info['name']
                 outdated[package_id] = {

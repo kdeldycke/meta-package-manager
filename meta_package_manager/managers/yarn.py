@@ -25,6 +25,7 @@ from ..platform import LINUX, MACOS, WINDOWS
 
 
 class YARN(PackageManager):
+
     name = "Node's yarn"
 
     cli_args = [
@@ -35,7 +36,7 @@ class YARN(PackageManager):
 
     platforms = frozenset([LINUX, MACOS, WINDOWS])
 
-    requirement = '>= 1.0.*'
+    requirement = '1.0.0'
 
     def get_version(self):
         """ Fetch version from ``yarn --version`` output."""

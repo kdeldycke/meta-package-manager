@@ -22,10 +22,10 @@ import re
 from shutil import which
 
 from boltons.cacheutils import cachedproperty
-from packaging.version import parse as parse_version
 
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
+from ..version import parse_version
 from . import logger
 
 
@@ -112,12 +112,8 @@ class Gem(PackageManager):
                     package_id, _, versions = match.groups()
 
                     # Guess latest installed version.
-                    versions = set([v.strip() for v in versions.split(',')])
-                    # Parse versions to avoid lexicographic sorting gotchas.
-                    version = None
-                    if versions:
-                        _, version = max(
-                            [(parse_version(v), v) for v in versions])
+                    _, version = max([
+                        (parse_version(v), v) for v in versions.split()])
 
                     installed[package_id] = {
                         'id': package_id,

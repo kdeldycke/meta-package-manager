@@ -33,7 +33,7 @@ class Pip(PackageManager):
 
     platforms = frozenset([MACOS, LINUX, WINDOWS])
 
-    requirement = '>= 10.0.0'
+    requirement = '10.0.0'
 
     # Declare this manager as virtual, i.e. not tied to a CLI.
     cli_name = None

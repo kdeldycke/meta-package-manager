@@ -260,7 +260,7 @@ class TestCLIManagers(TestCLITableRendering):
 
             self.assertSetEqual(set(info), set([
                 'available', 'cli_path', 'errors', 'executable', 'fresh', 'id',
-                'name', 'supported', 'version_string']))
+                'name', 'supported', 'version']))
 
             self.assertIsInstance(info['available'], bool)
             if info['cli_path'] is not None:
@@ -271,8 +271,8 @@ class TestCLIManagers(TestCLITableRendering):
             self.assertIsInstance(info['id'], str)
             self.assertIsInstance(info['name'], str)
             self.assertIsInstance(info['supported'], bool)
-            if info['version_string'] is not None:
-                self.assertIsInstance(info['version_string'], str)
+            if info['version'] is not None:
+                self.assertIsInstance(info['version'], str)
 
             self.assertEqual(info['id'], manager_id)
 

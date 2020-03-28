@@ -29,9 +29,7 @@ class OPKG(PackageManager):
 
     platforms = frozenset([LINUX])
 
-    requirement = '>= 0.2.0'
-
-    name = "OPKG"
+    requirement = '0.2.0'
 
     def get_version(self):
         """ Fetch version from ``opkg --version`` output.

@@ -17,11 +17,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import unittest
-
 import pytest
 
-from ..version import Token, tokenize
+from ..version import Token, TokenizedString, parse_version
+
+
+def reverse_fixtures(table):
+    """ Utility method to reverse a list of list. """
+    return list(map(list, map(reversed, table)))
 
 
 @pytest.mark.parametrize('value', [
@@ -138,6 +141,7 @@ def test_token_hash():
 
 version_list = [
     ['r2917_1', ('r', 2917, 1)],
+    [' r     29   \n  17   1 x  ', ('r', 29, 17, 1, 'x')],
     ['2020.03.24', (2020, 3, 24)],
     ['4.2.1-5666.3', (4, 2, 1, 5666, 3)],
     ['4.2.1-5666..3', (4, 2, 1, 5666, 3)],
@@ -174,7 +178,7 @@ version_list = [
 
 @pytest.mark.parametrize('v_string,v_tuple', version_list)
 def test_version_tokenizer(v_string, v_tuple):
-    assert tokenize(v_string) == v_tuple
+    assert TokenizedString(v_string) == v_tuple
 
 
 compared_gt = [
@@ -184,9 +188,19 @@ compared_gt = [
     ['0.1', '0.0.0.0.0'],
     ['2.0', '1.0'],
     ['2.0', '1'],
-]
+    ['3.1.10', '3.1.9'],
+    ['8.2p1_1', '8.2p1'],
+    [20200313, 20190801],
+    ['2020.03.24', '2019.11.28']]
 
 
 @pytest.mark.parametrize('v1,v2', compared_gt)
 def test_version_comparison_gt(v1, v2):
-    assert tokenize(v1) > tokenize(v2)
+    assert TokenizedString(v1) > TokenizedString(v2)
+    assert parse_version(v1) > parse_version(v2)
+
+
+@pytest.mark.parametrize('v1,v2', reverse_fixtures(compared_gt))
+def test_version_comparison_lt(v1, v2):
+    assert TokenizedString(v1) < TokenizedString(v2)
+    assert parse_version(v1) < parse_version(v2)

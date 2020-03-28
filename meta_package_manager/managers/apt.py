@@ -29,9 +29,7 @@ class APT(PackageManager):
 
     platforms = frozenset([LINUX])
 
-    requirement = '>= 1.0.0'
-
-    name = "APT"
+    requirement = '1.0.0'
 
     def get_version(self):
         """ Fetch version from ``apt version`` output.

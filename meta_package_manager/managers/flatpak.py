@@ -29,9 +29,7 @@ class Flatpak(PackageManager):
 
     platforms = frozenset([LINUX])
 
-    requirement = '>= 1.2.*'
-
-    name = "Flatpak"
+    requirement = '1.2.0'
 
     def get_version(self):
         """ Fetch version from ``flatpak --version`` output.

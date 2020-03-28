@@ -34,7 +34,7 @@ from . import __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
 from .platform import os_label
-from .version import tokenize
+from .version import TokenizedString
 
 # Initialize the table formatter.
 table_formatter = TabularOutputFormatter()
@@ -61,8 +61,22 @@ click_log.basic_config(logger)
 
 
 def json(data):
-    """ Utility function to render data structure into pretty printed JSON. """
-    return json_dumps(data, sort_keys=True, indent=4, separators=(',', ': '))
+    """ Utility function to render data structure into pretty printed JSON.
+
+    Also care of internal objects like `TokenizedString`.
+    """
+
+    def encode_tokens(obj):
+        if isinstance(obj, TokenizedString):
+            return str(obj)
+        raise TypeError(repr(obj) + " is not JSON serializable.")
+
+    return json_dumps(
+        data,
+        sort_keys=True,
+        indent=4,
+        separators=(',', ': '),
+        default=encode_tokens)
 
 
 def print_table(header_defs, rows, sort_key=None):
@@ -86,7 +100,7 @@ def print_table(header_defs, rows, sort_key=None):
         sort_order.insert(0, sort_column_index)
 
     def sort_method(line):
-        return list(map(tokenize, itemgetter(*sort_order)(line)))
+        return list(map(TokenizedString, itemgetter(*sort_order)(line)))
 
     for line in table_formatter.format_output(
             sorted(rows, key=sort_method),
@@ -208,7 +222,7 @@ def managers(ctx):
         # Build up the data structure of manager metadata.
         fields = [
             'name', 'id', 'supported', 'cli_path', 'executable',
-            'version_string', 'fresh', 'available']
+            'version', 'fresh', 'available']
         for manager in target_managers:
             manager_data[manager.id] = {
                 fid: getattr(manager, fid) for fid in fields}
@@ -241,7 +255,7 @@ def managers(ctx):
         if manager.executable:
             version_infos = OK if manager.fresh else KO
             if manager.version:
-                version_infos += "  {}".format(manager.version_string)
+                version_infos += "  {}".format(manager.version)
                 if not manager.fresh:
                     version_infos += " {}".format(manager.requirement)
 

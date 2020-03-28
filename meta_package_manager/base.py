@@ -23,12 +23,11 @@ from shutil import which
 from boltons.cacheutils import cachedproperty
 from boltons.strutils import indent, strip_ansi
 from boltons.typeutils import classproperty
-from packaging.specifiers import SpecifierSet
-from packaging.version import parse as parse_version
 
 from . import logger
 from .bitbar import run
 from .platform import current_os
+from .version import TokenizedString, parse_version
 
 # Rendering format of CLI in JSON fields.
 CLI_FORMATS = frozenset(['plain', 'fragments', 'bitbar'])
@@ -137,28 +136,23 @@ class PackageManager():
         return cli_path
 
     def get_version(self):
-        """ Invoke the manager and extract its own reported version. """
-        raise NotImplementedError
+        """ Invoke the manager and extract its own reported version.
 
-    @cachedproperty
-    def version_string(self):
-        """ Raw but cleaned string of the package manager version.
-
-        Returns `None` if the manager had an issue extracting its version.
+        It does matter if this method return unsanitized and crappy string. The
+        `version()` method below will clean and normalized it.
         """
-        if self.executable:
-            version = self.get_version()
-            if version:
-                return version.strip()
+        raise NotImplementedError
 
     @cachedproperty
     def version(self):
         """ Parsed and normalized package manager's own version.
 
-        Returns an instance of ``packaging.Version`` or None.
+        Returns an instance of `TokenizedString`.
         """
-        if self.version_string:
-            return parse_version(self.version_string)
+        if self.executable:
+            version = self.get_version()
+            if version:
+                return parse_version(version)
 
     @cachedproperty
     def supported(self):
@@ -182,9 +176,9 @@ class PackageManager():
         if not self.version:
             return False
         if self.requirement:
-            if self.version not in SpecifierSet(self.requirement):
+            if self.version < parse_version(self.requirement):
                 logger.debug(
-                    "{} {} doesn't fit the '{}' version requirement.".format(
+                    "{} {} is older than {} version requirement.".format(
                         self.id, self.version, self.requirement))
                 return False
         return True

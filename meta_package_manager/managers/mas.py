@@ -31,7 +31,7 @@ class MAS(PackageManager):
 
     # 'mas outdated' output has been changed in 1.3.1: https://github.com
     # /mas-cli/mas/commit/ca72ee42b1c5f482513b1d2fbf780b0bf3d9618b
-    requirement = '>= 1.3.1'
+    requirement = '1.3.1'
 
     name = "Mac AppStore"
 

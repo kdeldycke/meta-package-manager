@@ -29,13 +29,13 @@ class NPM(PackageManager):
 
     platforms = frozenset([LINUX, MACOS, WINDOWS])
 
-    requirement = '>= 4.0.*'
+    requirement = '4.0.0'
+
+    name = "Node's npm"
 
     def get_version(self):
         """ Fetch version from ``npm --version`` output."""
         return self.run([self.cli_path, '--version'])
-
-    name = "Node's npm"
 
     @cachedproperty
     def installed(self):

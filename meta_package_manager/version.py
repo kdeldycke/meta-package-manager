@@ -21,9 +21,9 @@
 
 import operator
 import re
+from functools import partial
 
 from boltons import strutils
-from boltons.cacheutils import LRI, cached
 
 
 class Token():
@@ -129,30 +129,105 @@ class Token():
         return operator.le(*map(self._match_type(other), [self, other]))
 
 
-ALNUM_EXTRACTOR = re.compile('(\\d+ | [a-z]+)', re.VERBOSE)
+class TokenizedString():
 
+    """ Tokenize a string for user-friendly sorting.
 
-@cached(LRI(max_size=2048))
-def tokenize(string):
-    """ Tokenize a string for user-friendly sorting, by ignoring case and
-    splitting at each non-alphanumeric characters.
-
-    Returns a tuple of Token instances. Which allows for comparison between
-    strings and integers. That way we get natural, user-friendly sorting of
-    version numbers. That we can get with simple Python, see:
-
-        >>> '2019.0.1' > '9.3'
-        False
-        >>> ('2019', '0', '1') > ('9', '3')
-        False
-        >>> (2019, 0, 1) > (9, 3)
-        True
+    Essentially a wrapper around a tuple of `Token` instances.
     """
-    tokens = []
-    normalized_str = strutils.asciify(string).lower().decode()
 
-    for segment in ALNUM_EXTRACTOR.split(normalized_str):
-        if segment.isalnum():
-            tokens.append(Token(segment))
+    separator = None
+    string = None
+    tokens = ()
 
-    return tuple(tokens)
+    def __hash__(self):
+        """ A `TokenizedString` is made unique by its original string and tuple
+        of parsed tokens. """
+        return hash((self.string, map(hash, self.tokens)))
+
+    def __init__(self, value, separator='-'):
+        if isinstance(value, int):
+            self.string = str(value)
+        elif isinstance(value, str):
+            self.string = value.strip()
+        else:
+            raise TypeError('{} not supported'.format(type(value)))
+        self.tokens = tuple(self.tokenize(self.string))
+        self.separator = separator
+
+    def __repr__(self):
+        return '<TokenizedString {} => {}>'.format(self.string, self.tokens)
+
+    def __str__(self):
+        return self.string
+
+    def pretty_print(self):
+        return self.separator.join(map(str, self.tokens))
+
+    ALNUM_EXTRACTOR = re.compile('(\\d+ | [a-z]+)', re.VERBOSE)
+
+    @classmethod
+    def tokenize(cls, string):
+        """ Tokenize a string: ignore case and split at each non-alphanumeric
+        characters.
+
+        Returns a tuple of Token instances. Which allows for comparison between
+        strings and integers. That way we get natural, user-friendly sorting of
+        version numbers. That we can get with simple Python, see:
+
+            >>> '2019.0.1' > '9.3'
+            False
+            >>> ('2019', '0', '1') > ('9', '3')
+            False
+            >>> (2019, 0, 1) > (9, 3)
+            True
+        """
+        normalized_str = strutils.asciify(string).lower().decode()
+
+        for segment in cls.ALNUM_EXTRACTOR.split(normalized_str):
+            if segment.isalnum():
+                yield Token(segment)
+
+    """ TokenizedString can be compared as tuples. """
+
+    def __iter__(self):
+        """ `TokenizedString` essentially are a wrapper around a tuple of
+        `Token`.
+        """
+        return iter(self.tokens)
+
+    def __eq__(self, other):
+        if isinstance(other, (TokenizedString, tuple)):
+            return tuple(self) == tuple(other)
+
+    def __ne__(self, other):
+        if isinstance(other, TokenizedString):
+            return tuple(self) != tuple(other)
+
+    def __gt__(self, other):
+        if isinstance(other, TokenizedString):
+            return tuple(self) > tuple(other)
+
+    def __lt__(self, other):
+        if isinstance(other, TokenizedString):
+            return tuple(self) < tuple(other)
+
+    def __ge__(self, other):
+        if isinstance(other, TokenizedString):
+            return tuple(self) >= tuple(other)
+
+    def __le__(self, other):
+        if isinstance(other, TokenizedString):
+            return tuple(self) <= tuple(other)
+
+
+
+""" Utility method tweaking TokenizedString for dot-based serialization. """
+parse_version = partial(TokenizedString, separator='.')
+
+
+def token_sort():
+    """ Method used as a comparator to sort token produce above between
+    themselves.
+    """
+    return list(map(tokenize, itemgetter(*sort_order)(line)))

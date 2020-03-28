@@ -28,13 +28,13 @@ class APM(PackageManager):
 
     platforms = frozenset([LINUX, MACOS, WINDOWS])
 
+    name = "Atom's apm"
+
     def get_version(self):
         """ Fetch version from ``apm --version`` output."""
         output = self.run([self.cli_path, '--version'])
         if output:
             return output.split('\n')[0].split()[1]
-
-    name = "Atom's apm"
 
     @cachedproperty
     def installed(self):

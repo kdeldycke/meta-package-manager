@@ -502,6 +502,7 @@ def backup(ctx, toml_output):
     The TOML file can then be safely consumed by the `mpm restore` command.
     """
     active_managers = ctx.obj['active_managers']
+    stats = ctx.obj['stats']
 
     is_stdout = toml_output is __stdout__
     toml_filepath = toml_output.name if is_stdout else path.abspath(
@@ -525,9 +526,16 @@ def backup(ctx, toml_output):
     doc.add(tomlkit.comment(
         "Timestamp: {}.".format(datetime.now().isoformat())))
 
+    installed_data = {}
+
     # Create one section for each package manager.
     for manager in active_managers:
         logger.info('Dumping packages from {}...'.format(manager.id))
+
+        # prepare data for stats.
+        installed_data[manager.id] = {
+            'id': manager.id,
+            'packages': manager.installed.values()}
 
         manager_section = tomlkit.table()
         for package_id, package_version in sorted([
@@ -538,6 +546,9 @@ def backup(ctx, toml_output):
         doc.add(manager.id, manager_section)
 
     toml_output.write(tomlkit.dumps(doc))
+
+    if stats:
+        print_stats(installed_data)
 
 
 @cli.command(

@@ -133,6 +133,10 @@ jobs:
     - name: mpm CLI output for debugging
       run: |
         poetry run mpm managers
+    - name: Hack trying to fix coverage - "Can't combine line data with arc data" error
+      if: runner.os != 'Windows'
+      run: |
+        rm -rf .coverage*
     - name: Unittests and coverage report in destructive mode
       env:
         DESTRUCTIVE_TESTS: true
@@ -142,7 +146,6 @@ jobs:
       # https://github.com/pytest-dev/pytest-cov/issues/168#issuecomment-327533847
       # https://github.com/pytest-dev/pytest-cov/issues/243
       run: |
-        rm -rf .coverage*
         poetry run pytest --cov-config=pyproject.toml --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1

@@ -33,6 +33,8 @@ class Gem(PackageManager):
 
     platforms = frozenset([LINUX, MACOS, WINDOWS])
 
+    name = "Ruby Gems"
+
     def get_version(self):
         """ Fetch version from ``gem --version`` output.
 
@@ -44,8 +46,6 @@ class Gem(PackageManager):
             3.0.3
         """
         return self.run([self.cli_path, '--version'])
-
-    name = "Ruby Gems"
 
     @cachedproperty
     def cli_path(self):

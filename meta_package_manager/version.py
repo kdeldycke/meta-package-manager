@@ -55,10 +55,14 @@ class Token():
             return str(string), None
         string = str(string)
 
+        # Double-check the string <> integer lossless transform.
         str_int = string
         if str_int != '0':
             str_int = string.lstrip('0')
-        #assert str(integer) == str_int
+        if str(integer) != str_int:
+            raise TypeError(
+                "{!r} string is not equivalent to {!r} integer".fornmat(
+                    string, integer))
 
         return string, integer
 

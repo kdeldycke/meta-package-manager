@@ -131,6 +131,7 @@ class Token():
 
 ALNUM_EXTRACTOR = re.compile('(\\d+ | [a-z]+)', re.VERBOSE)
 
+
 @cached(LRI(max_size=2048))
 def tokenize(string):
     """ Tokenize a string for user-friendly sorting, by ignoring case and

@@ -146,6 +146,8 @@ def test_tokenized_string_hash():
     assert hash(TokenizedString('9999')) == hash(TokenizedString(9999))
     assert hash(TokenizedString('09999')) != hash(TokenizedString('9999'))
     assert hash(TokenizedString('09999')) != hash(TokenizedString(9999))
+    assert hash(TokenizedString('1.2.3', separator='.')) \
+        != hash(TokenizedString('1.2.3', separator='_'))
 
 
 version_list = [

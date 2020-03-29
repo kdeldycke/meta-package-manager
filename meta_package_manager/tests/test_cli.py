@@ -97,7 +97,7 @@ class TestCLISubcommand(CLITestCase):
                     mid) in output.splitlines()[-1] if output else '',
                 # Match output of managers command.
                 bool(re.search(
-                    "\s+│\s+{}\s+│\s+(✓|✘).+│\s+(✓|✘)\s+".format(mid),
+                    r"\s+│\s+{}\s+│\s+(✓|✘).+│\s+(✓|✘)\s+".format(mid),
                     output)),
                 # Sync command.
                 "Sync {} package info...".format(mid) in output,

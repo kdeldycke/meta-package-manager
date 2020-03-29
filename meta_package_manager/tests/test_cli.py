@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+import re
 import textwrap
 import unittest
 
@@ -50,6 +51,11 @@ class TestCLISubcommand(CLITestCase):
 
     subcommand_args = []
 
+    # Hard-coded list of all supported manager IDs.
+    MANAGER_IDS = set([
+        'apm', 'apt', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm', 'pip2',
+        'pip3', 'flatpak', 'opkg', 'yarn'])
+
     @classmethod
     def setUpClass(klass):
         if not klass.subcommand_args:
@@ -74,131 +80,94 @@ class TestCLISubcommand(CLITestCase):
         self.assertEqual(result.exit_code, 0)
         return result
 
+    def check_manager_selection(self, output, included):
+        """ Check inclusion and exclusion of a set of managers. """
+        found_managers = set()
+        skipped_managers = set()
+
+        for mid in self.MANAGER_IDS:
+
+            # List of signals indicating a package manager has been retained by
+            # the CLI. Roughly sorted from most specific to more forgiving.
+            signals = [
+                # Common "not found" warning message.
+                "warning: Skip unavailable {} manager.".format(mid) in output,
+                # Stats line at the end of output.
+                "{}: ".format(
+                    mid) in output.splitlines()[-1] if output else '',
+                # Match output of managers command.
+                bool(re.search(
+                    "\s+│\s+{}\s+│\s+(✓|✘).+│\s+(✓|✘)\s+".format(mid),
+                    output)),
+                # Sync command.
+                "Sync {} package info...".format(mid) in output,
+                # Upgrade command.
+                "Updating all outdated packages from {}..."
+                "".format(mid) in output,
+                # Log message for backup command.
+                "Dumping packages from {}...".format(mid) in output,
+                # Warning message for restore command.
+                "warning: Skip {} packages: no section found in TOML file."
+                "".format(mid) in output]
+
+            if True in signals:
+                found_managers.add(mid)
+            else:
+                skipped_managers.add(mid)
+
+        # Compare managers reported by the CLI and those expected.
+        included = set(included)
+        self.assertSetEqual(found_managers, included)
+        self.assertSetEqual(skipped_managers, self.MANAGER_IDS - included)
+
     def test_manager_selection(self):
         result = self.invoke('--manager', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertIn(" apm", result.output)
-        self.assertNotIn(" npm", result.output)
-        self.assertNotIn(" apt", result.output)
-        self.assertNotIn(" brew", result.output)
-        self.assertNotIn(" composer", result.output)
-        self.assertNotIn(" pip2", result.output)
-        self.assertNotIn(" pip3", result.output)
-        self.assertNotIn(" gem", result.output)
-        self.assertNotIn(" flatpak", result.output)
-        self.assertNotIn(" opkg", result.output)
-        self.assertNotIn(" yarn", result.output)
+        self.check_manager_selection(result.output, ['apm'])
 
     def test_manager_duplicate_selection(self):
         result = self.invoke(
             '--manager', 'apm', '--manager', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertIn(" apm", result.output)
-        self.assertNotIn(" npm", result.output)
-        self.assertNotIn(" apt", result.output)
-        self.assertNotIn(" brew", result.output)
-        self.assertNotIn(" composer", result.output)
-        self.assertNotIn(" pip2", result.output)
-        self.assertNotIn(" pip3", result.output)
-        self.assertNotIn(" gem", result.output)
-        self.assertNotIn(" flatpak", result.output)
-        self.assertNotIn(" opkg", result.output)
-        self.assertNotIn(" yarn", result.output)
+        self.check_manager_selection(result.output, ['apm'])
 
     def test_manager_multiple_selection(self):
         result = self.invoke(
             '--manager', 'apm', '--manager', 'gem', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertIn(" apm", result.output)
-        self.assertIn(" gem", result.output)
-        self.assertNotIn(" npm", result.output)
-        self.assertNotIn(" apt", result.output)
-        self.assertNotIn(" brew", result.output)
-        self.assertNotIn(" composer", result.output)
-        self.assertNotIn(" pip2", result.output)
-        self.assertNotIn(" pip3", result.output)
-        self.assertNotIn(" flatpak", result.output)
-        self.assertNotIn(" opkg", result.output)
-        self.assertNotIn(" yarn", result.output)
+        self.check_manager_selection(result.output, ['apm', 'gem'])
 
     def test_manager_exclusion(self):
         result = self.invoke('--exclude', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertNotIn(" apm", result.output)
-        self.assertIn(" gem", result.output)
-        self.assertIn(" npm", result.output)
-        self.assertIn(" apt", result.output)
-        self.assertIn(" brew", result.output)
-        self.assertIn(" composer", result.output)
-        self.assertIn(" pip2", result.output)
-        self.assertIn(" pip3", result.output)
-        self.assertIn(" flatpak", result.output)
-        self.assertIn(" opkg", result.output)
-        self.assertIn(" yarn", result.output)
+        self.check_manager_selection(
+            result.output, self.MANAGER_IDS - set(['apm']))
 
     def test_manager_duplicate_exclusion(self):
         result = self.invoke(
             '--exclude', 'apm', '--exclude', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertNotIn(" apm", result.output)
-        self.assertIn(" gem", result.output)
-        self.assertIn(" npm", result.output)
-        self.assertIn(" apt", result.output)
-        self.assertIn(" brew", result.output)
-        self.assertIn(" composer", result.output)
-        self.assertIn(" pip2", result.output)
-        self.assertIn(" pip3", result.output)
-        self.assertIn(" flatpak", result.output)
-        self.assertIn(" opkg", result.output)
-        self.assertIn(" yarn", result.output)
+        self.check_manager_selection(
+            result.output, self.MANAGER_IDS - set(['apm']))
 
     def test_manager_multiple_exclusion(self):
         result = self.invoke(
             '--exclude', 'apm', '--exclude', 'gem', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertNotIn(" apm", result.output)
-        self.assertNotIn(" gem", result.output)
-        self.assertIn(" npm", result.output)
-        self.assertIn(" apt", result.output)
-        self.assertIn(" brew", result.output)
-        self.assertIn(" composer", result.output)
-        self.assertIn(" pip2", result.output)
-        self.assertIn(" pip3", result.output)
-        self.assertIn(" flatpak", result.output)
-        self.assertIn(" opkg", result.output)
-        self.assertIn(" yarn", result.output)
+        self.check_manager_selection(
+            result.output, self.MANAGER_IDS - set(['apm', 'gem']))
 
     def test_manager_selection_priority(self):
         result = self.invoke(
             '--manager', 'apm', '--exclude', 'gem', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertIn(" apm", result.output)
-        self.assertNotIn(" gem", result.output)
-        self.assertNotIn(" npm", result.output)
-        self.assertNotIn(" apt", result.output)
-        self.assertNotIn(" brew", result.output)
-        self.assertNotIn(" composer", result.output)
-        self.assertNotIn(" pip2", result.output)
-        self.assertNotIn(" pip3", result.output)
-        self.assertNotIn(" flatpak", result.output)
-        self.assertNotIn(" opkg", result.output)
-        self.assertNotIn(" yarn", result.output)
+        self.check_manager_selection(result.output, ['apm'])
 
     def test_manager_selection_exclusion_override(self):
         result = self.invoke(
             '--manager', 'apm', '--exclude', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertNotIn(" apm", result.output)
-        self.assertNotIn(" gem", result.output)
-        self.assertNotIn(" npm", result.output)
-        self.assertNotIn(" apt", result.output)
-        self.assertNotIn(" brew", result.output)
-        self.assertNotIn(" composer", result.output)
-        self.assertNotIn(" pip2", result.output)
-        self.assertNotIn(" pip3", result.output)
-        self.assertNotIn(" flatpak", result.output)
-        self.assertNotIn(" opkg", result.output)
-        self.assertNotIn(" yarn", result.output)
+        self.check_manager_selection(result.output, [])
 
 
 class TestCLITableRendering(TestCLISubcommand):
@@ -250,9 +219,7 @@ class TestCLIManagers(TestCLITableRendering):
     def test_json_output(self):
         result = super(TestCLIManagers, self).test_json_output()
 
-        self.assertSetEqual(set(result), set([
-            'apm', 'apt', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm',
-            'pip2', 'pip3', 'flatpak', 'opkg', 'yarn']))
+        self.assertSetEqual(set(result), self.MANAGER_IDS)
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, str)
@@ -289,9 +256,7 @@ class TestCLIInstalled(TestCLITableRendering):
     def test_json_output(self):
         result = super(TestCLIInstalled, self).test_json_output()
 
-        self.assertTrue(set(result).issubset([
-            'apm', 'apt', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm',
-            'pip2', 'pip3', 'flatpak', 'opkg', 'yarn']))
+        self.assertTrue(set(result).issubset(self.MANAGER_IDS))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, str)
@@ -325,9 +290,7 @@ class TestCLISearch(TestCLITableRendering):
     def test_json_output(self):
         result = super(TestCLISearch, self).test_json_output()
 
-        self.assertTrue(set(result).issubset([
-            'apm', 'apt', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm',
-            'pip2', 'pip3', 'flatpak', 'opkg', 'yarn']))
+        self.assertTrue(set(result).issubset(self.MANAGER_IDS))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, str)
@@ -378,9 +341,7 @@ class TestCLIOutdated(TestCLITableRendering):
     def test_json_output(self):
         result = super(TestCLIOutdated, self).test_json_output()
 
-        self.assertTrue(set(result).issubset([
-            'apm', 'apt', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm',
-            'pip2', 'pip3', 'flatpak', 'opkg', 'yarn']))
+        self.assertTrue(set(result).issubset(self.MANAGER_IDS))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, str)

@@ -21,6 +21,7 @@ import unittest
 
 from ..managers import pool
 from ..platform import OS_DEFINITIONS
+from ..version import TokenizedString
 from .case import unless_linux, unless_macos, unless_windows
 
 
@@ -88,7 +89,7 @@ class TestManagerDefinitions(unittest.TestCase):
                     self.assertIsInstance(pkg['name'], str)
                     if pkg['installed_version'] is not None:
                         self.assertIsInstance(
-                            pkg['installed_version'], str)
+                            pkg['installed_version'], (str, TokenizedString))
 
     def test_search_type(self):
         """ Check that all search operations returns a dict of dicts. """

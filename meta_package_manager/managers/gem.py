@@ -96,6 +96,9 @@ class Gem(PackageManager):
             cmath (default: 1.0.0)
             csv (default: 3.0.9)
             date (default: 2.0.0)
+            fileutils (1.4.1, default: 1.1.0)
+            io-console (0.5.6, default: 0.4.7)
+            ipaddr (default: 1.2.2)
             molinillo (0.5.4, 0.4.5, 0.2.3)
             nokogiri (1.5.6)
             psych (2.0.0)
@@ -109,16 +112,16 @@ class Gem(PackageManager):
         output = self.run([self.cli_path] + self.cli_args + ['list'])
 
         if output:
-            regexp = re.compile(r'(\S+) \((default: )?(.+)\)')
-            for package in output.split('\n'):
+            regexp = re.compile(r'(\S+) \((.+)\)')
+            for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
-                    package_id, _, versions = match.groups()
-
+                    package_id, versions = match.groups()
                     # Guess latest installed version.
-                    _, version = max([
-                        (parse_version(v), v) for v in versions.split()])
-
+                    version = max([
+                        parse_version(v)
+                        for v in re.compile(r',|default:| ').split(versions)
+                        if v])
                     installed[package_id] = {
                         'id': package_id,
                         'name': package_id,

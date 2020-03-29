@@ -147,7 +147,7 @@ class TokenizedString():
     def __hash__(self):
         """ A `TokenizedString` is made unique by its original string and tuple
         of parsed tokens. """
-        return hash((self.string, map(hash, self.tokens)))
+        return hash((self.string, self.separator, self.tokens))
 
     def __init__(self, value, separator='-'):
         if isinstance(value, int):

@@ -140,6 +140,14 @@ def test_token_hash():
     assert hash(Token('09999')) != hash(Token(9999))
 
 
+def test_tokenized_string_hash():
+    assert hash(TokenizedString('1.2.3')) == hash(TokenizedString('1.2.3'))
+    assert hash(TokenizedString(9999)) == hash(TokenizedString(9999))
+    assert hash(TokenizedString('9999')) == hash(TokenizedString(9999))
+    assert hash(TokenizedString('09999')) != hash(TokenizedString('9999'))
+    assert hash(TokenizedString('09999')) != hash(TokenizedString(9999))
+
+
 version_list = [
     ['r2917_1', ('r', 2917, 1)],
     [' r     29   \n  17   1 x  ', ('r', 29, 17, 1, 'x')],

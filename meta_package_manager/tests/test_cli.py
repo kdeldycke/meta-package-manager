@@ -75,10 +75,10 @@ class TestCLISubcommand(CLITestCase):
         return result
 
     def test_manager_selection(self):
-        result = self.invoke('--manager', 'npm', *self.subcommand_args)
+        result = self.invoke('--manager', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertNotIn(" apm", result.output)
-        self.assertIn(" npm", result.output)
+        self.assertIn(" apm", result.output)
+        self.assertNotIn(" npm", result.output)
         self.assertNotIn(" apt", result.output)
         self.assertNotIn(" brew", result.output)
         self.assertNotIn(" composer", result.output)
@@ -91,10 +91,10 @@ class TestCLISubcommand(CLITestCase):
 
     def test_manager_duplicate_selection(self):
         result = self.invoke(
-            '--manager', 'npm', '--manager', 'npm', *self.subcommand_args)
+            '--manager', 'apm', '--manager', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertNotIn(" apm", result.output)
-        self.assertIn(" npm", result.output)
+        self.assertIn(" apm", result.output)
+        self.assertNotIn(" npm", result.output)
         self.assertNotIn(" apt", result.output)
         self.assertNotIn(" brew", result.output)
         self.assertNotIn(" composer", result.output)
@@ -107,11 +107,11 @@ class TestCLISubcommand(CLITestCase):
 
     def test_manager_multiple_selection(self):
         result = self.invoke(
-            '--manager', 'npm', '--manager', 'gem', *self.subcommand_args)
+            '--manager', 'apm', '--manager', 'gem', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertNotIn(" apm", result.output)
+        self.assertIn(" apm", result.output)
         self.assertIn(" gem", result.output)
-        self.assertIn(" npm", result.output)
+        self.assertNotIn(" npm", result.output)
         self.assertNotIn(" apt", result.output)
         self.assertNotIn(" brew", result.output)
         self.assertNotIn(" composer", result.output)
@@ -122,11 +122,11 @@ class TestCLISubcommand(CLITestCase):
         self.assertNotIn(" yarn", result.output)
 
     def test_manager_exclusion(self):
-        result = self.invoke('--exclude', 'npm', *self.subcommand_args)
+        result = self.invoke('--exclude', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertIn(" apm", result.output)
+        self.assertNotIn(" apm", result.output)
         self.assertIn(" gem", result.output)
-        self.assertNotIn(" npm", result.output)
+        self.assertIn(" npm", result.output)
         self.assertIn(" apt", result.output)
         self.assertIn(" brew", result.output)
         self.assertIn(" composer", result.output)
@@ -138,11 +138,11 @@ class TestCLISubcommand(CLITestCase):
 
     def test_manager_duplicate_exclusion(self):
         result = self.invoke(
-            '--exclude', 'npm', '--exclude', 'npm', *self.subcommand_args)
+            '--exclude', 'apm', '--exclude', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertIn(" apm", result.output)
+        self.assertNotIn(" apm", result.output)
         self.assertIn(" gem", result.output)
-        self.assertNotIn(" npm", result.output)
+        self.assertIn(" npm", result.output)
         self.assertIn(" apt", result.output)
         self.assertIn(" brew", result.output)
         self.assertIn(" composer", result.output)
@@ -154,11 +154,11 @@ class TestCLISubcommand(CLITestCase):
 
     def test_manager_multiple_exclusion(self):
         result = self.invoke(
-            '--exclude', 'npm', '--exclude', 'gem', *self.subcommand_args)
+            '--exclude', 'apm', '--exclude', 'gem', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertIn(" apm", result.output)
+        self.assertNotIn(" apm", result.output)
         self.assertNotIn(" gem", result.output)
-        self.assertNotIn(" npm", result.output)
+        self.assertIn(" npm", result.output)
         self.assertIn(" apt", result.output)
         self.assertIn(" brew", result.output)
         self.assertIn(" composer", result.output)
@@ -170,11 +170,11 @@ class TestCLISubcommand(CLITestCase):
 
     def test_manager_selection_priority(self):
         result = self.invoke(
-            '--manager', 'npm', '--exclude', 'gem', *self.subcommand_args)
+            '--manager', 'apm', '--exclude', 'gem', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
-        self.assertNotIn(" apm", result.output)
+        self.assertIn(" apm", result.output)
         self.assertNotIn(" gem", result.output)
-        self.assertIn(" npm", result.output)
+        self.assertNotIn(" npm", result.output)
         self.assertNotIn(" apt", result.output)
         self.assertNotIn(" brew", result.output)
         self.assertNotIn(" composer", result.output)
@@ -186,7 +186,7 @@ class TestCLISubcommand(CLITestCase):
 
     def test_manager_selection_exclusion_override(self):
         result = self.invoke(
-            '--manager', 'npm', '--exclude', 'npm', *self.subcommand_args)
+            '--manager', 'apm', '--exclude', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.assertNotIn(" apm", result.output)
         self.assertNotIn(" gem", result.output)

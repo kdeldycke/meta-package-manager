@@ -172,6 +172,14 @@ def test_tokenized_string_hash():
         != hash(TokenizedString('1.2.3', separator='_'))
 
 
+def test_tokenized_string_idempotent_instanciation():
+    tok1 = TokenizedString('1.2.3')
+    tok2 = TokenizedString(tok1)
+    assert tok1 is tok2
+    assert hash(tok1) == hash(tok2)
+    assert tok1 == tok2
+
+
 version_list = [
     ['r2917_1', ('r', 2917, 1)],
     [' r     29   \n  17   1 x  ', ('r', 29, 17, 1, 'x')],

@@ -149,7 +149,18 @@ class TokenizedString():
         of parsed tokens. """
         return hash((self.string, self.separator, self.tokens))
 
+    def __new__(cls, value, *args, **kwargs):
+        """ Return same object if a TokenizedString parameter is used at
+        instanciation.
+        """
+        if isinstance(value, TokenizedString):
+            return value
+        return super(TokenizedString, cls).__new__(cls)
+
     def __init__(self, value, separator='-'):
+        if isinstance(value, TokenizedString):
+            # Skip initialization for instance of the class.
+            return
         if isinstance(value, int):
             self.string = str(value)
         elif isinstance(value, str):

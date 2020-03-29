@@ -35,6 +35,10 @@ class Gem(PackageManager):
 
     name = "Ruby Gems"
 
+    # Default to the version shipped with the latest maintained macOS version,
+    # i.e. macOS 10.13 High Sierra, which is bundled with gem 2.5.2.
+    requirement = '2.5.0'
+
     def get_version(self):
         """ Fetch version from ``gem --version`` output.
 

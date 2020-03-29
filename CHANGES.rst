@@ -11,6 +11,7 @@ Changelog
 * [gem]: Ignore ``default:`` prefix on package version parsing.
 * [mpm]: Remove ``packaging`` dependency. Rely on internal version parsing.
 * [mpm]: Allow stats to be printed for ``backup`` command.
+* [gem]: Bump minimal requirement to ``2.5.0``.
 
 
 `3.0.0 (2020-03-25) <https://github.com/kdeldycke/meta-package-manager/compare/v2.9.0...v3.0.0>`_

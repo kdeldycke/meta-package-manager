@@ -43,7 +43,7 @@ class OPKG(PackageManager):
         """
         output = self.run([self.cli_path, '--version'])
         if output:
-            return output.split('\n')[0].split()[2]
+            return output.splitlines()[0].split()[2]
 
     def sync(self):
         """
@@ -91,7 +91,7 @@ class OPKG(PackageManager):
 
         if output:
             regexp = re.compile(r'(\S+) - (\S+)')
-            for package in output.split('\n'):
+            for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     package_id, installed_version = match.groups()
@@ -117,7 +117,7 @@ class OPKG(PackageManager):
 
         if output:
             regexp = re.compile(r'(\S+) - (\S+) - (.+)')
-            for package in output.split('\n'):
+            for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     package_id, latest_version, description = match.groups()
@@ -148,7 +148,7 @@ class OPKG(PackageManager):
 
         if output:
             regexp = re.compile(r'(\S+) - (\S+) - (\S+)')
-            for package in output.split('\n'):
+            for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     package_id, installed_version, latest_version = \

@@ -154,7 +154,7 @@ class Gem(PackageManager):
 
         if output:
             regexp = re.compile(r'(\S+) \((.+)\)')
-            for package in output.split('\n'):
+            for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     package_id, version = match.groups()
@@ -188,7 +188,7 @@ class Gem(PackageManager):
 
         if output:
             regexp = re.compile(r'(\S+) \((\S+) < (\S+)\)')
-            for package in output.split('\n'):
+            for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     package_id, current_version, latest_version = \

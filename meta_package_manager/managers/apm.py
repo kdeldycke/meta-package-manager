@@ -34,7 +34,7 @@ class APM(PackageManager):
         """ Fetch version from ``apm --version`` output."""
         output = self.run([self.cli_path, '--version'])
         if output:
-            return output.split('\n')[0].split()[1]
+            return output.splitlines()[0].split()[1]
 
     @cachedproperty
     def installed(self):

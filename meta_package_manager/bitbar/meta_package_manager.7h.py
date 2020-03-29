@@ -110,7 +110,7 @@ def print_error(message, submenu=""):
 
     A red, fixed-width font is used to preserve traceback and exception layout.
     """
-    for line in message.strip().split("\n"):
+    for line in message.strip().splitlines():
         echo(
             "{}{} | {f_error} trim=false emojize=false"
             "".format(submenu, line, f_error=FONTS['error']))

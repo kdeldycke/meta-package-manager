@@ -120,7 +120,7 @@ class Homebrew(PackageManager):
 
         if output:
             regexp = re.compile(r'(\S+)( \(!\))? (.+)')
-            for pkg_info in output.split('\n'):
+            for pkg_info in output.splitlines():
                 match = regexp.match(pkg_info)
                 if match:
                     package_id, removed, versions = match.groups()
@@ -173,7 +173,8 @@ class Homebrew(PackageManager):
 
         if output:
             lines = [
-                l for l in output.split('\n') if l and not l.startswith('==>')]
+                l for l in output.splitlines()
+                if l and not l.startswith('==>')]
             for package_id in re.compile(r'[\s✔]+').split(' '.join(lines)):
                 if package_id:
                     matches[package_id] = {
@@ -345,7 +346,7 @@ class Cask(Homebrew):
 
         if output:
             regexp = re.compile(r'(\S+) \((.*)\) != (.*)')
-            for outdated_pkg in output.strip().split('\n'):
+            for outdated_pkg in output.strip().splitlines():
                 package_id, version, latest_version = regexp.match(
                     outdated_pkg).groups()
 

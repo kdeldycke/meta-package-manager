@@ -120,7 +120,7 @@ class Composer(PackageManager):
 
         if output:
             regexp = re.compile(r'(\S+\/\S+) .*')
-            for package in output.split('\n'):
+            for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     package_id = match.group(1)

@@ -48,7 +48,7 @@ class YARN(PackageManager):
         if not output:
             return packages
 
-        outdatedList = output.split('\n')
+        outdatedList = output.splitlines()
         for line in outdatedList:
             if not line:
                 continue
@@ -137,7 +137,7 @@ class YARN(PackageManager):
             return outdated
 
         packages = list()
-        for line in output.split('\n'):
+        for line in output.splitlines():
             if not line:
                 continue
             obj = json.loads(line)

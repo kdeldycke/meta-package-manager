@@ -57,7 +57,7 @@ class MAS(PackageManager):
 
         if output:
             regexp = re.compile(r'(\d+) (.*) \((\S+)\)$')
-            for package in output.split('\n'):
+            for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     package_id, package_name, installed_version = \
@@ -96,7 +96,7 @@ class MAS(PackageManager):
 
         if output:
             regexp = re.compile(r'(\d+) (.*)$')
-            for package in output.split('\n'):
+            for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     package_id, package_name = match.groups()
@@ -128,7 +128,7 @@ class MAS(PackageManager):
 
         if output:
             regexp = re.compile(r'(\d+) (.*) \((\S+) -> (\S+)\)$')
-            for package in output.split('\n'):
+            for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     package_id, package_name, installed_version, \

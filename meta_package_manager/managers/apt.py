@@ -50,7 +50,7 @@ class APT(PackageManager):
         """
         output = self.run([self.cli_path, '--version'])
         if output:
-            output = output.split('\n')[0].split()
+            output = output.splitlines()[0].split()
             if len(output) > 1:
                 return output[1]
             else:
@@ -120,7 +120,7 @@ class APT(PackageManager):
 
         if output:
             regexp = re.compile(r'(\S+)\/\S+ (\S+) .*')
-            for package in output.split('\n'):
+            for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     package_id, installed_version = match.groups()
@@ -210,7 +210,7 @@ class APT(PackageManager):
         if output:
             regexp = re.compile(
                 r'(\S+)\/\S+ (\S+).*\[upgradable from: (\S+)\]')
-            for package in output.split('\n'):
+            for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     package_id, latest_version, installed_version = \

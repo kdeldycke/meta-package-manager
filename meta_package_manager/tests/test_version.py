@@ -140,6 +140,28 @@ def test_token_hash():
     assert hash(Token('09999')) != hash(Token(9999))
 
 
+@pytest.mark.parametrize('value', [
+    0,
+    123,
+    -1,
+    '0',
+    '1.2.3',
+    'abc',
+    'A-B-C',
+    '123   a bc \n'])
+def test_tokenized_string_allowed_instanciation(value):
+    TokenizedString(value)
+
+
+@pytest.mark.parametrize('value', [
+    None,
+    1.0,
+    [1, 2, 3]])
+def test_tokenized_string_unauthorized_instanciation(value):
+    with pytest.raises(TypeError):
+        TokenizedString(value)
+
+
 def test_tokenized_string_hash():
     assert hash(TokenizedString('1.2.3')) == hash(TokenizedString('1.2.3'))
     assert hash(TokenizedString(9999)) == hash(TokenizedString(9999))

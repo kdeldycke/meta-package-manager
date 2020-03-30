@@ -79,7 +79,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            $ brew list --versions
+            $ brew list --versions -1
             ack 2.14
             apg 2.2.3
             audacity (!) 2.1.2
@@ -94,7 +94,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            $ brew cask list --versions
+            $ brew cask list --versions -1
             aerial 1.2beta5
             android-file-transfer latest
             audacity (!) 2.1.2
@@ -117,7 +117,7 @@ class Homebrew(PackageManager):
         installed = {}
 
         output = self.run(
-            [self.cli_path] + self.cli_args + ['list', '--versions'])
+            [self.cli_path] + self.cli_args + ['list', '--versions', '-1'])
 
         if output:
             regexp = re.compile(r'(\S+)( \(!\))? (.+)')

@@ -262,7 +262,7 @@ def managers(ctx):
         cli_infos = u"{}  {}".format(
             OK if manager.cli_path else KO,
             manager.cli_path if manager.cli_path
-            else "{} CLI not found.".format(manager.cli_name))
+            else "{!r} not found".format(manager.cli_name))
 
         # Build up the version column content.
         version_infos = ''

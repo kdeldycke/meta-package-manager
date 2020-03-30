@@ -107,10 +107,14 @@ def print_table(header_defs, rows, sort_key=None):
         2. Strip terminal color formating;
         3. Then tokenize each cell's content for user-friendly natural sorting.
         """
-        return list(
-            map(TokenizedString,
-                map(strip_ansi,
-                    itemgetter(*sort_order)(line))))
+        sorting_key = []
+        for cell in itemgetter(*sort_order)(line):
+            if isinstance(cell, TokenizedString):
+                key = cell
+            else:
+                key = TokenizedString(strip_ansi(cell))
+            sorting_key.append(key)
+        return tuple(sorting_key)
 
     for line in table_formatter.format_output(
             sorted(rows, key=sort_method),

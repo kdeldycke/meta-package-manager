@@ -39,6 +39,10 @@ class Gem(PackageManager):
     # i.e. macOS 10.13 High Sierra, which is bundled with gem 2.5.2.
     requirement = '2.5.0'
 
+    cli_args = [
+        '--quiet',  # Silence command progress meter
+    ]
+
     def get_version(self):
         """ Fetch version from ``gem --version`` output.
 
@@ -109,7 +113,7 @@ class Gem(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.cli_args + ['list'])
+        output = self.run([self.cli_path, 'list'] + self.cli_args)
 
         if output:
             regexp = re.compile(r'(\S+) \((.+)\)')
@@ -149,8 +153,7 @@ class Gem(PackageManager):
         """
         matches = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
-            'search', query])
+        output = self.run([self.cli_path, 'search', query] + self.cli_args)
 
         if output:
             regexp = re.compile(r'(\S+) \((.+)\)')
@@ -184,7 +187,7 @@ class Gem(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.cli_args + ['outdated'])
+        output = self.run([self.cli_path, 'outdated'] + self.cli_args)
 
         if output:
             regexp = re.compile(r'(\S+) \((\S+) < (\S+)\)')
@@ -196,13 +199,13 @@ class Gem(PackageManager):
                     outdated[package_id] = {
                         'id': package_id,
                         'name': package_id,
-                        'installed_version': current_version,
-                        'latest_version': latest_version}
+                        'installed_version': parse_version(current_version),
+                        'latest_version': parse_version(latest_version)}
 
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.cli_args + ['update', '--user-install']
+        cmd = [self.cli_path, 'update', '--user-install'] + self.cli_args
         # Installs require `sudo` on system ruby.
         # I (@tresni) recommend doing something like:
         #     $ sudo dseditgroup -o edit -a -t user wheel

@@ -62,8 +62,9 @@ class Homebrew(PackageManager):
             return parse_version(output.split()[1])
 
     def sync(self):
+        """ `brew` and `cask` share the same command. """
         super(Homebrew, self).sync()
-        self.run([self.cli_path] + self.cli_args + ['update'])
+        self.run([self.cli_path] + self.cli_args + ['update', '--quiet'])
 
     @cachedproperty
     def installed(self):

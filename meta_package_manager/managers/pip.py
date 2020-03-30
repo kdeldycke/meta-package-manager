@@ -39,6 +39,10 @@ class Pip(PackageManager):
     # Declare this manager as virtual, i.e. not tied to a CLI.
     cli_name = None
 
+    cli_args = [
+        '--no-color',  # Suppress colored output.
+    ]
+
     def get_version(self):
         """ Fetch version from ``pip --version`` output.
 
@@ -215,8 +219,8 @@ class Pip(PackageManager):
                 outdated[package_id] = {
                     'id': package_id,
                     'name': package_id,
-                    'installed_version': package['version'],
-                    'latest_version': package['latest_version']}
+                    'installed_version': parse_version(package['version']),
+                    'latest_version': parse_version(package['latest_version'])}
 
         return outdated
 

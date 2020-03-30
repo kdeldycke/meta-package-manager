@@ -240,6 +240,10 @@ class PackageManager():
         """ Refresh local manager metadata from remote repository. """
         logger.info('Sync {} package info...'.format(self.id))
 
+    def cleanup(self):
+        """ Remove left-overs and unused packages. """
+        logger.info('Cleanup {}...'.format(self.id))
+
     @property
     def installed(self):
         """ List packages currently installed on the system.

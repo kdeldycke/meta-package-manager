@@ -161,3 +161,16 @@ class Flatpak(PackageManager):
 
     def upgrade_all_cli(self):
         return self.upgrade_cli()
+
+    def cleanup(self):
+        """ Runs:
+
+        .. code-block:: shell-session
+
+            $ flatpak repair --user
+
+        See: https://docs.flatpak.org/en/latest
+        /flatpak-command-reference.html#flatpak-repair
+        """
+        super(Flatpak, self).cleanup()
+        self.run([self.cli_path] + self.cli_args + ['repair', '--user'])

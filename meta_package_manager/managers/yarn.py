@@ -176,3 +176,11 @@ class Yarn(PackageManager):
 
     def upgrade_all_cli(self):
         return self.upgrade_cli()
+
+    def cleanup(self):
+        """ Remove the shared cache files.
+
+        See: https://yarnpkg.com/cli/cache/clean
+        """
+        super(Yarn, self).cleanup()
+        self.run([self.cli_path] + self.cli_args + ['cache', 'clean', '--all'])

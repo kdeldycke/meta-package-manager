@@ -18,6 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import unittest
+from types import MethodType
 
 from ..managers import pool
 from ..platform import OS_DEFINITIONS
@@ -123,6 +124,20 @@ class TestManagerDefinitions(unittest.TestCase):
                         self.assertIsInstance(
                             pkg['installed_version'], str)
                     self.assertIsInstance(pkg['latest_version'], str)
+
+    def test_sync_type(self):
+        """ Check that sync operation return nothing. """
+        for manager in pool().values():
+            if manager.available:
+                self.assertIsInstance(manager.sync, MethodType)
+                self.assertIsNone(manager.sync())
+
+    def test_cleanup_type(self):
+        """ Check that cleanup operation return nothing. """
+        for manager in pool().values():
+            if manager.available:
+                self.assertIsInstance(manager.cleanup, MethodType)
+                self.assertIsNone(manager.cleanup())
 
 
 class TestManagerPlatform(unittest.TestCase):

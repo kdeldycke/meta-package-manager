@@ -231,3 +231,14 @@ class APT(PackageManager):
 
     def upgrade_all_cli(self):
         return self.upgrade_cli()
+
+    def cleanup(self):
+        """ Runs:
+
+        .. code-block:: shell-session
+
+            $ sudo apt-get -y autoremove
+        """
+        super(APT, self).cleanup()
+        self.run(
+            ['sudo', self.cli_path] + self.cli_args + ['-y', 'autoremove'])

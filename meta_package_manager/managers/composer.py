@@ -186,3 +186,15 @@ class Composer(PackageManager):
 
     def upgrade_all_cli(self):
         return self.upgrade_cli()
+
+    def cleanup(self):
+        """ Runs:
+
+        .. code-block:: shell-session
+
+            $ composer global clear-cache
+
+        See: https://getcomposer.org/doc/03-cli.md#clear-cache-clearcache-cc
+        """
+        super(Composer, self).cleanup()
+        self.run([self.cli_path] + self.cli_args + ['clear-cache'])

@@ -301,6 +301,16 @@ def sync(ctx):
         manager.sync()
 
 
+@cli.command(short_help='Cleanup local data.')
+@click.pass_context
+def cleanup(ctx):
+    """ Cleanup local data and temporary artifacts. """
+    active_managers = ctx.obj['active_managers']
+
+    for manager in active_managers:
+        manager.cleanup()
+
+
 @cli.command(short_help='List installed packages.')
 @click.pass_context
 def installed(ctx):

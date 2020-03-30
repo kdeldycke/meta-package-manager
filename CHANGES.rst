@@ -7,6 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm]: Add new ``cleanup`` command. Closes #5.
 * [mpm]: Improve table sorting with new version-aware tokenizer.
 * [mpm]: Highlight manager IDs depending on their availability in ``managers``
   command.

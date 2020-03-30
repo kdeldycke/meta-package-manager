@@ -250,6 +250,28 @@ class Homebrew(PackageManager):
     def upgrade_all_cli(self):
         return self.upgrade_cli()
 
+    def cleanup(self):
+        """ Scrub the cache, including downloads for even the latest versions.
+
+        Note downloads for any installed formulae or casks will still not be
+        deleted.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            $ brew cleanup -s
+            Removing: ~/Library/Caches/Homebrew/node--1.bottle.tar.gz... (9MB)
+            Warning: Skipping sdl2: most recent version 2.0.12_1 not installed
+            Removing: ~/Library/Caches/Homebrew/Cask/aerial--1.8.1.zip... (5MB)
+            Removing: ~/Library/Caches/Homebrew/Cask/prey--1.9.pkg... (19.9MB)
+            Removing: ~/Library/Logs/Homebrew/readline... (64B)
+            Removing: ~/Library/Logs/Homebrew/libfido2... (64B)
+            Removing: ~/Library/Logs/Homebrew/libcbor... (64B)
+        """
+        super(Homebrew, self).cleanup()
+        self.run([self.cli_path] + self.cli_args + ['cleanup', '-s'])
+
 
 class Brew(Homebrew):
 
@@ -363,14 +385,7 @@ class Cask(Homebrew):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        """ Install a package.
-
-        .. todo::
-
-            Wait for https://github.com/caskroom/homebrew-cask/issues/22647
-            so we can force a cleanup in one go, as we do above with vanilla
-            Homebrew.
-        """
+        """ Install a package. """
         cmd = [self.cli_path, 'cask'] + self.cli_args + ['upgrade']
         if package_id:
             cmd.append(package_id)

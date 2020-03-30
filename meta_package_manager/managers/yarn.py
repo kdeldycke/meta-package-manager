@@ -24,7 +24,7 @@ from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
 
 
-class YARN(PackageManager):
+class Yarn(PackageManager):
 
     name = "Node's yarn"
 

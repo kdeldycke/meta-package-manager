@@ -27,6 +27,7 @@ from sys import __stdin__, __stdout__
 import click
 import click_log
 import tomlkit
+from boltons.strutils import strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
 from simplejson import dumps as json_dumps
 
@@ -100,7 +101,16 @@ def print_table(header_defs, rows, sort_key=None):
         sort_order.insert(0, sort_column_index)
 
     def sort_method(line):
-        return list(map(TokenizedString, itemgetter(*sort_order)(line)))
+        """ Serialize line's content for natural sorting.
+
+        1. Extract each cell value in the order provided by `sort_order`;
+        2. Strip terminal color formating;
+        3. Then tokenize each cell's content for user-friendly natural sorting.
+        """
+        return list(
+            map(TokenizedString,
+                map(strip_ansi,
+                    itemgetter(*sort_order)(line))))
 
     for line in table_formatter.format_output(
             sorted(rows, key=sort_method),
@@ -261,7 +271,7 @@ def managers(ctx):
 
         table.append([
             manager.name,
-            manager.id,
+            click.style(manager.id, fg='green' if manager.fresh else 'red'),
             os_infos,
             cli_infos,
             OK if manager.executable else '',

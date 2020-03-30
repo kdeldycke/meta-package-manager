@@ -8,6 +8,8 @@ Changelog
 .. note:: This version is not yet released and is under active development.
 
 * [mpm]: Improve table sorting with new version-aware tokenizer.
+* [mpm]: Highlight manager IDs depending on their availability in ``managers``
+  command.
 * [gem]: Ignore ``default:`` prefix on package version parsing.
 * [mpm]: Remove ``packaging`` dependency. Rely on internal version parsing.
 * [mpm]: Allow stats to be printed for ``backup`` command.

@@ -124,7 +124,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-           $ yarn --json --no-progress --non-interactive --skip-integrity-check global list'  # noqa
+           $ yarn --json --no-progress --non-interactive --skip-integrity-check global list  # noqa
 
             (...)
         """

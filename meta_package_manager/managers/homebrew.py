@@ -236,6 +236,39 @@ class Homebrew(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
+        """ Runs:
+
+        .. code-block:: shell-session
+
+            $ brew upgrade
+            ==> Upgrading 2 outdated packages:
+            node 13.11.0 -> 13.12.0
+            sdl2 2.0.12 -> 2.0.12_1
+            ==> Upgrading node 13.11.0 -> 13.12.0
+            ==> Downloading https://homebrew.bintray.com/bottles/node-13.tar.gz
+            ==> Downloading from https://akamai.bintray.com/fc/fc0bfb42fe23e960
+            ############################################################ 100.0%
+            ==> Pouring node-13.12.0.catalina.bottle.tar.gz
+            ==> Caveats
+            Bash completion has been installed to:
+              /usr/local/etc/bash_completion.d
+            ==> Summary
+            🍺  /usr/local/Cellar/node/13.12.0: 4,660 files, 60.3MB
+            Removing: /usr/local/Cellar/node/13.11.0... (4,686 files, 60.4MB)
+            ==> Upgrading sdl2 2.0.12 -> 2.0.12_1
+            ==> Downloading https://homebrew.bintray.com/bottles/sdl2-2.tar.gz
+            ==> Downloading from https://akamai.bintray.com/4d/4dcd635465d16372
+            ############################################################ 100.0%
+            ==> Pouring sdl2-2.0.12_1.catalina.bottle.tar.gz
+            🍺  /usr/local/Cellar/sdl2/2.0.12_1: 89 files, 4.7MB
+            Removing: /usr/local/Cellar/sdl2/2.0.12... (89 files, 4.7MB)
+            ==> Checking for dependents of upgraded formulae...
+            ==> No dependents found!
+            ==> Caveats
+            ==> node
+            Bash completion has been installed to:
+              /usr/local/etc/bash_completion.d
+        """
         cmd = [self.cli_path] + self.cli_args + ['upgrade']
         if package_id:
             cmd.append(package_id)

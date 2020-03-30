@@ -23,6 +23,7 @@ from boltons.iterutils import remap
 
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
+from ..version import parse_version
 
 
 class NPM(PackageManager):
@@ -43,7 +44,7 @@ class NPM(PackageManager):
             $ npm --version
             6.13.7
         """
-        return self.run([self.cli_path, '--version'])
+        return parse_version(self.run([self.cli_path, '--version']))
 
     @cachedproperty
     def installed(self):
@@ -101,7 +102,7 @@ class NPM(PackageManager):
                     installed[package_id] = {
                         'id': package_id,
                         'name': package_id,
-                        'installed_version': value}
+                        'installed_version': parse_version(value)}
                 return True
 
             remap(json.loads(output), visit=visit)
@@ -192,7 +193,7 @@ class NPM(PackageManager):
                 matches[package_id] = {
                     'id': package_id,
                     'name': package_id,
-                    'latest_version': package['version'],
+                    'latest_version': parse_version(package['version']),
                     'exact': self.exact_match(query, package_id)}
 
         return matches
@@ -234,9 +235,8 @@ class NPM(PackageManager):
                 outdated[package_id] = {
                     'id': package_id + '@' + values['latest'],
                     'name': package_id,
-                    'installed_version':
-                        values['current'] if 'current' in values else None,
-                    'latest_version': values['latest']}
+                    'installed_version': parse_version(values['current']),
+                    'latest_version': parse_version(values['latest'])}
 
         return outdated
 

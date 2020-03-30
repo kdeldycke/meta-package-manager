@@ -24,6 +24,7 @@ from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
+from ..version import parse_version
 
 
 class Pip(PackageManager):
@@ -50,7 +51,7 @@ class Pip(PackageManager):
         """
         output = self.run([self.cli_path, '--version'])
         if output:
-            return output.split()[1]
+            return parse_version(output.split()[1])
 
     @cachedproperty
     def installed(self):
@@ -100,7 +101,7 @@ class Pip(PackageManager):
                 installed[package_id] = {
                     'id': package_id,
                     'name': package_id,
-                    'installed_version': package['version']}
+                    'installed_version': parse_version(package['version'])}
 
         return installed
 
@@ -138,7 +139,7 @@ class Pip(PackageManager):
                     matches[package_id] = {
                         'id': package_id,
                         'name': package_id,
-                        'latest_version': version,
+                        'latest_version': parse_version(version),
                         'exact': self.exact_match(query, package_id)}
 
         return matches

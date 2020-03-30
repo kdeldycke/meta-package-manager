@@ -22,6 +22,7 @@ from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
+from ..version import parse_version
 
 
 class Yarn(PackageManager):
@@ -40,7 +41,7 @@ class Yarn(PackageManager):
 
     def get_version(self):
         """ Fetch version from ``yarn --version`` output."""
-        return self.run([self.cli_path, '--version'])
+        return parse_version(self.run([self.cli_path, '--version']))
 
     def parse(self, output):
         packages = {}
@@ -67,7 +68,7 @@ class Yarn(PackageManager):
         return {
             'id': package_id,
             'name': package_id,
-            'installed_version': version
+            'installed_version': parse_version(version)
         }
 
     @cachedproperty
@@ -104,7 +105,7 @@ class Yarn(PackageManager):
                 matches[package_id] = {
                     'id': package_id,
                     'name': package_id,
-                    'latest_version': package['version'],
+                    'latest_version': parse_version(package['version']),
                     'exact': self.exact_match(query, package_id)}
 
         return matches
@@ -158,9 +159,8 @@ class Yarn(PackageManager):
             outdated[package_id] = {
                 'id': package_id + '@' + values['latest'],
                 'name': package_id,
-                'installed_version':
-                    values['current'] if 'current' in values else None,
-                'latest_version': values['latest']}
+                'installed_version': parse_version(values['current']),
+                'latest_version': parse_version(values['latest'])}
         return outdated
 
     def upgrade_cli(self, package_id=None):

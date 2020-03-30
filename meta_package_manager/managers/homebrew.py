@@ -59,7 +59,7 @@ class Homebrew(PackageManager):
         """
         output = self.run([self.cli_path] + self.cli_args + ['--version'])
         if output:
-            return output.split()[1]
+            return parse_version(output.split()[1])
 
     def sync(self):
         super(Homebrew, self).sync()
@@ -124,15 +124,12 @@ class Homebrew(PackageManager):
                 match = regexp.match(pkg_info)
                 if match:
                     package_id, removed, versions = match.groups()
-
-                    # Guess latest installed version.
-                    _, version = max(
-                        [(parse_version(v), v) for v in versions.split()])
-
                     installed[package_id] = {
                         'id': package_id,
                         'name': package_id,
-                        'installed_version': version}
+                        'installed_version':
+                            # Keep highest version found.
+                            max(map(parse_version, versions.split()))}
 
         return installed
 
@@ -226,18 +223,14 @@ class Homebrew(PackageManager):
 
         if output:
             for pkg_info in json.loads(output):
-
-                # Parse versions to avoid lexicographic sorting gotchas.
-                _, version = max([
-                    (parse_version(v), v)
-                    for v in pkg_info['installed_versions']])
-
                 package_id = pkg_info['name']
                 outdated[package_id] = {
                     'id': package_id,
                     'name': package_id,
-                    'installed_version': version,
-                    'latest_version': pkg_info['current_version']}
+                    'installed_version': max(map(
+                        parse_version, pkg_info['installed_versions'])),
+                    'latest_version':
+                        parse_version(pkg_info['current_version'])}
 
         return outdated
 
@@ -379,8 +372,8 @@ class Cask(Homebrew):
                 outdated[package_id] = {
                     'id': package_id,
                     'name': package_id,
-                    'installed_version': version,
-                    'latest_version': latest_version}
+                    'installed_version': parse_version(version),
+                    'latest_version': parse_version(latest_version)}
 
         return outdated
 

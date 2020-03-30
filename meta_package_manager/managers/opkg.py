@@ -23,6 +23,7 @@ from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
 from ..platform import LINUX
+from ..version import parse_version
 
 
 class OPKG(PackageManager):
@@ -43,7 +44,7 @@ class OPKG(PackageManager):
         """
         output = self.run([self.cli_path, '--version'])
         if output:
-            return output.splitlines()[0].split()[2]
+            return parse_version(output.splitlines()[0].split()[2])
 
     def sync(self):
         """
@@ -98,7 +99,7 @@ class OPKG(PackageManager):
                     installed[package_id] = {
                         'id': package_id,
                         'name': package_id,
-                        'installed_version': installed_version}
+                        'installed_version': parse_version(installed_version)}
 
         return installed
 
@@ -125,7 +126,7 @@ class OPKG(PackageManager):
                         matches[package_id] = {
                             'id': package_id,
                             'name': package_id,
-                            'latest_version': latest_version,
+                            'latest_version': parse_version(latest_version),
                             'exact': self.exact_match(query, package_id)}
         return matches
 
@@ -156,8 +157,8 @@ class OPKG(PackageManager):
                     outdated[package_id] = {
                         'id': package_id,
                         'name': package_id,
-                        'latest_version': latest_version,
-                        'installed_version': installed_version}
+                        'latest_version': parse_version(latest_version),
+                        'installed_version': parse_version(installed_version)}
 
         return outdated
 

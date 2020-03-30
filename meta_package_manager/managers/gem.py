@@ -49,7 +49,7 @@ class Gem(PackageManager):
             $ gem --version
             3.0.3
         """
-        return self.run([self.cli_path, '--version'])
+        return parse_version(self.run([self.cli_path, '--version']))
 
     @cachedproperty
     def cli_path(self):
@@ -161,7 +161,7 @@ class Gem(PackageManager):
                     matches[package_id] = {
                         'id': package_id,
                         'name': package_id,
-                        'latest_version': version.split()[0],
+                        'latest_version': parse_version(version.split()[0]),
                         'exact': self.exact_match(query, package_id)}
 
         return matches

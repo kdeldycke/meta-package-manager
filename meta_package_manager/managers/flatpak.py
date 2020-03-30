@@ -23,6 +23,7 @@ from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
 from ..platform import LINUX
+from ..version import parse_version
 
 
 class Flatpak(PackageManager):
@@ -43,7 +44,7 @@ class Flatpak(PackageManager):
         """
         output = self.run([self.cli_path, '--version'])
         if output:
-            return output.strip().split()[1]
+            return parse_version(output.strip().split()[1])
 
     @cachedproperty
     def installed(self):
@@ -78,7 +79,7 @@ class Flatpak(PackageManager):
                     installed[package_id] = {
                         'id': package_id,
                         'name': name,
-                        'installed_version': installed_version}
+                        'installed_version': parse_version(installed_version)}
         return installed
 
     def search(self, query):
@@ -105,7 +106,7 @@ class Flatpak(PackageManager):
                     matches[package_id] = {
                         'id': package_id,
                         'name': name,
-                        'latest_version': latest_version,
+                        'latest_version': parse_version(latest_version),
                         'exact': self.exact_match(query, package_id)}
 
         return matches
@@ -148,8 +149,8 @@ class Flatpak(PackageManager):
                     outdated[package_id] = {
                         'id': package_id,
                         'name': name,
-                        'latest_version': latest_version,
-                        'installed_version': installed_version}
+                        'latest_version': parse_version(latest_version),
+                        'installed_version': parse_version(installed_version)}
 
         return outdated
 

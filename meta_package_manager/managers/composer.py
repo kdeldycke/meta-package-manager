@@ -24,6 +24,7 @@ from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
+from ..version import parse_version
 
 
 class Composer(PackageManager):
@@ -34,10 +35,10 @@ class Composer(PackageManager):
     requirement = '1.4.0'
 
     def get_version(self):
-        """ Fetch version from ``composer --version`` output."""
+        """ Fetch version from ``composer --version`` output. """
         output = self.run([self.cli_path, '--version'])
         if output:
-            return output.split()[2]
+            return parse_version(output.split()[2])
 
     @cachedproperty
     def installed(self):
@@ -85,7 +86,7 @@ class Composer(PackageManager):
                 installed[package_id] = {
                     'id': package_id,
                     'name': package_id,
-                    'installed_version': package['version']}
+                    'installed_version': parse_version(package['version'])}
 
         return installed
 
@@ -172,8 +173,8 @@ class Composer(PackageManager):
                 outdated[package_id] = {
                     'id': package_id,
                     'name': package_id,
-                    'installed_version': package['version'],
-                    'latest_version': package['latest']}
+                    'installed_version': parse_version(package['version']),
+                    'latest_version': parse_version(package['latest'])}
 
         return outdated
 

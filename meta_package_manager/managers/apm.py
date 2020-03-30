@@ -22,6 +22,7 @@ from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
+from ..version import parse_version
 
 
 class APM(PackageManager):
@@ -30,11 +31,13 @@ class APM(PackageManager):
 
     name = "Atom's apm"
 
+    requirement = '1.0.0'
+
     def get_version(self):
         """ Fetch version from ``apm --version`` output."""
         output = self.run([self.cli_path, '--version'])
         if output:
-            return output.splitlines()[0].split()[1]
+            return parse_version(output.splitlines()[0].split()[1])
 
     @cachedproperty
     def installed(self):
@@ -146,7 +149,7 @@ class APM(PackageManager):
                     installed[package_id] = {
                         'id': package_id,
                         'name': package_id,
-                        'installed_version': package['version']}
+                        'installed_version': parse_version(package['version'])}
 
         return installed
 
@@ -243,7 +246,7 @@ class APM(PackageManager):
                 matches[package_id] = {
                     'id': package_id,
                     'name': package_id,
-                    'latest_version': package['version'],
+                    'latest_version': parse_version(package['version']),
                     'exact': self.exact_match(query, package_id)}
 
         return matches
@@ -412,8 +415,8 @@ class APM(PackageManager):
                 outdated[package_id] = {
                     'id': package_id,
                     'name': package_id,
-                    'installed_version': package['version'],
-                    'latest_version': package['latestVersion']}
+                    'installed_version': parse_version(package['version']),
+                    'latest_version': parse_version(package['latestVersion'])}
 
         return outdated
 

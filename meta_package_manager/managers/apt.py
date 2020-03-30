@@ -23,9 +23,14 @@ from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
 from ..platform import LINUX
+from ..version import parse_version
 
 
 class APT(PackageManager):
+
+    """ Documentation:
+    http://manpages.ubuntu.com/manpages/xenial/man8/apt.8.html
+    """
 
     platforms = frozenset([LINUX])
 
@@ -49,14 +54,17 @@ class APT(PackageManager):
             1.6.11
         """
         output = self.run([self.cli_path, '--version'])
+        version = None
         if output:
             output = output.splitlines()[0].split()
             if len(output) > 1:
-                return output[1]
+                version = output[1]
             else:
                 output = self.run([self.cli_path, 'version', 'apt'])
                 if output:
-                    return output
+                    version = output
+        if version:
+            return parse_version(version)
 
     def sync(self):
         """
@@ -127,7 +135,7 @@ class APT(PackageManager):
                     installed[package_id] = {
                         'id': package_id,
                         'name': package_id,
-                        'installed_version': installed_version}
+                        'installed_version': parse_version(installed_version)}
 
         return installed
 
@@ -184,7 +192,7 @@ class APT(PackageManager):
                     matches[package_id] = {
                         'id': package_id,
                         'name': package_id,
-                        'latest_version': latest_version,
+                        'latest_version': parse_version(latest_version),
                         'exact': self.exact_match(query, package_id)}
 
         return matches
@@ -218,8 +226,8 @@ class APT(PackageManager):
                     outdated[package_id] = {
                         'id': package_id,
                         'name': package_id,
-                        'latest_version': latest_version,
-                        'installed_version': installed_version}
+                        'latest_version': parse_version(latest_version),
+                        'installed_version': parse_version(installed_version)}
 
         return outdated
 

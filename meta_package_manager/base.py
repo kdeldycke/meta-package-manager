@@ -121,7 +121,6 @@ class PackageManager():
 
         Returns `None` if CLI is not found or is not a file.
         """
-
         if not self.cli_name:
             return None
         env_path = "/usr/local/bin:{}".format(os.environ.get("PATH"))
@@ -150,9 +149,7 @@ class PackageManager():
         Returns an instance of `TokenizedString`.
         """
         if self.executable:
-            version = self.get_version()
-            if version:
-                return parse_version(version)
+            return self.get_version()
 
     @cachedproperty
     def supported(self):

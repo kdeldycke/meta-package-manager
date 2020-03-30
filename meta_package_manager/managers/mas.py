@@ -23,6 +23,7 @@ from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
 from ..platform import MACOS
+from ..version import parse_version
 
 
 class MAS(PackageManager):
@@ -37,7 +38,7 @@ class MAS(PackageManager):
 
     def get_version(self):
         """ Fetch version from ``mas version`` output."""
-        return self.run([self.cli_path, 'version'])
+        return parse_version(self.run([self.cli_path, 'version']))
 
     @cachedproperty
     def installed(self):
@@ -68,9 +69,7 @@ class MAS(PackageManager):
                         # Normalize unknown version. See:
                         # https://github.com/mas-cli/mas/commit
                         # /1859eaedf49f6a1ebefe8c8d71ec653732674341
-                        'installed_version': (
-                            installed_version if installed_version != 'unknown'
-                            else None)}
+                        'installed_version': parse_version(installed_version)}
 
         return installed
 
@@ -136,13 +135,11 @@ class MAS(PackageManager):
                     outdated[package_id] = {
                         'id': package_id,
                         'name': package_name,
-                        'latest_version': latest_version,
+                        'latest_version': parse_version(latest_version),
                         # Normalize unknown version. See:
                         # https://github.com/mas-cli/mas/commit
                         # /1859eaedf49f6a1ebefe8c8d71ec653732674341
-                        'installed_version': (
-                            installed_version if installed_version != 'unknown'
-                            else None)}
+                        'installed_version': parse_version(installed_version)}
 
         return outdated
 

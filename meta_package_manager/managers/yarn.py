@@ -29,7 +29,7 @@ class Yarn(PackageManager):
 
     name = "Node's yarn"
 
-    cli_args = [
+    global_args = [
         '--no-progress',
         '--non-interactive',
         '--skip-integrity-check'
@@ -79,12 +79,13 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-           $ yarn --json --no-progress --non-interactive --skip-integrity-check global list'  # noqa
+           $ yarn --json --no-progress --non-interactive \
+           > --skip-integrity-check list --depth 0
 
             (...)
         """
 
-        cmd = [self.cli_path, 'global', '--json'] + self.cli_args + [
+        cmd = [self.cli_path, 'global', '--json'] + self.global_args + [
             'list', '--depth', '0']
         output = self.run(cmd)
 
@@ -93,7 +94,7 @@ class Yarn(PackageManager):
     def search(self, query):
         matches = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'info', query, '--json'])
 
         if output:
@@ -124,13 +125,14 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-           $ yarn --json --no-progress --non-interactive --skip-integrity-check global list  # noqa
+           $ yarn --json --no-progress --non-interactive \
+           > --skip-integrity-check outdated --cwd
 
             (...)
         """
 
         outdated = {}
-        cmd = [self.cli_path, '--json'] + self.cli_args + [
+        cmd = [self.cli_path, '--json'] + self.global_args + [
             'outdated', '--cwd', self.global_dir]
         output = self.run(cmd)
 
@@ -164,7 +166,7 @@ class Yarn(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, 'global'] + self.cli_args + ['--silent']
+        cmd = [self.cli_path, 'global'] + self.global_args + ['--silent']
 
         if package_id:
             cmd.append('add')
@@ -183,4 +185,5 @@ class Yarn(PackageManager):
         See: https://yarnpkg.com/cli/cache/clean
         """
         super(Yarn, self).cleanup()
-        self.run([self.cli_path] + self.cli_args + ['cache', 'clean', '--all'])
+        self.run(
+            [self.cli_path] + self.global_args + ['cache', 'clean', '--all'])

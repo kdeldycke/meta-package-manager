@@ -91,7 +91,7 @@ class NPM(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             '-g', '--json', 'list'])
 
         if output:
@@ -184,7 +184,7 @@ class NPM(PackageManager):
         """
         matches = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'search', query, '--json'])
 
         if output:
@@ -224,7 +224,7 @@ class NPM(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             '-g', '--progress=false', '--json', '--no-update-notifier',
             'outdated'])
 
@@ -241,7 +241,7 @@ class NPM(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None, version=None):
-        cmd = [self.cli_path] + self.cli_args
+        cmd = [self.cli_path] + self.global_args
         cmd_args = ['-g', '--progress=false', '--no-update-notifier']
         if package_id:
             cmd_args.append('install')

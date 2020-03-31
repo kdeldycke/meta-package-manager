@@ -65,7 +65,7 @@ class Flatpak(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'list', '--app', '--columns=name,application,version',
             '--ostree-verbose'])
 
@@ -94,7 +94,7 @@ class Flatpak(PackageManager):
         """
         matches = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'search', query, '--ostree-verbose'])
 
         if output:
@@ -124,7 +124,7 @@ class Flatpak(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'remote-ls', '--app', '--updates',
             '--columns=name,application,version', '--ostree-verbose'])
 
@@ -137,7 +137,7 @@ class Flatpak(PackageManager):
                     name, package_id, latest_version = match.groups()
 
                     info_installed__output = self.run(
-                        [self.cli_path] + self.cli_args +
+                        [self.cli_path] + self.global_args +
                         ['info', '--ostree-verbose', package_id])
                     current_version = re.search(
                         r'version:\s(?P<version>\S.*?)\n',
@@ -155,7 +155,8 @@ class Flatpak(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.cli_args + ['update', '--noninteractive']
+        cmd = [self.cli_path] + self.global_args + [
+            'update', '--noninteractive']
         if package_id:
             cmd.append(package_id)
         return cmd
@@ -174,4 +175,4 @@ class Flatpak(PackageManager):
         /flatpak-command-reference.html#flatpak-repair
         """
         super(Flatpak, self).cleanup()
-        self.run([self.cli_path] + self.cli_args + ['repair', '--user'])
+        self.run([self.cli_path] + self.global_args + ['repair', '--user'])

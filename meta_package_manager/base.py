@@ -61,9 +61,9 @@ class PackageManager():
     """ Base class from which all package manager definitions should inherits.
     """
 
-    # Systematic options passed to package manager CLI. Might be of use to
-    # force silencing or high verbosity for instance.
-    cli_args = []
+    # Global list of options used for each call to the package manager CLI.
+    # Might be of use to force silencing or high verbosity.
+    global_args = []
 
     # List of platforms supported by the manager.
     platforms = frozenset()

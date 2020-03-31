@@ -39,7 +39,7 @@ class Pip(PackageManager):
     # Declare this manager as virtual, i.e. not tied to a CLI.
     cli_name = None
 
-    cli_args = [
+    global_args = [
         '--no-color',  # Suppress colored output.
     ]
 
@@ -96,7 +96,7 @@ class Pip(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'list', '--format=json', '--verbose'])
 
         if output:
@@ -131,7 +131,7 @@ class Pip(PackageManager):
         """
         matches = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'search', query])
 
         if output:
@@ -210,7 +210,7 @@ class Pip(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'list', '--format=json', '--outdated', '--verbose', '--quiet'])
 
         if output:
@@ -226,7 +226,7 @@ class Pip(PackageManager):
 
     def upgrade_cli(self, package_id):
         return [
-            self.cli_path] + self.cli_args + [
+            self.cli_path] + self.global_args + [
                 'install', '--user', '--upgrade', package_id]
 
     def upgrade_all_cli(self):

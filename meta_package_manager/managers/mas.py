@@ -54,7 +54,7 @@ class MAS(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.cli_args + ['list'])
+        output = self.run([self.cli_path] + self.global_args + ['list'])
 
         if output:
             regexp = re.compile(r'(\d+) (.*) \((\S+)\)$')
@@ -90,7 +90,7 @@ class MAS(PackageManager):
         """
         matches = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'search', query])
 
         if output:
@@ -123,7 +123,7 @@ class MAS(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.cli_args + ['outdated'])
+        output = self.run([self.cli_path] + self.global_args + ['outdated'])
 
         if output:
             regexp = re.compile(r'(\d+) (.*) \((\S+) -> (\S+)\)$')
@@ -144,7 +144,7 @@ class MAS(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.cli_args + ['upgrade']
+        cmd = [self.cli_path] + self.global_args + ['upgrade']
         if package_id:
             cmd.append(package_id)
         return cmd

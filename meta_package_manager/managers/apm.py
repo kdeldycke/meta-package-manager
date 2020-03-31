@@ -139,7 +139,7 @@ class APM(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'list', '--json'])
 
         if output:
@@ -237,7 +237,7 @@ class APM(PackageManager):
         """
         matches = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'search', query, '--json'])
 
         if output:
@@ -406,7 +406,7 @@ class APM(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'outdated', '--compatible', '--json'])
 
         if output:
@@ -421,7 +421,7 @@ class APM(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.cli_args + ['update', '--no-confirm']
+        cmd = [self.cli_path] + self.global_args + ['update', '--no-confirm']
         if package_id:
             cmd.append(package_id)
         return cmd

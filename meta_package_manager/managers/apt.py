@@ -84,7 +84,7 @@ class APT(PackageManager):
             Reading state information...
         """
         super(APT, self).sync()
-        self.run([self.cli_path] + self.cli_args + ['update', '--quiet'])
+        self.run([self.cli_path] + self.global_args + ['update', '--quiet'])
 
     @cachedproperty
     def installed(self):
@@ -123,7 +123,7 @@ class APT(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'list', '--installed', '--quiet'])
 
         if output:
@@ -178,7 +178,7 @@ class APT(PackageManager):
         """
         matches = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'search', query, '--quiet'])
 
         if output:
@@ -212,7 +212,7 @@ class APT(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'list', '--upgradable', '--quiet'])
 
         if output:
@@ -232,7 +232,7 @@ class APT(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.cli_args + ['update']
+        cmd = [self.cli_path] + self.global_args + ['update']
         if package_id:
             cmd.append(package_id)
         return cmd
@@ -249,4 +249,4 @@ class APT(PackageManager):
         """
         super(APT, self).cleanup()
         self.run(
-            ['sudo', self.cli_path] + self.cli_args + ['-y', 'autoremove'])
+            ['sudo', self.cli_path] + self.global_args + ['-y', 'autoremove'])

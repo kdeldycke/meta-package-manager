@@ -75,11 +75,11 @@ class TestManagerDefinitions(unittest.TestCase):
                 self.assertEqual(parsed_path.name, manager.cli_name)
                 self.assertTrue(parsed_path.is_file())
 
-    def test_cli_args_type(self):
+    def test_global_args_type(self):
         """ Check that definitions returns CLI args as a list of strings. """
         for manager in pool().values():
-            self.assertIsInstance(manager.cli_args, list)
-            for arg in manager.cli_args:
+            self.assertIsInstance(manager.global_args, list)
+            for arg in manager.global_args:
                 self.assertIsInstance(arg, str)
 
     def test_requirement(self):

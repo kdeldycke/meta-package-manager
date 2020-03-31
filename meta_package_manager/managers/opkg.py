@@ -54,7 +54,7 @@ class OPKG(PackageManager):
         .. code-block:: shell-session
         """
         super(OPKG, self).sync()
-        self.run([self.cli_path] + self.cli_args + ['update'])
+        self.run([self.cli_path] + self.global_args + ['update'])
 
     @cachedproperty
     def installed(self):
@@ -87,7 +87,7 @@ class OPKG(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'list-installed'])
 
         if output:
@@ -114,7 +114,7 @@ class OPKG(PackageManager):
         """
         matches = {}
 
-        output = self.run([self.cli_path] + self.cli_args + ['list'])
+        output = self.run([self.cli_path] + self.global_args + ['list'])
 
         if output:
             regexp = re.compile(r'(\S+) - (\S+) - (.+)')
@@ -144,7 +144,7 @@ class OPKG(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'list-upgradable'])
 
         if output:
@@ -163,7 +163,7 @@ class OPKG(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.cli_args + ['upgrade']
+        cmd = [self.cli_path] + self.global_args + ['upgrade']
         if package_id:
             cmd.append(package_id)
         return cmd

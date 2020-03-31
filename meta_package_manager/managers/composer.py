@@ -30,7 +30,7 @@ from ..version import parse_version
 class Composer(PackageManager):
 
     name = "PHP's Composer"
-    cli_args = ['global']
+    global_args = ['global']
     platforms = frozenset([LINUX, MACOS, WINDOWS])
     requirement = '1.4.0'
 
@@ -75,7 +75,7 @@ class Composer(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'show', '--format=json'])
 
         if output:
@@ -116,7 +116,7 @@ class Composer(PackageManager):
         """
         matches = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'search', query])
 
         if output:
@@ -163,7 +163,7 @@ class Composer(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.cli_args + [
+        output = self.run([self.cli_path] + self.global_args + [
             'outdated', '--format=json', ])
 
         if output:
@@ -179,7 +179,7 @@ class Composer(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.cli_args + [
+        cmd = [self.cli_path] + self.global_args + [
             'update']
         if package_id:
             cmd.append(package_id)
@@ -198,4 +198,4 @@ class Composer(PackageManager):
         See: https://getcomposer.org/doc/03-cli.md#clear-cache-clearcache-cc
         """
         super(Composer, self).cleanup()
-        self.run([self.cli_path] + self.cli_args + ['clear-cache'])
+        self.run([self.cli_path] + self.global_args + ['clear-cache'])

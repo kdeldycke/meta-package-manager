@@ -39,7 +39,7 @@ class Gem(PackageManager):
     # i.e. macOS 10.13 High Sierra, which is bundled with gem 2.5.2.
     requirement = '2.5.0'
 
-    cli_args = [
+    global_args = [
         '--quiet',  # Silence command progress meter
     ]
 
@@ -113,7 +113,7 @@ class Gem(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path, 'list'] + self.cli_args)
+        output = self.run([self.cli_path, 'list'] + self.global_args)
 
         if output:
             regexp = re.compile(r'(\S+) \((.+)\)')
@@ -153,7 +153,7 @@ class Gem(PackageManager):
         """
         matches = {}
 
-        output = self.run([self.cli_path, 'search', query] + self.cli_args)
+        output = self.run([self.cli_path, 'search', query] + self.global_args)
 
         if output:
             regexp = re.compile(r'(\S+) \((.+)\)')
@@ -187,7 +187,7 @@ class Gem(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path, 'outdated'] + self.cli_args)
+        output = self.run([self.cli_path, 'outdated'] + self.global_args)
 
         if output:
             regexp = re.compile(r'(\S+) \((\S+) < (\S+)\)')
@@ -205,7 +205,7 @@ class Gem(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, 'update', '--user-install'] + self.cli_args
+        cmd = [self.cli_path, 'update', '--user-install'] + self.global_args
         # Installs require `sudo` on system ruby.
         # I (@tresni) recommend doing something like:
         #     $ sudo dseditgroup -o edit -a -t user wheel
@@ -241,4 +241,4 @@ class Gem(PackageManager):
             Clean up complete
         """
         super(Gem, self).cleanup()
-        self.run([self.cli_path, 'cleanup'] + self.cli_args)
+        self.run([self.cli_path, 'cleanup'] + self.global_args)

@@ -57,14 +57,14 @@ class Homebrew(PackageManager):
             Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
 
         """
-        output = self.run([self.cli_path] + self.cli_args + ['--version'])
+        output = self.run([self.cli_path] + self.global_args + ['--version'])
         if output:
             return parse_version(output.split()[1])
 
     def sync(self):
         """ `brew` and `cask` share the same command. """
         super(Homebrew, self).sync()
-        self.run([self.cli_path] + self.cli_args + ['update', '--quiet'])
+        self.run([self.cli_path] + self.global_args + ['update', '--quiet'])
 
     @cachedproperty
     def installed(self):
@@ -117,7 +117,7 @@ class Homebrew(PackageManager):
         installed = {}
 
         output = self.run(
-            [self.cli_path] + self.cli_args + ['list', '--versions', '-1'])
+            [self.cli_path] + self.global_args + ['list', '--versions', '-1'])
 
         if output:
             regexp = re.compile(r'(\S+)( \(!\))? (.+)')
@@ -220,7 +220,7 @@ class Homebrew(PackageManager):
 
         # List available updates.
         output = self.run(
-            [self.cli_path] + self.cli_args + ['outdated', '--json=v1'])
+            [self.cli_path] + self.global_args + ['outdated', '--json=v1'])
 
         if output:
             for pkg_info in json.loads(output):
@@ -269,7 +269,7 @@ class Homebrew(PackageManager):
             Bash completion has been installed to:
               /usr/local/etc/bash_completion.d
         """
-        cmd = [self.cli_path] + self.cli_args + ['upgrade']
+        cmd = [self.cli_path] + self.global_args + ['upgrade']
         if package_id:
             cmd.append(package_id)
         return cmd
@@ -297,7 +297,7 @@ class Homebrew(PackageManager):
             Removing: ~/Library/Logs/Homebrew/libcbor... (64B)
         """
         super(Homebrew, self).cleanup()
-        self.run([self.cli_path] + self.cli_args + ['cleanup', '-s'])
+        self.run([self.cli_path] + self.global_args + ['cleanup', '-s'])
 
 
 class Brew(Homebrew):
@@ -317,7 +317,7 @@ class Brew(Homebrew):
             ==> Formulae
             gnu-sed ✔                    libxdg-basedir               minised
         """
-        return [self.cli_path] + self.cli_args + ['search', '--formulae']
+        return [self.cli_path] + self.global_args + ['search', '--formulae']
 
 
 class Cask(Homebrew):
@@ -343,7 +343,7 @@ class Cask(Homebrew):
             google-adwords-editor             prefs-editor
             licensed                          subclassed-mnemosyne
         """
-        return [self.cli_path] + self.cli_args + ['search', '--cask']
+        return [self.cli_path] + self.global_args + ['search', '--cask']
 
     @cachedproperty
     def outdated(self):
@@ -390,7 +390,7 @@ class Cask(Homebrew):
 
         # List available updates.
         output = self.run(
-            [self.cli_path, 'cask'] + self.cli_args + ['outdated'] +
+            [self.cli_path, 'cask'] + self.global_args + ['outdated'] +
             options)
 
         if output:
@@ -413,7 +413,7 @@ class Cask(Homebrew):
 
     def upgrade_cli(self, package_id=None):
         """ Install a package. """
-        cmd = [self.cli_path, 'cask'] + self.cli_args + ['upgrade']
+        cmd = [self.cli_path, 'cask'] + self.global_args + ['upgrade']
         if package_id:
             cmd.append(package_id)
         return cmd

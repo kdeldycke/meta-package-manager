@@ -72,7 +72,7 @@ class TestManagerDefinitions(unittest.TestCase):
                 parsed_path = Path(manager.cli_path)
                 self.assertTrue(parsed_path.is_absolute())
                 self.assertFalse(parsed_path.is_reserved())
-                self.assertEqual(parsed_path.name, manager.cli_name)
+                self.assertEqual(parsed_path.stem, manager.cli_name)
                 self.assertTrue(parsed_path.is_file())
 
     def test_global_args_type(self):

@@ -206,10 +206,6 @@ class APT(PackageManager):
             'search', query, '--quiet'] + search_args)
 
         if output:
-            #regexp = re.compile(
-            #    r'^(?P<package_id>\S+)/.+ (?P<version>.*) (?:.*)\n(?P<description>(?:  .+\n)+)',
-            #    re.MULTILINE)
-
             regexp = re.compile(r"""
                 ^(?P<package_id>\S+)  # A string with a char at least.
                 /.+\                  # A slash, any string, then a space.

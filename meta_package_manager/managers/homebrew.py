@@ -283,8 +283,6 @@ class Homebrew(PackageManager):
         Note downloads for any installed formulae or casks will still not be
         deleted.
 
-        Raw CLI output samples:
-
         .. code-block:: shell-session
 
             $ brew cleanup -s
@@ -295,9 +293,11 @@ class Homebrew(PackageManager):
             Removing: ~/Library/Logs/Homebrew/readline... (64B)
             Removing: ~/Library/Logs/Homebrew/libfido2... (64B)
             Removing: ~/Library/Logs/Homebrew/libcbor... (64B)
+
+        More doc at: https://docs.brew.sh/Manpage#cleanup-options-formulacask
         """
         super(Homebrew, self).cleanup()
-        self.run([self.cli_path] + ['cleanup', '-s'])
+        self.run([self.cli_path, 'cleanup', '-s'])
 
 
 class Brew(Homebrew):

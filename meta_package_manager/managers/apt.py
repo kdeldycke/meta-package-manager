@@ -250,3 +250,5 @@ class APT(PackageManager):
         super(APT, self).cleanup()
         self.run(
             ['sudo', self.cli_path] + self.global_args + ['-y', 'autoremove'])
+        self.run(
+            ['sudo', self.cli_path] + self.global_args + ['clean'])

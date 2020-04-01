@@ -18,8 +18,8 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import unittest
+from pathlib import Path, PurePath
 from types import MethodType
-from pathlib import PurePath, Path
 
 from ..managers import pool
 from ..platform import OS_DEFINITIONS
@@ -155,18 +155,17 @@ class TestManagerDefinitions(unittest.TestCase):
         """ Check that all search operations returns a dict of dicts. """
         for manager in pool().values():
             if manager.available:
-                matches = manager.search('python')
+                matches = manager.search('python', extended=True, exact=False)
                 self.assertIsInstance(matches, dict)
                 for pkg in matches.values():
                     self.assertIsInstance(pkg, dict)
                     self.assertSetEqual(set(pkg), set([
-                        'id', 'name', 'latest_version', 'exact']))
+                        'id', 'name', 'latest_version']))
                     self.assertIsInstance(pkg['id'], str)
                     self.assertIsInstance(pkg['name'], str)
                     if pkg['latest_version'] is not None:
                         self.assertIsInstance(
                             pkg['latest_version'], TokenizedString)
-                    self.assertIsInstance(pkg['exact'], bool)
 
     def test_outdated_type(self):
         """ Check that all outdated operations returns a dict of dicts. """

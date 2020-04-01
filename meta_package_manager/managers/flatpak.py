@@ -24,6 +24,7 @@ from boltons.cacheutils import cachedproperty
 from ..base import PackageManager
 from ..platform import LINUX
 from ..version import parse_version
+from . import logger
 
 
 class Flatpak(PackageManager):
@@ -82,7 +83,7 @@ class Flatpak(PackageManager):
                         'installed_version': parse_version(installed_version)}
         return installed
 
-    def search(self, query):
+    def search(self, query, extended, exact):
         """ Fetch matching packages from ``flatpak search`` output.
 
         Raw CLI output samples:
@@ -94,20 +95,36 @@ class Flatpak(PackageManager):
         """
         matches = {}
 
+        if extended:
+            logger.warning(
+                "Extended search not supported for {}. Fallback to Fuzzy."
+                "".format(self.id))
+
         output = self.run([self.cli_path] + self.global_args + [
             'search', query, '--ostree-verbose'])
 
         if output:
-            for package in output.splitlines():
-                match_attrs = package.split('\t')
-                if len(match_attrs) > 1:
-                    name, description, package_id, latest_version, branch, \
-                            remotes = match_attrs
-                    matches[package_id] = {
-                        'id': package_id,
-                        'name': name,
-                        'latest_version': parse_version(latest_version),
-                        'exact': self.exact_match(query, package_id)}
+            regexp = re.compile(r"""
+                ^(?P<package_name>\S+)\t
+                (?P<description>\S+)\t
+                (?P<package_id>\S+)\t
+                (?P<version>\S+)\t
+                (?P<branch>\S+)\t
+                (?P<remotes>.+)
+                """, re.VERBOSE)
+
+            for (package_id, description, app_id, version, branch,
+                 remotes) in regexp.findall(output):
+
+                # Filters out fuzzy matches, only keep stricly matching
+                # packages.
+                if exact and query not in (package_id, package_name):
+                    continue
+
+                matches[package_id] = {
+                    'id': package_id,
+                    'name': package_name,
+                    'latest_version': parse_version(version)}
 
         return matches
 

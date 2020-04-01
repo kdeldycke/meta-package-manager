@@ -24,15 +24,16 @@ from boltons.cacheutils import cachedproperty
 from ..base import PackageManager
 from ..platform import MACOS
 from ..version import parse_version
+from . import logger
 
 
 class MAS(PackageManager):
 
     platforms = frozenset([MACOS])
 
-    # 'mas outdated' output has been changed in 1.3.1: https://github.com
-    # /mas-cli/mas/commit/ca72ee42b1c5f482513b1d2fbf780b0bf3d9618b
-    requirement = '1.3.1'
+    # 'mas search' output has been fixed in 1.6.1:
+    # https://github.com/mas-cli/mas/pull/205
+    requirement = '1.6.1'
 
     name = "Mac AppStore"
 
@@ -73,7 +74,7 @@ class MAS(PackageManager):
 
         return installed
 
-    def search(self, query):
+    def search(self, query, extended, exact):
         """ Fetch matching packages from ``mas search`` output.
 
         Raw CLI output samples:
@@ -81,29 +82,46 @@ class MAS(PackageManager):
         .. code-block:: shell-session
 
             $ mas search python
-            689176796 Python Runner
-            630736088 Learning Python
-            945397020 Run Python
-            891162632 Python Lint
-            1025391371 Tutorial for Python
-            1164498373 PythonGames
+               689176796  Python Runner   (1.3)
+               630736088  Learning Python (1.0)
+               945397020  Run Python      (1.0)
+              1164498373  PythonGames     (1.0)
+              1400050251  Pythonic        (1.0.0)
         """
         matches = {}
+
+        if extended:
+            logger.warning(
+                "Extended search not supported for {}. Fallback to Fuzzy."
+                "".format(self.id))
 
         output = self.run([self.cli_path] + self.global_args + [
             'search', query])
 
         if output:
             regexp = re.compile(r'(\d+) (.*)$')
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, package_name = match.groups()
-                    matches[package_id] = {
-                        'id': package_id,
-                        'name': package_name,
-                        'latest_version': None,
-                        'exact': self.exact_match(query, package_name)}
+
+            regexp = re.compile(r"""
+                (?P<package_id>\d+)
+                \ +
+                (?P<package_name>.*)
+                \ +
+                \(
+                    (?P<version>\S+)
+                \)
+                """, re.MULTILINE + re.VERBOSE)
+
+            for package_id, package_name, version in regexp.findall(output):
+
+                # Filters out fuzzy matches, only keep stricly matching
+                # packages.
+                if exact and query not in (package_id, package_name):
+                    continue
+
+                matches[package_id] = {
+                    'id': package_id,
+                    'name': package_name,
+                    'latest_version': parse_version(version)}
 
         return matches
 

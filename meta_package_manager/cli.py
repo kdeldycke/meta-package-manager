@@ -362,9 +362,18 @@ def installed(ctx):
 
 
 @cli.command(short_help='Search packages.')
+@click.option(
+    '--extended/--package-name', default=False,
+    help="Extend search to additional package metadata like description, "
+    "instead of restricting it package ID and name. Defaults to package ID "
+    "search.")
+@click.option(
+    '--exact/--fuzzy', default=False,
+    help="Only returns exact matches, or enable fuzzy search in substrings. "
+    "Fuzzy by default.")
 @click.argument('query', type=click.STRING, required=True)
 @click.pass_context
-def search(ctx, query):
+def search(ctx, extended, exact, query):
     """ Search packages from all managers. """
     active_managers = ctx.obj['active_managers']
     output_format = ctx.obj['output_format']
@@ -378,7 +387,7 @@ def search(ctx, query):
         matches[manager.id] = {
             'id': manager.id,
             'name': manager.name,
-            'packages': list(manager.search(query).values())}
+            'packages': list(manager.search(query, extended, exact).values())}
 
         # Serialize errors at the last minute to gather all we encountered.
         matches[manager.id]['errors'] = list({

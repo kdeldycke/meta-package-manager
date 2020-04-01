@@ -90,14 +90,12 @@ class Composer(PackageManager):
 
         return installed
 
-    def search(self, query):
+    def search(self, query, extended, exact):
         """ Fetch matching packages from ``composer search`` output.
-
-        Raw CLI output samples:
 
         .. code-block:: shell-session
 
-            $ composer search symfony
+            $ composer global search symfony
             symfony/symfony The Symfony PHP framework
             symfony/yaml Symfony Yaml Component
             symfony/var-dumper Symfony (...) dumping PHP variables
@@ -113,23 +111,51 @@ class Composer(PackageManager):
             symfony/event-dispatcher Symfony EventDispatcher Component
             symfony/debug Symfony Debug Component
             symfony/css-selector Symfony CssSelector Component
+
+        .. code-block:: shell-session
+
+            $ composer global search --only-name python
+            hiqdev/hidev-python
+            aanro/pythondocx
+            laravel-admin-ext/python-editor
+            pythonphp/pythonphp
+            blyxxyz/python-server
+            nim-development/python-domotics
+            rakshitbharat/pythoninphp
+            tequilarapido/python-bridge
+
+        .. code-block:: shell-session
+
+            $ search global --only-name pythonphp/pythonphp
+            pythonphp/pythonphp
         """
         matches = {}
 
+        search_args = []
+        if not extended:
+            search_args.append('--only-name')
+
         output = self.run([self.cli_path] + self.global_args + [
-            'search', query])
+            'search'] + search_args + [query])
 
         if output:
-            regexp = re.compile(r'(\S+\/\S+) .*')
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id = match.group(1)
-                    matches[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'latest_version': None,
-                        'exact': self.exact_match(query, package_id)}
+
+            regexp = re.compile(r"""
+                ^(?P<package_id>\S+\/\S+)
+                (?P<description> .*)?
+                """, re.MULTILINE + re.VERBOSE)
+
+            for package_id, description in regexp.findall(output):
+
+                # Filters out fuzzy matches, only keep stricly matching
+                # packages.
+                if exact and query != package_id:
+                    continue
+
+                matches[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'latest_version': None}
 
         return matches
 

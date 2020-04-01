@@ -13,6 +13,10 @@ Changelog
   command.
 * [gem]: Ignore ``default:`` prefix on package version parsing.
 * [mpm]: Remove ``packaging`` dependency. Rely on internal version parsing.
+* [mpm]: Add new ``--exact`` and ``--extended`` parameters to ``search``
+  command.
+* [mas]: Retrieve version in search results.
+* [mas]: Bump minimal version to ``1.6.1``.
 * [mpm]: Allow stats to be printed for ``backup`` command.
 * [gem]: Bump minimal requirement to ``2.5.0``.
 

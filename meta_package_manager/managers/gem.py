@@ -133,39 +133,55 @@ class Gem(PackageManager):
 
         return installed
 
-    def search(self, query):
+    def search(self, query, extended, exact):
         """ Fetch matching packages from ``gem search`` output.
-
-        Raw CLI output samples:
 
         .. code-block:: shell-session
 
-            $ gem search python
-
-            *** REMOTE GEMS ***
-
+            $ gem search python --versions --quiet
+            at_coder_friends-generator-python_ref (0.2.0)
             bee_python (0.2.3)
-            fluent-plugin-airbrake-python (0.2)
+            dependabot-python (0.117.5)
             logstash-filter-python (0.0.1 java)
-            pythonconfig (1.0.1)
+            python (0.0.1)
+            python-generator (1.1.0)
+            python_with_git_test (2.499.8)
             rabbit-slide-niku-erlangvm-for-pythonista (2015.09.12)
             RubyToPython (0.0)
+
+        .. code-block:: shell-session
+
+            $ gem search python --versions --exact --quiet
+            python (0.0.1)
         """
         matches = {}
 
-        output = self.run([self.cli_path, 'search', query] + self.global_args)
+        if extended:
+            logger.warning(
+                "Extended search not supported for {}. Fallback to Fuzzy."
+                "".format(self.id))
+
+        search_arg = []
+        if exact:
+            search_arg.append('--exact')
+
+        output = self.run([self.cli_path, 'search', query, '--versions'
+                           ] + search_arg + self.global_args)
 
         if output:
-            regexp = re.compile(r'(\S+) \((.+)\)')
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, version = match.groups()
-                    matches[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'latest_version': parse_version(version.split()[0]),
-                        'exact': self.exact_match(query, package_id)}
+            regexp = re.compile(r"""
+                (?P<package_id>\S+)     # Any string.
+                \                       # A space.
+                \(                      # Start of content in parenthesis.
+                    (?P<version>\S+)    # Version string.
+                    (?:\ \S+)?          # Optional platform value after space.
+                \)
+                """, re.VERBOSE)
+            for package_id, version in regexp.findall(output):
+                matches[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'latest_version': parse_version(version)}
 
         return matches
 

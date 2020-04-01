@@ -23,6 +23,7 @@ from boltons.cacheutils import cachedproperty
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
 from ..version import parse_version
+from . import logger
 
 
 class Yarn(PackageManager):
@@ -75,11 +76,9 @@ class Yarn(PackageManager):
     def installed(self):
         """ Fetch installed packages from ``yarn list`` output.
 
-        Raw CLI output samples:
-
         .. code-block:: shell-session
 
-           $ yarn --json --no-progress --non-interactive \
+           $ yarn global --json --no-progress --non-interactive \
            > --skip-integrity-check list --depth 0
 
             (...)
@@ -91,23 +90,109 @@ class Yarn(PackageManager):
 
         return self.parse(output)
 
-    def search(self, query):
+    def search(self, query, extended, exact):
+        """ Call ``yarn info`` and only works for exact match.
+
+        Yarn maintainers have decided not to implement a dedicated ``search``
+        command:
+        https://github.com/yarnpkg/yarn/issues/778#issuecomment-253146299
+
+        .. code-block:: shell-session
+            $ yarn --no-progress --non-interactive --skip-integrity-check \
+            > --json info python | jq
+            {
+              "type": "inspect",
+              "data": {
+                "name": "python",
+                "description": "Interact with python child process",
+                "dist-tags": {
+                  "latest": "0.0.4"
+                },
+                "versions": [
+                  "0.0.0",
+                  "0.0.1",
+                  "0.0.2",
+                  "0.0.3",
+                  "0.0.4"
+                ],
+                "maintainers": [
+                  {
+                    "name": "drderidder",
+                    "email": "drderidder@gmail.com"
+                  }
+                ],
+                "time": {
+                  "modified": "2017-09-16T05:26:13.151Z",
+                  "created": "2011-07-11T01:59:04.362Z",
+                  "0.0.0": "2011-07-11T01:59:05.137Z",
+                  "0.0.1": "2011-07-17T05:23:33.166Z",
+                  "0.0.2": "2011-07-20T03:42:50.379Z",
+                  "0.0.3": "2014-06-08T00:39:08.562Z",
+                  "0.0.4": "2015-01-25T02:48:07.820Z"
+                },
+                "author": {
+                  "name": "Darren DeRidder"
+                },
+                "repository": {
+                  "type": "git",
+                  "url": "git://github.com/73rhodes/node-python.git"
+                },
+                "homepage": "https://github.com/73rhodes/node-python",
+                "bugs": {
+                  "url": "https://github.com/73rhodes/node-python/issues"
+                },
+                "readmeFilename": "README.md",
+                "users": {
+                  "dewang-mistry": true,
+                  "goliatone": true,
+                  "sapanbhuta": true,
+                  "aditcmarix": true,
+                  "imlucas": true,
+                  "heyderpd": true,
+                  "ukuli": true,
+                  "chbardel": true,
+                  "asaupup": true,
+                  "nuwaio": true
+                },
+                "version": "0.0.4",
+                "main": "./lib/python.js",
+                "engines": {
+                  "node": ">= 0.4.1"
+                },
+                "gitHead": "69754aaa57658193916a1bf5fc391198098f74f6",
+                "scripts": {},
+                "dist": {
+                  "shasum": "3094e898ef17a33aa9c3e973b3848a38e47d1818",
+                  "tarball": "https://registry.npmjs.org/python/-/python-0.0.4.tgz"
+                },
+                "directories": {}
+              }
+            }
+        """
         matches = {}
 
+        if extended:
+            logger.warning(
+                "Extended search not supported for {}. Fallback to Fuzzy."
+                "".format(self.id))
+        elif not exact:
+            logger.warning(
+                "Fuzzy search not supported for {}. Fallback to Exact."
+                "".format(self.id))
+
         output = self.run([self.cli_path] + self.global_args + [
-            'info', query, '--json'])
+            '--json', 'info', query])
 
         if output:
-            for obj in json.loads('[{}]'.format(output)):
-                if obj['type'] != 'inspect':
-                    continue
-                package = obj['data']
+            result = json.loads(output)
+
+            if result['type'] == 'inspect':
+                package = result['data']
                 package_id = package['name']
                 matches[package_id] = {
                     'id': package_id,
                     'name': package_id,
-                    'latest_version': parse_version(package['version']),
-                    'exact': self.exact_match(query, package_id)}
+                    'latest_version': parse_version(package['version'])}
 
         return matches
 

@@ -23,7 +23,7 @@ from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
 from ..platform import LINUX
-from ..version import parse_version
+from ..version import TokenizedString, parse_version
 
 
 class OPKG(PackageManager):
@@ -103,31 +103,52 @@ class OPKG(PackageManager):
 
         return installed
 
-    def search(self, query):
-        """ opkg doesn't have a working 'search', so get all packages and
-        filter the packages.
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-        """
+    def search(self, query, extended, exact):
+        """ Simulate search by listing all packages. """
         matches = {}
 
+        # opkg doesn't have a working 'search', so get all packages and
+        # filter the packages later.
         output = self.run([self.cli_path] + self.global_args + ['list'])
 
         if output:
-            regexp = re.compile(r'(\S+) - (\S+) - (.+)')
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, latest_version, description = match.groups()
-                    if query in package_id:
-                        matches[package_id] = {
-                            'id': package_id,
-                            'name': package_id,
-                            'latest_version': parse_version(latest_version),
-                            'exact': self.exact_match(query, package_id)}
+            regexp = re.compile(r"""
+                (?P<package_id>\S+)
+                \ -\
+                (?P<version>\S+)
+                \ -\
+                (?P<description>.+)
+                """, re.VERBOSE + re.MULTILINE)
+
+            for package_id, version, description in regexp.findall(output):
+
+                # Skip all non-stricly matching package IDs in exact mode.
+                if exact:
+                    if query != package_id:
+                        continue
+
+                else:
+                    # All other modes search for matching in package IDs and
+                    # names.
+                    searched_content = set(
+                        map(str, TokenizedString(package_id)))
+
+                    # Also search within the description in extended mode.
+                    if extended:
+                        searched_content.update(
+                            set(map(str, TokenizedString(description))))
+
+                    # Skip package if not all sub-strings are present in the
+                    # searched content.
+                    query_parts = set(map(str, TokenizedString(query)))
+                    if not query_parts.issubset(searched_content):
+                        continue
+
+                matches[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'latest_version': parse_version(version)}
+
         return matches
 
     @cachedproperty

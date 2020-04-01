@@ -24,7 +24,7 @@ from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
-from ..version import parse_version
+from ..version import TokenizedString, parse_version
 
 
 class Pip(PackageManager):
@@ -109,14 +109,12 @@ class Pip(PackageManager):
 
         return installed
 
-    def search(self, query):
+    def search(self, query, extended, exact):
         """ Fetch matching packages from ``pip search`` output.
-
-        Raw CLI output samples:
 
         .. code-block:: shell-session
 
-            $ pip search abc
+            $ pip search --no-color abc
             ABC (0.0.0)                 - UNKNOWN
             micropython-abc (0.0.1)     - Dummy abc module for MicroPython
             abc1 (1.2.0)                - a list about my think
@@ -127,7 +125,7 @@ class Pip(PackageManager):
                                           Sequential Monte Carlo (ABC SMC)
                                           sampler for parameter estimation.
             collective.js.abcjs (1.10)  - UNKNOWN
-            cosmoabc (1.0.5)            - Python ABC sampler
+            cosmo (1.0.5)               - Python ABC sampler
         """
         matches = {}
 
@@ -135,16 +133,35 @@ class Pip(PackageManager):
             'search', query])
 
         if output:
-            regexp = re.compile(r'(\S+) \((.*?)\).*')
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, version = match.groups()
-                    matches[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'latest_version': parse_version(version),
-                        'exact': self.exact_match(query, package_id)}
+            regexp = re.compile(r"""
+                ^(?P<package_id>\S+)  # A string with a char at least.
+                \                     # A space.
+                \((?P<version>.*?)\)  # Content between parenthesis.
+                [ ]+-                 # A space or more, then a dash.
+                (?P<description>      # Start of the multi-line desc group.
+                    (?:[ ]+.*\s)+     # Lines of strings prefixed by spaces.
+                )
+                """, re.MULTILINE + re.VERBOSE)
+
+            for package_id, version, description in regexp.findall(output):
+
+                # Exclude packages not featuring the search query in their ID
+                # or name.
+                if not extended:
+                    query_parts = set(map(str, TokenizedString(query)))
+                    pkg_parts = set(map(str, TokenizedString(package_id)))
+                    if not query_parts.issubset(pkg_parts):
+                        continue
+
+                # Filters out fuzzy matches, only keep stricly matching
+                # packages.
+                if exact and query != package_id:
+                    continue
+
+                matches[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'latest_version': parse_version(version)}
 
         return matches
 

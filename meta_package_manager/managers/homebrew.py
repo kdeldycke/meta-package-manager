@@ -25,6 +25,7 @@ from boltons.cacheutils import cachedproperty
 from ..base import PackageManager
 from ..platform import MACOS
 from ..version import parse_version
+from . import logger
 
 
 class Homebrew(PackageManager):
@@ -134,10 +135,8 @@ class Homebrew(PackageManager):
 
         return installed
 
-    def search(self, query):
+    def search(self, query, extended, exact):
         """ Fetch matching packages from ``brew search`` output.
-
-        Raw CLI output samples:
 
         .. code-block:: shell-session
 
@@ -164,22 +163,55 @@ class Homebrew(PackageManager):
             focused                           physicseditor
             google-adwords-editor             prefs-editor
             licensed                          subclassed-mnemosyne
+
+        .. code-block:: shell-session
+
+            $ brew search --formulae python
+            ==> Formulae
+            app-engine-python   boost-python3   python ✔          python-yq
+            boost-python        gst-python      python-markdown   python@3.8 ✔
+
+        .. code-block:: shell-session
+
+            $ brew search --formulae "/^ssed$/"
+            ==> Formulae
+            ssed
+
+        .. code-block:: shell-session
+
+            $ brew search --formulae "/^sed$/"
+            No formula or cask found for "/^sed$/".
+            Closed pull requests:
+            Merge ba7a794 (https://github.com/Homebrew/linuxbrew-core/pull/198)
+            R: disable Tcl (https://github.com/Homebrew/homebrew-core/pull/521)
+            (...)
+
+        More doc at: https://docs.brew.sh/Manpage#search-texttext
         """
         matches = {}
+
+        if extended:
+            logger.warning(
+                "Extended search not supported for {}. Fallback to Fuzzy"
+                "".format(self.id))
+
+        # Use regexp for exact match.
+        if exact:
+            query = "/^{}$/".format(query)
 
         output = self.run(self.search_cli + [query])
 
         if output:
-            lines = [
-                l for l in output.splitlines()
-                if l and not l.startswith('==>')]
-            for package_id in re.compile(r'[\s✔]+').split(' '.join(lines)):
-                if package_id:
-                    matches[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'latest_version': None,
-                        'exact': self.exact_match(query, package_id)}
+            regexp = re.compile(r"""
+                (?:==>\s\S+\s)?           # Ignore section starting with '==>'.
+                (?P<package_id>[^\s✔]+)   # Anything not a whitespace or ✔.
+                """, re.VERBOSE)
+
+            for package_id in regexp.findall(output):
+                matches[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'latest_version': None}
 
         return matches
 

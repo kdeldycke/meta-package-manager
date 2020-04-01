@@ -23,7 +23,7 @@ from boltons.iterutils import remap
 
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
-from ..version import parse_version
+from ..version import TokenizedString, parse_version
 
 
 class NPM(PackageManager):
@@ -109,10 +109,10 @@ class NPM(PackageManager):
 
         return installed
 
-    def search(self, query):
+    def search(self, query, extended, exact):
         """ Fetch matching packages from ``npm search`` output.
 
-        Raw CLI output samples:
+        Doc: https://docs.npmjs.com/cli/search.html
 
         .. code-block:: shell-session
 
@@ -184,17 +184,34 @@ class NPM(PackageManager):
         """
         matches = {}
 
+        search_args = []
+        if not extended:
+            search_args.append('--no-description')
+
         output = self.run([self.cli_path] + self.global_args + [
-            'search', query, '--json'])
+            'search', '--json'] + search_args + [query])
 
         if output:
             for package in json.loads(output):
                 package_id = package['name']
+
+                # Exclude packages not featuring the search query in their ID
+                # or name.
+                if not extended:
+                    query_parts = set(map(str, TokenizedString(query)))
+                    pkg_parts = set(map(str, TokenizedString(package_id)))
+                    if not query_parts.issubset(pkg_parts):
+                        continue
+
+                # Filters out fuzzy matches, only keep stricly matching
+                # packages.
+                if exact and query != package_id:
+                    continue
+
                 matches[package_id] = {
                     'id': package_id,
                     'name': package_id,
-                    'latest_version': parse_version(package['version']),
-                    'exact': self.exact_match(query, package_id)}
+                    'latest_version': parse_version(package['version'])}
 
         return matches
 

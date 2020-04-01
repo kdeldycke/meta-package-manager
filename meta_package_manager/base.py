@@ -250,20 +250,7 @@ class PackageManager():
         """
         raise NotImplementedError
 
-    @staticmethod
-    def exact_match(query, result):
-        """ Compare search query and matching result.
-
-        Returns `True` if the matching result exactly match the search query.
-
-        Still pplies a light normalization and tokenization of strings before
-        comparison to make the "exactiness" in the human sense instead of
-        strictly machine sense.
-        """
-        # TODO: tokenize.
-        return query.lower() == result.lower()
-
-    def search(self, query):
+    def search(self, query, extended, exact):
         """ Search packages whose ID contain exact or partial query.
 
         Returns a dict indexed by package IDs. Each item is a dict with

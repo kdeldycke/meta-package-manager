@@ -139,21 +139,16 @@ class APT(PackageManager):
 
         return installed
 
-    def search(self, query):
+    def search(self, query, extended, exact):
         """ Fetch matching packages from ``apt search`` output.
-
-        Raw CLI output samples:
 
         .. code-block:: shell-session
 
-            $ apt search abc --quiet
+            $ apt search abc --names-only --quiet
             Sorting...
             Full Text Search...
             abcde/xenial 2.7.1-1 all
               A Better CD Encoder
-
-            abcm2ps/xenial 7.8.9-1 amd64
-              Translates ABC music description files to PostScript
 
             abcmidi/xenial 20160103-1 amd64
               converter from ABC to MIDI format and back
@@ -161,39 +156,76 @@ class APT(PackageManager):
             berkeley-abc/xenial 1.01+20150706hgc3698e0+dfsg-2 amd64
               ABC - A System for Sequential Synthesis and Verification
 
-            grabcd-encode/xenial 0009-1 all
-              rip and encode audio CDs - encoder
-
             grabcd-rip/xenial 0009-1 all
               rip and encode audio CDs - ripper
 
             libakonadi-kabc4/xenial 4:4.14.10-1ubuntu2 amd64
               Akonadi address book access library
 
-            libgrabcd-readconfig-perl/xenial 0009-1 all
-              rip and encode audio CDs - common files
+        .. code-block:: shell-session
 
-            libkabc4/xenial 4:4.14.10-1ubuntu2 amd64
-              library for handling address book data
+            $ apt search "^sed$" --names-only --quiet
+            Sorting...
+            Full Text Search...
+            sed/xenial 2.1.9-3 all
+              Blah blah blah
+
+        .. code-block:: shell-session
+
+            $ apt search abc --full --quiet
+            Sorting...
+            Full Text Search...
+            abcde/xenial 2.7.1-1 all
+              This package contains the essential basic system utilities.
+              .
+              Specifically, this package includes:
+              basename cat chgrp chmod chown chroot cksum comm cp csplit cut
+              dircolors dirname du echo env expand expr factor false fmt
+              hostid id install join link ln logname ls md5sum mkdir mkfifo
+              nohup od paste pathchk pinky pr printenv printf ptx pwd
+              sha1sum seq shred sleep sort split stat stty sum sync tac tail
+              tr true tsort tty uname unexpand uniq unlink users vdir wc who
+
+            midi/xenial 20160103-1 amd64
+              converter from ABC to MIDI format and back
+              (...)
         """
         matches = {}
 
+        search_args = ['--names-only']
+        if exact:
+            # Realy on apt regexp support to speed-up exact match.
+            query = '^{}$'.format(query)
+        # Extended search are always non-exact.
+        elif extended:
+            # Include full description in extended search to check up the match
+            # in the CLI output after its execution.
+            search_args = ['--full']
+
         output = self.run([self.cli_path] + self.global_args + [
-            'search', query, '--quiet'])
+            'search', query, '--quiet'] + search_args)
 
         if output:
-            regexp = re.compile(
-                r'\s*(\S+)\/(\S+) (\S+) (\S+)\s+(.*)', re.DOTALL)
-            for package in re.compile(r'(\n\n|.*\.\.\.\n)').split(output):
-                match = regexp.match(package)
-                if match:
-                    package_id, repository, latest_version, arch, \
-                        description = match.groups()
-                    matches[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'latest_version': parse_version(latest_version),
-                        'exact': self.exact_match(query, package_id)}
+            #regexp = re.compile(
+            #    r'^(?P<package_id>\S+)/.+ (?P<version>.*) (?:.*)\n(?P<description>(?:  .+\n)+)',
+            #    re.MULTILINE)
+
+            regexp = re.compile(r"""
+                ^(?P<package_id>\S+)  # A string with a char at least.
+                /.+\                  # A slash, any string, then a space.
+                (?P<version>.+)       # Any string.
+                \                     # A space.
+                (?:.+)\n              # Any string ending the line.
+                (?P<description>      # Start of the multi-line desc group.
+                    (?:\ \ .+\n)+     # Lines of strings prefixed by 2 spaces.
+                )
+                """, re.MULTILINE + re.VERBOSE)
+
+            for package_id, version, description in regexp.findall(output):
+                matches[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'latest_version': parse_version(version)}
 
         return matches
 

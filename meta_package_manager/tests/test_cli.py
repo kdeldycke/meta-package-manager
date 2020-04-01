@@ -310,9 +310,8 @@ class TestCLISearch(TestCLITableRendering):
                 self.assertIsInstance(pkg, dict)
 
                 self.assertSetEqual(set(pkg), set([
-                    'exact', 'id', 'latest_version', 'name']))
+                    'id', 'latest_version', 'name']))
 
-                self.assertIsInstance(pkg['exact'], bool)
                 self.assertIsInstance(pkg['id'], str)
                 if pkg['latest_version'] is not None:
                     self.assertIsInstance(pkg['latest_version'], str)
@@ -332,6 +331,47 @@ class TestCLISearch(TestCLITableRendering):
         self.assertEqual(result.exit_code, 0)
         self.assertIn("ubersicht", result.output)
         # self.assertIn("Übersicht", result.output)
+
+    def test_exact_search_tokenizer(self):
+        result = self.invoke('--manager', 'pip3', 'search', '--exact', 'sed')
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("1 package found", result.output)
+        self.assertIn(" sed ", result.output)
+
+        for query in ['SED', 'SeD', 'sEd*', '*sED*', '_seD-@', '', '_']:
+            result = self.invoke(
+                '--manager', 'pip3', 'search', '--exact', query)
+            self.assertEqual(result.exit_code, 0)
+            self.assertIn("0 package found", result.output)
+            self.assertNotIn("sed", result.output)
+
+    def test_fuzzy_search_tokenizer(self):
+        for query in ['', '_', '_seD-@']:
+            result = self.invoke('--manager', 'pip3', 'search', query)
+            self.assertEqual(result.exit_code, 0)
+            self.assertIn("0 package found", result.output)
+            self.assertNotIn("sed", result.output)
+
+        for query in ['sed', 'SED', 'SeD', 'sEd*', '*sED*']:
+            result = self.invoke('--manager', 'pip3', 'search', query)
+            self.assertEqual(result.exit_code, 0)
+            self.assertIn("2 packages found", result.output)
+            self.assertIn(" sed ", result.output)
+            self.assertIn(" SED-cli ", result.output)
+
+    def test_extended_search_tokenizer(self):
+        for query in ['', '_', '_seD-@']:
+            result = self.invoke(
+                '--manager', 'pip3', 'search', '--extended', query)
+            self.assertEqual(result.exit_code, 0)
+            self.assertIn("0 package found", result.output)
+            self.assertNotIn("sed", result.output)
+
+        for query in ['sed', 'SED', 'SeD', 'sEd*', '*sED*']:
+            result = self.invoke(
+                '--manager', 'pip3', 'search', '--extended', query)
+            self.assertEqual(result.exit_code, 0)
+            self.assertIn("22 packages found", result.output)
 
 
 class TestCLIOutdated(TestCLITableRendering):

@@ -163,7 +163,7 @@ class Yarn(PackageManager):
                 "scripts": {},
                 "dist": {
                   "shasum": "3094e898ef17a33aa9c3e973b3848a38e47d1818",
-                  "tarball": "https://registry.npmjs.org/python/-/python-0.0.4.tgz"
+                  "tarball": "https://registry.npmjs.org/python/-/python-1.tgz"
                 },
                 "directories": {}
               }

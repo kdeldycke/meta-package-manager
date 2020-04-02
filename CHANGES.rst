@@ -2,10 +2,8 @@ Changelog
 =========
 
 
-`3.1.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v3.0.0...develop>`_
+`3.1.0 (2020-04-02) <https://github.com/kdeldycke/meta-package-manager/compare/v3.0.0...develop>`_
 --------------------------------------------------------------------------------------------------
-
-.. note:: This version is not yet released and is under active development.
 
 * [mpm]: Add new ``cleanup`` command. Closes #5.
 * [mpm]: Improve table sorting with new version-aware tokenizer.

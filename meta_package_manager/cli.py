@@ -18,16 +18,18 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import logging
+import re
 from datetime import datetime
 from functools import partial
-from operator import itemgetter
+from operator import getitem, itemgetter
 from os import path
 from sys import __stdin__, __stdout__
 
 import click
 import click_log
 import tomlkit
-from boltons.strutils import strip_ansi
+from boltons.cacheutils import LRI, cached
+from boltons.strutils import format_int_list, parse_int_list, strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
 from simplejson import dumps as json_dumps
 
@@ -399,18 +401,148 @@ def search(ctx, extended, exact, query):
         click.echo(json(matches))
         return
 
+    # Prepare highlighting helpers.
+    query_parts = {query}.union(map(str, TokenizedString(query)))
+
+    @cached(LRI(max_size=1000))
+    def highlight(string):
+        # Ranges of character indices flagged for highlighting.
+        ranges = set()
+
+        # TODO: Fix upper-case matching, as tokenizer lower them down.
+
+        for part in query_parts:
+            # Search for occurences of query parts in original string.
+            if part in string:
+                # Flag matching substrings for highlighting.
+                occurences = [
+                    match.start() for match in re.finditer(part, string)]
+
+                for match_start in occurences:
+                    match_end = match_start + len(part) - 1
+                    ranges.add('{}-{}'.format(match_start, match_end))
+
+        # TODO: contribute the two methods below to boltons.
+
+        def int_list_complement(int_list, range_start=0, range_end=None):
+            """ Returns the complement of an int list (like those produced by
+            `boltons.strutils.format_int_list()`).
+
+            `range_start` is inclusive, `range_end` is exclusive.
+
+            >>> int_list_complement('1,3,5-8,10-11,15')
+            '0,2,4,9,12-14'
+
+            >>> int_list_complement('1,3,5-8,10-11,15', range_start=0)
+            '2,4,9,12-14'
+
+            >>> int_list_complement('1,3,5-8,10-11,15', range_start=1)
+            '2,4,9,12-14'
+
+            >>> int_list_complement('1,3,5-8,10-11,15', range_start=2)
+            '2,4,9,12-14'
+
+            >>> int_list_complement('1,3,5-8,10-11,15', range_start=3)
+            '4,9,12-14'
+
+            >>> int_list_complement('1,3,5-8,10-11,15', range_end=15)
+            '2,4,9,12-14'
+
+            >>> int_list_complement('1,3,5-8,10-11,15', range_end=14)
+            '2,4,9,12-12'
+
+            >>> int_list_complement('1,3,5-8,10-11,15', range_end=13)
+            '2,4,9,12'
+
+            >>> int_list_complement('1,3,5-8,10-11,15', range_end=20)
+            '0,2,4,9,12-14,16-19'
+
+            >>> int_list_complement('1,3,5-8,10-11,15', range_end=0)
+            ''
+
+            >>> int_list_complement('1,3,5-8,10-11,15', range_start=-1)
+            '0,2,4,9,12-14'
+
+            >>> int_list_complement('1,3,5-8,10-11,15', range_end=-1)
+            ''
+
+            >>> int_list_complement('1,3,5-8', range_start=1, range_end=1)
+            ''
+
+            >>> int_list_complement('1,3,5-8', range_start=2, range_end=2)
+            ''
+
+            >>> int_list_complement('1,3,5-8', range_start=2, range_end=3)
+            '2'
+
+            >>> int_list_complement('1,3,5-8', range_start=-10, range_end=-5)
+            ''
+
+            >>> int_list_complement('1,3,5-8', range_start=20, range_end=10)
+            ''
+
+            >>> int_list_complement('')
+            ''
+            """
+            ref_indexes = set(parse_int_list(int_list))
+            if range_end is None:
+                if ref_indexes:
+                    range_end = max(ref_indexes) + 1
+                else:
+                    range_end = range_start
+            complement_indexes = set(
+                range(range_end)) - ref_indexes - set(range(range_start))
+            return format_int_list(complement_indexes)
+
+        def int_list_to_int_tuples(int_list):
+            """ Transform a string of ranges into a tuple of tuples.
+
+            >>> int_list_to_int_tuples('1,3,5-8,10-11,15')
+            ((1, 1), (3, 3), (5, 8), (10, 11), (15, 15))
+
+            >>> int_list_to_int_tuples('')
+            ()
+            """
+            int_tuples = []
+            # Normalize int list.
+            int_list = format_int_list(parse_int_list(int_list))
+            if int_list:
+                for bounds in int_list.split(','):
+                    if '-' in bounds:
+                        start, end = bounds.split('-')
+                    else:
+                        start, end = bounds, bounds
+                    int_tuples.append((int(start), int(end)))
+            return tuple(int_tuples)
+
+        # Reduce index ranges, compute complement ranges, transform them to
+        # list of integers.
+        ranges = ','.join(ranges)
+        bold_ranges = int_list_to_int_tuples(ranges)
+        normal_ranges = int_list_to_int_tuples(
+            int_list_complement(ranges, range_end=len(string)))
+
+        # Apply style to range of characters flagged as matching.
+        styled_str = ''
+        for i, j in sorted(bold_ranges + normal_ranges):
+            segment = getitem(string, slice(i, j + 1))
+            if (i, j) in bold_ranges:
+                segment = click.style(segment, bold=True)
+            styled_str += segment
+
+        return styled_str
+
     # Human-friendly content rendering.
     table = []
     for manager_id, matching_pkg in matches.items():
         table += [[
-            info['name'],
-            info['id'],
+            highlight(info['name']),
+            highlight(info['id']),
             manager_id,
             info['latest_version'] if info['latest_version'] else '?']
             for info in matching_pkg['packages']]
 
     # Sort and print table.
-    # TODO: highlight exact matches.
     print_table([
         ('Package name', 'package_name'),
         ('ID', 'package_id'),

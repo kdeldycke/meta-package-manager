@@ -15,6 +15,7 @@ Changelog
 * [mpm]: Remove ``packaging`` dependency. Rely on internal version parsing.
 * [mpm]: Add new ``--exact`` and ``--extended`` parameters to ``search``
   command.
+* [mpm]: Highlight search matches in console output.
 * [mas]: Retrieve version in search results.
 * [mas]: Bump minimal version to ``1.6.1``.
 * [mpm]: Allow stats to be printed for ``backup`` command.

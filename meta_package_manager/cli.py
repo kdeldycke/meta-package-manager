@@ -422,7 +422,8 @@ def search(ctx, extended, exact, query):
                     match_end = match_start + len(part) - 1
                     ranges.add('{}-{}'.format(match_start, match_end))
 
-        # TODO: contribute the two methods below to boltons.
+        # TODO: Replace the two methods below by boltons utils once released.
+        # Waiting for: https://github.com/mahmoud/boltons/pull/248
 
         def int_list_complement(int_list, range_start=0, range_end=None):
             """ Returns the complement of an int list (like those produced by

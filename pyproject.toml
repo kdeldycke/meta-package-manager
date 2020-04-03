@@ -46,7 +46,7 @@ include = [
 [tool.poetry.dependencies]
 # List of python versions and their support status:
 # https://en.wikipedia.org/wiki/CPython#Version_history
-python = "^3.6"
+python = "^3.7"
 boltons = "^20.0"
 click = "^7.1"
 click-log = "^0.3"

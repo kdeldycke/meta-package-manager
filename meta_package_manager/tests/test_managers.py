@@ -197,26 +197,3 @@ class TestManagerDefinitions(unittest.TestCase):
             if manager.available:
                 self.assertIsInstance(manager.cleanup, MethodType)
                 self.assertIsNone(manager.cleanup())
-
-
-class TestManagerPlatform(unittest.TestCase):
-
-    @unless_macos()
-    def test_macos(self):
-        supported_managers = {m.id for m in pool().values() if m.supported}
-        self.assertSetEqual(supported_managers, set([
-            'apm', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm',
-            'pip2', 'pip3', 'yarn']))
-
-    @unless_linux()
-    def test_linux(self):
-        supported_managers = {m.id for m in pool().values() if m.supported}
-        self.assertSetEqual(supported_managers, set([
-            'apm', 'apt', 'composer', 'gem', 'npm', 'pip2', 'pip3',
-            'flatpak', 'opkg', 'yarn']))
-
-    @unless_windows()
-    def test_windows(self):
-        supported_managers = {m.id for m in pool().values() if m.supported}
-        self.assertSetEqual(supported_managers, set([
-            'apm', 'composer', 'gem', 'npm', 'pip2', 'pip3', 'yarn']))

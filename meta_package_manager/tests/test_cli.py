@@ -51,11 +51,6 @@ class TestCLISubcommand(CLITestCase):
 
     subcommand_args = []
 
-    # Hard-coded list of all supported manager IDs.
-    MANAGER_IDS = set([
-        'apm', 'apt', 'brew', 'cask', 'composer', 'gem', 'mas', 'npm', 'pip2',
-        'pip3', 'flatpak', 'opkg', 'yarn'])
-
     @classmethod
     def setUpClass(klass):
         if not klass.subcommand_args:

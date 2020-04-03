@@ -65,7 +65,26 @@ def unless_windows():
     return unittest.skip("Test requires Windows.")
 
 
-class CLITestCase(unittest.TestCase):
+class ManagerTestCase(unittest.TestCase):
+
+    # Hard-coded list of all supported manager IDs.
+    MANAGER_IDS = frozenset([
+        'apm',
+        'apt',
+        'brew',
+        'cask',
+        'composer',
+        'flatpak',
+        'gem',
+        'mas',
+        'npm',
+        'opkg',
+        'pip2',
+        'pip3',
+        'yarn'])
+
+
+class CLITestCase(ManagerTestCase):
 
     """ Utilities and helpers to easely write unit-tests. """
 

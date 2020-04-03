@@ -21,13 +21,15 @@
 
 import sys
 
-from . import logger
+from boltons.dictutils import FrozenDict
 
-MACOS = 'macos'
-""" Constant used to identify OSes of the macOS family. """
+from . import logger
 
 LINUX = 'linux'
 """ Constant used to identify OSes of the Linux family. """
+
+MACOS = 'macos'
+""" Constant used to identify OSes of the macOS family. """
 
 WINDOWS = 'windows'
 """ Constant used to identify OSes of the Windows family. """
@@ -49,19 +51,19 @@ def is_windows():
 
 
 # Map OS IDs to evaluation function and OS labels.
-OS_DEFINITIONS = {
-    MACOS: ('macOS', is_macos),
+OS_DEFINITIONS = FrozenDict({
     LINUX: ('Linux', is_linux),
-    WINDOWS: ('Windows', is_windows)}
+    MACOS: ('macOS', is_macos),
+    WINDOWS: ('Windows', is_windows)})
 
 
 def current_os():
     """ Return a 2-items `tuple` with ID and label of current OS. """
     platform_id = sys.platform
     logger.debug("Raw platform ID: {}.".format(platform_id))
-    for os_id, (os_name, eval_func) in OS_DEFINITIONS.items():
+    for os_id, (os_label, eval_func) in OS_DEFINITIONS.items():
         if eval_func():
-            return os_id, os_name
+            return os_id, os_label
     raise SystemError("Unrecognized {} platform.".format(platform_id))
 
 

@@ -7,6 +7,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm]: Add more platform definition unittests.
+
 
 `3.1.0 (2020-04-02) <https://github.com/kdeldycke/meta-package-manager/compare/v3.0.0...v3.1.0>`_
 -------------------------------------------------------------------------------------------------

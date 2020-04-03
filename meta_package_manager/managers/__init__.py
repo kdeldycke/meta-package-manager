@@ -25,16 +25,16 @@ from importlib import import_module
 from os import path
 
 from boltons.cacheutils import LRI, cached
+from boltons.dictutils import FrozenDict
 
 from .. import logger
 from ..base import PackageManager
 
 
-# Use a cache to keep the global pool of registered manager
-# definitions.
+# Cache the global pool of registered manager definitions to speed-up lookups.
 @cached(LRI(max_size=1))
 def pool():
-    """ Search for package manager definitions locally and return a dict.
+    """ Search for package manager definitions locally and return a FrozenDict.
 
     Is considered valid package manager, definitions classes which:
         1 - are sub-classes of PackageManager, and
@@ -59,4 +59,4 @@ def pool():
                 logger.debug(
                     "{!r} is not a valid manager definition".format(klass))
 
-    return register
+    return FrozenDict(register)

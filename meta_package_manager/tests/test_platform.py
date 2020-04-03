@@ -17,7 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+import sys
 from types import FunctionType
+
+import pytest
 
 from ..managers import pool
 from ..platform import (
@@ -84,6 +87,12 @@ def test_current_os():
     os_id, os_label = current_os()
     assert os_id in OS_DEFINITIONS
     assert os_label in [os[0] for os in OS_DEFINITIONS.values()]
+
+
+def test_unrecognized_os(monkeypatch):
+    monkeypatch.setattr(sys, "platform", "foobar")
+    with pytest.raises(SystemError):
+        current_os()
 
 
 def test_os_label():

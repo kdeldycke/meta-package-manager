@@ -113,7 +113,7 @@ class Flatpak(PackageManager):
                 (?P<remotes>.+)
                 """, re.VERBOSE)
 
-            for (package_id, description, app_id, version, branch,
+            for (package_name, description, package_id, version, branch,
                  remotes) in regexp.findall(output):
 
                 # Filters out fuzzy matches, only keep stricly matching

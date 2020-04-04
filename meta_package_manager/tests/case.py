@@ -23,9 +23,28 @@ import unittest
 from boltons.tbutils import ExceptionInfo
 from click.testing import CliRunner
 
-from ..bitbar import run
+from ..bitbar import run as bitbar_run
 from ..cli import cli
 from ..platform import is_linux, is_macos, is_windows
+
+""" Utilities and helpers for tests. """
+
+
+# Hard-coded list of all supported manager IDs.
+MANAGER_IDS = frozenset([
+    'apm',
+    'apt',
+    'brew',
+    'cask',
+    'composer',
+    'flatpak',
+    'gem',
+    'mas',
+    'npm',
+    'opkg',
+    'pip2',
+    'pip3',
+    'yarn'])
 
 
 def skip_destructive():
@@ -65,28 +84,32 @@ def unless_windows():
     return unittest.skip("Test requires Windows.")
 
 
-class ManagerTestCase(unittest.TestCase):
-
-    # Hard-coded list of all supported manager IDs.
-    MANAGER_IDS = frozenset([
-        'apm',
-        'apt',
-        'brew',
-        'cask',
-        'composer',
-        'flatpak',
-        'gem',
-        'mas',
-        'npm',
-        'opkg',
-        'pip2',
-        'pip3',
-        'yarn'])
+def print_cli_output(cmd, output):
+    """ Simulate CLI output. Used to print debug traces in test results. """
+    print(u"$ {}".format(' '.join(cmd)))
+    print(output)
 
 
-class CLITestCase(ManagerTestCase):
+def run_cmd(*args):
+    """ Run a system command, print output and return results.
 
-    """ Utilities and helpers to easely write unit-tests. """
+    Rely's on robust ``run`` function implemented in BitBar plugin.
+    """
+    code, output, error = bitbar_run(*args)
+
+    print_cli_output(args, output)
+
+    # Print some more debug info.
+    print("Return code: {}".format(code))
+    if error:
+        print(error)
+
+    return code, output, error
+
+
+class CLITestCase(unittest.TestCase):
+
+    """ Utilities to automate tests and checks for Click-based CLIs. """
 
     def __init__(self, *args, **kwargs):
         """ Force running all unittests within an isolated filesystem.
@@ -104,32 +127,11 @@ class CLITestCase(ManagerTestCase):
         decorated_run = self.runner.isolated_filesystem()(run_method)
         self.run = decorated_run
 
-    def print_cli_output(self, cmd, output):
-        """ Simulate CLI output.
-
-        Used to print debug traces in test suites.
-        """
-        print(u"$ {}".format(' '.join(cmd)))
-        print(output)
-
-    def run_cmd(self, *args):
-        """ Run a system command, print output and return results. """
-        code, output, error = run(*args)
-
-        self.print_cli_output(args, output)
-
-        # Print some more debug info.
-        print("Return code: {}".format(code))
-        if error:
-            print(error)
-
-        return code, output, error
-
     def invoke(self, *args):
         """ Executes Click's CLI, print output and return results. """
         result = self.runner.invoke(cli, args)
 
-        self.print_cli_output(['mpm'] + list(args), result.output)
+        print_cli_output(['mpm'] + list(args), result.output)
 
         # Print some more debug info.
         print(result)

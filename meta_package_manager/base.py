@@ -27,7 +27,7 @@ from boltons.typeutils import classproperty
 from . import logger
 from .bitbar import run
 from .platform import current_os
-from .version import TokenizedString, parse_version
+from .version import parse_version
 
 # Rendering format of CLI in JSON fields.
 CLI_FORMATS = frozenset(['plain', 'fragments', 'bitbar'])

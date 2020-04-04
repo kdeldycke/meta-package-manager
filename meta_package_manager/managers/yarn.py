@@ -50,8 +50,7 @@ class Yarn(PackageManager):
         if not output:
             return packages
 
-        outdatedList = output.splitlines()
-        for line in outdatedList:
+        for line in output.splitlines():
             if not line:
                 continue
             obj = json.loads(line)
@@ -61,7 +60,8 @@ class Yarn(PackageManager):
             packages[package['id']] = package
         return packages
 
-    def parse_info(self, obj):
+    @staticmethod
+    def parse_info(obj):
         data = obj['data'].replace('has binaries:', '')
         parts = data.replace('"', '').split('@')
         package_id = parts[0]

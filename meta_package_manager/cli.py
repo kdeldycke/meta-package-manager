@@ -31,9 +31,7 @@ import tomlkit
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import (
     complement_int_list,
-    format_int_list,
     int_ranges_from_int_list,
-    parse_int_list,
     strip_ansi
 )
 from cli_helpers.tabular_output import TabularOutputFormatter
@@ -197,11 +195,11 @@ def cli(ctx, manager, exclude, ignore_auto_updates, output_format, sort_by,
     target_managers = [m for mid, m in pool().items() if mid in target_ids]
 
     # Apply manager-level options.
-    for m in target_managers:
+    for m_obj in target_managers:
         # Does the manager should raise on error or not.
-        m.raise_on_error = stop_on_error
+        m_obj.raise_on_error = stop_on_error
         # Should we include auto-update packages or not?
-        m.ignore_auto_updates = ignore_auto_updates
+        m_obj.ignore_auto_updates = ignore_auto_updates
 
     # Pre-filters inactive managers.
     def keep_available(manager):
@@ -355,7 +353,7 @@ def installed(ctx):
             info['id'],
             manager_id,
             info['installed_version'] if info['installed_version'] else '?']
-                for info in installed_pkg['packages']]
+                  for info in installed_pkg['packages']]
 
     # Sort and print table.
     print_table([
@@ -453,7 +451,7 @@ def search(ctx, extended, exact, query):
             highlight(info['id']),
             manager_id,
             info['latest_version'] if info['latest_version'] else '?']
-            for info in matching_pkg['packages']]
+                  for info in matching_pkg['packages']]
 
     # Sort and print table.
     print_table([
@@ -528,7 +526,7 @@ def outdated(ctx, cli_format):
             manager_id,
             info['installed_version'] if info['installed_version'] else '?',
             info['latest_version']]
-            for info in outdated_pkg['packages']]
+                  for info in outdated_pkg['packages']]
 
     # Sort and print table.
     print_table([

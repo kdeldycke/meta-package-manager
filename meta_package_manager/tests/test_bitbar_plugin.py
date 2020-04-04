@@ -18,15 +18,13 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 from .. import bitbar
-from .case import CLITestCase, unless_macos
+from .case import run_cmd, unless_macos
 
 
 @unless_macos()
-class TestBitBarPlugin(CLITestCase):
+def test_simple_call():
+    code, output, error = run_cmd(bitbar.__file__)
 
-    def test_simple_call(self):
-        code, output, error = self.run_cmd(bitbar.__file__)
-
-        self.assertEqual(code, 0)
-        self.assertFalse(error)
-        self.assertIn(" | dropdown=false\n", output)
+    assert code == 0
+    assert error is None
+    assert " | dropdown=false\n" in output

@@ -24,7 +24,13 @@ import unittest
 import simplejson as json
 
 from .. import __version__
-from .case import CLITestCase, skip_destructive, unless_macos
+from .case import (
+    MANAGER_IDS,
+    CLITestCase,
+    run_cmd,
+    skip_destructive,
+    unless_macos
+)
 
 
 class TestCLI(CLITestCase):
@@ -80,7 +86,7 @@ class TestCLISubcommand(CLITestCase):
         found_managers = set()
         skipped_managers = set()
 
-        for mid in self.MANAGER_IDS:
+        for mid in MANAGER_IDS:
 
             # List of signals indicating a package manager has been retained by
             # the CLI. Roughly sorted from most specific to more forgiving.
@@ -113,7 +119,7 @@ class TestCLISubcommand(CLITestCase):
         # Compare managers reported by the CLI and those expected.
         included = set(included)
         self.assertSetEqual(found_managers, included)
-        self.assertSetEqual(skipped_managers, self.MANAGER_IDS - included)
+        self.assertSetEqual(skipped_managers, MANAGER_IDS - included)
 
     def test_manager_selection(self):
         result = self.invoke('--manager', 'apm', *self.subcommand_args)
@@ -136,21 +142,21 @@ class TestCLISubcommand(CLITestCase):
         result = self.invoke('--exclude', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.check_manager_selection(
-            result.output, self.MANAGER_IDS - set(['apm']))
+            result.output, MANAGER_IDS - set(['apm']))
 
     def test_manager_duplicate_exclusion(self):
         result = self.invoke(
             '--exclude', 'apm', '--exclude', 'apm', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.check_manager_selection(
-            result.output, self.MANAGER_IDS - set(['apm']))
+            result.output, MANAGER_IDS - set(['apm']))
 
     def test_manager_multiple_exclusion(self):
         result = self.invoke(
             '--exclude', 'apm', '--exclude', 'gem', *self.subcommand_args)
         self.assertEqual(result.exit_code, 0)
         self.check_manager_selection(
-            result.output, self.MANAGER_IDS - set(['apm', 'gem']))
+            result.output, MANAGER_IDS - set(['apm', 'gem']))
 
     def test_manager_selection_priority(self):
         result = self.invoke(
@@ -214,7 +220,7 @@ class TestCLIManagers(TestCLITableRendering):
     def test_json_output(self):
         result = super(TestCLIManagers, self).test_json_output()
 
-        self.assertSetEqual(set(result), self.MANAGER_IDS)
+        self.assertSetEqual(set(result), MANAGER_IDS)
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, str)
@@ -251,7 +257,7 @@ class TestCLIInstalled(TestCLITableRendering):
     def test_json_output(self):
         result = super(TestCLIInstalled, self).test_json_output()
 
-        self.assertTrue(set(result).issubset(self.MANAGER_IDS))
+        self.assertTrue(set(result).issubset(MANAGER_IDS))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, str)
@@ -285,7 +291,7 @@ class TestCLISearch(TestCLITableRendering):
     def test_json_output(self):
         result = super(TestCLISearch, self).test_json_output()
 
-        self.assertTrue(set(result).issubset(self.MANAGER_IDS))
+        self.assertTrue(set(result).issubset(MANAGER_IDS))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, str)
@@ -376,7 +382,7 @@ class TestCLIOutdated(TestCLITableRendering):
     def test_json_output(self):
         result = super(TestCLIOutdated, self).test_json_output()
 
-        self.assertTrue(set(result).issubset(self.MANAGER_IDS))
+        self.assertTrue(set(result).issubset(MANAGER_IDS))
 
         for manager_id, info in result.items():
             self.assertIsInstance(manager_id, str)
@@ -442,7 +448,7 @@ class TestCLIOutdated(TestCLITableRendering):
         formula_url = (
             "https://raw.githubusercontent.com/caskroom/homebrew-cask"
             "/51add049f53225ac2c98f59bbeee5e19c29e6557/Casks/ubersicht.rb")
-        code, output, error = self.run_cmd(
+        code, output, error = run_cmd(
             'brew', 'cask', 'install', formula_url)
         self.assertEqual(code, 0)
         self.assertIn('Uebersicht-1.0.44.app', output)
@@ -462,7 +468,7 @@ class TestCLIOutdated(TestCLITableRendering):
         formula_url = (
             "https://raw.githubusercontent.com/caskroom/homebrew-cask"
             "/9e6ca52ab7846c82471df586a930fb60231d63ee/Casks/xld.rb")
-        code, output, error = self.run_cmd(
+        code, output, error = run_cmd(
             'brew', 'cask', 'install', formula_url)
         self.assertEqual(code, 0)
         self.assertIn('xld-20160920.dmg', output)

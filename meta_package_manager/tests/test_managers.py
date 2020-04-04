@@ -24,7 +24,6 @@ from types import MethodType
 from ..managers import pool
 from ..platform import OS_DEFINITIONS
 from ..version import TokenizedString
-from .case import unless_linux, unless_macos, unless_windows
 
 
 class TestManagerDefinitions(unittest.TestCase):

@@ -36,7 +36,7 @@ from ..platform import (
     is_windows,
     os_label
 )
-from .case import ManagerTestCase, unless_linux, unless_macos, unless_windows
+from .case import MANAGER_IDS, unless_linux, unless_macos, unless_windows
 
 
 def test_os_id_func():
@@ -116,7 +116,7 @@ def test_blacklisted_manager():
     blacklist = blacklists[current_os()[0]]
     # List of supported managers on the current platform.
     supported = {m.id for m in pool().values() if m.supported}
-    assert supported == ManagerTestCase.MANAGER_IDS - blacklist
+    assert supported == MANAGER_IDS - blacklist
 
 
 # Test unittest decorator helpers.

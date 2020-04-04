@@ -237,13 +237,13 @@ compared_gt = [
     ['2020.03.24', '2019.11.28']]
 
 
-@pytest.mark.parametrize('v1,v2', compared_gt)
-def test_version_comparison_gt(v1, v2):
-    assert TokenizedString(v1) > TokenizedString(v2)
-    assert parse_version(v1) > parse_version(v2)
+@pytest.mark.parametrize('ver1,ver2', compared_gt)
+def test_version_comparison_gt(ver1, ver2):
+    assert TokenizedString(ver1) > TokenizedString(ver2)
+    assert parse_version(ver1) > parse_version(ver2)
 
 
-@pytest.mark.parametrize('v1,v2', reverse_fixtures(compared_gt))
-def test_version_comparison_lt(v1, v2):
-    assert TokenizedString(v1) < TokenizedString(v2)
-    assert parse_version(v1) < parse_version(v2)
+@pytest.mark.parametrize('ver1,ver2', reverse_fixtures(compared_gt))
+def test_version_comparison_lt(ver1, ver2):
+    assert TokenizedString(ver1) < TokenizedString(ver2)
+    assert parse_version(ver1) < parse_version(ver2)

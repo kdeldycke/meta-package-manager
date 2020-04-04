@@ -93,7 +93,7 @@ def print_cli_output(cmd, output):
 def run_cmd(*args):
     """ Run a system command, print output and return results.
 
-    Rely's on robust ``run`` function implemented in BitBar plugin.
+    Relies on robust ``run`` function implemented in BitBar plugin.
     """
     code, output, error = bitbar_run(*args)
 
@@ -116,8 +116,8 @@ class CLITestCase(unittest.TestCase):
 
         Intercepts `__init__()` to have an oportunity to decorate manually the
         whole `run()` method itself, so each test method and calls to `setUp()`
-        are wrap by the isolated filesystem decoartor. See:
-        https://github.com/python/cpython/blob/v3.6.0/Lib/unittest/case.py#L648-L649
+        are wrap by the isolated filesystem decorator. See: https://github.com
+        /python/cpython/blob/v3.6.0/Lib/unittest/case.py#L648-L649
         """
         super(CLITestCase, self).__init__(*args, **kwargs)
 

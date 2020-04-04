@@ -64,7 +64,9 @@ bump2version = "^1.0.0"
 coverage = {extras = ["toml"], version = "^5.0.4"}
 isort = "^4.3.5"
 pycodestyle = "^2"
-pylint = "^2.4"
+# XXX Waiting for pylint 2.5.0-dev1 and astroid 2.4.0 to be released.
+pylint = {git = "https://github.com/PyCQA/pylint.git"}
+astroid = {git = "https://github.com/PyCQA/astroid.git"}
 pytest = "^5.4"
 # More pytest plugins at: http://plugincompat.herokuapp.com .
 pytest-cov = "^2.8.1"
@@ -81,17 +83,16 @@ mpm = 'meta_package_manager.cli:cli'
 # https://github.com/timothycrosley/isort#configuring-isort
 multi_line_output = 3
 
-# XXX In anticipation of unreleased Pylint 2.5. Once release  remove section
-# from setup.cfg.
-#[tool.pylint]
+[tool.pylint.MASTER]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html
-#output-format = colorized
-#fail-under = 9
+output-format = "colorized"
+fail-under = "9"
+[tool.pylint."messages control"]
 # List messages with: $ pylint --list-msgs
 # C0111: Missing docstring
 # W0142: Used * or ** magic
 # W0511: Warning notes in code comments
-#disable = C0111,W0142,W0511
+disable = "C0111,W0142,W0511"
 
 # https://coverage.readthedocs.io/en/latest/config.html
 [tool.coverage.paths]

@@ -164,7 +164,7 @@ jobs:
         pip install poetry
         poetry install
         poetry run pycodestyle
-        poetry run pylint --exit-zero --rcfile=setup.cfg meta_package_manager
+        poetry run pylint meta_package_manager
         poetry run isort --apply
 
   packaging:

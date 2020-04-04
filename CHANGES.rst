@@ -9,6 +9,9 @@ Changelog
 
 * [mpm]: Replace internal helpers with upstreamed ``boltons`` utils.
 * [mpm]: Bump requirement to ``boltons 20.1.1``.
+* [mpm]: Bump development requirement to ``pylint 2.5``.
+* [mpm]: Move pylint config from ``setup.cfg`` to ``pyproject.toml``.
+* [mpm]: Fail CI and QA checks if pylint score lower than 9.
 * [mpm]: Add more platform definition unittests.
 * [mpm]: Drop support of Python 3.6.
 

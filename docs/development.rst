@@ -137,7 +137,7 @@ Then run `pycodestyle <https://pycodestyle.readthedocs.io>`_ and `Pylint
 .. code-block:: shell-session
 
     $ poetry run pycodestyle
-    $ poetry run pylint --rcfile=setup.cfg meta_package_manager
+    $ poetry run pylint meta_package_manager
 
 
 Documentation

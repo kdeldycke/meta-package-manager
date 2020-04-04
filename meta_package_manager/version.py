@@ -238,10 +238,3 @@ class TokenizedString():
 
 """ Utility method tweaking TokenizedString for dot-based serialization. """
 parse_version = partial(TokenizedString, separator='.')
-
-
-def token_sort():
-    """ Method used as a comparator to sort token produce above between
-    themselves.
-    """
-    return list(map(tokenize, itemgetter(*sort_order)(line)))

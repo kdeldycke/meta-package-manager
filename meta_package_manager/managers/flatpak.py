@@ -153,12 +153,12 @@ class Flatpak(PackageManager):
                 if match:
                     name, package_id, latest_version = match.groups()
 
-                    info_installed__output = self.run(
+                    info_installed_output = self.run(
                         [self.cli_path] + self.global_args +
                         ['info', '--ostree-verbose', package_id])
                     current_version = re.search(
                         r'version:\s(?P<version>\S.*?)\n',
-                        info_installed__output, re.IGNORECASE)
+                        info_installed_output, re.IGNORECASE)
 
                     installed_version = current_version.group(
                         'version') if current_version else 'unknow'

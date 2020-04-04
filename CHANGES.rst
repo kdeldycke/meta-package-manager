@@ -7,6 +7,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm]: Replace internal helpers with upstreamed ``boltons`` utils.
+* [mpm]: Bump requirement to ``boltons 20.1.1``.
 * [mpm]: Add more platform definition unittests.
 * [mpm]: Drop support of Python 3.6.
 

@@ -24,6 +24,8 @@ import pytest
 
 from ..managers import pool
 from ..platform import (
+    ALL_OS_ID_FUNCS,
+    ALL_OS_LABELS,
     LINUX,
     MACOS,
     OS_DEFINITIONS,
@@ -57,7 +59,7 @@ def test_mutual_exclusion():
 
 def test_os_definitions():
     assert isinstance(OS_DEFINITIONS, dict)
-    for k, v in OS_DEFINITIONS.items():
+    for k, data in OS_DEFINITIONS.items():
         # OS ID.
         assert isinstance(k, str)
         assert k
@@ -65,22 +67,26 @@ def test_os_definitions():
         assert k.isalpha()
         assert k.islower()
         # Metadata.
-        assert isinstance(v, tuple)
-        assert len(v) == 2
+        assert isinstance(data, tuple)
+        assert len(data) == 2
         # OS Label.
-        os_label = v[0]
+        os_label = data[0]
         assert os_label
         assert isinstance(os_label, str)
         assert os_label.isascii()
         assert os_label.isalpha()
+        assert os_label in ALL_OS_LABELS
         # OS identification function.
-        os_id_func = v[1]
+        os_id_func = data[1]
         assert os_id_func
         assert isinstance(os_id_func, FunctionType)
         assert os_id_func.__name__ == 'is_{}'.format(k)
+        assert os_id_func in ALL_OS_ID_FUNCS
     # Each OS definition must be unique.
-    assert len(OS_DEFINITIONS) == len({v[0] for v in OS_DEFINITIONS.values()})
-    assert len(OS_DEFINITIONS) == len({v[1] for v in OS_DEFINITIONS.values()})
+    assert isinstance(ALL_OS_LABELS, frozenset)
+    assert isinstance(ALL_OS_ID_FUNCS, frozenset)
+    assert len(OS_DEFINITIONS) == len(ALL_OS_LABELS)
+    assert len(OS_DEFINITIONS) == len(ALL_OS_ID_FUNCS)
 
 
 def test_current_os():

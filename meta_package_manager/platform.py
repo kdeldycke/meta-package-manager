@@ -57,12 +57,16 @@ OS_DEFINITIONS = FrozenDict({
     WINDOWS: ('Windows', is_windows)})
 
 
+# Generates some utility sets.
+ALL_OS_LABELS, ALL_OS_ID_FUNCS = map(frozenset, zip(*OS_DEFINITIONS.values()))
+
+
 def current_os():
     """ Return a 2-items `tuple` with ID and label of current OS. """
     platform_id = sys.platform
     logger.debug("Raw platform ID: {}.".format(platform_id))
-    for os_id, (os_name, eval_func) in OS_DEFINITIONS.items():
-        if eval_func():
+    for os_id, (os_name, os_id_func) in OS_DEFINITIONS.items():
+        if os_id_func():
             return os_id, os_name
     raise SystemError("Unrecognized {} platform.".format(platform_id))
 

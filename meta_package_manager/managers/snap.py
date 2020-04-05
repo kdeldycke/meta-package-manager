@@ -81,7 +81,7 @@ class Snap(PackageManager):
 
     def search(self, query, extended, exact):
         """ Fetch matching packages from ``snap find`` output.
-        
+
         .. code-block:: shell-session
             $ snap find doc
             Name                       Version                  Herausgeber               Hinweise  Zusammenfassung

@@ -20,11 +20,7 @@
 import os
 import unittest
 
-from boltons.tbutils import ExceptionInfo
-from click.testing import CliRunner
-
 from ..bitbar import run as bitbar_run
-from ..cli import cli
 from ..platform import is_linux, is_macos, is_windows
 
 """ Utilities and helpers for tests. """
@@ -105,38 +101,3 @@ def run_cmd(*args):
         print(error)
 
     return code, output, error
-
-
-class CLITestCase(unittest.TestCase):
-
-    """ Utilities to automate tests and checks for Click-based CLIs. """
-
-    def __init__(self, *args, **kwargs):
-        """ Force running all unittests within an isolated filesystem.
-
-        Intercepts `__init__()` to have an oportunity to decorate manually the
-        whole `run()` method itself, so each test method and calls to `setUp()`
-        are wrap by the isolated filesystem decorator. See: https://github.com
-        /python/cpython/blob/v3.6.0/Lib/unittest/case.py#L648-L649
-        """
-        super(CLITestCase, self).__init__(*args, **kwargs)
-
-        self.runner = CliRunner()
-
-        run_method = self.run
-        decorated_run = self.runner.isolated_filesystem()(run_method)
-        self.run = decorated_run
-
-    def invoke(self, *args):
-        """ Executes Click's CLI, print output and return results. """
-        result = self.runner.invoke(cli, args)
-
-        print_cli_output(['mpm'] + list(args), result.output)
-
-        # Print some more debug info.
-        print(result)
-        if result.exception:
-            print(ExceptionInfo.from_exc_info(
-                *result.exc_info).get_formatted())
-
-        return result

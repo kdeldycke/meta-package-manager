@@ -13,7 +13,7 @@ documentation = 'https://meta-package-manager.readthedocs.io'
 keywords = [
     'CLI', 'package', 'pip', 'apm', 'npm', 'homebrew', 'brew', 'cask',
     'macos', 'node', 'atom', 'ruby', 'gem', 'mac app store', 'mas',
-    'bitbar', 'plugin', 'flatpak', 'opkg', 'php composer']
+    'bitbar', 'plugin', 'flatpak', 'opkg', 'php composer', 'snap']
 classifiers = [
     # See: https://pypi.org/pypi?%3Aaction=list_classifiers
     'Development Status :: 5 - Production/Stable',

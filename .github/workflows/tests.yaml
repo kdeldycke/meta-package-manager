@@ -115,6 +115,12 @@ jobs:
         sudo add-apt-repository -y ppa:alexlarsson/flatpak
         sudo apt install -y flatpak
 
+    # Snap
+    - name: Linux - Upgrade Snapd
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt install -y snapd
+
     # Gem
     - name: Upgrade gem
       run: |

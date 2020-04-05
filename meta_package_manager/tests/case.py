@@ -40,6 +40,7 @@ MANAGER_IDS = frozenset([
     'opkg',
     'pip2',
     'pip3',
+    'snap',
     'yarn'])
 
 

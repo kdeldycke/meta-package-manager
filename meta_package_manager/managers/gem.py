@@ -17,10 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import os
 import re
-from pathlib import Path
-from shutil import which
 
 from boltons.cacheutils import cachedproperty
 
@@ -40,6 +37,11 @@ class Gem(PackageManager):
     # i.e. macOS 10.13 High Sierra, which is bundled with gem 2.5.2.
     requirement = '2.5.0'
 
+    # Help mpm a little bit in its search for the `gem` binary.
+    cli_search_path = [
+        "/usr/local/opt/ruby/bin/gem",
+        "/usr/local/opt/ruby/bin"]
+
     global_args = [
         '--quiet',  # Silence command progress meter
     ]
@@ -55,36 +57,6 @@ class Gem(PackageManager):
             3.0.3
         """
         return parse_version(self.run_cli(['--version']))
-
-    @cachedproperty
-    def cli_path(self):
-        """ Fully qualified path to the package manager CLI.
-
-        Automaticaly search the location of the CLI in the system.
-
-        Returns `None` if CLI is not found or is not a file.
-        """
-
-        if not self.cli_name:
-            return None
-        env_path = ":".join([
-            "/usr/local/opt/ruby/bin/gem",
-            "/usr/local/opt/ruby/bin",
-            "/usr/local/bin",
-            os.environ.get("PATH")
-        ])
-        cli_path = which(self.cli_name, mode=os.F_OK, path=env_path)
-        if not cli_path:
-            return None
-        cli_path = which(cli_path, mode=os.F_OK, path=env_path)
-
-        if cli_path:
-            cli_path = Path(cli_path).resolve(strict=True)
-            logger.debug("CLI found at {}".format(cli_path))
-        else:
-            logger.debug("{} CLI not found.".format(self.cli_name))
-
-        return cli_path
 
     @cachedproperty
     def installed(self):

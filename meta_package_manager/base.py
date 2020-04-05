@@ -59,18 +59,24 @@ class CLIError(Exception):
 
 class PackageManager():
 
-    """ Base class from which all package manager definitions should inherits.
+    """ Base class from which all package manager definitions must inherits.
     """
-
-    # Global list of options used for each call to the package manager CLI.
-    # Might be of use to force silencing or high verbosity.
-    global_args = []
 
     # List of platforms supported by the manager.
     platforms = frozenset()
 
     # Version requirement specifier.
     requirement = None
+
+    # List of additional path to help mpm hunt down the package manager CLI.
+    # Should be a list of strings whose order dictatate the search sequence.
+    # Most of the time unnecessay: the `cli_path()` method works well on all
+    # platforms.
+    cli_search_path = []
+
+    # Global list of options used for each call to the package manager CLI.
+    # Might be of use to force silencing or high verbosity.
+    global_args = []
 
     # Tell the manager either to raise or continue on errors.
     raise_on_cli_error = False
@@ -124,7 +130,10 @@ class PackageManager():
         """
         if not self.cli_name:
             return None
-        env_path = "/usr/local/bin:{}".format(os.environ.get("PATH"))
+        env_path = ":".join(
+            self.cli_search_path + [
+                '/usr/local/bin',
+                os.environ.get("PATH")])
         cli_path = which(self.cli_name, mode=os.F_OK, path=env_path)
         if not cli_path:
             return None

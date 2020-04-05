@@ -169,8 +169,8 @@ class Gem(PackageManager):
         if exact:
             search_arg.append('--exact')
 
-        output = self.run_cli(['search', query, '--versions'
-                           ] + search_arg + self.global_args)
+        output = self.run_cli(
+            ['search', query, '--versions'] + search_arg + self.global_args)
 
         if output:
             regexp = re.compile(r"""

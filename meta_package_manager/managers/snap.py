@@ -48,7 +48,7 @@ class Snap(PackageManager):
         """
         output = self.run_cli(['--version'])
         if output:
-            return parse_version(output.splitlines()[0].split()[1])
+            return parse_version(output.split()[1])
 
     @cachedproperty
     def installed(self):

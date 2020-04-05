@@ -85,12 +85,10 @@ def test_virtual():
 def test_cli_path():
     for manager in pool().values():
         if manager.cli_path is not None:
-            assert isinstance(manager.cli_path, str)
-            parsed_path = Path(manager.cli_path)
-            assert parsed_path.is_absolute()
-            assert not parsed_path.is_reserved()
-            assert parsed_path.stem == manager.cli_name
-            assert parsed_path.is_file()
+            assert isinstance(manager.cli_path, Path)
+            assert manager.cli_path.is_absolute()
+            assert not manager.cli_path.is_reserved()
+            assert manager.cli_path.is_file()
 
 
 def test_global_args_type():

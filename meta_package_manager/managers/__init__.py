@@ -20,9 +20,8 @@
 """ Registration, indexing and cache of package manager definitions. """
 
 import inspect
-from glob import glob
 from importlib import import_module
-from os import path
+from pathlib import Path
 
 from boltons.cacheutils import LRI, cached
 from boltons.dictutils import FrozenDict
@@ -43,12 +42,11 @@ def pool():
     """
     register = {}
 
-    here = path.dirname(path.abspath(__file__))
-
-    for py_file in glob(path.join(here, '*.py')):
-        module_name = path.splitext(path.basename(py_file))[0]
-        logger.debug("Search manager definitions in {}".format(py_file))
-        module = import_module('.{}'.format(module_name), package=__package__)
+    for py_file in Path(__file__).parent.glob('*.py'):
+        logger.debug(
+            "Search manager definitions in {}".format(py_file.resolve()))
+        module = import_module(
+            '.{}'.format(py_file.stem), package=__package__)
 
         for _, klass in inspect.getmembers(module, inspect.isclass):
             if issubclass(klass, PackageManager) and not klass.virtual:

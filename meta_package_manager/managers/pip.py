@@ -53,7 +53,7 @@ class Pip(PackageManager):
             $ pip --version
             pip 2.0.2 from /usr/local/lib/python/site-packages/pip (python 3.7)
         """
-        output = self.run([self.cli_path, '--version'])
+        output = self.run_cli(['--version'])
         if output:
             return parse_version(output.split()[1])
 
@@ -96,7 +96,7 @@ class Pip(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.global_args + [
+        output = self.run_cli(self.global_args + [
             'list', '--format=json', '--verbose'])
 
         if output:
@@ -129,7 +129,7 @@ class Pip(PackageManager):
         """
         matches = {}
 
-        output = self.run([self.cli_path] + self.global_args + [
+        output = self.run_cli(self.global_args + [
             'search', query])
 
         if output:
@@ -227,7 +227,7 @@ class Pip(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.global_args + [
+        output = self.run_cli(self.global_args + [
             'list', '--format=json', '--outdated', '--verbose', '--quiet'])
 
         if output:

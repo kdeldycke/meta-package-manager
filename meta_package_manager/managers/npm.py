@@ -44,7 +44,7 @@ class NPM(PackageManager):
             $ npm --version
             6.13.7
         """
-        return parse_version(self.run([self.cli_path, '--version']))
+        return parse_version(self.run_cli(['--version']))
 
     @cachedproperty
     def installed(self):
@@ -91,7 +91,7 @@ class NPM(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.global_args + [
+        output = self.run_cli(self.global_args + [
             '-g', '--json', 'list'])
 
         if output:
@@ -188,7 +188,7 @@ class NPM(PackageManager):
         if not extended:
             search_args.append('--no-description')
 
-        output = self.run([self.cli_path] + self.global_args + [
+        output = self.run_cli(self.global_args + [
             'search', '--json'] + search_args + [query])
 
         if output:
@@ -241,7 +241,7 @@ class NPM(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.global_args + [
+        output = self.run_cli(self.global_args + [
             '-g', '--progress=false', '--json', '--no-update-notifier',
             'outdated'])
 

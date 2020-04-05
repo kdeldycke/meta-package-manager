@@ -19,6 +19,7 @@
 
 import os
 import re
+from pathlib import Path
 from shutil import which
 
 from boltons.cacheutils import cachedproperty
@@ -53,7 +54,7 @@ class Gem(PackageManager):
             $ gem --version
             3.0.3
         """
-        return parse_version(self.run([self.cli_path, '--version']))
+        return parse_version(self.run_cli(['--version']))
 
     @cachedproperty
     def cli_path(self):
@@ -77,9 +78,12 @@ class Gem(PackageManager):
             return None
         cli_path = which(cli_path, mode=os.F_OK, path=env_path)
 
-        logger.debug(
-            "CLI found at {}".format(cli_path) if cli_path
-            else "{} CLI not found.".format(self.cli_name))
+        if cli_path:
+            cli_path = Path(cli_path).resolve(strict=True)
+            logger.debug("CLI found at {}".format(cli_path))
+        else:
+            logger.debug("{} CLI not found.".format(self.cli_name))
+
         return cli_path
 
     @cachedproperty
@@ -113,7 +117,7 @@ class Gem(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path, 'list'] + self.global_args)
+        output = self.run_cli(['list'] + self.global_args)
 
         if output:
             regexp = re.compile(r'(\S+) \((.+)\)')
@@ -165,7 +169,7 @@ class Gem(PackageManager):
         if exact:
             search_arg.append('--exact')
 
-        output = self.run([self.cli_path, 'search', query, '--versions'
+        output = self.run_cli(['search', query, '--versions'
                            ] + search_arg + self.global_args)
 
         if output:
@@ -203,7 +207,7 @@ class Gem(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path, 'outdated'] + self.global_args)
+        output = self.run_cli(['outdated'] + self.global_args)
 
         if output:
             regexp = re.compile(r'(\S+) \((\S+) < (\S+)\)')
@@ -257,4 +261,4 @@ class Gem(PackageManager):
             Clean up complete
         """
         super(Gem, self).cleanup()
-        self.run([self.cli_path, 'cleanup'] + self.global_args)
+        self.run_cli(['cleanup'] + self.global_args)

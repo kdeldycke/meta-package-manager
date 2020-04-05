@@ -35,7 +35,7 @@ class APM(PackageManager):
 
     def get_version(self):
         """ Fetch version from ``apm --version`` output."""
-        output = self.run([self.cli_path, '--version'])
+        output = self.run_cli(['--version'])
         if output:
             return parse_version(output.splitlines()[0].split()[1])
 
@@ -139,7 +139,7 @@ class APM(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.global_args + [
+        output = self.run_cli(self.global_args + [
             'list', '--json'])
 
         if output:
@@ -241,7 +241,7 @@ class APM(PackageManager):
         if not extended:
             search_args.append('--no-description')
 
-        output = self.run([self.cli_path] + self.global_args + [
+        output = self.run_cli(self.global_args + [
             'search', '--json'] + search_args + [query])
 
         if output:
@@ -423,7 +423,7 @@ class APM(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.global_args + [
+        output = self.run_cli(self.global_args + [
             'outdated', '--compatible', '--json'])
 
         if output:

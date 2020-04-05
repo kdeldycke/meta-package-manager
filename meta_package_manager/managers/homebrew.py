@@ -58,14 +58,14 @@ class Homebrew(PackageManager):
             Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
 
         """
-        output = self.run([self.cli_path] + ['--version'])
+        output = self.run_cli(['--version'])
         if output:
             return parse_version(output.split()[1])
 
     def sync(self):
         """ `brew` and `cask` share the same command. """
         super(Homebrew, self).sync()
-        self.run([self.cli_path] + ['update', '--quiet'])
+        self.run_cli(['update', '--quiet'])
 
     @cachedproperty
     def installed(self):
@@ -117,8 +117,7 @@ class Homebrew(PackageManager):
         """
         installed = {}
 
-        output = self.run(
-            [self.cli_path] + self.global_args + ['list', '--versions'])
+        output = self.run_cli(self.global_args + ['list', '--versions'])
 
         if output:
             regexp = re.compile(r'(\S+)( \(!\))? (.+)')
@@ -199,7 +198,7 @@ class Homebrew(PackageManager):
         if exact:
             query = "/^{}$/".format(query)
 
-        output = self.run(self.search_cli + [query])
+        output = self.run_cli(self.search_args + [query])
 
         if output:
             regexp = re.compile(r"""
@@ -251,8 +250,7 @@ class Homebrew(PackageManager):
         outdated = {}
 
         # List available updates.
-        output = self.run(
-            [self.cli_path] + self.global_args + ['outdated', '--json=v1'])
+        output = self.run_cli(self.global_args + ['outdated', '--json=v1'])
 
         if output:
             for pkg_info in json.loads(output):
@@ -329,7 +327,7 @@ class Homebrew(PackageManager):
         More doc at: https://docs.brew.sh/Manpage#cleanup-options-formulacask
         """
         super(Homebrew, self).cleanup()
-        self.run([self.cli_path, 'cleanup', '-s'])
+        self.run_cli(['cleanup', '-s'])
 
 
 class Brew(Homebrew):
@@ -338,10 +336,8 @@ class Brew(Homebrew):
     cli_name = 'brew'
 
     @cachedproperty
-    def search_cli(self):
-        """ Returns the CLI to run search on Homebrew formulae.
-
-        Raw CLI output samples:
+    def search_args(self):
+        """ Returns arguments needed for search of Homebrew formulae.
 
         .. code-block:: shell-session
 
@@ -349,7 +345,7 @@ class Brew(Homebrew):
             ==> Formulae
             gnu-sed ✔                    libxdg-basedir               minised
         """
-        return [self.cli_path] + self.global_args + ['search', '--formulae']
+        return self.global_args + ['search', '--formulae']
 
 
 class Cask(Homebrew):
@@ -363,10 +359,8 @@ class Cask(Homebrew):
     global_args = ['cask']
 
     @cachedproperty
-    def search_cli(self):
-        """ Returns the CLI to run search on Homebrew casks.
-
-        Raw CLI output samples:
+    def search_args(self):
+        """ Returns arguments needed for search of Homebrew casks.
 
         .. code-block:: shell-session
 
@@ -377,7 +371,7 @@ class Cask(Homebrew):
             google-adwords-editor             prefs-editor
             licensed                          subclassed-mnemosyne
         """
-        return [self.cli_path, 'search', '--cask']
+        return ['search', '--cask']
 
     @cachedproperty
     def outdated(self):
@@ -423,9 +417,7 @@ class Cask(Homebrew):
             options.append('--greedy')
 
         # List available updates.
-        output = self.run(
-            [self.cli_path] + self.global_args + ['outdated'] +
-            options)
+        output = self.run_cli(self.global_args + ['outdated'] + options)
 
         if output:
             regexp = re.compile(r'(\S+) \((.*)\) != (.*)')

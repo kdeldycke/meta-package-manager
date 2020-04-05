@@ -42,7 +42,7 @@ class Yarn(PackageManager):
 
     def get_version(self):
         """ Fetch version from ``yarn --version`` output."""
-        return parse_version(self.run([self.cli_path, '--version']))
+        return parse_version(self.run_cli(['--version']))
 
     def parse(self, output):
         packages = {}
@@ -83,11 +83,8 @@ class Yarn(PackageManager):
 
             (...)
         """
-
-        cmd = [self.cli_path, 'global', '--json'] + self.global_args + [
-            'list', '--depth', '0']
-        output = self.run(cmd)
-
+        output = self.run_cli(
+            ['global', '--json'] + self.global_args + ['list', '--depth', '0'])
         return self.parse(output)
 
     def search(self, query, extended, exact):
@@ -180,8 +177,7 @@ class Yarn(PackageManager):
                 "Fuzzy search not supported for {}. Fallback to Exact."
                 "".format(self.id))
 
-        output = self.run([self.cli_path] + self.global_args + [
-            '--json', 'info', query])
+        output = self.run_cli(self.global_args + ['--json', 'info', query])
 
         if output:
             result = json.loads(output)
@@ -198,9 +194,7 @@ class Yarn(PackageManager):
 
     @cachedproperty
     def global_dir(self):
-        cmd = [self.cli_path, 'global', 'dir']
-        output = self.run(cmd)
-        return output.rstrip("\n\r")
+        return self.run_cli(['global', 'dir']).rstrip()
 
     @cachedproperty
     def outdated(self):
@@ -215,11 +209,10 @@ class Yarn(PackageManager):
 
             (...)
         """
-
         outdated = {}
-        cmd = [self.cli_path, '--json'] + self.global_args + [
-            'outdated', '--cwd', self.global_dir]
-        output = self.run(cmd)
+
+        output = self.run_cli(['--json'] + self.global_args + [
+            'outdated', '--cwd', self.global_dir])
 
         if not output:
             return outdated
@@ -251,7 +244,7 @@ class Yarn(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, 'global'] + self.global_args + ['--silent']
+        cmd = ['global'] + self.global_args + ['--silent']
 
         if package_id:
             cmd.append('add')
@@ -270,5 +263,4 @@ class Yarn(PackageManager):
         See: https://yarnpkg.com/cli/cache/clean
         """
         super(Yarn, self).cleanup()
-        self.run(
-            [self.cli_path] + self.global_args + ['cache', 'clean', '--all'])
+        self.run_cli(self.global_args + ['cache', 'clean', '--all'])

@@ -53,14 +53,14 @@ class APT(PackageManager):
             $ apt version apt
             1.6.11
         """
-        output = self.run([self.cli_path, '--version'])
+        output = self.run_cli(['--version'])
         version = None
         if output:
             output = output.splitlines()[0].split()
             if len(output) > 1:
                 version = output[1]
             else:
-                output = self.run([self.cli_path, 'version', 'apt'])
+                output = self.run_cli(['version', 'apt'])
                 if output:
                     version = output
         if version:
@@ -84,7 +84,7 @@ class APT(PackageManager):
             Reading state information...
         """
         super(APT, self).sync()
-        self.run([self.cli_path] + self.global_args + ['update', '--quiet'])
+        self.run_cli(self.global_args + ['update', '--quiet'])
 
     @cachedproperty
     def installed(self):
@@ -123,8 +123,8 @@ class APT(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.global_args + [
-            'list', '--installed', '--quiet'])
+        output = self.run_cli(
+            self.global_args + ['list', '--installed', '--quiet'])
 
         if output:
             regexp = re.compile(r'(\S+)\/\S+ (\S+) .*')
@@ -202,8 +202,8 @@ class APT(PackageManager):
             # in the CLI output after its execution.
             search_args = ['--full']
 
-        output = self.run([self.cli_path] + self.global_args + [
-            'search', query, '--quiet'] + search_args)
+        output = self.run_cli(
+            self.global_args + ['search', query, '--quiet'] + search_args)
 
         if output:
             regexp = re.compile(r"""
@@ -240,8 +240,8 @@ class APT(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.global_args + [
-            'list', '--upgradable', '--quiet'])
+        output = self.run_cli(
+            self.global_args + ['list', '--upgradable', '--quiet'])
 
         if output:
             regexp = re.compile(

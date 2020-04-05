@@ -22,7 +22,7 @@ import re
 from datetime import datetime
 from functools import partial
 from operator import getitem, itemgetter
-from os import path
+from pathlib import Path
 from sys import __stdin__, __stdout__
 
 import click
@@ -70,11 +70,11 @@ click_log.basic_config(logger)
 def json(data):
     """ Utility function to render data structure into pretty printed JSON.
 
-    Also care of internal objects like `TokenizedString`.
+    Also care of internal objects like `TokenizedString` and `Path`:
     """
 
-    def encode_tokens(obj):
-        if isinstance(obj, TokenizedString):
+    def serialize_objects(obj):
+        if isinstance(obj, (TokenizedString, Path)):
             return str(obj)
         raise TypeError(repr(obj) + " is not JSON serializable.")
 
@@ -83,7 +83,7 @@ def json(data):
         sort_keys=True,
         indent=4,
         separators=(',', ': '),
-        default=encode_tokens)
+        default=serialize_objects)
 
 
 def print_table(header_defs, rows, sort_key=None):
@@ -581,16 +581,16 @@ def backup(ctx, toml_output):
     stats = ctx.obj['stats']
 
     is_stdout = toml_output is __stdout__
-    toml_filepath = toml_output.name if is_stdout else path.abspath(
-        toml_output.name)
+    toml_filepath = (
+        toml_output.name if is_stdout else Path(toml_output.name).resolve())
     logger.info(
         'Backup list of installed packages to: {}'.format(toml_filepath))
 
     if not is_stdout:
-        if path.exists(toml_filepath) and not path.isfile(toml_filepath):
+        if toml_filepath.exists() and not toml_filepath.is_file():
             logger.error('Target file exist and is not a file.')
             return
-        if path.splitext(toml_filepath)[1].lower() != '.toml':
+        if toml_filepath.suffix.lower() != '.toml':
             logger.error('Target file is not a TOML file.')
             return
 
@@ -641,7 +641,7 @@ def restore(ctx, toml_files):
 
         toml_filepath = (
             toml_input.name if toml_input is __stdin__
-            else path.abspath(toml_input.name))
+            else Path(toml_input.name).resolve())
         logger.info(
             'Load list of packages to install from: {}'.format(toml_filepath))
 

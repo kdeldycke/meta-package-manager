@@ -18,6 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import os
+from pathlib import Path
 from shutil import which
 
 from boltons.cacheutils import cachedproperty
@@ -129,9 +130,12 @@ class PackageManager():
             return None
         cli_path = which(cli_path, mode=os.F_OK, path=env_path)
 
-        logger.debug(
-            "CLI found at {}".format(cli_path) if cli_path
-            else "{} CLI not found.".format(self.cli_name))
+        if cli_path:
+            cli_path = Path(cli_path).resolve(strict=True)
+            logger.debug("CLI found at {}".format(cli_path))
+        else:
+            logger.debug("{} CLI not found.".format(self.cli_name))
+
         return cli_path
 
     def get_version(self):
@@ -202,6 +206,7 @@ class PackageManager():
         Removes ANSI escape codes, and returns ready-to-use strings.
         """
         assert isinstance(args, list)
+        args = list(map(str, args))  # Serialize Path objects to strings.
         logger.debug("Running `{}`...".format(' '.join(args)))
 
         code = 0
@@ -225,13 +230,19 @@ class PackageManager():
             exception = CLIError(code, output, error)
             if self.raise_on_cli_error:
                 raise exception
-            else:
-                logger.error(error)
-                self.cli_errors.append(exception)
+            logger.error(error)
+            self.cli_errors.append(exception)
 
         logger.debug(output)
 
         return output
+
+    def run_cli(self, args, dry_run=False):
+        """ Like the `run` method above, but execute the binary pointed to by
+        the `cli_path` property set in the current instance.
+        """
+        assert isinstance(args, list)
+        return self.run([str(self.cli_path)] + args, dry_run)
 
     def sync(self):
         """ Refresh local manager metadata from remote repository. """
@@ -303,9 +314,10 @@ class PackageManager():
 
     @staticmethod
     def render_cli(cmd, cli_format='plain'):
-        """ Return a formatted CLI in the provided format. """
+        """ Return a formatted CLI as string in the provided format. """
         assert isinstance(cmd, list)
         assert cli_format in CLI_FORMATS
+        cmd = list(map(str, cmd))  # Serialize Path instances.
         if cli_format != 'fragments':
             cmd = ' '.join(cmd)
             if cli_format == 'bitbar':

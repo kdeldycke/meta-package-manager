@@ -43,7 +43,7 @@ class Flatpak(PackageManager):
             $ flatpak --version
             Flatpak 1.4.2
         """
-        output = self.run([self.cli_path, '--version'])
+        output = self.run_cli(['--version'])
         if output:
             return parse_version(output.strip().split()[1])
 
@@ -66,7 +66,7 @@ class Flatpak(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.global_args + [
+        output = self.run_cli(self.global_args + [
             'list', '--app', '--columns=name,application,version',
             '--ostree-verbose'])
 
@@ -100,7 +100,7 @@ class Flatpak(PackageManager):
                 "Extended search not supported for {}. Fallback to Fuzzy."
                 "".format(self.id))
 
-        output = self.run([self.cli_path] + self.global_args + [
+        output = self.run_cli(self.global_args + [
             'search', query, '--ostree-verbose'])
 
         if output:
@@ -141,7 +141,7 @@ class Flatpak(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.global_args + [
+        output = self.run_cli(self.global_args + [
             'remote-ls', '--app', '--updates',
             '--columns=name,application,version', '--ostree-verbose'])
 
@@ -192,4 +192,4 @@ class Flatpak(PackageManager):
         /flatpak-command-reference.html#flatpak-repair
         """
         super(Flatpak, self).cleanup()
-        self.run([self.cli_path] + self.global_args + ['repair', '--user'])
+        self.run_cli(self.global_args + ['repair', '--user'])

@@ -39,7 +39,7 @@ class MAS(PackageManager):
 
     def get_version(self):
         """ Fetch version from ``mas version`` output."""
-        return parse_version(self.run([self.cli_path, 'version']))
+        return parse_version(self.run_cli(['version']))
 
     @cachedproperty
     def installed(self):
@@ -55,7 +55,7 @@ class MAS(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.global_args + ['list'])
+        output = self.run_cli(self.global_args + ['list'])
 
         if output:
             regexp = re.compile(r'(\d+) (.*) \((\S+)\)$')
@@ -95,7 +95,7 @@ class MAS(PackageManager):
                 "Extended search not supported for {}. Fallback to Fuzzy."
                 "".format(self.id))
 
-        output = self.run([self.cli_path] + self.global_args + [
+        output = self.run_cli(self.global_args + [
             'search', query])
 
         if output:
@@ -141,7 +141,7 @@ class MAS(PackageManager):
         """
         outdated = {}
 
-        output = self.run([self.cli_path] + self.global_args + ['outdated'])
+        output = self.run_cli(self.global_args + ['outdated'])
 
         if output:
             regexp = re.compile(r'(\d+) (.*) \((\S+) -> (\S+)\)$')

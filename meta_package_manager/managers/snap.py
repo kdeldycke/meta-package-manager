@@ -60,10 +60,10 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
             $ snap list
-            Name               Version    Rev   Aufzeichnung   Herausgeber     Hinweise
-            core               16-2.44.1  8935  latest/stable  canonical✓      core
-            electronic-wechat  2.0        7     latest/stable  ubuntu-dawndiy  -
-            pdftk              2.02-4     9     latest/stable  smoser          -
+            Name    Version    Rev   Aufzeichnung   Herausgeber     Hinweise
+            core    16-2.44.1  8935  latest/stable  canonical✓      core
+            wechat  2.0        7     latest/stable  ubuntu-dawndiy  -
+            pdftk   2.02-4     9     latest/stable  smoser          -
         """
         installed = {}
 
@@ -86,12 +86,10 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
             $ snap find doc
-            Name                       Version                  Herausgeber               Hinweise  Zusammenfassung
-            journey                    2.14.3                   2appstudio✓               -         Your private diary, journal & companion.
-            telegram-desktop           2.0.1                    telegram.desktop          -         Official desktop client for the Telegram messenger
-            nextcloud                  17.0.5snap1              nextcloud✓                -         Nextcloud Server - A safe home for all your data
-            kata-containers            1.10.2                   katacontainers✓           classic   Lightweight virtual machines that seamlessly plug into the containers ecosystem
-            skype                      8.58.0.93                skype✓                    classic   One Skype for all your devices. New features. New look. All Skype.
+            Name       Version      Herausgeber  Hinweise  Zusammenfassung
+            journey    2.14.3       2appstudio   -         Your private diary.
+            nextcloud  17.0.5snap1  nextcloud✓   -         Nextcloud Server
+            skype      8.58.0.93    skype✓       classic   One Skype for all.
         """
         matches = {}
 
@@ -111,8 +109,8 @@ class Snap(PackageManager):
                         continue
 
                 else:
-                    # Exclude packages not featuring the search query in their ID
-                    # or name.
+                    # Exclude packages not featuring the search query in their
+                    # ID or name.
                     if not extended:
                         query_parts = set(map(str, TokenizedString(query)))
                         pkg_parts = set(map(str, TokenizedString(package_id)))
@@ -156,13 +154,13 @@ class Snap(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id):
-        """snap has an auto-update function, but snaps can be updated manually."""
-        return [
-            self.cli_path] + self.global_args + [
-                'refresh', package_id]
+        """ snap has an auto-update function, but snaps can be updated
+        manually.
+        """
+        return [self.cli_path] + self.global_args + ['refresh', package_id]
 
     def upgrade_all_cli(self):
-        """snap has an auto-update function, but snaps can be updated manually."""
-        return [
-            self.cli_path] + self.global_args + [
-                'refresh']
+        """ Snap has an auto-update function, but snaps can be updated
+        manually.
+        """
+        return [self.cli_path] + self.global_args + ['refresh']

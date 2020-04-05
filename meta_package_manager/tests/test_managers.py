@@ -82,6 +82,20 @@ def test_virtual():
         assert isinstance(manager.virtual, bool)
 
 
+def test_cli_search_path():
+    for manager in pool().values():
+        assert isinstance(manager.cli_search_path, list)
+        assert len(
+            set(manager.cli_search_path)) == len(manager.cli_search_path)
+        for search_path in manager.cli_search_path:
+            assert isinstance(search_path, str)
+            path_obj = Path(search_path).resolve()
+            assert path_obj.is_absolute()
+            assert not path_obj.is_reserved()
+            if path_obj.exists():
+                assert path_obj.is_file() or path_obj.is_dir()
+
+
 def test_cli_path():
     for manager in pool().values():
         if manager.cli_path is not None:

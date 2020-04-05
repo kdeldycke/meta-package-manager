@@ -78,6 +78,7 @@ Package manager  Min. version  macOS  Linux  Windows  ``sync``  ``installed``  `
 |composer|__      1.4.0         ✓      ✓      ✓        ✓         ✓              ✓                        ✓             ✓            ✓
 |flatpak|__       1.2.*                ✓                         ✓              ✓                        ✓             ✓            ✓
 |opkg|__          0.2.0                ✓               ✓         ✓              ✓                        ✓             ✓
+|snap|__          2.0.0                ✓                         ✓              ✓                                      ✓
 ================ ============= ====== ====== ======== ========= ============== =========== ============ ============= ============ ============
 
 .. |brew| replace::
@@ -119,6 +120,9 @@ __ https://flatpak.org
 .. |opkg| replace::
    opkg
 __ https://git.yoctoproject.org/cgit/cgit.cgi/opkg/
+.. |snap| replace::
+   ``snap``
+__ https://snapcraft.io
 
 
 If you're bored, feel free to add support for new package manager. See

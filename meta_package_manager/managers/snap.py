@@ -46,7 +46,7 @@ class Snap(PackageManager):
             linuxmint  19.3
             kernel     4.15.0-91-generic
         """
-        output = self.run([self.cli_path, '--version'])
+        output = self.run_cli(['--version'])
         if output:
             return parse_version(output.splitlines()[0].split()[1])
 
@@ -65,7 +65,7 @@ class Snap(PackageManager):
         """
         installed = {}
 
-        output = self.run([self.cli_path] + self.global_args + [
+        output = self.run_cli(self.global_args + [
             'list'])
 
         if output:
@@ -93,7 +93,7 @@ class Snap(PackageManager):
         """
         matches = {}
 
-        output = self.run([self.cli_path] + self.global_args + ['find', query])
+        output = self.run_cli(self.global_args + ['find', query])
 
         if output:
 

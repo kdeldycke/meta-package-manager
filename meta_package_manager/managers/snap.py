@@ -32,6 +32,8 @@ class Snap(PackageManager):
 
     requirement = '2.0.0'
 
+    global_args = ['--color=never']
+
     def get_version(self):
         """ Fetch version from ``snap --version`` output.
 
@@ -122,6 +124,36 @@ class Snap(PackageManager):
                     'name': package_id,
                     'latest_version': parse_version(version)}
         return matches
+
+    @cachedproperty
+    def outdated(self):
+        """ Fetch outdated packages from ``snap refresh --list`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            $ snap refresh --list
+            Name            Version  Rev  Herausgeber     Hinweise
+            standard-notes  3.3.5    8    standardnotes✓  -
+        """
+        outdated = {}
+
+        output = self.run_cli(self.global_args + ['refresh', '--list'])
+
+        if len(output.splitlines()) > 1:
+            for package in output.splitlines()[1:]:
+                package_id = package.split()[0]
+                latest_version = package.split()[1]
+                installed_version = self.run_cli(self.global_args + [
+                    'list', package_id]).splitlines()[-1].split()[1]
+                outdated[package_id] = {
+                    'id': package_id,
+                    'name': package_id,
+                    'latest_version': parse_version(latest_version),
+                    'installed_version': parse_version(installed_version)}
+
+        return outdated
 
     def upgrade_cli(self, package_id):
         """snap has an auto-update function, but snaps can be updated manually."""

@@ -141,7 +141,7 @@ class Snap(PackageManager):
 
         output = self.run_cli(self.global_args + ['refresh', '--list'])
 
-        if len(output.splitlines()) > 1:
+        if output and len(output.splitlines()) > 1:
             for package in output.splitlines()[1:]:
                 package_id = package.split()[0]
                 latest_version = package.split()[1]

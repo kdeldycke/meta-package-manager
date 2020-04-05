@@ -69,7 +69,7 @@ class Snap(PackageManager):
             'list'])
 
         if output:
-            for package in output.splitlines():
+            for package in output.splitlines()[1:]:
                 package_id = package.split()[0]
                 installed_version = package.split()[1]
                 installed[package_id] = {

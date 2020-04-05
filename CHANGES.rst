@@ -8,6 +8,7 @@ Changelog
 .. note:: This version is not yet released and is under active development.
 
 * [mpm]: Replace internal helpers with upstreamed ``boltons`` utils.
+* [mpm]: Allow for manager-specific search path to help hunting down CLIs.
 * [mpm]: Bump requirement to ``boltons 20.1.1``.
 * [mpm]: Bump development requirement to ``pylint 2.5``.
 * [mpm]: Move pylint config from ``setup.cfg`` to ``pyproject.toml``.

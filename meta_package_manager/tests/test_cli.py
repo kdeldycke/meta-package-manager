@@ -122,11 +122,6 @@ def test_unknown_command(invoke):
     assert "Error: No such command 'blah'." in result.output
 
 
-@pytest.fixture(scope="function", params=commands)
-def commands_arg(request):
-    return request.param
-
-
 class TestCLISubcommand(CLITestCase):
 
     """ Base class to define tests common to each subcommands. """

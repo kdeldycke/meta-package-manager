@@ -17,11 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import os
 import re
-import textwrap
 import unittest
 
+import pytest
 import simplejson as json
 from boltons.tbutils import ExceptionInfo
 from click.testing import CliRunner
@@ -29,14 +28,32 @@ from click.testing import CliRunner
 from .. import __version__
 from ..bitbar import run as bitbar_run
 from ..cli import cli
-from ..platform import is_linux, is_macos, is_windows
-from .case import (
-    MANAGER_IDS,
-    print_cli_output,
-    run_cmd,
-    skip_destructive,
-    unless_macos
-)
+from .case import MANAGER_IDS, print_cli_output
+
+
+@pytest.fixture(scope="function")
+def runner(request):
+    return CliRunner()
+
+
+@pytest.fixture(scope="function")
+def invoke(runner, *args):
+    """ Executes Click's CLI, print output and return results. """
+
+    def run_run(*args):
+
+        result = runner.invoke(cli, args)
+
+        print_cli_output(['mpm'] + list(args), result.output)
+
+        # Print some more debug info.
+        print(result)
+        if result.exception:
+            print(ExceptionInfo.from_exc_info(*result.exc_info).get_formatted())
+
+        return result
+
+    return run_run
 
 
 class CLITestCase(unittest.TestCase):
@@ -68,28 +85,44 @@ class CLITestCase(unittest.TestCase):
         # Print some more debug info.
         print(result)
         if result.exception:
-            print(ExceptionInfo.from_exc_info(
-                *result.exc_info).get_formatted())
+            print(ExceptionInfo.from_exc_info(*result.exc_info).get_formatted())
 
         return result
 
 
-class TestCLI(CLITestCase):
+def test_bare_call(invoke):
+    result = invoke()
+    assert result.exit_code == 0
+    assert "--help" in result.output
 
-    def test_bare_call(self):
-        result = self.invoke()
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("--help", result.output)
 
-    def test_main_help(self):
-        result = self.invoke('--help')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("--help", result.output)
+def test_main_help(invoke):
+    result = invoke('--help')
+    assert result.exit_code == 0
+    assert "--help" in result.output
 
-    def test_version(self):
-        result = self.invoke('--version')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn(__version__, result.output)
+
+def test_version(invoke):
+    result = invoke('--version')
+    assert result.exit_code == 0
+    assert __version__ in result.output
+
+
+def test_unknown_option(invoke):
+    result = invoke('--blah')
+    assert result.exit_code == 2
+    assert "Error: no such option: --blah" in result.output
+
+
+def test_unknown_command(invoke):
+    result = invoke('blah')
+    assert result.exit_code == 2
+    assert "Error: No such command 'blah'." in result.output
+
+
+@pytest.fixture(scope="function", params=commands)
+def commands_arg(request):
+    return request.param
 
 
 class TestCLISubcommand(CLITestCase):
@@ -98,9 +131,8 @@ class TestCLISubcommand(CLITestCase):
 
     subcommand_args = []
 
-    @classmethod
-    def setUpClass(klass):
-        if not klass.subcommand_args:
+    def setUp(self):
+        if not self.subcommand_args:
             raise unittest.SkipTest('Skip generic test class.')
 
     def test_main_help(self):
@@ -252,363 +284,3 @@ class TestCLITableRendering(TestCLISubcommand):
         self.assertIn("debug:", result.output)
         with self.assertRaises(json.decoder.JSONDecodeError):
             json.loads(result.output)
-
-
-class TestCLIManagers(TestCLITableRendering):
-
-    subcommand_args = ['managers']
-
-    def test_json_output(self):
-        result = super(TestCLIManagers, self).test_json_output()
-
-        self.assertSetEqual(set(result), MANAGER_IDS)
-
-        for manager_id, info in result.items():
-            self.assertIsInstance(manager_id, str)
-            self.assertIsInstance(info, dict)
-
-            self.assertSetEqual(set(info), set([
-                'available', 'cli_path', 'errors', 'executable', 'fresh', 'id',
-                'name', 'supported', 'version']))
-
-            self.assertIsInstance(info['available'], bool)
-            if info['cli_path'] is not None:
-                self.assertIsInstance(info['cli_path'], str)
-            self.assertIsInstance(info['errors'], list)
-            self.assertIsInstance(info['executable'], bool)
-            self.assertIsInstance(info['fresh'], bool)
-            self.assertIsInstance(info['id'], str)
-            self.assertIsInstance(info['name'], str)
-            self.assertIsInstance(info['supported'], bool)
-            if info['version'] is not None:
-                self.assertIsInstance(info['version'], str)
-
-            self.assertEqual(info['id'], manager_id)
-
-
-class TestCLISync(TestCLISubcommand):
-
-    subcommand_args = ['sync']
-
-
-class TestCLIInstalled(TestCLITableRendering):
-
-    subcommand_args = ['installed']
-
-    def test_json_output(self):
-        result = super(TestCLIInstalled, self).test_json_output()
-
-        self.assertTrue(set(result).issubset(MANAGER_IDS))
-
-        for manager_id, info in result.items():
-            self.assertIsInstance(manager_id, str)
-            self.assertIsInstance(info, dict)
-
-            self.assertSetEqual(set(info), set([
-                'errors', 'id', 'name', 'packages']))
-
-            self.assertIsInstance(info['errors'], list)
-            self.assertIsInstance(info['id'], str)
-            self.assertIsInstance(info['name'], str)
-            self.assertIsInstance(info['packages'], list)
-
-            self.assertEqual(info['id'], manager_id)
-
-            for pkg in info['packages']:
-                self.assertIsInstance(pkg, dict)
-
-                self.assertSetEqual(set(pkg), set([
-                    'id', 'installed_version', 'name']))
-
-                self.assertIsInstance(pkg['id'], str)
-                self.assertIsInstance(pkg['installed_version'], str)
-                self.assertIsInstance(pkg['name'], str)
-
-
-class TestCLISearch(TestCLITableRendering):
-
-    subcommand_args = ['search', 'abc']
-
-    def test_json_output(self):
-        result = super(TestCLISearch, self).test_json_output()
-
-        self.assertTrue(set(result).issubset(MANAGER_IDS))
-
-        for manager_id, info in result.items():
-            self.assertIsInstance(manager_id, str)
-            self.assertIsInstance(info, dict)
-
-            self.assertSetEqual(set(info), set([
-                'errors', 'id', 'name', 'packages']))
-
-            self.assertIsInstance(info['errors'], list)
-            self.assertIsInstance(info['id'], str)
-            self.assertIsInstance(info['name'], str)
-            self.assertIsInstance(info['packages'], list)
-
-            self.assertEqual(info['id'], manager_id)
-
-            for pkg in info['packages']:
-                self.assertIsInstance(pkg, dict)
-
-                self.assertSetEqual(set(pkg), set([
-                    'id', 'latest_version', 'name']))
-
-                self.assertIsInstance(pkg['id'], str)
-                if pkg['latest_version'] is not None:
-                    self.assertIsInstance(pkg['latest_version'], str)
-                self.assertIsInstance(pkg['name'], str)
-
-    @unless_macos()
-    def test_unicode_search(self):
-        """ See #16. """
-        result = self.invoke('--manager', 'cask', 'search', 'ubersicht')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("ubersicht", result.output)
-        # XXX search command is not fetching details package infos like names
-        # for now.
-        # self.assertIn("Übersicht", result.output)
-
-        result = self.invoke('--manager', 'cask', 'search', 'Übersicht')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("ubersicht", result.output)
-        # self.assertIn("Übersicht", result.output)
-
-    def test_exact_search_tokenizer(self):
-        result = self.invoke('--manager', 'pip3', 'search', '--exact', 'sed')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("1 package found", result.output)
-        self.assertIn(" sed ", result.output)
-
-        for query in ['SED', 'SeD', 'sEd*', '*sED*', '_seD-@', '', '_']:
-            result = self.invoke(
-                '--manager', 'pip3', 'search', '--exact', query)
-            self.assertEqual(result.exit_code, 0)
-            self.assertIn("0 package found", result.output)
-            self.assertNotIn("sed", result.output)
-
-    def test_fuzzy_search_tokenizer(self):
-        for query in ['', '_', '_seD-@']:
-            result = self.invoke('--manager', 'pip3', 'search', query)
-            self.assertEqual(result.exit_code, 0)
-            self.assertIn("0 package found", result.output)
-            self.assertNotIn("sed", result.output)
-
-        for query in ['sed', 'SED', 'SeD', 'sEd*', '*sED*']:
-            result = self.invoke('--manager', 'pip3', 'search', query)
-            self.assertEqual(result.exit_code, 0)
-            self.assertIn("2 packages found", result.output)
-            self.assertIn(" sed ", result.output)
-            self.assertIn(" SED-cli ", result.output)
-
-    def test_extended_search_tokenizer(self):
-        for query in ['', '_', '_seD-@']:
-            result = self.invoke(
-                '--manager', 'pip3', 'search', '--extended', query)
-            self.assertEqual(result.exit_code, 0)
-            self.assertIn("0 package found", result.output)
-            self.assertNotIn("sed", result.output)
-
-        for query in ['sed', 'SED', 'SeD', 'sEd*', '*sED*']:
-            result = self.invoke(
-                '--manager', 'pip3', 'search', '--extended', query)
-            self.assertEqual(result.exit_code, 0)
-            self.assertIn("22 packages found", result.output)
-
-
-class TestCLIOutdated(TestCLITableRendering):
-
-    subcommand_args = ['outdated']
-
-    def test_json_output(self):
-        result = super(TestCLIOutdated, self).test_json_output()
-
-        self.assertTrue(set(result).issubset(MANAGER_IDS))
-
-        for manager_id, info in result.items():
-            self.assertIsInstance(manager_id, str)
-            self.assertIsInstance(info, dict)
-
-            self.assertIsInstance(info['errors'], list)
-            self.assertIsInstance(info['id'], str)
-            self.assertIsInstance(info['name'], str)
-            self.assertIsInstance(info['packages'], list)
-
-            keys = set(['errors', 'id', 'name', 'packages'])
-            if 'upgrade_all_cli' in info:
-                self.assertIsInstance(info['upgrade_all_cli'], str)
-                self.assertGreater(len(info['packages']), 0)
-                keys.add('upgrade_all_cli')
-            else:
-                self.assertEqual(len(info['packages']), 0)
-
-            self.assertSetEqual(set(info), keys)
-
-            self.assertEqual(info['id'], manager_id)
-
-            for pkg in info['packages']:
-                self.assertIsInstance(pkg, dict)
-
-                self.assertSetEqual(set(pkg), set([
-                    'id', 'installed_version', 'latest_version', 'name',
-                    'upgrade_cli']))
-
-                self.assertIsInstance(pkg['id'], str)
-                self.assertIsInstance(pkg['installed_version'], str)
-                self.assertIsInstance(pkg['latest_version'], str)
-                self.assertIsInstance(pkg['name'], str)
-                self.assertIsInstance(pkg['upgrade_cli'], str)
-
-    def test_cli_format_plain(self):
-        result = self.invoke(
-            '--output-format', 'json', 'outdated', '--cli-format', 'plain')
-        for outdated in json.loads(result.output).values():
-            for infos in outdated['packages']:
-                self.assertIsInstance(infos['upgrade_cli'], str)
-
-    def test_cli_format_fragments(self):
-        result = self.invoke(
-            '--output-format', 'json', 'outdated', '--cli-format', 'fragments')
-        for outdated in json.loads(result.output).values():
-            for infos in outdated['packages']:
-                self.assertIsInstance(infos['upgrade_cli'], list)
-
-    def test_cli_format_bitbar(self):
-        result = self.invoke(
-            '--output-format', 'json', 'outdated', '--cli-format', 'bitbar')
-        for outdated in json.loads(result.output).values():
-            for infos in outdated['packages']:
-                self.assertIsInstance(infos['upgrade_cli'], str)
-                self.assertIn('param1=', infos['upgrade_cli'])
-
-    @skip_destructive()
-    def test_unicode_name(self):
-        """ See #16. """
-        # Install an old version of a package with a unicode name.
-        # Old Cask formula for ubersicht 1.0.44.
-        formula_url = (
-            "https://raw.githubusercontent.com/caskroom/homebrew-cask"
-            "/51add049f53225ac2c98f59bbeee5e19c29e6557/Casks/ubersicht.rb")
-        code, output, error = run_cmd(
-            'brew', 'cask', 'install', formula_url)
-        self.assertEqual(code, 0)
-        self.assertIn('Uebersicht-1.0.44.app', output)
-        self.assertFalse(error)
-
-        # Look for reported available upgrade.
-        result = self.invoke('--manager', 'cask', 'outdated')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("ubersicht", result.output)
-        self.assertIn("Übersicht", result.output)
-
-    @skip_destructive()
-    def test_multiple_names(self):
-        """ See #26. """
-        # Install an old version of a package with multiple names.
-        # Old Cask formula for xld 2016.09.20.
-        formula_url = (
-            "https://raw.githubusercontent.com/caskroom/homebrew-cask"
-            "/9e6ca52ab7846c82471df586a930fb60231d63ee/Casks/xld.rb")
-        code, output, error = run_cmd(
-            'brew', 'cask', 'install', formula_url)
-        self.assertEqual(code, 0)
-        self.assertIn('xld-20160920.dmg', output)
-        self.assertFalse(error)
-
-        # Look for reported available upgrade.
-        result = self.invoke('--manager', 'cask', 'outdated')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("xld", result.output)
-        self.assertIn("X Lossless Decoder", result.output)
-
-
-class TestCLIUpgrade(TestCLISubcommand):
-
-    subcommand_args = ['upgrade', '--dry-run']
-
-    @skip_destructive()
-    def test_full_upgrade(self):
-        result = self.invoke('upgrade')
-        self.assertEqual(result.exit_code, 0)
-
-
-class TestCLIBackup(TestCLISubcommand):
-
-    subcommand_args = ['backup', 'mpm-packages.toml']
-
-    def test_export_all_packages_to_file(self):
-        result = self.invoke('backup', 'mpm-packages.toml')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn('mpm-packages.toml', result.output)
-
-    def test_backup_single_manager(self):
-        result = self.invoke('--manager', 'npm', 'backup', 'npm-packages.toml')
-        self.assertEqual(result.exit_code, 0)
-        with open('npm-packages.toml', 'r') as doc:
-            # Check only [npm] section appears in TOML file.
-            self.assertSetEqual(
-                {l for l in doc.read().split() if l.startswith('[')},
-                set(['[npm]']))
-
-
-class TestCLIRestore(TestCLISubcommand):
-
-    subcommand_args = ['restore', 'dummy.toml']
-
-    def setUp(self, *args, **kwargs):
-        """ Create a custom TOML file to feed the CLI with.
-
-        Our dummy file should result in no action as whole sections of
-        unrecognized managers are simply ignored.
-        """
-        toml_content = textwrap.dedent("""\
-            [dummy_manager]
-            fancy_package = "0.0.1"
-            """)
-
-        with open('dummy.toml', 'w') as doc:
-            doc.write(toml_content)
-
-        super(TestCLIRestore, self).setUp(*args, **kwargs)
-
-    def test_ignore_dummy_manager(self):
-        result = self.invoke('restore', 'dummy.toml')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn('dummy.toml', result.output)
-        self.assertNotIn('dummy_manager', result.output)
-
-    def test_restore_single_manager(self):
-        toml_content = textwrap.dedent("""\
-            [pip3]
-            fancy_package = "0.0.1"
-
-            [npm]
-            dummy_package = "2.2.2"
-            """)
-
-        with open('packages.toml', 'w') as doc:
-            doc.write(toml_content)
-
-        result = self.invoke('--manager', 'npm', 'restore', 'packages.toml')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn('packages.toml', result.output)
-        self.assertNotIn('Restore pip3', result.output)
-        self.assertIn('Restore npm', result.output)
-
-    def test_restore_excluded_manager(self):
-        toml_content = textwrap.dedent("""\
-            [pip3]
-            fancy_package = "0.0.1"
-
-            [npm]
-            dummy_package = "2.2.2"
-            """)
-
-        with open('packages.toml', 'w') as doc:
-            doc.write(toml_content)
-
-        result = self.invoke('--exclude', 'npm', 'restore', 'packages.toml')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn('packages.toml', result.output)
-        self.assertIn('Restore pip3', result.output)
-        self.assertNotIn('Restore npm', result.output)

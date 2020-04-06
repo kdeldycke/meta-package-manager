@@ -49,7 +49,8 @@ def invoke(runner, *args):
         # Print some more debug info.
         print(result)
         if result.exception:
-            print(ExceptionInfo.from_exc_info(*result.exc_info).get_formatted())
+            print(ExceptionInfo.from_exc_info(
+                *result.exc_info).get_formatted())
 
         return result
 
@@ -85,7 +86,8 @@ class CLITestCase(unittest.TestCase):
         # Print some more debug info.
         print(result)
         if result.exception:
-            print(ExceptionInfo.from_exc_info(*result.exc_info).get_formatted())
+            print(ExceptionInfo.from_exc_info(
+                *result.exc_info).get_formatted())
 
         return result
 

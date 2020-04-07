@@ -14,7 +14,7 @@ See also `pip installation instructions
 
 .. warning::
 
-    ``mpm``, `the Python module <https://pypi.python.org/pypi/mpm>`_, is not
+    `*mpm*, the Python module <https://pypi.python.org/pypi/mpm>`_, is not
     the same as ``meta-package-manager``. Only the later provides the
     :command:`mpm` CLI *per-se*. The former has nothing to do with the
     current project.

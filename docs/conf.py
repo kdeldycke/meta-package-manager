@@ -27,7 +27,8 @@ release = version
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
-    'sphinx.ext.viewcode']
+    'sphinx.ext.viewcode',
+    'sphinx_tabs.tabs']
 
 master_doc = 'index'
 

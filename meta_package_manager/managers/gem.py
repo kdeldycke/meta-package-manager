@@ -66,10 +66,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            $ gem list
-
-            *** LOCAL GEMS ***
-
+            $ gem list --quiet
             bigdecimal (default: 1.4.1)
             bundler (default: 1.17.2)
             CFPropertyList (2.3.6)

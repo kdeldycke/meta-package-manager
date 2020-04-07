@@ -2,9 +2,10 @@ History
 =======
 
 The ``package_manager.py`` script `started its life in my 'dotfile' repository
-<https://github.com/kdeldycke/dotfiles/commit/bfcc51e318b40c4283974548cfa1712d082be121#diff-c8127ac6af9d4a21e366ff740db2eeb5>`_,
-as a rewrite from Bash to Python of the `'brew-updates.sh' script
-<https://getbitbar.com/plugins/Dev/Homebrew/brew-updates.1h.sh>`_.
+<https://github.com/kdeldycke/dotfiles/commit/bfcc51e318b40c4283974548cfa1712d082be121#diff-c8127ac6af9d4a21e366ff740db2eeb5>`_
+in 2016, as a rewrite of a `BitBar 'brew-updates.sh' script
+<https://getbitbar.com/plugins/Dev/Homebrew/brew-updates.1h.sh>`_ from Bash to
+Python.
 
 I then `merged both Homebrew and Cask
 <https://github.com/kdeldycke/dotfiles/commit/792d32bfddfc3511ea10c10513b62e269f145148#diff-c8127ac6af9d4a21e366ff740db2eeb5>`_

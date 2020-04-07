@@ -72,6 +72,7 @@ pytest = "^5.4"
 pytest-cov = "^2.8.1"
 twine = "^3.1"
 
+sphinx_tabs = "^1.1.13"
 [tool.poetry.extras]
 # Workaround lacks of Poetry support by RTD: https://stackoverflow.com/a/58163431
 docs = ["sphinx", "sphinx_rtd_theme"]

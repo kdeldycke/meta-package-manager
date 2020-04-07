@@ -16,6 +16,7 @@ Changelog
 * [mpm]: Fail CI and QA checks if pylint score lower than 9.
 * [mpm]: Add more platform definition unittests.
 * [mpm]: Drop support of Python 3.6.
+* [mpm]: Use group-tabs in Sphinx docs.
 
 
 `3.1.0 (2020-04-02) <https://github.com/kdeldycke/meta-package-manager/compare/v3.0.0...v3.1.0>`_

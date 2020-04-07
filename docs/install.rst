@@ -26,65 +26,66 @@ Shell completion
 Completion for popular shell `rely on Click feature
 <https://click.palletsprojects.com/en/7.x/bashcomplete/>`_.
 
-Bash
-^^^^
+.. tabs::
 
-Add this to ``~/.bashrc``:
+  .. group-tab:: Bash
 
-.. code-block:: bash
+    Add this to ``~/.bashrc``:
 
-    eval "$(_MPM_COMPLETE=source_bash mpm)"
+    .. code-block:: bash
 
-Alternatively, export the generated completion code as a static script to be
-executed:
+        eval "$(_MPM_COMPLETE=source_bash mpm)"
 
-.. code-block:: shell-session
+  .. group-tab:: Zsh
 
-    $ _MPM_COMPLETE=source_bash mpm > mpm-complete.sh
+    Add this to ``~/.zshrc``:
 
-Then source it from ``~/.bashrc``:
+    .. code-block:: zsh
 
-.. code-block:: bash
+        eval "$(_MPM_COMPLETE=source_zsh mpm)"
 
-   . /path/to/mpm-complete.sh
+  .. group-tab:: Fish
 
-Zsh
-^^^
+    Add this to ``~/.config/fish/completions/mpm.fish``:
 
-Add this to ``~/.zshrc``:
+    .. code-block:: fish
 
-.. code-block:: zsh
-
-    eval "$(_MPM_COMPLETE=source_zsh mpm)"
+        eval (env _MPM_COMPLETE=source_fish mpm)
 
 Alternatively, export the generated completion code as a static script to be
 executed:
 
-.. code-block:: shell-session
+.. tabs::
 
-    $ _MPM_COMPLETE=source_zsh mpm > mpm-complete.sh
+  .. group-tab:: Bash
 
-Then source it from ``~/.zshrc``:
+    .. code-block:: shell-session
 
-.. code-block:: zsh
+        $ _MPM_COMPLETE=source_bash mpm > mpm-complete.sh
 
-   . /path/to/mpm-complete.sh
+    Then source it from ``~/.bashrc``:
 
-Fish
-^^^^
+    .. code-block:: bash
 
-Add this to ``~/.config/fish/completions/mpm.fish``:
+       . /path/to/mpm-complete.sh
 
-.. code-block:: fish
+  .. group-tab:: Zsh
 
-    eval (env _MPM_COMPLETE=source_fish mpm)
+    .. code-block:: shell-session
 
-Alternatively, export the generated completion code as a static script to be
-executed:
+        $ _MPM_COMPLETE=source_zsh mpm > mpm-complete.sh
 
-.. code-block:: fish
+    Then source it from ``~/.zshrc``:
 
-   _MPM_COMPLETE=source_fish mpm > ~/.config/fish/completions/mpm-complete.fish
+    .. code-block:: zsh
+
+       . /path/to/mpm-complete.sh
+
+  .. group-tab:: Fish
+
+    .. code-block:: fish
+
+       _MPM_COMPLETE=source_fish mpm > ~/.config/fish/completions/mpm-comp.fish
 
 
 Python dependencies

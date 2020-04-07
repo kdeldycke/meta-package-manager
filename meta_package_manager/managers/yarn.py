@@ -95,6 +95,7 @@ class Yarn(PackageManager):
         https://github.com/yarnpkg/yarn/issues/778#issuecomment-253146299
 
         .. code-block:: shell-session
+
             $ yarn --no-progress --non-interactive --skip-integrity-check \
             > --json info python | jq
             {

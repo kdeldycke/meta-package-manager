@@ -57,7 +57,7 @@ class CLIError(Exception):
                 indent(str(self.error), margin)), margin)
 
 
-class PackageManager():
+class PackageManager:
 
     """ Base class from which all package manager definitions must inherits.
     """
@@ -85,8 +85,9 @@ class PackageManager():
     # possessing their own auto-update mecanism.
     ignore_auto_updates = True
 
-    # Log of all encountered CLI errors.
-    cli_errors = []
+    def __init__(self):
+        # Log of all encountered CLI errors.
+        self.cli_errors = []
 
     @classproperty
     def id(cls):

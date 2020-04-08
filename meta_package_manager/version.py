@@ -25,6 +25,8 @@ from functools import partial
 
 from boltons import strutils
 
+ALNUM_EXTRACTOR = re.compile('(\\d+ | [a-z]+)', re.VERBOSE)
+
 
 class Token():
     """A token is a normalized word, persisting its lossless integer variant.
@@ -179,8 +181,6 @@ class TokenizedString():
     def pretty_print(self):
         return self.separator.join(map(str, self.tokens))
 
-    ALNUM_EXTRACTOR = re.compile('(\\d+ | [a-z]+)', re.VERBOSE)
-
     @classmethod
     def tokenize(cls, string):
         """ Tokenize a string: ignore case and split at each non-alphanumeric
@@ -199,7 +199,7 @@ class TokenizedString():
         """
         normalized_str = strutils.asciify(string).lower().decode()
 
-        for segment in cls.ALNUM_EXTRACTOR.split(normalized_str):
+        for segment in ALNUM_EXTRACTOR.split(normalized_str):
             if segment.isalnum():
                 yield Token(segment)
 

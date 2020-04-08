@@ -226,7 +226,7 @@ class PackageManager:
         if not dry_run:
             code, output, error = run(*args)
         else:
-            logger.warning("Dry-run mode active: skip execution of command.")
+            logger.warning("Dry-run: skip execution of command.")
 
         # Normalize messages.
         if error:

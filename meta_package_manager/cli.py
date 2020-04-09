@@ -150,11 +150,11 @@ def print_stats(data):
     logger, default='INFO', metavar='LEVEL',
     help='Either CRITICAL, ERROR, WARNING, INFO or DEBUG. Defaults to INFO.')
 @click.option(
-    '-m', '--manager', type=click.Choice(sorted(pool())), multiple=True,
+    '-m', '--manager', type=click.Choice(pool()), multiple=True,
     help="Restrict sub-command to a subset of package managers. Repeat to "
     "select multiple managers. Defaults to all.")
 @click.option(
-    '-e', '--exclude', type=click.Choice(sorted(pool())), multiple=True,
+    '-e', '--exclude', type=click.Choice(pool()), multiple=True,
     help="Exclude a package manager. Repeat to exclude multiple managers. "
     "Defaults to none.")
 @click.option(
@@ -192,7 +192,7 @@ def cli(ctx, manager, exclude, ignore_auto_updates, output_format, sort_by,
         target_ids = target_ids.intersection(manager)
     # Remove managers excluded by the user.
     target_ids = target_ids.difference(exclude)
-    target_managers = [m for mid, m in pool().items() if mid in target_ids]
+    target_managers = itemgetter(*sorted(target_ids))(pool())
 
     # Apply manager-level options.
     for m_obj in target_managers:
@@ -206,8 +206,8 @@ def cli(ctx, manager, exclude, ignore_auto_updates, output_format, sort_by,
         if manager.available:
             return True
         logger.warning('Skip unavailable {} manager.'.format(manager.id))
-    # Use an iterator to not trigger log messages for subcommands not using
-    # this variable.
+    # Use an iterator to not trigger log messages for the 'managers' subcommand
+    # which is not using this variable.
     active_managers = filter(keep_available, target_managers)
 
     # Silence all log message for JSON rendering unless in debug mode.

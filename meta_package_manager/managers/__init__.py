@@ -20,11 +20,11 @@
 """ Registration, indexing and cache of package manager definitions. """
 
 import inspect
+from collections import OrderedDict
 from importlib import import_module
 from pathlib import Path
 
 from boltons.cacheutils import LRI, cached
-from boltons.dictutils import FrozenDict
 
 from .. import logger
 from ..base import PackageManager
@@ -33,12 +33,15 @@ from ..base import PackageManager
 # Cache the global pool of registered manager definitions to speed-up lookups.
 @cached(LRI(max_size=1))
 def pool():
-    """ Search for package manager definitions locally and return a FrozenDict.
+    """ Search for package manager definitions locally and store them into an
+    internal register.
 
     Is considered valid package manager, definitions classes which:
         1 - are sub-classes of PackageManager, and
         2 - are located in files at the same level or below this one, and
         3 - are not virtual (i.e. have a non null cli_name property).
+
+    Returns an `OrderedDict` sorted by manager's ID.
     """
     register = {}
 
@@ -57,4 +60,6 @@ def pool():
                 logger.debug(
                     "{!r} is not a valid manager definition".format(klass))
 
-    return FrozenDict(register)
+    # Sort pool entries by ID.
+    # TODO: propose an OrderedDrozenDict in boltons and use it here.
+    return OrderedDict(sorted(register.items()))

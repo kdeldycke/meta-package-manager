@@ -36,6 +36,15 @@ def test_manager_count():
     assert MANAGER_IDS == set(pool())
 
 
+def test_cached_pool():
+    assert pool() == pool()
+    assert pool() is pool()
+
+
+def test_sorted_pool():
+    assert list(pool()) == sorted([m.id for m in pool().values()])
+
+
 def test_ascii_id():
     """ All package manager IDs should be short ASCII strings. """
     for manager_id, manager in pool().items():

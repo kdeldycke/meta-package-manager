@@ -24,7 +24,7 @@ from types import MethodType
 from ..managers import pool
 from ..platform import OS_DEFINITIONS
 from ..version import TokenizedString
-from .case import MANAGER_IDS
+from .conftest import MANAGER_IDS
 
 """ Test the structure, data and types returned by all package managers. """
 

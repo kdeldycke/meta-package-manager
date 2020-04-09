@@ -19,7 +19,7 @@
 
 import simplejson as json
 
-from .case import MANAGER_IDS, run_cmd, skip_destructive
+from .conftest import MANAGER_IDS, run_cmd, skip_destructive
 from .test_cli import TestCLITableRendering
 
 

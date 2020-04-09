@@ -28,7 +28,7 @@ from boltons import strutils
 ALNUM_EXTRACTOR = re.compile('(\\d+ | [a-z]+)', re.VERBOSE)
 
 
-class Token():
+class Token:
     """A token is a normalized word, persisting its lossless integer variant.
 
     Support natural comparison with `str` and `int` types.
@@ -135,7 +135,7 @@ class Token():
         return operator.le(*map(self._match_type(other), [self, other]))
 
 
-class TokenizedString():
+class TokenizedString:
 
     """ Tokenize a string for user-friendly sorting.
 

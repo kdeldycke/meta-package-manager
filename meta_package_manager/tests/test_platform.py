@@ -70,12 +70,12 @@ def test_os_definitions():
         assert isinstance(data, tuple)
         assert len(data) == 2
         # OS Label.
-        os_label = data[0]
-        assert os_label
-        assert isinstance(os_label, str)
-        assert os_label.isascii()
-        assert os_label.isalpha()
-        assert os_label in ALL_OS_LABELS
+        label = data[0]
+        assert label
+        assert isinstance(label, str)
+        assert label.isascii()
+        assert label.isalpha()
+        assert label in ALL_OS_LABELS
         # OS identification function.
         os_id_func = data[1]
         assert os_id_func
@@ -90,9 +90,9 @@ def test_os_definitions():
 
 
 def test_current_os():
-    os_id, os_label = current_os()
+    os_id, label = current_os()
     assert os_id in OS_DEFINITIONS
-    assert os_label in [os[0] for os in OS_DEFINITIONS.values()]
+    assert label in [os[0] for os in OS_DEFINITIONS.values()]
 
 
 def test_unrecognized_os(monkeypatch):

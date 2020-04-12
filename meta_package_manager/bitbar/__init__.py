@@ -17,11 +17,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import imp
-from os import path
+from importlib.machinery import SourceFileLoader
+from pathlib import Path
 
-# Manually import BitBar plugin content because of its non Python-compliant
-# name with a double extension.
-here = path.dirname(path.abspath(__file__))
-bitbar_plugin = path.join(here, 'meta_package_manager.7h.py')
-imp.load_source(__name__, bitbar_plugin)
+# Manually import BitBar plugin source code as a module, because of its non
+# Python-compliant filename with a double extension made the first dot
+# interpreted as a submodule.
+SourceFileLoader(
+    __name__,
+    str(Path(__file__).parent.joinpath('meta_package_manager.7h.py').resolve())
+).load_module()

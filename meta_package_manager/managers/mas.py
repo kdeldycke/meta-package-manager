@@ -103,13 +103,13 @@ class MAS(PackageManager):
 
             regexp = re.compile(r"""
                 (?P<package_id>\d+)
-                \ +
-                (?P<package_name>.*)
-                \ +
+                \s+
+                (?P<package_name>.+?)
+                \s+
                 \(
                     (?P<version>\S+)
                 \)
-                """, re.MULTILINE + re.VERBOSE)
+                """, re.MULTILINE | re.VERBOSE)
 
             for package_id, package_name, version in regexp.findall(output):
 

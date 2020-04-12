@@ -18,15 +18,19 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import os
-import unittest
+
+import pytest
+from boltons.iterutils import flatten
+from boltons.tbutils import ExceptionInfo
+from click.testing import CliRunner
 
 from ..bitbar import run as bitbar_run
+from ..cli import cli
 from ..platform import is_linux, is_macos, is_windows
 
-""" Utilities and helpers for tests. """
+""" Fixtures, configuration and helpers for tests. """
 
 
-# Hard-coded list of all supported manager IDs.
 MANAGER_IDS = frozenset([
     'apm',
     'apt',
@@ -42,48 +46,42 @@ MANAGER_IDS = frozenset([
     'pip3',
     'snap',
     'yarn'])
+""" Hard-coded list of all supported manager IDs. """
 
 
-def skip_destructive():
-    """ Decorator to skip a test unless destructive mode is allowed.
+destructive = pytest.mark.skipif(
+    bool(os.environ.get('DESTRUCTIVE_TESTS', False) not in [
+        True, 1, 'True', 'true', '1']),
+    reason="destructive tests")
+""" Pytest mark to skip a test unless destructive mode is allowed.
 
-    Destructive mode is activated by the presence of a ``DESTRUCTIVE_TESTS``
-    environment variable set to ``True``.
-    """
-    destructive_tests = os.environ.get('DESTRUCTIVE_TESTS', False) in [True, 1]
-    if destructive_tests:
-        # Destructive mode is ON. Let the test run anyway.
-        return lambda func: func
-    return unittest.skip("Destructive tests not allowed.")
+Destructive mode is activated by the presence of a ``DESTRUCTIVE_TESTS``
+environment variable set to ``True``.
 
+.. todo:
 
-def unless_linux():
-    """ Decorator to skip a test unless it is run on a Linux system. """
-    if is_linux():
-        # Run the test.
-        return lambda func: func
-    return unittest.skip("Test requires Linux.")
+    Test destructive test assessment.
+"""
 
 
-def unless_macos():
-    """ Decorator to skip a test unless it is run on a macOS system. """
-    if is_macos():
-        # Run the test.
-        return lambda func: func
-    return unittest.skip("Test requires macOS.")
+unless_linux = pytest.mark.skipif(
+    not is_linux(), reason="Linux required")
+""" Pytest mark to skip a test unless it is run on a Linux system. """
 
 
-def unless_windows():
-    """ Decorator to skip a test unless it is run on a Windows system. """
-    if is_windows():
-        # Run the test.
-        return lambda func: func
-    return unittest.skip("Test requires Windows.")
+unless_macos = pytest.mark.skipif(
+    not is_macos(), reason="macOS required")
+""" Pytest mark to skip a test unless it is run on a macOS system. """
+
+
+unless_windows = pytest.mark.skipif(
+    not is_windows(), reason="Windows required")
+""" Pytest mark to skip a test unless it is run on a Windows system. """
 
 
 def print_cli_output(cmd, output):
     """ Simulate CLI output. Used to print debug traces in test results. """
-    print(u"$ {}".format(' '.join(cmd)))
+    print(u"\n$ {}".format(' '.join(cmd)))
     print(output)
 
 
@@ -102,3 +100,50 @@ def run_cmd(*args):
         print(error)
 
     return code, output, error
+
+
+@pytest.fixture(autouse=True, scope="module")
+def runner(request):
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        yield runner
+
+
+# XXX Try reduce fixture scopr to function?
+@pytest.fixture(scope="module")
+def invoke(runner, *args):
+    """ Executes Click's CLI, print output and return results. """
+
+    def run_run(*args):
+        # TODO: Add that flatten trick in Base.run_cli() utils? Should simplify
+        # the writing of *args & others + []
+        args = flatten(args)
+
+        assert isinstance(args, list)
+        if args:
+            assert set(map(type, args)) == {str}
+
+        result = runner.invoke(cli, args)
+
+        print_cli_output(['mpm'] + args, result.output)
+
+        # Print some more debug info.
+        print(result)
+        if result.exception:
+            print(ExceptionInfo.from_exc_info(
+                *result.exc_info).get_formatted())
+
+        return result
+
+    return run_run
+
+
+@pytest.fixture
+def subcommand():
+    """ Fixture used in `test_cli_*.py` files to set the sub-command in all CLI
+    calls.
+
+    Must returns a string or an iterable of strings. Defaults to `None`, which
+    allows tests relying on this fixture to selectively skip running.
+    """
+    return None

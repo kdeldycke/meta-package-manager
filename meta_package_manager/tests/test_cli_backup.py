@@ -17,26 +17,41 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+import pytest
 
-from .test_cli import TestCLISubcommand
+from .conftest import MANAGER_IDS
+from .test_cli import check_manager_selection, test_manager_selection
 
 
-class TestCLIBackup(TestCLISubcommand):
+@pytest.fixture
+def subcommand():
+    return 'backup'
 
-    # Wait for https://github.com/pallets/click/pull/1497 before removing the
-    # mpm-packages.toml argument below.
-    subcommand_args = ['backup', 'mpm-packages.toml']
 
-    def test_export_all_packages_to_file(self):
-        result = self.invoke('backup', 'mpm-packages.toml')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn('mpm-packages.toml', result.output)
+def test_default_all_managers_output_to_console(invoke, subcommand):
+    result = invoke(subcommand)
+    assert result.exit_code == 0
+    assert "Backup package list to <stdout>" in result.output
+    check_manager_selection(result.output)
 
-    def test_backup_single_manager(self):
-        result = self.invoke('--manager', 'npm', 'backup', 'npm-packages.toml')
-        self.assertEqual(result.exit_code, 0)
-        with open('npm-packages.toml', 'r') as doc:
-            # Check only [npm] section appears in TOML file.
-            self.assertSetEqual(
-                {l for l in doc.read().split() if l.startswith('[')},
-                set(['[npm]']))
+
+def test_output_to_console(invoke, subcommand):
+    result = invoke(subcommand, '-')
+    assert result.exit_code == 0
+    assert "Backup package list to <stdout>" in result.output
+    check_manager_selection(result.output)
+
+
+def test_output_to_file(invoke, subcommand):
+    result = invoke(subcommand, 'mpm-packages.toml')
+    assert result.exit_code == 0
+    assert "mpm-packages.toml" in result.output
+    check_manager_selection(result.output)
+
+
+@pytest.mark.parametrize('mid', MANAGER_IDS)
+def test_single_manager_file_output(mid, invoke, subcommand):
+    result = invoke('--manager', mid, subcommand, 'mpm-packages.toml')
+    assert result.exit_code == 0
+    assert "mpm-packages.toml" in result.output
+    check_manager_selection(result.output, {mid})

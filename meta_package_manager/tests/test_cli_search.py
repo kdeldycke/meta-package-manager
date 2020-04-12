@@ -17,96 +17,120 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+import pytest
+import simplejson as json
+
 from .conftest import MANAGER_IDS, unless_macos
-from .test_cli import TestCLITableRendering
+from .test_cli import \
+    test_manager_selection  # Run manager selection tests for this subcommand.
+from .test_cli import check_manager_selection
 
 
-class TestCLISearch(TestCLITableRendering):
+@pytest.fixture
+def subcommand():
+    return 'search', 'abc'
 
-    subcommand_args = ['search', 'abc']
 
-    def test_json_output(self):
-        result = super(TestCLISearch, self).test_json_output()
+def test_default_all_manager(invoke, subcommand):
+    result = invoke(subcommand)
+    assert result.exit_code == 0
+    check_manager_selection(result.output)
 
-        self.assertTrue(set(result).issubset(MANAGER_IDS))
 
-        for manager_id, info in result.items():
-            self.assertIsInstance(manager_id, str)
-            self.assertIsInstance(info, dict)
+@pytest.mark.parametrize('mid', MANAGER_IDS)
+def test_single_manager(invoke, subcommand, mid):
+    result = invoke('--manager', mid, subcommand)
+    assert result.exit_code == 0
+    check_manager_selection(result.output, {mid})
 
-            self.assertSetEqual(set(info), set([
-                'errors', 'id', 'name', 'packages']))
 
-            self.assertIsInstance(info['errors'], list)
-            self.assertIsInstance(info['id'], str)
-            self.assertIsInstance(info['name'], str)
-            self.assertIsInstance(info['packages'], list)
+def test_json_parsing(invoke, subcommand):
+    result = invoke('--output-format', 'json', subcommand)
+    assert result.exit_code == 0
+    data = json.loads(result.output)
 
-            self.assertEqual(info['id'], manager_id)
+    assert data
+    assert isinstance(data, dict)
+    assert set(data).issubset(MANAGER_IDS)
 
-            for pkg in info['packages']:
-                self.assertIsInstance(pkg, dict)
+    for manager_id, info in data.items():
+        assert isinstance(manager_id, str)
+        assert isinstance(info, dict)
 
-                self.assertSetEqual(set(pkg), set([
-                    'id', 'latest_version', 'name']))
+        assert isinstance(info['id'], str)
+        assert isinstance(info['name'], str)
 
-                self.assertIsInstance(pkg['id'], str)
-                if pkg['latest_version'] is not None:
-                    self.assertIsInstance(pkg['latest_version'], str)
-                self.assertIsInstance(pkg['name'], str)
+        assert set(info) == {'errors', 'id', 'name', 'packages'}
 
-    @unless_macos()
-    def test_unicode_search(self):
-        """ See #16. """
-        result = self.invoke('--manager', 'cask', 'search', 'ubersicht')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("ubersicht", result.output)
-        # XXX search command is not fetching details package infos like names
-        # for now.
-        # self.assertIn("Übersicht", result.output)
+        assert isinstance(info['errors'], list)
+        if info['errors']:
+            assert set(map(type, info['errors'])) == {str}
 
-        result = self.invoke('--manager', 'cask', 'search', 'Übersicht')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("ubersicht", result.output)
-        # self.assertIn("Übersicht", result.output)
+        assert info['id'] == manager_id
 
-    def test_exact_search_tokenizer(self):
-        result = self.invoke('--manager', 'pip3', 'search', '--exact', 'sed')
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("1 package found", result.output)
-        self.assertIn(" sed ", result.output)
+        assert isinstance(info['packages'], list)
+        for pkg in info['packages']:
+            assert isinstance(pkg, dict)
 
-        for query in ['SED', 'SeD', 'sEd*', '*sED*', '_seD-@', '', '_']:
-            result = self.invoke(
-                '--manager', 'pip3', 'search', '--exact', query)
-            self.assertEqual(result.exit_code, 0)
-            self.assertIn("0 package found", result.output)
-            self.assertNotIn("sed", result.output)
+            assert set(pkg) == {'id', 'latest_version', 'name'}
 
-    def test_fuzzy_search_tokenizer(self):
-        for query in ['', '_', '_seD-@']:
-            result = self.invoke('--manager', 'pip3', 'search', query)
-            self.assertEqual(result.exit_code, 0)
-            self.assertIn("0 package found", result.output)
-            self.assertNotIn("sed", result.output)
+            assert isinstance(pkg['id'], str)
+            if pkg['latest_version'] is not None:
+                assert isinstance(pkg['latest_version'], str)
+            assert isinstance(pkg['name'], str)
 
-        for query in ['sed', 'SED', 'SeD', 'sEd*', '*sED*']:
-            result = self.invoke('--manager', 'pip3', 'search', query)
-            self.assertEqual(result.exit_code, 0)
-            self.assertIn("2 packages found", result.output)
-            self.assertIn(" sed ", result.output)
-            self.assertIn(" SED-cli ", result.output)
 
-    def test_extended_search_tokenizer(self):
-        for query in ['', '_', '_seD-@']:
-            result = self.invoke(
-                '--manager', 'pip3', 'search', '--extended', query)
-            self.assertEqual(result.exit_code, 0)
-            self.assertIn("0 package found", result.output)
-            self.assertNotIn("sed", result.output)
+@unless_macos
+def test_unicode_search(invoke):
+    """ See #16. """
+    result = invoke('--manager', 'cask', 'search', 'ubersicht')
+    assert result.exit_code == 0
+    assert "ubersicht" in result.output
+    # XXX search command is not fetching yet detailed package infos like names.
+    assert "Übersicht" not in result.output
 
-        for query in ['sed', 'SED', 'SeD', 'sEd*', '*sED*']:
-            result = self.invoke(
-                '--manager', 'pip3', 'search', '--extended', query)
-            self.assertEqual(result.exit_code, 0)
-            self.assertIn("22 packages found", result.output)
+    result = invoke('--manager', 'cask', 'search', 'Übersicht')
+    assert result.exit_code == 0
+    assert "ubersicht" in result.output
+    assert "Übersicht" not in result.output
+
+
+def test_exact_search_tokenizer(invoke):
+    result = invoke('--manager', 'pip3', 'search', '--exact', 'sed')
+    assert result.exit_code == 0
+    assert "1 package total" in result.output
+    assert " sed " in result.output
+
+    for query in ['SED', 'SeD', 'sEd*', '*sED*', '_seD-@', '', '_']:
+        result = invoke('--manager', 'pip3', 'search', '--exact', query)
+        assert result.exit_code == 0
+        assert "0 package total" in result.output
+        assert "sed" not in result.output
+
+
+def test_fuzzy_search_tokenizer(invoke):
+    for query in ['', '_', '_seD-@']:
+        result = invoke('--manager', 'pip3', 'search', query)
+        assert result.exit_code == 0
+        assert "0 package total" in result.output
+        assert "sed" not in result.output
+
+    for query in ['sed', 'SED', 'SeD', 'sEd*', '*sED*']:
+        result = invoke('--manager', 'pip3', 'search', query)
+        assert result.exit_code == 0
+        assert "2 packages total" in result.output
+        assert " sed " in result.output
+        assert " SED-cli " in result.output
+
+
+def test_extended_search_tokenizer(invoke):
+    for query in ['', '_', '_seD-@']:
+        result = invoke('--manager', 'pip3', 'search', '--extended', query)
+        assert result.exit_code == 0
+        assert "0 package total" in result.output
+        assert "sed" not in result.output
+
+    for query in ['sed', 'SED', 'SeD', 'sEd*', '*sED*']:
+        result = invoke('--manager', 'pip3', 'search', '--extended', query)
+        assert result.exit_code == 0
+        assert "22 packages total" in result.output

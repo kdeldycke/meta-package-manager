@@ -17,41 +17,65 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-
+import pytest
 import simplejson as json
 
-from .. import __version__
-from .case import MANAGER_IDS
-from .test_cli import TestCLITableRendering
+from .conftest import MANAGER_IDS
+from .test_cli import \
+    test_manager_selection  # Run manager selection tests for this subcommand.
+from .test_cli import check_manager_selection
 
 
-class TestCLIManagers(TestCLITableRendering):
+@pytest.fixture
+def subcommand():
+    return 'managers'
 
-    subcommand_args = ['managers']
 
-    def test_json_output(self):
-        result = super(TestCLIManagers, self).test_json_output()
+def test_default_all_manager(invoke, subcommand):
+    result = invoke(subcommand)
+    assert result.exit_code == 0
+    check_manager_selection(result.output)
 
-        self.assertSetEqual(set(result), MANAGER_IDS)
 
-        for manager_id, info in result.items():
-            self.assertIsInstance(manager_id, str)
-            self.assertIsInstance(info, dict)
+@pytest.mark.parametrize('mid', MANAGER_IDS)
+def test_single_manager(invoke, subcommand, mid):
+    result = invoke('--manager', mid, subcommand)
+    assert result.exit_code == 0
+    check_manager_selection(result.output, {mid})
 
-            self.assertSetEqual(set(info), set([
-                'available', 'cli_path', 'errors', 'executable', 'fresh', 'id',
-                'name', 'supported', 'version']))
 
-            self.assertIsInstance(info['available'], bool)
-            if info['cli_path'] is not None:
-                self.assertIsInstance(info['cli_path'], str)
-            self.assertIsInstance(info['errors'], list)
-            self.assertIsInstance(info['executable'], bool)
-            self.assertIsInstance(info['fresh'], bool)
-            self.assertIsInstance(info['id'], str)
-            self.assertIsInstance(info['name'], str)
-            self.assertIsInstance(info['supported'], bool)
-            if info['version'] is not None:
-                self.assertIsInstance(info['version'], str)
+def test_json_parsing(invoke, subcommand):
+    result = invoke('--output-format', 'json', subcommand)
+    assert result.exit_code == 0
+    data = json.loads(result.output)
 
-            self.assertEqual(info['id'], manager_id)
+    assert data
+    assert isinstance(data, dict)
+    assert set(data) == MANAGER_IDS
+
+    for manager_id, info in data.items():
+        assert isinstance(manager_id, str)
+        assert isinstance(info, dict)
+
+        assert set(info) == {
+            'available', 'cli_path', 'errors', 'executable', 'fresh', 'id',
+            'name', 'supported', 'version'}
+
+        assert isinstance(info['available'], bool)
+        if info['cli_path'] is not None:
+            assert isinstance(info['cli_path'], str)
+
+        assert isinstance(info['errors'], list)
+        if info['errors']:
+            assert set(map(type, info['errors'])) == {str}
+
+        assert isinstance(info['executable'], bool)
+        assert isinstance(info['fresh'], bool)
+        assert isinstance(info['id'], str)
+        assert isinstance(info['name'], str)
+        assert isinstance(info['supported'], bool)
+
+        if info['version'] is not None:
+            assert isinstance(info['version'], str)
+
+        assert info['id'] == manager_id

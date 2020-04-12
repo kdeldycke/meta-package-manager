@@ -36,7 +36,7 @@ from ..platform import (
     is_windows,
     os_label
 )
-from .case import MANAGER_IDS, unless_linux, unless_macos, unless_windows
+from .conftest import MANAGER_IDS, unless_linux, unless_macos, unless_windows
 
 
 def test_os_id_func():
@@ -121,21 +121,21 @@ def test_blacklisted_manager():
 
 # Test unittest decorator helpers.
 
-@unless_linux()
+@unless_linux
 def test_unless_linux():
     assert is_linux()
     assert not is_macos()
     assert not is_windows()
 
 
-@unless_macos()
+@unless_macos
 def test_unless_macos():
     assert not is_linux()
     assert is_macos()
     assert not is_windows()
 
 
-@unless_windows()
+@unless_windows
 def test_unless_windows():
     assert not is_linux()
     assert not is_macos()

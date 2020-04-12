@@ -21,6 +21,7 @@ import logging
 import re
 from datetime import datetime
 from functools import partial
+from io import TextIOWrapper
 from operator import getitem, itemgetter
 from pathlib import Path
 from sys import __stdin__, __stdout__
@@ -48,7 +49,7 @@ table_formatter = TabularOutputFormatter()
 
 
 # Register all rendering modes for table data.
-RENDERING_MODES = set(['json'])
+RENDERING_MODES = {'json'}
 RENDERING_MODES.update(table_formatter.supported_formats)
 
 # List of fields IDs allowed to be sorted.
@@ -192,7 +193,7 @@ def cli(ctx, manager, exclude, ignore_auto_updates, output_format, sort_by,
         target_ids = target_ids.intersection(manager)
     # Remove managers excluded by the user.
     target_ids = target_ids.difference(exclude)
-    target_managers = itemgetter(*sorted(target_ids))(pool())
+    target_managers = [pool()[mid] for mid in sorted(target_ids)]
 
     # Apply manager-level options.
     for m_obj in target_managers:
@@ -583,8 +584,7 @@ def backup(ctx, toml_output):
     is_stdout = toml_output is __stdout__
     toml_filepath = (
         toml_output.name if is_stdout else Path(toml_output.name).resolve())
-    logger.info(
-        'Backup list of installed packages to: {}'.format(toml_filepath))
+    logger.info('Backup package list to {}'.format(toml_filepath))
 
     if not is_stdout:
         if toml_filepath.exists() and not toml_filepath.is_file():
@@ -608,18 +608,20 @@ def backup(ctx, toml_output):
     for manager in active_managers:
         logger.info('Dumping packages from {}...'.format(manager.id))
 
-        # prepare data for stats.
+        # Prepare data for stats.
         installed_data[manager.id] = {
             'id': manager.id,
             'packages': manager.installed.values()}
 
         manager_section = tomlkit.table()
-        for package_id, package_version in sorted([
-                (p['id'], p['installed_version'])
-                for p in manager.installed.values()]):
+        pkg_data = sorted([
+            (p['id'], p['installed_version'])
+            for p in manager.installed.values()])
+        for package_id, package_version in pkg_data:
             # Version specifier is inspired by Poetry.
             manager_section.add(package_id, "^{}".format(package_version))
-        doc.add(manager.id, manager_section)
+        if pkg_data:
+            doc.add(manager.id, manager_section)
 
     toml_output.write(tomlkit.dumps(doc))
 
@@ -642,18 +644,23 @@ def restore(ctx, toml_files):
         toml_filepath = (
             toml_input.name if toml_input is __stdin__
             else Path(toml_input.name).resolve())
-        logger.info(
-            'Load list of packages to install from: {}'.format(toml_filepath))
+        logger.info('Load package list from {}'.format(toml_filepath))
 
         doc = tomlkit.parse(toml_input.read())
 
+        # List unrecognized sections.
+        ignored_sections = [
+            '[{}]'.format(section) for section in doc if section not in pool()]
+        if ignored_sections:
+            logger.warning("Ignore {} section{}.".format(
+                ', '.join(ignored_sections),
+                's' if len(ignored_sections) > 1 else ''))
+
         for manager in active_managers:
             if manager.id not in doc:
-                logger.warning(
-                    'Skip {} packages: no section found in TOML file.'.format(
-                        manager.id))
+                logger.warning('No [{}] section found.'.format(manager.id))
                 continue
             logger.info('Restore {} packages...'.format(manager.id))
-            logger.warning("Installation of packages not supported yet.")
+            logger.warning("Installation of packages not implemented yet.")
             # for package_id, version in doc[manager.id].items():
             #    raise NotImplemented

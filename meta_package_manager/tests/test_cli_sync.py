@@ -17,9 +17,27 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from .test_cli import TestCLISubcommand
+import pytest
+
+from .conftest import MANAGER_IDS
+from .test_cli import \
+    test_manager_selection  # Run manager selection tests for this subcommand.
+from .test_cli import check_manager_selection
 
 
-class TestCLISync(TestCLISubcommand):
+@pytest.fixture
+def subcommand():
+    return 'sync'
 
-    subcommand_args = ['sync']
+
+def test_default_all_manager(invoke, subcommand):
+    result = invoke(subcommand)
+    assert result.exit_code == 0
+    check_manager_selection(result.output)
+
+
+@pytest.mark.parametrize('mid', MANAGER_IDS)
+def test_single_manager(invoke, subcommand, mid):
+    result = invoke('--manager', mid, subcommand)
+    assert result.exit_code == 0
+    check_manager_selection(result.output, {mid})

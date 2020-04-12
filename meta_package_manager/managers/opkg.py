@@ -118,7 +118,7 @@ class OPKG(PackageManager):
                 (?P<version>\S+)
                 \ -\
                 (?P<description>.+)
-                """, re.VERBOSE + re.MULTILINE)
+                """, re.VERBOSE | re.MULTILINE)
 
             for package_id, version, description in regexp.findall(output):
 

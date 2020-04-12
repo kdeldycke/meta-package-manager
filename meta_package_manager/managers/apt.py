@@ -215,7 +215,7 @@ class APT(PackageManager):
                 (?P<description>      # Start of the multi-line desc group.
                     (?:\ \ .+\n)+     # Lines of strings prefixed by 2 spaces.
                 )
-                """, re.MULTILINE + re.VERBOSE)
+                """, re.MULTILINE | re.VERBOSE)
 
             for package_id, version, description in regexp.findall(output):
                 matches[package_id] = {

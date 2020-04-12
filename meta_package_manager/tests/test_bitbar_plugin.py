@@ -18,10 +18,10 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 from .. import bitbar
-from .case import run_cmd, unless_macos
+from .conftest import run_cmd, unless_macos
 
 
-@unless_macos()
+@unless_macos
 def test_simple_call():
     code, output, error = run_cmd(bitbar.__file__)
 

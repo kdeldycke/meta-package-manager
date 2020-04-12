@@ -88,7 +88,7 @@ multi_line_output = 3
 [tool.pylint.MASTER]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html
 output-format = "colorized"
-fail-under = "9"
+fail-under = "8"
 [tool.pylint."messages control"]
 # List messages with: $ pylint --list-msgs
 # C0111: Missing docstring

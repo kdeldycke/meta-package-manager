@@ -131,8 +131,8 @@ class Gem(PackageManager):
 
         if extended:
             logger.warning(
-                "Extended search not supported for {}. Fallback to Fuzzy."
-                "".format(self.id))
+                f"Extended search not supported for {self.id}. Fallback to "
+                "Fuzzy.")
 
         search_arg = []
         if exact:

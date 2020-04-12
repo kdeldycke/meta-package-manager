@@ -46,19 +46,17 @@ def pool():
     register = {}
 
     for py_file in Path(__file__).parent.glob('*.py'):
-        logger.debug(
-            "Search manager definitions in {}".format(py_file.resolve()))
+        logger.debug(f"Search manager definitions in {py_file}")
         module = import_module(
             '.{}'.format(py_file.stem), package=__package__)
 
         for _, klass in inspect.getmembers(module, inspect.isclass):
             if issubclass(klass, PackageManager) and not klass.virtual:
-                logger.debug("Found {!r}".format(klass))
+                logger.debug(f"Found {klass!r}")
                 manager = klass()
                 register[manager.id] = manager
             else:
-                logger.debug(
-                    "{!r} is not a valid manager definition".format(klass))
+                logger.debug(f"{klass!r} is not a valid manager definition")
 
     # Sort pool entries by ID.
     # TODO: propose an OrderedDrozenDict in boltons and use it here.

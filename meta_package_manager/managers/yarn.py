@@ -171,12 +171,12 @@ class Yarn(PackageManager):
 
         if extended:
             logger.warning(
-                "Extended search not supported for {}. Fallback to Fuzzy."
-                "".format(self.id))
+                f"Extended search not supported for {self.id}. Fallback to "
+                "Fuzzy.")
         elif not exact:
             logger.warning(
-                "Fuzzy search not supported for {}. Fallback to Exact."
-                "".format(self.id))
+                f"Fuzzy search not supported for {self.id}. Fallback to "
+                "Exact.")
 
         output = self.run_cli(self.global_args + ['--json', 'info', query])
 

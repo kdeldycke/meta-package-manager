@@ -64,7 +64,7 @@ ALL_OS_LABELS, ALL_OS_ID_FUNCS = map(frozenset, zip(*OS_DEFINITIONS.values()))
 def current_os():
     """ Return a 2-items `tuple` with ID and label of current OS. """
     platform_id = sys.platform
-    logger.debug("Raw platform ID: {}.".format(platform_id))
+    logger.debug(f"Raw platform ID: {platform_id}.")
     for os_id, (os_name, os_id_func) in OS_DEFINITIONS.items():
         if os_id_func():
             return os_id, os_name

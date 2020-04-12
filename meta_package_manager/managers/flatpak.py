@@ -97,8 +97,8 @@ class Flatpak(PackageManager):
 
         if extended:
             logger.warning(
-                "Extended search not supported for {}. Fallback to Fuzzy."
-                "".format(self.id))
+                f"Extended search not supported for {self.id}. Fallback to "
+                "Fuzzy.")
 
         output = self.run_cli(self.global_args + [
             'search', query, '--ostree-verbose'])

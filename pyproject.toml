@@ -95,6 +95,10 @@ fail-under = "9"
 # W0142: Used * or ** magic
 # W0511: Warning notes in code comments
 disable = "C0111,W0142,W0511"
+[tool.pylint.LOGGING]
+# Format style used to check logging format string. `old` means using %
+# formatting, `new` is for `{}` formatting, and `fstr` is for f-strings.
+logging-format-style = "fstr"
 
 [tool.coverage.paths]
 # https://coverage.readthedocs.io/en/latest/config.html

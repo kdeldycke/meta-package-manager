@@ -142,9 +142,9 @@ class PackageManager:
 
         if cli_path:
             cli_path = Path(cli_path).resolve(strict=True)
-            logger.debug("CLI found at {}".format(cli_path))
+            logger.debug(f"CLI found at {cli_path}")
         else:
-            logger.debug("{} CLI not found.".format(self.cli_name))
+            logger.debug(f"{self.cli_name} CLI not found.")
 
         return cli_path
 
@@ -176,7 +176,7 @@ class PackageManager:
         if not self.cli_path:
             return False
         if not os.access(self.cli_path, os.X_OK):
-            logger.debug("{} not executable.".format(self.cli_path))
+            logger.debug(f"{self.cli_path} not executable.")
             return False
         return True
 
@@ -189,8 +189,8 @@ class PackageManager:
         if self.requirement:
             if self.version < parse_version(self.requirement):
                 logger.debug(
-                    "{} {} is older than {} version requirement.".format(
-                        self.id, self.version, self.requirement))
+                    f"{self.id} {self.version} is older than "
+                    "{self.requirement} version requirement.")
                 return False
         return True
 
@@ -217,7 +217,8 @@ class PackageManager:
         """
         assert isinstance(args, list)
         args = list(map(str, args))  # Serialize Path objects to strings.
-        logger.debug("Running `{}`...".format(' '.join(args)))
+        args_str = ' '.join(args)
+        logger.debug(f"Running `{args_str}`...")
 
         code = 0
         output = None
@@ -256,11 +257,11 @@ class PackageManager:
 
     def sync(self):
         """ Refresh local manager metadata from remote repository. """
-        logger.info('Sync {} package info...'.format(self.id))
+        logger.info(f"Sync {self.id} package info...")
 
     def cleanup(self):
         """ Remove left-overs and unused packages. """
-        logger.info('Cleanup {}...'.format(self.id))
+        logger.info(f"Cleanup {self.id}...")
 
     @property
     def installed(self):
@@ -312,8 +313,8 @@ class PackageManager:
             return self.run(self.upgrade_all_cli(), dry_run=dry_run)
         except NotImplementedError:
             logger.warning(
-                "{} doesn't seems to implement a full upgrade subcommand. "
-                "Call single-package upgrade CLI one by one.".format(self.id))
+                f"Full upgrade subcommand not implemented in {self.id}. Call "
+                "single-package upgrade CLI one by one.")
             log = []
             for package_id in self.outdated:
                 output = self.upgrade(package_id, dry_run=dry_run)

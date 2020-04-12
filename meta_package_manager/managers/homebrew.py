@@ -191,8 +191,8 @@ class Homebrew(PackageManager):
 
         if extended:
             logger.warning(
-                "Extended search not supported for {}. Fallback to Fuzzy"
-                "".format(self.id))
+                f"Extended search not supported for {self.id}. Fallback to "
+                "Fuzzy.")
 
         # Use regexp for exact match.
         if exact:

@@ -140,10 +140,9 @@ def print_stats(data):
             manager_stats.items(), key=itemgetter(1), reverse=True)])
     if per_manager_totals:
         per_manager_totals = ' ({})'.format(per_manager_totals)
-    logger.info('{} package{} found{}.'.format(
-        total_installed,
-        's' if total_installed > 1 else '',
-        per_manager_totals))
+    plural = 's' if total_installed > 1 else ''
+    logger.info(
+        f"{total_installed} package{plural} total{per_manager_totals}.")
 
 
 @click.group()
@@ -184,7 +183,7 @@ def cli(ctx, manager, exclude, ignore_auto_updates, output_format, sort_by,
     """ CLI for multi-package manager upgrades. """
     level = logger.level
     level_name = logging._levelToName.get(level, level)
-    logger.debug('Verbosity set to {}.'.format(level_name))
+    logger.debug(f"Verbosity set to {level_name}.")
 
     # Target all available managers by default.
     target_ids = set(pool())
@@ -206,7 +205,7 @@ def cli(ctx, manager, exclude, ignore_auto_updates, output_format, sort_by,
     def keep_available(manager):
         if manager.available:
             return True
-        logger.warning('Skip unavailable {} manager.'.format(manager.id))
+        logger.warning(f"Skip unavailable {manager.id} manager.")
     # Use an iterator to not trigger log messages for the 'managers' subcommand
     # which is not using this variable.
     active_managers = filter(keep_available, target_managers)
@@ -553,8 +552,7 @@ def upgrade(ctx, dry_run):
 
     for manager in active_managers:
 
-        logger.info(
-            'Updating all outdated packages from {}...'.format(manager.id))
+        logger.info(f"Updating all outdated packages from {manager.id}...")
 
         try:
             output = manager.upgrade_all(dry_run=dry_run)
@@ -589,7 +587,7 @@ def backup(ctx, toml_output):
     is_stdout = toml_output is __stdout__
     toml_filepath = (
         toml_output.name if is_stdout else Path(toml_output.name).resolve())
-    logger.info('Backup package list to {}'.format(toml_filepath))
+    logger.info(f"Backup package list to {toml_filepath}")
 
     if not is_stdout:
         if toml_filepath.exists() and not toml_filepath.is_file():
@@ -611,7 +609,7 @@ def backup(ctx, toml_output):
 
     # Create one section for each package manager.
     for manager in active_managers:
-        logger.info('Dumping packages from {}...'.format(manager.id))
+        logger.info(f"Dumping packages from {manager.id}...")
 
         # Prepare data for stats.
         installed_data[manager.id] = {
@@ -649,7 +647,7 @@ def restore(ctx, toml_files):
         toml_filepath = (
             toml_input.name if toml_input is __stdin__
             else Path(toml_input.name).resolve())
-        logger.info('Load package list from {}'.format(toml_filepath))
+        logger.info(f"Load package list from {toml_filepath}")
 
         doc = tomlkit.parse(toml_input.read())
 
@@ -657,15 +655,15 @@ def restore(ctx, toml_files):
         ignored_sections = [
             '[{}]'.format(section) for section in doc if section not in pool()]
         if ignored_sections:
-            logger.warning("Ignore {} section{}.".format(
-                ', '.join(ignored_sections),
-                's' if len(ignored_sections) > 1 else ''))
+            plural = 's' if len(ignored_sections) > 1 else ''
+            sections = ', '.join(ignored_sections)
+            logger.warning(f"Ignore {sections} section{plural}.")
 
         for manager in active_managers:
             if manager.id not in doc:
-                logger.warning('No [{}] section found.'.format(manager.id))
+                logger.warning(f"No [{manager.id}] section found.")
                 continue
-            logger.info('Restore {} packages...'.format(manager.id))
+            logger.info(f"Restore {manager.id} packages...")
             logger.warning("Installation of packages not implemented yet.")
             # for package_id, version in doc[manager.id].items():
             #    raise NotImplemented

@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+import functools
 import logging
 import re
 from datetime import datetime
@@ -25,6 +26,7 @@ from io import TextIOWrapper
 from operator import getitem, itemgetter
 from pathlib import Path
 from sys import __stdin__, __stdout__
+from time import time as time_now
 
 import click
 import click_log
@@ -145,6 +147,28 @@ def print_stats(data):
         f"{total_installed} package{plural} total{per_manager_totals}.")
 
 
+class timeit:
+    """ Decorator to measure and print elapsed execution time of a function.
+    """
+
+    def __call__(self, func):
+        @functools.wraps(func)
+        def decorated(*args, **kwargs):
+            with self:
+                return func(*args, **kwargs)
+        return decorated
+
+    def __enter__(self):
+        self.measure_time = click.get_current_context().obj['time']
+        if self.measure_time:
+            self.start_time = time_now()
+
+    def __exit__(self, *args, **kwargs):
+        if self.measure_time:
+            elapsed = time_now() - self.start_time
+            logger.info(f"Execution time: {elapsed:.3} seconds.")
+
+
 @click.group()
 @click_log.simple_verbosity_option(
     logger, default='INFO', metavar='LEVEL',
@@ -172,14 +196,17 @@ def print_stats(data):
     help="Sort results. Defaults to manager_id.")
 @click.option(
     '--stats/--no-stats', default=True,
-    help="Print statistics or not at the end of output. Active by default.")
+    help="Print per-manager package statistics. Active by default.")
+@click.option(
+    '--time/--no-time', default=False,
+    help="Measure and print elapsed execution time. Inactive by default.")
 @click.option(
     '--stop-on-error/--continue-on-error', default=True, help="Stop right "
     "away or continue operations on manager CLI error. Defaults to stop.")
 @click.version_option(__version__)
 @click.pass_context
 def cli(ctx, manager, exclude, ignore_auto_updates, output_format, sort_by,
-        stats, stop_on_error):
+        stats, time, stop_on_error):
     """ CLI for multi-package manager upgrades. """
     level = logger.level
     level_name = logging._levelToName.get(level, level)
@@ -224,11 +251,13 @@ def cli(ctx, manager, exclude, ignore_auto_updates, output_format, sort_by,
         'active_managers': active_managers,
         'output_format': output_format,
         'sort_by': sort_by,
-        'stats': stats}
+        'stats': stats,
+        'time': time}
 
 
 @cli.command(short_help='List supported package managers and their location.')
 @click.pass_context
+@timeit()
 def managers(ctx):
     """ List all supported package managers and their presence on the system.
     """
@@ -299,6 +328,7 @@ def managers(ctx):
 
 @cli.command(short_help='Sync local package info.')
 @click.pass_context
+@timeit()
 def sync(ctx):
     """ Sync local package metadata and info from external sources. """
     active_managers = ctx.obj['active_managers']
@@ -309,6 +339,7 @@ def sync(ctx):
 
 @cli.command(short_help='Cleanup local data.')
 @click.pass_context
+@timeit()
 def cleanup(ctx):
     """ Cleanup local data and temporary artifacts. """
     active_managers = ctx.obj['active_managers']
@@ -319,6 +350,7 @@ def cleanup(ctx):
 
 @cli.command(short_help='List installed packages.')
 @click.pass_context
+@timeit()
 def installed(ctx):
     """ List all packages installed on the system from all managers. """
     active_managers = ctx.obj['active_managers']
@@ -379,6 +411,7 @@ def installed(ctx):
     "Fuzzy by default.")
 @click.argument('query', type=click.STRING, required=True)
 @click.pass_context
+@timeit()
 def search(ctx, extended, exact, query):
     """ Search packages from all managers. """
     active_managers = ctx.obj['active_managers']
@@ -470,6 +503,7 @@ def search(ctx, extended, exact, query):
     '-c', '--cli-format', type=click.Choice(CLI_FORMATS), default='plain',
     help="Format of CLI fields in JSON output. Defaults to plain.")
 @click.pass_context
+@timeit()
 def outdated(ctx, cli_format):
     """ List available package upgrades and their versions for each manager.
     """
@@ -546,6 +580,7 @@ def outdated(ctx, cli_format):
     '-d', '--dry-run', is_flag=True, default=False,
     help='Do not actually perform any upgrade, just simulate CLI calls.')
 @click.pass_context
+@timeit()
 def upgrade(ctx, dry_run):
     """ Perform a full package upgrade on all available managers. """
     active_managers = ctx.obj['active_managers']
@@ -566,6 +601,7 @@ def upgrade(ctx, dry_run):
 @cli.command(short_help='Save installed packages to a TOML file.')
 @click.argument('toml_output', type=click.File('w'), default='-')
 @click.pass_context
+@timeit()
 def backup(ctx, toml_output):
     """ Dump the list of installed packages to a TOML file.
 

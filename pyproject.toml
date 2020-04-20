@@ -36,7 +36,6 @@ include = [
     "docs/**/*",
     "CHANGES.rst",
     "README.rst",
-    "screenshot.png",
     "setup.cfg"]
 
 

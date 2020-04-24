@@ -672,6 +672,7 @@ def backup(ctx, toml_output):
     short_help='Install packages in batch as specified by TOML files.')
 @click.argument('toml_files', type=click.File('r'), required=True, nargs=-1)
 @click.pass_context
+@timeit()
 def restore(ctx, toml_files):
     """ Read TOML files then install or upgrade each package referenced in
     them.

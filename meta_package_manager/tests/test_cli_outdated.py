@@ -31,6 +31,32 @@ def subcmd():
     return 'outdated'
 
 
+@pytest.fixture
+def install_formula():
+
+    urls = []
+
+    def _install_formula(url):
+        urls.append(url)
+        code, output, error = run_cmd('brew', 'cask', 'install', url)
+        assert code == 0
+        assert error == (
+            "Warning: macOS's Gatekeeper has been disabled for this "
+            "Cask\n")
+        return output
+
+    yield _install_formula
+
+    # Remove all installed packages.
+    for url in urls:
+        package_id = url.split('/')[-1].split('.rb')[0]
+        code, output, error = run_cmd(
+            'brew', 'cask', 'uninstall', package_id)
+        assert code == 0
+        assert not error
+        assert package_id in output
+
+
 class TestOutdated(CLISubCommandTests):
 
     def test_default_all_manager(self, invoke, subcmd):
@@ -111,18 +137,14 @@ class TestOutdated(CLISubCommandTests):
 
     @destructive
     @unless_macos
-    def test_unicode_name(self, invoke, subcmd):
+    def test_unicode_name(self, invoke, subcmd, install_formula):
         """ See #16. """
         # Install an old version of a package with a unicode name.
-        # Old Cask formula for ubersicht 1.0.44.
-        formula_url = (
+        # Old Cask formula for ubersicht 1.4.61.
+        output = install_formula(
             "https://raw.githubusercontent.com/Homebrew/homebrew-cask"
             "/103dde670d398ab32492783a3822132d47f9ebf6/Casks/ubersicht.rb")
-        code, output, error = run_cmd('brew', 'cask', 'install', formula_url)
-        assert code == 0
-        assert error == (
-            "Warning: macOS's Gatekeeper has been disabled for this Cask\n")
-        assert 'Uebersicht-1.0.44.app.zip' in output
+        assert 'Uebersicht-1.4.61.app.zip' in output
         assert 'Übersicht.app' in output
 
         # Look for reported available upgrade.
@@ -131,26 +153,16 @@ class TestOutdated(CLISubCommandTests):
         assert "ubersicht" in result.output
         assert "Übersicht" in result.output
 
-        # Remove the installed package.
-        # TODO: Use a fixture that yields to cleanup if test fail.
-        run_cmd('brew', 'cask', 'uninstall', 'ubersicht')
-        assert result.exit_code == 0
-        assert not error
-
     @destructive
     @unless_macos
-    def test_multiple_names(self, invoke, subcmd):
+    def test_multiple_names(self, invoke, subcmd, install_formula):
         """ See #26. """
         # Install an old version of a package with multiple names.
-        # Old Cask formula for xld 2016.09.20.
-        formula_url = (
+        # Old Cask formula for xld 2019.10.04.
+        output = install_formula(
             "https://raw.githubusercontent.com/Homebrew/homebrew-cask"
             "/16ea1a95c76beaf2ff4dba161a86721d680756e8/Casks/xld.rb")
-        code, output, error = run_cmd('brew', 'cask', 'install', formula_url)
-        assert code == 0
-        assert error == (
-            "Warning: macOS's Gatekeeper has been disabled for this Cask\n")
-        assert 'xld-20160920.dmg' in output
+        assert 'xld-20191004.dmg' in output
         assert 'XLD.app' in output
 
         # Look for reported available upgrade.
@@ -158,9 +170,3 @@ class TestOutdated(CLISubCommandTests):
         assert result.exit_code == 0
         assert "xld" in result.output
         assert "X Lossless Decoder" in result.output
-
-        # Remove the installed package.
-        # TODO: Use a fixture that yields to cleanup if test fail.
-        run_cmd('brew', 'cask', 'uninstall', 'xld')
-        assert result.exit_code == 0
-        assert not error

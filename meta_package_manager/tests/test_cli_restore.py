@@ -27,9 +27,7 @@ from .test_cli import CLISubCommandTests
 
 class TestRestore(CLISubCommandTests):
 
-
     subcmd = 'restore', 'dummy.toml'
-
 
     def __init__(self):
         """ Seed common subcommand tests with a dummy file and content to
@@ -39,13 +37,11 @@ class TestRestore(CLISubCommandTests):
             fancy_package = "0.0.1"
             """)
 
-
     @staticmethod
     def create_toml(filename, content):
         """ Utility to produce TOML files. """
         with open(filename, 'w') as doc:
             doc.write(textwrap.dedent(content.strip()))
-
 
     def test_default_all_manager(self, invoke):
         self.create_toml('all-managers.toml', ''.join(["""
@@ -58,7 +54,6 @@ class TestRestore(CLISubCommandTests):
         assert 'all-managers.toml' in result.output
         self.check_manager_selection(result.output)
 
-
     @pytest.mark.parametrize('mid', MANAGER_IDS)
     def test_single_manager(self, invoke, mid):
         self.create_toml('all-managers.toml', ''.join(["""
@@ -70,7 +65,6 @@ class TestRestore(CLISubCommandTests):
         assert result.exit_code == 0
         self.check_manager_selection(result.output, {mid})
 
-
     def test_ignore_unrecognized_manager(self, invoke):
         self.create_toml('unrecognized.toml', """
             [random_section]
@@ -81,7 +75,6 @@ class TestRestore(CLISubCommandTests):
         assert result.exit_code == 0
         assert 'unrecognized.toml' in result.output
         assert 'warning: Ignore [random_section] section.' in result.output
-
 
     def test_restore_single_manager(self, invoke):
         self.create_toml('pip-npm-dummy.toml', """
@@ -98,7 +91,6 @@ class TestRestore(CLISubCommandTests):
         assert 'Restore pip3' not in result.output
         assert 'Restore npm' in result.output
 
-
     def test_restore_excluded_manager(self, invoke):
         self.create_toml('pip-npm-dummy.toml', """
             [pip3]
@@ -113,7 +105,6 @@ class TestRestore(CLISubCommandTests):
         assert 'pip-npm-dummy.toml' in result.output
         assert 'Restore pip3' in result.output
         assert 'Restore npm' not in result.output
-
 
     def test_empty_manager(self, invoke):
         self.create_toml('pip-empty.toml', """

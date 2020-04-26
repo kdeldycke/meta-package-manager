@@ -28,22 +28,18 @@ from .test_cli import CLISubCommandTests
 
 class TestOutdated(CLISubCommandTests):
 
-
     subcmd = 'outdated'
-
 
     def test_default_all_manager(self, invoke):
         result = invoke(self.subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result.output)
 
-
     @pytest.mark.parametrize('mid', MANAGER_IDS)
     def test_single_manager(self, invoke, mid):
         result = invoke('--manager', mid, self.subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result.output, {mid})
-
 
     def test_json_parsing(self, invoke):
         result = invoke('--output-format', 'json', self.subcmd)
@@ -87,7 +83,6 @@ class TestOutdated(CLISubCommandTests):
                 assert isinstance(pkg['name'], str)
                 assert isinstance(pkg['upgrade_cli'], str)
 
-
     def test_cli_format_plain(self, invoke):
         result = invoke(
             '--output-format', 'json', self.subcmd, '--cli-format', 'plain')
@@ -95,15 +90,14 @@ class TestOutdated(CLISubCommandTests):
             for infos in outdated['packages']:
                 assert isinstance(infos['upgrade_cli'], str)
 
-
     def test_cli_format_fragments(self, invoke):
         result = invoke(
-            '--output-format', 'json', self.subcmd, '--cli-format', 'fragments')
+            '--output-format', 'json', self.subcmd,
+            '--cli-format', 'fragments')
         for outdated in json.loads(result.output).values():
             for infos in outdated['packages']:
                 assert isinstance(infos['upgrade_cli'], list)
                 assert set(map(type, infos['upgrade_cli'])) == {str}
-
 
     def test_cli_format_bitbar(self, invoke):
         result = invoke(
@@ -112,7 +106,6 @@ class TestOutdated(CLISubCommandTests):
             for infos in outdated['packages']:
                 assert isinstance(infos['upgrade_cli'], str)
                 assert 'param1=' in infos['upgrade_cli']
-
 
     @destructive
     @unless_macos
@@ -140,7 +133,6 @@ class TestOutdated(CLISubCommandTests):
         run_cmd('brew', 'cask', 'uninstall', 'ubersicht')
         assert result.exit_code == 0
         assert not error
-
 
     @destructive
     @unless_macos

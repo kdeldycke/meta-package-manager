@@ -160,13 +160,11 @@ class CLISubCommandTests:
         assert found_managers == included
         assert skipped_managers == MANAGER_IDS - included
 
-
     def test_help(self, invoke):
         result = invoke(self.subcmd, '--help')
         assert result.exit_code == 0
         assert flatten([self.subcmd])[0] in result.output
         assert "--help" in result.output
-
 
     def test_verbosity(self, invoke):
         result = invoke('--verbosity', 'DEBUG', self.subcmd)
@@ -177,14 +175,12 @@ class CLISubCommandTests:
         assert result.exit_code == 0
         assert "debug:" not in result.output
 
-
     @pytest.mark.parametrize('selector', ['--manager', '--exclude'])
     def test_invalid_manager_selector(self, invoke, selector):
         result = invoke(selector, 'unknown', self.subcmd)
         assert result.exit_code == 2
         assert "Error: Invalid value for " in result.output
         assert selector in result.output
-
 
     @pytest.mark.parametrize('args,expected', [
         pytest.param(

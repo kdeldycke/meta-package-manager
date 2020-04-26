@@ -21,7 +21,7 @@
 
 import pytest
 
-from .conftest import MANAGER_IDS, destructive
+from .conftest import MANAGER_IDS
 from .test_cli import CLISubCommandTests
 
 
@@ -33,7 +33,6 @@ class TestSync(CLISubCommandTests):
         result = invoke(self.subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result.output)
-
 
     @pytest.mark.parametrize('mid', MANAGER_IDS)
     def test_single_manager(self, invoke, mid):

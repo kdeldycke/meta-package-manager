@@ -27,9 +27,7 @@ from .test_cli import CLISubCommandTests
 
 class TestBackup(CLISubCommandTests):
 
-
     subcmd = 'backup'
-
 
     def test_default_all_managers_output_to_console(self, invoke):
         result = invoke(self.subcmd)
@@ -37,20 +35,17 @@ class TestBackup(CLISubCommandTests):
         assert "Backup package list to <stdout>" in result.output
         self.check_manager_selection(result.output)
 
-
     def test_output_to_console(self, invoke):
         result = invoke(self.subcmd, '-')
         assert result.exit_code == 0
         assert "Backup package list to <stdout>" in result.output
         self.check_manager_selection(result.output)
 
-
     def test_output_to_file(self, invoke):
         result = invoke(self.subcmd, 'mpm-packages.toml')
         assert result.exit_code == 0
         assert "mpm-packages.toml" in result.output
         self.check_manager_selection(result.output)
-
 
     @pytest.mark.parametrize('mid', MANAGER_IDS)
     def test_single_manager_file_output(self, mid, invoke):

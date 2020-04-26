@@ -47,7 +47,6 @@ class TestUpgrade(CLISubCommandTests):
         assert result.exit_code == 0
         self.check_manager_selection(result.output, {mid})
 
-
     @destructive
     @pytest.mark.parametrize('mid', MANAGER_IDS)
     def test_single_manager(self, invoke, mid):

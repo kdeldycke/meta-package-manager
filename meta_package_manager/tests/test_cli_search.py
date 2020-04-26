@@ -28,22 +28,18 @@ from .test_cli import CLISubCommandTests
 
 class TestSearch(CLISubCommandTests):
 
-
     subcmd = 'search', 'abc'
-
 
     def test_default_all_manager(self, invoke):
         result = invoke(self.subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result.output)
 
-
     @pytest.mark.parametrize('mid', MANAGER_IDS)
     def test_single_manager(self, invoke, mid):
         result = invoke('--manager', mid, self.subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result.output, {mid})
-
 
     def test_json_parsing(self, invoke):
         result = invoke('--output-format', 'json', self.subcmd)
@@ -80,21 +76,20 @@ class TestSearch(CLISubCommandTests):
                     assert isinstance(pkg['latest_version'], str)
                 assert isinstance(pkg['name'], str)
 
-
     @unless_macos
     def test_unicode_search(self, invoke):
         """ See #16. """
         result = invoke('--manager', 'cask', 'search', 'ubersicht')
         assert result.exit_code == 0
         assert "ubersicht" in result.output
-        # XXX search command is not fetching yet detailed package infos like names.
+        # XXX search command is not fetching yet detailed package infos like
+        # names.
         assert "Übersicht" not in result.output
 
         result = invoke('--manager', 'cask', 'search', 'Übersicht')
         assert result.exit_code == 0
         assert "ubersicht" in result.output
         assert "Übersicht" not in result.output
-
 
     def test_exact_search_tokenizer(self, invoke):
         result = invoke('--manager', 'pip3', 'search', '--exact', 'sed')
@@ -107,7 +102,6 @@ class TestSearch(CLISubCommandTests):
             assert result.exit_code == 0
             assert "0 package total" in result.output
             assert "sed" not in result.output
-
 
     def test_fuzzy_search_tokenizer(self, invoke):
         for query in ['', '_', '_seD-@']:
@@ -122,7 +116,6 @@ class TestSearch(CLISubCommandTests):
             assert "2 packages total" in result.output
             assert " sed " in result.output
             assert " SED-cli " in result.output
-
 
     def test_extended_search_tokenizer(self, invoke):
         for query in ['', '_', '_seD-@']:

@@ -28,22 +28,18 @@ from .test_cli import CLISubCommandTests
 
 class TestInstalled(CLISubCommandTests):
 
-
     subcmd = 'installed'
-
 
     def test_default_all_manager(self, invoke):
         result = invoke(self.subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result.output)
 
-
     @pytest.mark.parametrize('mid', MANAGER_IDS)
     def test_single_manager(self, invoke, mid):
         result = invoke('--manager', mid, self.subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result.output, {mid})
-
 
     def test_json_parsing(self, invoke):
         result = invoke('--output-format', 'json', self.subcmd)

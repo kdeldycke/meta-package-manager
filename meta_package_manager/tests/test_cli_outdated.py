@@ -120,7 +120,8 @@ class TestOutdated(CLISubCommandTests):
             "/103dde670d398ab32492783a3822132d47f9ebf6/Casks/ubersicht.rb")
         code, output, error = run_cmd('brew', 'cask', 'install', formula_url)
         assert code == 0
-        assert not error
+        assert error == (
+            "Warning: macOS's Gatekeeper has been disabled for this Cask\n")
         assert 'Uebersicht-1.0.44.app.zip' in output
         assert 'Übersicht.app' in output
 
@@ -134,8 +135,7 @@ class TestOutdated(CLISubCommandTests):
         # TODO: Use a fixture that yields to cleanup if test fail.
         run_cmd('brew', 'cask', 'uninstall', 'ubersicht')
         assert result.exit_code == 0
-        assert error == (
-            "Warning: macOS's Gatekeeper has been disabled for this Cask\n")
+        assert not error
 
     @destructive
     @unless_macos
@@ -148,7 +148,8 @@ class TestOutdated(CLISubCommandTests):
             "/16ea1a95c76beaf2ff4dba161a86721d680756e8/Casks/xld.rb")
         code, output, error = run_cmd('brew', 'cask', 'install', formula_url)
         assert code == 0
-        assert not error
+        assert error == (
+            "Warning: macOS's Gatekeeper has been disabled for this Cask\n")
         assert 'xld-20160920.dmg' in output
         assert 'XLD.app' in output
 
@@ -162,5 +163,4 @@ class TestOutdated(CLISubCommandTests):
         # TODO: Use a fixture that yields to cleanup if test fail.
         run_cmd('brew', 'cask', 'uninstall', 'xld')
         assert result.exit_code == 0
-        assert error == (
-            "Warning: macOS's Gatekeeper has been disabled for this Cask\n")
+        assert not error

@@ -22,101 +22,105 @@ import textwrap
 import pytest
 
 from .conftest import MANAGER_IDS
-from .test_cli import check_manager_selection, test_manager_selection
+from .test_cli import CLISubCommandTests
 
 
-def create_toml(filename, content):
-    """ Utility to produce TOML files. """
-    with open(filename, 'w') as doc:
-        doc.write(textwrap.dedent(content.strip()))
+class TestRestore(CLISubCommandTests):
 
 
-@pytest.fixture
-def subcommand():
-    """ Seed common subcommand tests with a dummy file and content to allow the
-    CLI to not fail on required file input. """
-    create_toml('dummy.toml', """
-        [dummy_manager]
-        fancy_package = "0.0.1"
-        """)
-
-    return 'restore', 'dummy.toml'
+    subcmd = 'restore', 'dummy.toml'
 
 
-def test_default_all_manager(invoke):
-    create_toml('all-managers.toml', ''.join(["""
-        [{}]
-        blah = 123
-        """.format(m) for m in MANAGER_IDS]))
-
-    result = invoke('restore', 'all-managers.toml')
-    assert result.exit_code == 0
-    assert 'all-managers.toml' in result.output
-    check_manager_selection(result.output)
+    def __init__(self):
+        """ Seed common subcommand tests with a dummy file and content to
+        allow the CLI to not fail on required file input. """
+        self.create_toml('dummy.toml', """
+            [dummy_manager]
+            fancy_package = "0.0.1"
+            """)
 
 
-@pytest.mark.parametrize('mid', MANAGER_IDS)
-def test_single_manager(invoke, mid):
-    create_toml('all-managers.toml', ''.join(["""
-        [{}]
-        blah = 123
-        """.format(m) for m in MANAGER_IDS]))
-
-    result = invoke('--manager', mid, 'restore', 'all-managers.toml')
-    assert result.exit_code == 0
-    check_manager_selection(result.output, {mid})
+    @staticmethod
+    def create_toml(filename, content):
+        """ Utility to produce TOML files. """
+        with open(filename, 'w') as doc:
+            doc.write(textwrap.dedent(content.strip()))
 
 
-def test_ignore_unrecognized_manager(invoke):
-    create_toml('unrecognized.toml', """
-        [random_section]
-        blah = 123
-        """)
+    def test_default_all_manager(self, invoke):
+        self.create_toml('all-managers.toml', ''.join(["""
+            [{}]
+            blah = 123
+            """.format(m) for m in MANAGER_IDS]))
 
-    result = invoke('restore', 'unrecognized.toml')
-    assert result.exit_code == 0
-    assert 'unrecognized.toml' in result.output
-    assert 'warning: Ignore [random_section] section.' in result.output
-
-
-def test_restore_single_manager(invoke):
-    create_toml('pip-npm-dummy.toml', """
-        [pip3]
-        fancy_package = "0.0.1"
-
-        [npm]
-        dummy_package = "2.2.2"
-        """)
-
-    result = invoke('--manager', 'npm', 'restore', 'pip-npm-dummy.toml')
-    assert result.exit_code == 0
-    assert 'pip-npm-dummy.toml' in result.output
-    assert 'Restore pip3' not in result.output
-    assert 'Restore npm' in result.output
+        result = invoke('restore', 'all-managers.toml')
+        assert result.exit_code == 0
+        assert 'all-managers.toml' in result.output
+        self.check_manager_selection(result.output)
 
 
-def test_restore_excluded_manager(invoke):
-    create_toml('pip-npm-dummy.toml', """
-        [pip3]
-        fancy_package = "0.0.1"
+    @pytest.mark.parametrize('mid', MANAGER_IDS)
+    def test_single_manager(self, invoke, mid):
+        self.create_toml('all-managers.toml', ''.join(["""
+            [{}]
+            blah = 123
+            """.format(m) for m in MANAGER_IDS]))
 
-        [npm]
-        dummy_package = "2.2.2"
-        """)
-
-    result = invoke('--exclude', 'npm', 'restore', 'pip-npm-dummy.toml')
-    assert result.exit_code == 0
-    assert 'pip-npm-dummy.toml' in result.output
-    assert 'Restore pip3' in result.output
-    assert 'Restore npm' not in result.output
+        result = invoke('--manager', mid, 'restore', 'all-managers.toml')
+        assert result.exit_code == 0
+        self.check_manager_selection(result.output, {mid})
 
 
-def test_empty_manager(invoke):
-    create_toml('pip-empty.toml', """
-        [pip3]
-        """)
+    def test_ignore_unrecognized_manager(self, invoke):
+        self.create_toml('unrecognized.toml', """
+            [random_section]
+            blah = 123
+            """)
 
-    result = invoke('restore', 'pip-empty.toml')
-    assert result.exit_code == 0
-    assert 'pip-empty.toml' in result.output
-    assert 'Restore pip3' in result.output
+        result = invoke('restore', 'unrecognized.toml')
+        assert result.exit_code == 0
+        assert 'unrecognized.toml' in result.output
+        assert 'warning: Ignore [random_section] section.' in result.output
+
+
+    def test_restore_single_manager(self, invoke):
+        self.create_toml('pip-npm-dummy.toml', """
+            [pip3]
+            fancy_package = "0.0.1"
+
+            [npm]
+            dummy_package = "2.2.2"
+            """)
+
+        result = invoke('--manager', 'npm', 'restore', 'pip-npm-dummy.toml')
+        assert result.exit_code == 0
+        assert 'pip-npm-dummy.toml' in result.output
+        assert 'Restore pip3' not in result.output
+        assert 'Restore npm' in result.output
+
+
+    def test_restore_excluded_manager(self, invoke):
+        self.create_toml('pip-npm-dummy.toml', """
+            [pip3]
+            fancy_package = "0.0.1"
+
+            [npm]
+            dummy_package = "2.2.2"
+            """)
+
+        result = invoke('--exclude', 'npm', 'restore', 'pip-npm-dummy.toml')
+        assert result.exit_code == 0
+        assert 'pip-npm-dummy.toml' in result.output
+        assert 'Restore pip3' in result.output
+        assert 'Restore npm' not in result.output
+
+
+    def test_empty_manager(self, invoke):
+        self.create_toml('pip-empty.toml', """
+            [pip3]
+            """)
+
+        result = invoke('restore', 'pip-empty.toml')
+        assert result.exit_code == 0
+        assert 'pip-empty.toml' in result.output
+        assert 'Restore pip3' in result.output

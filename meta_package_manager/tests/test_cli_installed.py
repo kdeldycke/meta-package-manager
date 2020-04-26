@@ -23,56 +23,55 @@ import pytest
 import simplejson as json
 
 from .conftest import MANAGER_IDS
-from .test_cli import \
-    test_manager_selection  # Run manager selection tests for this subcommand.
-from .test_cli import check_manager_selection
+from .test_cli import CLISubCommandTests
 
 
-@pytest.fixture
-def subcommand():
-    return 'installed'
+class TestInstalled(CLISubCommandTests):
 
 
-def test_default_all_manager(invoke, subcommand):
-    result = invoke(subcommand)
-    assert result.exit_code == 0
-    check_manager_selection(result.output)
+    subcmd = 'installed'
 
 
-@pytest.mark.parametrize('mid', MANAGER_IDS)
-def test_single_manager(invoke, subcommand, mid):
-    result = invoke('--manager', mid, subcommand)
-    assert result.exit_code == 0
-    check_manager_selection(result.output, {mid})
+    def test_default_all_manager(self, invoke):
+        result = invoke(self.subcmd)
+        assert result.exit_code == 0
+        self.check_manager_selection(result.output)
 
 
-def test_json_parsing(invoke, subcommand):
-    result = invoke('--output-format', 'json', subcommand)
-    assert result.exit_code == 0
-    data = json.loads(result.output)
+    @pytest.mark.parametrize('mid', MANAGER_IDS)
+    def test_single_manager(self, invoke, mid):
+        result = invoke('--manager', mid, self.subcmd)
+        assert result.exit_code == 0
+        self.check_manager_selection(result.output, {mid})
 
-    assert set(data).issubset(MANAGER_IDS)
 
-    for manager_id, info in data.items():
-        assert isinstance(manager_id, str)
-        assert isinstance(info, dict)
+    def test_json_parsing(self, invoke):
+        result = invoke('--output-format', 'json', self.subcmd)
+        assert result.exit_code == 0
+        data = json.loads(result.output)
 
-        assert set(info) == {'errors', 'id', 'name', 'packages'}
+        assert set(data).issubset(MANAGER_IDS)
 
-        assert isinstance(info['errors'], list)
-        if info['errors']:
-            assert set(map(type, info['errors'])) == {str}
-        assert isinstance(info['id'], str)
-        assert isinstance(info['name'], str)
-        assert isinstance(info['packages'], list)
+        for manager_id, info in data.items():
+            assert isinstance(manager_id, str)
+            assert isinstance(info, dict)
 
-        assert info['id'] == manager_id
+            assert set(info) == {'errors', 'id', 'name', 'packages'}
 
-        for pkg in info['packages']:
-            assert isinstance(pkg, dict)
+            assert isinstance(info['errors'], list)
+            if info['errors']:
+                assert set(map(type, info['errors'])) == {str}
+            assert isinstance(info['id'], str)
+            assert isinstance(info['name'], str)
+            assert isinstance(info['packages'], list)
 
-            assert set(pkg) == {'id', 'installed_version', 'name'}
+            assert info['id'] == manager_id
 
-            assert isinstance(pkg['id'], str)
-            assert isinstance(pkg['installed_version'], str)
-            assert isinstance(pkg['name'], str)
+            for pkg in info['packages']:
+                assert isinstance(pkg, dict)
+
+                assert set(pkg) == {'id', 'installed_version', 'name'}
+
+                assert isinstance(pkg['id'], str)
+                assert isinstance(pkg['installed_version'], str)
+                assert isinstance(pkg['name'], str)

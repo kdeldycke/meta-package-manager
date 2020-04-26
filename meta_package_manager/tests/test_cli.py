@@ -21,6 +21,7 @@ import re
 
 import pytest
 import simplejson as json
+from boltons.iterutils import flatten
 
 from .. import __version__
 from .conftest import MANAGER_IDS, destructive
@@ -64,48 +65,6 @@ def test_required_command(invoke):
     assert "Error: Missing command." in result.output
 
 
-# List of all available sub-commands.
-subcommands = {
-    'backup',
-    'cleanup',
-    'installed',
-    'managers',
-    'outdated',
-    'restore',
-    'search',
-    'sync',
-    'upgrade'}
-
-
-@pytest.mark.parametrize('subcmd', subcommands)
-def test_subcommand_help(invoke, subcmd):
-    result = invoke(subcmd, '--help')
-    assert result.exit_code == 0
-    assert subcmd in result.output
-    assert "--help" in result.output
-
-
-@pytest.mark.parametrize('subcmd', [
-    'backup',
-    'cleanup',
-    'installed',
-    'managers',
-    'outdated',
-    'restore',
-    'search',
-    'sync',
-    'upgrade'])
-@destructive  # Until we spread it out to each command.
-def test_subcommand_verbosity(invoke, subcmd):
-    result = invoke('--verbosity', 'DEBUG', subcmd)
-    assert result.exit_code == 0
-    assert "debug:" in result.output
-
-    result = invoke('--verbosity', 'INFO', subcmd)
-    assert result.exit_code == 0
-    assert "debug:" not in result.output
-
-
 json_support_subcmd = [
     'backup',
     'cleanup',
@@ -134,107 +93,136 @@ def test_json_debug_output(invoke, subcmd):
         json.loads(result.output)
 
 
-def check_manager_selection(output, included=MANAGER_IDS):
-    """ Check inclusion and exclusion of a set of managers.
+class CLISubCommandTests:
 
-    Check all manager are there by default.
+    """ Common tests shared by all subcommands.
 
-    .. todo:
-
-        Parametrize/fixturize signals to pin point output depending on
-        subcommand.
+    This class doesn't starts with `Test` as it is meant to be used as a
+    template, inherited sub-command specific files.
     """
-    assert isinstance(output, str)
-    assert isinstance(included, (frozenset, set))
 
-    found_managers = set()
-    skipped_managers = set()
+    subcmd = None
+    """ Set the sub-command in all CLI calls. Must returns a string or an
+    iterable of strings.
+    """
 
-    for mid in MANAGER_IDS:
+    @staticmethod
+    def check_manager_selection(output, included=MANAGER_IDS):
+        """ Check inclusion and exclusion of a set of managers.
 
-        # List of signals indicating a package manager has been retained by
-        # the CLI. Roughly sorted from most specific to more forgiving.
-        signals = [
-            # Common "not found" warning message.
-            "warning: Skip unavailable {} manager.".format(mid) in output,
-            # Stats line at the end of output.
-            "{}: ".format(
-                mid) in output.splitlines()[-1] if output else '',
-            # Match output of managers command.
-            bool(re.search(
-                r"\s+│\s+{}\s+│\s+(✓|✘).+│\s+(✓|✘)\s+".format(mid),
-                output)),
-            # Sync command.
-            "Sync {} package info...".format(mid) in output,
-            # Upgrade command.
-            "Updating all outdated packages from {}..."
-            "".format(mid) in output,
-            # Cleanup command.
-            "Cleanup {}...".format(mid) in output,
-            # Log message for backup command.
-            "Dumping packages from {}...".format(mid) in output,
-            # Restoring message.
-            "Restore {} packages...".format(mid) in output,
-            # Warning message for restore command.
-            "warning: No [{}] section found.".format(mid) in output]
+        Check all manager are there by default.
 
-        if True in signals:
-            found_managers.add(mid)
-        else:
-            skipped_managers.add(mid)
+        .. todo:
 
-    # Compare managers reported by the CLI and those expected.
-    assert found_managers == included
-    assert skipped_managers == MANAGER_IDS - included
+            Parametrize/fixturize signals to pin point output depending on
+            subcommand.
+        """
+        assert isinstance(output, str)
+        assert isinstance(included, (frozenset, set))
+
+        found_managers = set()
+        skipped_managers = set()
+
+        for mid in MANAGER_IDS:
+
+            # List of signals indicating a package manager has been retained by
+            # the CLI. Roughly sorted from most specific to more forgiving.
+            signals = [
+                # Common "not found" warning message.
+                "warning: Skip unavailable {} manager.".format(mid) in output,
+                # Stats line at the end of output.
+                "{}: ".format(
+                    mid) in output.splitlines()[-1] if output else '',
+                # Match output of managers command.
+                bool(re.search(
+                    r"\s+│\s+{}\s+│\s+(✓|✘).+│\s+(✓|✘)\s+".format(mid),
+                    output)),
+                # Sync command.
+                "Sync {} package info...".format(mid) in output,
+                # Upgrade command.
+                "Updating all outdated packages from {}..."
+                "".format(mid) in output,
+                # Cleanup command.
+                "Cleanup {}...".format(mid) in output,
+                # Log message for backup command.
+                "Dumping packages from {}...".format(mid) in output,
+                # Restoring message.
+                "Restore {} packages...".format(mid) in output,
+                # Warning message for restore command.
+                "warning: No [{}] section found.".format(mid) in output]
+
+            if True in signals:
+                found_managers.add(mid)
+            else:
+                skipped_managers.add(mid)
+
+        # Compare managers reported by the CLI and those expected.
+        assert found_managers == included
+        assert skipped_managers == MANAGER_IDS - included
 
 
-@pytest.mark.parametrize('subcmd', subcommands)
-@pytest.mark.parametrize('selector', ['--manager', '--exclude'])
-def test_invalid_manager_selector(invoke, subcmd, selector):
-    result = invoke(selector, 'unknown', subcmd)
-    assert result.exit_code == 2
-    assert "Error: Invalid value for " in result.output
-    assert selector in result.output
+    def test_help(self, invoke):
+        result = invoke(self.subcmd, '--help')
+        assert result.exit_code == 0
+        assert flatten([self.subcmd])[0] in result.output
+        assert "--help" in result.output
 
 
-@pytest.mark.parametrize('args,expected', [
-    pytest.param(
-        ('--manager', 'apm'), {'apm'},
-        id="single_selector"),
-    pytest.param(
-        ('--manager', 'apm') * 2, {'apm'},
-        id="duplicate_selectors"),
-    pytest.param(
-        ('--manager', 'apm', '--manager', 'gem'), {'apm', 'gem'},
-        id="multiple_selectors"),
-    pytest.param(
-        ('--exclude', 'apm'), MANAGER_IDS - {'apm'},
-        id="single_exclusion"),
-    pytest.param(
-        ('--exclude', 'apm') * 2, MANAGER_IDS - {'apm'},
-        id="duplicate_exclusions"),
-    pytest.param(
-        ('--exclude', 'apm', '--exclude', 'gem'), MANAGER_IDS - {'apm', 'gem'},
-        id="multiple_exclusions"),
-    pytest.param(
-        ('--manager', 'apm', '--exclude', 'gem'), {'apm'},
-        id="priority_ordered"),
-    pytest.param(
-        ('--exclude', 'gem', '--manager', 'apm'), {'apm'},
-        id="priority_reversed"),
-    pytest.param(
-        ('--manager', 'apm', '--exclude', 'apm'), set(),
-        id="exclusion_override_ordered"),
-    pytest.param(
-        ('--exclude', 'apm', '--manager', 'apm'), set(),
-        id="exclusion_override_reversed"),
-])
-def test_manager_selection(invoke, subcommand, args, expected):
-    if subcommand is None:
-        pytest.skip("subcommand not set")
-    result = invoke(*args, subcommand)
-    assert result.exit_code == 0
-    check_manager_selection(result.output, expected)
+    def test_verbosity(self, invoke):
+        result = invoke('--verbosity', 'DEBUG', self.subcmd)
+        assert result.exit_code == 0
+        assert "debug:" in result.output
+
+        result = invoke('--verbosity', 'INFO', self.subcmd)
+        assert result.exit_code == 0
+        assert "debug:" not in result.output
+
+
+    @pytest.mark.parametrize('selector', ['--manager', '--exclude'])
+    def test_invalid_manager_selector(self, invoke, selector):
+        result = invoke(selector, 'unknown', self.subcmd)
+        assert result.exit_code == 2
+        assert "Error: Invalid value for " in result.output
+        assert selector in result.output
+
+
+    @pytest.mark.parametrize('args,expected', [
+        pytest.param(
+            ('--manager', 'apm'), {'apm'},
+            id="single_selector"),
+        pytest.param(
+            ('--manager', 'apm') * 2, {'apm'},
+            id="duplicate_selectors"),
+        pytest.param(
+            ('--manager', 'apm', '--manager', 'gem'), {'apm', 'gem'},
+            id="multiple_selectors"),
+        pytest.param(
+            ('--exclude', 'apm'), MANAGER_IDS - {'apm'},
+            id="single_exclusion"),
+        pytest.param(
+            ('--exclude', 'apm') * 2, MANAGER_IDS - {'apm'},
+            id="duplicate_exclusions"),
+        pytest.param(
+            ('--exclude', 'apm', '--exclude', 'gem'),
+            MANAGER_IDS - {'apm', 'gem'},
+            id="multiple_exclusions"),
+        pytest.param(
+            ('--manager', 'apm', '--exclude', 'gem'), {'apm'},
+            id="priority_ordered"),
+        pytest.param(
+            ('--exclude', 'gem', '--manager', 'apm'), {'apm'},
+            id="priority_reversed"),
+        pytest.param(
+            ('--manager', 'apm', '--exclude', 'apm'), set(),
+            id="exclusion_override_ordered"),
+        pytest.param(
+            ('--exclude', 'apm', '--manager', 'apm'), set(),
+            id="exclusion_override_reversed"),
+    ])
+    def test_manager_selection(self, invoke, args, expected):
+        result = invoke(*args, self.subcmd)
+        assert result.exit_code == 0
+        self.check_manager_selection(result.output, expected)
 
 
 @pytest.mark.skip(reason="refactor in progress")

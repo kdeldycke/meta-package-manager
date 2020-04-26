@@ -51,14 +51,25 @@ MANAGER_IDS = frozenset([
 """ Hard-coded list of all supported manager IDs. """
 
 
-destructive = pytest.mark.skipif(
-    bool(os.environ.get('DESTRUCTIVE_TESTS', False) not in [
-        True, 1, 'True', 'true', '1']),
-    reason="destructive tests")
+DESTRUCTIVE_MODE = bool(os.environ.get('DESTRUCTIVE_TESTS', False) not in [
+        True, 1, 'True', 'true', '1'])
+""" Pre-computed boolean flag indicating if destructive mode is activated by
+the presence of a ``DESTRUCTIVE_TESTS`` environment variable set to ``True``.
+"""
+
+
+destructive = pytest.mark.skipif(DESTRUCTIVE_MODE, reason="destructive test")
 """ Pytest mark to skip a test unless destructive mode is allowed.
 
-Destructive mode is activated by the presence of a ``DESTRUCTIVE_TESTS``
-environment variable set to ``True``.
+.. todo:
+
+    Test destructive test assessment.
+"""
+
+
+non_destructive = pytest.mark.skipif(
+    not DESTRUCTIVE_MODE, reason="non-destructive test")
+""" Pytest mark to skip a test unless destructive mode is allowed.
 
 .. todo:
 
@@ -138,14 +149,3 @@ def invoke(runner, *args):
         return result
 
     return run_run
-
-
-@pytest.fixture
-def subcommand():
-    """ Fixture used in `test_cli_*.py` files to set the sub-command in all CLI
-    calls.
-
-    Must returns a string or an iterable of strings. Defaults to `None`, which
-    allows tests relying on this fixture to selectively skip running.
-    """
-    return None

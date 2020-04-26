@@ -22,24 +22,21 @@
 import pytest
 
 from .conftest import MANAGER_IDS
-from .test_cli import \
-    test_manager_selection  # Run manager selection tests for this subcommand.
-from .test_cli import check_manager_selection
+from .test_cli import CLISubCommandTests
 
 
-@pytest.fixture
-def subcommand():
-    return 'cleanup'
+class TestCleanup(CLISubCommandTests):
+
+    subcmd = 'cleanup'
+
+    def test_default_all_manager(self, invoke):
+        result = invoke(self.subcmd)
+        assert result.exit_code == 0
+        self.check_manager_selection(result.output)
 
 
-def test_default_all_manager(invoke, subcommand):
-    result = invoke(subcommand)
-    assert result.exit_code == 0
-    check_manager_selection(result.output)
-
-
-@pytest.mark.parametrize('mid', MANAGER_IDS)
-def test_single_manager(invoke, subcommand, mid):
-    result = invoke('--manager', mid, subcommand)
-    assert result.exit_code == 0
-    check_manager_selection(result.output, {mid})
+    @pytest.mark.parametrize('mid', MANAGER_IDS)
+    def test_single_manager(self, invoke, mid):
+        result = invoke('--manager', mid, self.subcmd)
+        assert result.exit_code == 0
+        self.check_manager_selection(result.output, {mid})

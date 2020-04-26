@@ -22,38 +22,39 @@
 import pytest
 
 from .conftest import MANAGER_IDS
-from .test_cli import check_manager_selection, test_manager_selection
+from .test_cli import CLISubCommandTests
 
 
-@pytest.fixture
-def subcommand():
-    return 'backup'
+class TestBackup(CLISubCommandTests):
 
 
-def test_default_all_managers_output_to_console(invoke, subcommand):
-    result = invoke(subcommand)
-    assert result.exit_code == 0
-    assert "Backup package list to <stdout>" in result.output
-    check_manager_selection(result.output)
+    subcmd = 'backup'
 
 
-def test_output_to_console(invoke, subcommand):
-    result = invoke(subcommand, '-')
-    assert result.exit_code == 0
-    assert "Backup package list to <stdout>" in result.output
-    check_manager_selection(result.output)
+    def test_default_all_managers_output_to_console(self, invoke):
+        result = invoke(self.subcmd)
+        assert result.exit_code == 0
+        assert "Backup package list to <stdout>" in result.output
+        self.check_manager_selection(result.output)
 
 
-def test_output_to_file(invoke, subcommand):
-    result = invoke(subcommand, 'mpm-packages.toml')
-    assert result.exit_code == 0
-    assert "mpm-packages.toml" in result.output
-    check_manager_selection(result.output)
+    def test_output_to_console(self, invoke):
+        result = invoke(self.subcmd, '-')
+        assert result.exit_code == 0
+        assert "Backup package list to <stdout>" in result.output
+        self.check_manager_selection(result.output)
 
 
-@pytest.mark.parametrize('mid', MANAGER_IDS)
-def test_single_manager_file_output(mid, invoke, subcommand):
-    result = invoke('--manager', mid, subcommand, 'mpm-packages.toml')
-    assert result.exit_code == 0
-    assert "mpm-packages.toml" in result.output
-    check_manager_selection(result.output, {mid})
+    def test_output_to_file(self, invoke):
+        result = invoke(self.subcmd, 'mpm-packages.toml')
+        assert result.exit_code == 0
+        assert "mpm-packages.toml" in result.output
+        self.check_manager_selection(result.output)
+
+
+    @pytest.mark.parametrize('mid', MANAGER_IDS)
+    def test_single_manager_file_output(self, mid, invoke):
+        result = invoke('--manager', mid, self.subcmd, 'mpm-packages.toml')
+        assert result.exit_code == 0
+        assert "mpm-packages.toml" in result.output
+        self.check_manager_selection(result.output, {mid})

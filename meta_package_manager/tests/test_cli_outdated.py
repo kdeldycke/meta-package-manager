@@ -26,23 +26,26 @@ from .conftest import MANAGER_IDS, destructive, run_cmd, unless_macos
 from .test_cli import CLISubCommandTests
 
 
+@pytest.fixture
+def subcmd():
+    return 'outdated'
+
+
 class TestOutdated(CLISubCommandTests):
 
-    subcmd = 'outdated'
-
-    def test_default_all_manager(self, invoke):
-        result = invoke(self.subcmd)
+    def test_default_all_manager(self, invoke, subcmd):
+        result = invoke(subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result.output)
 
     @pytest.mark.parametrize('mid', MANAGER_IDS)
-    def test_single_manager(self, invoke, mid):
-        result = invoke('--manager', mid, self.subcmd)
+    def test_single_manager(self, invoke, mid, subcmd):
+        result = invoke('--manager', mid, subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result.output, {mid})
 
-    def test_json_parsing(self, invoke):
-        result = invoke('--output-format', 'json', self.subcmd)
+    def test_json_parsing(self, invoke, subcmd):
+        result = invoke('--output-format', 'json', subcmd)
         assert result.exit_code == 0
         data = json.loads(result.output)
 
@@ -83,25 +86,24 @@ class TestOutdated(CLISubCommandTests):
                 assert isinstance(pkg['name'], str)
                 assert isinstance(pkg['upgrade_cli'], str)
 
-    def test_cli_format_plain(self, invoke):
+    def test_cli_format_plain(self, invoke, subcmd):
         result = invoke(
-            '--output-format', 'json', self.subcmd, '--cli-format', 'plain')
+            '--output-format', 'json', subcmd, '--cli-format', 'plain')
         for outdated in json.loads(result.output).values():
             for infos in outdated['packages']:
                 assert isinstance(infos['upgrade_cli'], str)
 
-    def test_cli_format_fragments(self, invoke):
+    def test_cli_format_fragments(self, invoke, subcmd):
         result = invoke(
-            '--output-format', 'json', self.subcmd,
-            '--cli-format', 'fragments')
+            '--output-format', 'json', subcmd, '--cli-format', 'fragments')
         for outdated in json.loads(result.output).values():
             for infos in outdated['packages']:
                 assert isinstance(infos['upgrade_cli'], list)
                 assert set(map(type, infos['upgrade_cli'])) == {str}
 
-    def test_cli_format_bitbar(self, invoke):
+    def test_cli_format_bitbar(self, invoke, subcmd):
         result = invoke(
-            '--output-format', 'json', self.subcmd, '--cli-format', 'bitbar')
+            '--output-format', 'json', subcmd, '--cli-format', 'bitbar')
         for outdated in json.loads(result.output).values():
             for infos in outdated['packages']:
                 assert isinstance(infos['upgrade_cli'], str)
@@ -109,7 +111,7 @@ class TestOutdated(CLISubCommandTests):
 
     @destructive
     @unless_macos
-    def test_unicode_name(self, invoke):
+    def test_unicode_name(self, invoke, subcmd):
         """ See #16. """
         # Install an old version of a package with a unicode name.
         # Old Cask formula for ubersicht 1.0.44.
@@ -123,7 +125,7 @@ class TestOutdated(CLISubCommandTests):
         assert 'Übersicht.app' in output
 
         # Look for reported available upgrade.
-        result = invoke('--manager', 'cask', self.subcmd)
+        result = invoke('--manager', 'cask', subcmd)
         assert result.exit_code == 0
         assert "ubersicht" in result.output
         assert "Übersicht" in result.output
@@ -136,7 +138,7 @@ class TestOutdated(CLISubCommandTests):
 
     @destructive
     @unless_macos
-    def test_multiple_names(self, invoke):
+    def test_multiple_names(self, invoke, subcmd):
         """ See #26. """
         # Install an old version of a package with multiple names.
         # Old Cask formula for xld 2016.09.20.
@@ -150,7 +152,7 @@ class TestOutdated(CLISubCommandTests):
         assert 'XLD.app' in output
 
         # Look for reported available upgrade.
-        result = invoke('--manager', 'cask', self.subcmd)
+        result = invoke('--manager', 'cask', subcmd)
         assert result.exit_code == 0
         assert "xld" in result.output
         assert "X Lossless Decoder" in result.output

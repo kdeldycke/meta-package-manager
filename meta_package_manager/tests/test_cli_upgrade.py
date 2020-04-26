@@ -23,37 +23,41 @@ from .conftest import MANAGER_IDS, destructive
 from .test_cli import CLISubCommandTests
 
 
+@pytest.fixture
+def subcmd():
+    return 'upgrade'
+
+
 class TestUpgrade(CLISubCommandTests):
 
     """ All tests here should me marked as destructive unless --dry-run
     parameter is passed. """
 
-    subcmd = 'upgrade'
-
-    def test_default_all_manager_dry_run(self, invoke):
-        result = invoke(self.subcmd, '--dry-run')
+    def test_default_all_manager_dry_run(self, invoke, subcmd):
+        result = invoke(subcmd, '--dry-run')
         assert result.exit_code == 0
         self.check_manager_selection(result.output)
 
     @destructive
-    def test_default_all_manager(self, invoke):
-        result = invoke(self.subcmd)
+    def test_default_all_manager(self, invoke, subcmd):
+        result = invoke(subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result.output)
 
     @pytest.mark.parametrize('mid', MANAGER_IDS)
-    def test_single_manager_dry_run(self, invoke, mid):
-        result = invoke('--manager', mid, self.subcmd, '--dry-run')
+    def test_single_manager_dry_run(self, invoke, subcmd, mid):
+        result = invoke('--manager', mid, subcmd, '--dry-run')
         assert result.exit_code == 0
         self.check_manager_selection(result.output, {mid})
 
     @destructive
     @pytest.mark.parametrize('mid', MANAGER_IDS)
-    def test_single_manager(self, invoke, mid):
-        result = invoke('--manager', mid, self.subcmd)
+    def test_single_manager(self, invoke, subcmd, mid):
+        result = invoke('--manager', mid, subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result.output, {mid})
 
 
 destructive()(TestUpgrade.test_verbosity)
 destructive()(TestUpgrade.test_manager_selection)
+destructive()(TestUpgrade.test_json_debug_output)

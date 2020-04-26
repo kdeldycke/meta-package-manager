@@ -25,17 +25,20 @@ from .conftest import MANAGER_IDS
 from .test_cli import CLISubCommandTests
 
 
+@pytest.fixture
+def subcmd():
+    return 'cleanup'
+
+
 class TestCleanup(CLISubCommandTests):
 
-    subcmd = 'cleanup'
-
-    def test_default_all_manager(self, invoke):
-        result = invoke(self.subcmd)
+    def test_default_all_manager(self, invoke, subcmd):
+        result = invoke(subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result.output)
 
     @pytest.mark.parametrize('mid', MANAGER_IDS)
-    def test_single_manager(self, invoke, mid):
-        result = invoke('--manager', mid, self.subcmd)
+    def test_single_manager(self, invoke, subcmd, mid):
+        result = invoke('--manager', mid, subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result.output, {mid})

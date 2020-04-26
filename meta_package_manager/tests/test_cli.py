@@ -79,31 +79,12 @@ json_support_subcmd = [
 ]
 
 
-@pytest.mark.parametrize('subcmd', json_support_subcmd)
-def test_json_debug_output(invoke, subcmd):
-    """ Debug output is expected to be unparseable because of interleaved debug
-    messages and JSON output.
-
-    Also checks that JSON output format is not supported by all commands.
-    """
-    result = invoke('--output-format', 'json', '--verbosity', 'DEBUG', subcmd)
-    assert result.exit_code == 0
-    assert "debug:" in result.output
-    with pytest.raises(json.decoder.JSONDecodeError):
-        json.loads(result.output)
-
-
 class CLISubCommandTests:
 
     """ Common tests shared by all subcommands.
 
     This class doesn't starts with `Test` as it is meant to be used as a
     template, inherited sub-command specific files.
-    """
-
-    subcmd = None
-    """ Set the sub-command in all CLI calls. Must returns a string or an
-    iterable of strings.
     """
 
     @staticmethod
@@ -160,24 +141,24 @@ class CLISubCommandTests:
         assert found_managers == included
         assert skipped_managers == MANAGER_IDS - included
 
-    def test_help(self, invoke):
-        result = invoke(self.subcmd, '--help')
+    def test_help(self, invoke, subcmd):
+        result = invoke(subcmd, '--help')
         assert result.exit_code == 0
-        assert flatten([self.subcmd])[0] in result.output
+        assert flatten([subcmd])[0] in result.output
         assert "--help" in result.output
 
-    def test_verbosity(self, invoke):
-        result = invoke('--verbosity', 'DEBUG', self.subcmd)
+    def test_verbosity(self, invoke, subcmd):
+        result = invoke('--verbosity', 'DEBUG', subcmd)
         assert result.exit_code == 0
         assert "debug:" in result.output
 
-        result = invoke('--verbosity', 'INFO', self.subcmd)
+        result = invoke('--verbosity', 'INFO', subcmd)
         assert result.exit_code == 0
         assert "debug:" not in result.output
 
     @pytest.mark.parametrize('selector', ['--manager', '--exclude'])
-    def test_invalid_manager_selector(self, invoke, selector):
-        result = invoke(selector, 'unknown', self.subcmd)
+    def test_invalid_manager_selector(self, invoke, subcmd, selector):
+        result = invoke(selector, 'unknown', subcmd)
         assert result.exit_code == 2
         assert "Error: Invalid value for " in result.output
         assert selector in result.output
@@ -215,10 +196,23 @@ class CLISubCommandTests:
             ('--exclude', 'apm', '--manager', 'apm'), set(),
             id="exclusion_override_reversed"),
     ])
-    def test_manager_selection(self, invoke, args, expected):
-        result = invoke(*args, self.subcmd)
+    def test_manager_selection(self, invoke, subcmd, args, expected):
+        result = invoke(*args, subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result.output, expected)
+
+    def test_json_debug_output(self, invoke, subcmd):
+        """ Debug output is expected to be unparseable because of interleaved
+        debug messages and JSON output.
+
+        Also checks that JSON output format is not supported by all commands.
+        """
+        result = invoke(
+            '--output-format', 'json', '--verbosity', 'DEBUG', subcmd)
+        assert result.exit_code == 0
+        assert "debug:" in result.output
+        with pytest.raises(json.decoder.JSONDecodeError):
+            json.loads(result.output)
 
 
 @pytest.mark.skip(reason="refactor in progress")

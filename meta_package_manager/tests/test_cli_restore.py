@@ -25,26 +25,27 @@ from .conftest import MANAGER_IDS
 from .test_cli import CLISubCommandTests
 
 
+def create_toml(filename, content):
+    """ Utility to produce TOML files. """
+    with open(filename, 'w') as doc:
+        doc.write(textwrap.dedent(content.strip()))
+
+
+@pytest.fixture
+def subcmd():
+    """ Seed common subcommand tests with a dummy file and content to allow the
+    CLI to not fail on required file input. """
+    create_toml('dummy.toml', """
+        [dummy_manager]
+        fancy_package = "0.0.1"
+        """)
+    return 'restore', 'dummy.toml'
+
+
 class TestRestore(CLISubCommandTests):
 
-    subcmd = 'restore', 'dummy.toml'
-
-    def __init__(self):
-        """ Seed common subcommand tests with a dummy file and content to
-        allow the CLI to not fail on required file input. """
-        self.create_toml('dummy.toml', """
-            [dummy_manager]
-            fancy_package = "0.0.1"
-            """)
-
-    @staticmethod
-    def create_toml(filename, content):
-        """ Utility to produce TOML files. """
-        with open(filename, 'w') as doc:
-            doc.write(textwrap.dedent(content.strip()))
-
     def test_default_all_manager(self, invoke):
-        self.create_toml('all-managers.toml', ''.join(["""
+        create_toml('all-managers.toml', ''.join(["""
             [{}]
             blah = 123
             """.format(m) for m in MANAGER_IDS]))
@@ -56,7 +57,7 @@ class TestRestore(CLISubCommandTests):
 
     @pytest.mark.parametrize('mid', MANAGER_IDS)
     def test_single_manager(self, invoke, mid):
-        self.create_toml('all-managers.toml', ''.join(["""
+        create_toml('all-managers.toml', ''.join(["""
             [{}]
             blah = 123
             """.format(m) for m in MANAGER_IDS]))
@@ -66,7 +67,7 @@ class TestRestore(CLISubCommandTests):
         self.check_manager_selection(result.output, {mid})
 
     def test_ignore_unrecognized_manager(self, invoke):
-        self.create_toml('unrecognized.toml', """
+        create_toml('unrecognized.toml', """
             [random_section]
             blah = 123
             """)
@@ -77,7 +78,7 @@ class TestRestore(CLISubCommandTests):
         assert 'warning: Ignore [random_section] section.' in result.output
 
     def test_restore_single_manager(self, invoke):
-        self.create_toml('pip-npm-dummy.toml', """
+        create_toml('pip-npm-dummy.toml', """
             [pip3]
             fancy_package = "0.0.1"
 
@@ -92,7 +93,7 @@ class TestRestore(CLISubCommandTests):
         assert 'Restore npm' in result.output
 
     def test_restore_excluded_manager(self, invoke):
-        self.create_toml('pip-npm-dummy.toml', """
+        create_toml('pip-npm-dummy.toml', """
             [pip3]
             fancy_package = "0.0.1"
 
@@ -107,7 +108,7 @@ class TestRestore(CLISubCommandTests):
         assert 'Restore npm' not in result.output
 
     def test_empty_manager(self, invoke):
-        self.create_toml('pip-empty.toml', """
+        create_toml('pip-empty.toml', """
             [pip3]
             """)
 

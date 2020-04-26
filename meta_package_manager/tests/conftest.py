@@ -149,3 +149,14 @@ def invoke(runner, *args):
         return result
 
     return run_run
+
+
+@pytest.fixture
+def subcmd():
+    """ Fixture used in `test_cli_*.py` files to set the sub-command in all CLI
+    calls.
+
+    Must returns a string or an iterable of strings. Defaults to `None`, which
+    allows tests relying on this fixture to selectively skip running.
+    """
+    return None

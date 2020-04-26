@@ -49,7 +49,7 @@ jobs:
     - name: Linux - Install npm
       if: runner.os == 'Linux'
       run: |
-        sudo apt install -y node-gyp nodejs-dev npm
+        sudo apt install -y node-gyp nodejs-dev libssl1.0-dev npm
     - name: macOS - Install npm
       if: runner.os == 'macOS'
       run: |

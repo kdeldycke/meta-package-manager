@@ -134,7 +134,8 @@ class TestOutdated(CLISubCommandTests):
         # TODO: Use a fixture that yields to cleanup if test fail.
         run_cmd('brew', 'cask', 'uninstall', 'ubersicht')
         assert result.exit_code == 0
-        assert not error
+        assert error == (
+            "Warning: macOS's Gatekeeper has been disabled for this Cask\n")
 
     @destructive
     @unless_macos
@@ -161,4 +162,5 @@ class TestOutdated(CLISubCommandTests):
         # TODO: Use a fixture that yields to cleanup if test fail.
         run_cmd('brew', 'cask', 'uninstall', 'xld')
         assert result.exit_code == 0
-        assert not error
+        assert error == (
+            "Warning: macOS's Gatekeeper has been disabled for this Cask\n")

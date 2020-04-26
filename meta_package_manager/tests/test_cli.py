@@ -65,20 +65,6 @@ def test_required_command(invoke):
     assert "Error: Missing command." in result.output
 
 
-json_support_subcmd = [
-    'backup',
-    'cleanup',
-    'installed',
-    'managers',
-    'outdated',
-    pytest.param('restore', marks=pytest.mark.xfail(strict=True)),
-    ['search', 'abc'],
-    'sync',
-    pytest.param(
-        'upgrade', marks=[destructive, pytest.mark.xfail(strict=True)]),
-]
-
-
 class CLISubCommandTests:
 
     """ Common tests shared by all subcommands.

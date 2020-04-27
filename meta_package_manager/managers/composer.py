@@ -36,7 +36,7 @@ class Composer(PackageManager):
 
     def get_version(self):
         """ Fetch version from ``composer --version`` output. """
-        output = self.run_cli(['--version'])
+        output = self.run_cli('--version')
         if output:
             return parse_version(output.split()[2])
 
@@ -75,8 +75,7 @@ class Composer(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args + [
-            'show', '--format=json'])
+        output = self.run_cli(self.global_args, 'show', '--format=json')
 
         if output:
 
@@ -135,8 +134,7 @@ class Composer(PackageManager):
         if not extended:
             search_args.append('--only-name')
 
-        output = self.run_cli(self.global_args + [
-            'search'] + search_args + [query])
+        output = self.run_cli(self.global_args, 'search', search_args, query)
 
         if output:
 
@@ -189,8 +187,7 @@ class Composer(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args + [
-            'outdated', '--format=json', ])
+        output = self.run_cli(self.global_args, 'outdated', '--format=json')
 
         if output:
             package_list = json.loads(output)
@@ -205,8 +202,7 @@ class Composer(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.global_args + [
-            'update']
+        cmd = [self.cli_path, self.global_args, 'update']
         if package_id:
             cmd.append(package_id)
         return cmd
@@ -224,4 +220,4 @@ class Composer(PackageManager):
         See: https://getcomposer.org/doc/03-cli.md#clear-cache-clearcache-cc
         """
         super(Composer, self).cleanup()
-        self.run_cli(self.global_args + ['clear-cache'])
+        self.run_cli(self.global_args, 'clear-cache')

@@ -53,7 +53,7 @@ class Pip(PackageManager):
             $ pip --version
             pip 2.0.2 from /usr/local/lib/python/site-packages/pip (python 3.7)
         """
-        output = self.run_cli(['--version'])
+        output = self.run_cli('--version')
         if output:
             return parse_version(output.split()[1])
 
@@ -96,8 +96,8 @@ class Pip(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args + [
-            'list', '--format=json', '--verbose'])
+        output = self.run_cli(
+            self.global_args, 'list', '--format=json', '--verbose')
 
         if output:
             for package in json.loads(output):
@@ -129,8 +129,7 @@ class Pip(PackageManager):
         """
         matches = {}
 
-        output = self.run_cli(self.global_args + [
-            'search', query])
+        output = self.run_cli(self.global_args, 'search', query)
 
         if output:
             regexp = re.compile(r"""
@@ -227,8 +226,8 @@ class Pip(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args + [
-            'list', '--format=json', '--outdated', '--verbose', '--quiet'])
+        output = self.run_cli(self.global_args,
+            'list', '--format=json', '--outdated', '--verbose', '--quiet')
 
         if output:
             for package in json.loads(output):
@@ -243,8 +242,8 @@ class Pip(PackageManager):
 
     def upgrade_cli(self, package_id):
         return [
-            self.cli_path] + self.global_args + [
-                'install', '--user', '--upgrade', package_id]
+            self.cli_path, self.global_args,
+            'install', '--user', '--upgrade', package_id]
 
     def upgrade_all_cli(self):
         """ Pip lacks support of a proper full upgrade command.

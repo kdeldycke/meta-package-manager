@@ -56,7 +56,7 @@ class Gem(PackageManager):
             $ gem --version
             3.0.3
         """
-        return parse_version(self.run_cli(['--version']))
+        return parse_version(self.run_cli('--version'))
 
     @cachedproperty
     def installed(self):
@@ -86,7 +86,7 @@ class Gem(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(['list'] + self.global_args)
+        output = self.run_cli('list', self.global_args)
 
         if output:
             regexp = re.compile(r'(\S+) \((.+)\)')
@@ -139,7 +139,7 @@ class Gem(PackageManager):
             search_arg.append('--exact')
 
         output = self.run_cli(
-            ['search', query, '--versions'] + search_arg + self.global_args)
+            'search', query, '--versions', search_arg, self.global_args)
 
         if output:
             regexp = re.compile(r"""
@@ -176,7 +176,7 @@ class Gem(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(['outdated'] + self.global_args)
+        output = self.run_cli('outdated', self.global_args)
 
         if output:
             regexp = re.compile(r'(\S+) \((\S+) < (\S+)\)')
@@ -194,7 +194,7 @@ class Gem(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, 'update', '--user-install'] + self.global_args
+        cmd = [self.cli_path, 'update', '--user-install', self.global_args]
         # Installs require `sudo` on system ruby.
         # I (@tresni) recommend doing something like:
         #     $ sudo dseditgroup -o edit -a -t user wheel
@@ -230,4 +230,4 @@ class Gem(PackageManager):
             Clean up complete
         """
         super(Gem, self).cleanup()
-        self.run_cli(['cleanup'] + self.global_args)
+        self.run_cli('cleanup', self.global_args)

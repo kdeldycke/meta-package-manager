@@ -43,7 +43,7 @@ class Flatpak(PackageManager):
             $ flatpak --version
             Flatpak 1.4.2
         """
-        output = self.run_cli(['--version'])
+        output = self.run_cli('--version')
         if output:
             return parse_version(output.strip().split()[1])
 
@@ -66,9 +66,9 @@ class Flatpak(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args + [
-            'list', '--app', '--columns=name,application,version',
-            '--ostree-verbose'])
+        output = self.run_cli(
+            self.global_args, 'list', '--app',
+            '--columns=name,application,version', '--ostree-verbose')
 
         if output:
             regexp = re.compile(
@@ -100,8 +100,8 @@ class Flatpak(PackageManager):
                 f"Extended search not supported for {self.id}. Fallback to "
                 "Fuzzy.")
 
-        output = self.run_cli(self.global_args + [
-            'search', query, '--ostree-verbose'])
+        output = self.run_cli(
+            self.global_args, 'search', query, '--ostree-verbose')
 
         if output:
             regexp = re.compile(r"""
@@ -141,9 +141,9 @@ class Flatpak(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args + [
-            'remote-ls', '--app', '--updates',
-            '--columns=name,application,version', '--ostree-verbose'])
+        output = self.run_cli(
+            self.global_args, 'remote-ls', '--app', '--updates',
+            '--columns=name,application,version', '--ostree-verbose')
 
         if output:
             regexp = re.compile(
@@ -154,8 +154,8 @@ class Flatpak(PackageManager):
                     name, package_id, latest_version = match.groups()
 
                     info_installed_output = self.run(
-                        [self.cli_path] + self.global_args +
-                        ['info', '--ostree-verbose', package_id])
+                        self.cli_path, self.global_args,
+                        'info', '--ostree-verbose', package_id)
                     current_version = re.search(
                         r'version:\s(?P<version>\S.*?)\n',
                         info_installed_output, re.IGNORECASE)
@@ -172,8 +172,7 @@ class Flatpak(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.global_args + [
-            'update', '--noninteractive']
+        cmd = [self.cli_path, self.global_args, 'update', '--noninteractive']
         if package_id:
             cmd.append(package_id)
         return cmd
@@ -192,4 +191,4 @@ class Flatpak(PackageManager):
         /flatpak-command-reference.html#flatpak-repair
         """
         super(Flatpak, self).cleanup()
-        self.run_cli(self.global_args + ['repair', '--user'])
+        self.run_cli(self.global_args, 'repair', '--user')

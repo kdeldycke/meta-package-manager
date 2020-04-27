@@ -22,6 +22,7 @@ from pathlib import Path
 from shutil import which
 
 from boltons.cacheutils import cachedproperty
+from boltons.iterutils import flatten
 from boltons.strutils import indent, strip_ansi
 from boltons.typeutils import classproperty
 
@@ -210,13 +211,13 @@ class PackageManager:
             self.executable and
             self.fresh)
 
-    def run(self, args, dry_run=False):
+    def run(self, *args, dry_run=False):
         """ Run a shell command, return the output and keep error message.
 
         Removes ANSI escape codes, and returns ready-to-use strings.
         """
-        assert isinstance(args, list)
-        args = list(map(str, args))  # Serialize Path objects to strings.
+        # Serialize Path objects to strings.
+        args = list(map(str, flatten(args)))
         args_str = ' '.join(args)
         logger.debug(f"Running `{args_str}`...")
 
@@ -248,12 +249,11 @@ class PackageManager:
 
         return output
 
-    def run_cli(self, args, dry_run=False):
+    def run_cli(self, *args, dry_run=False):
         """ Like the `run` method above, but execute the binary pointed to by
         the `cli_path` property set in the current instance.
         """
-        assert isinstance(args, list)
-        return self.run([str(self.cli_path)] + args, dry_run)
+        return self.run(self.cli_path, args, dry_run=dry_run)
 
     def sync(self):
         """ Refresh local manager metadata from remote repository. """

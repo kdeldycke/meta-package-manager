@@ -35,7 +35,7 @@ class APM(PackageManager):
 
     def get_version(self):
         """ Fetch version from ``apm --version`` output."""
-        output = self.run_cli(['--version'])
+        output = self.run_cli('--version')
         if output:
             return parse_version(output.splitlines()[0].split()[1])
 
@@ -139,8 +139,7 @@ class APM(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args + [
-            'list', '--json'])
+        output = self.run_cli(self.global_args, 'list', '--json')
 
         if output:
             for package_list in json.loads(output).values():
@@ -241,8 +240,8 @@ class APM(PackageManager):
         if not extended:
             search_args.append('--no-description')
 
-        output = self.run_cli(self.global_args + [
-            'search', '--json'] + search_args + [query])
+        output = self.run_cli(
+            self.global_args, 'search', '--json', search_args, query)
 
         if output:
             for package in json.loads(output):
@@ -423,8 +422,8 @@ class APM(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args + [
-            'outdated', '--compatible', '--json'])
+        output = self.run_cli(
+            self.global_args, 'outdated', '--compatible', '--json')
 
         if output:
             for package in json.loads(output):
@@ -438,7 +437,7 @@ class APM(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.global_args + ['update', '--no-confirm']
+        cmd = [self.cli_path, self.global_args, 'update', '--no-confirm']
         if package_id:
             cmd.append(package_id)
         return cmd

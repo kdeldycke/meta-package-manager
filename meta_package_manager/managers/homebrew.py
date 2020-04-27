@@ -58,14 +58,14 @@ class Homebrew(PackageManager):
             Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
 
         """
-        output = self.run_cli(['--version'])
+        output = self.run_cli('--version')
         if output:
             return parse_version(output.split()[1])
 
     def sync(self):
         """ `brew` and `cask` share the same command. """
         super(Homebrew, self).sync()
-        self.run_cli(['update', '--quiet'])
+        self.run_cli('update', '--quiet')
 
     @cachedproperty
     def installed(self):
@@ -117,7 +117,7 @@ class Homebrew(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args + ['list', '--versions'])
+        output = self.run_cli(self.global_args, 'list', '--versions')
 
         if output:
             regexp = re.compile(r'(\S+)( \(!\))? (.+)')
@@ -198,7 +198,7 @@ class Homebrew(PackageManager):
         if exact:
             query = "/^{}$/".format(query)
 
-        output = self.run_cli(self.search_args + [query])
+        output = self.run_cli(self.search_args, query)
 
         if output:
             regexp = re.compile(r"""
@@ -250,7 +250,7 @@ class Homebrew(PackageManager):
         outdated = {}
 
         # List available updates.
-        output = self.run_cli(self.global_args + ['outdated', '--json=v1'])
+        output = self.run_cli(self.global_args, 'outdated', '--json=v1')
 
         if output:
             for pkg_info in json.loads(output):
@@ -299,7 +299,7 @@ class Homebrew(PackageManager):
             Bash completion has been installed to:
               /usr/local/etc/bash_completion.d
         """
-        cmd = [self.cli_path] + self.global_args + ['upgrade']
+        cmd = [self.cli_path, self.global_args, 'upgrade']
         if package_id:
             cmd.append(package_id)
         return cmd
@@ -327,7 +327,7 @@ class Homebrew(PackageManager):
         More doc at: https://docs.brew.sh/Manpage#cleanup-options-formulacask
         """
         super(Homebrew, self).cleanup()
-        self.run_cli(['cleanup', '-s'])
+        self.run_cli('cleanup', '-s')
 
 
 class Brew(Homebrew):
@@ -345,7 +345,7 @@ class Brew(Homebrew):
             ==> Formulae
             gnu-sed ✔                    libxdg-basedir               minised
         """
-        return self.global_args + ['search', '--formulae']
+        return [self.global_args, 'search', '--formulae']
 
 
 class Cask(Homebrew):
@@ -417,7 +417,7 @@ class Cask(Homebrew):
             options.append('--greedy')
 
         # List available updates.
-        output = self.run_cli(self.global_args + ['outdated'] + options)
+        output = self.run_cli(self.global_args, 'outdated', options)
 
         if output:
             regexp = re.compile(r'(\S+) \((.*)\) != (.*)')
@@ -439,7 +439,7 @@ class Cask(Homebrew):
 
     def upgrade_cli(self, package_id=None):
         """ Install a package. """
-        cmd = [self.cli_path] + self.global_args + ['upgrade']
+        cmd = [self.cli_path, self.global_args, 'upgrade']
         if package_id:
             cmd.append(package_id)
         return cmd

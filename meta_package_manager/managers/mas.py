@@ -39,7 +39,7 @@ class MAS(PackageManager):
 
     def get_version(self):
         """ Fetch version from ``mas version`` output."""
-        return parse_version(self.run_cli(['version']))
+        return parse_version(self.run_cli('version'))
 
     @cachedproperty
     def installed(self):
@@ -55,7 +55,7 @@ class MAS(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args + ['list'])
+        output = self.run_cli(self.global_args, 'list')
 
         if output:
             regexp = re.compile(r'(\d+) (.*) \((\S+)\)$')
@@ -95,8 +95,7 @@ class MAS(PackageManager):
                 f"Extended search not supported for {self.id}. Fallback to "
                 "Fuzzy.")
 
-        output = self.run_cli(self.global_args + [
-            'search', query])
+        output = self.run_cli(self.global_args, 'search', query)
 
         if output:
             regexp = re.compile(r'(\d+) (.*)$')
@@ -141,7 +140,7 @@ class MAS(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args + ['outdated'])
+        output = self.run_cli(self.global_args, 'outdated')
 
         if output:
             regexp = re.compile(r'(\d+) (.*) \((\S+) -> (\S+)\)$')
@@ -162,7 +161,7 @@ class MAS(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.global_args + ['upgrade']
+        cmd = [self.cli_path, self.global_args, 'upgrade']
         if package_id:
             cmd.append(package_id)
         return cmd

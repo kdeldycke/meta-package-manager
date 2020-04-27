@@ -42,7 +42,7 @@ class OPKG(PackageManager):
             $ opkg --version
             opkg version 0.3.6 (libsolv 0.7.5)
         """
-        output = self.run_cli(['--version'])
+        output = self.run_cli('--version')
         if output:
             return parse_version(output.splitlines()[0].split()[2])
 
@@ -54,7 +54,7 @@ class OPKG(PackageManager):
         .. code-block:: shell-session
         """
         super(OPKG, self).sync()
-        self.run_cli(self.global_args + ['update'])
+        self.run_cli(self.global_args, 'update')
 
     @cachedproperty
     def installed(self):
@@ -87,8 +87,7 @@ class OPKG(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args + [
-            'list-installed'])
+        output = self.run_cli(self.global_args, 'list-installed')
 
         if output:
             regexp = re.compile(r'(\S+) - (\S+)')
@@ -109,7 +108,7 @@ class OPKG(PackageManager):
 
         # opkg doesn't have a working 'search', so get all packages and
         # filter the packages later.
-        output = self.run_cli(self.global_args + ['list'])
+        output = self.run_cli(self.global_args, 'list')
 
         if output:
             regexp = re.compile(r"""
@@ -165,8 +164,7 @@ class OPKG(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args + [
-            'list-upgradable'])
+        output = self.run_cli(self.global_args, 'list-upgradable')
 
         if output:
             regexp = re.compile(r'(\S+) - (\S+) - (\S+)')
@@ -184,7 +182,7 @@ class OPKG(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path] + self.global_args + ['upgrade']
+        cmd = [self.cli_path, self.global_args, 'upgrade']
         if package_id:
             cmd.append(package_id)
         return cmd

@@ -44,7 +44,7 @@ class NPM(PackageManager):
             $ npm --version
             6.13.7
         """
-        return parse_version(self.run_cli(['--version']))
+        return parse_version(self.run_cli('--version'))
 
     @cachedproperty
     def installed(self):
@@ -91,8 +91,7 @@ class NPM(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args + [
-            '-g', '--json', 'list'])
+        output = self.run_cli(self.global_args, '-g', '--json', 'list')
 
         if output:
 
@@ -188,8 +187,8 @@ class NPM(PackageManager):
         if not extended:
             search_args.append('--no-description')
 
-        output = self.run_cli(self.global_args + [
-            'search', '--json'] + search_args + [query])
+        output = self.run_cli(
+            self.global_args, 'search', '--json', search_args, query)
 
         if output:
             for package in json.loads(output):
@@ -241,9 +240,9 @@ class NPM(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args + [
-            '-g', '--progress=false', '--json', '--no-update-notifier',
-            'outdated'])
+        output = self.run_cli(
+            self.global_args, '-g', '--progress=false', '--json',
+            '--no-update-notifier', 'outdated')
 
         if output:
             for package_id, values in json.loads(output).items():
@@ -258,7 +257,6 @@ class NPM(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None, version=None):
-        cmd = [self.cli_path] + self.global_args
         cmd_args = ['-g', '--progress=false', '--no-update-notifier']
         if package_id:
             cmd_args.append('install')
@@ -266,8 +264,7 @@ class NPM(PackageManager):
                 package_id + '@' + version if version else package_id)
         else:
             cmd_args.append('update')
-
-        return cmd + cmd_args
+        return [self.cli_path, self.global_args] + cmd_args
 
     def upgrade_all_cli(self):
         return self.upgrade_cli()

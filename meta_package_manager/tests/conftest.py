@@ -128,8 +128,6 @@ def invoke(runner, *args):
     """ Executes Click's CLI, print output and return results. """
 
     def run_run(*args):
-        # TODO: Add that flatten trick in Base.run_cli() utils? Should simplify
-        # the writing of *args & others + []
         args = flatten(args)
 
         assert isinstance(args, list)

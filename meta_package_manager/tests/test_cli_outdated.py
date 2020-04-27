@@ -141,13 +141,16 @@ class TestOutdated(CLISubCommandTests):
             "https://raw.githubusercontent.com/Homebrew/homebrew-cask"
             "/bb72da6c085c017f6bccebbfee5e3bc4837f3165/Casks/ubersicht.rb")
         assert 'Uebersicht-1.4.60.app.zip' in output
-        assert 'Übersicht.app' in output
+        assert 'Übersicht.app' in output
+        assert 'Übersicht.app' not in output
+
 
         # Look for reported available upgrade.
         result = invoke('--manager', 'cask', subcmd)
         assert result.exit_code == 0
         assert "ubersicht" in result.output
-        assert "Übersicht" in result.output
+        assert "Übersicht" in output
+        assert "Übersicht" not in output
 
     @destructive
     @unless_macos

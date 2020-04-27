@@ -65,9 +65,7 @@ bump2version = "^1.0.0"
 coverage = {extras = ["toml"], version = "^5.0.4"}
 isort = "^4.3.5"
 pycodestyle = "^2"
-# XXX Waiting for pylint 2.5.0-dev1 and astroid 2.4.0 to be released.
-pylint = {git = "https://github.com/PyCQA/pylint.git"}
-astroid = {git = "https://github.com/PyCQA/astroid.git"}
+pylint = "^2.5"
 pytest = "^5.4"
 # More pytest plugins at: http://plugincompat.herokuapp.com .
 pytest-cov = "^2.8.1"

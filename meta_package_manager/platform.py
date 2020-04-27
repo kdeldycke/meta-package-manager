@@ -21,6 +21,7 @@
 
 import sys
 
+from boltons.cacheutils import LRI, cached
 from boltons.dictutils import FrozenDict
 
 from . import logger
@@ -35,16 +36,19 @@ WINDOWS = 'windows'
 """ Constant used to identify OSes of the Windows family. """
 
 
+@cached(LRI(max_size=1))
 def is_linux():
     """ Return `True` only if current platform is of the Linux family. """
     return sys.platform.startswith('linux')
 
 
+@cached(LRI(max_size=1))
 def is_macos():
     """ Return `True` only if current platform is of the macOS family. """
     return sys.platform == 'darwin'
 
 
+@cached(LRI(max_size=1))
 def is_windows():
     """ Return `True` only if current platform is of the Windows family. """
     return sys.platform in ['win32', 'cygwin']
@@ -61,6 +65,7 @@ OS_DEFINITIONS = FrozenDict({
 ALL_OS_LABELS, ALL_OS_ID_FUNCS = map(frozenset, zip(*OS_DEFINITIONS.values()))
 
 
+@cached(LRI(max_size=1))
 def current_os():
     """ Return a 2-items `tuple` with ID and label of current OS. """
     platform_id = sys.platform

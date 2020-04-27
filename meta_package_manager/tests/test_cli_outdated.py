@@ -140,11 +140,11 @@ class TestOutdated(CLISubCommandTests):
     def test_unicode_name(self, invoke, subcmd, install_formula):
         """ See #16. """
         # Install an old version of a package with a unicode name.
-        # Old Cask formula for ubersicht 1.4.61.
+        # Old Cask formula for ubersicht 1.4.60.
         output = install_formula(
             "https://raw.githubusercontent.com/Homebrew/homebrew-cask"
-            "/103dde670d398ab32492783a3822132d47f9ebf6/Casks/ubersicht.rb")
-        assert 'Uebersicht-1.4.61.app.zip' in output
+            "/bb72da6c085c017f6bccebbfee5e3bc4837f3165/Casks/ubersicht.rb")
+        assert 'Uebersicht-1.4.60.app.zip' in output
         assert 'Übersicht.app' in output
 
         # Look for reported available upgrade.
@@ -158,11 +158,11 @@ class TestOutdated(CLISubCommandTests):
     def test_multiple_names(self, invoke, subcmd, install_formula):
         """ See #26. """
         # Install an old version of a package with multiple names.
-        # Old Cask formula for xld 2019.10.04.
+        # Old Cask formula for xld 2018.10.19.
         output = install_formula(
             "https://raw.githubusercontent.com/Homebrew/homebrew-cask"
-            "/16ea1a95c76beaf2ff4dba161a86721d680756e8/Casks/xld.rb")
-        assert 'xld-20191004.dmg' in output
+            "/89536da7075aa3ac9683a67189fddbed4a7d818c/Casks/xld.rb")
+        assert 'xld-20181019.dmg' in output
         assert 'XLD.app' in output
 
         # Look for reported available upgrade.

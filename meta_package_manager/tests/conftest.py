@@ -51,8 +51,8 @@ MANAGER_IDS = frozenset([
 """ Hard-coded list of all supported manager IDs. """
 
 
-DESTRUCTIVE_MODE = bool(os.environ.get('DESTRUCTIVE_TESTS', False) not in [
-        True, 1, 'True', 'true', '1'])
+DESTRUCTIVE_MODE = bool(os.environ.get('DESTRUCTIVE_TESTS', False) not in {
+        True, 1, 'True', 'true', '1'})
 """ Pre-computed boolean flag indicating if destructive mode is activated by
 the presence of a ``DESTRUCTIVE_TESTS`` environment variable set to ``True``.
 """

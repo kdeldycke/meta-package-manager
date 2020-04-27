@@ -28,7 +28,7 @@ from boltons.typeutils import classproperty
 
 from . import logger
 from .bitbar import run
-from .platform import current_os
+from .platform import CURRENT_OS_ID
 from .version import parse_version
 
 # Rendering format of CLI in JSON fields.
@@ -169,7 +169,7 @@ class PackageManager:
     @cachedproperty
     def supported(self):
         """ Is the package manager supported on that platform? """
-        return current_os()[0] in self.platforms
+        return CURRENT_OS_ID in self.platforms
 
     @cachedproperty
     def executable(self):

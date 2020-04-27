@@ -21,7 +21,6 @@
 
 import sys
 
-from boltons.cacheutils import LRI, cached
 from boltons.dictutils import FrozenDict
 
 from . import logger
@@ -29,26 +28,25 @@ from . import logger
 LINUX = 'linux'
 """ Constant used to identify OSes of the Linux family. """
 
+
 MACOS = 'macos'
 """ Constant used to identify OSes of the macOS family. """
+
 
 WINDOWS = 'windows'
 """ Constant used to identify OSes of the Windows family. """
 
 
-@cached(LRI(max_size=1))
 def is_linux():
     """ Return `True` only if current platform is of the Linux family. """
     return sys.platform.startswith('linux')
 
 
-@cached(LRI(max_size=1))
 def is_macos():
     """ Return `True` only if current platform is of the macOS family. """
     return sys.platform == 'darwin'
 
 
-@cached(LRI(max_size=1))
 def is_windows():
     """ Return `True` only if current platform is of the Windows family. """
     return sys.platform in ['win32', 'cygwin']
@@ -56,26 +54,29 @@ def is_windows():
 
 # Map OS IDs to evaluation function and OS labels.
 OS_DEFINITIONS = FrozenDict({
-    LINUX: ('Linux', is_linux),
-    MACOS: ('macOS', is_macos),
-    WINDOWS: ('Windows', is_windows)})
+    LINUX: ('Linux', is_linux()),
+    MACOS: ('macOS', is_macos()),
+    WINDOWS: ('Windows', is_windows())})
 
 
-# Generates some utility sets.
-ALL_OS_LABELS, ALL_OS_ID_FUNCS = map(frozenset, zip(*OS_DEFINITIONS.values()))
-
-
-@cached(LRI(max_size=1))
-def current_os():
-    """ Return a 2-items `tuple` with ID and label of current OS. """
-    platform_id = sys.platform
-    logger.debug(f"Raw platform ID: {platform_id}.")
-    for os_id, (os_name, os_id_func) in OS_DEFINITIONS.items():
-        if os_id_func():
-            return os_id, os_name
-    raise SystemError("Unrecognized {} platform.".format(platform_id))
+# Generare sets of recognized IDs and labels.
+ALL_OS_LABELS = frozenset([label for label, _ in OS_DEFINITIONS.values()])
 
 
 def os_label(os_id):
     """ Return platform label for user-friendly output. """
     return OS_DEFINITIONS[os_id][0]
+
+
+logger.debug(f"Raw platform ID: {sys.platform}.")
+
+
+def current_os():
+    """ Return a 2-items `tuple` with ID and label of current OS. """
+    for os_id, (os_name, os_flag) in OS_DEFINITIONS.items():
+        if os_flag is True:
+            return os_id, os_name
+    raise SystemError("Unrecognized {} platform.".format(sys.platform))
+
+
+CURRENT_OS_ID, CURRENT_OS_LABEL = current_os()

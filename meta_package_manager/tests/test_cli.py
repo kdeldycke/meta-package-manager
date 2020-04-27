@@ -147,7 +147,7 @@ class CLISubCommandTests:
 
     def test_unrecognized_verbosity(self, invoke, subcmd):
         result = invoke('--verbosity', 'random', subcmd)
-        assert result.exit_code == 1
+        assert result.exit_code == 2
         assert "Error: Invalid value for '--verbosity' / '-v'" in result.output
 
     @pytest.mark.parametrize('selector', ['--manager', '--exclude'])

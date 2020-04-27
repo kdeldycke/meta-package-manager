@@ -17,13 +17,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+import logging
 import re
 
 import pytest
 import simplejson as json
 from boltons.iterutils import flatten
 
-from .. import __version__
+from .. import __version__, logger
 from .conftest import MANAGER_IDS, destructive
 
 """ Common tests for all CLI basic features and subcommands. """
@@ -133,14 +134,21 @@ class CLISubCommandTests:
         assert flatten([subcmd])[0] in result.output
         assert "--help" in result.output
 
-    def test_verbosity(self, invoke, subcmd):
-        result = invoke('--verbosity', 'DEBUG', subcmd)
+    @pytest.mark.parametrize(
+        'level', ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'])
+    def test_verbosity(self, invoke, subcmd, level):
+        result = invoke('--verbosity', level, subcmd)
         assert result.exit_code == 0
-        assert "debug:" in result.output
+        assert logger.level == getattr(logging, level)
+        if level == 'DEBUG':
+            assert "debug: " in result.output
+        else:
+            assert "debug: " not in result.output
 
-        result = invoke('--verbosity', 'INFO', subcmd)
-        assert result.exit_code == 0
-        assert "debug:" not in result.output
+    def test_unrecognized_verbosity(self, invoke, subcmd):
+        result = invoke('--verbosity', 'random', subcmd)
+        assert result.exit_code == 1
+        assert "Error: Invalid value for '--verbosity' / '-v'" in result.output
 
     @pytest.mark.parametrize('selector', ['--manager', '--exclude'])
     def test_invalid_manager_selector(self, invoke, subcmd, selector):

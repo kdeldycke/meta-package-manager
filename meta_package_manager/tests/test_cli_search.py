@@ -23,7 +23,7 @@ import pytest
 import simplejson as json
 
 from .conftest import MANAGER_IDS, unless_macos
-from .test_cli import CLISubCommandTests
+from .test_cli import CLISubCommandTests, CLITableTests
 
 
 @pytest.fixture
@@ -31,7 +31,7 @@ def subcmd():
     return 'search', 'abc'
 
 
-class TestSearch(CLISubCommandTests):
+class TestSearch(CLISubCommandTests, CLITableTests):
 
     def test_default_all_manager(self, invoke, subcmd):
         result = invoke(subcmd)

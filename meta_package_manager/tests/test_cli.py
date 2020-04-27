@@ -195,6 +195,20 @@ class CLISubCommandTests:
         assert result.exit_code == 0
         self.check_manager_selection(result.output, expected)
 
+
+class CLITableTests:
+
+    def test_default_table_rendering(self, invoke, subcmd):
+        result = invoke(subcmd)
+        assert result.exit_code == 0
+        assert "═════" in result.output
+
+    @pytest.mark.parametrize('mode', ['simple', 'plain'])
+    def test_table_rendering(self, invoke, subcmd, mode):
+        result = invoke('--output-format', mode, subcmd)
+        assert result.exit_code == 0
+        assert "═════" not in result.output
+
     def test_json_debug_output(self, invoke, subcmd):
         """ Debug output is expected to be unparseable because of interleaved
         debug messages and JSON output.
@@ -207,28 +221,3 @@ class CLISubCommandTests:
         assert "debug:" in result.output
         with pytest.raises(json.decoder.JSONDecodeError):
             json.loads(result.output)
-
-
-@pytest.mark.skip(reason="refactor in progress")
-class TestCLITableRendering:
-
-    """ Test subcommands whose output is a configurable table.
-
-    A table output is also allowed to be rendered as JSON.
-    """
-
-    def test_simple_call(self):
-        result = super(TestCLITableRendering, self).test_simple_call()
-        self.assertIn("═════", result.output)
-
-    def test_simple_table_rendering(self):
-        result = self.invoke(
-            '--output-format', 'simple', *self.subcommand_args)
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("-----", result.output)
-
-    def test_plain_table_rendering(self):
-        result = self.invoke('--output-format', 'plain', *self.subcommand_args)
-        self.assertEqual(result.exit_code, 0)
-        self.assertNotIn("═════", result.output)
-        self.assertNotIn("-----", result.output)

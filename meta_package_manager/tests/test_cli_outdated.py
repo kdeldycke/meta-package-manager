@@ -23,7 +23,7 @@ import pytest
 import simplejson as json
 
 from .conftest import MANAGER_IDS, destructive, run_cmd, unless_macos
-from .test_cli import CLISubCommandTests
+from .test_cli import CLISubCommandTests, CLITableTests
 
 
 @pytest.fixture
@@ -53,7 +53,7 @@ def install_formula():
         run_cmd('brew', 'cask', 'uninstall', package_id)
 
 
-class TestOutdated(CLISubCommandTests):
+class TestOutdated(CLISubCommandTests, CLITableTests):
 
     def test_default_all_manager(self, invoke, subcmd):
         result = invoke(subcmd)

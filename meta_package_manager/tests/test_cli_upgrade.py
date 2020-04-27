@@ -60,4 +60,3 @@ class TestUpgrade(CLISubCommandTests):
 
 destructive()(TestUpgrade.test_verbosity)
 destructive()(TestUpgrade.test_manager_selection)
-destructive()(TestUpgrade.test_json_debug_output)

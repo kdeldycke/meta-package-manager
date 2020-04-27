@@ -23,7 +23,7 @@ import pytest
 import simplejson as json
 
 from .conftest import MANAGER_IDS
-from .test_cli import CLISubCommandTests
+from .test_cli import CLISubCommandTests, CLITableTests
 
 
 @pytest.fixture
@@ -31,7 +31,7 @@ def subcmd():
     return 'managers'
 
 
-class TestManagers(CLISubCommandTests):
+class TestManagers(CLISubCommandTests, CLITableTests):
 
     def test_default_all_manager(self, invoke, subcmd):
         result = invoke(subcmd)

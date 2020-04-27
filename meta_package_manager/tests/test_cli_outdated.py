@@ -50,11 +50,7 @@ def install_formula():
     # Remove all installed packages.
     for url in urls:
         package_id = url.split('/')[-1].split('.rb')[0]
-        code, output, error = run_cmd(
-            'brew', 'cask', 'uninstall', package_id)
-        assert code == 0
-        assert not error
-        assert package_id in output
+        run_cmd('brew', 'cask', 'uninstall', package_id)
 
 
 class TestOutdated(CLISubCommandTests):

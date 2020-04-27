@@ -226,8 +226,9 @@ class Pip(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args,
-            'list', '--format=json', '--outdated', '--verbose', '--quiet')
+        output = self.run_cli(
+            self.global_args, 'list', '--format=json', '--outdated',
+            '--verbose', '--quiet')
 
         if output:
             for package in json.loads(output):

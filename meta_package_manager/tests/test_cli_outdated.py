@@ -144,7 +144,6 @@ class TestOutdated(CLISubCommandTests):
         assert 'Übersicht.app' in output
         assert 'Übersicht.app' not in output
 
-
         # Look for reported available upgrade.
         result = invoke('--manager', 'cask', subcmd)
         assert result.exit_code == 0

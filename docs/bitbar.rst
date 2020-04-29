@@ -7,7 +7,7 @@ A copy of the latest stable version of the BitBar plugin for ``mpm`` is always
 and `plugin repository
 <https://github.com/matryer/bitbar-plugins/tree/master/Dev/MetaPackageManager>`_.
 
-.. image:: screenshot.png
+.. image:: bitbar-plugin.png
     :alt: Bitbar plugin screenshot.
     :align: left
 

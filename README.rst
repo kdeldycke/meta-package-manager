@@ -32,11 +32,11 @@ Development: |build| |docs| |coverage| |quality|
     :target: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/?branch=develop
     :alt: Code Quality
 
-.. figure:: https://imgs.xkcd.com/comics/universal_install_script.png
-    :alt: Obligatory XKCD.
-    :align: right
+.. figure:: https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/mpm-managers-cli.png
+    :align: center
 
-    Source: `XKCD #1654 <https://xkcd.com/1654/>`_.
+.. figure:: https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/mpm-outdated-cli.png
+    :align: center
 
 
 Features

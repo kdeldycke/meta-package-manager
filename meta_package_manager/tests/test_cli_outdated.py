@@ -32,24 +32,37 @@ def subcmd():
 
 
 @pytest.fixture
-def install_formula():
+def install_cask():
 
-    urls = []
+    CASK_PATH = (
+        '/usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask/Casks/')
 
-    def _install_formula(url):
-        urls.append(url)
-        code, output, error = run_cmd('brew', 'cask', 'install', url)
+    packages = set()
+
+    def _install_cask(package_id, commit):
+        packages.add(package_id)
+        # Deepen homebrew repository copy so we can dig into history.
+        code, _, error = run_cmd(
+            'git', '-C', CASK_PATH, 'fetch', '--shallow-since=2018-01-01')
         assert code == 0
-        assert error == (
-            "Warning: macOS's Gatekeeper has been disabled for this "
-            "Cask\n")
+        assert not error
+        # Fetch locally the old version of the Cask's formula.
+        code, _, error = run_cmd(
+            'git', '-C', CASK_PATH, 'checkout', commit,
+            "{}.rb".format(package_id))
+        assert code == 0
+        assert not error
+        # Install the cask.
+        code, output, error = run_cmd(
+            'HOMEBREW_NO_AUTO_UPDATE=1', 'brew', 'cask', 'install', package_id)
+        assert code == 0
+        assert not error
         return output
 
-    yield _install_formula
+    yield _install_cask
 
     # Remove all installed packages.
-    for url in urls:
-        package_id = url.split('/')[-1].split('.rb')[0]
+    for package_id in packages:
         run_cmd('brew', 'cask', 'uninstall', package_id)
 
 
@@ -137,9 +150,8 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
         """ See #16. """
         # Install an old version of a package with a unicode name.
         # Old Cask formula for ubersicht 1.4.60.
-        output = install_formula(
-            "https://raw.githubusercontent.com/Homebrew/homebrew-cask"
-            "/bb72da6c085c017f6bccebbfee5e3bc4837f3165/Casks/ubersicht.rb")
+        output = install_cask(
+            'ubersicht', 'bb72da6c085c017f6bccebbfee5e3bc4837f3165')
         assert 'Uebersicht-1.4.60.app.zip' in output
         assert 'Übersicht.app' in output
         assert 'Übersicht.app' not in output
@@ -157,9 +169,8 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
         """ See #26. """
         # Install an old version of a package with multiple names.
         # Old Cask formula for xld 2018.10.19.
-        output = install_formula(
-            "https://raw.githubusercontent.com/Homebrew/homebrew-cask"
-            "/89536da7075aa3ac9683a67189fddbed4a7d818c/Casks/xld.rb")
+        output = install_cask(
+            'xld', '89536da7075aa3ac9683a67189fddbed4a7d818c')
         assert 'xld-20181019.dmg' in output
         assert 'XLD.app' in output
 

@@ -66,9 +66,27 @@ def test_required_command(invoke):
     assert "Error: Missing command." in result.output
 
 
+def test_unrecognized_verbosity(invoke):
+    result = invoke('--verbosity', 'random', 'managers')
+    assert result.exit_code == 2
+    assert "Error: Invalid value for '--verbosity' / '-v'" in result.output
+
+
+@pytest.mark.parametrize(
+    'level', ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'])
+def test_verbosity(invoke, level):
+    result = invoke('--verbosity', level, 'managers')
+    assert result.exit_code == 0
+    assert logger.level == getattr(logging, level)
+    if level == 'DEBUG':
+        assert "debug: " in result.output
+    else:
+        assert "debug: " not in result.output
+
+
 class CLISubCommandTests:
 
-    """ Common tests shared by all subcommands.
+    """ All these tests runs on each subcommand.
 
     This class doesn't starts with `Test` as it is meant to be used as a
     template, inherited sub-command specific files.
@@ -133,22 +151,6 @@ class CLISubCommandTests:
         assert result.exit_code == 0
         assert flatten([subcmd])[0] in result.output
         assert "--help" in result.output
-
-    @pytest.mark.parametrize(
-        'level', ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'])
-    def test_verbosity(self, invoke, subcmd, level):
-        result = invoke('--verbosity', level, subcmd)
-        assert result.exit_code == 0
-        assert logger.level == getattr(logging, level)
-        if level == 'DEBUG':
-            assert "debug: " in result.output
-        else:
-            assert "debug: " not in result.output
-
-    def test_unrecognized_verbosity(self, invoke, subcmd):
-        result = invoke('--verbosity', 'random', subcmd)
-        assert result.exit_code == 2
-        assert "Error: Invalid value for '--verbosity' / '-v'" in result.output
 
     @pytest.mark.parametrize('selector', ['--manager', '--exclude'])
     def test_invalid_manager_selector(self, invoke, subcmd, selector):

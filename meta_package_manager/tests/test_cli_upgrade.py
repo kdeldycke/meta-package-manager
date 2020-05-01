@@ -58,5 +58,4 @@ class TestUpgrade(CLISubCommandTests):
         self.check_manager_selection(result.output, {mid})
 
 
-destructive()(TestUpgrade.test_verbosity)
 destructive()(TestUpgrade.test_manager_selection)

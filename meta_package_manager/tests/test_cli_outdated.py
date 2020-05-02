@@ -19,6 +19,8 @@
 
 # pylint: disable=redefined-outer-name
 
+import os
+
 import pytest
 import simplejson as json
 
@@ -31,39 +33,53 @@ def subcmd():
     return 'outdated'
 
 
+# Default location of Homebrew Cask formulas on macOS. This is supposed to be a
+# shallow copy of the following Git repository:
+# https://github.com/Homebrew/homebrew-cask
+CASK_PATH = '/usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask/Casks/'
+
+
 @pytest.fixture
 def install_cask():
 
-    CASK_PATH = (
-        '/usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask/Casks/')
-
     packages = set()
 
-    def _install_cask(package_id, commit):
-        packages.add(package_id)
-        # Deepen homebrew repository copy so we can dig into history.
-        code, _, error = run_cmd(
-            'git', '-C', CASK_PATH, 'fetch', '--shallow-since=2018-01-01')
-        assert code == 0
-        assert not error
-        # Fetch locally the old version of the Cask's formula.
-        code, _, error = run_cmd(
+    def git_checkout(package_id, commit):
+        code, _, _ = run_cmd(
             'git', '-C', CASK_PATH, 'checkout', commit,
             "{}.rb".format(package_id))
         assert code == 0
-        assert not error
-        # Install the cask.
-        code, output, error = run_cmd(
-            'HOMEBREW_NO_AUTO_UPDATE=1', 'brew', 'cask', 'install', package_id)
+
+    def _install_cask(package_id, commit):
+        packages.add(package_id)
+        # Deepen homebrew repository copy so we can dig into the past.
+        # Arbitrary set oldest reference to 2018-01-01, which gives us enough
+        # to dig into the past.
+        code, _, _ = run_cmd(
+            'git', '-C', CASK_PATH, 'fetch', '--shallow-since=2018-01-01')
         assert code == 0
-        assert not error
+        # Fetch locally the old version of the Cask's formula.
+        git_checkout(package_id, commit)
+        # Install the cask but bypass its local cache auto-update: we want to
+        # force brew to rely on our formula from the past.
+        os.environ['HOMEBREW_NO_AUTO_UPDATE'] = '1'
+        code, output, error = run_cmd('brew', 'cask', 'reinstall', package_id)
+        # Reset our temporary environment variable.
+        del os.environ['HOMEBREW_NO_AUTO_UPDATE']
+        # Restore old formula to its most recent version.
+        git_checkout(package_id, 'HEAD')
+        # Check the cask has been properly installed.
+        assert code == 0
+        if error:
+            assert "is already installed" not in error
+        assert "{} was successfully installed!".format(package_id) in output
         return output
 
     yield _install_cask
 
     # Remove all installed packages.
     for package_id in packages:
-        run_cmd('brew', 'cask', 'uninstall', package_id)
+        run_cmd('brew', 'cask', 'uninstall', '--force', package_id)
 
 
 class TestOutdated(CLISubCommandTests, CLITableTests):
@@ -146,7 +162,7 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
 
     @destructive
     @unless_macos
-    def test_unicode_name(self, invoke, subcmd, install_cask):
+    def test_autoupdate_unicode_name(self, invoke, subcmd, install_cask):
         """ See #16. """
         # Install an old version of a package with a unicode name.
         # Old Cask formula for ubersicht 1.4.60.
@@ -156,12 +172,27 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
         assert 'Übersicht.app' in output
         assert 'Übersicht.app' not in output
 
-        # Look for reported available upgrade.
+        # Ubersicht is not reported as outdated because is tagged as
+        # auto-update.
         result = invoke('--manager', 'cask', subcmd)
         assert result.exit_code == 0
-        assert "ubersicht" in result.output
-        assert "Übersicht" in output
+        assert "ubersicht" not in result.output
         assert "Übersicht" not in output
+
+        # Try with explicit option.
+        result = invoke('--ignore-auto-updates', '--manager', 'cask', subcmd)
+        assert result.exit_code == 0
+        assert "ubersicht" not in result.output
+        assert "Übersicht" not in output
+
+        # Look for reported available upgrade.
+        code, output, error = run_cmd(
+            'mpm', '--include-auto-updates', '--manager', 'cask', subcmd)
+        assert code == 0
+        assert not output
+        assert "ubersicht" in error
+        # Outdated subcommand does not fetch the unicode name by default.
+        assert "Übersicht" not in error
 
     @destructive
     @unless_macos
@@ -175,7 +206,9 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
         assert 'XLD.app' in output
 
         # Look for reported available upgrade.
-        result = invoke('--manager', 'cask', subcmd)
-        assert result.exit_code == 0
-        assert "xld" in result.output
-        assert "X Lossless Decoder" in result.output
+        code, output, error = run_cmd(
+            'mpm', '--include-auto-updates', '--manager', 'cask', subcmd)
+        assert code == 0
+        assert "xld" in error
+        # Outdated subcommand does not fetch the unicode name by default.
+        assert "X Lossless Decoder" not in error

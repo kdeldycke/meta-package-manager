@@ -115,19 +115,18 @@ def run_cmd(*args):
     return code, output, error
 
 
-@pytest.fixture(autouse=True, scope="module")
+@pytest.fixture(autouse=True, scope="function")
 def runner(request):
     runner = CliRunner()
     with runner.isolated_filesystem():
         yield runner
 
 
-# XXX Try reduce fixture scopr to function?
-@pytest.fixture(scope="module")
-def invoke(runner, *args):
+@pytest.fixture(scope="function")
+def invoke(runner):
     """ Executes Click's CLI, print output and return results. """
 
-    def run_run(*args):
+    def _run(*args):
         args = flatten(args)
 
         assert isinstance(args, list)
@@ -146,7 +145,7 @@ def invoke(runner, *args):
 
         return result
 
-    return run_run
+    yield _run
 
 
 @pytest.fixture

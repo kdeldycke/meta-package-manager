@@ -146,7 +146,7 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
 
     @destructive
     @unless_macos
-    def test_unicode_name(self, invoke, subcmd, install_formula):
+    def test_unicode_name(self, invoke, subcmd, install_cask):
         """ See #16. """
         # Install an old version of a package with a unicode name.
         # Old Cask formula for ubersicht 1.4.60.
@@ -165,7 +165,7 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
 
     @destructive
     @unless_macos
-    def test_multiple_names(self, invoke, subcmd, install_formula):
+    def test_multiple_names(self, invoke, subcmd, install_cask):
         """ See #26. """
         # Install an old version of a package with multiple names.
         # Old Cask formula for xld 2018.10.19.

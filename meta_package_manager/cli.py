@@ -129,7 +129,7 @@ def print_table(header_defs, rows, sort_key=None):
             sorted(rows, key=sort_method),
             header_labels,
             disable_numparse=True):
-        logger.info(line)
+        click.echo(line)
 
 
 def print_stats(data):
@@ -143,8 +143,7 @@ def print_stats(data):
     if per_manager_totals:
         per_manager_totals = ' ({})'.format(per_manager_totals)
     plural = 's' if total_installed > 1 else ''
-    logger.info(
-        f"{total_installed} package{plural} total{per_manager_totals}.")
+    click.echo(f"{total_installed} package{plural} total{per_manager_totals}.")
 
 
 class timeit:
@@ -166,7 +165,7 @@ class timeit:
     def __exit__(self, *args, **kwargs):
         if self.measure_time:
             elapsed = time_now() - self.start_time
-            logger.info(f"Execution time: {elapsed:.3} seconds.")
+            click.echo(f"Execution time: {elapsed:.3} seconds.")
 
 
 @click.group()
@@ -279,7 +278,6 @@ def managers(ctx):
             manager_data[manager.id]['errors'] = list({
                 expt.error for expt in manager.cli_errors})
 
-        # JSON mode use echo to output data because the logger is disabled.
         click.echo(json(manager_data))
         return
 
@@ -373,7 +371,6 @@ def installed(ctx):
 
     # Machine-friendly data rendering.
     if output_format == 'json':
-        # JSON mode use echo to output data because the logger is disabled.
         click.echo(json(installed_data))
         return
 
@@ -434,7 +431,6 @@ def search(ctx, extended, exact, query):
 
     # Machine-friendly data rendering.
     if output_format == 'json':
-        # JSON mode use echo to output data because the logger is disabled.
         click.echo(json(matches))
         return
 
@@ -547,7 +543,6 @@ def outdated(ctx, cli_format):
 
     # Machine-friendly data rendering.
     if output_format == 'json':
-        # JSON mode use echo to output data because the logger is disabled.
         click.echo(json(outdated_data))
         return
 

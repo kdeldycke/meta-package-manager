@@ -25,7 +25,7 @@ import simplejson as json
 from boltons.iterutils import flatten
 
 from .. import __version__, logger
-from .conftest import MANAGER_IDS, destructive
+from .conftest import MANAGER_IDS, destructive, run_cmd
 
 """ Common tests for all CLI basic features and subcommands. """
 
@@ -82,6 +82,15 @@ def test_verbosity(invoke, level):
         assert "debug: " in result.output
     else:
         assert "debug: " not in result.output
+
+
+def test_console_output():
+    """ Check the table is rendering in console's standard output (<stdout>)
+    instead of error output (<stderr>), so the result can be grep-ped. """
+    code, output, error = run_cmd('mpm', 'managers')
+    assert code == 0
+    assert "═════" in output
+    assert "═════" not in error
 
 
 class CLISubCommandTests:

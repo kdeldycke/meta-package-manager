@@ -177,23 +177,23 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
         result = invoke('--manager', 'cask', subcmd)
         assert result.exit_code == 0
         assert "ubersicht" not in result.output
-        assert "Übersicht" not in output
+        assert "Übersicht" not in result.output
 
         # Try with explicit option.
         result = invoke('--ignore-auto-updates', '--manager', 'cask', subcmd)
         assert result.exit_code == 0
         assert "ubersicht" not in result.output
-        assert "Übersicht" not in output
+        assert "Übersicht" not in result.output
 
         # Look for reported available upgrade.
         # TODO: replace with invoke, but the later somehow cache results.
         code, output, error = run_cmd(
             'mpm', '--include-auto-updates', '--manager', 'cask', subcmd)
         assert code == 0
-        assert not output
-        assert "ubersicht" in error
+        assert not error
+        assert "ubersicht" in output
         # Outdated subcommand does not fetch the unicode name by default.
-        assert "Übersicht" not in error
+        assert "Übersicht" not in output
 
     @destructive
     @unless_macos
@@ -211,6 +211,6 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
         code, output, error = run_cmd(
             'mpm', '--include-auto-updates', '--manager', 'cask', subcmd)
         assert code == 0
-        assert "xld" in error
+        assert "xld" in output
         # Outdated subcommand does not fetch the unicode name by default.
-        assert "X Lossless Decoder" not in error
+        assert "X Lossless Decoder" not in output

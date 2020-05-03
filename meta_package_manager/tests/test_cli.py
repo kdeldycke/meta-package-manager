@@ -200,6 +200,11 @@ class CLISubCommandTests:
 
 class CLITableTests:
 
+    """ Test subcommands whose output is a configurable table.
+
+    A table output is also allowed to be rendered as JSON.
+    """
+
     def test_default_table_rendering(self, invoke, subcmd):
         result = invoke(subcmd)
         assert result.exit_code == 0

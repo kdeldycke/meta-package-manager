@@ -186,6 +186,7 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
         assert "Übersicht" not in output
 
         # Look for reported available upgrade.
+        # TODO: replace with invoke, but the later somehow cache results.
         code, output, error = run_cmd(
             'mpm', '--include-auto-updates', '--manager', 'cask', subcmd)
         assert code == 0
@@ -206,6 +207,7 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
         assert 'XLD.app' in output
 
         # Look for reported available upgrade.
+        # TODO: replace with invoke, but the later somehow cache results.
         code, output, error = run_cmd(
             'mpm', '--include-auto-updates', '--manager', 'cask', subcmd)
         assert code == 0

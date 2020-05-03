@@ -36,18 +36,18 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     def test_default_all_manager(self, invoke, subcmd):
         result = invoke(subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result.output)
+        self.check_manager_selection(result)
 
     @pytest.mark.parametrize('mid', MANAGER_IDS)
     def test_single_manager(self, invoke, subcmd, mid):
         result = invoke('--manager', mid, subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result.output, {mid})
+        self.check_manager_selection(result, {mid})
 
     def test_json_parsing(self, invoke, subcmd):
         result = invoke('--output-format', 'json', subcmd)
         assert result.exit_code == 0
-        data = json.loads(result.output)
+        data = json.loads(result.stdout)
 
         assert data
         assert isinstance(data, dict)
@@ -84,50 +84,50 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         """ See #16. """
         result = invoke('--manager', 'cask', 'search', 'ubersicht')
         assert result.exit_code == 0
-        assert "ubersicht" in result.output
+        assert "ubersicht" in result.stdout
         # XXX search command is not fetching yet detailed package infos like
         # names.
-        assert "Übersicht" not in result.output
+        assert "Übersicht" not in result.stdout
 
         result = invoke('--manager', 'cask', 'search', 'Übersicht')
         assert result.exit_code == 0
-        assert "ubersicht" in result.output
-        assert "Übersicht" not in result.output
+        assert "ubersicht" in result.stdout
+        assert "Übersicht" not in result.stdout
 
     def test_exact_search_tokenizer(self, invoke):
         result = invoke('--manager', 'pip3', 'search', '--exact', 'sed')
         assert result.exit_code == 0
-        assert "1 package total" in result.output
-        assert " sed " in result.output
+        assert "1 package total" in result.stdout
+        assert " sed " in result.stdout
 
         for query in ['SED', 'SeD', 'sEd*', '*sED*', '_seD-@', '', '_']:
             result = invoke('--manager', 'pip3', 'search', '--exact', query)
             assert result.exit_code == 0
-            assert "0 package total" in result.output
-            assert "sed" not in result.output
+            assert "0 package total" in result.stdout
+            assert "sed" not in result.stdout
 
     def test_fuzzy_search_tokenizer(self, invoke):
         for query in ['', '_', '_seD-@']:
             result = invoke('--manager', 'pip3', 'search', query)
             assert result.exit_code == 0
-            assert "0 package total" in result.output
-            assert "sed" not in result.output
+            assert "0 package total" in result.stdout
+            assert "sed" not in result.stdout
 
         for query in ['sed', 'SED', 'SeD', 'sEd*', '*sED*']:
             result = invoke('--manager', 'pip3', 'search', query)
             assert result.exit_code == 0
-            assert "2 packages total" in result.output
-            assert " sed " in result.output
-            assert " SED-cli " in result.output
+            assert "2 packages total" in result.stdout
+            assert " sed " in result.stdout
+            assert " SED-cli " in result.stdout
 
     def test_extended_search_tokenizer(self, invoke):
         for query in ['', '_', '_seD-@']:
             result = invoke('--manager', 'pip3', 'search', '--extended', query)
             assert result.exit_code == 0
-            assert "0 package total" in result.output
-            assert "sed" not in result.output
+            assert "0 package total" in result.stdout
+            assert "sed" not in result.stdout
 
         for query in ['sed', 'SED', 'SeD', 'sEd*', '*sED*']:
             result = invoke('--manager', 'pip3', 'search', '--extended', query)
             assert result.exit_code == 0
-            assert "23 packages total" in result.output
+            assert "23 packages total" in result.stdout

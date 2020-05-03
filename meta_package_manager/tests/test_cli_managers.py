@@ -36,18 +36,18 @@ class TestManagers(CLISubCommandTests, CLITableTests):
     def test_default_all_manager(self, invoke, subcmd):
         result = invoke(subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result.output)
+        self.check_manager_selection(result)
 
     @pytest.mark.parametrize('mid', MANAGER_IDS)
     def test_single_manager(self, invoke, subcmd, mid):
         result = invoke('--manager', mid, subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result.output, {mid})
+        self.check_manager_selection(result, {mid})
 
     def test_json_parsing(self, invoke, subcmd):
         result = invoke('--output-format', 'json', subcmd)
         assert result.exit_code == 0
-        data = json.loads(result.output)
+        data = json.loads(result.stdout)
 
         assert data
         assert isinstance(data, dict)

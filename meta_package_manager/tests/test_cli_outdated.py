@@ -87,18 +87,18 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
     def test_default_all_manager(self, invoke, subcmd):
         result = invoke(subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result.output)
+        self.check_manager_selection(result)
 
     @pytest.mark.parametrize('mid', MANAGER_IDS)
     def test_single_manager(self, invoke, mid, subcmd):
         result = invoke('--manager', mid, subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result.output, {mid})
+        self.check_manager_selection(result, {mid})
 
     def test_json_parsing(self, invoke, subcmd):
         result = invoke('--output-format', 'json', subcmd)
         assert result.exit_code == 0
-        data = json.loads(result.output)
+        data = json.loads(result.stdout)
 
         assert data
         assert isinstance(data, dict)
@@ -140,14 +140,14 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
     def test_cli_format_plain(self, invoke, subcmd):
         result = invoke(
             '--output-format', 'json', subcmd, '--cli-format', 'plain')
-        for outdated in json.loads(result.output).values():
+        for outdated in json.loads(result.stdout).values():
             for infos in outdated['packages']:
                 assert isinstance(infos['upgrade_cli'], str)
 
     def test_cli_format_fragments(self, invoke, subcmd):
         result = invoke(
             '--output-format', 'json', subcmd, '--cli-format', 'fragments')
-        for outdated in json.loads(result.output).values():
+        for outdated in json.loads(result.stdout).values():
             for infos in outdated['packages']:
                 assert isinstance(infos['upgrade_cli'], list)
                 assert set(map(type, infos['upgrade_cli'])) == {str}
@@ -155,7 +155,7 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
     def test_cli_format_bitbar(self, invoke, subcmd):
         result = invoke(
             '--output-format', 'json', subcmd, '--cli-format', 'bitbar')
-        for outdated in json.loads(result.output).values():
+        for outdated in json.loads(result.stdout).values():
             for infos in outdated['packages']:
                 assert isinstance(infos['upgrade_cli'], str)
                 assert 'param1=' in infos['upgrade_cli']
@@ -176,14 +176,14 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
         # auto-update.
         result = invoke('--manager', 'cask', subcmd)
         assert result.exit_code == 0
-        assert "ubersicht" not in result.output
-        assert "Übersicht" not in result.output
+        assert "ubersicht" not in result.stdout
+        assert "Übersicht" not in result.stdout
 
         # Try with explicit option.
         result = invoke('--ignore-auto-updates', '--manager', 'cask', subcmd)
         assert result.exit_code == 0
-        assert "ubersicht" not in result.output
-        assert "Übersicht" not in result.output
+        assert "ubersicht" not in result.stdout
+        assert "Übersicht" not in result.stdout
 
         # Look for reported available upgrade.
         # TODO: replace with invoke, but the later somehow cache results.

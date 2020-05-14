@@ -20,22 +20,26 @@
 import logging
 import re
 
+import click
 import pytest
 import simplejson as json
 from boltons.iterutils import flatten
+from cli_helpers.tabular_output import TabularOutputFormatter
 
 from .. import __version__, logger
-from ..cli import RENDERING_MODES
-from .conftest import MANAGER_IDS, run_cmd
+from ..cli import RENDERING_MODES, WINDOWS_MODE_BLACKLIST
+from ..platform import is_windows
+from .conftest import MANAGER_IDS, run_cmd, unless_windows
 
 """ Common tests for all CLI basic features and templates for subcommands. """
 
 
 class TestBaseCLI:
 
-    """ This collection test based CLI behavior shared by all subcommands.
+    """ This collection is testing basic CLI behavior shared by all
+    subcommands.
 
-    Regroups tests not involving subcommands.
+    Also regroups tests not involving subcommands.
 
     Also includes a bunch of tests performed once on an arbitrary sub-command,
     for situation when the tested behavior is shared by all subcommands. In
@@ -105,6 +109,16 @@ class TestBaseCLI:
         assert result.exit_code == 0
         assert "═════" in result.stdout
         assert "═════" not in result.stderr
+
+    @unless_windows
+    @pytest.mark.parametrize('mode', WINDOWS_MODE_BLACKLIST)
+    def test_check_failing_unicode_rendering(self, mode):
+        """ Check internal assumption that some rendering unicode table
+        rendering modes fails in Windows console. """
+        table_formatter = TabularOutputFormatter(mode)
+        with pytest.raises(UnicodeEncodeError):
+            click.echo(table_formatter.format_output(
+                ((1, 87), (2, 80), (3, 79)), ('day', 'temperature')))
 
 
 class CLISubCommandTests:
@@ -262,10 +276,12 @@ class CLITableTests:
         assert RENDERING_MODES == set(self.expected_renderings.keys())
 
     def test_default_table_rendering(self, invoke, subcmd):
-        """ Check default rendering is fancy grid. """
+        """ Check default rendering is ascii on windows and fancy_grid
+        elsewhere. """
         result = invoke(subcmd)
         assert result.exit_code == 0
-        expected = self.expected_renderings['fancy_grid']
+        default_mode = 'ascii' if is_windows() else 'fancy_grid'
+        expected = self.expected_renderings[default_mode][0]
         assert expected in result.stdout
         assert expected not in result.stderr
 
@@ -275,6 +291,9 @@ class CLITableTests:
             self, invoke, subcmd, mode, expected, conflict):
         result = invoke('--output-format', mode, subcmd)
         assert result.exit_code == 0
+        # On Windows, some modes are overided to ascii to avoid encoding issue.
+        if is_windows():
+            expected, conflict = self.expected_renderings['ascii']
         assert expected in result.stdout
         assert expected not in result.stderr
         # Check that all other expected output from other rendering modes are

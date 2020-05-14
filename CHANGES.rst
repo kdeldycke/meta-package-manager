@@ -8,6 +8,7 @@ Changelog
 .. note:: This version is not yet released and is under active development.
 
 * [snap]: Add support for ``snap`` on Linux.
+* [windows]: Blacklist unicode table rendering. Defaults to ``ascii``.
 * [mpm]: Add ``--time`` / ``--no-time`` flag to show elapsed execution time.
   Closes #9.
 * [mpm]: Print table rendering, stats and timing in console output instead of

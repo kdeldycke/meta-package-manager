@@ -43,7 +43,7 @@ from simplejson import dumps as json_dumps
 from . import __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
-from .platform import os_label
+from .platform import CURRENT_OS_ID, WINDOWS, os_label
 from .version import TokenizedString
 
 # Initialize the table formatter.
@@ -54,6 +54,21 @@ table_formatter = TabularOutputFormatter()
 RENDERING_MODES = {'json'}
 RENDERING_MODES.update(table_formatter.supported_formats)
 RENDERING_MODES = frozenset(RENDERING_MODES)
+
+# List of unicode rendering modes that will fall back to ascii on windows.
+# Windows has some hard time printing unicode characters to console output. It
+# seems to be an effect of cp1252 encoding and/or click not able to transcode
+# chars. Here is the traceback:
+#
+# File "(...)\meta_package_manager\cli.py", line 133, in print_table
+#   click.echo(line)
+# File "(...)\site-packages\click\utils.py", line 272, in echo
+#   file.write(message)
+# File "(...)\lib\encodings\cp1252.py", line 19, in encode
+#   return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+# UnicodeEncodeError: 'charmap' codec can't encode characters in position
+#   0-140: character maps to <undefined>
+WINDOWS_MODE_BLACKLIST = frozenset(['double', 'fancy_grid'])
 
 # List of fields IDs allowed to be sorted.
 SORTABLE_FIELDS = {
@@ -243,6 +258,12 @@ def cli(ctx, manager, exclude, ignore_auto_updates, output_format, sort_by,
 
     # Setup the table formatter.
     if output_format != 'json':
+
+        # Fallback unicode-rendering to safe ascii on Windows.
+        if CURRENT_OS_ID == WINDOWS and \
+                output_format in WINDOWS_MODE_BLACKLIST:
+            output_format = 'ascii'
+
         table_formatter.format_name = output_format
 
     # Load up global options to the context.

@@ -24,6 +24,7 @@ import click
 import pytest
 import simplejson as json
 from boltons.iterutils import flatten
+from boltons.strutils import strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
 
 from .. import __version__, logger
@@ -157,9 +158,8 @@ class CLISubCommandTests:
                 "{}: ".format(mid) in result.stdout.splitlines(
                     )[-1] if result.stdout else '',
                 # Match output of managers command.
-                bool(re.search(
-                    r"\s+│\s+{}\s+│\s+(✓|✘).+│\s+(✓|✘)\s+".format(mid),
-                    result.stdout)),
+                bool(re.search(r"\s+│\s+{}\s+│\s+(✓|✘).+│\s+(✓|✘)".format(mid),
+                               strip_ansi(result.stdout))),
                 # Sync command.
                 "Sync {} package info...".format(mid) in result.stderr,
                 # Upgrade command.

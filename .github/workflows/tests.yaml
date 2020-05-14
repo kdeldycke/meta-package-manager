@@ -127,9 +127,14 @@ jobs:
         sudo apt install -y snapd
 
     # Gem
-    - name: Upgrade gem
+    - name: macOS & Windows - Upgrade gem
+      if: runner.os != 'Linux'
       run: |
         gem update --system
+    - name: Linux - Upgrade gem
+      if: runner.os == 'Linux'
+      run: |
+        sudo gem update --system
 
     # Pip
     - name: Upgrade Pip

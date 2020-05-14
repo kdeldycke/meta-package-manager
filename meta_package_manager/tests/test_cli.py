@@ -25,6 +25,7 @@ import simplejson as json
 from boltons.iterutils import flatten
 
 from .. import __version__, logger
+from ..cli import RENDERING_MODES
 from .conftest import MANAGER_IDS, run_cmd
 
 """ Common tests for all CLI basic features and templates for subcommands. """
@@ -229,18 +230,68 @@ class CLITableTests:
     A table output is also allowed to be rendered as JSON.
     """
 
+    # List of all supported rendering modes IDs, and their expected output.
+    expected_renderings = {
+        'ascii':          '---+---',
+        'csv':            ',',
+        'csv-tab':        '\t',
+        'double':         '═══╬═══',
+        'fancy_grid':     '═══╪═══',
+        'github':         '---|---',
+        'grid':           '===+===',
+        'html':           '<table>',
+        'jira':           ' || ',
+        'json':           '": {',
+        'latex':          '\\hline',
+        'latex_booktabs': '\\toprule',
+        'mediawiki':      '{| class="wikitable" ',
+        'moinmoin':       " ''' || ''' ",
+        'orgtbl':         '---+---',
+        'pipe':           '---|:---',
+        'plain':          '  ',
+        'psql':           '---+---',
+        'rst':            '===  ===',
+        'simple':         '---  ---',
+        'textile':        ' |_. ',
+        'tsv':            '\t',
+        'vertical':       '***[ 1. row ]***'}
+
+    def test_recognized_modes(self):
+        """ Check all rendering modes proposed by the table module are
+        accounted for. """
+        assert RENDERING_MODES == set(self.expected_renderings.keys())
+
     def test_default_table_rendering(self, invoke, subcmd):
+        """ Check default rendering is fancy grid. """
         result = invoke(subcmd)
         assert result.exit_code == 0
-        assert "═════" in result.stdout
-        assert "═════" not in result.stderr
+        expected = self.expected_renderings['fancy_grid']
+        assert expected in result.stdout
+        assert expected not in result.stderr
 
-    @pytest.mark.parametrize('mode', ['simple', 'plain'])
-    def test_table_rendering(self, invoke, subcmd, mode):
+    @pytest.mark.parametrize('mode,expected', expected_renderings.items())
+    def test_all_table_rendering(self, invoke, subcmd, mode, expected):
         result = invoke('--output-format', mode, subcmd)
         assert result.exit_code == 0
-        assert "═════" not in result.stdout
-        assert "═════" not in result.stderr
+        assert expected in result.stdout
+        assert expected not in result.stderr
+        # Check that all other expected output from other rendering modes are
+        # not appearing in output. Exclude obvious character sequences shorter
+        # than 3 characters to eliminate false negative.
+        blacklist = {
+            v for v in self.expected_renderings.values()
+            if len(v) > 2 and v != expected}
+        # Remove some overlapping edge-cases.
+        edge_cases = {
+            'grid': 'ascii',
+            'mediawiki': 'jira',
+            'moinmoin': 'jira',
+        }
+        if mode in edge_cases:
+            blacklist.remove(self.expected_renderings[edge_cases[mode]])
+        for unexpected in blacklist:
+            assert unexpected not in result.stdout
+            assert unexpected not in result.stderr
 
     def test_json_debug_output(self, invoke, subcmd):
         """ Output is expected to be parseable if read from <stdout> even in

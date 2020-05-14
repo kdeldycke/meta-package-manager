@@ -19,6 +19,7 @@ Changelog
 * [mpm]: Move pylint config from ``setup.cfg`` to ``pyproject.toml``.
 * [mpm]: Fail CI and QA checks if pylint score lower than 9.
 * [mpm]: Add more platform definition unittests.
+* [mpm]: Unittests all rendering modes in all subcommands.
 * [mpm]: Drop support of Python 3.6.
 * [mpm]: Use group-tabs in Sphinx docs.
 

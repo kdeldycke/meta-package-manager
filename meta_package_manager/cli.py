@@ -53,6 +53,7 @@ table_formatter = TabularOutputFormatter()
 # Register all rendering modes for table data.
 RENDERING_MODES = {'json'}
 RENDERING_MODES.update(table_formatter.supported_formats)
+RENDERING_MODES = frozenset(RENDERING_MODES)
 
 # List of fields IDs allowed to be sorted.
 SORTABLE_FIELDS = {

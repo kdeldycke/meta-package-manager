@@ -232,29 +232,29 @@ class CLITableTests:
 
     # List of all supported rendering modes IDs, and their expected output.
     expected_renderings = {
-        'ascii':          '---+---',
-        'csv':            ',',
-        'csv-tab':        '\t',
-        'double':         '═══╬═══',
-        'fancy_grid':     '═══╪═══',
-        'github':         '---|---',
-        'grid':           '===+===',
-        'html':           '<table>',
-        'jira':           ' || ',
-        'json':           '": {',
-        'latex':          '\\hline',
-        'latex_booktabs': '\\toprule',
-        'mediawiki':      '{| class="wikitable" ',
-        'moinmoin':       " ''' || ''' ",
-        'orgtbl':         '---+---',
-        'pipe':           '---|:---',
-        'plain':          '  ',
-        'psql':           '---+---',
-        'rst':            '===  ===',
-        'simple':         '---  ---',
-        'textile':        ' |_. ',
-        'tsv':            '\t',
-        'vertical':       '***[ 1. row ]***'}
+        'ascii':          ('---+---',               None),
+        'csv':            (',',                     None),
+        'csv-tab':        ('\t',                    None),
+        'double':         ('═══╬═══',               None),
+        'fancy_grid':     ('═══╪═══',               None),
+        'github':         ('---|---',               None),
+        'grid':           ('===+===',               'ascii'),
+        'html':           ('<table>',               None),
+        'jira':           (' || ',                  None),
+        'json':           ('": {',                  None),
+        'latex':          ('\\hline',               None),
+        'latex_booktabs': ('\\toprule',             None),
+        'mediawiki':      ('{| class="wikitable" ', 'jira'),
+        'moinmoin':       (" ''' || ''' ",          'jira'),
+        'orgtbl':         ('---+---',               None),
+        'pipe':           ('---|:---',              None),
+        'plain':          ('  ',                    None),
+        'psql':           ('---+---',               None),
+        'rst':            ('===  ===',              None),
+        'simple':         ('---  ---',              None),
+        'textile':        (' |_. ',                 None),
+        'tsv':            ('\t',                    None),
+        'vertical':       ('***[ 1. row ]***',      None)}
 
     def test_recognized_modes(self):
         """ Check all rendering modes proposed by the table module are
@@ -269,8 +269,10 @@ class CLITableTests:
         assert expected in result.stdout
         assert expected not in result.stderr
 
-    @pytest.mark.parametrize('mode,expected', expected_renderings.items())
-    def test_all_table_rendering(self, invoke, subcmd, mode, expected):
+    @pytest.mark.parametrize('mode,expected,conflict', [
+        (k, v[0], v[1]) for k, v in expected_renderings.items()])
+    def test_all_table_rendering(
+            self, invoke, subcmd, mode, expected, conflict):
         result = invoke('--output-format', mode, subcmd)
         assert result.exit_code == 0
         assert expected in result.stdout
@@ -279,16 +281,11 @@ class CLITableTests:
         # not appearing in output. Exclude obvious character sequences shorter
         # than 3 characters to eliminate false negative.
         blacklist = {
-            v for v in self.expected_renderings.values()
-            if len(v) > 2 and v != expected}
-        # Remove some overlapping edge-cases.
-        edge_cases = {
-            'grid': 'ascii',
-            'mediawiki': 'jira',
-            'moinmoin': 'jira',
-        }
-        if mode in edge_cases:
-            blacklist.remove(self.expected_renderings[edge_cases[mode]])
+            v[0] for v in self.expected_renderings.values()
+            if len(v[0]) > 2 and v[0] != expected}
+        # Remove overlapping edge-cases.
+        if conflict:
+            blacklist.remove(self.expected_renderings[conflict][0])
         for unexpected in blacklist:
             assert unexpected not in result.stdout
             assert unexpected not in result.stderr

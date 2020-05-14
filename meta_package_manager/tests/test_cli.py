@@ -97,8 +97,9 @@ class TestBaseCLI:
             assert "debug: " not in result.stderr
 
     def test_console_output(self, invoke):
-        """ Check the table is rendering in console's standard output (<stdout>)
-        instead of error output (<stderr>), so the result can be grep-ped. """
+        """ Check the table is rendering in console's standard output
+        (<stdout>) instead of error output (<stderr>), so the result can be
+        grep-ed. """
         result = invoke('managers')
         assert result.exit_code == 0
         assert "═════" in result.stdout
@@ -219,7 +220,6 @@ class CLISubCommandTests:
         result = invoke(*args, subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, expected)
-        #self.check_manager_selection(result.stdout, expected)
 
 
 class CLITableTests:
@@ -246,7 +246,7 @@ class CLITableTests:
         """ Output is expected to be parseable if read from <stdout> even in
         debug level as these messages are redirected to <stderr>.
 
-        ???Also checks that JSON output format is not supported by all commands.
+        Also checks that JSON output format is not supported by all commands.
         """
         result = invoke(
             '--output-format', 'json', '--verbosity', 'DEBUG', subcmd)

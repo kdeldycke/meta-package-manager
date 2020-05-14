@@ -42,7 +42,7 @@ Development: |build| |docs| |coverage| |quality|
 Features
 ---------
 
-* Inventory and list all package managers available the system.
+* Inventory and list all package managers available on the system.
 * Supports macOS, Linux and Windows.
 * List installed packages.
 * Search for packages.

@@ -145,7 +145,7 @@ def print_table(header_defs, rows, sort_key=None):
             sorted(rows, key=sort_method),
             header_labels,
             disable_numparse=True):
-        click.echo(line)
+        click.echo(line.encode("utf-8"))
 
 
 def print_stats(data):

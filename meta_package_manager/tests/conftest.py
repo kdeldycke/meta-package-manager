@@ -23,6 +23,7 @@ import os
 
 import pytest
 from boltons.iterutils import flatten
+from boltons.strutils import strip_ansi
 from boltons.tbutils import ExceptionInfo
 from click.testing import CliRunner
 
@@ -126,14 +127,21 @@ def runner(request):
 def invoke(runner):
     """ Executes Click's CLI, print output and return results. """
 
-    def _run(*args):
+    # TODO: Add a color parameter.
+    # See: https://github.com/pallets/click/blob/master/src/click/testing.py#L262
+
+    def _run(*args, color=False):
         args = flatten(args)
 
         assert isinstance(args, list)
         if args:
             assert set(map(type, args)) == {str}
 
-        result = runner.invoke(cli, args)
+        result = runner.invoke(cli, args, color=color)
+
+        # Strip colors out of results.
+        result.stdout_bytes = strip_ansi(result.stdout_bytes)
+        result.stderr_bytes = strip_ansi(result.stderr_bytes)
 
         print_cli_output(['mpm'] + args, result.output)
 

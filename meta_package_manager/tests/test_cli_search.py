@@ -95,7 +95,8 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         assert "Übersicht" not in result.stdout
 
     def test_exact_search_tokenizer(self, invoke):
-        result = invoke('--manager', 'pip3', 'search', '--exact', 'sed')
+        result = invoke(
+            '--manager', 'pip3', 'search', '--exact', 'sed', color=False)
         assert result.exit_code == 0
         assert "1 package total" in result.stdout
         assert " sed " in result.stdout
@@ -114,7 +115,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
             assert "sed" not in result.stdout
 
         for query in ['sed', 'SED', 'SeD', 'sEd*', '*sED*']:
-            result = invoke('--manager', 'pip3', 'search', query)
+            result = invoke('--manager', 'pip3', 'search', query, color=False)
             assert result.exit_code == 0
             assert "2 packages total" in result.stdout
             assert " sed " in result.stdout

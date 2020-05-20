@@ -46,8 +46,9 @@ include = [
 # List of python versions and their support status:
 # https://en.wikipedia.org/wiki/CPython#Version_history
 python = "^3.7"
-# XXX Waiting for boltons 20.1.1.dev0 to be released.
-boltons = {git = "https://github.com/mahmoud/boltons.git"}
+# XXX Waiting for boltons 20.1.1.dev0 to be released and
+# https://github.com/mahmoud/boltons/pull/258 to be merged.
+boltons = {git = "https://github.com/kdeldycke/boltons.git", branch = "strip-ansi-fix" }
 click = "^7.1"
 click-log = "^0.3"
 cli-helpers = "^1.2"

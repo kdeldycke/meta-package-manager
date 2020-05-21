@@ -127,9 +127,6 @@ def runner(request):
 def invoke(runner):
     """ Executes Click's CLI, print output and return results. """
 
-    # TODO: Add a color parameter.
-    # See: https://github.com/pallets/click/blob/master/src/click/testing.py#L262
-
     def _run(*args, color=False):
         args = flatten(args)
 

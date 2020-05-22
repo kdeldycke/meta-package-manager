@@ -120,6 +120,19 @@ class CLISubCommandTests:
     template, inherited sub-command specific files.
     """
 
+    def test_help(self, invoke, subcmd):
+        result = invoke(subcmd, '--help')
+        assert result.exit_code == 0
+        assert "Usage: " in result.stdout
+        assert flatten([subcmd])[0] in result.stdout
+        assert not result.stderr
+
+    def test_timer(self, invoke, subcmd):
+        result = invoke('--time', subcmd)
+        assert result.exit_code == 0
+        # Execution time at the end of output.
+        assert result.stdout.splitlines()[-1].startswith("Execution time: ")
+
     @staticmethod
     def check_manager_selection(result, included=MANAGER_IDS):
         """ Check inclusion and exclusion of a set of managers.
@@ -172,13 +185,6 @@ class CLISubCommandTests:
         # Compare managers reported by the CLI and those expected.
         assert found_managers == included
         assert skipped_managers == MANAGER_IDS - included
-
-    def test_help(self, invoke, subcmd):
-        result = invoke(subcmd, '--help')
-        assert result.exit_code == 0
-        assert "Usage: " in result.stdout
-        assert flatten([subcmd])[0] in result.stdout
-        assert not result.stderr
 
     @pytest.mark.parametrize('selector', ['--manager', '--exclude'])
     def test_invalid_manager_selector(self, invoke, subcmd, selector):

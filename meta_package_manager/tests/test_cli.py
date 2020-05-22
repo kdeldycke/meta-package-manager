@@ -101,15 +101,6 @@ class TestBaseCLI:
         else:
             assert "debug: " not in result.stderr
 
-    def test_console_output(self, invoke):
-        """ Check the table is rendering in console's standard output
-        (<stdout>) instead of error output (<stderr>), so the result can be
-        grep-ed. """
-        result = invoke('managers')
-        assert result.exit_code == 0
-        assert "═════" in result.stdout
-        assert "═════" not in result.stderr
-
     @unless_windows
     @pytest.mark.parametrize('mode', WINDOWS_MODE_BLACKLIST)
     def test_check_failing_unicode_rendering(self, mode):
@@ -288,6 +279,8 @@ class CLITableTests:
             self, invoke, subcmd, mode, expected, conflict):
         result = invoke('--output-format', mode, subcmd)
         assert result.exit_code == 0
+        # Check the table is rendering in console's standard output (<stdout>)
+        # instead of error output (<stderr>), so the result can be grep-ed.
         assert expected in result.stdout
         assert expected not in result.stderr
         # Check that all other expected output from other rendering modes are

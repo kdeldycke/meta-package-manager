@@ -134,7 +134,7 @@ class CLISubCommandTests:
         assert result.stdout.splitlines()[-1].startswith("Execution time: ")
 
     @staticmethod
-    def check_manager_selection(result, included=MANAGER_IDS):
+    def check_manager_selection(result, selected=MANAGER_IDS):
         """ Check inclusion and exclusion of a set of managers.
 
         Check all manager are there by default.
@@ -144,7 +144,7 @@ class CLISubCommandTests:
             Parametrize/fixturize signals to pin point output depending on
             subcommand.
         """
-        assert isinstance(included, (frozenset, set))
+        assert isinstance(selected, (frozenset, set))
 
         found_managers = set()
         skipped_managers = set()
@@ -183,8 +183,8 @@ class CLISubCommandTests:
                 skipped_managers.add(mid)
 
         # Compare managers reported by the CLI and those expected.
-        assert found_managers == included
-        assert skipped_managers == MANAGER_IDS - included
+        assert found_managers == selected
+        assert skipped_managers == MANAGER_IDS - selected
 
     @pytest.mark.parametrize('selector', ['--manager', '--exclude'])
     def test_invalid_manager_selector(self, invoke, subcmd, selector):

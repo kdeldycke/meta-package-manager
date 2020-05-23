@@ -70,6 +70,7 @@ pylint = "^2.5"
 pytest = "^5.4"
 # More pytest plugins at: http://plugincompat.herokuapp.com .
 pytest-cov = "^2.8.1"
+pytest-randomly = "^3.3.1"
 twine = "^3.1"
 
 [tool.poetry.extras]

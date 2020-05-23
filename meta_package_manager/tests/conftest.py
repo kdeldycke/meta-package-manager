@@ -116,14 +116,14 @@ def run_cmd(*args):
     return code, output, error
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def runner(request):
     runner = CliRunner(mix_stderr=False)
     with runner.isolated_filesystem():
         yield runner
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def invoke(runner):
     """ Executes Click's CLI, print output and return results. """
 

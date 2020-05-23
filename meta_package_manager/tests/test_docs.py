@@ -17,9 +17,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+import re
 from pathlib import Path
 
 import pytest
+from boltons.iterutils import flatten
+
+from ..platform import OS_DEFINITIONS
+from .conftest import MANAGER_IDS
 
 """ Test documentation. """
 
@@ -37,11 +42,19 @@ def test_temporary_fs(runner):
 
 
 def test_changelog():
-
     changelog_path = Path(
         __file__).parent.parent.parent.joinpath('CHANGES.rst').resolve()
-
     with changelog_path.open() as doc:
         changelog = doc.read()
 
     assert changelog.startswith("Changelog\n=========\n")
+
+    entry_pattern = re.compile(r"^\* \[(?P<category>[a-z,]+)\] (?P<entry>.+)")
+    for line in changelog.splitlines():
+        if line.startswith('*'):
+            match = entry_pattern.match(line)
+            assert match
+            entry = match.groupdict()
+            assert entry['category']
+            assert set(entry['category'].split(',')).issubset(flatten([
+                MANAGER_IDS, OS_DEFINITIONS.keys(), 'pip', 'mpm', 'bitbar']))

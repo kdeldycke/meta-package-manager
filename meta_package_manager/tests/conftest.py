@@ -116,14 +116,14 @@ def run_cmd(*args):
     return code, output, error
 
 
-@pytest.fixture(autouse=True, scope="function")
+@pytest.fixture(scope="module")
 def runner(request):
     runner = CliRunner(mix_stderr=False)
     with runner.isolated_filesystem():
         yield runner
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def invoke(runner):
     """ Executes Click's CLI, print output and return results. """
 
@@ -153,7 +153,7 @@ def invoke(runner):
     yield _run
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 def subcmd():
     """ Fixture used in `test_cli_*.py` files to set the sub-command in all CLI
     calls.

@@ -194,6 +194,12 @@ class CLISubCommandTests:
         assert "Error: Invalid value for " in result.stderr
         assert selector in result.stderr
 
+    def test_default_all_managers(self, invoke, subcmd):
+        """ Test all available managers are selected by default. """
+        result = invoke(subcmd)
+        assert result.exit_code == 0
+        self.check_manager_selection(result)
+
     @pytest.mark.parametrize('args,expected', [
         pytest.param(
             ('--manager', 'apm'), {'apm'},

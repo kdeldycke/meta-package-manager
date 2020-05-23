@@ -44,7 +44,7 @@ def subcmd():
 
 class TestRestore(CLISubCommandTests):
 
-    def test_default_all_manager(self, invoke):
+    def test_default_all_managers(self, invoke):
         create_toml('all-managers.toml', ''.join(["""
             [{}]
             blah = 123

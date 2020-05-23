@@ -33,14 +33,8 @@ class TestUpgrade(CLISubCommandTests):
     """ All tests here should me marked as destructive unless --dry-run
     parameter is passed. """
 
-    def test_default_all_manager_dry_run(self, invoke, subcmd):
+    def test_default_all_managers_dry_run(self, invoke, subcmd):
         result = invoke(subcmd, '--dry-run')
-        assert result.exit_code == 0
-        self.check_manager_selection(result)
-
-    @destructive
-    def test_default_all_manager(self, invoke, subcmd):
-        result = invoke(subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result)
 
@@ -58,4 +52,5 @@ class TestUpgrade(CLISubCommandTests):
         self.check_manager_selection(result, {mid})
 
 
+destructive()(TestUpgrade.test_default_all_managers)
 destructive()(TestUpgrade.test_manager_selection)

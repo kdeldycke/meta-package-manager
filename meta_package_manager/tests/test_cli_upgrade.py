@@ -52,5 +52,6 @@ class TestUpgrade(CLISubCommandTests):
         self.check_manager_selection(result, {mid})
 
 
+destructive()(TestUpgrade.test_options)
 destructive()(TestUpgrade.test_default_all_managers)
 destructive()(TestUpgrade.test_manager_selection)

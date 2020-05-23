@@ -127,11 +127,12 @@ class CLISubCommandTests:
         assert flatten([subcmd])[0] in result.stdout
         assert not result.stderr
 
-    def test_timer(self, invoke, subcmd):
-        result = invoke('--time', subcmd)
+    @pytest.mark.parametrize('opt_stats', ['--stats', '--no-stats', None])
+    @pytest.mark.parametrize('opt_timer', ['--time', '--no-time', None])
+    def test_options(self, invoke, subcmd, opt_stats, opt_timer):
+        """ Test the result on all combinations of optional options. """
+        result = invoke(opt_stats, opt_timer, subcmd)
         assert result.exit_code == 0
-        # Execution time at the end of output.
-        assert result.stdout.splitlines()[-1].startswith("Execution time: ")
 
     @staticmethod
     def check_manager_selection(result, selected=MANAGER_IDS):

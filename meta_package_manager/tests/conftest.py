@@ -128,9 +128,9 @@ def invoke(runner):
     """ Executes Click's CLI, print output and return results. """
 
     def _run(*args, color=False):
-        args = flatten(args)
-
-        assert isinstance(args, list)
+        # We allow for nested iterables and None values as args for
+        # convenience. We just need to flatten and filters them out.
+        args = list(filter(None.__ne__, flatten(args)))
         if args:
             assert set(map(type, args)) == {str}
 

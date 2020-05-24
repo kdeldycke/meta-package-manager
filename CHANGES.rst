@@ -8,6 +8,8 @@ Changelog
 .. note:: This version is not yet released and is under active development.
 
 * [snap] Add support for ``snap`` on Linux.
+* [pip] Remove ``pip2``/``pip3`` distinctions, use system's python and call
+  ``pip`` module.
 * [windows] Blacklist unicode table rendering. Defaults to ``ascii``.
 * [mpm] Add ``--time`` / ``--no-time`` flag to show elapsed execution time.
   Closes #9.

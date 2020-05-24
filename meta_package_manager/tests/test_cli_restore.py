@@ -79,7 +79,7 @@ class TestRestore(CLISubCommandTests):
 
     def test_restore_single_manager(self, invoke):
         create_toml('pip-npm-dummy.toml', """
-            [pip3]
+            [pip]
             fancy_package = "0.0.1"
 
             [npm]
@@ -89,12 +89,12 @@ class TestRestore(CLISubCommandTests):
         result = invoke('--manager', 'npm', 'restore', 'pip-npm-dummy.toml')
         assert result.exit_code == 0
         assert 'pip-npm-dummy.toml' in result.stderr
-        assert 'Restore pip3' not in result.stderr
+        assert 'Restore pip' not in result.stderr
         assert 'Restore npm' in result.stderr
 
     def test_restore_excluded_manager(self, invoke):
         create_toml('pip-npm-dummy.toml', """
-            [pip3]
+            [pip]
             fancy_package = "0.0.1"
 
             [npm]
@@ -104,15 +104,15 @@ class TestRestore(CLISubCommandTests):
         result = invoke('--exclude', 'npm', 'restore', 'pip-npm-dummy.toml')
         assert result.exit_code == 0
         assert 'pip-npm-dummy.toml' in result.stderr
-        assert 'Restore pip3' in result.stderr
+        assert 'Restore pip' in result.stderr
         assert 'Restore npm' not in result.stderr
 
     def test_empty_manager(self, invoke):
         create_toml('pip-empty.toml', """
-            [pip3]
+            [pip]
             """)
 
         result = invoke('restore', 'pip-empty.toml')
         assert result.exit_code == 0
         assert 'pip-empty.toml' in result.stderr
-        assert 'Restore pip3' in result.stderr
+        assert 'Restore pip' in result.stderr

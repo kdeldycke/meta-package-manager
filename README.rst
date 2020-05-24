@@ -67,8 +67,7 @@ Package manager  Min. version  macOS  Linux  Windows  ``sync``  ``installed``  `
 ================ ============= ====== ====== ======== ========= ============== =========== ============ ============= ============ ============
 |brew|__          1.7.4         ✓                      ✓         ✓              ✓                        ✓             ✓            ✓
 |cask|__          1.7.4         ✓                      ✓         ✓              ✓                        ✓             ✓            ✓
-|pip2|__          9.0.0         ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
-|pip3|__          9.0.0         ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
+|pip|__           10.0.0        ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
 |npm|__           4.0.0         ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
 |yarn|__          1.21.0        ✓      ✓      ✓                  ✓              ✓                        ✓             ✓            ✓
 |apm|__                         ✓      ✓      ✓                  ✓              ✓                        ✓             ✓
@@ -87,11 +86,8 @@ __ https://brew.sh
 .. |cask| replace::
    Homebrew Cask
 __ https://caskroom.github.io
-.. |pip2| replace::
-   Python 2 ``pip``
-__ https://pypi.org
-.. |pip3| replace::
-   Python 3 ``pip``
+.. |pip| replace::
+   Python ``pip``
 __ https://pypi.org
 .. |npm| replace::
    Node's ``npm``

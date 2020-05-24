@@ -29,43 +29,45 @@ from ..version import TokenizedString, parse_version
 
 class Pip(PackageManager):
 
-    """ Virutal package manager shared by pip2 and pip3 CLI defined below.
+    """ We will use system's default Python to call out ``pip`` as a module.
+
+    This is a more robust way of managing packages: "if you're on Windows there
+    is an added benefit to using python -m pip as it lets pip update itself."
+    Source: https://snarky.ca/why-you-should-use-python-m-pip/
     """
 
     platforms = frozenset([MACOS, LINUX, WINDOWS])
 
     requirement = '10.0.0'
 
-    # Declare this manager as virtual, i.e. not tied to a CLI.
-    cli_name = None
+    # We will use system's default python to call out pip as a module.
+    cli_name = 'python'
 
     global_args = [
+        '-m', 'pip',   # Canonical call to Python's pip module.
         '--no-color',  # Suppress colored output.
     ]
 
     def get_version(self):
-        """ Fetch version from ``pip --version`` output.
-
-        Raw CLI output samples:
+        """ Fetch version.
 
         .. code-block:: shell-session
 
-            $ pip --version
+            $ python -m pip --no-color --version
             pip 2.0.2 from /usr/local/lib/python/site-packages/pip (python 3.7)
         """
-        output = self.run_cli('--version')
+        output = self.run_cli(self.global_args, '--version')
         if output:
             return parse_version(output.split()[1])
 
     @cachedproperty
     def installed(self):
-        """ Fetch installed packages from ``pip list`` output.
-
-        Raw CLI output samples:
+        """ Fetch installed packages.
 
         .. code-block:: shell-session
 
-            $ pip list --format=json --verbose | jq
+            $ python -m pip list --no-color --format=json --verbose --quiet \
+            > | jq
             [
              {
                 "version": "1.3",
@@ -96,8 +98,10 @@ class Pip(PackageManager):
         """
         installed = {}
 
+        # --quiet is required here to silence warning and error messages
+        # mangling the JSON content.
         output = self.run_cli(
-            self.global_args, 'list', '--format=json', '--verbose')
+            self.global_args, 'list', '--format=json', '--verbose', '--quiet')
 
         if output:
             for package in json.loads(output):
@@ -110,11 +114,11 @@ class Pip(PackageManager):
         return installed
 
     def search(self, query, extended, exact):
-        """ Fetch matching packages from ``pip search`` output.
+        """ Fetch matching packages.
 
         .. code-block:: shell-session
 
-            $ pip search --no-color abc
+            $ python -m pip --no-color search abc
             ABC (0.0.0)                 - UNKNOWN
             micropython-abc (0.0.1)     - Dummy abc module for MicroPython
             abc1 (1.2.0)                - a list about my think
@@ -166,13 +170,12 @@ class Pip(PackageManager):
 
     @cachedproperty
     def outdated(self):
-        """ Fetch outdated packages from ``pip list --outdated`` output.
-
-        Raw CLI output samples:
+        """ Fetch outdated packages.
 
         .. code-block:: shell-session
 
-            $ pip list --format=json --outdated --verbose --quiet | jq
+            $ python -m pip --no-color list --format=json --outdated \
+            > --verbose --quiet | jq
             [
               {
                 "latest_filetype": "wheel",
@@ -226,6 +229,8 @@ class Pip(PackageManager):
         """
         outdated = {}
 
+        # --quiet is required here to silence warning and error messages
+        # mangling the JSON content.
         output = self.run_cli(
             self.global_args, 'list', '--format=json', '--outdated',
             '--verbose', '--quiet')
@@ -242,25 +247,28 @@ class Pip(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id):
+        """ Build-up package upgrade CLI.
+
+        .. code-block:: shell-session
+
+            $ python -m pip --no-color install --user --upgrade six
+            Collecting six
+              Using cached six-1.15.0-py2.py3-none-any.whl (10 kB)
+            Installing collected packages: six
+              Attempting uninstall: six
+                Found existing installation: six 1.14.0
+                Uninstalling six-1.14.0:
+                  Successfully uninstalled six-1.14.0
+            Successfully installed six-1.15.0
+        """
         return [
             self.cli_path, self.global_args,
             'install', '--user', '--upgrade', package_id]
 
     def upgrade_all_cli(self):
-        """ Pip lacks support of a proper full upgrade command.
+        """ Pip lacks support of a proper full upgrade command. Raising an
+        error let the parent class upgrade packages one by one.
 
         See: https://github.com/pypa/pip/issues/59
         """
         raise NotImplementedError
-
-
-class Pip2(Pip):
-
-    name = "Python 2's Pip"
-    cli_name = 'pip2'
-
-
-class Pip3(Pip):
-
-    name = "Python 3's Pip"
-    cli_name = 'pip3'

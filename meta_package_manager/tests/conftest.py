@@ -45,8 +45,7 @@ MANAGER_IDS = frozenset([
     'mas',
     'npm',
     'opkg',
-    'pip2',
-    'pip3',
+    'pip',
     'snap',
     'yarn'])
 """ Hard-coded list of all supported manager IDs. """

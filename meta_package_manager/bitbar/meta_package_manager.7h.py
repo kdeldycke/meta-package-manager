@@ -144,11 +144,6 @@ def print_menu():
     """Print menu structure using BitBar's plugin API.
 
     See: https://github.com/matryer/bitbar#plugin-api
-
-    .. todo
-
-        Add minimal requirement on ``meta-package-manager`` module in the
-        invoked ``pip`` command.
     """
     # Search for generic mpm CLI on system.
     code, _, error = run('mpm')
@@ -159,9 +154,11 @@ def print_menu():
         print_error(error)
         echo("---")
         echo(
-            "Install / upgrade `mpm` CLI. | bash=pip param1=install "
-            "param2=--upgrade param3=meta-package-manager terminal=true "
-            "refresh=true {f_error}".format(f_error=FONTS['error']))
+            "Install / upgrade `mpm` CLI. | bash=python param1=-m param2=pip "
+            "param3=install param4=--upgrade "
+            "param5=\\\"meta-package-manager>=2.7.0\\\" terminal=true "
+            "refresh=true {f_error}".format(
+                f_error=FONTS['error']))
         return
 
     # Fetch list of all outdated packages from all package manager available on

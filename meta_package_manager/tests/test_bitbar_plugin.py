@@ -19,8 +19,6 @@
 
 import re
 
-import pytest
-
 from .. import bitbar
 from .conftest import run_cmd, unless_macos
 
@@ -31,31 +29,27 @@ newer.
 """
 
 
-@pytest.fixture(scope='function')
-def plugin_output():
+@unless_macos
+def test_simple_call():
+    """ Check default rendering is flat: no submenu. """
     code, output, error = run_cmd(bitbar.__file__)
     assert code == 0
     assert error is None
-    return output
-
-
-@unless_macos
-def test_simple_call(plugin_output):
-    """ Check default rendering is flat: no submenu. """
-    output = plugin_output
     for regex in [
-            r"^↑\d+ | dropdown=false$",
+            r"^↑\d+ (⚠️\d+ )?| dropdown=false$",
             r"^---$",
-            r"^Upgrade all | bash=.*$"]:
+            r"^\d+ outdated .+ packages? |  emojize=false$"]:
         assert re.search(regex, output, re.MULTILINE)
 
 
 @unless_macos
-def test_submenu_rendering(monkeypatch, plugin_output):
+def test_submenu_rendering(monkeypatch):
     monkeypatch.setenv("BITBAR_MPM_SUBMENU", "True")
-    output = plugin_output
+    code, output, error = run_cmd(bitbar.__file__)
+    assert code == 0
+    assert error is None
     for regex in [
-            r"^↑\d+ | dropdown=false$",
+            r"^↑\d+ (⚠️\d+ )?| dropdown=false$",
             r"^.+:\s+\d+ packages? \| font=Menlo size=12 emojize=false$",
             r"^--\S+ \S+ → \S+ \| bash=.+$",
             r"^-----$",

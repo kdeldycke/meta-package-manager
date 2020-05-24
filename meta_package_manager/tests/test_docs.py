@@ -18,6 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
+from pathlib import Path
 
 import pytest
 from boltons.iterutils import flatten

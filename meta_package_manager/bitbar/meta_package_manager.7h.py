@@ -31,12 +31,14 @@ from subprocess import PIPE, Popen
 PY2 = sys.version_info[0] == 2
 
 
-FLAT_LAYOUT = True
+SUBMENU_LAYOUT = bool(os.environ.get('BITBAR_MPM_SUBMENU', False) in {
+    True, 1, 'True', 'true', '1', 'y', 'yes', 'Yes'})
 """ Define the rendering mode of outdated packages list.
 
-Set this constant to ``False`` to replace the default flat layout with an
-alternative structure where all upgrade actions are put into submenus, one for
-each manager.
+Edit this script to force this constant to ``True``, or use the
+``BITBAR_MPM_SUBMENU`` environment variable. This will replace the default flat
+layout with an alternative structure where all upgrade actions are put into
+submenus, one for each manager.
 """
 
 
@@ -50,8 +52,8 @@ FONTS = {
     'package': '',                              # Indiviual packages
     'error':   'color=red font=Menlo size=12',  # Errors
 }
-# Use a monospaced font when using submenus
-if not FLAT_LAYOUT:
+# Use a monospaced font when using submenus.
+if SUBMENU_LAYOUT:
     FONTS['summary'] = 'font=Menlo size=12'
 
 
@@ -131,7 +133,7 @@ def print_package_items(packages, submenu=""):
 def print_upgrade_all_item(manager, submenu=""):
     """Print the menu entry to upgrade all outdated package of a manager."""
     if manager.get('upgrade_all_cli'):
-        if not FLAT_LAYOUT:
+        if SUBMENU_LAYOUT:
             echo("-----")
         echo(
             "{}Upgrade all | {} terminal=false refresh=true {f_normal}".format(
@@ -185,31 +187,19 @@ def print_menu():
         " ⚠️{}".format(total_errors) if total_errors else ""))
 
     # Print a full detailed section for each manager.
-    submenu = "--" if not FLAT_LAYOUT else ""
+    submenu = "--" if SUBMENU_LAYOUT else ""
 
-    if not FLAT_LAYOUT:
+    if SUBMENU_LAYOUT:
         # Compute maximal manager's name length.
         label_max_length = max([len(m['name']) for m in managers])
         max_outdated = max([len(m['packages']) for m in managers])
-
-    if not FLAT_LAYOUT:
         echo("---")
 
     for manager in managers:
-        if FLAT_LAYOUT:
-            echo("---")
-
         package_label = "package{}".format(
             's' if len(manager['packages']) > 1 else '')
 
-        if FLAT_LAYOUT:
-            echo("{0} outdated {1} {2} | {f_summary} emojize=false".format(
-                len(manager['packages']),
-                manager['name'],
-                package_label,
-                f_summary=FONTS['summary']))
-
-        else:
+        if SUBMENU_LAYOUT:
             # Non-flat layout use a compact table-like rendering of manager
             # summary.
             echo(
@@ -222,13 +212,20 @@ def print_menu():
                     max_length=label_max_length + 1,
                     max_outdated=len(str(max_outdated)),
                     f_summary=FONTS['summary']))
+        else:
+            echo("---")
+            echo("{0} outdated {1} {2} | {f_summary} emojize=false".format(
+                len(manager['packages']),
+                manager['name'],
+                package_label,
+                f_summary=FONTS['summary']))
 
         print_package_items(manager['packages'], submenu)
 
         print_upgrade_all_item(manager, submenu)
 
         for error_msg in manager.get('errors', []):
-            echo("---" if FLAT_LAYOUT else "-----")
+            echo("-----" if SUBMENU_LAYOUT else "---")
             print_error(error_msg, submenu)
 
 

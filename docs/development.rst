@@ -159,6 +159,18 @@ And once in a while, it's good to upgrade the `graph of package dependencies
     $ poetry show --all --no-dev --tree
 
 
+Screenshots
+-----------
+
+Once in a while, refresh screenshots found in the docs and the README file at
+the root of project.
+
+To produce clean and fancy terminals screenshots, use either:
+
+* https://graphite-shot.now.sh
+* https://github.com/carbon-app/carbon
+
+
 Release process
 ---------------
 

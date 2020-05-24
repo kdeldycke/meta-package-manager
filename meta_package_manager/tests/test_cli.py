@@ -303,23 +303,34 @@ class CLITableTests:
         (k, v[0], v[1]) for k, v in expected_renderings.items()])
     def test_all_table_rendering(
             self, invoke, subcmd, mode, expected, conflict):
+        """ Check that from all rendering modes, only the selected one appears
+        in <stdout> and only there. Any other mode are not expected neither in
+        <stdout> or <stderr>.
+        """
         result = invoke('--output-format', mode, subcmd)
         assert result.exit_code == 0
-        # Check the table is rendering in console's standard output (<stdout>)
-        # instead of error output (<stderr>), so the result can be grep-ed.
+
+        # Check the selected mode is indeed rendered in <stdout>, so the CLI
+        # result can be grep-ed.
         assert expected in result.stdout
-        assert expected not in result.stderr
-        # Check that all other expected output from other rendering modes are
-        # not appearing in output. Exclude obvious character sequences shorter
-        # than 3 characters to eliminate false negative.
+
+        # Collect all possible unique traces from all possible rendering modes.
         blacklist = {
             v[0] for v in self.expected_renderings.values()
-            if len(v[0]) > 2 and v[0] != expected}
+            # Exclude obvious character sequences shorter than 3 characters to
+            # eliminate false negative.
+            if len(v[0]) > 2}
         # Remove overlapping edge-cases.
         if conflict:
             blacklist.remove(self.expected_renderings[conflict][0])
+
         for unexpected in blacklist:
-            assert unexpected not in result.stdout
+            if unexpected != expected:
+                # The unexpected trace is not the selected one, it should not
+                # appears at all in stdout.
+                assert unexpected not in result.stdout
+            # Any expected output from all rendering modes must not appears in
+            # <stderr>, including the selected one.
             assert unexpected not in result.stderr
 
     def test_json_debug_output(self, invoke, subcmd):

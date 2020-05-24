@@ -15,6 +15,9 @@ Bitbar plugin for Meta Package Manager (a.k.a. the :command:`mpm` CLI).
 Default update cycle is set to 7 hours so we have a chance to get user's
 attention once a day. Higher frequency might ruin the system as all checks are
 quite resource intensive, and Homebrew might hit GitHub's API calls quota.
+
+Minimal BitBar requirement is Mac OS X Lion (10.7), which ships with Python
+2.7.1. So this plugin is supposed to support Python 2.7.1 or newer.
 """
 
 from __future__ import print_function, unicode_literals

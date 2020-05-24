@@ -15,6 +15,7 @@ Changelog
   Closes #9.
 * [mpm] Print table rendering, stats and timing in console output instead of
   logger to allow them to be greppable.
+* [bitbar] Test plugin with Python 2.7.
 * [mpm] Replace internal helpers with upstreamed ``boltons`` utils.
 * [mpm] Allow for manager-specific search path to help hunting down CLIs.
 * [mpm] Bump requirement to ``boltons 20.1.1``.

@@ -8,15 +8,21 @@ on:
 
 jobs:
 
-  unittests:
-    name: Unit-tests
+  tests:
+    name: Tests
+    runs-on: ${{matrix.os}}
     strategy:
       matrix:
         # See what each os came pre-installed with at:
         # https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.7, 3.8]
-    runs-on: ${{matrix.os}}
+        python-version: [2.7, 3.7, 3.8]
+        # Python 2.7 tests only targets BitBar plugins on macOS.
+        exclude:
+          - os: ubuntu-latest
+            python-version: 2.7
+          - os: windows-latest
+            python-version: 2.7
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{matrix.python-version}}
@@ -153,7 +159,12 @@ jobs:
       if: runner.os != 'Windows'
       run: |
         rm -rf .coverage*
-    - name: Unittests and coverage report in destructive mode
+    - name: Test BitBar plugin
+      if: runner.python-version == '2.7'
+      run: |
+        poetry run pytest meta_package_manager/tests/test_bitbar_plugin.py --cov-config=pyproject.toml --cov=./ --cov-report=xml
+    - name: Tests and coverage report in destructive mode
+      if: runner.python-version != '2.7'
       env:
         DESTRUCTIVE_TESTS: true
       # pyproject.toml config file is specified at CLI level instead of letting

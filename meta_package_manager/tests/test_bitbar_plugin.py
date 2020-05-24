@@ -21,6 +21,11 @@ from .. import bitbar
 from .conftest import run_cmd, unless_macos
 
 
+"""
+Like BitBar, this plugin is supposed to run smoothly with Python 2.7.1 or
+newer.
+"""
+
 @unless_macos
 def test_simple_call():
     code, output, error = run_cmd(bitbar.__file__)

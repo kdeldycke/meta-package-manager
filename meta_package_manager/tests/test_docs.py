@@ -18,7 +18,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
-from pathlib import Path
 
 import pytest
 from boltons.iterutils import flatten
@@ -27,18 +26,6 @@ from ..platform import OS_DEFINITIONS
 from .conftest import MANAGER_IDS
 
 """ Test documentation. """
-
-
-def test_real_fs():
-    """ Check the test in not caught into the CLI runner fixture which is
-    encapsulating all filesystem access into temporary directory structure. """
-    assert str(Path(__file__)).startswith(str(Path.cwd()))
-
-
-def test_temporary_fs(runner):
-    """ Check the CLI runner fixture properly encapsulated the filesystem in
-    temporary directory. """
-    assert not str(Path(__file__)).startswith(str(Path.cwd()))
 
 
 def test_changelog():

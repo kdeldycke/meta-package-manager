@@ -19,6 +19,7 @@
 
 import logging
 import re
+from pathlib import Path
 
 import click
 import pytest
@@ -32,6 +33,18 @@ from ..cli import RENDERING_MODES, WINDOWS_MODE_BLACKLIST
 from .conftest import MANAGER_IDS, run_cmd, unless_windows
 
 """ Common tests for all CLI basic features and templates for subcommands. """
+
+
+def test_real_fs():
+    """ Check a simple test is not caught into the CLI runner fixture which is
+    encapsulating all filesystem access into temporary directory structure. """
+    assert str(Path(__file__)).startswith(str(Path.cwd()))
+
+
+def test_temporary_fs(runner):
+    """ Check the CLI runner fixture properly encapsulated the filesystem in
+    temporary directory. """
+    assert not str(Path(__file__)).startswith(str(Path.cwd()))
 
 
 class TestBaseCLI:

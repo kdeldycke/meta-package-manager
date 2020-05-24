@@ -200,7 +200,7 @@ def print_menu():
             echo("---")
 
         package_label = "package{}".format(
-            's' if len(manager['packages']) != 1 else '')
+            's' if len(manager['packages']) > 1 else '')
 
         if FLAT_LAYOUT:
             echo("{0} outdated {1} {2} | {f_summary} emojize=false".format(

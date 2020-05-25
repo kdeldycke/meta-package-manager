@@ -163,7 +163,7 @@ jobs:
       if: matrix.python-version == '2.7'
       run: |
         # Pytest 4.6 is the last line supporting Python 2.7.
-        python -m pip install --upgrade "pytest==4.6"
+        python -m pip install --upgrade "pytest~=4.6" pytest-cov
         pytest meta_package_manager/tests/test_bitbar_plugin.py --cov-config=pyproject.toml --cov=./ --cov-report=xml
     - name: Tests and coverage report in destructive mode
       if: matrix.python-version != '2.7'

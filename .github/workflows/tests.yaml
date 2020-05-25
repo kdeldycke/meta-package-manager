@@ -160,11 +160,11 @@ jobs:
       run: |
         rm -rf .coverage*
     - name: Test BitBar plugin
-      if: runner.python-version == '2.7.*'
+      if: ${{ startsWith(runner.python-version, '2.7') }}
       run: |
         pytest meta_package_manager/tests/test_bitbar_plugin.py --cov-config=pyproject.toml --cov=./ --cov-report=xml
     - name: Tests and coverage report in destructive mode
-      if: runner.python-version != '2.7.*'
+      if: ${{ ! startsWith(runner.python-version, '2.7') }}
       env:
         DESTRUCTIVE_TESTS: true
       # pyproject.toml config file is specified at CLI level instead of letting

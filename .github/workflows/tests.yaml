@@ -160,8 +160,7 @@ jobs:
       run: |
         rm -rf .coverage*
     - name: Test BitBar plugin
-      with:
-        python-version: '2.7'
+      if: runner.python-version == '2.7.*'
       run: |
         pytest meta_package_manager/tests/test_bitbar_plugin.py --cov-config=pyproject.toml --cov=./ --cov-report=xml
     - name: Tests and coverage report in destructive mode

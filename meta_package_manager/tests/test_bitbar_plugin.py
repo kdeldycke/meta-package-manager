@@ -36,9 +36,9 @@ def test_simple_call():
     assert code == 0
     assert error is None
     for regex in [
-            r"^↑\d+ (⚠️\d+ )?| dropdown=false$",
+            r"^↑\d+ (⚠️\d+ )?\| dropdown=false$",
             r"^---$",
-            r"^\d+ outdated .+ packages? |  emojize=false$"]:
+            r"^\d+ outdated .+ packages? \|  emojize=false$"]:
         assert re.search(regex, output, re.MULTILINE)
 
 
@@ -49,9 +49,9 @@ def test_submenu_rendering(monkeypatch):
     assert code == 0
     assert error is None
     for regex in [
-            r"^↑\d+ (⚠️\d+ )?| dropdown=false$",
+            r"^↑\d+ (⚠️\d+ )?\| dropdown=false$",
             r"^.+:\s+\d+ packages? \| font=Menlo size=12 emojize=false$",
             r"^--\S+ \S+ → \S+ \| bash=.+$",
             r"^-----$",
-            r"^--Upgrade all | bash=.+$"]:
+            r"^--Upgrade all \| bash=.+$"]:
         assert re.search(regex, output, re.MULTILINE)

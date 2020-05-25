@@ -50,7 +50,7 @@ def test_submenu_rendering(monkeypatch):
     assert error is None
     for regex in [
             r"^↑\d+ (⚠️\d+ )?\| dropdown=false$",
-            r"^.+:\s+\d+ packages? \| font=Menlo size=12 emojize=false$",
+            r"^.+:\s+\d+ package(s| ) \| font=Menlo size=12 emojize=false$",
             r"^--\S+ \S+ → \S+ \| bash=.+$",
             r"^-----$",
             r"^--Upgrade all \| bash=.+$"]:

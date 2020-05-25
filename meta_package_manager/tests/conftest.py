@@ -126,7 +126,13 @@ def runner(request):
 def invoke(runner):
     """ Executes Click's CLI, print output and return results. """
 
-    def _run(*args, color=False):
+    # XXX Python 3-only function signature.
+    # TODO: Use the commented signature below once we drop special Python 2.7
+    # unittest for BitBar.
+    # def _run(*args, color=False):
+    def _run(*args, **kwargs):
+        color = kwargs.get('color', False)
+
         # We allow for nested iterables and None values as args for
         # convenience. We just need to flatten and filters them out.
         args = list(filter(None.__ne__, flatten(args)))

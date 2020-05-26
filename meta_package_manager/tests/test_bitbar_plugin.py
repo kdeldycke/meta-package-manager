@@ -44,8 +44,14 @@ class TestBibarPlugin(unittest.TestCase):
     of pytest.
     """
 
-    def bitbar_output_checks(self, checklist):
+    def bitbar_output_checks(self, checklist, env=None):
+        if env:
+            for var, value in env.items():
+                os.environ[var] = value
         code, output, error = bitbar.run(bitbar.__file__)
+        if env:
+            for var in env:
+                del os.environ[var]
         self.assertEqual(code, 0)
         self.assertIsNone(error)
         for regex in checklist:
@@ -59,10 +65,11 @@ class TestBibarPlugin(unittest.TestCase):
             r"^\d+ outdated .+ packages? \|  emojize=false$"])
 
     def test_submenu_rendering(self):
-        os.environ['BITBAR_MPM_SUBMENU'] = 'True'
-        self.bitbar_output_checks([
-            r"^↑\d+ (⚠️\d+ )?\| dropdown=false$",
-            r"^.+:\s+\d+ package(s| ) \| font=Menlo size=12 emojize=false$",
-            r"^--\S+ \S+ → \S+ \| bash=.+$",
-            r"^-----$",
-            r"^--Upgrade all \| bash=.+$"])
+        self.bitbar_output_checks(
+            [
+                r"^↑\d+ (⚠️\d+ )?\| dropdown=false$",
+                r"^.+:\s+\d+ package(s| ) \| font=Menlo size=12 emojize=false$",
+                r"^--\S+ \S+ → \S+ \| bash=.+$",
+                r"^-----$",
+                r"^--Upgrade all \| bash=.+$"],
+            env={'BITBAR_MPM_SUBMENU': 'True'})

@@ -65,11 +65,10 @@ class TestBibarPlugin(unittest.TestCase):
             r"^\d+ outdated .+ packages? \|  emojize=false$"])
 
     def test_submenu_rendering(self):
-        self.bitbar_output_checks(
-            [
-                r"^↑\d+ (⚠️\d+ )?\| dropdown=false$",
-                r"^.+:\s+\d+ package(s| ) \| font=Menlo size=12 emojize=false$",
-                r"^--\S+ \S+ → \S+ \| bash=.+$",
-                r"^-----$",
-                r"^--Upgrade all \| bash=.+$"],
-            env={'BITBAR_MPM_SUBMENU': 'True'})
+        self.bitbar_output_checks([
+            r"^↑\d+ (⚠️\d+ )?\| dropdown=false$",
+            r"^.+:\s+\d+ package(s| ) \| font=Menlo size=12 emojize=false$",
+            r"^--\S+ \S+ → \S+ \| bash=.+$",
+            r"^-----$",
+            r"^--Upgrade all \| bash=.+$"],
+                                  env={'BITBAR_MPM_SUBMENU': 'True'})

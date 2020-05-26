@@ -17,10 +17,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals
+)
+
+import os
 import re
+import sys
+import unittest
 
 from .. import bitbar
-from .conftest import run_cmd, unless_macos
 
 
 """
@@ -29,29 +38,31 @@ newer.
 """
 
 
-@unless_macos
-def test_simple_call():
-    """ Check default rendering is flat: no submenu. """
-    code, output, error = run_cmd(bitbar.__file__)
-    assert code == 0
-    assert error is None
-    for regex in [
+@unittest.skipUnless(sys.platform == 'darwin', 'macOS required')
+class TestBibarPlugin(unittest.TestCase):
+    """ This is the only test suite that is still using unittest module instead
+    of pytest.
+    """
+
+    def bitbar_output_checks(self, checklist):
+        code, output, error = bitbar.run(bitbar.__file__)
+        self.assertEqual(code, 0)
+        self.assertIsNone(error)
+        for regex in checklist:
+            self.assertRegexpMatches(output, re.compile(regex, re.MULTILINE))
+
+    def test_simple_call(self):
+        """ Check default rendering is flat: no submenu. """
+        self.bitbar_output_checks([
             r"^↑\d+ (⚠️\d+ )?\| dropdown=false$",
             r"^---$",
-            r"^\d+ outdated .+ packages? \|  emojize=false$"]:
-        assert re.search(regex, output, re.MULTILINE)
+            r"^\d+ outdated .+ packages? \|  emojize=false$"])
 
-
-@unless_macos
-def test_submenu_rendering(monkeypatch):
-    monkeypatch.setenv("BITBAR_MPM_SUBMENU", "True")
-    code, output, error = run_cmd(bitbar.__file__)
-    assert code == 0
-    assert error is None
-    for regex in [
+    def test_submenu_rendering(self):
+        os.environ['BITBAR_MPM_SUBMENU'] = 'True'
+        self.bitbar_output_checks([
             r"^↑\d+ (⚠️\d+ )?\| dropdown=false$",
             r"^.+:\s+\d+ package(s| ) \| font=Menlo size=12 emojize=false$",
             r"^--\S+ \S+ → \S+ \| bash=.+$",
             r"^-----$",
-            r"^--Upgrade all \| bash=.+$"]:
-        assert re.search(regex, output, re.MULTILINE)
+            r"^--Upgrade all \| bash=.+$"])

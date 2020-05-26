@@ -162,6 +162,8 @@ jobs:
     - name: Test BitBar plugin
       if: matrix.python-version == '2.7'
       run: |
+        # mpm 2.8 is the last supporting Python 2.7.
+        python -m pip install "meta-package-manager~=2.8"
         python -m unittest discover -p test_bitbar_plugin.py
     - name: Tests and coverage report in destructive mode
       if: matrix.python-version != '2.7'

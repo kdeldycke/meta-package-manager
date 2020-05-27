@@ -545,6 +545,44 @@ def search(ctx, extended, exact, query):
             range(range_end)) - int_list - set(range(range_start))
         return format_int_list(complement_values, delim, range_delim)
 
+    # XXX Local copy of boltons.strutils.int_ranges_from_int_list().
+    # TODO: Replace with the boltons util function above once 20.1.1.dev0 is
+    # released.
+    def int_ranges_from_int_list(range_string, delim=',', range_delim='-'):
+        """ Transform a string of ranges (*range_string*) into a tuple of
+        tuples.
+
+        Args:
+            range_string (str): String of comma separated positive integers or
+               ranges (e.g. '1,2,4-6,8'). Typical of a custom page range string
+               used in printer dialogs.
+            delim (char): Defaults to ','. Separates integers and contiguous
+               ranges of integers.
+            range_delim (char): Defaults to '-'. Indicates a contiguous range
+               of integers.
+
+        >>> int_ranges_from_int_list('1,3,5-8,10-11,15')
+        ((1, 1), (3, 3), (5, 8), (10, 11), (15, 15))
+
+        >>> int_ranges_from_int_list('1')
+        ((1, 1),)
+
+        >>> int_ranges_from_int_list('')
+        ()
+        """
+        int_tuples = []
+        # Normalize the range string to our internal format for processing.
+        range_string = format_int_list(
+            parse_int_list(range_string, delim, range_delim))
+        if range_string:
+            for bounds in range_string.split(','):
+                if '-' in bounds:
+                    start, end = bounds.split('-')
+                else:
+                    start, end = bounds, bounds
+                int_tuples.append((int(start), int(end)))
+        return tuple(int_tuples)
+
     @cached(LRI(max_size=1000))
     def highlight(string):
         # Ranges of character indices flagged for highlighting.

@@ -64,6 +64,11 @@ RENDERING_MODES = frozenset(RENDERING_MODES)
 #   return codecs.charmap_encode(input,self.errors,encoding_table)[0]
 # UnicodeEncodeError: 'charmap' codec can't encode characters in position
 #   0-140: character maps to <undefined>
+#
+# Fortunately, I found the fundamental issue and I no longer need to blacklist
+# some rendering modes. See: a3008f8c3a42efedd88378f087202b73d907bbb7 . I'll
+# still keep the construct around just in case I need to quickly blacklist
+# some.
 WINDOWS_MODE_BLACKLIST = frozenset([])
 
 # List of fields IDs allowed to be sorted.

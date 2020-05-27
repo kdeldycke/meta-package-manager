@@ -171,6 +171,19 @@ To produce clean and fancy terminals screenshots, use either:
 * https://github.com/carbon-app/carbon
 
 
+Changelog
+---------
+
+From time to time, especially before a release, review and rewrite the changelog
+to make it clean and readeable. The idea is to have it stays in the spirit of the
+[Keep a changelog manifesto](https://keepachangelog.com).
+
+Most (if not all) changes can be derived by simply comparing the last tagged
+release with the `develop` branch:
+``https://github.com/kdeldycke/meta-package-manager/compare/vX.X.X...develop``.
+This direct link should be available at the top of the `changelog <changelog.html>`__ .
+
+
 Release process
 ---------------
 

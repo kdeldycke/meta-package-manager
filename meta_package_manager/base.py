@@ -23,10 +23,10 @@ from shutil import which
 
 from boltons.cacheutils import cachedproperty
 from boltons.iterutils import flatten
-from boltons.strutils import indent, strip_ansi
+from boltons.strutils import indent
 from boltons.typeutils import classproperty
 
-from . import logger
+from . import logger, strip_ansi
 from .bitbar import run
 from .platform import CURRENT_OS_ID
 from .version import parse_version

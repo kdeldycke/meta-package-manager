@@ -32,15 +32,11 @@ import click
 import click_log
 import tomlkit
 from boltons.cacheutils import LRI, cached
-from boltons.strutils import (
-    complement_int_list,
-    int_ranges_from_int_list,
-    strip_ansi
-)
+from boltons.strutils import format_int_list, parse_int_list
 from cli_helpers.tabular_output import TabularOutputFormatter
 from simplejson import dumps as json_dumps
 
-from . import __version__, logger
+from . import __version__, logger, strip_ansi
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
 from .platform import CURRENT_OS_ID, WINDOWS, os_label
@@ -458,6 +454,96 @@ def search(ctx, extended, exact, query):
 
     # Prepare highlighting helpers.
     query_parts = {query}.union(map(str, TokenizedString(query)))
+
+    # XXX Local copy of boltons.strutils.complement_int_list().
+    # TODO: Replace with the boltons util function above once 20.1.1.dev0 is
+    # released.
+    def complement_int_list(
+            range_string, range_start=0, range_end=None,
+            delim=',', range_delim='-'):
+        """ Returns range string that is the complement of the one provided as
+        *range_string* parameter.
+
+        These range strings are of the kind produce by :func:`format_int_list`,
+        and parseable by :func:`parse_int_list`.
+
+        Args:
+            range_string (str): String of comma separated positive integers or
+               ranges (e.g. '1,2,4-6,8'). Typical of a custom page range string
+               used in printer dialogs.
+            range_start (int): A positive integer from which to start the
+               resulting range. Value is inclusive. Defaults to ``0``.
+            range_end (int): A positive integer from which the produced range
+               is stopped. Value is exclusive. Defaults to the maximum value
+               found in the provided ``range_string``.
+            delim (char): Defaults to ','. Separates integers and contiguous
+               ranges of integers.
+            range_delim (char): Defaults to '-'. Indicates a contiguous range
+               of integers.
+
+        >>> complement_int_list('1,3,5-8,10-11,15')
+        '0,2,4,9,12-14'
+
+        >>> complement_int_list('1,3,5-8,10-11,15', range_start=0)
+        '0,2,4,9,12-14'
+
+        >>> complement_int_list('1,3,5-8,10-11,15', range_start=1)
+        '2,4,9,12-14'
+
+        >>> complement_int_list('1,3,5-8,10-11,15', range_start=2)
+        '2,4,9,12-14'
+
+        >>> complement_int_list('1,3,5-8,10-11,15', range_start=3)
+        '4,9,12-14'
+
+        >>> complement_int_list('1,3,5-8,10-11,15', range_end=15)
+        '0,2,4,9,12-14'
+
+        >>> complement_int_list('1,3,5-8,10-11,15', range_end=14)
+        '0,2,4,9,12-13'
+
+        >>> complement_int_list('1,3,5-8,10-11,15', range_end=13)
+        '0,2,4,9,12'
+
+        >>> complement_int_list('1,3,5-8,10-11,15', range_end=20)
+        '0,2,4,9,12-14,16-19'
+
+        >>> complement_int_list('1,3,5-8,10-11,15', range_end=0)
+        ''
+
+        >>> complement_int_list('1,3,5-8,10-11,15', range_start=-1)
+        '0,2,4,9,12-14'
+
+        >>> complement_int_list('1,3,5-8,10-11,15', range_end=-1)
+        ''
+
+        >>> complement_int_list('1,3,5-8', range_start=1, range_end=1)
+        ''
+
+        >>> complement_int_list('1,3,5-8', range_start=2, range_end=2)
+        ''
+
+        >>> complement_int_list('1,3,5-8', range_start=2, range_end=3)
+        '2'
+
+        >>> complement_int_list('1,3,5-8', range_start=-10, range_end=-5)
+        ''
+
+        >>> complement_int_list('1,3,5-8', range_start=20, range_end=10)
+        ''
+
+        >>> complement_int_list('')
+        ''
+        """
+        int_list = set(parse_int_list(range_string, delim, range_delim))
+        if range_end is None:
+            if int_list:
+                range_end = max(int_list) + 1
+            else:
+                range_end = range_start
+        complement_values = set(
+            range(range_end)) - int_list - set(range(range_start))
+        return format_int_list(complement_values, delim, range_delim)
 
     @cached(LRI(max_size=1000))
     def highlight(string):

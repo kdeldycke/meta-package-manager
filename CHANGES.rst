@@ -16,10 +16,10 @@ Changelog
 * [mpm] Print table rendering, stats and timing in console output instead of
   logger to allow them to be greppable.
 * [bitbar] Test plugin with Python 2.7.
-* [mpm] Replace internal helpers with upstreamed ``boltons`` utils.
+* [mpm] Use local copy of ``boltons`` utils while we wait for upstream release.
 * [mpm] Allow for manager-specific search path to help hunting down CLIs.
-* [mpm] Bump requirement to ``boltons 20.1.1``.
 * [mpm] Bump development requirement to ``pylint 2.5``.
+* [mpm] Use local copy of ``boltons`` utils while we wait for upstream release.
 * [mpm] Move pylint config from ``setup.cfg`` to ``pyproject.toml``.
 * [mpm] Fail CI and QA checks if pylint score lower than 9.
 * [mpm] Add more platform definition unittests.

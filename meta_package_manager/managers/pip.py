@@ -20,7 +20,6 @@
 import re
 
 import simplejson as json
-from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
@@ -60,7 +59,7 @@ class Pip(PackageManager):
         if output:
             return parse_version(output.split()[1])
 
-    @cachedproperty
+    @property
     def installed(self):
         """ Fetch installed packages.
 
@@ -168,7 +167,7 @@ class Pip(PackageManager):
 
         return matches
 
-    @cachedproperty
+    @property
     def outdated(self):
         """ Fetch outdated packages.
 

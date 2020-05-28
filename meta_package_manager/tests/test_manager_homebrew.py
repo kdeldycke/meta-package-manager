@@ -101,14 +101,13 @@ class TestCask:
         assert "Übersicht" not in result.stdout
 
         # Look for reported available upgrade.
-        # TODO: replace with invoke, but the later somehow cache results.
-        code, output, error = run_cmd(
-            'mpm', '--include-auto-updates', '--manager', 'cask', 'outdated')
-        assert code == 0
-        assert not error
-        assert "ubersicht" in output
+        result = invoke(
+            '--include-auto-updates', '--manager', 'cask', 'outdated')
+        assert result.exit_code == 0
+        assert not result.stderr
+        assert "ubersicht" in result.stdout
         # Outdated subcommand does not fetch the unicode name by default.
-        assert "Übersicht" not in output
+        assert "Übersicht" not in result.stdout
 
     def test_multiple_names(self, invoke, install_cask):
         """ See #26. """
@@ -120,10 +119,9 @@ class TestCask:
         assert 'XLD.app' in output
 
         # Look for reported available upgrade.
-        # TODO: replace with invoke, but the later somehow cache results.
-        code, output, error = run_cmd(
-            'mpm', '--include-auto-updates', '--manager', 'cask', 'outdated')
-        assert code == 0
-        assert "xld" in output
+        result = invoke(
+            '--include-auto-updates', '--manager', 'cask', 'outdated')
+        assert result.exit_code == 0
+        assert "xld" in result.stdout
         # Outdated subcommand does not fetch the unicode name by default.
-        assert "X Lossless Decoder" not in output
+        assert "X Lossless Decoder" not in result.stdout

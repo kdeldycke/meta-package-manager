@@ -17,8 +17,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from boltons.cacheutils import cachedproperty
-
 from ..base import PackageManager
 from ..platform import LINUX
 from ..version import TokenizedString, parse_version
@@ -50,7 +48,7 @@ class Snap(PackageManager):
         if output:
             return parse_version(output.split()[1])
 
-    @cachedproperty
+    @property
     def installed(self):
         """ Fetch installed packages from ``snap list`` output.
 
@@ -120,7 +118,7 @@ class Snap(PackageManager):
                     'latest_version': parse_version(version)}
         return matches
 
-    @cachedproperty
+    @property
     def outdated(self):
         """ Fetch outdated packages from ``snap refresh --list`` output.
 

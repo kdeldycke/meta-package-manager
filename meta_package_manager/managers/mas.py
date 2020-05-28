@@ -19,8 +19,6 @@
 
 import re
 
-from boltons.cacheutils import cachedproperty
-
 from ..base import PackageManager
 from ..platform import MACOS
 from ..version import parse_version
@@ -41,7 +39,7 @@ class MAS(PackageManager):
         """ Fetch version from ``mas version`` output."""
         return parse_version(self.run_cli('version'))
 
-    @cachedproperty
+    @property
     def installed(self):
         """ Fetch installed packages from ``mas list`` output.
 
@@ -124,7 +122,7 @@ class MAS(PackageManager):
 
         return matches
 
-    @cachedproperty
+    @property
     def outdated(self):
         """ Fetch outdated packages from ``mas outdated`` output.
 

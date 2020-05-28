@@ -18,7 +18,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import simplejson as json
-from boltons.cacheutils import cachedproperty
 from boltons.iterutils import remap
 
 from ..base import PackageManager
@@ -46,7 +45,7 @@ class NPM(PackageManager):
         """
         return parse_version(self.run_cli('--version'))
 
-    @cachedproperty
+    @property
     def installed(self):
         """ Fetch installed packages from ``npm list`` output.
 
@@ -214,7 +213,7 @@ class NPM(PackageManager):
 
         return matches
 
-    @cachedproperty
+    @property
     def outdated(self):
         """ Fetch outdated packages from ``npm outdated`` output.
 

@@ -19,8 +19,6 @@
 
 import re
 
-from boltons.cacheutils import cachedproperty
-
 from ..base import PackageManager
 from ..platform import LINUX
 from ..version import TokenizedString, parse_version
@@ -56,7 +54,7 @@ class OPKG(PackageManager):
         super(OPKG, self).sync()
         self.run_cli(self.global_args, 'update')
 
-    @cachedproperty
+    @property
     def installed(self):
         """ Fetch installed packages from ``opkg list-installed`` output.
 
@@ -150,7 +148,7 @@ class OPKG(PackageManager):
 
         return matches
 
-    @cachedproperty
+    @property
     def outdated(self):
         """ Fetch outdated packages from ``opkg list-upgradable`` output.
 

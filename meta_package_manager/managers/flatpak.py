@@ -19,8 +19,6 @@
 
 import re
 
-from boltons.cacheutils import cachedproperty
-
 from ..base import PackageManager
 from ..platform import LINUX
 from ..version import parse_version
@@ -47,7 +45,7 @@ class Flatpak(PackageManager):
         if output:
             return parse_version(output.strip().split()[1])
 
-    @cachedproperty
+    @property
     def installed(self):
         """Fetch installed packages from ``flatpak list`` output.
 
@@ -128,7 +126,7 @@ class Flatpak(PackageManager):
 
         return matches
 
-    @cachedproperty
+    @property
     def outdated(self):
         """ Fetch outdated packages from ``flatpak remote-ls`` output.
 

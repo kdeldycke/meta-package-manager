@@ -118,8 +118,8 @@ def run_cmd(*args):
     return code, output, error
 
 
-@pytest.fixture
-def runner(request):
+@pytest.fixture(scope='session')
+def runner():
     runner = CliRunner(mix_stderr=False)
     with runner.isolated_filesystem():
         yield runner
@@ -158,7 +158,7 @@ def invoke(runner):
 
         return result
 
-    yield _run
+    return _run
 
 
 @pytest.fixture(scope="class")

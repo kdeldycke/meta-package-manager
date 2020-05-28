@@ -19,8 +19,6 @@
 
 import re
 
-from boltons.cacheutils import cachedproperty
-
 from ..base import PackageManager
 from ..platform import LINUX
 from ..version import parse_version
@@ -86,7 +84,7 @@ class APT(PackageManager):
         super(APT, self).sync()
         self.run_cli(self.global_args, 'update', '--quiet')
 
-    @cachedproperty
+    @property
     def installed(self):
         """ Fetch installed packages from ``apt list`` output.
 
@@ -225,7 +223,7 @@ class APT(PackageManager):
 
         return matches
 
-    @cachedproperty
+    @property
     def outdated(self):
         """ Fetch outdated packages from ``apt list`` output.
 

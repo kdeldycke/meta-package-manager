@@ -19,8 +19,6 @@
 
 import re
 
-from boltons.cacheutils import cachedproperty
-
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
 from ..version import parse_version
@@ -58,7 +56,7 @@ class Gem(PackageManager):
         """
         return parse_version(self.run_cli('--version'))
 
-    @cachedproperty
+    @property
     def installed(self):
         """ Fetch installed packages from ``gem list`` output.
 
@@ -158,7 +156,7 @@ class Gem(PackageManager):
 
         return matches
 
-    @cachedproperty
+    @property
     def outdated(self):
         """ Fetch outdated packages from ``gem outdated`` output.
 

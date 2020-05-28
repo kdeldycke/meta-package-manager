@@ -72,7 +72,7 @@ class Yarn(PackageManager):
             'installed_version': parse_version(version)
         }
 
-    @cachedproperty
+    @property
     def installed(self):
         """ Fetch installed packages from ``yarn list`` output.
 
@@ -197,7 +197,7 @@ class Yarn(PackageManager):
     def global_dir(self):
         return self.run_cli('global', 'dir').rstrip()
 
-    @cachedproperty
+    @property
     def outdated(self):
         """ Fetch outdated packages from ``yarn outdated`` output.
 

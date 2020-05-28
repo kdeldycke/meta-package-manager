@@ -20,7 +20,6 @@
 import re
 
 import simplejson as json
-from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
@@ -40,7 +39,7 @@ class Composer(PackageManager):
         if output:
             return parse_version(output.split()[2])
 
-    @cachedproperty
+    @property
     def installed(self):
         """ Fetch installed packages from ``composer global show`` output.
 
@@ -157,7 +156,7 @@ class Composer(PackageManager):
 
         return matches
 
-    @cachedproperty
+    @property
     def outdated(self):
         """ Fetch outdated packages from ``composer global outdated`` output.
 

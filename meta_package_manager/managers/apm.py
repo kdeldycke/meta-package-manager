@@ -18,7 +18,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import simplejson as json
-from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
@@ -39,7 +38,7 @@ class APM(PackageManager):
         if output:
             return parse_version(output.splitlines()[0].split()[1])
 
-    @cachedproperty
+    @property
     def installed(self):
         """ Fetch installed packages from ``apm list`` output.
 
@@ -267,7 +266,7 @@ class APM(PackageManager):
 
         return matches
 
-    @cachedproperty
+    @property
     def outdated(self):
         """ Fetch outdated packages from ``apm outdated`` output.
 

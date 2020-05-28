@@ -67,7 +67,7 @@ class Homebrew(PackageManager):
         super(Homebrew, self).sync()
         self.run_cli('update', '--quiet')
 
-    @cachedproperty
+    @property
     def installed(self):
         """ Fetch installed packages from ``brew list`` output.
 
@@ -214,7 +214,7 @@ class Homebrew(PackageManager):
 
         return matches
 
-    @cachedproperty
+    @property
     def outdated(self):
         """ Fetch outdated packages from ``brew outdated`` output.
 
@@ -373,7 +373,7 @@ class Cask(Homebrew):
         """
         return ['search', '--cask']
 
-    @cachedproperty
+    @property
     def outdated(self):
         """ Search for outdated packages among installed one.
 

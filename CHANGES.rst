@@ -8,6 +8,8 @@ Changelog
 .. note:: This version is not yet released and is under active development.
 
 * [snap] Add support for ``snap`` on Linux.
+* [cask] Rely on JSON output to fetch outdated packages.
+* [brew,cask] Bump minimal requirement to 2.2.15.
 * [pip] Remove ``pip2``/``pip3`` distinctions, use system's python and call
   ``pip`` module.
 * [windows] Allow blacklisting some table rendering on Windows.

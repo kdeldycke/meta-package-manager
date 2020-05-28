@@ -39,8 +39,8 @@ class Homebrew(PackageManager):
     platforms = frozenset([MACOS])
 
     # Vanilla brew and cask CLIs now shares the same version.
-    # 2.2.9 is the first release to support --formulae option in search.
-    requirement = '2.2.9'
+    # 2.2.15 is the first release to support JSON output for outdated casks.
+    requirement = '2.2.15'
 
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     cli_name = None
@@ -377,41 +377,47 @@ class Cask(Homebrew):
     def outdated(self):
         """ Search for outdated packages among installed one.
 
-        Raw CLI output samples:
+        .. code-block:: shell-session
+
+            ► brew cask outdated --json | jq
+            [
+              {
+                "name": "google-play-music-desktop-player",
+                "installed_versions": "4.4.0",
+                "current_version": "4.4.1"
+              },
+              {
+                "name": "prey",
+                "installed_versions": "1.8.3.upgrading",
+                "current_version": "1.9.3"
+              }
+            ]
 
         .. code-block:: shell-session
 
-            ► brew cask outdated
-            google-play-music-desktop-player (4.4.0) != 4.4.1
-
-        .. code-block:: shell-session
-
-            ► brew cask outdated --verbose
-            java (9.0.1,11) != 10,46:76eac37278c24557a3c4199677f19b62
-            prey (1.7.2) != 1.7.3
-            qlvideo (1.90) != 1.91
-            virtualbox (5.2.4-119785) != 5.2.8,121009
-
-        .. code-block:: shell-session
-
-            ► brew cask outdated --greedy --verbose
-            android-file-transfer (latest) != latest
-            atom (1.19.3) != 1.19.4
-            dropbox (latest) != latest
-            google-chrome (latest) != latest
-            google-drive (latest) != latest
-            google-play-music-desktop-player (4.4.0) != 4.4.1
-            karabiner-elements (0.90.92) != 0.91.13
-            osxfuse (3.5.6) != 3.6.3
-            qlimagesize (latest) != latest
-            qlrest (latest) != latest
-            quicklook-json (latest) != latest
-            steam (latest) != latest
+            ► brew cask outdated --json --greedy | jq u
+            [
+              {
+                "name": "android-file-transfer",
+                "installed_versions": "latest",
+                "current_version": "latest"
+              },
+              {
+                "name": "atom",
+                "installed_versions": "1.19.3",
+                "current_version": "1.19.4"
+              },
+              {
+                "name": "keybase",
+                "installed_versions": "4.0.0-20190507193726,6614a49937",
+                "current_version": "5.5.0-20200526170801,139bb348af"
+              }
+            ]
         """
         outdated = {}
 
         # Build up the list of CLI options.
-        options = ['--verbose']
+        options = ['--json']
         # Includes auto-update packages or not.
         if not self.ignore_auto_updates:
             options.append('--greedy')
@@ -420,10 +426,10 @@ class Cask(Homebrew):
         output = self.run_cli(self.global_args, 'outdated', options)
 
         if output:
-            regexp = re.compile(r'(\S+) \((.*)\) != (.*)')
-            for outdated_pkg in output.strip().splitlines():
-                package_id, version, latest_version = regexp.match(
-                    outdated_pkg).groups()
+            for pkg_info in json.loads(output):
+                package_id = pkg_info['name']
+                version = pkg_info['installed_versions']
+                latest_version = pkg_info['current_version']
 
                 # Skip packages in undetermined state.
                 if version == latest_version:

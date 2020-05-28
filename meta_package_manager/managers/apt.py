@@ -43,14 +43,14 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            $ apt --version
+            ► apt --version
             apt 1.2.15 (amd64)
 
         In Linux Mint, another command has to be used:
 
         .. code-block:: shell-session
 
-            $ apt version apt
+            ► apt version apt
             1.6.11
         """
         output = self.run_cli('--version')
@@ -73,7 +73,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            $ apt update --quiet
+            ► apt update --quiet
             Hit:1 http://archive.ubuntu.com xenial InRelease
             Get:2 http://archive.ubuntu.com xenial-updates InRelease [102 kB]
             Get:3 http://archive.ubuntu.com xenial-security InRelease [102 kB]
@@ -94,7 +94,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            $ apt list --installed --quiet
+            ► apt list --installed --quiet
             Listing...
             adduser/xenial,now 3.113+nmu3ubuntu4 all [installed]
             base-files/xenial-updates,now 9.4ubuntu4.3 amd64 [installed]
@@ -144,7 +144,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            $ apt search abc --names-only --quiet
+            ► apt search abc --names-only --quiet
             Sorting...
             Full Text Search...
             abcde/xenial 2.7.1-1 all
@@ -164,7 +164,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            $ apt search "^sed$" --names-only --quiet
+            ► apt search "^sed$" --names-only --quiet
             Sorting...
             Full Text Search...
             sed/xenial 2.1.9-3 all
@@ -172,7 +172,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            $ apt search abc --full --quiet
+            ► apt search abc --full --quiet
             Sorting...
             Full Text Search...
             abcde/xenial 2.7.1-1 all
@@ -233,7 +233,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            $ apt list --upgradable --quiet
+            ► apt list --upgradable --quiet
             Listing...
             apt/xenial-updates 1.2.19 amd64 [upgradable from: 1.2.15ubuntu0.2]
             nano/xenial-updates 2.5.3-2ubuntu2 amd64 [upgradable from: 2.5.3-2]
@@ -273,7 +273,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            $ sudo apt-get -y autoremove
+            ► sudo apt-get -y autoremove
         """
         super(APT, self).cleanup()
         self.run('sudo', self.cli_path, self.global_args, '-y', 'autoremove')

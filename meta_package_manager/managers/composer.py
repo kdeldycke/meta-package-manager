@@ -48,7 +48,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            $ composer global show --format=json | jq
+            ► composer global show --format=json | jq
             {
               "installed": [
                 {
@@ -94,7 +94,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            $ composer global search symfony
+            ► composer global search symfony
             symfony/symfony The Symfony PHP framework
             symfony/yaml Symfony Yaml Component
             symfony/var-dumper Symfony (...) dumping PHP variables
@@ -113,7 +113,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            $ composer global search --only-name python
+            ► composer global search --only-name python
             hiqdev/hidev-python
             aanro/pythondocx
             laravel-admin-ext/python-editor
@@ -125,7 +125,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            $ search global --only-name pythonphp/pythonphp
+            ► search global --only-name pythonphp/pythonphp
             pythonphp/pythonphp
         """
         matches = {}
@@ -165,7 +165,7 @@ class Composer(PackageManager):
 
             .. code-block:: shell-session
 
-            $ composer global outdated --format=json
+            ► composer global outdated --format=json
             {
                 "installed": [
                     {
@@ -215,7 +215,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            $ composer global clear-cache
+            ► composer global clear-cache
 
         See: https://getcomposer.org/doc/03-cli.md#clear-cache-clearcache-cc
         """

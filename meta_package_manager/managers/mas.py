@@ -49,7 +49,7 @@ class MAS(PackageManager):
 
         .. code-block:: shell-session
 
-            $ mas list
+            ► mas list
             408981434 iMovie (10.1.4)
             747648890 Telegram (2.30)
         """
@@ -81,7 +81,7 @@ class MAS(PackageManager):
 
         .. code-block:: shell-session
 
-            $ mas search python
+            ► mas search python
                689176796  Python Runner   (1.3)
                630736088  Learning Python (1.0)
                945397020  Run Python      (1.0)
@@ -132,7 +132,7 @@ class MAS(PackageManager):
 
         .. code-block:: shell-session
 
-            $ mas outdated
+            ► mas outdated
 
         .. todo
 

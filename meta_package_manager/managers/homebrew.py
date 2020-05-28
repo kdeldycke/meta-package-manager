@@ -52,7 +52,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            $ brew --version
+            ► brew --version
             Homebrew 1.8.6-124-g6cd4c31
             Homebrew/homebrew-core (git revision 533d; last commit 2018-12-28)
             Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
@@ -80,7 +80,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            $ brew list --versions
+            ► brew list --versions
             ack 2.14
             apg 2.2.3
             audacity (!) 2.1.2
@@ -95,7 +95,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            $ brew cask list --versions
+            ► brew cask list --versions
             aerial 1.2beta5
             android-file-transfer latest
             audacity (!) 2.1.2
@@ -139,7 +139,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            $ brew search sed
+            ► brew search sed
             ==> Formulae
             gnu-sed ✔                    libxdg-basedir               minised
             ==> Casks
@@ -150,13 +150,13 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            $ brew search --formulae sed
+            ► brew search --formulae sed
             ==> Formulae
             gnu-sed ✔                    libxdg-basedir               minised
 
         .. code-block:: shell-session
 
-            $ brew search --cask sed
+            ► brew search --cask sed
             ==> Casks
             eclipse-dsl                       marsedit
             focused                           physicseditor
@@ -165,20 +165,20 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            $ brew search --formulae python
+            ► brew search --formulae python
             ==> Formulae
             app-engine-python   boost-python3   python ✔          python-yq
             boost-python        gst-python      python-markdown   python@3.8 ✔
 
         .. code-block:: shell-session
 
-            $ brew search --formulae "/^ssed$/"
+            ► brew search --formulae "/^ssed$/"
             ==> Formulae
             ssed
 
         .. code-block:: shell-session
 
-            $ brew search --formulae "/^sed$/"
+            ► brew search --formulae "/^sed$/"
             No formula or cask found for "/^sed$/".
             Closed pull requests:
             Merge ba7a794 (https://github.com/Homebrew/linuxbrew-core/pull/198)
@@ -222,7 +222,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            $ brew outdated --json=v1
+            ► brew outdated --json=v1
             [
               {
                 "name": "cassandra",
@@ -270,7 +270,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            $ brew upgrade
+            ► brew upgrade
             ==> Upgrading 2 outdated packages:
             node 13.11.0 -> 13.12.0
             sdl2 2.0.12 -> 2.0.12_1
@@ -315,7 +315,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            $ brew cleanup -s
+            ► brew cleanup -s
             Removing: ~/Library/Caches/Homebrew/node--1.bottle.tar.gz... (9MB)
             Warning: Skipping sdl2: most recent version 2.0.12_1 not installed
             Removing: ~/Library/Caches/Homebrew/Cask/aerial--1.8.1.zip... (5MB)
@@ -341,7 +341,7 @@ class Brew(Homebrew):
 
         .. code-block:: shell-session
 
-            $ brew search --formulae sed
+            ► brew search --formulae sed
             ==> Formulae
             gnu-sed ✔                    libxdg-basedir               minised
         """
@@ -364,7 +364,7 @@ class Cask(Homebrew):
 
         .. code-block:: shell-session
 
-            $ brew search --cask sed
+            ► brew search --cask sed
             ==> Casks
             eclipse-dsl                       marsedit
             focused                           physicseditor
@@ -381,12 +381,12 @@ class Cask(Homebrew):
 
         .. code-block:: shell-session
 
-            $ brew cask outdated
+            ► brew cask outdated
             google-play-music-desktop-player (4.4.0) != 4.4.1
 
         .. code-block:: shell-session
 
-            $ brew cask outdated --verbose
+            ► brew cask outdated --verbose
             java (9.0.1,11) != 10,46:76eac37278c24557a3c4199677f19b62
             prey (1.7.2) != 1.7.3
             qlvideo (1.90) != 1.91
@@ -394,7 +394,7 @@ class Cask(Homebrew):
 
         .. code-block:: shell-session
 
-            $ brew cask outdated --greedy --verbose
+            ► brew cask outdated --greedy --verbose
             android-file-transfer (latest) != latest
             atom (1.19.3) != 1.19.4
             dropbox (latest) != latest

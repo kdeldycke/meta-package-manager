@@ -53,7 +53,7 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            $ python -m pip --no-color --version
+            ► python -m pip --no-color --version
             pip 2.0.2 from /usr/local/lib/python/site-packages/pip (python 3.7)
         """
         output = self.run_cli(self.global_args, '--version')
@@ -66,7 +66,7 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            $ python -m pip list --no-color --format=json --verbose --quiet \
+            ► python -m pip list --no-color --format=json --verbose --quiet \
             > | jq
             [
              {
@@ -118,7 +118,7 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            $ python -m pip --no-color search abc
+            ► python -m pip --no-color search abc
             ABC (0.0.0)                 - UNKNOWN
             micropython-abc (0.0.1)     - Dummy abc module for MicroPython
             abc1 (1.2.0)                - a list about my think
@@ -174,7 +174,7 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            $ python -m pip --no-color list --format=json --outdated \
+            ► python -m pip --no-color list --format=json --outdated \
             > --verbose --quiet | jq
             [
               {
@@ -251,7 +251,7 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            $ python -m pip --no-color install --user --upgrade six
+            ► python -m pip --no-color install --user --upgrade six
             Collecting six
               Using cached six-1.15.0-py2.py3-none-any.whl (10 kB)
             Installing collected packages: six

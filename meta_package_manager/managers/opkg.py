@@ -39,7 +39,7 @@ class OPKG(PackageManager):
 
         .. code-block:: shell-session
 
-            $ opkg --version
+            ► opkg --version
             opkg version 0.3.6 (libsolv 0.7.5)
         """
         output = self.run_cli('--version')
@@ -63,7 +63,7 @@ class OPKG(PackageManager):
         Raw CLI output samples:
 
         .. code-block:: shell-session
-            $ opkg list-installed
+            ► opkg list-installed
             3rd-party-feed-configs - 1.1-r0
             aio-grab - 1.0+git71+c79e264-r0
             alsa-conf - 1.1.9-r0
@@ -158,7 +158,7 @@ class OPKG(PackageManager):
 
         .. code-block:: shell-session
 
-            $ opkg list-upgradable
+            ► opkg list-upgradable
             openpli-bootlogo - 20190717-r0 - 20190718-r0
             enigma2-hotplug - 2.7+git1720+55c6b34-r0 - 2.7+git1722+daf2f52-r0
         """

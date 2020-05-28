@@ -41,7 +41,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            $ npm --version
+            ► npm --version
             6.13.7
         """
         return parse_version(self.run_cli('--version'))
@@ -54,7 +54,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            $ npm list -g --json | jq
+            ► npm list -g --json | jq
             {
               "dependencies": {
                 "npm": {
@@ -115,7 +115,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            $ npm search python --json | jq
+            ► npm search python --json | jq
             [
               {
                 "name": "python",
@@ -222,7 +222,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            $ npm -g --progress=false --json outdated
+            ► npm -g --progress=false --json outdated
             {
               "my-linked-package": {
                 "current": "0.0.0-development",

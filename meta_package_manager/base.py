@@ -20,7 +20,9 @@
 import os
 from pathlib import Path
 from shutil import which
+from textwrap import indent
 
+import click
 from boltons.cacheutils import cachedproperty
 from boltons.iterutils import flatten
 from boltons.strutils import indent
@@ -218,8 +220,8 @@ class PackageManager:
         """
         # Serialize Path objects to strings.
         args = list(map(str, flatten(args)))
-        args_str = ' '.join(args)
-        logger.debug(f"Running `{args_str}`...")
+        args_str = click.style(' '.join(args), fg='white')
+        logger.debug(f"► {args_str}")
 
         code = 0
         output = None
@@ -245,7 +247,8 @@ class PackageManager:
             logger.error(error)
             self.cli_errors.append(exception)
 
-        logger.debug(output)
+        if output:
+            logger.debug(indent(output, '  '))
 
         return output
 

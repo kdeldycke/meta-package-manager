@@ -20,7 +20,9 @@
 # pylint: disable=redefined-outer-name
 
 import os
+from textwrap import indent
 
+import click
 import pytest
 from boltons.iterutils import flatten
 from boltons.tbutils import ExceptionInfo
@@ -94,8 +96,9 @@ unless_windows = pytest.mark.skipif(
 
 def print_cli_output(cmd, output):
     """ Simulate CLI output. Used to print debug traces in test results. """
-    print(u"\n$ {}".format(' '.join(cmd)))
-    print(output)
+    print(u"\n► {}".format(click.style(' '.join(cmd), fg='white')))
+    if output:
+        print(indent(output, '  '))
 
 
 def run_cmd(*args):
@@ -108,9 +111,9 @@ def run_cmd(*args):
     print_cli_output(args, output)
 
     # Print some more debug info.
-    print("Return code: {}".format(code))
+    print(click.style("Return code: {}".format(code), fg='yellow'))
     if error:
-        print(error)
+        print(indent(click.style(error, fg='red'), '  '))
 
     return code, output, error
 

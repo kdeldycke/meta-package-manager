@@ -53,7 +53,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            $ gem --version
+            ► gem --version
             3.0.3
         """
         return parse_version(self.run_cli('--version'))
@@ -66,7 +66,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            $ gem list --quiet
+            ► gem list --quiet
             bigdecimal (default: 1.4.1)
             bundler (default: 1.17.2)
             CFPropertyList (2.3.6)
@@ -111,7 +111,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            $ gem search python --versions --quiet
+            ► gem search python --versions --quiet
             at_coder_friends-generator-python_ref (0.2.0)
             bee_python (0.2.3)
             dependabot-python (0.117.5)
@@ -124,7 +124,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            $ gem search python --versions --exact --quiet
+            ► gem search python --versions --exact --quiet
             python (0.0.1)
         """
         matches = {}
@@ -166,7 +166,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            $ gem outdated
+            ► gem outdated
             did_you_mean (1.0.0 < 1.0.2)
             io-console (0.4.5 < 0.4.6)
             json (1.8.3 < 2.0.1)
@@ -197,7 +197,7 @@ class Gem(PackageManager):
         cmd = [self.cli_path, 'update', '--user-install', self.global_args]
         # Installs require `sudo` on system ruby.
         # I (@tresni) recommend doing something like:
-        #     $ sudo dseditgroup -o edit -a -t user wheel
+        #     ► sudo dseditgroup -o edit -a -t user wheel
         # And then do `visudo` to make it so the `wheel` group does not require
         # a password. There is a line already there for it, you just need to
         # uncomment it and save.)
@@ -217,7 +217,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            $ gem cleanup
+            ► gem cleanup
             Cleaning up installed gems...
             Attempting to uninstall test-unit-3.2.9
             Unable to uninstall test-unit-3.2.9:

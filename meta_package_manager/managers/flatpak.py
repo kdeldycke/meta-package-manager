@@ -40,7 +40,7 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            $ flatpak --version
+            ► flatpak --version
             Flatpak 1.4.2
         """
         output = self.run_cli('--version')
@@ -55,7 +55,7 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            $ flatpak list --app --columns=name,application,version \
+            ► flatpak list --app --columns=name,application,version \
             > --ostree-verbose
             Name                      Application ID                   Version
             Peek                      com.uploadedlobster.peek         1.3.1
@@ -90,7 +90,7 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            $ flatpak search gitg --ostree-verbose
+            ► flatpak search gitg --ostree-verbose
             gitg    GUI for git        org.gnome.gitg  3.32.1  stable  flathub
         """
         matches = {}
@@ -136,7 +136,7 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            $ flatpak remote-ls --app --updates --ostree-verbose
+            ► flatpak remote-ls --app --updates --ostree-verbose
             GNOME Dictionary    org.gnome.Dictionary    3.26.0  stable  x86_64
         """
         outdated = {}
@@ -185,7 +185,7 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            $ flatpak repair --user
+            ► flatpak repair --user
 
         See: https://docs.flatpak.org/en/latest
         /flatpak-command-reference.html#flatpak-repair

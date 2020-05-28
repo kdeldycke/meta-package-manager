@@ -47,7 +47,7 @@ class APM(PackageManager):
 
         .. code-block:: shell-session
 
-            $ apm list --json | jq
+            ► apm list --json | jq
             {
               "core": [
                 {
@@ -159,7 +159,7 @@ class APM(PackageManager):
 
         .. code-block:: shell-session
 
-            $ apm search python --json | jq
+            ► apm search python --json | jq
             [
               {
                 "name": "atom-python-run",
@@ -275,7 +275,7 @@ class APM(PackageManager):
 
         .. code-block:: shell-session
 
-            $ apm outdated --compatible --json | jq
+            ► apm outdated --compatible --json | jq
             [
               {
                 "_args": [

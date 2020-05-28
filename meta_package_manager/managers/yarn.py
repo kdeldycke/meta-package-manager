@@ -78,7 +78,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-           $ yarn global --json --no-progress --non-interactive \
+           ► yarn global --json --no-progress --non-interactive \
            > --skip-integrity-check list --depth 0
 
             (...)
@@ -96,7 +96,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            $ yarn --no-progress --non-interactive --skip-integrity-check \
+            ► yarn --no-progress --non-interactive --skip-integrity-check \
             > --json info python | jq
             {
               "type": "inspect",
@@ -205,7 +205,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-           $ yarn --json --no-progress --non-interactive \
+           ► yarn --json --no-progress --non-interactive \
            > --skip-integrity-check outdated --cwd
 
             (...)

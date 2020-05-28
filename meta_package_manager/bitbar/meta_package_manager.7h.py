@@ -81,8 +81,6 @@ def fix_environment():
 def run(*args):
     """Run a shell command, return error code, output and error message."""
     assert isinstance(args, tuple)
-    if args:
-        assert set(map(type, args)) == {str}
     try:
         process = Popen(args, stdout=PIPE, stderr=PIPE)
     except OSError:

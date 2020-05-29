@@ -118,7 +118,7 @@ def run_cmd(*args):
     return code, output, error
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def runner():
     runner = CliRunner(mix_stderr=False)
     with runner.isolated_filesystem():

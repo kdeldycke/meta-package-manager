@@ -2,6 +2,7 @@ name: Unittests
 on:
   push:
   pull_request:
+  create:
   schedule:
     # Run tests every week to catch regressions from external dependencies.
     - cron: 17 9 * * 1
@@ -180,11 +181,11 @@ jobs:
       uses: codecov/codecov-action@v1
 
   lint:
-    name: Lint
+    name: Lint and check code
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.x
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
@@ -196,16 +197,16 @@ jobs:
         poetry run pylint meta_package_manager
         poetry run isort --apply
 
-  packaging:
-    name: Packaging tests
+  build:
+    name: Build, check and deploy package
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.x
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
-    - name: Check building package works
+    - name: Build package
       run: |
         pip install poetry
         poetry install
@@ -214,4 +215,13 @@ jobs:
       run: |
         poetry check
         poetry run twine check ./dist/*
+    - name: Push package to public PyPi repository
+      # Only triggers on tagging.
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      uses: pypa/gh-action-pypi-publish@v1.1.0
+      with:
+        user: __token__
+        password: ${{secrets.pypi_token}}
+    - name: Test post release version bump
+      run: |
         poetry run bumpversion --verbose patch

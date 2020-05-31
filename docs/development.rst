@@ -214,6 +214,13 @@ Create a release commit, tag it and merge it back to ``master`` branch:
     $ git merge "vX.Y.Z"
     $ git push
 
+The next phases of the release process are automated and should be picked up by
+GitHub actions. If not, the next section details the manual deployment process.
+
+
+Manual build and deployment
+---------------------------
+
 Build packages:
 
 .. code-block:: shell-session
@@ -247,8 +254,14 @@ and set it back to development state by increasing the ``patch`` level.
     $ git commit -m "Post release version bump."
     $ git push
 
-Now if the next revision is no longer bug-fix only, bump the ``minor``
-revision level instead:
+
+Version bump
+------------
+
+Versions are automatticaly bumped to their next ``patch`` revision at release
+(see above). In the middle of your development, if the upcoming release is no
+longer bug-fix only, or gets really important, feel free to bump to the next
+``minor`` or ``major``:
 
 .. code-block:: shell-session
 

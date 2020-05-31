@@ -38,10 +38,50 @@ A [recent study shows that 70% of vulnerabilities lies in outdated libraries](ht
 This is the primary use case of ``mpm`` and the first reason I built it.
 
 
-Source packages
----------------
+Fills the gap between managers
+------------------------------
 
-You just learned of a fantastic ``broot`` CLI from a friend. Back to your terminal, you can easely search for it and choose your preferred package manager to install it:
+Some package manager are missing features.
+
+For instance, `pip doesn't can't upgrade all outdated package <https://github.com/pypa/pip/issues/4551>`_ with a single command. ``mpm`` adds that missing feature:
+
+.. code-block:: shell-session
+
+    $ mpm --manager pip upgrade
+    Updating all outdated packages from pip...
+    warning: pip doesn't seems to implement a full upgrade subcommand. Call
+    single-package upgrade CLI one by one.
+
+    Collecting boltons
+      Using cached boltons-20.1.0-py2.py3-none-any.whl (169 kB)
+    Installing collected packages: boltons
+    Successfully installed boltons-20.1.0
+
+    Collecting graphviz
+      Using cached graphviz-0.14-py2.py3-none-any.whl (18 kB)
+    Installing collected packages: graphviz
+    Successfully installed graphviz-0.14
+
+    Collecting tomlkit
+      Using cached tomlkit-0.6.0-py2.py3-none-any.whl (31 kB)
+    Installing collected packages: tomlkit
+    Successfully installed tomlkit-0.6.0
+
+    Collecting urllib3
+      Using cached urllib3-1.25.9-py2.py3-none-any.whl (126 kB)
+    Installing collected packages: urllib3
+    Successfully installed urllib3-1.25.9
+
+    Collecting zipp
+      Using cached zipp-3.1.0-py3-none-any.whl (4.9 kB)
+    Installing collected packages: zipp
+    Successfully installed zipp-3.1.0
+
+
+Explore repositories
+--------------------
+
+You just learned of a new CLI you did not known about (``broot``) from a friend. Back to your terminal, you can easely search for it accross all package repositories, then choose your preferred package manager to install it:
 
 .. code-block:: shell-session
 
@@ -59,7 +99,7 @@ You just learned of a fantastic ``broot`` CLI from a friend. Back to your termin
     (...)
     🍺  /usr/local/Cellar/broot/0.13.6: 8 files, 3.5MB
 
-No need to track down the CLI on Github and read the documentation (if it exists in the first place). Or which package manager got the latest version.
+Thanks to ``mpm`` we were able to choose quickly the place from which we sourced ``broot`` to get the latest version. No need to track down the CLI on Github and read the documentation (if it even exists).
 
 .. todo::
 

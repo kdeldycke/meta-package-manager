@@ -22,7 +22,6 @@ Changelog
 * [mpm] Print table rendering, stats and timing in console output instead of
   logger to allow them to be greppable.
 * [bitbar] Test plugin with Python 2.7.
-* [mpm] Use local copy of ``boltons`` utils while we wait for upstream release.
 * [mpm] Allow for manager-specific search path to help hunting down CLIs.
 * [mpm] Highlight CLI and indent results in debug output.
 * [mpm] Bump dependency to ``pylint 2.5`` and ``cli-helpers 2.0``.

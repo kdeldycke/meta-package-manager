@@ -200,9 +200,9 @@ jobs:
       if: github.event_name == 'push' && github.event.ref == 'develop'
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        commit_user_name: GitHub Actions
-        commit_user_email: action@github.com
-        commit_message: [lint] Sort python module imports.
+        commit_user_name: "GitHub Actions"
+        commit_user_email: "action@github.com"
+        commit_message: "[lint] Sort python module imports."
         file_pattern: *.py
 
   lint:

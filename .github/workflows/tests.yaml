@@ -184,6 +184,7 @@ jobs:
     name: Automaticcaly format and clean up code pushed to develop branch
     if: github.event_name == 'push' && github.event.ref == 'develop'
     runs-on: ubuntu-latest
+    steps:
     - uses: actions/checkout@v2
     - name: Set up Python
       uses: actions/setup-python@v2

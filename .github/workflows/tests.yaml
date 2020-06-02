@@ -11,6 +11,8 @@ jobs:
 
   tests:
     name: Tests
+    # No need to get furher if code style doesn't check.
+    needs: lint
     runs-on: ${{matrix.os}}
     strategy:
       matrix:

@@ -180,8 +180,25 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
 
+  auto-format:
+    name: Automaticcaly format and clean up code pushed to develop branch
+    if: github.event_name == 'push' && github.event.ref == 'develop'
+    runs-on: ubuntu-latest
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Sort imports
+      run: |
+        pip install poetry
+        poetry install
+        poetry run isort --apply
+
   lint:
     name: Lint and check code
+    # No need to lint before the auto formatting did its job.
+    needs: auto-format
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -195,7 +212,6 @@ jobs:
         poetry install
         poetry run pycodestyle
         poetry run pylint meta_package_manager
-        poetry run isort --apply
 
   build:
     name: Build, check and deploy package

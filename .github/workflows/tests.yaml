@@ -2,7 +2,6 @@ name: Unittests
 on:
   push:
   pull_request:
-  create:
   schedule:
     # Run tests every week to catch regressions from external dependencies.
     - cron: 17 9 * * 1
@@ -11,8 +10,6 @@ jobs:
 
   tests:
     name: Tests
-    # No need to get furher if code style doesn't check.
-    needs: lint
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
@@ -181,77 +178,3 @@ jobs:
         poetry run pytest --cov-config=pyproject.toml --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
-
-  auto-format:
-    name: Automaticcaly format and clean up code
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        # Required by git-auto-commit-action. See:
-        # https://github.com/stefanzweifel/git-auto-commit-action#checkout-the-correct-branch
-        ref: ${{github.head_ref}}
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - name: Sort imports
-      run: |
-        pip install poetry
-        poetry install
-        poetry run isort --apply
-    - name: Commit and push changes only on develop branch
-      if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.event.ref == 'develop')
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        commit_user_name: "GitHub Actions"
-        commit_user_email: "action@github.com"
-        commit_message: "[lint] Sort python module imports."
-        file_pattern: "*.py"
-
-  lint:
-    name: Lint and check code
-    # No need to lint before the auto formatting did its job.
-    needs: auto-format
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - name: Check coding style
-      run: |
-        pip install poetry
-        poetry install
-        poetry run pycodestyle
-        poetry run pylint meta_package_manager
-
-  build:
-    name: Build, check and deploy package
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - name: Build package
-      run: |
-        pip install poetry
-        poetry install
-        poetry build
-    - name: Validates package metadata
-      run: |
-        poetry check
-        poetry run twine check ./dist/*
-    - name: Push package to public PyPi repository
-      # Only triggers on tagging.
-      if: github.event_name == 'create' && github.event.ref_type == 'tag'
-      uses: pypa/gh-action-pypi-publish@v1.1.0
-      with:
-        user: __token__
-        password: ${{secrets.pypi_token}}
-    - name: Test post release version bump
-      run: |
-        poetry run bumpversion --verbose patch

@@ -1,0 +1,34 @@
+name: Build and distribute package
+on:
+  create:
+
+jobs:
+
+  build:
+    name: Build, check and deploy package
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Build package
+      run: |
+        pip install poetry
+        poetry install
+        poetry build
+    - name: Validates package metadata
+      run: |
+        poetry check
+        poetry run twine check ./dist/*
+    - name: Push package to public PyPi repository
+      # Only triggers on tagging.
+      if: github.event_name == 'create' && github.event.ref_type == 'tag'
+      uses: pypa/gh-action-pypi-publish@v1.1.0
+      with:
+        user: __token__
+        password: ${{secrets.pypi_token}}
+    - name: Test post release version bump
+      run: |
+        poetry run bumpversion --verbose patch

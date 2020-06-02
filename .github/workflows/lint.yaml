@@ -1,6 +1,10 @@
 name: Code linting
 on:
   push:
+    branches:
+      # QA on master is too late: we shouldn't mess with the code at this
+      # point.
+      - !master
   pull_request:
 
 jobs:
@@ -25,7 +29,6 @@ jobs:
         poetry run isort --apply
     - name: Commit and push changes
       # Only allow autocommits on develop branch and pull requests.
-      if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.event.ref == 'develop')
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_user_name: "GitHub Actions"

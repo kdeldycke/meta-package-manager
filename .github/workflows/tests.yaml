@@ -183,8 +183,7 @@ jobs:
       uses: codecov/codecov-action@v1
 
   auto-format:
-    name: Automaticcaly format and clean up code pushed to develop branch
-    if: github.event_name == 'push' && github.event.ref == 'develop'
+    name: Automaticcaly format and clean up code
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -197,6 +196,14 @@ jobs:
         pip install poetry
         poetry install
         poetry run isort --apply
+    - name: Commit and push changes only on develop branch
+      if: github.event_name == 'push' && github.event.ref == 'develop'
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_user_name: GitHub Actions
+        commit_user_email: action@github.com
+        commit_message: [lint] Sort python module imports.
+        file_pattern: *.py
 
   lint:
     name: Lint and check code

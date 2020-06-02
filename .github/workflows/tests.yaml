@@ -187,6 +187,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        # Required by git-auto-commit-action. See:
+        # https://github.com/stefanzweifel/git-auto-commit-action#checkout-the-correct-branch
+        ref: ${{github.head_ref}}
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -197,7 +201,7 @@ jobs:
         poetry install
         poetry run isort --apply
     - name: Commit and push changes only on develop branch
-      if: github.event_name == 'push' && github.event.ref == 'develop'
+      if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.event.ref == 'develop')
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_user_name: "GitHub Actions"

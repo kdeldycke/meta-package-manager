@@ -27,9 +27,9 @@ import simplejson as json
 from boltons.iterutils import flatten
 from cli_helpers.tabular_output import TabularOutputFormatter
 
-from .conftest import MANAGER_IDS, run_cmd, unless_windows
 from .. import __version__, logger, strip_ansi
-from ..cli import RENDERING_MODES, WINDOWS_MODE_BLACKLIST, cli
+from ..cli import RENDERING_MODES, WINDOWS_MODE_BLACKLIST
+from .conftest import MANAGER_IDS, unless_windows
 
 """ Common tests for all CLI basic features and templates for subcommands. """
 

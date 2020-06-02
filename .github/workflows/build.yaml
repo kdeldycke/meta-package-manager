@@ -1,5 +1,7 @@
 name: Build and distribute package
 on:
+  push:
+  pull_request:
   create:
 
 jobs:

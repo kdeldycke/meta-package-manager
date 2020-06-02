@@ -19,7 +19,6 @@
 
 import functools
 import logging
-import re
 from datetime import datetime
 from functools import partial
 from io import TextIOWrapper
@@ -35,6 +34,8 @@ from boltons.cacheutils import LRI, cached
 from boltons.strutils import format_int_list, parse_int_list
 from cli_helpers.tabular_output import TabularOutputFormatter
 from simplejson import dumps as json_dumps
+
+import re
 
 from . import __version__, logger, strip_ansi
 from .base import CLI_FORMATS, CLIError, PackageManager

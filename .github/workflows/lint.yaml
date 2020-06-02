@@ -5,7 +5,7 @@ on:
       - '**'  # matches all branches.
       # QA on master is too late: we shouldn't mess with the code at this
       # point.
-      - !master
+      - '!master'
   pull_request:
 
 jobs:

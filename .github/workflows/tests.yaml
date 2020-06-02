@@ -203,7 +203,7 @@ jobs:
         commit_user_name: "GitHub Actions"
         commit_user_email: "action@github.com"
         commit_message: "[lint] Sort python module imports."
-        file_pattern: *.py
+        file_pattern: "*.py"
 
   lint:
     name: Lint and check code

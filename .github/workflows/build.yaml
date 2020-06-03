@@ -46,7 +46,9 @@ jobs:
         password: ${{secrets.PYPI_TOKEN}}
 
   version-bump:
-    - name: Test post-release version bump
-      # needs: release
+    name: Test post-release version bump
+    # needs: release
+    steps:
+    - name: Bump patch revision
       run: |
         poetry run bumpversion --verbose patch

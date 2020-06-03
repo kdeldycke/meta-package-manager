@@ -2,12 +2,11 @@ name: Build and distribute package
 on:
   push:
   pull_request:
-  create:
 
 jobs:
 
   build:
-    name: Build, check and deploy package
+    name: Build and check package
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -24,13 +23,30 @@ jobs:
       run: |
         poetry check
         poetry run twine check ./dist/*
-    - name: Push package to public PyPi repository
-      # Only triggers on tagging.
-      if: github.event_name == 'create' && github.event.ref_type == 'tag'
-      uses: pypa/gh-action-pypi-publish@v1.1.0
+
+  release:
+    name: Create a release on GitHub
+    needs: build
+    # Only triggers on version tagging.
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        files: ./dist/*
+
+  pypi:
+    name: Push package to public PyPi repository
+    needs: release
+    steps:
+    - uses: pypa/gh-action-pypi-publish@v1.1.0
       with:
         user: __token__
-        password: ${{secrets.pypi_token}}
-    - name: Test post release version bump
+        password: ${{secrets.PYPI_TOKEN}}
+
+  version-bump:
+    - name: Test post-release version bump
+      # needs: release
       run: |
         poetry run bumpversion --verbose patch

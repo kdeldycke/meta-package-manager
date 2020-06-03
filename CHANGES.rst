@@ -7,6 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Automate creation of GitHib release.
 * [mpm] Automate publishing of package to PyPi on tagging.
 * [mpm] Automate auto-sorting of module imports.
 

@@ -1,5 +1,6 @@
 # Print all contest ti help debug and build-up actions.
 # Source: https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#example-printing-context-information-to-the-log-file
+name: Env variables
 on: push
 
 jobs:

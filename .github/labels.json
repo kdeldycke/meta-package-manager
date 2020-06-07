@@ -1,0 +1,117 @@
+[
+    {
+        "name": "BitBar plugin",
+        "color": "#fef2c0",
+        "description": null
+    },
+    {
+        "name": "bug",
+        "color": "#ee0701",
+        "description": null
+    },
+    {
+        "name": "documentation",
+        "color": "#d4c5f9",
+        "description": null
+    },
+    {
+        "name": "duplicate",
+        "color": "#cccccc",
+        "description": null
+    },
+    {
+        "name": "enhancement",
+        "color": "#84b6eb",
+        "description": null
+    },
+    {
+        "name": "help wanted",
+        "color": "#128A0C",
+        "description": null
+    },
+    {
+        "name": "invalid",
+        "color": "#e6e6e6",
+        "description": null
+    },
+    {
+        "name": "manager: apm",
+        "color": "#bfdadc",
+        "description": null
+    },
+    {
+        "name": "manager: brew",
+        "color": "#bfdadc",
+        "description": null
+    },
+    {
+        "name": "manager: cask",
+        "color": "#bfdadc",
+        "description": null
+    },
+    {
+        "name": "manager: composer",
+        "color": "#bfdadc",
+        "description": null
+    },
+    {
+        "name": "manager: dpkg-like",
+        "color": "#bfdadc",
+        "description": "apt, dpkg, opkg"
+    },
+    {
+        "name": "manager: flatpak",
+        "color": "#bfdadc",
+        "description": null
+    },
+    {
+        "name": "manager: gem",
+        "color": "#bfdadc",
+        "description": null
+    },
+    {
+        "name": "manager: mas",
+        "color": "#bfdadc",
+        "description": null
+    },
+    {
+        "name": "manager: npm-like",
+        "color": "#bfdadc",
+        "description": "npm, yarn"
+    },
+    {
+        "name": "manager: pip",
+        "color": "#bfdadc",
+        "description": null
+    },
+    {
+        "name": "manager: snap",
+        "color": "#bfdadc",
+        "description": null
+    },
+    {
+        "name": "platform: Linux",
+        "color": "#bfd4f2",
+        "description": null
+    },
+    {
+        "name": "platform: Windows",
+        "color": "#bfd4f2",
+        "description": null
+    },
+    {
+        "name": "platform: macOS",
+        "color": "#bfd4f2",
+        "description": null
+    },
+    {
+        "name": "question",
+        "color": "#cc317c",
+        "description": null
+    },
+    {
+        "name": "wontfix",
+        "color": "#ffffff",
+        "description": null
+    }
+]

@@ -10,6 +10,7 @@ Changelog
 * [mpm] Automate creation of GitHib release.
 * [mpm] Automate publishing of package to PyPi on tagging.
 * [mpm] Automate auto-sorting of module imports.
+* [mpm] Automate GitHub label management.
 
 
 `3.2.0 (2020-05-31) <https://github.com/kdeldycke/meta-package-manager/compare/v3.1.0...v3.2.0>`_

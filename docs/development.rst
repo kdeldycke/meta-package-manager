@@ -159,6 +159,16 @@ And once in a while, it's good to upgrade the `graph of package dependencies
     $ poetry show --all --no-dev --tree
 
 
+GitHub labels
+-------------
+
+When adding a new platform or manager, regenerate labels:
+
+.. code-block:: shell-session
+
+    $ poetry run generate_labels
+
+
 Screenshots
 -----------
 

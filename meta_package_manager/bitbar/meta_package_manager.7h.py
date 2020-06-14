@@ -121,12 +121,22 @@ def print_error(message, submenu=""):
             "".format(submenu, line, f_error=FONTS['error']))
 
 
+def print_cli_item(item):
+    """Print two CLI entries:
+    * one that is silent
+    * a second one that is the exact copy of the above but forces the execution
+      by the way of a visible terminal
+    """
+    echo("{} terminal=false".format(item))
+    echo("{} terminal=true alternate=true".format(item))
+
+
 def print_package_items(packages, submenu=""):
     """Print a menu entry for each outdated packages available for upgrade."""
     for pkg_info in packages:
-        echo(
+        print_cli_item(
             "{}{name} {installed_version} → {latest_version} | {upgrade_cli}"
-            " terminal=false refresh=true {f_package} emojize=false".format(
+            " refresh=true {f_package} emojize=false".format(
                 submenu, f_package=FONTS['package'], **pkg_info))
 
 
@@ -135,8 +145,8 @@ def print_upgrade_all_item(manager, submenu=""):
     if manager.get('upgrade_all_cli'):
         if SUBMENU_LAYOUT:
             echo("-----")
-        echo(
-            "{}Upgrade all | {} terminal=false refresh=true {f_normal}".format(
+        print_cli_item(
+            "{}Upgrade all | {} refresh=true {f_normal}".format(
                 submenu, manager['upgrade_all_cli'], f_normal=FONTS['normal']))
 
 

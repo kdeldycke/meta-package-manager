@@ -7,6 +7,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [bitbar] Each entry in the drop-down menu can now be called into a terminal
+  to track the execution by holding the ``Option`` key.
 * [mpm] Automate creation of GitHib release.
 * [mpm] Automate publishing of package to PyPi on tagging.
 * [mpm] Automate auto-sorting of module imports.

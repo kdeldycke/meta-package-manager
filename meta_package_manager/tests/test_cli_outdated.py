@@ -31,6 +31,11 @@ def subcmd():
     return 'outdated'
 
 
+BITBAR_KEYWORDS = {
+   'bash',
+}.union({"param{}".format(i) for i in range(1, 10)})
+
+
 class TestOutdated(CLISubCommandTests, CLITableTests):
 
     @pytest.mark.parametrize('mid', MANAGER_IDS)
@@ -103,3 +108,8 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
             for infos in outdated['packages']:
                 assert isinstance(infos['upgrade_cli'], str)
                 assert 'param1=' in infos['upgrade_cli']
+                for param in infos['upgrade_cli'].split(' '):
+                    k, v = param.split('=', 1)
+                    assert k in BITBAR_KEYWORDS
+                    assert set(v.lower()).issubset(
+                        '0123456789abcdefghijklmnopqrstuvwxyz./-_="\\@')

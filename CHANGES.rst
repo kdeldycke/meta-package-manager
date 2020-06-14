@@ -9,6 +9,7 @@ Changelog
 
 * [bitbar] Each entry in the drop-down menu can now be called into a terminal
   to track the execution by holding the ``Option`` key.
+* [bitbar] Fix rendering of upgrade CLI in Bitbar dialect.
 * [mpm] Automate creation of GitHib release.
 * [mpm] Automate publishing of package to PyPi on tagging.
 * [mpm] Automate auto-sorting of module imports.

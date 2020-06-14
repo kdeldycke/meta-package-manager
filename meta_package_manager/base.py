@@ -328,22 +328,30 @@ class PackageManager:
 
     @staticmethod
     def render_cli(cmd, cli_format='plain'):
-        """ Return a formatted CLI as string in the provided format. """
+        """ Return a formatted CLI in the requested format.
+
+        * ``plain`` returns a simple string
+        * ``fragments`` returns a list of strings
+        * ``bitbar`` returns a CLI with parameters formatted into the bitbar
+        dialect.
+        """
         assert isinstance(cmd, list)
         assert cli_format in CLI_FORMATS
-        cmd = list(map(str, cmd))  # Serialize Path instances.
-        if cli_format != 'fragments':
-            cmd = ' '.join(cmd)
-            if cli_format == 'bitbar':
-                cmd = PackageManager.render_bitbar_cli(cmd)
-        return cmd
+        cmd = map(str, flatten(cmd))  # Serialize Path instances.
 
-    @staticmethod
-    def render_bitbar_cli(full_cli):
-        """ Format a bash-runnable full-CLI with parameters into bitbar schema.
-        """
-        cmd, params = full_cli.strip().split(' ', 1)
-        bitbar_cli = "bash={}".format(cmd)
-        for index, param in enumerate(params.split(' ')):
-            bitbar_cli += " param{}={}".format(index + 1, param)
+        if cli_format == 'fragments':
+            return list(cmd)
+
+        if cli_format == 'plain':
+            return ' '.join(cmd)
+
+        # Renders the CLI into BitBar dialect.
+        bitbar_cli = ''
+        for index, param in enumerate(cmd):
+            if index == 0:
+                bitbar_cli += "bash={}".format(param)
+            else:
+                if '=' in param:
+                    param = "\\\"{}\\\"".format(param)
+                bitbar_cli += " param{}={}".format(index, param)
         return bitbar_cli

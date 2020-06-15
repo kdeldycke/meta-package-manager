@@ -32,7 +32,8 @@ from .platform import ALL_OS_LABELS
 def generate_labels():
     """ Generate GitHub labels to use in issues and PR management.
     """
-    label_defs = Path('../.github/labels.json').resolve()
+    json_file = Path(__file__).parent.joinpath(
+        '../.github/labels.json').resolve()
 
     # Format: label name, color, optional description.
     LABELS = [
@@ -62,12 +63,12 @@ def generate_labels():
         LABELS.append((
             'platform: {}'.format(platform_id), PLATFORM_COLOR, None))
 
-    # Create one label per manager.
-    grouped_managers = set(flatten(MANAGER_GROUPS.values()))
-    for manager_id in pool():
-        if manager_id not in grouped_managers:
-            LABELS.append((
-                'manager: {}'.format(manager_id), MANAGER_COLOR, None))
+    # Create one label per manager. Add mpm as its own manager.
+    non_grouped_managers = set(
+        pool()) - set(flatten(MANAGER_GROUPS.values())) | {'mpm'}
+    for manager_id in non_grouped_managers:
+        LABELS.append((
+            'manager: {}'.format(manager_id), MANAGER_COLOR, None))
 
     # Add labels for grouped managers.
     for group_label, manager_ids in MANAGER_GROUPS.items():
@@ -75,13 +76,18 @@ def generate_labels():
             'manager: {}'.format(group_label), MANAGER_COLOR,
             ', '.join(sorted(manager_ids))))
 
+    # Debug messages.
+    for label_name, _, _ in sorted(LABELS):
+        print("Generated label: {}".format(label_name))
+    print("{} labels generated.".format(len(LABELS)))
+    print("Saving to: {}".format(json_file))
+
     # Save to json definition file.
     label_defs = [
         dict(zip(['name', 'color', 'description'], label))
         for label in sorted(LABELS)]
-    Path(__file__).parent.joinpath('../.github/labels.json').resolve().open(
-        'w').write(json_dumps(
-            label_defs,
-            indent=4,
-            separators=(',', ': '),
-        ))
+    json_file.open('w').write(json_dumps(
+        label_defs,
+        indent=4,
+        separators=(',', ': '),
+    ))

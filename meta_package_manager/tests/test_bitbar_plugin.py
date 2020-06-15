@@ -28,6 +28,7 @@ import os
 import re
 import sys
 import unittest
+from collections import Counter
 
 from .. import bitbar
 
@@ -44,6 +45,18 @@ class TestBibarPlugin(unittest.TestCase):
     of pytest.
     """
 
+    common_checklist = [
+        # Menubar line. Required.
+        (r"↑\d+ (⚠️\d+ )?\| dropdown=false$", True),
+        # Package upgrade line. Optional: there might be no package to
+        # upgrade.
+        (r"(--)?\S+ \S+ → \S+ \| bash=.+$", False),
+        # Submenu marker line. Required.
+        (r"-{3,5}$", True),
+        # Upgrade all line. Required.
+        (r"(--)?Upgrade all \| bash=.+$", True),
+    ]
+
     def bitbar_output_checks(self, checklist, env=None):
         if env:
             for var, value in env.items():
@@ -54,21 +67,44 @@ class TestBibarPlugin(unittest.TestCase):
                 del os.environ[var]
         self.assertEqual(code, 0)
         self.assertIsNone(error)
-        for regex in checklist:
-            self.assertRegexpMatches(output, re.compile(regex, re.MULTILINE))
+
+        checks = checklist + self.common_checklist
+
+        match_counter = Counter()
+
+        for line in output.splitlines():
+            # The line is expected to match at least one regexp.
+            matches = False
+            for index, (regex, _) in enumerate(checks):
+                if re.match(regex, line):
+                    matches = True
+                    match_counter[index] += 1
+                    break
+            if not matches:
+                self.fail(
+                    "BitBar output line {!r} did not match any regexp."
+                    "".format(line))
+
+        # Check all required regexp did match at least once.
+        for index, (regex, required) in enumerate(checks):
+            if required and not match_counter[index]:
+                self.fail(
+                    "{!r} regex did not match any BitBar plugin output line."
+                    "".format(regex))
 
     def test_simple_call(self):
         """ Check default rendering is flat: no submenu. """
         self.bitbar_output_checks([
-            r"^↑\d+ (⚠️\d+ )?\| dropdown=false$",
-            r"^---$",
-            r"^\d+ outdated .+ packages? \|  emojize=false$"])
+            # Summary package statistics. Required.
+            (r"\d+ outdated .+ packages? \|  emojize=false$", True),
+        ])
 
     def test_submenu_rendering(self):
         self.bitbar_output_checks([
-            r"^↑\d+ (⚠️\d+ )?\| dropdown=false$",
-            r"^.+:\s+\d+ package(s| ) \| font=Menlo size=12 emojize=false$",
-            r"^--\S+ \S+ → \S+ \| bash=.+$",
-            r"^-----$",
-            r"^--Upgrade all \| bash=.+$"],
-                                  env={'BITBAR_MPM_SUBMENU': 'True'})
+            # Submenu entry line with summary. Required.
+            (r".+:\s+\d+ package(s| ) \| font=Menlo size=12 emojize=false$",
+             True),
+            # Error line. Optional.
+            (r"--.+ \| color=red font=Menlo size=12 trim=false emojize=false$",
+             False),
+        ], env={'BITBAR_MPM_SUBMENU': 'True'})

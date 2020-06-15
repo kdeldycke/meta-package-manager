@@ -75,6 +75,11 @@
         "description": null
     },
     {
+        "name": "manager: mpm",
+        "color": "#bfdadc",
+        "description": null
+    },
+    {
         "name": "manager: npm-like",
         "color": "#bfdadc",
         "description": "npm, yarn"

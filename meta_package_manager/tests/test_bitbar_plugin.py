@@ -55,6 +55,9 @@ class TestBibarPlugin(unittest.TestCase):
         (r"-{3,5}$", True),
         # Upgrade all line. Required.
         (r"(--)?Upgrade all \| bash=.+$", True),
+        # Error line. Optional.
+        (r"(--)?.+ \| color=red font=Menlo size=12 trim=false emojize=false$",
+         False),
     ]
 
     def bitbar_output_checks(self, checklist, env=None):
@@ -104,7 +107,4 @@ class TestBibarPlugin(unittest.TestCase):
             # Submenu entry line with summary. Required.
             (r".+:\s+\d+ package(s| ) \| font=Menlo size=12 emojize=false$",
              True),
-            # Error line. Optional.
-            (r"--.+ \| color=red font=Menlo size=12 trim=false emojize=false$",
-             False),
         ], env={'BITBAR_MPM_SUBMENU': 'True'})

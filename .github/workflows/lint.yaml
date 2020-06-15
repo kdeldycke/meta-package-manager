@@ -25,7 +25,8 @@ jobs:
         python-version: '3.x'
     - name: Sort imports
       run: |
-        pip install poetry
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade poetry
         poetry install
         poetry run isort --apply
     - name: Commit and push changes
@@ -50,7 +51,8 @@ jobs:
         python-version: '3.x'
     - name: Check coding style
       run: |
-        pip install poetry
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade poetry
         poetry install
         poetry run pycodestyle
         poetry run pylint meta_package_manager

@@ -14,7 +14,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install mpm
       run: |
-        pip install poetry
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade poetry
         poetry install
     - name: Generate labels
       run: |

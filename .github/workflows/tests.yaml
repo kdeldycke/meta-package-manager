@@ -150,7 +150,7 @@ jobs:
     # Mpm
     - name: Install mpm and its dependencies
       run: |
-        pip install poetry
+        python -m pip install --upgrade poetry
         poetry install
     - name: mpm CLI output for debugging
       run: |

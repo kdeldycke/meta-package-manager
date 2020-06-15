@@ -32,8 +32,8 @@ jobs:
         git stash -- ./.github/labels.json
         # Reset all repository.
         git checkout --force
-        # Restore modified file.
-        git stash pop
+        # Restore modified file. Do not fail if no file has been stashed.
+        git stash pop || true
     - name: Create PR
       uses: peter-evans/create-pull-request@v2
       with:

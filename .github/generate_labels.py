@@ -25,8 +25,8 @@ from pathlib import Path
 from boltons.iterutils import flatten
 from simplejson import dumps as json_dumps
 
-from .managers import pool
-from .platform import ALL_OS_LABELS
+from meta_package_manager.managers import pool
+from meta_package_manager.platform import ALL_OS_LABELS
 
 
 def generate_labels():
@@ -93,3 +93,7 @@ def generate_labels():
         indent=4,
         separators=(',', ': '),
     ))
+
+
+if __name__ == '__main__':
+    generate_labels()

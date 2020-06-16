@@ -6,17 +6,22 @@
     },
     {
         "name": "bug",
-        "color": "#ee0701",
+        "color": "#d73a4a",
+        "description": null
+    },
+    {
+        "name": "can't reproduce",
+        "color": "#fec1c1",
         "description": null
     },
     {
         "name": "documentation",
-        "color": "#d4c5f9",
+        "color": "#006b75",
         "description": null
     },
     {
         "name": "duplicate",
-        "color": "#cccccc",
+        "color": "#cfd3d7",
         "description": null
     },
     {
@@ -25,13 +30,18 @@
         "description": null
     },
     {
-        "name": "help wanted",
-        "color": "#128A0C",
+        "name": "feature request",
+        "color": "#fbca04",
         "description": null
     },
     {
-        "name": "invalid",
-        "color": "#e6e6e6",
+        "name": "good first issue",
+        "color": "#7057ff",
+        "description": null
+    },
+    {
+        "name": "help wanted",
+        "color": "#008672",
         "description": null
     },
     {
@@ -111,12 +121,12 @@
     },
     {
         "name": "question",
-        "color": "#cc317c",
+        "color": "#d876e3",
         "description": null
     },
     {
-        "name": "wontfix",
-        "color": "#ffffff",
+        "name": "wont do/fix",
+        "color": "#eeeeee",
         "description": null
     }
 ]

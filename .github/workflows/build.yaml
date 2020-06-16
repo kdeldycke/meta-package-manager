@@ -23,7 +23,7 @@ jobs:
     - name: Attach packages to workflow run for later inspection and debugging
       uses: actions/upload-artifact@v2
       with:
-        name: build-artifacts
+        name: mpm-python-packages
         path: ./dist/*
     - name: Validates package metadata
       run: |

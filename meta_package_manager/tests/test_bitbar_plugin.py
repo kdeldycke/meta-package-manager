@@ -54,7 +54,7 @@ class TestBibarPlugin(unittest.TestCase):
         # Submenu marker line. Required.
         (r"-{3,5}$", True),
         # Upgrade all line. Required.
-        (r"(--)?Upgrade all \| bash=.+$", True),
+        (r"(--)?Upgrade all \| bash=.+$", False),
         # Error line. Optional.
         (r"(--)?.+ \| color=red font=Menlo size=12 trim=false emojize=false$",
          False),

@@ -23,7 +23,7 @@ jobs:
         poetry install
     - name: Generate labels
       run: |
-        python ./.github/generate_labels.py
+        poetry run python ./.github/generate_labels.py
     - name: Discard all local changes but the label definitions file
       run: |
         # Remove untracked directories and files.

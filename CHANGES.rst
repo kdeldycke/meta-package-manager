@@ -13,6 +13,7 @@ Changelog
 * [mpm] Force test marked as ``xfail`` count as failure if they succeed.
 * [mpm] Automate creation of GitHib release.
 * [mpm] Automate publishing of package to PyPi on tagging.
+* [mpm] Save build artifacts on each CI runs.
 * [mpm] Automate auto-sorting of module imports.
 * [mpm] Automate GitHub label generation and synchronization.
 

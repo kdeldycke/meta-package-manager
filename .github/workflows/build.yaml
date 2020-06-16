@@ -20,6 +20,11 @@ jobs:
         python -m pip install --upgrade poetry
         poetry install
         poetry build
+    - name: Attach packages to workflow run for later inspection and debugging
+      uses: actions/upload-artifact@v2
+      with:
+        name: build-artifacts
+        path: ./dist/*
     - name: Validates package metadata
       run: |
         poetry check

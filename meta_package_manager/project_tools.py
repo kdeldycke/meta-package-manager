@@ -37,15 +37,17 @@ def generate_labels():
 
     # Format: label name, color, optional description.
     LABELS = [
-        ('BitBar plugin',   '#fef2c0', None),
-        ('bug',             '#ee0701', None),
-        ('documentation',   '#d4c5f9', None),
-        ('duplicate',       '#cccccc', None),
-        ('enhancement',     '#84b6eb', None),
-        ('help wanted',     '#128A0C', None),
-        ('invalid',         '#e6e6e6', None),
-        ('question',        '#cc317c', None),
-        ('wontfix',         '#ffffff', None),
+        ("BitBar plugin",       '#fef2c0', None),
+        ("bug",                 '#d73a4a', None),
+        ("documentation",       '#006b75', None),
+        ("duplicate",           '#cfd3d7', None),
+        ("enhancement",         '#84b6eb', None),
+        ("feature request",     '#fbca04', None),
+        ("good first issue",    '#7057ff', None),
+        ("help wanted",         '#008672', None),
+        ("can't reproduce",     '#fec1c1', None),
+        ("question",            '#d876e3', None),
+        ("wont do/fix",         '#eeeeee', None),
     ]
 
     # Define some colors.

@@ -12,6 +12,7 @@ Changelog
 * [bitbar] Fix rendering of upgrade CLI in Bitbar dialect.
 * [mpm] Force test marked as ``xfail`` count as failure if they succeed.
 * [mpm] Automate creation of GitHib release.
+* [mpm] Automate creation of GitHub release.
 * [mpm] Automate publishing of package to PyPi on tagging.
 * [mpm] Save build artifacts on each CI runs.
 * [mpm] Automate auto-sorting of module imports.

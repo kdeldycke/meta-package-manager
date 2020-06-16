@@ -78,7 +78,6 @@ docs = ["sphinx", "sphinx_rtd_theme", "sphinx_tabs"]
 
 [tool.poetry.scripts]
 mpm = 'meta_package_manager.cli:cli'
-generate_labels = 'meta_package_manager.project_tools:generate_labels'
 
 [tool.isort]
 # https://github.com/timothycrosley/isort#configuring-isort

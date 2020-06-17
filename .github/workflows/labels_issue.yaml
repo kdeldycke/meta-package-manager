@@ -2,7 +2,7 @@ name: Issues and PRs labeller (content-based)
 on:
   issues:
     types: [opened]
-  pull_requests:
+  pull_request:
     typed: [opened]
 
 jobs:

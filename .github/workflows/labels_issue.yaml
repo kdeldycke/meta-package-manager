@@ -1,0 +1,37 @@
+name: Issues and PRs labeller (content-based)
+on:
+  issues:
+    types: [opened]
+  pull_requests:
+    typed: [opened]
+
+jobs:
+  labeller:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Naturalclar/issue-action@v2.0.0
+        with:
+          parameters: >
+            [
+              {"labels": ["BitBar plugin"],         "keywords": ["bitbar"]},
+              {"labels": ["bug"],                   "keywords": ["bug", "error", "traceback"]},
+              {"labels": ["CI/CD"],                 "keywords": ["ci-cd", "cicd", "ci", ".github", "workflow", "actions"]},
+              {"labels": ["documentation"],         "keywords": ["sphinx", "readthedocs", "read the docs", "readme", "rst", "typo"]},
+              {"labels": ["enhancement"],           "keywords": ["add"]},
+              {"labels": ["help wanted"],           "keywords": ["help"]},
+              {"labels": ["manager: apm"],          "keywords": ["apm", "atom"]},
+              {"labels": ["manager: brew"],         "keywords": ["brew", "homebrew", "tap", "formula"]},
+              {"labels": ["manager: cask"],         "keywords": ["cask"]},
+              {"labels": ["manager: composer"],     "keywords": ["composer", "php"]},
+              {"labels": ["manager: dpkg-like"],    "keywords": ["apt", "aptitude", "dpkg", "opkg"]},
+              {"labels": ["manager: flatpak"],      "keywords": ["flatpak", "flat"]},
+              {"labels": ["manager: gem"],          "keywords": ["gem", "ruby"]},
+              {"labels": ["manager: mas"],          "keywords": ["mas", "app store", "app-store"]},
+              {"labels": ["manager: npm-like"],     "keywords": ["npm", "node", "yarn"]},
+              {"labels": ["manager: pip"],          "keywords": ["pip"]},
+              {"labels": ["manager: snap"],         "keywords": ["snap"]},
+              {"labels": ["platform: Linux"],       "keywords": ["linux", "ubuntu", "debian"]},
+              {"labels": ["platform: macOS"],       "keywords": ["macos", "mac os", "osx", "os x", "apple"]},
+              {"labels": ["platform: Windows"],     "keywords": ["windows", "c:", "microsoft"]},
+            ]
+          github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,9 +1,9 @@
-name: Pull-request labeler
+name: Pull-requests labeller (based on file changes)
 on:
 - pull_request
 
 jobs:
-  triage:
+  labeller:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/labeler@v2

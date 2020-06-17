@@ -17,8 +17,8 @@ Changelog
 * [mpm] Save build artifacts on each CI runs.
 * [mpm] Automate auto-sorting of module imports.
 * [mpm] Automate GitHub label generation and synchronization.
-* [mpm] Automaticcaly applies some labels to PR depending on their changed
-  content.
+* [mpm] Automaticcaly applies labels on PRs and issues depending on their
+  changed files and content.
 
 
 `3.2.0 (2020-05-31) <https://github.com/kdeldycke/meta-package-manager/compare/v3.1.0...v3.2.0>`_

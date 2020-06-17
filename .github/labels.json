@@ -5,6 +5,11 @@
         "description": null
     },
     {
+        "name": "CI/CD",
+        "color": "#dbca13",
+        "description": null
+    },
+    {
         "name": "bug",
         "color": "#d73a4a",
         "description": null

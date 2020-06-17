@@ -1,4 +1,6 @@
-"BitBar plugin": meta_package_manager/bitbar/*
+"BitBar plugin":
+  - meta_package_manager/bitbar/*
+  - meta_package_manager/tests/*bitbar*
 
 "CI/CD":
   - .github/**/*

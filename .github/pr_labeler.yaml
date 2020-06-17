@@ -1,5 +1,11 @@
 "BitBar plugin": meta_package_manager/bitbar/*
 
+"CI/CD":
+  - .github/**/*
+  - .gitignore
+  - pyproject.toml
+  - setup.cfg
+
 documentation:
   - docs/**/*
   - README.rst

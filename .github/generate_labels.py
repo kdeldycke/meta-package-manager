@@ -39,6 +39,7 @@ def generate_labels():
     LABELS = [
         ("BitBar plugin",       '#fef2c0', None),
         ("bug",                 '#d73a4a', None),
+        ("CI/CD",               '#dbca13', None),
         ("documentation",       '#006b75', None),
         ("duplicate",           '#cfd3d7', None),
         ("enhancement",         '#84b6eb', None),

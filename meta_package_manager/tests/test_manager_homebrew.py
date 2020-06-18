@@ -104,7 +104,6 @@ class TestCask:
         result = invoke(
             '--include-auto-updates', '--manager', 'cask', 'outdated')
         assert result.exit_code == 0
-        assert not result.stderr
         assert "ubersicht" in result.stdout
         # Outdated subcommand does not fetch the unicode name by default.
         assert "Übersicht" not in result.stdout

@@ -1,11 +1,9 @@
 name: Code linting
 on:
   push:
-    branches:
-      - '**'  # matches all branches.
-      # QA on master is too late: we shouldn't mess with the code at this
-      # point.
-      - '!master'
+    # QA on master is too late: we shouldn't mess with the code at this point.
+    branches-ignore:
+      - 'master'
   pull_request:
 
 jobs:

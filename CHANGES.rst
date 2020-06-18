@@ -10,6 +10,7 @@ Changelog
 * [bitbar] Each entry in the drop-down menu can now be called into a terminal
   to track the execution by holding the ``Option`` key.
 * [bitbar] Fix rendering of upgrade CLI in Bitbar dialect.
+* [mpm] Hint for lack of ``sync`` and ``cleanup`` support by managers.
 * [mpm] Do not print table headers if there is no row to print.
 * [mpm] Skip table rendering tests if no table is printed to stdout. Fixes
   flacky tests.

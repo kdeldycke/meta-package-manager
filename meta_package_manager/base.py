@@ -260,10 +260,17 @@ class PackageManager:
 
     def sync(self):
         """ Refresh local manager metadata from remote repository. """
+        if self.sync.__func__.__qualname__ == PackageManager.sync.__qualname__:
+            logger.warning(f"Sync not implemented for {self.id}.")
+            return
         logger.info(f"Sync {self.id} package info...")
 
     def cleanup(self):
         """ Remove left-overs and unused packages. """
+        if (self.cleanup.__func__.__qualname__ ==
+                PackageManager.cleanup.__qualname__):
+            logger.warning(f"Cleanup not implemented for {self.id}.")
+            return
         logger.info(f"Cleanup {self.id}...")
 
     @property

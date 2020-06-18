@@ -33,6 +33,7 @@ jobs:
       # Only allow autocommits on develop branch and pull requests.
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
+        commit_author: "Kevin Deldycke <kevin@deldycke.com>"
         commit_message: "[lint] Sort python module imports."
         file_pattern: "*.py"
 

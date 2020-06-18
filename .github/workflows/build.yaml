@@ -29,6 +29,7 @@ jobs:
       run: |
         poetry check
         poetry run twine check ./dist/*
+        poetry run check-wheel-contents ./dist/*.whl
     - name: Create a release on GitHub
       # Only triggers on version tagging.
       if: startsWith(github.ref, 'refs/tags/v')

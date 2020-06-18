@@ -32,11 +32,6 @@ classifiers = [
     'Topic :: System :: Installation/Setup',
     'Topic :: System :: Software Distribution',
     'Topic :: Utilities']
-include = [
-    "docs/**/*",
-    "CHANGES.rst",
-    "README.rst",
-    "setup.cfg"]
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/kdeldycke/meta-package-manager/issues"
@@ -62,6 +57,7 @@ sphinx_tabs = {version = "^1.1.13", optional = true}
 
 [tool.poetry.dev-dependencies]
 bump2version = "^1.0.0"
+check-wheel-contents = "^0.1.0"
 coverage = {extras = ["toml"], version = "^5.0.4"}
 isort = "^4.3.5"
 pycodestyle = "^2"
@@ -108,6 +104,11 @@ omit = ["*/tests/*"]
 [tool.coverage.report]
 omit = ["*/tests/*"]
 precision = 2
+
+[tool.check-wheel-contents]
+# W004: Module is not located at importable path:
+#   meta_package_manager/bitbar/meta_package_manager.7h.py
+ignore = "W004"
 
 [build-system]
 requires = ["poetry>=0.12"]

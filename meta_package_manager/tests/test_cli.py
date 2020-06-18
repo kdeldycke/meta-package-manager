@@ -170,6 +170,10 @@ class CLISubCommandTests:
                 # Common "not found" warning message.
                 "warning: Skip unavailable {} manager.".format(
                     mid) in result.stderr,
+                # Common "not implemented" optional command warning message.
+                bool(re.search(
+                    r"warning: (Sync|Cleanup) not implemented for {}.".format(
+                        mid), result.stderr)),
                 # Stats line at the end of output.
                 "{}: ".format(mid) in result.stdout.splitlines(
                     )[-1] if result.stdout else '',

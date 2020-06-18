@@ -240,15 +240,22 @@ class PackageManager:
             output = strip_ansi(output)
             output = output if output else None
 
+        # Non-successful run.
         if code and error:
+            # Produce an exception and eventually raise it.
             exception = CLIError(code, output, error)
             if self.raise_on_cli_error:
                 raise exception
-            logger.error(error)
+            # Accumulate errors.
             self.cli_errors.append(exception)
 
+        # Log <stdout> and <stderr> output.
         if output:
             logger.debug(indent(output, '  '))
+        if error:
+            # Non-fatal error messages are logged as warnings.
+            log_func = logger.error if code else logger.warning
+            log_func(indent(error, '  '))
 
         return output
 

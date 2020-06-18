@@ -12,6 +12,7 @@ Changelog
 * [bitbar] Fix rendering of upgrade CLI in Bitbar dialect.
 * [mpm] Hint for lack of ``sync`` and ``cleanup`` support by managers.
 * [mpm] Do not print table headers if there is no row to print.
+* [mpm] Always print non-fatal ``<stderr>`` output as warning mode.
 * [mpm] Skip table rendering tests if no table is printed to stdout. Fixes
   flacky tests.
 * [mpm] Force test marked as ``xfail`` count as failure if they succeed.

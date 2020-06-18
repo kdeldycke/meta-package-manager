@@ -309,6 +309,10 @@ class CLITableTests:
         result = invoke('--output-format', mode, subcmd)
         assert result.exit_code == 0
 
+        # Skip test if no package found.
+        if result.stdout.startswith("0 package total ("):
+            pytest.skip("No package found to test output")
+
         # Check the selected mode is indeed rendered in <stdout>, so the CLI
         # result can be grep-ed.
         assert expected in result.stdout

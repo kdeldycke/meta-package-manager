@@ -10,6 +10,9 @@ Changelog
 * [bitbar] Each entry in the drop-down menu can now be called into a terminal
   to track the execution by holding the ``Option`` key.
 * [bitbar] Fix rendering of upgrade CLI in Bitbar dialect.
+* [mpm] Do not print table headers if there is no row to print.
+* [mpm] Skip table rendering tests if no table is printed to stdout. Fixes
+  flacky tests.
 * [mpm] Force test marked as ``xfail`` count as failure if they succeed.
 * [mpm] Always check wheel content.
 * [mpm] Automate creation of GitHub release.

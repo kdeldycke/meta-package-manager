@@ -108,6 +108,10 @@ def json(data):
 
 def print_table(header_defs, rows, sort_key=None):
     """ Utility to print a table and sort its content. """
+    # Do not print anything, not even table headers if no rows.
+    if not rows:
+        return
+
     header_labels = [label for label, _ in header_defs]
 
     # Check there is no duplicate column IDs.

@@ -48,8 +48,6 @@ class Homebrew(PackageManager):
     def get_version(self):
         """ Fetch version from ``brew --version`` output.
 
-        Raw CLI output samples:
-
         .. code-block:: shell-session
 
             ► brew --version
@@ -63,7 +61,13 @@ class Homebrew(PackageManager):
             return parse_version(output.split()[1])
 
     def sync(self):
-        """ `brew` and `cask` share the same command. """
+        """ `brew` and `cask` share the same command.
+
+        .. code-block:: shell-session
+
+            ► brew update --quiet
+            Already up-to-date.
+        """
         super(Homebrew, self).sync()
         self.run_cli('update', '--quiet')
 

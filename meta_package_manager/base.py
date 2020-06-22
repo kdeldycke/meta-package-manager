@@ -25,10 +25,10 @@ from textwrap import indent
 import click
 from boltons.cacheutils import cachedproperty
 from boltons.iterutils import flatten
-from boltons.strutils import indent
+from boltons.strutils import strip_ansi
 from boltons.typeutils import classproperty
 
-from . import logger, strip_ansi
+from . import logger
 from .bitbar import run
 from .platform import CURRENT_OS_ID
 from .version import parse_version

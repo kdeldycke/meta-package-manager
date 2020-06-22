@@ -25,9 +25,10 @@ import click
 import pytest
 import simplejson as json
 from boltons.iterutils import flatten
+from boltons.strutils import strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
 
-from .. import __version__, logger, strip_ansi
+from .. import __version__, logger
 from ..cli import RENDERING_MODES, WINDOWS_MODE_BLACKLIST
 from .conftest import MANAGER_IDS, unless_windows
 

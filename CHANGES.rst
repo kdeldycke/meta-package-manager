@@ -15,6 +15,7 @@ Changelog
 * [mpm] Always print non-fatal ``<stderr>`` output as warning mode.
 * [mpm] Skip table rendering tests if no table is printed to stdout. Fixes
   flacky tests.
+* [mpm] Replace internal helpers with upstreamed ``boltons 20.2.0`` utils.
 * [mpm] Force test marked as ``xfail`` count as failure if they succeed.
 * [mpm] Always check wheel content.
 * [mpm] Automate creation of GitHub release.

@@ -25,10 +25,10 @@ from textwrap import indent
 import click
 import pytest
 from boltons.iterutils import flatten
+from boltons.strutils import strip_ansi
 from boltons.tbutils import ExceptionInfo
 from click.testing import CliRunner
 
-from .. import strip_ansi
 from ..bitbar import run as bitbar_run
 from ..cli import cli
 from ..platform import is_linux, is_macos, is_windows

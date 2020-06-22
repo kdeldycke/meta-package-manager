@@ -298,6 +298,11 @@ class CLITableTests:
         """ Check default rendering is fancy_grid. """
         result = invoke(subcmd)
         assert result.exit_code == 0
+
+        # Skip test if no package found.
+        if result.stdout.startswith("0 package total ("):
+            pytest.skip("No package found to test output")
+
         expected = self.expected_renderings['fancy_grid'][0]
         assert expected in result.stdout
         assert expected not in result.stderr

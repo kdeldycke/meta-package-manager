@@ -299,12 +299,16 @@ class CLITableTests:
         result = invoke(subcmd)
         assert result.exit_code == 0
 
-        # Skip test if no package found.
-        if result.stdout.startswith("0 package total ("):
-            pytest.skip("No package found to test output")
-
         expected = self.expected_renderings['fancy_grid'][0]
-        assert expected in result.stdout
+
+        # If no package found, check that no table gets rendered. Else, check
+        # the selected mode is indeed rendered in <stdout>, so the CLI result
+        # can be grep-ed.
+        if result.stdout.startswith("0 package total ("):
+            assert expected not in result.stdout
+        else:
+            assert expected in result.stdout
+
         assert expected not in result.stderr
 
     @pytest.mark.parametrize('mode,expected,conflict', [
@@ -318,13 +322,13 @@ class CLITableTests:
         result = invoke('--output-format', mode, subcmd)
         assert result.exit_code == 0
 
-        # Skip test if no package found.
+        # If no package found, check that no table gets rendered. Else, check
+        # the selected mode is indeed rendered in <stdout>, so the CLI result
+        # can be grep-ed.
         if result.stdout.startswith("0 package total ("):
-            pytest.skip("No package found to test output")
-
-        # Check the selected mode is indeed rendered in <stdout>, so the CLI
-        # result can be grep-ed.
-        assert expected in result.stdout
+            assert expected not in result.stdout
+        else:
+            assert expected in result.stdout
 
         # Collect all possible unique traces from all possible rendering modes.
         blacklist = {

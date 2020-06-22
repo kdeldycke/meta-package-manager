@@ -326,7 +326,9 @@ class CLITableTests:
         # the selected mode is indeed rendered in <stdout>, so the CLI result
         # can be grep-ed.
         if result.stdout.startswith("0 package total ("):
-            assert expected not in result.stdout
+            # CSV mode will match on comma.
+            if mode != 'csv':
+                assert expected not in result.stdout
         else:
             assert expected in result.stdout
 

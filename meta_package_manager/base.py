@@ -39,7 +39,7 @@ CLI_FORMATS = frozenset(['plain', 'fragments', 'bitbar'])
 
 class CLIError(Exception):
 
-    """ An error occured when running package manager CLI. """
+    """ An error occurred when running package manager CLI. """
 
     def __init__(self, code, output, error):
         """ The exception internally keeps the result of CLI execution. """

@@ -38,7 +38,7 @@ def generate_labels():
     # Format: label name, color, optional description.
     LABELS = [
         ("BitBar plugin", '#fef2c0',
-         None),
+         "Plugin code, documentation or features related to BitBar"),
         ("bug", '#d73a4a',
          "Something isn't working"),
         ("CI/CD", '#dbca13',
@@ -76,14 +76,16 @@ def generate_labels():
     # Create one label per platform.
     for platform_id in ALL_OS_LABELS:
         LABELS.append((
-            'platform: {}'.format(platform_id), PLATFORM_COLOR, None))
+            'platform: {}'.format(platform_id), PLATFORM_COLOR,
+            '{}'.format(platform_id)))
 
     # Create one label per manager. Add mpm as its own manager.
     non_grouped_managers = set(
         pool()) - set(flatten(MANAGER_GROUPS.values())) | {'mpm'}
     for manager_id in non_grouped_managers:
         LABELS.append((
-            'manager: {}'.format(manager_id), MANAGER_COLOR, None))
+            'manager: {}'.format(manager_id), MANAGER_COLOR,
+            '{}'.format(manager_id)))
 
     # Add labels for grouped managers.
     for group_label, manager_ids in MANAGER_GROUPS.items():

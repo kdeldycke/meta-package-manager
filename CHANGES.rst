@@ -27,6 +27,8 @@ Changelog
 * [mpm] Automate GitHub label generation and synchronization.
 * [mpm] Automaticcaly applies labels on PRs and issues depending on their
   changed files and content.
+* [mpm] Check label rules against manager definitions. Adds development
+  dependency on ``PyYAML``.
 
 
 `3.2.0 (2020-05-31) <https://github.com/kdeldycke/meta-package-manager/compare/v3.1.0...v3.2.0>`_

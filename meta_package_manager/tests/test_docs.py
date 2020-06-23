@@ -22,23 +22,37 @@ from pathlib import Path
 
 import pytest
 from boltons.iterutils import flatten
+from yaml import load, Loader
+import simplejson as json
+from collections import Counter
 
-from ..platform import OS_DEFINITIONS
+from ..platform import OS_DEFINITIONS, os_label
 from .conftest import MANAGER_IDS
+from ..labels import MANAGER_LABELS, PLATFORM_LABELS
+from ..managers import pool
 
-""" Test documentation. """
+""" Test all non-code artifacts depending on manager definitions.
+
+Covers:
+    * Documentation (sphinx, readme, etc.)
+    * CI/CD scripts
+    * GitHub project config
+
+These tests are mainly there to remind us keep extra stuff in sync on new
+platform or manager addition.
+"""
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 
 def test_changelog():
-    changelog_path = Path(
-        __file__).parent.parent.parent.joinpath('CHANGES.rst').resolve()
-    with changelog_path.open() as doc:
-        changelog = doc.read()
+    with PROJECT_ROOT.joinpath('CHANGES.rst').resolve().open() as doc:
+        content = doc.read()
 
-    assert changelog.startswith("Changelog\n=========\n")
+    assert content.startswith("Changelog\n=========\n")
 
     entry_pattern = re.compile(r"^\* \[(?P<category>[a-z,]+)\] (?P<entry>.+)")
-    for line in changelog.splitlines():
+    for line in content.splitlines():
         if line.startswith('*'):
             match = entry_pattern.match(line)
             assert match
@@ -46,3 +60,101 @@ def test_changelog():
             assert entry['category']
             assert set(entry['category'].split(',')).issubset(flatten([
                 MANAGER_IDS, OS_DEFINITIONS.keys(), 'mpm', 'bitbar']))
+
+
+def test_labeller_rules():
+
+    # Extract list of canonically defined labels.
+    with PROJECT_ROOT.joinpath('.github/labels.json').resolve().open() as doc:
+        content = doc.read()
+    defined_labels = [l['name'] for l in json.loads(content)]
+
+    # Canonical labels are uniques.
+    assert len(defined_labels) == len(set(defined_labels))
+    canonical_labels = set(defined_labels)
+
+    # Extract and categorize labels.
+    canonical_managers = {l for l in canonical_labels
+                          if l.startswith('manager: ') and 'mpm' not in l}
+    canonical_platforms = {l for l in canonical_labels
+                           if l.startswith('platform: ')}
+    assert canonical_managers
+    assert canonical_platforms
+
+    # Extract rules from json blurb serialized into YAML.
+    with PROJECT_ROOT.joinpath(
+            '.github/workflows/labels_issue.yaml').resolve().open() as doc:
+        content = doc.read()
+    assert "Naturalclar/issue-action" in content
+    json_rules = load(content, Loader=Loader)[
+        'jobs']['labeller']['steps'][0]['with']['parameters']
+    rules = json.loads(json_rules)
+    assert rules
+
+    # Each keyword match one rule only.
+    rules_keywords = Counter(flatten([r['keywords'] for r in rules]))
+    assert rules_keywords
+    assert max(rules_keywords.values()) == 1
+
+    # Extract and categorize labels.
+    rules_labels = Counter(flatten([r['labels'] for r in rules]))
+
+    assert rules_labels
+    # Check that all labels are canonically defined.
+    assert canonical_labels.issuperset(rules_labels)
+
+    rules_managers = Counter({
+        label: count for label, count in rules_labels.items()
+        if label.startswith('manager: ')})
+    rules_platforms = Counter({
+        label: count for label, count in rules_labels.items()
+        if label.startswith('platform: ')})
+
+    assert rules_managers
+    # Each canonical manager labels is defined.
+    assert len(canonical_managers.symmetric_difference(rules_managers)) == 0
+    # Each manager has a rule and one only.
+    assert max(rules_managers.values()) == 1
+
+    assert rules_platforms
+    # Each canonical platform labels is defined.
+    assert len(canonical_platforms.symmetric_difference(rules_platforms)) == 0
+    # Each registered OS has a rule.
+    assert len(rules_platforms) == len(OS_DEFINITIONS)
+    # Each platforms has at least a rule.
+    assert min(rules_platforms.values()) >= 1
+
+    # Check that all labels are canonically defined.
+    assert canonical_labels.issuperset(rules_labels)
+
+    # Check each rule definition.
+    for rule in rules:
+
+        # No duplicate labels.
+        assert len(set(rule['labels'])) == len(rule['labels'])
+
+        # Special checks for rules targetting manager labels.
+        manager_label = canonical_managers.intersection(rule['labels'])
+        if manager_label:
+
+            # Extract manager label
+            assert len(manager_label) == 1
+            manager_label = manager_label.pop()
+
+            # Only platforms are expected alongside manager labels.
+            platforms = set(rule['labels']) - canonical_managers
+            assert platforms.issubset(canonical_platforms)
+
+            # Check managers sharing the same label shares the same platforms.
+            supported_platforms = [
+                pool()[mid].platforms
+                for mid, l in MANAGER_LABELS.items()
+                # Relying on pool() restrict our checks, as the pool exclude
+                # non-locally supported managers.
+                if l == manager_label and mid in pool()]
+            assert len(set(supported_platforms)) == 1
+
+            # Check the right platforms is associated with the manager.
+            supported_platform_labels = {
+                PLATFORM_LABELS[os_label(p)] for p in supported_platforms[0]}
+            assert platforms == supported_platform_labels

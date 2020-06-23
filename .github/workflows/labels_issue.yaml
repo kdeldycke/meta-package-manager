@@ -13,25 +13,64 @@ jobs:
         with:
           parameters: >
             [
-              {"labels": ["BitBar plugin"],         "keywords": ["bitbar"]},
-              {"labels": ["bug"],                   "keywords": ["bug", "error", "traceback"]},
-              {"labels": ["CI/CD"],                 "keywords": ["ci-cd", "cicd", "ci", ".github", "workflow", "actions"]},
-              {"labels": ["documentation"],         "keywords": ["sphinx", "readthedocs", "read the docs", "readme", "rst", "typo"]},
-              {"labels": ["enhancement"],           "keywords": ["add"]},
-              {"labels": ["help wanted"],           "keywords": ["help"]},
-              {"labels": ["manager: apm"],          "keywords": ["apm", "atom"]},
-              {"labels": ["manager: brew"],         "keywords": ["brew", "homebrew", "tap", "formula"]},
-              {"labels": ["manager: cask"],         "keywords": ["cask"]},
-              {"labels": ["manager: composer"],     "keywords": ["composer", "php"]},
-              {"labels": ["manager: dpkg-like"],    "keywords": ["apt", "aptitude", "dpkg", "opkg"]},
-              {"labels": ["manager: flatpak"],      "keywords": ["flatpak", "flat"]},
-              {"labels": ["manager: gem"],          "keywords": ["gem", "ruby"]},
-              {"labels": ["manager: mas"],          "keywords": ["mas", "app store", "app-store"]},
-              {"labels": ["manager: npm-like"],     "keywords": ["npm", "node", "yarn"]},
-              {"labels": ["manager: pip"],          "keywords": ["pip"]},
-              {"labels": ["manager: snap"],         "keywords": ["snap"]},
-              {"labels": ["platform: Linux"],       "keywords": ["linux", "ubuntu", "debian"]},
-              {"labels": ["platform: macOS"],       "keywords": ["macos", "mac os", "osx", "os x", "apple"]},
-              {"labels": ["platform: Windows"],     "keywords": ["windows", "c:", "microsoft"]},
+              {"labels":    ["BitBar plugin", "platform: macOS"],
+               "keywords":      ["bitbar"]},
+
+              {"labels":    ["bug"],
+               "keywords":      ["bug", "error", "traceback"]},
+
+              {"labels":    ["CI/CD"],
+               "keywords":      ["ci-cd", "cicd", "ci", ".github", "workflow", "actions"]},
+
+              {"labels":    ["documentation"],
+               "keywords":      ["sphinx", "readthedocs", "read the docs", "readme", "rst", "typo"]},
+
+              {"labels":    ["enhancement"],
+               "keywords":      ["add"]},
+
+              {"labels":    ["help wanted"],
+               "keywords":      ["help"]},
+
+               {"labels":   ["manager: apm", "platform: Linux", "platform: macOS", "platform: Windows"],
+               "keywords":      ["apm", "atom"]},
+
+              {"labels":    ["manager: brew", "platform: macOS"],
+               "keywords":      ["brew", "homebrew", "tap", "formula"]},
+
+              {"labels":    ["manager: cask", "platform: macOS"],
+               "keywords":      ["cask"]},
+
+              {"labels":    ["manager: composer", "platform: Linux", "platform: macOS", "platform: Windows"],
+              "keywords":       ["composer", "php"]},
+
+              {"labels":    ["manager: dpkg-like", "platform: Linux"],
+               "keywords":      ["apt", "aptitude", "dpkg", "opkg"]},
+
+              {"labels":    ["manager: flatpak", "platform: Linux"],
+               "keywords":      ["flatpak", "flat"]},
+
+              {"labels":    ["manager: gem", "platform: Linux", "platform: macOS", "platform: Windows"],
+               "keywords":      ["gem", "ruby"]},
+
+              {"labels":    ["manager: mas", "platform: macOS"],
+               "keywords":      ["mas", "app store", "app-store"]},
+
+              {"labels":    ["manager: npm-like", "platform: Linux", "platform: macOS", "platform: Windows"],
+               "keywords":      ["npm", "node", "yarn"]},
+
+              {"labels":    ["manager: pip", "platform: Linux", "platform: macOS", "platform: Windows"],
+               "keywords":      ["pip"]},
+
+              {"labels":    ["manager: snap", "platform: Linux"],
+               "keywords":      ["snap"]},
+
+              {"labels":    ["platform: Linux"],
+               "keywords":      ["linux", "ubuntu", "debian"]},
+
+              {"labels":    ["platform: macOS"],
+               "keywords":      ["macos", "mac os", "osx", "os x", "apple"]},
+
+              {"labels":    ["platform: Windows"],
+               "keywords":      ["windows", "c:", "microsoft"]}
             ]
           github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -25,7 +25,6 @@ from boltons.iterutils import flatten
 from .managers import pool
 from .platform import ALL_OS_LABELS
 
-
 # Format: label name, color, optional description.
 LABELS = [
     ("BitBar plugin", '#fef2c0',

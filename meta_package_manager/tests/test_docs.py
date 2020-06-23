@@ -18,18 +18,19 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
+from collections import Counter
 from pathlib import Path
 
 import pytest
-from boltons.iterutils import flatten
-from yaml import load, Loader
 import simplejson as json
-from collections import Counter
+from boltons.iterutils import flatten
 
-from ..platform import OS_DEFINITIONS, os_label
-from .conftest import MANAGER_IDS
+from yaml import Loader, load
+
 from ..labels import MANAGER_LABELS, PLATFORM_LABELS
 from ..managers import pool
+from ..platform import OS_DEFINITIONS, os_label
+from .conftest import MANAGER_IDS
 
 """ Test all non-code artifacts depending on manager definitions.
 

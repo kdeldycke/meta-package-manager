@@ -8,15 +8,15 @@ on:
 
 jobs:
 
-  auto-format:
-    name: Automaticcaly format and clean up code
+  sort-python-imports:
+    name: Auto-sort Python imports and auto-commit
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
         # Required by git-auto-commit-action. See:
         # https://github.com/stefanzweifel/git-auto-commit-action#checkout-the-correct-branch
-        ref: ${{github.head_ref}}
+        ref: ${{ github.head_ref }}
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -35,10 +35,10 @@ jobs:
         commit_message: "[lint] Sort python module imports."
         file_pattern: "*.py"
 
-  lint:
-    name: Lint and check code
+  lint-python:
+    name: Lint and check Python code
     # No need to lint before the auto formatting did its job.
-    needs: auto-format
+    needs: sort-python-imports
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

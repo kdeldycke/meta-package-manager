@@ -64,7 +64,7 @@ jobs:
         sudo npm install jsonlint -g
     - name: Lint
       run: |
-        find ./ -type f -name '*.json' -print -exec jsonlint --sort-keys --in-place "{}" \;
+        find ./ -type f -name '*.json' -print -exec jsonlint --in-place "{}" \;
     - name: Create PR
       uses: peter-evans/create-pull-request@v2
       with:

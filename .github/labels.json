@@ -1,137 +1,137 @@
 [
   {
+    "name": "BitBar plugin",
     "color": "#fef2c0",
-    "description": "Plugin code, documentation or features related to BitBar",
-    "name": "BitBar plugin"
+    "description": "Plugin code, documentation or features related to BitBar"
   },
   {
+    "name": "CI/CD",
     "color": "#dbca13",
-    "description": "Automation and management of the project itself",
-    "name": "CI/CD"
+    "description": "Tests, automation and management of the project"
   },
   {
+    "name": "bug",
     "color": "#d73a4a",
-    "description": "Something isn't working",
-    "name": "bug"
+    "description": "Something isn't working, or a fix is proposed"
   },
   {
+    "name": "can't reproduce",
     "color": "#fec1c1",
-    "description": "Root cause unlikely to come from the project",
-    "name": "can't reproduce"
+    "description": "Root cause unlikely to come from the project"
   },
   {
+    "name": "documentation",
     "color": "#006b75",
-    "description": "Update to documentation's content or its generation",
-    "name": "documentation"
+    "description": "Update to non-code (manual, readme, tutorial, docstrings, ...) and its generation"
   },
   {
+    "name": "duplicate",
     "color": "#cfd3d7",
-    "description": "This issue or pull request already exists",
-    "name": "duplicate"
+    "description": "This issue or pull request already exists"
   },
   {
+    "name": "enhancement",
     "color": "#84b6eb",
-    "description": "Improvement of an existing feature",
-    "name": "enhancement"
+    "description": "Improvement or change of an existing feature"
   },
   {
+    "name": "feature request",
     "color": "#fbca04",
-    "description": "Something not existing yet that need to be implemented",
-    "name": "feature request"
+    "description": "Something not existing yet that need to be implemented"
   },
   {
+    "name": "good first issue",
     "color": "#7057ff",
-    "description": "A place for newcomers to start contributing",
-    "name": "good first issue"
+    "description": "A place for newcomers to start contributing"
   },
   {
+    "name": "help wanted",
     "color": "#008672",
-    "description": "Extra attention is needed",
-    "name": "help wanted"
+    "description": "Extra attention is needed"
   },
   {
+    "name": "manager: apm",
     "color": "#bfdadc",
-    "description": "apm",
-    "name": "manager: apm"
+    "description": "apm"
   },
   {
+    "name": "manager: brew",
     "color": "#bfdadc",
-    "description": "brew",
-    "name": "manager: brew"
+    "description": "brew"
   },
   {
+    "name": "manager: cask",
     "color": "#bfdadc",
-    "description": "cask",
-    "name": "manager: cask"
+    "description": "cask"
   },
   {
+    "name": "manager: composer",
     "color": "#bfdadc",
-    "description": "composer",
-    "name": "manager: composer"
+    "description": "composer"
   },
   {
+    "name": "manager: dpkg-like",
     "color": "#bfdadc",
-    "description": "apt, dpkg, opkg",
-    "name": "manager: dpkg-like"
+    "description": "apt, dpkg, opkg"
   },
   {
+    "name": "manager: flatpak",
     "color": "#bfdadc",
-    "description": "flatpak",
-    "name": "manager: flatpak"
+    "description": "flatpak"
   },
   {
+    "name": "manager: gem",
     "color": "#bfdadc",
-    "description": "gem",
-    "name": "manager: gem"
+    "description": "gem"
   },
   {
+    "name": "manager: mas",
     "color": "#bfdadc",
-    "description": "mas",
-    "name": "manager: mas"
+    "description": "mas"
   },
   {
+    "name": "manager: mpm",
     "color": "#bfdadc",
-    "description": "mpm",
-    "name": "manager: mpm"
+    "description": "mpm"
   },
   {
+    "name": "manager: npm-like",
     "color": "#bfdadc",
-    "description": "npm, yarn",
-    "name": "manager: npm-like"
+    "description": "npm, yarn"
   },
   {
+    "name": "manager: pip",
     "color": "#bfdadc",
-    "description": "pip",
-    "name": "manager: pip"
+    "description": "pip"
   },
   {
+    "name": "manager: snap",
     "color": "#bfdadc",
-    "description": "snap",
-    "name": "manager: snap"
+    "description": "snap"
   },
   {
+    "name": "platform: Linux",
     "color": "#bfd4f2",
-    "description": "Linux",
-    "name": "platform: Linux"
+    "description": "Linux"
   },
   {
+    "name": "platform: Windows",
     "color": "#bfd4f2",
-    "description": "Windows",
-    "name": "platform: Windows"
+    "description": "Windows"
   },
   {
+    "name": "platform: macOS",
     "color": "#bfd4f2",
-    "description": "macOS",
-    "name": "platform: macOS"
+    "description": "macOS"
   },
   {
+    "name": "question",
     "color": "#d876e3",
-    "description": "Further information is requested",
-    "name": "question"
+    "description": "Further information is requested"
   },
   {
+    "name": "wont do/fix",
     "color": "#eeeeee",
-    "description": "This will not be worked on",
-    "name": "wont do/fix"
+    "description": "This will not be worked on"
   }
 ]

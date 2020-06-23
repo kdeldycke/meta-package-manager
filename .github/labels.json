@@ -1,137 +1,137 @@
 [
   {
-    "name": "BitBar plugin",
     "color": "#fef2c0",
     "description": "Plugin code, documentation or features related to BitBar"
+    "name": "BitBar plugin"
   },
   {
-    "name": "CI/CD",
     "color": "#dbca13",
-    "description": "Automation and management of the project itself"
+    "description": "Automation and management of the project itself",
+    "name": "CI/CD"
   },
   {
-    "name": "bug",
     "color": "#d73a4a",
-    "description": "Something isn't working"
+    "description": "Something isn't working",
+    "name": "bug"
   },
   {
-    "name": "can't reproduce",
     "color": "#fec1c1",
-    "description": "Root cause unlikely to come from the project"
+    "description": "Root cause unlikely to come from the project",
+    "name": "can't reproduce"
   },
   {
-    "name": "documentation",
     "color": "#006b75",
-    "description": "Update to documentation's content or its generation"
+    "description": "Update to documentation's content or its generation",
+    "name": "documentation"
   },
   {
-    "name": "duplicate",
     "color": "#cfd3d7",
-    "description": "This issue or pull request already exists"
+    "description": "This issue or pull request already exists",
+    "name": "duplicate"
   },
   {
-    "name": "enhancement",
     "color": "#84b6eb",
-    "description": "Improvement of an existing feature"
+    "description": "Improvement of an existing feature",
+    "name": "enhancement"
   },
   {
-    "name": "feature request",
     "color": "#fbca04",
-    "description": "Something not existing yet that need to be implemented"
+    "description": "Something not existing yet that need to be implemented",
+    "name": "feature request"
   },
   {
-    "name": "good first issue",
     "color": "#7057ff",
-    "description": "A place for newcomers to start contributing"
+    "description": "A place for newcomers to start contributing",
+    "name": "good first issue"
   },
   {
-    "name": "help wanted",
     "color": "#008672",
-    "description": "Extra attention is needed"
+    "description": "Extra attention is needed",
+    "name": "help wanted"
   },
   {
-    "name": "manager: apm",
     "color": "#bfdadc",
     "description": "apm"
+    "name": "manager: apm"
   },
   {
-    "name": "manager: brew",
     "color": "#bfdadc",
     "description": "brew"
+    "name": "manager: brew"
   },
   {
-    "name": "manager: cask",
     "color": "#bfdadc",
     "description": "cask"
+    "name": "manager: cask"
   },
   {
-    "name": "manager: composer",
     "color": "#bfdadc",
     "description": "composer"
+    "name": "manager: composer"
   },
   {
-    "name": "manager: dpkg-like",
     "color": "#bfdadc",
-    "description": "apt, dpkg, opkg"
+    "description": "apt, dpkg, opkg",
+    "name": "manager: dpkg-like"
   },
   {
-    "name": "manager: flatpak",
     "color": "#bfdadc",
     "description": "flatpak"
+    "name": "manager: flatpak"
   },
   {
-    "name": "manager: gem",
     "color": "#bfdadc",
     "description": "gem"
+    "name": "manager: gem"
   },
   {
-    "name": "manager: mas",
     "color": "#bfdadc",
     "description": "mas"
+    "name": "manager: mas"
   },
   {
-    "name": "manager: mpm",
     "color": "#bfdadc",
     "description": "mpm"
+    "name": "manager: mpm"
   },
   {
-    "name": "manager: npm-like",
     "color": "#bfdadc",
-    "description": "npm, yarn"
+    "description": "npm, yarn",
+    "name": "manager: npm-like"
   },
   {
-    "name": "manager: pip",
     "color": "#bfdadc",
     "description": "pip"
+    "name": "manager: pip"
   },
   {
-    "name": "manager: snap",
     "color": "#bfdadc",
     "description": "snap"
+    "name": "manager: snap"
   },
   {
-    "name": "platform: Linux",
     "color": "#bfd4f2",
     "description": "Linux"
+    "name": "platform: Linux"
   },
   {
-    "name": "platform: Windows",
     "color": "#bfd4f2",
     "description": "Windows"
+    "name": "platform: Windows"
   },
   {
-    "name": "platform: macOS",
     "color": "#bfd4f2",
     "description": "macOS"
+    "name": "platform: macOS"
   },
   {
-    "name": "question",
     "color": "#d876e3",
-    "description": "Further information is requested"
+    "description": "Further information is requested",
+    "name": "question"
   },
   {
-    "name": "wont do/fix",
     "color": "#eeeeee",
-    "description": "This will not be worked on"
+    "description": "This will not be worked on",
+    "name": "wont do/fix"
   }
 ]

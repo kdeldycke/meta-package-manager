@@ -76,8 +76,8 @@ jobs:
         assignees: kdeldycke
         branch: lint-json
 
-  fix_typo:
-    name: Typo auto-fix
+  fix-typo:
+    name: Auto-fix typos and create a PR
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

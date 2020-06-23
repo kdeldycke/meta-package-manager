@@ -68,17 +68,17 @@ def test_labeller_rules():
     # Extract list of canonically defined labels.
     with PROJECT_ROOT.joinpath('.github/labels.json').resolve().open() as doc:
         content = doc.read()
-    defined_labels = [l['name'] for l in json.loads(content)]
+    defined_labels = [lbl['name'] for lbl in json.loads(content)]
 
     # Canonical labels are uniques.
     assert len(defined_labels) == len(set(defined_labels))
     canonical_labels = set(defined_labels)
 
     # Extract and categorize labels.
-    canonical_managers = {l for l in canonical_labels
-                          if l.startswith('manager: ') and 'mpm' not in l}
-    canonical_platforms = {l for l in canonical_labels
-                           if l.startswith('platform: ')}
+    canonical_managers = {lbl for lbl in canonical_labels
+                          if lbl.startswith('manager: ') and 'mpm' not in lbl}
+    canonical_platforms = {lbl for lbl in canonical_labels
+                           if lbl.startswith('platform: ')}
     assert canonical_managers
     assert canonical_platforms
 
@@ -149,10 +149,10 @@ def test_labeller_rules():
             # Check managers sharing the same label shares the same platforms.
             supported_platforms = [
                 pool()[mid].platforms
-                for mid, l in MANAGER_LABELS.items()
+                for mid, lbl in MANAGER_LABELS.items()
                 # Relying on pool() restrict our checks, as the pool exclude
                 # non-locally supported managers.
-                if l == manager_label and mid in pool()]
+                if lbl == manager_label and mid in pool()]
             assert len(set(supported_platforms)) == 1
 
             # Check the right platforms is associated with the manager.

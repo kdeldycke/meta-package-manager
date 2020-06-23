@@ -24,7 +24,6 @@ from pathlib import Path
 import pytest
 import simplejson as json
 from boltons.iterutils import flatten
-
 from yaml import Loader, load
 
 from ..labels import MANAGER_LABELS, PLATFORM_LABELS

@@ -164,7 +164,7 @@ Labels
 
 GitHub labels for issues and pull requests are automatticaly `generated and
 synchronized by a GitHub action workflow
-<https://github.com/kdeldycke/meta-package-manager/blob/develop/.github/workflows/labels.yaml>`.
+<https://github.com/kdeldycke/meta-package-manager/blob/develop/.github/workflows/labels_sync.yaml>`_.
 
 
 Screenshots
@@ -185,7 +185,7 @@ Changelog
 
 From time to time, especially before a release, review and rewrite the changelog
 to make it clean and readeable. The idea is to have it stays in the spirit of the
-[Keep a changelog manifesto](https://keepachangelog.com).
+`keep a changelog manifesto <https://keepachangelog.com>`_.
 
 Most (if not all) changes can be derived by simply comparing the last tagged
 release with the `develop` branch:

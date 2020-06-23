@@ -103,7 +103,7 @@ def generate_labels():
         for label in sorted(LABELS)]
     json_file.open('w').write(json_dumps(
         label_defs,
-        indent=4,
+        indent=2,
         separators=(',', ': '),
     ))
 

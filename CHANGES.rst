@@ -23,6 +23,7 @@ Changelog
 * [mpm] Save build artifacts on each CI runs.
 * [mpm] Auto-sort module imports.
 * [mpm] Auto-fix common typos.
+* [mpm] Lint JSON files.
 * [mpm] Automate GitHub label generation and synchronization.
 * [mpm] Automaticcaly applies labels on PRs and issues depending on their
   changed files and content.

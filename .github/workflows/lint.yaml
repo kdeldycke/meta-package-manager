@@ -61,7 +61,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install JSON Lint
       run: |
-        npm install jsonlint -g
+        sudo npm install jsonlint -g
     - name: Lint
       run: |
         find ./ -type f -name '*.json' -print -exec jsonlint --sort-keys --in-place "{}" \;

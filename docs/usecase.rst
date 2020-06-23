@@ -81,7 +81,7 @@ For instance, `pip doesn't can't upgrade all outdated package <https://github.co
 Explore repositories
 --------------------
 
-You just learned of a new CLI you did not known about (``broot``) from a friend. Back to your terminal, you can easely search for it accross all package repositories, then choose your preferred package manager to install it:
+You just learned of a new CLI you did not known about (``broot``) from a friend. Back to your terminal, you can easely search for it across all package repositories, then choose your preferred package manager to install it:
 
 .. code-block:: shell-session
 

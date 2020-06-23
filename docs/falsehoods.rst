@@ -47,7 +47,7 @@ Package Managers
     <https://github.com/pypa/pip/issues/988>`_.
 21. All dependencies are provided by the package manager.
 22. Package managers have a CLI.
-23. Package managers behave the same accross OSes and distributions.
+23. Package managers behave the same across OSes and distributions.
 24. Package managers `tracks installed versions
     <https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/homebrew.py#L219-L221>`_.
 25. Package managers `can track removed packages

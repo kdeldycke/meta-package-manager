@@ -476,13 +476,13 @@ def search(ctx, extended, exact, query):
         # TODO: Fix upper-case matching, as tokenizer lower them down.
 
         for part in query_parts:
-            # Search for occurences of query parts in original string.
+            # Search for occurrences of query parts in original string.
             if part in string:
                 # Flag matching substrings for highlighting.
-                occurences = [
+                occurrences = [
                     match.start() for match in re.finditer(part, string)]
 
-                for match_start in occurences:
+                for match_start in occurrences:
                     match_end = match_start + len(part) - 1
                     ranges.add('{}-{}'.format(match_start, match_end))
 

@@ -2,7 +2,7 @@
   {
     "name": "BitBar plugin",
     "color": "#fef2c0",
-    "description": null
+    "description": "Plugin code, documentation or features related to BitBar"
   },
   {
     "name": "CI/CD",
@@ -52,22 +52,22 @@
   {
     "name": "manager: apm",
     "color": "#bfdadc",
-    "description": null
+    "description": "apm"
   },
   {
     "name": "manager: brew",
     "color": "#bfdadc",
-    "description": null
+    "description": "brew"
   },
   {
     "name": "manager: cask",
     "color": "#bfdadc",
-    "description": null
+    "description": "cask"
   },
   {
     "name": "manager: composer",
     "color": "#bfdadc",
-    "description": null
+    "description": "composer"
   },
   {
     "name": "manager: dpkg-like",
@@ -77,22 +77,22 @@
   {
     "name": "manager: flatpak",
     "color": "#bfdadc",
-    "description": null
+    "description": "flatpak"
   },
   {
     "name": "manager: gem",
     "color": "#bfdadc",
-    "description": null
+    "description": "gem"
   },
   {
     "name": "manager: mas",
     "color": "#bfdadc",
-    "description": null
+    "description": "mas"
   },
   {
     "name": "manager: mpm",
     "color": "#bfdadc",
-    "description": null
+    "description": "mpm"
   },
   {
     "name": "manager: npm-like",
@@ -102,27 +102,27 @@
   {
     "name": "manager: pip",
     "color": "#bfdadc",
-    "description": null
+    "description": "pip"
   },
   {
     "name": "manager: snap",
     "color": "#bfdadc",
-    "description": null
+    "description": "snap"
   },
   {
     "name": "platform: Linux",
     "color": "#bfd4f2",
-    "description": null
+    "description": "Linux"
   },
   {
     "name": "platform: Windows",
     "color": "#bfd4f2",
-    "description": null
+    "description": "Windows"
   },
   {
     "name": "platform: macOS",
     "color": "#bfd4f2",
-    "description": null
+    "description": "macOS"
   },
   {
     "name": "question",

@@ -91,6 +91,6 @@ for manager_id in non_grouped_managers:
 # Add labels for grouped managers.
 for group_label, manager_ids in MANAGER_GROUPS.items():
     label_id = 'manager: {}'.format(group_label)
-    LABELS.append((label_id, MANAGER_COLOR,', '.join(sorted(manager_ids))))
+    LABELS.append((label_id, MANAGER_COLOR, ', '.join(sorted(manager_ids))))
     for manager_id in manager_ids:
         MANAGER_LABELS[manager_id] = label_id

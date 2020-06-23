@@ -99,7 +99,7 @@ def generate_labels():
 
     # Save to json definition file.
     label_defs = [
-        dict(zip(sorted(['name', 'color', 'description']), label))
+        dict(zip(['name', 'color', 'description'], label))
         for label in sorted(LABELS)]
     json_file.open('w').write(json_dumps(
         label_defs,

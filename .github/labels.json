@@ -1,137 +1,137 @@
 [
-    {
-        "color": "BitBar plugin",
-        "description": "#fef2c0",
-        "name": null
-    },
-    {
-        "color": "CI/CD",
-        "description": "#dbca13",
-        "name": "Automation and management of the project itself"
-    },
-    {
-        "color": "bug",
-        "description": "#d73a4a",
-        "name": "Something isn't working"
-    },
-    {
-        "color": "can't reproduce",
-        "description": "#fec1c1",
-        "name": "Root cause unlikely to come from the project"
-    },
-    {
-        "color": "documentation",
-        "description": "#006b75",
-        "name": "Update to documentation's content or its generation"
-    },
-    {
-        "color": "duplicate",
-        "description": "#cfd3d7",
-        "name": "This issue or pull request already exists"
-    },
-    {
-        "color": "enhancement",
-        "description": "#84b6eb",
-        "name": "Improvement of an existing feature"
-    },
-    {
-        "color": "feature request",
-        "description": "#fbca04",
-        "name": "Something not existing yet that need to be implemented"
-    },
-    {
-        "color": "good first issue",
-        "description": "#7057ff",
-        "name": "A place for newcomers to start contributing"
-    },
-    {
-        "color": "help wanted",
-        "description": "#008672",
-        "name": "Extra attention is needed"
-    },
-    {
-        "color": "manager: apm",
-        "description": "#bfdadc",
-        "name": null
-    },
-    {
-        "color": "manager: brew",
-        "description": "#bfdadc",
-        "name": null
-    },
-    {
-        "color": "manager: cask",
-        "description": "#bfdadc",
-        "name": null
-    },
-    {
-        "color": "manager: composer",
-        "description": "#bfdadc",
-        "name": null
-    },
-    {
-        "color": "manager: dpkg-like",
-        "description": "#bfdadc",
-        "name": "apt, dpkg, opkg"
-    },
-    {
-        "color": "manager: flatpak",
-        "description": "#bfdadc",
-        "name": null
-    },
-    {
-        "color": "manager: gem",
-        "description": "#bfdadc",
-        "name": null
-    },
-    {
-        "color": "manager: mas",
-        "description": "#bfdadc",
-        "name": null
-    },
-    {
-        "color": "manager: mpm",
-        "description": "#bfdadc",
-        "name": null
-    },
-    {
-        "color": "manager: npm-like",
-        "description": "#bfdadc",
-        "name": "npm, yarn"
-    },
-    {
-        "color": "manager: pip",
-        "description": "#bfdadc",
-        "name": null
-    },
-    {
-        "color": "manager: snap",
-        "description": "#bfdadc",
-        "name": null
-    },
-    {
-        "color": "platform: Linux",
-        "description": "#bfd4f2",
-        "name": null
-    },
-    {
-        "color": "platform: Windows",
-        "description": "#bfd4f2",
-        "name": null
-    },
-    {
-        "color": "platform: macOS",
-        "description": "#bfd4f2",
-        "name": null
-    },
-    {
-        "color": "question",
-        "description": "#d876e3",
-        "name": "Further information is requested"
-    },
-    {
-        "color": "wont do/fix",
-        "description": "#eeeeee",
-        "name": "This will not be worked on"
-    }
+  {
+    "name": "BitBar plugin",
+    "color": "#fef2c0",
+    "description": null
+  },
+  {
+    "name": "CI/CD",
+    "color": "#dbca13",
+    "description": "Automation and management of the project itself"
+  },
+  {
+    "name": "bug",
+    "color": "#d73a4a",
+    "description": "Something isn't working"
+  },
+  {
+    "name": "can't reproduce",
+    "color": "#fec1c1",
+    "description": "Root cause unlikely to come from the project"
+  },
+  {
+    "name": "documentation",
+    "color": "#006b75",
+    "description": "Update to documentation's content or its generation"
+  },
+  {
+    "name": "duplicate",
+    "color": "#cfd3d7",
+    "description": "This issue or pull request already exists"
+  },
+  {
+    "name": "enhancement",
+    "color": "#84b6eb",
+    "description": "Improvement of an existing feature"
+  },
+  {
+    "name": "feature request",
+    "color": "#fbca04",
+    "description": "Something not existing yet that need to be implemented"
+  },
+  {
+    "name": "good first issue",
+    "color": "#7057ff",
+    "description": "A place for newcomers to start contributing"
+  },
+  {
+    "name": "help wanted",
+    "color": "#008672",
+    "description": "Extra attention is needed"
+  },
+  {
+    "name": "manager: apm",
+    "color": "#bfdadc",
+    "description": null
+  },
+  {
+    "name": "manager: brew",
+    "color": "#bfdadc",
+    "description": null
+  },
+  {
+    "name": "manager: cask",
+    "color": "#bfdadc",
+    "description": null
+  },
+  {
+    "name": "manager: composer",
+    "color": "#bfdadc",
+    "description": null
+  },
+  {
+    "name": "manager: dpkg-like",
+    "color": "#bfdadc",
+    "description": "apt, dpkg, opkg"
+  },
+  {
+    "name": "manager: flatpak",
+    "color": "#bfdadc",
+    "description": null
+  },
+  {
+    "name": "manager: gem",
+    "color": "#bfdadc",
+    "description": null
+  },
+  {
+    "name": "manager: mas",
+    "color": "#bfdadc",
+    "description": null
+  },
+  {
+    "name": "manager: mpm",
+    "color": "#bfdadc",
+    "description": null
+  },
+  {
+    "name": "manager: npm-like",
+    "color": "#bfdadc",
+    "description": "npm, yarn"
+  },
+  {
+    "name": "manager: pip",
+    "color": "#bfdadc",
+    "description": null
+  },
+  {
+    "name": "manager: snap",
+    "color": "#bfdadc",
+    "description": null
+  },
+  {
+    "name": "platform: Linux",
+    "color": "#bfd4f2",
+    "description": null
+  },
+  {
+    "name": "platform: Windows",
+    "color": "#bfd4f2",
+    "description": null
+  },
+  {
+    "name": "platform: macOS",
+    "color": "#bfd4f2",
+    "description": null
+  },
+  {
+    "name": "question",
+    "color": "#d876e3",
+    "description": "Further information is requested"
+  },
+  {
+    "name": "wont do/fix",
+    "color": "#eeeeee",
+    "description": "This will not be worked on"
+  }
 ]

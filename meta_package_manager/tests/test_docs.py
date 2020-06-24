@@ -83,7 +83,8 @@ def test_labeller_rules():
 
     # Extract rules from json blurb serialized into YAML.
     with PROJECT_ROOT.joinpath(
-            '.github/workflows/labels_issue.yaml').resolve().open() as doc:
+            '.github/workflows/labeller-content-based.yaml').resolve().open() \
+            as doc:
         content = doc.read()
     assert "Naturalclar/issue-action" in content
     json_rules = load(content, Loader=Loader)[

@@ -1,4 +1,4 @@
-name: Unittests
+name: Tests
 on:
   push:
   pull_request:
@@ -9,7 +9,7 @@ on:
 jobs:
 
   tests:
-    name: Tests
+    name: Install package managers and run unittests
     runs-on: ${{matrix.os}}
     strategy:
       matrix:

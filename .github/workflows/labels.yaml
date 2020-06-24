@@ -1,4 +1,4 @@
-name: Generate and sync labels
+name: Labels
 on:
   # Only the develop branch has authority on the project management. This will
   # prevent any other tagging or release activity interfer with the project.
@@ -9,6 +9,7 @@ on:
 jobs:
 
   labels:
+    name: Generate and sync labels
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

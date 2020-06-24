@@ -1,4 +1,4 @@
-name: Build and distribute package
+name: Build
 on:
   push:
   pull_request:
@@ -6,7 +6,7 @@ on:
 jobs:
 
   build:
-    name: Build, check and distribute package
+    name: Build, check and publish package on release
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

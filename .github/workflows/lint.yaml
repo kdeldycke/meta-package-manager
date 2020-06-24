@@ -71,8 +71,8 @@ jobs:
         author: "Kevin Deldycke <kevin@deldycke.com>"
         commit-message: "[lint] Auto-format JSON content."
         title: '[lint] Auto-format JSON content.'
-        body: |
-          [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/runs/${{ github.run_id }}?check_suite_focus=true)
+        body: >
+          [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
         labels: "CI/CD"
         assignees: kdeldycke
@@ -89,8 +89,8 @@ jobs:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[lint] Fix typo."
           title: "Typo."
-          body: |
-            [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/runs/${{ github.run_id }}?check_suite_focus=true)
+          body: >
+            [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
             as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
           labels: "documentation"
           assignees: kdeldycke
@@ -113,8 +113,8 @@ jobs:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "Regenerate .gitignore."
           title: "Regenerate .gitignore"
-          body: |
-            [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/runs/${{ github.run_id }}?check_suite_focus=true)
+          body: >
+            [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
             as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
           labels: "CI/CD"
           assignees: kdeldycke

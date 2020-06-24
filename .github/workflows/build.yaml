@@ -47,6 +47,9 @@ jobs:
           Changelog:
 
             * <TODO>
+            * <TODO>
+            * <TODO>
+
     - name: Push package to public PyPi repository
       # Only triggers on version tagging.
       if: startsWith(github.ref, 'refs/tags/v')

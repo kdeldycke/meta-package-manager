@@ -27,9 +27,8 @@ identities, and tidying things up by hand-editing the .mailmap file.
 """
 
 import sys
-from subprocess import PIPE, Popen
 from pathlib import Path
-
+from subprocess import PIPE, Popen
 
 contributors = set()
 

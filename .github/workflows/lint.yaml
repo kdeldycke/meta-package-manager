@@ -111,7 +111,7 @@ jobs:
       - uses: peter-evans/create-pull-request@v2
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
-          commit-message: "Regenerate .gitignore."
+          commit-message: "Regenerate .gitignore"
           title: "Regenerate .gitignore"
           body: >
             [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
@@ -119,3 +119,30 @@ jobs:
           labels: "CI/CD"
           assignees: kdeldycke
           branch: update-gitignore
+
+  update-mailmap:
+    name: Update .mailmap and create a PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # Fetch all history to extract all contributors.
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Generate .mailmap
+        run: |
+          python ./.github/update_mailmap.py
+      - uses: peter-evans/create-pull-request@v2
+        with:
+          author: "Kevin Deldycke <kevin@deldycke.com>"
+          commit-message: "Regenerate .mailmap"
+          title: "Regenerate .mailmap"
+          body: >
+            [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
+          labels: "CI/CD"
+          assignees: kdeldycke
+          branch: update-mailmap

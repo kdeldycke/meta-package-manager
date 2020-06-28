@@ -30,7 +30,7 @@ jobs:
       with:
         author: "Kevin Deldycke <kevin@deldycke.com>"
         commit-message: "[lint] Format Python code."
-        title: "Format Python code."
+        title: "Format Python code"
         body: >
           [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
@@ -87,7 +87,7 @@ jobs:
       with:
         author: "Kevin Deldycke <kevin@deldycke.com>"
         commit-message: "[lint] Auto-format JSON content."
-        title: '[lint] Auto-format JSON content.'
+        title: '[lint] Auto-format JSON content'
         body: >
           [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
@@ -105,7 +105,7 @@ jobs:
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[lint] Fix typo."
-          title: "Typo."
+          title: "Typo"
           body: >
             [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
             as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).

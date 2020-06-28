@@ -53,10 +53,10 @@ sphinx_rtd_theme = {version = "^0.4.3", optional = true}
 sphinx_tabs = {version = "^1.1.13", optional = true}
 
 [tool.poetry.dev-dependencies]
+black = "^19.10b0"
 bump2version = "^1.0.0"
 check-wheel-contents = "^0.1.0"
 coverage = {extras = ["toml"], version = "^5.0.4"}
-isort = "^4.3.5"
 pycodestyle = "^2"
 pylint = "^2.5"
 pytest = "^5.4"
@@ -74,9 +74,8 @@ docs = ["sphinx", "sphinx_rtd_theme", "sphinx_tabs"]
 [tool.poetry.scripts]
 mpm = 'meta_package_manager.cli:cli'
 
-[tool.isort]
-# https://github.com/timothycrosley/isort#configuring-isort
-multi_line_output = 3
+[tool.black]
+target-version = ['py37', 'py38']
 
 [tool.pylint.MASTER]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html
@@ -85,13 +84,18 @@ fail-under = "8"
 [tool.pylint."messages control"]
 # List messages with: $ pylint --list-msgs
 # C0114: missing-module-docstring
+# C0326: bad-whitespace (black compatibility)
+# C0330: bad-continuation (black compatibility)
 # W0511: fixme
 # W1203: logging-fstring-interpolation
-disable = "C0114,W0511,W1203"
+disable = "C0114, C0326,  C0330, W0511, W1203"
 [tool.pylint.LOGGING]
 # The type of string formatting that logging methods do. `old` means using %
 # formatting, `new` is for `{}` formatting.
 logging-format-style = "new"
+[tool.pylint.FORMAT]
+# Aligns to black's config: https://github.com/psf/black/blob/master/docs/compatible_configs.md#pylint
+max-line-length = "88"
 
 [tool.coverage.paths]
 # https://coverage.readthedocs.io/en/latest/config.html

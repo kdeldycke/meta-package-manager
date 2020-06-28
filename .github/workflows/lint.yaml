@@ -8,8 +8,8 @@ on:
 
 jobs:
 
-  sort-python-imports:
-    name: Auto-sort Python imports and auto-commit
+  format-python:
+    name: Auto-format Python code and create a PR
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -21,19 +21,25 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
-    - name: Sort imports
+    - name: Install black
       run: |
         python -m pip install --upgrade pip
         python -m pip install --upgrade poetry
         poetry install
-        poetry run isort --apply
-    - name: Commit and push changes
-      # Only allow autocommits on develop branch and pull requests.
-      uses: stefanzweifel/git-auto-commit-action@v4
+    - name: Run black
+      run: |
+        poetry run black .
+    - uses: peter-evans/create-pull-request@v2
       with:
-        commit_author: "Kevin Deldycke <kevin@deldycke.com>"
-        commit_message: "[lint] Sort python module imports."
-        file_pattern: "*.py"
+        author: "Kevin Deldycke <kevin@deldycke.com>"
+        commit-message: "[lint] Format Python code."
+        title: "Format Python code."
+        body: >
+          [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
+        labels: "CI/CD"
+        assignees: kdeldycke
+        branch: format-python
 
   lint-python:
     name: Lint and check Python code

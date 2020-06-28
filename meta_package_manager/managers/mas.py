@@ -90,7 +90,7 @@ class MAS(PackageManager):
 
         if extended:
             logger.warning(
-                f"Extended search not supported for {self.id}. Fallback to " "Fuzzy."
+                f"Extended search not supported for {self.id}. Fallback to Fuzzy."
             )
 
         output = self.run_cli(self.global_args, "search", query)

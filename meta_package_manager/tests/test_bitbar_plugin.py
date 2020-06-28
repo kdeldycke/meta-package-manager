@@ -79,7 +79,7 @@ class TestBibarPlugin(unittest.TestCase):
                     break
             if not matches:
                 self.fail(
-                    "BitBar output line {!r} did not match any regexp." "".format(line)
+                    "BitBar output line {!r} did not match any regexp.".format(line)
                 )
 
         # Check all required regexp did match at least once.

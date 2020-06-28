@@ -9,7 +9,7 @@ Changelog
 
 * [mpm] Auto-update ``.gitignore`` file.
 * [mpm] Auto-update ``.mailmap`` file.
-* [mpm] Lint all YAML files.
+* [mpm] Lint all YAML files. Add dependency on ``yamllint`` package.
 
 `3.3.0 (2020-06-23) <https://github.com/kdeldycke/meta-package-manager/compare/v3.2.0...v3.3.0>`_
 -------------------------------------------------------------------------------------------------

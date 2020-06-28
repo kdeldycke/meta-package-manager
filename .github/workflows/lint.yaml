@@ -59,12 +59,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install JSON Lint
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install linter
       run: |
-        python -m pip install --upgrade yamllint
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade poetry
+        poetry install
     - name: Lint
       run: |
-        yamllint -d relaxed .
+        poetry run yamllint -d relaxed .
 
   lint-json:
     name: Lint JSON files and create a PR

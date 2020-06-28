@@ -46,11 +46,13 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
-    - name: Check coding style
+    - name: Install linters
       run: |
         python -m pip install --upgrade pip
         python -m pip install --upgrade poetry
         poetry install
+    - name: Lint
+      run: |
         poetry run pycodestyle
         poetry run pylint meta_package_manager
 
@@ -77,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install JSON Lint
+    - name: Install linter
       run: |
         sudo npm install jsonlint -g
     - name: Lint

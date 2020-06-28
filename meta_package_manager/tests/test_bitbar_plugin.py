@@ -17,12 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals
-)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
 import re
@@ -39,7 +34,7 @@ newer.
 """
 
 
-@unittest.skipUnless(sys.platform == 'darwin', 'macOS required')
+@unittest.skipUnless(sys.platform == "darwin", "macOS required")
 class TestBibarPlugin(unittest.TestCase):
     """ This is the only test suite that is still using unittest module instead
     of pytest.
@@ -56,8 +51,7 @@ class TestBibarPlugin(unittest.TestCase):
         # Upgrade all line. Required.
         (r"(--)?Upgrade all \| bash=.+$", False),
         # Error line. Optional.
-        (r"(--)?.+ \| color=red font=Menlo size=12 trim=false emojize=false$",
-         False),
+        (r"(--)?.+ \| color=red font=Menlo size=12 trim=false emojize=false$", False),
     ]
 
     def bitbar_output_checks(self, checklist, env=None):
@@ -85,26 +79,31 @@ class TestBibarPlugin(unittest.TestCase):
                     break
             if not matches:
                 self.fail(
-                    "BitBar output line {!r} did not match any regexp."
-                    "".format(line))
+                    "BitBar output line {!r} did not match any regexp." "".format(line)
+                )
 
         # Check all required regexp did match at least once.
         for index, (regex, required) in enumerate(checks):
             if required and not match_counter[index]:
                 self.fail(
                     "{!r} regex did not match any BitBar plugin output line."
-                    "".format(regex))
+                    "".format(regex)
+                )
 
     def test_simple_call(self):
         """ Check default rendering is flat: no submenu. """
-        self.bitbar_output_checks([
-            # Summary package statistics. Required.
-            (r"\d+ outdated .+ packages? \|  emojize=false$", True),
-        ])
+        self.bitbar_output_checks(
+            [
+                # Summary package statistics. Required.
+                (r"\d+ outdated .+ packages? \|  emojize=false$", True),
+            ]
+        )
 
     def test_submenu_rendering(self):
-        self.bitbar_output_checks([
-            # Submenu entry line with summary. Required.
-            (r".+:\s+\d+ package(s| ) \| font=Menlo size=12 emojize=false$",
-             True),
-        ], env={'BITBAR_MPM_SUBMENU': 'True'})
+        self.bitbar_output_checks(
+            [
+                # Submenu entry line with summary. Required.
+                (r".+:\s+\d+ package(s| ) \| font=Menlo size=12 emojize=false$", True),
+            ],
+            env={"BITBAR_MPM_SUBMENU": "True"},
+        )

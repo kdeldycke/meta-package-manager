@@ -34,7 +34,7 @@ from .platform import CURRENT_OS_ID
 from .version import parse_version
 
 # Rendering format of CLI in JSON fields.
-CLI_FORMATS = frozenset(['plain', 'fragments', 'bitbar'])
+CLI_FORMATS = frozenset(["plain", "fragments", "bitbar"])
 
 
 class CLIError(Exception):
@@ -50,14 +50,15 @@ class CLIError(Exception):
 
     def __str__(self):
         """ Human-readable error. """
-        margin = ' ' * 2
-        return indent((
-            "\nReturn code: {}\n"
-            "Output:\n{}\n"
-            "Error:\n{}").format(
+        margin = " " * 2
+        return indent(
+            ("\nReturn code: {}\n" "Output:\n{}\n" "Error:\n{}").format(
                 self.code,
                 indent(str(self.output), margin),
-                indent(str(self.error), margin)), margin)
+                indent(str(self.error), margin),
+            ),
+            margin,
+        )
 
 
 class PackageManager:
@@ -122,7 +123,7 @@ class PackageManager:
         Virtual package manager are just skeleton classes used to factorize
         code among managers of the same family.
         """
-        return cls.__name__ == 'PackageManager' or not cls.cli_name
+        return cls.__name__ == "PackageManager" or not cls.cli_name
 
     @cachedproperty
     def cli_path(self):
@@ -135,9 +136,8 @@ class PackageManager:
         if not self.cli_name:
             return None
         env_path = ":".join(
-            self.cli_search_path + [
-                '/usr/local/bin',
-                os.environ.get("PATH")])
+            self.cli_search_path + ["/usr/local/bin", os.environ.get("PATH")]
+        )
         cli_path = which(self.cli_name, mode=os.F_OK, path=env_path)
         if not cli_path:
             return None
@@ -193,7 +193,8 @@ class PackageManager:
             if self.version < parse_version(self.requirement):
                 logger.debug(
                     f"{self.id} {self.version} is older than "
-                    "{self.requirement} version requirement.")
+                    "{self.requirement} version requirement."
+                )
                 return False
         return True
 
@@ -207,11 +208,7 @@ class PackageManager:
             3 - is executable, and
             4 - match the version requirement.
         """
-        return bool(
-            self.supported and
-            self.cli_path and
-            self.executable and
-            self.fresh)
+        return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
     def run(self, *args, dry_run=False):
         """ Run a shell command, return the output and keep error message.
@@ -220,7 +217,7 @@ class PackageManager:
         """
         # Serialize Path objects to strings.
         args = list(map(str, flatten(args)))
-        args_str = click.style(' '.join(args), fg='white')
+        args_str = click.style(" ".join(args), fg="white")
         logger.debug(f"► {args_str}")
 
         code = 0
@@ -251,11 +248,11 @@ class PackageManager:
 
         # Log <stdout> and <stderr> output.
         if output:
-            logger.debug(indent(output, '  '))
+            logger.debug(indent(output, "  "))
         if error:
             # Non-fatal error messages are logged as warnings.
             log_func = logger.error if code else logger.warning
-            log_func(indent(error, '  '))
+            log_func(indent(error, "  "))
 
         return output
 
@@ -274,8 +271,7 @@ class PackageManager:
 
     def cleanup(self):
         """ Remove left-overs and unused packages. """
-        if (self.cleanup.__func__.__qualname__ ==
-                PackageManager.cleanup.__qualname__):
+        if self.cleanup.__func__.__qualname__ == PackageManager.cleanup.__qualname__:
             logger.warning(f"Cleanup not implemented for {self.id}.")
             return
         logger.info(f"Cleanup {self.id}...")
@@ -331,17 +327,18 @@ class PackageManager:
         except NotImplementedError:
             logger.warning(
                 f"Full upgrade subcommand not implemented in {self.id}. Call "
-                "single-package upgrade CLI one by one.")
+                "single-package upgrade CLI one by one."
+            )
             log = []
             for package_id in self.outdated:
                 output = self.upgrade(package_id, dry_run=dry_run)
                 if output:
                     log.append(output)
             if log:
-                return '\n'.join(log)
+                return "\n".join(log)
 
     @staticmethod
-    def render_cli(cmd, cli_format='plain'):
+    def render_cli(cmd, cli_format="plain"):
         """ Return a formatted CLI in the requested format.
 
         * ``plain`` returns a simple string
@@ -353,19 +350,19 @@ class PackageManager:
         assert cli_format in CLI_FORMATS
         cmd = map(str, flatten(cmd))  # Serialize Path instances.
 
-        if cli_format == 'fragments':
+        if cli_format == "fragments":
             return list(cmd)
 
-        if cli_format == 'plain':
-            return ' '.join(cmd)
+        if cli_format == "plain":
+            return " ".join(cmd)
 
         # Renders the CLI into BitBar dialect.
-        bitbar_cli = ''
+        bitbar_cli = ""
         for index, param in enumerate(cmd):
             if index == 0:
                 bitbar_cli += "bash={}".format(param)
             else:
-                if '=' in param:
-                    param = "\\\"{}\\\"".format(param)
+                if "=" in param:
+                    param = '\\"{}\\"'.format(param)
                 bitbar_cli += " param{}={}".format(index, param)
         return bitbar_cli

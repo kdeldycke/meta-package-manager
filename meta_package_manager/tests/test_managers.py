@@ -58,7 +58,7 @@ def test_ascii_id():
 
 def test_name():
     """ Check all managers have a name. """
-    name_matcher = re.compile(r'[a-zA-Z0-9\' ]+')
+    name_matcher = re.compile(r"[a-zA-Z0-9\' ]+")
     for manager in pool().values():
         assert manager.name
         assert isinstance(manager.name, str)
@@ -94,8 +94,7 @@ def test_virtual():
 def test_cli_search_path():
     for manager in pool().values():
         assert isinstance(manager.cli_search_path, list)
-        assert len(
-            set(manager.cli_search_path)) == len(manager.cli_search_path)
+        assert len(set(manager.cli_search_path)) == len(manager.cli_search_path)
         for search_path in manager.cli_search_path:
             assert isinstance(search_path, str)
             path_obj = Path(search_path).resolve()
@@ -116,7 +115,7 @@ def test_cli_path():
 
 def test_global_args_type():
     """ Check that definitions returns CLI args as a list of strings. """
-    arg_matcher = re.compile(r'[a-zA-Z0-9-]+')
+    arg_matcher = re.compile(r"[a-zA-Z0-9-]+")
     for manager in pool().values():
         assert isinstance(manager.global_args, list)
         for arg in manager.global_args:
@@ -127,7 +126,7 @@ def test_global_args_type():
 
 def test_requirement():
     """ Each manager is required to specify a minimal version. """
-    req_matcher = re.compile(r'[0-9\.]+')
+    req_matcher = re.compile(r"[0-9\.]+")
     for manager in pool().values():
         assert isinstance(manager.requirement, str)
         assert req_matcher.match(manager.requirement)
@@ -173,7 +172,7 @@ def test_available():
 def test_cli_type():
     """ Check that all methods returning a CLI is a list. """
     for manager in pool().values():
-        assert isinstance(manager.upgrade_cli('dummy_package_id'), list)
+        assert isinstance(manager.upgrade_cli("dummy_package_id"), list)
 
         # Upgrade-all CLI are allowed to raise a particular error.
         try:
@@ -191,28 +190,26 @@ def test_installed_type():
             assert isinstance(manager.installed, dict)
             for pkg in manager.installed.values():
                 assert isinstance(pkg, dict)
-                assert set(pkg) == {'id', 'name', 'installed_version'}
-                assert isinstance(pkg['id'], str)
-                assert isinstance(pkg['name'], str)
-                if pkg['installed_version'] is not None:
-                    assert isinstance(
-                        pkg['installed_version'], TokenizedString)
+                assert set(pkg) == {"id", "name", "installed_version"}
+                assert isinstance(pkg["id"], str)
+                assert isinstance(pkg["name"], str)
+                if pkg["installed_version"] is not None:
+                    assert isinstance(pkg["installed_version"], TokenizedString)
 
 
 def test_search_type():
     """ Check that all search operations returns a dict of dicts. """
     for manager in pool().values():
         if manager.available:
-            matches = manager.search('python', extended=True, exact=False)
+            matches = manager.search("python", extended=True, exact=False)
             assert isinstance(matches, dict)
             for pkg in matches.values():
                 assert isinstance(pkg, dict)
-                assert set(pkg) == {'id', 'name', 'latest_version'}
-                assert isinstance(pkg['id'], str)
-                assert isinstance(pkg['name'], str)
-                if pkg['latest_version'] is not None:
-                    assert isinstance(
-                        pkg['latest_version'], TokenizedString)
+                assert set(pkg) == {"id", "name", "latest_version"}
+                assert isinstance(pkg["id"], str)
+                assert isinstance(pkg["name"], str)
+                if pkg["latest_version"] is not None:
+                    assert isinstance(pkg["latest_version"], TokenizedString)
 
 
 def test_outdated_type():
@@ -222,15 +219,12 @@ def test_outdated_type():
             assert isinstance(manager.outdated, dict)
             for pkg in manager.outdated.values():
                 assert isinstance(pkg, dict)
-                assert set(pkg) == {
-                    'id', 'name', 'installed_version', 'latest_version'}
-                assert isinstance(pkg['id'], str)
-                assert isinstance(pkg['name'], str)
-                if pkg['installed_version'] is not None:
-                    assert isinstance(
-                        pkg['installed_version'], TokenizedString)
-                assert isinstance(
-                    pkg['latest_version'], TokenizedString)
+                assert set(pkg) == {"id", "name", "installed_version", "latest_version"}
+                assert isinstance(pkg["id"], str)
+                assert isinstance(pkg["name"], str)
+                if pkg["installed_version"] is not None:
+                    assert isinstance(pkg["installed_version"], TokenizedString)
+                assert isinstance(pkg["latest_version"], TokenizedString)
 
 
 def test_sync_type():

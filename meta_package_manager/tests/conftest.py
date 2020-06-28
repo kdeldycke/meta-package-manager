@@ -36,25 +36,29 @@ from ..platform import is_linux, is_macos, is_windows
 """ Fixtures, configuration and helpers for tests. """
 
 
-MANAGER_IDS = frozenset([
-    'apm',
-    'apt',
-    'brew',
-    'cask',
-    'composer',
-    'flatpak',
-    'gem',
-    'mas',
-    'npm',
-    'opkg',
-    'pip',
-    'snap',
-    'yarn'])
+MANAGER_IDS = frozenset(
+    [
+        "apm",
+        "apt",
+        "brew",
+        "cask",
+        "composer",
+        "flatpak",
+        "gem",
+        "mas",
+        "npm",
+        "opkg",
+        "pip",
+        "snap",
+        "yarn",
+    ]
+)
 """ Hard-coded list of all supported manager IDs. """
 
 
-DESTRUCTIVE_MODE = bool(os.environ.get('DESTRUCTIVE_TESTS', False) not in {
-        True, 1, 'True', 'true', '1'})
+DESTRUCTIVE_MODE = bool(
+    os.environ.get("DESTRUCTIVE_TESTS", False) not in {True, 1, "True", "true", "1"}
+)
 """ Pre-computed boolean flag indicating if destructive mode is activated by
 the presence of a ``DESTRUCTIVE_TESTS`` environment variable set to ``True``.
 """
@@ -70,7 +74,8 @@ destructive = pytest.mark.skipif(DESTRUCTIVE_MODE, reason="destructive test")
 
 
 non_destructive = pytest.mark.skipif(
-    not DESTRUCTIVE_MODE, reason="non-destructive test")
+    not DESTRUCTIVE_MODE, reason="non-destructive test"
+)
 """ Pytest mark to skip a test unless destructive mode is allowed.
 
 .. todo:
@@ -79,26 +84,23 @@ non_destructive = pytest.mark.skipif(
 """
 
 
-unless_linux = pytest.mark.skipif(
-    not is_linux(), reason="Linux required")
+unless_linux = pytest.mark.skipif(not is_linux(), reason="Linux required")
 """ Pytest mark to skip a test unless it is run on a Linux system. """
 
 
-unless_macos = pytest.mark.skipif(
-    not is_macos(), reason="macOS required")
+unless_macos = pytest.mark.skipif(not is_macos(), reason="macOS required")
 """ Pytest mark to skip a test unless it is run on a macOS system. """
 
 
-unless_windows = pytest.mark.skipif(
-    not is_windows(), reason="Windows required")
+unless_windows = pytest.mark.skipif(not is_windows(), reason="Windows required")
 """ Pytest mark to skip a test unless it is run on a Windows system. """
 
 
 def print_cli_output(cmd, output):
     """ Simulate CLI output. Used to print debug traces in test results. """
-    print(u"\n► {}".format(click.style(' '.join(cmd), fg='white')))
+    print("\n► {}".format(click.style(" ".join(cmd), fg="white")))
     if output:
-        print(indent(output, '  '))
+        print(indent(output, "  "))
 
 
 def run_cmd(*args):
@@ -111,9 +113,9 @@ def run_cmd(*args):
     print_cli_output(args, output)
 
     # Print some more debug info.
-    print(click.style("Return code: {}".format(code), fg='yellow'))
+    print(click.style("Return code: {}".format(code), fg="yellow"))
     if error:
-        print(indent(click.style(error, fg='red'), '  '))
+        print(indent(click.style(error, fg="red"), "  "))
 
     return code, output, error
 
@@ -134,7 +136,7 @@ def invoke(runner):
     # unittest for BitBar.
     # def _run(*args, color=False):
     def _run(*args, **kwargs):
-        color = kwargs.get('color', False)
+        color = kwargs.get("color", False)
 
         # We allow for nested iterables and None values as args for
         # convenience. We just need to flatten and filters them out.
@@ -148,13 +150,12 @@ def invoke(runner):
         result.stdout_bytes = strip_ansi(result.stdout_bytes)
         result.stderr_bytes = strip_ansi(result.stderr_bytes)
 
-        print_cli_output(['mpm'] + args, result.output)
+        print_cli_output(["mpm"] + args, result.output)
 
         # Print some more debug info.
         print(result)
         if result.exception:
-            print(ExceptionInfo.from_exc_info(
-                *result.exc_info).get_formatted())
+            print(ExceptionInfo.from_exc_info(*result.exc_info).get_formatted())
 
         return result
 

@@ -37,14 +37,15 @@ class Pip(PackageManager):
 
     platforms = frozenset([MACOS, LINUX, WINDOWS])
 
-    requirement = '10.0.0'
+    requirement = "10.0.0"
 
     # We will use system's default python to call out pip as a module.
-    cli_name = 'python'
+    cli_name = "python"
 
     global_args = [
-        '-m', 'pip',   # Canonical call to Python's pip module.
-        '--no-color',  # Suppress colored output.
+        "-m",
+        "pip",  # Canonical call to Python's pip module.
+        "--no-color",  # Suppress colored output.
     ]
 
     def get_version(self):
@@ -55,7 +56,7 @@ class Pip(PackageManager):
             ► python -m pip --no-color --version
             pip 2.0.2 from /usr/local/lib/python/site-packages/pip (python 3.7)
         """
-        output = self.run_cli(self.global_args, '--version')
+        output = self.run_cli(self.global_args, "--version")
         if output:
             return parse_version(output.split()[1])
 
@@ -100,15 +101,17 @@ class Pip(PackageManager):
         # --quiet is required here to silence warning and error messages
         # mangling the JSON content.
         output = self.run_cli(
-            self.global_args, 'list', '--format=json', '--verbose', '--quiet')
+            self.global_args, "list", "--format=json", "--verbose", "--quiet"
+        )
 
         if output:
             for package in json.loads(output):
-                package_id = package['name']
+                package_id = package["name"]
                 installed[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'installed_version': parse_version(package['version'])}
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(package["version"]),
+                }
 
         return installed
 
@@ -132,10 +135,11 @@ class Pip(PackageManager):
         """
         matches = {}
 
-        output = self.run_cli(self.global_args, 'search', query)
+        output = self.run_cli(self.global_args, "search", query)
 
         if output:
-            regexp = re.compile(r"""
+            regexp = re.compile(
+                r"""
                 ^(?P<package_id>\S+)  # A string with a char at least.
                 \                     # A space.
                 \((?P<version>.*?)\)  # Content between parenthesis.
@@ -143,7 +147,9 @@ class Pip(PackageManager):
                 (?P<description>      # Start of the multi-line desc group.
                     (?:[ ]+.*\s)+     # Lines of strings prefixed by spaces.
                 )
-                """, re.MULTILINE | re.VERBOSE)
+                """,
+                re.MULTILINE | re.VERBOSE,
+            )
 
             for package_id, version, description in regexp.findall(output):
 
@@ -161,9 +167,10 @@ class Pip(PackageManager):
                     continue
 
                 matches[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'latest_version': parse_version(version)}
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(version),
+                }
 
         return matches
 
@@ -231,17 +238,23 @@ class Pip(PackageManager):
         # --quiet is required here to silence warning and error messages
         # mangling the JSON content.
         output = self.run_cli(
-            self.global_args, 'list', '--format=json', '--outdated',
-            '--verbose', '--quiet')
+            self.global_args,
+            "list",
+            "--format=json",
+            "--outdated",
+            "--verbose",
+            "--quiet",
+        )
 
         if output:
             for package in json.loads(output):
-                package_id = package['name']
+                package_id = package["name"]
                 outdated[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'installed_version': parse_version(package['version']),
-                    'latest_version': parse_version(package['latest_version'])}
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(package["version"]),
+                    "latest_version": parse_version(package["latest_version"]),
+                }
 
         return outdated
 
@@ -261,8 +274,13 @@ class Pip(PackageManager):
             Successfully installed six-1.15.0
         """
         return [
-            self.cli_path, self.global_args,
-            'install', '--user', '--upgrade', package_id]
+            self.cli_path,
+            self.global_args,
+            "install",
+            "--user",
+            "--upgrade",
+            package_id,
+        ]
 
     def upgrade_all_cli(self):
         """ Pip lacks support of a proper full upgrade command. Raising an

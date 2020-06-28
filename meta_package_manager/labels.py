@@ -27,31 +27,31 @@ from .platform import ALL_OS_LABELS
 
 # Format: label name, color, optional description.
 LABELS = [
-    ("BitBar plugin", '#fef2c0',
-     "Plugin code, documentation or features related to BitBar"),
-    ("bug", '#d73a4a',
-     "Something isn't working, or a fix is proposed"),
-    ("CI/CD", '#dbca13',
-     "Tests, automation and management of the project"),
-    ("documentation", '#006b75',
-     "Update to non-code (manual, readme, tutorial, docstrings, ...) and "
-     "its generation"),
-    ("duplicate", '#cfd3d7',
-     "This issue or pull request already exists"),
-    ("enhancement", '#84b6eb',
-     "Improvement or change of an existing feature"),
-    ("feature request", '#fbca04',
-     "Something not existing yet that need to be implemented"),
-    ("good first issue", '#7057ff',
-     "A place for newcomers to start contributing"),
-    ("help wanted", '#008672',
-     "Extra attention is needed"),
-    ("can't reproduce", '#fec1c1',
-     "Root cause unlikely to come from the project"),
-    ("question", '#d876e3',
-     "Further information is requested"),
-    ("wont do/fix", '#eeeeee',
-     "This will not be worked on"),
+    (
+        "BitBar plugin",
+        "#fef2c0",
+        "Plugin code, documentation or features related to BitBar",
+    ),
+    ("bug", "#d73a4a", "Something isn't working, or a fix is proposed"),
+    ("CI/CD", "#dbca13", "Tests, automation and management of the project"),
+    (
+        "documentation",
+        "#006b75",
+        "Update to non-code (manual, readme, tutorial, docstrings, ...) and "
+        "its generation",
+    ),
+    ("duplicate", "#cfd3d7", "This issue or pull request already exists"),
+    ("enhancement", "#84b6eb", "Improvement or change of an existing feature"),
+    (
+        "feature request",
+        "#fbca04",
+        "Something not existing yet that need to be implemented",
+    ),
+    ("good first issue", "#7057ff", "A place for newcomers to start contributing"),
+    ("help wanted", "#008672", "Extra attention is needed"),
+    ("can't reproduce", "#fec1c1", "Root cause unlikely to come from the project"),
+    ("question", "#d876e3", "Further information is requested"),
+    ("wont do/fix", "#eeeeee", "This will not be worked on"),
 ]
 
 
@@ -62,35 +62,34 @@ MANAGER_LABELS = {}
 
 # Some managers sharing some roots will be grouped together.
 MANAGER_GROUPS = {
-    'dpkg-like': {'dpkg', 'apt', 'opkg'},
-    'npm-like': {'npm', 'yarn'},
+    "dpkg-like": {"dpkg", "apt", "opkg"},
+    "npm-like": {"npm", "yarn"},
 }
 
 # Define some colors.
-PLATFORM_COLOR = '#bfd4f2'
-MANAGER_COLOR = '#bfdadc'
+PLATFORM_COLOR = "#bfd4f2"
+MANAGER_COLOR = "#bfdadc"
 
 
 # Create one label per platform.
 for platform_id in ALL_OS_LABELS:
-    label_id = 'platform: {}'.format(platform_id)
+    label_id = "platform: {}".format(platform_id)
     LABELS.append((label_id, PLATFORM_COLOR, platform_id))
     PLATFORM_LABELS[platform_id] = label_id
 
 
 # Create one label per manager. Add mpm as its own manager.
-non_grouped_managers = set(
-    pool()) - set(flatten(MANAGER_GROUPS.values())) | {'mpm'}
+non_grouped_managers = set(pool()) - set(flatten(MANAGER_GROUPS.values())) | {"mpm"}
 for manager_id in non_grouped_managers:
-    label_id = 'manager: {}'.format(manager_id)
+    label_id = "manager: {}".format(manager_id)
     LABELS.append((label_id, MANAGER_COLOR, manager_id))
-    if manager_id != 'mpm':
+    if manager_id != "mpm":
         MANAGER_LABELS[manager_id] = label_id
 
 
 # Add labels for grouped managers.
 for group_label, manager_ids in MANAGER_GROUPS.items():
-    label_id = 'manager: {}'.format(group_label)
-    LABELS.append((label_id, MANAGER_COLOR, ', '.join(sorted(manager_ids))))
+    label_id = "manager: {}".format(group_label)
+    LABELS.append((label_id, MANAGER_COLOR, ", ".join(sorted(manager_ids))))
     for manager_id in manager_ids:
         MANAGER_LABELS[manager_id] = label_id

@@ -40,7 +40,7 @@ class Homebrew(PackageManager):
 
     # Vanilla brew and cask CLIs now shares the same version.
     # 2.2.15 is the first release to support JSON output for outdated casks.
-    requirement = '2.2.15'
+    requirement = "2.2.15"
 
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     cli_name = None
@@ -56,7 +56,7 @@ class Homebrew(PackageManager):
             Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
 
         """
-        output = self.run_cli('--version')
+        output = self.run_cli("--version")
         if output:
             return parse_version(output.split()[1])
 
@@ -69,7 +69,7 @@ class Homebrew(PackageManager):
             Already up-to-date.
         """
         super(Homebrew, self).sync()
-        self.run_cli('update', '--quiet')
+        self.run_cli("update", "--quiet")
 
     @property
     def installed(self):
@@ -121,20 +121,21 @@ class Homebrew(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, 'list', '--versions')
+        output = self.run_cli(self.global_args, "list", "--versions")
 
         if output:
-            regexp = re.compile(r'(\S+)( \(!\))? (.+)')
+            regexp = re.compile(r"(\S+)( \(!\))? (.+)")
             for pkg_info in output.splitlines():
                 match = regexp.match(pkg_info)
                 if match:
                     package_id, removed, versions = match.groups()
                     installed[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'installed_version':
-                            # Keep highest version found.
-                            max(map(parse_version, versions.split()))}
+                        "id": package_id,
+                        "name": package_id,
+                        "installed_version":
+                        # Keep highest version found.
+                        max(map(parse_version, versions.split())),
+                    }
 
         return installed
 
@@ -195,8 +196,8 @@ class Homebrew(PackageManager):
 
         if extended:
             logger.warning(
-                f"Extended search not supported for {self.id}. Fallback to "
-                "Fuzzy.")
+                f"Extended search not supported for {self.id}. Fallback to " "Fuzzy."
+            )
 
         # Use regexp for exact match.
         if exact:
@@ -205,16 +206,20 @@ class Homebrew(PackageManager):
         output = self.run_cli(self.search_args, query)
 
         if output:
-            regexp = re.compile(r"""
+            regexp = re.compile(
+                r"""
                 (?:==>\s\S+\s)?           # Ignore section starting with '==>'.
                 (?P<package_id>[^\s✔]+)   # Anything not a whitespace or ✔.
-                """, re.VERBOSE)
+                """,
+                re.VERBOSE,
+            )
 
             for package_id in regexp.findall(output):
                 matches[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'latest_version': None}
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": None,
+                }
 
         return matches
 
@@ -254,18 +259,19 @@ class Homebrew(PackageManager):
         outdated = {}
 
         # List available updates.
-        output = self.run_cli(self.global_args, 'outdated', '--json=v1')
+        output = self.run_cli(self.global_args, "outdated", "--json=v1")
 
         if output:
             for pkg_info in json.loads(output):
-                package_id = pkg_info['name']
+                package_id = pkg_info["name"]
                 outdated[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'installed_version': max(map(
-                        parse_version, pkg_info['installed_versions'])),
-                    'latest_version':
-                        parse_version(pkg_info['current_version'])}
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": max(
+                        map(parse_version, pkg_info["installed_versions"])
+                    ),
+                    "latest_version": parse_version(pkg_info["current_version"]),
+                }
 
         return outdated
 
@@ -303,7 +309,7 @@ class Homebrew(PackageManager):
             Bash completion has been installed to:
               /usr/local/etc/bash_completion.d
         """
-        cmd = [self.cli_path, self.global_args, 'upgrade']
+        cmd = [self.cli_path, self.global_args, "upgrade"]
         if package_id:
             cmd.append(package_id)
         return cmd
@@ -331,13 +337,13 @@ class Homebrew(PackageManager):
         More doc at: https://docs.brew.sh/Manpage#cleanup-options-formulacask
         """
         super(Homebrew, self).cleanup()
-        self.run_cli('cleanup', '-s')
+        self.run_cli("cleanup", "-s")
 
 
 class Brew(Homebrew):
 
     name = "Homebrew Formulae"
-    cli_name = 'brew'
+    cli_name = "brew"
 
     @cachedproperty
     def search_args(self):
@@ -349,7 +355,7 @@ class Brew(Homebrew):
             ==> Formulae
             gnu-sed ✔                    libxdg-basedir               minised
         """
-        return [self.global_args, 'search', '--formulae']
+        return [self.global_args, "search", "--formulae"]
 
 
 class Cask(Homebrew):
@@ -358,9 +364,9 @@ class Cask(Homebrew):
     """
 
     name = "Homebrew Cask"
-    cli_name = 'brew'
+    cli_name = "brew"
 
-    global_args = ['cask']
+    global_args = ["cask"]
 
     @cachedproperty
     def search_args(self):
@@ -375,7 +381,7 @@ class Cask(Homebrew):
             google-adwords-editor             prefs-editor
             licensed                          subclassed-mnemosyne
         """
-        return ['search', '--cask']
+        return ["search", "--cask"]
 
     @property
     def outdated(self):
@@ -421,35 +427,36 @@ class Cask(Homebrew):
         outdated = {}
 
         # Build up the list of CLI options.
-        options = ['--json']
+        options = ["--json"]
         # Includes auto-update packages or not.
         if not self.ignore_auto_updates:
-            options.append('--greedy')
+            options.append("--greedy")
 
         # List available updates.
-        output = self.run_cli(self.global_args, 'outdated', options)
+        output = self.run_cli(self.global_args, "outdated", options)
 
         if output:
             for pkg_info in json.loads(output):
-                package_id = pkg_info['name']
-                version = pkg_info['installed_versions']
-                latest_version = pkg_info['current_version']
+                package_id = pkg_info["name"]
+                version = pkg_info["installed_versions"]
+                latest_version = pkg_info["current_version"]
 
                 # Skip packages in undetermined state.
                 if version == latest_version:
                     continue
 
                 outdated[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'installed_version': parse_version(version),
-                    'latest_version': parse_version(latest_version)}
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(version),
+                    "latest_version": parse_version(latest_version),
+                }
 
         return outdated
 
     def upgrade_cli(self, package_id=None):
         """ Install a package. """
-        cmd = [self.cli_path, self.global_args, 'upgrade']
+        cmd = [self.cli_path, self.global_args, "upgrade"]
         if package_id:
             cmd.append(package_id)
         return cmd

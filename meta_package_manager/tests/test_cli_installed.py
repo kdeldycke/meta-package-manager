@@ -28,19 +28,18 @@ from .test_cli import CLISubCommandTests, CLITableTests
 
 @pytest.fixture
 def subcmd():
-    return 'installed'
+    return "installed"
 
 
 class TestInstalled(CLISubCommandTests, CLITableTests):
-
-    @pytest.mark.parametrize('mid', MANAGER_IDS)
+    @pytest.mark.parametrize("mid", MANAGER_IDS)
     def test_single_manager(self, invoke, subcmd, mid):
-        result = invoke('--manager', mid, subcmd)
+        result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 
     def test_json_parsing(self, invoke, subcmd):
-        result = invoke('--output-format', 'json', subcmd)
+        result = invoke("--output-format", "json", subcmd)
         assert result.exit_code == 0
         data = json.loads(result.stdout)
 
@@ -50,22 +49,22 @@ class TestInstalled(CLISubCommandTests, CLITableTests):
             assert isinstance(manager_id, str)
             assert isinstance(info, dict)
 
-            assert set(info) == {'errors', 'id', 'name', 'packages'}
+            assert set(info) == {"errors", "id", "name", "packages"}
 
-            assert isinstance(info['errors'], list)
-            if info['errors']:
-                assert set(map(type, info['errors'])) == {str}
-            assert isinstance(info['id'], str)
-            assert isinstance(info['name'], str)
-            assert isinstance(info['packages'], list)
+            assert isinstance(info["errors"], list)
+            if info["errors"]:
+                assert set(map(type, info["errors"])) == {str}
+            assert isinstance(info["id"], str)
+            assert isinstance(info["name"], str)
+            assert isinstance(info["packages"], list)
 
-            assert info['id'] == manager_id
+            assert info["id"] == manager_id
 
-            for pkg in info['packages']:
+            for pkg in info["packages"]:
                 assert isinstance(pkg, dict)
 
-                assert set(pkg) == {'id', 'installed_version', 'name'}
+                assert set(pkg) == {"id", "installed_version", "name"}
 
-                assert isinstance(pkg['id'], str)
-                assert isinstance(pkg['installed_version'], str)
-                assert isinstance(pkg['name'], str)
+                assert isinstance(pkg["id"], str)
+                assert isinstance(pkg["installed_version"], str)
+                assert isinstance(pkg["name"], str)

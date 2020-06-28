@@ -37,13 +37,13 @@ contributors = set()
 #   /pretty-formats#Documentation/pretty-formats.txt-emaNem
 for param in ["%aN <%aE>", "%cN <%cE>"]:
     process = Popen(
-        ('git', 'log', '--pretty=format:{}'.format(param)),
-        stdout=PIPE, stderr=PIPE)
+        ("git", "log", "--pretty=format:{}".format(param)), stdout=PIPE, stderr=PIPE
+    )
 
     # Parse git CLI output.
     output, error = process.communicate()
-    git_output = output.decode('utf-8') if output else None
-    error = error.decode('utf-8') if error else None
+    git_output = output.decode("utf-8") if output else None
+    error = error.decode("utf-8") if error else None
     if process.returncode:
         sys.exit(error)
     for line in git_output.splitlines():
@@ -51,7 +51,7 @@ for param in ["%aN <%aE>", "%cN <%cE>"]:
             contributors.add(line)
 
 # Generate .mailmap location.
-mailmap_file = Path(__file__).parent.joinpath('../.mailmap').resolve()
+mailmap_file = Path(__file__).parent.joinpath("../.mailmap").resolve()
 
 # Load .mailmap content.
 with mailmap_file.open() as doc:
@@ -61,7 +61,7 @@ with mailmap_file.open() as doc:
 header_comments = []
 mappings = set()
 for line in content.splitlines():
-    if line.startswith('#'):
+    if line.startswith("#"):
         header_comments.append(line)
     elif line.strip():
         mappings.add(line)
@@ -72,6 +72,6 @@ for contributor in contributors:
         mappings.add(contributor)
 
 # Save content to .mailmap file.
-mailmap_file.open('w').write("{}\n\n{}".format(
-    '\n'.join(header_comments),
-    '\n'.join(sorted(mappings))))
+mailmap_file.open("w").write(
+    "{}\n\n{}".format("\n".join(header_comments), "\n".join(sorted(mappings)))
+)

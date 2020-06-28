@@ -33,15 +33,13 @@ class Gem(PackageManager):
 
     # Default to the version shipped with the latest maintained macOS version,
     # i.e. macOS 10.13 High Sierra, which is bundled with gem 2.5.2.
-    requirement = '2.5.0'
+    requirement = "2.5.0"
 
     # Help mpm a little bit in its search for the `gem` binary.
-    cli_search_path = [
-        "/usr/local/opt/ruby/bin/gem",
-        "/usr/local/opt/ruby/bin"]
+    cli_search_path = ["/usr/local/opt/ruby/bin/gem", "/usr/local/opt/ruby/bin"]
 
     global_args = [
-        '--quiet',  # Silence command progress meter
+        "--quiet",  # Silence command progress meter
     ]
 
     def get_version(self):
@@ -54,7 +52,7 @@ class Gem(PackageManager):
             ► gem --version
             3.0.3
         """
-        return parse_version(self.run_cli('--version'))
+        return parse_version(self.run_cli("--version"))
 
     @property
     def installed(self):
@@ -84,23 +82,27 @@ class Gem(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli('list', self.global_args)
+        output = self.run_cli("list", self.global_args)
 
         if output:
-            regexp = re.compile(r'(\S+) \((.+)\)')
+            regexp = re.compile(r"(\S+) \((.+)\)")
             for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     package_id, versions = match.groups()
                     # Guess latest installed version.
-                    version = max([
-                        parse_version(v)
-                        for v in re.compile(r',|default:| ').split(versions)
-                        if v])
+                    version = max(
+                        [
+                            parse_version(v)
+                            for v in re.compile(r",|default:| ").split(versions)
+                            if v
+                        ]
+                    )
                     installed[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'installed_version': version}
+                        "id": package_id,
+                        "name": package_id,
+                        "installed_version": version,
+                    }
 
         return installed
 
@@ -129,30 +131,35 @@ class Gem(PackageManager):
 
         if extended:
             logger.warning(
-                f"Extended search not supported for {self.id}. Fallback to "
-                "Fuzzy.")
+                f"Extended search not supported for {self.id}. Fallback to " "Fuzzy."
+            )
 
         search_arg = []
         if exact:
-            search_arg.append('--exact')
+            search_arg.append("--exact")
 
         output = self.run_cli(
-            'search', query, '--versions', search_arg, self.global_args)
+            "search", query, "--versions", search_arg, self.global_args
+        )
 
         if output:
-            regexp = re.compile(r"""
+            regexp = re.compile(
+                r"""
                 (?P<package_id>\S+)     # Any string.
                 \                       # A space.
                 \(                      # Start of content in parenthesis.
                     (?P<version>\S+)    # Version string.
                     (?:\ \S+)?          # Optional platform value after space.
                 \)
-                """, re.VERBOSE)
+                """,
+                re.VERBOSE,
+            )
             for package_id, version in regexp.findall(output):
                 matches[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'latest_version': parse_version(version)}
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(version),
+                }
 
         return matches
 
@@ -174,25 +181,25 @@ class Gem(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli('outdated', self.global_args)
+        output = self.run_cli("outdated", self.global_args)
 
         if output:
-            regexp = re.compile(r'(\S+) \((\S+) < (\S+)\)')
+            regexp = re.compile(r"(\S+) \((\S+) < (\S+)\)")
             for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
-                    package_id, current_version, latest_version = \
-                        match.groups()
+                    package_id, current_version, latest_version = match.groups()
                     outdated[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'installed_version': parse_version(current_version),
-                        'latest_version': parse_version(latest_version)}
+                        "id": package_id,
+                        "name": package_id,
+                        "installed_version": parse_version(current_version),
+                        "latest_version": parse_version(latest_version),
+                    }
 
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, 'update', '--user-install', self.global_args]
+        cmd = [self.cli_path, "update", "--user-install", self.global_args]
         # Installs require `sudo` on system ruby.
         # I (@tresni) recommend doing something like:
         #     ► sudo dseditgroup -o edit -a -t user wheel
@@ -228,4 +235,4 @@ class Gem(PackageManager):
             Clean up complete
         """
         super(Gem, self).cleanup()
-        self.run_cli('cleanup', self.global_args)
+        self.run_cli("cleanup", self.global_args)

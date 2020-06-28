@@ -27,13 +27,12 @@ from .test_cli import CLISubCommandTests
 
 @pytest.fixture
 def subcmd():
-    return 'sync'
+    return "sync"
 
 
 class TestSync(CLISubCommandTests):
-
-    @pytest.mark.parametrize('mid', MANAGER_IDS)
+    @pytest.mark.parametrize("mid", MANAGER_IDS)
     def test_single_manager(self, invoke, subcmd, mid):
-        result = invoke('--manager', mid, subcmd)
+        result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})

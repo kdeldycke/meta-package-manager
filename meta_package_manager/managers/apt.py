@@ -32,7 +32,7 @@ class APT(PackageManager):
 
     platforms = frozenset([LINUX])
 
-    requirement = '1.0.0'
+    requirement = "1.0.0"
 
     def get_version(self):
         """ Fetch version from ``apt version`` output.
@@ -51,14 +51,14 @@ class APT(PackageManager):
             ► apt version apt
             1.6.11
         """
-        output = self.run_cli('--version')
+        output = self.run_cli("--version")
         version = None
         if output:
             output = output.splitlines()[0].split()
             if len(output) > 1:
                 version = output[1]
             else:
-                output = self.run_cli('version', 'apt')
+                output = self.run_cli("version", "apt")
                 if output:
                     version = output
         if version:
@@ -82,7 +82,7 @@ class APT(PackageManager):
             Reading state information...
         """
         super(APT, self).sync()
-        self.run_cli(self.global_args, 'update', '--quiet')
+        self.run_cli(self.global_args, "update", "--quiet")
 
     @property
     def installed(self):
@@ -121,19 +121,19 @@ class APT(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(
-            self.global_args, 'list', '--installed', '--quiet')
+        output = self.run_cli(self.global_args, "list", "--installed", "--quiet")
 
         if output:
-            regexp = re.compile(r'(\S+)\/\S+ (\S+) .*')
+            regexp = re.compile(r"(\S+)\/\S+ (\S+) .*")
             for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     package_id, installed_version = match.groups()
                     installed[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'installed_version': parse_version(installed_version)}
+                        "id": package_id,
+                        "name": package_id,
+                        "installed_version": parse_version(installed_version),
+                    }
 
         return installed
 
@@ -190,21 +190,21 @@ class APT(PackageManager):
         """
         matches = {}
 
-        search_args = ['--names-only']
+        search_args = ["--names-only"]
         if exact:
             # Realy on apt regexp support to speed-up exact match.
-            query = '^{}$'.format(query)
+            query = "^{}$".format(query)
         # Extended search are always non-exact.
         elif extended:
             # Include full description in extended search to check up the match
             # in the CLI output after its execution.
-            search_args = ['--full']
+            search_args = ["--full"]
 
-        output = self.run_cli(
-            self.global_args, 'search', query, '--quiet', search_args)
+        output = self.run_cli(self.global_args, "search", query, "--quiet", search_args)
 
         if output:
-            regexp = re.compile(r"""
+            regexp = re.compile(
+                r"""
                 ^(?P<package_id>\S+)  # A string with a char at least.
                 /.+\                  # A slash, any string, then a space.
                 (?P<version>.+)       # Any string.
@@ -213,13 +213,16 @@ class APT(PackageManager):
                 (?P<description>      # Start of the multi-line desc group.
                     (?:\ \ .+\n)+     # Lines of strings prefixed by 2 spaces.
                 )
-                """, re.MULTILINE | re.VERBOSE)
+                """,
+                re.MULTILINE | re.VERBOSE,
+            )
 
             for package_id, version, description in regexp.findall(output):
                 matches[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'latest_version': parse_version(version)}
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(version),
+                }
 
         return matches
 
@@ -238,27 +241,25 @@ class APT(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(
-            self.global_args, 'list', '--upgradable', '--quiet')
+        output = self.run_cli(self.global_args, "list", "--upgradable", "--quiet")
 
         if output:
-            regexp = re.compile(
-                r'(\S+)\/\S+ (\S+).*\[upgradable from: (\S+)\]')
+            regexp = re.compile(r"(\S+)\/\S+ (\S+).*\[upgradable from: (\S+)\]")
             for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
-                    package_id, latest_version, installed_version = \
-                        match.groups()
+                    package_id, latest_version, installed_version = match.groups()
                     outdated[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'latest_version': parse_version(latest_version),
-                        'installed_version': parse_version(installed_version)}
+                        "id": package_id,
+                        "name": package_id,
+                        "latest_version": parse_version(latest_version),
+                        "installed_version": parse_version(installed_version),
+                    }
 
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, self.global_args, 'update']
+        cmd = [self.cli_path, self.global_args, "update"]
         if package_id:
             cmd.append(package_id)
         return cmd
@@ -274,5 +275,5 @@ class APT(PackageManager):
             ► sudo apt-get -y autoremove
         """
         super(APT, self).cleanup()
-        self.run('sudo', self.cli_path, self.global_args, '-y', 'autoremove')
-        self.run('sudo', self.cli_path, self.global_args, 'clean')
+        self.run("sudo", self.cli_path, self.global_args, "-y", "autoremove")
+        self.run("sudo", self.cli_path, self.global_args, "clean")

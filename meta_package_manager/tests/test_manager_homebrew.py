@@ -26,7 +26,7 @@ from .conftest import destructive, run_cmd, unless_macos
 # Default location of Homebrew Cask formulas on macOS. This is supposed to be a
 # shallow copy of the following Git repository:
 # https://github.com/Homebrew/homebrew-cask
-CASK_PATH = '/usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask/Casks/'
+CASK_PATH = "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask/Casks/"
 
 
 @pytest.fixture
@@ -36,8 +36,8 @@ def install_cask():
 
     def git_checkout(package_id, commit):
         code, _, _ = run_cmd(
-            'git', '-C', CASK_PATH, 'checkout', commit,
-            "{}.rb".format(package_id))
+            "git", "-C", CASK_PATH, "checkout", commit, "{}.rb".format(package_id)
+        )
         assert code == 0
 
     def _install_cask(package_id, commit):
@@ -46,18 +46,19 @@ def install_cask():
         # Arbitrary set oldest reference to 2018-01-01, which gives us enough
         # to dig into the past.
         code, _, _ = run_cmd(
-            'git', '-C', CASK_PATH, 'fetch', '--shallow-since=2018-01-01')
+            "git", "-C", CASK_PATH, "fetch", "--shallow-since=2018-01-01"
+        )
         assert code == 0
         # Fetch locally the old version of the Cask's formula.
         git_checkout(package_id, commit)
         # Install the cask but bypass its local cache auto-update: we want to
         # force brew to rely on our formula from the past.
-        os.environ['HOMEBREW_NO_AUTO_UPDATE'] = '1'
-        code, output, error = run_cmd('brew', 'cask', 'reinstall', package_id)
+        os.environ["HOMEBREW_NO_AUTO_UPDATE"] = "1"
+        code, output, error = run_cmd("brew", "cask", "reinstall", package_id)
         # Reset our temporary environment variable.
-        del os.environ['HOMEBREW_NO_AUTO_UPDATE']
+        del os.environ["HOMEBREW_NO_AUTO_UPDATE"]
         # Restore old formula to its most recent version.
-        git_checkout(package_id, 'HEAD')
+        git_checkout(package_id, "HEAD")
         # Check the cask has been properly installed.
         assert code == 0
         if error:
@@ -69,40 +70,36 @@ def install_cask():
 
     # Remove all installed packages.
     for package_id in packages:
-        run_cmd('brew', 'cask', 'uninstall', '--force', package_id)
+        run_cmd("brew", "cask", "uninstall", "--force", package_id)
 
 
 @destructive
 @unless_macos
 class TestCask:
-
     def test_autoupdate_unicode_name(self, invoke, install_cask):
         """ See #16. """
         # Install an old version of a package with a unicode name.
         # Old Cask formula for ubersicht 1.4.60.
-        output = install_cask(
-            'ubersicht', 'bb72da6c085c017f6bccebbfee5e3bc4837f3165')
-        assert 'Uebersicht-1.4.60.app.zip' in output
-        assert 'Übersicht.app' in output
-        assert 'Übersicht.app' not in output
+        output = install_cask("ubersicht", "bb72da6c085c017f6bccebbfee5e3bc4837f3165")
+        assert "Uebersicht-1.4.60.app.zip" in output
+        assert "Übersicht.app" in output
+        assert "Übersicht.app" not in output
 
         # Ubersicht is not reported as outdated because is tagged as
         # auto-update.
-        result = invoke('--manager', 'cask', 'outdated')
+        result = invoke("--manager", "cask", "outdated")
         assert result.exit_code == 0
         assert "ubersicht" not in result.stdout
         assert "Übersicht" not in result.stdout
 
         # Try with explicit option.
-        result = invoke(
-            '--ignore-auto-updates', '--manager', 'cask', 'outdated')
+        result = invoke("--ignore-auto-updates", "--manager", "cask", "outdated")
         assert result.exit_code == 0
         assert "ubersicht" not in result.stdout
         assert "Übersicht" not in result.stdout
 
         # Look for reported available upgrade.
-        result = invoke(
-            '--include-auto-updates', '--manager', 'cask', 'outdated')
+        result = invoke("--include-auto-updates", "--manager", "cask", "outdated")
         assert result.exit_code == 0
         assert "ubersicht" in result.stdout
         # Outdated subcommand does not fetch the unicode name by default.
@@ -112,14 +109,12 @@ class TestCask:
         """ See #26. """
         # Install an old version of a package with multiple names.
         # Old Cask formula for xld 2018.10.19.
-        output = install_cask(
-            'xld', '89536da7075aa3ac9683a67189fddbed4a7d818c')
-        assert 'xld-20181019.dmg' in output
-        assert 'XLD.app' in output
+        output = install_cask("xld", "89536da7075aa3ac9683a67189fddbed4a7d818c")
+        assert "xld-20181019.dmg" in output
+        assert "XLD.app" in output
 
         # Look for reported available upgrade.
-        result = invoke(
-            '--include-auto-updates', '--manager', 'cask', 'outdated')
+        result = invoke("--include-auto-updates", "--manager", "cask", "outdated")
         assert result.exit_code == 0
         assert "xld" in result.stdout
         # Outdated subcommand does not fetch the unicode name by default.

@@ -210,5 +210,5 @@ during your migration, you can invotory all your installed packages with
 
 .. todo::
 
-    Implement a best matchig strategy, accross package managers of different
+    Implement a best matchig strategy, across package managers of different
     kinds.

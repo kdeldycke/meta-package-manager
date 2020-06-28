@@ -123,13 +123,11 @@ Install test dependencies and run unit-tests:
 Coding style
 ------------
 
-Run `isort <https://github.com/timothycrosley/isort>`_ utility to sort Python
-imports:
+Run `black <https://github.com/psf/black>`_ to auto-format Python code:
 
 .. code-block:: shell-session
 
-    $ poetry run isort --apply
-
+    $ poetry run black .
 
 Then run `pycodestyle <https://pycodestyle.readthedocs.io>`_ and `Pylint
 <https://docs.pylint.org>`_ code style checks:

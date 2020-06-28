@@ -17,10 +17,7 @@ jobs:
         # Required by git-auto-commit-action. See:
         # https://github.com/stefanzweifel/git-auto-commit-action#checkout-the-correct-branch
         ref: ${{ github.head_ref }}
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
+    - uses: actions/setup-python@v2
     - name: Install black
       run: |
         python -m pip install --upgrade pip
@@ -48,10 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
+    - uses: actions/setup-python@v2
     - name: Install linters
       run: |
         python -m pip install --upgrade pip
@@ -67,10 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
+    - uses: actions/setup-python@v2
     - name: Install linter
       run: |
         python -m pip install --upgrade pip
@@ -154,10 +145,7 @@ jobs:
         with:
           # Fetch all history to extract all contributors.
           fetch-depth: 0
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
+      - uses: actions/setup-python@v2
       - name: Generate .mailmap
         run: |
           python ./.github/update_mailmap.py

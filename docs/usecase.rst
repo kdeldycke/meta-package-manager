@@ -172,3 +172,43 @@ You maintain a repository of ``dotfiles``. This helps you spawn up a highly cust
     (...)
 
 
+Get rid of Docker for lambda ?
+------------------------------
+
+Some developers have a hard-time reproducing environment for lambda execution
+onto their local machine. Most of devs use Docker to abstract their runtime
+requirements. But Docker might be too big for some people.
+
+``mpm`` can be a lightweigh alternative to Docker here to abstract the runtime
+from their execution environment.
+
+.. todo::
+
+    Once the ``install`` and ``restore`` sub-commands are implemented, we can
+    declare all dependencies into a ``.toml`` file and let ``mpm`` resolve
+    dependencies.
+
+
+Switch systems
+--------------
+
+You used to work on macOS. Now you'd like to move to Linux. To reduce friction
+during your migration, you can invotory all your installed packages with
+``mpm``, then reinstall them on your new, bare OS.
+
+1. Inventory all installed packages on macOS:
+
+.. code-block:: shell-session
+
+    $ mpm backup ./packages.toml
+
+1. On your brand new Linux install, restore all packages with:
+
+.. code-block:: shell-session
+
+    $ mpm restore ./packages.toml
+
+.. todo::
+
+    Implement a best matchig strategy, accross package managers of different
+    kinds.

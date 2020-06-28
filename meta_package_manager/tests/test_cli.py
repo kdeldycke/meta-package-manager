@@ -67,62 +67,64 @@ class TestBaseCLI:
         assert not result.stderr
 
     def test_main_help(self, invoke):
-        result = invoke('--help')
+        result = invoke("--help")
         assert result.exit_code == 0
         assert "Usage: " in result.stdout
         assert not result.stderr
 
     def test_version(self, invoke):
-        result = invoke('--version')
+        result = invoke("--version")
         assert result.exit_code == 0
         assert __version__ in result.stdout
         assert not result.stderr
 
     def test_unknown_option(self, invoke):
-        result = invoke('--blah')
+        result = invoke("--blah")
         assert result.exit_code == 2
         assert not result.stdout
         assert "Error: no such option: --blah" in result.stderr
 
     def test_unknown_command(self, invoke):
-        result = invoke('blah')
+        result = invoke("blah")
         assert result.exit_code == 2
         assert not result.stdout
         assert "Error: No such command 'blah'." in result.stderr
 
     def test_required_command(self, invoke):
-        result = invoke('--verbosity', 'DEBUG')
+        result = invoke("--verbosity", "DEBUG")
         assert result.exit_code == 2
         assert not result.stdout
         assert "Error: Missing command." in result.stderr
 
     def test_unrecognized_verbosity(self, invoke):
-        result = invoke('--verbosity', 'random', 'managers')
+        result = invoke("--verbosity", "random", "managers")
         assert result.exit_code == 2
         assert not result.stdout
         assert "Error: Invalid value for '--verbosity' / '-v'" in result.stderr
 
-    @pytest.mark.parametrize(
-        'level', ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'])
+    @pytest.mark.parametrize("level", ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"])
     def test_verbosity(self, invoke, level):
-        result = invoke('--verbosity', level, 'managers')
+        result = invoke("--verbosity", level, "managers")
         assert result.exit_code == 0
         assert logger.level == getattr(logging, level)
         assert "══════" in result.stdout
-        if level == 'DEBUG':
+        if level == "DEBUG":
             assert "debug: " in result.stderr
         else:
             assert "debug: " not in result.stderr
 
     @unless_windows
-    @pytest.mark.parametrize('mode', WINDOWS_MODE_BLACKLIST)
+    @pytest.mark.parametrize("mode", WINDOWS_MODE_BLACKLIST)
     def test_check_failing_unicode_rendering(self, mode):
         """ Check internal assumption that some rendering unicode table
         rendering modes fails in Windows console. """
         table_formatter = TabularOutputFormatter(mode)
         with pytest.raises(UnicodeEncodeError):
-            click.echo(table_formatter.format_output(
-                ((1, 87), (2, 80), (3, 79)), ('day', 'temperature')))
+            click.echo(
+                table_formatter.format_output(
+                    ((1, 87), (2, 80), (3, 79)), ("day", "temperature")
+                )
+            )
 
 
 class CLISubCommandTests:
@@ -134,14 +136,14 @@ class CLISubCommandTests:
     """
 
     def test_help(self, invoke, subcmd):
-        result = invoke(subcmd, '--help')
+        result = invoke(subcmd, "--help")
         assert result.exit_code == 0
         assert "Usage: " in result.stdout
         assert flatten([subcmd])[0] in result.stdout
         assert not result.stderr
 
-    @pytest.mark.parametrize('opt_stats', ['--stats', '--no-stats', None])
-    @pytest.mark.parametrize('opt_timer', ['--time', '--no-time', None])
+    @pytest.mark.parametrize("opt_stats", ["--stats", "--no-stats", None])
+    @pytest.mark.parametrize("opt_timer", ["--time", "--no-time", None])
     def test_options(self, invoke, subcmd, opt_stats, opt_timer):
         """ Test the result on all combinations of optional options. """
         result = invoke(opt_stats, opt_timer, subcmd)
@@ -169,23 +171,30 @@ class CLISubCommandTests:
             # the CLI. Roughly sorted from most specific to more forgiving.
             signals = [
                 # Common "not found" warning message.
-                "warning: Skip unavailable {} manager.".format(
-                    mid) in result.stderr,
+                "warning: Skip unavailable {} manager.".format(mid) in result.stderr,
                 # Common "not implemented" optional command warning message.
-                bool(re.search(
-                    r"warning: (Sync|Cleanup) not implemented for {}.".format(
-                        mid), result.stderr)),
+                bool(
+                    re.search(
+                        r"warning: (Sync|Cleanup) not implemented for {}.".format(mid),
+                        result.stderr,
+                    )
+                ),
                 # Stats line at the end of output.
-                "{}: ".format(mid) in result.stdout.splitlines(
-                    )[-1] if result.stdout else '',
+                "{}: ".format(mid) in result.stdout.splitlines()[-1]
+                if result.stdout
+                else "",
                 # Match output of managers command.
-                bool(re.search(r"\s+│\s+{}\s+│\s+(✓|✘).+│\s+(✓|✘)".format(mid),
-                               strip_ansi(result.stdout))),
+                bool(
+                    re.search(
+                        r"\s+│\s+{}\s+│\s+(✓|✘).+│\s+(✓|✘)".format(mid),
+                        strip_ansi(result.stdout),
+                    )
+                ),
                 # Sync command.
                 "Sync {} package info...".format(mid) in result.stderr,
                 # Upgrade command.
-                "Updating all outdated packages from {}...".format(
-                    mid) in result.stderr,
+                "Updating all outdated packages from {}...".format(mid)
+                in result.stderr,
                 # Cleanup command.
                 "Cleanup {}...".format(mid) in result.stderr,
                 # Log message for backup command.
@@ -193,7 +202,8 @@ class CLISubCommandTests:
                 # Restoring message.
                 "Restore {} packages...".format(mid) in result.stderr,
                 # Warning message for restore command.
-                "warning: No [{}] section found.".format(mid) in result.stderr]
+                "warning: No [{}] section found.".format(mid) in result.stderr,
+            ]
 
             if True in signals:
                 found_managers.add(mid)
@@ -204,9 +214,9 @@ class CLISubCommandTests:
         assert found_managers == selected
         assert skipped_managers == MANAGER_IDS - selected
 
-    @pytest.mark.parametrize('selector', ['--manager', '--exclude'])
+    @pytest.mark.parametrize("selector", ["--manager", "--exclude"])
     def test_invalid_manager_selector(self, invoke, subcmd, selector):
-        result = invoke(selector, 'unknown', subcmd)
+        result = invoke(selector, "unknown", subcmd)
         assert result.exit_code == 2
         assert not result.stdout
         assert "Error: Invalid value for " in result.stderr
@@ -218,39 +228,49 @@ class CLISubCommandTests:
         assert result.exit_code == 0
         self.check_manager_selection(result)
 
-    @pytest.mark.parametrize('args,expected', [
-        pytest.param(
-            ('--manager', 'apm'), {'apm'},
-            id="single_selector"),
-        pytest.param(
-            ('--manager', 'apm') * 2, {'apm'},
-            id="duplicate_selectors"),
-        pytest.param(
-            ('--manager', 'apm', '--manager', 'gem'), {'apm', 'gem'},
-            id="multiple_selectors"),
-        pytest.param(
-            ('--exclude', 'apm'), MANAGER_IDS - {'apm'},
-            id="single_exclusion"),
-        pytest.param(
-            ('--exclude', 'apm') * 2, MANAGER_IDS - {'apm'},
-            id="duplicate_exclusions"),
-        pytest.param(
-            ('--exclude', 'apm', '--exclude', 'gem'),
-            MANAGER_IDS - {'apm', 'gem'},
-            id="multiple_exclusions"),
-        pytest.param(
-            ('--manager', 'apm', '--exclude', 'gem'), {'apm'},
-            id="priority_ordered"),
-        pytest.param(
-            ('--exclude', 'gem', '--manager', 'apm'), {'apm'},
-            id="priority_reversed"),
-        pytest.param(
-            ('--manager', 'apm', '--exclude', 'apm'), set(),
-            id="exclusion_override_ordered"),
-        pytest.param(
-            ('--exclude', 'apm', '--manager', 'apm'), set(),
-            id="exclusion_override_reversed"),
-    ])
+    @pytest.mark.parametrize(
+        "args,expected",
+        [
+            pytest.param(("--manager", "apm"), {"apm"}, id="single_selector"),
+            pytest.param(("--manager", "apm") * 2, {"apm"}, id="duplicate_selectors"),
+            pytest.param(
+                ("--manager", "apm", "--manager", "gem"),
+                {"apm", "gem"},
+                id="multiple_selectors",
+            ),
+            pytest.param(
+                ("--exclude", "apm"), MANAGER_IDS - {"apm"}, id="single_exclusion"
+            ),
+            pytest.param(
+                ("--exclude", "apm") * 2,
+                MANAGER_IDS - {"apm"},
+                id="duplicate_exclusions",
+            ),
+            pytest.param(
+                ("--exclude", "apm", "--exclude", "gem"),
+                MANAGER_IDS - {"apm", "gem"},
+                id="multiple_exclusions",
+            ),
+            pytest.param(
+                ("--manager", "apm", "--exclude", "gem"), {"apm"}, id="priority_ordered"
+            ),
+            pytest.param(
+                ("--exclude", "gem", "--manager", "apm"),
+                {"apm"},
+                id="priority_reversed",
+            ),
+            pytest.param(
+                ("--manager", "apm", "--exclude", "apm"),
+                set(),
+                id="exclusion_override_ordered",
+            ),
+            pytest.param(
+                ("--exclude", "apm", "--manager", "apm"),
+                set(),
+                id="exclusion_override_reversed",
+            ),
+        ],
+    )
     def test_manager_selection(self, invoke, subcmd, args, expected):
         result = invoke(*args, subcmd)
         assert result.exit_code == 0
@@ -266,29 +286,30 @@ class CLITableTests:
 
     # List of all supported rendering modes IDs, and their expected output.
     expected_renderings = {
-        'ascii':          ('---+---',               None),
-        'csv':            (',',                     None),
-        'csv-tab':        ('\t',                    None),
-        'double':         ('═══╬═══',               None),
-        'fancy_grid':     ('═══╪═══',               None),
-        'github':         ('---|---',               None),
-        'grid':           ('===+===',               'ascii'),
-        'html':           ('<table>',               None),
-        'jira':           (' || ',                  None),
-        'json':           ('": {',                  None),
-        'latex':          ('\\hline',               None),
-        'latex_booktabs': ('\\toprule',             None),
-        'mediawiki':      ('{| class="wikitable" ', 'jira'),
-        'moinmoin':       (" ''' || ''' ",          'jira'),
-        'orgtbl':         ('---+---',               None),
-        'pipe':           ('---|:---',              None),
-        'plain':          ('  ',                    None),
-        'psql':           ('---+---',               None),
-        'rst':            ('===  ===',              None),
-        'simple':         ('---  ---',              None),
-        'textile':        (' |_. ',                 None),
-        'tsv':            ('\t',                    None),
-        'vertical':       ('***[ 1. row ]***',      None)}
+        "ascii": ("---+---", None),
+        "csv": (",", None),
+        "csv-tab": ("\t", None),
+        "double": ("═══╬═══", None),
+        "fancy_grid": ("═══╪═══", None),
+        "github": ("---|---", None),
+        "grid": ("===+===", "ascii"),
+        "html": ("<table>", None),
+        "jira": (" || ", None),
+        "json": ('": {', None),
+        "latex": ("\\hline", None),
+        "latex_booktabs": ("\\toprule", None),
+        "mediawiki": ('{| class="wikitable" ', "jira"),
+        "moinmoin": (" ''' || ''' ", "jira"),
+        "orgtbl": ("---+---", None),
+        "pipe": ("---|:---", None),
+        "plain": ("  ", None),
+        "psql": ("---+---", None),
+        "rst": ("===  ===", None),
+        "simple": ("---  ---", None),
+        "textile": (" |_. ", None),
+        "tsv": ("\t", None),
+        "vertical": ("***[ 1. row ]***", None),
+    }
 
     def test_recognized_modes(self):
         """ Check all rendering modes proposed by the table module are
@@ -300,7 +321,7 @@ class CLITableTests:
         result = invoke(subcmd)
         assert result.exit_code == 0
 
-        expected = self.expected_renderings['fancy_grid'][0]
+        expected = self.expected_renderings["fancy_grid"][0]
 
         # If no package found, check that no table gets rendered. Else, check
         # the selected mode is indeed rendered in <stdout>, so the CLI result
@@ -312,15 +333,16 @@ class CLITableTests:
 
         assert expected not in result.stderr
 
-    @pytest.mark.parametrize('mode,expected,conflict', [
-        (k, v[0], v[1]) for k, v in expected_renderings.items()])
-    def test_all_table_rendering(
-            self, invoke, subcmd, mode, expected, conflict):
+    @pytest.mark.parametrize(
+        "mode,expected,conflict",
+        [(k, v[0], v[1]) for k, v in expected_renderings.items()],
+    )
+    def test_all_table_rendering(self, invoke, subcmd, mode, expected, conflict):
         """ Check that from all rendering modes, only the selected one appears
         in <stdout> and only there. Any other mode are not expected neither in
         <stdout> or <stderr>.
         """
-        result = invoke('--output-format', mode, subcmd)
+        result = invoke("--output-format", mode, subcmd)
         assert result.exit_code == 0
 
         # If no package found, check that no table gets rendered. Else, check
@@ -328,17 +350,19 @@ class CLITableTests:
         # can be grep-ed.
         if result.stdout.startswith("0 package total ("):
             # CSV mode will match on comma.
-            if mode != 'csv':
+            if mode != "csv":
                 assert expected not in result.stdout
         else:
             assert expected in result.stdout
 
         # Collect all possible unique traces from all possible rendering modes.
         blacklist = {
-            v[0] for v in self.expected_renderings.values()
+            v[0]
+            for v in self.expected_renderings.values()
             # Exclude obvious character sequences shorter than 3 characters to
             # eliminate false negative.
-            if len(v[0]) > 2}
+            if len(v[0]) > 2
+        }
         # Remove overlapping edge-cases.
         if conflict:
             blacklist.remove(self.expected_renderings[conflict][0])
@@ -358,8 +382,7 @@ class CLITableTests:
 
         Also checks that JSON output format is not supported by all commands.
         """
-        result = invoke(
-            '--output-format', 'json', '--verbosity', 'DEBUG', subcmd)
+        result = invoke("--output-format", "json", "--verbosity", "DEBUG", subcmd)
         assert result.exit_code == 0
         assert "debug:" in result.stderr
         json.loads(result.stdout)

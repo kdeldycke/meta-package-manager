@@ -25,11 +25,13 @@ try:
     # Python 3.
     from importlib.machinery import SourceFileLoader
     from pathlib import Path
+
     PY = 3
 except ImportError:
     # Python 2.
     import imp
     from os import path
+
     PY = 2
 
 
@@ -38,8 +40,10 @@ except ImportError:
 # interpreted as a submodule.
 if PY == 2:
     here = path.dirname(path.abspath(__file__))
-    bitbar_plugin = path.join(here, 'meta_package_manager.7h.py')
+    bitbar_plugin = path.join(here, "meta_package_manager.7h.py")
     imp.load_source(__name__, bitbar_plugin)
 else:
-    SourceFileLoader(__name__, str(Path(__file__).parent.joinpath(
-        'meta_package_manager.7h.py').resolve())).load_module()
+    SourceFileLoader(
+        __name__,
+        str(Path(__file__).parent.joinpath("meta_package_manager.7h.py").resolve()),
+    ).load_module()

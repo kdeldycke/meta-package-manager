@@ -30,19 +30,15 @@ class Yarn(PackageManager):
 
     name = "Node's yarn"
 
-    global_args = [
-        '--no-progress',
-        '--non-interactive',
-        '--skip-integrity-check'
-    ]
+    global_args = ["--no-progress", "--non-interactive", "--skip-integrity-check"]
 
     platforms = frozenset([LINUX, MACOS, WINDOWS])
 
-    requirement = '1.0.0'
+    requirement = "1.0.0"
 
     def get_version(self):
         """ Fetch version from ``yarn --version`` output."""
-        return parse_version(self.run_cli('--version'))
+        return parse_version(self.run_cli("--version"))
 
     def parse(self, output):
         packages = {}
@@ -54,22 +50,22 @@ class Yarn(PackageManager):
             if not line:
                 continue
             obj = json.loads(line)
-            if obj['type'] != 'info':
+            if obj["type"] != "info":
                 continue
             package = self.parse_info(obj)
-            packages[package['id']] = package
+            packages[package["id"]] = package
         return packages
 
     @staticmethod
     def parse_info(obj):
-        data = obj['data'].replace('has binaries:', '')
-        parts = data.replace('"', '').split('@')
+        data = obj["data"].replace("has binaries:", "")
+        parts = data.replace('"', "").split("@")
         package_id = parts[0]
         version = parts[1]
         return {
-            'id': package_id,
-            'name': package_id,
-            'installed_version': parse_version(version)
+            "id": package_id,
+            "name": package_id,
+            "installed_version": parse_version(version),
         }
 
     @property
@@ -84,7 +80,8 @@ class Yarn(PackageManager):
             (...)
         """
         output = self.run_cli(
-            'global', '--json', self.global_args, 'list', '--depth', '0')
+            "global", "--json", self.global_args, "list", "--depth", "0"
+        )
         return self.parse(output)
 
     def search(self, query, extended, exact):
@@ -171,31 +168,32 @@ class Yarn(PackageManager):
 
         if extended:
             logger.warning(
-                f"Extended search not supported for {self.id}. Fallback to "
-                "Fuzzy.")
+                f"Extended search not supported for {self.id}. Fallback to Fuzzy."
+            )
         elif not exact:
             logger.warning(
-                f"Fuzzy search not supported for {self.id}. Fallback to "
-                "Exact.")
+                f"Fuzzy search not supported for {self.id}. Fallback to Exact."
+            )
 
-        output = self.run_cli(self.global_args, '--json', 'info', query)
+        output = self.run_cli(self.global_args, "--json", "info", query)
 
         if output:
             result = json.loads(output)
 
-            if result['type'] == 'inspect':
-                package = result['data']
-                package_id = package['name']
+            if result["type"] == "inspect":
+                package = result["data"]
+                package_id = package["name"]
                 matches[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'latest_version': parse_version(package['version'])}
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(package["version"]),
+                }
 
         return matches
 
     @cachedproperty
     def global_dir(self):
-        return self.run_cli('global', 'dir').rstrip()
+        return self.run_cli("global", "dir").rstrip()
 
     @property
     def outdated(self):
@@ -213,7 +211,8 @@ class Yarn(PackageManager):
         outdated = {}
 
         output = self.run_cli(
-            '--json', self.global_args, 'outdated', '--cwd', self.global_dir)
+            "--json", self.global_args, "outdated", "--cwd", self.global_dir
+        )
 
         if not output:
             return outdated
@@ -223,35 +222,32 @@ class Yarn(PackageManager):
             if not line:
                 continue
             obj = json.loads(line)
-            if obj['type'] == 'table':
-                packages = obj['data']['body']
+            if obj["type"] == "table":
+                packages = obj["data"]["body"]
                 break
 
         for package in packages:
             package_id = package[0]
-            values = {
-                'current': package[1],
-                'wanted': package[2],
-                'latest': package[3]
-            }
+            values = {"current": package[1], "wanted": package[2], "latest": package[3]}
 
-            if values['wanted'] == 'linked':
+            if values["wanted"] == "linked":
                 continue
             outdated[package_id] = {
-                'id': package_id + '@' + values['latest'],
-                'name': package_id,
-                'installed_version': parse_version(values['current']),
-                'latest_version': parse_version(values['latest'])}
+                "id": package_id + "@" + values["latest"],
+                "name": package_id,
+                "installed_version": parse_version(values["current"]),
+                "latest_version": parse_version(values["latest"]),
+            }
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = ['global', self.global_args, '--silent']
+        cmd = ["global", self.global_args, "--silent"]
 
         if package_id:
-            cmd.append('add')
+            cmd.append("add")
             cmd.append(package_id)
         else:
-            cmd.append('upgrade')
+            cmd.append("upgrade")
 
         return cmd
 
@@ -264,4 +260,4 @@ class Yarn(PackageManager):
         See: https://yarnpkg.com/cli/cache/clean
         """
         super(Yarn, self).cleanup()
-        self.run_cli(self.global_args, 'cache', 'clean', '--all')
+        self.run_cli(self.global_args, "cache", "clean", "--all")

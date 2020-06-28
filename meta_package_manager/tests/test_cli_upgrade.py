@@ -25,7 +25,7 @@ from .test_cli import CLISubCommandTests
 
 @pytest.fixture
 def subcmd():
-    return 'upgrade'
+    return "upgrade"
 
 
 class TestUpgrade(CLISubCommandTests):
@@ -34,20 +34,20 @@ class TestUpgrade(CLISubCommandTests):
     parameter is passed. """
 
     def test_default_all_managers_dry_run(self, invoke, subcmd):
-        result = invoke(subcmd, '--dry-run')
+        result = invoke(subcmd, "--dry-run")
         assert result.exit_code == 0
         self.check_manager_selection(result)
 
-    @pytest.mark.parametrize('mid', MANAGER_IDS)
+    @pytest.mark.parametrize("mid", MANAGER_IDS)
     def test_single_manager_dry_run(self, invoke, subcmd, mid):
-        result = invoke('--manager', mid, subcmd, '--dry-run')
+        result = invoke("--manager", mid, subcmd, "--dry-run")
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 
     @destructive
-    @pytest.mark.parametrize('mid', MANAGER_IDS)
+    @pytest.mark.parametrize("mid", MANAGER_IDS)
     def test_single_manager(self, invoke, subcmd, mid):
-        result = invoke('--manager', mid, subcmd)
+        result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 

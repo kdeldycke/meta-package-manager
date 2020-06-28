@@ -25,38 +25,41 @@ from boltons.dictutils import FrozenDict
 
 from . import logger
 
-LINUX = 'linux'
+LINUX = "linux"
 """ Constant used to identify OSes of the Linux family. """
 
 
-MACOS = 'macos'
+MACOS = "macos"
 """ Constant used to identify OSes of the macOS family. """
 
 
-WINDOWS = 'windows'
+WINDOWS = "windows"
 """ Constant used to identify OSes of the Windows family. """
 
 
 def is_linux():
     """ Return `True` only if current platform is of the Linux family. """
-    return sys.platform.startswith('linux')
+    return sys.platform.startswith("linux")
 
 
 def is_macos():
     """ Return `True` only if current platform is of the macOS family. """
-    return sys.platform == 'darwin'
+    return sys.platform == "darwin"
 
 
 def is_windows():
     """ Return `True` only if current platform is of the Windows family. """
-    return sys.platform in ['win32', 'cygwin']
+    return sys.platform in ["win32", "cygwin"]
 
 
 # Map OS IDs to evaluation function and OS labels.
-OS_DEFINITIONS = FrozenDict({
-    LINUX: ('Linux', is_linux()),
-    MACOS: ('macOS', is_macos()),
-    WINDOWS: ('Windows', is_windows())})
+OS_DEFINITIONS = FrozenDict(
+    {
+        LINUX: ("Linux", is_linux()),
+        MACOS: ("macOS", is_macos()),
+        WINDOWS: ("Windows", is_windows()),
+    }
+)
 
 
 # Generare sets of recognized IDs and labels.

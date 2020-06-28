@@ -31,13 +31,13 @@ class MAS(PackageManager):
 
     # 'mas search' output has been fixed in 1.6.1:
     # https://github.com/mas-cli/mas/pull/205
-    requirement = '1.6.1'
+    requirement = "1.6.1"
 
     name = "Mac AppStore"
 
     def get_version(self):
         """ Fetch version from ``mas version`` output."""
-        return parse_version(self.run_cli('version'))
+        return parse_version(self.run_cli("version"))
 
     @property
     def installed(self):
@@ -53,22 +53,22 @@ class MAS(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, 'list')
+        output = self.run_cli(self.global_args, "list")
 
         if output:
-            regexp = re.compile(r'(\d+) (.*) \((\S+)\)$')
+            regexp = re.compile(r"(\d+) (.*) \((\S+)\)$")
             for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
-                    package_id, package_name, installed_version = \
-                        match.groups()
+                    package_id, package_name, installed_version = match.groups()
                     installed[package_id] = {
-                        'id': package_id,
-                        'name': package_name,
+                        "id": package_id,
+                        "name": package_name,
                         # Normalize unknown version. See:
                         # https://github.com/mas-cli/mas/commit
                         # /1859eaedf49f6a1ebefe8c8d71ec653732674341
-                        'installed_version': parse_version(installed_version)}
+                        "installed_version": parse_version(installed_version),
+                    }
 
         return installed
 
@@ -90,15 +90,16 @@ class MAS(PackageManager):
 
         if extended:
             logger.warning(
-                f"Extended search not supported for {self.id}. Fallback to "
-                "Fuzzy.")
+                f"Extended search not supported for {self.id}. Fallback to Fuzzy."
+            )
 
-        output = self.run_cli(self.global_args, 'search', query)
+        output = self.run_cli(self.global_args, "search", query)
 
         if output:
-            regexp = re.compile(r'(\d+) (.*)$')
+            regexp = re.compile(r"(\d+) (.*)$")
 
-            regexp = re.compile(r"""
+            regexp = re.compile(
+                r"""
                 (?P<package_id>\d+)
                 \s+
                 (?P<package_name>.+?)
@@ -106,7 +107,9 @@ class MAS(PackageManager):
                 \(
                     (?P<version>\S+)
                 \)
-                """, re.MULTILINE | re.VERBOSE)
+                """,
+                re.MULTILINE | re.VERBOSE,
+            )
 
             for package_id, package_name, version in regexp.findall(output):
 
@@ -116,9 +119,10 @@ class MAS(PackageManager):
                     continue
 
                 matches[package_id] = {
-                    'id': package_id,
-                    'name': package_name,
-                    'latest_version': parse_version(version)}
+                    "id": package_id,
+                    "name": package_name,
+                    "latest_version": parse_version(version),
+                }
 
         return matches
 
@@ -138,28 +142,33 @@ class MAS(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args, 'outdated')
+        output = self.run_cli(self.global_args, "outdated")
 
         if output:
-            regexp = re.compile(r'(\d+) (.*) \((\S+) -> (\S+)\)$')
+            regexp = re.compile(r"(\d+) (.*) \((\S+) -> (\S+)\)$")
             for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
-                    package_id, package_name, installed_version, \
-                        latest_version = match.groups()
+                    (
+                        package_id,
+                        package_name,
+                        installed_version,
+                        latest_version,
+                    ) = match.groups()
                     outdated[package_id] = {
-                        'id': package_id,
-                        'name': package_name,
-                        'latest_version': parse_version(latest_version),
+                        "id": package_id,
+                        "name": package_name,
+                        "latest_version": parse_version(latest_version),
                         # Normalize unknown version. See:
                         # https://github.com/mas-cli/mas/commit
                         # /1859eaedf49f6a1ebefe8c8d71ec653732674341
-                        'installed_version': parse_version(installed_version)}
+                        "installed_version": parse_version(installed_version),
+                    }
 
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, self.global_args, 'upgrade']
+        cmd = [self.cli_path, self.global_args, "upgrade"]
         if package_id:
             cmd.append(package_id)
         return cmd

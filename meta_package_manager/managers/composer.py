@@ -29,13 +29,13 @@ from ..version import parse_version
 class Composer(PackageManager):
 
     name = "PHP's Composer"
-    global_args = ['global']
+    global_args = ["global"]
     platforms = frozenset([LINUX, MACOS, WINDOWS])
-    requirement = '1.4.0'
+    requirement = "1.4.0"
 
     def get_version(self):
         """ Fetch version from ``composer --version`` output. """
-        output = self.run_cli('--version')
+        output = self.run_cli("--version")
         if output:
             return parse_version(output.split()[2])
 
@@ -74,17 +74,18 @@ class Composer(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, 'show', '--format=json')
+        output = self.run_cli(self.global_args, "show", "--format=json")
 
         if output:
 
             package_list = json.loads(output)
-            for package in package_list['installed']:
-                package_id = package['name']
+            for package in package_list["installed"]:
+                package_id = package["name"]
                 installed[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'installed_version': parse_version(package['version'])}
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(package["version"]),
+                }
 
         return installed
 
@@ -131,16 +132,19 @@ class Composer(PackageManager):
 
         search_args = []
         if not extended:
-            search_args.append('--only-name')
+            search_args.append("--only-name")
 
-        output = self.run_cli(self.global_args, 'search', search_args, query)
+        output = self.run_cli(self.global_args, "search", search_args, query)
 
         if output:
 
-            regexp = re.compile(r"""
+            regexp = re.compile(
+                r"""
                 ^(?P<package_id>\S+\/\S+)
                 (?P<description> .*)?
-                """, re.MULTILINE | re.VERBOSE)
+                """,
+                re.MULTILINE | re.VERBOSE,
+            )
 
             for package_id, description in regexp.findall(output):
 
@@ -150,9 +154,10 @@ class Composer(PackageManager):
                     continue
 
                 matches[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'latest_version': None}
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": None,
+                }
 
         return matches
 
@@ -186,22 +191,23 @@ class Composer(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args, 'outdated', '--format=json')
+        output = self.run_cli(self.global_args, "outdated", "--format=json")
 
         if output:
             package_list = json.loads(output)
-            for package in package_list['installed']:
-                package_id = package['name']
+            for package in package_list["installed"]:
+                package_id = package["name"]
                 outdated[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'installed_version': parse_version(package['version']),
-                    'latest_version': parse_version(package['latest'])}
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(package["version"]),
+                    "latest_version": parse_version(package["latest"]),
+                }
 
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, self.global_args, 'update']
+        cmd = [self.cli_path, self.global_args, "update"]
         if package_id:
             cmd.append(package_id)
         return cmd
@@ -219,4 +225,4 @@ class Composer(PackageManager):
         See: https://getcomposer.org/doc/03-cli.md#clear-cache-clearcache-cc
         """
         super(Composer, self).cleanup()
-        self.run_cli(self.global_args, 'clear-cache')
+        self.run_cli(self.global_args, "clear-cache")

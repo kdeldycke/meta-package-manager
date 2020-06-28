@@ -26,9 +26,9 @@ class Snap(PackageManager):
 
     platforms = frozenset([LINUX])
 
-    requirement = '2.0.0'
+    requirement = "2.0.0"
 
-    global_args = ['--color=never']
+    global_args = ["--color=never"]
 
     def get_version(self):
         """ Fetch version from ``snap --version`` output.
@@ -44,7 +44,7 @@ class Snap(PackageManager):
             linuxmint  19.3
             kernel     4.15.0-91-generic
         """
-        output = self.run_cli('--version')
+        output = self.run_cli("--version")
         if output:
             return parse_version(output.split()[1])
 
@@ -63,16 +63,17 @@ class Snap(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, 'list')
+        output = self.run_cli(self.global_args, "list")
 
         if output:
             for package in output.splitlines()[1:]:
                 package_id = package.split()[0]
                 installed_version = package.split()[1]
                 installed[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'installed_version': parse_version(installed_version)}
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(installed_version),
+                }
 
         return installed
 
@@ -88,7 +89,7 @@ class Snap(PackageManager):
         """
         matches = {}
 
-        output = self.run_cli(self.global_args, 'find', query)
+        output = self.run_cli(self.global_args, "find", query)
 
         if output:
 
@@ -96,7 +97,7 @@ class Snap(PackageManager):
 
                 package_id = package.split()[0]
                 version = package.split()[1]
-                description = ' '.join(map(str, package.split()[4:]))
+                description = " ".join(map(str, package.split()[4:]))
 
                 # Skip all non-stricly matching package IDs in exact mode.
                 if exact:
@@ -113,9 +114,10 @@ class Snap(PackageManager):
                             continue
 
                 matches[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'latest_version': parse_version(version)}
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(version),
+                }
         return matches
 
     @property
@@ -132,20 +134,23 @@ class Snap(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args, 'refresh', '--list')
+        output = self.run_cli(self.global_args, "refresh", "--list")
 
         if output and len(output.splitlines()) > 1:
             for package in output.splitlines()[1:]:
                 package_id = package.split()[0]
                 latest_version = package.split()[1]
-                installed_version = self.run_cli(
-                    self.global_args, 'list', package_id).splitlines(
-                    )[-1].split()[1]
+                installed_version = (
+                    self.run_cli(self.global_args, "list", package_id)
+                    .splitlines()[-1]
+                    .split()[1]
+                )
                 outdated[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'latest_version': parse_version(latest_version),
-                    'installed_version': parse_version(installed_version)}
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(latest_version),
+                    "installed_version": parse_version(installed_version),
+                }
 
         return outdated
 
@@ -153,10 +158,10 @@ class Snap(PackageManager):
         """ snap has an auto-update function, but snaps can be updated
         manually.
         """
-        return [self.cli_path, self.global_args, 'refresh', package_id]
+        return [self.cli_path, self.global_args, "refresh", package_id]
 
     def upgrade_all_cli(self):
         """ Snap has an auto-update function, but snaps can be updated
         manually.
         """
-        return [self.cli_path, self.global_args, 'refresh']
+        return [self.cli_path, self.global_args, "refresh"]

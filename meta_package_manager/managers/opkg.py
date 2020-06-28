@@ -28,7 +28,7 @@ class OPKG(PackageManager):
 
     platforms = frozenset([LINUX])
 
-    requirement = '0.2.0'
+    requirement = "0.2.0"
 
     def get_version(self):
         """ Fetch version from ``opkg --version`` output.
@@ -40,7 +40,7 @@ class OPKG(PackageManager):
             ► opkg --version
             opkg version 0.3.6 (libsolv 0.7.5)
         """
-        output = self.run_cli('--version')
+        output = self.run_cli("--version")
         if output:
             return parse_version(output.splitlines()[0].split()[2])
 
@@ -52,7 +52,7 @@ class OPKG(PackageManager):
         .. code-block:: shell-session
         """
         super(OPKG, self).sync()
-        self.run_cli(self.global_args, 'update')
+        self.run_cli(self.global_args, "update")
 
     @property
     def installed(self):
@@ -85,18 +85,19 @@ class OPKG(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, 'list-installed')
+        output = self.run_cli(self.global_args, "list-installed")
 
         if output:
-            regexp = re.compile(r'(\S+) - (\S+)')
+            regexp = re.compile(r"(\S+) - (\S+)")
             for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
                     package_id, installed_version = match.groups()
                     installed[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'installed_version': parse_version(installed_version)}
+                        "id": package_id,
+                        "name": package_id,
+                        "installed_version": parse_version(installed_version),
+                    }
 
         return installed
 
@@ -106,16 +107,19 @@ class OPKG(PackageManager):
 
         # opkg doesn't have a working 'search', so get all packages and
         # filter the packages later.
-        output = self.run_cli(self.global_args, 'list')
+        output = self.run_cli(self.global_args, "list")
 
         if output:
-            regexp = re.compile(r"""
+            regexp = re.compile(
+                r"""
                 (?P<package_id>\S+)
                 \ -\
                 (?P<version>\S+)
                 \ -\
                 (?P<description>.+)
-                """, re.VERBOSE | re.MULTILINE)
+                """,
+                re.VERBOSE | re.MULTILINE,
+            )
 
             for package_id, version, description in regexp.findall(output):
 
@@ -127,13 +131,13 @@ class OPKG(PackageManager):
                 else:
                     # All other modes search for matching in package IDs and
                     # names.
-                    searched_content = set(
-                        map(str, TokenizedString(package_id)))
+                    searched_content = set(map(str, TokenizedString(package_id)))
 
                     # Also search within the description in extended mode.
                     if extended:
                         searched_content.update(
-                            set(map(str, TokenizedString(description))))
+                            set(map(str, TokenizedString(description)))
+                        )
 
                     # Skip package if not all sub-strings are present in the
                     # searched content.
@@ -142,9 +146,10 @@ class OPKG(PackageManager):
                         continue
 
                 matches[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'latest_version': parse_version(version)}
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(version),
+                }
 
         return matches
 
@@ -162,25 +167,25 @@ class OPKG(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args, 'list-upgradable')
+        output = self.run_cli(self.global_args, "list-upgradable")
 
         if output:
-            regexp = re.compile(r'(\S+) - (\S+) - (\S+)')
+            regexp = re.compile(r"(\S+) - (\S+) - (\S+)")
             for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
-                    package_id, installed_version, latest_version = \
-                        match.groups()
+                    package_id, installed_version, latest_version = match.groups()
                     outdated[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'latest_version': parse_version(latest_version),
-                        'installed_version': parse_version(installed_version)}
+                        "id": package_id,
+                        "name": package_id,
+                        "latest_version": parse_version(latest_version),
+                        "installed_version": parse_version(installed_version),
+                    }
 
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, self.global_args, 'upgrade']
+        cmd = [self.cli_path, self.global_args, "upgrade"]
         if package_id:
             cmd.append(package_id)
         return cmd

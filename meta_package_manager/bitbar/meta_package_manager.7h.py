@@ -31,8 +31,10 @@ from subprocess import PIPE, Popen
 PY2 = sys.version_info[0] == 2
 
 
-SUBMENU_LAYOUT = bool(os.environ.get('BITBAR_MPM_SUBMENU', False) in {
-    True, 1, 'True', 'true', '1', 'y', 'yes', 'Yes'})
+SUBMENU_LAYOUT = bool(
+    os.environ.get("BITBAR_MPM_SUBMENU", False)
+    in {True, 1, "True", "true", "1", "y", "yes", "Yes"}
+)
 """ Define the rendering mode of outdated packages list.
 
 Edit this script to force this constant to ``True``, or use the
@@ -47,14 +49,14 @@ submenus, one for each manager.
 # An alternate "good looking" font is "font=NotoMono size=13" (not installed
 # on MacOS by default though) that matches the system font quite well.
 FONTS = {
-    'normal':  '',                              # Use default system font
-    'summary': '',                              # Package summary
-    'package': '',                              # Indiviual packages
-    'error':   'color=red font=Menlo size=12',  # Errors
+    "normal": "",  # Use default system font
+    "summary": "",  # Package summary
+    "package": "",  # Indiviual packages
+    "error": "color=red font=Menlo size=12",  # Errors
 }
 # Use a monospaced font when using submenus.
 if SUBMENU_LAYOUT:
-    FONTS['summary'] = 'font=Menlo size=12'
+    FONTS["summary"] = "font=Menlo size=12"
 
 
 def fix_environment():
@@ -66,16 +68,19 @@ def fix_environment():
     always get to the necessary binaries, we overload the path. Current
     preference order would equate to Homebrew, Macports, then system.
     """
-    os.environ['PATH'] = ':'.join([
-        '/usr/local/bin',
-        '/usr/local/sbin',
-        '/opt/local/bin',
-        '/opt/local/sbin',
-        os.environ.get('PATH', '')])
+    os.environ["PATH"] = ":".join(
+        [
+            "/usr/local/bin",
+            "/usr/local/sbin",
+            "/opt/local/bin",
+            "/opt/local/sbin",
+            os.environ.get("PATH", ""),
+        ]
+    )
 
     # Python 3 Surrogate Handling. See:
     # https://click.pocoo.org/6/python3/#python-3-surrogate-handling
-    os.environ['LC_ALL'] = os.environ['LANG'] = 'en_US.UTF-8'
+    os.environ["LC_ALL"] = os.environ["LANG"] = "en_US.UTF-8"
 
 
 def run(*args):
@@ -88,8 +93,9 @@ def run(*args):
     output, error = process.communicate()
     return (
         process.returncode,
-        output.decode('utf-8') if output else None,
-        error.decode('utf-8') if error else None)
+        output.decode("utf-8") if output else None,
+        error.decode("utf-8") if error else None,
+    )
 
 
 def echo(message):
@@ -100,7 +106,7 @@ def echo(message):
     and platforms.
     """
     if PY2:
-        message = message.encode('utf-8')
+        message = message.encode("utf-8")
     print(message)
 
 
@@ -118,7 +124,8 @@ def print_error(message, submenu=""):
     for line in message.strip().splitlines():
         echo(
             "{}{} | {f_error} trim=false emojize=false"
-            "".format(submenu, line, f_error=FONTS['error']))
+            "".format(submenu, line, f_error=FONTS["error"])
+        )
 
 
 def print_cli_item(item):
@@ -137,17 +144,21 @@ def print_package_items(packages, submenu=""):
         print_cli_item(
             "{}{name} {installed_version} → {latest_version} | {upgrade_cli}"
             " refresh=true {f_package} emojize=false".format(
-                submenu, f_package=FONTS['package'], **pkg_info))
+                submenu, f_package=FONTS["package"], **pkg_info
+            )
+        )
 
 
 def print_upgrade_all_item(manager, submenu=""):
     """Print the menu entry to upgrade all outdated package of a manager."""
-    if manager.get('upgrade_all_cli'):
+    if manager.get("upgrade_all_cli"):
         if SUBMENU_LAYOUT:
             echo("-----")
         print_cli_item(
             "{}Upgrade all | {} refresh=true {f_normal}".format(
-                submenu, manager['upgrade_all_cli'], f_normal=FONTS['normal']))
+                submenu, manager["upgrade_all_cli"], f_normal=FONTS["normal"]
+            )
+        )
 
 
 def print_menu():
@@ -156,7 +167,7 @@ def print_menu():
     See: https://github.com/matryer/bitbar#plugin-api
     """
     # Search for generic mpm CLI on system.
-    code, _, error = run('mpm')
+    code, _, error = run("mpm")
     # mpm CLI hasn't been found on the system. Propose to the user to install
     # or upgrade it.
     if code or error:
@@ -167,14 +178,15 @@ def print_menu():
             "Install / upgrade `mpm` CLI. | bash=python param1=-m param2=pip "
             "param3=install param4=--upgrade "
             "param5=\\\"meta-package-manager>=2.7.0\\\" terminal=true "
-            "refresh=true {f_error}".format(
-                f_error=FONTS['error']))
+            "refresh=true {f_error}".format(f_error=FONTS["error"])
+        )
         return
 
     # Fetch list of all outdated packages from all package manager available on
     # the system.
     _, output, error = run(
-        'mpm', '--output-format', 'json', 'outdated', '--cli-format', 'bitbar')
+        "mpm", "--output-format", "json", "outdated", "--cli-format", "bitbar"
+    )
 
     # Bail-out immediately on errors related to mpm self-execution or if mpm is
     # not able to produce any output.
@@ -184,27 +196,28 @@ def print_menu():
         return
 
     # Sort outdated packages by manager's name.
-    managers = sorted(json.loads(output).values(), key=itemgetter('name'))
+    managers = sorted(json.loads(output).values(), key=itemgetter("name"))
 
     # Print menu bar icon with number of available upgrades.
-    total_outdated = sum([len(m['packages']) for m in managers])
-    total_errors = sum([len(m.get('errors', [])) for m in managers])
-    echo("↑{}{} | dropdown=false".format(
-        total_outdated,
-        " ⚠️{}".format(total_errors) if total_errors else ""))
+    total_outdated = sum([len(m["packages"]) for m in managers])
+    total_errors = sum([len(m.get("errors", [])) for m in managers])
+    echo(
+        "↑{}{} | dropdown=false".format(
+            total_outdated, " ⚠️{}".format(total_errors) if total_errors else ""
+        )
+    )
 
     # Print a full detailed section for each manager.
     submenu = "--" if SUBMENU_LAYOUT else ""
 
     if SUBMENU_LAYOUT:
         # Compute maximal manager's name length.
-        label_max_length = max([len(m['name']) for m in managers])
-        max_outdated = max([len(m['packages']) for m in managers])
+        label_max_length = max([len(m["name"]) for m in managers])
+        max_outdated = max([len(m["packages"]) for m in managers])
         echo("---")
 
     for manager in managers:
-        package_label = "package{}".format(
-            's' if len(manager['packages']) > 1 else '')
+        package_label = "package{}".format("s" if len(manager["packages"]) > 1 else "")
 
         if SUBMENU_LAYOUT:
             # Non-flat layout use a compact table-like rendering of manager
@@ -212,30 +225,35 @@ def print_menu():
             echo(
                 "{error}{0:<{max_length}} {1:>{max_outdated}} {2:<8} | "
                 "{f_summary} emojize=false".format(
-                    manager['name'] + ':',
-                    len(manager['packages']),
+                    manager["name"] + ":",
+                    len(manager["packages"]),
                     package_label,
-                    error="⚠️ " if manager.get('errors', None) else '',
+                    error="⚠️ " if manager.get("errors", None) else "",
                     max_length=label_max_length + 1,
                     max_outdated=len(str(max_outdated)),
-                    f_summary=FONTS['summary']))
+                    f_summary=FONTS["summary"],
+                )
+            )
         else:
             echo("---")
-            echo("{0} outdated {1} {2} | {f_summary} emojize=false".format(
-                len(manager['packages']),
-                manager['name'],
-                package_label,
-                f_summary=FONTS['summary']))
+            echo(
+                "{0} outdated {1} {2} | {f_summary} emojize=false".format(
+                    len(manager["packages"]),
+                    manager["name"],
+                    package_label,
+                    f_summary=FONTS["summary"],
+                )
+            )
 
-        print_package_items(manager['packages'], submenu)
+        print_package_items(manager["packages"], submenu)
 
         print_upgrade_all_item(manager, submenu)
 
-        for error_msg in manager.get('errors', []):
+        for error_msg in manager.get("errors", []):
             echo("-----" if SUBMENU_LAYOUT else "---")
             print_error(error_msg, submenu)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     fix_environment()
     print_menu()

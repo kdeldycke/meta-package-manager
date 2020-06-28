@@ -54,6 +54,18 @@ jobs:
         poetry run pycodestyle
         poetry run pylint meta_package_manager
 
+  lint-yaml:
+    name: Lint YAML files
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install JSON Lint
+      run: |
+        python -m pip install --upgrade yamllint
+    - name: Lint
+      run: |
+        yamllint -d relaxed .
+
   lint-json:
     name: Lint JSON files and create a PR
     runs-on: ubuntu-latest

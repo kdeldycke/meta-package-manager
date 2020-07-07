@@ -3,7 +3,7 @@ Meta Package Manager
 
 CLI providing unifying interface to all package managers.
 
-Stable release: |release| |versions| |license| |dependencies|
+Stable release: |release| |versions| |license|
 
 Development: |build| |docs| |coverage| |quality|
 

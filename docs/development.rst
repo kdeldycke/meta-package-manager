@@ -40,7 +40,6 @@ Branch          |master-branch|__   |develop-branch|__
 Unittests       |build-stable|      |build-dev|
 Coverage        |coverage-stable|   |coverage-dev|
 Quality         |quality-stable|    |quality-dev|
-Dependencies    |deps-stable|       |deps-dev|
 Documentation   |docs-stable|       |docs-dev|
 ==============  ==================  ===================
 
@@ -71,13 +70,6 @@ __ https://github.com/kdeldycke/meta-package-manager/tree/develop
 .. |quality-dev| image:: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/badges/quality-score.png?b=develop
     :target: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/?branch=develop
     :alt: Code Quality
-
-.. |deps-stable| image:: https://requires.io/github/kdeldycke/meta-package-manager/requirements.svg?branch=master
-    :target: https://requires.io/github/kdeldycke/meta-package-manager/requirements/?branch=master
-    :alt: Requirements freshness
-.. |deps-dev| image:: https://requires.io/github/kdeldycke/meta-package-manager/requirements.svg?branch=develop
-    :target: https://requires.io/github/kdeldycke/meta-package-manager/requirements/?branch=develop
-    :alt: Requirements freshness
 
 .. |docs-stable| image:: https://readthedocs.org/projects/meta-package-manager/badge/?version=stable
     :target: https://meta-package-manager.readthedocs.io/en/stable/

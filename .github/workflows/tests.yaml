@@ -24,7 +24,7 @@ jobs:
           - os: windows-latest
             python-version: 2.7
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v2.3.1
     - name: Set up Python ${{matrix.python-version}}
       uses: actions/setup-python@v2
       with:
@@ -177,4 +177,4 @@ jobs:
       run: |
         poetry run pytest --cov-config=pyproject.toml --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v1.0.10

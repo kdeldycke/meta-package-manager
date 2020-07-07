@@ -12,7 +12,7 @@ jobs:
     name: Generate and sync labels
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v2.3.1
     - uses: actions/setup-python@v2
     - name: Install mpm
       run: |
@@ -33,7 +33,7 @@ jobs:
         # Restore modified file. Do not fail if no file has been stashed.
         git stash pop || true
     - name: Create PR
-      uses: peter-evans/create-pull-request@v2
+      uses: peter-evans/create-pull-request@v2.8.1
       with:
         author: "Kevin Deldycke <kevin@deldycke.com>"
         commit-message: "[github] Update project labels."

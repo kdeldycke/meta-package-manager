@@ -9,6 +9,7 @@ Changelog
 
 * [mpm] Auto-format Python code with Black.
 * [mpm] Removes ``isort``.
+* [mpm] Auto-update GitHub actions.
 * [mpm] Auto-update ``.gitignore`` file.
 * [mpm] Auto-update ``.mailmap`` file.
 * [mpm] Lint all YAML files. Add dependency on ``yamllint`` package.

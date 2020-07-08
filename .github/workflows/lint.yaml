@@ -124,7 +124,6 @@ jobs:
       - name: Generate .gitignore
         run: |
           git ignore-io --replace emacs git linux macos nohup python vim virtualenv visualstudiocode windows
-          echo 'poetry.lock' >> ./.gitignore
       - uses: peter-evans/create-pull-request@v2.8.1
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"

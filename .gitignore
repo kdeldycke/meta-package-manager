@@ -317,4 +317,3 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/emacs,git,linux,macos,nohup,python,vim,virtualenv,visualstudiocode,windows
-poetry.lock

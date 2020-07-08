@@ -34,7 +34,7 @@ jobs:
         body: >
           [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
-        labels: "CI/CD"
+        labels: CI/CD
         assignees: kdeldycke
         branch: format-python
 
@@ -58,7 +58,7 @@ jobs:
         body: >
           [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
-        labels: "CI/CD"
+        labels: CI/CD
         assignees: kdeldycke
         branch: lint-json
 
@@ -76,7 +76,7 @@ jobs:
           body: >
             [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
             as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
-          labels: "CI/CD", "documentation"
+          labels: CI/CD, documentation
           assignees: kdeldycke
           branch: fix-typo
 
@@ -99,7 +99,7 @@ jobs:
           body: >
             [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
             as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
-          labels: "CI/CD"
+          labels: CI/CD
           assignees: kdeldycke
           branch: update-gitignore
 
@@ -123,7 +123,7 @@ jobs:
           body: >
             [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
             as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
-          labels: "CI/CD", "documentation"
+          labels: CI/CD, documentation
           assignees: kdeldycke
           branch: update-mailmap
 
@@ -149,6 +149,6 @@ jobs:
           body: >
             [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
             as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
-          labels: "CI/CD", "documentation"
+          labels: CI/CD, documentation
           assignees: kdeldycke
           branch: update-deps-image

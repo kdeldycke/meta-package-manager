@@ -118,7 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1.4.0
+      uses: actions/setup-dotnet@v1.5.0
     - name: Install actions updater
       run: |
         cd ~ && wget https://github.com/fabasoad/ghacu/releases/download/v1.1.4/ghacu-1.1.4-linux-x64.tgz

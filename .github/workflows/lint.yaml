@@ -10,8 +10,6 @@ jobs:
 
   lint-python:
     name: Lint and check Python code
-    # No need to lint before the auto formatting did its job.
-    needs: format-python
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2.3.1

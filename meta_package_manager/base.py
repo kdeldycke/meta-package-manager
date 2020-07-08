@@ -363,6 +363,6 @@ class PackageManager:
                 bitbar_cli += "bash={}".format(param)
             else:
                 if "=" in param:
-                    param = "\\\"{}\\\"".format(param)
+                    param = '\\"{}\\"'.format(param)
                 bitbar_cli += " param{}={}".format(index, param)
         return bitbar_cli

@@ -1,7 +1,9 @@
 name: Labeller (content-based)
 on:
-  - issues
-  - pull_request
+  issues:
+    types: [opened]
+  pull_request:
+    typed: [opened]
 
 jobs:
   labeller:

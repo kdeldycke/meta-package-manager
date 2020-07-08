@@ -138,6 +138,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --upgrade poetry
           poetry install
+          sudo apt install graphviz
       - name: Run pipdeptree
         run: |
           poetry run pipdeptree --packages meta-package-manager --graph-output png > ./docs/dependencies.png

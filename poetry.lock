@@ -416,6 +416,20 @@ version = "0.8.0"
 
 [[package]]
 category = "dev"
+description = "Command line utility to show dependency tree of packages"
+name = "pipdeptree"
+optional = false
+python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
+version = "2.0.0b1"
+
+[package.dependencies]
+pip = ">=6.0.0"
+
+[package.extras]
+graphviz = ["graphviz"]
+
+[[package]]
+category = "dev"
 description = "Query metadatdata from sdists / bdists / installed packages."
 name = "pkginfo"
 optional = false
@@ -1263,6 +1277,11 @@ packaging = [
 pathspec = [
     {file = "pathspec-0.8.0-py2.py3-none-any.whl", hash = "sha256:7d91249d21749788d07a2d0f94147accd8f845507400749ea19c1ec9054a12b0"},
     {file = "pathspec-0.8.0.tar.gz", hash = "sha256:da45173eb3a6f2a5a487efba21f050af2b41948be6ab52b6a1e3ff22bb8b7061"},
+]
+pipdeptree = [
+    {file = "pipdeptree-2.0.0b1-py2-none-any.whl", hash = "sha256:e4531d7f5d1d2ca61584b149758d8af5fd58b910c14873cd6f8a7d084aba5def"},
+    {file = "pipdeptree-2.0.0b1-py3-none-any.whl", hash = "sha256:2c0967c0778e8fcbc494d248deadad5528c72740fc40ab959f6b9beeab132771"},
+    {file = "pipdeptree-2.0.0b1.tar.gz", hash = "sha256:e297e3539b99ee417c3a0c9fb72cfe7064eaa5c52fbc4fa3ccb6183021276611"},
 ]
 pkginfo = [
     {file = "pkginfo-1.5.0.1-py2.py3-none-any.whl", hash = "sha256:a6d9e40ca61ad3ebd0b72fbadd4fba16e4c0e4df0428c041e01e06eb6ee71f32"},

@@ -37,7 +37,13 @@ class Yarn(PackageManager):
     requirement = "1.21.0"
 
     def get_version(self):
-        """ Fetch version from ``yarn --version`` output."""
+        """ Fetch version from ``yarn --version`` output.
+
+        .. code-block:: shell-session
+
+            ► yarn --version
+            (...)
+        """
         return parse_version(self.run_cli("--version"))
 
     def parse(self, output):
@@ -74,9 +80,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-           ► yarn global --json --non-interactive \
-           > --skip-integrity-check list --depth 0
-
+            ► yarn global --json list --depth 0
             (...)
         """
         output = self.run_cli(
@@ -93,8 +97,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn --non-interactive --skip-integrity-check \
-            > --json info python | jq
+            ► yarn --json info python | jq
             {
               "type": "inspect",
               "data": {
@@ -203,9 +206,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-           ► yarn --json --non-interactive \
-           > --skip-integrity-check outdated --cwd
-
+            ► yarn --json outdated --cwd
             (...)
         """
         outdated = {}

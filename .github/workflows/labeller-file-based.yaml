@@ -11,4 +11,4 @@ jobs:
     - uses: actions/labeler@v2.1.1
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        configuration-path: ".github/pr_labeler.yaml"
+        configuration-path: ".github/labeller-file-based.yaml"

@@ -34,7 +34,7 @@ class Yarn(PackageManager):
 
     platforms = frozenset([LINUX, MACOS, WINDOWS])
 
-    requirement = "1.0.0"
+    requirement = "1.21.0"
 
     def get_version(self):
         """ Fetch version from ``yarn --version`` output."""

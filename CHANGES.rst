@@ -7,6 +7,7 @@ Changelog
 
  .. note:: This version is not yet released and is under active development.
 
+* [yarn] Set minimal requirement to 1.20.0.
 * [mpm] Auto-format Python code with Black.
 * [mpm] Removes ``isort``.
 * [mpm] Auto-update GitHub actions.

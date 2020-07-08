@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  format-python:
+  python:
     name: Format Python code and create a PR
     runs-on: ubuntu-latest
     steps:
@@ -38,7 +38,7 @@ jobs:
         assignees: kdeldycke
         branch: format-python
 
-  format-json:
+  json:
     name: Format JSON files and create a PR
     runs-on: ubuntu-latest
     steps:
@@ -62,7 +62,7 @@ jobs:
         assignees: kdeldycke
         branch: lint-json
 
-  fix-typo:
+  typos:
     name: Fix typos and create a PR
     runs-on: ubuntu-latest
     steps:
@@ -80,7 +80,7 @@ jobs:
           assignees: kdeldycke
           branch: fix-typo
 
-  update-gitignore:
+  gitignore:
     name: Generate .gitignore and create a PR
     runs-on: ubuntu-latest
     steps:
@@ -103,7 +103,7 @@ jobs:
           assignees: kdeldycke
           branch: update-gitignore
 
-  update-mailmap:
+  mailmap:
     name: Update .mailmap and create a PR
     runs-on: ubuntu-latest
     steps:

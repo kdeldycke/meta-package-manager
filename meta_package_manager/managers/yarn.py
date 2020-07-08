@@ -30,7 +30,7 @@ class Yarn(PackageManager):
 
     name = "Node's yarn"
 
-    global_args = ["--no-progress", "--non-interactive", "--skip-integrity-check"]
+    global_args = []
 
     platforms = frozenset([LINUX, MACOS, WINDOWS])
 
@@ -74,7 +74,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-           ► yarn global --json --no-progress --non-interactive \
+           ► yarn global --json --non-interactive \
            > --skip-integrity-check list --depth 0
 
             (...)
@@ -93,7 +93,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn --no-progress --non-interactive --skip-integrity-check \
+            ► yarn --non-interactive --skip-integrity-check \
             > --json info python | jq
             {
               "type": "inspect",
@@ -203,7 +203,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-           ► yarn --json --no-progress --non-interactive \
+           ► yarn --json --non-interactive \
            > --skip-integrity-check outdated --cwd
 
             (...)
@@ -241,7 +241,7 @@ class Yarn(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = ["global", self.global_args, "--silent"]
+        cmd = [self.cli_path, "global", self.global_args]
 
         if package_id:
             cmd.append("add")

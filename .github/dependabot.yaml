@@ -8,6 +8,8 @@ updates:
       interval: "daily"
     labels:
       - "CI/CD"
+    assignees:
+      - "kdeldycke"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -15,3 +17,5 @@ updates:
       interval: "daily"
     labels:
       - "CI/CD"
+    assignees:
+      - "kdeldycke"

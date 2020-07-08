@@ -11,6 +11,7 @@ Changelog
 * [yarn] Fix deprecated global arguments.
 * [mpm] Auto-format Python code with Black.
 * [mpm] Removes ``isort``.
+* [mpm] Auto-update Python's dependencies.
 * [mpm] Auto-update GitHub actions.
 * [mpm] Auto-update ``.gitignore`` file.
 * [mpm] Auto-update ``.mailmap`` file.

@@ -67,7 +67,9 @@ def read_config(custom_conf=None):
         cfg_filepath = Path(custom_conf).resolve()
     # Get configuration from default location.
     else:
-        cfg_filepath = Path(click.get_app_dir(CLI_NAME, force_posix=True), 'config.toml').resolve()
+        cfg_filepath = Path(
+            click.get_app_dir(CLI_NAME, force_posix=True), "config.toml"
+        ).resolve()
 
     # Check config file. Issues with non-default config file are fatal.
     if not cfg_filepath.exists():

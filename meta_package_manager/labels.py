@@ -24,6 +24,7 @@ from boltons.iterutils import flatten
 
 from .managers import pool
 from .platform import ALL_OS_LABELS
+from . import CLI_NAME
 
 # Format: label name, color, optional description.
 LABELS = [
@@ -79,11 +80,11 @@ for platform_id in ALL_OS_LABELS:
 
 
 # Create one label per manager. Add mpm as its own manager.
-non_grouped_managers = set(pool()) - set(flatten(MANAGER_GROUPS.values())) | {"mpm"}
+non_grouped_managers = set(pool()) - set(flatten(MANAGER_GROUPS.values())) | {CLI_NAME}
 for manager_id in non_grouped_managers:
     label_id = "manager: {}".format(manager_id)
     LABELS.append((label_id, MANAGER_COLOR, manager_id))
-    if manager_id != "mpm":
+    if manager_id != CLI_NAME:
         MANAGER_LABELS[manager_id] = label_id
 
 

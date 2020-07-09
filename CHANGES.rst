@@ -9,6 +9,7 @@ Changelog
 
 * [yarn] Set minimal requirement to 1.20.0.
 * [yarn] Fix deprecated global arguments.
+* [mpm] Add utilities to read a config TOML file. Refs #66.
 * [mpm] Auto-format Python code with Black.
 * [mpm] Removes ``isort``.
 * [mpm] Auto-update Python's dependencies.

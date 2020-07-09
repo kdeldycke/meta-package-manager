@@ -31,6 +31,7 @@ from click.testing import CliRunner
 
 from ..bitbar import run as bitbar_run
 from ..cli import cli
+from .. import CLI_NAME
 from ..platform import is_linux, is_macos, is_windows
 
 """ Fixtures, configuration and helpers for tests. """
@@ -150,7 +151,7 @@ def invoke(runner):
         result.stdout_bytes = strip_ansi(result.stdout_bytes)
         result.stderr_bytes = strip_ansi(result.stderr_bytes)
 
-        print_cli_output(["mpm"] + args, result.output)
+        print_cli_output([CLI_NAME] + args, result.output)
 
         # Print some more debug info.
         print(result)

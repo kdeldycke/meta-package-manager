@@ -10,7 +10,38 @@ jobs:
     name: Issue & PR labeller based on content
     runs-on: ubuntu-latest
     steps:
+      # XXX DEBUG info
+      # I need to identify how to skip this whole labelling for issues and PRs
+      # created by bots and other GitHub actions.
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"
+      - name: Dump runner context
+        env:
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+        run: echo "$RUNNER_CONTEXT"
+      - name: Dump strategy context
+        env:
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        run: echo "$STRATEGY_CONTEXT"
+      - name: Dump matrix context
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        run: echo "$MATRIX_CONTEXT"
       - uses: Naturalclar/issue-action@v2.0.1
+        # TODO: skip this step if this workflow was created/triggered by a bot
+        # or another GitHub action. That way we can prevent content-rich PRs
+        # (like those produced by dependabot) to be overly tagged with extra
+        # labels.
         with:
           parameters: >
             [

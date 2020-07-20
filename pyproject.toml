@@ -44,7 +44,7 @@ boltons = "^20.2.0"
 click = "^7.1"
 click-log = "^0.3"
 cli-helpers = "^2.0"
-simplejson = "^3.17.0"
+simplejson = "^3.17.2"
 tomlkit = "^0.6"
 # Should have been put in dev-dependencies but extras only works from main
 # section.

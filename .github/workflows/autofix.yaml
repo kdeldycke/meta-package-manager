@@ -26,7 +26,7 @@ jobs:
     - name: Run black
       run: |
         poetry run black .
-    - uses: peter-evans/create-pull-request@v2.8.1
+    - uses: peter-evans/create-pull-request@v3
       with:
         author: "Kevin Deldycke <kevin@deldycke.com>"
         commit-message: "[lint] Format Python code."
@@ -50,7 +50,7 @@ jobs:
       run: |
         find ./ -type f -name '*.json' -print -exec jsonlint --in-place "{}" \;
     - name: Create PR
-      uses: peter-evans/create-pull-request@v2.8.1
+      uses: peter-evans/create-pull-request@v3
       with:
         author: "Kevin Deldycke <kevin@deldycke.com>"
         commit-message: "[lint] Auto-format JSON content."
@@ -68,7 +68,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.1
       - uses: sobolevn/misspell-fixer-action@0.1.0
-      - uses: peter-evans/create-pull-request@v2.8.1
+      - uses: peter-evans/create-pull-request@v3
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[lint] Fix typo."
@@ -91,7 +91,7 @@ jobs:
       - name: Generate .gitignore
         run: |
           git ignore-io --replace emacs git linux macos nohup python vim virtualenv visualstudiocode windows
-      - uses: peter-evans/create-pull-request@v2.8.1
+      - uses: peter-evans/create-pull-request@v3
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "Regenerate .gitignore"
@@ -115,7 +115,7 @@ jobs:
       - name: Generate .mailmap
         run: |
           python ./.github/update_mailmap.py
-      - uses: peter-evans/create-pull-request@v2.8.1
+      - uses: peter-evans/create-pull-request@v3
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "Regenerate .mailmap"
@@ -142,7 +142,7 @@ jobs:
       - name: Run pipdeptree
         run: |
           poetry run pipdeptree --packages meta-package-manager --graph-output png > ./docs/dependencies.png
-      - uses: peter-evans/create-pull-request@v2.8.1
+      - uses: peter-evans/create-pull-request@v3
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "Regenerate dependency graph image"

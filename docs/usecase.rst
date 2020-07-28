@@ -38,10 +38,10 @@ A `recent study shows that 70% of vulnerabilities lies in outdated libraries <ht
 This is the primary use case of ``mpm`` and the first reason I built it.
 
 
-Fills the gap between managers
-------------------------------
+Extra features for your package managers
+----------------------------------------
 
-Some package manager are missing features.
+All package managers are not on-par between themselves. ``mpm`` is filling the gap between managers and implement some missing features.
 
 For instance, `pip doesn't can't upgrade all outdated package <https://github.com/pypa/pip/issues/4551>`_ with a single command. ``mpm`` adds that missing feature:
 
@@ -172,8 +172,8 @@ You maintain a repository of ``dotfiles``. This helps you spawn up a highly cust
     (...)
 
 
-Get rid of Docker for lambda ?
-------------------------------
+Get rid of Docker for lambda?
+-----------------------------
 
 Some developers have a hard-time reproducing environment for lambda execution
 onto their local machine. Most of devs use Docker to abstract their runtime
@@ -189,8 +189,8 @@ from their execution environment.
     dependencies.
 
 
-Switch systems
---------------
+Switch systems?
+---------------
 
 You used to work on macOS. Now you'd like to move to Linux. To reduce friction
 during your migration, you can invotory all your installed packages with
@@ -212,3 +212,12 @@ during your migration, you can invotory all your installed packages with
 
     Implement a best matchig strategy, across package managers of different
     kinds.
+
+
+Support and fund open-source?
+-----------------------------
+
+One future development direction might be to add a way to inventory all components
+your using on your system and track down their preferred funding platform like `GitHub
+Sponsors <https://github.com/sponsors>`_, `Liberapay <https://liberapay.com>`_ or
+`Patreon <https://patreon.com>`_. Then have a way to fund all those.

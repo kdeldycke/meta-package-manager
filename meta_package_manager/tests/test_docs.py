@@ -92,7 +92,7 @@ def test_labeller_rules():
     ).resolve().open() as doc:
         content = doc.read()
     assert "Naturalclar/issue-action" in content
-    json_rules = load(content, Loader=Loader)["jobs"]["labeller"]["steps"][0]["with"][
+    json_rules = load(content, Loader=Loader)["jobs"]["labeller"]["steps"][1]["with"][
         "parameters"
     ]
     rules = json.loads(json_rules)

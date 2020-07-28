@@ -29,11 +29,11 @@ jobs:
     - uses: peter-evans/create-pull-request@v3
       with:
         author: "Kevin Deldycke <kevin@deldycke.com>"
-        commit-message: "[lint] Format Python code."
-        title: "Format Python code"
+        commit-message: "[autofix] Format Python code"
+        title: "[autofix] Format Python code"
         body: >
           [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
+          as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/autofix.yaml).
         labels: CI/CD
         assignees: kdeldycke
         branch: format-python
@@ -53,14 +53,14 @@ jobs:
       uses: peter-evans/create-pull-request@v3
       with:
         author: "Kevin Deldycke <kevin@deldycke.com>"
-        commit-message: "[lint] Auto-format JSON content."
-        title: '[lint] Auto-format JSON content'
+        commit-message: "[autofix] Format JSON content"
+        title: "[autofix] Format JSON content"
         body: >
           [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
+          as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/autofix.yaml).
         labels: CI/CD
         assignees: kdeldycke
-        branch: lint-json
+        branch: format-json
 
   typos:
     name: Fix typos and create a PR
@@ -71,14 +71,14 @@ jobs:
       - uses: peter-evans/create-pull-request@v3
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
-          commit-message: "[lint] Fix typo."
-          title: "Typo"
+          commit-message: "[autofix] Typo"
+          title: "[autofix] Typo"
           body: >
             [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
+            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/autofix.yaml).
           labels: CI/CD, documentation
           assignees: kdeldycke
-          branch: fix-typo
+          branch: autofix-typo
 
   gitignore:
     name: Generate .gitignore and create a PR
@@ -94,11 +94,11 @@ jobs:
       - uses: peter-evans/create-pull-request@v3
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
-          commit-message: "Regenerate .gitignore"
-          title: "Regenerate .gitignore"
+          commit-message: "[autofix] Regenerate .gitignore"
+          title: "[autofix] Regenerate .gitignore"
           body: >
             [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
+            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/autofix.yaml).
           labels: CI/CD
           assignees: kdeldycke
           branch: update-gitignore
@@ -118,11 +118,11 @@ jobs:
       - uses: peter-evans/create-pull-request@v3
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
-          commit-message: "Regenerate .mailmap"
-          title: "Regenerate .mailmap"
+          commit-message: "[autofix] Regenerate .mailmap"
+          title: "[autofix] Regenerate .mailmap"
           body: >
             [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
+            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/autofix.yaml).
           labels: CI/CD, documentation
           assignees: kdeldycke
           branch: update-mailmap
@@ -145,11 +145,11 @@ jobs:
       - uses: peter-evans/create-pull-request@v3
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
-          commit-message: "Regenerate dependency graph image"
-          title: "Regenerate dependency graph"
+          commit-message: "[autofix] Regenerate dependency graph"
+          title: "[autofix] Regenerate dependency graph"
           body: >
             [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/lint.yaml).
+            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/autofix.yaml).
           labels: CI/CD, documentation
           assignees: kdeldycke
           branch: update-deps-image

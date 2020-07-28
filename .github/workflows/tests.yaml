@@ -147,24 +147,31 @@ jobs:
       run: |
         python -m pip install --upgrade pip
 
-    # Mpm
-    - name: Install mpm and its dependencies
+    - name: Upgrade Poetry
       run: |
         python -m pip install --upgrade poetry
-        poetry install
-    - name: mpm CLI output for debugging
-      run: |
-        poetry run mpm managers
-    - name: Hack trying to fix coverage - "Can't combine line data with arc data" error
-      if: runner.os != 'Windows'
-      run: |
-        rm -rf .coverage*
+
+    # BitBar
     - name: Test BitBar plugin
       if: matrix.python-version == '2.7'
       run: |
         # mpm 2.8 is the last supporting Python 2.7.
         python -m pip install "meta-package-manager~=2.8"
         python -m unittest discover -p test_bitbar_plugin.py
+
+    # Mpm
+    - name: Install mpm and its dependencies
+      if: matrix.python-version != '2.7'
+      run: |
+        poetry install
+    - name: mpm CLI output for debugging
+      if: matrix.python-version != '2.7'
+      run: |
+        poetry run mpm managers
+    - name: Hack trying to fix coverage - "Can't combine line data with arc data" error
+      if: runner.os != 'Windows'
+      run: |
+        rm -rf .coverage*
     - name: Tests and coverage report in destructive mode
       if: matrix.python-version != '2.7'
       env:

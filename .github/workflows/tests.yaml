@@ -184,4 +184,5 @@ jobs:
       run: |
         poetry run pytest --cov-config=pyproject.toml --cov=./ --cov-report=xml
     - name: Upload coverage to Codecov
+      if: matrix.python-version != '2.7'
       uses: codecov/codecov-action@v1.0.12

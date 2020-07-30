@@ -160,8 +160,8 @@ jobs:
     - name: Install old mpm
       if: matrix.python-version == '2.7'
       run: |
-        # mpm 2.8 is the last supporting Python 2.7.
-        python -m pip install "meta-package-manager~=2.8"
+        # mpm 2.8 and cli_helpers 2.1.0 are the last supporting Python 2.7.
+        python -m pip install "meta-package-manager~=2.8" "cli-helpers<2.1.0"
     - name: mpm CLI output for debugging
       if: matrix.python-version == '2.7'
       run: |

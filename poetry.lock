@@ -163,7 +163,7 @@ description = "Helpers for building command-line apps"
 name = "cli-helpers"
 optional = false
 python-versions = "*"
-version = "2.0.1"
+version = "2.1.0"
 
 [package.dependencies]
 configobj = ">=5.0.5"
@@ -1032,7 +1032,7 @@ testing = ["jaraco.itertools", "func-timeout"]
 docs = ["sphinx", "sphinx_rtd_theme", "sphinx_tabs"]
 
 [metadata]
-content-hash = "0736969d8f8125ee1a65a17b9a4ef8291af976d8e2b4fc94e65488e7e55a27f4"
+content-hash = "c1199438425ef773fc2f708065500af18081a9121db2ef09827084a2f6eeb4c4"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -1119,8 +1119,8 @@ check-wheel-contents = [
     {file = "check_wheel_contents-0.1.0-py3-none-any.whl", hash = "sha256:1a6f7f1f10775de7bf388b13fc60bd62c5bece1d9457f4e910e3200c076952bb"},
 ]
 cli-helpers = [
-    {file = "cli_helpers-2.0.1-py3-none-any.whl", hash = "sha256:5b02fc02ed66f4c47f6d27ed4bcaf52e6c7d3a3e5e10f2388e83e5f45cf5624f"},
-    {file = "cli_helpers-2.0.1.tar.gz", hash = "sha256:18f7d8c5a22d85fc685d56a9f301d8b9f7f0d7d4e9033a27563b066c2ab41833"},
+    {file = "cli_helpers-2.1.0-py3-none-any.whl", hash = "sha256:6fe25b8fa78030a88f41b2af9ae4699bb341970773b444bd522f3627bd4485f2"},
+    {file = "cli_helpers-2.1.0.tar.gz", hash = "sha256:dd6f164310f7d86fa3da1f82043a9c784e44a02ad49be932a80624261e56979b"},
 ]
 click = [
     {file = "click-7.1.2-py2.py3-none-any.whl", hash = "sha256:dacca89f4bfadd5de3d7489b7c8a566eee0d3676333fbb50030263894c38c0dc"},

@@ -56,7 +56,7 @@ sphinx_tabs = {version = "^1.1.13", optional = true}
 black = "^19.10b0"
 bump2version = "^1.0.0"
 check-wheel-contents = "^0.1.0"
-coverage = {extras = ["toml"], version = "^5.0.4"}
+coverage = {extras = ["toml"], version = "^5.2.1"}
 pipdeptree = {extras = ["graphviz"], version = "^2.0.0-beta.1", allow-prereleases = true}
 pycodestyle = "^2"
 pylint = "^2.5"

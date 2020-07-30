@@ -98,6 +98,11 @@ logging-format-style = "new"
 # Aligns to black's config: https://github.com/psf/black/blob/master/docs/compatible_configs.md#pylint
 max-line-length = "88"
 
+[tool.pytest.ini_options]
+# https://docs.pytest.org/en/latest/customize.html#pyproject-toml
+addopts = "--durations=10 --cov-report term --cov=meta_package_manager"
+xfail_strict = true
+
 [tool.coverage.paths]
 # https://coverage.readthedocs.io/en/latest/config.html
 source = ["meta_package_manager"]

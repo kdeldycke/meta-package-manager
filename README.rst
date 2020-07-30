@@ -5,7 +5,7 @@ CLI providing unifying interface to all package managers.
 
 Stable release: |release| |versions| |license|
 
-Development: |build| |docs| |coverage| |quality|
+Development: |build| |docs| |coverage|
 
 .. |release| image:: https://img.shields.io/pypi/v/meta-package-manager.svg
     :target: https://pypi.python.org/pypi/meta-package-manager
@@ -25,9 +25,6 @@ Development: |build| |docs| |coverage| |quality|
 .. |coverage| image:: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop/graph/badge.svg
     :target: https://codecov.io/github/kdeldycke/meta-package-manager?branch=develop
     :alt: Coverage Status
-.. |quality| image:: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/badges/quality-score.png?b=develop
-    :target: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/?branch=develop
-    :alt: Code Quality
 
 .. figure:: https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/mpm-managers-cli.png
     :align: center

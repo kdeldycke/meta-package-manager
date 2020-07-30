@@ -39,7 +39,6 @@ Branch          |master-branch|__   |develop-branch|__
 ==============  ==================  ===================
 Unittests       |build-stable|      |build-dev|
 Coverage        |coverage-stable|   |coverage-dev|
-Quality         |quality-stable|    |quality-dev|
 Documentation   |docs-stable|       |docs-dev|
 ==============  ==================  ===================
 
@@ -63,13 +62,6 @@ __ https://github.com/kdeldycke/meta-package-manager/tree/develop
 .. |coverage-dev| image:: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop/graph/badge.svg
     :target: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop
     :alt: Coverage Status
-
-.. |quality-stable| image:: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/badges/quality-score.png?b=master
-    :target: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/?branch=master
-    :alt: Code Quality
-.. |quality-dev| image:: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/badges/quality-score.png?b=develop
-    :target: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/?branch=develop
-    :alt: Code Quality
 
 .. |docs-stable| image:: https://readthedocs.org/projects/meta-package-manager/badge/?version=stable
     :target: https://meta-package-manager.readthedocs.io/en/stable/

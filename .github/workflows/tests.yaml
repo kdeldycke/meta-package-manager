@@ -157,11 +157,18 @@ jobs:
         rm -rf .coverage*
 
     # BitBar
-    - name: Test BitBar plugin
+    - name: Install old mpm
       if: matrix.python-version == '2.7'
       run: |
         # mpm 2.8 is the last supporting Python 2.7.
         python -m pip install "meta-package-manager~=2.8"
+    - name: mpm CLI output for debugging
+      if: matrix.python-version == '2.7'
+      run: |
+        mpm managers
+    - name: Test BitBar plugin
+      if: matrix.python-version == '2.7'
+      run: |
         python -m unittest discover -p test_bitbar_plugin.py
 
     # Mpm

@@ -34,6 +34,7 @@ classifiers = [
     'Topic :: Utilities']
 
 [tool.poetry.urls]
+"Funding" = "https://github.com/sponsors/kdeldycke"
 "Bug Tracker" = "https://github.com/kdeldycke/meta-package-manager/issues"
 
 [tool.poetry.dependencies]

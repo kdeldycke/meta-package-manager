@@ -33,7 +33,7 @@ jobs:
         title: "[autofix] Format Python code"
         body: >
           [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/autofix.yaml).
+          as defined by [workflow action](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
         labels: CI/CD
         assignees: kdeldycke
         branch: format-python
@@ -57,7 +57,7 @@ jobs:
         title: "[autofix] Format JSON content"
         body: >
           [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/autofix.yaml).
+          as defined by [workflow action](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
         labels: CI/CD
         assignees: kdeldycke
         branch: format-json
@@ -75,7 +75,7 @@ jobs:
           title: "[autofix] Typo"
           body: >
             [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/autofix.yaml).
+            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
           labels: CI/CD, documentation
           assignees: kdeldycke
           branch: autofix-typo
@@ -98,7 +98,7 @@ jobs:
           title: "[autofix] Regenerate .gitignore"
           body: >
             [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/autofix.yaml).
+            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
           labels: CI/CD
           assignees: kdeldycke
           branch: update-gitignore
@@ -122,7 +122,7 @@ jobs:
           title: "[autofix] Regenerate .mailmap"
           body: >
             [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/autofix.yaml).
+            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
           labels: CI/CD, documentation
           assignees: kdeldycke
           branch: update-mailmap
@@ -149,7 +149,7 @@ jobs:
           title: "[autofix] Regenerate dependency graph"
           body: >
             [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/develop/.github/workflows/autofix.yaml).
+            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
           labels: CI/CD, documentation
           assignees: kdeldycke
           branch: update-deps-image

@@ -778,7 +778,7 @@ def backup(ctx, toml_output):
         if pkg_data:
             doc.add(manager.id, manager_section)
 
-    toml_output.write(tomlkit.dumps(doc))
+    toml_output.write(tomlkit.dumps(doc, sort_keys=True))
 
     if stats:
         print_stats(installed_data)

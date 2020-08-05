@@ -90,10 +90,10 @@ jobs:
           choco install yarn
 
       # Composer
-      - name: macOS - Install Composer
+      - name: macOS - Upgrade Composer
         if: runner.os == 'macOS'
         run: |
-          brew install composer
+          brew upgrade composer
       - name: Windows - Install Composer
         if: runner.os == 'Windows'
         run: |

@@ -53,8 +53,7 @@ jobs:
         run: >
           find ./ -type f -name '*.json' -print -exec
           jsonlint --in-place "{}" \;
-      - name: Create PR
-        uses: peter-evans/create-pull-request@v3
+      - uses: peter-evans/create-pull-request@v3
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Format JSON content"

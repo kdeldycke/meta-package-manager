@@ -221,3 +221,6 @@ One future development direction might be to add a way to inventory all componen
 your using on your system and track down their preferred funding platform like `GitHub
 Sponsors <https://github.com/sponsors>`_, `Liberapay <https://liberapay.com>`_ or
 `Patreon <https://patreon.com>`_. Then have a way to fund all those.
+
+Homebrew is already featuring some commands in that direction:
+https://github.com/Homebrew/brew/pull/7900

@@ -111,6 +111,23 @@ class Homebrew(PackageManager):
             tunnelblick 3.6.8_build_4625 3.6.9_build_4685
             virtualbox 5.1.8-111374 5.1.10-112026
 
+        Alternative since 2.4.6 (see
+        https://github.com/Homebrew/brew/pull/7949):
+
+        .. code-block:: shell-session
+
+            ► brew list --cask --versions
+            aerial 1.2beta5
+            android-file-transfer latest
+            audacity (!) 2.1.2
+            bitbar 1.9.2
+            firefox 49.0.1
+            flux 37.7
+            gimp 2.8.18-x86_64
+            java 1.8.0_112-b16
+            tunnelblick 3.6.8_build_4625 3.6.9_build_4685
+            virtualbox 5.1.8-111374 5.1.10-112026
+
         .. todo
 
             Use the ``removed`` variable to detect removed packages (which are

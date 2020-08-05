@@ -141,14 +141,6 @@ And once in a while, it's good to upgrade the `graph of package dependencies
     $ poetry show --all --no-dev --tree
 
 
-Labels
-------
-
-GitHub labels for issues and pull requests are automatticaly `generated and
-synchronized by a GitHub action workflow
-<https://github.com/kdeldycke/meta-package-manager/blob/develop/.github/workflows/labels_sync.yaml>`_.
-
-
 Screenshots
 -----------
 

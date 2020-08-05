@@ -34,7 +34,7 @@ jobs:
           body: >
             [Auto-generated on run
             #${{ github.run_id }}](https://github.com/${{ github.repository
-            #}}/actions/runs/${{ github.run_id }}) as defined by [workflow
+            }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
             }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
           labels: CI/CD
@@ -62,7 +62,7 @@ jobs:
           body: >
             [Auto-generated on run
             #${{ github.run_id }}](https://github.com/${{ github.repository
-            #}}/actions/runs/${{ github.run_id }}) as defined by [workflow
+            }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
             }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
           labels: CI/CD
@@ -83,7 +83,7 @@ jobs:
           body: >
             [Auto-generated on run
             #${{ github.run_id }}](https://github.com/${{ github.repository
-            #}}/actions/runs/${{ github.run_id }}) as defined by [workflow
+            }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
             }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
           labels: CI/CD, documentation
@@ -110,7 +110,7 @@ jobs:
           body: >
             [Auto-generated on run
             #${{ github.run_id }}](https://github.com/${{ github.repository
-            #}}/actions/runs/${{ github.run_id }}) as defined by [workflow
+            }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
             }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
           labels: CI/CD
@@ -137,7 +137,7 @@ jobs:
           body: >
             [Auto-generated on run
             #${{ github.run_id }}](https://github.com/${{ github.repository
-            #}}/actions/runs/${{ github.run_id }}) as defined by [workflow
+            }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
             }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
           labels: CI/CD, documentation
@@ -168,7 +168,7 @@ jobs:
           body: >
             [Auto-generated on run
             #${{ github.run_id }}](https://github.com/${{ github.repository
-            #}}/actions/runs/${{ github.run_id }}) as defined by [workflow
+            }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
             }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
           labels: CI/CD, documentation

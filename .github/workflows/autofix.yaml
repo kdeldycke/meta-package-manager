@@ -12,55 +12,62 @@ jobs:
     name: Format Python code and create a PR
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2.3.1
-      with:
-        # Required by git-auto-commit-action. See:
-        # https://github.com/stefanzweifel/git-auto-commit-action#checkout-the-correct-branch
-        ref: ${{ github.head_ref }}
-    - uses: actions/setup-python@v2.1.1
-    - name: Install black
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade poetry
-        poetry install
-    - name: Run black
-      run: |
-        poetry run black .
-    - uses: peter-evans/create-pull-request@v3
-      with:
-        author: "Kevin Deldycke <kevin@deldycke.com>"
-        commit-message: "[autofix] Format Python code"
-        title: "[autofix] Format Python code"
-        body: >
-          [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          as defined by [workflow action](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
-        labels: CI/CD
-        assignees: kdeldycke
-        branch: format-python
+      - uses: actions/checkout@v2.3.1
+        with:
+          # Required by git-auto-commit-action. See:
+          # https://github.com/stefanzweifel/git-auto-commit-action#checkout-the-correct-branch
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-python@v2.1.1
+      - name: Install black
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade poetry
+          poetry install
+      - name: Run black
+        run: |
+          poetry run black .
+      - uses: peter-evans/create-pull-request@v3
+        with:
+          author: "Kevin Deldycke <kevin@deldycke.com>"
+          commit-message: "[autofix] Format Python code"
+          title: "[autofix] Format Python code"
+          body: >
+            [Auto-generated on run
+            #${{ github.run_id }}](https://github.com/${{ github.repository
+            #}}/actions/runs/${{ github.run_id }}) as defined by [workflow
+            action](https://github.com/${{ github.repository
+            }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
+          labels: CI/CD
+          assignees: kdeldycke
+          branch: format-python
 
   json:
     name: Format JSON files and create a PR
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2.3.1
-    - name: Install linter
-      run: |
-        sudo npm install jsonlint -g
-    - name: Lint
-      run: |
-        find ./ -type f -name '*.json' -print -exec jsonlint --in-place "{}" \;
-    - name: Create PR
-      uses: peter-evans/create-pull-request@v3
-      with:
-        author: "Kevin Deldycke <kevin@deldycke.com>"
-        commit-message: "[autofix] Format JSON content"
-        title: "[autofix] Format JSON content"
-        body: >
-          [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          as defined by [workflow action](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
-        labels: CI/CD
-        assignees: kdeldycke
-        branch: format-json
+      - uses: actions/checkout@v2.3.1
+      - name: Install linter
+        run: |
+          sudo npm install jsonlint -g
+      - name: Lint
+        run: >
+          find ./ -type f -name '*.json' -print -exec
+          jsonlint --in-place "{}" \;
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v3
+        with:
+          author: "Kevin Deldycke <kevin@deldycke.com>"
+          commit-message: "[autofix] Format JSON content"
+          title: "[autofix] Format JSON content"
+          body: >
+            [Auto-generated on run
+            #${{ github.run_id }}](https://github.com/${{ github.repository
+            #}}/actions/runs/${{ github.run_id }}) as defined by [workflow
+            action](https://github.com/${{ github.repository
+            }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
+          labels: CI/CD
+          assignees: kdeldycke
+          branch: format-json
 
   typos:
     name: Fix typos and create a PR
@@ -74,8 +81,11 @@ jobs:
           commit-message: "[autofix] Typo"
           title: "[autofix] Typo"
           body: >
-            [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
+            [Auto-generated on run
+            #${{ github.run_id }}](https://github.com/${{ github.repository
+            #}}/actions/runs/${{ github.run_id }}) as defined by [workflow
+            action](https://github.com/${{ github.repository
+            }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
           labels: CI/CD, documentation
           assignees: kdeldycke
           branch: autofix-typo
@@ -89,16 +99,20 @@ jobs:
         run: |
           sudo apt install -y git-extras
       - name: Generate .gitignore
-        run: |
-          git ignore-io --replace emacs git linux macos nohup python vim virtualenv visualstudiocode windows
+        run: >
+          git ignore-io --replace emacs git linux macos nohup python vim
+          virtualenv visualstudiocode windows
       - uses: peter-evans/create-pull-request@v3
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Regenerate .gitignore"
           title: "[autofix] Regenerate .gitignore"
           body: >
-            [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
+            [Auto-generated on run
+            #${{ github.run_id }}](https://github.com/${{ github.repository
+            #}}/actions/runs/${{ github.run_id }}) as defined by [workflow
+            action](https://github.com/${{ github.repository
+            }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
           labels: CI/CD
           assignees: kdeldycke
           branch: update-gitignore
@@ -121,8 +135,11 @@ jobs:
           commit-message: "[autofix] Regenerate .mailmap"
           title: "[autofix] Regenerate .mailmap"
           body: >
-            [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
+            [Auto-generated on run
+            #${{ github.run_id }}](https://github.com/${{ github.repository
+            #}}/actions/runs/${{ github.run_id }}) as defined by [workflow
+            action](https://github.com/${{ github.repository
+            }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
           labels: CI/CD, documentation
           assignees: kdeldycke
           branch: update-mailmap
@@ -140,16 +157,20 @@ jobs:
           poetry install
           sudo apt install graphviz
       - name: Run pipdeptree
-        run: |
-          poetry run pipdeptree --packages meta-package-manager --graph-output png > ./docs/dependencies.png
+        run: >
+          poetry run pipdeptree --packages meta-package-manager
+          --graph-output png > ./docs/dependencies.png
       - uses: peter-evans/create-pull-request@v3
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Regenerate dependency graph"
           title: "[autofix] Regenerate dependency graph"
           body: >
-            [Auto-generated on run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            as defined by [workflow action](https://github.com/${{ github.repository }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
+            [Auto-generated on run
+            #${{ github.run_id }}](https://github.com/${{ github.repository
+            #}}/actions/runs/${{ github.run_id }}) as defined by [workflow
+            action](https://github.com/${{ github.repository
+            }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
           labels: CI/CD, documentation
           assignees: kdeldycke
           branch: update-deps-image

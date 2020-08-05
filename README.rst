@@ -16,8 +16,8 @@ Development: |build| |docs| |coverage|
 .. |license| image:: https://img.shields.io/pypi/l/meta-package-manager.svg
     :target: https://www.gnu.org/licenses/gpl-2.0.html
     :alt: Software license
-.. |build| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Unittests/badge.svg
-    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3AUnittests
+.. |build| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Tests/badge.svg
+    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3ATests
     :alt: Unittests status
 .. |docs| image:: https://readthedocs.org/projects/meta-package-manager/badge/?version=develop
     :target: https://meta-package-manager.readthedocs.io/en/develop/

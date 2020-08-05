@@ -111,8 +111,9 @@ class Homebrew(PackageManager):
             tunnelblick 3.6.8_build_4625 3.6.9_build_4685
             virtualbox 5.1.8-111374 5.1.10-112026
 
-        Alternative since 2.4.6 (see
-        https://github.com/Homebrew/brew/pull/7949):
+        Alternatives since 2.4.7 (see
+        https://github.com/Homebrew/brew/pull/7949 and
+        https://github.com/Homebrew/brew/pull/7966):
 
         .. code-block:: shell-session
 
@@ -127,6 +128,84 @@ class Homebrew(PackageManager):
             java 1.8.0_112-b16
             tunnelblick 3.6.8_build_4625 3.6.9_build_4685
             virtualbox 5.1.8-111374 5.1.10-112026
+
+            ► brew cask list --json --versions | jq
+            [
+              {
+                "token": "aerial",
+                "name": [
+                  "Aerial Screensaver"
+                ],
+                "homepage": "https://github.com/JohnCoates/Aerial",
+                "url": "https://github.com/(...)/download/v1.9.2/Aerial.zip",
+                "appcast": "https://github.com/(...)/releases.atom",
+                "version": "1.9.2",
+                "sha256": "1d21511a31895ece4a18c93c779cbf4e35a611a27ba",
+                "artifacts": [
+                  [
+                    "Aerial.saver"
+                  ],
+                  {
+                    "trash": "~/Library/Caches/Aerial",
+                    "signal": {}
+                  }
+                ],
+                "caveats": null,
+                "depends_on": {},
+                "conflicts_with": null,
+                "container": null,
+                "auto_updates": null
+              },
+              {
+                "token": "dropbox",
+                "name": [
+                  "Dropbox"
+                ],
+                "homepage": "https://www.dropbox.com/",
+                "url": "https://www.dropbox.com/download?plat=mac&full=1",
+                "appcast": null,
+                "version": "latest",
+                "sha256": "no_check",
+                "artifacts": [
+                  {
+                    "launchctl": "com.dropbox.DropboxMacUpdate.agent",
+                    "signal": {}
+                  },
+                  [
+                    "Dropbox.app"
+                  ],
+                  {
+                    "trash": [
+                      "/Library/DropboxHelperTools",
+                      "~/.dropbox",
+                      "~/Library/Application Support/Dropbox",
+                      "~/Library/Caches/com.dropbox.DropboxMacUpdate",
+                      "~/Library/Caches/com.getdropbox.DropboxMetaInstaller",
+                      "~/Library/Caches/com.getdropbox.dropbox",
+                      "~/Library/Containers/com.dropbox.activityprovider",
+                      "~/Library/Containers/com.dropbox.foldertagger",
+                      "~/Library/Containers/com.getdropbox.dropbox.garcon",
+                      "~/Library/Dropbox",
+                      "~/Library/Group Containers/com.dropbox.client.crashpad",
+                      "~/Library/Logs/Dropbox_debug.log",
+                      "~/Library/Preferences/com.dropbox.DropboxMonitor.plist",
+                      "~/Library/Preferences/com.getdropbox.dropbox.plist"
+                    ],
+                    "signal": {}
+                  }
+                ],
+                "caveats": null,
+                "depends_on": {},
+                "conflicts_with": {
+                  "cask": [
+                    "dropbox-beta"
+                  ]
+                },
+                "container": null,
+                "auto_updates": null
+              },
+              (...)
+            ]
 
         .. todo
 

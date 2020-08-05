@@ -64,7 +64,7 @@ jobs:
             #${{ github.run_id }}](https://github.com/${{ github.repository
             }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
-            }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
+            }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
           labels: CI/CD
           assignees: kdeldycke
           branch: format-json
@@ -85,7 +85,7 @@ jobs:
             #${{ github.run_id }}](https://github.com/${{ github.repository
             }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
-            }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
+            }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
           labels: CI/CD, documentation
           assignees: kdeldycke
           branch: autofix-typo
@@ -112,7 +112,7 @@ jobs:
             #${{ github.run_id }}](https://github.com/${{ github.repository
             }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
-            }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
+            }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
           labels: CI/CD
           assignees: kdeldycke
           branch: update-gitignore
@@ -139,7 +139,7 @@ jobs:
             #${{ github.run_id }}](https://github.com/${{ github.repository
             }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
-            }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
+            }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
           labels: CI/CD, documentation
           assignees: kdeldycke
           branch: update-mailmap
@@ -170,7 +170,7 @@ jobs:
             #${{ github.run_id }}](https://github.com/${{ github.repository
             }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
-            }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
+            }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
           labels: CI/CD, documentation
           assignees: kdeldycke
           branch: update-deps-image

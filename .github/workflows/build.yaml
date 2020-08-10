@@ -9,7 +9,7 @@ jobs:
     name: Build, check and publish package on release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.1
+      - uses: actions/checkout@v2.3.2
       - uses: actions/setup-python@v2.1.1
       - name: Build package
         run: |

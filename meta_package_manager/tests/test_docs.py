@@ -46,7 +46,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 
 def test_changelog():
-    with PROJECT_ROOT.joinpath("CHANGES.rst").resolve().open() as doc:
+    with PROJECT_ROOT.joinpath("changelog.rst").resolve().open() as doc:
         content = doc.read()
 
     assert content.startswith("Changelog\n=========\n")

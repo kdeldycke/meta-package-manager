@@ -219,7 +219,7 @@ class timeit:
     "--ignore-auto-updates/--include-auto-updates",
     default=True,
     help="Report all outdated packages, including those tagged as "
-    "auto-updating. Defaults to include all packages. Only applies for "
+    "auto-updating. Defaults to include all packages. Only applies to "
     "'outdated' and 'upgrade' commands.",
 )
 @click.option(

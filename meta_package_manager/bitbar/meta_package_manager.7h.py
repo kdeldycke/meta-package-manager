@@ -182,19 +182,19 @@ def print_menu():
         )
         return
 
-    # Force a sync of all local package databases then fetch outdated packages.
-    # Applies to all package manager available on the system.
-    for mpm_cmd in [
-            ("sync", ),
-            ("--output-format", "json", "outdated", "--cli-format", "bitbar")]:
-        _, output, error = run("mpm", *mpm_cmd)
+    # Force a sync of all local package databases.
+    run("mpm", "sync")
 
-        # Bail-out immediately on errors related to mpm self-execution or if mpm
-        # is not able to produce any output.
-        if error or not output:
-            print_error_header()
-            print_error(error)
-            return
+    # Fetch outdated package form all package manager available on the system.
+    _, output, error = run(
+        "mpm", "--output-format", "json", "outdated", "--cli-format", "bitbar")
+
+    # Bail-out immediately on errors related to mpm self-execution or if mpm is
+    # not able to produce any output.
+    if error or not output:
+        print_error_header()
+        print_error(error)
+        return
 
     # Sort outdated packages by manager's name.
     managers = sorted(json.loads(output).values(), key=itemgetter("name"))

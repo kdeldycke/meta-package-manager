@@ -144,8 +144,8 @@ And once in a while, it's good to upgrade the `graph of package dependencies
 Screenshots
 -----------
 
-Once in a while, refresh screenshots found in the docs and the README file at
-the root of project.
+Once in a while, refresh screenshots found in the docs and the ``readme.rst``
+file at the root of project.
 
 To produce clean and fancy terminals screenshots, use either:
 

@@ -187,7 +187,8 @@ def print_menu():
 
     # Fetch outdated package form all package manager available on the system.
     _, output, error = run(
-        "mpm", "--output-format", "json", "outdated", "--cli-format", "bitbar")
+        "mpm", "--output-format", "json", "outdated", "--cli-format", "bitbar"
+    )
 
     # Bail-out immediately on errors related to mpm self-execution or if mpm is
     # not able to produce any output.

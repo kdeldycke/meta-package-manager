@@ -3,7 +3,7 @@ Meta Package Manager
 
 CLI providing unifying interface to all package managers.
 
-Stable release: |release| |versions| |license|
+Stable release: |release| |versions|
 
 Development: |build| |docs| |coverage|
 
@@ -13,9 +13,6 @@ Development: |build| |docs| |coverage|
 .. |versions| image:: https://img.shields.io/pypi/pyversions/meta-package-manager.svg
     :target: https://pypi.python.org/pypi/meta-package-manager
     :alt: Python versions
-.. |license| image:: https://img.shields.io/pypi/l/meta-package-manager.svg
-    :target: https://www.gnu.org/licenses/gpl-2.0.html
-    :alt: Software license
 .. |build| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Tests/badge.svg
     :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3ATests
     :alt: Unittests status

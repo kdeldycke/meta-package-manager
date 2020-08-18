@@ -1,0 +1,103 @@
+name: Labeller (content-based)
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    typed: [opened]
+
+jobs:
+  labeller:
+    name: Issue & PR labeller based on content
+    runs-on: ubuntu-latest
+    steps:
+      # XXX DEBUG info
+      # I need to identify how to skip this whole labelling for issues and PRs
+      # created by bots and other GitHub actions.
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - uses: Naturalclar/issue-action@v2.0.1
+        # TODO: skip this step if this workflow was created/triggered by a bot
+        # or another GitHub action. That way we can prevent content-rich PRs
+        # (like those produced by dependabot) to be overly tagged with extra
+        # labels.
+        if: github.sender.type != 'Bot'
+        # if: github.actor == 'dependabot[bot]'
+        # if: github.sender.login == 'dependabot[bot]'
+        with:
+          parameters: >
+            [
+              {"labels": ["BitBar plugin", "platform: macOS"],
+               "keywords": ["bitbar"]},
+
+              {"labels": ["bug"],
+               "keywords": ["bug", "error", "traceback"]},
+
+              {"labels": ["CI/CD"],
+               "keywords": ["ci-cd", "cicd", ".github", "workflow", "actions"]},
+
+              {"labels": ["documentation"],
+               "keywords": [
+                  "sphinx", "readthedocs", "read the docs", "readme", "rst",
+                  "typo"]},
+
+              {"labels": ["enhancement"],
+               "keywords": ["add"]},
+
+              {"labels": ["help wanted"],
+               "keywords": ["help"]},
+
+               {"labels": [
+                  "manager: apm",
+                  "platform: Linux", "platform: macOS", "platform: Windows"],
+               "keywords": ["apm", "atom"]},
+
+              {"labels": ["manager: brew", "platform: macOS"],
+               "keywords": ["brew", "homebrew", "tap", "formula"]},
+
+              {"labels": ["manager: cask", "platform: macOS"],
+               "keywords": ["cask"]},
+
+              {"labels": [
+                "manager: composer",
+                "platform: Linux", "platform: macOS", "platform: Windows"],
+              "keywords": ["composer", "php"]},
+
+              {"labels": ["manager: dpkg-like", "platform: Linux"],
+               "keywords": ["apt", "aptitude", "dpkg", "opkg"]},
+
+              {"labels": ["manager: flatpak", "platform: Linux"],
+               "keywords": ["flatpak", "flat"]},
+
+              {"labels": [
+                "manager: gem",
+                "platform: Linux", "platform: macOS", "platform: Windows"],
+               "keywords": ["gem", "ruby"]},
+
+              {"labels": ["manager: mas", "platform: macOS"],
+               "keywords": ["mas", "app store", "app-store"]},
+
+              {"labels": [
+                "manager: npm-like",
+                "platform: Linux", "platform: macOS", "platform: Windows"],
+               "keywords": ["npm", "node", "yarn"]},
+
+              {"labels": [
+                "manager: pip",
+                "platform: Linux", "platform: macOS", "platform: Windows"],
+               "keywords": ["pip"]},
+
+              {"labels": ["manager: snap", "platform: Linux"],
+               "keywords": ["snap"]},
+
+              {"labels": ["platform: Linux"],
+               "keywords": ["linux", "ubuntu", "debian"]},
+
+              {"labels": ["platform: macOS"],
+               "keywords": ["macos", "mac os", "osx", "os x", "apple"]},
+
+              {"labels": ["platform: Windows"],
+               "keywords": ["windows", "c:", "microsoft"]}
+            ]
+          github-token: ${{ secrets.GITHUB_TOKEN }}

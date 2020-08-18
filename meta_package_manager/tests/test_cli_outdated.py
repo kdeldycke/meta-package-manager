@@ -28,24 +28,21 @@ from .test_cli import CLISubCommandTests, CLITableTests
 
 @pytest.fixture
 def subcmd():
-    return 'outdated'
+    return "outdated"
 
 
-BITBAR_KEYWORDS = {
-   'bash',
-}.union({"param{}".format(i) for i in range(1, 10)})
+BITBAR_KEYWORDS = {"bash"}.union({"param{}".format(i) for i in range(1, 10)})
 
 
 class TestOutdated(CLISubCommandTests, CLITableTests):
-
-    @pytest.mark.parametrize('mid', MANAGER_IDS)
+    @pytest.mark.parametrize("mid", MANAGER_IDS)
     def test_single_manager(self, invoke, mid, subcmd):
-        result = invoke('--manager', mid, subcmd)
+        result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 
     def test_json_parsing(self, invoke, subcmd):
-        result = invoke('--output-format', 'json', subcmd)
+        result = invoke("--output-format", "json", subcmd)
         assert result.exit_code == 0
         data = json.loads(result.stdout)
 
@@ -57,59 +54,61 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
             assert isinstance(manager_id, str)
             assert isinstance(info, dict)
 
-            assert isinstance(info['id'], str)
-            assert isinstance(info['name'], str)
+            assert isinstance(info["id"], str)
+            assert isinstance(info["name"], str)
 
-            keys = {'errors', 'id', 'name', 'packages'}
-            if 'upgrade_all_cli' in info:
-                assert isinstance(info['upgrade_all_cli'], str)
-                keys.add('upgrade_all_cli')
+            keys = {"errors", "id", "name", "packages"}
+            if "upgrade_all_cli" in info:
+                assert isinstance(info["upgrade_all_cli"], str)
+                keys.add("upgrade_all_cli")
             assert set(info) == keys
 
-            assert isinstance(info['errors'], list)
-            if info['errors']:
-                assert set(map(type, info['errors'])) == {str}
+            assert isinstance(info["errors"], list)
+            if info["errors"]:
+                assert set(map(type, info["errors"])) == {str}
 
-            assert info['id'] == manager_id
+            assert info["id"] == manager_id
 
-            assert isinstance(info['packages'], list)
-            for pkg in info['packages']:
+            assert isinstance(info["packages"], list)
+            for pkg in info["packages"]:
                 assert isinstance(pkg, dict)
 
                 assert set(pkg) == {
-                    'id', 'installed_version', 'latest_version', 'name',
-                    'upgrade_cli'}
+                    "id",
+                    "installed_version",
+                    "latest_version",
+                    "name",
+                    "upgrade_cli",
+                }
 
-                assert isinstance(pkg['id'], str)
-                assert isinstance(pkg['installed_version'], str)
-                assert isinstance(pkg['latest_version'], str)
-                assert isinstance(pkg['name'], str)
-                assert isinstance(pkg['upgrade_cli'], str)
+                assert isinstance(pkg["id"], str)
+                assert isinstance(pkg["installed_version"], str)
+                assert isinstance(pkg["latest_version"], str)
+                assert isinstance(pkg["name"], str)
+                assert isinstance(pkg["upgrade_cli"], str)
 
     def test_cli_format_plain(self, invoke, subcmd):
-        result = invoke(
-            '--output-format', 'json', subcmd, '--cli-format', 'plain')
+        result = invoke("--output-format", "json", subcmd, "--cli-format", "plain")
         for outdated in json.loads(result.stdout).values():
-            for infos in outdated['packages']:
-                assert isinstance(infos['upgrade_cli'], str)
+            for infos in outdated["packages"]:
+                assert isinstance(infos["upgrade_cli"], str)
 
     def test_cli_format_fragments(self, invoke, subcmd):
-        result = invoke(
-            '--output-format', 'json', subcmd, '--cli-format', 'fragments')
+        result = invoke("--output-format", "json", subcmd, "--cli-format", "fragments")
         for outdated in json.loads(result.stdout).values():
-            for infos in outdated['packages']:
-                assert isinstance(infos['upgrade_cli'], list)
-                assert set(map(type, infos['upgrade_cli'])) == {str}
+            for infos in outdated["packages"]:
+                assert isinstance(infos["upgrade_cli"], list)
+                assert set(map(type, infos["upgrade_cli"])) == {str}
 
     def test_cli_format_bitbar(self, invoke, subcmd):
-        result = invoke(
-            '--output-format', 'json', subcmd, '--cli-format', 'bitbar')
+        result = invoke("--output-format", "json", subcmd, "--cli-format", "bitbar")
         for outdated in json.loads(result.stdout).values():
-            for infos in outdated['packages']:
-                assert isinstance(infos['upgrade_cli'], str)
-                assert 'param1=' in infos['upgrade_cli']
-                for param in infos['upgrade_cli'].split(' '):
-                    k, v = param.split('=', 1)
+            for infos in outdated["packages"]:
+                assert isinstance(infos["upgrade_cli"], str)
+                assert "param1=" in infos["upgrade_cli"]
+                for param in infos["upgrade_cli"].split(" "):
+                    k, v = param.split("=", 1)
                     assert k in BITBAR_KEYWORDS
                     assert set(v.lower()).issubset(
-                        '0123456789abcdefghijklmnopqrstuvwxyz./-_+="\\@:')
+                        '0123456789abcdefghijklmnopqrstuvwxyz./-_+="\\@:'
+                    )

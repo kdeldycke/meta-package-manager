@@ -29,7 +29,7 @@ class NPM(PackageManager):
 
     platforms = frozenset([LINUX, MACOS, WINDOWS])
 
-    requirement = '4.0.0'
+    requirement = "4.0.0"
 
     name = "Node's npm"
 
@@ -43,7 +43,7 @@ class NPM(PackageManager):
             ► npm --version
             6.13.7
         """
-        return parse_version(self.run_cli('--version'))
+        return parse_version(self.run_cli("--version"))
 
     @property
     def installed(self):
@@ -90,17 +90,18 @@ class NPM(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, '-g', '--json', 'list')
+        output = self.run_cli(self.global_args, "-g", "--json", "list")
 
         if output:
 
             def visit(path, key, value):
-                if key == 'version':
+                if key == "version":
                     package_id = path[-1]
                     installed[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'installed_version': parse_version(value)}
+                        "id": package_id,
+                        "name": package_id,
+                        "installed_version": parse_version(value),
+                    }
                 return True
 
             remap(json.loads(output), visit=visit)
@@ -184,14 +185,13 @@ class NPM(PackageManager):
 
         search_args = []
         if not extended:
-            search_args.append('--no-description')
+            search_args.append("--no-description")
 
-        output = self.run_cli(
-            self.global_args, 'search', '--json', search_args, query)
+        output = self.run_cli(self.global_args, "search", "--json", search_args, query)
 
         if output:
             for package in json.loads(output):
-                package_id = package['name']
+                package_id = package["name"]
 
                 # Exclude packages not featuring the search query in their ID
                 # or name.
@@ -207,9 +207,10 @@ class NPM(PackageManager):
                     continue
 
                 matches[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'latest_version': parse_version(package['version'])}
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(package["version"]),
+                }
 
         return matches
 
@@ -240,29 +241,34 @@ class NPM(PackageManager):
         outdated = {}
 
         output = self.run_cli(
-            self.global_args, '-g', '--progress=false', '--json',
-            '--no-update-notifier', 'outdated')
+            self.global_args,
+            "-g",
+            "--progress=false",
+            "--json",
+            "--no-update-notifier",
+            "outdated",
+        )
 
         if output:
             for package_id, values in json.loads(output).items():
-                if values['wanted'] == 'linked':
+                if values["wanted"] == "linked":
                     continue
                 outdated[package_id] = {
-                    'id': package_id + '@' + values['latest'],
-                    'name': package_id,
-                    'installed_version': parse_version(values['current']),
-                    'latest_version': parse_version(values['latest'])}
+                    "id": package_id + "@" + values["latest"],
+                    "name": package_id,
+                    "installed_version": parse_version(values["current"]),
+                    "latest_version": parse_version(values["latest"]),
+                }
 
         return outdated
 
     def upgrade_cli(self, package_id=None, version=None):
-        cmd_args = ['-g', '--progress=false', '--no-update-notifier']
+        cmd_args = ["-g", "--progress=false", "--no-update-notifier"]
         if package_id:
-            cmd_args.append('install')
-            cmd_args.append(
-                package_id + '@' + version if version else package_id)
+            cmd_args.append("install")
+            cmd_args.append(package_id + "@" + version if version else package_id)
         else:
-            cmd_args.append('update')
+            cmd_args.append("update")
         return [self.cli_path, self.global_args] + cmd_args
 
     def upgrade_all_cli(self):

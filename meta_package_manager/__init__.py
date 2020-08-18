@@ -23,7 +23,10 @@ import logging
 
 from .bitbar import fix_environment
 
-__version__ = '3.3.0'
+# Canonical name of the CLI.
+CLI_NAME = "mpm"
+
+__version__ = "3.4.0"
 """ Examples of valid version strings according :pep:`440#version-scheme`:
 
 .. code-block:: python

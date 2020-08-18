@@ -1,4 +1,16 @@
 # Format is:
-# <preferred e-mail> <other e-mail 1>
-# <preferred e-mail> <other e-mail 2>
-Björn Torkelsson <torkel@torkel.se> Björn Torkelsson <(none)>
+#   Prefered Name <preferred e-mail>  Other Name <other e-mail>
+#
+# Reference: https://git-scm.com/docs/git-blame#_mapping_authors
+
+Björn Torkelsson <torkel@torkel.se>     Björn Torkelsson <(none)>
+Brian Hartvigsen <brian.andrew@brianandjenny.com>
+Csaba Maulis <csaba.maulis@gmail.com>
+Francis St-Amour <fr.stamour@gmail.com>
+GitHub Actions <actions@github.com>     GitHub Actions <action@github.com>  GitHub <noreply@github.com>     github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+Gutierri Barboza <me@gutierri.me>
+Ivan Poštić <biber.np@gmail.com>
+Kevin Deldycke <kevin@deldycke.com>     Kevin Deldycke <kdeldycke@scaleway.com>     kdeldycke <kdeldycke@users.noreply.github.com>
+Sidney Kuyateh <sidneyjohn23@kuyateh.eu>    Sidney <27780930+autinerd@users.noreply.github.com>
+dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+ncihnegn <ncihnegn@users.noreply.github.com>

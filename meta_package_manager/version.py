@@ -25,7 +25,7 @@ from functools import partial
 
 from boltons import strutils
 
-ALNUM_EXTRACTOR = re.compile('(\\d+ | [a-z]+)', re.VERBOSE)
+ALNUM_EXTRACTOR = re.compile("(\\d+ | [a-z]+)", re.VERBOSE)
 
 
 class Token:
@@ -58,13 +58,13 @@ class Token:
         string = str(string)
 
         # Double-check the string <> integer lossless transform.
-        str_int = string.lstrip('0')
+        str_int = string.lstrip("0")
         if not str_int:
-            str_int = '0'
+            str_int = "0"
         if str(integer) != str_int:
             raise TypeError(
-                "{!r} string is not equivalent to {!r} integer".format(
-                    string, integer))
+                "{!r} string is not equivalent to {!r} integer".format(string, integer)
+            )
 
         return string, integer
 
@@ -75,20 +75,21 @@ class Token:
         # Check provided value.
         if isinstance(value, str):
             if not value.isalnum():
-                raise TypeError('Only alphanumeric characters are allowed.')
+                raise TypeError("Only alphanumeric characters are allowed.")
         elif isinstance(value, int):
             if value < 0:
-                raise TypeError('Negative integers not allowed.')
+                raise TypeError("Negative integers not allowed.")
         else:
-            raise TypeError('Only string and integer allowed.')
+            raise TypeError("Only string and integer allowed.")
 
         # Parse user-value and stores its string and integer representations.
         self.string, self.integer = self.str_to_int(value)
 
     def __repr__(self):
         """ Prints internal string and number values for debug. """
-        return '<Token:{}>'.format(','.join(
-            ['{}={!r}'.format(k, v) for k, v in self.__dict__.items()]))
+        return "<Token:{}>".format(
+            ",".join(["{}={!r}".format(k, v) for k, v in self.__dict__.items()])
+        )
 
     def __str__(self):
         return self.string
@@ -159,7 +160,7 @@ class TokenizedString:
             return value
         return super(TokenizedString, cls).__new__(cls)
 
-    def __init__(self, value, separator='-'):
+    def __init__(self, value, separator="-"):
         if isinstance(value, TokenizedString):
             # Skip initialization for instance of the class.
             return
@@ -168,12 +169,12 @@ class TokenizedString:
         elif isinstance(value, str):
             self.string = value.strip()
         else:
-            raise TypeError('{} not supported'.format(type(value)))
+            raise TypeError("{} not supported".format(type(value)))
         self.tokens = tuple(self.tokenize(self.string))
         self.separator = separator
 
     def __repr__(self):
-        return '<TokenizedString {} => {}>'.format(self.string, self.tokens)
+        return "<TokenizedString {} => {}>".format(self.string, self.tokens)
 
     def __str__(self):
         return self.string
@@ -237,4 +238,4 @@ class TokenizedString:
 
 
 """ Utility method tweaking TokenizedString for dot-based serialization. """
-parse_version = partial(TokenizedString, separator='.')
+parse_version = partial(TokenizedString, separator=".")

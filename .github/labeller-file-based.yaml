@@ -12,7 +12,7 @@ documentation:
   - docs/**/*
   - .mailmap
   - LICENSE
-  - README.rst
+  - readme.rst
   - readthedocs.yaml
 
 "manager: apm":

@@ -1,12 +1,12 @@
 [tool.poetry]
 # Docs: https://python-poetry.org/docs/pyproject/
 name = "meta-package-manager"
-version = "3.3.0"
+version = "3.4.0"
 description = """
     CLI unifying Homebrew, apt, Chocolatey, Pip, NPM, Composer and the like."""
 license = 'GPL-2.0-or-later'
 authors = ["Kevin Deldycke <kevin@deldycke.com>"]
-readme = "README.rst"
+readme = "readme.rst"
 homepage = 'https://github.com/kdeldycke/meta-package-manager'
 repository = 'https://github.com/kdeldycke/meta-package-manager'
 documentation = 'https://meta-package-manager.readthedocs.io'
@@ -34,37 +34,40 @@ classifiers = [
     'Topic :: Utilities']
 
 [tool.poetry.urls]
+"Funding" = "https://github.com/sponsors/kdeldycke"
 "Bug Tracker" = "https://github.com/kdeldycke/meta-package-manager/issues"
 
 [tool.poetry.dependencies]
 # List of python versions and their support status:
 # https://en.wikipedia.org/wiki/CPython#Version_history
 python = "^3.7"
-boltons = "^20.2.0"
+boltons = "^20.2.1"
 click = "^7.1"
 click-log = "^0.3"
-cli-helpers = "^2.0"
-simplejson = "^3.17.0"
-tomlkit = "^0.5"
+cli-helpers = "^2.1"
+simplejson = "^3.17.2"
+tomlkit = "^0.7"
 # Should have been put in dev-dependencies but extras only works from main
 # section.
-sphinx = {version = "^2.4", optional = true}
-sphinx_rtd_theme = {version = "^0.4.3", optional = true}
+sphinx = {version = "^3.2", optional = true}
+sphinx_rtd_theme = {version = "^0.5.0", optional = true}
 sphinx_tabs = {version = "^1.1.13", optional = true}
 
 [tool.poetry.dev-dependencies]
+black = "^19.10b0"
 bump2version = "^1.0.0"
 check-wheel-contents = "^0.1.0"
-coverage = {extras = ["toml"], version = "^5.0.4"}
-isort = "^4.3.5"
+coverage = {extras = ["toml"], version = "^5.2.1"}
+pipdeptree = {extras = ["graphviz"], version = "^2.0.0-beta.1", allow-prereleases = true}
 pycodestyle = "^2"
 pylint = "^2.5"
-pytest = "^5.4"
+pytest = "^6.0"
 # More pytest plugins at: http://plugincompat.herokuapp.com .
-pytest-cov = "^2.8.1"
-pytest-randomly = "^3.3.1"
+pytest-cov = "^2.10.1"
+pytest-randomly = "^3.4.1"
 pyyaml = "^5.3.1"
 twine = "^3.1"
+yamllint = "^1.24.2"
 
 [tool.poetry.extras]
 # Workaround lacks of Poetry support by RTD: https://stackoverflow.com/a/58163431
@@ -73,9 +76,8 @@ docs = ["sphinx", "sphinx_rtd_theme", "sphinx_tabs"]
 [tool.poetry.scripts]
 mpm = 'meta_package_manager.cli:cli'
 
-[tool.isort]
-# https://github.com/timothycrosley/isort#configuring-isort
-multi_line_output = 3
+[tool.black]
+target-version = ['py37', 'py38']
 
 [tool.pylint.MASTER]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html
@@ -84,13 +86,23 @@ fail-under = "8"
 [tool.pylint."messages control"]
 # List messages with: $ pylint --list-msgs
 # C0114: missing-module-docstring
+# C0326: bad-whitespace (black compatibility)
+# C0330: bad-continuation (black compatibility)
 # W0511: fixme
 # W1203: logging-fstring-interpolation
-disable = "C0114,W0511,W1203"
+disable = "C0114, C0326,  C0330, W0511, W1203"
 [tool.pylint.LOGGING]
 # The type of string formatting that logging methods do. `old` means using %
 # formatting, `new` is for `{}` formatting.
 logging-format-style = "new"
+[tool.pylint.FORMAT]
+# Aligns to black's config: https://github.com/psf/black/blob/master/docs/compatible_configs.md#pylint
+max-line-length = "88"
+
+[tool.pytest.ini_options]
+# https://docs.pytest.org/en/latest/customize.html#pyproject-toml
+addopts = "--durations=10 --cov-report term --cov=meta_package_manager"
+xfail_strict = true
 
 [tool.coverage.paths]
 # https://coverage.readthedocs.io/en/latest/config.html

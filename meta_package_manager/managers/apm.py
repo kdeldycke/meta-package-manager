@@ -30,11 +30,11 @@ class APM(PackageManager):
 
     name = "Atom's apm"
 
-    requirement = '1.0.0'
+    requirement = "1.0.0"
 
     def get_version(self):
         """ Fetch version from ``apm --version`` output."""
-        output = self.run_cli('--version')
+        output = self.run_cli("--version")
         if output:
             return parse_version(output.splitlines()[0].split()[1])
 
@@ -138,16 +138,17 @@ class APM(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, 'list', '--json')
+        output = self.run_cli(self.global_args, "list", "--json")
 
         if output:
             for package_list in json.loads(output).values():
                 for package in package_list:
-                    package_id = package['name']
+                    package_id = package["name"]
                     installed[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'installed_version': parse_version(package['version'])}
+                        "id": package_id,
+                        "name": package_id,
+                        "installed_version": parse_version(package["version"]),
+                    }
 
         return installed
 
@@ -237,14 +238,13 @@ class APM(PackageManager):
 
         search_args = []
         if not extended:
-            search_args.append('--no-description')
+            search_args.append("--no-description")
 
-        output = self.run_cli(
-            self.global_args, 'search', '--json', search_args, query)
+        output = self.run_cli(self.global_args, "search", "--json", search_args, query)
 
         if output:
             for package in json.loads(output):
-                package_id = package['name']
+                package_id = package["name"]
 
                 # Exclude packages not featuring the search query in their ID
                 # or name.
@@ -260,9 +260,10 @@ class APM(PackageManager):
                     continue
 
                 matches[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'latest_version': parse_version(package['version'])}
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(package["version"]),
+                }
 
         return matches
 
@@ -421,22 +422,22 @@ class APM(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(
-            self.global_args, 'outdated', '--compatible', '--json')
+        output = self.run_cli(self.global_args, "outdated", "--compatible", "--json")
 
         if output:
             for package in json.loads(output):
-                package_id = package['name']
+                package_id = package["name"]
                 outdated[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'installed_version': parse_version(package['version']),
-                    'latest_version': parse_version(package['latestVersion'])}
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(package["version"]),
+                    "latest_version": parse_version(package["latestVersion"]),
+                }
 
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, self.global_args, 'update', '--no-confirm']
+        cmd = [self.cli_path, self.global_args, "update", "--no-confirm"]
         if package_id:
             cmd.append(package_id)
         return cmd

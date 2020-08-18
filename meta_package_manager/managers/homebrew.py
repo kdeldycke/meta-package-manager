@@ -40,7 +40,7 @@ class Homebrew(PackageManager):
 
     # Vanilla brew and cask CLIs now shares the same version.
     # 2.2.15 is the first release to support JSON output for outdated casks.
-    requirement = '2.2.15'
+    requirement = "2.2.15"
 
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     cli_name = None
@@ -56,7 +56,7 @@ class Homebrew(PackageManager):
             Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
 
         """
-        output = self.run_cli('--version')
+        output = self.run_cli("--version")
         if output:
             return parse_version(output.split()[1])
 
@@ -69,7 +69,7 @@ class Homebrew(PackageManager):
             Already up-to-date.
         """
         super(Homebrew, self).sync()
-        self.run_cli('update', '--quiet')
+        self.run_cli("update", "--quiet")
 
     @property
     def installed(self):
@@ -111,6 +111,102 @@ class Homebrew(PackageManager):
             tunnelblick 3.6.8_build_4625 3.6.9_build_4685
             virtualbox 5.1.8-111374 5.1.10-112026
 
+        Alternatives since 2.4.7 (see
+        https://github.com/Homebrew/brew/pull/7949 and
+        https://github.com/Homebrew/brew/pull/7966):
+
+        .. code-block:: shell-session
+
+            ► brew list --cask --versions
+            aerial 1.2beta5
+            android-file-transfer latest
+            audacity (!) 2.1.2
+            bitbar 1.9.2
+            firefox 49.0.1
+            flux 37.7
+            gimp 2.8.18-x86_64
+            java 1.8.0_112-b16
+            tunnelblick 3.6.8_build_4625 3.6.9_build_4685
+            virtualbox 5.1.8-111374 5.1.10-112026
+
+            ► brew cask list --json --versions | jq
+            [
+              {
+                "token": "aerial",
+                "name": [
+                  "Aerial Screensaver"
+                ],
+                "homepage": "https://github.com/JohnCoates/Aerial",
+                "url": "https://github.com/(...)/download/v1.9.2/Aerial.zip",
+                "appcast": "https://github.com/(...)/releases.atom",
+                "version": "1.9.2",
+                "sha256": "1d21511a31895ece4a18c93c779cbf4e35a611a27ba",
+                "artifacts": [
+                  [
+                    "Aerial.saver"
+                  ],
+                  {
+                    "trash": "~/Library/Caches/Aerial",
+                    "signal": {}
+                  }
+                ],
+                "caveats": null,
+                "depends_on": {},
+                "conflicts_with": null,
+                "container": null,
+                "auto_updates": null
+              },
+              {
+                "token": "dropbox",
+                "name": [
+                  "Dropbox"
+                ],
+                "homepage": "https://www.dropbox.com/",
+                "url": "https://www.dropbox.com/download?plat=mac&full=1",
+                "appcast": null,
+                "version": "latest",
+                "sha256": "no_check",
+                "artifacts": [
+                  {
+                    "launchctl": "com.dropbox.DropboxMacUpdate.agent",
+                    "signal": {}
+                  },
+                  [
+                    "Dropbox.app"
+                  ],
+                  {
+                    "trash": [
+                      "/Library/DropboxHelperTools",
+                      "~/.dropbox",
+                      "~/Library/Application Support/Dropbox",
+                      "~/Library/Caches/com.dropbox.DropboxMacUpdate",
+                      "~/Library/Caches/com.getdropbox.DropboxMetaInstaller",
+                      "~/Library/Caches/com.getdropbox.dropbox",
+                      "~/Library/Containers/com.dropbox.activityprovider",
+                      "~/Library/Containers/com.dropbox.foldertagger",
+                      "~/Library/Containers/com.getdropbox.dropbox.garcon",
+                      "~/Library/Dropbox",
+                      "~/Library/Group Containers/com.dropbox.client.crashpad",
+                      "~/Library/Logs/Dropbox_debug.log",
+                      "~/Library/Preferences/com.dropbox.DropboxMonitor.plist",
+                      "~/Library/Preferences/com.getdropbox.dropbox.plist"
+                    ],
+                    "signal": {}
+                  }
+                ],
+                "caveats": null,
+                "depends_on": {},
+                "conflicts_with": {
+                  "cask": [
+                    "dropbox-beta"
+                  ]
+                },
+                "container": null,
+                "auto_updates": null
+              },
+              (...)
+            ]
+
         .. todo
 
             Use the ``removed`` variable to detect removed packages (which are
@@ -121,20 +217,21 @@ class Homebrew(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, 'list', '--versions')
+        output = self.run_cli(self.global_args, "list", "--versions")
 
         if output:
-            regexp = re.compile(r'(\S+)( \(!\))? (.+)')
+            regexp = re.compile(r"(\S+)( \(!\))? (.+)")
             for pkg_info in output.splitlines():
                 match = regexp.match(pkg_info)
                 if match:
                     package_id, removed, versions = match.groups()
                     installed[package_id] = {
-                        'id': package_id,
-                        'name': package_id,
-                        'installed_version':
-                            # Keep highest version found.
-                            max(map(parse_version, versions.split()))}
+                        "id": package_id,
+                        "name": package_id,
+                        "installed_version":
+                        # Keep highest version found.
+                        max(map(parse_version, versions.split())),
+                    }
 
         return installed
 
@@ -195,8 +292,8 @@ class Homebrew(PackageManager):
 
         if extended:
             logger.warning(
-                f"Extended search not supported for {self.id}. Fallback to "
-                "Fuzzy.")
+                f"Extended search not supported for {self.id}. Fallback to Fuzzy."
+            )
 
         # Use regexp for exact match.
         if exact:
@@ -205,16 +302,20 @@ class Homebrew(PackageManager):
         output = self.run_cli(self.search_args, query)
 
         if output:
-            regexp = re.compile(r"""
+            regexp = re.compile(
+                r"""
                 (?:==>\s\S+\s)?           # Ignore section starting with '==>'.
                 (?P<package_id>[^\s✔]+)   # Anything not a whitespace or ✔.
-                """, re.VERBOSE)
+                """,
+                re.VERBOSE,
+            )
 
             for package_id in regexp.findall(output):
                 matches[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'latest_version': None}
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": None,
+                }
 
         return matches
 
@@ -254,18 +355,19 @@ class Homebrew(PackageManager):
         outdated = {}
 
         # List available updates.
-        output = self.run_cli(self.global_args, 'outdated', '--json=v1')
+        output = self.run_cli(self.global_args, "outdated", "--json=v1")
 
         if output:
             for pkg_info in json.loads(output):
-                package_id = pkg_info['name']
+                package_id = pkg_info["name"]
                 outdated[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'installed_version': max(map(
-                        parse_version, pkg_info['installed_versions'])),
-                    'latest_version':
-                        parse_version(pkg_info['current_version'])}
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": max(
+                        map(parse_version, pkg_info["installed_versions"])
+                    ),
+                    "latest_version": parse_version(pkg_info["current_version"]),
+                }
 
         return outdated
 
@@ -303,7 +405,7 @@ class Homebrew(PackageManager):
             Bash completion has been installed to:
               /usr/local/etc/bash_completion.d
         """
-        cmd = [self.cli_path, self.global_args, 'upgrade']
+        cmd = [self.cli_path, self.global_args, "upgrade"]
         if package_id:
             cmd.append(package_id)
         return cmd
@@ -331,13 +433,13 @@ class Homebrew(PackageManager):
         More doc at: https://docs.brew.sh/Manpage#cleanup-options-formulacask
         """
         super(Homebrew, self).cleanup()
-        self.run_cli('cleanup', '-s')
+        self.run_cli("cleanup", "-s")
 
 
 class Brew(Homebrew):
 
     name = "Homebrew Formulae"
-    cli_name = 'brew'
+    cli_name = "brew"
 
     @cachedproperty
     def search_args(self):
@@ -349,7 +451,7 @@ class Brew(Homebrew):
             ==> Formulae
             gnu-sed ✔                    libxdg-basedir               minised
         """
-        return [self.global_args, 'search', '--formulae']
+        return [self.global_args, "search", "--formulae"]
 
 
 class Cask(Homebrew):
@@ -358,9 +460,9 @@ class Cask(Homebrew):
     """
 
     name = "Homebrew Cask"
-    cli_name = 'brew'
+    cli_name = "brew"
 
-    global_args = ['cask']
+    global_args = ["cask"]
 
     @cachedproperty
     def search_args(self):
@@ -375,7 +477,7 @@ class Cask(Homebrew):
             google-adwords-editor             prefs-editor
             licensed                          subclassed-mnemosyne
         """
-        return ['search', '--cask']
+        return ["search", "--cask"]
 
     @property
     def outdated(self):
@@ -421,35 +523,36 @@ class Cask(Homebrew):
         outdated = {}
 
         # Build up the list of CLI options.
-        options = ['--json']
+        options = ["--json"]
         # Includes auto-update packages or not.
         if not self.ignore_auto_updates:
-            options.append('--greedy')
+            options.append("--greedy")
 
         # List available updates.
-        output = self.run_cli(self.global_args, 'outdated', options)
+        output = self.run_cli(self.global_args, "outdated", options)
 
         if output:
             for pkg_info in json.loads(output):
-                package_id = pkg_info['name']
-                version = pkg_info['installed_versions']
-                latest_version = pkg_info['current_version']
+                package_id = pkg_info["name"]
+                version = pkg_info["installed_versions"]
+                latest_version = pkg_info["current_version"]
 
                 # Skip packages in undetermined state.
                 if version == latest_version:
                     continue
 
                 outdated[package_id] = {
-                    'id': package_id,
-                    'name': package_id,
-                    'installed_version': parse_version(version),
-                    'latest_version': parse_version(latest_version)}
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(version),
+                    "latest_version": parse_version(latest_version),
+                }
 
         return outdated
 
     def upgrade_cli(self, package_id=None):
         """ Install a package. """
-        cmd = [self.cli_path, self.global_args, 'upgrade']
+        cmd = [self.cli_path, self.global_args, "upgrade"]
         if package_id:
             cmd.append(package_id)
         return cmd

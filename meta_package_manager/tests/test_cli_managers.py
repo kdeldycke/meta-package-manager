@@ -28,19 +28,18 @@ from .test_cli import CLISubCommandTests, CLITableTests
 
 @pytest.fixture
 def subcmd():
-    return 'managers'
+    return "managers"
 
 
 class TestManagers(CLISubCommandTests, CLITableTests):
-
-    @pytest.mark.parametrize('mid', MANAGER_IDS)
+    @pytest.mark.parametrize("mid", MANAGER_IDS)
     def test_single_manager(self, invoke, subcmd, mid):
-        result = invoke('--manager', mid, subcmd)
+        result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 
     def test_json_parsing(self, invoke, subcmd):
-        result = invoke('--output-format', 'json', subcmd)
+        result = invoke("--output-format", "json", subcmd)
         assert result.exit_code == 0
         data = json.loads(result.stdout)
 
@@ -53,24 +52,32 @@ class TestManagers(CLISubCommandTests, CLITableTests):
             assert isinstance(info, dict)
 
             assert set(info) == {
-                'available', 'cli_path', 'errors', 'executable', 'fresh', 'id',
-                'name', 'supported', 'version'}
+                "available",
+                "cli_path",
+                "errors",
+                "executable",
+                "fresh",
+                "id",
+                "name",
+                "supported",
+                "version",
+            }
 
-            assert isinstance(info['available'], bool)
-            if info['cli_path'] is not None:
-                assert isinstance(info['cli_path'], str)
+            assert isinstance(info["available"], bool)
+            if info["cli_path"] is not None:
+                assert isinstance(info["cli_path"], str)
 
-            assert isinstance(info['errors'], list)
-            if info['errors']:
-                assert set(map(type, info['errors'])) == {str}
+            assert isinstance(info["errors"], list)
+            if info["errors"]:
+                assert set(map(type, info["errors"])) == {str}
 
-            assert isinstance(info['executable'], bool)
-            assert isinstance(info['fresh'], bool)
-            assert isinstance(info['id'], str)
-            assert isinstance(info['name'], str)
-            assert isinstance(info['supported'], bool)
+            assert isinstance(info["executable"], bool)
+            assert isinstance(info["fresh"], bool)
+            assert isinstance(info["id"], str)
+            assert isinstance(info["name"], str)
+            assert isinstance(info["supported"], bool)
 
-            if info['version'] is not None:
-                assert isinstance(info['version'], str)
+            if info["version"] is not None:
+                assert isinstance(info["version"], str)
 
-            assert info['id'] == manager_id
+            assert info["id"] == manager_id

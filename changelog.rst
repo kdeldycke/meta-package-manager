@@ -2,6 +2,25 @@ Changelog
 =========
 
 
+`3.4.0 (2020-08-18) <https://github.com/kdeldycke/meta-package-manager/compare/v3.3.0...v3.4.0>`_
+-------------------------------------------------------------------------------------------------
+
+* [yarn] Set minimal requirement to 1.20.0.
+* [yarn] Fix deprecated global arguments.
+* [bitbar] Force refresh of local package databases before fetching outdated
+  ones.
+* [mpm] Add utilities to read a config TOML file. Refs #66.
+* [mpm] Auto-format Python code with Black.
+* [mpm] Move ``pytest`` config from setup.py to ``pyproject.toml``.
+* [mpm] Removes ``isort``.
+* [mpm] Auto-update Python's dependencies.
+* [mpm] Auto-update GitHub actions.
+* [mpm] Auto-update ``.gitignore`` file.
+* [mpm] Auto-update ``.mailmap`` file.
+* [mpm] Lint all YAML files. Add dependency on ``yamllint`` package.
+* [mpm] Removes ``requires.io`` and Scrutinizer badges.
+* [mpm] Revert to ``pipdeptree`` to produce package dependency graph.
+
 `3.3.0 (2020-06-23) <https://github.com/kdeldycke/meta-package-manager/compare/v3.2.0...v3.3.0>`_
 -------------------------------------------------------------------------------------------------
 

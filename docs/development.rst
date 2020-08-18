@@ -39,8 +39,6 @@ Branch          |master-branch|__   |develop-branch|__
 ==============  ==================  ===================
 Unittests       |build-stable|      |build-dev|
 Coverage        |coverage-stable|   |coverage-dev|
-Quality         |quality-stable|    |quality-dev|
-Dependencies    |deps-stable|       |deps-dev|
 Documentation   |docs-stable|       |docs-dev|
 ==============  ==================  ===================
 
@@ -51,11 +49,11 @@ __ https://github.com/kdeldycke/meta-package-manager/tree/master
    ``develop``
 __ https://github.com/kdeldycke/meta-package-manager/tree/develop
 
-.. |build-stable| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Unittests/badge.svg?branch=master
-    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3AUnittests+branch%3Amaster
+.. |build-stable| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Tests/badge.svg?branch=master
+    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3ATests+branch%3Amaster
     :alt: Unittests status
-.. |build-dev| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Unittests/badge.svg?branch=develop
-    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3AUnittests+branch%3Adevelop
+.. |build-dev| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Tests/badge.svg?branch=develop
+    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3ATests+branch%3Adevelop
     :alt: Unittests status
 
 .. |coverage-stable| image:: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/master/graph/badge.svg
@@ -64,20 +62,6 @@ __ https://github.com/kdeldycke/meta-package-manager/tree/develop
 .. |coverage-dev| image:: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop/graph/badge.svg
     :target: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop
     :alt: Coverage Status
-
-.. |quality-stable| image:: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/badges/quality-score.png?b=master
-    :target: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/?branch=master
-    :alt: Code Quality
-.. |quality-dev| image:: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/badges/quality-score.png?b=develop
-    :target: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/?branch=develop
-    :alt: Code Quality
-
-.. |deps-stable| image:: https://requires.io/github/kdeldycke/meta-package-manager/requirements.svg?branch=master
-    :target: https://requires.io/github/kdeldycke/meta-package-manager/requirements/?branch=master
-    :alt: Requirements freshness
-.. |deps-dev| image:: https://requires.io/github/kdeldycke/meta-package-manager/requirements.svg?branch=develop
-    :target: https://requires.io/github/kdeldycke/meta-package-manager/requirements/?branch=develop
-    :alt: Requirements freshness
 
 .. |docs-stable| image:: https://readthedocs.org/projects/meta-package-manager/badge/?version=stable
     :target: https://meta-package-manager.readthedocs.io/en/stable/
@@ -123,13 +107,11 @@ Install test dependencies and run unit-tests:
 Coding style
 ------------
 
-Run `isort <https://github.com/timothycrosley/isort>`_ utility to sort Python
-imports:
+Run `black <https://github.com/psf/black>`_ to auto-format Python code:
 
 .. code-block:: shell-session
 
-    $ poetry run isort --apply
-
+    $ poetry run black .
 
 Then run `pycodestyle <https://pycodestyle.readthedocs.io>`_ and `Pylint
 <https://docs.pylint.org>`_ code style checks:
@@ -159,19 +141,11 @@ And once in a while, it's good to upgrade the `graph of package dependencies
     $ poetry show --all --no-dev --tree
 
 
-Labels
-------
-
-GitHub labels for issues and pull requests are automatticaly `generated and
-synchronized by a GitHub action workflow
-<https://github.com/kdeldycke/meta-package-manager/blob/develop/.github/workflows/labels_sync.yaml>`_.
-
-
 Screenshots
 -----------
 
-Once in a while, refresh screenshots found in the docs and the README file at
-the root of project.
+Once in a while, refresh screenshots found in the docs and the ``readme.rst``
+file at the root of project.
 
 To produce clean and fancy terminals screenshots, use either:
 
@@ -207,13 +181,13 @@ released date in the changelog:
 
 .. code-block:: shell-session
 
-    $ vi ./CHANGES.rst
+    $ vi ./changelog.rst
 
 Create a release commit, tag it and merge it back to ``master`` branch:
 
 .. code-block:: shell-session
 
-    $ git add ./meta_package_manager/__init__.py ./CHANGES.rst
+    $ git add ./meta_package_manager/__init__.py ./changelog.rst
     $ git commit -m "Release vX.Y.Z"
     $ git tag "vX.Y.Z"
     $ git push
@@ -259,7 +233,7 @@ and set it back to development state by increasing the ``patch`` level.
 
     $ git checkout develop
     $ poetry run bumpversion --verbose patch
-    $ git add ./meta_package_manager/__init__.py ./CHANGES.rst
+    $ git add ./meta_package_manager/__init__.py ./changelog.rst
     $ git commit -m "Post release version bump."
     $ git push
 
@@ -275,6 +249,6 @@ longer bug-fix only, or gets really important, feel free to bump to the next
 .. code-block:: shell-session
 
     $ poetry run bumpversion --verbose minor
-    $ git add ./meta_package_manager/__init__.py ./CHANGES.rst
+    $ git add ./meta_package_manager/__init__.py ./changelog.rst
     $ git commit -m "Next release no longer bug-fix only. Bump revision."
     $ git push

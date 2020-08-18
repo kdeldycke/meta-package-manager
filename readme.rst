@@ -3,9 +3,9 @@ Meta Package Manager
 
 CLI providing unifying interface to all package managers.
 
-Stable release: |release| |versions| |license| |dependencies|
+Stable release: |release| |versions|
 
-Development: |build| |docs| |coverage| |quality|
+Development: |build| |docs| |coverage|
 
 .. |release| image:: https://img.shields.io/pypi/v/meta-package-manager.svg
     :target: https://pypi.python.org/pypi/meta-package-manager
@@ -13,14 +13,8 @@ Development: |build| |docs| |coverage| |quality|
 .. |versions| image:: https://img.shields.io/pypi/pyversions/meta-package-manager.svg
     :target: https://pypi.python.org/pypi/meta-package-manager
     :alt: Python versions
-.. |license| image:: https://img.shields.io/pypi/l/meta-package-manager.svg
-    :target: https://www.gnu.org/licenses/gpl-2.0.html
-    :alt: Software license
-.. |dependencies| image:: https://requires.io/github/kdeldycke/meta-package-manager/requirements.svg?branch=master
-    :target: https://requires.io/github/kdeldycke/meta-package-manager/requirements/?branch=master
-    :alt: Requirements freshness
-.. |build| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Unittests/badge.svg
-    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3AUnittests
+.. |build| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Tests/badge.svg
+    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3ATests
     :alt: Unittests status
 .. |docs| image:: https://readthedocs.org/projects/meta-package-manager/badge/?version=develop
     :target: https://meta-package-manager.readthedocs.io/en/develop/
@@ -28,9 +22,6 @@ Development: |build| |docs| |coverage| |quality|
 .. |coverage| image:: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop/graph/badge.svg
     :target: https://codecov.io/github/kdeldycke/meta-package-manager?branch=develop
     :alt: Coverage Status
-.. |quality| image:: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/badges/quality-score.png?b=develop
-    :target: https://scrutinizer-ci.com/g/kdeldycke/meta-package-manager/?branch=develop
-    :alt: Code Quality
 
 .. figure:: https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/mpm-managers-cli.png
     :align: center

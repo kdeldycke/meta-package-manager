@@ -34,7 +34,7 @@ from ..platform import (
     is_linux,
     is_macos,
     is_windows,
-    os_label
+    os_label,
 )
 from .conftest import MANAGER_IDS, unless_linux, unless_macos, unless_windows
 
@@ -81,7 +81,7 @@ def test_os_definitions():
         assert label in ALL_OS_LABELS
         # OS identification function.
         assert isinstance(os_flag, bool)
-        os_id_func_name = 'is_{}'.format(os_id)
+        os_id_func_name = "is_{}".format(os_id)
         assert os_id_func_name in globals()
         os_id_func = globals()[os_id_func_name]
         assert isinstance(os_id_func, FunctionType)
@@ -107,9 +107,9 @@ def test_os_label():
 def test_blacklisted_manager():
     """ Check all managers are accounted for on each platforms. """
     blacklists = {
-        LINUX: {'brew', 'cask', 'mas'},
-        MACOS: {'apt', 'flatpak', 'opkg', 'snap'},
-        WINDOWS: {'apt', 'cask', 'brew', 'flatpak', 'mas', 'opkg', 'snap'}
+        LINUX: {"brew", "cask", "mas"},
+        MACOS: {"apt", "flatpak", "opkg", "snap"},
+        WINDOWS: {"apt", "cask", "brew", "flatpak", "mas", "opkg", "snap"},
     }
     blacklist = blacklists[current_os()[0]]
     # List of supported managers on the current platform.
@@ -118,6 +118,7 @@ def test_blacklisted_manager():
 
 
 # Test unittest decorator helpers.
+
 
 @unless_linux
 def test_unless_linux():

@@ -1,15 +1,15 @@
-name: Unittests
+name: Tests
 on:
   push:
   pull_request:
   schedule:
-    # Run tests every week to catch regressions from external dependencies.
-    - cron: 17 9 * * 1
+    # Run tests every Monday at 9:17 to catch regressions.
+    - cron: "17 9 * * 1"
 
 jobs:
 
   tests:
-    name: Tests
+    name: Install package managers and run unittests
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
@@ -24,157 +24,176 @@ jobs:
           - os: windows-latest
             python-version: 2.7
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{matrix.python-version}}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{matrix.python-version}}
-    - name: Linux - Fix runner cache folder permissions
-      if: runner.os == 'Linux'
-      run: |
-        mkdir -p /home/runner/.cache
-        sudo chown -R runner /home/runner/.cache
+      - uses: actions/checkout@v2.3.2
+      - name: Set up Python ${{matrix.python-version}}
+        uses: actions/setup-python@v2.1.2
+        with:
+          python-version: ${{matrix.python-version}}
+      - name: Linux - Fix runner cache folder permissions
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p /home/runner/.cache
+          sudo chown -R runner /home/runner/.cache
 
-    ### Install or upgrade package managers on each platform, and made them
-    ### ready to use for mpm.
+      ### Install or upgrade package managers on each platform, and made them
+      ### ready to use for mpm.
 
-    # Homebrew
-    - name: macOS - Upgrade Homebrew
-      if: runner.os == 'macOS'
-      run: |
-        brew update
+      # Homebrew
+      - name: macOS - Upgrade Homebrew
+        if: runner.os == 'macOS'
+        run: |
+          brew update
 
-    # Apt
-    - name: Linux - Upgrade apt
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt update
+      # Apt
+      - name: Linux - Upgrade apt
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
 
-    # Chocolatey
-    - name: Windows - Upgrade Chocolatey
-      if: runner.os == 'Windows'
-      run: |
-        choco upgrade chocolatey
+      # Chocolatey
+      - name: Windows - Upgrade Chocolatey
+        if: runner.os == 'Windows'
+        run: |
+          choco upgrade chocolatey
 
-    # NPM
-    - name: Linux - Install npm
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt install -y node-gyp nodejs-dev libssl1.0-dev npm
-    - name: macOS - Install npm
-      if: runner.os == 'macOS'
-      run: |
-        brew unlink node@12
-        brew install npm
-    - name: Windows - Upgrade npm
-      if: runner.os == 'Windows'
-      run: |
-        npm install -g npm
+      # NPM
+      - name: Linux - Install npm
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt install -y node-gyp nodejs-dev libssl1.0-dev npm
+      - name: macOS - Install npm
+        if: runner.os == 'macOS'
+        run: |
+          brew unlink node@12
+          brew install npm
+      - name: Windows - Upgrade npm
+        if: runner.os == 'Windows'
+        run: |
+          npm install -g npm
 
-    # Yarn
-    - name: macOS - Install Yarn
-      if: runner.os == 'macOS'
-      run: |
-        brew install yarn
-    - name: Linux - Install Yarn
-      if: runner.os == 'Linux'
-      run: |
-        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-        echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-        sudo apt update
-        sudo apt install -y yarn
-    - name: Windows - Install Yarn
-      if: runner.os == 'Windows'
-      run: |
-        choco install yarn
+      # Yarn
+      - name: macOS - Install Yarn
+        if: runner.os == 'macOS'
+        run: |
+          brew install yarn
+      - name: Linux - Install Yarn
+        if: runner.os == 'Linux'
+        run: |
+          curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+          echo "deb https://dl.yarnpkg.com/debian/ stable main" \
+            | sudo tee /etc/apt/sources.list.d/yarn.list
+          sudo apt update
+          sudo apt install -y yarn
+      - name: Windows - Install Yarn
+        if: runner.os == 'Windows'
+        run: |
+          choco install yarn
 
-    # Composer
-    - name: macOS - Install Composer
-      if: runner.os == 'macOS'
-      run: |
-        brew install composer
-    - name: Windows - Install Composer
-      if: runner.os == 'Windows'
-      run: |
-        choco install composer
+      # Composer
+      - name: macOS - Upgrade Composer
+        if: runner.os == 'macOS'
+        run: |
+          brew upgrade composer
+      - name: Windows - Install Composer
+        if: runner.os == 'Windows'
+        run: |
+          choco install composer
 
-    # APM
-    - name: macOS - Install Atom
-      if: runner.os == 'macOS'
-      run: |
-        brew install Caskroom/cask/atom
-    - name: Linux - Install Atom
-      if: runner.os == 'Linux'
-      run: |
-        sudo add-apt-repository -y ppa:webupd8team/atom
-        sudo apt install -y atom
-    - name: Windows - Install Atom
-      if: runner.os == 'Windows'
-      run: |
-        choco install atom
+      # APM
+      - name: macOS - Install Atom
+        if: runner.os == 'macOS'
+        run: |
+          brew install Caskroom/cask/atom
+      - name: Linux - Install Atom
+        if: runner.os == 'Linux'
+        run: |
+          sudo add-apt-repository -y ppa:webupd8team/atom
+          sudo apt install -y atom
+      - name: Windows - Install Atom
+        if: runner.os == 'Windows'
+        run: |
+          choco install atom
 
-    # MAS
-    - name: macOS - Install mas
-      if: runner.os == 'macOS'
-      run: |
-        brew install mas
+      # MAS
+      - name: macOS - Install mas
+        if: runner.os == 'macOS'
+        run: |
+          brew install mas
 
-    # Flatpak
-    - name: Linux - Install Flatpak
-      if: runner.os == 'Linux'
-      run: |
-        sudo add-apt-repository -y ppa:alexlarsson/flatpak
-        sudo apt install -y flatpak
+      # Flatpak
+      - name: Linux - Install Flatpak
+        if: runner.os == 'Linux'
+        run: |
+          sudo add-apt-repository -y ppa:alexlarsson/flatpak
+          sudo apt install -y flatpak
 
-    # Snap
-    - name: Linux - Upgrade Snapd
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt install -y snapd
+      # Snap
+      - name: Linux - Upgrade Snapd
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt install -y snapd
 
-    # Gem
-    - name: macOS & Windows - Upgrade gem
-      if: runner.os != 'Linux'
-      run: |
-        gem update --system
-    - name: Linux - Upgrade gem
-      if: runner.os == 'Linux'
-      run: |
-        sudo gem update --system
+      # Gem
+      - name: macOS & Windows - Upgrade gem
+        if: runner.os != 'Linux'
+        run: |
+          gem update --system
+      - name: Linux - Upgrade gem
+        if: runner.os == 'Linux'
+        run: |
+          sudo gem update --system
 
-    # Pip
-    - name: Upgrade Pip
-      run: |
-        python -m pip install --upgrade pip
+      # Pip
+      - name: Upgrade Pip
+        run: |
+          python -m pip install --upgrade pip
 
-    # Mpm
-    - name: Install mpm and its dependencies
-      run: |
-        python -m pip install --upgrade poetry
-        poetry install
-    - name: mpm CLI output for debugging
-      run: |
-        poetry run mpm managers
-    - name: Hack trying to fix coverage - "Can't combine line data with arc data" error
-      if: runner.os != 'Windows'
-      run: |
-        rm -rf .coverage*
-    - name: Test BitBar plugin
-      if: matrix.python-version == '2.7'
-      run: |
-        # mpm 2.8 is the last supporting Python 2.7.
-        python -m pip install "meta-package-manager~=2.8"
-        python -m unittest discover -p test_bitbar_plugin.py
-    - name: Tests and coverage report in destructive mode
-      if: matrix.python-version != '2.7'
-      env:
-        DESTRUCTIVE_TESTS: true
-      # pyproject.toml config file is specified at CLI level instead of letting
-      # coverage find it because of this bug:
-      # https://github.com/nedbat/coveragepy/issues/512#issuecomment-399707938
-      # https://github.com/pytest-dev/pytest-cov/issues/168#issuecomment-327533847
-      # https://github.com/pytest-dev/pytest-cov/issues/243
-      run: |
-        poetry run pytest --cov-config=pyproject.toml --cov=./ --cov-report=xml
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+      # Prepare env for test for Python 2 & 3
+      - name: Upgrade Poetry
+        run: |
+          python -m pip install --upgrade poetry
+      - name: Hack to fix coverage
+        # "Can't combine line data with arc data" error
+        if: runner.os != 'Windows'
+        run: |
+          rm -rf .coverage*
+
+      # BitBar
+      - name: Install old mpm
+        if: matrix.python-version == '2.7'
+        run: |
+          # mpm 2.8 and cli_helpers 2.1.0 are the last supporting Python 2.7.
+          python -m pip install "meta-package-manager~=2.8" "cli-helpers<2.1.0"
+      - name: mpm CLI output for debugging
+        if: matrix.python-version == '2.7'
+        run: |
+          mpm managers
+      - name: Test BitBar plugin
+        if: matrix.python-version == '2.7'
+        run: |
+          python -m unittest discover -p test_bitbar_plugin.py
+
+      # Mpm
+      - name: Install mpm and its dependencies
+        if: matrix.python-version != '2.7'
+        run: |
+          poetry install
+      - name: mpm CLI output for debugging
+        if: matrix.python-version != '2.7'
+        run: |
+          poetry run mpm managers
+      - name: Tests and coverage report in destructive mode
+        if: matrix.python-version != '2.7'
+        env:
+          DESTRUCTIVE_TESTS: true
+        # pyproject.toml config file is specified at CLI level instead of
+        # letting coverage find it because of this bug:
+        # https://github.com/nedbat/coveragepy/issues/512#issuecomment-399707938
+        # https://github.com/pytest-dev/pytest-cov/issues/168#issuecomment-327533847
+        # https://github.com/pytest-dev/pytest-cov/issues/243
+        run: >
+          poetry run
+          pytest --cov-config=pyproject.toml --cov=./ --cov-report=xml
+      - name: Upload coverage to Codecov
+        if: matrix.python-version != '2.7'
+        uses: codecov/codecov-action@v1.0.13

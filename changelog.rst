@@ -17,7 +17,7 @@ Changelog
   ones.
 * [mpm] Add utilities to read a config TOML file. Refs #66.
 * [mpm] Auto-format Python code with Black.
-* [mpm] Move ``pytest`` config from setup.py to ``pyproject.toml``.
+* [mpm] Move ``pytest`` config from ``setup.py`` to ``pyproject.toml``.
 * [mpm] Removes ``isort``.
 * [mpm] Auto-update Python's dependencies.
 * [mpm] Auto-update GitHub actions.

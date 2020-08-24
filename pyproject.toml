@@ -60,7 +60,7 @@ check-wheel-contents = "^0.1.0"
 coverage = {extras = ["toml"], version = "^5.2.1"}
 pipdeptree = {extras = ["graphviz"], version = "^2.0.0-beta.1", allow-prereleases = true}
 pycodestyle = "^2"
-pylint = "^2.5"
+pylint = "^2.6"
 pytest = "^6.0"
 # More pytest plugins at: http://plugincompat.herokuapp.com .
 pytest-cov = "^2.10.1"

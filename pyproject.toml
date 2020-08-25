@@ -86,11 +86,9 @@ fail-under = "8"
 [tool.pylint."messages control"]
 # List messages with: $ pylint --list-msgs
 # C0114: missing-module-docstring
-# C0326: bad-whitespace (black compatibility)
-# C0330: bad-continuation (black compatibility)
 # W0511: fixme
 # W1203: logging-fstring-interpolation
-disable = "C0114, C0326,  C0330, W0511, W1203"
+disable = "C0114, W0511, W1203"
 [tool.pylint.LOGGING]
 # The type of string formatting that logging methods do. `old` means using %
 # formatting, `new` is for `{}` formatting.

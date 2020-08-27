@@ -32,7 +32,7 @@ class Flatpak(PackageManager):
     requirement = "1.2.0"
 
     def get_version(self):
-        """ Fetch version from ``flatpak --version`` output.
+        """Fetch version from ``flatpak --version`` output.
 
         Raw CLI output samples:
 
@@ -88,7 +88,7 @@ class Flatpak(PackageManager):
         return installed
 
     def search(self, query, extended, exact):
-        """ Fetch matching packages from ``flatpak search`` output.
+        """Fetch matching packages from ``flatpak search`` output.
 
         Raw CLI output samples:
 
@@ -143,7 +143,7 @@ class Flatpak(PackageManager):
 
     @property
     def outdated(self):
-        """ Fetch outdated packages from ``flatpak remote-ls`` output.
+        """Fetch outdated packages from ``flatpak remote-ls`` output.
 
         Raw CLI output samples:
 
@@ -210,7 +210,7 @@ class Flatpak(PackageManager):
         return self.upgrade_cli()
 
     def cleanup(self):
-        """ Runs:
+        """Runs:
 
         .. code-block:: shell-session
 

@@ -37,7 +37,7 @@ class Yarn(PackageManager):
     requirement = "1.21.0"
 
     def get_version(self):
-        """ Fetch version from ``yarn --version`` output.
+        """Fetch version from ``yarn --version`` output.
 
         .. code-block:: shell-session
 
@@ -76,7 +76,7 @@ class Yarn(PackageManager):
 
     @property
     def installed(self):
-        """ Fetch installed packages from ``yarn list`` output.
+        """Fetch installed packages from ``yarn list`` output.
 
         .. code-block:: shell-session
 
@@ -89,7 +89,7 @@ class Yarn(PackageManager):
         return self.parse(output)
 
     def search(self, query, extended, exact):
-        """ Call ``yarn info`` and only works for exact match.
+        """Call ``yarn info`` and only works for exact match.
 
         Yarn maintainers have decided not to implement a dedicated ``search``
         command:
@@ -200,7 +200,7 @@ class Yarn(PackageManager):
 
     @property
     def outdated(self):
-        """ Fetch outdated packages from ``yarn outdated`` output.
+        """Fetch outdated packages from ``yarn outdated`` output.
 
         Raw CLI output samples:
 
@@ -256,7 +256,7 @@ class Yarn(PackageManager):
         return self.upgrade_cli()
 
     def cleanup(self):
-        """ Remove the shared cache files.
+        """Remove the shared cache files.
 
         See: https://yarnpkg.com/cli/cache/clean
         """

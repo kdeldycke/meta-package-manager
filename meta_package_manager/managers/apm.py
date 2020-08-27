@@ -40,7 +40,7 @@ class APM(PackageManager):
 
     @property
     def installed(self):
-        """ Fetch installed packages from ``apm list`` output.
+        """Fetch installed packages from ``apm list`` output.
 
         Raw CLI output samples:
 
@@ -153,7 +153,7 @@ class APM(PackageManager):
         return installed
 
     def search(self, query, extended, exact):
-        """ Fetch matching packages from ``apm search`` output.
+        """Fetch matching packages from ``apm search`` output.
 
         Raw CLI output samples:
 
@@ -269,7 +269,7 @@ class APM(PackageManager):
 
     @property
     def outdated(self):
-        """ Fetch outdated packages from ``apm outdated`` output.
+        """Fetch outdated packages from ``apm outdated`` output.
 
         Raw CLI output samples:
 

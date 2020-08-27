@@ -40,13 +40,12 @@ class Token:
     integer = None
 
     def __hash__(self):
-        """ A Token is made unique by a tuple of its immutable internal data.
-        """
+        """A Token is made unique by a tuple of its immutable internal data."""
         return hash((self.string, self.integer))
 
     @staticmethod
     def str_to_int(string):
-        """ Convert a string or an integer to a `(string, integer)` couple.
+        """Convert a string or an integer to a `(string, integer)` couple.
 
         Returns together the original string and its integer representation if
         convertion is successful and lossless. Else returns the original string
@@ -69,7 +68,7 @@ class Token:
         return string, integer
 
     def __init__(self, value):
-        """ Instantiates a Token from alphanumeric strings or non-negative
+        """Instantiates a Token from alphanumeric strings or non-negative
         integers.
         """
         # Check provided value.
@@ -138,7 +137,7 @@ class Token:
 
 class TokenizedString:
 
-    """ Tokenize a string for user-friendly sorting.
+    """Tokenize a string for user-friendly sorting.
 
     Essentially a wrapper around a tuple of `Token` instances.
     """
@@ -148,12 +147,12 @@ class TokenizedString:
     tokens = ()
 
     def __hash__(self):
-        """ A `TokenizedString` is made unique by its original string and tuple
-        of parsed tokens. """
+        """A `TokenizedString` is made unique by its original string and tuple
+        of parsed tokens."""
         return hash((self.string, self.separator, self.tokens))
 
     def __new__(cls, value, *args, **kwargs):
-        """ Return same object if a TokenizedString parameter is used at
+        """Return same object if a TokenizedString parameter is used at
         instanciation.
         """
         if isinstance(value, TokenizedString):
@@ -184,7 +183,7 @@ class TokenizedString:
 
     @classmethod
     def tokenize(cls, string):
-        """ Tokenize a string: ignore case and split at each non-alphanumeric
+        """Tokenize a string: ignore case and split at each non-alphanumeric
         characters.
 
         Returns a tuple of Token instances. Which allows for comparison between
@@ -207,7 +206,7 @@ class TokenizedString:
     """ TokenizedString can be compared as tuples. """
 
     def __iter__(self):
-        """ `TokenizedString` essentially are a wrapper around a tuple of
+        """`TokenizedString` essentially are a wrapper around a tuple of
         `Token`.
         """
         return iter(self.tokens)

@@ -89,7 +89,7 @@ click_log.basic_config(logger)
 
 
 def json(data):
-    """ Utility function to render data structure into pretty printed JSON.
+    """Utility function to render data structure into pretty printed JSON.
 
     Also care of internal objects like `TokenizedString` and `Path`:
     """
@@ -132,7 +132,7 @@ def print_table(header_defs, rows, sort_key=None):
         sort_order.insert(0, sort_column_index)
 
     def sort_method(line):
-        """ Serialize line's content for natural sorting.
+        """Serialize line's content for natural sorting.
 
         1. Extract each cell value in the order provided by `sort_order`;
         2. Strip terminal color formating;
@@ -170,8 +170,7 @@ def print_stats(data):
 
 
 class timeit:
-    """ Decorator to measure and print elapsed execution time of a function.
-    """
+    """Decorator to measure and print elapsed execution time of a function."""
 
     def __call__(self, func):
         @functools.wraps(func)
@@ -327,8 +326,7 @@ def cli(
 @click.pass_context
 @timeit()
 def managers(ctx):
-    """ List all supported package managers and their presence on the system.
-    """
+    """List all supported package managers and their presence on the system."""
     target_managers = ctx.obj["target_managers"]
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
@@ -613,8 +611,7 @@ def search(ctx, extended, exact, query):
 @click.pass_context
 @timeit()
 def outdated(ctx, cli_format):
-    """ List available package upgrades and their versions for each manager.
-    """
+    """List available package upgrades and their versions for each manager."""
     active_managers = ctx.obj["active_managers"]
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
@@ -721,7 +718,7 @@ def upgrade(ctx, dry_run):
 @click.pass_context
 @timeit()
 def backup(ctx, toml_output):
-    """ Dump the list of installed packages to a TOML file.
+    """Dump the list of installed packages to a TOML file.
 
     By default the generated TOML content is displayed directly in the console
     output. So `mpm backup` is the same as a call to `mpm backup -`. To have
@@ -789,7 +786,7 @@ def backup(ctx, toml_output):
 @click.pass_context
 @timeit()
 def restore(ctx, toml_files):
-    """ Read TOML files then install or upgrade each package referenced in
+    """Read TOML files then install or upgrade each package referenced in
     them.
     """
     active_managers = ctx.obj["active_managers"]

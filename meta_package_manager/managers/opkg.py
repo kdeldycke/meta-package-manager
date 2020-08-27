@@ -31,7 +31,7 @@ class OPKG(PackageManager):
     requirement = "0.2.0"
 
     def get_version(self):
-        """ Fetch version from ``opkg --version`` output.
+        """Fetch version from ``opkg --version`` output.
 
         Raw CLI output samples:
 
@@ -56,7 +56,7 @@ class OPKG(PackageManager):
 
     @property
     def installed(self):
-        """ Fetch installed packages from ``opkg list-installed`` output.
+        """Fetch installed packages from ``opkg list-installed`` output.
 
         Raw CLI output samples:
 
@@ -155,7 +155,7 @@ class OPKG(PackageManager):
 
     @property
     def outdated(self):
-        """ Fetch outdated packages from ``opkg list-upgradable`` output.
+        """Fetch outdated packages from ``opkg list-upgradable`` output.
 
         Raw CLI output samples:
 

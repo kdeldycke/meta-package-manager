@@ -63,8 +63,7 @@ class CLIError(Exception):
 
 class PackageManager:
 
-    """ Base class from which all package manager definitions must inherits.
-    """
+    """Base class from which all package manager definitions must inherits."""
 
     # List of platforms supported by the manager.
     platforms = frozenset()
@@ -95,7 +94,7 @@ class PackageManager:
 
     @classproperty
     def id(cls):
-        """ Return package manager's ID. Defaults based on class name.
+        """Return package manager's ID. Defaults based on class name.
 
         This ID must be unique among all package manager definitions and
         lower-case as they're used as feature flags for the :command:`mpm` CLI.
@@ -104,13 +103,12 @@ class PackageManager:
 
     @classproperty
     def name(cls):
-        """ Return package manager's common name. Defaults based on class name.
-        """
+        """Return package manager's common name. Defaults based on class name."""
         return cls.__name__
 
     @classproperty
     def cli_name(cls):
-        """ Package manager's CLI name.
+        """Package manager's CLI name.
 
         Is derived by default from the manager's ID.
         """
@@ -118,7 +116,7 @@ class PackageManager:
 
     @classproperty
     def virtual(cls):
-        """ Should we expose the package manager to the user?
+        """Should we expose the package manager to the user?
 
         Virtual package manager are just skeleton classes used to factorize
         code among managers of the same family.
@@ -127,7 +125,7 @@ class PackageManager:
 
     @cachedproperty
     def cli_path(self):
-        """ Fully qualified path to the package manager CLI.
+        """Fully qualified path to the package manager CLI.
 
         Automaticaly search the location of the CLI in the system.
 
@@ -152,7 +150,7 @@ class PackageManager:
         return cli_path
 
     def get_version(self):
-        """ Invoke the manager and extract its own reported version.
+        """Invoke the manager and extract its own reported version.
 
         It does matter if this method return unsanitized and crappy string. The
         `version()` method below will clean and normalized it.
@@ -161,7 +159,7 @@ class PackageManager:
 
     @cachedproperty
     def version(self):
-        """ Parsed and normalized package manager's own version.
+        """Parsed and normalized package manager's own version.
 
         Returns an instance of `TokenizedString`.
         """
@@ -200,7 +198,7 @@ class PackageManager:
 
     @cachedproperty
     def available(self):
-        """ Is the package manager available and ready-to-use on the system?
+        """Is the package manager available and ready-to-use on the system?
 
         Returns True only if the main CLI:
             1 - is supported on the current platform,
@@ -211,7 +209,7 @@ class PackageManager:
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
     def run(self, *args, dry_run=False):
-        """ Run a shell command, return the output and keep error message.
+        """Run a shell command, return the output and keep error message.
 
         Removes ANSI escape codes, and returns ready-to-use strings.
         """
@@ -257,7 +255,7 @@ class PackageManager:
         return output
 
     def run_cli(self, *args, dry_run=False):
-        """ Like the `run` method above, but execute the binary pointed to by
+        """Like the `run` method above, but execute the binary pointed to by
         the `cli_path` property set in the current instance.
         """
         return self.run(self.cli_path, args, dry_run=dry_run)
@@ -278,7 +276,7 @@ class PackageManager:
 
     @property
     def installed(self):
-        """ List packages currently installed on the system.
+        """List packages currently installed on the system.
 
         Returns a dict indexed by package IDs. Each item is a dict with
         package ID, name and version.
@@ -286,7 +284,7 @@ class PackageManager:
         raise NotImplementedError
 
     def search(self, query, extended, exact):
-        """ Search packages whose ID contain exact or partial query.
+        """Search packages whose ID contain exact or partial query.
 
         Returns a dict indexed by package IDs. Each item is a dict with
         package ID, name, version and a boolean indicating if the match is
@@ -296,7 +294,7 @@ class PackageManager:
 
     @property
     def outdated(self):
-        """ List currently installed packages having a new version available.
+        """List currently installed packages having a new version available.
 
         Returns a dict indexed by package IDs. Each item is a dict with
         package ID, name, current installed version and latest upgradeable
@@ -317,7 +315,7 @@ class PackageManager:
         raise NotImplementedError
 
     def upgrade_all(self, dry_run=False):
-        """ Perform a full upgrade of all outdated packages to latest versions.
+        """Perform a full upgrade of all outdated packages to latest versions.
 
         If the manager doesn't implements a full upgrade one-liner, then
         fall-back to calling single-package upgrade one by one.
@@ -339,7 +337,7 @@ class PackageManager:
 
     @staticmethod
     def render_cli(cmd, cli_format="plain"):
-        """ Return a formatted CLI in the requested format.
+        """Return a formatted CLI in the requested format.
 
         * ``plain`` returns a simple string
         * ``fragments`` returns a list of strings

@@ -33,8 +33,8 @@ def create_toml(filename, content):
 
 @pytest.fixture
 def subcmd():
-    """ Seed common subcommand tests with a dummy file and content to allow the
-    CLI to not fail on required file input. """
+    """Seed common subcommand tests with a dummy file and content to allow the
+    CLI to not fail on required file input."""
     create_toml(
         "dummy.toml",
         """

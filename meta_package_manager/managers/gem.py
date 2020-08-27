@@ -43,7 +43,7 @@ class Gem(PackageManager):
     ]
 
     def get_version(self):
-        """ Fetch version from ``gem --version`` output.
+        """Fetch version from ``gem --version`` output.
 
         Raw CLI output samples:
 
@@ -56,7 +56,7 @@ class Gem(PackageManager):
 
     @property
     def installed(self):
-        """ Fetch installed packages from ``gem list`` output.
+        """Fetch installed packages from ``gem list`` output.
 
         Raw CLI output samples:
 
@@ -107,7 +107,7 @@ class Gem(PackageManager):
         return installed
 
     def search(self, query, extended, exact):
-        """ Fetch matching packages from ``gem search`` output.
+        """Fetch matching packages from ``gem search`` output.
 
         .. code-block:: shell-session
 
@@ -165,7 +165,7 @@ class Gem(PackageManager):
 
     @property
     def outdated(self):
-        """ Fetch outdated packages from ``gem outdated`` output.
+        """Fetch outdated packages from ``gem outdated`` output.
 
         Raw CLI output samples:
 

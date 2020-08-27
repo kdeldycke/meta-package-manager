@@ -30,8 +30,8 @@ def subcmd():
 
 class TestUpgrade(CLISubCommandTests):
 
-    """ All tests here should me marked as destructive unless --dry-run
-    parameter is passed. """
+    """All tests here should me marked as destructive unless --dry-run
+    parameter is passed."""
 
     def test_default_all_managers_dry_run(self, invoke, subcmd):
         result = invoke(subcmd, "--dry-run")

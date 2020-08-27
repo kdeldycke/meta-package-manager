@@ -34,7 +34,7 @@ class NPM(PackageManager):
     name = "Node's npm"
 
     def get_version(self):
-        """ Fetch version from ``npm --version`` output.
+        """Fetch version from ``npm --version`` output.
 
         Raw CLI output samples:
 
@@ -47,7 +47,7 @@ class NPM(PackageManager):
 
     @property
     def installed(self):
-        """ Fetch installed packages from ``npm list`` output.
+        """Fetch installed packages from ``npm list`` output.
 
         Raw CLI output samples:
 
@@ -109,7 +109,7 @@ class NPM(PackageManager):
         return installed
 
     def search(self, query, extended, exact):
-        """ Fetch matching packages from ``npm search`` output.
+        """Fetch matching packages from ``npm search`` output.
 
         Doc: https://docs.npmjs.com/cli/search.html
 
@@ -216,7 +216,7 @@ class NPM(PackageManager):
 
     @property
     def outdated(self):
-        """ Fetch outdated packages from ``npm outdated`` output.
+        """Fetch outdated packages from ``npm outdated`` output.
 
         Raw CLI output samples:
 

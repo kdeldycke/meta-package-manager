@@ -30,7 +30,7 @@ from . import logger
 
 class Homebrew(PackageManager):
 
-    """ Virutal package manager shared by brew and cask CLI defined below.
+    """Virutal package manager shared by brew and cask CLI defined below.
 
     Homebrew is the umbrella project providing both brew and brew cask
     commands.
@@ -46,7 +46,7 @@ class Homebrew(PackageManager):
     cli_name = None
 
     def get_version(self):
-        """ Fetch version from ``brew --version`` output.
+        """Fetch version from ``brew --version`` output.
 
         .. code-block:: shell-session
 
@@ -61,7 +61,7 @@ class Homebrew(PackageManager):
             return parse_version(output.split()[1])
 
     def sync(self):
-        """ `brew` and `cask` share the same command.
+        """`brew` and `cask` share the same command.
 
         .. code-block:: shell-session
 
@@ -73,7 +73,7 @@ class Homebrew(PackageManager):
 
     @property
     def installed(self):
-        """ Fetch installed packages from ``brew list`` output.
+        """Fetch installed packages from ``brew list`` output.
 
         .. note::
 
@@ -236,7 +236,7 @@ class Homebrew(PackageManager):
         return installed
 
     def search(self, query, extended, exact):
-        """ Fetch matching packages from ``brew search`` output.
+        """Fetch matching packages from ``brew search`` output.
 
         .. code-block:: shell-session
 
@@ -321,7 +321,7 @@ class Homebrew(PackageManager):
 
     @property
     def outdated(self):
-        """ Fetch outdated packages from ``brew outdated`` output.
+        """Fetch outdated packages from ``brew outdated`` output.
 
         Raw CLI output samples:
 
@@ -372,7 +372,7 @@ class Homebrew(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        """ Runs:
+        """Runs:
 
         .. code-block:: shell-session
 
@@ -414,7 +414,7 @@ class Homebrew(PackageManager):
         return self.upgrade_cli()
 
     def cleanup(self):
-        """ Scrub the cache, including downloads for even the latest versions.
+        """Scrub the cache, including downloads for even the latest versions.
 
         Note downloads for any installed formulae or casks will still not be
         deleted.
@@ -443,7 +443,7 @@ class Brew(Homebrew):
 
     @cachedproperty
     def search_args(self):
-        """ Returns arguments needed for search of Homebrew formulae.
+        """Returns arguments needed for search of Homebrew formulae.
 
         .. code-block:: shell-session
 
@@ -456,8 +456,7 @@ class Brew(Homebrew):
 
 class Cask(Homebrew):
 
-    """ Cask is now part of Homebrew's core and extend it.
-    """
+    """Cask is now part of Homebrew's core and extend it."""
 
     name = "Homebrew Cask"
     cli_name = "brew"
@@ -466,7 +465,7 @@ class Cask(Homebrew):
 
     @cachedproperty
     def search_args(self):
-        """ Returns arguments needed for search of Homebrew casks.
+        """Returns arguments needed for search of Homebrew casks.
 
         .. code-block:: shell-session
 
@@ -481,7 +480,7 @@ class Cask(Homebrew):
 
     @property
     def outdated(self):
-        """ Search for outdated packages among installed one.
+        """Search for outdated packages among installed one.
 
         .. code-block:: shell-session
 

@@ -28,8 +28,7 @@ from meta_package_manager.labels import LABELS
 
 
 def write_labels():
-    """ Write down labels into JSON file.
-    """
+    """Write down labels into JSON file."""
     json_file = Path(__file__).parent.joinpath("../.github/labels.json").resolve()
 
     # Debug messages.
@@ -42,7 +41,13 @@ def write_labels():
     label_defs = [
         dict(zip(["name", "color", "description"], label)) for label in sorted(LABELS)
     ]
-    json_file.open("w").write(json_dumps(label_defs, indent=2, separators=(",", ": "),))
+    json_file.open("w").write(
+        json_dumps(
+            label_defs,
+            indent=2,
+            separators=(",", ": "),
+        )
+    )
 
 
 if __name__ == "__main__":

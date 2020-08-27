@@ -33,7 +33,7 @@ from ..base import PackageManager
 # Cache the global pool of registered manager definitions to speed-up lookups.
 @cached(LRI(max_size=1))
 def pool():
-    """ Search for package manager definitions locally and store them into an
+    """Search for package manager definitions locally and store them into an
     internal register.
 
     Is considered valid package manager, definitions classes which:

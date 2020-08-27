@@ -28,7 +28,7 @@ from ..version import TokenizedString, parse_version
 
 class Pip(PackageManager):
 
-    """ We will use system's default Python to call out ``pip`` as a module.
+    """We will use system's default Python to call out ``pip`` as a module.
 
     This is a more robust way of managing packages: "if you're on Windows there
     is an added benefit to using python -m pip as it lets pip update itself."
@@ -49,7 +49,7 @@ class Pip(PackageManager):
     ]
 
     def get_version(self):
-        """ Fetch version.
+        """Fetch version.
 
         .. code-block:: shell-session
 
@@ -116,7 +116,7 @@ class Pip(PackageManager):
         return installed
 
     def search(self, query, extended, exact):
-        """ Fetch matching packages.
+        """Fetch matching packages.
 
         .. code-block:: shell-session
 
@@ -259,7 +259,7 @@ class Pip(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id):
-        """ Build-up package upgrade CLI.
+        """Build-up package upgrade CLI.
 
         .. code-block:: shell-session
 
@@ -283,7 +283,7 @@ class Pip(PackageManager):
         ]
 
     def upgrade_all_cli(self):
-        """ Pip lacks support of a proper full upgrade command. Raising an
+        """Pip lacks support of a proper full upgrade command. Raising an
         error let the parent class upgrade packages one by one.
 
         See: https://github.com/pypa/pip/issues/59

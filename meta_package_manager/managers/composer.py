@@ -41,7 +41,7 @@ class Composer(PackageManager):
 
     @property
     def installed(self):
-        """ Fetch installed packages from ``composer global show`` output.
+        """Fetch installed packages from ``composer global show`` output.
 
         Raw CLI output samples:
 
@@ -90,7 +90,7 @@ class Composer(PackageManager):
         return installed
 
     def search(self, query, extended, exact):
-        """ Fetch matching packages from ``composer search`` output.
+        """Fetch matching packages from ``composer search`` output.
 
         .. code-block:: shell-session
 
@@ -163,31 +163,31 @@ class Composer(PackageManager):
 
     @property
     def outdated(self):
-        """ Fetch outdated packages from ``composer global outdated`` output.
+        """Fetch outdated packages from ``composer global outdated`` output.
 
-            Raw CLI output samples:
+        Raw CLI output samples:
 
-            .. code-block:: shell-session
+        .. code-block:: shell-session
 
-            ► composer global outdated --format=json
-            {
-                "installed": [
-                    {
-                        "name": "illuminate/contracts",
-                        "version": "v5.7.2",
-                        "latest": "v5.7.3",
-                        "latest-status": "semver-safe-update",
-                        "description": "The Illuminate Contracts package."
-                    },
-                    {
-                        "name": "illuminate/support",
-                        "version": "v5.7.2",
-                        "latest": "v5.7.3",
-                        "latest-status": "semver-safe-update",
-                        "description": "The Illuminate Support package."
-                    }
-                ]
-            }
+        ► composer global outdated --format=json
+        {
+            "installed": [
+                {
+                    "name": "illuminate/contracts",
+                    "version": "v5.7.2",
+                    "latest": "v5.7.3",
+                    "latest-status": "semver-safe-update",
+                    "description": "The Illuminate Contracts package."
+                },
+                {
+                    "name": "illuminate/support",
+                    "version": "v5.7.2",
+                    "latest": "v5.7.3",
+                    "latest-status": "semver-safe-update",
+                    "description": "The Illuminate Support package."
+                }
+            ]
+        }
         """
         outdated = {}
 
@@ -216,7 +216,7 @@ class Composer(PackageManager):
         return self.upgrade_cli()
 
     def cleanup(self):
-        """ Runs:
+        """Runs:
 
         .. code-block:: shell-session
 

@@ -68,8 +68,7 @@ def test_name():
 
 
 def test_platforms():
-    """ Check that definitions returns supported platforms as a frozenset.
-    """
+    """Check that definitions returns supported platforms as a frozenset."""
     for manager in pool().values():
         assert manager.platforms
         assert isinstance(manager.platforms, frozenset)

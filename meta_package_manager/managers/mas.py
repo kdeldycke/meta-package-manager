@@ -41,7 +41,7 @@ class MAS(PackageManager):
 
     @property
     def installed(self):
-        """ Fetch installed packages from ``mas list`` output.
+        """Fetch installed packages from ``mas list`` output.
 
         Raw CLI output samples:
 
@@ -73,7 +73,7 @@ class MAS(PackageManager):
         return installed
 
     def search(self, query, extended, exact):
-        """ Fetch matching packages from ``mas search`` output.
+        """Fetch matching packages from ``mas search`` output.
 
         Raw CLI output samples:
 
@@ -128,7 +128,7 @@ class MAS(PackageManager):
 
     @property
     def outdated(self):
-        """ Fetch outdated packages from ``mas outdated`` output.
+        """Fetch outdated packages from ``mas outdated`` output.
 
         Raw CLI output samples:
 

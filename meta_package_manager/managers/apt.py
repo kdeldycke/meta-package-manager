@@ -26,7 +26,7 @@ from ..version import parse_version
 
 class APT(PackageManager):
 
-    """ Documentation:
+    """Documentation:
     http://manpages.ubuntu.com/manpages/xenial/man8/apt.8.html
     """
 
@@ -35,7 +35,7 @@ class APT(PackageManager):
     requirement = "1.0.0"
 
     def get_version(self):
-        """ Fetch version from ``apt version`` output.
+        """Fetch version from ``apt version`` output.
 
         Raw CLI output samples:
 
@@ -86,7 +86,7 @@ class APT(PackageManager):
 
     @property
     def installed(self):
-        """ Fetch installed packages from ``apt list`` output.
+        """Fetch installed packages from ``apt list`` output.
 
         Raw CLI output samples:
 
@@ -138,7 +138,7 @@ class APT(PackageManager):
         return installed
 
     def search(self, query, extended, exact):
-        """ Fetch matching packages from ``apt search`` output.
+        """Fetch matching packages from ``apt search`` output.
 
         .. code-block:: shell-session
 
@@ -228,7 +228,7 @@ class APT(PackageManager):
 
     @property
     def outdated(self):
-        """ Fetch outdated packages from ``apt list`` output.
+        """Fetch outdated packages from ``apt list`` output.
 
         Raw CLI output samples:
 
@@ -268,7 +268,7 @@ class APT(PackageManager):
         return self.upgrade_cli()
 
     def cleanup(self):
-        """ Runs:
+        """Runs:
 
         .. code-block:: shell-session
 

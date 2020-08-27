@@ -36,7 +36,7 @@ newer.
 
 @unittest.skipUnless(sys.platform == "darwin", "macOS required")
 class TestBibarPlugin(unittest.TestCase):
-    """ This is the only test suite that is still using unittest module instead
+    """This is the only test suite that is still using unittest module instead
     of pytest.
     """
 

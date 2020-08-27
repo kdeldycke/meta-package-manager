@@ -36,20 +36,20 @@ from .conftest import MANAGER_IDS, unless_windows
 
 
 def test_real_fs():
-    """ Check a simple test is not caught into the CLI runner fixture which is
-    encapsulating all filesystem access into temporary directory structure. """
+    """Check a simple test is not caught into the CLI runner fixture which is
+    encapsulating all filesystem access into temporary directory structure."""
     assert str(Path(__file__)).startswith(str(Path.cwd()))
 
 
 def test_temporary_fs(runner):
-    """ Check the CLI runner fixture properly encapsulated the filesystem in
-    temporary directory. """
+    """Check the CLI runner fixture properly encapsulated the filesystem in
+    temporary directory."""
     assert not str(Path(__file__)).startswith(str(Path.cwd()))
 
 
 class TestBaseCLI:
 
-    """ This collection is testing basic CLI behavior shared by all
+    """This collection is testing basic CLI behavior shared by all
     subcommands.
 
     Also regroups tests not involving subcommands.
@@ -116,8 +116,8 @@ class TestBaseCLI:
     @unless_windows
     @pytest.mark.parametrize("mode", WINDOWS_MODE_BLACKLIST)
     def test_check_failing_unicode_rendering(self, mode):
-        """ Check internal assumption that some rendering unicode table
-        rendering modes fails in Windows console. """
+        """Check internal assumption that some rendering unicode table
+        rendering modes fails in Windows console."""
         table_formatter = TabularOutputFormatter(mode)
         with pytest.raises(UnicodeEncodeError):
             click.echo(
@@ -129,7 +129,7 @@ class TestBaseCLI:
 
 class CLISubCommandTests:
 
-    """ All these tests runs on each subcommand.
+    """All these tests runs on each subcommand.
 
     This class doesn't starts with `Test` as it is meant to be used as a
     template, inherited sub-command specific files.
@@ -151,7 +151,7 @@ class CLISubCommandTests:
 
     @staticmethod
     def check_manager_selection(result, selected=MANAGER_IDS):
-        """ Check inclusion and exclusion of a set of managers.
+        """Check inclusion and exclusion of a set of managers.
 
         Check all manager are there by default.
 
@@ -279,7 +279,7 @@ class CLISubCommandTests:
 
 class CLITableTests:
 
-    """ Test subcommands whose output is a configurable table.
+    """Test subcommands whose output is a configurable table.
 
     A table output is also allowed to be rendered as JSON.
     """
@@ -312,8 +312,8 @@ class CLITableTests:
     }
 
     def test_recognized_modes(self):
-        """ Check all rendering modes proposed by the table module are
-        accounted for. """
+        """Check all rendering modes proposed by the table module are
+        accounted for."""
         assert RENDERING_MODES == set(self.expected_renderings.keys())
 
     def test_default_table_rendering(self, invoke, subcmd):
@@ -338,7 +338,7 @@ class CLITableTests:
         [(k, v[0], v[1]) for k, v in expected_renderings.items()],
     )
     def test_all_table_rendering(self, invoke, subcmd, mode, expected, conflict):
-        """ Check that from all rendering modes, only the selected one appears
+        """Check that from all rendering modes, only the selected one appears
         in <stdout> and only there. Any other mode are not expected neither in
         <stdout> or <stderr>.
         """
@@ -377,7 +377,7 @@ class CLITableTests:
             assert unexpected not in result.stderr
 
     def test_json_debug_output(self, invoke, subcmd):
-        """ Output is expected to be parseable if read from <stdout> even in
+        """Output is expected to be parseable if read from <stdout> even in
         debug level as these messages are redirected to <stderr>.
 
         Also checks that JSON output format is not supported by all commands.

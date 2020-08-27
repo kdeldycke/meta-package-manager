@@ -26,7 +26,7 @@ from . import logger, CLI_NAME
 
 
 def config_structure():
-    """ Returns the supported configuration structure.
+    """Returns the supported configuration structure.
 
     Derives TOML structure from CLI definition.
     """

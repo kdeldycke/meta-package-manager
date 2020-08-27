@@ -105,7 +105,7 @@ def print_cli_output(cmd, output):
 
 
 def run_cmd(*args):
-    """ Run a system command, print output and return results.
+    """Run a system command, print output and return results.
 
     Relies on robust ``run`` function implemented in BitBar plugin.
     """
@@ -165,7 +165,7 @@ def invoke(runner):
 
 @pytest.fixture(scope="class")
 def subcmd():
-    """ Fixture used in `test_cli_*.py` files to set the sub-command in all CLI
+    """Fixture used in `test_cli_*.py` files to set the sub-command in all CLI
     calls.
 
     Must returns a string or an iterable of strings. Defaults to `None`, which

@@ -5,8 +5,7 @@ Changelog
 `3.4.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v3.4.0...develop>`_
 --------------------------------------------------------------------------------------------------
 
- .. note:: This version is not yet released and is under active development.
-
+* [mpm] Rename ``master`` branch to ``main``.
 
 `3.4.0 (2020-08-18) <https://github.com/kdeldycke/meta-package-manager/compare/v3.3.0...v3.4.0>`_
 -------------------------------------------------------------------------------------------------

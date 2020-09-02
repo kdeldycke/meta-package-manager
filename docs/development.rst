@@ -35,29 +35,29 @@ Build status
 ------------
 
 ==============  ==================  ===================
-Branch          |master-branch|__   |develop-branch|__
+Branch          |main-branch|__     |develop-branch|__
 ==============  ==================  ===================
 Unittests       |build-stable|      |build-dev|
 Coverage        |coverage-stable|   |coverage-dev|
 Documentation   |docs-stable|       |docs-dev|
 ==============  ==================  ===================
 
-.. |master-branch| replace::
-   ``master``
-__ https://github.com/kdeldycke/meta-package-manager/tree/master
+.. |main-branch| replace::
+   ``main``
+__ https://github.com/kdeldycke/meta-package-manager/tree/main
 .. |develop-branch| replace::
    ``develop``
 __ https://github.com/kdeldycke/meta-package-manager/tree/develop
 
-.. |build-stable| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Tests/badge.svg?branch=master
-    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3ATests+branch%3Amaster
+.. |build-stable| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Tests/badge.svg?branch=main
+    :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3ATests+branch%3Amain
     :alt: Unittests status
 .. |build-dev| image:: https://github.com/kdeldycke/meta-package-manager/workflows/Tests/badge.svg?branch=develop
     :target: https://github.com/kdeldycke/meta-package-manager/actions?query=workflow%3ATests+branch%3Adevelop
     :alt: Unittests status
 
-.. |coverage-stable| image:: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/master
+.. |coverage-stable| image:: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/badge.svg
+    :target: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main
     :alt: Coverage Status
 .. |coverage-dev| image:: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop/graph/badge.svg
     :target: https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop
@@ -183,7 +183,7 @@ released date in the changelog:
 
     $ vi ./changelog.rst
 
-Create a release commit, tag it and merge it back to ``master`` branch:
+Create a release commit, tag it and merge it back to ``main`` branch:
 
 .. code-block:: shell-session
 
@@ -192,7 +192,7 @@ Create a release commit, tag it and merge it back to ``master`` branch:
     $ git tag "vX.Y.Z"
     $ git push
     $ git push --tags
-    $ git checkout master
+    $ git checkout main
     $ git pull
     $ git merge "vX.Y.Z"
     $ git push

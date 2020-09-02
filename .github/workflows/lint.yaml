@@ -1,9 +1,9 @@
 name: Lint
 on:
   push:
-    # QA on master is too late: we shouldn't mess with the code at this point.
+    # QA on main is too late: we shouldn't mess with the code at this point.
     branches-ignore:
-      - 'master'
+      - 'main'
   pull_request:
 
 jobs:

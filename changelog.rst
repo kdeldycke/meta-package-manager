@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-`3.4.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v3.4.0...develop>`_
+`3.4.1 (2020-09-02) <https://github.com/kdeldycke/meta-package-manager/compare/v3.4.0...v3.4.1>`_
 --------------------------------------------------------------------------------------------------
 
 * [mpm] Rename ``master`` branch to ``main``.

@@ -77,6 +77,8 @@ For instance, `pip doesn't can't upgrade all outdated package <https://github.co
     Installing collected packages: zipp
     Successfully installed zipp-3.1.0
 
+Another example is the discreet ``opkg`` package manager, only used by a confidential audience. It is a bare project with only the basic primitives implemented (``update``, ``list``, ...). Thanks to ``mpm`` it gains a free ``search`` feature.
+
 
 Explore repositories
 --------------------

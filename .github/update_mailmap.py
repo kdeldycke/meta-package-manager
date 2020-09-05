@@ -59,12 +59,14 @@ content = mailmap_file.read_text()
 
 # Initialize empty .mailmap with pointers to reference documentation.
 if not content:
-    content = dedent("""
+    content = dedent(
+        """
         # Format is:
         #   Prefered Name <preferred e-mail>  Other Name <other e-mail>
         #
         # Reference: https://git-scm.com/docs/git-blame#_mapping_authors
-        """)
+        """
+    )
 
 # Extract comments in .mailmap header and keep mapping lines.
 header_comments = []

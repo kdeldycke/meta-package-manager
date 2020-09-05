@@ -50,12 +50,10 @@ for param in ["%aN <%aE>", "%cN <%cE>"]:
         if line.strip():
             contributors.add(line)
 
-# Generate .mailmap location.
+# Load-up .mailmap content. Create file if it doesn't exists.
 mailmap_file = Path(__file__).parent.joinpath("../.mailmap").resolve()
-
-# Load .mailmap content.
-with mailmap_file.open() as doc:
-    content = doc.read()
+mailmap_file.touch(exist_ok=True)
+content = mailmap_file.read_text()
 
 # Extract comments in .mailmap header and keep mapping lines.
 header_comments = []

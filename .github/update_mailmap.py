@@ -29,6 +29,8 @@ identities, and tidying things up by hand-editing the .mailmap file.
 import sys
 from pathlib import Path
 from subprocess import PIPE, Popen
+from textwrap import dedent
+
 
 contributors = set()
 
@@ -54,6 +56,15 @@ for param in ["%aN <%aE>", "%cN <%cE>"]:
 mailmap_file = Path(__file__).parent.joinpath("../.mailmap").resolve()
 mailmap_file.touch(exist_ok=True)
 content = mailmap_file.read_text()
+
+# Initialize empty .mailmap with pointers to reference documentation.
+if not content:
+    content = dedent("""
+        # Format is:
+        #   Prefered Name <preferred e-mail>  Other Name <other e-mail>
+        #
+        # Reference: https://git-scm.com/docs/git-blame#_mapping_authors
+        """)
 
 # Extract comments in .mailmap header and keep mapping lines.
 header_comments = []

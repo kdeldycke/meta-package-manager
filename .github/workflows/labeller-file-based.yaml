@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.2
-      - uses: actions/labeler@v2.1.1
+      - uses: actions/labeler@2.2.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           configuration-path: ".github/labeller-file-based.yaml"

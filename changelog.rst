@@ -12,6 +12,7 @@ Changelog
 * [brew,cask] Do not mix-up brew and cask upgrades.
 * [mpm] Rename ``master`` branch to ``main``.
 
+
 `3.4.0 (2020-08-18) <https://github.com/kdeldycke/meta-package-manager/compare/v3.3.0...v3.4.0>`_
 -------------------------------------------------------------------------------------------------
 
@@ -30,6 +31,7 @@ Changelog
 * [mpm] Lint all YAML files. Add dependency on ``yamllint`` package.
 * [mpm] Removes ``requires.io`` and Scrutinizer badges.
 * [mpm] Revert to ``pipdeptree`` to produce package dependency graph.
+
 
 `3.3.0 (2020-06-23) <https://github.com/kdeldycke/meta-package-manager/compare/v3.2.0...v3.3.0>`_
 -------------------------------------------------------------------------------------------------

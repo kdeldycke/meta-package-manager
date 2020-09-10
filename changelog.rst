@@ -9,6 +9,7 @@ Changelog
 `3.4.1 (2020-09-02) <https://github.com/kdeldycke/meta-package-manager/compare/v3.4.0...v3.4.1>`_
 --------------------------------------------------------------------------------------------------
 
+* [brew,cask] Do not mix-up brew and cask upgrades.
 * [mpm] Rename ``master`` branch to ``main``.
 
 `3.4.0 (2020-08-18) <https://github.com/kdeldycke/meta-package-manager/compare/v3.3.0...v3.4.0>`_

@@ -19,8 +19,11 @@
 
 # pylint: disable=redefined-outer-name
 
+import re
+
 import pytest
 import simplejson as json
+from boltons.iterutils import same
 
 from .conftest import MANAGER_IDS, unless_macos
 from .test_cli import CLISubCommandTests, CLITableTests
@@ -124,4 +127,10 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         for query in ["sed", "SED", "SeD", "sEd*", "*sED*"]:
             result = invoke("--manager", "pip", "search", "--extended", query)
             assert result.exit_code == 0
-            assert "23 packages total" in result.stdout
+            last_line = result.stdout.splitlines()[-1]
+            assert last_line
+            msg_match = re.match(r"^([0-9]+) packages total \(pip: ([0-9]+)\).$", last_line)
+            assert msg_match
+            assert same(msg_match.groups())
+            # We should find lots of results for this package search.
+            assert int(msg_match.groups()[0]) >= 20

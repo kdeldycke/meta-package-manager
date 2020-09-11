@@ -10,6 +10,7 @@ Changelog
 --------------------------------------------------------------------------------------------------
 
 * [brew,cask] Do not mix-up brew and cask upgrades.
+* [npm] Skip parsing of JSON results on error.
 * [mpm] Rename ``master`` branch to ``main``.
 
 

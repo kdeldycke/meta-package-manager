@@ -189,7 +189,8 @@ class NPM(PackageManager):
 
         output = self.run_cli(self.global_args, "search", "--json", search_args, query)
 
-        if output:
+        # npm fatal errors are reported as JSON too. We need to skip that case.
+        if output and not self.cli_errors:
             for package in json.loads(output):
                 package_id = package["name"]
 

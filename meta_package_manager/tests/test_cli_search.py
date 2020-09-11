@@ -129,7 +129,9 @@ class TestSearch(CLISubCommandTests, CLITableTests):
             assert result.exit_code == 0
             last_line = result.stdout.splitlines()[-1]
             assert last_line
-            msg_match = re.match(r"^([0-9]+) packages total \(pip: ([0-9]+)\).$", last_line)
+            msg_match = re.match(
+                r"^([0-9]+) packages total \(pip: ([0-9]+)\).$", last_line
+            )
             assert msg_match
             assert same(msg_match.groups())
             # We should find lots of results for this package search.

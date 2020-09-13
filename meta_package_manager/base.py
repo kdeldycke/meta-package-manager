@@ -20,7 +20,7 @@
 import os
 from pathlib import Path
 from shutil import which
-from textwrap import indent
+from textwrap import indent, shorten
 
 import click
 from boltons.cacheutils import cachedproperty
@@ -59,6 +59,12 @@ class CLIError(Exception):
             ),
             margin,
         )
+
+    def __repr__(self):
+        return "<{}({}, {!r})>".format(
+            self.__class__.__name__, self.code,
+            shorten(' '.join(self.error.split()), width=60,
+                    placeholder="(...)"))
 
 
 class PackageManager:

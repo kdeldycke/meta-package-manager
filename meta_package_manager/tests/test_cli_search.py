@@ -98,7 +98,8 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         assert " sed " in result.stdout
 
     @pytest.mark.parametrize(
-        "query", ["SED", "SeD", "sEd*", "*sED*", "_seD-@", "", "_"])
+        "query", ["SED", "SeD", "sEd*", "*sED*", "_seD-@", "", "_"]
+    )
     def test_exact_search_tokenizer_no_result(self, invoke, query):
         result = invoke("--manager", "pip", "search", "--exact", query)
         assert result.exit_code == 0

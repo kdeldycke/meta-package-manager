@@ -7,6 +7,9 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [brew,cask] Bump minimal requirement of to ``2.5.0``.
+* [brew,cask] Fix warning to deprecated options.
+
 
 `3.4.2 (2020-09-13) <https://github.com/kdeldycke/meta-package-manager/compare/v3.4.1...v3.4.2>`_
 -------------------------------------------------------------------------------------------------

@@ -39,8 +39,8 @@ class Homebrew(PackageManager):
     platforms = frozenset([MACOS])
 
     # Vanilla brew and cask CLIs now shares the same version.
-    # 2.2.15 is the first release to support JSON output for outdated casks.
-    requirement = "2.2.15"
+    # 2.5.0 is the first release to deprecate the use of --json=v1 option.
+    requirement = "2.5.0"
 
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     cli_name = None
@@ -319,58 +319,6 @@ class Homebrew(PackageManager):
 
         return matches
 
-    @property
-    def outdated(self):
-        """Fetch outdated packages from ``brew outdated`` output.
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► brew outdated --json=v1
-            [
-              {
-                "name": "cassandra",
-                "installed_versions": [
-                  "3.5"
-                ],
-                "current_version": "3.7"
-              },
-              {
-                "name": "vim",
-                "installed_versions": [
-                  "7.4.1967"
-                ],
-                "current_version": "7.4.1993"
-              },
-              {
-                "name": "youtube-dl",
-                "installed_versions": [
-                  "2016.07.06"
-                ],
-                "current_version": "2016.07.09.1"
-              }
-            ]
-        """
-        outdated = {}
-
-        # List available updates.
-        output = self.run_cli(self.global_args, "outdated", "--json=v1")
-
-        if output:
-            for pkg_info in json.loads(output):
-                package_id = pkg_info["name"]
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": max(
-                        map(parse_version, pkg_info["installed_versions"])
-                    ),
-                    "latest_version": parse_version(pkg_info["current_version"]),
-                }
-
-        return outdated
-
     def upgrade_cli(self, package_id=None):
         """Returns the right CLI depending on weither formula or cask are
         concerned:
@@ -474,6 +422,58 @@ class Brew(Homebrew):
         """
         return [self.global_args, "search", "--formulae"]
 
+    @property
+    def outdated(self):
+        """Fetch outdated formulae from ``brew outdated`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            ► brew outdated --formula --json=v2 | jq
+            {
+              "formulae": [
+                {
+                  "name": "pygobject3",
+                  "installed_versions": [
+                    "3.36.1"
+                  ],
+                  "current_version": "3.38.0",
+                  "pinned": false,
+                  "pinned_version": null
+                },
+                {
+                  "name": "rav1e",
+                  "installed_versions": [
+                    "0.3.3"
+                  ],
+                  "current_version": "0.3.4",
+                  "pinned": false,
+                  "pinned_version": null
+                }
+              ],
+              "casks": []
+            }
+        """
+        outdated = {}
+
+        # List available updates.
+        output = self.run_cli(self.global_args, "outdated", "--formula", "--json=v2")
+
+        if output:
+            for pkg_info in json.loads(output)["formulae"]:
+                package_id = pkg_info["name"]
+                outdated[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": max(
+                        map(parse_version, pkg_info["installed_versions"])
+                    ),
+                    "latest_version": parse_version(pkg_info["current_version"]),
+                }
+
+        return outdated
+
     @cachedproperty
     def upgrade_args(self):
         """Returns arguments needed for upgrade of Homebrew formulae.
@@ -538,58 +538,74 @@ class Cask(Homebrew):
 
     @property
     def outdated(self):
-        """Search for outdated packages among installed one.
+        """Fetch outdated casks from ``brew outdated`` output.
 
         .. code-block:: shell-session
 
-            ► brew cask outdated --json | jq
-            [
-              {
-                "name": "google-play-music-desktop-player",
-                "installed_versions": "4.4.0",
-                "current_version": "4.4.1"
-              },
-              {
-                "name": "prey",
-                "installed_versions": "1.8.3.upgrading",
-                "current_version": "1.9.3"
-              }
-            ]
+            ► brew outdated --cask --json=v2 | jq
+            {
+              "formulae": [],
+              "casks": [
+                {
+                  "name": "electrum",
+                  "installed_versions": "4.0.2",
+                  "current_version": "4.0.3"
+                },
+                {
+                  "name": "qlcolorcode",
+                  "installed_versions": "3.0.2",
+                  "current_version": "3.1.1"
+                }
+              ]
+            }
 
         .. code-block:: shell-session
 
-            ► brew cask outdated --json --greedy | jq u
-            [
-              {
-                "name": "android-file-transfer",
-                "installed_versions": "latest",
-                "current_version": "latest"
-              },
-              {
-                "name": "atom",
-                "installed_versions": "1.19.3",
-                "current_version": "1.19.4"
-              },
-              {
-                "name": "keybase",
-                "installed_versions": "4.0.0-20190507193726,6614a49937",
-                "current_version": "5.5.0-20200526170801,139bb348af"
-              }
-            ]
+            ► brew outdated --cask --json=v2 --greedy | jq
+            {
+              "formulae": [],
+              "casks": [
+                {
+                  "name": "amethyst",
+                  "installed_versions": "0.14.3",
+                  "current_version": "0.15.3"
+                },
+                {
+                  "name": "balenaetcher",
+                  "installed_versions": "1.5.106",
+                  "current_version": "1.5.108"
+                },
+                {
+                  "name": "caldigit-thunderbolt-charging",
+                  "installed_versions": "latest",
+                  "current_version": "latest"
+                },
+                {
+                  "name": "electrum",
+                  "installed_versions": "4.0.2",
+                  "current_version": "4.0.3"
+                },
+                {
+                  "name": "qlcolorcode",
+                  "installed_versions": "3.0.2",
+                  "current_version": "3.1.1"
+                }
+              ]
+            }
         """
         outdated = {}
 
         # Build up the list of CLI options.
-        options = ["--json"]
+        options = ["--cask", "--json=v2"]
         # Includes auto-update packages or not.
         if not self.ignore_auto_updates:
             options.append("--greedy")
 
         # List available updates.
-        output = self.run_cli(self.global_args, "outdated", options)
+        output = self.run_cli("outdated", options)
 
         if output:
-            for pkg_info in json.loads(output):
+            for pkg_info in json.loads(output)["casks"]:
                 package_id = pkg_info["name"]
                 version = pkg_info["installed_versions"]
                 latest_version = pkg_info["current_version"]

@@ -91,48 +91,52 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         assert "ubersicht" in result.stdout
         assert "Übersicht" not in result.stdout
 
-    def test_exact_search_tokenizer(self, invoke):
+    def test_exact_search_tokenizer_one_result(self, invoke):
         result = invoke("--manager", "pip", "search", "--exact", "sed", color=False)
         assert result.exit_code == 0
         assert "1 package total" in result.stdout
         assert " sed " in result.stdout
 
-        for query in ["SED", "SeD", "sEd*", "*sED*", "_seD-@", "", "_"]:
-            result = invoke("--manager", "pip", "search", "--exact", query)
-            assert result.exit_code == 0
-            assert "0 package total" in result.stdout
-            assert "sed" not in result.stdout
+    @pytest.mark.parametrize(
+        "query", ["SED", "SeD", "sEd*", "*sED*", "_seD-@", "", "_"])
+    def test_exact_search_tokenizer_no_result(self, invoke, query):
+        result = invoke("--manager", "pip", "search", "--exact", query)
+        assert result.exit_code == 0
+        assert "0 package total" in result.stdout
+        assert "sed" not in result.stdout
 
-    def test_fuzzy_search_tokenizer(self, invoke):
-        for query in ["", "_", "_seD-@"]:
-            result = invoke("--manager", "pip", "search", query)
-            assert result.exit_code == 0
-            assert "0 package total" in result.stdout
-            assert "sed" not in result.stdout
+    @pytest.mark.parametrize("query", ["", "_", "_seD-@"])
+    def test_fuzzy_search_tokenizer_no_results(self, invoke, query):
+        result = invoke("--manager", "pip", "search", query)
+        assert result.exit_code == 0
+        assert "0 package total" in result.stdout
+        assert "sed" not in result.stdout
 
-        for query in ["sed", "SED", "SeD", "sEd*", "*sED*"]:
-            result = invoke("--manager", "pip", "search", query, color=False)
-            assert result.exit_code == 0
-            assert "2 packages total" in result.stdout
-            assert " sed " in result.stdout
-            assert " SED-cli " in result.stdout
+    @pytest.mark.parametrize("query", ["sed", "SED", "SeD", "sEd*", "*sED*"])
+    def test_fuzzy_search_tokenizer_multiple_results(self, invoke, query):
+        result = invoke("--manager", "pip", "search", query, color=False)
+        assert result.exit_code == 0
+        assert "2 packages total" in result.stdout
+        assert " sed " in result.stdout
+        assert " SED-cli " in result.stdout
 
-    def test_extended_search_tokenizer(self, invoke):
-        for query in ["", "_", "_seD-@"]:
-            result = invoke("--manager", "pip", "search", "--extended", query)
-            assert result.exit_code == 0
-            assert "0 package total" in result.stdout
-            assert "sed" not in result.stdout
+    @pytest.mark.parametrize("query", ["", "_", "_seD-@"])
+    def test_extended_search_tokenizeri_no_results(self, invoke, query):
+        result = invoke("--manager", "pip", "search", "--extended", query)
+        assert result.exit_code == 0
+        assert "0 package total" in result.stdout
+        assert "sed" not in result.stdout
 
-        for query in ["sed", "SED", "SeD", "sEd*", "*sED*"]:
-            result = invoke("--manager", "pip", "search", "--extended", query)
-            assert result.exit_code == 0
-            last_line = result.stdout.splitlines()[-1]
-            assert last_line
-            msg_match = re.match(
-                r"^([0-9]+) packages total \(pip: ([0-9]+)\).$", last_line
-            )
-            assert msg_match
-            assert same(msg_match.groups())
-            # We should find lots of results for this package search.
-            assert int(msg_match.groups()[0]) >= 20
+    @pytest.mark.parametrize("query", ["sed", "SED", "SeD", "sEd*", "*sED*"])
+    def test_extended_search_tokenizeri_multiple_results(self, invoke, query):
+        result = invoke("--manager", "pip", "search", "--extended", query)
+        assert result.exit_code == 0
+        last_line = result.stdout.splitlines()[-1]
+        assert last_line
+        msg_match = re.match(
+            r"^([0-9]+) packages? total \(pip: ([0-9]+)\).$", last_line
+        )
+        assert msg_match
+        assert same(msg_match.groups())
+        # We should find lots of results for this package search.
+        assert int(msg_match.groups()[0]) >= 20

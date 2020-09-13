@@ -62,9 +62,10 @@ class CLIError(Exception):
 
     def __repr__(self):
         return "<{}({}, {!r})>".format(
-            self.__class__.__name__, self.code,
-            shorten(' '.join(self.error.split()), width=60,
-                    placeholder="(...)"))
+            self.__class__.__name__,
+            self.code,
+            shorten(" ".join(self.error.split()), width=60, placeholder="(...)"),
+        )
 
 
 class PackageManager:

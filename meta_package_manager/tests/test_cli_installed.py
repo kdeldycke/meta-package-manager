@@ -22,6 +22,8 @@
 import pytest
 import simplejson as json
 
+from boltons.iterutils import same
+
 from .conftest import MANAGER_IDS
 from .test_cli import CLISubCommandTests, CLITableTests
 
@@ -53,7 +55,7 @@ class TestInstalled(CLISubCommandTests, CLITableTests):
 
             assert isinstance(info["errors"], list)
             if info["errors"]:
-                assert set(map(type, info["errors"])) == {str}
+                assert same(map(type, info["errors"]), str)
             assert isinstance(info["id"], str)
             assert isinstance(info["name"], str)
             assert isinstance(info["packages"], list)

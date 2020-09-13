@@ -61,7 +61,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
             assert isinstance(info["errors"], list)
             if info["errors"]:
-                assert set(map(type, info["errors"])) == {str}
+                assert same(map(type, info["errors"]), str)
 
             assert info["id"] == manager_id
 

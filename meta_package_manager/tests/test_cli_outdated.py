@@ -22,6 +22,8 @@
 import pytest
 import simplejson as json
 
+from boltons.iterutils import same
+
 from .conftest import MANAGER_IDS
 from .test_cli import CLISubCommandTests, CLITableTests
 
@@ -65,7 +67,7 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
 
             assert isinstance(info["errors"], list)
             if info["errors"]:
-                assert set(map(type, info["errors"])) == {str}
+                assert same(map(type, info["errors"]), str)
 
             assert info["id"] == manager_id
 
@@ -98,7 +100,7 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
         for outdated in json.loads(result.stdout).values():
             for infos in outdated["packages"]:
                 assert isinstance(infos["upgrade_cli"], list)
-                assert set(map(type, infos["upgrade_cli"])) == {str}
+                assert same(map(type, infos["upgrade_cli"]), str)
 
     def test_cli_format_bitbar(self, invoke, subcmd):
         result = invoke("--output-format", "json", subcmd, "--cli-format", "bitbar")

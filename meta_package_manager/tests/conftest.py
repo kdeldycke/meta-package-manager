@@ -24,7 +24,7 @@ from textwrap import indent
 
 import click
 import pytest
-from boltons.iterutils import flatten
+from boltons.iterutils import flatten, same
 from boltons.strutils import strip_ansi
 from boltons.tbutils import ExceptionInfo
 from click.testing import CliRunner
@@ -143,7 +143,7 @@ def invoke(runner):
         # convenience. We just need to flatten and filters them out.
         args = list(filter(None.__ne__, flatten(args)))
         if args:
-            assert set(map(type, args)) == {str}
+            assert same(map(type, args), str)
 
         result = runner.invoke(cli, args, color=color)
 

@@ -34,7 +34,7 @@ class NPM(PackageManager):
     name = "Node's npm"
 
     def run_cli(self, *args, dry_run=False):
-        """ Like the common run_cli helper, but silence NPM's JSON output on error.
+        """Like the common run_cli helper, but silence NPM's JSON output on error.
 
         NPM is prone to breakage if local node version is not in sync:
 

@@ -33,6 +33,34 @@ class NPM(PackageManager):
 
     name = "Node's npm"
 
+    def run_cli(self, *args, dry_run=False):
+        """ Like the common run_cli helper, but silence NPM's JSON output on error.
+
+        NPM is prone to breakage if local node version is not in sync:
+
+        .. code-block:: shell-session
+
+            ► npm -g --progress=false --json --no-update-notifier outdated
+            {
+              "error": {
+                "code": "ERR_OUT_OF_RANGE",
+                "summary": "The value of \"err\" is out of range. Received 536870212",
+                "detail": ""
+              }
+            }
+        """
+        output = super().run_cli(*args, dry_run=dry_run)
+
+        # NPM fatal errors are reported both in <stderr> output and as JSON. So we
+        # silence the errors in JSON so they get reported in CLI output (as
+        # they're already featured in self.cli_errors) without raising error
+        # (unless the --stop-on-error option is provided).
+        if "--json" in args:
+            if output and self.cli_errors:
+                output = None
+
+        return output
+
     def get_version(self):
         """Fetch version from ``npm --version`` output.
 
@@ -189,8 +217,7 @@ class NPM(PackageManager):
 
         output = self.run_cli(self.global_args, "search", "--json", search_args, query)
 
-        # npm fatal errors are reported as JSON too. We need to skip that case.
-        if output and not self.cli_errors:
+        if output:
             for package in json.loads(output):
                 package_id = package["name"]
 

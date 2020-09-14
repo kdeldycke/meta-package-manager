@@ -68,7 +68,7 @@ class Homebrew(PackageManager):
             ► brew update --quiet
             Already up-to-date.
         """
-        super(Homebrew, self).sync()
+        super().sync()
         self.run_cli("update", "--quiet")
 
     @property
@@ -401,7 +401,7 @@ class Homebrew(PackageManager):
 
         More doc at: https://docs.brew.sh/Manpage#cleanup-options-formulacask
         """
-        super(Homebrew, self).cleanup()
+        super().cleanup()
         self.run_cli("cleanup", "-s")
 
 

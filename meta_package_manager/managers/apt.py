@@ -81,7 +81,7 @@ class APT(PackageManager):
             Building dependency tree...
             Reading state information...
         """
-        super(APT, self).sync()
+        super().sync()
         self.run_cli(self.global_args, "update", "--quiet")
 
     @property
@@ -274,6 +274,6 @@ class APT(PackageManager):
 
             ► sudo apt-get -y autoremove
         """
-        super(APT, self).cleanup()
+        super().cleanup()
         self.run("sudo", self.cli_path, self.global_args, "-y", "autoremove")
         self.run("sudo", self.cli_path, self.global_args, "clean")

@@ -234,5 +234,5 @@ class Gem(PackageManager):
                 for the /Library/Ruby/Gems/2.6.0 directory.
             Clean up complete
         """
-        super(Gem, self).cleanup()
+        super().cleanup()
         self.run_cli("cleanup", self.global_args)

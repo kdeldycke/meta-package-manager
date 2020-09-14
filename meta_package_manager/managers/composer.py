@@ -224,5 +224,5 @@ class Composer(PackageManager):
 
         See: https://getcomposer.org/doc/03-cli.md#clear-cache-clearcache-cc
         """
-        super(Composer, self).cleanup()
+        super().cleanup()
         self.run_cli(self.global_args, "clear-cache")

@@ -43,7 +43,7 @@ class CLIError(Exception):
 
     def __init__(self, code, output, error):
         """ The exception internally keeps the result of CLI execution. """
-        super(CLIError, self).__init__()
+        super().__init__()
         self.code = code
         self.output = output
         self.error = error

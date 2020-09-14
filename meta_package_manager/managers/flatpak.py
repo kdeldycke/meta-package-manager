@@ -219,5 +219,5 @@ class Flatpak(PackageManager):
         See: https://docs.flatpak.org/en/latest
         /flatpak-command-reference.html#flatpak-repair
         """
-        super(Flatpak, self).cleanup()
+        super().cleanup()
         self.run_cli(self.global_args, "repair", "--user")

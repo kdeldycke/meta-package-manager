@@ -260,5 +260,5 @@ class Yarn(PackageManager):
 
         See: https://yarnpkg.com/cli/cache/clean
         """
-        super(Yarn, self).cleanup()
+        super().cleanup()
         self.run_cli(self.global_args, "cache", "clean", "--all")

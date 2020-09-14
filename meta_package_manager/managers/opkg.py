@@ -51,7 +51,7 @@ class OPKG(PackageManager):
 
         .. code-block:: shell-session
         """
-        super(OPKG, self).sync()
+        super().sync()
         self.run_cli(self.global_args, "update")
 
     @property

@@ -12,7 +12,7 @@ Changelog
 -------------------------------------------------------------------------------------------------
 
 * [mpm] Fix ``--stop-on-error`` parameter: it was never taken into account.
-* [brew,cask] Bump minimal requirement of to ``2.5.0``.
+* [brew,cask] Bump minimal requirement of ``brew`` to ``2.5.0``.
 * [brew,cask] Fix warning to deprecated options.
 * [npm] Always fix JSON parsing on error for any npm subcommand.
 

@@ -89,7 +89,7 @@ class PackageManager:
     global_args = []
 
     # Tell the manager either to raise or continue on errors.
-    raise_on_cli_error = False
+    stop_on_error = False
 
     # Some managers have the ability to report or ignore packages
     # possessing their own auto-update mecanism.
@@ -246,7 +246,7 @@ class PackageManager:
         if code and error:
             # Produce an exception and eventually raise it.
             exception = CLIError(code, output, error)
-            if self.raise_on_cli_error:
+            if self.stop_on_error:
                 raise exception
             # Accumulate errors.
             self.cli_errors.append(exception)

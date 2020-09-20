@@ -284,7 +284,7 @@ def cli(
     # Apply manager-level options.
     for m_obj in target_managers:
         # Does the manager should raise on error or not.
-        m_obj.raise_on_error = stop_on_error
+        m_obj.stop_on_error = stop_on_error
         # Should we include auto-update packages or not?
         m_obj.ignore_auto_updates = ignore_auto_updates
 

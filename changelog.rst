@@ -2,10 +2,8 @@ Changelog
 =========
 
 
-`3.5.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v3.4.2...develop>`_
---------------------------------------------------------------------------------------------------
-
-.. note:: This version is not yet released and is under active development.
+`3.5.0 (2020-09-20) <https://github.com/kdeldycke/meta-package-manager/compare/v3.4.2...v3.5.0>`_
+-------------------------------------------------------------------------------------------------
 
 * [mpm] Fix ``--stop-on-error`` parameter: it was never taken into account.
 * [brew,cask] Bump minimal requirement of to ``2.5.0``.

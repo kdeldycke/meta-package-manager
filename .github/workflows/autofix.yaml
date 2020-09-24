@@ -12,7 +12,7 @@ jobs:
     name: Format Python code and create a PR
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.2
+      - uses: actions/checkout@v2.3.3
         with:
           # Required by git-auto-commit-action. See:
           # https://github.com/stefanzweifel/git-auto-commit-action#checkout-the-correct-branch
@@ -45,7 +45,7 @@ jobs:
     name: Format JSON files and create a PR
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.2
+      - uses: actions/checkout@v2.3.3
       - name: Install linter
         run: |
           sudo npm install jsonlint -g
@@ -72,7 +72,7 @@ jobs:
     name: Fix typos and create a PR
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.2
+      - uses: actions/checkout@v2.3.3
       - uses: sobolevn/misspell-fixer-action@0.1.0
       - uses: peter-evans/create-pull-request@v3
         with:
@@ -93,7 +93,7 @@ jobs:
     name: Generate .gitignore and create a PR
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.2
+      - uses: actions/checkout@v2.3.3
       - name: Install git-extras package
         run: |
           sudo apt install -y git-extras
@@ -120,7 +120,7 @@ jobs:
     name: Update .mailmap and create a PR
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.2
+      - uses: actions/checkout@v2.3.3
         with:
           # Fetch all history to extract all contributors.
           fetch-depth: 0
@@ -147,7 +147,7 @@ jobs:
     name: Update dependency image and create a PR
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.2
+      - uses: actions/checkout@v2.3.3
       - uses: actions/setup-python@v2.1.2
       - name: Install pipdeptree
         run: |

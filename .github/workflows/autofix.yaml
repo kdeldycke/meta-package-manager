@@ -89,6 +89,30 @@ jobs:
           assignees: kdeldycke
           branch: autofix-typo
 
+  images:
+    name: Optimize images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.3
+      - uses: calibreapp/image-actions@1.1.0
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          compressOnly: true
+      - uses: peter-evans/create-pull-request@v3
+        with:
+          author: "Kevin Deldycke <kevin@deldycke.com>"
+          commit-message: "[autofix] Optimize images"
+          title: "[autofix] Optimize images"
+          body: >
+            [Auto-generated on run
+            #${{ github.run_id }}](https://github.com/${{ github.repository
+            }}/actions/runs/${{ github.run_id }}) as defined by [workflow
+            action](https://github.com/${{ github.repository
+            }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
+          labels: CI/CD, documentation
+          assignees: kdeldycke
+          branch: optimize-images
+
   gitignore:
     name: Generate .gitignore and create a PR
     runs-on: ubuntu-latest

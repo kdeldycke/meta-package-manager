@@ -7,6 +7,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Auto-optimize images.
+
 
 `3.5.0 (2020-09-20) <https://github.com/kdeldycke/meta-package-manager/compare/v3.4.2...v3.5.0>`_
 -------------------------------------------------------------------------------------------------

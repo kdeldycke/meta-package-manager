@@ -7,6 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Defaults to ``--continue-on-error`` instead of stopping.
 * [mpm] Auto-optimize images.
 
 

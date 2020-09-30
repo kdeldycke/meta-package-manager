@@ -247,9 +247,9 @@ class timeit:
 )
 @click.option(
     "--stop-on-error/--continue-on-error",
-    default=True,
     help="Stop right "
     "away or continue operations on manager CLI error. Defaults to stop.",
+    default=False,
 )
 @click.version_option(__version__)
 @click.pass_context

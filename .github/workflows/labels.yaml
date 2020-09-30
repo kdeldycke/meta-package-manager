@@ -1,5 +1,5 @@
 name: Labels
-on:
+"on":
   # Only the develop branch has authority on the project management. This will
   # prevent any other tagging or release activity interfer with the project.
   push:

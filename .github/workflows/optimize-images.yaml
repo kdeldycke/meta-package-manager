@@ -1,5 +1,5 @@
 name: Optimize images
-on:
+"on":
   # push:
   # XXX Wait for https://github.com/calibreapp/image-actions/pull/30 to trigger
   # on push to default branch.

@@ -1,5 +1,5 @@
 name: Build
-on:
+"on":
   push:
   pull_request:
 

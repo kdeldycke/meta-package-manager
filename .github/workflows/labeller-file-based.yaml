@@ -1,5 +1,5 @@
 name: Labeller (file-based)
-on:
+"on":
   - pull_request
 
 jobs:

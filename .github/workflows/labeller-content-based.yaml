@@ -1,5 +1,5 @@
 name: Labeller (content-based)
-on:
+"on":
   issues:
     types: [opened]
   pull_request:

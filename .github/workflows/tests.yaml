@@ -103,7 +103,7 @@ jobs:
       - name: macOS - Install Atom
         if: runner.os == 'macOS'
         run: |
-          brew install Caskroom/cask/atom
+          brew cask install atom
       - name: Linux - Install Atom
         if: runner.os == 'Linux'
         run: |

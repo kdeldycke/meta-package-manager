@@ -17,7 +17,7 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
-      - uses: Naturalclar/issue-action@v2.0.1
+      - uses: Naturalclar/issue-action@v2.0.2
         # TODO: skip this step if this workflow was created/triggered by a bot
         # or another GitHub action. That way we can prevent content-rich PRs
         # (like those produced by dependabot) to be overly tagged with extra

@@ -134,25 +134,26 @@ class PackageManager:
     def cli_path(self):
         """Fully qualified path to the package manager CLI.
 
-        Automaticaly search the location of the CLI in the system.
+        Automaticaly search the location of the CLI in the system. Only checks
+        if the file exists. Its executability will be assessed later. See the
+        ``self.executable`` method below.
 
         Returns `None` if CLI is not found or is not a file.
         """
-        if not self.cli_name:
-            return None
-        env_path = ":".join(
-            self.cli_search_path + ["/usr/local/bin", os.environ.get("PATH")]
-        )
+        # Check if the path exist in any of the environment locations.
+        env_path = ":".join(self.cli_search_path + [os.getenv("PATH")])
         cli_path = which(self.cli_name, mode=os.F_OK, path=env_path)
         if not cli_path:
-            return None
-        cli_path = which(cli_path, mode=os.F_OK, path=env_path)
-
-        if cli_path:
-            cli_path = Path(cli_path).resolve(strict=True)
-            logger.debug(f"CLI found at {cli_path}")
-        else:
             logger.debug(f"{self.cli_name} CLI not found.")
+            return
+
+        # Normalize CLI path and check it is a file.
+        cli_path = Path(cli_path).resolve(strict=True)
+        logger.debug(f"CLI found at {cli_path}")
+
+        if not cli_path.is_file():
+            logger.warning(f"{cli_path} is not a file.")
+            return
 
         return cli_path
 

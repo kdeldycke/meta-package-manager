@@ -8,6 +8,7 @@ Changelog
 .. note:: This version is not yet released and is under active development.
 
 * [mpm] Defaults to ``--continue-on-error`` instead of stopping.
+* [mpm] Force checking of CLI being a file.
 * [mpm] Auto-optimize images.
 
 

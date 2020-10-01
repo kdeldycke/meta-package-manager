@@ -3,7 +3,8 @@
 name: Autolock
 "on":
   schedule:
-    - cron: '0 * * * *'
+    # Run weekly, every Monday at 8:43.
+    - cron: "43 8 * * 1"
 
 jobs:
   lock:

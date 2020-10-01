@@ -10,6 +10,7 @@ Changelog
 * [mpm] Defaults to ``--continue-on-error`` instead of stopping.
 * [mpm] Force checking of CLI being a file.
 * [mpm] Auto-optimize images.
+* [mpm] Auto-lock closed issues and PRs after a moment of inactivity.
 
 
 `3.5.0 (2020-09-20) <https://github.com/kdeldycke/meta-package-manager/compare/v3.4.2...v3.5.0>`_

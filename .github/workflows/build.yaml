@@ -27,6 +27,9 @@ jobs:
           poetry check
           poetry run twine check ./dist/*
           poetry run check-wheel-contents ./dist/*.whl
+      - name: Test publishing
+        run: |
+          poetry publish --dry-run --no-interaction
       - name: Extract version
         id: get_version
         run: echo ::set-output name=TAG_VERSION::${GITHUB_REF#refs/tags/v}

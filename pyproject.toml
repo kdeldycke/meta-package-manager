@@ -41,14 +41,14 @@ classifiers = [
 # https://en.wikipedia.org/wiki/CPython#Version_history
 python = "^3.7"
 boltons = "^20.2.1"
-click = "^7.1"
-click-log = "^0.3"
-cli-helpers = "^2.1"
+click = "^7.1.2"
+click-log = "^0.3.2"
+cli-helpers = "^2.1.0"
 simplejson = "^3.17.2"
-tomlkit = "^0.7"
+tomlkit = "^0.7.0"
 # Should have been put in dev-dependencies but extras only works from main
 # section.
-sphinx = {version = "^3.2", optional = true}
+sphinx = {version = "^3.2.1", optional = true}
 sphinx_rtd_theme = {version = "^0.5.0", optional = true}
 sphinx_tabs = {version = "^1.3.0", optional = true}
 
@@ -58,14 +58,14 @@ bump2version = "^1.0.0"
 check-wheel-contents = "^0.1.0"
 coverage = {extras = ["toml"], version = "^5.3"}
 pipdeptree = {extras = ["graphviz"], version = "^2.0.0-beta.1", allow-prereleases = true}
-pycodestyle = "^2"
-pylint = "^2.6"
-pytest = "^6.1"
+pycodestyle = "^2.6.0"
+pylint = "^2.6.0"
+pytest = "^6.1.1"
 # More pytest plugins at: http://plugincompat.herokuapp.com .
 pytest-cov = "^2.10.1"
 pytest-randomly = "^3.4.1"
 pyyaml = "^5.3.1"
-twine = "^3.1"
+twine = "^3.2.0"
 yamllint = "^1.25.0"
 
 [tool.poetry.extras]

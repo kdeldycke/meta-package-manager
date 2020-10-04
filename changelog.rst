@@ -7,6 +7,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Upgrade to ``Poetry 1.1.0``.
+
 
 `3.5.1 (2020-10-03) <https://github.com/kdeldycke/meta-package-manager/compare/v3.5.0...v3.5.1>`_
 -------------------------------------------------------------------------------------------------

@@ -9,6 +9,8 @@ Changelog
 
 * [mpm] Upgrade to ``Poetry 1.1.0``.
 * [mpm] Test publishing to PyPi in dry-run mode by the way of Poetry.
+* [mpm] Make all keyword-based choice parameters (``--manager``, ``--exclude``,
+  ``--output-format``, ``--sort-by`` and ``--cli-format``) case-insensitive.
 
 
 `3.5.1 (2020-10-03) <https://github.com/kdeldycke/meta-package-manager/compare/v3.5.0...v3.5.1>`_

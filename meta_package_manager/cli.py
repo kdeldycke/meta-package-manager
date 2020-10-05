@@ -201,7 +201,7 @@ class timeit:
 @click.option(
     "-m",
     "--manager",
-    type=click.Choice(pool()),
+    type=click.Choice(pool(), case_sensitive=False),
     multiple=True,
     help="Restrict sub-command to a subset of package managers. Repeat to "
     "select multiple managers. Defaults to all.",
@@ -209,7 +209,7 @@ class timeit:
 @click.option(
     "-e",
     "--exclude",
-    type=click.Choice(pool()),
+    type=click.Choice(pool(), case_sensitive=False),
     multiple=True,
     help="Exclude a package manager. Repeat to exclude multiple managers. "
     "Defaults to none.",
@@ -224,14 +224,14 @@ class timeit:
 @click.option(
     "-o",
     "--output-format",
-    type=click.Choice(sorted(RENDERING_MODES)),
+    type=click.Choice(sorted(RENDERING_MODES), case_sensitive=False),
     default="fancy_grid",
     help="Rendering mode of the output. Defaults to fancy-grid.",
 )
 @click.option(
     "-s",
     "--sort-by",
-    type=click.Choice(SORTABLE_FIELDS),
+    type=click.Choice(SORTABLE_FIELDS, case_sensitive=False),
     default="manager_id",
     help="Sort results. Defaults to manager_id.",
 )
@@ -604,7 +604,7 @@ def search(ctx, extended, exact, query):
 @click.option(
     "-c",
     "--cli-format",
-    type=click.Choice(CLI_FORMATS),
+    type=click.Choice(CLI_FORMATS, case_sensitive=False),
     default="plain",
     help="Format of CLI fields in JSON output. Defaults to plain.",
 )

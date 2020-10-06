@@ -7,6 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Run tests on Python 3.9.
 * [mpm] Upgrade to ``Poetry 1.1.0``.
 * [mpm] Test publishing to PyPi in dry-run mode by the way of Poetry.
 * [mpm] Make all keyword-based choice parameters (``--manager``, ``--exclude``,

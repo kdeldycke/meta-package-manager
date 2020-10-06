@@ -36,7 +36,7 @@ def install_cask():
 
     def git_checkout(package_id, commit):
         code, _, _ = run_cmd(
-            "git", "-C", CASK_PATH, "checkout", commit, "{}.rb".format(package_id)
+            "git", "-C", CASK_PATH, "checkout", commit, f"{package_id}.rb"
         )
         assert code == 0
 
@@ -63,7 +63,7 @@ def install_cask():
         assert code == 0
         if error:
             assert "is already installed" not in error
-        assert "{} was successfully installed!".format(package_id) in output
+        assert f"{package_id} was successfully installed!" in output
         return output
 
     yield _install_cask

@@ -62,7 +62,7 @@ class Token:
             str_int = "0"
         if str(integer) != str_int:
             raise TypeError(
-                "{!r} string is not equivalent to {!r} integer".format(string, integer)
+                f"{string!r} string is not equivalent to {integer!r} integer."
             )
 
         return string, integer
@@ -87,7 +87,7 @@ class Token:
     def __repr__(self):
         """ Prints internal string and number values for debug. """
         return "<Token:{}>".format(
-            ",".join(["{}={!r}".format(k, v) for k, v in self.__dict__.items()])
+            ",".join([f"{k}={v!r}" for k, v in self.__dict__.items()])
         )
 
     def __str__(self):
@@ -173,7 +173,7 @@ class TokenizedString:
         self.separator = separator
 
     def __repr__(self):
-        return "<TokenizedString {} => {}>".format(self.string, self.tokens)
+        return f"<TokenizedString {self.string} => {self.tokens}>"
 
     def __str__(self):
         return self.string

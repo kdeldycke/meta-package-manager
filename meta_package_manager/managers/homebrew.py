@@ -297,7 +297,7 @@ class Homebrew(PackageManager):
 
         # Use regexp for exact match.
         if exact:
-            query = "/^{}$/".format(query)
+            query = f"/^{query}$/"
 
         output = self.run_cli(self.search_args, query)
 

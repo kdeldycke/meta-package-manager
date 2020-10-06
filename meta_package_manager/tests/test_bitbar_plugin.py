@@ -79,15 +79,14 @@ class TestBibarPlugin(unittest.TestCase):
                     break
             if not matches:
                 self.fail(
-                    "BitBar output line {!r} did not match any regexp.".format(line)
+                    f"BitBar output line {line!r} did not match any regexp."
                 )
 
         # Check all required regexp did match at least once.
         for index, (regex, required) in enumerate(checks):
             if required and not match_counter[index]:
                 self.fail(
-                    "{!r} regex did not match any BitBar plugin output line."
-                    "".format(regex)
+                    f"{regex!r} regex did not match any BitBar plugin output line."
                 )
 
     def test_simple_call(self):

@@ -114,7 +114,7 @@ def run_cmd(*args):
     print_cli_output(args, output)
 
     # Print some more debug info.
-    print(click.style("Return code: {}".format(code), fg="yellow"))
+    print(click.style(f"Return code: {code}", fg="yellow"))
     if error:
         print(indent(click.style(error, fg="red"), "  "))
 

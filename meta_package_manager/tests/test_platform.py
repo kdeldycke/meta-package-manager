@@ -81,7 +81,7 @@ def test_os_definitions():
         assert label in ALL_OS_LABELS
         # OS identification function.
         assert isinstance(os_flag, bool)
-        os_id_func_name = "is_{}".format(os_id)
+        os_id_func_name = f"is_{os_id}"
         assert os_id_func_name in globals()
         os_id_func = globals()[os_id_func_name]
         assert isinstance(os_id_func, FunctionType)

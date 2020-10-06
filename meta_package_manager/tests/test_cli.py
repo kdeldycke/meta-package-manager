@@ -171,38 +171,35 @@ class CLISubCommandTests:
             # the CLI. Roughly sorted from most specific to more forgiving.
             signals = [
                 # Common "not found" warning message.
-                "warning: Skip unavailable {} manager.".format(mid) in result.stderr,
+                f"warning: Skip unavailable {mid} manager." in result.stderr,
                 # Common "not implemented" optional command warning message.
                 bool(
                     re.search(
-                        r"warning: (Sync|Cleanup) not implemented for {}.".format(mid),
+                        fr"warning: (Sync|Cleanup) not implemented for {mid}.",
                         result.stderr,
                     )
                 ),
                 # Stats line at the end of output.
-                "{}: ".format(mid) in result.stdout.splitlines()[-1]
-                if result.stdout
-                else "",
+                f"{mid}: " in result.stdout.splitlines()[-1] if result.stdout else "",
                 # Match output of managers command.
                 bool(
                     re.search(
-                        r"\s+│\s+{}\s+│\s+(✓|✘).+│\s+(✓|✘)".format(mid),
+                        fr"\s+│\s+{mid}\s+│\s+(✓|✘).+│\s+(✓|✘)",
                         strip_ansi(result.stdout),
                     )
                 ),
                 # Sync command.
-                "Sync {} package info...".format(mid) in result.stderr,
+                f"Sync {mid} package info..." in result.stderr,
                 # Upgrade command.
-                "Updating all outdated packages from {}...".format(mid)
-                in result.stderr,
+                f"Updating all outdated packages from {mid}..." in result.stderr,
                 # Cleanup command.
-                "Cleanup {}...".format(mid) in result.stderr,
+                f"Cleanup {mid}..." in result.stderr,
                 # Log message for backup command.
-                "Dumping packages from {}...".format(mid) in result.stderr,
+                f"Dumping packages from {mid}..." in result.stderr,
                 # Restoring message.
-                "Restore {} packages...".format(mid) in result.stderr,
+                f"Restore {mid} packages..." in result.stderr,
                 # Warning message for restore command.
-                "warning: No [{}] section found.".format(mid) in result.stderr,
+                f"warning: No [{mid}] section found." in result.stderr,
             ]
 
             if True in signals:

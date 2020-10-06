@@ -20,7 +20,7 @@
 import os
 from pathlib import Path
 from shutil import which
-from textwrap import indent, shorten
+from textwrap import dedent, indent, shorten
 
 import click
 from boltons.cacheutils import cachedproperty
@@ -51,21 +51,21 @@ class CLIError(Exception):
     def __str__(self):
         """ Human-readable error. """
         margin = " " * 2
-        return indent(
-            ("\nReturn code: {}\n" "Output:\n{}\n" "Error:\n{}").format(
-                self.code,
-                indent(str(self.output), margin),
-                indent(str(self.error), margin),
-            ),
+        indented_output = indent(str(self.output), margin)
+        indented_error = indent(str(self.error), margin)
+        return indent(dedent(f"""
+            Return code: {self.code}
+            Output:
+            {indented_output}
+            Error:
+            {indented_error}"""),
             margin,
         )
 
     def __repr__(self):
-        return "<{}({}, {!r})>".format(
-            self.__class__.__name__,
-            self.code,
-            shorten(" ".join(self.error.split()), width=60, placeholder="(...)"),
-        )
+        error_excerpt = shorten(
+            " ".join(self.error.split()), width=60, placeholder="(...)")
+        return f"<{self.__class__.__name__}({self.code}, {error_excerpt!r})>"
 
 
 class PackageManager:
@@ -366,9 +366,9 @@ class PackageManager:
         bitbar_cli = ""
         for index, param in enumerate(cmd):
             if index == 0:
-                bitbar_cli += "bash={}".format(param)
+                bitbar_cli += f"bash={param}"
             else:
                 if "=" in param:
-                    param = '\\"{}\\"'.format(param)
-                bitbar_cli += " param{}={}".format(index, param)
+                    param = f'\\"{param}\\"'
+                bitbar_cli += f" param{index}={param}"
         return bitbar_cli

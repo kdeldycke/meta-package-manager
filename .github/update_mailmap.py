@@ -39,7 +39,7 @@ contributors = set()
 #   /pretty-formats#Documentation/pretty-formats.txt-emaNem
 for param in ["%aN <%aE>", "%cN <%cE>"]:
     process = Popen(
-        ("git", "log", "--pretty=format:{}".format(param)), stdout=PIPE, stderr=PIPE
+        ("git", "log", f"--pretty=format:{param}"), stdout=PIPE, stderr=PIPE
     )
 
     # Parse git CLI output.

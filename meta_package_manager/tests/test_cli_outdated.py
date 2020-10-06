@@ -33,7 +33,7 @@ def subcmd():
     return "outdated"
 
 
-BITBAR_KEYWORDS = {"bash"}.union({"param{}".format(i) for i in range(1, 10)})
+BITBAR_KEYWORDS = {"bash"}.union({f"param{i}" for i in range(1, 10)})
 
 
 class TestOutdated(CLISubCommandTests, CLITableTests):

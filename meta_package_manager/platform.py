@@ -79,7 +79,7 @@ def current_os():
     for os_id, (os_name, os_flag) in OS_DEFINITIONS.items():
         if os_flag is True:
             return os_id, os_name
-    raise SystemError("Unrecognized {} platform.".format(sys.platform))
+    raise SystemError(f"Unrecognized {sys.platform} platform.")
 
 
 CURRENT_OS_ID, CURRENT_OS_LABEL = current_os()

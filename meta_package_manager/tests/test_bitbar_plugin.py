@@ -27,7 +27,6 @@ from collections import Counter
 
 from .. import bitbar
 
-
 """
 Like BitBar, this plugin is supposed to run smoothly with Python 2.7.1 or
 newer.

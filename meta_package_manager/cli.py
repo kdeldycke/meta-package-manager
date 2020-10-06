@@ -36,7 +36,7 @@ from boltons.strutils import complement_int_list, int_ranges_from_int_list, stri
 from cli_helpers.tabular_output import TabularOutputFormatter
 from simplejson import dumps as json_dumps
 
-from . import __version__, logger, CLI_NAME
+from . import CLI_NAME, __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
 from .platform import CURRENT_OS_ID, WINDOWS, os_label

@@ -19,10 +19,12 @@
 
 """ Utilities to load parameters and options from a configuration file. """
 
+from pathlib import Path
+
 import click
 import tomlkit
-from pathlib import Path
-from . import logger, CLI_NAME
+
+from . import CLI_NAME, logger
 
 
 def config_structure():

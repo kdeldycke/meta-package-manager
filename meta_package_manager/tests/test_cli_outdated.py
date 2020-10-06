@@ -21,7 +21,6 @@
 
 import pytest
 import simplejson as json
-
 from boltons.iterutils import same
 
 from .conftest import MANAGER_IDS

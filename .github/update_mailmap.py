@@ -31,7 +31,6 @@ from pathlib import Path
 from subprocess import PIPE, Popen
 from textwrap import dedent
 
-
 contributors = set()
 
 # Fetch all variations of authors and commiters.

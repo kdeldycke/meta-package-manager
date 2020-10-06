@@ -29,9 +29,9 @@ from boltons.strutils import strip_ansi
 from boltons.tbutils import ExceptionInfo
 from click.testing import CliRunner
 
+from .. import CLI_NAME
 from ..bitbar import run as bitbar_run
 from ..cli import cli
-from .. import CLI_NAME
 from ..platform import is_linux, is_macos, is_windows
 
 """ Fixtures, configuration and helpers for tests. """

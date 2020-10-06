@@ -53,18 +53,22 @@ class CLIError(Exception):
         margin = " " * 2
         indented_output = indent(str(self.output), margin)
         indented_error = indent(str(self.error), margin)
-        return indent(dedent(f"""
+        return indent(
+            dedent(
+                f"""
             Return code: {self.code}
             Output:
             {indented_output}
             Error:
-            {indented_error}"""),
+            {indented_error}"""
+            ),
             margin,
         )
 
     def __repr__(self):
         error_excerpt = shorten(
-            " ".join(self.error.split()), width=60, placeholder="(...)")
+            " ".join(self.error.split()), width=60, placeholder="(...)"
+        )
         return f"<{self.__class__.__name__}({self.code}, {error_excerpt!r})>"
 
 

@@ -369,9 +369,7 @@ def managers(ctx):
         # Build up the CLI path column content.
         cli_infos = "{}  {}".format(
             OK if manager.cli_path else KO,
-            manager.cli_path
-            if manager.cli_path
-            else f"{manager.cli_name!r} not found",
+            manager.cli_path if manager.cli_path else f"{manager.cli_name!r} not found",
         )
 
         # Build up the version column content.
@@ -803,9 +801,7 @@ def restore(ctx, toml_files):
         doc = tomlkit.parse(toml_input.read())
 
         # List unrecognized sections.
-        ignored_sections = [
-            f"[{section}]" for section in doc if section not in pool()
-        ]
+        ignored_sections = [f"[{section}]" for section in doc if section not in pool()]
         if ignored_sections:
             plural = "s" if len(ignored_sections) > 1 else ""
             sections = ", ".join(ignored_sections)

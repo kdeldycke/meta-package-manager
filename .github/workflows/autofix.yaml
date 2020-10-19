@@ -110,8 +110,8 @@ jobs:
             }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
             }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
-            %0A$
-            {{ steps.image_actions.outputs.markdown }}
+            %0A
+            ${{ steps.image_actions.outputs.markdown }}
           labels: CI/CD, documentation
           assignees: kdeldycke
           branch: optimize-images

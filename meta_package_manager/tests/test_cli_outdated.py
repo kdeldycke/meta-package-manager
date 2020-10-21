@@ -19,6 +19,7 @@
 
 # pylint: disable=redefined-outer-name
 
+from string import ascii_lowercase, digits
 import pytest
 import simplejson as json
 from boltons.iterutils import same
@@ -111,5 +112,5 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
                     k, v = param.split("=", 1)
                     assert k in BITBAR_KEYWORDS
                     assert set(v.lower()).issubset(
-                        '0123456789abcdefghijklmnopqrstuvwxyz./-_+="\\@:'
+                        digits + ascii_lowercase + './-_+="\\@:'
                     )

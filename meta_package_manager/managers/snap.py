@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Copyright Kevin Deldycke <kevin@deldycke.com> and contributors.
 # All Rights Reserved.
 #

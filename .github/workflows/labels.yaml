@@ -1,3 +1,4 @@
+---
 name: Labels
 "on":
   # Only the develop branch has authority on the project management. This will

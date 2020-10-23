@@ -1,3 +1,4 @@
+---
 name: Labeller (file-based)
 "on":
   - pull_request

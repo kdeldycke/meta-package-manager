@@ -45,13 +45,13 @@ jobs:
       - name: macOS - Upgrade Homebrew
         if: runner.os == 'macOS'
         run: |
-          brew uninstall --ignore-dependencies glib subversion
+          brew uninstall --ignore-dependencies glib subversion yamllint
           brew uninstall openssl@1.0.2t
           brew uninstall python@2.7.17
           brew untap local/openssl
           brew untap local/python2
           brew update
-          brew reinstall --force openssl
+          brew reinstall openssl
           brew reinstall python
 
       # Apt

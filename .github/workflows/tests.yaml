@@ -50,8 +50,8 @@ jobs:
           brew untap local/openssl
           brew untap local/python2
           brew update
-          brew install openssl
-          brew install python
+          brew reinstall openssl
+          brew reinstall python
 
       # Apt
       - name: Linux - Upgrade apt

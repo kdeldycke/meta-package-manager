@@ -29,7 +29,7 @@ from .test_cli import CLISubCommandTests, CLITableTests
 
 @pytest.fixture
 def subcmd():
-    return "--verbosity", "DEBUG", "search", "abc"
+    return "search", "abc"
 
 
 class TestSearch(CLISubCommandTests, CLITableTests):
@@ -113,7 +113,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
     @pytest.mark.parametrize("query", ["sed", "SED", "SeD", "sEd*", "*sED*"])
     def test_fuzzy_search_tokenizer_multiple_results(self, invoke, query):
-        result = invoke("--manager", "pip", "search", query, color=False)
+        result = invoke("--verbosity", "DEBUG", "--manager", "pip", "search", query, color=False)
         assert result.exit_code == 0
         assert "2 packages total" in result.stdout
         assert " sed " in result.stdout

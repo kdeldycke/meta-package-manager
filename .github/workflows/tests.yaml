@@ -37,8 +37,9 @@ jobs:
           brew uninstall python@2.7.17
           brew untap local/openssl
           brew untap local/python2
-          brew reinstall openssl
-          brew reinstall python
+          brew update
+          brew upgrade openssl
+          brew upgrade python
 
       - name: Set up Python ${{matrix.python-version}}
         uses: actions/setup-python@v2.1.4

@@ -51,6 +51,7 @@ jobs:
           brew untap local/openssl
           brew untap local/python2
           brew update
+          brew upgrade
           brew reinstall openssl
           brew reinstall python
 

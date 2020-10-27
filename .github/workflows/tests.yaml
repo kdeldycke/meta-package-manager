@@ -11,7 +11,7 @@ jobs:
 
   tests:
     name: Install package managers and run unittests
-    runs-on: ${{matrix.os}}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         # See what each os came pre-installed with at:
@@ -35,10 +35,10 @@ jobs:
           brew untap local/homebrew-openssl
           brew untap local/homebrew-python2
 
-      - name: Set up Python ${{matrix.python-version}}
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2.1.4
         with:
-          python-version: ${{matrix.python-version}}
+          python-version: ${{ matrix.python-version }}
 
       - name: Linux - Fix runner cache folder permissions
         if: runner.os == 'Linux'

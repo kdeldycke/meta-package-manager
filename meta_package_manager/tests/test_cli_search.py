@@ -29,7 +29,7 @@ from .test_cli import CLISubCommandTests, CLITableTests
 
 @pytest.fixture
 def subcmd():
-    return "search", "abc"
+    return "--verbosity", "DEBUG", "search", "abc"
 
 
 class TestSearch(CLISubCommandTests, CLITableTests):

@@ -22,7 +22,7 @@ jobs:
         exclude:
           - os: ubuntu-20.04
             python-version: 2.7
-          - os: windows-latest
+          - os: windows-2019
             python-version: 2.7
     steps:
       - uses: actions/checkout@v2.3.3

@@ -28,8 +28,9 @@ jobs:
       - uses: actions/checkout@v2.3.3
 
       - name: Fix brew on macOS GitHub runners
-        # XXX GitHub runners are broken. See: https://github.com/actions
-        # /virtual-environments/issues/1811#issuecomment-708480190
+        # XXX GitHub runners are broken. See:
+        # https://github.com/actions/virtual-environments/pull/1808
+        # https://github.com/actions/virtual-environments/issues/1745
         if: runner.os == 'macOS'
         run: |
           brew untap local/homebrew-openssl

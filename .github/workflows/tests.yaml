@@ -32,14 +32,8 @@ jobs:
         # /virtual-environments/issues/1811#issuecomment-708480190
         if: runner.os == 'macOS'
         run: |
-          brew uninstall --ignore-dependencies glib subversion yamllint
-          brew uninstall openssl@1.0.2t
-          brew uninstall python@2.7.17
-          brew untap local/openssl
-          brew untap local/python2
-          brew update
-          brew upgrade openssl
-          brew upgrade python
+          brew untap local/homebrew-openssl
+          brew untap local/homebrew-python2
 
       - name: Set up Python ${{matrix.python-version}}
         uses: actions/setup-python@v2.1.4

@@ -30,7 +30,7 @@ jobs:
       - name: Fix brew on macOS GitHub runners
         # XXX GitHub runners are broken. See: https://github.com/actions
         # /virtual-environments/issues/1811#issuecomment-708480190
-         if: runner.os == 'macOS'
+        if: runner.os == 'macOS'
         run: |
           brew uninstall --ignore-dependencies glib subversion yamllint
           brew uninstall openssl@1.0.2t

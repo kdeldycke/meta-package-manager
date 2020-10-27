@@ -9,7 +9,7 @@ name: Labeller (content-based)
 jobs:
   labeller:
     name: Issue & PR labeller based on content
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       # XXX DEBUG info
       # I need to identify how to skip this whole labelling for issues and PRs

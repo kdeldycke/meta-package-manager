@@ -8,7 +8,7 @@ jobs:
 
   build:
     name: Build, check and publish package on release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2.3.3
       - uses: actions/setup-python@v2.1.4

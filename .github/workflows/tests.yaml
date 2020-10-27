@@ -45,8 +45,10 @@ jobs:
       - name: macOS - Upgrade Homebrew
         if: runner.os == 'macOS'
         run: |
+          brew uninstall glib
           brew uninstall openssl@1.0.2t
           brew uninstall python@2.7.17
+          brew untap local/glib
           brew untap local/openssl
           brew untap local/python2
           brew update

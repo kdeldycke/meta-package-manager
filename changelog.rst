@@ -9,6 +9,7 @@ Changelog
 
 * [mpm] Run tests on Python 3.9.
 * [mpm] Upgrade to ``Poetry 1.1.0``.
+* [mpm] Colorize version screen and add debug data.
 * [mpm] Test publishing to PyPi in dry-run mode by the way of Poetry.
 * [mpm] Make all keyword-based choice parameters (``--manager``, ``--exclude``,
   ``--output-format``, ``--sort-by`` and ``--cli-format``) case-insensitive.

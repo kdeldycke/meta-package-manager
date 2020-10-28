@@ -32,9 +32,10 @@ import tomlkit
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list, strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
+from click_help_colors import HelpColorsGroup, HelpColorsCommand, version_option
 from simplejson import dumps as json_dumps
 
-from . import CLI_NAME, __version__, logger
+from . import CLI_NAME, __version__, logger, env_data
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
 from .platform import CURRENT_OS_ID, WINDOWS, os_label
@@ -249,7 +250,14 @@ class timeit:
     help="Stop right away or continue operations on manager CLI error. Defaults to "
     "continue.",
 )
-@click.version_option(__version__)
+@version_option(
+    version=__version__,
+    prog_name=CLI_NAME,
+    version_color='green',
+    prog_name_color='white',
+    message=f"%(prog)s %(version)s\n{env_data}",
+    message_color='bright_black',
+)
 @click.pass_context
 def cli(
     ctx,

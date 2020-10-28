@@ -19,6 +19,8 @@
 
 import logging
 
+from boltons.ecoutils import get_profile
+
 from .bitbar import fix_environment
 
 # Canonical name of the CLI.
@@ -38,6 +40,11 @@ __version__ = "3.5.2"
 """
 
 
+# Environment data.
+env_data = get_profile(scrub=True)
+
+
+# Initialize global logger.
 logger = logging.getLogger(__name__)
 
 

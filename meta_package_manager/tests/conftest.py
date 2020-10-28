@@ -95,11 +95,15 @@ unless_windows = pytest.mark.skipif(not is_windows(), reason="Windows required")
 """ Pytest mark to skip a test unless it is run on a Windows system. """
 
 
-def print_cli_output(cmd, output):
+def print_cli_output(cmd, output=None, error=None, error_code=None):
     """ Simulate CLI output. Used to print debug traces in test results. """
     print("\n► {}".format(click.style(" ".join(cmd), fg="white")))
     if output:
         print(indent(output, "  "))
+    if error:
+        print(indent(click.style(error, fg="red"), "  "))
+    if error_code is not None:
+        print(click.style(f"Return code: {error_code}", fg="yellow"))
 
 
 def run_cmd(*args):
@@ -108,14 +112,7 @@ def run_cmd(*args):
     Relies on robust ``run`` function implemented in BitBar plugin.
     """
     code, output, error = bitbar_run(*args)
-
-    print_cli_output(args, output)
-
-    # Print some more debug info.
-    print(click.style(f"Return code: {code}", fg="yellow"))
-    if error:
-        print(indent(click.style(error, fg="red"), "  "))
-
+    print_cli_output(args, output, error, code)
     return code, output, error
 
 
@@ -145,16 +142,15 @@ def invoke(runner):
 
         result = runner.invoke(cli, args, color=color)
 
+        print_cli_output(
+            [CLI_NAME] + args, result.output, result.stderr_bytes, result.exit_code)
+
+        if result.exception:
+            print(ExceptionInfo.from_exc_info(*result.exc_info).get_formatted())
+
         # Strip colors out of results.
         result.stdout_bytes = strip_ansi(result.stdout_bytes)
         result.stderr_bytes = strip_ansi(result.stderr_bytes)
-
-        print_cli_output([CLI_NAME] + args, result.output)
-
-        # Print some more debug info.
-        print(result)
-        if result.exception:
-            print(ExceptionInfo.from_exc_info(*result.exc_info).get_formatted())
 
         return result
 

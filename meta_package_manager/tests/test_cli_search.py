@@ -18,6 +18,7 @@
 # pylint: disable=redefined-outer-name
 
 import re
+from time import sleep
 
 import pytest
 import simplejson as json
@@ -89,7 +90,14 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         assert "ubersicht" in result.stdout
         assert "Übersicht" not in result.stdout
 
+    # PyPi's online search API is rate-limited. We add an artificial 2-seconds delay to
+    # prevent this issue:
+    #   xmlrpc.client.Fault: <Fault -32500: 'HTTPTooManyRequests: The action could not
+    #   be performed because there were too many requests by the client. Limit may reset
+    #   in 1 seconds.'>
+
     def test_exact_search_tokenizer_one_result(self, invoke):
+        sleep(2)
         result = invoke("--manager", "pip", "search", "--exact", "sed", color=False)
         assert result.exit_code == 0
         assert "1 package total" in result.stdout
@@ -99,6 +107,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         "query", ["SED", "SeD", "sEd*", "*sED*", "_seD-@", "", "_"]
     )
     def test_exact_search_tokenizer_no_result(self, invoke, query):
+        sleep(2)
         result = invoke("--manager", "pip", "search", "--exact", query)
         assert result.exit_code == 0
         assert "0 package total" in result.stdout
@@ -106,6 +115,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
     @pytest.mark.parametrize("query", ["", "_", "_seD-@"])
     def test_fuzzy_search_tokenizer_no_results(self, invoke, query):
+        sleep(2)
         result = invoke("--manager", "pip", "search", query)
         assert result.exit_code == 0
         assert "0 package total" in result.stdout
@@ -113,7 +123,8 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
     @pytest.mark.parametrize("query", ["sed", "SED", "SeD", "sEd*", "*sED*"])
     def test_fuzzy_search_tokenizer_multiple_results(self, invoke, query):
-        result = invoke("--verbosity", "DEBUG", "--manager", "pip", "search", query, color=False)
+        sleep(2)
+        result = invoke("--manager", "pip", "search", query, color=False)
         assert result.exit_code == 0
         assert "2 packages total" in result.stdout
         assert " sed " in result.stdout
@@ -121,6 +132,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
     @pytest.mark.parametrize("query", ["", "_", "_seD-@"])
     def test_extended_search_tokenizeri_no_results(self, invoke, query):
+        sleep(2)
         result = invoke("--manager", "pip", "search", "--extended", query)
         assert result.exit_code == 0
         assert "0 package total" in result.stdout
@@ -128,6 +140,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
     @pytest.mark.parametrize("query", ["sed", "SED", "SeD", "sEd*", "*sED*"])
     def test_extended_search_tokenizeri_multiple_results(self, invoke, query):
+        sleep(2)
         result = invoke("--manager", "pip", "search", "--extended", query)
         assert result.exit_code == 0
         last_line = result.stdout.splitlines()[-1]

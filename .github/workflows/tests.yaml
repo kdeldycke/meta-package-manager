@@ -187,6 +187,8 @@ jobs:
       - name: mpm CLI output for debugging
         if: matrix.python-version == '2.7'
         run: |
+          mpm
+          mpm --version
           mpm managers
       - name: Test BitBar plugin
         if: matrix.python-version == '2.7'
@@ -201,6 +203,8 @@ jobs:
       - name: mpm CLI output for debugging
         if: matrix.python-version != '2.7'
         run: |
+          poetry run mpm
+          poetry run mpm --version
           poetry run mpm managers
       - name: Tests and coverage report in destructive mode
         if: matrix.python-version != '2.7'

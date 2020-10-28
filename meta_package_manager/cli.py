@@ -253,10 +253,10 @@ class timeit:
 @version_option(
     version=__version__,
     prog_name=CLI_NAME,
-    version_color='green',
-    prog_name_color='white',
+    version_color="green",
+    prog_name_color="white",
     message=f"%(prog)s %(version)s\n{env_data}",
-    message_color='bright_black',
+    message_color="bright_black",
 )
 @click.pass_context
 def cli(

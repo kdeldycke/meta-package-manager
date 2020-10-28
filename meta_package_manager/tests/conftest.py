@@ -142,15 +142,15 @@ def invoke(runner):
 
         result = runner.invoke(cli, args, color=color)
 
+        # Strip colors out of results.
+        result.stdout_bytes = strip_ansi(result.stdout_bytes)
+        result.stderr_bytes = strip_ansi(result.stderr_bytes)
+
         print_cli_output(
             [CLI_NAME] + args, result.output, result.stderr_bytes, result.exit_code)
 
         if result.exception:
             print(ExceptionInfo.from_exc_info(*result.exc_info).get_formatted())
-
-        # Strip colors out of results.
-        result.stdout_bytes = strip_ansi(result.stdout_bytes)
-        result.stderr_bytes = strip_ansi(result.stderr_bytes)
 
         return result
 

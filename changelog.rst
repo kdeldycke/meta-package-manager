@@ -2,10 +2,8 @@ Changelog
 =========
 
 
-`3.5.2 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v3.5.1...develop>`_
---------------------------------------------------------------------------------------------------
-
-.. note:: This version is not yet released and is under active development.
+`3.5.2 (2020-10-29) <https://github.com/kdeldycke/meta-package-manager/compare/v3.5.1...v3.5.2>`_
+-------------------------------------------------------------------------------------------------
 
 * [mpm] Run tests on Python 3.9.
 * [mpm] Upgrade to ``Poetry 1.1.0``.

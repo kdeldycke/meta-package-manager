@@ -13,6 +13,13 @@ Changelog
 * [mpm] Test publishing to PyPi in dry-run mode by the way of Poetry.
 * [mpm] Make all keyword-based choice parameters (``--manager``, ``--exclude``,
   ``--output-format``, ``--sort-by`` and ``--cli-format``) case-insensitive.
+* [mpm] Pin versions of OSes and distributions in CI workflows to ``ubuntu-20.04``,
+  ``macos-10.15`` and ``windows-2019``.
+* [mpm] Always print errors in unittest's CLI calls.
+* [mpm] Slow-down tests to prevent PyPi rate-limiting on live API.
+* [mpm] Fix ``brew`` setup on macOS CI runners.
+* [mpm] Fix ``npm`` setup in Ubuntu 18.04 and 20.04 CI runners.
+* [mpm] Use latest ``Atom`` version in Ubuntu CI runners.
 
 
 `3.5.1 (2020-10-03) <https://github.com/kdeldycke/meta-package-manager/compare/v3.5.0...v3.5.1>`_

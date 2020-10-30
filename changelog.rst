@@ -7,6 +7,9 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Add test runs against new OSes and distributions: ``ubuntu-18.04`` and
+  ``macos-11.0``.
+
 
 `3.5.2 (2020-10-29) <https://github.com/kdeldycke/meta-package-manager/compare/v3.5.1...v3.5.2>`_
 -------------------------------------------------------------------------------------------------

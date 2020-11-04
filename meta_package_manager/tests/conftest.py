@@ -98,12 +98,13 @@ unless_windows = pytest.mark.skipif(not is_windows(), reason="Windows required")
 def print_cli_output(cmd, output=None, error=None, error_code=None):
     """ Simulate CLI output. Used to print debug traces in test results. """
     print("\n► {}".format(click.style(" ".join(cmd), fg="white")))
+    margin = " " * 2
     if output:
-        print(indent(output, "  "))
+        print(indent(output, margin))
     if error:
-        print(indent(click.style(error, fg="red"), "  "))
+        print(indent(click.style(error, fg="red"), margin))
     if error_code is not None:
-        print(click.style(f"Return code: {error_code}", fg="yellow"))
+        print(click.style(f"{margin}Return code: {error_code}", fg="yellow"))
 
 
 def run_cmd(*args):

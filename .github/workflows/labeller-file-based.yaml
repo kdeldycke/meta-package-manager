@@ -8,7 +8,7 @@ jobs:
     name: Issue & PR labeller based on changed files
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v2.3.4
       - uses: actions/labeler@2.2.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}

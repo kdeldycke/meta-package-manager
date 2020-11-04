@@ -32,7 +32,7 @@ jobs:
           - os: windows-2019
             python-version: 2.7
     steps:
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v2.3.4
 
       - name: Fix brew on macOS GitHub runners
         # XXX GitHub runners are broken. See:

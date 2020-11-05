@@ -13,3 +13,4 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           configuration-path: ".github/labeller-file-based.yaml"
+          sync-labels: true

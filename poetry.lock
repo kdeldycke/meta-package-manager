@@ -141,7 +141,7 @@ python-versions = "*"
 
 [[package]]
 name = "check-wheel-contents"
-version = "0.1.0"
+version = "0.2.0"
 description = "Check your wheels have the right contents"
 category = "dev"
 optional = false
@@ -150,6 +150,7 @@ python-versions = "~=3.6"
 [package.dependencies]
 attrs = ">=18.1"
 click = ">=7.0,<8.0"
+packaging = "*"
 property-manager = ">=3.0,<4.0"
 toml = "*"
 wheel-filename = ">=1.1,<2.0"
@@ -1022,7 +1023,7 @@ docs = ["sphinx", "sphinx_rtd_theme", "sphinx_tabs"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "6bb08fadf754cc507b18bd318b09cc3276363d8c12ac99c96391a2ff69755b71"
+content-hash = "c2c9aeb0ac12185c314623a23c3463de1f574e0ea1dcc5dfe9debb4beec146cf"
 
 [metadata.files]
 alabaster = [
@@ -1111,8 +1112,8 @@ chardet = [
     {file = "chardet-3.0.4.tar.gz", hash = "sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae"},
 ]
 check-wheel-contents = [
-    {file = "check-wheel-contents-0.1.0.tar.gz", hash = "sha256:ad49551fe3b89fee6ae3b483df7b8166c0cf5c3ac04259933540bcafd6367841"},
-    {file = "check_wheel_contents-0.1.0-py3-none-any.whl", hash = "sha256:1a6f7f1f10775de7bf388b13fc60bd62c5bece1d9457f4e910e3200c076952bb"},
+    {file = "check-wheel-contents-0.2.0.tar.gz", hash = "sha256:3422e12a52b7b8648508a070ad7da795aede5ce0c05d95f34155216db5fd9469"},
+    {file = "check_wheel_contents-0.2.0-py3-none-any.whl", hash = "sha256:2aa06128a1b67a4cd1c9dc6f1e6cdae23c2ad0bfe388c18dc5eeb95dbe610605"},
 ]
 cli-helpers = [
     {file = "cli_helpers-2.1.0-py3-none-any.whl", hash = "sha256:6fe25b8fa78030a88f41b2af9ae4699bb341970773b444bd522f3627bd4485f2"},

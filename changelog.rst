@@ -9,6 +9,7 @@ Changelog
 
 * [mpm] Add test runs against new OSes and distributions: ``ubuntu-18.04`` and
   ``macos-11.0``.
+* [mpm] Add emoji to issue labels.
 
 
 `3.5.2 (2020-10-29) <https://github.com/kdeldycke/meta-package-manager/compare/v3.5.1...v3.5.2>`_

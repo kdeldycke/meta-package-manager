@@ -181,14 +181,14 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "click-help-colors"
-version = "0.8.1"
+version = "0.9"
 description = "Colorization of help messages in Click"
 category = "main"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-click = ">=7.0,<8"
+click = ">=7.0,<9"
 
 [package.extras]
 dev = ["pytest"]
@@ -1023,7 +1023,7 @@ docs = ["sphinx", "sphinx_rtd_theme", "sphinx_tabs"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "b2363bc854c4cc86275ca1a77256eda29669b07a43a9c495644e4c06ac9b4581"
+content-hash = "bba3f4baaf00ad87c7ab5ca06df66ca5cba03db987ba66d33527846219319a48"
 
 [metadata.files]
 alabaster = [
@@ -1124,8 +1124,8 @@ click = [
     {file = "click-7.1.2.tar.gz", hash = "sha256:d2b5255c7c6349bc1bd1e59e08cd12acbbd63ce649f2588755783aa94dfb6b1a"},
 ]
 click-help-colors = [
-    {file = "click-help-colors-0.8.1.tar.gz", hash = "sha256:9f660cb64b9ed0927c906af51169ad27c60771c14e6bc9076d490b05bfa7befd"},
-    {file = "click_help_colors-0.8.1-py3-none-any.whl", hash = "sha256:311bfac0ce694fcc2a9d91f27d15caf8240bb5f1445b923728ba16ef9664cc57"},
+    {file = "click-help-colors-0.9.tar.gz", hash = "sha256:eb037a2dd95a9e20b3897c2b3ca57e7f6797f76a8d93f7eeedda7fcdcbc9b635"},
+    {file = "click_help_colors-0.9-py3-none-any.whl", hash = "sha256:f6c3d1fe86b07790e6ef0339f458196a8814de90946d876774ea4b4f30a5a539"},
 ]
 click-log = [
     {file = "click-log-0.3.2.tar.gz", hash = "sha256:16fd1ca3fc6b16c98cea63acf1ab474ea8e676849dc669d86afafb0ed7003124"},

@@ -9,6 +9,7 @@ Changelog
 
 * [mpm] Add test runs against new OSes and distributions: ``ubuntu-18.04`` and
   ``macos-11.0``.
+* [mpm] Remove ``pycodestyle`` now that we rely on ``black``.
 * [mpm] Add emoji to issue labels.
 
 

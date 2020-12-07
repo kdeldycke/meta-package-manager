@@ -113,12 +113,10 @@ Run `black <https://github.com/psf/black>`_ to auto-format Python code:
 
     $ poetry run black .
 
-Then run `pycodestyle <https://pycodestyle.readthedocs.io>`_ and `Pylint
-<https://docs.pylint.org>`_ code style checks:
+Then run `Pylint <https://docs.pylint.org>`_ code style checks:
 
 .. code-block:: shell-session
 
-    $ poetry run pycodestyle
     $ poetry run pylint meta_package_manager
 
 

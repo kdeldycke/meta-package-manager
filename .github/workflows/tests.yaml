@@ -87,7 +87,6 @@ jobs:
       - name: macOS - Install npm
         if: runner.os == 'macOS'
         run: |
-          brew unlink node@12
           brew install npm
       - name: Windows - Upgrade npm
         if: runner.os == 'Windows'

@@ -34,15 +34,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.4
 
-      - name: Fix brew on macOS GitHub runners
-        # XXX GitHub runners are broken. See:
-        # https://github.com/actions/virtual-environments/pull/1808
-        # https://github.com/actions/virtual-environments/issues/1745
-        if: runner.os == 'macOS'
-        run: |
-          brew untap local/homebrew-openssl
-          brew untap local/homebrew-python2
-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2.2.0
         with:

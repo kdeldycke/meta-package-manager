@@ -53,6 +53,10 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew update
+      - name: Linux - Install npm
+        if: runner.os == 'Linux'
+        run: |
+          brew update || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
       # Apt
       - name: Linux - Upgrade apt

@@ -16,12 +16,15 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
+import os
+from shutil import which
+from pathlib import Path
 
 import simplejson as json
 from boltons.cacheutils import cachedproperty
 
 from ..base import PackageManager
-from ..platform import MACOS
+from ..platform import LINUX, MACOS
 from ..version import parse_version
 from . import logger
 
@@ -42,6 +45,34 @@ class Homebrew(PackageManager):
 
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     cli_name = None
+
+    @cachedproperty
+    def cli_path(self):
+        """Fully qualified path to the package manager CLI.
+
+        Automatically search the location of the CLI in the system. Only checks
+        if the file exists. Its executability will be assessed later. See the
+        ``self.executable`` method below.
+
+        Returns `None` if CLI is not found or is not a file.
+        """
+        # Check if the path exist in any of the environment locations.
+        env_path = ":".join(self.cli_search_path + [os.getenv("PATH")])
+        cli_path = which(self.cli_name, mode=os.F_OK, path=env_path)
+        if not cli_path:
+            logger.debug(f"{self.cli_name} CLI not found.")
+            return
+
+        # Normalize CLI path and check it is a file. Do not follow symlinks.
+        # Homebrew on linux uses the symlink path to set environment variables.
+        cli_path = Path.cwd() / Path(cli_path)
+        logger.debug(f"CLI found at {cli_path}")
+
+        if not cli_path.is_file():
+            logger.warning(f"{cli_path} is not a file.")
+            return
+
+        return cli_path
 
     def get_version(self):
         """Fetch version from ``brew --version`` output.
@@ -405,6 +436,7 @@ class Homebrew(PackageManager):
 
 class Brew(Homebrew):
 
+    platforms = frozenset([LINUX, MACOS])
     name = "Homebrew Formulae"
     cli_name = "brew"
 

@@ -1,136 +1,136 @@
 [
   {
-    "name": "🔌 BitBar plugin",
-    "color": "#fef2c0",
-    "description": "Plugin code, documentation or features related to BitBar"
-  },
-  {
-    "name": "🔩 CI/CD",
-    "color": "#dbca13",
-    "description": "Tests, automation and management of the project"
-  },
-  {
-    "name": "🐛 bug",
-    "color": "#d73a4a",
-    "description": "Something isn't working, or a fix is proposed"
-  },
-  {
-    "name": "🎲 can't reproduce",
-    "color": "#fec1c1",
-    "description": "Root cause unlikely to come from the project"
-  },
-  {
-    "name": "📗 documentation",
-    "color": "#006b75",
-    "description": "Update to non-code (manual, readme, tutorial, docstrings, ...) and its generation"
-  },
-  {
-    "name": "🔄 duplicate",
-    "color": "#cfd3d7",
-    "description": "This issue or pull request already exists"
-  },
-  {
-    "name": "✨ enhancement",
+    "name": "\u2728 enhancement",
     "color": "#84b6eb",
     "description": "Improvement or change of an existing feature"
   },
   {
-    "name": "🆕 feature request",
-    "color": "#fbca04",
-    "description": "Something not existing yet that need to be implemented"
-  },
-  {
-    "name": "🌱 good first issue",
-    "color": "#7057ff",
-    "description": "A place for newcomers to start contributing"
-  },
-  {
-    "name": "❓ help wanted",
-    "color": "#008672",
-    "description": "Extra attention is needed"
-  },
-  {
-    "name": "📦 manager: apm",
-    "color": "#bfdadc",
-    "description": "apm"
-  },
-  {
-    "name": "📦 manager: brew",
-    "color": "#bfdadc",
-    "description": "brew"
-  },
-  {
-    "name": "📦 manager: cask",
-    "color": "#bfdadc",
-    "description": "cask"
-  },
-  {
-    "name": "📦 manager: composer",
-    "color": "#bfdadc",
-    "description": "composer"
-  },
-  {
-    "name": "📦 manager: dpkg-like",
-    "color": "#bfdadc",
-    "description": "apt, dpkg, opkg"
-  },
-  {
-    "name": "📦 manager: flatpak",
-    "color": "#bfdadc",
-    "description": "flatpak"
-  },
-  {
-    "name": "📦 manager: gem",
-    "color": "#bfdadc",
-    "description": "gem"
-  },
-  {
-    "name": "📦 manager: mas",
-    "color": "#bfdadc",
-    "description": "mas"
-  },
-  {
-    "name": "📦 manager: mpm",
-    "color": "#bfdadc",
-    "description": "mpm"
-  },
-  {
-    "name": "📦 manager: npm-like",
-    "color": "#bfdadc",
-    "description": "npm, yarn"
-  },
-  {
-    "name": "📦 manager: pip",
-    "color": "#bfdadc",
-    "description": "pip"
-  },
-  {
-    "name": "📦 manager: snap",
-    "color": "#bfdadc",
-    "description": "snap"
-  },
-  {
-    "name": "🖥 platform: Linux",
-    "color": "#bfd4f2",
-    "description": "Linux"
-  },
-  {
-    "name": "🖥 platform: Windows",
-    "color": "#bfd4f2",
-    "description": "Windows"
-  },
-  {
-    "name": "🖥 platform: macOS",
-    "color": "#bfd4f2",
-    "description": "macOS"
-  },
-  {
-    "name": "❓ question",
+    "name": "\u2753 question",
     "color": "#d876e3",
     "description": "Further information is requested"
   },
   {
-    "name": "🚫 wont do/fix",
+    "name": "\ud83c\udd95 feature request",
+    "color": "#fbca04",
+    "description": "Something not existing yet that need to be implemented"
+  },
+  {
+    "name": "\ud83c\udd98 help wanted",
+    "color": "#008672",
+    "description": "Extra attention is needed"
+  },
+  {
+    "name": "\ud83c\udf31 good first issue",
+    "color": "#7057ff",
+    "description": "A place for newcomers to start contributing"
+  },
+  {
+    "name": "\ud83c\udfb2 can't reproduce",
+    "color": "#fec1c1",
+    "description": "Root cause unlikely to come from the project"
+  },
+  {
+    "name": "\ud83d\udc1b bug",
+    "color": "#d73a4a",
+    "description": "Something isn't working, or a fix is proposed"
+  },
+  {
+    "name": "\ud83d\udcd7 documentation",
+    "color": "#006b75",
+    "description": "Update to non-code (manual, readme, tutorial, docstrings, ...) and its generation"
+  },
+  {
+    "name": "\ud83d\udce6 manager: apm",
+    "color": "#bfdadc",
+    "description": "apm"
+  },
+  {
+    "name": "\ud83d\udce6 manager: brew",
+    "color": "#bfdadc",
+    "description": "brew"
+  },
+  {
+    "name": "\ud83d\udce6 manager: cask",
+    "color": "#bfdadc",
+    "description": "cask"
+  },
+  {
+    "name": "\ud83d\udce6 manager: composer",
+    "color": "#bfdadc",
+    "description": "composer"
+  },
+  {
+    "name": "\ud83d\udce6 manager: dpkg-like",
+    "color": "#bfdadc",
+    "description": "apt, dpkg, opkg"
+  },
+  {
+    "name": "\ud83d\udce6 manager: flatpak",
+    "color": "#bfdadc",
+    "description": "flatpak"
+  },
+  {
+    "name": "\ud83d\udce6 manager: gem",
+    "color": "#bfdadc",
+    "description": "gem"
+  },
+  {
+    "name": "\ud83d\udce6 manager: mas",
+    "color": "#bfdadc",
+    "description": "mas"
+  },
+  {
+    "name": "\ud83d\udce6 manager: mpm",
+    "color": "#bfdadc",
+    "description": "mpm"
+  },
+  {
+    "name": "\ud83d\udce6 manager: npm-like",
+    "color": "#bfdadc",
+    "description": "npm, yarn"
+  },
+  {
+    "name": "\ud83d\udce6 manager: pip",
+    "color": "#bfdadc",
+    "description": "pip"
+  },
+  {
+    "name": "\ud83d\udce6 manager: snap",
+    "color": "#bfdadc",
+    "description": "snap"
+  },
+  {
+    "name": "\ud83d\udd04 duplicate",
+    "color": "#cfd3d7",
+    "description": "This issue or pull request already exists"
+  },
+  {
+    "name": "\ud83d\udd0c BitBar plugin",
+    "color": "#fef2c0",
+    "description": "Plugin code, documentation or features related to BitBar"
+  },
+  {
+    "name": "\ud83d\udd29 CI/CD",
+    "color": "#dbca13",
+    "description": "Tests, automation and management of the project"
+  },
+  {
+    "name": "\ud83d\udda5 platform: Linux",
+    "color": "#bfd4f2",
+    "description": "Linux"
+  },
+  {
+    "name": "\ud83d\udda5 platform: Windows",
+    "color": "#bfd4f2",
+    "description": "Windows"
+  },
+  {
+    "name": "\ud83d\udda5 platform: macOS",
+    "color": "#bfd4f2",
+    "description": "macOS"
+  },
+  {
+    "name": "\ud83d\udeab wont do/fix",
     "color": "#eeeeee",
     "description": "This will not be worked on"
   }

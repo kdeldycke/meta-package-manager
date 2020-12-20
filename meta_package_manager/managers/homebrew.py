@@ -545,6 +545,7 @@ class Cask(Homebrew):
 
     """Cask is now part of Homebrew's core and extend it."""
 
+    # Casks are only available on macOS, not Linux.
     platforms = frozenset([MACOS])
     name = "Homebrew Cask"
     cli_name = "brew"

@@ -59,9 +59,7 @@ jobs:
                 "🖥 platform: macOS", "🖥 platform: Linux"],
                "keywords": ["brew", "homebrew", "tap", "formula"]},
 
-              {"labels": [
-                "📦 manager: cask",
-                "🖥 platform: macOS", "🖥 platform: Linux"],
+              {"labels": ["📦 manager: cask", "🖥 platform: macOS"],
                "keywords": ["cask"]},
 
               {"labels": [

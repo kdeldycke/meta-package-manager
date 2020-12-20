@@ -37,7 +37,7 @@ class Homebrew(PackageManager):
     commands.
     """
 
-    platforms = frozenset([MACOS])
+    platforms = frozenset([LINUX, MACOS])
 
     # Vanilla brew and cask CLIs now shares the same version.
     # 2.5.0 is the first release to deprecate the use of --json=v1 option.
@@ -436,7 +436,6 @@ class Homebrew(PackageManager):
 
 class Brew(Homebrew):
 
-    platforms = frozenset([LINUX, MACOS])
     name = "Homebrew Formulae"
     cli_name = "brew"
 
@@ -546,6 +545,7 @@ class Cask(Homebrew):
 
     """Cask is now part of Homebrew's core and extend it."""
 
+    platforms = frozenset([MACOS])
     name = "Homebrew Cask"
     cli_name = "brew"
 

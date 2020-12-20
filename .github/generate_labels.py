@@ -44,6 +44,7 @@ def write_labels():
             label_defs,
             indent=2,
             separators=(",", ": "),
+            ensure_ascii=False,
         )
     )
 

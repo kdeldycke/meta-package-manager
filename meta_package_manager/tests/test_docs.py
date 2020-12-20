@@ -24,7 +24,7 @@ import simplejson as json
 from boltons.iterutils import flatten
 from yaml import Loader, load
 
-from ..labels import MANAGER_LABELS, PLATFORM_LABELS
+from ..labels import MANAGER_LABELS, PLATFORM_LABELS, PLATFORM_PREFIX, MANAGER_PREFIX
 from ..managers import pool
 from ..platform import OS_DEFINITIONS, os_label
 from .conftest import MANAGER_IDS
@@ -76,10 +76,10 @@ def test_labeller_rules():
     canonical_managers = {
         lbl
         for lbl in canonical_labels
-        if lbl.startswith("manager: ") and "mpm" not in lbl
+        if lbl.startswith(MANAGER_PREFIX) and "mpm" not in lbl
     }
     canonical_platforms = {
-        lbl for lbl in canonical_labels if lbl.startswith("platform: ")
+        lbl for lbl in canonical_labels if lbl.startswith(PLATFORM_PREFIX)
     }
     assert canonical_managers
     assert canonical_platforms
@@ -112,14 +112,14 @@ def test_labeller_rules():
         {
             label: count
             for label, count in rules_labels.items()
-            if label.startswith("manager: ")
+            if label.startswith(MANAGER_PREFIX)
         }
     )
     rules_platforms = Counter(
         {
             label: count
             for label, count in rules_labels.items()
-            if label.startswith("platform: ")
+            if label.startswith(PLATFORM_PREFIX)
         }
     )
 

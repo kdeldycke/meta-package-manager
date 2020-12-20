@@ -1,38 +1,38 @@
 ---
-"BitBar plugin":
+"🔌 BitBar plugin":
   - meta_package_manager/bitbar/*
   - meta_package_manager/tests/*bitbar*
 
-"CI/CD":
+"🔩 CI/CD":
   - .github/**/*
   - .gitignore
   - pyproject.toml
   - setup.cfg
 
-documentation:
+"📗 documentation":
   - docs/**/*
   - .mailmap
   - LICENSE
   - readme.rst
   - readthedocs.yaml
 
-"manager: apm":
+"📦 manager: apm":
   - meta_package_manager/managers/apm*
   - meta_package_manager/tests/*apm*
 
-"manager: brew":
+"📦 manager: brew":
   - meta_package_manager/managers/homebrew*
   - meta_package_manager/tests/*homebrew*
 
-"manager: cask":
+"📦 manager: cask":
   - meta_package_manager/managers/homebrew*
   - meta_package_manager/tests/*homebrew*
 
-"manager: composer":
+"📦 manager: composer":
   - meta_package_manager/managers/composer*
   - meta_package_manager/tests/*composer*
 
-"manager: dpkg-like":
+"📦 manager: dpkg-like":
   - meta_package_manager/managers/apt*
   - meta_package_manager/managers/dpkg*
   - meta_package_manager/managers/opkg*
@@ -40,31 +40,31 @@ documentation:
   - meta_package_manager/tests/*dpkg*
   - meta_package_manager/tests/*opkg*
 
-"manager: flatpak":
+"📦 manager: flatpak":
   - meta_package_manager/managers/flatpak*
   - meta_package_manager/tests/*flatpak*
 
-"manager: gem":
+"📦 manager: gem":
   - meta_package_manager/managers/gem*
   - meta_package_manager/tests/*gem*
 
-"manager: mas":
+"📦 manager: mas":
   - meta_package_manager/managers/mas*
   - meta_package_manager/tests/*mas*
 
-"manager: mpm":
+"📦 manager: mpm":
   - meta_package_manager/*
 
-"manager: npm-like":
+"📦 manager: npm-like":
   - meta_package_manager/managers/npm*
   - meta_package_manager/managers/yarn*
   - meta_package_manager/tests/*npm*
   - meta_package_manager/tests/*yarn*
 
-"manager: pip":
+"📦 manager: pip":
   - meta_package_manager/managers/pip*
   - meta_package_manager/tests/*pip*
 
-"manager: snap":
+"📦 manager: snap":
   - meta_package_manager/managers/snap*
   - meta_package_manager/tests/*snap*

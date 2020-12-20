@@ -65,14 +65,17 @@ MANAGER_GROUPS = {
     "npm-like": {"npm", "yarn"},
 }
 
-# Define some colors.
+
+# Define generated labels prefixes and colors.
+PLATFORM_PREFIX = "🖥 platform: "
 PLATFORM_COLOR = "#bfd4f2"
+MANAGER_PREFIX = "📦 manager: "
 MANAGER_COLOR = "#bfdadc"
 
 
 # Create one label per platform.
 for platform_id in ALL_OS_LABELS:
-    label_id = f"🖥 platform: {platform_id}"
+    label_id = f"{PLATFORM_PREFIX}{platform_id}"
     LABELS.append((label_id, PLATFORM_COLOR, platform_id))
     PLATFORM_LABELS[platform_id] = label_id
 
@@ -80,7 +83,7 @@ for platform_id in ALL_OS_LABELS:
 # Create one label per manager. Add mpm as its own manager.
 non_grouped_managers = set(pool()) - set(flatten(MANAGER_GROUPS.values())) | {CLI_NAME}
 for manager_id in non_grouped_managers:
-    label_id = f"📦 manager: {manager_id}"
+    label_id = f"{MANAGER_PREFIX}{manager_id}"
     LABELS.append((label_id, MANAGER_COLOR, manager_id))
     if manager_id != CLI_NAME:
         MANAGER_LABELS[manager_id] = label_id
@@ -88,7 +91,7 @@ for manager_id in non_grouped_managers:
 
 # Add labels for grouped managers.
 for group_label, manager_ids in MANAGER_GROUPS.items():
-    label_id = f"📦 manager: {group_label}"
+    label_id = f"{MANAGER_PREFIX}{group_label}"
     LABELS.append((label_id, MANAGER_COLOR, ", ".join(sorted(manager_ids))))
     for manager_id in manager_ids:
         MANAGER_LABELS[manager_id] = label_id

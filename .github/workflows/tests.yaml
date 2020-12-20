@@ -53,6 +53,12 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew update
+      - name: Linux - Upgrade or Install Homebrew
+        if: runner.os == 'Linux'
+        # Use Github url shortener for brew (un)install script to avoid line to
+        # long error from yamllint.
+        run: |
+          brew update || /bin/bash -c "$(curl -fsSL "https://git.io/JIY6g")"
 
       # Apt
       - name: Linux - Upgrade apt

@@ -86,7 +86,7 @@ jobs:
             }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
             }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
-          labels: "🔩 CI/CD", "📗 documentation"
+          labels: "🔩 CI/CD, 📗 documentation"
           assignees: kdeldycke
           branch: autofix-typo
 
@@ -113,7 +113,7 @@ jobs:
             }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
             %0A
             ${{ steps.image_actions.outputs.markdown }}
-          labels: "🔩 CI/CD", "📗 documentation"
+          labels: "🔩 CI/CD, 📗 documentation"
           assignees: kdeldycke
           branch: optimize-images
 
@@ -167,7 +167,7 @@ jobs:
             }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
             }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
-          labels: "🔩 CI/CD", "📗 documentation"
+          labels: "🔩 CI/CD, 📗 documentation"
           assignees: kdeldycke
           branch: update-mailmap
 
@@ -198,6 +198,6 @@ jobs:
             }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
             }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
-          labels: "🔩 CI/CD", "📗 documentation"
+          labels: "🔩 CI/CD, 📗 documentation"
           assignees: kdeldycke
           branch: update-deps-image

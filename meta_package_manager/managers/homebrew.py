@@ -40,8 +40,8 @@ class Homebrew(PackageManager):
     platforms = frozenset([LINUX, MACOS])
 
     # Vanilla brew and cask CLIs now shares the same version.
-    # 2.5.0 is the first release to deprecate the use of --json=v1 option.
-    requirement = "2.5.0"
+    # 2.7.0 is the first release to enforce the use of --cask option.
+    requirement = "2.7.0"
 
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     cli_name = None
@@ -90,7 +90,7 @@ class Homebrew(PackageManager):
             return parse_version(output.split()[1])
 
     def sync(self):
-        """`brew` and `cask` share the same command.
+        """Fetch content of remote taps.
 
         .. code-block:: shell-session
 
@@ -102,18 +102,13 @@ class Homebrew(PackageManager):
 
     @property
     def installed(self):
-        """Fetch installed packages from ``brew list`` output.
-
-        .. note::
-
-            This method is shared by ``brew`` and ``cask``, only that the
-            latter adds its ``cask`` subcommand to the CLI call.
+        """List installed packages from ``brew list`` output.
 
         Raw CLI output samples:
 
         .. code-block:: shell-session
 
-            ► brew list --versions
+            ► brew list --formula --versions
             ack 2.14
             apg 2.2.3
             audacity (!) 2.1.2
@@ -125,24 +120,6 @@ class Homebrew(PackageManager):
             c-ares 1.12.0
             graphviz 2.40.1 2.40.20161221.0239
             quicklook-json latest
-
-        .. code-block:: shell-session
-
-            ► brew cask list --versions
-            aerial 1.2beta5
-            android-file-transfer latest
-            audacity (!) 2.1.2
-            bitbar 1.9.2
-            firefox 49.0.1
-            flux 37.7
-            gimp 2.8.18-x86_64
-            java 1.8.0_112-b16
-            tunnelblick 3.6.8_build_4625 3.6.9_build_4685
-            virtualbox 5.1.8-111374 5.1.10-112026
-
-        Alternatives since 2.4.7 (see
-        https://github.com/Homebrew/brew/pull/7949 and
-        https://github.com/Homebrew/brew/pull/7966):
 
         .. code-block:: shell-session
 
@@ -158,84 +135,6 @@ class Homebrew(PackageManager):
             tunnelblick 3.6.8_build_4625 3.6.9_build_4685
             virtualbox 5.1.8-111374 5.1.10-112026
 
-            ► brew cask list --json --versions | jq
-            [
-              {
-                "token": "aerial",
-                "name": [
-                  "Aerial Screensaver"
-                ],
-                "homepage": "https://github.com/JohnCoates/Aerial",
-                "url": "https://github.com/(...)/download/v1.9.2/Aerial.zip",
-                "appcast": "https://github.com/(...)/releases.atom",
-                "version": "1.9.2",
-                "sha256": "1d21511a31895ece4a18c93c779cbf4e35a611a27ba",
-                "artifacts": [
-                  [
-                    "Aerial.saver"
-                  ],
-                  {
-                    "trash": "~/Library/Caches/Aerial",
-                    "signal": {}
-                  }
-                ],
-                "caveats": null,
-                "depends_on": {},
-                "conflicts_with": null,
-                "container": null,
-                "auto_updates": null
-              },
-              {
-                "token": "dropbox",
-                "name": [
-                  "Dropbox"
-                ],
-                "homepage": "https://www.dropbox.com/",
-                "url": "https://www.dropbox.com/download?plat=mac&full=1",
-                "appcast": null,
-                "version": "latest",
-                "sha256": "no_check",
-                "artifacts": [
-                  {
-                    "launchctl": "com.dropbox.DropboxMacUpdate.agent",
-                    "signal": {}
-                  },
-                  [
-                    "Dropbox.app"
-                  ],
-                  {
-                    "trash": [
-                      "/Library/DropboxHelperTools",
-                      "~/.dropbox",
-                      "~/Library/Application Support/Dropbox",
-                      "~/Library/Caches/com.dropbox.DropboxMacUpdate",
-                      "~/Library/Caches/com.getdropbox.DropboxMetaInstaller",
-                      "~/Library/Caches/com.getdropbox.dropbox",
-                      "~/Library/Containers/com.dropbox.activityprovider",
-                      "~/Library/Containers/com.dropbox.foldertagger",
-                      "~/Library/Containers/com.getdropbox.dropbox.garcon",
-                      "~/Library/Dropbox",
-                      "~/Library/Group Containers/com.dropbox.client.crashpad",
-                      "~/Library/Logs/Dropbox_debug.log",
-                      "~/Library/Preferences/com.dropbox.DropboxMonitor.plist",
-                      "~/Library/Preferences/com.getdropbox.dropbox.plist"
-                    ],
-                    "signal": {}
-                  }
-                ],
-                "caveats": null,
-                "depends_on": {},
-                "conflicts_with": {
-                  "cask": [
-                    "dropbox-beta"
-                  ]
-                },
-                "container": null,
-                "auto_updates": null
-              },
-              (...)
-            ]
-
         .. todo
 
             Use the ``removed`` variable to detect removed packages (which are
@@ -246,7 +145,7 @@ class Homebrew(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, "list", "--versions")
+        output = self.run_cli("list", self.global_args, "--versions")
 
         if output:
             regexp = re.compile(r"(\S+)( \(!\))? (.+)")
@@ -328,7 +227,7 @@ class Homebrew(PackageManager):
         if exact:
             query = f"/^{query}$/"
 
-        output = self.run_cli(self.search_args, query)
+        output = self.run_cli("search", self.global_args, query)
 
         if output:
             regexp = re.compile(
@@ -348,114 +247,9 @@ class Homebrew(PackageManager):
 
         return matches
 
-    def upgrade_cli(self, package_id=None):
-        """Returns the right CLI depending on weither formula or cask are
-        concerned:
-
-        .. code-block:: shell-session
-
-            ► brew upgrade --formula
-            ==> Upgrading 2 outdated packages:
-            node 13.11.0 -> 13.12.0
-            sdl2 2.0.12 -> 2.0.12_1
-            ==> Upgrading node 13.11.0 -> 13.12.0
-            ==> Downloading https://homebrew.bintray.com/bottles/node-13.tar.gz
-            ==> Downloading from https://akamai.bintray.com/fc/fc0bfb42fe23e960
-            ############################################################ 100.0%
-            ==> Pouring node-13.12.0.catalina.bottle.tar.gz
-            ==> Caveats
-            Bash completion has been installed to:
-              /usr/local/etc/bash_completion.d
-            ==> Summary
-            🍺  /usr/local/Cellar/node/13.12.0: 4,660 files, 60.3MB
-            Removing: /usr/local/Cellar/node/13.11.0... (4,686 files, 60.4MB)
-            ==> Upgrading sdl2 2.0.12 -> 2.0.12_1
-            ==> Downloading https://homebrew.bintray.com/bottles/sdl2-2.tar.gz
-            ==> Downloading from https://akamai.bintray.com/4d/4dcd635465d16372
-            ############################################################ 100.0%
-            ==> Pouring sdl2-2.0.12_1.catalina.bottle.tar.gz
-            🍺  /usr/local/Cellar/sdl2/2.0.12_1: 89 files, 4.7MB
-            Removing: /usr/local/Cellar/sdl2/2.0.12... (89 files, 4.7MB)
-            ==> Checking for dependents of upgraded formulae...
-            ==> No dependents found!
-            ==> Caveats
-            ==> node
-            Bash completion has been installed to:
-              /usr/local/etc/bash_completion.d
-
-        .. code-block:: shell-session
-
-            ► brew upgrade --cask
-            Updating Homebrew...
-            ==> Auto-updated Homebrew!
-            Updated Homebrew from 1654de327 to cfa03c8cc.
-            Updated 2 taps (homebrew/core and homebrew/cask).
-            ==> Casks with `auto_updates` or `version :latest` will not be upgraded
-            ==> Upgrading 1 outdated packages:
-            aerial 2.0.7 -> 2.0.8
-            ==> Upgrading aerial
-            ==> Downloading https://github.com/Aerial/download/v2.0.8/Aerial.saver.zip
-            ==> Downloading from https://65be.s3.amazonaws.com/44998092/29eb1e0
-            ==> Verifying SHA-256 checksum for Cask 'aerial'.
-            ==> Backing Screen Saver up to '/usr/local/Caskroom/Aerial.saver'.
-            ==> Removing Screen Saver '/Users/kde/Library/Screen Savers/Aerial.saver'.
-            ==> Moving Screen Saver to '/Users/kde/Library/Screen Savers/Aerial.saver'.
-            ==> Purging files for version 2.0.7 of Cask aerial
-            🍺  aerial was successfully upgraded!
-        """
-        cmd = [self.cli_path] + self.upgrade_args
-        if package_id:
-            cmd.append(package_id)
-        return cmd
-
-    def upgrade_all_cli(self):
-        return self.upgrade_cli()
-
-    def cleanup(self):
-        """Scrub the cache, including downloads for even the latest versions.
-
-        Note downloads for any installed formulae or casks will still not be
-        deleted.
-
-        .. code-block:: shell-session
-
-            ► brew cleanup -s
-            Removing: ~/Library/Caches/Homebrew/node--1.bottle.tar.gz... (9MB)
-            Warning: Skipping sdl2: most recent version 2.0.12_1 not installed
-            Removing: ~/Library/Caches/Homebrew/Cask/aerial--1.8.1.zip... (5MB)
-            Removing: ~/Library/Caches/Homebrew/Cask/prey--1.9.pkg... (19.9MB)
-            Removing: ~/Library/Logs/Homebrew/readline... (64B)
-            Removing: ~/Library/Logs/Homebrew/libfido2... (64B)
-            Removing: ~/Library/Logs/Homebrew/libcbor... (64B)
-
-        More doc at: https://docs.brew.sh/Manpage#cleanup-options-formulacask
-        """
-        super().cleanup()
-        self.run_cli("cleanup", "-s")
-
-
-class Brew(Homebrew):
-
-    name = "Homebrew Formulae"
-    cli_name = "brew"
-
-    @cachedproperty
-    def search_args(self):
-        """Returns arguments needed for search of Homebrew formulae.
-
-        .. code-block:: shell-session
-
-            ► brew search --formulae sed
-            ==> Formulae
-            gnu-sed ✔                    libxdg-basedir               minised
-        """
-        return [self.global_args, "search", "--formulae"]
-
     @property
     def outdated(self):
-        """Fetch outdated formulae from ``brew outdated`` output.
-
-        Raw CLI output samples:
+        """Fetch outdated packages from ``brew outdated`` output.
 
         .. code-block:: shell-session
 
@@ -483,93 +277,6 @@ class Brew(Homebrew):
               ],
               "casks": []
             }
-        """
-        outdated = {}
-
-        # List available updates.
-        output = self.run_cli(self.global_args, "outdated", "--formula", "--json=v2")
-
-        if output:
-            for pkg_info in json.loads(output)["formulae"]:
-                package_id = pkg_info["name"]
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": max(
-                        map(parse_version, pkg_info["installed_versions"])
-                    ),
-                    "latest_version": parse_version(pkg_info["current_version"]),
-                }
-
-        return outdated
-
-    @cachedproperty
-    def upgrade_args(self):
-        """Returns arguments needed for upgrade of Homebrew formulae.
-
-        .. code-block:: shell-session
-
-            ► brew upgrade --formula
-            ==> Upgrading 2 outdated packages:
-            node 13.11.0 -> 13.12.0
-            sdl2 2.0.12 -> 2.0.12_1
-            ==> Upgrading node 13.11.0 -> 13.12.0
-            ==> Downloading https://homebrew.bintray.com/bottles/node-13.tar.gz
-            ==> Downloading from https://akamai.bintray.com/fc/fc0bfb42fe23e960
-            ############################################################ 100.0%
-            ==> Pouring node-13.12.0.catalina.bottle.tar.gz
-            ==> Caveats
-            Bash completion has been installed to:
-              /usr/local/etc/bash_completion.d
-            ==> Summary
-            🍺  /usr/local/Cellar/node/13.12.0: 4,660 files, 60.3MB
-            Removing: /usr/local/Cellar/node/13.11.0... (4,686 files, 60.4MB)
-            ==> Upgrading sdl2 2.0.12 -> 2.0.12_1
-            ==> Downloading https://homebrew.bintray.com/bottles/sdl2-2.tar.gz
-            ==> Downloading from https://akamai.bintray.com/4d/4dcd635465d16372
-            ############################################################ 100.0%
-            ==> Pouring sdl2-2.0.12_1.catalina.bottle.tar.gz
-            🍺  /usr/local/Cellar/sdl2/2.0.12_1: 89 files, 4.7MB
-            Removing: /usr/local/Cellar/sdl2/2.0.12... (89 files, 4.7MB)
-            ==> Checking for dependents of upgraded formulae...
-            ==> No dependents found!
-            ==> Caveats
-            ==> node
-            Bash completion has been installed to:
-              /usr/local/etc/bash_completion.d
-        """
-        return [self.global_args, "upgrade", "--formula"]
-
-
-class Cask(Homebrew):
-
-    """Cask is now part of Homebrew's core and extend it."""
-
-    # Casks are only available on macOS, not Linux.
-    platforms = frozenset([MACOS])
-    name = "Homebrew Cask"
-    cli_name = "brew"
-
-    global_args = ["cask"]
-
-    @cachedproperty
-    def search_args(self):
-        """Returns arguments needed for search of Homebrew casks.
-
-        .. code-block:: shell-session
-
-            ► brew search --cask sed
-            ==> Casks
-            eclipse-dsl                       marsedit
-            focused                           physicseditor
-            google-adwords-editor             prefs-editor
-            licensed                          subclassed-mnemosyne
-        """
-        return ["search", "--cask"]
-
-    @property
-    def outdated(self):
-        """Fetch outdated casks from ``brew outdated`` output.
 
         .. code-block:: shell-session
 
@@ -627,7 +334,7 @@ class Cask(Homebrew):
         outdated = {}
 
         # Build up the list of CLI options.
-        options = ["--cask", "--json=v2"]
+        options = [self.global_args, "--json=v2"]
         # Includes auto-update packages or not.
         if not self.ignore_auto_updates:
             options.append("--greedy")
@@ -636,9 +343,12 @@ class Cask(Homebrew):
         output = self.run_cli("outdated", options)
 
         if output:
-            for pkg_info in json.loads(output)["casks"]:
+            package_list = json.loads(output)
+            for pkg_info in package_list["formulae"] + package_list["casks"]:
                 package_id = pkg_info["name"]
                 version = pkg_info["installed_versions"]
+                if not isinstance(version, str):
+                    version = max(map(parse_version, version))
                 latest_version = pkg_info["current_version"]
 
                 # Skip packages in undetermined state.
@@ -654,9 +364,42 @@ class Cask(Homebrew):
 
         return outdated
 
-    @cachedproperty
-    def upgrade_args(self):
-        """Returns arguments needed for upgrade of Homebrew casks.
+    def upgrade_cli(self, package_id=None):
+        """Returns the right CLI depending on weither formula or cask are
+        concerned:
+
+        ``brew`` and ``cask`` share the same command.
+
+        .. code-block:: shell-session
+
+            ► brew upgrade --formula
+            ==> Upgrading 2 outdated packages:
+            node 13.11.0 -> 13.12.0
+            sdl2 2.0.12 -> 2.0.12_1
+            ==> Upgrading node 13.11.0 -> 13.12.0
+            ==> Downloading https://homebrew.bintray.com/bottles/node-13.tar.gz
+            ==> Downloading from https://akamai.bintray.com/fc/fc0bfb42fe23e960
+            ############################################################ 100.0%
+            ==> Pouring node-13.12.0.catalina.bottle.tar.gz
+            ==> Caveats
+            Bash completion has been installed to:
+              /usr/local/etc/bash_completion.d
+            ==> Summary
+            🍺  /usr/local/Cellar/node/13.12.0: 4,660 files, 60.3MB
+            Removing: /usr/local/Cellar/node/13.11.0... (4,686 files, 60.4MB)
+            ==> Upgrading sdl2 2.0.12 -> 2.0.12_1
+            ==> Downloading https://homebrew.bintray.com/bottles/sdl2-2.tar.gz
+            ==> Downloading from https://akamai.bintray.com/4d/4dcd635465d16372
+            ############################################################ 100.0%
+            ==> Pouring sdl2-2.0.12_1.catalina.bottle.tar.gz
+            🍺  /usr/local/Cellar/sdl2/2.0.12_1: 89 files, 4.7MB
+            Removing: /usr/local/Cellar/sdl2/2.0.12... (89 files, 4.7MB)
+            ==> Checking for dependents of upgraded formulae...
+            ==> No dependents found!
+            ==> Caveats
+            ==> node
+            Bash completion has been installed to:
+              /usr/local/etc/bash_completion.d
 
         .. code-block:: shell-session
 
@@ -678,4 +421,96 @@ class Cask(Homebrew):
             ==> Purging files for version 2.0.7 of Cask aerial
             🍺  aerial was successfully upgraded!
         """
-        return ["upgrade", "--cask"]
+        cmd = [self.cli_path, "upgrade", self.global_args]
+        if package_id:
+            cmd.append(package_id)
+        return cmd
+
+    def upgrade_all_cli(self):
+        return self.upgrade_cli()
+
+    def cleanup(self):
+        """Scrub the cache, including latest version's downloads.
+
+        Downloads for all installed formulae and casks will not be deleted.
+
+        .. code-block:: shell-session
+
+            ► brew cleanup -s
+            Removing: ~/Library/Caches/Homebrew/node--1.bottle.tar.gz... (9MB)
+            Warning: Skipping sdl2: most recent version 2.0.12_1 not installed
+            Removing: ~/Library/Caches/Homebrew/Cask/aerial--1.8.1.zip... (5MB)
+            Removing: ~/Library/Caches/Homebrew/Cask/prey--1.9.pkg... (19.9MB)
+            Removing: ~/Library/Logs/Homebrew/readline... (64B)
+            Removing: ~/Library/Logs/Homebrew/libfido2... (64B)
+            Removing: ~/Library/Logs/Homebrew/libcbor... (64B)
+
+        More doc at: https://docs.brew.sh/Manpage#cleanup-options-formulacask
+
+        TODO: add autoremove command from brew 2.5.9
+        https://github.com/Homebrew/brew/pull/9047
+
+        ❯ brew autoremove
+        ==> Uninstalling 17 unneeded formulae:
+        atkmm
+        c-ares
+        cairomm
+        glibmm
+        gtkmm3
+        highlight
+        jansson
+        libmaxminddb
+        libsigc++@2
+        libsmi
+        lua
+        lua@5.1
+        nasm
+        nghttp2
+        openblas
+        pangomm
+        texi2html
+        Uninstalling /usr/local/Cellar/nghttp2/1.41.0_1... (26 files, 2.7MB)
+        Uninstalling /usr/local/Cellar/highlight/3.59... (558 files, 3.5MB)
+
+        Warning: The following highlight configuration files have not been removed!
+        If desired, remove them manually with `rm -rf`:
+          /usr/local/etc/highlight
+          /usr/local/etc/highlight/filetypes.conf
+          /usr/local/etc/highlight/filetypes.conf.default
+        Uninstalling /usr/local/Cellar/gtkmm3/3.24.2_1... (1,903 files, 173.7MB)
+        Uninstalling /usr/local/Cellar/texi2html/5.0... (279 files, 6.2MB)
+        Uninstalling /usr/local/Cellar/lua@5.1/5.1.5_8... (22 files, 245.6KB)
+        Uninstalling /usr/local/Cellar/nasm/2.15.05... (29 files, 2.9MB)
+        Uninstalling /usr/local/Cellar/libsmi/0.5.0... (476 files, 20.1MB)
+        Uninstalling /usr/local/Cellar/openblas/0.3.12_1... (23 files, 120.2MB)
+        Uninstalling /usr/local/Cellar/libmaxminddb/1.4.3... (32 files, 164.3KB)
+        Uninstalling /usr/local/Cellar/jansson/2.13.1... (11 files, 169.0KB)
+        Uninstalling /usr/local/Cellar/c-ares/1.16.1_1... (84 files, 539.0KB)
+        Uninstalling /usr/local/Cellar/lua/5.3.5_1... (28 files, 274.5KB)
+        Uninstalling /usr/local/Cellar/pangomm/2.42.1_2... (353 files, 5.6MB)
+        Uninstalling /usr/local/Cellar/atkmm/2.28.0_2... (231 files, 5.1MB)
+        Uninstalling /usr/local/Cellar/glibmm/2.64.2... (1,736 files, 47.7MB)
+        Uninstalling /usr/local/Cellar/cairomm/1.12.2_1... (258 files, 3.9MB)
+        Uninstalling /usr/local/Cellar/libsigc++@2/2.10.4... (44 files, 1.3MB)
+
+        """
+        super().cleanup()
+        self.run_cli("cleanup", "-s")
+
+
+class Brew(Homebrew):
+
+    name = "Homebrew Formulae"
+    cli_name = "brew"
+
+    global_args = ["--formula"]
+
+
+class Cask(Homebrew):
+
+    # Casks are only available on macOS, not Linux.
+    platforms = frozenset([MACOS])
+    name = "Homebrew Cask"
+    cli_name = "brew"
+
+    global_args = ["--cask"]

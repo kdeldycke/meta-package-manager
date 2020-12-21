@@ -52,7 +52,7 @@ def install_cask():
         # Install the cask but bypass its local cache auto-update: we want to
         # force brew to rely on our formula from the past.
         os.environ["HOMEBREW_NO_AUTO_UPDATE"] = "1"
-        code, output, error = run_cmd("brew", "cask", "reinstall", package_id)
+        code, output, error = run_cmd("brew", "reinstall", "--cask", package_id)
         # Reset our temporary environment variable.
         del os.environ["HOMEBREW_NO_AUTO_UPDATE"]
         # Restore old formula to its most recent version.
@@ -68,7 +68,7 @@ def install_cask():
 
     # Remove all installed packages.
     for package_id in packages:
-        run_cmd("brew", "cask", "uninstall", "--force", package_id)
+        run_cmd("brew", "uninstall", "--cask", "--force", package_id)
 
 
 @destructive

@@ -31,7 +31,7 @@ from . import logger
 
 class Homebrew(PackageManager):
 
-    """Virutal package manager shared by brew and cask CLI defined below.
+    """Virtual package manager shared by brew and cask CLI defined below.
 
     Homebrew is the umbrella project providing both brew and brew cask
     commands.

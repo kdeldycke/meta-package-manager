@@ -107,7 +107,7 @@ def test_blacklisted_manager():
     blacklists = {
         LINUX: {"cask", "mas"},
         MACOS: {"apt", "flatpak", "opkg", "snap"},
-        WINDOWS: {"apt", "cask", "brew", "flatpak", "mas", "opkg", "snap"},
+        WINDOWS: {"apt", "brew", "cask", "flatpak", "mas", "opkg", "snap"},
     }
     blacklist = blacklists[current_os()[0]]
     # List of supported managers on the current platform.

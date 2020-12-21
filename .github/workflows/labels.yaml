@@ -44,7 +44,7 @@ jobs:
             }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
             }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
-          labels: "CI/CD"
+          labels: "🔩 CI/CD"
           assignees: kdeldycke
           branch: update-labels
       - name: Sync labels

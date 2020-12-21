@@ -105,7 +105,7 @@ def test_os_label():
 def test_blacklisted_manager():
     """ Check all managers are accounted for on each platforms. """
     blacklists = {
-        LINUX: {"brew", "cask", "mas"},
+        LINUX: {"cask", "mas"},
         MACOS: {"apt", "flatpak", "opkg", "snap"},
         WINDOWS: {"apt", "cask", "brew", "flatpak", "mas", "opkg", "snap"},
     }

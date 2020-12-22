@@ -71,48 +71,48 @@ Package manager  Min. version  macOS  Linux  Windows  ``sync``  ``installed``  `
 |yarn|__          1.21.0        ✓      ✓      ✓                  ✓              ✓                             ✓             ✓            ✓
 ================ ============= ====== ====== ======== ========= ============== ================ ============ ============= ============ ============
 
+.. |apm| replace::
+   Atom's ``apm``
+__ https://atom.io/packages
+.. |apt| replace::
+   ``apt``
+__ https://wiki.debian.org/Apt
 .. |brew| replace::
    Homebrew
 __ https://brew.sh
 .. |cask| replace::
    Homebrew Cask
 __ https://caskroom.github.io
-.. |pip| replace::
-   Python ``pip``
-__ https://pypi.org
-.. |pip-search| replace::
-   ✘*
-__ https://github.com/pypa/pip/issues/5216#issuecomment-744605466
-.. |npm| replace::
-   Node's ``npm``
-__ https://www.npmjs.com
-.. |yarn| replace::
-   Node's ``yarn``
-__ https://yarnpkg.com
-.. |apm| replace::
-   Atom's ``apm``
-__ https://atom.io/packages
-.. |gem| replace::
-   Ruby's ``gem``
-__ https://rubygems.org
-.. |mas| replace::
-   Mac AppStore via ``mas``
-__ https://github.com/argon/mas
-.. |apt| replace::
-   ``apt``
-__ https://wiki.debian.org/Apt
 .. |composer| replace::
    ``composer``
 __ https://getcomposer.org
 .. |flatpak| replace::
    Flatpak
 __ https://flatpak.org
+.. |gem| replace::
+   Ruby's ``gem``
+__ https://rubygems.org
+.. |mas| replace::
+   Mac AppStore via ``mas``
+__ https://github.com/argon/mas
+.. |npm| replace::
+   Node's ``npm``
+__ https://www.npmjs.com
 .. |opkg| replace::
    opkg
 __ https://git.yoctoproject.org/cgit/cgit.cgi/opkg/
+.. |pip| replace::
+   Python ``pip``
+__ https://pypi.org
+.. |pip-search| replace::
+   ✘*
+__ https://github.com/pypa/pip/issues/5216#issuecomment-744605466
 .. |snap| replace::
    ``snap``
 __ https://snapcraft.io
+.. |yarn| replace::
+   Node's ``yarn``
+__ https://yarnpkg.com
 
 
 If you're bored, feel free to add support for new package manager. See

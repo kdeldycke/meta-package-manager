@@ -10,6 +10,8 @@ Changelog
 * [brew] Add support for ``brew`` on Linux.
 * [brew,cask] Bump minimal requirement of ``brew`` to ``2.7.0``.
 * [cask] Address deprecation of ``cask`` CLI subcommands.
+* [pip] ``pip search`` has been disabled by maintainers because of server-side
+  high-load.
 * [mpm] Add test runs against new OSes and distributions: ``ubuntu-18.04`` and
   ``macos-11.0``.
 * [mpm] Remove ``pycodestyle`` now that we rely on ``black``.

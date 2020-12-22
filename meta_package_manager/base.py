@@ -300,7 +300,9 @@ class PackageManager:
         package ID, name, version and a boolean indicating if the match is
         exact or partial.
         """
-        raise NotImplementedError
+        if self.search.__func__.__qualname__ == PackageManager.search.__qualname__:
+            logger.warning(f"Search not implemented for {self.id}.")
+            return {}
 
     @property
     def outdated(self):

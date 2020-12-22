@@ -173,7 +173,7 @@ class CLISubCommandTests:
                 # Common "not implemented" optional command warning message.
                 bool(
                     re.search(
-                        fr"warning: (Sync|Cleanup) not implemented for {mid}.",
+                        fr"warning: (Sync|Cleanup|Search) not implemented for {mid}.",
                         result.stderr,
                     )
                 ),

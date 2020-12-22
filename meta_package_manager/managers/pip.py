@@ -113,8 +113,17 @@ class Pip(PackageManager):
 
         return installed
 
-    def search(self, query, extended, exact):
+    def search_xxx_disabled(self, query, extended, exact):
         """Fetch matching packages.
+
+        .. warning:
+            That function was previously named ``search`` but has been renamed
+            to make it invisible from the ``mpm`` framework, disabling search
+            feature altogether for ``pip``.
+
+            This had to be done has Pip's maintainers disabled the server-side
+            API because of unmanageable high-load. See:
+            https://github.com/pypa/pip/issues/5216#issuecomment-744605466
 
         .. code-block:: shell-session
 

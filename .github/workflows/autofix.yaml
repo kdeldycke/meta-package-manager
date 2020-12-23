@@ -27,7 +27,7 @@ jobs:
       - name: Run black
         run: |
           poetry run black .
-      - uses: peter-evans/create-pull-request@v3.5.2
+      - uses: peter-evans/create-pull-request@v3.6.0
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Format Python code"
@@ -54,7 +54,7 @@ jobs:
         run: >
           find ./ -type f -name '*.json' -print -exec
           jsonlint --in-place "{}" \;
-      - uses: peter-evans/create-pull-request@v3.5.2
+      - uses: peter-evans/create-pull-request@v3.6.0
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Format JSON content"
@@ -75,7 +75,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.4
       - uses: sobolevn/misspell-fixer-action@0.1.0
-      - uses: peter-evans/create-pull-request@v3.5.2
+      - uses: peter-evans/create-pull-request@v3.6.0
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Typo"
@@ -100,7 +100,7 @@ jobs:
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           compressOnly: true
-      - uses: peter-evans/create-pull-request@v3.5.2
+      - uses: peter-evans/create-pull-request@v3.6.0
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Optimize images"
@@ -129,7 +129,7 @@ jobs:
         run: >
           git ignore-io --replace emacs git linux macos nohup python vim
           virtualenv visualstudiocode windows
-      - uses: peter-evans/create-pull-request@v3.5.2
+      - uses: peter-evans/create-pull-request@v3.6.0
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Regenerate .gitignore"
@@ -156,7 +156,7 @@ jobs:
       - name: Generate .mailmap
         run: |
           python ./.github/update_mailmap.py
-      - uses: peter-evans/create-pull-request@v3.5.2
+      - uses: peter-evans/create-pull-request@v3.6.0
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Regenerate .mailmap"
@@ -187,7 +187,7 @@ jobs:
         run: >
           poetry run pipdeptree --packages meta-package-manager
           --graph-output png > ./docs/dependencies.png
-      - uses: peter-evans/create-pull-request@v3.5.2
+      - uses: peter-evans/create-pull-request@v3.6.0
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Regenerate dependency graph"

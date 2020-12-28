@@ -27,7 +27,7 @@ from yaml import Loader, load
 from ..labels import MANAGER_LABELS, PLATFORM_LABELS, PLATFORM_PREFIX, MANAGER_PREFIX
 from ..managers import pool
 from ..platform import OS_DEFINITIONS, os_label
-from .conftest import MANAGER_IDS
+from .conftest import MANAGER_IDS, unless_linux
 
 """ Test all non-code artifacts depending on manager definitions.
 
@@ -61,7 +61,12 @@ def test_changelog():
             )
 
 
+@unless_linux
 def test_labeller_rules():
+    """This covers the dynamic production of labels by GitHub action. As such it
+    only targets Linux. See: https://github.com/kdeldycke/meta-package-manager/blob
+    /bd666e291c783fe480015c9aae3beab19b12774c/.github/workflows/labels.yaml#L14
+    """
 
     # Extract list of canonically defined labels.
     with PROJECT_ROOT.joinpath(".github/labels.json").resolve().open() as doc:

@@ -55,6 +55,13 @@ class Homebrew(PackageManager):
         ``self.executable`` method below.
 
         Returns `None` if CLI is not found or is not a file.
+
+        ..todo:
+
+            This is a copy of the parent's ``PackageManager.cli_path()`` method. It was
+            copy-pasted then slightly tweaked in
+            https://github.com/kdeldycke/meta-package-manager/pull/188 . Please try to
+            fix this ugly code duplication.
         """
         # Check if the path exist in any of the environment locations.
         env_path = ":".join(self.cli_search_path + [os.getenv("PATH")])

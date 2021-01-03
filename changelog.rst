@@ -2,10 +2,8 @@ Changelog
 =========
 
 
-`3.6.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v3.5.2...develop>`_
---------------------------------------------------------------------------------------------------
-
-.. note:: This version is not yet released and is under active development.
+`3.6.0 (2021-01-03) <https://github.com/kdeldycke/meta-package-manager/compare/v3.5.2...v3.6.0>`_
+-------------------------------------------------------------------------------------------------
 
 * [brew] Add support for ``brew`` on Linux.
 * [brew,cask] Bump minimal requirement of ``brew`` to ``2.7.0``.

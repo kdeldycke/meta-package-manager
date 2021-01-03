@@ -149,13 +149,16 @@ class PackageManager:
             logger.debug(f"{self.cli_name} CLI not found.")
             return
 
-        # Normalize CLI path and check it is a file.
-        cli_path = Path(cli_path).resolve(strict=True)
-        logger.debug(f"CLI found at {cli_path}")
-
-        if not cli_path.is_file():
+        # Check if path exist and is a file.
+        # Do not resolve symlink here. Some manager like Homebrew on Linux rely on some
+        # sort of synlink trickery to set environment variables.
+        cli_path = Path(cli_path)
+        if not cli_path.exists():
+            raise FileNotFoundError(f"{cli_path}")
+        elif not cli_path.is_file():
             logger.warning(f"{cli_path} is not a file.")
-            return
+        else:
+            logger.debug(f"CLI found at {cli_path}")
 
         return cli_path
 

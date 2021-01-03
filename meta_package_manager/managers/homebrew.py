@@ -43,9 +43,6 @@ class Homebrew(PackageManager):
     # 2.7.0 is the first release to enforce the use of --cask option.
     requirement = "2.7.0"
 
-    # Help mpm a little bit in its search for the `brew` binary on Linux.
-    cli_search_path = ["~/.linuxbrew"]
-
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     cli_name = None
 

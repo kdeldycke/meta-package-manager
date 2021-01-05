@@ -19,7 +19,7 @@ jobs:
           poetry install
           poetry build
       - name: Attach packages to workflow run for later inspection and debugging
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v2.2.2
         with:
           name: mpm-python-packages
           path: ./dist/*

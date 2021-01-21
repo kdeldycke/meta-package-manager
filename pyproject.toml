@@ -64,7 +64,7 @@ pytest = "^6.2.1"
 # More pytest plugins at: http://plugincompat.herokuapp.com .
 pytest-cov = "^2.10.1"
 pytest-randomly = "^3.5.0"
-pyyaml = "^5.3.1"
+pyyaml = "^5.4.1"
 twine = "^3.3.0"
 yamllint = "^1.25.0"
 

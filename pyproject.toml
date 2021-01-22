@@ -62,7 +62,7 @@ pipdeptree = {extras = ["graphviz"], version = "^2.0.0"}
 pylint = "^2.6.0"
 pytest = "^6.2.1"
 # More pytest plugins at: http://plugincompat.herokuapp.com .
-pytest-cov = "^2.10.1"
+pytest-cov = "^2.11.1"
 pytest-randomly = "^3.5.0"
 pyyaml = "^5.4.1"
 twine = "^3.3.0"

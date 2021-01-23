@@ -14,10 +14,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2.3.4
-        with:
-          # Required by git-auto-commit-action. See:
-          # https://github.com/stefanzweifel/git-auto-commit-action#checkout-the-correct-branch
-          ref: ${{ github.head_ref }}
       - uses: actions/setup-python@v2.2.1
       - name: Install black
         run: |

@@ -11,7 +11,7 @@ Contents
    usage
    falsehoods
    bitbar
-   api/index
+   meta_package_manager
    development
    changelog
    todolist

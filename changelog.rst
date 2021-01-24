@@ -6,6 +6,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Auto-generate API documentation via a GitHub action workflow.
 * [mpm] Only trigger dependency graph update on tagging to reduce noise.
 
 

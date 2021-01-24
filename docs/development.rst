@@ -131,12 +131,11 @@ The documentation you're currently reading can be built locally with `Sphinx
     $ poetry install --extras docs
     $ poetry run sphinx-build -b html ./docs ./docs/html
 
-And once in a while, it's good to upgrade the `graph of package dependencies
-<./install.html#python-dependencies>`_:
+To update the auto-generated API documention:
 
 .. code-block:: shell-session
 
-    $ poetry show --all --no-dev --tree
+    $ poetry run sphinx-apidoc -f -o ./docs .
 
 
 Screenshots

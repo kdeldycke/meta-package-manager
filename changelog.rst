@@ -6,6 +6,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Only trigger dependency graph update on tagging to reduce noise.
+
 
 `3.6.0 (2021-01-03) <https://github.com/kdeldycke/meta-package-manager/compare/v3.5.2...v3.6.0>`_
 -------------------------------------------------------------------------------------------------

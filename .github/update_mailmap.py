@@ -81,5 +81,5 @@ for contributor in contributors:
 
 # Save content to .mailmap file.
 mailmap_file.open("w").write(
-    "{}\n\n{}".format("\n".join(header_comments), "\n".join(sorted(mappings)))
+    "{}\n\n{}\n".format("\n".join(header_comments), "\n".join(sorted(mappings)))
 )

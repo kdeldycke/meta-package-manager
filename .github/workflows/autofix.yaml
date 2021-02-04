@@ -22,6 +22,7 @@ jobs:
           poetry install
       - name: Run black
         run: |
+          poetry run isort
           poetry run black .
       - uses: peter-evans/create-pull-request@v3.7.0
         with:

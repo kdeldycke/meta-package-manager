@@ -58,6 +58,7 @@ black = "^20.8b1"
 bump2version = "^1.0.1"
 check-wheel-contents = "^0.2.0"
 coverage = {extras = ["toml"], version = "^5.3"}
+isort = "^5.7.0"
 pipdeptree = {extras = ["graphviz"], version = "^2.0.0"}
 pylint = "^2.6.0"
 pytest = "^6.2.2"
@@ -77,6 +78,12 @@ mpm = 'meta_package_manager.cli:cli'
 
 [tool.black]
 target-version = ['py37', 'py38']
+
+[tool.isort]
+# https://pycqa.github.io/isort/docs/configuration/black_compatibility/
+multi_line_output = 3
+line_length = 88
+include_trailing_comma = true
 
 [tool.pylint.MASTER]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html

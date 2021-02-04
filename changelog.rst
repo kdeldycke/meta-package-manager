@@ -8,6 +8,7 @@ Changelog
 
 * [mpm] Auto-generate API documentation via a GitHub action workflow.
 * [mpm] Only trigger dependency graph update on tagging to reduce noise.
+* [mpm] Re-introduce ``isort``.
 
 
 `3.6.0 (2021-01-03) <https://github.com/kdeldycke/meta-package-manager/compare/v3.5.2...v3.6.0>`_

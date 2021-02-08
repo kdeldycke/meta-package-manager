@@ -24,7 +24,7 @@ import simplejson as json
 from boltons.iterutils import flatten
 from yaml import Loader, load
 
-from ..labels import MANAGER_LABELS, PLATFORM_LABELS, PLATFORM_PREFIX, MANAGER_PREFIX
+from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_LABELS, PLATFORM_PREFIX
 from ..managers import pool
 from ..platform import OS_DEFINITIONS, os_label
 from .conftest import MANAGER_IDS, unless_linux

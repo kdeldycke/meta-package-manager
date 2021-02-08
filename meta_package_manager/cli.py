@@ -32,10 +32,10 @@ import tomlkit
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list, strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
-from click_help_colors import HelpColorsGroup, HelpColorsCommand, version_option
+from click_help_colors import HelpColorsCommand, HelpColorsGroup, version_option
 from simplejson import dumps as json_dumps
 
-from . import CLI_NAME, __version__, logger, env_data
+from . import CLI_NAME, __version__, env_data, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .managers import pool
 from .platform import CURRENT_OS_ID, WINDOWS, os_label

@@ -48,7 +48,7 @@ simplejson = "^3.17.2"
 tomlkit = "^0.7.0"
 # Should have been put in dev-dependencies but extras only works from main
 # section.
-sphinx = {version = "^3.4.3", optional = true}
+sphinx = {version = "^3.5.1", optional = true}
 sphinx_rtd_theme = {version = "^0.5.1", optional = true}
 sphinx_tabs = {version = "^2.0.1", optional = true}
 click-help-colors = "^0.9"

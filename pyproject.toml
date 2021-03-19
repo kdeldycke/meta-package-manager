@@ -66,7 +66,7 @@ pytest = "^6.2.2"
 pytest-cov = "^2.11.1"
 pytest-randomly = "^3.5.0"
 pyyaml = "^5.4.1"
-twine = "^3.3.0"
+twine = "^3.4.1"
 yamllint = "^1.26.0"
 
 [tool.poetry.extras]

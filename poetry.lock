@@ -990,7 +990,7 @@ python-versions = "*"
 
 [[package]]
 name = "yamllint"
-version = "1.26.0"
+version = "1.26.1"
 description = "A linter for YAML files."
 category = "dev"
 optional = false
@@ -1018,7 +1018,7 @@ docs = ["sphinx", "sphinx_rtd_theme", "sphinx_tabs"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "c06153b7c35b73eea5f25a31c4be9b325e5855f9a93208315b1b894351916a73"
+content-hash = "5593d123abe71ccbcd38173fb6ffc091d596cb7fdb94fadcee45d12ed4c55fce"
 
 [metadata.files]
 alabaster = [
@@ -1665,8 +1665,7 @@ wrapt = [
     {file = "wrapt-1.12.1.tar.gz", hash = "sha256:b62ffa81fb85f4332a4f609cab4ac40709470da05643a082ec1eb88e6d9b97d7"},
 ]
 yamllint = [
-    {file = "yamllint-1.26.0-py2.py3-none-any.whl", hash = "sha256:8a5f8e442f49309eaf3e9d7232ce76f2fc8026f5c0c0b164b83f33fed1399637"},
-    {file = "yamllint-1.26.0.tar.gz", hash = "sha256:b0e4c89985c7f5f8451c2eb8c67d804d10ac13a4abe031cbf49bdf3465d01087"},
+    {file = "yamllint-1.26.1.tar.gz", hash = "sha256:87d9462b3ed7e9dfa19caa177f7a77cd9888b3dc4044447d6ae0ab233bcd1324"},
 ]
 zipp = [
     {file = "zipp-3.4.0-py3-none-any.whl", hash = "sha256:102c24ef8f171fd729d46599845e95c7ab894a4cf45f5de11a44cc7444fb1108"},

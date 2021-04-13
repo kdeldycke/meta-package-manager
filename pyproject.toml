@@ -67,7 +67,7 @@ pytest-cov = "^2.11.1"
 pytest-randomly = "^3.7.0"
 pyyaml = "^5.4.1"
 twine = "^3.4.1"
-yamllint = "^1.26.0"
+yamllint = "^1.26.1"
 
 [tool.poetry.extras]
 # Workaround lacks of Poetry support by RTD: https://stackoverflow.com/a/58163431

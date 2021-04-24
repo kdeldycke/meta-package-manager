@@ -224,4 +224,4 @@ jobs:
           pytest --cov-config=pyproject.toml --cov=./ --cov-report=xml
       - name: Upload coverage to Codecov
         if: matrix.python-version != '2.7'
-        uses: codecov/codecov-action@v1.3.2
+        uses: codecov/codecov-action@v1.4.1

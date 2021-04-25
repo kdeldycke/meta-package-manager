@@ -31,6 +31,11 @@ LABELS = [
         "#fef2c0",
         "Plugin code, documentation or features related to BitBar",
     ),
+    (
+        "🔌 xbar plugin",
+        "#fef2c0",
+        "Plugin code, documentation or features related to xbar",
+    ),
     ("🐛 bug", "#d73a4a", "Something isn't working, or a fix is proposed"),
     ("🔩 CI/CD", "#dbca13", "Tests, automation and management of the project"),
     (

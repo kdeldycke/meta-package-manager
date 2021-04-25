@@ -27,9 +27,9 @@ from boltons.strutils import strip_ansi
 from boltons.typeutils import classproperty
 
 from . import logger
-from .xbar import run
 from .platform import CURRENT_OS_ID
 from .version import parse_version
+from .xbar import run
 
 # Rendering format of CLI in JSON fields.
 CLI_FORMATS = frozenset(["plain", "fragments", "xbar"])

@@ -1,11 +1,11 @@
 meta\_package\_manager.xbar package
-=====================================
+===================================
 
 Submodules
 ----------
 
 meta\_package\_manager.xbar.meta\_package\_manager module
------------------------------------------------------------
+---------------------------------------------------------
 
 .. automodule:: meta_package_manager.xbar.meta_package_manager
    :members:

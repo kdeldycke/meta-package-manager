@@ -28,9 +28,9 @@ from boltons.tbutils import ExceptionInfo
 from click.testing import CliRunner
 
 from .. import CLI_NAME
-from ..xbar import run as xbar_run
 from ..cli import cli
 from ..platform import is_linux, is_macos, is_windows
+from ..xbar import run as xbar_run
 
 """ Fixtures, configuration and helpers for tests. """
 

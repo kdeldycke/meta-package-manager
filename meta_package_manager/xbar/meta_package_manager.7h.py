@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # <xbar.title>Meta Package Manager</xbar.title>
-# <xbar.version>v3.6.1</xbar.version>
+# <xbar.version>v4.0.0</xbar.version>
 # <xbar.author>Kevin Deldycke</xbar.author>
 # <xbar.author.github>kdeldycke</xbar.author.github>
 # <xbar.desc>List outdated packages and manage upgrades.</xbar.desc>

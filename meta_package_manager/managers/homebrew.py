@@ -99,7 +99,6 @@ class Homebrew(PackageManager):
             aerial 1.2beta5
             android-file-transfer latest
             audacity (!) 2.1.2
-            bitbar 1.9.2
             firefox 49.0.1
             flux 37.7
             gimp 2.8.18-x86_64

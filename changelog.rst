@@ -6,6 +6,10 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [xbar] Ugrade BitBar plugin to new xbar format.
+* [xbar] Update references of BitBar to xbar.
+* [xbar] Rename ``BITBAR_MPM_SUBMENU`` environment variable to ``XBAR_MPM_SUBMENU``.
+* [mpm] Rename ``--cli-format bitbar`` option to ``--cli-format xbar``.
 * [mpm] Auto-generate API documentation via a GitHub action workflow.
 * [mpm] Only trigger dependency graph update on tagging to reduce noise.
 * [mpm] Re-introduce ``isort``.

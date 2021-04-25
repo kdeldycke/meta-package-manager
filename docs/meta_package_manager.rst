@@ -7,7 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   meta_package_manager.bitbar
+   meta_package_manager.xbar
    meta_package_manager.managers
    meta_package_manager.tests
 

@@ -30,9 +30,9 @@ jobs:
           parameters: >
             [
               {"labels": [
-                "🔌 BitBar plugin",
+                "🔌 xbar plugin",
                 "🖥 platform: macOS"],
-               "keywords": ["bitbar"]},
+               "keywords": ["xbar"]},
 
               {"labels": [
                 "🐛 bug"],

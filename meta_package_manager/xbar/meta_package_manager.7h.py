@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# <bitbar.title>Meta Package Manager</bitbar.title>
-# <bitbar.version>v3.6.1</bitbar.version>
-# <bitbar.author>Kevin Deldycke</bitbar.author>
-# <bitbar.author.github>kdeldycke</bitbar.author.github>
-# <bitbar.desc>List outdated packages and manage upgrades.</bitbar.desc>
-# <bitbar.dependencies>python,mpm</bitbar.dependencies>
-# <bitbar.image>https://i.imgur.com/CiQpQ42.png</bitbar.image>
-# <bitbar.abouturl>https://github.com/kdeldycke/meta-package-manager</bitbar.abouturl>
+# <xbar.title>Meta Package Manager</xbar.title>
+# <xbar.version>v3.6.1</xbar.version>
+# <xbar.author>Kevin Deldycke</xbar.author>
+# <xbar.author.github>kdeldycke</xbar.author.github>
+# <xbar.desc>List outdated packages and manage upgrades.</xbar.desc>
+# <xbar.dependencies>python,mpm</xbar.dependencies>
+# <xbar.image>https://i.imgur.com/CiQpQ42.png</xbar.image>
+# <xbar.abouturl>https://github.com/kdeldycke/meta-package-manager</xbar.abouturl>
 
 """
-Bitbar plugin for Meta Package Manager (a.k.a. the :command:`mpm` CLI).
+xbar plugin for Meta Package Manager (a.k.a. the :command:`mpm` CLI).
 
 Default update cycle is set to 7 hours so we have a chance to get user's
 attention once a day. Higher frequency might ruin the system as all checks are
@@ -32,22 +32,22 @@ PY2 = sys.version_info[0] == 2
 
 
 SUBMENU_LAYOUT = bool(
-    os.environ.get("BITBAR_MPM_SUBMENU", False)
+    os.environ.get("XBAR_MPM_SUBMENU", False)
     in {True, 1, "True", "true", "1", "y", "yes", "Yes"}
 )
 """ Define the rendering mode of outdated packages list.
 
 Edit this script to force this constant to ``True``, or use the
-``BITBAR_MPM_SUBMENU`` environment variable. This will replace the default flat
+``XBAR_MPM_SUBMENU`` environment variable. This will replace the default flat
 layout with an alternative structure where all upgrade actions are put into
 submenus, one for each manager.
 """
 
 
 # Make it easier to change font, sizes and colors of the output
-# See https://github.com/matryer/bitbar#writing-plugins for details
+# See https://github.com/matryer/xbar#writing-plugins for details
 # An alternate "good looking" font is "font=NotoMono size=13" (not installed
-# on MacOS by default though) that matches the system font quite well.
+# on macOS by default though) that matches the system font quite well.
 FONTS = {
     "normal": "",  # Use default system font
     "summary": "",  # Package summary
@@ -162,9 +162,9 @@ def print_upgrade_all_item(manager, submenu=""):
 
 
 def print_menu():
-    """Print menu structure using BitBar's plugin API.
+    """Print menu structure using xbar's plugin API.
 
-    See: https://github.com/matryer/bitbar#plugin-api
+    See: https://github.com/matryer/xbar#plugin-api
     """
     # Search for generic mpm CLI on system.
     code, _, error = run("mpm")
@@ -187,7 +187,7 @@ def print_menu():
 
     # Fetch outdated package form all package manager available on the system.
     _, output, error = run(
-        "mpm", "--output-format", "json", "outdated", "--cli-format", "bitbar"
+        "mpm", "--output-format", "json", "outdated", "--cli-format", "xbar"
     )
 
     # Bail-out immediately on errors related to mpm self-execution or if mpm is

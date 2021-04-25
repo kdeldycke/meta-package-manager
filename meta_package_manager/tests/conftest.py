@@ -28,7 +28,7 @@ from boltons.tbutils import ExceptionInfo
 from click.testing import CliRunner
 
 from .. import CLI_NAME
-from ..bitbar import run as bitbar_run
+from ..xbar import run as xbar_run
 from ..cli import cli
 from ..platform import is_linux, is_macos, is_windows
 
@@ -110,9 +110,9 @@ def print_cli_output(cmd, output=None, error=None, error_code=None):
 def run_cmd(*args):
     """Run a system command, print output and return results.
 
-    Relies on robust ``run`` function implemented in BitBar plugin.
+    Relies on robust ``run`` function implemented in xbar plugin.
     """
-    code, output, error = bitbar_run(*args)
+    code, output, error = xbar_run(*args)
     print_cli_output(args, output, error, code)
     return code, output, error
 
@@ -130,7 +130,7 @@ def invoke(runner):
 
     # XXX Python 3-only function signature.
     # TODO: Use the commented signature below once we drop special Python 2.7
-    # unittest for BitBar.
+    # unittest for xbar.
     # def _run(*args, color=False):
     def _run(*args, **kwargs):
         color = kwargs.get("color", False)

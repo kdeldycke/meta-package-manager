@@ -23,7 +23,7 @@ jobs:
           - macos-10.15
           - windows-2019
         python-version: [2.7, 3.7, 3.8, 3.9]
-        # Python 2.7 tests only targets BitBar plugins on macOS.
+        # Python 2.7 tests only targets xbar plugins on macOS.
         exclude:
           - os: ubuntu-20.04
             python-version: 2.7
@@ -182,7 +182,7 @@ jobs:
         run: |
           rm -rf .coverage*
 
-      # BitBar
+      # xbar
       - name: Install old mpm
         if: matrix.python-version == '2.7'
         run: |
@@ -194,10 +194,10 @@ jobs:
           mpm
           mpm --version
           mpm managers
-      - name: Test BitBar plugin
+      - name: Test xbar plugin
         if: matrix.python-version == '2.7'
         run: |
-          python -m unittest discover -p test_bitbar_plugin.py
+          python -m unittest discover -p test_xbar_plugin.py
 
       # Mpm
       - name: Install mpm and its dependencies

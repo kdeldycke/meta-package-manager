@@ -1,25 +1,25 @@
-BitBar Plugin
-=============
+xbar Plugin
+===========
 
-A copy of the latest stable version of the BitBar plugin for ``mpm`` is always
-`available on BitBar website
-<https://getbitbar.com/plugins/Dev/MetaPackageManager/meta_package_manager.7h.py>`_
+A copy of the latest stable version of the xbar plugin for ``mpm`` is always
+`available on xbar website
+<https://xbarapp.com/docs/plugins/Dev/meta_package_manager.7h.py.html>`_
 and `plugin repository
-<https://github.com/matryer/bitbar-plugins/tree/master/Dev/MetaPackageManager>`_.
+<https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py>`_.
 
-.. image:: bitbar-plugin-flat-layout.png
-    :alt: Bitbar plugin with default layout.
+.. image:: xbar-plugin-flat-layout.png
+    :alt: xbar plugin with default layout.
     :align: left
 
-.. image:: bitbar-plugin-submenu-layout.png
-    :alt: Bitbar plugin with submenu layout.
+.. image:: xbar-plugin-submenu-layout.png
+    :alt: xbar plugin with submenu layout.
     :align: left
 
 
 Development constraints
 -----------------------
 
-BitBar plugins are self-contained scripts. As such, the
+xbar plugins are self-contained scripts. As such, the
 ``meta_package_manager.7h.py`` needs to be able to run without any extra
 dependency, on the pre-installed Python distribution that ships with macOS.
 
@@ -44,23 +44,23 @@ A release is ready when both the package and the plugin reach a stable state.
 
 If the plugin has been changed between releases, a `copy of the plugin is
 pushed
-<https://github.com/matryer/bitbar-plugins/pulls?q=is%3Apr%20%22Meta%20Package%20Manager%22>`_
-to the `official BitBar plugin repository
-<https://github.com/matryer/bitbar-plugins/tree/master/Dev/MetaPackageManager>`_.
+<https://github.com/matryer/xbar-plugins/pulls?q=is%3Apr%20%22Meta%20Package%20Manager%22>`_
+to the `official xbar plugin repository
+<https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py>`_.
 
 
 Release process
 ---------------
 
-1. `Fork <https://help.github.com/articles/fork-a-repo/>`_ the official `BitBar
-   plugin repository <https://github.com/matryer/bitbar-plugins>`_.
+1. `Fork <https://help.github.com/articles/fork-a-repo/>`_ the official `xbar
+   plugin repository <https://github.com/matryer/xbar-plugins>`_.
 
 2. Fetch a local copy of the fork:
 
    .. code-block:: shell-session
 
-        $ git clone https://github.com/kdeldycke/bitbar-plugins
-        $ cd bitbar-plugins
+        $ git clone https://github.com/kdeldycke/xbar-plugins
+        $ cd xbar-plugins
 
 3. Create a new branch and switch to it:
 
@@ -73,15 +73,15 @@ Release process
 
    .. code-block:: shell-session
 
-        $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v2.3.0/meta_package_manager/bitbar/meta_package_manager.7h.py
-        $ mv ./meta_package_manager.7h.py ./Dev/MetaPackageManager/
-        $ chmod 755 ./Dev/MetaPackageManager/meta_package_manager.7h.py
+        $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v2.3.0/meta_package_manager/xbar/meta_package_manager.7h.py
+        $ mv ./meta_package_manager.7h.py ./Dev/
+        $ chmod 755 ./Dev/meta_package_manager.7h.py
 
 5. Commit the new plugin:
 
    .. code-block:: shell-session
 
-        $ git add ./Dev/MetaPackageManager/meta_package_manager.7h.py
+        $ git add ./Dev/meta_package_manager.7h.py
         $ git commit -m 'Upgrade to Meta Package Manager plugin v2.3.0.'
 
 6. Push new branch:

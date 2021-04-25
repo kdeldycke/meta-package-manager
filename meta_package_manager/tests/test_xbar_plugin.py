@@ -25,7 +25,7 @@ import sys
 import unittest
 from collections import Counter
 
-from .. import bitbar
+from .. import xbar
 
 """
 Like BitBar, this plugin is supposed to run smoothly with Python 2.7.1 or
@@ -34,7 +34,7 @@ newer.
 
 
 @unittest.skipUnless(sys.platform == "darwin", "macOS required")
-class TestBibarPlugin(unittest.TestCase):
+class TestXbarPlugin(unittest.TestCase):
     """This is the only test suite that is still using unittest module instead
     of pytest.
     """
@@ -44,20 +44,20 @@ class TestBibarPlugin(unittest.TestCase):
         (r"↑\d+ (⚠️\d+ )?\| dropdown=false$", True),
         # Package upgrade line. Optional: there might be no package to
         # upgrade.
-        (r"(--)?\S+ \S+ → \S+ \| bash=.+$", False),
+        (r"(--)?\S+ \S+ → \S+ \| shell=.+$", False),
         # Submenu marker line. Required.
         (r"-{3,5}$", True),
         # Upgrade all line. Required.
-        (r"(--)?Upgrade all \| bash=.+$", False),
+        (r"(--)?Upgrade all \| shell=.+$", False),
         # Error line. Optional.
         (r"(--)?.+ \| color=red font=Menlo size=12 trim=false emojize=false$", False),
     ]
 
-    def bitbar_output_checks(self, checklist, env=None):
+    def xbar_output_checks(self, checklist, env=None):
         if env:
             for var, value in env.items():
                 os.environ[var] = value
-        code, output, error = bitbar.run(bitbar.__file__)
+        code, output, error = xbar.run(xbar.__file__)
         if env:
             for var in env:
                 del os.environ[var]
@@ -78,20 +78,20 @@ class TestBibarPlugin(unittest.TestCase):
                     break
             if not matches:
                 self.fail(
-                    "BitBar output line {!r} did not match any regexp.".format(line)
+                    "xbar output line {!r} did not match any regexp.".format(line)
                 )
 
         # Check all required regexp did match at least once.
         for index, (regex, required) in enumerate(checks):
             if required and not match_counter[index]:
                 self.fail(
-                    "{!r} regex did not match any BitBar plugin output line."
+                    "{!r} regex did not match any xbar plugin output line."
                     "".format(regex)
                 )
 
     def test_simple_call(self):
         """ Check default rendering is flat: no submenu. """
-        self.bitbar_output_checks(
+        self.xbar_output_checks(
             [
                 # Summary package statistics. Required.
                 (r"\d+ outdated .+ packages? \|  emojize=false$", True),
@@ -99,10 +99,10 @@ class TestBibarPlugin(unittest.TestCase):
         )
 
     def test_submenu_rendering(self):
-        self.bitbar_output_checks(
+        self.xbar_output_checks(
             [
                 # Submenu entry line with summary. Required.
                 (r".+:\s+\d+ package(s| ) \| font=Menlo size=12 emojize=false$", True),
             ],
-            env={"BITBAR_MPM_SUBMENU": "True"},
+            env={"XBAR_MPM_SUBMENU": "True"},
         )

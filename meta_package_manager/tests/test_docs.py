@@ -57,7 +57,7 @@ def test_changelog():
             entry = match.groupdict()
             assert entry["category"]
             assert set(entry["category"].split(",")).issubset(
-                flatten([MANAGER_IDS, OS_DEFINITIONS.keys(), "mpm", "bitbar"])
+                flatten([MANAGER_IDS, OS_DEFINITIONS.keys(), "mpm", "bitbar", "xbar"])
             )
 
 

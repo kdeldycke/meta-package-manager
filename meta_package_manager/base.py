@@ -27,12 +27,12 @@ from boltons.strutils import strip_ansi
 from boltons.typeutils import classproperty
 
 from . import logger
-from .bitbar import run
+from .xbar import run
 from .platform import CURRENT_OS_ID
 from .version import parse_version
 
 # Rendering format of CLI in JSON fields.
-CLI_FORMATS = frozenset(["plain", "fragments", "bitbar"])
+CLI_FORMATS = frozenset(["plain", "fragments", "xbar"])
 
 
 class CLIError(Exception):
@@ -318,7 +318,7 @@ class PackageManager:
         raise NotImplementedError
 
     def upgrade_cli(self, package_id=None):
-        """ Return a bash-compatible full-CLI to upgrade a package. """
+        """ Return a shell-compatible full-CLI to upgrade a package. """
         raise NotImplementedError
 
     def upgrade(self, package_id=None, dry_run=False):
@@ -326,7 +326,7 @@ class PackageManager:
         return self.run(self.upgrade_cli(package_id), dry_run=dry_run)
 
     def upgrade_all_cli(self):
-        """ Return a bash-compatible full-CLI to upgrade all packages. """
+        """ Return a shell-compatible full-CLI to upgrade all packages. """
         raise NotImplementedError
 
     def upgrade_all(self, dry_run=False):
@@ -356,7 +356,7 @@ class PackageManager:
 
         * ``plain`` returns a simple string
         * ``fragments`` returns a list of strings
-        * ``bitbar`` returns a CLI with parameters formatted into the bitbar
+        * ``xbar`` returns a CLI with parameters formatted into the xbar
         dialect.
         """
         assert isinstance(cmd, list)
@@ -369,13 +369,13 @@ class PackageManager:
         if cli_format == "plain":
             return " ".join(cmd)
 
-        # Renders the CLI into BitBar dialect.
-        bitbar_cli = ""
+        # Renders the CLI into xbar dialect.
+        xbar_cli = ""
         for index, param in enumerate(cmd):
             if index == 0:
-                bitbar_cli += f"bash={param}"
+                xbar_cli += f"shell={param}"
             else:
                 if "=" in param:
                     param = f'\\"{param}\\"'
-                bitbar_cli += f" param{index}={param}"
-        return bitbar_cli
+                xbar_cli += f" param{index}={param}"
+        return xbar_cli

@@ -1,7 +1,7 @@
 ---
-"🔌 BitBar plugin":
-  - meta_package_manager/bitbar/*
-  - meta_package_manager/tests/*bitbar*
+"🔌 xbar plugin":
+  - meta_package_manager/xbar/*
+  - meta_package_manager/tests/*xbar*
 
 "🔩 CI/CD":
   - .github/**/*

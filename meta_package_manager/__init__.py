@@ -21,7 +21,7 @@ import logging
 
 from boltons.ecoutils import get_profile
 
-from .bitbar import fix_environment
+from .xbar import fix_environment
 
 # Canonical name of the CLI.
 CLI_NAME = "mpm"

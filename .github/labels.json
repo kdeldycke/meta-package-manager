@@ -110,6 +110,11 @@
     "description": "Plugin code, documentation or features related to BitBar"
   },
   {
+    "name": "🔌 xbar plugin",
+    "color": "#fef2c0",
+    "description": "Plugin code, documentation or features related to xbar"
+  },
+  {
     "name": "🔩 CI/CD",
     "color": "#dbca13",
     "description": "Tests, automation and management of the project"

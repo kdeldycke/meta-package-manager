@@ -13,7 +13,7 @@ documentation = 'https://meta-package-manager.readthedocs.io'
 keywords = [
     'CLI', 'package', 'pip', 'apm', 'npm', 'homebrew', 'brew', 'cask',
     'macos', 'node', 'atom', 'ruby', 'gem', 'mac app store', 'mas',
-    'bitbar', 'plugin', 'flatpak', 'opkg', 'php composer', 'snap']
+    'xbar', 'plugin', 'flatpak', 'opkg', 'php composer', 'snap']
 classifiers = [
     # See: https://pypi.org/pypi?%3Aaction=list_classifiers
     'Development Status :: 5 - Production/Stable',
@@ -121,7 +121,7 @@ precision = 2
 
 [tool.check-wheel-contents]
 # W004: Module is not located at importable path:
-#   meta_package_manager/bitbar/meta_package_manager.7h.py
+#   meta_package_manager/xbar/meta_package_manager.7h.py
 ignore = "W004"
 
 [build-system]

@@ -1,13 +1,13 @@
-meta\_package\_manager.bitbar package
+meta\_package\_manager.xbar package
 =====================================
 
 Submodules
 ----------
 
-meta\_package\_manager.bitbar.meta\_package\_manager module
+meta\_package\_manager.xbar.meta\_package\_manager module
 -----------------------------------------------------------
 
-.. automodule:: meta_package_manager.bitbar.meta_package_manager
+.. automodule:: meta_package_manager.xbar.meta_package_manager
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ meta\_package\_manager.bitbar.meta\_package\_manager module
 Module contents
 ---------------
 
-.. automodule:: meta_package_manager.bitbar
+.. automodule:: meta_package_manager.xbar
    :members:
    :undoc-members:
    :show-inheritance:

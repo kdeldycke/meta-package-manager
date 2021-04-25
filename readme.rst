@@ -45,8 +45,8 @@ Features
   selectors).
 * Export results in JSON or user-friendly tables.
 * Shell auto-completion for Bash, Zsh and Fish.
-* Provides a `BitBar plugin
-  <https://meta-package-manager.readthedocs.io/en/develop/bitbar.html>`_ for
+* Provides a `xbar plugin
+  <https://meta-package-manager.readthedocs.io/en/develop/xbar.html>`_ for
   friendly macOS integration.
 
 

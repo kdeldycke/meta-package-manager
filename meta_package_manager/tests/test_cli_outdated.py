@@ -32,7 +32,7 @@ def subcmd():
     return "outdated"
 
 
-BITBAR_KEYWORDS = {"bash"}.union({f"param{i}" for i in range(1, 10)})
+XBAR_KEYWORDS = {"shell"}.union({f"param{i}" for i in range(1, 10)})
 
 
 class TestOutdated(CLISubCommandTests, CLITableTests):
@@ -101,15 +101,15 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
                 assert isinstance(infos["upgrade_cli"], list)
                 assert same(map(type, infos["upgrade_cli"]), str)
 
-    def test_cli_format_bitbar(self, invoke, subcmd):
-        result = invoke("--output-format", "json", subcmd, "--cli-format", "bitbar")
+    def test_cli_format_xbar(self, invoke, subcmd):
+        result = invoke("--output-format", "json", subcmd, "--cli-format", "xbar")
         for outdated in json.loads(result.stdout).values():
             for infos in outdated["packages"]:
                 assert isinstance(infos["upgrade_cli"], str)
                 assert "param1=" in infos["upgrade_cli"]
                 for param in infos["upgrade_cli"].split(" "):
                     k, v = param.split("=", 1)
-                    assert k in BITBAR_KEYWORDS
+                    assert k in XBAR_KEYWORDS
                     assert set(v.lower()).issubset(
                         digits + ascii_lowercase + './-_+="\\@:'
                     )

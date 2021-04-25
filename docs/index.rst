@@ -10,7 +10,7 @@ Contents
    usecase
    usage
    falsehoods
-   bitbar
+   xbar
    meta_package_manager
    development
    changelog

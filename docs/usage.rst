@@ -89,7 +89,7 @@ List global options and commands:
       List available package upgrades and their versions for each manager.
 
     Options:
-      -c, --cli-format [plain|fragments|bitbar]
+      -c, --cli-format [plain|fragments|xbar]
                                       Format of CLI fields in JSON output.
                                       Defaults to plain.
       --help                          Show this message and exit.

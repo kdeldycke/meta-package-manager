@@ -117,10 +117,10 @@ def print_package_items(packages, submenu=""):
     """Print a menu entry for each outdated packages available for upgrade."""
     for pkg_info in packages:
         print_cli_item(
-            "{}{name} {installed_version} → {latest_version} | {upgrade_cli}"
-            " refresh=true {f_package} emojize=false".format(
-                submenu, f_package=FONTS["package"], **pkg_info
-            )
+            f"{submenu}{pkg_info['name']}"
+            f" {pkg_info['installed_version']} → {pkg_info['latest_version']}"
+            f" | {pkg_info['upgrade_cli']} refresh=true {FONTS['package']}"
+            " emojize=false"
         )
 
 
@@ -130,9 +130,8 @@ def print_upgrade_all_item(manager, submenu=""):
         if SUBMENU_LAYOUT:
             print("-----")
         print_cli_item(
-            "{}Upgrade all | {} refresh=true {f_normal}".format(
-                submenu, manager["upgrade_all_cli"], f_normal=FONTS["normal"]
-            )
+            f"{submenu}Upgrade all | {manager['upgrade_all_cli']} refresh=true"
+            f" {FONTS['normal']}"
         )
 
 
@@ -180,7 +179,7 @@ def print_menu():
     total_errors = sum([len(m.get("errors", [])) for m in managers])
     print(
         "↑{}{} | dropdown=false".format(
-            total_outdated, " ⚠️{}".format(total_errors) if total_errors else ""
+            total_outdated, f" ⚠️{total_errors}" if total_errors else ""
         )
     )
 
@@ -214,12 +213,8 @@ def print_menu():
         else:
             print("---")
             print(
-                "{0} outdated {1} {2} | {f_summary} emojize=false".format(
-                    len(manager["packages"]),
-                    manager["name"],
-                    package_label,
-                    f_summary=FONTS["summary"],
-                )
+                f"{len(manager['packages'])} outdated {manager['name']} {package_label}"
+                f" | {FONTS['summary']} emojize=false"
             )
 
         print_package_items(manager["packages"], submenu)

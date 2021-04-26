@@ -22,15 +22,7 @@ jobs:
           - macos-11.0
           - macos-10.15
           - windows-2019
-        python-version: [2.7, 3.7, 3.8, 3.9]
-        # Python 2.7 tests only targets xbar plugins on macOS.
-        exclude:
-          - os: ubuntu-20.04
-            python-version: 2.7
-          - os: ubuntu-18.04
-            python-version: 2.7
-          - os: windows-2019
-            python-version: 2.7
+        python-version: [3.7, 3.8, 3.9]
     steps:
       - uses: actions/checkout@v2.3.4
 
@@ -172,7 +164,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
 
-      # Prepare env for test for Python 2 & 3
+      # Prepare env for tests
       - name: Upgrade Poetry
         run: |
           python -m pip install --upgrade poetry
@@ -182,36 +174,16 @@ jobs:
         run: |
           rm -rf .coverage*
 
-      # xbar
-      - name: Install old mpm
-        if: matrix.python-version == '2.7'
-        run: |
-          # mpm 2.8 and cli_helpers 2.1.0 are the last supporting Python 2.7.
-          python -m pip install "meta-package-manager~=2.8" "cli-helpers<2.1.0"
-      - name: mpm CLI output for debugging
-        if: matrix.python-version == '2.7'
-        run: |
-          mpm
-          mpm --version
-          mpm managers
-      - name: Test xbar plugin
-        if: matrix.python-version == '2.7'
-        run: |
-          python -m unittest discover -p test_xbar_plugin.py
-
       # Mpm
       - name: Install mpm and its dependencies
-        if: matrix.python-version != '2.7'
         run: |
           poetry install
       - name: mpm CLI output for debugging
-        if: matrix.python-version != '2.7'
         run: |
           poetry run mpm
           poetry run mpm --version
           poetry run mpm managers
       - name: Tests and coverage report in destructive mode
-        if: matrix.python-version != '2.7'
         env:
           DESTRUCTIVE_TESTS: true
         # pyproject.toml config file is specified at CLI level instead of
@@ -223,5 +195,4 @@ jobs:
           poetry run
           pytest --cov-config=pyproject.toml --cov=./ --cov-report=xml
       - name: Upload coverage to Codecov
-        if: matrix.python-version != '2.7'
         uses: codecov/codecov-action@v1.4.1

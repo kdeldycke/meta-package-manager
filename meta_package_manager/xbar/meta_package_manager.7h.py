@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 # <xbar.title>Meta Package Manager</xbar.title>
 # <xbar.version>v4.0.0</xbar.version>
 # <xbar.author>Kevin Deldycke</xbar.author>
@@ -16,20 +15,15 @@ Default update cycle is set to 7 hours so we have a chance to get user's
 attention once a day. Higher frequency might ruin the system as all checks are
 quite resource intensive, and Homebrew might hit GitHub's API calls quota.
 
-Minimal BitBar requirement is Mac OS X Lion (10.7), which ships with Python
-2.7.1. So this plugin is supposed to support Python 2.7.1 or newer.
+Minimal xbar requirement is macOS Catalina (10.15), which deprecates Python
+2.x, and ships with Python 3.7.3. So this plugin is required to work with
+Python 3.7.3 or newer.
 """
-
-from __future__ import print_function, unicode_literals
 
 import json
 import os
-import sys
 from operator import itemgetter
 from subprocess import PIPE, Popen
-
-PY2 = sys.version_info[0] == 2
-
 
 SUBMENU_LAYOUT = bool(
     os.environ.get("XBAR_MPM_SUBMENU", False)
@@ -78,10 +72,6 @@ def fix_environment():
         ]
     )
 
-    # Python 3 Surrogate Handling. See:
-    # https://click.pocoo.org/6/python3/#python-3-surrogate-handling
-    os.environ["LC_ALL"] = os.environ["LANG"] = "en_US.UTF-8"
-
 
 def run(*args):
     """Run a shell command, return error code, output and error message."""
@@ -89,7 +79,7 @@ def run(*args):
     try:
         process = Popen(args, stdout=PIPE, stderr=PIPE)
     except OSError:
-        return None, None, "`{}` executable not found.".format(args[0])
+        return None, None, f"`{args[0]}` executable not found."
     output, error = process.communicate()
     return (
         process.returncode,
@@ -98,22 +88,10 @@ def run(*args):
     )
 
 
-def echo(message):
-    """Print message to the output.
-
-    Not unlike ``click.echo()``, this method is required to support
-    discrepencies in the way strings are handled in different Python versions
-    and platforms.
-    """
-    if PY2:
-        message = message.encode("utf-8")
-    print(message)
-
-
 def print_error_header():
     """Generic header for blockng error."""
-    echo("❌ | dropdown=false")
-    echo("---")
+    print("❌ | dropdown=false")
+    print("---")
 
 
 def print_error(message, submenu=""):
@@ -122,10 +100,7 @@ def print_error(message, submenu=""):
     A red, fixed-width font is used to preserve traceback and exception layout.
     """
     for line in message.strip().splitlines():
-        echo(
-            "{}{} | {f_error} trim=false emojize=false"
-            "".format(submenu, line, f_error=FONTS["error"])
-        )
+        print(f"{submenu}{line} | {FONTS['error']} trim=false emojize=false")
 
 
 def print_cli_item(item):
@@ -134,8 +109,8 @@ def print_cli_item(item):
     * a second one that is the exact copy of the above but forces the execution
       by the way of a visible terminal
     """
-    echo("{} terminal=false".format(item))
-    echo("{} terminal=true alternate=true".format(item))
+    print(f"{item} terminal=false")
+    print(f"{item} terminal=true alternate=true")
 
 
 def print_package_items(packages, submenu=""):
@@ -153,7 +128,7 @@ def print_upgrade_all_item(manager, submenu=""):
     """Print the menu entry to upgrade all outdated package of a manager."""
     if manager.get("upgrade_all_cli"):
         if SUBMENU_LAYOUT:
-            echo("-----")
+            print("-----")
         print_cli_item(
             "{}Upgrade all | {} refresh=true {f_normal}".format(
                 submenu, manager["upgrade_all_cli"], f_normal=FONTS["normal"]
@@ -173,12 +148,12 @@ def print_menu():
     if code or error:
         print_error_header()
         print_error(error)
-        echo("---")
-        echo(
-            "Install / upgrade `mpm` CLI. | bash=python param1=-m param2=pip "
+        print("---")
+        print(
+            "Install / upgrade `mpm` CLI. | shell=python3 param1=-m param2=pip "
             "param3=install param4=--upgrade "
             'param5=\\"meta-package-manager>=2.7.0\\" terminal=true '
-            "refresh=true {f_error}".format(f_error=FONTS["error"])
+            f"refresh=true {FONTS['error']}"
         )
         return
 
@@ -203,7 +178,7 @@ def print_menu():
     # Print menu bar icon with number of available upgrades.
     total_outdated = sum([len(m["packages"]) for m in managers])
     total_errors = sum([len(m.get("errors", [])) for m in managers])
-    echo(
+    print(
         "↑{}{} | dropdown=false".format(
             total_outdated, " ⚠️{}".format(total_errors) if total_errors else ""
         )
@@ -216,7 +191,7 @@ def print_menu():
         # Compute maximal manager's name length.
         label_max_length = max([len(m["name"]) for m in managers])
         max_outdated = max([len(m["packages"]) for m in managers])
-        echo("---")
+        print("---")
 
     for manager in managers:
         package_label = "package{}".format("s" if len(manager["packages"]) > 1 else "")
@@ -224,7 +199,7 @@ def print_menu():
         if SUBMENU_LAYOUT:
             # Non-flat layout use a compact table-like rendering of manager
             # summary.
-            echo(
+            print(
                 "{error}{0:<{max_length}} {1:>{max_outdated}} {2:<8} | "
                 "{f_summary} emojize=false".format(
                     manager["name"] + ":",
@@ -237,8 +212,8 @@ def print_menu():
                 )
             )
         else:
-            echo("---")
-            echo(
+            print("---")
+            print(
                 "{0} outdated {1} {2} | {f_summary} emojize=false".format(
                     len(manager["packages"]),
                     manager["name"],
@@ -252,7 +227,7 @@ def print_menu():
         print_upgrade_all_item(manager, submenu)
 
         for error_msg in manager.get("errors", []):
-            echo("-----" if SUBMENU_LAYOUT else "---")
+            print("-----" if SUBMENU_LAYOUT else "---")
             print_error(error_msg, submenu)
 
 

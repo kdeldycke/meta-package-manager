@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Copyright Kevin Deldycke <kevin@deldycke.com> and contributors.
 # All Rights Reserved.
 #
@@ -17,27 +15,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import os
 import re
-import sys
-import unittest
 from collections import Counter
 
 from .. import xbar
-
-"""
-Like BitBar, this plugin is supposed to run smoothly with Python 2.7.1 or
-newer.
-"""
+from .conftest import unless_macos
 
 
-@unittest.skipUnless(sys.platform == "darwin", "macOS required")
-class TestXbarPlugin(unittest.TestCase):
-    """This is the only test suite that is still using unittest module instead
-    of pytest.
-    """
+@unless_macos
+class TestXbarPlugin:
 
     common_checklist = [
         # Menubar line. Required.
@@ -61,8 +48,8 @@ class TestXbarPlugin(unittest.TestCase):
         if env:
             for var in env:
                 del os.environ[var]
-        self.assertEqual(code, 0)
-        self.assertIsNone(error)
+        assert code == 0
+        assert error is None
 
         checks = checklist + self.common_checklist
 
@@ -77,16 +64,14 @@ class TestXbarPlugin(unittest.TestCase):
                     match_counter[index] += 1
                     break
             if not matches:
-                self.fail(
-                    "xbar output line {!r} did not match any regexp.".format(line)
-                )
+                print(repr(output))
+                raise Exception(f"xbar output line {line!r} did not match any regexp.")
 
         # Check all required regexp did match at least once.
         for index, (regex, required) in enumerate(checks):
             if required and not match_counter[index]:
-                self.fail(
-                    "{!r} regex did not match any xbar plugin output line."
-                    "".format(regex)
+                raise Exception(
+                    f"{regex!r} regex did not match any xbar plugin output line."
                 )
 
     def test_simple_call(self):

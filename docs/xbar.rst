@@ -23,10 +23,33 @@ xbar plugins are self-contained scripts. As such, the
 ``meta_package_manager.7h.py`` needs to be able to run without any extra
 dependency, on the pre-installed Python distribution that ships with macOS.
 
-BitBar itself `requires Mac OS X Lion or newer (>= 10.7)
-<https://github.com/matryer/bitbar/commit/f9525901049a7cb33b0765fe8d082bd2d3b502f9>`_.
-So this plugin is supposed to run smoothly with `Python 2.7.1 or newer
-<https://mail.python.org/pipermail/pythonmac-sig/2011-December/023422.html>`_.
+xbar itself `requires macOS Catalina or newer (>= 10.15)
+<https://github.com/matryer/xbar/blame/2d063e0e46a0e427aedef62dc047b0065602cd40/README.md#L9>`_.
+
+With `Python 2.x being deprecated as of macOS Catalina
+<https://developer.apple.com/documentation/macos-release-notes/macos-catalina-10_15-release-notes>`_,
+this plugin targets Python 3.7.3 or newer, which is the version available under
+the ``python3`` CLI:
+
+   .. code-block:: shell-session
+
+        $ python
+
+        WARNING: Python 2.7 is not recommended.
+        This version is included in macOS for compatibility with legacy software.
+        Future versions of macOS will not include Python 2.7.
+        Instead, it is recommended that you transition to using 'python3' from within Terminal.
+
+        Python 2.7.16 (default, Aug 24 2019, 18:37:03)
+        [GCC 4.2.1 Compatible Apple LLVM 11.0.0 (clang-1100.0.32.4) (-macos10.15-objc-s on darwin
+        Type "help", "copyright", "credits" or "license" for more information.
+        >>>
+
+   .. code-block:: shell-session
+
+        $ xcrun python3
+        Python 3.7.3 (default, Sep  5 2019, 17:14:41)
+        [Clang 11.0.0 (clang-1100.0.33.8)] on darwin
 
 
 Development workflow

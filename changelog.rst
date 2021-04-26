@@ -7,6 +7,7 @@ Changelog
 .. note:: This version is not yet released and is under active development.
 
 * [xbar] Ugrade BitBar plugin to new xbar format.
+* [xbar] Drop xbar plugin requirement on Python 2.x and bump it up to Python 3.7.3.
 * [xbar] Update references of BitBar to xbar.
 * [xbar] Rename ``BITBAR_MPM_SUBMENU`` environment variable to ``XBAR_MPM_SUBMENU``.
 * [mpm] Rename ``--cli-format bitbar`` option to ``--cli-format xbar``.

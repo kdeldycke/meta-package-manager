@@ -32,7 +32,7 @@ from .version import parse_version
 from .xbar import run
 
 # Rendering format of CLI in JSON fields.
-CLI_FORMATS = frozenset(["plain", "fragments", "xbar"])
+CLI_FORMATS = frozenset(["plain", "fragments", "bitbar", "xbar"])
 
 
 class CLIError(Exception):
@@ -356,8 +356,13 @@ class PackageManager:
 
         * ``plain`` returns a simple string
         * ``fragments`` returns a list of strings
-        * ``xbar`` returns a CLI with parameters formatted into the xbar
-        dialect.
+        * ``xbar`` (or ``bitbar``) returns a CLI with parameters formatted into
+        the xbar dialect
+
+        ..warning:
+
+            ``bitbar`` is deprecated but is provided as temporary alias to
+            ``xbar`` to provide a smooth transition to the rebooted project.
         """
         assert isinstance(cmd, list)
         assert cli_format in CLI_FORMATS

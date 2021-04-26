@@ -151,7 +151,7 @@ def print_menu():
         print(
             "Install / upgrade `mpm` CLI. | shell=python3 param1=-m param2=pip "
             "param3=install param4=--upgrade "
-            'param5=\\"meta-package-manager>=2.7.0\\" terminal=true '
+            'param5=\\"meta-package-manager>=4.0.0\\" terminal=true '
             f"refresh=true {FONTS['error']}"
         )
         return

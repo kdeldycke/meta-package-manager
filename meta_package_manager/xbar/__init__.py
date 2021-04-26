@@ -18,7 +18,6 @@
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
 
-
 # Manually import xbar plugin source code as a module, because of its non
 # Python-compliant filename with a double extension made the first dot
 # interpreted as a submodule.

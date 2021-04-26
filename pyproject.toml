@@ -77,7 +77,7 @@ docs = ["sphinx", "sphinx_rtd_theme", "sphinx_tabs"]
 mpm = 'meta_package_manager.cli:cli'
 
 [tool.black]
-target-version = ['py37', 'py38']
+target-version = ['py37', 'py38', 'py39']
 
 [tool.isort]
 # https://pycqa.github.io/isort/docs/configuration/black_compatibility/

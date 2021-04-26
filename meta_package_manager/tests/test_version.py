@@ -21,7 +21,7 @@ from ..version import Token, TokenizedString, parse_version
 
 
 def reverse_fixtures(table):
-    """ Utility method to reverse a list of list. """
+    """Utility method to reverse a list of list."""
     return list(map(list, map(reversed, table)))
 
 

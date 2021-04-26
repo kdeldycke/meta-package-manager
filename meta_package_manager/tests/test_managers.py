@@ -28,7 +28,7 @@ from .conftest import MANAGER_IDS
 
 
 def test_manager_count():
-    """ Check all implemented package managers are accounted for. """
+    """Check all implemented package managers are accounted for."""
     assert len(pool()) == 13
     assert len(pool()) == len(MANAGER_IDS)
     assert MANAGER_IDS == set(pool())
@@ -44,7 +44,7 @@ def test_sorted_pool():
 
 
 def test_ascii_id():
-    """ All package manager IDs should be short ASCII strings. """
+    """All package manager IDs should be short ASCII strings."""
     for manager_id, manager in pool().items():
         assert manager_id
         assert isinstance(manager_id, str)
@@ -55,7 +55,7 @@ def test_ascii_id():
 
 
 def test_name():
-    """ Check all managers have a name. """
+    """Check all managers have a name."""
     name_matcher = re.compile(r"[a-zA-Z0-9\' ]+")
     for manager in pool().values():
         assert manager.name
@@ -74,7 +74,7 @@ def test_platforms():
 
 
 def test_cli_name_type():
-    """ Check the pointed CLI name and path are file-system compatible. """
+    """Check the pointed CLI name and path are file-system compatible."""
     for manager in pool().values():
         assert manager.cli_name
         assert isinstance(manager.cli_name, str)
@@ -83,7 +83,7 @@ def test_cli_name_type():
 
 
 def test_virtual():
-    """ Check the manager as a defined virtual property. """
+    """Check the manager as a defined virtual property."""
     for manager in pool().values():
         assert isinstance(manager.virtual, bool)
 
@@ -111,7 +111,7 @@ def test_cli_path():
 
 
 def test_global_args_type():
-    """ Check that definitions returns CLI args as a list of strings. """
+    """Check that definitions returns CLI args as a list of strings."""
     arg_matcher = re.compile(r"[a-zA-Z0-9-]+")
     for manager in pool().values():
         assert isinstance(manager.global_args, list)
@@ -122,7 +122,7 @@ def test_global_args_type():
 
 
 def test_requirement():
-    """ Each manager is required to specify a minimal version. """
+    """Each manager is required to specify a minimal version."""
     req_matcher = re.compile(r"[0-9\.]+")
     for manager in pool().values():
         assert isinstance(manager.requirement, str)
@@ -132,7 +132,7 @@ def test_requirement():
 
 
 def test_get_version():
-    """ Check that method parsing the CLI version returns a string. """
+    """Check that method parsing the CLI version returns a string."""
     for manager in pool().values():
         assert isinstance(manager.get_version, MethodType)
         if manager.executable:
@@ -167,7 +167,7 @@ def test_available():
 
 
 def test_cli_type():
-    """ Check that all methods returning a CLI is a list. """
+    """Check that all methods returning a CLI is a list."""
     for manager in pool().values():
         assert isinstance(manager.upgrade_cli("dummy_package_id"), list)
 
@@ -181,7 +181,7 @@ def test_cli_type():
 
 
 def test_installed_type():
-    """ Check that all installed operations returns a dict of dicts. """
+    """Check that all installed operations returns a dict of dicts."""
     for manager in pool().values():
         if manager.available:
             assert isinstance(manager.installed, dict)
@@ -195,7 +195,7 @@ def test_installed_type():
 
 
 def test_search_type():
-    """ Check that all search operations returns a dict of dicts. """
+    """Check that all search operations returns a dict of dicts."""
     for manager in pool().values():
         if manager.available:
             matches = manager.search("python", extended=True, exact=False)
@@ -210,7 +210,7 @@ def test_search_type():
 
 
 def test_outdated_type():
-    """ Check that all outdated operations returns a dict of dicts. """
+    """Check that all outdated operations returns a dict of dicts."""
     for manager in pool().values():
         if manager.available:
             assert isinstance(manager.outdated, dict)
@@ -225,7 +225,7 @@ def test_outdated_type():
 
 
 def test_sync_type():
-    """ Check that sync operation return nothing. """
+    """Check that sync operation return nothing."""
     for manager in pool().values():
         if manager.available:
             assert isinstance(manager.sync, MethodType)
@@ -233,7 +233,7 @@ def test_sync_type():
 
 
 def test_cleanup_type():
-    """ Check that cleanup operation return nothing. """
+    """Check that cleanup operation return nothing."""
     for manager in pool().values():
         if manager.available:
             assert isinstance(manager.cleanup, MethodType)

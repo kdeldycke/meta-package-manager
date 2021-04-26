@@ -31,7 +31,7 @@ class APM(PackageManager):
     requirement = "1.0.0"
 
     def get_version(self):
-        """ Fetch version from ``apm --version`` output."""
+        """Fetch version from ``apm --version`` output."""
         output = self.run_cli("--version")
         if output:
             return parse_version(output.splitlines()[0].split()[1])

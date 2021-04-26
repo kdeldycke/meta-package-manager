@@ -34,7 +34,7 @@ class MAS(PackageManager):
     name = "Mac AppStore"
 
     def get_version(self):
-        """ Fetch version from ``mas version`` output."""
+        """Fetch version from ``mas version`` output."""
         return parse_version(self.run_cli("version"))
 
     @property

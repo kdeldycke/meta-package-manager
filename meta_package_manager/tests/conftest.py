@@ -96,7 +96,7 @@ unless_windows = pytest.mark.skipif(not is_windows(), reason="Windows required")
 
 
 def print_cli_output(cmd, output=None, error=None, error_code=None):
-    """ Simulate CLI output. Used to print debug traces in test results. """
+    """Simulate CLI output. Used to print debug traces in test results."""
     print("\n► {}".format(click.style(" ".join(cmd), fg="white")))
     margin = " " * 2
     if output:
@@ -126,7 +126,7 @@ def runner():
 
 @pytest.fixture
 def invoke(runner):
-    """ Executes Click's CLI, print output and return results. """
+    """Executes Click's CLI, print output and return results."""
 
     # XXX Python 3-only function signature.
     # TODO: Use the commented signature below once we drop special Python 2.7

@@ -83,7 +83,7 @@ class Token:
         self.string, self.integer = self.str_to_int(value)
 
     def __repr__(self):
-        """ Prints internal string and number values for debug. """
+        """Prints internal string and number values for debug."""
         return "<Token:{}>".format(
             ",".join([f"{k}={v!r}" for k, v in self.__dict__.items()])
         )
@@ -96,7 +96,7 @@ class Token:
 
     @property
     def isint(self):
-        """ Does the Token got a pure integer representation? """
+        """Does the Token got a pure integer representation?"""
         return self.integer is not None
 
     """ In the best case, try to comparison Token to integers.
@@ -106,7 +106,7 @@ class Token:
     """
 
     def _match_type(self, other):
-        """ Returns the safe type with which we can compare two values. """
+        """Returns the safe type with which we can compare two values."""
         if self.isint:
             if isinstance(other, int):
                 return int

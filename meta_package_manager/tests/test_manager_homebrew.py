@@ -75,7 +75,7 @@ def install_cask():
 @unless_macos
 class TestCask:
     def test_autoupdate_unicode_name(self, invoke, install_cask):
-        """ See #16. """
+        """See #16."""
         # Install an old version of a package with a unicode name.
         # Old Cask formula for ubersicht 1.4.60.
         output = install_cask("ubersicht", "bb72da6c085c017f6bccebbfee5e3bc4837f3165")
@@ -104,7 +104,7 @@ class TestCask:
         assert "Übersicht" not in result.stdout
 
     def test_multiple_names(self, invoke, install_cask):
-        """ See #26. """
+        """See #26."""
         # Install an old version of a package with multiple names.
         # Old Cask formula for xld 2018.10.19.
         output = install_cask("xld", "89536da7075aa3ac9683a67189fddbed4a7d818c")

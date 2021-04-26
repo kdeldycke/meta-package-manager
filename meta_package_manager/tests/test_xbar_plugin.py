@@ -90,7 +90,7 @@ class TestXbarPlugin(unittest.TestCase):
                 )
 
     def test_simple_call(self):
-        """ Check default rendering is flat: no submenu. """
+        """Check default rendering is flat: no submenu."""
         self.xbar_output_checks(
             [
                 # Summary package statistics. Required.

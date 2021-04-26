@@ -37,17 +37,17 @@ CLI_FORMATS = frozenset(["plain", "fragments", "xbar"])
 
 class CLIError(Exception):
 
-    """ An error occurred when running package manager CLI. """
+    """An error occurred when running package manager CLI."""
 
     def __init__(self, code, output, error):
-        """ The exception internally keeps the result of CLI execution. """
+        """The exception internally keeps the result of CLI execution."""
         super().__init__()
         self.code = code
         self.output = output
         self.error = error
 
     def __str__(self):
-        """ Human-readable error. """
+        """Human-readable error."""
         margin = " " * 2
         indented_output = indent(str(self.output), margin)
         indented_error = indent(str(self.error), margin)
@@ -181,12 +181,12 @@ class PackageManager:
 
     @cachedproperty
     def supported(self):
-        """ Is the package manager supported on that platform? """
+        """Is the package manager supported on that platform?"""
         return CURRENT_OS_ID in self.platforms
 
     @cachedproperty
     def executable(self):
-        """ Is the package manager CLI can be executed by the current user? """
+        """Is the package manager CLI can be executed by the current user?"""
         if not self.cli_path:
             return False
         if not os.access(self.cli_path, os.X_OK):
@@ -196,7 +196,7 @@ class PackageManager:
 
     @cachedproperty
     def fresh(self):
-        """ Does the package manager match the version requirement? """
+        """Does the package manager match the version requirement?"""
         # Version is mandatory.
         if not self.version:
             return False
@@ -274,14 +274,14 @@ class PackageManager:
         return self.run(self.cli_path, args, dry_run=dry_run)
 
     def sync(self):
-        """ Refresh local manager metadata from remote repository. """
+        """Refresh local manager metadata from remote repository."""
         if self.sync.__func__.__qualname__ == PackageManager.sync.__qualname__:
             logger.warning(f"Sync not implemented for {self.id}.")
             return
         logger.info(f"Sync {self.id} package info...")
 
     def cleanup(self):
-        """ Remove left-overs and unused packages. """
+        """Remove left-overs and unused packages."""
         if self.cleanup.__func__.__qualname__ == PackageManager.cleanup.__qualname__:
             logger.warning(f"Cleanup not implemented for {self.id}.")
             return
@@ -318,15 +318,15 @@ class PackageManager:
         raise NotImplementedError
 
     def upgrade_cli(self, package_id=None):
-        """ Return a shell-compatible full-CLI to upgrade a package. """
+        """Return a shell-compatible full-CLI to upgrade a package."""
         raise NotImplementedError
 
     def upgrade(self, package_id=None, dry_run=False):
-        """ Perform the upgrade of the provided package to latest version. """
+        """Perform the upgrade of the provided package to latest version."""
         return self.run(self.upgrade_cli(package_id), dry_run=dry_run)
 
     def upgrade_all_cli(self):
-        """ Return a shell-compatible full-CLI to upgrade all packages. """
+        """Return a shell-compatible full-CLI to upgrade all packages."""
         raise NotImplementedError
 
     def upgrade_all(self, dry_run=False):

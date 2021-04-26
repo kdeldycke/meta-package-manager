@@ -103,7 +103,7 @@ def test_os_label():
 
 
 def test_blacklisted_manager():
-    """ Check all managers are accounted for on each platforms. """
+    """Check all managers are accounted for on each platforms."""
     # TODO: Use that blacklist to generate readme.rst's support table?
     blacklists = {
         LINUX: {"cask", "mas"},

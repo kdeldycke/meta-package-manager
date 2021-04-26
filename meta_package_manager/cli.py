@@ -108,7 +108,7 @@ def json(data):
 
 
 def print_table(header_defs, rows, sort_key=None):
-    """ Utility to print a table and sort its content. """
+    """Utility to print a table and sort its content."""
     # Do not print anything, not even table headers if no rows.
     if not rows:
         return
@@ -153,7 +153,7 @@ def print_table(header_defs, rows, sort_key=None):
 
 
 def print_stats(data):
-    """ Print statistics. """
+    """Print statistics."""
     manager_stats = {infos["id"]: len(infos["packages"]) for infos in data.values()}
     total_installed = sum(manager_stats.values())
     per_manager_totals = ", ".join(
@@ -270,7 +270,7 @@ def cli(
     time,
     stop_on_error,
 ):
-    """ CLI for multi-package manager upgrades. """
+    """CLI for multi-package manager upgrades."""
     # TODO: merge CLI parameters and config file here.
     # See: https://github.com/kdeldycke/meta-package-manager/issues/66
 
@@ -416,7 +416,7 @@ def managers(ctx):
 @click.pass_context
 @timeit()
 def sync(ctx):
-    """ Sync local package metadata and info from external sources. """
+    """Sync local package metadata and info from external sources."""
     active_managers = ctx.obj["active_managers"]
 
     for manager in active_managers:
@@ -427,7 +427,7 @@ def sync(ctx):
 @click.pass_context
 @timeit()
 def cleanup(ctx):
-    """ Cleanup local data and temporary artifacts. """
+    """Cleanup local data and temporary artifacts."""
     active_managers = ctx.obj["active_managers"]
 
     for manager in active_managers:
@@ -438,7 +438,7 @@ def cleanup(ctx):
 @click.pass_context
 @timeit()
 def installed(ctx):
-    """ List all packages installed on the system from all managers. """
+    """List all packages installed on the system from all managers."""
     active_managers = ctx.obj["active_managers"]
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
@@ -511,7 +511,7 @@ def installed(ctx):
 @click.pass_context
 @timeit()
 def search(ctx, extended, exact, query):
-    """ Search packages from all managers. """
+    """Search packages from all managers."""
     active_managers = ctx.obj["active_managers"]
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
@@ -701,7 +701,7 @@ def outdated(ctx, cli_format):
 @click.pass_context
 @timeit()
 def upgrade(ctx, dry_run):
-    """ Perform a full package upgrade on all available managers. """
+    """Perform a full package upgrade on all available managers."""
     active_managers = ctx.obj["active_managers"]
 
     for manager in active_managers:

@@ -143,7 +143,7 @@ class CLISubCommandTests:
     @pytest.mark.parametrize("opt_stats", ["--stats", "--no-stats", None])
     @pytest.mark.parametrize("opt_timer", ["--time", "--no-time", None])
     def test_options(self, invoke, subcmd, opt_stats, opt_timer):
-        """ Test the result on all combinations of optional options. """
+        """Test the result on all combinations of optional options."""
         result = invoke(opt_stats, opt_timer, subcmd)
         assert result.exit_code == 0
 
@@ -218,7 +218,7 @@ class CLISubCommandTests:
         assert selector in result.stderr
 
     def test_default_all_managers(self, invoke, subcmd):
-        """ Test all available managers are selected by default. """
+        """Test all available managers are selected by default."""
         result = invoke(subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result)
@@ -312,7 +312,7 @@ class CLITableTests:
         assert RENDERING_MODES == set(self.expected_renderings.keys())
 
     def test_default_table_rendering(self, invoke, subcmd):
-        """ Check default rendering is fancy_grid. """
+        """Check default rendering is fancy_grid."""
         result = invoke(subcmd)
         assert result.exit_code == 0
 

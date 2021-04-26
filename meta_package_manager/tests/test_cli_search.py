@@ -77,7 +77,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
     @unless_macos
     def test_unicode_search(self, invoke):
-        """ See #16. """
+        """See #16."""
         result = invoke("--manager", "cask", "search", "ubersicht")
         assert result.exit_code == 0
         assert "ubersicht" in result.stdout

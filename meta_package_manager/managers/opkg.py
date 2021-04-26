@@ -100,7 +100,7 @@ class OPKG(PackageManager):
         return installed
 
     def search(self, query, extended, exact):
-        """ Simulate search by listing all packages. """
+        """Simulate search by listing all packages."""
         matches = {}
 
         # opkg doesn't have a working 'search', so get all packages and

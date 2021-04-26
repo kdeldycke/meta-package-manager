@@ -24,7 +24,7 @@ from .test_cli import CLISubCommandTests
 
 
 def create_toml(filename, content):
-    """ Utility to produce TOML files. """
+    """Utility to produce TOML files."""
     with open(filename, "w") as doc:
         doc.write(textwrap.dedent(content.strip()))
 

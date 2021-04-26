@@ -36,17 +36,17 @@ WINDOWS = "windows"
 
 
 def is_linux():
-    """ Return `True` only if current platform is of the Linux family. """
+    """Return `True` only if current platform is of the Linux family."""
     return sys.platform.startswith("linux")
 
 
 def is_macos():
-    """ Return `True` only if current platform is of the macOS family. """
+    """Return `True` only if current platform is of the macOS family."""
     return sys.platform == "darwin"
 
 
 def is_windows():
-    """ Return `True` only if current platform is of the Windows family. """
+    """Return `True` only if current platform is of the Windows family."""
     return sys.platform in ["win32", "cygwin"]
 
 
@@ -65,7 +65,7 @@ ALL_OS_LABELS = frozenset([label for label, _ in OS_DEFINITIONS.values()])
 
 
 def os_label(os_id):
-    """ Return platform label for user-friendly output. """
+    """Return platform label for user-friendly output."""
     return OS_DEFINITIONS[os_id][0]
 
 
@@ -73,7 +73,7 @@ logger.debug(f"Raw platform ID: {sys.platform}.")
 
 
 def current_os():
-    """ Return a 2-items `tuple` with ID and label of current OS. """
+    """Return a 2-items `tuple` with ID and label of current OS."""
     for os_id, (os_name, os_flag) in OS_DEFINITIONS.items():
         if os_flag is True:
             return os_id, os_name

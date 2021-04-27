@@ -1,10 +1,8 @@
 Changelog
 =========
 
-`4.0.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v3.6.0...develop>`_
+`4.0.0 (2021-04-27) <https://github.com/kdeldycke/meta-package-manager/compare/v3.6.0...v4.0.0>`_
 -------------------------------------------------------------------------------------------------
-
-.. note:: This version is not yet released and is under active development.
 
 * [xbar] Ugrade BitBar plugin to new xbar format.
 * [xbar] Drop xbar plugin requirement on Python 2.x and bump it up to Python 3.7.3.

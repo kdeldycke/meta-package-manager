@@ -7,6 +7,7 @@
 # <xbar.dependencies>python,mpm</xbar.dependencies>
 # <xbar.image>https://i.imgur.com/CiQpQ42.png</xbar.image>
 # <xbar.abouturl>https://github.com/kdeldycke/meta-package-manager</xbar.abouturl>
+# <xbar.var>boolean(VAR_SUBMENU_lAYOUT=false): Group packages into manager sub-menus.</xbar.var>
 
 """
 xbar plugin for Meta Package Manager (a.k.a. the :command:`mpm` CLI).
@@ -26,15 +27,17 @@ from operator import itemgetter
 from subprocess import PIPE, Popen
 
 SUBMENU_LAYOUT = bool(
-    os.environ.get("XBAR_MPM_SUBMENU", False)
+    os.environ.get("VAR_SUBMENU_lAYOUT", False)
     in {True, 1, "True", "true", "1", "y", "yes", "Yes"}
 )
 """ Define the rendering mode of outdated packages list.
 
-Edit this script to force this constant to ``True``, or use the
-``XBAR_MPM_SUBMENU`` environment variable. This will replace the default flat
-layout with an alternative structure where all upgrade actions are put into
-submenus, one for each manager.
+If ``True``, will replace the default flat layout with an alternative structure
+where all upgrade actions are grouped into submenus, one for each manager.
+
+xbar automaticcaly bridge that option between its UI and environment variable
+on script execution.
+See: https://xbarapp.com/docs/2021/03/14/variables-in-xbar.html
 """
 
 

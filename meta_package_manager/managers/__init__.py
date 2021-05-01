@@ -56,5 +56,5 @@ def pool():
                 logger.debug(f"{klass!r} is not a valid manager definition")
 
     # Sort pool entries by ID.
-    # TODO: propose an OrderedDrozenDict in boltons and use it here.
+    # TODO: propose an OrderedFrozenDict in boltons and use it here.
     return OrderedDict(sorted(register.items()))

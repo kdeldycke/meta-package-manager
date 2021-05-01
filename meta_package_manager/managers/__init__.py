@@ -37,7 +37,7 @@ def pool():
     Is considered valid package manager, definitions classes which:
         1 - are sub-classes of PackageManager, and
         2 - are located in files at the same level or below this one, and
-        3 - are not virtual (i.e. have a non null cli_name property).
+        3 - are not virtual (i.e. have a non null `cli_names` property).
 
     Returns an `OrderedDict` sorted by manager's ID.
     """

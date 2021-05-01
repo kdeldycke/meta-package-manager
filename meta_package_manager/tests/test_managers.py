@@ -73,13 +73,15 @@ def test_platforms():
         assert manager.platforms.issubset(OS_DEFINITIONS)
 
 
-def test_cli_name_type():
+def test_cli_names_type():
     """Check the pointed CLI name and path are file-system compatible."""
     for manager in pool().values():
-        assert manager.cli_name
-        assert isinstance(manager.cli_name, str)
-        assert manager.cli_name.isalnum()
-        assert PurePath(manager.cli_name).name == manager.cli_name
+        assert manager.cli_names
+        assert isinstance(manager.cli_names, list)
+        for name in manager.cli_names:
+            assert isinstance(name, str)
+            assert name.isalnum()
+            assert PurePath(name).name == name
 
 
 def test_virtual():

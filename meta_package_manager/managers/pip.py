@@ -26,10 +26,10 @@ from ..version import TokenizedString, parse_version
 
 class Pip(PackageManager):
 
-    """We will use system's default Python to call out ``pip`` as a module.
+    """We will use the Python binary to call out ``pip`` as a module instead of a CLI.
 
     This is a more robust way of managing packages: "if you're on Windows there
-    is an added benefit to using python -m pip as it lets pip update itself."
+    is an added benefit to using `python -m pip` as it lets `pip` update itself."
     Source: https://snarky.ca/why-you-should-use-python-m-pip/
     """
 
@@ -37,8 +37,9 @@ class Pip(PackageManager):
 
     requirement = "10.0.0"
 
-    # We will use system's default python to call out pip as a module.
-    cli_name = "python"
+    # Targets `python3` CLI first to allow for some systems (like macOS) to keep the
+    # default `python` CLI tied to the Python 2.x ecosystem.
+    cli_names = ["python3", "python"]
 
     global_args = [
         "-m",

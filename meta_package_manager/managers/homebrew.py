@@ -44,7 +44,7 @@ class Homebrew(PackageManager):
     requirement = "2.7.0"
 
     # Declare this manager as virtual, i.e. not tied to a real CLI.
-    cli_name = None
+    cli_names = None
 
     def get_version(self):
         """Fetch version from ``brew --version`` output.
@@ -472,7 +472,7 @@ class Homebrew(PackageManager):
 class Brew(Homebrew):
 
     name = "Homebrew Formulae"
-    cli_name = "brew"
+    cli_names = ["brew"]
 
     global_args = ["--formula"]
 
@@ -482,6 +482,6 @@ class Cask(Homebrew):
     # Casks are only available on macOS, not Linux.
     platforms = frozenset([MACOS])
     name = "Homebrew Cask"
-    cli_name = "brew"
+    cli_names = ["brew"]
 
     global_args = ["--cask"]

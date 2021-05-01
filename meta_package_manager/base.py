@@ -116,12 +116,16 @@ class PackageManager:
         return cls.__name__
 
     @classproperty
-    def cli_name(cls):
-        """Package manager's CLI name.
+    def cli_names(cls):
+        """List of CLI names the package manager is known as.
+
+        The supported CLI names are ordered by priority. This is used for example to
+        help out the search of the right binary in the case of the python3/python2
+        transition.
 
         Is derived by default from the manager's ID.
         """
-        return cls.id
+        return [cls.id]
 
     @classproperty
     def virtual(cls):
@@ -130,23 +134,31 @@ class PackageManager:
         Virtual package manager are just skeleton classes used to factorize
         code among managers of the same family.
         """
-        return cls.__name__ == "PackageManager" or not cls.cli_name
+        return cls.__name__ == "PackageManager" or not cls.cli_names
 
     @cachedproperty
     def cli_path(self):
         """Fully qualified path to the package manager CLI.
 
-        Automaticaly search the location of the CLI in the system. Only checks
-        if the file exists. Its executability will be assessed later. See the
-        ``self.executable`` method below.
+        Automaticaly search the location of the CLI in the system. Try multiple CLI
+        names within several system path.
 
-        Returns `None` if CLI is not found or is not a file.
+        Only checks if the file exists. Its executability will be assessed later. See
+        the ``self.executable`` method below.
+
+        Returns `None` if no CLI was found or those found were not a file.
         """
         # Check if the path exist in any of the environment locations.
         env_path = ":".join(self.cli_search_path + [os.getenv("PATH")])
-        cli_path = which(self.cli_name, mode=os.F_OK, path=env_path)
+
+        # Search for multiple CLI names.
+        for name in self.cli_names:
+            cli_path = which(name, mode=os.F_OK, path=env_path)
+            if cli_path:
+                break
+            logger.debug(f"{name!r} CLI not found.")
+
         if not cli_path:
-            logger.debug(f"{self.cli_name} CLI not found.")
             return
 
         # Check if path exist and is a file.
@@ -158,7 +170,7 @@ class PackageManager:
         elif not cli_path.is_file():
             logger.warning(f"{cli_path} is not a file.")
         else:
-            logger.debug(f"CLI found at {cli_path}")
+            logger.debug(f"{name!r} CLI found at {cli_path}")
 
         return cli_path
 

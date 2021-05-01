@@ -2,10 +2,14 @@ Changelog
 =========
 
 
-`4.1.0 (2021-05-01) <https://github.com/kdeldycke/meta-package-manager/compare/v4.0.0...develop>`_
+`4.1.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v4.1.0...develop>`_
 --------------------------------------------------------------------------------------------------
 
 .. note:: This version is not yet released and is under active development.
+
+
+`4.1.0 (2021-05-01) <https://github.com/kdeldycke/meta-package-manager/compare/v4.0.0...v4.1.0>`_
+-------------------------------------------------------------------------------------------------
 
 * [xbar] Add new ``Submenu layout`` boolean option in xbar plugin UI.
 * [xbar] Rename ``XBAR_MPM_SUBMENU`` environment variable to ``VAR_SUBMENU_lAYOUT``.

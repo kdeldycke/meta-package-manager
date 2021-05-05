@@ -61,7 +61,7 @@ coverage = {extras = ["toml"], version = "^5.5"}
 isort = "^5.8.0"
 pipdeptree = {extras = ["graphviz"], version = "^2.0.0"}
 pylint = "^2.8.2"
-pytest = "^6.2.3"
+pytest = "^6.2.4"
 # More pytest plugins at: http://plugincompat.herokuapp.com .
 pytest-cov = "^2.11.1"
 pytest-randomly = "^3.7.0"

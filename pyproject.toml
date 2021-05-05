@@ -54,7 +54,7 @@ sphinx_tabs = {version = "^2.1.0", optional = true}
 click-help-colors = "^0.9"
 
 [tool.poetry.dev-dependencies]
-black = "^21.4b2"
+black = "^21.5b0"
 bump2version = "^1.0.1"
 check-wheel-contents = "^0.2.0"
 coverage = {extras = ["toml"], version = "^5.5"}

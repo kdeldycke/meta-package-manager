@@ -7,6 +7,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Upgrade to Click 8.x.
+
 
 `4.1.0 (2021-05-01) <https://github.com/kdeldycke/meta-package-manager/compare/v4.0.0...v4.1.0>`_
 -------------------------------------------------------------------------------------------------

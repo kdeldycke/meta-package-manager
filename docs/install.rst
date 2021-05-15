@@ -24,7 +24,7 @@ Shell completion
 ----------------
 
 Completion for popular shell `rely on Click feature
-<https://click.palletsprojects.com/en/7.x/bashcomplete/>`_.
+<https://click.palletsprojects.com/en/8.0.x/shell-completion/>`_.
 
 .. tabs::
 
@@ -34,7 +34,7 @@ Completion for popular shell `rely on Click feature
 
     .. code-block:: bash
 
-        eval "$(_MPM_COMPLETE=source_bash mpm)"
+        eval "$(_MPM_COMPLETE=bash_source mpm)"
 
   .. group-tab:: Zsh
 
@@ -42,7 +42,7 @@ Completion for popular shell `rely on Click feature
 
     .. code-block:: zsh
 
-        eval "$(_MPM_COMPLETE=source_zsh mpm)"
+        eval "$(_MPM_COMPLETE=zsh_source mpm)"
 
   .. group-tab:: Fish
 
@@ -50,7 +50,7 @@ Completion for popular shell `rely on Click feature
 
     .. code-block:: fish
 
-        eval (env _MPM_COMPLETE=source_fish mpm)
+        eval (env _MPM_COMPLETE=fish_source mpm)
 
 Alternatively, export the generated completion code as a static script to be
 executed:
@@ -61,31 +61,31 @@ executed:
 
     .. code-block:: shell-session
 
-        $ _MPM_COMPLETE=source_bash mpm > mpm-complete.sh
+        $ _MPM_COMPLETE=bash_source mpm > ~/.mpm-complete.bash
 
     Then source it from ``~/.bashrc``:
 
     .. code-block:: bash
 
-       . /path/to/mpm-complete.sh
+        . ~/.mpm-complete.bash
 
   .. group-tab:: Zsh
 
     .. code-block:: shell-session
 
-        $ _MPM_COMPLETE=source_zsh mpm > mpm-complete.sh
+        $ _MPM_COMPLETE=zsh_source mpm > ~/.mpm-complete.zsh
 
     Then source it from ``~/.zshrc``:
 
     .. code-block:: zsh
 
-       . /path/to/mpm-complete.sh
+        . ~/.mpm.zsh
 
   .. group-tab:: Fish
 
     .. code-block:: fish
 
-       _MPM_COMPLETE=source_fish mpm > ~/.config/fish/completions/mpm-comp.fish
+       _MPM_COMPLETE=fish_source mpm > ~/.config/fish/completions/mpm.fish
 
 
 Python dependencies

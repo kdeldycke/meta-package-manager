@@ -47,18 +47,16 @@ def config_structure():
 
 
 def read_config(custom_conf=None):
-    """ Loads a configuration files and returns recognized options.
+    """Loads a configuration files and returns recognized options.
 
     If no config file provided, defaults to the ``config.toml`` file found in a
     folder depending on the OS:
-    * macOS & Linux:
-        ~/.mpm/
-    * Windows XP:
-        C:\\Documents and Settings\\<user>\\Local Settings\\Application Data\\mpm\\
-    * Windows 7:
-        C:\\Users\\<user>\\AppData\\Roaming\\mpm\\
 
-    As per: https://click.palletsprojects.com/en/7.x/api/#click.get_app_dir
+      * macOS & Linux: ``~/.mpm/``
+
+      * Windows: ``C:\\Users\\<user>\\AppData\\Roaming\\mpm\\``
+
+    As per: https://click.palletsprojects.com/en/8.0.x/api/#click.get_app_dir
 
     Invalid parameters are ignored and log messages are emitted.
     """

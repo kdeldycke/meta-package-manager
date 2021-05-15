@@ -37,6 +37,7 @@ from simplejson import dumps as json_dumps
 
 from . import CLI_NAME, __version__, env_data, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
+from .config import read_config
 from .managers import pool
 from .platform import CURRENT_OS_ID, WINDOWS, os_label
 from .version import TokenizedString
@@ -271,6 +272,8 @@ def cli(
     stop_on_error,
 ):
     """CLI for multi-package manager upgrades."""
+    # Fetch option from configuration file.
+    conf = read_config()
     # TODO: merge CLI parameters and config file here.
     # See: https://github.com/kdeldycke/meta-package-manager/issues/66
 

@@ -24,6 +24,10 @@ import tomlkit
 
 from . import CLI_NAME, logger
 
+DEFAULT_CONFIG_FILE = Path(
+    click.get_app_dir(CLI_NAME, force_posix=True), "config.toml"
+).resolve()
+
 
 def config_structure():
     """Returns the supported configuration structure.
@@ -68,9 +72,7 @@ def read_config(custom_conf=None):
         cfg_filepath = Path(custom_conf).resolve()
     # Get configuration from default location.
     else:
-        cfg_filepath = Path(
-            click.get_app_dir(CLI_NAME, force_posix=True), "config.toml"
-        ).resolve()
+        cfg_filepath = DEFAULT_CONFIG_FILE
 
     # Check config file. Issues with non-default config file are fatal.
     if not cfg_filepath.exists():

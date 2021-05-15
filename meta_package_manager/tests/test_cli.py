@@ -28,7 +28,8 @@ from cli_helpers.tabular_output import TabularOutputFormatter
 
 from .. import __version__, logger
 from ..cli import RENDERING_MODES, WINDOWS_MODE_BLACKLIST
-from .conftest import MANAGER_IDS, unless_windows
+from ..config import DEFAULT_CONFIG_FILE
+from .conftest import MANAGER_IDS, create_toml, unless_windows
 
 """ Common tests for all CLI basic features and templates for subcommands. """
 
@@ -45,6 +46,18 @@ def test_temporary_fs(runner):
     assert not str(Path(__file__)).startswith(str(Path.cwd()))
 
 
+DUMMY_CONFIG_FILE = """
+        # Comment
+
+        [mpm]
+        verbosity = "DEBUG"
+        blahblah = 234
+
+        [garbage]
+
+        [backup]
+        """
+
 class TestBaseCLI:
 
     """This collection is testing basic CLI behavior shared by all
@@ -53,9 +66,9 @@ class TestBaseCLI:
     Also regroups tests not involving subcommands.
 
     Also includes a bunch of tests performed once on an arbitrary sub-command,
-    for situation when the tested behavior is shared by all subcommands. In
-    that case we choosed `managers` as it is a safe read-only operation
-    supposed to work on all platforms whatever the environment.
+    for situation when the tested behavior is shared by all subcommands. The
+    arbitrary sub-command is `managers`, as it is a safe read-only operation
+    supposed to work on all platforms, whatever the environment.
     """
 
     def test_bare_call(self, invoke):
@@ -110,6 +123,14 @@ class TestBaseCLI:
             assert "debug: " in result.stderr
         else:
             assert "debug: " not in result.stderr
+
+    def test_read_config_file(self, invoke):
+        create_toml(DEFAULT_CONFIG_FILE, DUMMY_CONFIG_FILE)
+        result = invoke("managers")
+        assert result.exit_code == 0
+        assert f"Load configuration from {DEFAULT_CONFIG_FILE}" in result.stderr
+        assert "warning: Ignore [mpm].blahblah option." in result.stderr
+        assert "warning: Ignore [garbage] section." in result.stderr
 
     @unless_windows
     @pytest.mark.parametrize("mode", WINDOWS_MODE_BLACKLIST)

@@ -18,7 +18,7 @@
 # pylint: disable=redefined-outer-name
 
 import os
-from textwrap import indent
+from textwrap import dedent, indent
 
 import click
 import pytest
@@ -162,3 +162,9 @@ def subcmd():
     allows tests relying on this fixture to selectively skip running.
     """
     return None
+
+
+def create_toml(filename, content):
+    """Utility to produce TOML files."""
+    with open(filename, "w") as doc:
+        doc.write(dedent(content.strip()))

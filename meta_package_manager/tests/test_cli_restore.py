@@ -15,18 +15,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import textwrap
-
 import pytest
 
-from .conftest import MANAGER_IDS
+from .conftest import MANAGER_IDS, create_toml
 from .test_cli import CLISubCommandTests
-
-
-def create_toml(filename, content):
-    """Utility to produce TOML files."""
-    with open(filename, "w") as doc:
-        doc.write(textwrap.dedent(content.strip()))
 
 
 @pytest.fixture

@@ -80,7 +80,7 @@ class TestBaseCLI:
         result = invoke("--blah")
         assert result.exit_code == 2
         assert not result.stdout
-        assert "Error: no such option: --blah" in result.stderr
+        assert "Error: No such option: --blah" in result.stderr
 
     def test_unknown_command(self, invoke):
         result = invoke("blah")

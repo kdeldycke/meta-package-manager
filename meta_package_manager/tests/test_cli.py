@@ -124,11 +124,21 @@ class TestBaseCLI:
         else:
             assert "debug: " not in result.stderr
 
-    def test_read_config_file(self, invoke):
+    def test_read_default_conf_file(self, invoke):
         create_toml(DEFAULT_CONFIG_FILE, DUMMY_CONFIG_FILE)
         result = invoke("managers")
         assert result.exit_code == 0
         assert f"Load configuration from {DEFAULT_CONFIG_FILE}" in result.stderr
+        assert "warning: Ignore [mpm].blahblah option." in result.stderr
+        assert "warning: Ignore [garbage] section." in result.stderr
+
+    def test_read_specific_conf_file(self, invoke, tmp_path):
+        specific_conf = tmp_path / "configuration.extension"
+        assert DEFAULT_CONFIG_FILE != specific_conf
+        create_toml(specific_conf, DUMMY_CONFIG_FILE)
+        result = invoke("--config", str(specific_conf), "managers")
+        assert result.exit_code == 0
+        assert f"Load configuration from {specific_conf}" in result.stderr
         assert "warning: Ignore [mpm].blahblah option." in result.stderr
         assert "warning: Ignore [garbage] section." in result.stderr
 

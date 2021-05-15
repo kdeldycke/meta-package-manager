@@ -27,6 +27,16 @@ from . import CLI_NAME, logger
 DEFAULT_CONFIG_FILE = Path(
     click.get_app_dir(CLI_NAME, force_posix=True), "config.toml"
 ).resolve()
+"""
+Default configuration file.
+
+Location depends on OS (see `Click documentation
+<https://click.palletsprojects.com/en/8.0.x/api/#click.get_app_dir>`_:
+
+    * macOS & Linux: ``~/.mpm/config.toml``
+
+    * Windows: ``C:\\Users\\<user>\\AppData\\Roaming\\mpm\\config.toml``
+"""
 
 
 def config_structure():
@@ -50,29 +60,13 @@ def config_structure():
     return config
 
 
-def read_config(custom_conf=None):
-    """Loads a configuration files and returns recognized options.
-
-    If no config file provided, defaults to the ``config.toml`` file found in a
-    folder depending on the OS:
-
-      * macOS & Linux: ``~/.mpm/``
-
-      * Windows: ``C:\\Users\\<user>\\AppData\\Roaming\\mpm\\``
-
-    As per: https://click.palletsprojects.com/en/8.0.x/api/#click.get_app_dir
+def read_config(cfg_filepath):
+    """Loads a configuration files and returns recognized options and their values.
 
     Invalid parameters are ignored and log messages are emitted.
     """
     # The recognized configuration extracted from the file.
     valid_config = {}
-
-    # Get configuration from provided file.
-    if custom_conf:
-        cfg_filepath = Path(custom_conf).resolve()
-    # Get configuration from default location.
-    else:
-        cfg_filepath = DEFAULT_CONFIG_FILE
 
     # Check config file. Issues with non-default config file are fatal.
     if not cfg_filepath.exists():

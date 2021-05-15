@@ -37,7 +37,7 @@ from simplejson import dumps as json_dumps
 
 from . import CLI_NAME, __version__, env_data, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
-from .config import read_config
+from .config import DEFAULT_CONFIG_FILE, read_config
 from .managers import pool
 from .platform import CURRENT_OS_ID, WINDOWS, os_label
 from .version import TokenizedString
@@ -251,6 +251,14 @@ class timeit:
     help="Stop right away or continue operations on manager CLI error. Defaults to "
     "continue.",
 )
+@click.option(
+    "-C",
+    "--config",
+    metavar="CONFIG_PATH",
+    type=click.Path(path_type=Path, resolve_path=True),
+    default=DEFAULT_CONFIG_FILE,
+    help=f'Location of the configuration file. Defaults to "{DEFAULT_CONFIG_FILE}".',
+)
 @version_option(
     version=__version__,
     prog_name=CLI_NAME,
@@ -270,10 +278,11 @@ def cli(
     stats,
     time,
     stop_on_error,
+    config,
 ):
     """CLI for multi-package manager upgrades."""
     # Fetch option from configuration file.
-    conf = read_config()
+    conf = read_config(config)
     # TODO: merge CLI parameters and config file here.
     # See: https://github.com/kdeldycke/meta-package-manager/issues/66
 

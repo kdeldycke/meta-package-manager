@@ -7,6 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Add ``-C`` / ``--config`` option to point to specific configuration file.
 * [mpm] Upgrade to Click 8.x.
 
 

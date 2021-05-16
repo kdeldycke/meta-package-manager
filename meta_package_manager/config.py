@@ -70,7 +70,7 @@ def read_config(cfg_filepath):
 
     # Check config file. Issues with non-default config file are fatal.
     if not cfg_filepath.exists():
-        if custom_conf:
+        if cfg_filepath:
             logger.fatal(f"Configuration not found at {cfg_filepath}")
             raise FileNotFoundError
         else:

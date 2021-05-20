@@ -45,7 +45,7 @@ click = "^8.0.1"
 click-log = "^0.3.2"
 cli-helpers = "^2.1.0"
 simplejson = "^3.17.2"
-tomlkit = "^0.7.0"
+tomlkit = "^0.7.1"
 # Should have been put in dev-dependencies but extras only works from main
 # section.
 sphinx = {version = "^4.0.1", optional = true}

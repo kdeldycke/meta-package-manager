@@ -902,7 +902,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
 name = "tomlkit"
-version = "0.7.0"
+version = "0.7.1"
 description = "Style preserving TOML library"
 category = "main"
 optional = false
@@ -1039,7 +1039,7 @@ docs = ["sphinx", "sphinx_rtd_theme", "sphinx_tabs"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "2d9000747cc30da6e38c7948d59d78dc397a578c54ec63ccb0ef15abb1ee8c85"
+content-hash = "8f3eebbb174d11e7ff2d7be9f20651af1180decec41b7fd9f0ec0f6ff39578f7"
 
 [metadata.files]
 alabaster = [
@@ -1657,8 +1657,8 @@ toml = [
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
 ]
 tomlkit = [
-    {file = "tomlkit-0.7.0-py2.py3-none-any.whl", hash = "sha256:6babbd33b17d5c9691896b0e68159215a9387ebfa938aa3ac42f4a4beeb2b831"},
-    {file = "tomlkit-0.7.0.tar.gz", hash = "sha256:ac57f29693fab3e309ea789252fcce3061e19110085aa31af5446ca749325618"},
+    {file = "tomlkit-0.7.1-py2.py3-none-any.whl", hash = "sha256:01227863019024861bb83d9a09a757b1c65604969fd2cebb19f5e2b340649792"},
+    {file = "tomlkit-0.7.1.tar.gz", hash = "sha256:24d6049e0765aad9c56a30dfa60d54c69f39c142112a6c57ce8f1c285b6b9d8f"},
 ]
 tqdm = [
     {file = "tqdm-4.60.0-py2.py3-none-any.whl", hash = "sha256:daec693491c52e9498632dfbe9ccfc4882a557f5fa08982db1b4d3adbe0887c3"},

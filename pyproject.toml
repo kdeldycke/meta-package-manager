@@ -41,7 +41,7 @@ classifiers = [
 # https://en.wikipedia.org/wiki/History_of_Python#Support
 python = "^3.7"
 boltons = "^21.0.0"
-click = "^8.0.0"
+click = "^8.0.1"
 click-log = "^0.3.2"
 cli-helpers = "^2.1.0"
 simplejson = "^3.17.2"

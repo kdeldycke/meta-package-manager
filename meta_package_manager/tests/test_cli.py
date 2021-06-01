@@ -58,6 +58,7 @@ DUMMY_CONFIG_FILE = """
         [backup]
         """
 
+
 class TestBaseCLI:
 
     """This collection is testing basic CLI behavior shared by all

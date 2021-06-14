@@ -50,7 +50,7 @@ tomlkit = "^0.7.2"
 # section.
 sphinx = {version = "^4.0.2", optional = true}
 sphinx_rtd_theme = {version = "^0.5.2", optional = true}
-sphinx_tabs = {version = "^3.0.0", optional = true}
+sphinx_tabs = {version = "^3.1.0", optional = true}
 click-help-colors = "^0.9"
 
 [tool.poetry.dev-dependencies]

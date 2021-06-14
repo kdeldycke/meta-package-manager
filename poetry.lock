@@ -785,7 +785,7 @@ dev = ["transifex-client", "sphinxcontrib-httpdomain", "bump2version"]
 
 [[package]]
 name = "sphinx-tabs"
-version = "3.0.0"
+version = "3.1.0"
 description = "Tabbed views for Sphinx"
 category = "main"
 optional = true
@@ -1040,7 +1040,7 @@ docs = ["sphinx", "sphinx_rtd_theme", "sphinx_tabs"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "3bfecb875b459c6d2ba66a60b28b72ed4675a3556171eddabfa855a8c1c22355"
+content-hash = "36f364a4005ac1c3ff9059cb7aafafae6278f7ce76fd8d684ec4682c020885a0"
 
 [metadata.files]
 alabaster = [
@@ -1619,8 +1619,8 @@ sphinx-rtd-theme = [
     {file = "sphinx_rtd_theme-0.5.2.tar.gz", hash = "sha256:32bd3b5d13dc8186d7a42fc816a23d32e83a4827d7d9882948e7b837c232da5a"},
 ]
 sphinx-tabs = [
-    {file = "sphinx-tabs-3.0.0.tar.gz", hash = "sha256:3f766762fffacc99828cb877a9e4cb8ac0ba3582f2a054ea68248e5e026e5612"},
-    {file = "sphinx_tabs-3.0.0-py3-none-any.whl", hash = "sha256:2abbcaaa3b8a857de06f3db31762a7bdd17aba1b8979d000f193debe6f917c2c"},
+    {file = "sphinx-tabs-3.1.0.tar.gz", hash = "sha256:5eee2a869b1226e1f618f0c7ed267e5e3c24425565e6313cad80d00a7119694f"},
+    {file = "sphinx_tabs-3.1.0-py3-none-any.whl", hash = "sha256:63df94e84bc05eb8598419a313ffc24455a14d1a580d174bb748404063958a67"},
 ]
 sphinxcontrib-applehelp = [
     {file = "sphinxcontrib-applehelp-1.0.2.tar.gz", hash = "sha256:a072735ec80e7675e3f432fcae8610ecf509c5f1869d17e2eecff44389cdbc58"},

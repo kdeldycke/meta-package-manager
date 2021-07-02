@@ -143,7 +143,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "check-wheel-contents"
-version = "0.3.0"
+version = "0.3.1"
 description = "Check your wheels have the right contents"
 category = "dev"
 optional = false
@@ -155,7 +155,7 @@ click = ">=7.0"
 packaging = "*"
 property-manager = ">=3.0,<4.0"
 pydantic = ">=1.7,<2.0"
-toml = "*"
+tomli = ">=1.0,<2.0"
 wheel-filename = ">=1.1,<2.0"
 
 [[package]]
@@ -904,6 +904,14 @@ optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
+name = "tomli"
+version = "1.0.3"
+description = "A lil' TOML parser"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
 name = "tomlkit"
 version = "0.7.2"
 description = "Style preserving TOML library"
@@ -1042,7 +1050,7 @@ docs = ["sphinx", "sphinx_rtd_theme", "sphinx_tabs"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "5325283478294a5dd2a75b5b7f43ff13704ffeffe60357d98b87819ba6059fd8"
+content-hash = "4abff51e1bfac1b19e7b7c7f5fd826ead75c7139b2e0a3cc976a37b072bb9c2c"
 
 [metadata.files]
 alabaster = [
@@ -1145,8 +1153,8 @@ chardet = [
     {file = "chardet-4.0.0.tar.gz", hash = "sha256:0d6f53a15db4120f2b08c94f11e7d93d2c911ee118b6b30a04ec3ee8310179fa"},
 ]
 check-wheel-contents = [
-    {file = "check-wheel-contents-0.3.0.tar.gz", hash = "sha256:d84e6ce47344555aee480d729fe94b6e66bdd7fc29dcfa8d6b78468809e1677d"},
-    {file = "check_wheel_contents-0.3.0-py3-none-any.whl", hash = "sha256:f6986c85f8f57da1c25fdf3fbeb51acd99330ddd27de23a93117412ad77cf442"},
+    {file = "check-wheel-contents-0.3.1.tar.gz", hash = "sha256:2f0c870408ffe4fb60f72b9f0cf094b07ffa5f459f8c9340de3fff03433d6ce5"},
+    {file = "check_wheel_contents-0.3.1-py3-none-any.whl", hash = "sha256:96a40119ec75ded7cc0f90a5d7f913a7381b0b27c3fbf30c8f6f1afb3bddc39f"},
 ]
 cli-helpers = [
     {file = "cli_helpers-2.1.0-py3-none-any.whl", hash = "sha256:6fe25b8fa78030a88f41b2af9ae4699bb341970773b444bd522f3627bd4485f2"},
@@ -1658,6 +1666,10 @@ terminaltables = [
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
+]
+tomli = [
+    {file = "tomli-1.0.3-py3-none-any.whl", hash = "sha256:e4f5bfadf0355dde1143c85ba9436363062c8d8d2cfe6913fd98288c828fe490"},
+    {file = "tomli-1.0.3.tar.gz", hash = "sha256:7c35beea296d1b7dc4e69e8db7702c856da888f5dd2f87b588761d34eaa05a52"},
 ]
 tomlkit = [
     {file = "tomlkit-0.7.2-py2.py3-none-any.whl", hash = "sha256:173ad840fa5d2aac140528ca1933c29791b79a374a0861a80347f42ec9328117"},

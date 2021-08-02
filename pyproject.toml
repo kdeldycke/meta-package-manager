@@ -59,7 +59,7 @@ bump2version = "^1.0.1"
 check-wheel-contents = "^0.3.2"
 coverage = {extras = ["toml"], version = "^5.5"}
 isort = "^5.9.2"
-pipdeptree = {extras = ["graphviz"], version = "^2.0.0"}
+pipdeptree = {extras = ["graphviz"], version = "^2.1.0"}
 pylint = "^2.9.5"
 pytest = "^6.2.4"
 # More pytest plugins at: http://plugincompat.herokuapp.com .

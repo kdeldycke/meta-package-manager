@@ -147,7 +147,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "check-wheel-contents"
-version = "0.3.2"
+version = "0.3.3"
 description = "Check your wheels have the right contents"
 category = "dev"
 optional = false
@@ -159,7 +159,7 @@ cached-property = {version = ">=1.5,<2.0", markers = "python_version < \"3.8\""}
 click = ">=7.0"
 packaging = "*"
 pydantic = ">=1.7,<2.0"
-tomli = ">=1.0,<2.0"
+tomli = ">=1.2,<2.0"
 wheel-filename = ">=1.1,<2.0"
 
 [[package]]
@@ -883,7 +883,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
 name = "tomli"
-version = "1.0.3"
+version = "1.2.1"
 description = "A lil' TOML parser"
 category = "dev"
 optional = false
@@ -1020,7 +1020,7 @@ docs = ["sphinx", "sphinx_rtd_theme", "sphinx_tabs"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "b572d0f2746e3210c8b72beca1dca800e59a480ae727035d37eb5905189f1c9f"
+content-hash = "9cd4e0987af016eb5cc472d87d38c3746e8d1f924ef7cce1c43a5c9d3ebdcdf8"
 
 [metadata.files]
 alabaster = [
@@ -1123,8 +1123,8 @@ chardet = [
     {file = "chardet-4.0.0.tar.gz", hash = "sha256:0d6f53a15db4120f2b08c94f11e7d93d2c911ee118b6b30a04ec3ee8310179fa"},
 ]
 check-wheel-contents = [
-    {file = "check-wheel-contents-0.3.2.tar.gz", hash = "sha256:1489b22b5ca2bc3ffbb1c32c0d1360f3e8d7f97b2a565e740dc451df5537c68d"},
-    {file = "check_wheel_contents-0.3.2-py3-none-any.whl", hash = "sha256:109c381b7014c69b5872dec4c545207747c11846dbe78684461a723571e9914d"},
+    {file = "check-wheel-contents-0.3.3.tar.gz", hash = "sha256:f180da620e19dcc6f00875b335c55f5615f4b64a0e19a2713e127c353c49bf34"},
+    {file = "check_wheel_contents-0.3.3-py3-none-any.whl", hash = "sha256:5af01d699b5d3360bfc995f5fba26a076f9786417fffdbc3323b3a8bf0b77547"},
 ]
 cli-helpers = [
     {file = "cli_helpers-2.2.0-py3-none-any.whl", hash = "sha256:3ed557793aa4ef5529c792e6a9c55f84ae798997d4a5107352219221023b4a81"},
@@ -1628,8 +1628,8 @@ toml = [
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
 ]
 tomli = [
-    {file = "tomli-1.0.3-py3-none-any.whl", hash = "sha256:e4f5bfadf0355dde1143c85ba9436363062c8d8d2cfe6913fd98288c828fe490"},
-    {file = "tomli-1.0.3.tar.gz", hash = "sha256:7c35beea296d1b7dc4e69e8db7702c856da888f5dd2f87b588761d34eaa05a52"},
+    {file = "tomli-1.2.1-py3-none-any.whl", hash = "sha256:8dd0e9524d6f386271a36b41dbf6c57d8e32fd96fd22b6584679dc569d20899f"},
+    {file = "tomli-1.2.1.tar.gz", hash = "sha256:a5b75cb6f3968abb47af1b40c1819dc519ea82bcc065776a866e8d74c5ca9442"},
 ]
 tomlkit = [
     {file = "tomlkit-0.7.2-py2.py3-none-any.whl", hash = "sha256:173ad840fa5d2aac140528ca1933c29791b79a374a0861a80347f42ec9328117"},

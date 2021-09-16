@@ -18,7 +18,7 @@ Changelog
 * [xbar] Add new ``Submenu layout`` boolean option in xbar plugin UI.
 * [xbar] Rename ``XBAR_MPM_SUBMENU`` environment variable to ``VAR_SUBMENU_lAYOUT``.
 * [mpm] Allow search of multiple CLI names for a package manager.
-* [pip] Fix search of `python3` binary on macOS. Closes #247.
+* [pip] Fix search of ``python3`` binary on macOS. Closes #247.
 
 
 `4.0.0 (2021-04-27) <https://github.com/kdeldycke/meta-package-manager/compare/v3.6.0...v4.0.0>`_

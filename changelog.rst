@@ -9,6 +9,7 @@ Changelog
 
 * [mpm] Add ``-C`` / ``--config`` option to point to specific configuration file.
 * [mpm] Upgrade to Click 8.x.
+* [mpm] Let Click produce default values in help screen.
 
 
 `4.1.0 (2021-05-01) <https://github.com/kdeldycke/meta-package-manager/compare/v4.0.0...v4.1.0>`_

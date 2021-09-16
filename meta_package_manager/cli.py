@@ -210,12 +210,12 @@ def load_config(ctx, param, config_file):
     return config_file
 
 
-@click.group()
+@click.group(context_settings=dict(show_default=True))
 @click_log.simple_verbosity_option(
     logger,
     default="INFO",
     metavar="LEVEL",
-    help="Either CRITICAL, ERROR, WARNING, INFO or DEBUG. Defaults to INFO.",
+    help="Either CRITICAL, ERROR, WARNING, INFO or DEBUG.",
 )
 @click.option(
     "-m",
@@ -223,52 +223,49 @@ def load_config(ctx, param, config_file):
     type=click.Choice(pool(), case_sensitive=False),
     multiple=True,
     help="Restrict sub-command to a subset of package managers. Repeat to "
-    "select multiple managers. Defaults to all.",
+    "select multiple managers.",
 )
 @click.option(
     "-e",
     "--exclude",
     type=click.Choice(pool(), case_sensitive=False),
     multiple=True,
-    help="Exclude a package manager. Repeat to exclude multiple managers. "
-    "Defaults to none.",
+    help="Exclude a package manager. Repeat to exclude multiple managers.",
 )
 @click.option(
     "--ignore-auto-updates/--include-auto-updates",
     default=True,
     help="Report all outdated packages, including those tagged as "
-    "auto-updating. Defaults to include all packages. Only applies to "
-    "'outdated' and 'upgrade' commands.",
+    "auto-updating. Only applies to 'outdated' and 'upgrade' commands.",
 )
 @click.option(
     "-o",
     "--output-format",
     type=click.Choice(sorted(RENDERING_MODES), case_sensitive=False),
     default="fancy_grid",
-    help="Rendering mode of the output. Defaults to fancy-grid.",
+    help="Rendering mode of the output.",
 )
 @click.option(
     "-s",
     "--sort-by",
     type=click.Choice(SORTABLE_FIELDS, case_sensitive=False),
     default="manager_id",
-    help="Sort results. Defaults to manager_id.",
+    help="Sort results.",
 )
 @click.option(
     "--stats/--no-stats",
     default=True,
-    help="Print per-manager package statistics. Active by default.",
+    help="Print per-manager package statistics.",
 )
 @click.option(
     "--time/--no-time",
     default=False,
-    help="Measure and print elapsed execution time. Inactive by default.",
+    help="Measure and print elapsed execution time.",
 )
 @click.option(
     "--stop-on-error/--continue-on-error",
     default=False,
-    help="Stop right away or continue operations on manager CLI error. Defaults to "
-    "continue.",
+    help="Stop right away or continue operations on manager CLI error.",
 )
 @click.option(
     "-C",
@@ -277,7 +274,7 @@ def load_config(ctx, param, config_file):
     type=click.Path(path_type=Path, resolve_path=True),
     default=DEFAULT_CONFIG_FILE,
     callback=load_config,
-    help=f'Location of the configuration file. Defaults to "{DEFAULT_CONFIG_FILE}".',
+    help="Location of the configuration file.",
 )
 @version_option(
     version=__version__,
@@ -528,14 +525,12 @@ def installed(ctx):
     "--extended/--package-name",
     default=False,
     help="Extend search to additional package metadata like description, "
-    "instead of restricting it package ID and name. Defaults to package ID "
-    "search.",
+    "instead of restricting it package ID and name.",
 )
 @click.option(
     "--exact/--fuzzy",
     default=False,
-    help="Only returns exact matches, or enable fuzzy search in substrings. "
-    "Fuzzy by default.",
+    help="Only returns exact matches, or enable fuzzy search in substrings.",
 )
 @click.argument("query", type=click.STRING, required=True)
 @click.pass_context
@@ -640,7 +635,7 @@ def search(ctx, extended, exact, query):
     "--cli-format",
     type=click.Choice(CLI_FORMATS, case_sensitive=False),
     default="plain",
-    help="Format of CLI fields in JSON output. Defaults to plain.",
+    help="Format of CLI fields in JSON output.",
 )
 @click.pass_context
 @timeit()

@@ -49,7 +49,7 @@ tomlkit = "^0.7.2"
 # Should have been put in dev-dependencies but extras only works from main
 # section.
 sphinx = {version = "^4.2.0", optional = true}
-sphinx_rtd_theme = {version = "^0.5.2", optional = true}
+sphinx_rtd_theme = {version = "^1.0.0", optional = true}
 sphinx_tabs = {version = "^3.1.0", optional = true}
 click-help-colors = "^0.9"
 

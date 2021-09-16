@@ -210,7 +210,9 @@ def load_config(ctx, param, config_file):
     return config_file
 
 
-@click.group(context_settings=dict(show_default=True))
+@click.group(
+    context_settings=dict(help_option_names=["-h", "--help"], show_default=True)
+)
 @click_log.simple_verbosity_option(
     logger,
     default="INFO",

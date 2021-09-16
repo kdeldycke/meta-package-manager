@@ -203,8 +203,8 @@ def load_config(ctx, param, config_file):
             logger.fatal(excpt)
             sys.exit()
         else:
-    # TODO: merge CLI parameters and config file here.
-    # See: https://github.com/kdeldycke/meta-package-manager/issues/66
+            # TODO: merge CLI parameters and config file here.
+            # See: https://github.com/kdeldycke/meta-package-manager/issues/66
             logger.debug(excpt)
             logger.debug("Ignore configuration file.")
     return config_file

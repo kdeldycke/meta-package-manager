@@ -26,7 +26,7 @@ from .xbar import fix_environment
 # Canonical name of the CLI.
 CLI_NAME = "mpm"
 
-__version__ = "4.1.1"
+__version__ = "4.2.0"
 """ Examples of valid version strings according :pep:`440#version-scheme`:
 
 .. code-block:: python

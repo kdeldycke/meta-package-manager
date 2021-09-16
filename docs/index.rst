@@ -9,6 +9,7 @@ Contents
    install
    usecase
    usage
+   configuration
    falsehoods
    xbar
    meta_package_manager

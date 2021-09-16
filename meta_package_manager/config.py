@@ -39,6 +39,12 @@ Location depends on OS (see `Click documentation
 """
 
 
+class ConfigurationFileError(Exception):
+    """Base class for all exceptions related to configuration file."""
+
+    pass
+
+
 def config_structure():
     """Returns the supported configuration structure.
 
@@ -47,15 +53,23 @@ def config_structure():
     # Imported here to avoid circular imports.
     from .cli import cli
 
+    # List of unsupported options we're going to ignore.
+    ignored_options = [
+        # --version is not a configurable option.
+        "version",
+        # -C/--config option cannot be used to link to another file.
+        "config",
+    ]
+
     # Global, top-level options shared by all subcommands are placed under the
     # cli name's section.
-    # TODO: exclude version option.
-    # TODO: take particular attention to boolean flag options.
-    config = {CLI_NAME: {p.name for p in cli.params}}
+    config = {CLI_NAME: {p.name for p in cli.params if p.name not in ignored_options}}
 
     # Subcommand-specific options.
     for cmd_id, cmd in cli.commands.items():
-        config[cmd_id] = {p.name for p in cmd.params}
+        cmd_options = {p.name for p in cmd.params if p.name not in ignored_options}
+        if cmd_options:
+            config[cmd_id] = cmd_options
 
     return config
 
@@ -68,17 +82,11 @@ def read_config(cfg_filepath):
     # The recognized configuration extracted from the file.
     valid_config = {}
 
-    # Check config file. Issues with non-default config file are fatal.
+    # Check config file.
     if not cfg_filepath.exists():
-        if cfg_filepath:
-            logger.fatal(f"Configuration not found at {cfg_filepath}")
-            raise FileNotFoundError
-        else:
-            logger.warning(f"Configuration not found at {cfg_filepath}")
-            return valid_config
+        raise ConfigurationFileError(f"Configuration not found at {cfg_filepath}")
     if not cfg_filepath.is_file():
-        logger.fatal(f"Configuration {cfg_filepath} is not a file.")
-        raise FileNotFoundError
+        raise ConfigurationFileError(f"Configuration {cfg_filepath} is not a file.")
 
     # Parse TOML content.
     logger.info(f"Load configuration from {cfg_filepath}")
@@ -107,6 +115,9 @@ def read_config(cfg_filepath):
             # Keep option.
             valid_options[opt_id] = opt_value
 
-        valid_config[section] = valid_options
+        if valid_options:
+            valid_config[section] = valid_options
+        else:
+            logger.warning(f"Ignore empty [{section}] section.")
 
     return valid_config

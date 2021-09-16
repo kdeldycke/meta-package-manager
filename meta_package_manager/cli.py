@@ -18,6 +18,7 @@
 import functools
 import logging
 import re
+import sys
 from datetime import datetime
 from functools import partial
 from io import TextIOWrapper
@@ -32,12 +33,13 @@ import tomlkit
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list, strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
+from click.core import ParameterSource
 from click_help_colors import HelpColorsCommand, HelpColorsGroup, version_option
 from simplejson import dumps as json_dumps
 
 from . import CLI_NAME, __version__, env_data, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
-from .config import DEFAULT_CONFIG_FILE, read_config
+from .config import DEFAULT_CONFIG_FILE, ConfigurationFileError, read_config
 from .managers import pool
 from .platform import CURRENT_OS_ID, WINDOWS, os_label
 from .version import TokenizedString
@@ -191,6 +193,23 @@ class timeit:
             click.echo(f"Execution time: {elapsed:.3} seconds.")
 
 
+def load_config(ctx, param, config_file):
+    # Fetch option from configuration file.
+    try:
+        conf = read_config(config_file)
+    except ConfigurationFileError as excpt:
+        # Exit the CLI if the user-provided config file is bad.
+        if ctx.get_parameter_source("config") != ParameterSource.DEFAULT:
+            logger.fatal(excpt)
+            sys.exit()
+        else:
+            logger.info(excpt)
+            logger.info("Ignore configuration file.")
+    # TODO: merge CLI parameters and config file here.
+    # See: https://github.com/kdeldycke/meta-package-manager/issues/66
+    return config_file
+
+
 @click.group()
 @click_log.simple_verbosity_option(
     logger,
@@ -257,6 +276,7 @@ class timeit:
     metavar="CONFIG_PATH",
     type=click.Path(path_type=Path, resolve_path=True),
     default=DEFAULT_CONFIG_FILE,
+    callback=load_config,
     help=f'Location of the configuration file. Defaults to "{DEFAULT_CONFIG_FILE}".',
 )
 @version_option(
@@ -281,10 +301,6 @@ def cli(
     config,
 ):
     """CLI for multi-package manager upgrades."""
-    # Fetch option from configuration file.
-    conf = read_config(config)
-    # TODO: merge CLI parameters and config file here.
-    # See: https://github.com/kdeldycke/meta-package-manager/issues/66
 
     level = logger.level
     level_name = logging._levelToName.get(level, level)

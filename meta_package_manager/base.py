@@ -146,7 +146,7 @@ class PackageManager:
         Only checks if the file exists. Its executability will be assessed later. See
         the ``self.executable`` method below.
 
-        Returns `None` if no CLI was found or those found were not a file.
+        Returns ``None`` if no CLI was found or those found were not a file.
         """
         # Check if the path exist in any of the environment locations.
         env_path = ":".join(self.cli_search_path + [os.getenv("PATH")])
@@ -178,7 +178,7 @@ class PackageManager:
         """Invoke the manager and extract its own reported version.
 
         It does matter if this method return unsanitized and crappy string. The
-        `version()` method below will clean and normalized it.
+        ``version()`` method below will clean and normalized it.
         """
         raise NotImplementedError
 
@@ -226,10 +226,11 @@ class PackageManager:
         """Is the package manager available and ready-to-use on the system?
 
         Returns True only if the main CLI:
-            1 - is supported on the current platform,
-            2 - was found on the system,
-            3 - is executable, and
-            4 - match the version requirement.
+
+        # is supported on the current platform,
+        # was found on the system,
+        # is executable, and
+        # match the version requirement.
         """
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
@@ -280,8 +281,8 @@ class PackageManager:
         return output
 
     def run_cli(self, *args, dry_run=False):
-        """Like the `run` method above, but execute the binary pointed to by
-        the `cli_path` property set in the current instance.
+        """Like the ``run`` method above, but execute the binary pointed to by
+        the ``cli_path`` property set in the current instance.
         """
         return self.run(self.cli_path, args, dry_run=dry_run)
 
@@ -371,7 +372,7 @@ class PackageManager:
         * ``xbar`` (or ``bitbar``) returns a CLI with parameters formatted into
         the xbar dialect
 
-        ..warning:
+        .. warning::
 
             ``bitbar`` is deprecated but is provided as temporary alias to
             ``xbar`` to provide a smooth transition to the rebooted project.

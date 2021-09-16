@@ -31,7 +31,7 @@ DEFAULT_CONFIG_FILE = Path(
 Default configuration file.
 
 Location depends on OS (see `Click documentation
-<https://click.palletsprojects.com/en/8.0.x/api/#click.get_app_dir>`_:
+<https://click.palletsprojects.com/en/8.0.x/api/#click.get_app_dir>`_):
 
     * macOS & Linux: ``~/.mpm/config.toml``
 

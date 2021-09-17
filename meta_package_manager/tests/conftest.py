@@ -166,5 +166,6 @@ def subcmd():
 
 def create_toml(filename, content):
     """Utility to produce TOML files."""
-    with open(filename, "w") as doc:
-        doc.write(dedent(content.strip()))
+    # Create the missing folder structure, like "mkdir -p" does.
+    filename.parent.mkdir(parents=True, exist_ok=True)
+    filename.write_text(dedent(content).strip())

@@ -39,7 +39,7 @@ def write_labels():
     label_defs = [
         dict(zip(["name", "color", "description"], label)) for label in sorted(LABELS)
     ]
-    json_file.open("w").write(
+    json_file.write_text(
         json_dumps(
             label_defs,
             indent=2,

@@ -44,8 +44,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 
 def test_changelog():
-    with PROJECT_ROOT.joinpath("changelog.rst").resolve().open() as doc:
-        content = doc.read()
+    content = PROJECT_ROOT.joinpath("changelog.rst").read_text()
 
     assert content.startswith("Changelog\n=========\n")
 
@@ -69,8 +68,7 @@ def test_labeller_rules():
     """
 
     # Extract list of canonically defined labels.
-    with PROJECT_ROOT.joinpath(".github/labels.json").resolve().open() as doc:
-        content = doc.read()
+    content = PROJECT_ROOT.joinpath(".github/labels.json").read_text()
     defined_labels = [lbl["name"] for lbl in json.loads(content)]
 
     # Canonical labels are uniques.
@@ -90,10 +88,9 @@ def test_labeller_rules():
     assert canonical_platforms
 
     # Extract rules from json blurb serialized into YAML.
-    with PROJECT_ROOT.joinpath(
+    content = PROJECT_ROOT.joinpath(
         ".github/workflows/labeller-content-based.yaml"
-    ).resolve().open() as doc:
-        content = doc.read()
+    ).read_text()
     assert "Naturalclar/issue-action" in content
     json_rules = load(content, Loader=Loader)["jobs"]["labeller"]["steps"][1]["with"][
         "parameters"

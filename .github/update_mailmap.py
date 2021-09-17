@@ -80,6 +80,6 @@ for contributor in contributors:
         mappings.add(contributor)
 
 # Save content to .mailmap file.
-mailmap_file.open("w").write(
+mailmap_file.write_text(
     "{}\n\n{}\n".format("\n".join(header_comments), "\n".join(sorted(mappings)))
 )

@@ -326,11 +326,13 @@ class CLITableTests:
         "latex": ("\\hline", None),
         "latex_booktabs": ("\\toprule", None),
         "mediawiki": ('{| class="wikitable" ', "jira"),
+        "minimal": ("  ", None),
         "moinmoin": (" ''' || ''' ", "jira"),
         "orgtbl": ("---+---", None),
         "pipe": ("---|:---", None),
         "plain": ("  ", None),
         "psql": ("---+---", None),
+        "psql_unicode": ("───┼───", None),
         "rst": ("===  ===", None),
         "simple": ("---  ---", None),
         "textile": (" |_. ", None),
@@ -344,11 +346,11 @@ class CLITableTests:
         assert RENDERING_MODES == set(self.expected_renderings.keys())
 
     def test_default_table_rendering(self, invoke, subcmd):
-        """Check default rendering is fancy_grid."""
+        """Check default rendering is psql_unicode."""
         result = invoke(subcmd)
         assert result.exit_code == 0
 
-        expected = self.expected_renderings["fancy_grid"][0]
+        expected = self.expected_renderings["psql_unicode"][0]
 
         # If no package found, check that no table gets rendered. Else, check
         # the selected mode is indeed rendered in <stdout>, so the CLI result

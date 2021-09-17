@@ -244,7 +244,7 @@ def load_config(ctx, param, config_file):
     "-o",
     "--output-format",
     type=click.Choice(sorted(RENDERING_MODES), case_sensitive=False),
-    default="fancy_grid",
+    default="psql_unicode",
     help="Rendering mode of the output.",
 )
 @click.option(

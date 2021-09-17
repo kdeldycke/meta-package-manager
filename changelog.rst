@@ -9,6 +9,9 @@ Changelog
 
 * [mpm] Add ``-C`` / ``--config`` option to point to specific configuration file.
 * [mpm] Upgrade to Click 8.x.
+* [mpm] Add support for ``psql_unicode`` and ``minimal`` table format.
+* [mpm] Set default table format to ``psql_unicode`` instead of ``fancy_grid`` to
+  reduce visual noise.
 * [mpm] Let Click produce default values in help screen.
 
 

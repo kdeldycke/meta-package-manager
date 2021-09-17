@@ -119,7 +119,7 @@ class TestBaseCLI:
         result = invoke("--verbosity", level, "managers")
         assert result.exit_code == 0
         assert logger.level == getattr(logging, level)
-        assert "══════" in result.stdout
+        assert "──────" in result.stdout
         if level == "DEBUG":
             assert "debug: " in result.stderr
         else:

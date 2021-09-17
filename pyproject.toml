@@ -43,6 +43,7 @@ python = "^3.7"
 boltons = "^21.0.0"
 click = "^8.0.1"
 click-log = "^0.3.2"
+click-help-colors = "^0.9"
 cli-helpers = "^2.2.0"
 simplejson = "^3.17.5"
 tomlkit = "^0.7.2"
@@ -51,7 +52,6 @@ tomlkit = "^0.7.2"
 sphinx = {version = "^4.2.0", optional = true}
 sphinx_rtd_theme = {version = "^1.0.0", optional = true}
 sphinx_tabs = {version = "^3.2.0", optional = true}
-click-help-colors = "^0.9"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"

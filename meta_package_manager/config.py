@@ -20,7 +20,8 @@
 from pathlib import Path
 
 import click
-import tomlkit
+import tomli
+from boltons.iterutils import remap
 
 from . import CLI_NAME, logger
 
@@ -45,10 +46,12 @@ class ConfigurationFileError(Exception):
     pass
 
 
-def config_structure():
+def conf_structure():
     """Returns the supported configuration structure.
 
     Derives TOML structure from CLI definition.
+
+    Sections are dicts. All options have their defaults value to None.
     """
     # Imported here to avoid circular imports.
     from .cli import cli
@@ -63,61 +66,66 @@ def config_structure():
 
     # Global, top-level options shared by all subcommands are placed under the
     # cli name's section.
-    config = {CLI_NAME: {p.name for p in cli.params if p.name not in ignored_options}}
+    conf = {
+        CLI_NAME: {p.name: None for p in cli.params if p.name not in ignored_options}
+    }
 
     # Subcommand-specific options.
     for cmd_id, cmd in cli.commands.items():
-        cmd_options = {p.name for p in cmd.params if p.name not in ignored_options}
+        cmd_options = {
+            p.name: None for p in cmd.params if p.name not in ignored_options
+        }
         if cmd_options:
-            config[cmd_id] = cmd_options
+            conf[CLI_NAME][cmd_id] = cmd_options
 
-    return config
+    return conf
 
 
-def read_config(cfg_filepath):
-    """Loads a configuration files and returns recognized options and their values.
+def read_conf(conf_filepath):
+    """Loads a configuration files and only returns recognized options and their values.
 
-    Invalid parameters are ignored and log messages are emitted.
+    Invalid parameters are ignored.
     """
-    # The recognized configuration extracted from the file.
-    valid_config = {}
-
-    # Check config file.
-    if not cfg_filepath.exists():
-        raise ConfigurationFileError(f"Configuration not found at {cfg_filepath}")
-    if not cfg_filepath.is_file():
-        raise ConfigurationFileError(f"Configuration {cfg_filepath} is not a file.")
+    # Check conf file.
+    if not conf_filepath.exists():
+        raise ConfigurationFileError(f"Configuration not found at {conf_filepath}")
+    if not conf_filepath.is_file():
+        raise ConfigurationFileError(f"Configuration {conf_filepath} is not a file.")
 
     # Parse TOML content.
-    logger.info(f"Load configuration from {cfg_filepath}")
-    doc = tomlkit.parse(cfg_filepath.read_bytes())
+    logger.info(f"Load configuration from {conf_filepath}")
+    user_conf = tomli.loads(conf_filepath.read_text())
 
-    # Filters-out configuration file's content against the reference structure and
-    # only keep recognized options.
-    structure = config_structure()
+    # Merge configuration file's content into the canonical reference structure, but
+    # ignore all unrecognized options.
 
-    for section, options in doc.items():
+    def recursive_update(a, b):
+        """Like standard ``dict.update()``, but recursive so sub-dict gets updated.
 
-        # Ignore unrecognized section.
-        if section not in structure:
-            logger.warning(f"Ignore [{section}] section.")
-            continue
+        Ignore elements present in ``b`` but not in ``a``.
+        """
+        for k, v in b.items():
+            if isinstance(v, dict) and isinstance(a.get(k), dict):
+                a[k] = recursive_update(a[k], v)
+            # Ignore elements unregistered in the canonical structure.
+            elif k in a:
+                a[k] = b[k]
+        return a
 
-        # Dive into section and look at options.
-        valid_options = {}
-        for opt_id, opt_value in options.items():
+    valid_conf = recursive_update(conf_structure(), user_conf)
 
-            # Ignore unrecognized option.
-            if opt_id not in structure[section]:
-                logger.warning(f"Ignore [{section}].{opt_id} option.")
-                continue
+    # Clean-up blank values left-over by the canonical reference structure.
 
-            # Keep option.
-            valid_options[opt_id] = opt_value
+    def visit(path, key, value):
+        """Skip None values and empty dicts."""
+        if value is None:
+            return False
+        if isinstance(value, dict) and not len(value):
+            return False
+        return True
 
-        if valid_options:
-            valid_config[section] = valid_options
-        else:
-            logger.warning(f"Ignore empty [{section}] section.")
+    clean_conf = remap(valid_conf, visit=visit)
 
-    return valid_config
+    logger.debug(f"Configuration loaded: {clean_conf}")
+
+    return clean_conf

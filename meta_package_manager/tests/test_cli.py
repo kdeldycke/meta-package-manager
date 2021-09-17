@@ -49,13 +49,18 @@ def test_temporary_fs(runner):
 DUMMY_CONFIG_FILE = """
         # Comment
 
+        top_level_param = "to_ignore"
+
         [mpm]
         verbosity = "DEBUG"
         blahblah = 234
+        manager = ["pip", "npm", "gem"]
 
         [garbage]
 
-        [backup]
+        [mpm.search]
+        exact = true
+        dummy_parameter = 3
         """
 
 
@@ -130,8 +135,6 @@ class TestBaseCLI:
         result = invoke("managers")
         assert result.exit_code == 0
         assert f"Load configuration from {DEFAULT_CONFIG_FILE}" in result.stderr
-        assert "warning: Ignore [mpm].blahblah option." in result.stderr
-        assert "warning: Ignore [garbage] section." in result.stderr
 
     def test_read_specific_conf_file(self, invoke, tmp_path):
         specific_conf = tmp_path / "configuration.extension"
@@ -142,6 +145,33 @@ class TestBaseCLI:
         assert f"Load configuration from {specific_conf}" in result.stderr
         assert "warning: Ignore [mpm].blahblah option." in result.stderr
         assert "warning: Ignore [garbage] section." in result.stderr
+
+    def test_conf_file_overrides_defaults(self, invoke):
+        create_toml(DEFAULT_CONFIG_FILE, DUMMY_CONFIG_FILE)
+        result = invoke("managers")
+        assert result.exit_code == 0
+        assert logger.level == getattr(logging, "DEBUG")
+        assert " │ pip │ " in result.stdout
+        assert " │ npm │ " in result.stdout
+        assert " │ gem │ " in result.stdout
+        assert "brew" not in result.stdout
+        assert "cask" not in result.stdout
+        assert "debug: " in result.stderr
+
+    def test_conf_file_cli_override(self, invoke):
+        create_toml(DEFAULT_CONFIG_FILE, DUMMY_CONFIG_FILE)
+        result = invoke("--verbosity", "CRITICAL", "managers")
+        assert result.exit_code == 0
+        assert logger.level == getattr(logging, "CRITICAL")
+        assert " │ pip │ " in result.stdout
+        assert " │ npm │ " in result.stdout
+        assert " │ gem │ " in result.stdout
+        assert "brew" not in result.stdout
+        assert "cask" not in result.stdout
+        assert "error: " not in result.stderr
+        assert "warning: " not in result.stderr
+        assert "info: " not in result.stderr
+        assert "debug: " not in result.stderr
 
     @unless_windows
     @pytest.mark.parametrize("mode", WINDOWS_MODE_BLACKLIST)

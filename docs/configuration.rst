@@ -11,9 +11,7 @@ Here is a sample:
 
     [mpm]
     verbosity = "DEBUG"
-    manager = [
-      "brew",
-      "cask",
-    ]
+    manager = ["brew", "cask"]
 
-    [backup]
+    [mpm.search]
+    exact = True

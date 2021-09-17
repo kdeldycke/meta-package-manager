@@ -1,12 +1,11 @@
-import io
 import os
+from pathlib import Path
 
-import tomlkit
+import tomli
 
 # Fetch general information about the project from pyproject.toml.
-toml_path = os.path.join(os.path.dirname(__file__), "..", "pyproject.toml")
-with io.open(toml_path, "r") as toml_file:
-    toml_config = tomlkit.loads(toml_file.read())
+toml_path = Path(__file__).parent.joinpath("../pyproject.toml").resolve()
+toml_config = tomli.loads(toml_path.read_text())
 
 # Redistribute pyproject.toml config to Sphinx.
 project_id = toml_config["tool"]["poetry"]["name"]

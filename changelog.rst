@@ -7,12 +7,14 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Add support for TOML configuration file. Closes #66.
 * [mpm] Add ``-C`` / ``--config`` option to point to specific configuration file.
 * [mpm] Upgrade to Click 8.x.
 * [mpm] Add support for ``psql_unicode`` and ``minimal`` table format.
 * [mpm] Set default table format to ``psql_unicode`` instead of ``fancy_grid`` to
   reduce visual noise.
 * [mpm] Let Click produce default values in help screen.
+* [mpm] Replace ``tomlkit`` dependency by ``tomli``.
 
 
 `4.1.0 (2021-05-01) <https://github.com/kdeldycke/meta-package-manager/compare/v4.0.0...v4.1.0>`_

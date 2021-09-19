@@ -14,7 +14,7 @@ Changelog
 * [mpm] Set default table format to ``psql_unicode`` instead of ``fancy_grid`` to
   reduce visual noise.
 * [mpm] Let Click produce default values in help screen.
-* [mpm] Replace ``tomlkit`` dependency by ``tomli``.
+* [mpm] Replace ``tomlkit`` dependency by ``tomli`` and ``tomli_w``.
 
 
 `4.1.0 (2021-05-01) <https://github.com/kdeldycke/meta-package-manager/compare/v4.0.0...v4.1.0>`_

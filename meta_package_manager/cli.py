@@ -29,6 +29,7 @@ from time import time as time_now
 import click
 import click_log
 import tomli
+import tomli_w
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list, strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
@@ -779,19 +780,21 @@ def backup(ctx, toml_output):
             "packages": manager.installed.values(),
         }
 
-        pkg_data = dict(
-            **sorted(
-                # Version specifier is inspired by Poetry.
-                [
-                    (p["id"], "^" + p["installed_version"])
-                    for p in manager.installed.values()
-                ]
-            )
+        pkg_data = sorted(
+            [(p["id"], p["installed_version"]) for p in manager.installed.values()]
         )
-        if pkg_data:
-            doc += "\n" + tomli.dumps({manager.id: pkg_data})
 
-    toml_output.write_text(doc)
+        if pkg_data:
+            doc += "\n" + tomli_w.dumps(
+                {
+                    manager.id: {
+                        package_id: f"^{package_version}"
+                        for package_id, package_version in pkg_data
+                    }
+                }
+            )
+
+    toml_output.write(doc)
 
     if stats:
         print_stats(installed_data)

@@ -17,27 +17,27 @@
 
 import pytest
 
-from .conftest import MANAGER_IDS, create_toml
+from .conftest import MANAGER_IDS
 from .test_cli import CLISubCommandTests
 
 
 @pytest.fixture
-def subcmd():
+def subcmd(create_toml):
     """Seed common subcommand tests with a dummy file and content to allow the
     CLI to not fail on required file input."""
-    create_toml(
+    toml_path = create_toml(
         "dummy.toml",
         """
         [dummy_manager]
         fancy_package = "0.0.1"
         """,
     )
-    return "restore", "dummy.toml"
+    return "restore", str(toml_path)
 
 
 class TestRestore(CLISubCommandTests):
-    def test_default_all_managers(self, invoke):
-        create_toml(
+    def test_default_all_managers(self, invoke, create_toml):
+        toml_path = create_toml(
             "all-managers.toml",
             "".join(
                 [
@@ -52,14 +52,14 @@ class TestRestore(CLISubCommandTests):
             ),
         )
 
-        result = invoke("restore", "all-managers.toml")
+        result = invoke("restore", str(toml_path))
         assert result.exit_code == 0
         assert "all-managers.toml" in result.stderr
         self.check_manager_selection(result)
 
     @pytest.mark.parametrize("mid", MANAGER_IDS)
-    def test_single_manager(self, invoke, mid):
-        create_toml(
+    def test_ignore_unrecognized_manager(self, invoke, create_toml, mid):
+        toml_path = create_toml(
             "all-managers.toml",
             "".join(
                 [
@@ -74,12 +74,12 @@ class TestRestore(CLISubCommandTests):
             ),
         )
 
-        result = invoke("--manager", mid, "restore", "all-managers.toml")
+        result = invoke("--manager", mid, "restore", str(toml_path))
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 
-    def test_ignore_unrecognized_manager(self, invoke):
-        create_toml(
+    def test_ignore_unrecognized_manager(self, invoke, create_toml):
+        toml_path = create_toml(
             "unrecognized.toml",
             """
             [random_section]
@@ -87,13 +87,13 @@ class TestRestore(CLISubCommandTests):
             """,
         )
 
-        result = invoke("restore", "unrecognized.toml")
+        result = invoke("restore", str(toml_path))
         assert result.exit_code == 0
         assert "unrecognized.toml" in result.stderr
         assert "warning: Ignore [random_section] section." in result.stderr
 
-    def test_restore_single_manager(self, invoke):
-        create_toml(
+    def test_restore_single_manager(self, invoke, create_toml):
+        toml_path = create_toml(
             "pip-npm-dummy.toml",
             """
             [pip]
@@ -104,14 +104,14 @@ class TestRestore(CLISubCommandTests):
             """,
         )
 
-        result = invoke("--manager", "npm", "restore", "pip-npm-dummy.toml")
+        result = invoke("--manager", "npm", "restore", str(toml_path))
         assert result.exit_code == 0
         assert "pip-npm-dummy.toml" in result.stderr
         assert "Restore pip" not in result.stderr
         assert "Restore npm" in result.stderr
 
-    def test_restore_excluded_manager(self, invoke):
-        create_toml(
+    def test_restore_excluded_manager(self, invoke, create_toml):
+        toml_path = create_toml(
             "pip-npm-dummy.toml",
             """
             [pip]
@@ -122,21 +122,21 @@ class TestRestore(CLISubCommandTests):
             """,
         )
 
-        result = invoke("--exclude", "npm", "restore", "pip-npm-dummy.toml")
+        result = invoke("--exclude", "npm", "restore", str(toml_path))
         assert result.exit_code == 0
         assert "pip-npm-dummy.toml" in result.stderr
         assert "Restore pip" in result.stderr
         assert "Restore npm" not in result.stderr
 
-    def test_empty_manager(self, invoke):
-        create_toml(
+    def test_empty_manager(self, invoke, create_toml):
+        toml_path = create_toml(
             "pip-empty.toml",
             """
             [pip]
             """,
         )
 
-        result = invoke("restore", "pip-empty.toml")
+        result = invoke("restore", str(toml_path))
         assert result.exit_code == 0
         assert "pip-empty.toml" in result.stderr
         assert "Restore pip" in result.stderr

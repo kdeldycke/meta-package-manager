@@ -18,6 +18,7 @@
 # pylint: disable=redefined-outer-name
 
 import os
+from pathlib import Path
 from textwrap import dedent, indent
 
 import click
@@ -164,8 +165,24 @@ def subcmd():
     return None
 
 
-def create_toml(filename, content):
-    """Utility to produce TOML files."""
-    # Create the missing folder structure, like "mkdir -p" does.
-    filename.parent.mkdir(parents=True, exist_ok=True)
-    filename.write_text(dedent(content).strip())
+@pytest.fixture
+def create_toml(tmp_path):
+    """A generic fixture to produce a temporary TOML file."""
+
+    def _create_toml(filename, content):
+        """Create a fake TOML file."""
+        assert isinstance(content, str)
+
+        if isinstance(filename, str):
+            toml_path = tmp_path.joinpath(filename)
+        else:
+            assert isinstance(filename, Path)
+            toml_path = filename.resolve()
+
+        # Create the missing folder structure, like "mkdir -p" does.
+        toml_path.parent.mkdir(parents=True, exist_ok=True)
+        toml_path.write_text(dedent(content).strip())
+
+        return toml_path
+
+    return _create_toml

@@ -32,13 +32,12 @@ import tomli
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list, strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
-from click.core import ParameterSource
 from click_help_colors import HelpColorsCommand, HelpColorsGroup, version_option
 from simplejson import dumps as json_dumps
 
 from . import CLI_NAME, __version__, env_data, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
-from .config import DEFAULT_CONFIG_FILE, ConfigurationFileError, read_conf
+from .config import load_conf
 from .managers import pool
 from .platform import CURRENT_OS_ID, WINDOWS, os_label
 from .version import TokenizedString
@@ -192,34 +191,6 @@ class timeit:
             click.echo(f"Execution time: {elapsed:.3} seconds.")
 
 
-def load_config(ctx, param, config_file):
-    # Fetch option from configuration file.
-    conf = {}
-    try:
-        conf = read_conf(config_file)
-    except ConfigurationFileError as excpt:
-        # Exit the CLI if the user-provided config file is bad.
-        if ctx.get_parameter_source("config") != ParameterSource.DEFAULT:
-            logger.fatal(excpt)
-            ctx.exit()
-        else:
-            logger.debug(excpt)
-            logger.debug("Ignore configuration file.")
-
-    # Merge user config to the context default_map. See:
-    # https://click.palletsprojects.com/en/8.0.x/commands/#context-defaults
-    # This allow user's config to only overrides defaults. Values sets from direct
-    # command line calls, environment variables or interactive prompts takes precedence
-    # over any parameters from the config file.
-    if ctx.default_map is None:
-        ctx.default_map = dict()
-    ctx.default_map.update(conf.get(CLI_NAME, {}))
-
-    return config_file
-
-
-@click.group(
-    context_settings=dict(help_option_names=["-h", "--help"], show_default=True)
 )
 @click_log.simple_verbosity_option(
     logger,
@@ -282,11 +253,10 @@ def load_config(ctx, param, config_file):
     "--config",
     metavar="CONFIG_PATH",
     type=click.Path(path_type=Path, resolve_path=True),
-    default=DEFAULT_CONFIG_FILE,
     # Force eagerness so the config option's callback gets the oportunity to set the
     # default_map values before the other options use them.
     is_eager=True,
-    callback=load_config,
+    callback=load_conf,
     help="Location of the configuration file.",
 )
 @version_option(

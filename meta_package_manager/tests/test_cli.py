@@ -26,10 +26,9 @@ from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
 
-from .. import __version__, logger
+from .. import __version__, config, logger
 from ..cli import RENDERING_MODES, WINDOWS_MODE_BLACKLIST
-from ..config import DEFAULT_CONFIG_FILE
-from .conftest import MANAGER_IDS, create_toml, unless_windows
+from .conftest import MANAGER_IDS, unless_windows
 
 """ Common tests for all CLI basic features and templates for subcommands. """
 
@@ -46,7 +45,7 @@ def test_temporary_fs(runner):
     assert not str(Path(__file__)).startswith(str(Path.cwd()))
 
 
-DUMMY_CONFIG_FILE = """
+DUMMY_CONF_FILE = """
         # Comment
 
         top_level_param = "to_ignore"
@@ -130,39 +129,53 @@ class TestBaseCLI:
         else:
             assert "debug: " not in result.stderr
 
-    def test_read_default_conf_file(self, invoke):
-        create_toml(DEFAULT_CONFIG_FILE, DUMMY_CONFIG_FILE)
+    def test_unset_default_conf(self, invoke):
+        """ Message related to default conf only appears in logs. """
         result = invoke("managers")
         assert result.exit_code == 0
-        assert f"Load configuration from {DEFAULT_CONFIG_FILE}" in result.stderr
+        assert f"Load configuration at " not in result.stderr
 
-    def test_read_specific_conf_file(self, invoke, tmp_path):
-        specific_conf = tmp_path / "configuration.extension"
-        assert DEFAULT_CONFIG_FILE != specific_conf
-        create_toml(specific_conf, DUMMY_CONFIG_FILE)
-        result = invoke("--config", str(specific_conf), "managers")
+        result = invoke("--verbosity", "DEBUG", "managers")
         assert result.exit_code == 0
-        assert f"Load configuration from {specific_conf}" in result.stderr
-        assert "warning: Ignore [mpm].blahblah option." in result.stderr
-        assert "warning: Ignore [garbage] section." in result.stderr
+        assert (
+            f"debug: Configuration not found at {config.default_conf_path()}"
+            in result.stderr
+        )
+        assert "debug: Ignore configuration file." in result.stderr
+        assert "debug: Loaded configuration: {}" in result.stderr
 
-    def test_conf_file_overrides_defaults(self, invoke):
-        create_toml(DEFAULT_CONFIG_FILE, DUMMY_CONFIG_FILE)
+    def test_conf_not_exist(self, invoke):
+        conf_path = config.default_conf_path().parent / "dummy.toml"
+        result = invoke("--config", str(conf_path), "managers")
+        assert result.exit_code == 2
+        assert f"critical: Configuration not found at {conf_path}" in result.stderr
+
+    def test_conf_not_file(self, invoke):
+        conf_path = config.default_conf_path().parent
+        result = invoke("--config", str(conf_path), "managers")
+        assert result.exit_code == 2
+        assert f"critical: Configuration {conf_path} is not a file." in result.stderr
+
+    def test_read_specific_conf(self, invoke, create_toml):
+        conf_path = create_toml("configuration.extension", DUMMY_CONF_FILE)
+        result = invoke("--config", str(conf_path), "managers")
+        assert result.exit_code == 0
+        assert f"Load configuration at {conf_path}" in result.stderr
+
+    def test_conf_file_overrides_defaults(self, invoke, create_toml):
+        create_toml(config.default_conf_path(), DUMMY_CONF_FILE)
         result = invoke("managers")
         assert result.exit_code == 0
-        assert logger.level == getattr(logging, "DEBUG")
         assert " │ pip │ " in result.stdout
         assert " │ npm │ " in result.stdout
         assert " │ gem │ " in result.stdout
         assert "brew" not in result.stdout
         assert "cask" not in result.stdout
-        assert "debug: " in result.stderr
 
-    def test_conf_file_cli_override(self, invoke):
-        create_toml(DEFAULT_CONFIG_FILE, DUMMY_CONFIG_FILE)
+    def test_conf_file_cli_override(self, invoke, create_toml):
+        create_toml(config.default_conf_path(), DUMMY_CONF_FILE)
         result = invoke("--verbosity", "CRITICAL", "managers")
         assert result.exit_code == 0
-        assert logger.level == getattr(logging, "CRITICAL")
         assert " │ pip │ " in result.stdout
         assert " │ npm │ " in result.stdout
         assert " │ gem │ " in result.stdout

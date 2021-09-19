@@ -28,7 +28,7 @@ from boltons.strutils import strip_ansi
 from boltons.tbutils import ExceptionInfo
 from click.testing import CliRunner
 
-from .. import CLI_NAME
+from .. import CLI_NAME, config
 from ..cli import cli
 from ..platform import is_linux, is_macos, is_windows
 from ..xbar import run as xbar_run
@@ -123,6 +123,19 @@ def runner():
     runner = CliRunner(mix_stderr=False)
     with runner.isolated_filesystem():
         yield runner
+
+
+@pytest.fixture(autouse=True)
+def mock_conf_location(tmp_path, monkeypatch):
+    """Patch the default config file location to force it within pytest's isolated temporary filesystem.
+
+    That patch applies to all unittests.
+    """
+
+    def _mock_conf_location():
+        return tmp_path.joinpath(config.DEFAULT_CONF_NAME).resolve()
+
+    monkeypatch.setattr(config, "default_conf_path", _mock_conf_location)
 
 
 @pytest.fixture

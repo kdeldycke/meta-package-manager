@@ -1,7 +1,8 @@
 Configuration
 =============
 
-``mpm`` can read defaults options from a `configuration file <https://meta-package-manager.readthedocs.io/en/latest/meta_package_manager.html#meta_package_manager.config.DEFAULT_CONFIG_FILE>`_.
+``mpm`` can read defaults options from a `configuration file
+<https://meta-package-manager.readthedocs.io/en/latest/meta_package_manager.html#meta_package_manager.config.default_conf_path>`_.
 
 Here is a sample:
 

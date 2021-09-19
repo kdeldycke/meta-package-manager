@@ -166,16 +166,19 @@ class TestBaseCLI:
         create_toml(config.default_conf_path(), DUMMY_CONF_FILE)
         result = invoke("managers")
         assert result.exit_code == 0
+        assert logger.level == getattr(logging, "DEBUG")
         assert " │ pip │ " in result.stdout
         assert " │ npm │ " in result.stdout
         assert " │ gem │ " in result.stdout
         assert "brew" not in result.stdout
         assert "cask" not in result.stdout
+        assert "debug: " in result.stderr
 
     def test_conf_file_cli_override(self, invoke, create_toml):
         create_toml(config.default_conf_path(), DUMMY_CONF_FILE)
         result = invoke("--verbosity", "CRITICAL", "managers")
         assert result.exit_code == 0
+        assert logger.level == getattr(logging, "CRITICAL")
         assert " │ pip │ " in result.stdout
         assert " │ npm │ " in result.stdout
         assert " │ gem │ " in result.stdout

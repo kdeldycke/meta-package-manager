@@ -191,6 +191,20 @@ class timeit:
             click.echo(f"Execution time: {elapsed:.3} seconds.")
 
 
+@click.group(
+    context_settings=dict(help_option_names=["-h", "--help"], show_default=True)
+)
+@click.option(
+    "-C",
+    "--config",
+    metavar="CONFIG_PATH",
+    type=click.Path(path_type=Path, resolve_path=True),
+    # default=default_conf_path(),
+    # Force eagerness so the config option's callback gets the oportunity to set the
+    # default_map values before the other options use them.
+    is_eager=True,
+    callback=load_conf,
+    help="Location of the configuration file.",
 )
 @click_log.simple_verbosity_option(
     logger,
@@ -248,17 +262,6 @@ class timeit:
     default=False,
     help="Stop right away or continue operations on manager CLI error.",
 )
-@click.option(
-    "-C",
-    "--config",
-    metavar="CONFIG_PATH",
-    type=click.Path(path_type=Path, resolve_path=True),
-    # Force eagerness so the config option's callback gets the oportunity to set the
-    # default_map values before the other options use them.
-    is_eager=True,
-    callback=load_conf,
-    help="Location of the configuration file.",
-)
 @version_option(
     version=__version__,
     prog_name=CLI_NAME,
@@ -270,6 +273,7 @@ class timeit:
 @click.pass_context
 def cli(
     ctx,
+    config,
     manager,
     exclude,
     ignore_auto_updates,
@@ -278,17 +282,17 @@ def cli(
     stats,
     time,
     stop_on_error,
-    config,
 ):
     """CLI for multi-package manager upgrades."""
 
+    # Print log level.
     level = logger.level
     level_name = logging._levelToName.get(level, level)
     logger.debug(f"Verbosity set to {level_name}.")
 
     # Target all available managers by default.
     target_ids = set(pool())
-    # Only keeps the subset of selected by the user.
+    # Only keeps the subset selected by the user.
     if manager:
         target_ids = target_ids.intersection(manager)
     # Remove managers excluded by the user.

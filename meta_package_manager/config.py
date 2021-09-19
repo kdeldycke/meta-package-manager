@@ -141,7 +141,7 @@ def load_conf(ctx, param, config_file):
         ParameterSource.ENVIRONMENT,
         ParameterSource.PROMPT,
     )
-    # Always print a message if the user explicitely set the configuration location.
+    # Always print a message if the user explicitly set the configuration location.
     # We can't use logger.info yet because the default have not been loaded yet and the logger is stuck to its default WARNING level.
     if explicit_conf:
         click.echo(f"Load configuration at {config_file}", err=True)

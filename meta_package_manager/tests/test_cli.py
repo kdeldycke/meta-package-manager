@@ -130,7 +130,7 @@ class TestBaseCLI:
             assert "debug: " not in result.stderr
 
     def test_unset_default_conf(self, invoke):
-        """ Message related to default conf only appears in logs. """
+        """Message related to default conf only appears in logs."""
         result = invoke("managers")
         assert result.exit_code == 0
         assert f"Load configuration at " not in result.stderr

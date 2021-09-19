@@ -341,13 +341,14 @@ class CLITableTests:
     A table output is also allowed to be rendered as JSON.
     """
 
-    # List of all supported rendering modes IDs, and their expected output.
+    # List of all supported rendering modes IDs, their expected output and the other
+    # mode they are allowed to conflict with.
     expected_renderings = {
         "ascii": ("---+---", None),
         "csv": (",", None),
         "csv-tab": ("\t", None),
         "double": ("═══╬═══", None),
-        "fancy_grid": ("═══╪═══", None),
+        "fancy_grid": ("═══╪═══", "psql_unicode"),
         "github": ("---|---", None),
         "grid": ("===+===", "ascii"),
         "html": ("<table>", None),

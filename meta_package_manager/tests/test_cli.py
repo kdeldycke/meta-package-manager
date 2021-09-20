@@ -82,8 +82,9 @@ class TestBaseCLI:
         assert "Usage: " in result.stdout
         assert not result.stderr
 
-    def test_main_help(self, invoke):
-        result = invoke("--help")
+    @pytest.mark.parametrize("param", ["--help", "-h"])
+    def test_main_help(self, invoke, param):
+        result = invoke(param)
         assert result.exit_code == 0
         assert "Usage: " in result.stdout
         assert not result.stderr
@@ -112,6 +113,25 @@ class TestBaseCLI:
         assert not result.stdout
         assert "Error: Missing command." in result.stderr
 
+    @pytest.mark.parametrize(
+        "params", [["--version"], ["blah"], ["--config", "random.toml"]]
+    )
+    def test_help_eagerness(self, invoke, params):
+        # See: https://click.palletsprojects.com/en/8.0.x/advanced/#callback-evaluation-order
+        result = invoke("--help", params)
+        assert result.exit_code == 0
+        assert "Usage: " in result.stdout
+        assert not result.stderr
+
+    @pytest.mark.parametrize(
+        "params", [["--help"], ["blah"], ["--config", "random.toml"]]
+    )
+    def test_version_eagerness(self, invoke, params):
+        result = invoke("--version", params)
+        assert result.exit_code == 0
+        assert __version__ in result.stdout
+        assert not result.stderr
+
     def test_unrecognized_verbosity(self, invoke):
         result = invoke("--verbosity", "random", "managers")
         assert result.exit_code == 2
@@ -129,12 +149,12 @@ class TestBaseCLI:
         else:
             assert "debug: " not in result.stderr
 
-    def test_unset_default_conf(self, invoke):
-        """Message related to default conf only appears in logs."""
+    def test_unset_conf_no_message(self, invoke):
         result = invoke("managers")
         assert result.exit_code == 0
         assert f"Load configuration at " not in result.stderr
 
+    def test_unset_conf_debug_message(self, invoke):
         result = invoke("--verbosity", "DEBUG", "managers")
         assert result.exit_code == 0
         assert (

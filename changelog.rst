@@ -13,6 +13,7 @@ Changelog
 * [mpm] Add support for ``psql_unicode`` and ``minimal`` table format.
 * [mpm] Set default table format to ``psql_unicode`` instead of ``fancy_grid`` to
   reduce visual noise.
+* [mpm] Add support for environment variables for all parameters, prefixed with ``MPM_``.
 * [mpm] Let Click produce default values in help screen.
 * [mpm] Replace ``tomlkit`` dependency by ``tomli`` and ``tomli_w``.
 

@@ -193,25 +193,10 @@ class timeit:
 
 
 @click.group(
-    context_settings=dict(help_option_names=["-h", "--help"], show_default=True)
-)
-@click.option(
-    "-C",
-    "--config",
-    metavar="CONFIG_PATH",
-    type=click.Path(path_type=Path, resolve_path=True),
-    # default=default_conf_path(),
-    # Force eagerness so the config option's callback gets the oportunity to set the
-    # default_map values before the other options use them.
-    is_eager=True,
-    callback=load_conf,
-    help="Location of the configuration file.",
-)
-@click_log.simple_verbosity_option(
-    logger,
-    default="INFO",
-    metavar="LEVEL",
-    help="Either CRITICAL, ERROR, WARNING, INFO or DEBUG.",
+    context_settings=dict(
+        show_default=True,
+        auto_envvar_prefix=CLI_NAME,
+    )
 )
 @click.option(
     "-m",
@@ -263,6 +248,25 @@ class timeit:
     default=False,
     help="Stop right away or continue operations on manager CLI error.",
 )
+@click.option(
+    "-C",
+    "--config",
+    metavar="CONFIG_PATH",
+    type=click.Path(path_type=Path, resolve_path=True),
+    # default=default_conf_path(),
+    help="Location of the configuration file.",
+    # Force eagerness so the config option's callback gets the oportunity to set the
+    # default_map values before the other options use them.
+    is_eager=True,
+    callback=load_conf,
+    expose_value=False,
+)
+@click_log.simple_verbosity_option(
+    logger,
+    default="INFO",
+    metavar="LEVEL",
+    help="Either CRITICAL, ERROR, WARNING, INFO or DEBUG.",
+)
 @version_option(
     version=__version__,
     prog_name=CLI_NAME,
@@ -271,10 +275,10 @@ class timeit:
     message=f"%(prog)s %(version)s\n{env_data}",
     message_color="bright_black",
 )
+@click.help_option("-h", "--help")
 @click.pass_context
 def cli(
     ctx,
-    config,
     manager,
     exclude,
     ignore_auto_updates,

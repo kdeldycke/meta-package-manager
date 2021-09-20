@@ -75,13 +75,7 @@ class TestBaseCLI:
     supposed to work on all platforms, whatever the environment.
     """
 
-    def test_bare_call(self, invoke):
-        result = invoke()
-        assert result.exit_code == 0
-        assert "Usage: " in result.stdout
-        assert not result.stderr
-
-    @pytest.mark.parametrize("param", ["--help", "-h"])
+    @pytest.mark.parametrize("param", [None, "--help", "-h"])
     def test_main_help(self, invoke, param):
         result = invoke(param)
         assert result.exit_code == 0

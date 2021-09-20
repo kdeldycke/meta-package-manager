@@ -149,7 +149,8 @@ def invoke(runner):
         if args:
             assert same(map(type, args), str)
 
-        result = runner.invoke(cli, args, color=color)
+        # Force default_map reset between calls to prevent initial context to be polluted by previous tests.
+        result = runner.invoke(cli, args, color=color, default_map={})
 
         # Strip colors out of results.
         result.stdout_bytes = strip_ansi(result.stdout_bytes)

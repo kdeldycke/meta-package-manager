@@ -15,7 +15,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import logging
 import re
 from pathlib import Path
 
@@ -26,7 +25,7 @@ from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
 
-from .. import __version__, config, logger
+from .. import __version__, config
 from ..cli import RENDERING_MODES, WINDOWS_MODE_BLACKLIST
 from .conftest import MANAGER_IDS, unless_windows
 
@@ -142,7 +141,6 @@ class TestBaseCLI:
     def test_verbosity(self, invoke, level):
         result = invoke("--verbosity", level, "managers")
         assert result.exit_code == 0
-        assert logger.level == getattr(logging, level)
         assert "──────" in result.stdout
         if level == "DEBUG":
             assert "debug: " in result.stderr
@@ -186,7 +184,6 @@ class TestBaseCLI:
         create_toml(config.default_conf_path(), DUMMY_CONF_FILE)
         result = invoke("managers")
         assert result.exit_code == 0
-        assert logger.level == getattr(logging, "DEBUG")
         assert " │ pip │ " in result.stdout
         assert " │ npm │ " in result.stdout
         assert " │ gem │ " in result.stdout
@@ -198,7 +195,6 @@ class TestBaseCLI:
         create_toml(config.default_conf_path(), DUMMY_CONF_FILE)
         result = invoke("--verbosity", "CRITICAL", "managers")
         assert result.exit_code == 0
-        assert logger.level == getattr(logging, "CRITICAL")
         assert " │ pip │ " in result.stdout
         assert " │ npm │ " in result.stdout
         assert " │ gem │ " in result.stdout

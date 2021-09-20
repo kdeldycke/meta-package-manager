@@ -344,6 +344,13 @@ def cli(
         "time": time,
     }
 
+    @ctx.call_on_close
+    def reset_logger():
+        """Forces the logger level to reset at the end of each CLI execution, as it
+        might pollute the logger state between multiple test calls.
+        """
+        logger.setLevel(logging.NOTSET)
+
 
 @cli.command(short_help="List supported package managers and their location.")
 @click.pass_context

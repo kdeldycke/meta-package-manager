@@ -16,6 +16,7 @@ Changelog
 * [mpm] Add support for environment variables for all parameters, prefixed with ``MPM_``.
 * [mpm] Let Click produce default values in help screen.
 * [mpm] Replace ``tomlkit`` dependency by ``tomli`` and ``tomli_w``.
+* [xbar] Rename ``VAR_SUBMENU_lAYOUT`` environment variable to ``VAR_SUBMENU_LAYOUT``.
 
 
 `4.1.0 (2021-05-01) <https://github.com/kdeldycke/meta-package-manager/compare/v4.0.0...v4.1.0>`_

@@ -7,7 +7,7 @@
 # <xbar.dependencies>python,mpm</xbar.dependencies>
 # <xbar.image>https://i.imgur.com/CiQpQ42.png</xbar.image>
 # <xbar.abouturl>https://github.com/kdeldycke/meta-package-manager</xbar.abouturl>
-# <xbar.var>boolean(VAR_SUBMENU_lAYOUT=false): Group packages into manager sub-menus.</xbar.var>
+# <xbar.var>boolean(VAR_SUBMENU_LAYOUT=false): Group packages into manager sub-menus.</xbar.var>
 
 """
 xbar plugin for Meta Package Manager (a.k.a. the :command:`mpm` CLI).
@@ -27,7 +27,7 @@ from operator import itemgetter
 from subprocess import PIPE, Popen
 
 SUBMENU_LAYOUT = bool(
-    os.environ.get("VAR_SUBMENU_lAYOUT", False)
+    os.environ.get("VAR_SUBMENU_LAYOUT", False)
     in {True, 1, "True", "true", "1", "y", "yes", "Yes"}
 )
 """ Define the rendering mode of outdated packages list.

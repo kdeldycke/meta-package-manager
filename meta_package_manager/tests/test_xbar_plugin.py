@@ -89,5 +89,5 @@ class TestXbarPlugin:
                 # Submenu entry line with summary. Required.
                 (r".+:\s+\d+ package(s| ) \| font=Menlo size=12 emojize=false$", True),
             ],
-            env={"VAR_SUBMENU_lAYOUT": "True"},
+            env={"VAR_SUBMENU_LAYOUT": "True"},
         )

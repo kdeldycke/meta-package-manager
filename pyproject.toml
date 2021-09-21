@@ -1,7 +1,7 @@
 [tool.poetry]
 # Docs: https://python-poetry.org/docs/pyproject/
 name = "meta-package-manager"
-version = "4.2.0"
+version = "4.2.1"
 description = """
     CLI unifying Homebrew, apt, Chocolatey, Pip, NPM, Composer and the like."""
 license = 'GPL-2.0-or-later'

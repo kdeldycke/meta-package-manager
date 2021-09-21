@@ -107,9 +107,9 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
             for infos in outdated["packages"]:
                 assert isinstance(infos["upgrade_cli"], str)
                 assert "param1=" in infos["upgrade_cli"]
-                for param in infos["upgrade_cli"].split(" "):
+                for param in infos["upgrade_cli"].split(" | "):
                     k, v = param.split("=", 1)
                     assert k in XBAR_KEYWORDS
                     assert set(v.lower()).issubset(
-                        digits + ascii_lowercase + './-_+="\\@:'
+                        digits + ascii_lowercase + './-_+="@:'
                     )

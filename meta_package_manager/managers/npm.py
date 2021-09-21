@@ -38,7 +38,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm -g --progress=false --json --no-update-notifier outdated
+            ► npm --global --progress=false --json --no-update-notifier outdated
             {
               "error": {
                 "code": "ERR_OUT_OF_RANGE",
@@ -79,7 +79,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm list -g --json | jq
+            ► npm list --global --json | jq
             {
               "dependencies": {
                 "npm": {
@@ -116,7 +116,7 @@ class NPM(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, "-g", "--json", "list")
+        output = self.run_cli(self.global_args, "--global", "--json", "list")
 
         if output:
 
@@ -248,7 +248,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm -g --progress=false --json outdated
+            ► npm --global --progress=false --json outdated
             {
               "my-linked-package": {
                 "current": "0.0.0-development",
@@ -268,7 +268,7 @@ class NPM(PackageManager):
 
         output = self.run_cli(
             self.global_args,
-            "-g",
+            "--global",
             "--progress=false",
             "--json",
             "--no-update-notifier",
@@ -289,7 +289,7 @@ class NPM(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None, version=None):
-        cmd_args = ["-g", "--progress=false", "--no-update-notifier"]
+        cmd_args = ["--global", "--progress=false", "--no-update-notifier"]
         if package_id:
             cmd_args.append("install")
             cmd_args.append(package_id + "@" + version if version else package_id)

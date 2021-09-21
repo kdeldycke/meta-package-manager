@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@v2.3.4
       - name: Install linter
         run: |
-          sudo npm install jsonlint -g
+          sudo npm install --global jsonlint
       - name: Lint
         run: >
           find ./ -type f -name '*.json' -print -exec

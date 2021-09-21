@@ -80,7 +80,7 @@ jobs:
       - name: Windows - Upgrade npm
         if: runner.os == 'Windows'
         run: |
-          npm install -g npm
+          npm install --global npm
 
       # Yarn
       - name: macOS - Install Yarn

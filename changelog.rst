@@ -2,10 +2,8 @@ Changelog
 =========
 
 
-`4.2.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v4.1.0...develop>`_
---------------------------------------------------------------------------------------------------
-
-.. note:: This version is not yet released and is under active development.
+`4.2.0 (2021-09-21) <https://github.com/kdeldycke/meta-package-manager/compare/v4.1.0...v4.2.0>`_
+-------------------------------------------------------------------------------------------------
 
 * [mpm] Add support for TOML configuration file. Closes #66.
 * [mpm] Add ``-C`` / ``--config`` option to point to specific configuration file.

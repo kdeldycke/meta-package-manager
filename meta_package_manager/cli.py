@@ -758,6 +758,11 @@ def backup(ctx, toml_output):
     active_managers = ctx.obj["active_managers"]
     stats = ctx.obj["stats"]
 
+    # XXX Hack for unittests to pass, while we wait for
+    # https://github.com/pallets/click/pull/1497
+    if isinstance(toml_output, TextIOWrapper):
+        toml_output = __stdout__
+
     is_stdout = toml_output is __stdout__
     toml_filepath = toml_output.name if is_stdout else Path(toml_output.name).resolve()
     logger.info(f"Backup package list to {toml_filepath}")

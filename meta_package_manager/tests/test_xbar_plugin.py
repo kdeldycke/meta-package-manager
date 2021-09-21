@@ -37,7 +37,10 @@ class TestXbarPlugin:
         # Upgrade all line. Required.
         (r"(--)?Upgrade all \| shell=.+$", False),
         # Error line. Optional.
-        (r"(--)?.+ \| color=red font=Menlo size=12 trim=false emojize=false$", False),
+        (
+            r"(--)?.+ \| color=red \| font=Menlo \| size=12 \| trim=false \| emojize=false$",
+            False,
+        ),
     ]
 
     def xbar_output_checks(self, checklist, env=None):
@@ -79,7 +82,7 @@ class TestXbarPlugin:
         self.xbar_output_checks(
             [
                 # Summary package statistics. Required.
-                (r"\d+ outdated .+ packages? \|  emojize=false$", True),
+                (r"\d+ outdated .+ packages? \| emojize=false$", True),
             ]
         )
 
@@ -87,7 +90,10 @@ class TestXbarPlugin:
         self.xbar_output_checks(
             [
                 # Submenu entry line with summary. Required.
-                (r".+:\s+\d+ package(s| ) \| font=Menlo size=12 emojize=false$", True),
+                (
+                    r".+:\s+\d+ package(s| ) \| font=Menlo \| size=12 \| emojize=false$",
+                    True,
+                ),
             ],
             env={"VAR_SUBMENU_LAYOUT": "True"},
         )

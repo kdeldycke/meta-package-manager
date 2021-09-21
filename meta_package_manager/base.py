@@ -382,12 +382,8 @@ class PackageManager:
             return " ".join(cmd)
 
         # Renders the CLI into xbar dialect.
-        xbar_cli = ""
-        for index, param in enumerate(cmd):
-            if index == 0:
-                xbar_cli += f"shell={param}"
-            else:
-                if "=" in param:
-                    param = f'\\"{param}\\"'
-                xbar_cli += f" param{index}={param}"
-        return xbar_cli
+        xbar_params = []
+        for index, param_value in enumerate(cmd):
+            param_id = "shell" if index == 0 else f"param{index}"
+            xbar_params.append(f"{param_id}={param_value}")
+        return " | ".join(xbar_params)

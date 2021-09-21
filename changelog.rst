@@ -16,6 +16,7 @@ Changelog
 * [mpm] Add support for environment variables for all parameters, prefixed with ``MPM_``.
 * [mpm] Let Click produce default values in help screen.
 * [mpm] Replace ``tomlkit`` dependency by ``tomli`` and ``tomli_w``.
+* [xbar] Fix xbar plugin output format.
 * [xbar] Rename ``VAR_SUBMENU_lAYOUT`` environment variable to ``VAR_SUBMENU_LAYOUT``.
 * [mpm] Remove support for ``--cli-format bitbar`` option. Use ``xbar`` value instead.
 

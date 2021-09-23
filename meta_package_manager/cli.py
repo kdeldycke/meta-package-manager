@@ -23,7 +23,6 @@ from functools import partial
 from io import TextIOWrapper
 from operator import getitem, itemgetter
 from pathlib import Path
-from sys import __stdin__, __stdout__
 from time import time as time_now
 
 import click
@@ -758,12 +757,7 @@ def backup(ctx, toml_output):
     active_managers = ctx.obj["active_managers"]
     stats = ctx.obj["stats"]
 
-    # XXX Hack for unittests to pass, while we wait for
-    # https://github.com/pallets/click/pull/1497
-    if isinstance(toml_output, TextIOWrapper):
-        toml_output = __stdout__
-
-    is_stdout = toml_output is __stdout__
+    is_stdout = isinstance(toml_output, TextIOWrapper)
     toml_filepath = toml_output.name if is_stdout else Path(toml_output.name).resolve()
     logger.info(f"Backup package list to {toml_filepath}")
 
@@ -823,11 +817,8 @@ def restore(ctx, toml_files):
 
     for toml_input in toml_files:
 
-        toml_filepath = (
-            toml_input.name
-            if toml_input is __stdin__
-            else Path(toml_input.name).resolve()
-        )
+        is_stdin = isinstance(toml_input, TextIOWrapper)
+        toml_filepath = toml_input.name if is_stdin else Path(toml_input.name).resolve()
         logger.info(f"Load package list from {toml_filepath}")
 
         doc = tomli.loads(toml_input.read())

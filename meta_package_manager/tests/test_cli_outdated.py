@@ -111,5 +111,5 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
                     k, v = param.split("=", 1)
                     assert k in XBAR_KEYWORDS
                     assert set(v.lower()).issubset(
-                        digits + ascii_lowercase + './-_+="@:'
+                        digits + ascii_lowercase + './-_+="\\@:'
                     )

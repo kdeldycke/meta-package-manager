@@ -92,6 +92,14 @@ meta\_package\_manager.managers.snap module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.managers.vscode module
+---------------------------------------------
+
+.. automodule:: meta_package_manager.managers.vscode
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.managers.yarn module
 -------------------------------------------
 

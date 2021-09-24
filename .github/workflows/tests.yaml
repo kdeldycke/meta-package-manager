@@ -149,6 +149,20 @@ jobs:
         run: |
           sudo apt install -y snapd
 
+      # VSCode
+      - name: macOS - Install VSCode
+        if: runner.os == 'macOS'
+        run: |
+          brew install --cask visual-studio-code
+      - name: Linux - Install VSCode
+        if: runner.os == 'Linux'
+        run:
+          sudo snap install --classic code
+      - name: Windows - Install VSCode
+        if: runner.os == 'Windows'
+        run: |
+          choco install vscode.install
+
       # Gem
       - name: macOS & Windows - Upgrade gem
         if: runner.os != 'Linux'

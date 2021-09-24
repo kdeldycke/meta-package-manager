@@ -50,6 +50,7 @@ MANAGER_IDS = frozenset(
         "opkg",
         "pip",
         "snap",
+        "vscode",
         "yarn",
     ]
 )

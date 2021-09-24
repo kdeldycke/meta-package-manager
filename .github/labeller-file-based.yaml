@@ -68,3 +68,7 @@
 "📦 manager: snap":
   - meta_package_manager/managers/snap*
   - meta_package_manager/tests/*snap*
+
+"📦 manager: vscode":
+  - meta_package_manager/managers/vscode*
+  - meta_package_manager/tests/*vscode*

@@ -100,6 +100,11 @@
     "description": "snap"
   },
   {
+    "name": "📦 manager: vscode",
+    "color": "#bfdadc",
+    "description": "vscode"
+  },
+  {
     "name": "🔄 duplicate",
     "color": "#cfd3d7",
     "description": "This issue or pull request already exists"

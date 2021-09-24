@@ -123,6 +123,13 @@ jobs:
                "keywords": ["snap"]},
 
               {"labels": [
+                "📦 manager: vscode",
+                "🖥 platform: Linux",
+                "🖥 platform: macOS",
+                "🖥 platform: Windows"],
+               "keywords": ["vscode"]},
+
+              {"labels": [
                 "🖥 platform: Linux"],
                "keywords": ["linux", "ubuntu", "debian"]},
 

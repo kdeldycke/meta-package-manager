@@ -61,7 +61,8 @@ class TestInstall(CLISubCommandTests):
         "opkg": "enigma2-hotplug",
         "pip": "arrow",
         "snap": "standard-notes",
-        "yarn": "python",
+        "vscode": "tamasfe.even-better-toml",
+        "yarn": "markdown",
     }
     assert set(PACKAGE_IDS) == set(MANAGER_IDS)
 

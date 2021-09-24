@@ -70,6 +70,7 @@ Package manager  Min. version  macOS  Linux  Windows  ``sync``  ``installed``  `
 |opkg|__          0.2.0                ✓               ✓         ✓              ✓                 ✓           ✓             ✓
 |pip|__           10.0.0        ✓      ✓      ✓                  ✓              |pip-search|__    ✓           ✓             ✓
 |snap|__          2.0.0                ✓                         ✓              ✓                 ✓                         ✓
+|vscode|__        1.60.0        ✓      ✓      ✓                  ✓              ✓                 ✓                         ✓
 |yarn|__          1.21.0        ✓      ✓      ✓                  ✓              ✓                 ✓           ✓             ✓            ✓
 ================ ============= ====== ====== ======== ========= ============== ================ ============ ============= ============ ============
 
@@ -112,6 +113,9 @@ __ https://github.com/pypa/pip/issues/5216#issuecomment-744605466
 .. |snap| replace::
    ``snap``
 __ https://snapcraft.io
+.. |vscode| replace::
+   Visual Studio Code
+__ https://code.visualstudio.com
 .. |yarn| replace::
    Node's ``yarn``
 __ https://yarnpkg.com

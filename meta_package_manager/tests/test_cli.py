@@ -286,6 +286,13 @@ class CLISubCommandTests:
                 f"Restore {mid} packages..." in result.stderr,
                 # Warning message for restore command.
                 f"warning: No [{mid}] section found." in result.stderr,
+                # Install message.
+                bool(
+                    re.search(
+                        fr"Install \S+ package from {mid}...",
+                        result.stderr,
+                    )
+                ),
             ]
 
             if True in signals:

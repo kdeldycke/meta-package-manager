@@ -166,11 +166,25 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            ► gem install minitest
-
+            ► gem install --user-install markdown
+            Fetching kramdown-2.3.1.gem
+            Fetching concurrent-ruby-1.1.9.gem
+            (...)
+            Fetching rubyzip-2.3.2.gem
+            Fetching logutils-0.6.1.gem
+            Fetching markdown-1.2.0.gem
+            Successfully installed kramdown-2.3.1
+            Successfully installed rubyzip-2.3.2
+            (...)
+            Successfully installed markdown-1.2.0
+            (...)
+            Parsing documentation for markdown-1.2.0
+            Installing ri documentation for markdown-1.2.0
+            Done installing documentation for (...) markdown after 19 seconds
+            12 gems installed
         """
         super().install(package_id)
-        return self.run_cli("install", self.global_args, package_id)
+        return self.run_cli("install", "--user-install", self.global_args, package_id)
 
     @property
     def outdated(self):

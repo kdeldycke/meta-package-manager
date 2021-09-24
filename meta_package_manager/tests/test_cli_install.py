@@ -17,6 +17,7 @@
 
 import pytest
 
+from ..managers import pool
 from .conftest import MANAGER_IDS, destructive
 from .test_cli import CLISubCommandTests
 
@@ -48,14 +49,14 @@ class TestInstall(CLISubCommandTests):
         assert "critical: Only one package manager should be provided." in result.stderr
 
     PACKAGE_IDS = {
-        "apm": "image-view",
+        "apm": "markdown-pdf",
         "apt": "bat",
         "brew": "jpeginfo",
         "cask": "pngyu",
         "composer": "illuminate/contracts",
         "flatpak": "org.gnome.Dictionary",
-        "gem": "minitest",
-        "mas": "945397020",
+        "gem": "markdown",
+        "mas": "747648890",  # Telegram
         "npm": "raven",
         "opkg": "enigma2-hotplug",
         "pip": "arrow",
@@ -66,11 +67,16 @@ class TestInstall(CLISubCommandTests):
 
     @destructive
     @pytest.mark.parametrize("mid,package_id", PACKAGE_IDS.items())
-    def test_ignore_unrecognized_manager(self, invoke, mid, package_id):
-
+    def test_single_manager_install(self, invoke, mid, package_id):
         result = invoke("--manager", mid, "install", package_id)
-        assert result.exit_code == 0
-        self.check_manager_selection(result, {mid})
+
+        if pool()[mid].available:
+            assert result.exit_code == 0
+            self.check_manager_selection(result, {mid})
+        else:
+            assert result.exit_code == 2
+            assert not result.stdout
+            assert "critical: A package manager must be provided" in result.stderr
 
 
 destructive()(TestInstall.test_options)

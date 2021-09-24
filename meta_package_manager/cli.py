@@ -804,19 +804,17 @@ def backup(ctx, toml_output):
             "packages": manager.installed.values(),
         }
 
-        pkg_data = sorted(
-            [(p["id"], p["installed_version"]) for p in manager.installed.values()]
+        pkg_data = dict(
+            sorted(
+                [
+                    (p["id"], str(p["installed_version"]))
+                    for p in manager.installed.values()
+                ]
+            )
         )
 
         if pkg_data:
-            doc += "\n" + tomli_w.dumps(
-                {
-                    manager.id: {
-                        package_id: f"^{package_version}"
-                        for package_id, package_version in pkg_data
-                    }
-                }
-            )
+            doc += "\n" + tomli_w.dumps({manager.id: pkg_data})
 
     toml_output.write(doc)
 

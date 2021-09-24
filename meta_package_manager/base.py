@@ -320,6 +320,10 @@ class PackageManager:
             logger.warning(f"Search not implemented for {self.id}.")
             return {}
 
+    def install(self, package_id):
+        """Install one package and one only."""
+        raise NotImplementedError
+
     @property
     def outdated(self):
         """List currently installed packages having a new version available.

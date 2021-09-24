@@ -124,6 +124,16 @@ class MAS(PackageManager):
 
         return matches
 
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► mas install 945397020
+
+        """
+        return self.run_cli(self.global_args, "install", package_id)
+
     @property
     def outdated(self):
         """Fetch outdated packages from ``mas outdated`` output.

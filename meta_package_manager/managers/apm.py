@@ -265,6 +265,20 @@ class APM(PackageManager):
 
         return matches
 
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► apm install image-view
+            The image-view package is bundled with Atom and should not be explicitly installed.
+            You can run `apm uninstall image-view` to uninstall it and then the version bundled
+            with Atom will be used.
+            Installing image-view to /Users/kde/.atom/packages ✓
+
+        """
+        return self.run_cli("install", self.global_args, package_id)
+
     @property
     def outdated(self):
         """Fetch outdated packages from ``apm outdated`` output.

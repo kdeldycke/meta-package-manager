@@ -7,6 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Add new ``install`` command. Closes #21.
 * [mpm] Forces logger state reset before each CLI call in unittests.
 
 

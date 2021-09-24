@@ -118,6 +118,16 @@ class Snap(PackageManager):
                 }
         return matches
 
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► snap install standard-notes
+
+        """
+        return self.run_cli(self.global_args, "install", package_id)
+
     @property
     def outdated(self):
         """Fetch outdated packages from ``snap refresh --list`` output.

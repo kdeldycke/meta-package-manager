@@ -182,6 +182,23 @@ class Pip(PackageManager):
 
         return matches
 
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► python -m pip --no-color install arrow
+            Collecting arrow
+              Using cached arrow-1.1.1-py3-none-any.whl (60 kB)
+            Collecting python-dateutil>=2.7.0
+              Using cached python_dateutil-2.8.2-py2.py3-none-any.whl (247 kB)
+            Requirement already satisfied: six>=1.5 in python3.9/site-packages (1.16.0)
+            Installing collected packages: python-dateutil, arrow
+            Successfully installed arrow-1.1.1 python-dateutil-2.8.2
+
+        """
+        return self.run_cli(self.global_args, "install", package_id)
+
     @property
     def outdated(self):
         """ Fetch outdated packages.

@@ -224,6 +224,16 @@ class APT(PackageManager):
 
         return matches
 
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► apt install --quiet bat
+
+        """
+        return self.run_cli("install", self.global_args, package_id)
+
     @property
     def outdated(self):
         """Fetch outdated packages from ``apt list`` output.

@@ -151,6 +151,16 @@ class OPKG(PackageManager):
 
         return matches
 
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► opkg install enigma2-hotplug
+
+        """
+        return self.run_cli(self.global_args, "install", package_id)
+
     @property
     def outdated(self):
         """Fetch outdated packages from ``opkg list-upgradable`` output.

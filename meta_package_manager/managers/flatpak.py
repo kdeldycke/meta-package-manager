@@ -139,6 +139,16 @@ class Flatpak(PackageManager):
 
         return matches
 
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► flatpak install org.gnome.Dictionary
+
+        """
+        return self.run_cli(self.global_args, "install", package_id)
+
     @property
     def outdated(self):
         """Fetch outdated packages from ``flatpak remote-ls`` output.

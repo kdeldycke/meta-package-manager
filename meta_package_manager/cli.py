@@ -622,6 +622,30 @@ def search(ctx, extended, exact, query):
         print_stats(matches)
 
 
+@cli.command(short_help="Install a package.")
+@click.argument("package_id", type=click.STRING, required=True)
+@click.pass_context
+@timeit()
+def install(ctx, package_id):
+    """Install a package from one package manager and one only.
+
+    The -m\--manager option is required."""
+    active_managers = ctx.obj["active_managers"]
+    active_managers = list(active_managers)
+
+    if not active_managers:
+        logger.fatal(f"A package manager must be provided via the -m/--manager option.")
+        ctx.exit(2)
+    if len(active_managers) > 1:
+        logger.fatal(f"Only one package manager should be provided.")
+        ctx.exit(2)
+
+    manager = active_managers.pop()
+    logger.info(f"Install {package_id} from {manager.id}...")
+    output = manager.install(package_id)
+    click.echo(output)
+
+
 @cli.command(short_help="List outdated packages.")
 @click.option(
     "-c",

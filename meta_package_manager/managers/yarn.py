@@ -196,6 +196,16 @@ class Yarn(PackageManager):
     def global_dir(self):
         return self.run_cli("global", "dir").rstrip()
 
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► yarn install python
+
+        """
+        return self.run_cli(self.global_args, "install", package_id)
+
     @property
     def outdated(self):
         """Fetch outdated packages from ``yarn outdated`` output.

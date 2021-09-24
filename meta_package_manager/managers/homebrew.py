@@ -218,6 +218,33 @@ class Homebrew(PackageManager):
 
         return matches
 
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► brew install --formula jpeginfo
+            ==> Downloading https://ghcr.io/core/jpeginfo/manifests/1.6.1_1-1
+            ############################################################## 100.0%
+            ==> Downloading https://ghcr.io/core/jpeginfo/blobs/sha256:27bb35884368b83
+            ==> Downloading from https://pkg.githubcontent.com/ghcr1/blobs/sha256:27bb3
+            ############################################################## 100.0%
+            ==> Pouring jpeginfo--1.6.1_1.big_sur.bottle.1.tar.gz
+            🍺  /usr/local/Cellar/jpeginfo/1.6.1_1: 7 files, 77.6KB
+
+        .. code-block:: shell-session
+
+            ► brew install --cask pngyu
+            Updating Homebrew...
+            ==> Downloading https://nukesaq.github.io/Pngyu/download/Pngyu_mac_101.zip
+            ################################################################## 100.0%
+            ==> Installing Cask pngyu
+            ==> Moving App 'Pngyu.app' to '/Applications/Pngyu.app'
+            🍺  pngyu was successfully installed!
+
+        """
+        return self.run_cli("install", self.global_args, package_id)
+
     @property
     def outdated(self):
         """Fetch outdated packages from ``brew outdated`` output.

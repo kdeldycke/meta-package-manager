@@ -240,6 +240,23 @@ class NPM(PackageManager):
 
         return matches
 
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► npm --global --progress=false --no-update-notifier install raven
+
+        """
+        return self.run_cli(
+            self.global_args,
+            "--global",
+            "--progress=false",
+            "--no-update-notifier",
+            "install",
+            package_id,
+        )
+
     @property
     def outdated(self):
         """Fetch outdated packages from ``npm outdated`` output.

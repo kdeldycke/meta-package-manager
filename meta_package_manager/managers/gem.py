@@ -161,6 +161,16 @@ class Gem(PackageManager):
 
         return matches
 
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► gem install minitest
+
+        """
+        return self.run_cli("install", self.global_args, package_id)
+
     @property
     def outdated(self):
         """Fetch outdated packages from ``gem outdated`` output.

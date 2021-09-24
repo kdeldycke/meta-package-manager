@@ -36,6 +36,14 @@ meta\_package\_manager.tests.test\_cli\_cleanup module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.tests.test\_cli\_install module
+------------------------------------------------------
+
+.. automodule:: meta_package_manager.tests.test_cli_install
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.tests.test\_cli\_installed module
 --------------------------------------------------------
 

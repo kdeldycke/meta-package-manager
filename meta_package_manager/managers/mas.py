@@ -94,8 +94,6 @@ class MAS(PackageManager):
         output = self.run_cli(self.global_args, "search", query)
 
         if output:
-            regexp = re.compile(r"(\d+) (.*)$")
-
             regexp = re.compile(
                 r"""
                 (?P<package_id>\d+)

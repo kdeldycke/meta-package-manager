@@ -29,7 +29,7 @@ from .conftest import MANAGER_IDS
 
 def test_manager_count():
     """Check all implemented package managers are accounted for."""
-    assert len(pool()) == 13
+    assert len(pool()) == 14
     assert len(pool()) == len(MANAGER_IDS)
     assert MANAGER_IDS == set(pool())
 

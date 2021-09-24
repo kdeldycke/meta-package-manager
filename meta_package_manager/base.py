@@ -343,7 +343,12 @@ class PackageManager:
 
     def upgrade(self, package_id=None, dry_run=False):
         """Perform the upgrade of the provided package to latest version."""
-        return self.run(self.upgrade_cli(package_id), dry_run=dry_run)
+        try:
+            upgrade_cli = self.upgrade_cli(package_id)
+        except NotImplementedError:
+            logger.warning(f"Upgrade not implemented for {self.id}.")
+            return
+        return self.run(upgrade_cli, dry_run=dry_run)
 
     def upgrade_all_cli(self):
         """Return a shell-compatible full-CLI to upgrade all packages."""

@@ -169,11 +169,16 @@ def test_available():
 
 
 def test_cli_type():
-    """Check that all methods returning a CLI is a list."""
+    """Check that all methods returning a CLI is either not implemented or returns a list."""
     for manager in pool().values():
-        assert isinstance(manager.upgrade_cli("dummy_package_id"), list)
 
-        # Upgrade-all CLI are allowed to raise a particular error.
+        try:
+            result = manager.upgrade_cli("dummy_package_id")
+        except Exception as excpt:
+            assert isinstance(excpt, NotImplementedError)
+        else:
+            assert isinstance(result, list)
+
         try:
             result = manager.upgrade_all_cli()
         except Exception as excpt:

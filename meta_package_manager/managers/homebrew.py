@@ -243,6 +243,7 @@ class Homebrew(PackageManager):
             🍺  pngyu was successfully installed!
 
         """
+        super().install(package_id)
         return self.run_cli("install", self.global_args, package_id)
 
     @property

@@ -147,6 +147,7 @@ class Flatpak(PackageManager):
             ► flatpak install org.gnome.Dictionary
 
         """
+        super().install(package_id)
         return self.run_cli(self.global_args, "install", package_id)
 
     @property

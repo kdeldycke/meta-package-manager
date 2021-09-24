@@ -167,6 +167,7 @@ class Composer(PackageManager):
             ► composer global install illuminate/contracts
 
         """
+        super().install(package_id)
         return self.run_cli(self.global_args, "install", package_id)
 
     @property

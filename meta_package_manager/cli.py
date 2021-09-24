@@ -641,7 +641,6 @@ def install(ctx, package_id):
         ctx.exit(2)
 
     manager = active_managers.pop()
-    logger.info(f"Install {package_id} from {manager.id}...")
     output = manager.install(package_id)
     click.echo(output)
 
@@ -829,6 +828,8 @@ def backup(ctx, toml_output):
 def restore(ctx, toml_files):
     """Read TOML files then install or upgrade each package referenced in
     them.
+
+    Version specified in the TOML file is ignored in the current implementation.
     """
     active_managers = ctx.obj["active_managers"]
 
@@ -852,6 +853,6 @@ def restore(ctx, toml_files):
                 logger.warning(f"No [{manager.id}] section found.")
                 continue
             logger.info(f"Restore {manager.id} packages...")
-            logger.warning("Installation of packages not implemented yet.")
-            # for package_id, version in doc[manager.id].items():
-            #    raise NotImplemented
+            for package_id, version in doc[manager.id].items():
+                output = manager.install(package_id)
+                click.echo(output)

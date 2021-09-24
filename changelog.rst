@@ -8,6 +8,7 @@ Changelog
 .. note:: This version is not yet released and is under active development.
 
 * [mpm] Add new ``install`` command. Closes #21.
+* [mpm] Finish complete ``restore`` command implementation. Closes #38.
 * [mpm] Remove un-enforced poetry-like caret-based version specifiction from TOML
   backup files.
 * [mpm] Forces logger state reset before each CLI call in unittests.

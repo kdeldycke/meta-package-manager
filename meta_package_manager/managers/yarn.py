@@ -204,6 +204,7 @@ class Yarn(PackageManager):
             ► yarn install python
 
         """
+        super().install(package_id)
         return self.run_cli(self.global_args, "install", package_id)
 
     @property

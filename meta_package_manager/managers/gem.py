@@ -169,6 +169,7 @@ class Gem(PackageManager):
             ► gem install minitest
 
         """
+        super().install(package_id)
         return self.run_cli("install", self.global_args, package_id)
 
     @property

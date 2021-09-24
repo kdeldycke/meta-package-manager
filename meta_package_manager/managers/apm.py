@@ -277,6 +277,7 @@ class APM(PackageManager):
             Installing image-view to /Users/kde/.atom/packages ✓
 
         """
+        super().install(package_id)
         return self.run_cli("install", self.global_args, package_id)
 
     @property

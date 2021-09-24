@@ -322,7 +322,10 @@ class PackageManager:
 
     def install(self, package_id):
         """Install one package and one only."""
-        raise NotImplementedError
+        if self.install.__func__.__qualname__ == PackageManager.install.__qualname__:
+            logger.warning(f"Install not implemented for {self.id}.")
+            return
+        logger.info(f"Install {package_id} from {self.id}...")
 
     @property
     def outdated(self):

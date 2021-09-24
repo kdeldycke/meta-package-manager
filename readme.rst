@@ -41,7 +41,8 @@ Features
 * List outdated packages.
 * Sync local package infos.
 * Upgrade all outdated packages.
-* Backup list of installed packages to TOML files.
+* Backup list of installed packages to TOML file.
+* Restore/install list of packages from TOML files.
 * Pin-point commands to a subset of package managers (include/exclude
   selectors).
 * Export results in JSON or user-friendly tables.

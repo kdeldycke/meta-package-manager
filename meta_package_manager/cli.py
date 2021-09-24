@@ -35,7 +35,7 @@ from cli_helpers.tabular_output import TabularOutputFormatter
 from click_help_colors import HelpColorsCommand, HelpColorsGroup, version_option
 from simplejson import dumps as json_dumps
 
-from . import CLI_NAME, __version__, env_data, logger
+from . import CLI_NAME, __version__, env_data, logger, reset_logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .config import load_conf
 from .managers import pool
@@ -343,12 +343,7 @@ def cli(
         "time": time,
     }
 
-    @ctx.call_on_close
-    def reset_logger():
-        """Forces the logger level to reset at the end of each CLI execution, as it
-        might pollute the logger state between multiple test calls.
-        """
-        logger.setLevel(logging.NOTSET)
+    ctx.call_on_close(reset_logger)
 
 
 @cli.command(short_help="List supported package managers and their location.")

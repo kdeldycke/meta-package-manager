@@ -48,4 +48,11 @@ env_data = get_profile(scrub=True)
 logger = logging.getLogger(__name__)
 
 
+def reset_logger():
+    """Forces the logger level to reset at the end of each CLI execution, as it
+    might pollute the logger state between multiple test calls.
+    """
+    logger.setLevel(logging.NOTSET)
+
+
 fix_environment()

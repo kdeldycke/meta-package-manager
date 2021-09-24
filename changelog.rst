@@ -7,6 +7,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Forces logger state reset before each CLI call in unittests.
+
 
 `4.2.0 (2021-09-21) <https://github.com/kdeldycke/meta-package-manager/compare/v4.1.0...v4.2.0>`_
 -------------------------------------------------------------------------------------------------

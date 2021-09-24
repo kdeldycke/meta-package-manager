@@ -28,7 +28,7 @@ from boltons.strutils import strip_ansi
 from boltons.tbutils import ExceptionInfo
 from click.testing import CliRunner
 
-from .. import CLI_NAME, config
+from .. import CLI_NAME, config, reset_logger
 from ..cli import cli
 from ..platform import is_linux, is_macos, is_windows
 from ..xbar import run as xbar_run
@@ -148,6 +148,11 @@ def invoke(runner):
         args = list(filter(None.__ne__, flatten(args)))
         if args:
             assert same(map(type, args), str)
+
+        # Forces logger reset before each CLI invokation as it seems the
+        # @ctx.call_on_close decorator in cli.py is not enough to clean up some
+        # re-entrant calls in the test suite.
+        reset_logger()
 
         # Force default_map reset between calls to prevent initial context to be polluted by previous tests.
         result = runner.invoke(cli, args, color=color, default_map={})

@@ -247,7 +247,9 @@ class CLISubCommandTests:
                 # Common "not implemented" optional command warning message.
                 bool(
                     re.search(
-                        fr"warning: (Sync|Cleanup|Search) not implemented for {mid}.",
+                        fr"warning: {mid} does not implement "
+                        r"(search|outdated|upgrade|sync|cleanup|install|upgrade_all) "
+                        "command.",
                         result.stderr,
                     )
                 ),
@@ -262,13 +264,8 @@ class CLISubCommandTests:
                 ),
                 # Sync command.
                 f"Sync {mid} package info..." in result.stderr,
-                # Search command.
-                f"warning: {mid} does not implement search command." in result.stderr,
-                # Outdated command.
-                f"warning: {mid} does not implement outdated command." in result.stderr,
                 # Upgrade command.
                 f"Updating all outdated packages from {mid}..." in result.stderr,
-                f"warning: {mid} does not implement upgrade command." in result.stderr,
                 # Cleanup command.
                 f"Cleanup {mid}..." in result.stderr,
                 # Log message for backup command.

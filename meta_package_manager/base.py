@@ -318,14 +318,14 @@ class PackageManager:
     def sync(self):
         """Refresh local manager metadata from remote repository."""
         if self.sync.__func__.__qualname__ == PackageManager.sync.__qualname__:
-            logger.warning(f"Sync not implemented for {self.id}.")
+            logger.warning(f"{self.id} does not implement sync command.")
             return
         logger.info(f"Sync {self.id} package info...")
 
     def cleanup(self):
         """Remove left-overs and unused packages."""
         if self.cleanup.__func__.__qualname__ == PackageManager.cleanup.__qualname__:
-            logger.warning(f"Cleanup not implemented for {self.id}.")
+            logger.warning(f"{self.id} does not implement cleanup command.")
             return
         logger.info(f"Cleanup {self.id}...")
 
@@ -345,14 +345,12 @@ class PackageManager:
         package ID, name, version and a boolean indicating if the match is
         exact or partial.
         """
-        if self.search.__func__.__qualname__ == PackageManager.search.__qualname__:
-            logger.warning(f"Search not implemented for {self.id}.")
-            return {}
+        raise NotImplementedError
 
     def install(self, package_id):
         """Install one package and one only."""
         if self.install.__func__.__qualname__ == PackageManager.install.__qualname__:
-            logger.warning(f"Install not implemented for {self.id}.")
+            logger.warning(f"{self.id} does not implement install command.")
             return
         logger.info(f"Install {package_id} package from {self.id}...")
 
@@ -372,12 +370,7 @@ class PackageManager:
 
     def upgrade(self, package_id=None):
         """Perform the upgrade of the provided package to latest version."""
-        try:
-            upgrade_cli = self.upgrade_cli(package_id)
-        except NotImplementedError:
-            logger.warning(f"Upgrade not implemented for {self.id}.")
-            return
-        return self.run(upgrade_cli)
+        return self.run(self.upgrade_cli(package_id))
 
     def upgrade_all_cli(self):
         """Return a shell-compatible full-CLI to upgrade all packages."""
@@ -392,10 +385,8 @@ class PackageManager:
         try:
             return self.run(self.upgrade_all_cli())
         except NotImplementedError:
-            logger.warning(
-                f"Full upgrade subcommand not implemented in {self.id}. Call "
-                "single-package upgrade CLI one by one."
-            )
+            logger.warning(f"{self.id} does not implement upgrade_all command.")
+            logger.info(f"Call single-package upgrade CLI one by one.")
             log = []
             for package_id in self.outdated:
                 output = self.upgrade(package_id)

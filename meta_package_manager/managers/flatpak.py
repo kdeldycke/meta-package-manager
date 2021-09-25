@@ -29,19 +29,12 @@ class Flatpak(PackageManager):
 
     requirement = "1.2.0"
 
-    def get_version(self):
-        """Fetch version from ``flatpak --version`` output.
+    version_regex = r"Flatpak\s+(?P<version>\S+)"
+    """.. code-block:: shell-session
 
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► flatpak --version
-            Flatpak 1.4.2
-        """
-        output = self.run_cli("--version")
-        if output:
-            return output.strip().split()[1]
+        ► flatpak --version
+        Flatpak 1.4.2
+    """
 
     @property
     def installed(self):

@@ -24,7 +24,9 @@ from ..version import parse_version
 
 class APT(PackageManager):
 
-    """Documentation:
+    """Base package manager shared by variation of the apt command.
+
+    Documentation:
     http://manpages.ubuntu.com/manpages/xenial/man8/apt.8.html
     """
 
@@ -32,19 +34,12 @@ class APT(PackageManager):
 
     requirement = "1.0.0"
 
-    def get_version(self):
-        """Fetch version from ``apt version`` output.
+    version_regex = r"apt\s+(?P<version>\S+)"
+    """.. code-block:: shell-session
 
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► apt --version
-            apt 1.2.15 (amd64)
-        """
-        output = self.run_cli("--version")
-        if output:
-            return output.split()[1]
+        ► apt --version
+        apt 1.2.15 (amd64)
+    """
 
     def sync(self):
         """
@@ -283,14 +278,9 @@ class APT_Mint(APT):
 
     cli_names = ["apt"]
 
-    def get_version(self):
-        """Fetch version from ``apt version`` output.
+    version_cli_options = ["version", "apt"]
+    """.. code-block:: shell-session
 
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► apt version apt
-            1.6.11
-        """
-        return self.run_cli("version", "apt")
+        ► apt version apt
+        1.6.11
+    """

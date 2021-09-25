@@ -31,17 +31,12 @@ class Composer(PackageManager):
     platforms = frozenset([LINUX, MACOS, WINDOWS])
     requirement = "1.4.0"
 
-    def get_version(self):
-        """Fetch version.
+    version_regex = r"Composer\s+version\s+(?P<version>\S+)"
+    """.. code-block:: shell-session
 
-        .. code-block:: shell-session
-
-            ► composer --version
-            Composer version 2.1.8 2021-09-15 13:55:14
-        """
-        output = self.run_cli("--version")
-        if output:
-            return output.split()[2]
+        ► composer --version
+        Composer version 2.1.8 2021-09-15 13:55:14
+    """
 
     @property
     def installed(self):

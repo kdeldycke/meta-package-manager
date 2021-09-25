@@ -33,15 +33,12 @@ class MAS(PackageManager):
 
     name = "Mac AppStore"
 
-    def get_version(self):
-        """Fetch version.
+    version_cli_options = ["version"]
+    """.. code-block:: shell-session
 
-        .. code-block:: shell-session
-
-            ► mas version
-            1.8.3
-        """
-        return self.run_cli("version")
+        ► mas version
+        1.8.3
+    """
 
     @property
     def installed(self):

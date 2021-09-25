@@ -28,23 +28,16 @@ class Snap(PackageManager):
 
     global_args = ["--color=never"]
 
-    def get_version(self):
-        """Fetch version from ``snap --version`` output.
+    version_regex = r"snap\s+(?P<version>\S+)"
+    """.. code-block:: shell-session
 
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► snap --version
-            snap       2.44.1
-            snapd      2.44.1
-            series     16
-            linuxmint  19.3
-            kernel     4.15.0-91-generic
-        """
-        output = self.run_cli("--version")
-        if output:
-            return output.split()[1]
+        ► snap --version
+        snap       2.44.1
+        snapd      2.44.1
+        series     16
+        linuxmint  19.3
+        kernel     4.15.0-91-generic
+    """
 
     @property
     def installed(self):

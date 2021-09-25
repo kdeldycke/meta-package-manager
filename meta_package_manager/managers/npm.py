@@ -31,6 +31,12 @@ class NPM(PackageManager):
 
     name = "Node's npm"
 
+    """.. code-block:: shell-session
+
+        ► npm --version
+        6.13.7
+    """
+
     def run_cli(self, *args):
         """Like the common run_cli helper, but silence NPM's JSON output on error.
 
@@ -58,18 +64,6 @@ class NPM(PackageManager):
                 output = None
 
         return output
-
-    def get_version(self):
-        """Fetch version from ``npm --version`` output.
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► npm --version
-            6.13.7
-        """
-        return self.run_cli("--version")
 
     @property
     def installed(self):

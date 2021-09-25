@@ -30,22 +30,17 @@ class APM(PackageManager):
 
     requirement = "1.0.0"
 
-    def get_version(self):
-        """Fetch version.
+    version_regex = r"apm\s+(?P<version>\S+)"
+    """.. code-block:: shell-session
 
-        .. code-block:: shell-session
-
-            ► apm --version
-            apm  2.6.2
-            npm  6.14.13
-            node 12.14.1 x64
-            atom 1.58.0
-            python 2.7.16
-            git 2.33.0
-        """
-        output = self.run_cli("--version")
-        if output:
-            return output.splitlines()[0].split()[1]
+        ► apm --version
+        apm  2.6.2
+        npm  6.14.13
+        node 12.14.1 x64
+        atom 1.58.0
+        python 2.7.16
+        git 2.33.0
+    """
 
     @property
     def installed(self):

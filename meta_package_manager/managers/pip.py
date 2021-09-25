@@ -47,17 +47,13 @@ class Pip(PackageManager):
         "--no-color",  # Suppress colored output.
     ]
 
-    def get_version(self):
-        """Fetch version.
+    version_cli_options = global_args + ["--version"]
+    version_regex = r"pip\s+(?P<version>\S+)"
+    """.. code-block:: shell-session
 
-        .. code-block:: shell-session
-
-            ► python -m pip --no-color --version
-            pip 2.0.2 from /usr/local/lib/python/site-packages/pip (python 3.7)
-        """
-        output = self.run_cli(self.global_args, "--version")
-        if output:
-            return output.split()[1]
+        ► python -m pip --no-color --version
+        pip 2.0.2 from /usr/local/lib/python/site-packages/pip (python 3.7)
+    """
 
     @property
     def installed(self):

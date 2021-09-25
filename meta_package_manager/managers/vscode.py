@@ -29,21 +29,17 @@ class VSCode(PackageManager):
 
     requirement = "1.60.0"
 
-    cli_names = ["code"]
-
     name = "Visual Studio Code"
 
-    def get_version(self):
-        """Fetch version.
+    cli_names = ["code"]
 
-        .. code-block:: shell-session
+    """.. code-block:: shell-session
 
-            ► code --version
-            1.60.2
-            7f6ab5485bbc008386c4386d08766667e155244e
-            x64
-        """
-        return self.run_cli("--version").split()[0]
+        ► code --version
+        1.60.2
+        7f6ab5485bbc008386c4386d08766667e155244e
+        x64
+    """
 
     @property
     def installed(self):

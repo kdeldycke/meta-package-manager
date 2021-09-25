@@ -28,19 +28,12 @@ class OPKG(PackageManager):
 
     requirement = "0.2.0"
 
-    def get_version(self):
-        """Fetch version from ``opkg --version`` output.
+    version_regex = r"opkg\s+version\s+(?P<version>\S+)"
+    """.. code-block:: shell-session
 
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► opkg --version
-            opkg version 0.3.6 (libsolv 0.7.5)
-        """
-        output = self.run_cli("--version")
-        if output:
-            return output.splitlines()[0].split()[2]
+        ► opkg --version
+        opkg version 0.3.6 (libsolv 0.7.5)
+    """
 
     def sync(self):
         """

@@ -46,20 +46,14 @@ class Homebrew(PackageManager):
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     cli_names = None
 
-    def get_version(self):
-        """Fetch version from ``brew --version`` output.
+    version_regex = r"Homebrew\s+(?P<version>\S+)"
+    """.. code-block:: shell-session
 
-        .. code-block:: shell-session
-
-            ► brew --version
-            Homebrew 1.8.6-124-g6cd4c31
-            Homebrew/homebrew-core (git revision 533d; last commit 2018-12-28)
-            Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
-
-        """
-        output = self.run_cli("--version")
-        if output:
-            return output.split()[1]
+        ► brew --version
+        Homebrew 1.8.6-124-g6cd4c31
+        Homebrew/homebrew-core (git revision 533d; last commit 2018-12-28)
+        Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
+    """
 
     def sync(self):
         """Fetch content of remote taps.

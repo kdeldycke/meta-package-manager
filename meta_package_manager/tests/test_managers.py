@@ -138,15 +138,21 @@ def test_requirement(manager):
     assert str(TokenizedString(manager.requirement)) == manager.requirement
 
 
-def test_get_version():
-    """Check that method parsing the CLI version returns a string."""
-    for manager in pool().values():
-        assert isinstance(manager.get_version, MethodType)
-        if manager.executable:
-            if manager.get_version() is not None:
-                assert isinstance(manager.get_version(), str)
+@all_managers
+def test_version_cli_options(manager):
+    """Version CLI options must be a list of strings or a dict of that structure."""
+    assert isinstance(manager.version_cli_options, list)
+    for arg in manager.version_cli_options:
+        assert arg
+        assert isinstance(arg, str)
 
 
+@all_managers
+def test_version_regex(manager):
+    """Version regex is required. Check it compiles and match has a version group."""
+    assert isinstance(manager.version_regex, str)
+    regex = re.compile(manager.version_regex)
+    assert "version" in regex.groupindex
 
 
 @all_managers

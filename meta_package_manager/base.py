@@ -16,6 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import os
+import re
 from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
@@ -78,6 +79,15 @@ class PackageManager:
 
     # Version requirement specifier.
     requirement = None
+
+    # List of options to use to get the version from the package manager.
+    version_cli_options = ["--version"]
+
+    # Regular expression used to extract the version number from the result of the CLI
+    # run with the options above. It doesn't matter if the regex returns unsanitized
+    # and crappy string. The ``version()`` method will clean and normalized it.
+    # By default match the first part that is space-separated.
+    version_regex = r"(?P<version>\S+)"
 
     # List of additional path to help mpm hunt down the package manager CLI.
     # Should be a list of strings whose order dictatate the search sequence.
@@ -176,28 +186,32 @@ class PackageManager:
 
         return cli_path
 
-    def get_version(self):
-        """Invoke the manager and extract its own reported version string.
-
-        It does matter if this method return unsanitized and crappy string. The
-        ``version()`` method below will clean and normalized it.
-        """
-        raise NotImplementedError
-
     @cachedproperty
     def version(self):
-        """Parsed and normalized package manager's own version.
+        """Invoke the manager and extract its own reported version string.
 
-        Returns an instance of `TokenizedString`.
+        Returns a parsed and normalized version in the form of a `TokenizedString`
+        instance.
         """
         if self.executable:
-            # Temporarily disable --dry-run option.
-            user_option = self.dry_run
-            self.dry_run = False
-            version_string = self.get_version()
-            # Restore user's value for --dry-run option.
-            self.dry_run = user_option
-            if version_string:
+            # Temporarily replace --dry-run and --stop-on-error user options with our own.
+            user_options = (self.dry_run, self.stop_on_error)
+            self.dry_run, self.stop_on_error = False, False
+
+            # Invoke the manager.
+            output = self.run_cli(self.version_cli_options)
+
+            # Restore user options for --dry-run and --stop-on-error.
+            self.dry_run, self.stop_on_error = user_options
+
+            # Extract the version with the regex.
+            if output:
+                version_string = (
+                    re.compile(self.version_regex, re.MULTILINE | re.VERBOSE)
+                    .search(output)
+                    .groupdict()
+                ).get("version")
+                logger.debug(f"Extracted version: {version_string}")
                 return parse_version(version_string)
 
     @cachedproperty

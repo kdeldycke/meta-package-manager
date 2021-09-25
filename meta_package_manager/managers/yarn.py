@@ -34,15 +34,11 @@ class Yarn(PackageManager):
 
     requirement = "1.21.0"
 
-    def get_version(self):
-        """Fetch version.
+    """.. code-block:: shell-session
 
-        .. code-block:: shell-session
-
-            ► yarn --version
-            1.22.11
-        """
-        return self.run_cli("--version")
+        ► yarn --version
+        1.22.11
+    """
 
     def parse(self, output):
         packages = {}

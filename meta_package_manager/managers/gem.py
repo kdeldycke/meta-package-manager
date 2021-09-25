@@ -33,24 +33,18 @@ class Gem(PackageManager):
     # i.e. macOS 10.13 High Sierra, which is bundled with gem 2.5.2.
     requirement = "2.5.0"
 
+    """.. code-block:: shell-session
+
+        ► gem --version
+        3.0.3
+    """
+
     # Help mpm a little bit in its search for the `gem` binary.
     cli_search_path = ["/usr/local/opt/ruby/bin/gem", "/usr/local/opt/ruby/bin"]
 
     global_args = [
         "--quiet",  # Silence command progress meter
     ]
-
-    def get_version(self):
-        """Fetch version from ``gem --version`` output.
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► gem --version
-            3.0.3
-        """
-        return self.run_cli("--version")
 
     @property
     def installed(self):

@@ -262,6 +262,10 @@ class CLISubCommandTests:
                 ),
                 # Sync command.
                 f"Sync {mid} package info..." in result.stderr,
+                # Search command.
+                f"warning: {mid} does not implement search command." in result.stderr,
+                # Outdated command.
+                f"warning: {mid} does not implement outdated command." in result.stderr,
                 # Upgrade command.
                 f"Updating all outdated packages from {mid}..." in result.stderr,
                 # Cleanup command.

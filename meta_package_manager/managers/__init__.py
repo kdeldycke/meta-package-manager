@@ -58,3 +58,40 @@ def pool():
     # Sort pool entries by ID.
     # TODO: propose an OrderedFrozenDict in boltons and use it here.
     return OrderedDict(sorted(register.items()))
+
+
+def select_managers(keep=None, drop=None, **kwargs):
+    """ "Utility method to extract a subset of the manager pool based on selection and exclusion criterion.
+
+    By default, all managers are selected.
+
+    kwargs are fed to the manager objects from the pool to set some options.
+
+    Returns a list of manager objects sorted by IDs.
+    """
+    selected_ids = set(pool())
+
+    if not keep:
+        keep = selected_ids
+    if not drop:
+        drop = set()
+    assert isinstance(keep, (set, tuple, list))
+    assert isinstance(drop, (set, tuple, list))
+
+    # Only keeps the subset selected by the user.
+    selected_ids = selected_ids.intersection(keep)
+    # Remove managers excluded by the user.
+    selected_ids = selected_ids.difference(drop)
+
+    selected_managers = [pool()[mid] for mid in sorted(selected_ids)]
+
+    # List of supported manager options.
+    option_ids = {"stop_on_error", "ignore_auto_updates", "dry_run"}
+    assert option_ids.issuperset(kwargs)
+    # Apply manager-level options.
+    for m_obj in selected_managers:
+        for param, value in kwargs.items():
+            assert hasattr(m_obj, param)
+            setattr(m_obj, param, value)
+
+    return selected_managers

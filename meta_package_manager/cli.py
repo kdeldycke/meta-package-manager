@@ -38,7 +38,7 @@ from simplejson import dumps as json_dumps
 from . import CLI_NAME, __version__, env_data, logger, reset_logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .config import load_conf
-from .managers import pool
+from .managers import pool, select_managers
 from .platform import CURRENT_OS_ID, WINDOWS, os_label
 from .version import TokenizedString
 
@@ -302,22 +302,16 @@ def cli(
     level_name = logging._levelToName.get(level, level)
     logger.debug(f"Verbosity set to {level_name}.")
 
-    # Target all available managers by default.
-    target_ids = set(pool())
-    # Only keeps the subset selected by the user.
-    if manager:
-        target_ids = target_ids.intersection(manager)
-    # Remove managers excluded by the user.
-    target_ids = target_ids.difference(exclude)
-    target_managers = [pool()[mid] for mid in sorted(target_ids)]
-
-    # Apply manager-level options.
-    for m_obj in target_managers:
+    # Select the subset of manager to target, and apply manager-level options.
+    target_managers = select_managers(
+        keep=manager,
+        drop=exclude,
         # Does the manager should raise on error or not.
-        m_obj.stop_on_error = stop_on_error
+        stop_on_error=stop_on_error,
         # Should we include auto-update packages or not?
-        m_obj.ignore_auto_updates = ignore_auto_updates
-        m_obj.dry_run = dry_run
+        ignore_auto_updates=ignore_auto_updates,
+        dry_run=dry_run,
+    )
 
     # Pre-filters inactive managers.
     def keep_available(manager):

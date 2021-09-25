@@ -29,6 +29,8 @@ class VSCode(PackageManager):
 
     requirement = "1.60.0"
 
+    cli_names = ["code"]
+
     name = "Visual Studio Code"
 
     def get_version(self):

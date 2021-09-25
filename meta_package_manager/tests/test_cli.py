@@ -435,7 +435,7 @@ class CLITableTests:
             assert expected in result.stdout
 
         # Collect all possible unique traces from all possible rendering modes.
-        blacklist = {
+        unexpected_traces = {
             v[0]
             for v in self.expected_renderings.values()
             # Exclude obvious character sequences shorter than 3 characters to
@@ -444,9 +444,9 @@ class CLITableTests:
         }
         # Remove overlapping edge-cases.
         if conflict:
-            blacklist.remove(self.expected_renderings[conflict][0])
+            unexpected_traces.remove(self.expected_renderings[conflict][0])
 
-        for unexpected in blacklist:
+        for unexpected in unexpected_traces:
             if unexpected != expected:
                 # The unexpected trace is not the selected one, it should not
                 # appears at all in stdout.

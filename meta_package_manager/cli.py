@@ -733,7 +733,12 @@ def upgrade(ctx):
 
     for manager in active_managers:
         logger.info(f"Updating all outdated packages from {manager.id}...")
-        output = manager.upgrade_all()
+        try:
+            output = manager.upgrade_all()
+        except NotImplementedError:
+            logger.warning(f"{manager.id} does not implement upgrade command.")
+            continue
+
         if output:
             logger.info(output)
 

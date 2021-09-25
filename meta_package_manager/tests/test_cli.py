@@ -268,6 +268,7 @@ class CLISubCommandTests:
                 f"warning: {mid} does not implement outdated command." in result.stderr,
                 # Upgrade command.
                 f"Updating all outdated packages from {mid}..." in result.stderr,
+                f"warning: {mid} does not implement upgrade command." in result.stderr,
                 # Cleanup command.
                 f"Cleanup {mid}..." in result.stderr,
                 # Log message for backup command.

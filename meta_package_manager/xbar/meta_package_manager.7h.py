@@ -161,22 +161,33 @@ def print_menu():
     See: https://github.com/matryer/xbar#plugin-api
     """
     # Search for generic mpm CLI on system.
-    code, _, error = run("mpm")
-    # mpm CLI hasn't been found on the system. Propose to the user to install
-    # or upgrade it.
-    if code or error:
+    code, output, error = run("mpm", "--version")
+
+    mpm_installed = False
+    mpm_up_to_date = False
+    # Is mpm CLI installed on the system?
+    if not code and not error:
+        mpm_installed = True
+        # Is mpm too old?
+        mpm_version = tuple(map(int, output.split()[1].split(".")))
+        if mpm_version >= MPM_MIN_VERSION:
+            mpm_up_to_date = True
+
+    if not mpm_installed or not mpm_up_to_date:
         print_error_header()
         print_error(error)
         print("---")
+        action_msg = "Install" if not mpm_installed else "Upgrade"
+        min_version_str = ".".join(map(str, MPM_MIN_VERSION))
         pp(
             [
-                "Install / upgrade `mpm` CLI.",
+                f"{action_msg} mpm CLI >= v{min_version_str}",
                 "shell=python3",
                 "param1=-m",
                 "param2=pip",
                 "param3=install",
                 "param4=--upgrade",
-                f"param5=meta-package-manager>={'.'.join(MPM_MIN_VERSION)}",
+                f"param5=meta-package-manager>={min_version_str}",
                 "terminal=true",
                 "refresh=true",
                 FONTS["error"],

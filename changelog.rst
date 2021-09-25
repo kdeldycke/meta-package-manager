@@ -7,6 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [xbar] Let xbar plugin check minimal mpm version requirement.
 * [mpm] Add beta ``windows-2022`` CI/CD build target.
 
 

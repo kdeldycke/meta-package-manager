@@ -72,7 +72,8 @@ Package Managers
 39. Package managers `can bootstrap themselves
     <https://github.com/Homebrew/brew/blob/master/docs/Common-Issues.md#brew-complains-about-absence-of-command-line-tools>`_.
 40. Package managers supports maultiple architectures.
-41. You only need one package manager.
+41. You `only need one package manager
+    <https://utcc.utoronto.ca/~cks/space/blog/tech/PackageManagersTwoTypes>`_.
 
 
 Meta

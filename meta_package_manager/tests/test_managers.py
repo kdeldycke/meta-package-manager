@@ -139,7 +139,7 @@ def test_get_version():
         assert isinstance(manager.get_version, MethodType)
         if manager.executable:
             if manager.get_version() is not None:
-                assert isinstance(manager.get_version(), TokenizedString)
+                assert isinstance(manager.get_version(), str)
 
 
 def test_version():

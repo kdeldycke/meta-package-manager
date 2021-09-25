@@ -97,6 +97,9 @@ class PackageManager:
     # possessing their own auto-update mecanism.
     ignore_auto_updates = True
 
+    # Do not actually perform any action, just simulate CLI calls.
+    dry_run = False
+
     def __init__(self):
         # Log of all encountered CLI errors.
         self.cli_errors = []
@@ -189,7 +192,12 @@ class PackageManager:
         Returns an instance of `TokenizedString`.
         """
         if self.executable:
+            # Temporarily disable --dry-run option.
+            user_option = self.dry_run
+            self.dry_run = False
             version_string = self.get_version()
+            # Restore user's value for --dry-run option.
+            self.dry_run = user_option
             if version_string:
                 return parse_version(version_string)
 
@@ -236,7 +244,7 @@ class PackageManager:
         """
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
-    def run(self, *args, dry_run=False):
+    def run(self, *args):
         """Run a shell command, return the output and keep error message.
 
         Removes ANSI escape codes, and returns ready-to-use strings.
@@ -244,16 +252,17 @@ class PackageManager:
         # Serialize Path objects to strings.
         args = list(map(str, flatten(args)))
         args_str = click.style(" ".join(args), fg="white")
-        logger.debug(f"► {args_str}")
+        cli_msg = f"► {args_str}"
 
         code = 0
         output = None
         error = None
 
-        if not dry_run:
-            code, output, error = run(*args)
+        if self.dry_run:
+            logger.warning(f"Dry-run: {cli_msg}")
         else:
-            logger.warning("Dry-run: skip execution of command.")
+            logger.debug(cli_msg)
+            code, output, error = run(*args)
 
         # Normalize messages.
         if error:
@@ -282,11 +291,11 @@ class PackageManager:
 
         return output
 
-    def run_cli(self, *args, dry_run=False):
+    def run_cli(self, *args):
         """Like the ``run`` method above, but execute the binary pointed to by
         the ``cli_path`` property set in the current instance.
         """
-        return self.run(self.cli_path, args, dry_run=dry_run)
+        return self.run(self.cli_path, args)
 
     def sync(self):
         """Refresh local manager metadata from remote repository."""
@@ -343,27 +352,27 @@ class PackageManager:
         """Return a shell-compatible full-CLI to upgrade a package."""
         raise NotImplementedError
 
-    def upgrade(self, package_id=None, dry_run=False):
+    def upgrade(self, package_id=None):
         """Perform the upgrade of the provided package to latest version."""
         try:
             upgrade_cli = self.upgrade_cli(package_id)
         except NotImplementedError:
             logger.warning(f"Upgrade not implemented for {self.id}.")
             return
-        return self.run(upgrade_cli, dry_run=dry_run)
+        return self.run(upgrade_cli)
 
     def upgrade_all_cli(self):
         """Return a shell-compatible full-CLI to upgrade all packages."""
         raise NotImplementedError
 
-    def upgrade_all(self, dry_run=False):
+    def upgrade_all(self):
         """Perform a full upgrade of all outdated packages to latest versions.
 
         If the manager doesn't implements a full upgrade one-liner, then
         fall-back to calling single-package upgrade one by one.
         """
         try:
-            return self.run(self.upgrade_all_cli(), dry_run=dry_run)
+            return self.run(self.upgrade_all_cli())
         except NotImplementedError:
             logger.warning(
                 f"Full upgrade subcommand not implemented in {self.id}. Call "
@@ -371,7 +380,7 @@ class PackageManager:
             )
             log = []
             for package_id in self.outdated:
-                output = self.upgrade(package_id, dry_run=dry_run)
+                output = self.upgrade(package_id)
                 if output:
                     log.append(output)
             if log:

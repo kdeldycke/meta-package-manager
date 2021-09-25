@@ -248,6 +248,13 @@ class timeit:
     help="Stop right away or continue operations on manager CLI error.",
 )
 @click.option(
+    "-d",
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Do not actually perform any action, just simulate CLI calls.",
+)
+@click.option(
     "-C",
     "--config",
     metavar="CONFIG_PATH",
@@ -286,6 +293,7 @@ def cli(
     stats,
     time,
     stop_on_error,
+    dry_run,
 ):
     """CLI for multi-package manager upgrades."""
 
@@ -309,6 +317,7 @@ def cli(
         m_obj.stop_on_error = stop_on_error
         # Should we include auto-update packages or not?
         m_obj.ignore_auto_updates = ignore_auto_updates
+        m_obj.dry_run = dry_run
 
     # Pre-filters inactive managers.
     def keep_available(manager):
@@ -732,16 +741,9 @@ def outdated(ctx, cli_format):
 
 
 @cli.command(short_help="Upgrade all packages.")
-@click.option(
-    "-d",
-    "--dry-run",
-    is_flag=True,
-    default=False,
-    help="Do not actually perform any upgrade, just simulate CLI calls.",
-)
 @click.pass_context
 @timeit()
-def upgrade(ctx, dry_run):
+def upgrade(ctx):
     """Perform a full package upgrade on all available managers."""
     active_managers = ctx.obj["active_managers"]
 
@@ -750,7 +752,7 @@ def upgrade(ctx, dry_run):
         logger.info(f"Updating all outdated packages from {manager.id}...")
 
         try:
-            output = manager.upgrade_all(dry_run=dry_run)
+            output = manager.upgrade_all()
         except CLIError as expt:
             logger.error(expt.error)
 

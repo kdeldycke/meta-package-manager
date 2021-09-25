@@ -32,13 +32,13 @@ class TestUpgrade(CLISubCommandTests):
     parameter is passed."""
 
     def test_default_all_managers_dry_run(self, invoke, subcmd):
-        result = invoke(subcmd, "--dry-run")
+        result = invoke("--dry-run", subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result)
 
     @pytest.mark.parametrize("mid", MANAGER_IDS)
     def test_single_manager_dry_run(self, invoke, subcmd, mid):
-        result = invoke("--manager", mid, subcmd, "--dry-run")
+        result = invoke("--manager", mid, "--dry-run", subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 

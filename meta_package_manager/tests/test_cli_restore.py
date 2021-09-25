@@ -58,7 +58,7 @@ class TestRestore(CLISubCommandTests):
         self.check_manager_selection(result)
 
     @pytest.mark.parametrize("mid", MANAGER_IDS)
-    def test_ignore_unrecognized_manager(self, invoke, create_toml, mid):
+    def test_single_manager(self, invoke, create_toml, mid):
         toml_path = create_toml(
             "all-managers.toml",
             "".join(

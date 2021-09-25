@@ -34,7 +34,13 @@ class MAS(PackageManager):
     name = "Mac AppStore"
 
     def get_version(self):
-        """Fetch version from ``mas version`` output."""
+        """Fetch version.
+
+        .. code-block:: shell-session
+
+            ► mas version
+            1.8.3
+        """
         return parse_version(self.run_cli("version"))
 
     @property

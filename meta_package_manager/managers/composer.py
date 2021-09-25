@@ -32,7 +32,13 @@ class Composer(PackageManager):
     requirement = "1.4.0"
 
     def get_version(self):
-        """Fetch version from ``composer --version`` output."""
+        """Fetch version.
+
+        .. code-block:: shell-session
+
+            ► composer --version
+            Composer version 2.1.8 2021-09-15 13:55:14
+        """
         output = self.run_cli("--version")
         if output:
             return parse_version(output.split()[2])

@@ -7,6 +7,8 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Add beta ``windows-2022`` CI/CD build target.
+
 
 `4.3.0 (2021-09-25) <https://github.com/kdeldycke/meta-package-manager/compare/v4.2.0...v4.3.0>`_
 -------------------------------------------------------------------------------------------------

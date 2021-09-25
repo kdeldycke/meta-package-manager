@@ -244,11 +244,16 @@ class PackageManager:
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
     def run(self, *args):
-        """Run a shell command, return the output and keep error message.
+        """Run a shell command, return the output and accumulate error messages.
 
-        Removes ANSI escape codes, and returns ready-to-use strings.
+        args is allowed to be a nested structure of iterables, in which case it will
+        be flatten, then each item within casted to strings.
+
+        Internally reuse the run() method from the xbar plugin, but adds logs at the
+        appropriate level, removes ANSI escape codes, returns ready-to-use strings, and
+        takes --dry-run and --stop-on-error into account.
         """
-        # Serialize Path objects to strings.
+        # Casting to string helps serialize Path and Version objects.
         args = list(map(str, flatten(args)))
         args_str = click.style(" ".join(args), fg="white")
         cli_msg = f"{PROMPT}{args_str}"

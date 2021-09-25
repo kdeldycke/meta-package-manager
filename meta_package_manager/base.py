@@ -158,7 +158,7 @@ class PackageManager:
             cli_path = which(name, mode=os.F_OK, path=env_path)
             if cli_path:
                 break
-            logger.debug(f"{name!r} CLI not found.")
+            logger.debug(f"{name} CLI not found.")
 
         if not cli_path:
             return
@@ -172,7 +172,7 @@ class PackageManager:
         elif not cli_path.is_file():
             logger.warning(f"{cli_path} is not a file.")
         else:
-            logger.debug(f"{name!r} CLI found at {cli_path}")
+            logger.debug(f"{name} CLI found at {cli_path}")
 
         return cli_path
 

@@ -827,7 +827,7 @@ def restore(ctx, toml_files):
         if ignored_sections:
             plural = "s" if len(ignored_sections) > 1 else ""
             sections = ", ".join(ignored_sections)
-            logger.warning(f"Ignore {sections} section{plural}.")
+            logger.info(f"Ignore {sections} section{plural}.")
 
         for manager in active_managers:
             if manager.id not in doc:

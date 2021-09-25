@@ -87,10 +87,10 @@ class TestRestore(CLISubCommandTests):
             """,
         )
 
-        result = invoke("restore", str(toml_path))
+        result = invoke("--verbosity", "INFO", "restore", str(toml_path))
         assert result.exit_code == 0
         assert "unrecognized.toml" in result.stderr
-        assert "warning: Ignore [random_section] section." in result.stderr
+        assert "Ignore [random_section] section" in result.stderr
 
     def test_restore_single_manager(self, invoke, create_toml):
         toml_path = create_toml(

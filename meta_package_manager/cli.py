@@ -796,20 +796,16 @@ def backup(ctx, toml_output):
     # Create one section for each package manager.
     for manager in active_managers:
         logger.info(f"Dumping packages from {manager.id}...")
+        installed_packages = manager.installed.values()
 
         # Prepare data for stats.
         installed_data[manager.id] = {
             "id": manager.id,
-            "packages": manager.installed.values(),
+            "packages": installed_packages,
         }
 
         pkg_data = dict(
-            sorted(
-                [
-                    (p["id"], str(p["installed_version"]))
-                    for p in manager.installed.values()
-                ]
-            )
+            sorted([(p["id"], str(p["installed_version"])) for p in installed_packages])
         )
 
         if pkg_data:

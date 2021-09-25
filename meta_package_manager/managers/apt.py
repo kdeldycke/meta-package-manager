@@ -41,25 +41,10 @@ class APT(PackageManager):
 
             ► apt --version
             apt 1.2.15 (amd64)
-
-        In Linux Mint, another command has to be used:
-
-        .. code-block:: shell-session
-
-            ► apt version apt
-            1.6.11
         """
         output = self.run_cli("--version")
-        version = None
         if output:
-            output = output.splitlines()[0].split()
-            if len(output) > 1:
-                version = output[1]
-            else:
-                output = self.run_cli("version", "apt")
-                if output:
-                    version = output
-        return version
+            return output.split()[1]
 
     def sync(self):
         """
@@ -285,3 +270,27 @@ class APT(PackageManager):
         super().cleanup()
         self.run("sudo", self.cli_path, self.global_args, "-y", "autoremove")
         self.run("sudo", self.cli_path, self.global_args, "clean")
+
+
+class APT_Mint(APT):
+
+    """Special version of apt for Linux Mint.
+
+    Exactly the same as its parent but implement specific version extraction.
+    """
+
+    name = "Linux Mint's apt"
+
+    cli_names = ["apt"]
+
+    def get_version(self):
+        """Fetch version from ``apt version`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            ► apt version apt
+            1.6.11
+        """
+        return self.run_cli("version", "apt")

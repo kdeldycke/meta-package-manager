@@ -60,6 +60,7 @@ Package manager  Min. version  macOS  Linux  Windows  ``sync``  ``installed``  `
 ================ ============= ====== ====== ======== ========= ============== ================ ============ ============= ============ ============
 |apm|__           1.0.0         ✓      ✓      ✓                  ✓              ✓                 ✓           ✓             ✓
 |apt|__           1.0.0                ✓               ✓         ✓              ✓                 ✓           ✓             ✓            ✓
+|apt-mint|__      1.0.0                ✓               ✓         ✓              ✓                 ✓           ✓             ✓            ✓
 |brew|__          2.7.0         ✓      ✓               ✓         ✓              ✓                 ✓           ✓             ✓            ✓
 |cask|__          2.7.0         ✓                      ✓         ✓              ✓                 ✓           ✓             ✓            ✓
 |composer|__      1.4.0         ✓      ✓      ✓        ✓         ✓              ✓                 ✓           ✓             ✓            ✓
@@ -80,6 +81,9 @@ __ https://atom.io/packages
 .. |apt| replace::
    ``apt``
 __ https://wiki.debian.org/Apt
+.. |apt-mint| replace::
+   Linux Mint's ``apt``
+__ https://github.com/kdeldycke/meta-package-manager/issues/52
 .. |brew| replace::
    Homebrew
 __ https://brew.sh
@@ -201,32 +205,22 @@ List all supported package managers and their status on current system (macOS):
 .. code-block:: shell-session
 
     $ mpm managers
-    ╒═══════════════════╤══════════╤═══════════════╤════════════════════════════╤══════════════╤═══════════╕
-    │ Package manager   │ ID       │ Supported     │ CLI                        │ Executable   │ Version   │
-    ╞═══════════════════╪══════════╪═══════════════╪════════════════════════════╪══════════════╪═══════════╡
-    │ Atom's apm        │ apm      │ ✓             │ ✘  apm CLI not found.      │              │           │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
-    │ APT               │ apt      │ ✘  Linux only │ ✓  /usr/bin/apt            │ ✓            │ ✘         │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
-    │ Homebrew          │ brew     │ ✓             │ ✓  /usr/local/bin/brew     │ ✓            │ ✓  2.2.10 │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
-    │ Homebrew Cask     │ cask     │ ✓             │ ✓  /usr/local/bin/brew     │ ✓            │ ✓  2.2.10 │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
-    │ PHP's Composer    │ composer │ ✓             │ ✘  composer CLI not found. │              │           │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
-    │ Flatpak           │ flatpak  │ ✘  Linux only │ ✘  flatpak CLI not found.  │              │           │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
-    │ Ruby Gems         │ gem      │ ✓             │ ✓  /usr/bin/gem            │ ✓            │ ✓  3.0.3  │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
-    │ Mac AppStore      │ mas      │ ✓             │ ✓  /usr/local/bin/mas      │ ✓            │ ✓  1.6.3  │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
-    │ Node's npm        │ npm      │ ✓             │ ✓  /usr/local/bin/npm      │ ✓            │ ✓  6.13.7 │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
-    │ Node's yarn       │ yarn     │ ✓             │ ✓  /usr/local/bin/yarn     │ ✓            │ ✓  1.21.0 │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
-    │ OPKG              │ opkg     │ ✘  Linux only │ ✘  opkg CLI not found.     │              │           │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
-    │ Python 2's Pip    │ pip2     │ ✓             │ ✘  pip2 CLI not found.     │              │           │
-    ├───────────────────┼──────────┼───────────────┼────────────────────────────┼──────────────┼───────────┤
-    │ Python 3's Pip    │ pip3     │ ✓             │ ✓  /usr/local/bin/pip3     │ ✓            │ ✓  20.0.2 │
-    ╘═══════════════════╧══════════╧═══════════════╧════════════════════════════╧══════════════╧═══════════╛
+    ┌────────────────────┬──────────┬───────────────┬────────────────────────────┬────────────┬────────────┐
+    │ Package manager    │ ID       │ Supported     │ CLI                        │ Executable │ Version    │
+    ├────────────────────┼──────────┼───────────────┼────────────────────────────┼────────────┼────────────┤
+    │ Atom's apm         │ apm      │ ✓             │ ✓  /usr/local/bin/apm      │ ✓          │ ✓  2.6.2   │
+    │ APT                │ apt      │ ✘  Linux only │ ✓  /usr/bin/apt            │ ✓          │ ✘          │
+    │ Linux Mint's apt   │ apt-mint │ ✘  Linux only │ ✓  /usr/bin/apt            │ ✓          │ ✘          │
+    │ Homebrew Formulae  │ brew     │ ✓             │ ✓  /usr/local/bin/brew     │ ✓          │ ✓  3.2.13  │
+    │ Homebrew Cask      │ cask     │ ✓             │ ✓  /usr/local/bin/brew     │ ✓          │ ✓  3.2.13  │
+    │ PHP's Composer     │ composer │ ✓             │ ✓  /usr/local/bin/composer │ ✓          │ ✓  2.1.8   │
+    │ Flatpak            │ flatpak  │ ✘  Linux only │ ✘  no flatpak found        │            │            │
+    │ Ruby Gems          │ gem      │ ✓             │ ✓  /usr/bin/gem            │ ✓          │ ✓  3.0.3   │
+    │ Mac AppStore       │ mas      │ ✓             │ ✓  /usr/local/bin/mas      │ ✓          │ ✓  1.8.3   │
+    │ Node's npm         │ npm      │ ✓             │ ✓  /usr/local/bin/npm      │ ✓          │ ✓  7.24.0  │
+    │ OPKG               │ opkg     │ ✘  Linux only │ ✘  no opkg found           │            │            │
+    │ Pip                │ pip      │ ✓             │ ✓  /usr/local/bin/python3  │ ✓          │ ✓  21.2.4  │
+    │ Snap               │ snap     │ ✘  Linux only │ ✘  no snap found           │            │            │
+    │ Visual Studio Code │ vscode   │ ✓             │ ✘  no vscode found         │            │            │
+    │ Node's yarn        │ yarn     │ ✓             │ ✓  /usr/local/bin/yarn     │ ✓          │ ✓  1.22.11 │
+    └────────────────────┴──────────┴───────────────┴────────────────────────────┴────────────┴────────────┘

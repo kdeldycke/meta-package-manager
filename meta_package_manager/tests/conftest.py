@@ -40,6 +40,7 @@ MANAGER_IDS = frozenset(
     [
         "apm",
         "apt",
+        "apt-mint",
         "brew",
         "cask",
         "composer",

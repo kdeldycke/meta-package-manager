@@ -84,7 +84,7 @@ jobs:
               {"labels": [
                 "📦 manager: dpkg-like",
                 "🖥 platform: Linux"],
-               "keywords": ["apt", "aptitude", "dpkg", "opkg"]},
+               "keywords": ["apt", "apt-mint", "aptitude", "dpkg", "opkg"]},
 
               {"labels": [
                 "📦 manager: flatpak",

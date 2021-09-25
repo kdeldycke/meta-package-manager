@@ -110,7 +110,7 @@ class PackageManager:
         This ID must be unique among all package manager definitions and
         lower-case as they're used as feature flags for the :command:`mpm` CLI.
         """
-        return cls.__name__.lower()
+        return cls.__name__.lower().replace("_", "-")
 
     @classproperty
     def name(cls):

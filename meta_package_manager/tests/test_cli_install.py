@@ -51,6 +51,7 @@ class TestInstall(CLISubCommandTests):
     PACKAGE_IDS = {
         "apm": "markdown-pdf",
         "apt": "bat",
+        "apt-mint": "bat",
         "brew": "jpeginfo",
         "cask": "pngyu",
         "composer": "illuminate/contracts",

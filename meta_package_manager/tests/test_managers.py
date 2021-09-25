@@ -36,7 +36,7 @@ all_managers = pytest.mark.parametrize("manager", pool().values(), ids=attrgette
 
 def test_manager_count():
     """Check all implemented package managers are accounted for."""
-    assert len(pool()) == 14
+    assert len(pool()) == 15
     assert len(pool()) == len(MANAGER_IDS)
     assert MANAGER_IDS == set(pool())
 

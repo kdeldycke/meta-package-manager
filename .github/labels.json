@@ -62,7 +62,7 @@
   {
     "name": "📦 manager: dpkg-like",
     "color": "#bfdadc",
-    "description": "apt, dpkg, opkg"
+    "description": "apt, apt-mint, dpkg, opkg"
   },
   {
     "name": "📦 manager: flatpak",

@@ -107,8 +107,8 @@ def test_blacklisted_manager():
     # TODO: Use that blacklist to generate readme.rst's support table?
     blacklists = {
         LINUX: {"cask", "mas"},
-        MACOS: {"apt", "flatpak", "opkg", "snap"},
-        WINDOWS: {"apt", "brew", "cask", "flatpak", "mas", "opkg", "snap"},
+        MACOS: {"apt", "apt-mint", "flatpak", "opkg", "snap"},
+        WINDOWS: {"apt", "apt-mint", "brew", "cask", "flatpak", "mas", "opkg", "snap"},
     }
     blacklist = blacklists[current_os()[0]]
     # List of supported managers on the current platform.

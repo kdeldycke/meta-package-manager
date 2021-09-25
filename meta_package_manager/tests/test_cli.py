@@ -18,16 +18,14 @@
 import re
 from pathlib import Path
 
-import click
 import pytest
 import simplejson as json
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
-from cli_helpers.tabular_output import TabularOutputFormatter
 
 from .. import __version__, config
-from ..cli import RENDERING_MODES, WINDOWS_MODE_BLACKLIST
-from .conftest import MANAGER_IDS, unless_windows
+from ..cli import RENDERING_MODES
+from .conftest import MANAGER_IDS
 
 """ Common tests for all CLI basic features and templates for subcommands. """
 
@@ -199,18 +197,6 @@ class TestBaseCLI:
         assert "info: " not in result.stderr
         assert "debug: " not in result.stderr
 
-    @unless_windows
-    @pytest.mark.parametrize("mode", WINDOWS_MODE_BLACKLIST)
-    def test_check_failing_unicode_rendering(self, mode):
-        """Check internal assumption that some rendering unicode table
-        rendering modes fails in Windows console."""
-        table_formatter = TabularOutputFormatter(mode)
-        with pytest.raises(UnicodeEncodeError):
-            click.echo(
-                table_formatter.format_output(
-                    ((1, 87), (2, 80), (3, 79)), ("day", "temperature")
-                )
-            )
 
 
 class CLISubCommandTests:

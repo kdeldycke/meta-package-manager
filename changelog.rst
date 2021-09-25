@@ -12,6 +12,7 @@ Changelog
 * [xbar] Let xbar plugin check minimal mpm version requirement.
 * [mpm] Use regexpes to extract package manager versions.
 * [mpm] Add beta ``windows-2022`` CI/CD build target.
+* [mpm] Remove all the unused utilities to discard some table rendering on Windows.
 
 
 `4.3.0 (2021-09-25) <https://github.com/kdeldycke/meta-package-manager/compare/v4.2.0...v4.3.0>`_
@@ -182,7 +183,7 @@ Changelog
 * [brew,cask] Bump minimal requirement to 2.2.15.
 * [pip] Remove ``pip2``/``pip3`` distinctions, use system's python and call
   ``pip`` module.
-* [windows] Allow blacklisting some table rendering on Windows.
+* [windows] Allow discarding of some table rendering on Windows.
 * [mpm] Add ``--time`` / ``--no-time`` flag to show elapsed execution time.
   Closes #9.
 * [mpm] Print table rendering, stats and timing in console output instead of

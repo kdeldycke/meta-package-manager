@@ -32,14 +32,14 @@ import tomli_w
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list, strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
-from click_help_colors import HelpColorsCommand, HelpColorsGroup, version_option
+from click_help_colors import version_option
 from simplejson import dumps as json_dumps
 
 from . import CLI_NAME, __version__, env_data, logger, reset_logger
-from .base import CLI_FORMATS, CLIError, PackageManager
+from .base import CLI_FORMATS, PackageManager
 from .config import load_conf
 from .managers import pool, select_managers
-from .platform import CURRENT_OS_ID, WINDOWS, os_label
+from .platform import os_label
 from .version import TokenizedString
 
 # Initialize the table formatter.
@@ -51,25 +51,6 @@ RENDERING_MODES = {"json"}
 RENDERING_MODES.update(table_formatter.supported_formats)
 RENDERING_MODES = frozenset(RENDERING_MODES)
 
-# List of unicode rendering modes that will fall back to ascii on windows.
-# Windows has some hard time printing unicode characters to console output. It
-# seems to be an effect of cp1252 encoding and/or click not able to transcode
-# chars. Here is the traceback:
-#
-# File "(...)\meta_package_manager\cli.py", line 133, in print_table
-#   click.echo(line)
-# File "(...)\site-packages\click\utils.py", line 272, in echo
-#   file.write(message)
-# File "(...)\lib\encodings\cp1252.py", line 19, in encode
-#   return codecs.charmap_encode(input,self.errors,encoding_table)[0]
-# UnicodeEncodeError: 'charmap' codec can't encode characters in position
-#   0-140: character maps to <undefined>
-#
-# Fortunately, I found the fundamental issue and I no longer need to blacklist
-# some rendering modes. See: a3008f8c3a42efedd88378f087202b73d907bbb7 . I'll
-# still keep the construct around just in case I need to quickly blacklist
-# some.
-WINDOWS_MODE_BLACKLIST = frozenset([])
 
 # List of fields IDs allowed to be sorted.
 SORTABLE_FIELDS = {
@@ -79,6 +60,7 @@ SORTABLE_FIELDS = {
     "package_name",
     "version",
 }
+
 
 # Pre-rendered UI-elements.
 OK = click.style("✓", fg="green")
@@ -329,11 +311,6 @@ def cli(
 
     # Setup the table formatter.
     if output_format != "json":
-
-        # Fallback unicode-rendering to safe ascii on Windows.
-        if CURRENT_OS_ID == WINDOWS and output_format in WINDOWS_MODE_BLACKLIST:
-            output_format = "ascii"
-
         table_formatter.format_name = output_format
 
     # Load up global options to the context.

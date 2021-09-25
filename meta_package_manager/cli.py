@@ -542,10 +542,18 @@ def search(ctx, extended, exact, query):
     matches = {}
 
     for manager in active_managers:
+
+        # Allow managers to not implement search.
+        try:
+            results = manager.search(query, extended, exact).values()
+        except NotImplementedError:
+            logger.warning(f"{manager.id} does not implement search command.")
+            continue
+
         matches[manager.id] = {
             "id": manager.id,
             "name": manager.name,
-            "packages": list(manager.search(query, extended, exact).values()),
+            "packages": list(results),
         }
 
         # Serialize errors at the last minute to gather all we encountered.

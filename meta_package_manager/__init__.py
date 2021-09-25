@@ -23,9 +23,6 @@ from boltons.ecoutils import get_profile
 
 from .xbar import fix_environment
 
-# Canonical name of the CLI.
-CLI_NAME = "mpm"
-
 __version__ = "4.4.0"
 """ Examples of valid version strings according :pep:`440#version-scheme`:
 
@@ -38,6 +35,15 @@ __version__ = "4.4.0"
     __version__ = '1.2.3'        # Final Release
     __version__ = '1.2.3.post1'  # Post Release 1
 """
+
+
+# Canonical name of the CLI.
+CLI_NAME = "mpm"
+
+
+# Some CLI printing constants.
+PROMPT = "► "
+INDENT = " " * len(PROMPT)
 
 
 # Environment data.

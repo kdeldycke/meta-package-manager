@@ -26,7 +26,7 @@ from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from boltons.typeutils import classproperty
 
-from . import logger
+from . import INDENT, PROMPT, logger
 from .platform import CURRENT_OS_ID
 from .version import parse_version
 from .xbar import run
@@ -48,9 +48,8 @@ class CLIError(Exception):
 
     def __str__(self):
         """Human-readable error."""
-        margin = " " * 2
-        indented_output = indent(str(self.output), margin)
-        indented_error = indent(str(self.error), margin)
+        indented_output = indent(str(self.output), INDENT)
+        indented_error = indent(str(self.error), INDENT)
         return indent(
             dedent(
                 f"""
@@ -60,7 +59,7 @@ class CLIError(Exception):
             Error:
             {indented_error}"""
             ),
-            margin,
+            INDENT,
         )
 
     def __repr__(self):
@@ -252,7 +251,7 @@ class PackageManager:
         # Serialize Path objects to strings.
         args = list(map(str, flatten(args)))
         args_str = click.style(" ".join(args), fg="white")
-        cli_msg = f"► {args_str}"
+        cli_msg = f"{PROMPT}{args_str}"
 
         code = 0
         output = None
@@ -274,11 +273,11 @@ class PackageManager:
 
         # Log <stdout> and <stderr> output.
         if output:
-            logger.debug(indent(output, "  "))
+            logger.debug(indent(output, INDENT))
         if error:
             # Non-fatal error messages are logged as warnings.
             log_func = logger.error if code else logger.warning
-            log_func(indent(error, "  "))
+            log_func(indent(error, INDENT))
 
         # Non-successful run.
         if code and error:

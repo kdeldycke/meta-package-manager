@@ -28,7 +28,7 @@ from boltons.strutils import strip_ansi
 from boltons.tbutils import ExceptionInfo
 from click.testing import CliRunner
 
-from .. import CLI_NAME, config, reset_logger
+from .. import CLI_NAME, INDENT, PROMPT, config, reset_logger
 from ..cli import cli
 from ..platform import is_linux, is_macos, is_windows
 from ..xbar import run as xbar_run
@@ -99,14 +99,13 @@ unless_windows = pytest.mark.skipif(not is_windows(), reason="Windows required")
 
 def print_cli_output(cmd, output=None, error=None, error_code=None):
     """Simulate CLI output. Used to print debug traces in test results."""
-    print("\n► {}".format(click.style(" ".join(cmd), fg="white")))
-    margin = " " * 2
+    print("\n{}{}".format(PROMPT, click.style(" ".join(cmd), fg="white")))
     if output:
-        print(indent(output, margin))
+        print(indent(output, INDENT))
     if error:
-        print(indent(click.style(error, fg="red"), margin))
+        print(indent(click.style(error, fg="red"), INDENT))
     if error_code is not None:
-        print(click.style(f"{margin}Return code: {error_code}", fg="yellow"))
+        print(click.style(f"{INDENT}Return code: {error_code}", fg="yellow"))
 
 
 def run_cmd(*args):

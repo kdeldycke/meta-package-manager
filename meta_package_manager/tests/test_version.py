@@ -15,6 +15,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+from random import shuffle
+
 import pytest
 
 from ..version import Token, TokenizedString, parse_version
@@ -242,3 +244,29 @@ def test_version_comparison_gt(ver1, ver2):
 def test_version_comparison_lt(ver1, ver2):
     assert TokenizedString(ver1) < TokenizedString(ver2)
     assert parse_version(ver1) < parse_version(ver2)
+
+
+@pytest.mark.parametrize(
+    "sequence",
+    [
+        [
+            "r0",
+            "r1",
+            "r9_0",
+            "r9_3",
+            "r9_30",
+            "r2917_1",
+            "r02918_1",
+            "r02920_0",
+            "r02920_1",
+            "r02920_20",
+            "r02920_021",
+        ],
+    ],
+)
+def test_version_sorting(sequence):
+    sorted_version = list(map(TokenizedString, sequence))
+    ramdom_order = sorted_version.copy()
+    shuffle(ramdom_order)
+    assert ramdom_order != sorted_version
+    assert sorted(ramdom_order) == sorted_version

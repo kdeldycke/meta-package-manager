@@ -599,7 +599,7 @@ def search(ctx, extended, exact, query):
         for i, j in sorted(bold_ranges + normal_ranges):
             segment = getitem(string, slice(i, j + 1))
             if (i, j) in bold_ranges:
-                segment = click.style(segment, bold=True)
+                segment = click.style(segment, bold=True, fg="green")
             styled_str += segment
 
         return styled_str

@@ -748,14 +748,8 @@ def upgrade(ctx):
     active_managers = ctx.obj["active_managers"]
 
     for manager in active_managers:
-
         logger.info(f"Updating all outdated packages from {manager.id}...")
-
-        try:
-            output = manager.upgrade_all()
-        except CLIError as expt:
-            logger.error(expt.error)
-
+        output = manager.upgrade_all()
         if output:
             logger.info(output)
 

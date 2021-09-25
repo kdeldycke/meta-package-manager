@@ -272,6 +272,14 @@ class PackageManager:
             output = strip_ansi(output)
             output = output if output else None
 
+        # Log <stdout> and <stderr> output.
+        if output:
+            logger.debug(indent(output, "  "))
+        if error:
+            # Non-fatal error messages are logged as warnings.
+            log_func = logger.error if code else logger.warning
+            log_func(indent(error, "  "))
+
         # Non-successful run.
         if code and error:
             # Produce an exception and eventually raise it.
@@ -280,14 +288,6 @@ class PackageManager:
                 raise exception
             # Accumulate errors.
             self.cli_errors.append(exception)
-
-        # Log <stdout> and <stderr> output.
-        if output:
-            logger.debug(indent(output, "  "))
-        if error:
-            # Non-fatal error messages are logged as warnings.
-            log_func = logger.error if code else logger.warning
-            log_func(indent(error, "  "))
 
         return output
 

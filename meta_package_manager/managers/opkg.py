@@ -40,7 +40,7 @@ class OPKG(PackageManager):
         """
         output = self.run_cli("--version")
         if output:
-            return parse_version(output.splitlines()[0].split()[2])
+            return output.splitlines()[0].split()[2]
 
     def sync(self):
         """

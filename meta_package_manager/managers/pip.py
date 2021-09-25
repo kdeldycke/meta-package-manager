@@ -57,7 +57,7 @@ class Pip(PackageManager):
         """
         output = self.run_cli(self.global_args, "--version")
         if output:
-            return parse_version(output.split()[1])
+            return output.split()[1]
 
     @property
     def installed(self):

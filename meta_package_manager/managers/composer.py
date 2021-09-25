@@ -41,7 +41,7 @@ class Composer(PackageManager):
         """
         output = self.run_cli("--version")
         if output:
-            return parse_version(output.split()[2])
+            return output.split()[2]
 
     @property
     def installed(self):

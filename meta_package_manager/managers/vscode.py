@@ -41,7 +41,7 @@ class VSCode(PackageManager):
             7f6ab5485bbc008386c4386d08766667e155244e
             x64
         """
-        return parse_version(self.run_cli("--version").split()[0])
+        return self.run_cli("--version").split()[0]
 
     @property
     def installed(self):

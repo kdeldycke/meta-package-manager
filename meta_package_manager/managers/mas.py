@@ -41,7 +41,7 @@ class MAS(PackageManager):
             ► mas version
             1.8.3
         """
-        return parse_version(self.run_cli("version"))
+        return self.run_cli("version")
 
     @property
     def installed(self):

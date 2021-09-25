@@ -59,8 +59,7 @@ class APT(PackageManager):
                 output = self.run_cli("version", "apt")
                 if output:
                     version = output
-        if version:
-            return parse_version(version)
+        return version
 
     def sync(self):
         """

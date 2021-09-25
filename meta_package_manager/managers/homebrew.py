@@ -59,7 +59,7 @@ class Homebrew(PackageManager):
         """
         output = self.run_cli("--version")
         if output:
-            return parse_version(output.split()[1])
+            return output.split()[1]
 
     def sync(self):
         """Fetch content of remote taps.

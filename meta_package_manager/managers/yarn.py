@@ -42,7 +42,7 @@ class Yarn(PackageManager):
             ► yarn --version
             1.22.11
         """
-        return parse_version(self.run_cli("--version"))
+        return self.run_cli("--version")
 
     def parse(self, output):
         packages = {}

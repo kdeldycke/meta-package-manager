@@ -175,7 +175,7 @@ class PackageManager:
         return cli_path
 
     def get_version(self):
-        """Invoke the manager and extract its own reported version.
+        """Invoke the manager and extract its own reported version string.
 
         It does matter if this method return unsanitized and crappy string. The
         ``version()`` method below will clean and normalized it.
@@ -189,7 +189,9 @@ class PackageManager:
         Returns an instance of `TokenizedString`.
         """
         if self.executable:
-            return self.get_version()
+            version_string = self.get_version()
+            if version_string:
+                return parse_version(version_string)
 
     @cachedproperty
     def supported(self):

@@ -69,7 +69,7 @@ class NPM(PackageManager):
             ► npm --version
             6.13.7
         """
-        return parse_version(self.run_cli("--version"))
+        return self.run_cli("--version")
 
     @property
     def installed(self):

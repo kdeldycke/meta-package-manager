@@ -45,7 +45,7 @@ class APM(PackageManager):
         """
         output = self.run_cli("--version")
         if output:
-            return parse_version(output.splitlines()[0].split()[1])
+            return output.splitlines()[0].split()[1]
 
     @property
     def installed(self):

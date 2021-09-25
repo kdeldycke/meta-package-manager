@@ -44,7 +44,7 @@ class Snap(PackageManager):
         """
         output = self.run_cli("--version")
         if output:
-            return parse_version(output.split()[1])
+            return output.split()[1]
 
     @property
     def installed(self):

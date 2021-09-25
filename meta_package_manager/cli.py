@@ -672,7 +672,12 @@ def outdated(ctx, cli_format):
 
     for manager in active_managers:
 
-        packages = list(map(dict, manager.outdated.values()))
+        try:
+            packages = list(map(dict, manager.outdated.values()))
+        except NotImplementedError:
+            logger.warning(f"{manager.id} does not implement outdated command.")
+            continue
+
         for info in packages:
             info.update({"upgrade_cli": render_cli(manager.upgrade_cli(info["id"]))})
 

@@ -303,7 +303,7 @@ class PackageManager:
         return output
 
     def run_cli(self, *args, force_exec=False):
-        """Shortcut utility to the ``run`` method above, that is explicitely using the
+        """Shortcut utility to the ``run`` method above, that is explicitly using the
         binary set by the ``cli_path`` property.
 
         Also offer the possibility to force the execution and completion of the command

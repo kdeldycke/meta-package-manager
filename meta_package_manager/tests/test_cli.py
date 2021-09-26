@@ -198,7 +198,6 @@ class TestBaseCLI:
         assert "debug: " not in result.stderr
 
 
-
 class CLISubCommandTests:
 
     """All these tests runs on each subcommand.

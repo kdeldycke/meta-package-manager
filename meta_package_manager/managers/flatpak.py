@@ -174,8 +174,7 @@ class Flatpak(PackageManager):
                 if match:
                     name, package_id, latest_version = match.groups()
 
-                    info_installed_output = self.run(
-                        self.cli_path,
+                    info_installed_output = self.run_cli(
                         self.global_args,
                         "info",
                         "--ostree-verbose",

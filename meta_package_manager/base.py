@@ -194,15 +194,8 @@ class PackageManager:
         instance.
         """
         if self.executable:
-            # Temporarily replace --dry-run and --stop-on-error user options with our own.
-            user_options = (self.dry_run, self.stop_on_error)
-            self.dry_run, self.stop_on_error = False, False
-
             # Invoke the manager.
-            output = self.run_cli(self.version_cli_options)
-
-            # Restore user options for --dry-run and --stop-on-error.
-            self.dry_run, self.stop_on_error = user_options
+            output = self.run_cli(self.version_cli_options, force_exec=True)
 
             # Extract the version with the regex.
             if output:
@@ -309,11 +302,26 @@ class PackageManager:
 
         return output
 
-    def run_cli(self, *args):
-        """Like the ``run`` method above, but execute the binary pointed to by
-        the ``cli_path`` property set in the current instance.
+    def run_cli(self, *args, force_exec=False):
+        """Shortcut utility to the ``run`` method above, that is explicitely using the
+        binary set by the ``cli_path`` property.
+
+        Also offer the possibility to force the execution and completion of the command
+        regardless of the instance --dry-run and --stop-on-error user options.
         """
-        return self.run(self.cli_path, args)
+        # Temporarily replace --dry-run and --stop-on-error user options with our own.
+        if force_exec:
+            user_options = (self.dry_run, self.stop_on_error)
+            self.dry_run, self.stop_on_error = False, False
+
+        # Execute the command.
+        output = self.run(self.cli_path, args)
+
+        # Restore user options for --dry-run and --stop-on-error.
+        if force_exec:
+            self.dry_run, self.stop_on_error = user_options
+
+        return output
 
     def sync(self):
         """Refresh local manager metadata from remote repository."""

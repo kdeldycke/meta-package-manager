@@ -37,7 +37,7 @@ class NPM(PackageManager):
         6.13.7
     """
 
-    def run_cli(self, *args):
+    def run_cli(self, *args, force_exec=False):
         """Like the common run_cli helper, but silence NPM's JSON output on error.
 
         NPM is prone to breakage if local node version is not in sync:
@@ -53,7 +53,7 @@ class NPM(PackageManager):
               }
             }
         """
-        output = super().run_cli(*args)
+        output = super().run_cli(*args, force_exec=force_exec)
 
         # NPM fatal errors are reported both in <stderr> output and as JSON. So we
         # silence the errors in JSON so they get reported in CLI output (as

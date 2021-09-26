@@ -190,7 +190,7 @@ class Yarn(PackageManager):
 
     @cachedproperty
     def global_dir(self):
-        return self.run_cli("global", "dir").rstrip()
+        return self.run_cli("global", "dir", force_exec=True).rstrip()
 
     def install(self, package_id):
         """Install one package.

@@ -263,6 +263,7 @@ class APT(PackageManager):
             ► sudo apt-get -y autoremove
         """
         super().cleanup()
+        # Cannot use self.run_cli() because of sudo.
         self.run("sudo", self.cli_path, self.global_args, "-y", "autoremove")
         self.run("sudo", self.cli_path, self.global_args, "clean")
 

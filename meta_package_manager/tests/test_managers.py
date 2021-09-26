@@ -217,15 +217,19 @@ def test_installed_type(manager):
 def test_search_type(manager):
     """Check that all search operations returns a dict of dicts."""
     if manager.available:
-        matches = manager.search("python", extended=True, exact=False)
-        assert isinstance(matches, dict)
-        for pkg in matches.values():
-            assert isinstance(pkg, dict)
-            assert set(pkg) == {"id", "name", "latest_version"}
-            assert isinstance(pkg["id"], str)
-            assert isinstance(pkg["name"], str)
-            if pkg["latest_version"] is not None:
-                assert isinstance(pkg["latest_version"], TokenizedString)
+        try:
+            matches = manager.search("python", extended=True, exact=False)
+        except Exception as excpt:
+            assert isinstance(excpt, NotImplementedError)
+        else:
+            assert isinstance(matches, dict)
+            for pkg in matches.values():
+                assert isinstance(pkg, dict)
+                assert set(pkg) == {"id", "name", "latest_version"}
+                assert isinstance(pkg["id"], str)
+                assert isinstance(pkg["name"], str)
+                if pkg["latest_version"] is not None:
+                    assert isinstance(pkg["latest_version"], TokenizedString)
 
 
 @all_managers

@@ -378,7 +378,7 @@ def managers(ctx):
             OK if manager.cli_path else KO,
             manager.cli_path
             if manager.cli_path
-            else f"no {', '.join(manager.cli_names)} found",
+            else f"{', '.join(manager.cli_names)} not found",
         )
 
         # Build up the version column content.

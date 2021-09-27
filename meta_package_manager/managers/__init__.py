@@ -83,17 +83,14 @@ def select_managers(
 
     Returns a list of manager objects sorted by IDs.
     """
-    if drop_unsupported:
-        selected_ids = DEFAULT_MANAGER_IDS
-    else:
-        selected_ids = set(pool())
+    selected_ids = DEFAULT_MANAGER_IDS if drop_unsupported else ALL_MANAGER_IDS
 
     if not keep:
         keep = selected_ids
     if not drop:
         drop = set()
-    assert isinstance(keep, (set, tuple, list))
-    assert isinstance(drop, (set, tuple, list))
+    assert isinstance(keep, (set, frozenset, tuple, list))
+    assert isinstance(drop, (set, frozenset, tuple, list))
 
     # Only keeps the subset selected by the user.
     selected_ids = selected_ids.intersection(keep)

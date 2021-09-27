@@ -54,4 +54,7 @@ def test_unsupported_managers(manager_id):
 
 
 def test_manager_groups():
-    assert DEFAULT_MANAGER_IDS + UNSUPPORTED_MANAGER_IDS == ALL_MANAGER_IDS
+    assert len(DEFAULT_MANAGER_IDS) + len(UNSUPPORTED_MANAGER_IDS) == len(
+        ALL_MANAGER_IDS
+    )
+    assert set(DEFAULT_MANAGER_IDS).union(UNSUPPORTED_MANAGER_IDS) == ALL_MANAGER_IDS

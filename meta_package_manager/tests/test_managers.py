@@ -37,8 +37,6 @@ new package manager definitions.
 all_managers = pytest.mark.parametrize("manager", pool().values(), ids=attrgetter("id"))
 
 
-
-
 @pytest.mark.parametrize("manager_id,manager", pool().items())
 def test_ascii_id(manager_id, manager):
     """All package manager IDs should be short ASCII strings."""

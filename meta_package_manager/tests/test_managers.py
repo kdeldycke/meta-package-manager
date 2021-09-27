@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
-from operator import attrgetter, itemgetter
+from operator import attrgetter
 from pathlib import Path, PurePath
 from string import ascii_letters, ascii_lowercase, digits
 from types import MethodType
@@ -28,26 +28,16 @@ from ..platform import OS_DEFINITIONS
 from ..version import TokenizedString
 from .conftest import MANAGER_IDS
 
-""" Test the structure, data and types returned by all package managers. """
+""" Test the structure, data and types returned by all package managers.
+
+This test suite try to automate most of the basic reviewing work for the addition of
+new package manager definitions.
+"""
 
 # Parametrization decorators.
 all_managers = pytest.mark.parametrize("manager", pool().values(), ids=attrgetter("id"))
 
 
-def test_manager_count():
-    """Check all implemented package managers are accounted for."""
-    assert len(pool()) == 15
-    assert len(pool()) == len(MANAGER_IDS)
-    assert MANAGER_IDS == set(pool())
-
-
-def test_cached_pool():
-    assert pool() == pool()
-    assert pool() is pool()
-
-
-def test_sorted_pool():
-    assert list(pool()) == sorted([m.id for m in pool().values()])
 
 
 @pytest.mark.parametrize("manager_id,manager", pool().items())

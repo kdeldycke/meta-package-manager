@@ -26,6 +26,7 @@ from boltons.cacheutils import LRI, cached
 
 from .. import logger
 from ..base import PackageManager
+from ..platform import CURRENT_OS_ID, OS_DEFINITIONS
 
 
 # Cache the global pool of registered manager definitions to speed-up lookups.
@@ -60,7 +61,25 @@ def pool():
     return OrderedDict(sorted(register.items()))
 
 
-def select_managers(keep=None, drop=None, **kwargs):
+# Pre-compute the list of supported managers per platforms.
+@cached(LRI(max_size=1))
+def supported_managers():
+    platform_groups = dict()
+
+    for manager_id, manager in pool().items():
+        for platform_id in manager.platforms:
+            platform_groups.setdefault(platform_id, set()).add(manager_id)
+
+    return platform_groups
+
+
+CURRENTLY_SUPPORTED_MANAGERS = supported_managers()[CURRENT_OS_ID]
+""" List of manager IDs supported on the current platform. """
+
+
+def select_managers(
+    keep=None, drop=None, drop_unsupported=True, drop_inactive=True, **kwargs
+):
     """ "Utility method to extract a subset of the manager pool based on selection and exclusion criterion.
 
     By default, all managers are selected.
@@ -69,7 +88,10 @@ def select_managers(keep=None, drop=None, **kwargs):
 
     Returns a list of manager objects sorted by IDs.
     """
-    selected_ids = set(pool())
+    if drop_unsupported:
+        selected_ids = CURRENTLY_SUPPORTED_MANAGERS
+    else:
+        selected_ids = set(pool())
 
     if not keep:
         keep = selected_ids
@@ -85,7 +107,7 @@ def select_managers(keep=None, drop=None, **kwargs):
 
     selected_managers = [pool()[mid] for mid in sorted(selected_ids)]
 
-    # List of supported manager options.
+    # List of recognized manager options.
     option_ids = {"stop_on_error", "ignore_auto_updates", "dry_run"}
     assert option_ids.issuperset(kwargs)
     # Apply manager-level options.
@@ -94,4 +116,17 @@ def select_managers(keep=None, drop=None, **kwargs):
             assert hasattr(m_obj, param)
             setattr(m_obj, param, value)
 
-    return selected_managers
+    if not drop_inactive:
+        return selected_managers
+
+    # Pre-filters inactive managers.
+    def keep_available(manager):
+        if manager.available:
+            return True
+        logger.warning(f"Skip unavailable {manager.id} manager.")
+
+    # Use an iterator to not trigger log messages for the 'managers' subcommand
+    # which is not using this variable.
+    active_managers = filter(keep_available, selected_managers)
+
+    return active_managers

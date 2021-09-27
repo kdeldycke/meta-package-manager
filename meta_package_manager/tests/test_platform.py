@@ -17,9 +17,6 @@
 
 from types import FunctionType
 
-import pytest
-
-from ..managers import pool
 from ..platform import (
     ALL_OS_LABELS,
     CURRENT_OS_ID,
@@ -34,7 +31,7 @@ from ..platform import (
     is_windows,
     os_label,
 )
-from .conftest import MANAGER_IDS, unless_linux, unless_macos, unless_windows
+from .conftest import unless_linux, unless_macos, unless_windows
 
 
 def test_mutual_exclusion():
@@ -100,20 +97,6 @@ def test_current_os_func():
 def test_os_label():
     os_id, os_name = current_os()
     assert os_label(os_id) == os_name
-
-
-def test_unsupported_manager():
-    """Check all managers are accounted for on each platforms."""
-    # TODO: Use that list to generate readme.rst's support table?
-    unsupported = {
-        LINUX: {"cask", "mas"},
-        MACOS: {"apt", "apt-mint", "flatpak", "opkg", "snap"},
-        WINDOWS: {"apt", "apt-mint", "brew", "cask", "flatpak", "mas", "opkg", "snap"},
-    }
-    unsupported = unsupported[current_os()[0]]
-    # List of supported managers on the current platform.
-    supported = {m.id for m in pool().values() if m.supported}
-    assert supported == MANAGER_IDS - unsupported
 
 
 # Test unittest decorator helpers.

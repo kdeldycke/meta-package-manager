@@ -24,7 +24,8 @@ import pytest
 import simplejson as json
 from boltons.iterutils import same
 
-from .conftest import MANAGER_IDS, unless_macos
+from ..managers import CURRENTLY_SUPPORTED_MANAGERS
+from .conftest import unless_macos
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
@@ -34,7 +35,7 @@ def subcmd():
 
 
 class TestSearch(CLISubCommandTests, CLITableTests):
-    @pytest.mark.parametrize("mid", MANAGER_IDS)
+    @pytest.mark.parametrize("mid", CURRENTLY_SUPPORTED_MANAGERS)
     def test_single_manager(self, invoke, subcmd, mid):
         result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0
@@ -47,7 +48,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
         assert data
         assert isinstance(data, dict)
-        assert set(data).issubset(MANAGER_IDS)
+        assert set(data).issubset(CURRENTLY_SUPPORTED_MANAGERS)
 
         for manager_id, info in data.items():
             assert isinstance(manager_id, str)

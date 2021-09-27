@@ -19,7 +19,7 @@
 
 import pytest
 
-from .conftest import MANAGER_IDS
+from ..managers import CURRENTLY_SUPPORTED_MANAGERS
 from .test_cli import CLISubCommandTests
 
 
@@ -29,7 +29,7 @@ def subcmd():
 
 
 class TestSync(CLISubCommandTests):
-    @pytest.mark.parametrize("mid", MANAGER_IDS)
+    @pytest.mark.parametrize("mid", CURRENTLY_SUPPORTED_MANAGERS)
     def test_single_manager(self, invoke, subcmd, mid):
         result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0

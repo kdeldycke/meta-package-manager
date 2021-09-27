@@ -25,7 +25,7 @@ from boltons.strutils import strip_ansi
 
 from .. import __version__, config
 from ..cli import RENDERING_MODES
-from .conftest import MANAGER_IDS
+from ..managers import CURRENTLY_SUPPORTED_MANAGERS
 
 """ Common tests for all CLI basic features and templates for subcommands. """
 
@@ -221,7 +221,11 @@ class CLISubCommandTests:
         assert result.exit_code == 0
 
     @staticmethod
-    def check_manager_selection(result, selected=MANAGER_IDS):
+    def check_manager_selection(
+        result,
+        selected=CURRENTLY_SUPPORTED_MANAGERS,
+        full_set=CURRENTLY_SUPPORTED_MANAGERS,
+    ):
         """Check inclusion and exclusion of a set of managers.
 
         Check all manager are there by default.
@@ -236,7 +240,7 @@ class CLISubCommandTests:
         found_managers = set()
         skipped_managers = set()
 
-        for mid in MANAGER_IDS:
+        for mid in full_set:
 
             # List of signals indicating a package manager has been retained by
             # the CLI. Roughly sorted from most specific to more forgiving.
@@ -289,7 +293,7 @@ class CLISubCommandTests:
 
         # Compare managers reported by the CLI and those expected.
         assert found_managers == selected
-        assert skipped_managers == MANAGER_IDS - selected
+        assert skipped_managers == full_set - selected
 
     @pytest.mark.parametrize("selector", ["--manager", "--exclude"])
     def test_invalid_manager_selector(self, invoke, subcmd, selector):
@@ -316,16 +320,18 @@ class CLISubCommandTests:
                 id="multiple_selectors",
             ),
             pytest.param(
-                ("--exclude", "apm"), MANAGER_IDS - {"apm"}, id="single_exclusion"
+                ("--exclude", "apm"),
+                CURRENTLY_SUPPORTED_MANAGERS - {"apm"},
+                id="single_exclusion",
             ),
             pytest.param(
                 ("--exclude", "apm") * 2,
-                MANAGER_IDS - {"apm"},
+                CURRENTLY_SUPPORTED_MANAGERS - {"apm"},
                 id="duplicate_exclusions",
             ),
             pytest.param(
                 ("--exclude", "apm", "--exclude", "gem"),
-                MANAGER_IDS - {"apm", "gem"},
+                CURRENTLY_SUPPORTED_MANAGERS - {"apm", "gem"},
                 id="multiple_exclusions",
             ),
             pytest.param(

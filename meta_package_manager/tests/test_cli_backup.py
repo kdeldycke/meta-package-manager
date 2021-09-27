@@ -19,7 +19,7 @@
 
 import pytest
 
-from .conftest import MANAGER_IDS
+from ..managers import CURRENTLY_SUPPORTED_MANAGERS
 from .test_cli import CLISubCommandTests
 
 
@@ -47,7 +47,7 @@ class TestBackup(CLISubCommandTests):
         assert "mpm-packages.toml" in result.stderr
         self.check_manager_selection(result)
 
-    @pytest.mark.parametrize("mid", MANAGER_IDS)
+    @pytest.mark.parametrize("mid", CURRENTLY_SUPPORTED_MANAGERS)
     def test_single_manager_file_output(self, mid, invoke, subcmd):
         result = invoke("--manager", mid, subcmd, "mpm-packages.toml")
         assert result.exit_code == 0

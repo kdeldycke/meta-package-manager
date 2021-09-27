@@ -21,6 +21,7 @@ import pytest
 import simplejson as json
 from boltons.iterutils import same
 
+from ..managers import CURRENTLY_SUPPORTED_MANAGERS
 from .conftest import MANAGER_IDS
 from .test_cli import CLISubCommandTests, CLITableTests
 
@@ -31,11 +32,23 @@ def subcmd():
 
 
 class TestManagers(CLISubCommandTests, CLITableTests):
-    @pytest.mark.parametrize("mid", MANAGER_IDS)
-    def test_single_manager(self, invoke, subcmd, mid):
+    @pytest.mark.parametrize("mid", CURRENTLY_SUPPORTED_MANAGERS)
+    def test_default_managers(self, invoke, subcmd, mid):
         result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
+
+    @pytest.mark.parametrize("mid", MANAGER_IDS)
+    def test_all_managers(self, invoke, subcmd, mid):
+        result = invoke("--manager", mid, "--all-managers", subcmd)
+        assert result.exit_code == 0
+        self.check_manager_selection(result, {mid}, MANAGER_IDS)
+
+    @pytest.mark.parametrize("mid", MANAGER_IDS - CURRENTLY_SUPPORTED_MANAGERS)
+    def test_unsupported_managers(self, invoke, subcmd, mid):
+        result = invoke("--manager", mid, subcmd)
+        assert result.exit_code == 0
+        self.check_manager_selection(result, set())
 
     def test_json_parsing(self, invoke, subcmd):
         result = invoke("--output-format", "json", subcmd)
@@ -44,7 +57,7 @@ class TestManagers(CLISubCommandTests, CLITableTests):
 
         assert data
         assert isinstance(data, dict)
-        assert set(data) == MANAGER_IDS
+        assert set(data) == CURRENTLY_SUPPORTED_MANAGERS
 
         for manager_id, info in data.items():
             assert isinstance(manager_id, str)

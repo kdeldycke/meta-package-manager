@@ -195,6 +195,15 @@ class timeit:
     help="Exclude a package manager. Repeat to exclude multiple managers.",
 )
 @click.option(
+    "-a",
+    "--all-managers",
+    is_flag=True,
+    default=False,
+    help="Force evaluation of all package manager implemented by mpm, even those not"
+    "supported by the current platform. Still applies filtering by --manager and "
+    "--exclude options before calling the subcommand.",
+)
+@click.option(
     "--ignore-auto-updates/--include-auto-updates",
     default=True,
     help="Report all outdated packages, including those tagged as "
@@ -269,6 +278,7 @@ def cli(
     ctx,
     manager,
     exclude,
+    all_managers,
     ignore_auto_updates,
     output_format,
     sort_by,
@@ -285,25 +295,19 @@ def cli(
     logger.debug(f"Verbosity set to {level_name}.")
 
     # Select the subset of manager to target, and apply manager-level options.
-    target_managers = select_managers(
+    selected_managers = select_managers(
         keep=manager,
         drop=exclude,
+        drop_unsupported=not all_managers,
+        # Only keep inactive managers to show them in the "managers" subcommand table.
+        # Filters them out in any other subcommand.
+        drop_inactive=ctx.invoked_subcommand != "managers",
         # Does the manager should raise on error or not.
         stop_on_error=stop_on_error,
         # Should we include auto-update packages or not?
         ignore_auto_updates=ignore_auto_updates,
         dry_run=dry_run,
     )
-
-    # Pre-filters inactive managers.
-    def keep_available(manager):
-        if manager.available:
-            return True
-        logger.warning(f"Skip unavailable {manager.id} manager.")
-
-    # Use an iterator to not trigger log messages for the 'managers' subcommand
-    # which is not using this variable.
-    active_managers = filter(keep_available, target_managers)
 
     # Silence all log message for JSON rendering unless in debug mode.
     if output_format == "json" and level_name != "DEBUG":
@@ -315,8 +319,7 @@ def cli(
 
     # Load up global options to the context.
     ctx.obj = {
-        "target_managers": target_managers,
-        "active_managers": active_managers,
+        "selected_managers": selected_managers,
         "output_format": output_format,
         "sort_by": sort_by,
         "stats": stats,
@@ -331,7 +334,7 @@ def cli(
 @timeit()
 def managers(ctx):
     """List all supported package managers and their presence on the system."""
-    target_managers = ctx.obj["target_managers"]
+    selected_managers = ctx.obj["selected_managers"]
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
 
@@ -349,7 +352,7 @@ def managers(ctx):
             "fresh",
             "available",
         ]
-        for manager in target_managers:
+        for manager in selected_managers:
             manager_data[manager.id] = {fid: getattr(manager, fid) for fid in fields}
             # Serialize errors at the last minute to gather all we encountered.
             manager_data[manager.id]["errors"] = list(
@@ -361,7 +364,7 @@ def managers(ctx):
 
     # Human-friendly content rendering.
     table = []
-    for manager in target_managers:
+    for manager in selected_managers:
 
         # Build up the OS column content.
         os_infos = OK if manager.supported else KO
@@ -417,9 +420,9 @@ def managers(ctx):
 @timeit()
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
-    active_managers = ctx.obj["active_managers"]
+    selected_managers = ctx.obj["selected_managers"]
 
-    for manager in active_managers:
+    for manager in selected_managers:
         manager.sync()
 
 
@@ -428,9 +431,9 @@ def sync(ctx):
 @timeit()
 def cleanup(ctx):
     """Cleanup local data and temporary artifacts."""
-    active_managers = ctx.obj["active_managers"]
+    selected_managers = ctx.obj["selected_managers"]
 
-    for manager in active_managers:
+    for manager in selected_managers:
         manager.cleanup()
 
 
@@ -439,7 +442,7 @@ def cleanup(ctx):
 @timeit()
 def installed(ctx):
     """List all packages installed on the system from all managers."""
-    active_managers = ctx.obj["active_managers"]
+    selected_managers = ctx.obj["selected_managers"]
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
     stats = ctx.obj["stats"]
@@ -447,7 +450,7 @@ def installed(ctx):
     # Build-up a global dict of installed packages per manager.
     installed_data = {}
 
-    for manager in active_managers:
+    for manager in selected_managers:
         installed_data[manager.id] = {
             "id": manager.id,
             "name": manager.name,
@@ -510,7 +513,7 @@ def installed(ctx):
 @timeit()
 def search(ctx, extended, exact, query):
     """Search packages from all managers."""
-    active_managers = ctx.obj["active_managers"]
+    selected_managers = ctx.obj["selected_managers"]
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
     stats = ctx.obj["stats"]
@@ -518,7 +521,7 @@ def search(ctx, extended, exact, query):
     # Build-up a global list of package matches per manager.
     matches = {}
 
-    for manager in active_managers:
+    for manager in selected_managers:
 
         # Allow managers to not implement search.
         try:
@@ -618,17 +621,17 @@ def install(ctx, package_id):
     """Install a package from one package manager and one only.
 
     The -m\--manager option is required."""
-    active_managers = ctx.obj["active_managers"]
-    active_managers = list(active_managers)
+    selected_managers = ctx.obj["selected_managers"]
+    selected_managers = list(selected_managers)
 
-    if not active_managers:
+    if not selected_managers:
         logger.fatal(f"A package manager must be provided via the -m/--manager option.")
         ctx.exit(2)
-    if len(active_managers) > 1:
+    if len(selected_managers) > 1:
         logger.fatal(f"Only one package manager should be provided.")
         ctx.exit(2)
 
-    manager = active_managers.pop()
+    manager = selected_managers.pop()
     output = manager.install(package_id)
     click.echo(output)
 
@@ -645,7 +648,7 @@ def install(ctx, package_id):
 @timeit()
 def outdated(ctx, cli_format):
     """List available package upgrades and their versions for each manager."""
-    active_managers = ctx.obj["active_managers"]
+    selected_managers = ctx.obj["selected_managers"]
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
     stats = ctx.obj["stats"]
@@ -655,7 +658,7 @@ def outdated(ctx, cli_format):
     # Build-up a global list of outdated packages per manager.
     outdated_data = {}
 
-    for manager in active_managers:
+    for manager in selected_managers:
 
         try:
             packages = list(map(dict, manager.outdated.values()))
@@ -729,9 +732,9 @@ def outdated(ctx, cli_format):
 @timeit()
 def upgrade(ctx):
     """Perform a full package upgrade on all available managers."""
-    active_managers = ctx.obj["active_managers"]
+    selected_managers = ctx.obj["selected_managers"]
 
-    for manager in active_managers:
+    for manager in selected_managers:
         logger.info(f"Updating all outdated packages from {manager.id}...")
         try:
             output = manager.upgrade_all()
@@ -757,7 +760,7 @@ def backup(ctx, toml_output):
 
     The TOML file can then be safely consumed by the `mpm restore` command.
     """
-    active_managers = ctx.obj["active_managers"]
+    selected_managers = ctx.obj["selected_managers"]
     stats = ctx.obj["stats"]
 
     is_stdout = isinstance(toml_output, TextIOWrapper)
@@ -779,7 +782,7 @@ def backup(ctx, toml_output):
     installed_data = {}
 
     # Create one section for each package manager.
-    for manager in active_managers:
+    for manager in selected_managers:
         logger.info(f"Dumping packages from {manager.id}...")
         installed_packages = manager.installed.values()
 
@@ -812,7 +815,7 @@ def restore(ctx, toml_files):
 
     Version specified in the TOML file is ignored in the current implementation.
     """
-    active_managers = ctx.obj["active_managers"]
+    selected_managers = ctx.obj["selected_managers"]
 
     for toml_input in toml_files:
 
@@ -829,7 +832,7 @@ def restore(ctx, toml_files):
             sections = ", ".join(ignored_sections)
             logger.info(f"Ignore {sections} section{plural}.")
 
-        for manager in active_managers:
+        for manager in selected_managers:
             if manager.id not in doc:
                 logger.warning(f"No [{manager.id}] section found.")
                 continue

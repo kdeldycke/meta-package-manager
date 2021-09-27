@@ -2,10 +2,14 @@ Changelog
 =========
 
 
-`4.4.0 (2021-09-27) <https://github.com/kdeldycke/meta-package-manager/compare/v4.3.0...develop>`_
+`4.4.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v4.4.0...develop>`_
 --------------------------------------------------------------------------------------------------
 
 .. note:: This version is not yet released and is under active development.
+
+
+`4.4.0 (2021-09-27) <https://github.com/kdeldycke/meta-package-manager/compare/v4.3.0...v4.4.0>`_
+-------------------------------------------------------------------------------------------------
 
 * [mpm] Add a global ``-d/--dry-run`` option.
 * [apt] Add dedicated ``apt_mint`` manager to handle the special case of ``apt`` on Linux Mint.

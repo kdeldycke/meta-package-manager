@@ -43,21 +43,21 @@ def test_temporary_fs(runner):
 
 
 DUMMY_CONF_FILE = """
-        # Comment
+    # Comment
 
-        top_level_param = "to_ignore"
+    top_level_param = "to_ignore"
 
-        [mpm]
-        verbosity = "DEBUG"
-        blahblah = 234
-        manager = ["pip", "npm", "gem"]
+    [mpm]
+    verbosity = "DEBUG"
+    blahblah = 234
+    manager = ["pip", "npm", "gem"]
 
-        [garbage]
+    [garbage]
 
-        [mpm.search]
-        exact = true
-        dummy_parameter = 3
-        """
+    [mpm.search]
+    exact = true
+    dummy_parameter = 3
+    """
 
 
 class TestBaseCLI:

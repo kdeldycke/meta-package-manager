@@ -17,8 +17,12 @@
 
 import pytest
 
-from ..managers import CURRENTLY_SUPPORTED_MANAGERS, pool
-from .conftest import MANAGER_IDS
+from ..managers import (
+    ALL_MANAGER_IDS,
+    DEFAULT_MANAGER_IDS,
+    UNSUPPORTED_MANAGER_IDS,
+    pool,
+)
 
 """ Test the pool and its content. """
 
@@ -26,8 +30,8 @@ from .conftest import MANAGER_IDS
 def test_manager_count():
     """Check all implemented package managers are accounted for."""
     assert len(pool()) == 15
-    assert len(pool()) == len(MANAGER_IDS)
-    assert MANAGER_IDS == set(pool())
+    assert len(pool()) == len(ALL_MANAGER_IDS)
+    assert ALL_MANAGER_IDS == set(pool())
 
 
 def test_cached_pool():
@@ -39,11 +43,11 @@ def test_sorted_pool():
     assert list(pool()) == sorted([m.id for m in pool().values()])
 
 
-@pytest.mark.parametrize("manager_id", CURRENTLY_SUPPORTED_MANAGERS)
+@pytest.mark.parametrize("manager_id", DEFAULT_MANAGER_IDS)
 def test_supported_managers(manager_id):
     assert pool()[manager_id].supported is True
 
 
-@pytest.mark.parametrize("manager_id", MANAGER_IDS - CURRENTLY_SUPPORTED_MANAGERS)
+@pytest.mark.parametrize("manager_id", UNSUPPORTED_MANAGER_IDS)
 def test_unsupported_managers(manager_id):
     assert pool()[manager_id].supported is False

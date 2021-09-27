@@ -25,7 +25,7 @@ from boltons.strutils import strip_ansi
 
 from .. import __version__, config
 from ..cli import RENDERING_MODES
-from ..managers import CURRENTLY_SUPPORTED_MANAGERS
+from ..managers import DEFAULT_MANAGER_IDS
 
 """ Common tests for all CLI basic features and templates for subcommands. """
 
@@ -223,8 +223,8 @@ class CLISubCommandTests:
     @staticmethod
     def check_manager_selection(
         result,
-        selected=CURRENTLY_SUPPORTED_MANAGERS,
-        full_set=CURRENTLY_SUPPORTED_MANAGERS,
+        selected=DEFAULT_MANAGER_IDS,
+        full_set=DEFAULT_MANAGER_IDS,
     ):
         """Check inclusion and exclusion of a set of managers.
 
@@ -321,17 +321,17 @@ class CLISubCommandTests:
             ),
             pytest.param(
                 ("--exclude", "apm"),
-                CURRENTLY_SUPPORTED_MANAGERS - {"apm"},
+                DEFAULT_MANAGER_IDS - {"apm"},
                 id="single_exclusion",
             ),
             pytest.param(
                 ("--exclude", "apm") * 2,
-                CURRENTLY_SUPPORTED_MANAGERS - {"apm"},
+                DEFAULT_MANAGER_IDS - {"apm"},
                 id="duplicate_exclusions",
             ),
             pytest.param(
                 ("--exclude", "apm", "--exclude", "gem"),
-                CURRENTLY_SUPPORTED_MANAGERS - {"apm", "gem"},
+                DEFAULT_MANAGER_IDS - {"apm", "gem"},
                 id="multiple_exclusions",
             ),
             pytest.param(

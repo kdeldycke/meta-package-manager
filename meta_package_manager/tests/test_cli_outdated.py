@@ -23,7 +23,7 @@ import pytest
 import simplejson as json
 from boltons.iterutils import same
 
-from ..managers import CURRENTLY_SUPPORTED_MANAGERS
+from ..managers import DEFAULT_MANAGER_IDS
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
@@ -36,7 +36,7 @@ XBAR_KEYWORDS = {"shell"}.union({f"param{i}" for i in range(1, 10)})
 
 
 class TestOutdated(CLISubCommandTests, CLITableTests):
-    @pytest.mark.parametrize("mid", CURRENTLY_SUPPORTED_MANAGERS)
+    @pytest.mark.parametrize("mid", DEFAULT_MANAGER_IDS)
     def test_single_manager(self, invoke, mid, subcmd):
         result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0
@@ -49,7 +49,7 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
 
         assert data
         assert isinstance(data, dict)
-        assert set(data).issubset(CURRENTLY_SUPPORTED_MANAGERS)
+        assert set(data).issubset(DEFAULT_MANAGER_IDS)
 
         for manager_id, info in data.items():
             assert isinstance(manager_id, str)

@@ -25,9 +25,9 @@ from boltons.iterutils import flatten
 from yaml import Loader, load
 
 from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_LABELS, PLATFORM_PREFIX
-from ..managers import pool
+from ..managers import ALL_MANAGER_IDS, pool
 from ..platform import OS_DEFINITIONS, os_label
-from .conftest import MANAGER_IDS, unless_linux
+from .conftest import unless_linux
 
 """ Test all non-code artifacts depending on manager definitions.
 
@@ -56,7 +56,9 @@ def test_changelog():
             entry = match.groupdict()
             assert entry["category"]
             assert set(entry["category"].split(",")).issubset(
-                flatten([MANAGER_IDS, OS_DEFINITIONS.keys(), "mpm", "bitbar", "xbar"])
+                flatten(
+                    [ALL_MANAGER_IDS, OS_DEFINITIONS.keys(), "mpm", "bitbar", "xbar"]
+                )
             )
 
 

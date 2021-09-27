@@ -23,10 +23,9 @@ from types import MethodType
 
 import pytest
 
-from ..managers import pool
+from ..managers import ALL_MANAGER_IDS, pool
 from ..platform import OS_DEFINITIONS
 from ..version import TokenizedString
-from .conftest import MANAGER_IDS
 
 """ Test the structure, data and types returned by all package managers.
 
@@ -59,7 +58,7 @@ def test_name(manager):
 
 
 def test_unique_names():
-    assert len({m.name for m in pool().values()}) == len(MANAGER_IDS)
+    assert len({m.name for m in pool().values()}) == len(ALL_MANAGER_IDS)
 
 
 @all_managers

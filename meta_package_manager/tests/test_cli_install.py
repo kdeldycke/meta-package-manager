@@ -17,8 +17,8 @@
 
 import pytest
 
-from ..managers import pool
-from .conftest import MANAGER_IDS, destructive
+from ..managers import ALL_MANAGER_IDS, pool
+from .conftest import destructive
 from .test_cli import CLISubCommandTests
 
 
@@ -65,7 +65,7 @@ class TestInstall(CLISubCommandTests):
         "vscode": "tamasfe.even-better-toml",
         "yarn": "markdown",
     }
-    assert set(PACKAGE_IDS) == set(MANAGER_IDS)
+    assert set(PACKAGE_IDS) == set(ALL_MANAGER_IDS)
 
     @destructive
     @pytest.mark.parametrize("mid,package_id", PACKAGE_IDS.items())

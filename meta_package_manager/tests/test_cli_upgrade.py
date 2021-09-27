@@ -17,7 +17,7 @@
 
 import pytest
 
-from ..managers import CURRENTLY_SUPPORTED_MANAGERS
+from ..managers import DEFAULT_MANAGER_IDS
 from .conftest import destructive
 from .test_cli import CLISubCommandTests
 
@@ -37,14 +37,14 @@ class TestUpgrade(CLISubCommandTests):
         assert result.exit_code == 0
         self.check_manager_selection(result)
 
-    @pytest.mark.parametrize("mid", CURRENTLY_SUPPORTED_MANAGERS)
+    @pytest.mark.parametrize("mid", DEFAULT_MANAGER_IDS)
     def test_single_manager_dry_run(self, invoke, subcmd, mid):
         result = invoke("--manager", mid, "--dry-run", subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 
     @destructive
-    @pytest.mark.parametrize("mid", CURRENTLY_SUPPORTED_MANAGERS)
+    @pytest.mark.parametrize("mid", DEFAULT_MANAGER_IDS)
     def test_single_manager(self, invoke, subcmd, mid):
         result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0

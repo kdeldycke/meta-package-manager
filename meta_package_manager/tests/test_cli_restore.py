@@ -17,8 +17,7 @@
 
 import pytest
 
-from ..managers import CURRENTLY_SUPPORTED_MANAGERS
-from .conftest import MANAGER_IDS
+from ..managers import ALL_MANAGER_IDS, DEFAULT_MANAGER_IDS
 from .test_cli import CLISubCommandTests
 
 
@@ -48,7 +47,7 @@ class TestRestore(CLISubCommandTests):
             """.format(
                         m
                     )
-                    for m in MANAGER_IDS
+                    for m in ALL_MANAGER_IDS
                 ]
             ),
         )
@@ -58,7 +57,7 @@ class TestRestore(CLISubCommandTests):
         assert "all-managers.toml" in result.stderr
         self.check_manager_selection(result)
 
-    @pytest.mark.parametrize("mid", CURRENTLY_SUPPORTED_MANAGERS)
+    @pytest.mark.parametrize("mid", DEFAULT_MANAGER_IDS)
     def test_single_manager(self, invoke, create_toml, mid):
         toml_path = create_toml(
             "all-managers.toml",
@@ -70,7 +69,7 @@ class TestRestore(CLISubCommandTests):
             """.format(
                         m
                     )
-                    for m in MANAGER_IDS
+                    for m in ALL_MANAGER_IDS
                 ]
             ),
         )

@@ -36,28 +36,6 @@ from ..xbar import run as xbar_run
 """ Fixtures, configuration and helpers for tests. """
 
 
-MANAGER_IDS = frozenset(
-    [
-        "apm",
-        "apt",
-        "apt-mint",
-        "brew",
-        "cask",
-        "composer",
-        "flatpak",
-        "gem",
-        "mas",
-        "npm",
-        "opkg",
-        "pip",
-        "snap",
-        "vscode",
-        "yarn",
-    ]
-)
-""" Hard-coded list of all supported manager IDs. """
-
-
 DESTRUCTIVE_MODE = bool(
     os.environ.get("DESTRUCTIVE_TESTS", False) not in {True, 1, "True", "true", "1"}
 )

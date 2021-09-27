@@ -61,20 +61,16 @@ def pool():
     return OrderedDict(sorted(register.items()))
 
 
-# Pre-compute the list of supported managers per platforms.
-@cached(LRI(max_size=1))
-def supported_managers():
-    platform_groups = dict()
+# Pre-compute all sorts of constants.
 
-    for manager_id, manager in pool().items():
-        for platform_id in manager.platforms:
-            platform_groups.setdefault(platform_id, set()).add(manager_id)
+ALL_MANAGER_IDS = frozenset(pool())
+""" All recognized manager IDs. """
 
-    return platform_groups
+DEFAULT_MANAGER_IDS = frozenset({m.id for m in pool().values() if m.supported})
+""" All manager IDs supported on the current platform. """
 
-
-CURRENTLY_SUPPORTED_MANAGERS = supported_managers()[CURRENT_OS_ID]
-""" List of manager IDs supported on the current platform. """
+UNSUPPORTED_MANAGER_IDS = frozenset(ALL_MANAGER_IDS - DEFAULT_MANAGER_IDS)
+""" All manager IDs unsupported on the current platform. """
 
 
 def select_managers(
@@ -89,7 +85,7 @@ def select_managers(
     Returns a list of manager objects sorted by IDs.
     """
     if drop_unsupported:
-        selected_ids = CURRENTLY_SUPPORTED_MANAGERS
+        selected_ids = DEFAULT_MANAGER_IDS
     else:
         selected_ids = set(pool())
 

@@ -19,7 +19,7 @@
 
 import pytest
 
-from ..managers import CURRENTLY_SUPPORTED_MANAGERS
+from ..managers import DEFAULT_MANAGER_IDS
 from .test_cli import CLISubCommandTests
 
 
@@ -29,7 +29,7 @@ def subcmd():
 
 
 class TestCleanup(CLISubCommandTests):
-    @pytest.mark.parametrize("mid", CURRENTLY_SUPPORTED_MANAGERS)
+    @pytest.mark.parametrize("mid", DEFAULT_MANAGER_IDS)
     def test_single_manager(self, invoke, subcmd, mid):
         result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0

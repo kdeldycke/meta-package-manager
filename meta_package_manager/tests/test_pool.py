@@ -51,3 +51,7 @@ def test_supported_managers(manager_id):
 @pytest.mark.parametrize("manager_id", UNSUPPORTED_MANAGER_IDS)
 def test_unsupported_managers(manager_id):
     assert pool()[manager_id].supported is False
+
+
+def test_manager_groups():
+    assert DEFAULT_MANAGER_IDS + UNSUPPORTED_MANAGER_IDS == ALL_MANAGER_IDS

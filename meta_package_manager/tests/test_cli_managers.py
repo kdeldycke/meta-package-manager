@@ -21,11 +21,7 @@ import pytest
 import simplejson as json
 from boltons.iterutils import same
 
-from ..managers import (
-    ALL_MANAGER_IDS,
-    DEFAULT_MANAGER_IDS,
-    UNSUPPORTED_MANAGER_IDS,
-)
+from ..managers import ALL_MANAGER_IDS, DEFAULT_MANAGER_IDS, UNSUPPORTED_MANAGER_IDS
 from .test_cli import CLISubCommandTests, CLITableTests
 
 

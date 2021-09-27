@@ -132,6 +132,14 @@ meta\_package\_manager.tests.test\_platform module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.tests.test\_pool module
+----------------------------------------------
+
+.. automodule:: meta_package_manager.tests.test_pool
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.tests.test\_version module
 -------------------------------------------------
 

@@ -26,7 +26,6 @@ from boltons.cacheutils import LRI, cached
 
 from .. import logger
 from ..base import PackageManager
-from ..platform import CURRENT_OS_ID, OS_DEFINITIONS
 
 
 # Cache the global pool of registered manager definitions to speed-up lookups.

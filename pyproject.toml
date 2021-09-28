@@ -57,7 +57,8 @@ classifiers = [
     'Topic :: System :: Archiving :: Packaging',
     'Topic :: System :: Installation/Setup',
     'Topic :: System :: Software Distribution',
-    'Topic :: Utilities']
+    'Topic :: Utilities',
+]
 
 [tool.poetry.urls]
 "Funding" = "https://github.com/sponsors/kdeldycke"
@@ -76,17 +77,17 @@ tomli = "^1.2.1"
 tomli_w = "^0.3.0"
 # Should have been put in dev-dependencies but extras only works from main
 # section.
-sphinx = {version = "^4.2.0", optional = true}
-sphinx_rtd_theme = {version = "^1.0.0", optional = true}
-sphinx_tabs = {version = "^3.2.0", optional = true}
+sphinx = { version = "^4.2.0", optional = true }
+sphinx_rtd_theme = { version = "^1.0.0", optional = true }
+sphinx_tabs = { version = "^3.2.0", optional = true }
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
 bump2version = "^1.0.1"
 check-wheel-contents = "^0.3.3"
-coverage = {extras = ["toml"], version = "^5.5"}
+coverage = { extras = ["toml"], version = "^5.5" }
 isort = "^5.9.3"
-pipdeptree = {extras = ["graphviz"], version = "^2.1.0"}
+pipdeptree = { extras = ["graphviz"], version = "^2.1.0" }
 pylint = "^2.11.1"
 pytest = "^6.2.5"
 # More pytest plugins at: http://plugincompat.herokuapp.com .

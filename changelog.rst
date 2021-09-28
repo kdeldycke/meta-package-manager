@@ -11,6 +11,7 @@ Changelog
 * [mpm] Skip by default the evaluation of package managers not supported on the user's
   platform. Closes #278.
 * [mpm] Add a ``-a/--all-managers`` option to force the evaluation of all managers.
+* [mpm] Fix highlighting of substrings in search results.
 
 
 `4.4.0 (2021-09-27) <https://github.com/kdeldycke/meta-package-manager/compare/v4.3.0...v4.4.0>`_

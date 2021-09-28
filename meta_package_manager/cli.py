@@ -554,17 +554,15 @@ def search(ctx, extended, exact, query):
         # Ranges of character indices flagged for highlighting.
         ranges = set()
 
-        # TODO: Fix upper-case matching, as tokenizer lower them down.
-
         for part in query_parts:
             # Search for occurrences of query parts in original string.
-            if part in string:
-                # Flag matching substrings for highlighting.
-                occurrences = [match.start() for match in re.finditer(part, string)]
-
-                for match_start in occurrences:
-                    match_end = match_start + len(part) - 1
-                    ranges.add(f"{match_start}-{match_end}")
+            occurrences = [
+                match.start() for match in re.finditer(part, string, re.IGNORECASE)
+            ]
+            # Flag matching substrings for highlighting.
+            for match_start in occurrences:
+                match_end = match_start + len(part) - 1
+                ranges.add(f"{match_start}-{match_end}")
 
         # Reduce index ranges, compute complement ranges, transform them to
         # list of integers.

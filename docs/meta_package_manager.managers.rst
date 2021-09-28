@@ -20,6 +20,14 @@ meta\_package\_manager.managers.apt module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.managers.chocolatey module
+-------------------------------------------------
+
+.. automodule:: meta_package_manager.managers.chocolatey
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.managers.composer module
 -----------------------------------------------
 

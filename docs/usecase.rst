@@ -184,12 +184,6 @@ requirements. But Docker might be too big for some people.
 ``mpm`` can be a lightweigh alternative to Docker here to abstract the runtime
 from their execution environment.
 
-.. todo::
-
-    Once the ``install`` and ``restore`` sub-commands are implemented, we can
-    declare all dependencies into a ``.toml`` file and let ``mpm`` resolve
-    dependencies.
-
 
 Switch systems?
 ---------------

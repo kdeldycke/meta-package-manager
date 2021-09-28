@@ -31,7 +31,8 @@ class NPM(PackageManager):
 
     name = "Node's npm"
 
-    """.. code-block:: shell-session
+    """
+    .. code-block:: shell-session
 
         ► npm --version
         6.13.7

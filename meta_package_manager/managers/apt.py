@@ -35,7 +35,8 @@ class APT(PackageManager):
     requirement = "1.0.0"
 
     version_regex = r"apt\s+(?P<version>\S+)"
-    """.. code-block:: shell-session
+    """
+    .. code-block:: shell-session
 
         ► apt --version
         apt 1.2.15 (amd64)
@@ -43,9 +44,6 @@ class APT(PackageManager):
 
     def sync(self):
         """
-
-        Raw CLI output samples:
-
         .. code-block:: shell-session
 
             ► apt update --quiet
@@ -280,7 +278,8 @@ class APT_Mint(APT):
     cli_names = ["apt"]
 
     version_cli_options = ["version", "apt"]
-    """.. code-block:: shell-session
+    """
+    .. code-block:: shell-session
 
         ► apt version apt
         1.6.11

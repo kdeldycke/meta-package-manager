@@ -31,7 +31,8 @@ class APM(PackageManager):
     requirement = "1.0.0"
 
     version_regex = r"apm\s+(?P<version>\S+)"
-    """.. code-block:: shell-session
+    """
+    .. code-block:: shell-session
 
         ► apm --version
         apm  2.6.2

@@ -47,7 +47,8 @@ class Homebrew(PackageManager):
     cli_names = None
 
     version_regex = r"Homebrew\s+(?P<version>\S+)"
-    """.. code-block:: shell-session
+    """
+    .. code-block:: shell-session
 
         ► brew --version
         Homebrew 1.8.6-124-g6cd4c31

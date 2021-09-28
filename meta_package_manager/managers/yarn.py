@@ -34,7 +34,8 @@ class Yarn(PackageManager):
 
     requirement = "1.21.0"
 
-    """.. code-block:: shell-session
+    """
+    .. code-block:: shell-session
 
         ► yarn --version
         1.22.11

@@ -29,7 +29,8 @@ class Snap(PackageManager):
     global_args = ["--color=never"]
 
     version_regex = r"snap\s+(?P<version>\S+)"
-    """.. code-block:: shell-session
+    """
+    .. code-block:: shell-session
 
         ► snap --version
         snap       2.44.1

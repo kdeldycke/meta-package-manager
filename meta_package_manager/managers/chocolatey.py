@@ -34,7 +34,8 @@ class Choco(PackageManager):
 
     version_cli_options = ["version"]
     version_regex = r"Chocolatey\s+v(?P<version>\S+)"
-    """.. code-block:: shell-session
+    """
+    .. code-block:: shell-session
 
         ► choco version
         Chocolatey v0.11.0 Business

@@ -34,7 +34,8 @@ class MAS(PackageManager):
     name = "Mac AppStore"
 
     version_cli_options = ["version"]
-    """.. code-block:: shell-session
+    """
+    .. code-block:: shell-session
 
         ► mas version
         1.8.3

@@ -32,7 +32,8 @@ class Composer(PackageManager):
     requirement = "1.4.0"
 
     version_regex = r"Composer\s+version\s+(?P<version>\S+)"
-    """.. code-block:: shell-session
+    """
+    .. code-block:: shell-session
 
         ► composer --version
         Composer version 2.1.8 2021-09-15 13:55:14

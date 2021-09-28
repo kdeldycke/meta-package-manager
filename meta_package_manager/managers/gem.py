@@ -33,7 +33,8 @@ class Gem(PackageManager):
     # i.e. macOS 10.13 High Sierra, which is bundled with gem 2.5.2.
     requirement = "2.5.0"
 
-    """.. code-block:: shell-session
+    """
+    .. code-block:: shell-session
 
         ► gem --version
         3.0.3

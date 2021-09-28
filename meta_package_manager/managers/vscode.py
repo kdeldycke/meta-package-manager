@@ -33,7 +33,8 @@ class VSCode(PackageManager):
 
     cli_names = ["code"]
 
-    """.. code-block:: shell-session
+    """
+    .. code-block:: shell-session
 
         ► code --version
         1.60.2

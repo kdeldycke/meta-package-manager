@@ -29,7 +29,8 @@ class OPKG(PackageManager):
     requirement = "0.2.0"
 
     version_regex = r"opkg\s+version\s+(?P<version>\S+)"
-    """.. code-block:: shell-session
+    """
+    .. code-block:: shell-session
 
         ► opkg --version
         opkg version 0.3.6 (libsolv 0.7.5)

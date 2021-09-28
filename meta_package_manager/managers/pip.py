@@ -49,7 +49,8 @@ class Pip(PackageManager):
 
     version_cli_options = global_args + ["--version"]
     version_regex = r"pip\s+(?P<version>\S+)"
-    """.. code-block:: shell-session
+    """
+    .. code-block:: shell-session
 
         ► python -m pip --no-color --version
         pip 2.0.2 from /usr/local/lib/python/site-packages/pip (python 3.7)

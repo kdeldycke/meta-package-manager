@@ -29,7 +29,7 @@ from ..managers import (
 
 def test_manager_count():
     """Check all implemented package managers are accounted for."""
-    assert len(pool()) == 15
+    assert len(pool()) == 16
     assert len(pool()) == len(ALL_MANAGER_IDS)
     assert ALL_MANAGER_IDS == set(pool())
 

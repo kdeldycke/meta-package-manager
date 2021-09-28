@@ -15,7 +15,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import functools
 import logging
 import re
 from datetime import datetime
@@ -23,7 +22,7 @@ from functools import partial
 from io import TextIOWrapper
 from operator import getitem, itemgetter
 from pathlib import Path
-from time import time as time_now
+from time import perf_counter
 
 import click
 import click_log
@@ -151,26 +150,14 @@ def print_stats(data):
     click.echo(f"{total_installed} package{plural} total{per_manager_totals}.")
 
 
-class timeit:
-    """Decorator to measure and print elapsed execution time of a function."""
+def timeit():
+    """Print elapsed execution time."""
+    ctx = click.get_current_context()
+    if ctx.obj["time"]:
+        start_time = ctx.obj["start_time"]
+        click.echo(f"Execution time: {perf_counter() - start_time:0.3f} seconds.")
 
-    def __call__(self, func):
-        @functools.wraps(func)
-        def decorated(*args, **kwargs):
-            with self:
-                return func(*args, **kwargs)
 
-        return decorated
-
-    def __enter__(self):
-        self.measure_time = click.get_current_context().obj["time"]
-        if self.measure_time:
-            self.start_time = time_now()
-
-    def __exit__(self, *args, **kwargs):
-        if self.measure_time:
-            elapsed = time_now() - self.start_time
-            click.echo(f"Execution time: {elapsed:.3} seconds.")
 
 
 @click.group(
@@ -288,6 +275,8 @@ def cli(
     dry_run,
 ):
     """CLI for multi-package manager upgrades."""
+    # Take timestamp snapshot.
+    start_time = perf_counter() if time else None
 
     # Print log level.
     level = logger.level
@@ -324,14 +313,15 @@ def cli(
         "sort_by": sort_by,
         "stats": stats,
         "time": time,
+        "start_time": start_time,
     }
 
     ctx.call_on_close(reset_logger)
+    ctx.call_on_close(timeit)
 
 
 @cli.command(short_help="List supported package managers and their location.")
 @click.pass_context
-@timeit()
 def managers(ctx):
     """List all supported package managers and their presence on the system."""
     selected_managers = ctx.obj["selected_managers"]
@@ -417,7 +407,6 @@ def managers(ctx):
 
 @cli.command(short_help="Sync local package info.")
 @click.pass_context
-@timeit()
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
     selected_managers = ctx.obj["selected_managers"]
@@ -428,7 +417,6 @@ def sync(ctx):
 
 @cli.command(short_help="Cleanup local data.")
 @click.pass_context
-@timeit()
 def cleanup(ctx):
     """Cleanup local data and temporary artifacts."""
     selected_managers = ctx.obj["selected_managers"]
@@ -439,7 +427,6 @@ def cleanup(ctx):
 
 @cli.command(short_help="List installed packages.")
 @click.pass_context
-@timeit()
 def installed(ctx):
     """List all packages installed on the system from all managers."""
     selected_managers = ctx.obj["selected_managers"]
@@ -510,7 +497,6 @@ def installed(ctx):
 )
 @click.argument("query", type=click.STRING, required=True)
 @click.pass_context
-@timeit()
 def search(ctx, extended, exact, query):
     """Search packages from all managers."""
     selected_managers = ctx.obj["selected_managers"]
@@ -614,7 +600,6 @@ def search(ctx, extended, exact, query):
 @cli.command(short_help="Install a package.")
 @click.argument("package_id", type=click.STRING, required=True)
 @click.pass_context
-@timeit()
 def install(ctx, package_id):
     """Install a package from one package manager and one only.
 
@@ -643,7 +628,6 @@ def install(ctx, package_id):
     help="Format of CLI fields in JSON output.",
 )
 @click.pass_context
-@timeit()
 def outdated(ctx, cli_format):
     """List available package upgrades and their versions for each manager."""
     selected_managers = ctx.obj["selected_managers"]
@@ -727,7 +711,6 @@ def outdated(ctx, cli_format):
 
 @cli.command(short_help="Upgrade all packages.")
 @click.pass_context
-@timeit()
 def upgrade(ctx):
     """Perform a full package upgrade on all available managers."""
     selected_managers = ctx.obj["selected_managers"]
@@ -747,7 +730,6 @@ def upgrade(ctx):
 @cli.command(short_help="Save installed packages to a TOML file.")
 @click.argument("toml_output", type=click.File("w"), default="-")
 @click.pass_context
-@timeit()
 def backup(ctx, toml_output):
     """Dump the list of installed packages to a TOML file.
 
@@ -806,7 +788,6 @@ def backup(ctx, toml_output):
 @cli.command(short_help="Install packages in batch as specified by TOML files.")
 @click.argument("toml_files", type=click.File("r"), required=True, nargs=-1)
 @click.pass_context
-@timeit()
 def restore(ctx, toml_files):
     """Read TOML files then install or upgrade each package referenced in
     them.

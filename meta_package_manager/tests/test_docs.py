@@ -21,6 +21,7 @@ from pathlib import Path
 
 import pytest
 import simplejson as json
+import tomli
 from boltons.iterutils import flatten
 from yaml import Loader, load
 
@@ -41,6 +42,14 @@ platform or manager addition.
 """
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
+
+
+def test_project_metadata():
+    # Fetch general information about the project from pyproject.toml.
+    toml_path = Path(__file__).parent.joinpath("../../pyproject.toml").resolve()
+    toml_config = tomli.loads(toml_path.read_text())
+    # Check all managers are referenced in Python package keywords.
+    assert ALL_MANAGER_IDS.issubset(toml_config["tool"]["poetry"]["keywords"])
 
 
 def test_changelog():

@@ -11,9 +11,33 @@ homepage = 'https://github.com/kdeldycke/meta-package-manager'
 repository = 'https://github.com/kdeldycke/meta-package-manager'
 documentation = 'https://meta-package-manager.readthedocs.io'
 keywords = [
-    'CLI', 'package', 'pip', 'apm', 'npm', 'homebrew', 'brew', 'cask',
-    'macos', 'node', 'atom', 'ruby', 'gem', 'mac app store', 'mas',
-    'xbar', 'plugin', 'flatpak', 'opkg', 'php composer', 'snap']
+    'CLI',
+    'apm',
+    'apt',
+    'apt-mint',
+    'atom',
+    'brew',
+    'cask',
+    'composer',
+    'flatpak',
+    'gem',
+    'homebrew',
+    'mac app store',
+    'macos',
+    'mas',
+    'node',
+    'npm',
+    'opkg',
+    'package',
+    'php composer',
+    'pip',
+    'plugin',
+    'ruby',
+    'snap',
+    'vscode',
+    'xbar',
+    'yarn',
+]
 classifiers = [
     # See: https://pypi.org/pypi?%3Aaction=list_classifiers
     'Development Status :: 5 - Production/Stable',

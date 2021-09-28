@@ -75,6 +75,11 @@ jobs:
                "keywords": ["cask"]},
 
               {"labels": [
+                "📦 manager: choco",
+                "🖥 platform: Windows"],
+              "keywords": ["choco", "chocolatey"]},
+
+              {"labels": [
                 "📦 manager: composer",
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",

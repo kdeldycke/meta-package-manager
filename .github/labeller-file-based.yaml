@@ -28,6 +28,10 @@
   - meta_package_manager/managers/homebrew*
   - meta_package_manager/tests/*homebrew*
 
+"📦 manager: choco":
+  - meta_package_manager/managers/chocolatey*
+  - meta_package_manager/tests/*chocolatey*
+
 "📦 manager: composer":
   - meta_package_manager/managers/composer*
   - meta_package_manager/tests/*composer*

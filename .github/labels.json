@@ -55,6 +55,11 @@
     "description": "cask"
   },
   {
+    "name": "📦 manager: choco",
+    "color": "#bfdadc",
+    "description": "choco"
+  },
+  {
     "name": "📦 manager: composer",
     "color": "#bfdadc",
     "description": "composer"

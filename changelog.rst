@@ -7,6 +7,7 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [choco] Add Chocolatey package manager.
 * [mpm] Skip by default the evaluation of package managers not supported on the user's
   platform. Closes #278.
 * [mpm] Add a ``-a/--all-managers`` option to force the evaluation of all managers.

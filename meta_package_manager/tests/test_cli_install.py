@@ -54,6 +54,7 @@ class TestInstall(CLISubCommandTests):
         "apt-mint": "bat",
         "brew": "jpeginfo",
         "cask": "pngyu",
+        "choco": "ccleaner",
         "composer": "illuminate/contracts",
         "flatpak": "org.gnome.Dictionary",
         "gem": "markdown",

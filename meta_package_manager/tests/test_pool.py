@@ -39,10 +39,6 @@ def test_cached_pool():
     assert pool() is pool()
 
 
-def test_sorted_pool():
-    assert list(pool()) == sorted([m.id for m in pool().values()])
-
-
 @pytest.mark.parametrize("manager_id", DEFAULT_MANAGER_IDS)
 def test_supported_managers(manager_id):
     assert pool()[manager_id].supported is True

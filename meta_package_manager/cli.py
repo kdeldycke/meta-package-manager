@@ -38,7 +38,7 @@ from simplejson import dumps as json_dumps
 from . import CLI_NAME, __version__, env_data, logger, reset_logger
 from .base import CLI_FORMATS, PackageManager
 from .config import load_conf
-from .managers import pool, select_managers
+from .managers import ALL_MANAGER_IDS, select_managers
 from .platform import os_label
 from .version import TokenizedString
 
@@ -182,7 +182,7 @@ class timeit:
 @click.option(
     "-m",
     "--manager",
-    type=click.Choice(pool(), case_sensitive=False),
+    type=click.Choice(sorted(ALL_MANAGER_IDS), case_sensitive=False),
     multiple=True,
     help="Restrict sub-command to a subset of package managers. Repeat to "
     "select multiple managers.",
@@ -190,7 +190,7 @@ class timeit:
 @click.option(
     "-e",
     "--exclude",
-    type=click.Choice(pool(), case_sensitive=False),
+    type=click.Choice(sorted(ALL_MANAGER_IDS), case_sensitive=False),
     multiple=True,
     help="Exclude a package manager. Repeat to exclude multiple managers.",
 )
@@ -219,7 +219,7 @@ class timeit:
 @click.option(
     "-s",
     "--sort-by",
-    type=click.Choice(SORTABLE_FIELDS, case_sensitive=False),
+    type=click.Choice(sorted(SORTABLE_FIELDS), case_sensitive=False),
     default="manager_id",
     help="Sort results.",
 )
@@ -640,7 +640,7 @@ def install(ctx, package_id):
 @click.option(
     "-c",
     "--cli-format",
-    type=click.Choice(CLI_FORMATS, case_sensitive=False),
+    type=click.Choice(sorted(CLI_FORMATS), case_sensitive=False),
     default="plain",
     help="Format of CLI fields in JSON output.",
 )
@@ -826,7 +826,9 @@ def restore(ctx, toml_files):
         doc = tomli.loads(toml_input.read())
 
         # List unrecognized sections.
-        ignored_sections = [f"[{section}]" for section in doc if section not in pool()]
+        ignored_sections = [
+            f"[{section}]" for section in doc if section not in ALL_MANAGER_IDS
+        ]
         if ignored_sections:
             plural = "s" if len(ignored_sections) > 1 else ""
             sections = ", ".join(ignored_sections)

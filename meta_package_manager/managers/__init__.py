@@ -18,8 +18,8 @@
 """ Registration, indexing and cache of package manager definitions. """
 
 import inspect
-from collections import OrderedDict
 from importlib import import_module
+from operator import getitem, itemgetter
 from pathlib import Path
 
 from boltons.cacheutils import LRI, cached
@@ -38,8 +38,6 @@ def pool():
         1 - are sub-classes of PackageManager, and
         2 - are located in files at the same level or below this one, and
         3 - are not virtual (i.e. have a non null `cli_names` property).
-
-    Returns an `OrderedDict` sorted by manager's ID.
     """
     register = {}
 
@@ -55,9 +53,7 @@ def pool():
             else:
                 logger.debug(f"{klass!r} is not a valid manager definition")
 
-    # Sort pool entries by ID.
-    # TODO: propose an OrderedFrozenDict in boltons and use it here.
-    return OrderedDict(sorted(register.items()))
+    return register
 
 
 # Pre-compute all sorts of constants.
@@ -75,13 +71,14 @@ UNSUPPORTED_MANAGER_IDS = frozenset(ALL_MANAGER_IDS - DEFAULT_MANAGER_IDS)
 def select_managers(
     keep=None, drop=None, drop_unsupported=True, drop_inactive=True, **kwargs
 ):
-    """ "Utility method to extract a subset of the manager pool based on selection and exclusion criterion.
+    """Utility method to extract a subset of the manager pool based on selection and
+    exclusion criterion.
 
     By default, all managers are selected.
 
     kwargs are fed to the manager objects from the pool to set some options.
 
-    Returns a list of manager objects sorted by IDs.
+    Returns a generator returning manager objects one by one.
     """
     selected_ids = DEFAULT_MANAGER_IDS if drop_unsupported else ALL_MANAGER_IDS
 
@@ -97,28 +94,22 @@ def select_managers(
     # Remove managers excluded by the user.
     selected_ids = selected_ids.difference(drop)
 
-    selected_managers = [pool()[mid] for mid in sorted(selected_ids)]
-
     # List of recognized manager options.
     option_ids = {"stop_on_error", "ignore_auto_updates", "dry_run"}
     assert option_ids.issuperset(kwargs)
-    # Apply manager-level options.
-    for m_obj in selected_managers:
+
+    for manager in [pool()[mid] for mid in selected_ids]:
+
+        # TODO: check if not implemeted before calling .available. It saves one call to the package manager CLI.
+
+        # Filters out inactive managers.
+        if drop_inactive and not manager.available:
+            logger.warning(f"Skip unavailable {manager.id} manager.")
+            continue
+
+        # Apply manager-level options.
         for param, value in kwargs.items():
-            assert hasattr(m_obj, param)
-            setattr(m_obj, param, value)
+            assert hasattr(manager, param)
+            setattr(manager, param, value)
 
-    if not drop_inactive:
-        return selected_managers
-
-    # Pre-filters inactive managers.
-    def keep_available(manager):
-        if manager.available:
-            return True
-        logger.warning(f"Skip unavailable {manager.id} manager.")
-
-    # Use an iterator to not trigger log messages for the 'managers' subcommand
-    # which is not using this variable.
-    active_managers = filter(keep_available, selected_managers)
-
-    return active_managers
+        yield manager

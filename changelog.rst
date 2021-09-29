@@ -18,7 +18,7 @@ Changelog
 -------------------------------------------------------------------------------------------------
 
 * [mpm] Add a global ``-d/--dry-run`` option.
-* [apt] Add dedicated ``apt_mint`` manager to handle the special case of ``apt`` on Linux Mint.
+* [apt] Add dedicated ``apt-mint`` manager to handle the special case of ``apt`` on Linux Mint.
 * [xbar] Let xbar plugin check minimal mpm version requirement.
 * [mpm] Use regexpes to extract package manager versions.
 * [mpm] Add beta ``windows-2022`` CI/CD build target.

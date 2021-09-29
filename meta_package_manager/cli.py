@@ -158,8 +158,6 @@ def timeit():
         click.echo(f"Execution time: {perf_counter() - start_time:0.3f} seconds.")
 
 
-
-
 @click.group(
     context_settings=dict(
         show_default=True,

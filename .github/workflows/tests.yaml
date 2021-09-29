@@ -162,7 +162,7 @@ jobs:
       - name: Windows - Install VSCode
         if: runner.os == 'Windows'
         run: |
-          choco install vscode.install
+          choco install vscode
 
       # Gem
       - name: macOS & Windows - Upgrade gem

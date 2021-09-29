@@ -1,11 +1,12 @@
 Meta Package Manager
 ====================
 
-CLI providing unifying interface to all package managers.
+|release| |versions| |build| |docs| |coverage|
 
-Stable release: |release| |versions|
+*`mpm` is the [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) of package managers.*
 
-Development: |build| |docs| |coverage|
+As the latter, `mpm` is a multi-platform CLI (Linux, macOS, Windows) that is providing
+unifying interface. But to all [package managers it supports](#supported-package-managers).
 
 .. |release| image:: https://img.shields.io/pypi/v/meta-package-manager.svg
     :target: https://pypi.python.org/pypi/meta-package-manager
@@ -31,7 +32,7 @@ Development: |build| |docs| |coverage|
 
 
 Features
----------
+--------
 
 * Inventory and list all package managers available on the system.
 * Supports macOS, Linux and Windows.

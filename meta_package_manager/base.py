@@ -381,8 +381,11 @@ class PackageManager:
         return self.run(self.upgrade_cli(package_id))
 
     def upgrade_all_cli(self):
-        """Return a shell-compatible full-CLI to upgrade all packages."""
-        raise NotImplementedError
+        """Return a shell-compatible full-CLI to upgrade all packages.
+
+        Piggy-back on upgrade_cli() by default, which we'll call without a package_id parameter.
+        """
+        return self.upgrade_cli()
 
     def upgrade_all(self):
         """Perform a full upgrade of all outdated packages to latest versions.

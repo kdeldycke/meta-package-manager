@@ -250,8 +250,6 @@ class APT(PackageManager):
             cmd.append(package_id)
         return cmd
 
-    upgrade_all_cli = upgrade_cli
-
     def cleanup(self):
         """Runs:
 

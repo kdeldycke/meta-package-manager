@@ -309,5 +309,3 @@ class NPM(PackageManager):
         else:
             cmd_args.append("update")
         return [self.cli_path, self.global_args] + cmd_args
-
-    upgrade_all_cli = upgrade_cli

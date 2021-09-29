@@ -195,5 +195,3 @@ class Choco(PackageManager):
             "--limit-output",
             self.global_args,
         ]
-
-    upgrade_all_cli = upgrade_cli

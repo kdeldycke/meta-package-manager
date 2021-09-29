@@ -258,8 +258,6 @@ class Yarn(PackageManager):
 
         return cmd
 
-    upgrade_all_cli = upgrade_cli
-
     def cleanup(self):
         """Remove the shared cache files.
 

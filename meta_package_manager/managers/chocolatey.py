@@ -32,13 +32,11 @@ class Choco(PackageManager):
 
     global_args = ["--no-progress", "--no-color"]
 
-    version_cli_options = ["version"]
-    version_regex = r"Chocolatey\s+v(?P<version>\S+)"
     """
     .. code-block:: shell-session
 
-        ► choco version
-        Chocolatey v0.11.0 Business
+        ► choco --version
+        0.11.0
     """
 
     @property

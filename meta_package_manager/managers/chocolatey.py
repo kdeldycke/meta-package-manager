@@ -41,15 +41,6 @@ class Choco(PackageManager):
         Chocolatey v0.11.0 Business
     """
 
-    def sync(self):
-        """
-        .. code-block:: shell-session
-
-            ► choco sync --no-progress --no-color
-        """
-        super().sync()
-        self.run_cli("sync", self.global_args)
-
     @property
     def installed(self):
         """Fetch installed packages.

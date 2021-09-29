@@ -181,12 +181,3 @@ class Choco(PackageManager):
             ► choco upgrade all --no-progress --no-color
         """
         return [self.cli_path, "upgrade", "all", self.global_args]
-
-    def cleanup(self):
-        """
-        .. code-block:: shell-session
-
-            ► choco optimize
-        """
-        super().cleanup()
-        self.run_cli("optimize")

@@ -182,6 +182,10 @@ class Choco(PackageManager):
         .. code-block:: shell-session
 
             ► choco upgrade ccleaner --yes --limit-output --no-progress --no-color
+
+        .. code-block:: shell-session
+
+            ► choco upgrade all --yes --limit-output --no-progress --no-color
         """
         return [
             self.cli_path,
@@ -192,10 +196,4 @@ class Choco(PackageManager):
             self.global_args,
         ]
 
-    def upgrade_all_cli(self):
-        """
-        .. code-block:: shell-session
-
-            ► choco upgrade all --yes --limit-output --no-progress --no-color
-        """
-        return self.upgrade_cli
+    upgrade_all_cli = upgrade_cli

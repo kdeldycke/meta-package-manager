@@ -157,14 +157,13 @@ class Snap(PackageManager):
 
         return outdated
 
-    def upgrade_cli(self, package_id):
-        """snap has an auto-update function, but snaps can be updated
-        manually.
-        """
-        return [self.cli_path, self.global_args, "refresh", package_id]
-
-    def upgrade_all_cli(self):
+    def upgrade_cli(self, package_id=None):
         """Snap has an auto-update function, but snaps can be updated
         manually.
         """
-        return [self.cli_path, self.global_args, "refresh"]
+        cmd = [self.cli_path, self.global_args, "refresh"]
+        if package_id:
+            cmd.append(package_id)
+        return cmd
+
+    upgrade_all_cli = upgrade_cli

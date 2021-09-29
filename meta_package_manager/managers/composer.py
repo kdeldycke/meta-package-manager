@@ -223,8 +223,7 @@ class Composer(PackageManager):
             cmd.append(package_id)
         return cmd
 
-    def upgrade_all_cli(self):
-        return self.upgrade_cli()
+    upgrade_all_cli = upgrade_cli
 
     def cleanup(self):
         """Runs:

@@ -46,12 +46,12 @@ class Choco(PackageManager):
         .. code-block:: shell-session
 
             ► choco list --local-only --limit-output --no-progress --no-color
-            adobereader 11.0.10
-            ccleaner 5.03.5128
-            chocolatey 0.9.9.2
-            ConEmu 14.9.23.0
-            gimp 2.8.14.1
-            git 1.9.5.20150114
+            adobereader|11.0.10
+            ccleaner|5.03.5128
+            chocolatey|0.9.9.2
+            ConEmu|14.9.23.0
+            gimp|2.8.14.1
+            git|1.9.5.20150114
         """
         installed = {}
 
@@ -60,7 +60,7 @@ class Choco(PackageManager):
         )
 
         if output:
-            regexp = re.compile(r"(\S+)\s+(\S+)")
+            regexp = re.compile(r"(.+)\|(.+)")
             for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
@@ -78,24 +78,33 @@ class Choco(PackageManager):
 
         .. code-block:: shell-session
 
-            ► choco search virtualbox --by-id-only --limit-output --no-progress --no-color
-            ► choco search virtualbox --by-id-only --exact --limit-output --no-progress --no-color
-            ► choco search virtualbox --exact --limit-output --no-progress --no-color
+            ► choco search VirtualBox --limit-output --no-progress --no-color
+            virtualbox|6.1.0
+            VirtualBox.ExtensionPack|5.1.10.20161223
+            enigmavirtualbox|9.20
+            virtualbox-guest-additions-guest.install|6.1.0
+            VBoxHeadlessTray|4.2.0.3
+            VBoxVmService|6.1
+            multipass|1.0.0
 
-            ► choco search virtualbox --limit-output --no-progress --no-color
-            virtualbox 6.1.0 [Approved]
-            VirtualBox.ExtensionPack 5.1.10.20161223 [Approved]
-            enigmavirtualbox 9.20 [Approved] Downloads cached for licensed users - Possibly broken for FOSS users (due to original download location changes by vendor)
-            virtualbox-guest-additions-guest.install 6.1.0 [Approved] Downloads cached for licensed users
-            VBoxHeadlessTray 4.2.0.3
-            VBoxVmService 6.1 [Approved] Downloads cached for licensed users
-            multipass 1.0.0 [Approved]
-            psievm 0.2.7.29815 [Approved]
-            disk2vhd 2.01.0.20160213 [Approved] Downloads cached for licensed users
-            packer 1.5.1 [Approved]
-            vagrant 2.2.6 [Approved] Downloads cached for licensed users
-            VBoxGuestAdditions.install 99.99.99.99 [Approved]
-            docker-toolbox 19.03.1 [Approved] Downloads cached for licensed users
+        .. code-block:: shell-session
+
+            ► choco search VirtualBox --by-id-only --limit-output --no-progress --no-color
+            virtualbox|6.1.0
+            VirtualBox.ExtensionPack|5.1.10.20161223
+            enigmavirtualbox|9.20
+            virtualbox-guest-additions-guest.install|6.1.0
+
+        .. code-block:: shell-session
+
+            ► choco search VirtualBox --by-id-only --exact --limit-output --no-progress --no-color
+            virtualbox|6.1.0
+
+        .. code-block:: shell-session
+
+            ► choco search virtualbox --exact --limit-output --no-progress --no-color
+            virtualbox|6.1.0
+
         """
         matches = {}
 
@@ -110,7 +119,7 @@ class Choco(PackageManager):
         output = self.run_cli("search", query, query_params, self.global_args)
 
         if output:
-            regexp = re.compile(r"(\S+)\s+(\S+)")
+            regexp = re.compile(r"(.+)\|(.+)")
 
             for package_id, latest_version in regexp.findall(output):
                 matches[package_id] = {
@@ -126,10 +135,12 @@ class Choco(PackageManager):
 
         .. code-block:: shell-session
 
-            ► choco install ccleaner --no-progress --no-color
+            ► choco install ccleaner --yes --limit-output --no-progress --no-color
         """
         super().install(package_id)
-        return self.run_cli("install", package_id, self.global_args)
+        return self.run_cli(
+            "install", package_id, "--yes", "--limit-output", self.global_args
+        )
 
     @property
     def outdated(self):
@@ -152,7 +163,7 @@ class Choco(PackageManager):
         output = self.run_cli("outdated", "--limit-output", self.global_args)
 
         if output:
-            regexp = re.compile(r"(.+)|(.+)|(.+)|.+")
+            regexp = re.compile(r"(.+)\|(.+)\|(.+)\|.+")
             for package in output.splitlines():
                 match = regexp.match(package)
                 if match:
@@ -166,18 +177,25 @@ class Choco(PackageManager):
 
         return outdated
 
-    def upgrade_cli(self, package_id):
+    def upgrade_cli(self, package_id="all"):
         """
         .. code-block:: shell-session
 
-            ► choco upgrade ccleaner --no-progress --no-color
+            ► choco upgrade ccleaner --yes --limit-output --no-progress --no-color
         """
-        return [self.cli_path, "upgrade", package_id, self.global_args]
+        return [
+            self.cli_path,
+            "upgrade",
+            package_id,
+            "--yes",
+            "--limit-output",
+            self.global_args,
+        ]
 
     def upgrade_all_cli(self):
         """
         .. code-block:: shell-session
 
-            ► choco upgrade all --no-progress --no-color
+            ► choco upgrade all --yes --limit-output --no-progress --no-color
         """
-        return [self.cli_path, "upgrade", "all", self.global_args]
+        return self.upgrade_cli

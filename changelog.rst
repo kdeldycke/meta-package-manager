@@ -2,10 +2,8 @@ Changelog
 =========
 
 
-`4.5.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v4.4.0...develop>`_
---------------------------------------------------------------------------------------------------
-
-.. note:: This version is not yet released and is under active development.
+`4.5.0 (2021-09-30) <https://github.com/kdeldycke/meta-package-manager/compare/v4.4.0...v4.5.0>`_
+-------------------------------------------------------------------------------------------------
 
 * [choco] Add Chocolatey package manager.
 * [mpm] Skip by default the evaluation of package managers not supported on the user's

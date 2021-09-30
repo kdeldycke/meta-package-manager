@@ -69,7 +69,7 @@ Changelog
 `4.0.0 (2021-04-27) <https://github.com/kdeldycke/meta-package-manager/compare/v3.6.0...v4.0.0>`_
 -------------------------------------------------------------------------------------------------
 
-* [xbar] Ugrade BitBar plugin to new xbar format.
+* [xbar] Upgrade BitBar plugin to new xbar format.
 * [xbar] Drop xbar plugin requirement on Python 2.x and bump it up to Python 3.7.3.
 * [xbar] Update references of BitBar to xbar.
 * [xbar] Rename ``BITBAR_MPM_SUBMENU`` environment variable to ``XBAR_MPM_SUBMENU``.

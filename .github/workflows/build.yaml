@@ -43,11 +43,11 @@ jobs:
         with:
           files: ./dist/*
           body: |
-            🐍 [Available on
-            PyPi](https://pypi.org/project/meta-package-manager/${{
-            steps.get_version.outputs.TAG_VERSION }}/).
+            [🐍 Available on PyPi
+            ](https://pypi.org/project/meta-package-manager/${{
+            steps.get_version.outputs.TAG_VERSION }}/)
 
-            Changelog:
+            Highlights:
 
               * <TODO>
               * <TODO>

@@ -2,6 +2,12 @@ Changelog
 =========
 
 
+`4.5.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v4.5.1...develop>`_
+--------------------------------------------------------------------------------------------------
+
+.. note:: This version is not yet released and is under active development.
+
+
 `4.5.0 (2021-09-30) <https://github.com/kdeldycke/meta-package-manager/compare/v4.4.0...v4.5.0>`_
 -------------------------------------------------------------------------------------------------
 

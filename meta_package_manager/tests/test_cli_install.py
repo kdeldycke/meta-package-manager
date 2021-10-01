@@ -64,7 +64,7 @@ class TestInstall(CLISubCommandTests):
         result = invoke("--manager", mid, "install", package_id)
 
         assert result.exit_code == 0
-        self.check_manager_selection(result, {mid})
+        self.check_manager_selection(result, {mid}, full_set=ALL_MANAGER_IDS)
 
 
 destructive()(TestInstall.test_options)

@@ -26,7 +26,7 @@ from .test_cli import CLISubCommandTests
 def subcmd():
     """Seed common subcommand tests with a dummy file and content to allow the
     CLI to not fail on required file input."""
-    return "--manager", "pip", "install", "arrow"
+    return "install", "arrow"
 
 
 class TestInstall(CLISubCommandTests):
@@ -35,18 +35,6 @@ class TestInstall(CLISubCommandTests):
         assert result.exit_code == 2
         assert not result.stdout
         assert "Error: Missing argument 'PACKAGE_ID'." in result.stderr
-
-    def test_no_manager(self, invoke):
-        result = invoke("install", "dummy")
-        assert result.exit_code == 2
-        assert not result.stdout
-        assert "critical: Only one package manager should be provided." in result.stderr
-
-    def test_multiple_manager(self, invoke):
-        result = invoke("--manager", "pip", "--manager", "npm", "install", "dummy")
-        assert result.exit_code == 2
-        assert not result.stdout
-        assert "critical: Only one package manager should be provided." in result.stderr
 
     PACKAGE_IDS = {
         "apm": "markdown-pdf",
@@ -83,9 +71,5 @@ class TestInstall(CLISubCommandTests):
 
 
 destructive()(TestInstall.test_options)
-
-skip_multiple_manager = pytest.mark.skip(
-    reason="mpm install only support one manager at a time"
-)
-skip_multiple_manager(TestInstall.test_default_all_managers)
-skip_multiple_manager(TestInstall.test_manager_selection)
+destructive()(TestInstall.test_default_all_managers)
+destructive()(TestInstall.test_manager_selection)

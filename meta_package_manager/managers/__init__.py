@@ -19,10 +19,10 @@
 
 import inspect
 from importlib import import_module
-from operator import getitem, itemgetter
 from pathlib import Path
 
 from boltons.cacheutils import LRI, cached
+from boltons.iterutils import unique
 
 from .. import logger
 from ..base import PackageManager
@@ -68,47 +68,61 @@ UNSUPPORTED_MANAGER_IDS = frozenset(ALL_MANAGER_IDS - DEFAULT_MANAGER_IDS)
 """ All manager IDs unsupported on the current platform. """
 
 
+EXTRA_OPTION_IDS = {"stop_on_error", "ignore_auto_updates", "dry_run"}
+"""List of extra options that can be set on managers during the use of the
+select_managers() helper below."""
+
+
 def select_managers(
-    keep=None, drop=None, drop_unsupported=True, drop_inactive=True, **kwargs
+    keep=None,
+    drop=None,
+    drop_unsupported=True,
+    drop_inactive=True,
+    **extra_options,
 ):
-    """Utility method to extract a subset of the manager pool based on selection and
-    exclusion criterion.
+    """Utility method to extract a subset of the manager pool based on selection list
+    (`keep` parameter) and exclusion list (`drop` parameter) criterion.
 
-    By default, all managers are selected.
+    By default, all managers supported on the current platform are selected. Unless
+    `drop_unsupported` is set to False, in which case all managers implemented by mpm
+    are selected, regardless of their supported platform.
 
-    kwargs are fed to the manager objects from the pool to set some options.
+    `drop_inactive` filters out managers that where not found on the system.
 
-    Returns a generator returning manager objects one by one.
+    Finally, `extra_options` parameters are fed to the manager objects from the pool to
+    set some options.
+
+    Returns a generator producing a manager object one after the other.
     """
-    selected_ids = DEFAULT_MANAGER_IDS if drop_unsupported else ALL_MANAGER_IDS
-
     if not keep:
-        keep = selected_ids
+        keep = DEFAULT_MANAGER_IDS if drop_unsupported else ALL_MANAGER_IDS
     if not drop:
         drop = set()
-    assert isinstance(keep, (set, frozenset, tuple, list))
-    assert isinstance(drop, (set, frozenset, tuple, list))
+    assert ALL_MANAGER_IDS.issuperset(keep)
+    assert ALL_MANAGER_IDS.issuperset(drop)
+
+    assert EXTRA_OPTION_IDS.issuperset(extra_options)
 
     # Only keeps the subset selected by the user.
-    selected_ids = selected_ids.intersection(keep)
-    # Remove managers excluded by the user.
-    selected_ids = selected_ids.difference(drop)
+    selected_ids = keep
 
-    # List of recognized manager options.
-    option_ids = {"stop_on_error", "ignore_auto_updates", "dry_run"}
-    assert option_ids.issuperset(kwargs)
+    # Force a natural order for orderless iteratables.
+    if isinstance(selected_ids, (set, frozenset)):
+        selected_ids = sorted(selected_ids)
 
-    for manager in [pool()[mid] for mid in selected_ids]:
+    # Deduplicate managers IDs while preserving order, then remove excluded managers.
+    for manager_id in [mid for mid in unique(selected_ids) if mid not in drop]:
+        manager = pool()[manager_id]
 
         # TODO: check if not implemeted before calling .available. It saves one call to the package manager CLI.
 
         # Filters out inactive managers.
         if drop_inactive and not manager.available:
-            logger.warning(f"Skip unavailable {manager.id} manager.")
+            logger.warning(f"Skip unavailable {manager_id} manager.")
             continue
 
         # Apply manager-level options.
-        for param, value in kwargs.items():
+        for param, value in extra_options.items():
             assert hasattr(manager, param)
             setattr(manager, param, value)
 

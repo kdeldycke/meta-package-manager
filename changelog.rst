@@ -7,6 +7,10 @@ Changelog
 
 .. note:: This version is not yet released and is under active development.
 
+* [mpm] Implements XKCD 1654. Closes #10.
+* [mpm] Add ``-x/--xkcd`` option to forces manager selection.
+* [mpm] Let ``-m/--manager`` multi-option keep order.
+
 
 `4.5.0 (2021-09-30) <https://github.com/kdeldycke/meta-package-manager/compare/v4.4.0...v4.5.0>`_
 -------------------------------------------------------------------------------------------------

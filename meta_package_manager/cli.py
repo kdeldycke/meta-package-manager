@@ -35,7 +35,7 @@ from click_help_colors import version_option
 from simplejson import dumps as json_dumps
 
 from . import CLI_NAME, __version__, env_data, logger, reset_logger
-from .base import CLI_FORMATS, PackageManager
+from .base import CLI_FORMATS, CLIError, PackageManager
 from .config import load_conf
 from .managers import ALL_MANAGER_IDS, select_managers
 from .platform import os_label
@@ -59,6 +59,10 @@ SORTABLE_FIELDS = {
     "package_name",
     "version",
 }
+
+
+XKCD_MANAGER_ORDER = ["pip", "brew", "npm", "apt"]
+assert ALL_MANAGER_IDS.issuperset(XKCD_MANAGER_ORDER)
 
 
 # Pre-rendered UI-elements.
@@ -170,7 +174,8 @@ def timeit():
     type=click.Choice(sorted(ALL_MANAGER_IDS), case_sensitive=False),
     multiple=True,
     help="Restrict sub-command to a subset of package managers. Repeat to "
-    "select multiple managers.",
+    "select multiple managers. The order in which options are provided defines the "
+    "order in which sub-commands will process them.",
 )
 @click.option(
     "-e",
@@ -187,6 +192,14 @@ def timeit():
     help="Force evaluation of all package manager implemented by mpm, even those not"
     "supported by the current platform. Still applies filtering by --manager and "
     "--exclude options before calling the subcommand.",
+)
+@click.option(
+    "-x",
+    "--xkcd",
+    is_flag=True,
+    default=False,
+    help=f"Forces the subset of package managers to the order defined in XKCD #1654 "
+    "comic, i.e. {XKCD_MANAGER_ORDER}.",
 )
 @click.option(
     "--ignore-auto-updates/--include-auto-updates",
@@ -264,6 +277,7 @@ def cli(
     manager,
     exclude,
     all_managers,
+    xkcd,
     ignore_auto_updates,
     output_format,
     sort_by,
@@ -283,7 +297,7 @@ def cli(
 
     # Select the subset of manager to target, and apply manager-level options.
     selected_managers = select_managers(
-        keep=manager,
+        keep=manager if not xkcd else XKCD_MANAGER_ORDER,
         drop=exclude,
         drop_unsupported=not all_managers,
         # Only keep inactive managers to show them in the "managers" subcommand table.
@@ -599,22 +613,48 @@ def search(ctx, extended, exact, query):
 @click.argument("package_id", type=click.STRING, required=True)
 @click.pass_context
 def install(ctx, package_id):
-    """Install a package from one package manager and one only.
+    """Install the provided package using one of the provided package manager."""
+    selected_managers = list(ctx.obj["selected_managers"])
 
-    The -m\--manager option is required."""
-    selected_managers = ctx.obj["selected_managers"]
-    selected_managers = list(selected_managers)
+    logger.info(
+        f"Package manager order: {', '.join([m.id for m in selected_managers])}"
+    )
 
-    if not selected_managers:
-        logger.fatal(f"A package manager must be provided via the -m/--manager option.")
-        ctx.exit(2)
-    if len(selected_managers) > 1:
-        logger.fatal(f"Only one package manager should be provided.")
-        ctx.exit(2)
+    for manager in selected_managers:
+        logger.debug(f"Try to install {package_id} with {manager.id}.")
 
-    manager = selected_managers.pop()
-    output = manager.install(package_id)
-    click.echo(output)
+        # Is the package available on this manager?
+        matches = None
+        try:
+            matches = manager.search(extended=False, exact=True, query=package_id)
+        except NotImplementedError:
+            logger.warning(
+                f"No way to search for {package_id} with {manager.id}. Try to directly install it."
+            )
+        else:
+            if not matches:
+                logger.warning(f"No {package_id} package found on {manager.id}.")
+                continue
+            assert len(matches) == 1
+
+        # Allow install subcommand to fail.
+        default_value = manager.stop_on_error
+        manager.stop_on_error = True
+        try:
+            output = manager.install(package_id)
+        except CLIError:
+            logger.warning(f"Could not install {package_id} with {manager.id}.")
+
+            # Restore default value.
+            manager.stop_on_error = default_value
+
+            continue
+
+        # Restore default value.
+        manager.stop_on_error = default_value
+
+        click.echo(output)
+        return
 
 
 @cli.command(short_help="List outdated packages.")

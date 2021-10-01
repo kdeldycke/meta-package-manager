@@ -24,13 +24,13 @@ from ..version import parse_version
 
 class Choco(PackageManager):
 
-    platforms = frozenset([WINDOWS])
+    platforms = frozenset({WINDOWS})
 
     requirement = "0.10.4"
 
     name = "Chocolatey"
 
-    global_args = ["--no-progress", "--no-color"]
+    global_args = ("--no-progress", "--no-color")
 
     """
     .. code-block:: shell-session

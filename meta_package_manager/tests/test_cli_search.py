@@ -115,7 +115,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
     @skip_pip_search
     @pytest.mark.parametrize(
-        "query", ["SED", "SeD", "sEd*", "*sED*", "_seD-@", "", "_"]
+        "query", ("SED", "SeD", "sEd*", "*sED*", "_seD-@", "", "_")
     )
     def test_exact_search_tokenizer_no_result(self, invoke, query):
         sleep(2)
@@ -125,7 +125,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         assert "sed" not in result.stdout
 
     @skip_pip_search
-    @pytest.mark.parametrize("query", ["", "_", "_seD-@"])
+    @pytest.mark.parametrize("query", ("", "_", "_seD-@"))
     def test_fuzzy_search_tokenizer_no_results(self, invoke, query):
         sleep(2)
         result = invoke("--manager", "pip", "search", query)
@@ -134,7 +134,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         assert "sed" not in result.stdout
 
     @skip_pip_search
-    @pytest.mark.parametrize("query", ["sed", "SED", "SeD", "sEd*", "*sED*"])
+    @pytest.mark.parametrize("query", ("sed", "SED", "SeD", "sEd*", "*sED*"))
     def test_fuzzy_search_tokenizer_multiple_results(self, invoke, query):
         sleep(2)
         result = invoke("--manager", "pip", "search", query, color=False)
@@ -144,7 +144,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         assert " SED-cli " in result.stdout
 
     @skip_pip_search
-    @pytest.mark.parametrize("query", ["", "_", "_seD-@"])
+    @pytest.mark.parametrize("query", ("", "_", "_seD-@"))
     def test_extended_search_tokenizeri_no_results(self, invoke, query):
         sleep(2)
         result = invoke("--manager", "pip", "search", "--extended", query)
@@ -153,7 +153,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         assert "sed" not in result.stdout
 
     @skip_pip_search
-    @pytest.mark.parametrize("query", ["sed", "SED", "SeD", "sEd*", "*sED*"])
+    @pytest.mark.parametrize("query", ("sed", "SED", "SeD", "sEd*", "*sED*"))
     def test_extended_search_tokenizeri_multiple_results(self, invoke, query):
         sleep(2)
         result = invoke("--manager", "pip", "search", "--extended", query)

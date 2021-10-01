@@ -30,12 +30,12 @@ DEFAULT_CONF_NAME = "config.toml"
 
 
 # List of unsupported options we're going to ignore.
-IGNORED_OPTIONS = [
+IGNORED_OPTIONS = (
     # --version is not a configurable option.
     "version",
     # -C/--config option cannot be used to link to another file.
     "config",
-]
+)
 
 
 class ConfigurationFileError(Exception):

@@ -37,7 +37,7 @@ class Homebrew(PackageManager):
     commands.
     """
 
-    platforms = frozenset([LINUX, MACOS])
+    platforms = frozenset({LINUX, MACOS})
 
     # Vanilla brew and cask CLIs now shares the same version.
     # 2.7.0 is the first release to enforce the use of --cask option.
@@ -492,16 +492,16 @@ class Homebrew(PackageManager):
 class Brew(Homebrew):
 
     name = "Homebrew Formulae"
-    cli_names = ["brew"]
+    cli_names = ("brew",)
 
-    global_args = ["--formula"]
+    global_args = ("--formula",)
 
 
 class Cask(Homebrew):
 
     # Casks are only available on macOS, not Linux.
-    platforms = frozenset([MACOS])
+    platforms = frozenset({MACOS})
     name = "Homebrew Cask"
-    cli_names = ["brew"]
+    cli_names = ("brew",)
 
-    global_args = ["--cask"]
+    global_args = ("--cask",)

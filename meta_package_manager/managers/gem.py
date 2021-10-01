@@ -25,7 +25,7 @@ from . import logger
 
 class Gem(PackageManager):
 
-    platforms = frozenset([LINUX, MACOS, WINDOWS])
+    platforms = frozenset({LINUX, MACOS, WINDOWS})
 
     name = "Ruby Gems"
 
@@ -41,11 +41,9 @@ class Gem(PackageManager):
     """
 
     # Help mpm a little bit in its search for the `gem` binary.
-    cli_search_path = ["/usr/local/opt/ruby/bin/gem", "/usr/local/opt/ruby/bin"]
+    cli_search_path = ("/usr/local/opt/ruby/bin/gem", "/usr/local/opt/ruby/bin")
 
-    global_args = [
-        "--quiet",  # Silence command progress meter
-    ]
+    global_args = ("--quiet",)  # Silence command progress meter
 
     @property
     def installed(self):
@@ -85,11 +83,9 @@ class Gem(PackageManager):
                     package_id, versions = match.groups()
                     # Guess latest installed version.
                     version = max(
-                        [
                             parse_version(v)
                             for v in re.compile(r",|default:| ").split(versions)
                             if v
-                        ]
                     )
                     installed[package_id] = {
                         "id": package_id,

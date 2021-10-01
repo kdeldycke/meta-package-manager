@@ -73,7 +73,7 @@ class TestBaseCLI:
     supposed to work on all platforms, whatever the environment.
     """
 
-    @pytest.mark.parametrize("param", [None, "--help", "-h"])
+    @pytest.mark.parametrize("param", (None, "--help", "-h"))
     def test_main_help(self, invoke, param):
         result = invoke(param)
         assert result.exit_code == 0
@@ -105,7 +105,7 @@ class TestBaseCLI:
         assert "Error: Missing command." in result.stderr
 
     @pytest.mark.parametrize(
-        "params", [["--version"], ["blah"], ["--config", "random.toml"]]
+        "params", (("--version",), ("blah",), ("--config", "random.toml"))
     )
     def test_help_eagerness(self, invoke, params):
         # See: https://click.palletsprojects.com/en/8.0.x/advanced/#callback-evaluation-order
@@ -115,7 +115,7 @@ class TestBaseCLI:
         assert not result.stderr
 
     @pytest.mark.parametrize(
-        "params", [["--help"], ["blah"], ["--config", "random.toml"]]
+        "params", (("--help",), ("blah",), ("--config", "random.toml"))
     )
     def test_version_eagerness(self, invoke, params):
         result = invoke("--version", params)
@@ -129,7 +129,7 @@ class TestBaseCLI:
         assert not result.stdout
         assert "Error: Invalid value for '--verbosity' / '-v'" in result.stderr
 
-    @pytest.mark.parametrize("level", ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"])
+    @pytest.mark.parametrize("level", ("CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"))
     def test_verbosity(self, invoke, level):
         result = invoke("--verbosity", level, "managers")
         assert result.exit_code == 0
@@ -213,8 +213,8 @@ class CLISubCommandTests:
         assert flatten([subcmd])[0] in result.stdout
         assert not result.stderr
 
-    @pytest.mark.parametrize("opt_stats", ["--stats", "--no-stats", None])
-    @pytest.mark.parametrize("opt_timer", ["--time", "--no-time", None])
+    @pytest.mark.parametrize("opt_stats", ("--stats", "--no-stats", None))
+    @pytest.mark.parametrize("opt_timer", ("--time", "--no-time", None))
     def test_options(self, invoke, subcmd, opt_stats, opt_timer):
         """Test the result on all combinations of optional options."""
         result = invoke(opt_stats, opt_timer, subcmd)
@@ -302,7 +302,7 @@ class CLISubCommandTests:
         assert found_managers == set(selected)
         assert skipped_managers == set(full_set) - set(selected)
 
-    @pytest.mark.parametrize("selector", ["--manager", "--exclude"])
+    @pytest.mark.parametrize("selector", ("--manager", "--exclude"))
     def test_invalid_manager_selector(self, invoke, subcmd, selector):
         result = invoke(selector, "unknown", subcmd)
         assert result.exit_code == 2
@@ -428,7 +428,7 @@ class CLITableTests:
 
     @pytest.mark.parametrize(
         "mode,expected,conflict",
-        [pytest.param(*v, id=v[0]) for v in map(flatten, expected_renderings.items())],
+        (pytest.param(*v, id=v[0]) for v in map(flatten, expected_renderings.items())),
     )
     def test_all_table_rendering(self, invoke, subcmd, mode, expected, conflict):
         """Check that from all rendering modes, only the selected one appears

@@ -70,13 +70,13 @@ def fix_environment():
     preference order would equate to Homebrew, Macports, then system.
     """
     os.environ["PATH"] = ":".join(
-        [
+        (
             "/usr/local/bin",
             "/usr/local/sbin",
             "/opt/local/bin",
             "/opt/local/sbin",
             os.environ.get("PATH", ""),
-        ]
+        )
     )
 
 
@@ -97,12 +97,12 @@ def run(*args):
 
 def pp(params):
     """Print all parameters separated by a pipe. Ignore empty items."""
-    print(" | ".join([p for p in params if p]))
+    print(" | ".join((p for p in params if p)))
 
 
 def print_error_header():
     """Generic header for blockng error."""
-    pp(["❌", "dropdown=false"])
+    pp(("❌", "dropdown=false"))
     print("---")
 
 
@@ -214,8 +214,8 @@ def print_menu():
     managers = sorted(json.loads(output).values(), key=itemgetter("name"))
 
     # Print menu bar icon with number of available upgrades.
-    total_outdated = sum([len(m["packages"]) for m in managers])
-    total_errors = sum([len(m.get("errors", [])) for m in managers])
+    total_outdated = sum((len(m["packages"]) for m in managers))
+    total_errors = sum((len(m.get("errors", [])) for m in managers))
     pp(
         [
             "↑{}{}".format(
@@ -230,8 +230,8 @@ def print_menu():
 
     if SUBMENU_LAYOUT:
         # Compute maximal manager's name length.
-        label_max_length = max([len(m["name"]) for m in managers])
-        max_outdated = max([len(m["packages"]) for m in managers])
+        label_max_length = max(len(m["name"]) for m in managers)
+        max_outdated = max(len(m["packages"]) for m in managers)
         print("---")
 
     for manager in managers:

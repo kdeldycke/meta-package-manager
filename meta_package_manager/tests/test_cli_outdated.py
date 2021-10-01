@@ -32,7 +32,7 @@ def subcmd():
     return "outdated"
 
 
-XBAR_KEYWORDS = {"shell"}.union({f"param{i}" for i in range(1, 10)})
+XBAR_KEYWORDS = frozenset({"shell"}.union({f"param{i}" for i in range(1, 10)}))
 
 
 class TestOutdated(CLISubCommandTests, CLITableTests):

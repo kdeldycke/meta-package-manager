@@ -28,9 +28,7 @@ class Yarn(PackageManager):
 
     name = "Node's yarn"
 
-    global_args = []
-
-    platforms = frozenset([LINUX, MACOS, WINDOWS])
+    platforms = frozenset({LINUX, MACOS, WINDOWS})
 
     requirement = "1.21.0"
 
@@ -224,7 +222,7 @@ class Yarn(PackageManager):
         if not output:
             return outdated
 
-        packages = list()
+        packages = []
         for line in output.splitlines():
             if not line:
                 continue

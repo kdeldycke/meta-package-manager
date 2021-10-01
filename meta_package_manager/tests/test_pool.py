@@ -31,7 +31,7 @@ def test_manager_count():
     """Check all implemented package managers are accounted for, and unique."""
     assert len(pool()) == 16
     assert len(pool()) == len(ALL_MANAGER_IDS)
-    assert ALL_MANAGER_IDS == sorted(set(pool()))
+    assert ALL_MANAGER_IDS == tuple(sorted(set(pool())))
 
 
 def test_cached_pool():

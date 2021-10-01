@@ -17,7 +17,7 @@
 
 import pytest
 
-from ..managers import ALL_MANAGER_IDS, pool
+from ..managers import ALL_MANAGER_IDS
 from .conftest import destructive
 from .test_cli import CLISubCommandTests
 
@@ -58,7 +58,7 @@ class TestInstall(CLISubCommandTests):
 
     @destructive
     @pytest.mark.parametrize(
-        "mid,package_id", [pytest.param(*v, id=v[0]) for v in PACKAGE_IDS.items()]
+        "mid,package_id", (pytest.param(*v, id=v[0]) for v in PACKAGE_IDS.items())
     )
     def test_single_manager_install(self, invoke, mid, package_id):
         result = invoke("--manager", mid, "install", package_id)

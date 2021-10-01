@@ -33,21 +33,21 @@ class Pip(PackageManager):
     Source: https://snarky.ca/why-you-should-use-python-m-pip/
     """
 
-    platforms = frozenset([MACOS, LINUX, WINDOWS])
+    platforms = frozenset({MACOS, LINUX, WINDOWS})
 
     requirement = "10.0.0"
 
     # Targets `python3` CLI first to allow for some systems (like macOS) to keep the
     # default `python` CLI tied to the Python 2.x ecosystem.
-    cli_names = ["python3", "python"]
+    cli_names = ("python3", "python")
 
-    global_args = [
+    global_args = (
         "-m",
         "pip",  # Canonical call to Python's pip module.
         "--no-color",  # Suppress colored output.
-    ]
+    )
 
-    version_cli_options = global_args + ["--version"]
+    version_cli_options = tuple(list(global_args) + ["--version"])
     version_regex = r"pip\s+(?P<version>\S+)"
     """
     .. code-block:: shell-session

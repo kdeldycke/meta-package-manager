@@ -34,7 +34,7 @@ contributors = set()
 # Fetch all variations of authors and commiters.
 # For format output syntax, see: https://git-scm.com/docs
 #   /pretty-formats#Documentation/pretty-formats.txt-emaNem
-for param in ["%aN <%aE>", "%cN <%cE>"]:
+for param in ("%aN <%aE>", "%cN <%cE>"):
     process = Popen(
         ("git", "log", f"--pretty=format:{param}"), stdout=PIPE, stderr=PIPE
     )

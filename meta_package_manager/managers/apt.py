@@ -30,7 +30,7 @@ class APT(PackageManager):
     http://manpages.ubuntu.com/manpages/xenial/man8/apt.8.html
     """
 
-    platforms = frozenset([LINUX])
+    platforms = frozenset({LINUX})
 
     requirement = "1.0.0"
 
@@ -165,7 +165,7 @@ class APT(PackageManager):
         """
         matches = {}
 
-        search_args = ["--names-only"]
+        search_arg = "--names-only"
         if exact:
             # Realy on apt regexp support to speed-up exact match.
             query = f"^{query}$"
@@ -173,9 +173,9 @@ class APT(PackageManager):
         elif extended:
             # Include full description in extended search to check up the match
             # in the CLI output after its execution.
-            search_args = ["--full"]
+            search_arg = "--full"
 
-        output = self.run_cli(self.global_args, "search", query, "--quiet", search_args)
+        output = self.run_cli(self.global_args, "search", query, "--quiet", search_arg)
 
         if output:
             regexp = re.compile(
@@ -272,9 +272,9 @@ class APT_Mint(APT):
 
     name = "Linux Mint's apt"
 
-    cli_names = ["apt"]
+    cli_names = ("apt",)
 
-    version_cli_options = ["version", "apt"]
+    version_cli_options = ("version", "apt")
     """
     .. code-block:: shell-session
 

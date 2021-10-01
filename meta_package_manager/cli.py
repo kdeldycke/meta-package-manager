@@ -99,7 +99,7 @@ def print_table(header_defs, rows, sort_key=None):
     if not rows:
         return
 
-    header_labels = [label for label, _ in header_defs]
+    header_labels = (label for label, _ in header_defs)
 
     # Check there is no duplicate column IDs.
     header_ids = [col_id for _, col_id in header_defs if col_id]
@@ -143,10 +143,10 @@ def print_stats(data):
     manager_stats = {infos["id"]: len(infos["packages"]) for infos in data.values()}
     total_installed = sum(manager_stats.values())
     per_manager_totals = ", ".join(
-        [
+        (
             f"{k}: {v}"
             for k, v in sorted(manager_stats.items(), key=itemgetter(1), reverse=True)
-        ]
+        )
     )
     if per_manager_totals:
         per_manager_totals = f" ({per_manager_totals})"
@@ -344,7 +344,7 @@ def managers(ctx):
     if output_format == "json":
         manager_data = {}
         # Build up the data structure of manager metadata.
-        fields = [
+        fields = (
             "name",
             "id",
             "supported",
@@ -353,7 +353,7 @@ def managers(ctx):
             "version",
             "fresh",
             "available",
-        ]
+        )
         for manager in selected_managers:
             manager_data[manager.id] = {fid: getattr(manager, fid) for fid in fields}
             # Serialize errors at the last minute to gather all we encountered.
@@ -372,7 +372,7 @@ def managers(ctx):
         os_infos = OK if manager.supported else KO
         if not manager.supported:
             os_infos += "  {} only".format(
-                ", ".join(sorted([os_label(os_id) for os_id in manager.platforms]))
+                ", ".join(sorted((os_label(os_id) for os_id in manager.platforms)))
             )
 
         # Build up the CLI path column content.
@@ -393,25 +393,25 @@ def managers(ctx):
                     version_infos += f" {manager.requirement}"
 
         table.append(
-            [
+            (
                 manager.name,
                 click.style(manager.id, fg="green" if manager.fresh else "red"),
                 os_infos,
                 cli_infos,
                 OK if manager.executable else "",
                 version_infos,
-            ]
+            )
         )
 
     print_table(
-        [
+        (
             ("Package manager", "manager_name"),
             ("ID", "manager_id"),
             ("Supported", None),
             ("CLI", None),
             ("Executable", None),
             ("Version", "version"),
-        ],
+        ),
         table,
         sort_by,
     )
@@ -470,23 +470,23 @@ def installed(ctx):
     table = []
     for manager_id, installed_pkg in installed_data.items():
         table += [
-            [
+            (
                 info["name"],
                 info["id"],
                 manager_id,
                 info["installed_version"] if info["installed_version"] else "?",
-            ]
+            )
             for info in installed_pkg["packages"]
         ]
 
     # Sort and print table.
     print_table(
-        [
+        (
             ("Package name", "package_name"),
             ("ID", "package_id"),
             ("Manager", "manager_id"),
             ("Installed version", "version"),
-        ],
+        ),
         table,
         sort_by,
     )
@@ -554,9 +554,9 @@ def search(ctx, extended, exact, query):
 
         for part in query_parts:
             # Search for occurrences of query parts in original string.
-            occurrences = [
+            occurrences = (
                 match.start() for match in re.finditer(part, string, re.IGNORECASE)
-            ]
+            )
             # Flag matching substrings for highlighting.
             for match_start in occurrences:
                 match_end = match_start + len(part) - 1
@@ -584,23 +584,23 @@ def search(ctx, extended, exact, query):
     table = []
     for manager_id, matching_pkg in matches.items():
         table += [
-            [
+            (
                 highlight(info["name"]),
                 highlight(info["id"]),
                 manager_id,
                 info["latest_version"] if info["latest_version"] else "?",
-            ]
+            )
             for info in matching_pkg["packages"]
         ]
 
     # Sort and print table.
     print_table(
-        [
+        (
             ("Package name", "package_name"),
             ("ID", "package_id"),
             ("Manager", "manager_id"),
             ("Latest version", "version"),
-        ],
+        ),
         table,
         sort_by,
     )
@@ -681,7 +681,7 @@ def outdated(ctx, cli_format):
     for manager in selected_managers:
 
         try:
-            packages = list(map(dict, manager.outdated.values()))
+            packages = tuple(map(dict, manager.outdated.values()))
         except NotImplementedError:
             logger.warning(f"{manager.id} does not implement outdated command.")
             continue
@@ -720,25 +720,25 @@ def outdated(ctx, cli_format):
     table = []
     for manager_id, outdated_pkg in outdated_data.items():
         table += [
-            [
+            (
                 info["name"],
                 info["id"],
                 manager_id,
                 info["installed_version"] if info["installed_version"] else "?",
                 info["latest_version"],
-            ]
+            )
             for info in outdated_pkg["packages"]
         ]
 
     # Sort and print table.
     print_table(
-        [
+        (
             ("Package name", "package_name"),
             ("ID", "package_id"),
             ("Manager", "manager_id"),
             ("Installed version", "version"),
             ("Latest version", None),
-        ],
+        ),
         table,
         sort_by,
     )
@@ -811,7 +811,7 @@ def backup(ctx, toml_output):
         }
 
         pkg_data = dict(
-            sorted([(p["id"], str(p["installed_version"])) for p in installed_packages])
+            sorted(((p["id"], str(p["installed_version"])) for p in installed_packages))
         )
 
         if pkg_data:

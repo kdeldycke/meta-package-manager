@@ -24,7 +24,7 @@ from ..version import TokenizedString, parse_version
 
 class OPKG(PackageManager):
 
-    platforms = frozenset([LINUX])
+    platforms = frozenset({LINUX})
 
     requirement = "0.2.0"
 

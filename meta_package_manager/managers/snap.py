@@ -22,11 +22,11 @@ from ..version import TokenizedString, parse_version
 
 class Snap(PackageManager):
 
-    platforms = frozenset([LINUX])
+    platforms = frozenset({LINUX})
 
     requirement = "2.0.0"
 
-    global_args = ["--color=never"]
+    global_args = ("--color=never",)
 
     version_regex = r"snap\s+(?P<version>\S+)"
     """

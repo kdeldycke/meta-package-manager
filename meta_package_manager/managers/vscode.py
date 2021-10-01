@@ -25,13 +25,13 @@ from ..version import TokenizedString, parse_version
 
 class VSCode(PackageManager):
 
-    platforms = frozenset([LINUX, MACOS, WINDOWS])
+    platforms = frozenset({LINUX, MACOS, WINDOWS})
 
     requirement = "1.60.0"
 
     name = "Visual Studio Code"
 
-    cli_names = ["code"]
+    cli_names = ("code",)
 
     """
     .. code-block:: shell-session

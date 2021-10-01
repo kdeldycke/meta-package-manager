@@ -24,7 +24,7 @@ from ..version import TokenizedString, parse_version
 
 class APM(PackageManager):
 
-    platforms = frozenset([LINUX, MACOS, WINDOWS])
+    platforms = frozenset({LINUX, MACOS, WINDOWS})
 
     name = "Atom's apm"
 

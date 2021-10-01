@@ -25,7 +25,7 @@ from . import logger
 
 class Flatpak(PackageManager):
 
-    platforms = frozenset([LINUX])
+    platforms = frozenset({LINUX})
 
     requirement = "1.2.0"
 

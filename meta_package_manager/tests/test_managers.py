@@ -71,7 +71,7 @@ def test_platforms(manager):
 def test_cli_names_type(manager):
     """Check the pointed CLI name and path are file-system compatible."""
     assert manager.cli_names
-    assert isinstance(manager.cli_names, list)
+    assert isinstance(manager.cli_names, tuple)
     for name in manager.cli_names:
         assert isinstance(name, str)
         assert name.isalnum()
@@ -86,7 +86,7 @@ def test_virtual(manager):
 
 @all_managers
 def test_cli_search_path(manager):
-    assert isinstance(manager.cli_search_path, list)
+    assert isinstance(manager.cli_search_path, tuple)
     assert len(set(manager.cli_search_path)) == len(manager.cli_search_path)
     for search_path in manager.cli_search_path:
         assert isinstance(search_path, str)
@@ -109,7 +109,7 @@ def test_cli_path(manager):
 @all_managers
 def test_global_args_type(manager):
     """Check that definitions returns CLI args as a list of strings."""
-    assert isinstance(manager.global_args, list)
+    assert isinstance(manager.global_args, tuple)
     for arg in manager.global_args:
         assert arg
         assert isinstance(arg, str)
@@ -128,7 +128,7 @@ def test_requirement(manager):
 @all_managers
 def test_version_cli_options(manager):
     """Version CLI options must be a list of strings or a dict of that structure."""
-    assert isinstance(manager.version_cli_options, list)
+    assert isinstance(manager.version_cli_options, tuple)
     for arg in manager.version_cli_options:
         assert arg
         assert isinstance(arg, str)

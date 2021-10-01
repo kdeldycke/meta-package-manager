@@ -25,7 +25,7 @@ from . import logger
 
 class MAS(PackageManager):
 
-    platforms = frozenset([MACOS])
+    platforms = frozenset({MACOS})
 
     # 'mas search' output has been fixed in 1.6.1:
     # https://github.com/mas-cli/mas/pull/205
@@ -33,7 +33,7 @@ class MAS(PackageManager):
 
     name = "Mac AppStore"
 
-    version_cli_options = ["version"]
+    version_cli_options = ("version",)
     """
     .. code-block:: shell-session
 

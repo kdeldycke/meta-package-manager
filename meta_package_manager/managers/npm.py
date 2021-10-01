@@ -25,7 +25,7 @@ from ..version import TokenizedString, parse_version
 
 class NPM(PackageManager):
 
-    platforms = frozenset([LINUX, MACOS, WINDOWS])
+    platforms = frozenset({LINUX, MACOS, WINDOWS})
 
     requirement = "4.0.0"
 
@@ -293,7 +293,7 @@ class NPM(PackageManager):
                 if values["wanted"] == "linked":
                     continue
                 outdated[package_id] = {
-                    "id": package_id + "@" + values["latest"],
+                    "id": f"{package_id}@{values['latest']}",
                     "name": package_id,
                     "installed_version": parse_version(values["current"]),
                     "latest_version": parse_version(values["latest"]),

@@ -33,7 +33,7 @@ from .version import parse_version
 from .xbar import run
 
 # Rendering format of CLI in JSON fields.
-CLI_FORMATS = frozenset(["plain", "fragments", "xbar"])
+CLI_FORMATS = frozenset({"plain", "fragments", "xbar"})
 
 
 class CLIError(Exception):
@@ -81,7 +81,7 @@ class PackageManager:
     requirement = None
 
     # List of options to use to get the version from the package manager.
-    version_cli_options = ["--version"]
+    version_cli_options = ("--version",)
 
     # Regular expression used to extract the version number from the result of the CLI
     # run with the options above. It doesn't matter if the regex returns unsanitized
@@ -93,11 +93,11 @@ class PackageManager:
     # Should be a list of strings whose order dictatate the search sequence.
     # Most of the time unnecessay: the `cli_path()` method works well on all
     # platforms.
-    cli_search_path = []
+    cli_search_path = ()
 
     # Global list of options used for each call to the package manager CLI.
     # Might be of use to force silencing or high verbosity.
-    global_args = []
+    global_args = ()
 
     # Tell the manager either to raise or continue on errors.
     stop_on_error = False
@@ -137,7 +137,7 @@ class PackageManager:
 
         Is derived by default from the manager's ID.
         """
-        return [cls.id]
+        return (cls.id,)
 
     @classproperty
     def virtual(cls):
@@ -161,7 +161,7 @@ class PackageManager:
         Returns ``None`` if no CLI was found or those found were not a file.
         """
         # Check if the path exist in any of the environment locations.
-        env_path = ":".join(self.cli_search_path + [os.getenv("PATH")])
+        env_path = ":".join(flatten((self.cli_search_path, os.getenv("PATH"))))
 
         # Search for multiple CLI names.
         for name in self.cli_names:

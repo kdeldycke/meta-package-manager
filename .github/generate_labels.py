@@ -36,9 +36,9 @@ def write_labels():
     print(f"Saving to: {json_file}")
 
     # Save to json definition file.
-    label_defs = [
+    label_defs = (
         dict(zip(["name", "color", "description"], label)) for label in sorted(LABELS)
-    ]
+    )
     json_file.write_text(
         json_dumps(
             label_defs,

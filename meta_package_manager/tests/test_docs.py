@@ -66,7 +66,7 @@ def test_changelog():
             assert entry["category"]
             assert set(entry["category"].split(",")).issubset(
                 flatten(
-                    [ALL_MANAGER_IDS, OS_DEFINITIONS.keys(), "mpm", "bitbar", "xbar"]
+                    (ALL_MANAGER_IDS, OS_DEFINITIONS.keys(), "mpm", "bitbar", "xbar")
                 )
             )
 
@@ -80,7 +80,7 @@ def test_labeller_rules():
 
     # Extract list of canonically defined labels.
     content = PROJECT_ROOT.joinpath(".github/labels.json").read_text()
-    defined_labels = [lbl["name"] for lbl in json.loads(content)]
+    defined_labels = (lbl["name"] for lbl in json.loads(content))
 
     # Canonical labels are uniques.
     assert len(defined_labels) == len(set(defined_labels))
@@ -172,13 +172,13 @@ def test_labeller_rules():
             assert platforms.issubset(canonical_platforms)
 
             # Check managers sharing the same label shares the same platforms.
-            supported_platforms = [
+            supported_platforms = (
                 pool()[mid].platforms
                 for mid, lbl in MANAGER_LABELS.items()
                 # Relying on pool() restrict our checks, as the pool exclude
                 # non-locally supported managers.
                 if lbl == manager_label and mid in pool()
-            ]
+            )
             assert len(set(supported_platforms)) == 1
 
             # Check the right platforms is associated with the manager.

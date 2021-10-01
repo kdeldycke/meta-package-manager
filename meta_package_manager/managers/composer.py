@@ -27,8 +27,8 @@ from ..version import parse_version
 class Composer(PackageManager):
 
     name = "PHP's Composer"
-    global_args = ["global"]
-    platforms = frozenset([LINUX, MACOS, WINDOWS])
+    global_args = ("global",)
+    platforms = frozenset({LINUX, MACOS, WINDOWS})
     requirement = "1.4.0"
 
     version_regex = r"Composer\s+version\s+(?P<version>\S+)"

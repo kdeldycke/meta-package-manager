@@ -284,6 +284,12 @@ class CLISubCommandTests:
                         result.stderr,
                     )
                 ),
+                bool(
+                    re.search(
+                        fr"warning: No \S+ package found on {mid}.",
+                        result.stderr,
+                    )
+                ),
             ]
 
             if True in signals:

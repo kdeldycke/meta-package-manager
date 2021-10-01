@@ -63,13 +63,8 @@ class TestInstall(CLISubCommandTests):
     def test_single_manager_install(self, invoke, mid, package_id):
         result = invoke("--manager", mid, "install", package_id)
 
-        if pool()[mid].available:
-            assert result.exit_code == 0
-            self.check_manager_selection(result, {mid})
-        else:
-            assert result.exit_code == 2
-            assert not result.stdout
-            assert "critical: A package manager must be provided" in result.stderr
+        assert result.exit_code == 0
+        self.check_manager_selection(result, {mid})
 
 
 destructive()(TestInstall.test_options)

@@ -38,8 +38,8 @@ class TestInstall(CLISubCommandTests):
 
     PACKAGE_IDS = {
         "apm": "markdown-pdf",
-        "apt": "bat",
-        "apt-mint": "bat",
+        "apt": "wget",
+        "apt-mint": "exiftool",
         "brew": "jpeginfo",
         "cask": "pngyu",
         "choco": "ccleaner",
@@ -57,7 +57,9 @@ class TestInstall(CLISubCommandTests):
     assert set(PACKAGE_IDS) == set(ALL_MANAGER_IDS)
 
     @destructive
-    @pytest.mark.parametrize("mid,package_id", PACKAGE_IDS.items())
+    @pytest.mark.parametrize(
+        "mid,package_id", [pytest.param(*v, id=v[0]) for v in PACKAGE_IDS.items()]
+    )
     def test_single_manager_install(self, invoke, mid, package_id):
         result = invoke("--manager", mid, "install", package_id)
 

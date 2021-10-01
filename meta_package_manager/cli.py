@@ -61,8 +61,8 @@ SORTABLE_FIELDS = {
 }
 
 
-XKCD_MANAGER_ORDER = ["pip", "brew", "npm", "apt"]
-assert ALL_MANAGER_IDS.issuperset(XKCD_MANAGER_ORDER)
+XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "apt")
+assert set(ALL_MANAGER_IDS).issuperset(XKCD_MANAGER_ORDER)
 
 
 # Pre-rendered UI-elements.
@@ -171,7 +171,7 @@ def timeit():
 @click.option(
     "-m",
     "--manager",
-    type=click.Choice(sorted(ALL_MANAGER_IDS), case_sensitive=False),
+    type=click.Choice(ALL_MANAGER_IDS, case_sensitive=False),
     multiple=True,
     help="Restrict sub-command to a subset of package managers. Repeat to "
     "select multiple managers. The order in which options are provided defines the "
@@ -180,7 +180,7 @@ def timeit():
 @click.option(
     "-e",
     "--exclude",
-    type=click.Choice(sorted(ALL_MANAGER_IDS), case_sensitive=False),
+    type=click.Choice(ALL_MANAGER_IDS, case_sensitive=False),
     multiple=True,
     help="Exclude a package manager. Repeat to exclude multiple managers.",
 )

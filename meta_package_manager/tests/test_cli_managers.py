@@ -56,7 +56,7 @@ class TestManagers(CLISubCommandTests, CLITableTests):
 
         assert data
         assert isinstance(data, dict)
-        assert set(data) == DEFAULT_MANAGER_IDS
+        assert set(data) == set(DEFAULT_MANAGER_IDS)
 
         for manager_id, info in data.items():
             assert isinstance(manager_id, str)

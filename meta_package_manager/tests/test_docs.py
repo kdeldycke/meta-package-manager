@@ -49,7 +49,7 @@ def test_project_metadata():
     toml_path = Path(__file__).parent.joinpath("../../pyproject.toml").resolve()
     toml_config = tomli.loads(toml_path.read_text())
     # Check all managers are referenced in Python package keywords.
-    assert ALL_MANAGER_IDS.issubset(toml_config["tool"]["poetry"]["keywords"])
+    assert set(ALL_MANAGER_IDS).issubset(toml_config["tool"]["poetry"]["keywords"])
 
 
 def test_changelog():

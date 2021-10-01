@@ -28,10 +28,10 @@ from ..managers import (
 
 
 def test_manager_count():
-    """Check all implemented package managers are accounted for."""
+    """Check all implemented package managers are accounted for, and unique."""
     assert len(pool()) == 16
     assert len(pool()) == len(ALL_MANAGER_IDS)
-    assert ALL_MANAGER_IDS == set(pool())
+    assert ALL_MANAGER_IDS == sorted(set(pool()))
 
 
 def test_cached_pool():
@@ -53,4 +53,7 @@ def test_manager_groups():
     assert len(DEFAULT_MANAGER_IDS) + len(UNSUPPORTED_MANAGER_IDS) == len(
         ALL_MANAGER_IDS
     )
-    assert set(DEFAULT_MANAGER_IDS).union(UNSUPPORTED_MANAGER_IDS) == ALL_MANAGER_IDS
+    assert (
+        tuple(sorted(set(DEFAULT_MANAGER_IDS).union(UNSUPPORTED_MANAGER_IDS)))
+        == ALL_MANAGER_IDS
+    )

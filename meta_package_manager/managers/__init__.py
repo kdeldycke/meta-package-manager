@@ -58,17 +58,30 @@ def pool():
 
 # Pre-compute all sorts of constants.
 
-ALL_MANAGER_IDS = frozenset(pool())
-""" All recognized manager IDs. """
+ALL_MANAGER_IDS = tuple(sorted(pool()))
+""" All recognized manager IDs.
 
-DEFAULT_MANAGER_IDS = frozenset({m.id for m in pool().values() if m.supported})
-""" All manager IDs supported on the current platform. """
+Is a list of sorted items to provide consistency accross all UI, and reproducability in
+the order package managers are evaluated.
+"""
 
-UNSUPPORTED_MANAGER_IDS = frozenset(ALL_MANAGER_IDS - DEFAULT_MANAGER_IDS)
-""" All manager IDs unsupported on the current platform. """
+DEFAULT_MANAGER_IDS = tuple(mid for mid in ALL_MANAGER_IDS if pool()[mid].supported)
+""" All manager IDs supported on the current platform.
+
+Must keep the same order defined by ALL_MANAGER_IDS.
+"""
+
+UNSUPPORTED_MANAGER_IDS = tuple(
+    mid for mid in ALL_MANAGER_IDS if mid not in DEFAULT_MANAGER_IDS
+)
+""" All manager IDs unsupported on the current platform.
+
+Order is not important here as this list will be used to discard managers from selection
+sets.
+"""
 
 
-EXTRA_OPTION_IDS = {"stop_on_error", "ignore_auto_updates", "dry_run"}
+EXTRA_OPTION_IDS = frozenset({"stop_on_error", "ignore_auto_updates", "dry_run"})
 """List of extra options that can be set on managers during the use of the
 select_managers() helper below."""
 
@@ -98,20 +111,16 @@ def select_managers(
         keep = DEFAULT_MANAGER_IDS if drop_unsupported else ALL_MANAGER_IDS
     if not drop:
         drop = set()
-    assert ALL_MANAGER_IDS.issuperset(keep)
-    assert ALL_MANAGER_IDS.issuperset(drop)
+    assert set(ALL_MANAGER_IDS).issuperset(keep)
+    assert set(ALL_MANAGER_IDS).issuperset(drop)
 
     assert EXTRA_OPTION_IDS.issuperset(extra_options)
 
     # Only keeps the subset selected by the user.
     selected_ids = keep
 
-    # Force a natural order for orderless iteratables.
-    if isinstance(selected_ids, (set, frozenset)):
-        selected_ids = sorted(selected_ids)
-
     # Deduplicate managers IDs while preserving order, then remove excluded managers.
-    for manager_id in [mid for mid in unique(selected_ids) if mid not in drop]:
+    for manager_id in (mid for mid in unique(selected_ids) if mid not in drop):
         manager = pool()[manager_id]
 
         # TODO: check if not implemeted before calling .available. It saves one call to the package manager CLI.

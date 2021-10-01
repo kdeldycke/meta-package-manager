@@ -235,7 +235,8 @@ class CLISubCommandTests:
             Parametrize/fixturize signals to pin point output depending on
             subcommand.
         """
-        assert isinstance(selected, (frozenset, set))
+        assert isinstance(selected, (list, tuple, frozenset, set))
+        assert isinstance(full_set, (list, tuple, frozenset, set))
 
         found_managers = set()
         skipped_managers = set()
@@ -298,8 +299,8 @@ class CLISubCommandTests:
                 skipped_managers.add(mid)
 
         # Compare managers reported by the CLI and those expected.
-        assert found_managers == selected
-        assert skipped_managers == full_set - selected
+        assert found_managers == set(selected)
+        assert skipped_managers == set(full_set) - set(selected)
 
     @pytest.mark.parametrize("selector", ["--manager", "--exclude"])
     def test_invalid_manager_selector(self, invoke, subcmd, selector):
@@ -327,17 +328,17 @@ class CLISubCommandTests:
             ),
             pytest.param(
                 ("--exclude", "apm"),
-                DEFAULT_MANAGER_IDS - {"apm"},
+                set(DEFAULT_MANAGER_IDS) - {"apm"},
                 id="single_exclusion",
             ),
             pytest.param(
                 ("--exclude", "apm") * 2,
-                DEFAULT_MANAGER_IDS - {"apm"},
+                set(DEFAULT_MANAGER_IDS) - {"apm"},
                 id="duplicate_exclusions",
             ),
             pytest.param(
                 ("--exclude", "apm", "--exclude", "gem"),
-                DEFAULT_MANAGER_IDS - {"apm", "gem"},
+                set(DEFAULT_MANAGER_IDS) - {"apm", "gem"},
                 id="multiple_exclusions",
             ),
             pytest.param(

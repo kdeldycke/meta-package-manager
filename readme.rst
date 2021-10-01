@@ -3,10 +3,12 @@ Meta Package Manager
 
 |release| |versions| |build| |docs| |coverage|
 
-** ``mpm`` is the `yt-dlp <https://github.com/yt-dlp/yt-dlp>`_ of package managers. **
+What is Meta Package Manager?
 
-As the latter, `mpm` is a multi-platform CLI (Linux, macOS, Windows) that is providing
-a unifying interface. But to all `package managers it supports <#supported-package-managers>`_.
+* It provides the ``mpm`` multi-platform CLI (Linux, macOS, Windows)
+* ``mpm`` is like `yt-dlp <https://github.com/yt-dlp/yt-dlp>`_, but for package managers instead of videos
+* ``mpm`` solves [XKCD #1654 (Universal Install Script)](https://xkcd.com/1654/)
+* Because ``mpm`` try to wrap all other package managers, it became another pathological case of [XKCD #927 (Standards)](https://xkcd.com/927/)
 
 .. |release| image:: https://img.shields.io/pypi/v/meta-package-manager.svg
     :target: https://pypi.python.org/pypi/meta-package-manager

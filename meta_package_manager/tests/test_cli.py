@@ -421,7 +421,7 @@ class CLITableTests:
 
     @pytest.mark.parametrize(
         "mode,expected,conflict",
-        [(k, v[0], v[1]) for k, v in expected_renderings.items()],
+        [pytest.param(*v, id=v[0]) for v in map(flatten, expected_renderings.items())],
     )
     def test_all_table_rendering(self, invoke, subcmd, mode, expected, conflict):
         """Check that from all rendering modes, only the selected one appears

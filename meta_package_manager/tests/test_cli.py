@@ -345,6 +345,11 @@ class CLISubCommandTests:
                 id="multiple_selectors",
             ),
             pytest.param(
+                ("--manager", "gem", "--manager", "apm"),
+                {"apm", "gem"},
+                id="ordered_selectors",
+            ),
+            pytest.param(
                 ("--exclude", "apm"),
                 set(DEFAULT_MANAGER_IDS) - {"apm"},
                 id="single_exclusion",
@@ -360,12 +365,14 @@ class CLISubCommandTests:
                 id="multiple_exclusions",
             ),
             pytest.param(
-                ("--manager", "apm", "--exclude", "gem"), {"apm"}, id="priority_ordered"
+                ("--manager", "apm", "--exclude", "gem"),
+                {"apm"},
+                id="selector_priority_ordered",
             ),
             pytest.param(
                 ("--exclude", "gem", "--manager", "apm"),
                 {"apm"},
-                id="priority_reversed",
+                id="selector_priority_reversed",
             ),
             pytest.param(
                 ("--manager", "apm", "--exclude", "apm"),

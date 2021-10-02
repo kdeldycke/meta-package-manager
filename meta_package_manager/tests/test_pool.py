@@ -22,6 +22,7 @@ from ..managers import (
     DEFAULT_MANAGER_IDS,
     UNSUPPORTED_MANAGER_IDS,
     pool,
+    select_managers,
 )
 
 """ Test the pool and its content. """
@@ -57,3 +58,77 @@ def test_manager_groups():
         tuple(sorted(set(DEFAULT_MANAGER_IDS).union(UNSUPPORTED_MANAGER_IDS)))
         == ALL_MANAGER_IDS
     )
+
+
+selection_cases = {
+    "single_selector": (
+        {"keep": ("apm",)},
+        ("apm",),
+    ),
+    "duplicate_selectors": (
+        {"keep": ("apm", "apm")},
+        ("apm",),
+    ),
+    "multiple_selectors": (
+        {"keep": ("apm", "gem")},
+        ("apm", "gem"),
+    ),
+    "ordered_selectors": (
+        {"keep": ("gem", "apm")},
+        ("gem", "apm"),
+    ),
+    "single_exclusion": (
+        {"drop": ("apm")},
+        tuple(mid for mid in DEFAULT_MANAGER_IDS if mid != "apm"),
+    ),
+    "duplicate_exclusions": (
+        {"drop": ("apm", "apm")},
+        tuple(mid for mid in DEFAULT_MANAGER_IDS if mid != "apm"),
+    ),
+    "multiple_exclusions": (
+        {"drop": ("apm", "gem")},
+        tuple(mid for mid in DEFAULT_MANAGER_IDS if mid not in ("apm", "gem")),
+    ),
+    "selector_priority": (
+        {"keep": ("apm"), "drop": ("gem")},
+        ("apm",),
+    ),
+    "exclusion_override": (
+        {"keep": ("apm"), "drop": ("apm")},
+        (),
+    ),
+    "default_selection": (
+        {},
+        DEFAULT_MANAGER_IDS,
+    ),
+    "drop_unsupported": (
+        {"drop_unsupported": True},
+        DEFAULT_MANAGER_IDS,
+    ),
+    "keep_unsupported": (
+        {"drop_unsupported": False},
+        ALL_MANAGER_IDS,
+    ),
+    "drop_inactive": (
+        {"drop_inactive": True},
+        tuple(mid for mid in DEFAULT_MANAGER_IDS if pool()[mid].available),
+    ),
+    "keep_inactive": (
+        {"drop_inactive": False},
+        DEFAULT_MANAGER_IDS,
+    ),
+}
+
+
+@pytest.mark.parametrize(
+    "kwargs,expected",
+    (
+        pytest.param(kwargs, expected, id=test_id)
+        for test_id, (kwargs, expected) in selection_cases.items()
+    ),
+)
+def select_managers(kwargs, expected):
+    """We use tuple everywhere so we can check that select_managers() conserve the
+    soriginal order."""
+    selection = select_managers(**kwargs)
+    assert tuple(selection) == expected

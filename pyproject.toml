@@ -63,6 +63,8 @@ classifiers = [
 
 [tool.poetry.urls]
 "Funding" = "https://github.com/sponsors/kdeldycke"
+"Issues" = "https://github.com/kdeldycke/meta-package-manager/issues"
+"Changelog" = "https://meta-package-manager.readthedocs.io/en/latest/changelog.html"
 
 [tool.poetry.dependencies]
 # List of python versions and their support status:

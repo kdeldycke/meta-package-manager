@@ -31,7 +31,7 @@ class TestXbarPlugin:
         (r"↑\d+ (⚠️\d+ )?\| dropdown=false$", True),
         # Package upgrade line. Optional: there might be no package to
         # upgrade.
-        (r"(--)?\S+ \S+ → \S+ \| shell=.+$", False),
+        (r"(--)?.+ \S+ → \S+ \| shell=.+$", False),
         # Submenu marker line. Required.
         (r"-{3,5}$", True),
         # Upgrade all line. Required.

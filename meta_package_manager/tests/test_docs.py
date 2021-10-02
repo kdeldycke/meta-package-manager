@@ -80,7 +80,7 @@ def test_labeller_rules():
 
     # Extract list of canonically defined labels.
     content = PROJECT_ROOT.joinpath(".github/labels.json").read_text()
-    defined_labels = (lbl["name"] for lbl in json.loads(content))
+    defined_labels = [lbl["name"] for lbl in json.loads(content)]
 
     # Canonical labels are uniques.
     assert len(defined_labels) == len(set(defined_labels))

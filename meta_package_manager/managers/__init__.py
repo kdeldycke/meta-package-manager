@@ -61,7 +61,7 @@ def pool():
 ALL_MANAGER_IDS = tuple(sorted(pool()))
 """ All recognized manager IDs.
 
-Is a list of sorted items to provide consistency accross all UI, and reproducability in
+Is a list of sorted items to provide consistency across all UI, and reproducability in
 the order package managers are evaluated.
 """
 

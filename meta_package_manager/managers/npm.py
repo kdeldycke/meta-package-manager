@@ -305,7 +305,7 @@ class NPM(PackageManager):
         cmd_args = ["--global", "--progress=false", "--no-update-notifier"]
         if package_id:
             cmd_args.append("install")
-            cmd_args.append(package_id + "@" + version if version else package_id)
+            cmd_args.append(f"{package_id}@{version}" if version else package_id)
         else:
             cmd_args.append("update")
         return [self.cli_path, self.global_args] + cmd_args

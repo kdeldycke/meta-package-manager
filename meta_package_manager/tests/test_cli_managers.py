@@ -41,7 +41,7 @@ class TestManagers(CLISubCommandTests, CLITableTests):
     def test_all_managers(self, invoke, subcmd, mid):
         result = invoke("--manager", mid, "--all-managers", subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result, {mid}, ALL_MANAGER_IDS)
+        self.check_manager_selection(result, {mid}, reference_set=ALL_MANAGER_IDS)
 
     @pytest.mark.parametrize("mid", UNSUPPORTED_MANAGER_IDS)
     def test_unsupported_managers(self, invoke, subcmd, mid):

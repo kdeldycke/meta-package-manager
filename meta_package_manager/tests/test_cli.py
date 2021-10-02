@@ -203,7 +203,7 @@ class CLISubCommandTests:
     """All these tests runs on each subcommand.
 
     This class doesn't starts with `Test` as it is meant to be used as a
-    template, inherited sub-command specific files.
+    template, inherited by sub-command specific test cases.
     """
 
     def test_help(self, invoke, subcmd):
@@ -220,15 +220,25 @@ class CLISubCommandTests:
         result = invoke(opt_stats, opt_timer, subcmd)
         assert result.exit_code == 0
 
-    @staticmethod
+    strict_selection_match = True
+    """All user-selected managers are expected to be reported in CLI output."""
+
+    @classmethod
     def check_manager_selection(
+        cls,
         result,
         selected=DEFAULT_MANAGER_IDS,
-        full_set=DEFAULT_MANAGER_IDS,
+        reference_set=DEFAULT_MANAGER_IDS,
     ):
-        """Check inclusion and exclusion of a set of managers.
+        """Check that user-selected managers are found in CLI's output.
 
-        Check all manager are there by default.
+        At this stage of the CLI, the order in which the managers are reported doesn't
+        matter because:
+        * ``<stdout>`` and ``<stderr>`` gets mangled
+        * paging is async
+        * we may introduce parrallel execution of manager in the future
+
+        This explain the use of ``set()`` everywhere.
 
         .. todo:
 
@@ -236,16 +246,16 @@ class CLISubCommandTests:
             subcommand.
         """
         assert isinstance(selected, (list, tuple, frozenset, set))
-        assert isinstance(full_set, (list, tuple, frozenset, set))
+        assert isinstance(reference_set, (list, tuple, frozenset, set))
 
         found_managers = set()
         skipped_managers = set()
 
-        for mid in full_set:
+        for mid in reference_set:
 
             # List of signals indicating a package manager has been retained by
             # the CLI. Roughly sorted from most specific to more forgiving.
-            signals = [
+            signals = (
                 # Common "not found" warning message.
                 f"warning: Skip unavailable {mid} manager." in result.stderr,
                 # Common "not implemented" optional command warning message.
@@ -291,16 +301,24 @@ class CLISubCommandTests:
                         result.stderr,
                     )
                 ),
-            ]
+            )
 
             if True in signals:
                 found_managers.add(mid)
             else:
                 skipped_managers.add(mid)
 
+        # Check consistency of reported findings.
+        assert len(found_managers) + len(skipped_managers) == len(reference_set)
+        assert found_managers.union(skipped_managers) == set(reference_set)
+
         # Compare managers reported by the CLI and those expected.
-        assert found_managers == set(selected)
-        assert skipped_managers == set(full_set) - set(selected)
+        if cls.strict_selection_match:
+            assert found_managers == set(selected)
+        # Partial reporting of found manager is allowed in certain cases like install
+        # command, which is only picking one manager among the user's selection.
+        else:
+            assert set(found_managers).issubset(selected)
 
     @pytest.mark.parametrize("selector", ("--manager", "--exclude"))
     def test_invalid_manager_selector(self, invoke, subcmd, selector):

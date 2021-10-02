@@ -24,12 +24,17 @@ from .test_cli import CLISubCommandTests
 
 @pytest.fixture
 def subcmd():
-    """Seed common subcommand tests with a dummy file and content to allow the
-    CLI to not fail on required file input."""
     return "install", "arrow"
 
 
 class TestInstall(CLISubCommandTests):
+
+    strict_selection_match = False
+    """ Install sub-command try each user-selected manager until it find one providing
+    the package we seek to install, after which the process stop. This mean not all
+    managers will be called, so we allow the CLI output checks to partially match.
+    """
+
     def test_no_package_id(self, invoke):
         result = invoke("install")
         assert result.exit_code == 2
@@ -62,9 +67,8 @@ class TestInstall(CLISubCommandTests):
     )
     def test_single_manager_install(self, invoke, mid, package_id):
         result = invoke("--manager", mid, "install", package_id)
-
         assert result.exit_code == 0
-        self.check_manager_selection(result, {mid}, full_set=ALL_MANAGER_IDS)
+        self.check_manager_selection(result, {mid}, reference_set=ALL_MANAGER_IDS)
 
 
 destructive()(TestInstall.test_options)

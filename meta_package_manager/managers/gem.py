@@ -83,9 +83,9 @@ class Gem(PackageManager):
                     package_id, versions = match.groups()
                     # Guess latest installed version.
                     version = max(
-                            parse_version(v)
-                            for v in re.compile(r",|default:| ").split(versions)
-                            if v
+                        parse_version(v)
+                        for v in re.compile(r",|default:| ").split(versions)
+                        if v
                     )
                     installed[package_id] = {
                         "id": package_id,

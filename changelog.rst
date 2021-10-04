@@ -2,10 +2,9 @@ Changelog
 =========
 
 
-`4.6.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v4.5.0...develop>`_
---------------------------------------------------------------------------------------------------
 
-.. note:: This version is not yet released and is under active development.
+`4.6.0 (2021-10-04) <https://github.com/kdeldycke/meta-package-manager/compare/v4.5.0...v4.6.0>`_
+-------------------------------------------------------------------------------------------------
 
 * [mpm] Implements XKCD 1654. Closes #10.
 * [mpm] Add ``-x/--xkcd`` option to forces manager selection.

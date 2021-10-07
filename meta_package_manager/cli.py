@@ -31,6 +31,7 @@ import tomli_w
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list, strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
+from cloup import Context, HelpFormatter, HelpTheme, Style, group
 from simplejson import dumps as json_dumps
 
 from . import CLI_NAME, __version__, env_data, logger, reset_logger
@@ -161,12 +162,24 @@ def timeit():
         click.echo(f"Execution time: {perf_counter() - start_time:0.3f} seconds.")
 
 
-@click.group(
-    context_settings=dict(
-        show_default=True,
-        auto_envvar_prefix=CLI_NAME,
-    )
+CONTEXT_SETTINGS = Context.settings(
+    show_default=True,
+    auto_envvar_prefix=CLI_NAME,
+    align_option_groups=False,
+    show_constraints=True,
+    show_subcommand_aliases=True,
+    formatter_settings=HelpFormatter.settings(
+        theme=HelpTheme(
+            invoked_command=Style(fg="bright_white"),
+            heading=Style(fg="bright_green", bold=True),
+            constraint=Style(fg="magenta"),
+            col1=Style(fg="cyan"),
+        )
+    ),
 )
+
+
+@group(context_settings=CONTEXT_SETTINGS)
 @click.option(
     "-m",
     "--manager",
@@ -197,8 +210,8 @@ def timeit():
     "--xkcd",
     is_flag=True,
     default=False,
-    help=f"Forces the subset of package managers to the order defined in XKCD #1654 "
-    "comic, i.e. {XKCD_MANAGER_ORDER}.",
+    help="Forces the subset of package managers to the order defined in XKCD #1654 "
+    f"comic, i.e. {XKCD_MANAGER_ORDER}.",
 )
 @click.option(
     "--ignore-auto-updates/--include-auto-updates",

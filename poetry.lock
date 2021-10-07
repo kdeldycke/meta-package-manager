@@ -204,6 +204,18 @@ python-versions = "*"
 click = "*"
 
 [[package]]
+name = "cloup"
+version = "0.12.0"
+description = "Adds features to Click: option groups, constraints, subcommand sections and help themes."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+click = ">=7.1,<9.0"
+typing-extensions = {version = "*", markers = "python_version <= \"3.8\""}
+
+[[package]]
 name = "colorama"
 version = "0.4.4"
 description = "Cross-platform colored terminal text."
@@ -1013,7 +1025,7 @@ docs = ["sphinx", "sphinx_rtd_theme", "sphinx_tabs"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "7ae47373ef0360d3991ea9c77be6bcc5951345bac30463a07c0934c7a2d2a99d"
+content-hash = "b68f22d29088d92401ee8b052257bf36830fde0a2289aec3e2116ee479fbe00e"
 
 [metadata.files]
 alabaster = [
@@ -1125,6 +1137,10 @@ click = [
 click-log = [
     {file = "click-log-0.3.2.tar.gz", hash = "sha256:16fd1ca3fc6b16c98cea63acf1ab474ea8e676849dc669d86afafb0ed7003124"},
     {file = "click_log-0.3.2-py2.py3-none-any.whl", hash = "sha256:eee14dc37cdf3072158570f00406572f9e03e414accdccfccd4c538df9ae322c"},
+]
+cloup = [
+    {file = "cloup-0.12.0-py2.py3-none-any.whl", hash = "sha256:7a3a70044f1008d521a27308a991c85dbc6c0b4650d550e2d6f9f68d0d96c188"},
+    {file = "cloup-0.12.0.tar.gz", hash = "sha256:aeaa5ccacf2105259d85ed154122c854e7885b740c7dda4f00284820479c088f"},
 ]
 colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},

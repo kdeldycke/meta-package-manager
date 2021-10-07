@@ -27,7 +27,8 @@ jobs:
           - "3.7"
           - "3.8"
           - "3.9"
-          # XXX Temporary disable 3.10 while we wait for https://github.com/mahmoud/boltons/issues/294
+          # XXX Temporary disable 3.10 while we wait for
+          # https://github.com/mahmoud/boltons/issues/294
           # - "3.10"
     steps:
       - uses: actions/checkout@v2.3.4

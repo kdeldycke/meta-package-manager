@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-`4.6.1 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v4.6.0...develop>`_
+`4.7.0 (unreleased) <https://github.com/kdeldycke/meta-package-manager/compare/v4.6.0...develop>`_
 --------------------------------------------------------------------------------------------------
 
 .. note:: This version is not yet released and is under active development.

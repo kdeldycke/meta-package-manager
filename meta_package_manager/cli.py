@@ -31,7 +31,6 @@ import tomli_w
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list, strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
-from click_help_colors import version_option
 from simplejson import dumps as json_dumps
 
 from . import CLI_NAME, __version__, env_data, logger, reset_logger
@@ -262,13 +261,10 @@ def timeit():
     metavar="LEVEL",
     help="Either CRITICAL, ERROR, WARNING, INFO or DEBUG.",
 )
-@version_option(
+@click.version_option(
     version=__version__,
     prog_name=CLI_NAME,
-    version_color="green",
-    prog_name_color="white",
     message=f"%(prog)s %(version)s\n{env_data}",
-    message_color="bright_black",
 )
 @click.help_option("-h", "--help")
 @click.pass_context

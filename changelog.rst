@@ -8,6 +8,7 @@ Changelog
 .. note:: This version is not yet released and is under active development.
 
 * [mpm] Run tests on Python 3.10.
+* [mpm] Removes ``click-help-colors`` dependency.
 
 
 `4.6.0 (2021-10-04) <https://github.com/kdeldycke/meta-package-manager/compare/v4.5.0...v4.6.0>`_

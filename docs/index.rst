@@ -10,14 +10,14 @@ Contents
    usecase
    usage
    configuration
-   falsehoods
    xbar
-   meta_package_manager
+   falsehoods
    contributing
    development
    changelog
-   todolist
    history
+   meta_package_manager
+   todolist
    license
 
 

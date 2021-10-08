@@ -29,6 +29,11 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
     "sphinx_tabs.tabs",
+    # Adds a copy button to code blocks.
+    "sphinx_copybutton",
+    # Link to GitHub issues and PRs.
+    "sphinx_issues",
+    "sphinxext.opengraph",
 ]
 
 master_doc = "index"
@@ -59,4 +64,13 @@ autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
+issues_github_path = f"kdeldycke/{project_id}"
+
+extlinks = {
+    "issue": (f"https://github.com/{issues_github_path}/issues/%s", "issue "),
+    "pr": (f"https://github.com/{issues_github_path}/pull/%s", "pull request "),
+}
+
+
 html_theme = "furo"
+html_title = project

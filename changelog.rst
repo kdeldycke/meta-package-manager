@@ -10,6 +10,7 @@ Changelog
 * [mpm] Add help screen coloring.
 * [mpm] Change documentation theme from class RTD to furo.
 * [mpm] Move documentation from ``readthedocs.org`` to ``github.io``.
+* [mpm] Rewrite documentation from rST to MyST.
 * [mpm] Add dependency on ``cloup``.
 * [mpm] Removes ``click-help-colors`` dependency.
 * [mpm] Run tests on Python 3.10.

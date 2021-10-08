@@ -34,6 +34,7 @@ extensions = [
     # Link to GitHub issues and PRs.
     "sphinx_issues",
     "sphinxext.opengraph",
+    "myst_parser",
 ]
 
 master_doc = "index"

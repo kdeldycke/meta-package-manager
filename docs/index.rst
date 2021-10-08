@@ -13,6 +13,7 @@ Contents
    falsehoods
    xbar
    meta_package_manager
+   contributing
    development
    changelog
    todolist

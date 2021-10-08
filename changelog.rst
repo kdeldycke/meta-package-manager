@@ -11,6 +11,7 @@ Changelog
 * [mpm] Add dependency on ``cloup``.
 * [mpm] Removes ``click-help-colors`` dependency.
 * [mpm] Run tests on Python 3.10.
+* [mpm] Add a contribution guide stub in documentation. Closes #276.
 
 
 `4.6.0 (2021-10-04) <https://github.com/kdeldycke/meta-package-manager/compare/v4.5.0...v4.6.0>`_

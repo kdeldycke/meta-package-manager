@@ -27,6 +27,7 @@ release = version
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.todo",
+    "sphinx.ext.extlinks",
     "sphinx.ext.viewcode",
     "sphinx_tabs.tabs",
     # Adds a copy button to code blocks.
@@ -65,13 +66,14 @@ autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
+# External reference shortcuts.
 issues_github_path = f"kdeldycke/{project_id}"
 
+github_project = f"https://github.com/{issues_github_path}"
 extlinks = {
-    "issue": (f"https://github.com/{issues_github_path}/issues/%s", "issue "),
-    "pr": (f"https://github.com/{issues_github_path}/pull/%s", "pull request "),
+    "gh": (f"{github_project}/%s", "GitHub: %s"),
 }
 
-
+# Theme config.
 html_theme = "furo"
 html_title = project

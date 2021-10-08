@@ -18,6 +18,7 @@ Contents
    history
    meta_package_manager
    todolist
+   code-of-conduct
    license
 
 

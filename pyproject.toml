@@ -9,7 +9,7 @@ authors = ["Kevin Deldycke <kevin@deldycke.com>"]
 readme = "readme.rst"
 homepage = 'https://github.com/kdeldycke/meta-package-manager'
 repository = 'https://github.com/kdeldycke/meta-package-manager'
-documentation = 'https://meta-package-manager.readthedocs.io'
+documentation = 'https://kdeldycke.github.io/meta-package-manager'
 keywords = [
     'CLI',
     'apm',
@@ -64,7 +64,7 @@ classifiers = [
 [tool.poetry.urls]
 "Funding" = "https://github.com/sponsors/kdeldycke"
 "Issues" = "https://github.com/kdeldycke/meta-package-manager/issues"
-"Changelog" = "https://meta-package-manager.readthedocs.io/en/latest/changelog.html"
+"Changelog" = "https://kdeldycke.github.io/meta-package-manager/changelog.html"
 
 [tool.poetry.dependencies]
 # List of python versions and their support status:

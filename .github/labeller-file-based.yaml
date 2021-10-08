@@ -14,7 +14,6 @@
   - .mailmap
   - LICENSE
   - readme.rst
-  - readthedocs.yaml
 
 "📦 manager: apm":
   - meta_package_manager/managers/apm*

@@ -66,9 +66,10 @@ autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
-# External reference shortcuts.
+# GitHub pre-implemented shortcuts.
 issues_github_path = f"kdeldycke/{project_id}"
 
+# External reference shortcuts.
 github_project = f"https://github.com/{issues_github_path}"
 extlinks = {
     "gh": (f"{github_project}/%s", "GitHub: %s"),

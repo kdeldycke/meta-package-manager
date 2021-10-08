@@ -45,8 +45,7 @@ jobs:
               {"labels": [
                 "📗 documentation"],
                "keywords": [
-                  "sphinx", "readthedocs", "read the docs", "readme", "rst",
-                  "typo"]},
+                  "sphinx", "readme", "markdown", "typo"]},
 
               {"labels": [
                 "✨ enhancement"],

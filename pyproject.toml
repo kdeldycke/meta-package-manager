@@ -78,17 +78,13 @@ cloup = "^0.12.0"
 simplejson = "^3.17.5"
 tomli = "^1.2.1"
 tomli_w = "^0.3.0"
-# Should have been put in dev-dependencies but extras only works from main
-# section.
-sphinx = { version = "^4.2.0", optional = true }
-sphinx_rtd_theme = { version = "^1.0.0", optional = true }
-sphinx_tabs = { version = "^3.2.0", optional = true }
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
 bump2version = "^1.0.1"
 check-wheel-contents = "^0.3.3"
 coverage = { extras = ["toml"], version = "^6.0" }
+furo = "^2021.9.22"
 isort = "^5.9.3"
 pipdeptree = { extras = ["graphviz"], version = "^2.1.0" }
 pylint = "^2.11.1"
@@ -97,12 +93,10 @@ pytest = "^6.2.5"
 pytest-cov = "^3.0.0"
 pytest-randomly = "^3.10.1"
 pyyaml = "^5.4.1"
+sphinx = "^4.2.0"
+sphinx_tabs = "^3.2.0"
 twine = "^3.4.2"
 yamllint = "^1.26.3"
-
-[tool.poetry.extras]
-# Workaround lacks of Poetry support by RTD: https://stackoverflow.com/a/58163431
-docs = ["sphinx", "sphinx_rtd_theme", "sphinx_tabs"]
 
 [tool.poetry.scripts]
 mpm = 'meta_package_manager.cli:cli'

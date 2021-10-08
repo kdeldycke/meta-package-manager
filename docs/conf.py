@@ -3,8 +3,10 @@ from pathlib import Path
 
 import tomli
 
+project_path = Path(__file__).parent.parent.resolve()
+
 # Fetch general information about the project from pyproject.toml.
-toml_path = Path(__file__).parent.joinpath("../pyproject.toml").resolve()
+toml_path = project_path / "pyproject.toml"
 toml_config = tomli.loads(toml_path.read_text())
 
 # Redistribute pyproject.toml config to Sphinx.
@@ -35,10 +37,9 @@ master_doc = "index"
 # HTML content.
 html_show_copyright = False
 copyright = (
-    "<a href='https://kevin.deldycke.com'>{}</a> and <a href='{}"
+    f"<a href='https://kevin.deldycke.com'>{author}</a> and <a href='{url}"
     "/graphs/contributors'>contributors</a>"
-).format(author, url)
-
+)
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 nitpicky = True
@@ -58,11 +59,4 @@ autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
-# Use RTD theme both locally and online. Source: https://github.com/snide
-# /sphinx_rtd_theme#using-this-theme-locally-then-building-on-read-the-docs
-on_rtd = os.environ.get("READTHEDOCS", None) == "True"
-if not on_rtd:
-    import sphinx_rtd_theme
-
-    html_theme = "sphinx_rtd_theme"
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme = "furo"

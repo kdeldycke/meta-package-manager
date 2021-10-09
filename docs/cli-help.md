@@ -1,6 +1,4 @@
-# Usage
-
-All CLI help screens.
+# CLI Help Screens
 
 ## `mpm`
 

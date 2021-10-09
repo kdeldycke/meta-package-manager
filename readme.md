@@ -3,7 +3,7 @@
 <a href="https://xkcd.com/1654/" alt="XKCD #1654: Universal Install Script">
 <img align="right" width="20%" height="20%" src="http://imgs.xkcd.com/comics/universal_install_script.png"/>
 </a>
-  
+
 [![Last release](https://img.shields.io/pypi/v/meta-package-manager.svg)](https://pypi.python.org/pypi/meta-package-manager)
 [![Python versions](https://img.shields.io/pypi/pyversions/meta-package-manager.svg)](https://pypi.python.org/pypi/meta-package-manager)
 [![Unittests status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=develop)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Adevelop)
@@ -64,14 +64,13 @@
 |[`yarn`](https://yarnpkg.com)      |   1.21.0  |     ✓   |   ✓  |   ✓   |        |     ✓  |           ✓              |  ✓     |      ✓     |        ✓       |     ✓ |
 
 
-## Installation
+## Quickstart
 
-This package is [available on PyPi](https://pypi.python.org/pypi/meta-package-manager), so you can install the
-latest stable release and its dependencies with a simple `pip` call:
+1. Install `mpm` with `pip`:
 
-```shell-session
-$ pip install meta-package-manager
-```
+   ```shell-session
+   $ pip install meta-package-manager
+   ```
 
 Other [alternatives installation methods](https://kdeldycke.github.io/meta-package-manager/install.html) are available in the documentation.
 
@@ -105,5 +104,5 @@ $ mpm -a managers
 ```
 
 More documentation is available in:
-* the [detailed help screen](https://kdeldycke.github.io/meta-package-manager/usage.html)
+* the [detailed help screens](https://kdeldycke.github.io/meta-package-manager/cli-help.html)
 * the [list of use-cases](https://kdeldycke.github.io/meta-package-manager/usecase.html) where you'll find inspiration on how to leverage `mpm` power

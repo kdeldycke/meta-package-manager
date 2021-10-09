@@ -592,7 +592,12 @@ This version is not released yet and is under active development.
 * [pip] Add support for Python's `pip`.
 
 
-## {commit}`1.0.0 (2016-07-05) <170ce9>`
+## {gh}`1.0.0 (2016-07-05) <commit/170ce9>`
 
 * [mpm] Initial public release.
 * [brew,cask] Add support for Homebrew and Cask.
+
+``` {todo}
+Replace sub-title above with shorter `` {commit}`1.0.0 (2016-07-05) <170ce9>` ``
+role once {issue}`sloria/sphinx-issues#116` is resolved.
+```

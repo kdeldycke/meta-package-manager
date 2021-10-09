@@ -1,18 +1,16 @@
 # xbar Plugin
 
+```{sidebar} Submenu layout
+![](xbar-plugin-submenu-layout.png)
+```
+
+```{sidebar} Default layout
+![](xbar-plugin-flat-layout.png)
+```
+
 A copy of the latest stable version of the xbar plugin for `mpm` is always
 [available on xbar website](https://xbarapp.com/docs/plugins/Dev/meta_package_manager.7h.py.html)
 and [plugin repository](https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py).
-
-```{image} xbar-plugin-submenu-layout.png
-:alt: xbar plugin with submenu layout
-:align: center
-```
-
-```{image} xbar-plugin-flat-layout.png
-:alt: xbar plugin with default layout
-:align: center
-```
 
 ## Development constraints
 
@@ -48,7 +46,7 @@ Python 3.7.3 (default, Sep  5 2019, 17:14:41)
 ## Development workflow
 
 Active development of the plugin is happening here, as a side-project of
-:command:`mpm` itself.
+{command}`mpm` itself.
 
 Releases of the plugin is synchronized with the package. Both share the exact
 same version to simplify management. This explain why the plugin could appears

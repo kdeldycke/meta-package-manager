@@ -4,7 +4,7 @@
 
 List global options and commands:
 
-```shell-session
+``` shell-session
 $ mpm --help
 Usage: mpm [OPTIONS] COMMAND [ARGS]...
 
@@ -66,7 +66,7 @@ Commands:
 
 ## `mpm backup`
 
-```shell-session
+``` shell-session
 $ mpm backup --help
 Usage: mpm backup [OPTIONS] [TOML_OUTPUT]
 
@@ -85,7 +85,7 @@ Options:
 
 ## `mpm cleanup`
 
-```shell-session
+``` shell-session
 $ mpm cleanup --help
 Usage: mpm cleanup [OPTIONS]
 
@@ -97,7 +97,7 @@ Options:
 
 ## `mpm install`
 
-```shell-session
+``` shell-session
 $ mpm install --help
 Usage: mpm install [OPTIONS] PACKAGE_ID
 
@@ -109,7 +109,7 @@ Options:
 
 ## `mpm installed`
 
-```shell-session
+``` shell-session
 $ mpm installed --help
 Usage: mpm installed [OPTIONS]
 
@@ -121,7 +121,7 @@ Options:
 
 ## `mpm managers`
 
-```shell-session
+``` shell-session
 $ mpm managers --help
 Usage: mpm managers [OPTIONS]
 
@@ -133,7 +133,7 @@ Options:
 
 ## `mpm outdated`
 
-```shell-session
+``` shell-session
 $ mpm outdated --help
 Usage: mpm outdated [OPTIONS]
 
@@ -147,7 +147,7 @@ Options:
 
 ## `mpm restore`
 
-```shell-session
+``` shell-session
 $ mpm restore --help
 Usage: mpm restore [OPTIONS] TOML_FILES...
 
@@ -161,7 +161,7 @@ Options:
 
 ## `mpm search`
 
-```shell-session
+``` shell-session
 $ mpm search --help
 Usage: mpm search [OPTIONS] QUERY
 
@@ -178,7 +178,7 @@ Options:
 
 ## `mpm sync`
 
-```shell-session
+``` shell-session
 $ mpm sync --help
 Usage: mpm sync [OPTIONS]
 
@@ -190,7 +190,7 @@ Options:
 
 ## `mpm upgrade`
 
-```shell-session
+``` shell-session
 $ mpm upgrade --help
 Usage: mpm upgrade [OPTIONS]
 
@@ -200,7 +200,6 @@ Options:
   --help  Show this message and exit.  [default: False]
 ```
 
-
-```{todo}
+``` {todo}
 Dynamiccaly update all CLI output above.
 ```

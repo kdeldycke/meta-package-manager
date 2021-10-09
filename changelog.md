@@ -3,7 +3,7 @@
 
 ## {gh}`4.7.0 (unreleased) <compare/v4.6.0...develop>`
 
-```{important}
+``` {important}
 This version is not released yet and is under active development.
 ```
 

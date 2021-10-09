@@ -1,10 +1,11 @@
 # Configuration
 
-`mpm` can read defaults options from a [configuration file](meta_package_manager.config.default_conf_path).
+`mpm` can read defaults options from a [configuration
+file](meta_package_manager.config.default_conf_path).
 
 Here is a sample:
 
-```toml
+``` toml
 # My default configuration file.
 
 [mpm]

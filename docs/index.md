@@ -5,7 +5,7 @@ hide-toc: true
 ```{include} ../readme.md
 ```
 
-```{toctree}
+``` {toctree}
 :maxdepth: 2
 :hidden:
 install
@@ -16,7 +16,7 @@ xbar
 falsehoods
 ```
 
-```{toctree}
+``` {toctree}
 :caption: Development
 :maxdepth: 2
 :hidden:
@@ -33,6 +33,6 @@ GitHub Repository <https://github.com/kdeldycke/meta-package-manager>
 
 ## Indices and tables
 
-* {ref}`genindex`
-* {ref}`modindex`
-* {ref}`search`
+- {ref}`genindex`
+- {ref}`modindex`
+- {ref}`search`

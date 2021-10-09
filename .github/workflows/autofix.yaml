@@ -39,6 +39,44 @@ jobs:
           assignees: kdeldycke
           branch: format-python
 
+  markdown:
+    name: Format markdown and create a PR
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Install Pandoc
+        run: |
+          sudo apt install pandoc
+      - name: Auto-format to GitHub-Flavored Markdown
+        # Waiting for these issues to be resolved:
+        # https://github.com/jgm/pandoc/issues/7616
+        run: >
+          find ./ -iname "*.md" -exec pandoc "{}" --to=markdown --output="{}"
+          --columns=79 --tab-stop=2 \;
+      - name: Auto-fix Markdown
+        uses: avto-dev/markdown-lint@v1.5.0
+        # Non-fixable markdown issues will return non-zero error code. Allow
+        # that step to fail so we can proceed with creating the auto-fix PR
+        # below.
+        continue-on-error: true
+        with:
+          args: './**/*.md'
+          fix: true
+      - uses: peter-evans/create-pull-request@v3.10.1
+        with:
+          author: "Kevin Deldycke <kevin@deldycke.com>"
+          commit-message: "[autofix] Format Markdown"
+          title: "[autofix] Format Markdown"
+          body: >
+            [Auto-generated on run
+            #${{ github.run_id }}](https://github.com/${{ github.repository
+            }}/actions/runs/${{ github.run_id }}) as defined by [workflow
+            action](https://github.com/${{ github.repository
+            }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
+          labels: "🔩 CI/CD"
+          assignees: kdeldycke
+          branch: format-markdown
+
   json:
     name: Format JSON files and create a PR
     runs-on: ubuntu-20.04

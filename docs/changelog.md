@@ -1,3 +1,2 @@
-```{eval-rst}
-.. include:: ../changelog.rst
+```{include} ../changelog.md
 ```

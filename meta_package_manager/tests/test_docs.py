@@ -53,9 +53,9 @@ def test_project_metadata():
 
 
 def test_changelog():
-    content = PROJECT_ROOT.joinpath("changelog.rst").read_text()
+    content = PROJECT_ROOT.joinpath("changelog.md").read_text()
 
-    assert content.startswith("Changelog\n=========\n")
+    assert content.startswith("# Changelog\n")
 
     entry_pattern = re.compile(r"^\* \[(?P<category>[a-z,]+)\] (?P<entry>.+)")
     for line in content.splitlines():

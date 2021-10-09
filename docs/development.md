@@ -133,13 +133,13 @@ Revision should already be set to the next version, so we just need to set the
 released date in the changelog:
 
 ```shell-session
-$ vi ./changelog.rst
+$ vi ./changelog.md
 ```
 
 Create a release commit, tag it and merge it back to `main` branch:
 
 ```shell-session
-$ git add ./meta_package_manager/__init__.py ./changelog.rst
+$ git add ./meta_package_manager/__init__.py ./changelog.md
 $ git commit -m "Release vX.Y.Z"
 $ git tag "vX.Y.Z"
 $ git push
@@ -183,7 +183,7 @@ and set it back to development state by increasing the `patch` level.
 ```shell-session
 $ git checkout develop
 $ poetry run bumpversion --verbose patch
-$ git add ./meta_package_manager/__init__.py ./changelog.rst
+$ git add ./meta_package_manager/__init__.py ./changelog.md
 $ git commit -m "Post release version bump."
 $ git push
 ```
@@ -198,7 +198,7 @@ longer bug-fix only, or gets really important, feel free to bump to the next
 
 ```shell-session
 $ poetry run bumpversion --verbose minor
-$ git add ./meta_package_manager/__init__.py ./changelog.rst
+$ git add ./meta_package_manager/__init__.py ./changelog.md
 $ git commit -m "Next release no longer bug-fix only. Bump revision."
 $ git push
 ```

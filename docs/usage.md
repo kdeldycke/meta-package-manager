@@ -1,8 +1,6 @@
 # Usage
 
-```{todo}
-Update documentation below from CLI execution.
-```
+All CLI help screens.
 
 ## `mpm`
 
@@ -120,4 +118,9 @@ Usage: mpm upgrade [OPTIONS]
 Options:
   -d, --dry-run  Do not actually perform any upgrade, just simulate CLI calls.
   --help         Show this message and exit.
+```
+
+
+```{todo}
+Dynamiccaly update all CLI output above.
 ```

@@ -37,7 +37,7 @@
   selectors).
 * Export results in JSON or user-friendly tables.
 * Shell auto-completion for Bash, Zsh and Fish.
-* Provides a {doc}`xbar` for friendly macOS integration.
+* Provides a [xbar plugin](https://kdeldycke.github.io/meta-package-manager/xbar.html) for friendly macOS integration.
 * Because `mpm` try to wrap all other package managers, it became another pathological case of [XKCD #927 (Standards)](https://xkcd.com/927/)
 
 
@@ -72,7 +72,7 @@ latest stable release and its dependencies with a simple `pip` call:
 $ pip install meta-package-manager
 ```
 
-Other {doc}`alternatives installation methods <install>` are available in the documentation.
+Other [alternatives installation methods](https://kdeldycke.github.io/meta-package-manager/install.html) are available in the documentation.
 
 
 ## Usage
@@ -104,5 +104,5 @@ $ mpm -a managers
 ```
 
 More documentation is available in:
-* the {doc}`detailed help screen <usage>`
-* the {doc}`list of use-cases <usecase>` where you'll find inspiration on how to leverage `mpm` power
+* the [detailed help screen](https://kdeldycke.github.io/meta-package-manager/usage.html)
+* the [list of use-cases](https://kdeldycke.github.io/meta-package-manager/usecase.html) where you'll find inspiration on how to leverage `mpm` power

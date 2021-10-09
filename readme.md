@@ -87,8 +87,8 @@ $ mpm -a managers
 │ Atom's apm         │ apm      │ ✓               │ ✓  /usr/local/bin/apm      │ ✓          │ ✓  2.6.2  │
 │ APT                │ apt      │ ✘  Linux only   │ ✓  /usr/bin/apt            │ ✓          │ ✘         │
 │ Linux Mint's apt   │ apt-mint │ ✘  Linux only   │ ✓  /usr/bin/apt            │ ✓          │ ✘         │
-│ Homebrew Formulae  │ brew     │ ✓               │ ✓  /usr/local/bin/brew     │ ✓          │ ✓  3.2.13 │
-│ Homebrew Cask      │ cask     │ ✓               │ ✓  /usr/local/bin/brew     │ ✓          │ ✓  3.2.13 │
+│ Homebrew Formulae  │ brew     │ ✓               │ ✓  /usr/local/bin/brew     │ ✓          │ ✓  3.2.15 │
+│ Homebrew Cask      │ cask     │ ✓               │ ✓  /usr/local/bin/brew     │ ✓          │ ✓  3.2.15 │
 │ Chocolatey         │ choco    │ ✘  Windows only │ ✘  choco not found         │            │           │
 │ PHP's Composer     │ composer │ ✓               │ ✓  /usr/local/bin/composer │ ✓          │ ✓  2.1.8  │
 │ Flatpak            │ flatpak  │ ✘  Linux only   │ ✘  flatpak not found       │            │           │

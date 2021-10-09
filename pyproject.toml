@@ -6,7 +6,7 @@ description = """
     CLI unifying Homebrew, apt, Chocolatey, Pip, NPM, Composer and the like."""
 license = 'GPL-2.0-or-later'
 authors = ["Kevin Deldycke <kevin@deldycke.com>"]
-readme = "readme.rst"
+readme = "readme.md"
 homepage = 'https://github.com/kdeldycke/meta-package-manager'
 repository = 'https://github.com/kdeldycke/meta-package-manager'
 documentation = 'https://kdeldycke.github.io/meta-package-manager'

@@ -13,7 +13,7 @@
   - docs/**/*
   - .mailmap
   - LICENSE
-  - readme.rst
+  - readme.md
 
 "📦 manager: apm":
   - meta_package_manager/managers/apm*

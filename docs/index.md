@@ -1,5 +1,4 @@
-```{eval-rst}
-.. include:: ../readme.rst
+```{include} ../readme.md
 ```
 
 ## Contents

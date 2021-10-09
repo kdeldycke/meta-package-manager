@@ -41,12 +41,14 @@ jobs:
 
   markdown:
     name: Format markdown and create a PR
-    runs-on: ubuntu-20.04
+    runs-on: macos-11.0
     steps:
       - uses: actions/checkout@v2.3.4
       - name: Install Pandoc
         run: |
-          sudo apt install pandoc
+          brew update
+          brew install pandoc
+          pandoc --version
       - name: Auto-format to GitHub-Flavored Markdown
         # Waiting for these issues to be resolved:
         # https://github.com/jgm/pandoc/issues/7616

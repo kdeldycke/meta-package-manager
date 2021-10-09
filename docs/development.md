@@ -26,7 +26,7 @@ Which boils down to the following rules of thumb regarding stability:
 
 ## Build status
 
-| Branch | [`main`](https://github.com/kdeldycke/meta-package-manager/tree/main) | [`develop`](https://github.com/kdeldycke/meta-package-manager/tree/develop) |
+| Branch | {gh}`main <tree/main>` | {gh}`develop <tree/develop>` |
 |---|---|---|
 | Unittests | [![Unittests status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Amain) | [![Unittests status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=develop)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Adevelop)
 | Coverage | [![Coverage status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/badge.svg)](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main) | [![Coverage status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop/graph/badge.svg)](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop)

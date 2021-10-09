@@ -1,27 +1,28 @@
 # Meta Package Manager
 
+<a href="https://xkcd.com/1654/" alt="XKCD #1654: Universal Install Script">
+<img align="right" width="20%" height="20%" src="http://imgs.xkcd.com/comics/universal_install_script.png"/>
+</a>
+  
 [![Last release](https://img.shields.io/pypi/v/meta-package-manager.svg)](https://pypi.python.org/pypi/meta-package-manager)
 [![Python versions](https://img.shields.io/pypi/pyversions/meta-package-manager.svg)](https://pypi.python.org/pypi/meta-package-manager)
 [![Unittests status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=develop)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Adevelop)
 [![Documentation status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/docs.yaml/badge.svg?branch=develop)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/docs.yaml?query=branch%3Adevelop)
 [![Coverage status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop/graph/badge.svg)](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop)
 
+
 **What is Meta Package Manager?**
 
 * It provides the `mpm` CLI
 * `mpm` is like [`yt-dlp`](https://github.com/yt-dlp/yt-dlp), but for package managers instead of videos
-* `mpm` solves [XKCD #1654 (Universal Install Script)](https://xkcd.com/1654/)
+* `mpm` solves [XKCD #1654: Universal Install Script](https://xkcd.com/1654/)
 
 
 ## Features
 
-```{sidebar} List managers
-![](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/mpm-managers-cli.png)
-```
+<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/mpm-outdated-cli.png"/>
 
-```{sidebar} List outdated packages
-![](https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/mpm-outdated-cli.png)
-```
+<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/mpm-managers-cli.png"/>
 
 * Inventory and list all package managers available on the system.
 * Supports macOS, Linux and Windows.
@@ -38,7 +39,7 @@
 * Export results in JSON or user-friendly tables.
 * Shell auto-completion for Bash, Zsh and Fish.
 * Provides a [xbar plugin](https://kdeldycke.github.io/meta-package-manager/xbar.html) for friendly macOS integration.
-* Because `mpm` try to wrap all other package managers, it became another pathological case of [XKCD #927 (Standards)](https://xkcd.com/927/)
+* Because `mpm` try to wrap all other package managers, it became another pathological case of [XKCD #927: Standards](https://xkcd.com/927/)
 
 
 ## Supported package managers

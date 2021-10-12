@@ -51,11 +51,10 @@ jobs:
           pandoc --version
       - name: Auto-format to GitHub-Flavored Markdown
         # More contextual docs:
-        # https://pandoc.org/MANUAL.html#extension-pipe_tables
+        # https://pandoc.org/MANUAL.html#general-writer-options
         run: >
-          find ./ -iname "*.md" -exec pandoc "{}" --output="{}"
-          --to=gfm
-          --columns=79 --tab-stop=2 \;
+          find ./ -iname "*.md" -exec pandoc "{}" --output="{}" --to=gfm
+          --standalone --columns=79 --tab-stop=2 \;
       - name: Auto-fix Markdown
         uses: avto-dev/markdown-lint@v1.5.0
         # Non-fixable markdown issues will return non-zero error code. Allow

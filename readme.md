@@ -50,25 +50,24 @@ status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop/grap
 
 ## Supported package managers
 
-| Package manager | Min. version | macOS | Linux | Windows | `sync` | `installed` | `search` | `install` | `outdated` | `upgrade` | `cleanup`
-|---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|[`apm`](https://atom.io/packages)      |   1.0.0   |     ✓   |   ✓  |   ✓   |        |     ✓  |           ✓              |  ✓     |      ✓     |        ✓ |
-|[`apt`](https://wiki.debian.org/Apt)       |   1.0.0   |          |  ✓   |        |  ✓    |    ✓   |          ✓               | ✓      |     ✓      |       ✓      |     ✓ |
-|[`apt-mint`](https://github.com/kdeldycke/meta-package-manager/issues/52)  |   1.0.0   |          |  ✓   |        |  ✓    |    ✓   |          ✓               | ✓      |     ✓      |       ✓      |     ✓ |
-|[`brew`](https://brew.sh)      |   2.7.0   |     ✓   |   ✓  |        |   ✓   |     ✓  |           ✓              |  ✓     |      ✓     |        ✓      |     ✓ |
-|[`cask`](https://caskroom.github.io)      |   2.7.0   |     ✓   |       |        |  ✓    |    ✓   |          ✓               | ✓      |     ✓      |       ✓      |     ✓ |
-|[`choco`](https://chocolatey.org)     |   0.10.4  |          |       | ✓     |  ✓    |    ✓   |          ✓               | ✓      |     ✓      |       ✓      |     ✓ |
-|[`composer`](https://getcomposer.org)  |   1.4.0   |     ✓   |   ✓  |   ✓   |    ✓  |      ✓ |            ✓             |   ✓    |       ✓    |         ✓      |     ✓ |
-|[`flatpak`](https://flatpak.org)   |   1.2.0   |          |  ✓   |        |        |   ✓    |         ✓                |✓       |    ✓       |      ✓      |     ✓ |
-|[`gem`](https://rubygems.org)       |   2.5.0   |     ✓   |   ✓  |   ✓   |        |     ✓  |           ✓              |  ✓     |      ✓     |        ✓      |     ✓ |
-|[`mas`](https://github.com/argon/mas)       |   1.6.1   |     ✓   |       |        |        |   ✓    |         ✓                |✓       |    ✓       |      ✓|
-|[`npm`](https://www.npmjs.com)       |   4.0.0   |     ✓   |   ✓  |   ✓   |        |     ✓  |           ✓              |  ✓     |      ✓     |        ✓|
-|[`opkg`](https://git.yoctoproject.org/cgit/cgit.cgi/opkg/)      |   0.2.0   |          |  ✓   |        |  ✓    |    ✓   |          ✓               | ✓      |     ✓      |       ✓|
-|[`pip`](https://pypi.org)       |   10.0.0  |     ✓   |   ✓  |   ✓   |        |     ✓  |           [✘*](https://github.com/pypa/pip/issues/5216#issuecomment-744605466) | ✓      |     ✓      |       ✓|
-|[`snap`](https://snapcraft.io)      |   2.0.0   |          |  ✓   |        |        |   ✓    |         ✓                |✓       |             |     ✓|
-|[`vscode`](https://code.visualstudio.com)    |   1.60.0  |     ✓   |   ✓  |   ✓   |        |     ✓  |           ✓              |  ✓     |             |       ✓|
-|[`yarn`](https://yarnpkg.com)      |   1.21.0  |     ✓   |   ✓  |   ✓   |        |     ✓  |           ✓              |  ✓     |      ✓     |        ✓       |     ✓ |
-
+| Package manager                                                           | Min. version | macOS | Linux | Windows | `sync` | `installed` |                               `search`                                | `install` | `outdated` | `upgrade` | `cleanup` |
+|---------------------------------------------------------------------------|--------------|:-----:|:-----:|:-------:|:------:|:-----------:|:---------------------------------------------------------------------:|:---------:|:----------:|:---------:|:---------:|
+| [`apm`](https://atom.io/packages)                                         | 1.0.0        |   ✓   |   ✓   |    ✓    |        |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |           |
+| [`apt`](https://wiki.debian.org/Apt)                                      | 1.0.0        |       |   ✓   |         |   ✓    |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
+| [`apt-mint`](https://github.com/kdeldycke/meta-package-manager/issues/52) | 1.0.0        |       |   ✓   |         |   ✓    |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
+| [`brew`](https://brew.sh)                                                 | 2.7.0        |   ✓   |   ✓   |         |   ✓    |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
+| [`cask`](https://caskroom.github.io)                                      | 2.7.0        |   ✓   |       |         |   ✓    |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
+| [`choco`](https://chocolatey.org)                                         | 0.10.4       |       |       |    ✓    |   ✓    |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
+| [`composer`](https://getcomposer.org)                                     | 1.4.0        |   ✓   |   ✓   |    ✓    |   ✓    |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
+| [`flatpak`](https://flatpak.org)                                          | 1.2.0        |       |   ✓   |         |        |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
+| [`gem`](https://rubygems.org)                                             | 2.5.0        |   ✓   |   ✓   |    ✓    |        |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
+| [`mas`](https://github.com/argon/mas)                                     | 1.6.1        |   ✓   |       |         |        |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |           |
+| [`npm`](https://www.npmjs.com)                                            | 4.0.0        |   ✓   |   ✓   |    ✓    |        |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |           |
+| [`opkg`](https://git.yoctoproject.org/cgit/cgit.cgi/opkg/)                | 0.2.0        |       |   ✓   |         |   ✓    |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |           |
+| [`pip`](https://pypi.org)                                                 | 10.0.0       |   ✓   |   ✓   |    ✓    |        |      ✓      | [✘\*](https://github.com/pypa/pip/issues/5216#issuecomment-744605466) |     ✓     |     ✓      |     ✓     |           |
+| [`snap`](https://snapcraft.io)                                            | 2.0.0        |       |   ✓   |         |        |      ✓      |                                   ✓                                   |     ✓     |            |     ✓     |           |
+| [`vscode`](https://code.visualstudio.com)                                 | 1.60.0       |   ✓   |   ✓   |    ✓    |        |      ✓      |                                   ✓                                   |     ✓     |            |     ✓     |           |
+| [`yarn`](https://yarnpkg.com)                                             | 1.21.0       |   ✓   |   ✓   |    ✓    |        |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
 
 ## Quickstart
 

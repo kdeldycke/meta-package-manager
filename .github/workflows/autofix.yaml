@@ -50,10 +50,11 @@ jobs:
           brew install pandoc
           pandoc --version
       - name: Auto-format to GitHub-Flavored Markdown
-        # Waiting for these issues to be resolved:
-        # https://github.com/jgm/pandoc/issues/7616
+        # More contextual docs:
+        # https://pandoc.org/MANUAL.html#extension-pipe_tables
         run: >
-          find ./ -iname "*.md" -exec pandoc "{}" --to=markdown --output="{}"
+          find ./ -iname "*.md" -exec pandoc "{}" --output="{}"
+          --to=markdown-simple_tables-multiline_tables-grid_tables
           --columns=79 --tab-stop=2 \;
       - name: Auto-fix Markdown
         uses: avto-dev/markdown-lint@v1.5.0

@@ -81,7 +81,7 @@ Other [alternatives installation
 methods](https://kdeldycke.github.io/meta-package-manager/install.html) are
 available in the documentation.
 
-## Usage
+## List managers
 
 List all supported package managers and their status on current system (macOS
 in this case):
@@ -109,6 +109,37 @@ $ mpm -a managers
 │ Node's yarn        │ yarn     │ ✓               │ ✘  yarn not found          │            │           │
 └────────────────────┴──────────┴─────────────────┴────────────────────────────┴────────────┴───────────┘
 ```
+
+## List packages
+
+List all packages on current system (macOS in this case):
+
+``` shell-session
+$ mpm installed
+┌─────────────────────────────┬─────────────────────────────┬─────────┬────────────────────┐
+│ Package name                │ ID                          │ Manager │ Installed version  │
+├─────────────────────────────┼─────────────────────────────┼─────────┼────────────────────┤
+│ github                      │ github                      │ apm     │ 0.36.9             │
+│ update-package-dependencies │ update-package-dependencies │ apm     │ 0.13.1             │
+│ rust                        │ rust                        │ brew    │ 1.55.0             │
+│ x264                        │ x264                        │ brew    │ r3060              │
+│ atom                        │ atom                        │ cask    │ 1.58.0             │
+│ visual-studio-code          │ visual-studio-code          │ cask    │ 1.52.0             │
+│ nokogiri                    │ nokogiri                    │ gem     │ x86_64-darwin      │
+│ rake                        │ rake                        │ gem     │ 13.0.3             │
+│ iMovie                      │ 408981434                   │ mas     │ 10.2.5             │
+│ Telegram                    │ 747648890                   │ mas     │ 8.1                │
+│ npm                         │ npm                         │ npm     │ 7.24.0             │
+│ raven                       │ raven                       │ npm     │ 2.6.4              │
+│ jupyterlab                  │ jupyterlab                  │ pip     │ 3.1.14             │
+│ Sphinx                      │ Sphinx                      │ pip     │ 4.2.0              │
+│ ms-python.python            │ ms-python.python            │ vscode  │ 2021.10.1317843341 │
+│ ms-toolsai.jupyter          │ ms-toolsai.jupyter          │ vscode  │ 2021.9.1001312534  │
+└─────────────────────────────┴─────────────────────────────┴─────────┴────────────────────┘
+16 packages total (brew: 2, pip: 2, apm: 2, gem: 2, cask: 2, mas: 2, vscode: 2, npm: 2, composer: 0).
+```
+
+## Usage
 
 More documentation is available in:
 

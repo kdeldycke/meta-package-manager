@@ -22,9 +22,10 @@ as **`meta-package-manager`**. Only the later provides the {command}`mpm` CLI
 
 ## Shell completion
 
-Completion for popular shell [rely on Click feature](https://click.palletsprojects.com/en/8.0.x/shell-completion/).
+Completion for popular shell [rely on Click
+feature](https://click.palletsprojects.com/en/8.0.x/shell-completion/).
 
-```{eval-rst}
+``` {eval-rst}
 .. tabs::
 
   .. group-tab:: Bash

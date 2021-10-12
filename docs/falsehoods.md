@@ -2,8 +2,10 @@
 
 Pre-required reads:
 
-- [Falsehoods About Versions](https://github.com/xenoterracide/falsehoods/blob/master/versions.md).
-- And more generally, this [Awesome List of Falshoods](https://github.com/kdeldycke/awesome-falsehood).
+- [Falsehoods About
+  Versions](https://github.com/xenoterracide/falsehoods/blob/master/versions.md).
+- And more generally, this [Awesome List of
+  Falshoods](https://github.com/kdeldycke/awesome-falsehood).
 
 ## Packages
 

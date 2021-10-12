@@ -3,7 +3,7 @@
 ## Philosophy
 
 1.  First create something that works (to provide business value).
-2.  Then something that's beautiful (to lower maintenance costs).
+2.  Then something that’s beautiful (to lower maintenance costs).
 3.  Finally works on performance (to avoid wasting time on premature
     optimizations).
 
@@ -50,7 +50,7 @@ $ pip install poetry
 $ poetry install
 ```
 
-Now you're ready to hack and abuse git!
+Now you’re ready to hack and abuse git!
 
 ## Unit-tests
 
@@ -76,7 +76,7 @@ $ poetry run pylint meta_package_manager
 
 ## Documentation
 
-The documentation you're currently reading can be built locally with
+The documentation you’re currently reading can be built locally with
 [Sphinx](https://www.sphinx-doc.org):
 
 ``` shell-session
@@ -152,7 +152,7 @@ Build packages:
 $ poetry build
 ```
 
-For a smooth release, you also need to [validate the rendering of package's
+For a smooth release, you also need to [validate the rendering of package’s
 long description on
 PyPi](https://packaging.python.org/guides/making-a-pypi-friendly-readme/#validating-restructuredtext-markup),
 as well as metadata:

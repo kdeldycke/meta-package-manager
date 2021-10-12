@@ -54,7 +54,7 @@ jobs:
         # https://pandoc.org/MANUAL.html#extension-pipe_tables
         run: >
           find ./ -iname "*.md" -exec pandoc "{}" --output="{}"
-          --to=markdown-simple_tables-multiline_tables-grid_tables
+          --to=gfm
           --columns=79 --tab-stop=2 \;
       - name: Auto-fix Markdown
         uses: avto-dev/markdown-lint@v1.5.0

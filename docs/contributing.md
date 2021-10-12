@@ -15,7 +15,7 @@ For now the easiest way to have new package managers supported is to:
 
 1.  Fork the project.
 2.  Identify an already implemented package manager that is similar to the new
-    one you'd like to add.
+    one you’d like to add.
 3.  Duplicate its already existing definition file in the
     {gh}`/managers subfolder <tree/develop/meta_package_manager/managers>`.
 4.  Adapt the new file to the particularities of the new package manager. Read

@@ -22,7 +22,7 @@ Pre-required reads:
 9.  All
     {gh}`packages have a version <blob/v2.2.0/meta_package_manager/managers/mas.py#L71-L75>`.
 10. {gh}`Versionned packages are immutable <blob/v2.2.0/meta_package_manager/managers/homebrew.py#L230-L231>`.
-11. Packages can't upgrade themselves.
+11. Packages can’t upgrade themselves.
 12. A package can be reinstalled.
 
 ## Package Managers
@@ -55,7 +55,7 @@ Pre-required reads:
     {gh}`can upgrade all outdated packages <blob/v2.2.0/meta_package_manager/managers/pip.py#L94-L97>`.
 20. Package managers are forbidden to upgrade other package managers.
 21. Packages are only managed by one package manager.
-22. Installing a package doesn't require a reboot.
+22. Installing a package doesn’t require a reboot.
 23. Package manager
     {gh}`output is consistent <blob/v2.2.0/meta_package_manager/managers/mas.py#L42-L44>`.
 24. A package manager can upgrade a package installed by the user.

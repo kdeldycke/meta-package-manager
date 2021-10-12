@@ -116,4 +116,4 @@ More documentation is available in:
   screens](https://kdeldycke.github.io/meta-package-manager/cli-help.html)
 - the [list of
   use-cases](https://kdeldycke.github.io/meta-package-manager/usecase.html)
-  where you'll find inspiration on how to leverage `mpm` power
+  where you’ll find inspiration on how to leverage `mpm` power

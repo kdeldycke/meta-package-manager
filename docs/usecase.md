@@ -1,6 +1,6 @@
 # Use-cases
 
-A collection of user's problems and how `mpm` solves them.
+A collection of user’s problems and how `mpm` solves them.
 
 ## Keep system secure
 
@@ -43,7 +43,7 @@ This is the primary use case of `mpm` and the first reason I built it.
 All package managers are not on-par between themselves. `mpm` is filling the
 gap between managers and implement some missing features.
 
-For instance, [`pip` doesn't can't upgrade all outdated
+For instance, [`pip` doesn’t can’t upgrade all outdated
 package](https://github.com/pypa/pip/issues/4551) with a single command. `mpm`
 adds that missing feature:
 
@@ -81,7 +81,7 @@ Successfully installed zipp-3.1.0
 
 Another example is the modest `opkg` package manager, only used by a
 confidential audience. It is a bare project with only the basic primitives
-implemented (`update`, `list`, ...). Thanks to `mpm` it gains a free `search`
+implemented (`update`, `list`, …). Thanks to `mpm` it gains a free `search`
 feature.
 
 ## Same package, multiple sources
@@ -195,21 +195,21 @@ from their execution environment.
 
 ## Switch systems
 
-You used to work on macOS. Now you'd like to move to Linux. To reduce friction
+You used to work on macOS. Now you’d like to move to Linux. To reduce friction
 during your migration, you can invotory all your installed packages with `mpm`,
 then reinstall them on your new, bare OS.
 
 1.  Inventory all installed packages on macOS:
 
-  ```shell-session
-  $ mpm backup ./packages.toml
-  ```
+    ``` shell-session
+    $ mpm backup ./packages.toml
+    ```
 
-1.  On your brand new Linux install, restore all packages with:
+2.  On your brand new Linux install, restore all packages with:
 
-  ```shell-session
-  $ mpm restore ./packages.toml
-  ```
+    ``` shell-session
+    $ mpm restore ./packages.toml
+    ```
 
 ``` {todo}
 Implement a best matchig strategy, across package managers of different kinds.

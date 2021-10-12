@@ -110,9 +110,9 @@ $ mpm -a managers
 └────────────────────┴──────────┴─────────────────┴────────────────────────────┴────────────┴───────────┘
 ```
 
-## List packages
+## List installed packages
 
-List all packages on current system (macOS in this case):
+List all packages installed on current system:
 
 ``` shell-session
 $ mpm installed
@@ -137,6 +137,27 @@ $ mpm installed
 │ ms-toolsai.jupyter          │ ms-toolsai.jupyter          │ vscode  │ 2021.9.1001312534  │
 └─────────────────────────────┴─────────────────────────────┴─────────┴────────────────────┘
 16 packages total (brew: 2, pip: 2, apm: 2, gem: 2, cask: 2, mas: 2, vscode: 2, npm: 2, composer: 0).
+```
+
+## List outdated packages
+
+List all packages installed for which an upgrade is available:
+
+``` shell-session
+$ mpm outdated
+┌──────────────┬─────────────┬─────────┬───────────────────┬────────────────┐
+│ Package name │ ID          │ Manager │ Installed version │ Latest version │
+├──────────────┼─────────────┼─────────┼───────────────────┼────────────────┤
+│ curl         │ curl        │ brew    │ 7.79.1            │ 7.79.1_1       │
+│ git          │ git         │ brew    │ 2.33.0            │ 2.33.0_1       │
+│ openssl@1.1  │ openssl@1.1 │ brew    │ 1.1.1l            │ 1.1.1l_1       │
+│ rake         │ rake        │ gem     │ 13.0.3            │ 13.0.6         │
+│ Telegram     │ 747648890   │ mas     │ 8.1               │ 8.1.3          │
+│ npm          │ npm@8.0.0   │ npm     │ 7.24.0            │ 8.0.0          │
+│ pip          │ pip         │ pip     │ 21.2.4            │ 21.3           │
+│ regex        │ regex       │ pip     │ 2021.9.30         │ 2021.10.8      │
+└──────────────┴─────────────┴─────────┴───────────────────┴────────────────┘
+8 packages total (brew: 3, pip: 2, gem: 1, mas: 1, npm: 1, apm: 0, cask: 0, composer: 0).
 ```
 
 ## Usage

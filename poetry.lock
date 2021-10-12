@@ -536,7 +536,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 
 [[package]]
 name = "pipdeptree"
-version = "2.1.0"
+version = "2.2.0"
 description = "Command line utility to show dependency tree of packages"
 category = "dev"
 optional = false
@@ -1153,7 +1153,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "6916364909dba455bdb3c3e0f22036c7c2b53a4d6084510171501eb30f28df14"
+content-hash = "edce9dd83351d0db97b08f467fd6a31fd96f73d00932bca58ce86df38234ce25"
 
 [metadata.files]
 alabaster = [
@@ -1489,9 +1489,9 @@ pathspec = [
     {file = "pathspec-0.9.0.tar.gz", hash = "sha256:e564499435a2673d586f6b2130bb5b95f04a3ba06f81b8f895b651a3c76aabb1"},
 ]
 pipdeptree = [
-    {file = "pipdeptree-2.1.0-py2-none-any.whl", hash = "sha256:e75b0595b0473177c08e6cde7ad2bd41b4a4b97cb86ccbdcd96a62ca0b4dcac8"},
-    {file = "pipdeptree-2.1.0-py3-none-any.whl", hash = "sha256:763bc2b706ba0bbbebf9277e824cf405ff57cb897cac9eb86990deff1f1d1f33"},
-    {file = "pipdeptree-2.1.0.tar.gz", hash = "sha256:0edf5e0d11d26c3960884839ac6fbe72eabf6f3bf3c76e495414d3aae693f9a2"},
+    {file = "pipdeptree-2.2.0-py2-none-any.whl", hash = "sha256:e31bcb4db905fe3df15e7c41bc015a3587ef4bafdd5119b011aae32948c4a371"},
+    {file = "pipdeptree-2.2.0-py3-none-any.whl", hash = "sha256:95fb603e46343651342583c337a0ee68d3ccade7a81f5cf6b2fbd8151b79ed80"},
+    {file = "pipdeptree-2.2.0.tar.gz", hash = "sha256:21a89e77d6eae635685e8af5ecd56561f092f8216bb290e7ae5362885d611f60"},
 ]
 pkginfo = [
     {file = "pkginfo-1.7.1-py2.py3-none-any.whl", hash = "sha256:37ecd857b47e5f55949c41ed061eb51a0bee97a87c969219d144c0e023982779"},

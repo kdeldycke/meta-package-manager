@@ -89,7 +89,7 @@ coverage = { extras = ["toml"], version = "^6.0" }
 furo = "^2021.9.22"
 isort = "^5.9.3"
 myst-parser = "^0.15.2"
-pipdeptree = { extras = ["graphviz"], version = "^2.1.0" }
+pipdeptree = { extras = ["graphviz"], version = "^2.2.0" }
 pylint = "^2.11.1"
 pytest = "^6.2.5"
 # More pytest plugins at: http://plugincompat.herokuapp.com .

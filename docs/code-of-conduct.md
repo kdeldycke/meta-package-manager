@@ -1,3 +1,2 @@
-```{include} ../.github/code-of-conduct.md
+``` {include} ../.github/code-of-conduct.md
 ```
-

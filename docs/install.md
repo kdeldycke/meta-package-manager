@@ -13,7 +13,7 @@ $ pip install meta-package-manager
 See also [pip installation
 instructions](https://pip.pypa.io/en/stable/installing/).
 
-```{admonition} Danger: **Misleading package names**
+``` {admonition} Danger: **Misleading package names**
 :class: danger
 [*`mpm`*, the Python module](https://pypi.python.org/pypi/mpm), is not the same
 as **`meta-package-manager`**. Only the later provides the {command}`mpm` CLI
@@ -100,7 +100,7 @@ Replace [`sphinx_tabs`](https://github.com/executablebooks/sphinx-tabs) by
 
 FYI, here is a graph of Python package dependencies:
 
-```{image} dependencies.png
+``` {image} dependencies.png
 :alt: Meta Package Manager dependency graph
 :align: center
 ```

@@ -1,10 +1,10 @@
 # xbar Plugin
 
-```{sidebar} Default layout
+``` {sidebar} Default layout
 ![](xbar-plugin-flat-layout.png)
 ```
 
-```{sidebar} Submenu layout
+``` {sidebar} Submenu layout
 ![](xbar-plugin-submenu-layout.png)
 ```
 

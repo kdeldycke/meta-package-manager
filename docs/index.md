@@ -2,7 +2,7 @@
 hide-toc: true
 ---
 
-```{include} ../readme.md
+``` {include} ../readme.md
 ```
 
 ``` {toctree}

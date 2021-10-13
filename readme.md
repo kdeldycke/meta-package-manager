@@ -88,26 +88,26 @@ in this case):
 
 ``` shell-session
 $ mpm -a managers
-┌────────────────────┬──────────┬─────────────────┬────────────────────────────┬────────────┬───────────┐
-│ Package manager    │ ID       │ Supported       │ CLI                        │ Executable │ Version   │
-├────────────────────┼──────────┼─────────────────┼────────────────────────────┼────────────┼───────────┤
-│ Atom's apm         │ apm      │ ✓               │ ✓  /usr/local/bin/apm      │ ✓          │ ✓  2.6.2  │
-│ APT                │ apt      │ ✘  Linux only   │ ✓  /usr/bin/apt            │ ✓          │ ✘         │
-│ Linux Mint's apt   │ apt-mint │ ✘  Linux only   │ ✓  /usr/bin/apt            │ ✓          │ ✘         │
-│ Homebrew Formulae  │ brew     │ ✓               │ ✓  /usr/local/bin/brew     │ ✓          │ ✓  3.2.15 │
-│ Homebrew Cask      │ cask     │ ✓               │ ✓  /usr/local/bin/brew     │ ✓          │ ✓  3.2.15 │
-│ Chocolatey         │ choco    │ ✘  Windows only │ ✘  choco not found         │            │           │
-│ PHP's Composer     │ composer │ ✓               │ ✓  /usr/local/bin/composer │ ✓          │ ✓  2.1.8  │
-│ Flatpak            │ flatpak  │ ✘  Linux only   │ ✘  flatpak not found       │            │           │
-│ Ruby Gems          │ gem      │ ✓               │ ✓  /usr/bin/gem            │ ✓          │ ✓  3.0.3  │
-│ Mac AppStore       │ mas      │ ✓               │ ✓  /usr/local/bin/mas      │ ✓          │ ✓  1.8.3  │
-│ Node's npm         │ npm      │ ✓               │ ✓  /usr/local/bin/npm      │ ✓          │ ✓  7.24.0 │
-│ OPKG               │ opkg     │ ✘  Linux only   │ ✘  opkg not found          │            │           │
-│ Pip                │ pip      │ ✓               │ ✓  /usr/local/bin/python3  │ ✓          │ ✓  21.2.4 │
-│ Snap               │ snap     │ ✘  Linux only   │ ✘  snap not found          │            │           │
-│ Visual Studio Code │ vscode   │ ✓               │ ✓  /usr/local/bin/code     │ ✓          │ ✓  1.60.2 │
-│ Node's yarn        │ yarn     │ ✓               │ ✘  yarn not found          │            │           │
-└────────────────────┴──────────┴─────────────────┴────────────────────────────┴────────────┴───────────┘
+┌────────────────────┬──────────┬────────────────┬───────────────────────────┬────────────┬──────────┐
+│ Package manager    │ ID       │ Supported      │ CLI                       │ Executable │ Version  │
+├────────────────────┼──────────┼────────────────┼───────────────────────────┼────────────┼──────────┤
+│ Atom's apm         │ apm      │ ✓              │ ✓ /usr/local/bin/apm      │ ✓          │ ✓ 2.6.2  │
+│ APT                │ apt      │ ✘ Linux only   │ ✓ /usr/bin/apt            │ ✓          │ ✘        │
+│ Linux Mint's apt   │ apt-mint │ ✘ Linux only   │ ✓ /usr/bin/apt            │ ✓          │ ✘        │
+│ Homebrew Formulae  │ brew     │ ✓              │ ✓ /usr/local/bin/brew     │ ✓          │ ✓ 3.2.16 │
+│ Homebrew Cask      │ cask     │ ✓              │ ✓ /usr/local/bin/brew     │ ✓          │ ✓ 3.2.16 │
+│ Chocolatey         │ choco    │ ✘ Windows only │ ✘ choco not found         │            │          │
+│ PHP's Composer     │ composer │ ✓              │ ✓ /usr/local/bin/composer │ ✓          │ ✓ 2.1.8  │
+│ Flatpak            │ flatpak  │ ✘ Linux only   │ ✘ flatpak not found       │            │          │
+│ Ruby Gems          │ gem      │ ✓              │ ✓ /usr/bin/gem            │ ✓          │ ✓ 3.0.3  │
+│ Mac AppStore       │ mas      │ ✓              │ ✓ /usr/local/bin/mas      │ ✓          │ ✓ 1.8.3  │
+│ Node's npm         │ npm      │ ✓              │ ✓ /usr/local/bin/npm      │ ✓          │ ✓ 7.24.0 │
+│ OPKG               │ opkg     │ ✘ Linux only   │ ✘ opkg not found          │            │          │
+│ Pip                │ pip      │ ✓              │ ✓ /usr/local/bin/python3  │ ✓          │ ✓ 21.2.4 │
+│ Snap               │ snap     │ ✘ Linux only   │ ✘ snap not found          │            │          │
+│ Visual Studio Code │ vscode   │ ✓              │ ✓ /usr/local/bin/code     │ ✓          │ ✓ 1.61.0 │
+│ Node's yarn        │ yarn     │ ✓              │ ✘ yarn not found          │            │          │
+└────────────────────┴──────────┴────────────────┴───────────────────────────┴────────────┴──────────┘
 ```
 
 ## List installed packages

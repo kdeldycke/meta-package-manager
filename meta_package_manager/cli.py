@@ -380,12 +380,12 @@ def managers(ctx):
         # Build up the OS column content.
         os_infos = OK if manager.supported else KO
         if not manager.supported:
-            os_infos += "  {} only".format(
+            os_infos += " {} only".format(
                 ", ".join(sorted((os_label(os_id) for os_id in manager.platforms)))
             )
 
         # Build up the CLI path column content.
-        cli_infos = "{}  {}".format(
+        cli_infos = "{} {}".format(
             OK if manager.cli_path else KO,
             manager.cli_path
             if manager.cli_path
@@ -397,7 +397,7 @@ def managers(ctx):
         if manager.executable:
             version_infos = OK if manager.fresh else KO
             if manager.version:
-                version_infos += f"  {manager.version}"
+                version_infos += f" {manager.version}"
                 if not manager.fresh:
                     version_infos += f" {manager.requirement}"
 

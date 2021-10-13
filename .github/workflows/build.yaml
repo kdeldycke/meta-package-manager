@@ -16,8 +16,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install --upgrade poetry
-          poetry install
-          poetry build
+          poetry config virtualenvs.create false
+          poetry install --no-interaction --no-ansi
+          poetry build --no-interaction --no-ansi
       - name: Attach packages to workflow run for later inspection and debugging
         uses: actions/upload-artifact@v2.2.4
         with:
@@ -25,7 +26,7 @@ jobs:
           path: ./dist/*
       - name: Validates package metadata
         run: |
-          poetry check
+          poetry check --no-interaction --no-ansi
           poetry run twine check ./dist/*
           poetry run check-wheel-contents ./dist/*.whl
       - name: Test publishing

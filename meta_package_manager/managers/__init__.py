@@ -81,9 +81,9 @@ sets.
 """
 
 
-EXTRA_OPTION_IDS = frozenset({"stop_on_error", "ignore_auto_updates", "dry_run"})
-"""List of extra options that can be set on managers during the use of the
-select_managers() helper below."""
+ALLOWED_EXTRA_OPTION = frozenset({"stop_on_error", "ignore_auto_updates", "dry_run"})
+"""List of extra options that are allowed to be set on managers during the use of the
+:py:func:`meta_package_manager.managers.select_managers` helper below."""
 
 
 def select_managers(
@@ -114,7 +114,7 @@ def select_managers(
     assert set(ALL_MANAGER_IDS).issuperset(keep)
     assert set(ALL_MANAGER_IDS).issuperset(drop)
 
-    assert EXTRA_OPTION_IDS.issuperset(extra_options)
+    assert ALLOWED_EXTRA_OPTION.issuperset(extra_options)
 
     # Only keeps the subset selected by the user.
     selected_ids = keep

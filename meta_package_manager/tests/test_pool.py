@@ -17,8 +17,10 @@
 
 import pytest
 
+from ..cli import cli
 from ..managers import (
     ALL_MANAGER_IDS,
+    ALLOWED_EXTRA_OPTION,
     DEFAULT_MANAGER_IDS,
     UNSUPPORTED_MANAGER_IDS,
     pool,
@@ -58,6 +60,10 @@ def test_manager_groups():
         tuple(sorted(set(DEFAULT_MANAGER_IDS).union(UNSUPPORTED_MANAGER_IDS)))
         == ALL_MANAGER_IDS
     )
+
+
+def test_extra_option_allowlist():
+    assert ALLOWED_EXTRA_OPTION.issubset(opt.name for opt in cli.params)
 
 
 selection_cases = {

@@ -8,7 +8,7 @@ This version is not released yet and is under active development.
 ```
 
 * [mpm] Add help screen coloring.
-* [mpm] Change documentation theme from class RTD to furo.
+* [mpm] Change documentation theme from classic RTD to furo.
 * [mpm] Move documentation from `readthedocs.org` to `github.io`.
 * [mpm] Rewrite documentation from rST to MyST.
 * [mpm] Add dependency on `cloup`.

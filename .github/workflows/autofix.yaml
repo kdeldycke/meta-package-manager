@@ -42,30 +42,18 @@ jobs:
 
   markdown:
     name: Format markdown and create a PR
-    runs-on: macos-11.0
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2.3.4
-      - name: Install Pandoc
+      - name: Install mdformat and its plugins
         run: |
-          brew update
-          brew install pandoc
-          pandoc --version
-      - name: Auto-format to GitHub-Flavored Markdown
-        # More contextual docs:
-        # --standalone => https://pandoc.org/MANUAL.html#general-writer-options
-        # MyST code-blocks => https://github.com/jgm/pandoc/issues/7622
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade poetry
+          poetry config virtualenvs.create false
+          poetry install --no-interaction --no-ansi
+      - name: Auto-format Markdown
         run: >
-          find ./ -iname "*.md" -exec pandoc "{}" --output="{}"
-          --from-gfm --to=gfm --standalone --columns=79 --tab-stop=2\;
-      - name: Auto-fix Markdown
-        uses: avto-dev/markdown-lint@v1.5.0
-        # Non-fixable markdown issues will return non-zero error code. Allow
-        # that step to fail so we can proceed with creating the auto-fix PR
-        # below.
-        continue-on-error: true
-        with:
-          args: './**/*.md'
-          fix: true
+          find ./ -iname "*.md" -exec mdformat --wrap 79 "{}" \;
       - uses: peter-evans/create-pull-request@v3.10.1
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"

@@ -72,42 +72,49 @@ class CLIError(Exception):
 
 class PackageManager:
 
-    """Base class from which all package manager definitions must inherits."""
+    """Base class from which all package manager definitions inherits."""
 
-    # List of platforms supported by the manager.
     platforms = frozenset()
+    """List of platforms supported by the manager."""
 
-    # Version requirement specifier.
     requirement = None
+    """Minimal required version."""
 
-    # List of options to use to get the version from the package manager.
     version_cli_options = ("--version",)
+    """List of options to get the version from the package manager CLI."""
 
-    # Regular expression used to extract the version number from the result of the CLI
-    # run with the options above. It doesn't matter if the regex returns unsanitized
-    # and crappy string. The ``version()`` method will clean and normalized it.
-    # By default match the first part that is space-separated.
     version_regex = r"(?P<version>\S+)"
+    """ Regular expression used to extract the version number from the result of the CLI
+    run with the options above. It doesn't matter if the regex returns unsanitized
+    and crappy string. The ``version()`` method will clean and normalized it.
 
-    # List of additional path to help mpm hunt down the package manager CLI.
-    # Should be a list of strings whose order dictatate the search sequence.
-    # Most of the time unnecessay: the `cli_path()` method works well on all
-    # platforms.
+    By default match the first part that is space-separated.
+    """
+
     cli_search_path = ()
+    """ List of additional path to help mpm hunt down the package manager CLI.
 
-    # Global list of options used for each call to the package manager CLI.
-    # Might be of use to force silencing or high verbosity.
+    Should be a list of strings whose order dictatate the search sequence.
+
+    Most of the time unnecessay: :py:func:`meta_package_manager.base.PackageManager.cli_path`
+    works well on all platforms.
+    """
+
     global_args = ()
+    """Global list of options used for each call to the package manager CLI.
 
-    # Tell the manager either to raise or continue on errors.
+    Usually used to force silencing, low verbosity or no color output.
+    """
+
     stop_on_error = False
+    """Tell the manager to either raise or continue on errors."""
 
-    # Some managers have the ability to report or ignore packages
-    # possessing their own auto-update mecanism.
     ignore_auto_updates = True
+    """Some managers can report or ignore packages which have their own auto-update mecanism.
+    """
 
-    # Do not actually perform any action, just simulate CLI calls.
     dry_run = False
+    """Do not actually perform any action, just simulate CLI calls."""
 
     def __init__(self):
         # Log of all encountered CLI errors.

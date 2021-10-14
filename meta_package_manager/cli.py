@@ -31,6 +31,7 @@ import tomli_w
 from boltons.cacheutils import LRI, cached
 from cloup import Context, HelpFormatter, HelpTheme, Style, group
 from boltons.strutils import complement_int_list, int_ranges_from_int_list
+from click_log import ColorFormatter
 
 from . import CLI_NAME, __version__, env_data, logger, reset_logger
 from .base import CLI_FORMATS, CLIError, PackageManager
@@ -208,6 +209,10 @@ def cli(
     """CLI for multi-package manager upgrades."""
     # Take timestamp snapshot.
     start_time = perf_counter() if time else None
+
+    # Neutralize color by removing configuration for each levels.
+    if no_color:
+        ColorFormatter.colors = {level: {} for level in ColorFormatter.colors}
 
     # Print log level.
     level = logger.level

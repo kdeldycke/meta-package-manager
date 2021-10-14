@@ -29,9 +29,20 @@ import click_log
 import tomli
 import tomli_w
 from boltons.cacheutils import LRI, cached
-from cloup import Context, HelpFormatter, HelpTheme, Style, group
 from boltons.strutils import complement_int_list, int_ranges_from_int_list
 from click_log import ColorFormatter
+from cloup import (
+    Context,
+    Group,
+    HelpFormatter,
+    HelpTheme,
+    OptionGroupMixin,
+    Style,
+    command,
+    group,
+    option,
+    option_group,
+)
 
 from . import CLI_NAME, __version__, env_data, logger, reset_logger
 from .base import CLI_FORMATS, CLIError, PackageManager
@@ -65,6 +76,15 @@ def timeit():
         click.echo(f"Execution time: {perf_counter() - start_time:0.3f} seconds.")
 
 
+class GroupWithOptionGroup(OptionGroupMixin, Group):
+    """Cloup does not support option groups on `Click.group`.
+
+    This is a workaround that is being diescussed at https://github.com/janluke/cloup/issues/98
+    """
+
+    pass
+
+
 CONTEXT_SETTINGS = Context.settings(
     show_default=True,
     auto_envvar_prefix=CLI_NAME,
@@ -82,90 +102,100 @@ CONTEXT_SETTINGS = Context.settings(
 )
 
 
-@group(context_settings=CONTEXT_SETTINGS)
-@click.option(
-    "-m",
-    "--manager",
-    type=click.Choice(ALL_MANAGER_IDS, case_sensitive=False),
-    multiple=True,
-    help="Restrict sub-command to a subset of package managers. Repeat to "
-    "select multiple managers. The order in which options are provided defines the "
-    "order in which sub-commands will process them.",
+@group(cls=GroupWithOptionGroup, context_settings=CONTEXT_SETTINGS)
+@option_group(
+    "Package manager selection options",
+    option(
+        "-m",
+        "--manager",
+        type=click.Choice(ALL_MANAGER_IDS, case_sensitive=False),
+        multiple=True,
+        help="Restrict sub-command to a subset of package managers. Repeat to "
+        "select multiple managers. The order in which options are provided defines the "
+        "order in which sub-commands will process them.",
+    ),
+    option(
+        "-e",
+        "--exclude",
+        type=click.Choice(ALL_MANAGER_IDS, case_sensitive=False),
+        multiple=True,
+        help="Exclude a package manager. Repeat to exclude multiple managers.",
+    ),
+    option(
+        "-a",
+        "--all-managers",
+        is_flag=True,
+        default=False,
+        help="Force evaluation of all package manager implemented by mpm, even those not"
+        "supported by the current platform. Still applies filtering by --manager and "
+        "--exclude options before calling the subcommand.",
+    ),
+    option(
+        "-x",
+        "--xkcd",
+        is_flag=True,
+        default=False,
+        help="Forces the subset of package managers to the order defined in XKCD #1654 "
+        f"comic, i.e. {XKCD_MANAGER_ORDER}.",
+    ),
 )
-@click.option(
-    "-e",
-    "--exclude",
-    type=click.Choice(ALL_MANAGER_IDS, case_sensitive=False),
-    multiple=True,
-    help="Exclude a package manager. Repeat to exclude multiple managers.",
+@option_group(
+    "Manager's options",
+    option(
+        "--ignore-auto-updates/--include-auto-updates",
+        default=True,
+        help="Report all outdated packages, including those tagged as "
+        "auto-updating. Only applies to 'outdated' and 'upgrade' commands.",
+    ),
+    option(
+        "--stop-on-error/--continue-on-error",
+        default=False,
+        help="Stop right away or continue operations on manager CLI error.",
+    ),
+    option(
+        "-d",
+        "--dry-run",
+        is_flag=True,
+        default=False,
+        help="Do not actually perform any action, just simulate CLI calls.",
+    ),
 )
-@click.option(
-    "-a",
-    "--all-managers",
-    is_flag=True,
-    default=False,
-    help="Force evaluation of all package manager implemented by mpm, even those not"
-    "supported by the current platform. Still applies filtering by --manager and "
-    "--exclude options before calling the subcommand.",
+@option_group(
+    "Output options",
+    option(
+        "-o",
+        "--output-format",
+        type=click.Choice(sorted(RENDERING_MODES), case_sensitive=False),
+        default="psql_unicode",
+        help="Rendering mode of the output.",
+    ),
+    option(
+        "-s",
+        "--sort-by",
+        type=click.Choice(sorted(SORTABLE_FIELDS), case_sensitive=False),
+        default="manager_id",
+        help="Sort results.",
+    ),
+    # option('--sort-asc/--sort-desc', default=True)
+    option(
+        "--stats/--no-stats",
+        default=True,
+        help="Print per-manager package statistics.",
+    ),
+    option(
+        "--time/--no-time",
+        default=False,
+        help="Measure and print elapsed execution time.",
+    ),
+    option(
+        "--no-color",
+        "--no-ansi",
+        is_flag=True,
+        default=False,
+        help="Strip out all colors and all ANSI codes.",
+    ),
 )
-@click.option(
-    "-x",
-    "--xkcd",
-    is_flag=True,
-    default=False,
-    help="Forces the subset of package managers to the order defined in XKCD #1654 "
-    f"comic, i.e. {XKCD_MANAGER_ORDER}.",
-)
-@click.option(
-    "--ignore-auto-updates/--include-auto-updates",
-    default=True,
-    help="Report all outdated packages, including those tagged as "
-    "auto-updating. Only applies to 'outdated' and 'upgrade' commands.",
-)
-@click.option(
-    "-o",
-    "--output-format",
-    type=click.Choice(sorted(RENDERING_MODES), case_sensitive=False),
-    default="psql_unicode",
-    help="Rendering mode of the output.",
-)
-@click.option(
-    "-s",
-    "--sort-by",
-    type=click.Choice(sorted(SORTABLE_FIELDS), case_sensitive=False),
-    default="manager_id",
-    help="Sort results.",
-)
-@click.option(
-    "--stats/--no-stats",
-    default=True,
-    help="Print per-manager package statistics.",
-)
-@click.option(
-    "--time/--no-time",
-    default=False,
-    help="Measure and print elapsed execution time.",
-)
-@click.option(
-    "--stop-on-error/--continue-on-error",
-    default=False,
-    help="Stop right away or continue operations on manager CLI error.",
-)
-@click.option(
-    "-d",
-    "--dry-run",
-    is_flag=True,
-    default=False,
-    help="Do not actually perform any action, just simulate CLI calls.",
-)
-@click.option(
-    "--no-color",
-    "--no-ansi",
-    is_flag=True,
-    default=False,
-    help="Strip out all colors and all ANSI codes.",
-)
-@click.option(
+@option(
     "-C",
     "--config",
     metavar="CONFIG_PATH",
@@ -198,12 +228,12 @@ def cli(
     all_managers,
     xkcd,
     ignore_auto_updates,
+    stop_on_error,
+    dry_run,
     output_format,
     sort_by,
     stats,
     time,
-    stop_on_error,
-    dry_run,
     no_color,
 ):
     """CLI for multi-package manager upgrades."""
@@ -227,10 +257,10 @@ def cli(
         # Only keep inactive managers to show them in the "managers" subcommand table.
         # Filters them out in any other subcommand.
         drop_inactive=ctx.invoked_subcommand != "managers",
-        # Does the manager should raise on error or not.
-        stop_on_error=stop_on_error,
         # Should we include auto-update packages or not?
         ignore_auto_updates=ignore_auto_updates,
+        # Does the manager should raise on error or not.
+        stop_on_error=stop_on_error,
         dry_run=dry_run,
     )
 
@@ -257,7 +287,7 @@ def cli(
     ctx.call_on_close(timeit)
 
 
-@cli.command(short_help="List supported package managers and their location.")
+@command(short_help="List supported package managers and their location.")
 @click.pass_context
 def managers(ctx):
     """List all supported package managers and their presence on the system."""
@@ -344,7 +374,7 @@ def managers(ctx):
     )
 
 
-@cli.command(short_help="Sync local package info.")
+@command(short_help="Sync local package info.")
 @click.pass_context
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
@@ -354,7 +384,7 @@ def sync(ctx):
         manager.sync()
 
 
-@cli.command(short_help="Cleanup local data.")
+@command(short_help="Cleanup local data.")
 @click.pass_context
 def cleanup(ctx):
     """Cleanup local data and temporary artifacts."""
@@ -364,7 +394,7 @@ def cleanup(ctx):
         manager.cleanup()
 
 
-@cli.command(short_help="List installed packages.")
+@command(short_help="List installed packages.")
 @click.pass_context
 def installed(ctx):
     """List all packages installed on the system from all managers."""
@@ -424,14 +454,14 @@ def installed(ctx):
         print_stats(installed_data)
 
 
-@cli.command(short_help="Search packages.")
-@click.option(
+@command(short_help="Search packages.")
+@option(
     "--extended/--package-name",
     default=False,
     help="Extend search to additional package metadata like description, "
     "instead of restricting it package ID and name.",
 )
-@click.option(
+@option(
     "--exact/--fuzzy",
     default=False,
     help="Only returns exact matches, or enable fuzzy search in substrings.",
@@ -540,7 +570,7 @@ def search(ctx, extended, exact, query):
         print_stats(matches)
 
 
-@cli.command(short_help="Install a package.")
+@command(short_help="Install a package.")
 @click.argument("package_id", type=click.STRING, required=True)
 @click.pass_context
 def install(ctx, package_id):
@@ -589,8 +619,8 @@ def install(ctx, package_id):
         return
 
 
-@cli.command(short_help="List outdated packages.")
-@click.option(
+@command(short_help="List outdated packages.")
+@option(
     "-c",
     "--cli-format",
     type=click.Choice(sorted(CLI_FORMATS), case_sensitive=False),
@@ -681,7 +711,7 @@ def outdated(ctx, cli_format):
         print_stats(outdated_data)
 
 
-@cli.command(short_help="Upgrade all packages.")
+@command(short_help="Upgrade all packages.")
 @click.pass_context
 def upgrade(ctx):
     """Perform a full package upgrade on all available managers."""
@@ -699,7 +729,7 @@ def upgrade(ctx):
             logger.info(output)
 
 
-@cli.command(short_help="Save installed packages to a TOML file.")
+@command(short_help="Save installed packages to a TOML file.")
 @click.argument("toml_output", type=click.File("w"), default="-")
 @click.pass_context
 def backup(ctx, toml_output):
@@ -757,7 +787,7 @@ def backup(ctx, toml_output):
         print_stats(installed_data)
 
 
-@cli.command(short_help="Install packages in batch as specified by TOML files.")
+@command(short_help="Install packages in batch as specified by TOML files.")
 @click.argument("toml_files", type=click.File("r"), required=True, nargs=-1)
 @click.pass_context
 def restore(ctx, toml_files):
@@ -794,3 +824,27 @@ def restore(ctx, toml_files):
             for package_id, version in doc[manager.id].items():
                 output = manager.install(package_id)
                 click.echo(output, color=color)
+
+
+# Group sub-command in sections.
+cli.section(
+    "Explore commands",
+    managers,
+    installed,
+    outdated,
+    search,
+)
+
+cli.section(
+    "Maintainance commands",
+    install,
+    upgrade,
+    sync,
+    cleanup,
+)
+
+cli.section(
+    "Package snapshots commands",
+    backup,
+    restore,
+)

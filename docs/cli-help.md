@@ -10,58 +10,67 @@ Usage: mpm [OPTIONS] COMMAND [ARGS]...
 
   CLI for multi-package manager upgrades.
 
-Options:
+Package manager selection options:
   -m, --manager [apm|apt|apt-mint|brew|cask|choco|composer|flatpak|gem|mas|npm|opkg|pip|snap|vscode|yarn]
-                            Restrict sub-command to a subset of package
-                            managers. Repeat to select multiple managers. The
-                            order in which options are provided defines the
-                            order in which sub-commands will process them.
+                      Restrict sub-command to a subset of package managers.
+                      Repeat to select multiple managers. The order in which
+                      options are provided defines the order in which sub-
+                      commands will process them.
   -e, --exclude [apm|apt|apt-mint|brew|cask|choco|composer|flatpak|gem|mas|npm|opkg|pip|snap|vscode|yarn]
-                            Exclude a package manager. Repeat to exclude
-                            multiple managers.
-  -a, --all-managers        Force evaluation of all package manager implemented
-                            by mpm, even those notsupported by the current
-                            platform. Still applies filtering by --manager and
-                            --exclude options before calling the subcommand.
-                            [default: False]
-  -x, --xkcd                Forces the subset of package managers to the order
-                            defined in XKCD #1654 comic, i.e. ('pip', 'brew',
-                            'npm', 'apt').  [default: False]
+                      Exclude a package manager. Repeat to exclude multiple
+                      managers.
+  -a, --all-managers  Force evaluation of all package manager implemented by
+                      mpm, even those notsupported by the current platform.
+                      Still applies filtering by --manager and --exclude options
+                      before calling the subcommand.  [default: False]
+  -x, --xkcd          Forces the subset of package managers to the order defined
+                      in XKCD #1654 comic, i.e. ('pip', 'brew', 'npm', 'apt').
+                      [default: False]
+
+Manager's options:
   --ignore-auto-updates / --include-auto-updates
-                            Report all outdated packages, including those tagged
-                            as auto-updating. Only applies to 'outdated' and
-                            'upgrade' commands.  [default: ignore-auto-updates]
-  -o, --output-format [ascii|csv|csv-tab|double|fancy_grid|github|grid|html|jira|json|latex|latex_booktabs|mediawiki|minimal|moinmoin|orgtbl|pipe|plain|psql|psql_unicode|rst|simple|textile|tsv|vertical]
-                            Rendering mode of the output.  [default:
-                            psql_unicode]
-  -s, --sort-by [manager_id|manager_name|package_id|package_name|version]
-                            Sort results.  [default: manager_id]
-  --stats / --no-stats      Print per-manager package statistics.  [default:
-                            stats]
-  --time / --no-time        Measure and print elapsed execution time.  [default:
-                            no-time]
+                 Report all outdated packages, including those tagged as auto-
+                 updating. Only applies to 'outdated' and 'upgrade' commands.
+                 [default: ignore-auto-updates]
   --stop-on-error / --continue-on-error
-                            Stop right away or continue operations on manager
-                            CLI error.  [default: continue-on-error]
-  -d, --dry-run             Do not actually perform any action, just simulate
-                            CLI calls.  [default: False]
+                 Stop right away or continue operations on manager CLI error.
+                 [default: continue-on-error]
+  -d, --dry-run  Do not actually perform any action, just simulate CLI calls.
+                 [default: False]
+
+Output options:
+  -o, --output-format [ascii|csv|csv-tab|double|fancy_grid|github|grid|html|jira|json|latex|latex_booktabs|mediawiki|minimal|moinmoin|orgtbl|pipe|plain|psql|psql_unicode|rst|simple|textile|tsv|vertical]
+                         Rendering mode of the output.  [default: psql_unicode]
+  -s, --sort-by [manager_id|manager_name|package_id|package_name|version]
+                         Sort results.  [default: manager_id]
+  --stats / --no-stats   Print per-manager package statistics.  [default: stats]
+  --time / --no-time     Measure and print elapsed execution time.  [default:
+                         no-time]
+  --no-color, --no-ansi  Strip out all colors and all ANSI codes.  [default:
+                         False]
+
+Other options:
   -C, --config CONFIG_PATH  Location of the configuration file.
   -v, --verbosity LEVEL     Either CRITICAL, ERROR, WARNING, INFO or DEBUG.
                             [default: INFO]
   --version                 Show the version and exit.  [default: False]
   -h, --help                Show this message and exit.  [default: False]
 
-Commands:
-  backup     Save installed packages to a TOML file.
-  cleanup    Cleanup local data.
-  install    Install a package.
-  installed  List installed packages.
+Explore commands:
   managers   List supported package managers and their location.
+  installed  List installed packages.
   outdated   List outdated packages.
-  restore    Install packages in batch as specified by TOML files.
   search     Search packages.
-  sync       Sync local package info.
+
+Maintainance commands:
+  install    Install a package.
   upgrade    Upgrade all packages.
+  sync       Sync local package info.
+  cleanup    Cleanup local data.
+
+Package snapshots commands:
+  backup     Save installed packages to a TOML file.
+  restore    Install packages in batch as specified by TOML files.
 ```
 
 ## `mpm backup`

@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+* [mpm] Add ``--no-color``/``--no-ansi`` flags.
+* [mpm] Forces no color on JSON output.
 * [mpm] Autofix Markdown content with `mdformat`.
 
 

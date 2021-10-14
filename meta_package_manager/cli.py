@@ -93,13 +93,13 @@ def json(data):
     )
 
 
-def print_table(header_defs, rows, sort_key=None):
+def print_table(header_defs, rows, sort_key=None, color=True):
     """Utility to print a table and sort its content."""
     # Do not print anything, not even table headers if no rows.
     if not rows:
         return
 
-    header_labels = (label for label, _ in header_defs)
+    header_labels = (click.style(label, bold=True) for label, _ in header_defs)
 
     # Check there is no duplicate column IDs.
     header_ids = [col_id for _, col_id in header_defs if col_id]
@@ -135,7 +135,7 @@ def print_table(header_defs, rows, sort_key=None):
     for line in table_formatter.format_output(
         sorted(rows, key=sort_method), header_labels, disable_numparse=True
     ):
-        click.echo(line.encode("utf-8"))
+        click.echo(line, color=color)
 
 
 def print_stats(data):
@@ -256,6 +256,13 @@ CONTEXT_SETTINGS = Context.settings(
     help="Do not actually perform any action, just simulate CLI calls.",
 )
 @click.option(
+    "--no-color",
+    "--no-ansi",
+    is_flag=True,
+    default=False,
+    help="Strip out all colors and all ANSI codes.",
+)
+@click.option(
     "-C",
     "--config",
     metavar="CONFIG_PATH",
@@ -294,6 +301,7 @@ def cli(
     time,
     stop_on_error,
     dry_run,
+    no_color,
 ):
     """CLI for multi-package manager upgrades."""
     # Take timestamp snapshot.
@@ -335,6 +343,7 @@ def cli(
         "stats": stats,
         "time": time,
         "start_time": start_time,
+        "color": not no_color,
     }
 
     ctx.call_on_close(reset_logger)
@@ -348,6 +357,7 @@ def managers(ctx):
     selected_managers = ctx.obj["selected_managers"]
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
+    color = ctx.obj["color"]
 
     # Machine-friendly data rendering.
     if output_format == "json":
@@ -370,7 +380,7 @@ def managers(ctx):
                 {expt.error for expt in manager.cli_errors}
             )
 
-        click.echo(json(manager_data))
+        click.echo(json(manager_data), color=False)
         return
 
     # Human-friendly content rendering.
@@ -423,6 +433,7 @@ def managers(ctx):
         ),
         table,
         sort_by,
+        color,
     )
 
 
@@ -454,6 +465,7 @@ def installed(ctx):
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
     stats = ctx.obj["stats"]
+    color = ctx.obj["color"]
 
     # Build-up a global dict of installed packages per manager.
     installed_data = {}
@@ -472,7 +484,7 @@ def installed(ctx):
 
     # Machine-friendly data rendering.
     if output_format == "json":
-        click.echo(json(installed_data))
+        click.echo(json(installed_data), color=False)
         return
 
     # Human-friendly content rendering.
@@ -498,6 +510,7 @@ def installed(ctx):
         ),
         table,
         sort_by,
+        color,
     )
 
     if stats:
@@ -524,6 +537,7 @@ def search(ctx, extended, exact, query):
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
     stats = ctx.obj["stats"]
+    color = ctx.obj["color"]
 
     # Build-up a global list of package matches per manager.
     matches = {}
@@ -550,7 +564,7 @@ def search(ctx, extended, exact, query):
 
     # Machine-friendly data rendering.
     if output_format == "json":
-        click.echo(json(matches))
+        click.echo(json(matches), color=False)
         return
 
     # Prepare highlighting helpers.
@@ -612,6 +626,7 @@ def search(ctx, extended, exact, query):
         ),
         table,
         sort_by,
+        color,
     )
 
     if stats:
@@ -624,6 +639,7 @@ def search(ctx, extended, exact, query):
 def install(ctx, package_id):
     """Install the provided package using one of the provided package manager."""
     selected_managers = list(ctx.obj["selected_managers"])
+    color = ctx.obj["color"]
 
     logger.info(
         f"Package manager order: {', '.join([m.id for m in selected_managers])}"
@@ -662,7 +678,7 @@ def install(ctx, package_id):
         # Restore default value.
         manager.stop_on_error = default_value
 
-        click.echo(output)
+        click.echo(output, color=color)
         return
 
 
@@ -681,6 +697,7 @@ def outdated(ctx, cli_format):
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
     stats = ctx.obj["stats"]
+    color = ctx.obj["color"]
 
     render_cli = partial(PackageManager.render_cli, cli_format=cli_format)
 
@@ -722,7 +739,7 @@ def outdated(ctx, cli_format):
 
     # Machine-friendly data rendering.
     if output_format == "json":
-        click.echo(json(outdated_data))
+        click.echo(json(outdated_data), color=False)
         return
 
     # Human-friendly content rendering.
@@ -750,6 +767,7 @@ def outdated(ctx, cli_format):
         ),
         table,
         sort_by,
+        color,
     )
 
     if stats:
@@ -842,6 +860,7 @@ def restore(ctx, toml_files):
     Version specified in the TOML file is ignored in the current implementation.
     """
     selected_managers = ctx.obj["selected_managers"]
+    color = ctx.obj["color"]
 
     for toml_input in toml_files:
 
@@ -867,4 +886,4 @@ def restore(ctx, toml_files):
             logger.info(f"Restore {manager.id} packages...")
             for package_id, version in doc[manager.id].items():
                 output = manager.install(package_id)
-                click.echo(output)
+                click.echo(output, color=color)

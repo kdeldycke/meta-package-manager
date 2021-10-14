@@ -17,7 +17,7 @@
 
 import pytest
 
-from ..managers import DEFAULT_MANAGER_IDS
+from ..pool import DEFAULT_MANAGER_IDS
 from .conftest import destructive
 from .test_cli import CLISubCommandTests
 

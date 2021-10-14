@@ -20,7 +20,7 @@ import re
 from ..base import PackageManager
 from ..platform import LINUX
 from ..version import parse_version
-from . import logger
+from .. import logger
 
 
 class Flatpak(PackageManager):

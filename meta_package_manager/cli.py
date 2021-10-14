@@ -35,7 +35,6 @@ from boltons.strutils import complement_int_list, int_ranges_from_int_list
 from . import CLI_NAME, __version__, env_data, logger, reset_logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .config import load_conf
-from .managers import ALL_MANAGER_IDS, select_managers
 from .output import (
     KO,
     OK,
@@ -47,6 +46,7 @@ from .output import (
     table_formatter,
 )
 from .platform import os_label
+from .pool import ALL_MANAGER_IDS, select_managers
 from .version import TokenizedString
 
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "apt")

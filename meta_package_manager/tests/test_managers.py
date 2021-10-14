@@ -23,7 +23,7 @@ from types import MethodType
 
 import pytest
 
-from ..managers import ALL_MANAGER_IDS, pool
+from ..pool import ALL_MANAGER_IDS, pool
 from ..platform import OS_DEFINITIONS
 from ..version import TokenizedString
 

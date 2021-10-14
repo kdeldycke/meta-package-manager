@@ -24,7 +24,7 @@ import pytest
 import simplejson as json
 from boltons.iterutils import same
 
-from ..managers import DEFAULT_MANAGER_IDS
+from ..pool import DEFAULT_MANAGER_IDS
 from .conftest import unless_macos
 from .test_cli import CLISubCommandTests, CLITableTests
 

@@ -17,7 +17,7 @@
 
 import pytest
 
-from ..managers import ALL_MANAGER_IDS, DEFAULT_MANAGER_IDS
+from ..pool import ALL_MANAGER_IDS, DEFAULT_MANAGER_IDS
 from .test_cli import CLISubCommandTests
 
 

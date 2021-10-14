@@ -25,7 +25,7 @@ from boltons.strutils import strip_ansi
 
 from .. import __version__, config
 from ..cli import RENDERING_MODES
-from ..managers import DEFAULT_MANAGER_IDS
+from ..pool import DEFAULT_MANAGER_IDS
 
 """ Common tests for all CLI basic features and templates for subcommands. """
 

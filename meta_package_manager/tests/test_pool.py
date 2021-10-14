@@ -18,7 +18,7 @@
 import pytest
 
 from ..cli import cli
-from ..managers import (
+from ..pool import (
     ALL_MANAGER_IDS,
     ALLOWED_EXTRA_OPTION,
     DEFAULT_MANAGER_IDS,

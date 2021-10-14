@@ -21,8 +21,8 @@
 from boltons.iterutils import flatten
 
 from . import CLI_NAME
-from .managers import pool
 from .platform import ALL_OS_LABELS
+from .pool import pool
 
 # Format: label name, color, optional description.
 LABELS = [

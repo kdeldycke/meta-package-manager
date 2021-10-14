@@ -26,7 +26,7 @@ from boltons.cacheutils import cachedproperty
 from ..base import PackageManager
 from ..platform import LINUX, MACOS
 from ..version import parse_version
-from . import logger
+from .. import logger
 
 
 class Homebrew(PackageManager):

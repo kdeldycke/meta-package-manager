@@ -38,7 +38,7 @@ from . import CLI_NAME, __version__, env_data, logger, reset_logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .config import load_conf
 from .managers import ALL_MANAGER_IDS, select_managers
-from .platform import os_label
+from .platform import is_windows, os_label
 from .version import TokenizedString
 
 # Initialize the table formatter.
@@ -135,6 +135,8 @@ def print_table(header_defs, rows, sort_key=None, color=True):
     for line in table_formatter.format_output(
         sorted(rows, key=sort_method), header_labels, disable_numparse=True
     ):
+        if is_windows():
+            line = line.encode("utf-8")
         click.echo(line, color=color)
 
 

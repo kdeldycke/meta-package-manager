@@ -30,6 +30,7 @@ from click.testing import CliRunner
 
 from .. import CLI_NAME, INDENT, PROMPT, config, reset_logger
 from ..cli import cli
+from ..output import theme
 from ..platform import is_linux, is_macos, is_windows
 from ..xbar import run as xbar_run
 
@@ -78,13 +79,13 @@ unless_windows = pytest.mark.skipif(not is_windows(), reason="Windows required")
 
 def print_cli_output(cmd, output=None, error=None, error_code=None):
     """Simulate CLI output. Used to print debug traces in test results."""
-    print("\n{}{}".format(PROMPT, click.style(" ".join(cmd), fg="white")))
+    print("\n{}{}".format(PROMPT, theme.invoked_command(" ".join(cmd))))
     if output:
         print(indent(output, INDENT))
     if error:
-        print(indent(click.style(error, fg="red"), INDENT))
+        print(indent(theme.error(error), INDENT))
     if error_code is not None:
-        print(click.style(f"{INDENT}Return code: {error_code}", fg="yellow"))
+        print(theme.error(f"{INDENT}Return code: {error_code}"))
 
 
 def run_cmd(*args):

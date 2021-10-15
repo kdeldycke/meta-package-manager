@@ -21,13 +21,13 @@ from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
 
-import click
 from boltons.cacheutils import cachedproperty
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from boltons.typeutils import classproperty
 
 from . import INDENT, PROMPT, logger
+from .output import theme
 from .platform import CURRENT_OS_ID
 from .version import parse_version
 from .xbar import run
@@ -269,7 +269,7 @@ class PackageManager:
         """
         # Casting to string helps serialize Path and Version objects.
         args = list(map(str, flatten(args)))
-        args_str = click.style(" ".join(args), fg="white")
+        args_str = theme.invoked_command(" ".join(args))
         cli_msg = f"{PROMPT}{args_str}"
 
         code = 0

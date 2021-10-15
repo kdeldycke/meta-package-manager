@@ -34,8 +34,6 @@ from click_log import ColorFormatter
 from cloup import (
     Context,
     Group,
-    HelpFormatter,
-    HelpTheme,
     OptionGroupMixin,
     Style,
     command,
@@ -52,10 +50,13 @@ from .output import (
     OK,
     RENDERING_MODES,
     SORTABLE_FIELDS,
+    ExtraHelpColorsMixin,
+    HelpExtraFormatter,
     json,
     print_stats,
     print_table,
     table_formatter,
+    theme,
 )
 from .platform import os_label
 from .pool import ALL_MANAGER_IDS, select_managers
@@ -76,29 +77,23 @@ def timeit():
         click.echo(f"Execution time: {perf_counter() - start_time:0.3f} seconds.")
 
 
-class GroupWithOptionGroup(OptionGroupMixin, Group):
+class GroupWithOptionGroup(ExtraHelpColorsMixin, OptionGroupMixin, Group):
     """Cloup does not support option groups on `Click.group`.
 
-    This is a workaround that is being diescussed at https://github.com/janluke/cloup/issues/98
+    This is a workaround that is being discussed at https://github.com/janluke/cloup/issues/98
     """
 
     pass
 
 
+Context.formatter_class = HelpExtraFormatter
 CONTEXT_SETTINGS = Context.settings(
     show_default=True,
     auto_envvar_prefix=CLI_NAME,
     align_option_groups=False,
     show_constraints=True,
     show_subcommand_aliases=True,
-    formatter_settings=HelpFormatter.settings(
-        theme=HelpTheme(
-            invoked_command=Style(fg="bright_white"),
-            heading=Style(fg="bright_green", bold=True),
-            constraint=Style(fg="magenta"),
-            col1=Style(fg="cyan"),
-        )
-    ),
+    formatter_settings=HelpExtraFormatter.settings(theme=theme),
 )
 
 
@@ -136,7 +131,7 @@ CONTEXT_SETTINGS = Context.settings(
         is_flag=True,
         default=False,
         help="Forces the subset of package managers to the order defined in XKCD #1654 "
-        f"comic, i.e. {XKCD_MANAGER_ORDER}.",
+        "comic, i.e. {}.".format(", ".join(map(theme.choice, XKCD_MANAGER_ORDER))),
     ),
 )
 @option_group(
@@ -351,7 +346,7 @@ def managers(ctx):
         table.append(
             (
                 manager.name,
-                click.style(manager.id, fg="green" if manager.fresh else "red"),
+                getattr(theme, "success" if manager.fresh else "error")(manager.id),
                 os_infos,
                 cli_infos,
                 OK if manager.executable else "",
@@ -535,7 +530,7 @@ def search(ctx, extended, exact, query):
         for i, j in sorted(bold_ranges + normal_ranges):
             segment = getitem(string, slice(i, j + 1))
             if (i, j) in bold_ranges:
-                segment = click.style(segment, bold=True, fg="green")
+                segment = theme.search(segment)
             styled_str += segment
 
         return styled_str

@@ -9,6 +9,7 @@ This version is not released yet and is under active development.
 * [mpm] Add ``--no-color``/``--no-ansi`` flags.
 * [mpm] Forces no color on JSON output.
 * [mpm] Group commands and options in help screen.
+* [mpm] Colorize options, choices, metavars and default values in help screens.
 * [mpm] Autofix Markdown content with `mdformat`.
 
 

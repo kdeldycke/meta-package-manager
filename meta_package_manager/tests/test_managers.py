@@ -23,8 +23,8 @@ from types import MethodType
 
 import pytest
 
-from ..pool import ALL_MANAGER_IDS, pool
 from ..platform import OS_DEFINITIONS
+from ..pool import ALL_MANAGER_IDS, pool
 from ..version import TokenizedString
 
 """ Test the structure, data and types returned by all package managers.

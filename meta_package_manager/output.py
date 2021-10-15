@@ -106,7 +106,7 @@ class ExtraHelpColorsMixin:
     """
 
     def collect_keywords(self, ctx):
-        """ Parse click context to collect option names, choices and metavar keywords. """
+        """Parse click context to collect option names, choices and metavar keywords."""
         options = set()
         choices = set()
         metavars = set()

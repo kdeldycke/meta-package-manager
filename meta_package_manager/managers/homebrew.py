@@ -23,10 +23,10 @@ from shutil import which
 import simplejson as json
 from boltons.cacheutils import cachedproperty
 
+from .. import logger
 from ..base import PackageManager
 from ..platform import LINUX, MACOS
 from ..version import parse_version
-from .. import logger
 
 
 class Homebrew(PackageManager):

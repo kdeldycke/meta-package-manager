@@ -17,10 +17,10 @@
 
 import re
 
+from .. import logger
 from ..base import PackageManager
 from ..platform import LINUX, MACOS, WINDOWS
 from ..version import parse_version
-from .. import logger
 
 
 class Gem(PackageManager):

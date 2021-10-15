@@ -26,8 +26,8 @@ from boltons.iterutils import flatten
 from yaml import Loader, load
 
 from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_LABELS, PLATFORM_PREFIX
-from ..pool import ALL_MANAGER_IDS, pool
 from ..platform import OS_DEFINITIONS, os_label
+from ..pool import ALL_MANAGER_IDS, pool
 from .conftest import unless_linux
 
 """ Test all non-code artifacts depending on manager definitions.

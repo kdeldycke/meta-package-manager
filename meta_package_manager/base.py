@@ -27,7 +27,7 @@ from boltons.strutils import strip_ansi
 from boltons.typeutils import classproperty
 
 from . import INDENT, PROMPT, logger
-from .output import theme
+from .colorize import theme
 from .platform import CURRENT_OS_ID
 from .version import parse_version
 from .xbar import run

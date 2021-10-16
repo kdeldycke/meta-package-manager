@@ -31,32 +31,19 @@ import tomli_w
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list
 from click_log import ColorFormatter
-from cloup import (
-    Context,
-    Group,
-    OptionGroupMixin,
-    Style,
-    command,
-    group,
-    option,
-    option_group,
-)
+from cloup import Context, Group, OptionGroupMixin, command, group, option, option_group
 
 from . import CLI_NAME, __version__, env_data, logger, reset_logger
 from .base import CLI_FORMATS, CLIError, PackageManager
+from .colorize import KO, OK, ExtraHelpColorsMixin, HelpExtraFormatter, theme
 from .config import load_conf
 from .output import (
-    KO,
-    OK,
     RENDERING_MODES,
     SORTABLE_FIELDS,
-    ExtraHelpColorsMixin,
-    HelpExtraFormatter,
     json,
     print_stats,
     print_table,
     table_formatter,
-    theme,
 )
 from .platform import os_label
 from .pool import ALL_MANAGER_IDS, select_managers

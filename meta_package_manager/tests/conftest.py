@@ -21,7 +21,6 @@ import os
 from pathlib import Path
 from textwrap import dedent, indent
 
-import click
 import pytest
 from boltons.iterutils import flatten, same
 from boltons.strutils import strip_ansi
@@ -30,7 +29,7 @@ from click.testing import CliRunner
 
 from .. import CLI_NAME, INDENT, PROMPT, config, reset_logger
 from ..cli import cli
-from ..output import theme
+from ..colorize import theme
 from ..platform import is_linux, is_macos, is_windows
 from ..xbar import run as xbar_run
 

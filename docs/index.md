@@ -29,6 +29,7 @@ history
 code-of-conduct
 license
 GitHub Repository <https://github.com/kdeldycke/meta-package-manager>
+Funding <https://github.com/sponsors/kdeldycke>
 ```
 
 ## Indices and tables

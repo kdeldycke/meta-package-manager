@@ -1,4 +1,4 @@
-# Falsehoods Programmers Believe About Package Managers
+# Falsehoods programmers believe about package managers
 
 Pre-required reads:
 
@@ -25,7 +25,7 @@ Pre-required reads:
 11. Packages can’t upgrade themselves.
 12. A package can be reinstalled.
 
-## Package Managers
+## Package managers
 
 1.  Package managers provides the latest version of packages.
 2.  Package managers provides clean packages.

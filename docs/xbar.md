@@ -1,4 +1,4 @@
-# xbar Plugin
+# xbar plugin
 
 ``` {sidebar} Default layout
 ![](xbar-plugin-flat-layout.png)

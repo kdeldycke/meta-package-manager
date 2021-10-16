@@ -13,16 +13,21 @@ This project more or less follows [Semantic Versioning](https://semver.org/).
 
 Which boils down to the following rules of thumb regarding stability:
 
-- **Patch releases** (`0.x.n` → `0.x.(n+1)` upgrades) are bug-fix only. These
-  releases must not break anything and keep backward-compatibility with `0.x.*`
-  and `0.(x-1).*` series.
+- **Patch releases** (`0.x.n` → `0.x.(n+1)` upgrades)
 
-- **Minor releases** (`0.n.*` → `0.(n+1).0` upgrades) includes any non-bugfix
-  changes. These releases must be backward-compatible with any `0.n.*` version
-  but are allowed to drop compatibility with the `0.(n-1).*` series and below.
+  Are bug-fix only. These releases must not break anything and keep
+  backward-compatibility with `0.x.*` and `0.(x-1).*` series.
 
-- **Major releases** (`n.*.*` → `(n+1).0.0` upgrades) make no promises about
-  backwards-compability. Any API change requires a new major release.
+- **Minor releases** (`0.n.*` → `0.(n+1).0` upgrades)
+
+  Includes any non-bugfix changes. These releases must be backward-compatible
+  with any `0.n.*` version but are allowed to drop compatibility with the
+  `0.(n-1).*` series and below.
+
+- **Major releases** (`n.*.*` → `(n+1).0.0` upgrades)
+
+  Make no promises about backwards-compability. Any API change requires a new
+  major release.
 
 ## Build status
 

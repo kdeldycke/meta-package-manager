@@ -160,12 +160,15 @@ omit = ["*/tests/*"]
 precision = 2
 
 [tool.check-wheel-contents]
-# W002: Wheel contains duplicate files:
-#   meta_package_manager/managers/__init__.py
-#   meta_package_manager/tests/__init__.py
-# W004: Module is not located at importable path:
-#   meta_package_manager/xbar/meta_package_manager.7h.py
-ignore = "W002, W004"
+ignore = [
+    # W002: Wheel contains duplicate files:
+    #   meta_package_manager/managers/__init__.py
+    #   meta_package_manager/tests/__init__.py
+    "W002",
+    # W004: Module is not located at importable path:
+    #   meta_package_manager/xbar/meta_package_manager.7h.py
+    "W004",
+]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -133,6 +133,12 @@ class HelpExtraFormatter(HelpFormatter):
     * https://github.com/janluke/cloup/issues/95
     """
 
+    def __init__(self, *args, **kwargs):
+        """ Forces our hard-coded theme as default if none provided. """
+        if "theme" not in kwargs:
+            kwargs["theme"] = theme
+        super().__init__(*args, **kwargs)
+
     # Lists of extra keywords to highlight.
     long_options = set()
     short_options = set()

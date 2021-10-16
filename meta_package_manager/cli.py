@@ -80,7 +80,6 @@ CONTEXT_SETTINGS = Context.settings(
     align_option_groups=False,
     show_constraints=True,
     show_subcommand_aliases=True,
-    formatter_settings=HelpExtraFormatter.settings(theme=theme),
 )
 
 

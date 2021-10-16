@@ -13,9 +13,6 @@ $ pip install meta-package-manager
 See also [pip installation
 instructions](https://pip.pypa.io/en/stable/installing/).
 
-
-<img align="right" width="20%" height="20%" src="images/angry-paper-box.png"/>
-
 ````` {admonition} Danger: **Misleading package names**
 :class: danger
 
@@ -29,8 +26,6 @@ instructions](https://pip.pypa.io/en/stable/installing/).
 as **`meta-package-manager`**. Only the later provides the {command}`mpm` CLI
 *per-se*. The former has nothing to do with the current project.
 `````
-
-
 
 ## Shell completion
 

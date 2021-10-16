@@ -36,6 +36,7 @@ extensions = [
     "sphinx_issues",
     "sphinxext.opengraph",
     "myst_parser",
+    "sphinx_click",
 ]
 
 master_doc = "index"

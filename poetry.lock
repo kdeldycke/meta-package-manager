@@ -1007,6 +1007,19 @@ lint = ["flake8 (>=3.5.0)", "isort", "mypy (>=0.900)", "docutils-stubs", "types-
 test = ["pytest", "pytest-cov", "html5lib", "cython", "typed-ast"]
 
 [[package]]
+name = "sphinx-click"
+version = "3.0.1"
+description = "Sphinx extension that automatically documents click applications"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+click = ">=7.0"
+docutils = "*"
+sphinx = ">=2.0"
+
+[[package]]
 name = "sphinx-copybutton"
 version = "0.4.0"
 description = "Add a copy button to each of your code cells."
@@ -1308,7 +1321,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "6e564418159cd97e1b9bb98ddb13d480936bdaa496ba68d66a44a7be725bc4e9"
+content-hash = "2110911504f10a6af40427c7710a3c61312a754a77517b4d0ae84bfe1a2f64ce"
 
 [metadata.files]
 alabaster = [
@@ -1928,6 +1941,10 @@ soupsieve = [
 sphinx = [
     {file = "Sphinx-4.2.0-py3-none-any.whl", hash = "sha256:98a535c62a4fcfcc362528592f69b26f7caec587d32cd55688db580be0287ae0"},
     {file = "Sphinx-4.2.0.tar.gz", hash = "sha256:94078db9184491e15bce0a56d9186e0aec95f16ac20b12d00e06d4e36f1058a6"},
+]
+sphinx-click = [
+    {file = "sphinx-click-3.0.1.tar.gz", hash = "sha256:9b24c46f3b8f25fc639f47c97ac0361d9f80d48c2ed6b3917de2865bbdbe1785"},
+    {file = "sphinx_click-3.0.1-py3-none-any.whl", hash = "sha256:e9ee2237e5a6b6620e9996b8214934afdf8f7f9f9fc082482c77be0e4379038e"},
 ]
 sphinx-copybutton = [
     {file = "sphinx-copybutton-0.4.0.tar.gz", hash = "sha256:8daed13a87afd5013c3a9af3575cc4d5bec052075ccd3db243f895c07a689386"},

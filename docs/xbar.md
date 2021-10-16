@@ -1,11 +1,11 @@
 # xbar plugin
 
 ``` {sidebar} Default layout
-![](xbar-plugin-flat-layout.png)
+![](images/xbar-plugin-flat-layout.png)
 ```
 
 ``` {sidebar} Submenu layout
-![](xbar-plugin-submenu-layout.png)
+![](images/xbar-plugin-submenu-layout.png)
 ```
 
 A copy of the latest stable version of the xbar plugin for `mpm` is always

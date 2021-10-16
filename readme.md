@@ -1,4 +1,8 @@
-# Meta Package Manager
+<p align="center">
+  <a href="https://github.com/kdeldycke/meta-package-manager/">
+    <img src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/images/logo-banner.svg" alt="Meta Package Manager">
+  </a>
+</p>
 
 <a href="https://xkcd.com/1654/" alt="XKCD #1654: Universal Install Script">
 <img align="right" width="20%" height="20%" src="http://imgs.xkcd.com/comics/universal_install_script.png"/>
@@ -22,11 +26,13 @@ status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop/grap
   managers instead of videos
 - `mpm` solves [XKCD #1654: Universal Install Script](https://xkcd.com/1654/)
 
+---
+
 ## Features
 
-<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/mpm-outdated-cli.png"/>
+<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/images/mpm-outdated-cli.png"/>
 
-<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/mpm-managers-cli.png"/>
+<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/images/mpm-managers-cli.png"/>
 
 - Inventory and list all package managers available on the system.
 - Supports macOS, Linux and Windows.

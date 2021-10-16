@@ -100,7 +100,7 @@ Replace [`sphinx_tabs`](https://github.com/executablebooks/sphinx-tabs) by
 
 FYI, here is a graph of Python package dependencies:
 
-``` {image} dependencies.png
+``` {image} images/dependencies.png
 :alt: Meta Package Manager dependency graph
 :align: center
 ```

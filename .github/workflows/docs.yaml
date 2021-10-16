@@ -152,7 +152,7 @@ jobs:
       - name: Run pipdeptree
         run: >
           poetry run pipdeptree --packages meta-package-manager
-          --graph-output png > ./docs/dependencies.png
+          --graph-output png > ./docs/images/dependencies.png
       - uses: peter-evans/create-pull-request@v3.10.1
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"

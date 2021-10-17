@@ -30,6 +30,14 @@ meta\_package\_manager.cli module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.colorize module
+--------------------------------------
+
+.. automodule:: meta_package_manager.colorize
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.config module
 ------------------------------------
 

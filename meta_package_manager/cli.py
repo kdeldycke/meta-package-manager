@@ -30,12 +30,12 @@ import tomli
 import tomli_w
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list
+from click_extra.colorize import KO, OK, ExtraHelpColorsMixin, HelpExtraFormatter, theme
 from click_log import ColorFormatter
 from cloup import Context, Group, OptionGroupMixin, command, group, option, option_group
 
 from . import CLI_NAME, __version__, env_data, logger, reset_logger
 from .base import CLI_FORMATS, CLIError, PackageManager
-from .colorize import KO, OK, ExtraHelpColorsMixin, HelpExtraFormatter, theme
 from .config import load_conf
 from .output import (
     RENDERING_MODES,
@@ -202,7 +202,7 @@ CONTEXT_SETTINGS = Context.settings(
 )
 @click.help_option("-h", "--help")
 @click.pass_context
-def cli(
+def mpm(
     ctx,
     manager,
     exclude,
@@ -217,7 +217,7 @@ def cli(
     time,
     no_color,
 ):
-    """CLI for multi-package manager upgrades."""
+    """Common CLI options and behavior for multiple package managers."""
     # Take timestamp snapshot.
     start_time = perf_counter() if time else None
 
@@ -808,7 +808,7 @@ def restore(ctx, toml_files):
 
 
 # Group sub-command in sections.
-cli.section(
+mpm.section(
     "Explore commands",
     managers,
     installed,
@@ -816,7 +816,7 @@ cli.section(
     search,
 )
 
-cli.section(
+mpm.section(
     "Maintainance commands",
     install,
     upgrade,
@@ -824,7 +824,7 @@ cli.section(
     cleanup,
 )
 
-cli.section(
+mpm.section(
     "Package snapshots commands",
     backup,
     restore,

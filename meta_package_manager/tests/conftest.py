@@ -26,10 +26,10 @@ from boltons.iterutils import flatten, same
 from boltons.strutils import strip_ansi
 from boltons.tbutils import ExceptionInfo
 from click.testing import CliRunner
+from click_extra.colorize import theme
 
 from .. import CLI_NAME, INDENT, PROMPT, config, reset_logger
-from ..cli import cli
-from ..colorize import theme
+from ..cli import mpm
 from ..platform import is_linux, is_macos, is_windows
 from ..xbar import run as xbar_run
 
@@ -134,7 +134,7 @@ def invoke(runner):
         reset_logger()
 
         # Force default_map reset between calls to prevent initial context to be polluted by previous tests.
-        result = runner.invoke(cli, args, color=color, default_map={})
+        result = runner.invoke(mpm, args, color=color, default_map={})
 
         # Strip colors out of results.
         result.stdout_bytes = strip_ansi(result.stdout_bytes)

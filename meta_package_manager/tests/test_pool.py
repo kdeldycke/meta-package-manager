@@ -17,7 +17,7 @@
 
 import pytest
 
-from ..cli import cli
+from ..cli import mpm
 from ..pool import (
     ALL_MANAGER_IDS,
     ALLOWED_EXTRA_OPTION,
@@ -63,7 +63,7 @@ def test_manager_groups():
 
 
 def test_extra_option_allowlist():
-    assert ALLOWED_EXTRA_OPTION.issubset(opt.name for opt in cli.params)
+    assert ALLOWED_EXTRA_OPTION.issubset(opt.name for opt in mpm.params)
 
 
 selection_cases = {

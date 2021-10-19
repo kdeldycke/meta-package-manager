@@ -67,7 +67,7 @@ def conf_structure():
     Sections are dicts. All options have their defaults value to None.
     """
     # Imported here to avoid circular imports.
-    from .cli import cli
+    from .cli import mpm
 
     # Global, top-level options shared by all subcommands are placed under the
     # cli name's section.
@@ -76,7 +76,7 @@ def conf_structure():
     }
 
     # Subcommand-specific options.
-    for cmd_id, cmd in cli.commands.items():
+    for cmd_id, cmd in mpm.commands.items():
         cmd_options = {
             p.name: None for p in cmd.params if p.name not in IGNORED_OPTIONS
         }

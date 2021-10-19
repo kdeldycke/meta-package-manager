@@ -25,9 +25,9 @@ from boltons.cacheutils import cachedproperty
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from boltons.typeutils import classproperty
+from click_extra.colorize import theme
 
 from . import INDENT, PROMPT, logger
-from .colorize import theme
 from .platform import CURRENT_OS_ID
 from .version import parse_version
 from .xbar import run

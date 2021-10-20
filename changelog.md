@@ -10,6 +10,7 @@ This version is not released yet and is under active development.
 * [mpm] Forces no color on JSON output.
 * [mpm] Group commands and options in help screen.
 * [mpm] Colorize options, choices, metavars and default values in help screens.
+* [mpm] Reintroduce coloring of ``--version`` option.
 * [mpm] Add dependency on ``click-extra``.
 * [mpm] Use ``sphinx-click`` to auto-generate CLI documentation.
 * [mpm] Autofix Markdown content with `mdformat`.

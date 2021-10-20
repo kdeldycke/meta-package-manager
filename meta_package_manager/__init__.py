@@ -19,8 +19,6 @@
 
 import logging
 
-from boltons.ecoutils import get_profile
-
 from .xbar import fix_environment
 
 __version__ = "4.8.0"
@@ -44,10 +42,6 @@ CLI_NAME = "mpm"
 # Some CLI printing constants.
 PROMPT = "► "
 INDENT = " " * len(PROMPT)
-
-
-# Environment data.
-env_data = get_profile(scrub=True)
 
 
 # Initialize global logger.

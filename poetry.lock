@@ -233,8 +233,8 @@ tomli = "^1.2.1"
 [package.source]
 type = "git"
 url = "https://github.com/kdeldycke/click-extra.git"
-reference = "5128a29da78c73798d063f959978306d52cdc3fd"
-resolved_reference = "5128a29da78c73798d063f959978306d52cdc3fd"
+reference = "094abf71d6b7e872f646c15712609ddbbe2d12a8"
+resolved_reference = "094abf71d6b7e872f646c15712609ddbbe2d12a8"
 
 [[package]]
 name = "click-log"
@@ -1343,7 +1343,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "2ca48fa777c378b698f2f664e94c6c1b0ff0bb2fccdc81108d48ec448b6749b5"
+content-hash = "258eddefba2f2efcae918c4d17de776579dac82b3ab91e088309e7b42f364ba4"
 
 [metadata.files]
 alabaster = [

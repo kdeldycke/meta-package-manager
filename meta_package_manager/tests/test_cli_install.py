@@ -16,9 +16,9 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import pytest
+from click_extra.tests.conftest import destructive
 
 from ..pool import ALL_MANAGER_IDS
-from .conftest import destructive
 from .test_cli import CLISubCommandTests
 
 

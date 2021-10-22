@@ -20,9 +20,9 @@ import re
 from collections import Counter
 
 from click_extra.run import run_cmd
+from click_extra.tests.conftest import unless_macos
 
 from .. import xbar
-from .conftest import unless_macos
 
 
 @unless_macos

@@ -18,8 +18,8 @@
 import os
 
 import pytest
-
-from .conftest import destructive, run_cmd, unless_macos
+from click_extra.run import run_cmd
+from click_extra.tests.conftest import destructive, unless_macos
 
 # Default location of Homebrew Cask formulas on macOS. This is supposed to be a
 # shallow copy of the following Git repository:

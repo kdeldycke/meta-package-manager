@@ -23,9 +23,9 @@ from time import sleep
 import pytest
 import simplejson as json
 from boltons.iterutils import same
+from click_extra.tests.conftest import unless_macos
 
 from ..pool import DEFAULT_MANAGER_IDS
-from .conftest import unless_macos
 from .test_cli import CLISubCommandTests, CLITableTests
 
 

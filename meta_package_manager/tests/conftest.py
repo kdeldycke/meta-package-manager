@@ -21,14 +21,8 @@ from pathlib import Path
 from textwrap import dedent
 
 import pytest
-from click_extra.tests.conftest import destructive
 from click_extra.tests.conftest import invoke as invoke_extra
-from click_extra.tests.conftest import (
-    runner,
-    unless_linux,
-    unless_macos,
-    unless_windows,
-)
+from click_extra.tests.conftest import runner
 
 from .. import config
 from ..cli import mpm
@@ -51,7 +45,6 @@ def mock_conf_location(tmp_path, monkeypatch):
 
 @pytest.fixture
 def invoke(invoke_extra):
-
     return partial(invoke_extra, mpm)
 
 

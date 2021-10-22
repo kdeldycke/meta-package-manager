@@ -19,16 +19,15 @@ import re
 from collections import Counter
 from pathlib import Path
 
-import pytest
 import simplejson as json
 import tomli
 from boltons.iterutils import flatten
 from click_extra.platform import OS_DEFINITIONS, os_label
+from click_extra.tests.conftest import unless_linux
 from yaml import Loader, load
 
 from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_LABELS, PLATFORM_PREFIX
 from ..pool import ALL_MANAGER_IDS, pool
-from .conftest import unless_linux
 
 """ Test all non-code artifacts depending on manager definitions.
 

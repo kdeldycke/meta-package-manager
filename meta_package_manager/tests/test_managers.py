@@ -22,8 +22,8 @@ from string import ascii_letters, ascii_lowercase, digits
 from types import MethodType
 
 import pytest
+from click_extra.platform import OS_DEFINITIONS
 
-from ..platform import OS_DEFINITIONS
 from ..pool import ALL_MANAGER_IDS, pool
 from ..version import TokenizedString
 

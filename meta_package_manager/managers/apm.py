@@ -16,9 +16,9 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import simplejson as json
+from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from ..base import PackageManager
-from ..platform import LINUX, MACOS, WINDOWS
 from ..version import TokenizedString, parse_version
 
 

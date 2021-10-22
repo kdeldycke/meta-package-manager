@@ -18,9 +18,9 @@
 import re
 
 import simplejson as json
+from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from ..base import PackageManager
-from ..platform import LINUX, MACOS, WINDOWS
 from ..version import parse_version
 
 

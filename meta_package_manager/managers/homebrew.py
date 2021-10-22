@@ -15,17 +15,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import os
 import re
-from pathlib import Path
-from shutil import which
 
 import simplejson as json
-from boltons.cacheutils import cachedproperty
+from click_extra.logging import logger
+from click_extra.platform import LINUX, MACOS
 
-from .. import logger
 from ..base import PackageManager
-from ..platform import LINUX, MACOS
 from ..version import parse_version
 
 

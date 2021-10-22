@@ -15,8 +15,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+from click_extra.platform import LINUX
+
 from ..base import PackageManager
-from ..platform import LINUX
 from ..version import TokenizedString, parse_version
 
 

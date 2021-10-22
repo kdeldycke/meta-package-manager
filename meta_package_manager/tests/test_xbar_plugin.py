@@ -19,6 +19,8 @@ import os
 import re
 from collections import Counter
 
+from click_extra.run import run_cmd
+
 from .. import xbar
 from .conftest import unless_macos
 
@@ -47,7 +49,7 @@ class TestXbarPlugin:
         if env:
             for var, value in env.items():
                 os.environ[var] = value
-        code, output, error = xbar.run(xbar.__file__)
+        code, output, error = run_cmd(xbar.__file__)
         if env:
             for var in env:
                 del os.environ[var]

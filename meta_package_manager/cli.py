@@ -25,7 +25,6 @@ from pathlib import Path
 from time import perf_counter
 
 import click
-import click_log
 import tomli
 import tomli_w
 from boltons.cacheutils import LRI, cached
@@ -33,15 +32,17 @@ from boltons.strutils import complement_int_list, int_ranges_from_int_list
 from click_extra.colorize import (
     KO,
     OK,
-    ExtraHelpColorsMixin,
+    ExtraGroup,
     HelpExtraFormatter,
     theme,
     version_option,
 )
+from click_extra.logging import logger, reset_logger, verbosity_option
+from click_extra.platform import os_label
 from click_log import ColorFormatter
-from cloup import Context, Group, OptionGroupMixin, command, group, option, option_group
+from cloup import Context, command, group, option, option_group
 
-from . import CLI_NAME, __version__, logger, reset_logger
+from . import __version__
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .config import load_conf
 from .output import (
@@ -52,15 +53,11 @@ from .output import (
     print_table,
     table_formatter,
 )
-from .platform import os_label
 from .pool import ALL_MANAGER_IDS, select_managers
 from .version import TokenizedString
 
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "apt")
 assert set(ALL_MANAGER_IDS).issuperset(XKCD_MANAGER_ORDER)
-
-
-click_log.basic_config(logger)
 
 
 def timeit():
@@ -71,26 +68,17 @@ def timeit():
         click.echo(f"Execution time: {perf_counter() - start_time:0.3f} seconds.")
 
 
-class GroupWithOptionGroup(ExtraHelpColorsMixin, OptionGroupMixin, Group):
-    """Cloup does not support option groups on `Click.group`.
-
-    This is a workaround that is being discussed at https://github.com/janluke/cloup/issues/98
-    """
-
-    pass
-
-
 Context.formatter_class = HelpExtraFormatter
 CONTEXT_SETTINGS = Context.settings(
     show_default=True,
-    auto_envvar_prefix=CLI_NAME,
+    auto_envvar_prefix="MPM",
     align_option_groups=False,
     show_constraints=True,
     show_subcommand_aliases=True,
 )
 
 
-@group(cls=GroupWithOptionGroup, context_settings=CONTEXT_SETTINGS)
+@group(cls=ExtraGroup, context_settings=CONTEXT_SETTINGS)
 @option_group(
     "Package manager selection options",
     option(
@@ -196,13 +184,8 @@ CONTEXT_SETTINGS = Context.settings(
     callback=load_conf,
     expose_value=False,
 )
-@click_log.simple_verbosity_option(
-    logger,
-    default="INFO",
-    metavar="LEVEL",
-    help="Either CRITICAL, ERROR, WARNING, INFO or DEBUG.",
-)
-@version_option(print_env_info=True)
+@verbosity_option()
+@version_option(version=__version__, print_env_info=True)
 @click.help_option("-h", "--help")
 @click.pass_context
 def mpm(

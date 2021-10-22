@@ -17,10 +17,6 @@
 
 """ Expose package-wide elements. """
 
-import logging
-
-from .xbar import fix_environment
-
 __version__ = "4.8.0"
 """ Examples of valid version strings according :pep:`440#version-scheme`:
 
@@ -33,26 +29,3 @@ __version__ = "4.8.0"
     __version__ = '1.2.3'        # Final Release
     __version__ = '1.2.3.post1'  # Post Release 1
 """
-
-
-# Canonical name of the CLI.
-CLI_NAME = "mpm"
-
-
-# Some CLI printing constants.
-PROMPT = "► "
-INDENT = " " * len(PROMPT)
-
-
-# Initialize global logger.
-logger = logging.getLogger(__name__)
-
-
-def reset_logger():
-    """Forces the logger level to reset at the end of each CLI execution, as it
-    might pollute the logger state between multiple test calls.
-    """
-    logger.setLevel(logging.NOTSET)
-
-
-fix_environment()

@@ -23,8 +23,8 @@ from pathlib import Path
 
 from boltons.cacheutils import LRI, cached
 from boltons.iterutils import unique
+from click_extra.logging import logger
 
-from . import logger
 from .base import PackageManager
 
 MANAGER_SUBFOLDER = "managers"

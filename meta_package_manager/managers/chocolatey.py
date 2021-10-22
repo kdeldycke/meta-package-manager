@@ -17,8 +17,9 @@
 
 import re
 
+from click_extra.platform import WINDOWS
+
 from ..base import PackageManager
-from ..platform import WINDOWS
 from ..version import parse_version
 
 

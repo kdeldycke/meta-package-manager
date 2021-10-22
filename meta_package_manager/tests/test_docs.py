@@ -23,10 +23,10 @@ import pytest
 import simplejson as json
 import tomli
 from boltons.iterutils import flatten
+from click_extra.platform import OS_DEFINITIONS, os_label
 from yaml import Loader, load
 
 from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_LABELS, PLATFORM_PREFIX
-from ..platform import OS_DEFINITIONS, os_label
 from ..pool import ALL_MANAGER_IDS, pool
 from .conftest import unless_linux
 

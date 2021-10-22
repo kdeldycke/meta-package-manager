@@ -26,11 +26,11 @@ from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from boltons.typeutils import classproperty
 from click_extra.colorize import theme
+from click_extra.logging import logger
+from click_extra.platform import CURRENT_OS_ID
+from click_extra.run import INDENT, PROMPT, run
 
-from . import INDENT, PROMPT, logger
-from .platform import CURRENT_OS_ID
 from .version import parse_version
-from .xbar import run
 
 # Rendering format of CLI in JSON fields.
 CLI_FORMATS = frozenset({"plain", "fragments", "xbar"})

@@ -23,10 +23,10 @@ from pathlib import Path
 import click
 from boltons.strutils import strip_ansi
 from cli_helpers.tabular_output import TabularOutputFormatter
+from click_extra.platform import is_windows
 from simplejson import dumps as json_dumps
 
 from . import __version__
-from .platform import is_windows
 from .version import TokenizedString
 
 # Initialize the table formatter.

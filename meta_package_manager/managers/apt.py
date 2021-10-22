@@ -17,8 +17,9 @@
 
 import re
 
+from click_extra.platform import LINUX
+
 from ..base import PackageManager
-from ..platform import LINUX
 from ..version import parse_version
 
 

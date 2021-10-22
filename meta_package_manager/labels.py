@@ -19,10 +19,11 @@
 """
 
 from boltons.iterutils import flatten
+from click_extra.platform import ALL_OS_LABELS
 
-from . import CLI_NAME
-from .platform import ALL_OS_LABELS
 from .pool import pool
+
+CLI_NAME = "mpm"
 
 # Format: label name, color, optional description.
 LABELS = [

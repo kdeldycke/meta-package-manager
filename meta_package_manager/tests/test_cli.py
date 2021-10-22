@@ -16,7 +16,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
-from pathlib import Path
 
 import pytest
 import simplejson as json
@@ -28,18 +27,6 @@ from ..cli import RENDERING_MODES
 from ..pool import DEFAULT_MANAGER_IDS
 
 """ Common tests for all CLI basic features and templates for subcommands. """
-
-
-def test_real_fs():
-    """Check a simple test is not caught into the CLI runner fixture which is
-    encapsulating all filesystem access into temporary directory structure."""
-    assert str(Path(__file__)).startswith(str(Path.cwd()))
-
-
-def test_temporary_fs(runner):
-    """Check the CLI runner fixture properly encapsulated the filesystem in
-    temporary directory."""
-    assert not str(Path(__file__)).startswith(str(Path.cwd()))
 
 
 DUMMY_CONF_FILE = """
@@ -123,22 +110,6 @@ class TestBaseCLI:
         assert __version__ in result.stdout
         assert not result.stderr
 
-    def test_unrecognized_verbosity(self, invoke):
-        result = invoke("--verbosity", "random", "managers")
-        assert result.exit_code == 2
-        assert not result.stdout
-        assert "Error: Invalid value for '--verbosity' / '-v'" in result.stderr
-
-    @pytest.mark.parametrize("level", ("CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"))
-    def test_verbosity(self, invoke, level):
-        result = invoke("--verbosity", level, "managers")
-        assert result.exit_code == 0
-        assert "──────" in result.stdout
-        if level == "DEBUG":
-            assert "debug: " in result.stderr
-        else:
-            assert "debug: " not in result.stderr
-
     def test_unset_conf_no_message(self, invoke):
         result = invoke("managers")
         assert result.exit_code == 0
@@ -169,6 +140,12 @@ class TestBaseCLI:
     def test_read_specific_conf(self, invoke, create_toml):
         conf_path = create_toml("configuration.extension", DUMMY_CONF_FILE)
         result = invoke("--config", str(conf_path), "managers")
+        assert result.exit_code == 0
+        assert f"Load configuration at {conf_path}" in result.stderr
+
+    def test_auto_env_var_conf(self, invoke, create_toml):
+        conf_path = create_toml("configuration.extension", DUMMY_CONF_FILE)
+        result = invoke("managers", env={"MPM_CONFIG": str(conf_path)})
         assert result.exit_code == 0
         assert f"Load configuration at {conf_path}" in result.stderr
 

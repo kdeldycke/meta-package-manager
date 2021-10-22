@@ -23,8 +23,7 @@ import click
 import tomli
 from boltons.iterutils import remap
 from click.core import ParameterSource
-
-from . import CLI_NAME, logger
+from click_extra.logging import logger
 
 DEFAULT_CONF_NAME = "config.toml"
 
@@ -54,9 +53,7 @@ def default_conf_path():
 
         * Windows: ``C:\\Users\\<user>\\AppData\\Roaming\\mpm\\config.toml``
     """
-    return Path(
-        click.get_app_dir(CLI_NAME, force_posix=True), DEFAULT_CONF_NAME
-    ).resolve()
+    return Path(click.get_app_dir("mpm", force_posix=True), DEFAULT_CONF_NAME).resolve()
 
 
 def conf_structure():
@@ -71,9 +68,7 @@ def conf_structure():
 
     # Global, top-level options shared by all subcommands are placed under the
     # cli name's section.
-    conf = {
-        CLI_NAME: {p.name: None for p in cli.params if p.name not in IGNORED_OPTIONS}
-    }
+    conf = {"mpm": {p.name: None for p in mpm.params if p.name not in IGNORED_OPTIONS}}
 
     # Subcommand-specific options.
     for cmd_id, cmd in mpm.commands.items():
@@ -81,7 +76,7 @@ def conf_structure():
             p.name: None for p in cmd.params if p.name not in IGNORED_OPTIONS
         }
         if cmd_options:
-            conf[CLI_NAME][cmd_id] = cmd_options
+            conf["mpm"][cmd_id] = cmd_options
 
     return conf
 
@@ -173,6 +168,6 @@ def load_conf(ctx, param, config_file):
     # over any parameters from the config file.
     if ctx.default_map is None:
         ctx.default_map = dict()
-    ctx.default_map.update(conf.get(CLI_NAME, {}))
+    ctx.default_map.update(conf.get("mpm", {}))
 
     return config_file

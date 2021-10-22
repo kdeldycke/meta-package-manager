@@ -17,9 +17,10 @@
 
 import re
 
-from .. import logger
+from click_extra.logging import logger
+from click_extra.platform import MACOS
+
 from ..base import PackageManager
-from ..platform import MACOS
 from ..version import parse_version
 
 

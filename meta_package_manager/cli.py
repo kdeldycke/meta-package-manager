@@ -29,18 +29,12 @@ import tomli
 import tomli_w
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list
-from click_extra.colorize import (
-    KO,
-    OK,
-    ExtraGroup,
-    HelpExtraFormatter,
-    theme,
-    version_option,
-)
+from click_extra.colorize import KO, OK, theme, version_option
+from click_extra.commands import command, group
 from click_extra.logging import logger, reset_logger, verbosity_option
 from click_extra.platform import os_label
 from click_log import ColorFormatter
-from cloup import Context, command, group, option, option_group
+from cloup import Context, option, option_group
 
 from . import __version__
 from .base import CLI_FORMATS, CLIError, PackageManager
@@ -68,7 +62,6 @@ def timeit():
         click.echo(f"Execution time: {perf_counter() - start_time:0.3f} seconds.")
 
 
-Context.formatter_class = HelpExtraFormatter
 CONTEXT_SETTINGS = Context.settings(
     show_default=True,
     auto_envvar_prefix="MPM",
@@ -78,7 +71,7 @@ CONTEXT_SETTINGS = Context.settings(
 )
 
 
-@group(cls=ExtraGroup, context_settings=CONTEXT_SETTINGS)
+@group(context_settings=CONTEXT_SETTINGS)
 @option_group(
     "Package manager selection options",
     option(

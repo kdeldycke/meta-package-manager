@@ -23,6 +23,7 @@ Python 3.7.3 or newer.
 
 import json
 import os
+import re
 from operator import itemgetter
 from subprocess import PIPE, Popen
 
@@ -169,7 +170,12 @@ def print_menu():
     if not code and not error:
         mpm_installed = True
         # Is mpm too old?
-        mpm_version = tuple(map(int, output.split()[1].split(".")))
+        version_string = (
+            re.compile(r".*\s+(?P<version>[0-9\.]+)$")
+            .search(output)
+            .groupdict()["version"]
+        )
+        mpm_version = tuple(map(int, version_string.split(".")))
         if mpm_version >= MPM_MIN_VERSION:
             mpm_up_to_date = True
 

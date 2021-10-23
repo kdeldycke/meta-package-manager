@@ -71,6 +71,6 @@ class TestInstall(CLISubCommandTests):
         self.check_manager_selection(result, {mid}, reference_set=ALL_MANAGER_IDS)
 
 
-destructive()(TestInstall.test_options)
+destructive()(TestInstall.test_stats)
 destructive()(TestInstall.test_default_all_managers)
 destructive()(TestInstall.test_manager_selection)

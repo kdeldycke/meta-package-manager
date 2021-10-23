@@ -113,7 +113,7 @@ def print_table(header_defs, rows, sort_key=None, color=True):
     ):
         if is_windows():
             line = line.encode("utf-8")
-        click.echo(line, color=color)
+        click.echo(line)
 
 
 def print_stats(data):

@@ -32,7 +32,6 @@ from click_extra.colorize import KO, OK, theme, version_option
 from click_extra.commands import command, group
 from click_extra.logging import logger
 from click_extra.platform import os_label
-from click_log import ColorFormatter
 from cloup import option, option_group
 
 from . import __version__
@@ -204,7 +203,6 @@ def managers(ctx):
     selected_managers = ctx.obj["selected_managers"]
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
-    color = ctx.obj["color"]
 
     # Machine-friendly data rendering.
     if output_format == "json":
@@ -312,7 +310,6 @@ def installed(ctx):
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
     stats = ctx.obj["stats"]
-    color = ctx.obj["color"]
 
     # Build-up a global dict of installed packages per manager.
     installed_data = {}
@@ -384,7 +381,6 @@ def search(ctx, extended, exact, query):
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
     stats = ctx.obj["stats"]
-    color = ctx.obj["color"]
 
     # Build-up a global list of package matches per manager.
     matches = {}
@@ -486,7 +482,6 @@ def search(ctx, extended, exact, query):
 def install(ctx, package_id):
     """Install the provided package using one of the provided package manager."""
     selected_managers = list(ctx.obj["selected_managers"])
-    color = ctx.obj["color"]
 
     logger.info(
         f"Package manager order: {', '.join([m.id for m in selected_managers])}"
@@ -525,7 +520,7 @@ def install(ctx, package_id):
         # Restore default value.
         manager.stop_on_error = default_value
 
-        click.echo(output, color=color)
+        click.echo(output)
         return
 
 
@@ -544,7 +539,6 @@ def outdated(ctx, cli_format):
     output_format = ctx.obj["output_format"]
     sort_by = ctx.obj["sort_by"]
     stats = ctx.obj["stats"]
-    color = ctx.obj["color"]
 
     render_cli = partial(PackageManager.render_cli, cli_format=cli_format)
 
@@ -733,7 +727,7 @@ def restore(ctx, toml_files):
             logger.info(f"Restore {manager.id} packages...")
             for package_id, version in doc[manager.id].items():
                 output = manager.install(package_id)
-                click.echo(output, color=color)
+                click.echo(output)
 
 
 # Group sub-command in sections.

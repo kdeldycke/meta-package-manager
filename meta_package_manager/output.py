@@ -69,7 +69,7 @@ def json(data):
     )
 
 
-def print_table(header_defs, rows, sort_key=None, color=True):
+def print_table(header_defs, rows, sort_key=None):
     """Utility to print a table and sort its content."""
     # Do not print anything, not even table headers if no rows.
     if not rows:

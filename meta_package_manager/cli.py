@@ -278,7 +278,6 @@ def managers(ctx):
         ),
         table,
         sort_by,
-        color,
     )
 
 
@@ -354,7 +353,6 @@ def installed(ctx):
         ),
         table,
         sort_by,
-        color,
     )
 
     if stats:
@@ -469,7 +467,6 @@ def search(ctx, extended, exact, query):
         ),
         table,
         sort_by,
-        color,
     )
 
     if stats:
@@ -608,7 +605,6 @@ def outdated(ctx, cli_format):
         ),
         table,
         sort_by,
-        color,
     )
 
     if stats:
@@ -701,7 +697,6 @@ def restore(ctx, toml_files):
     Version specified in the TOML file is ignored in the current implementation.
     """
     selected_managers = ctx.obj["selected_managers"]
-    color = ctx.obj["color"]
 
     for toml_input in toml_files:
 

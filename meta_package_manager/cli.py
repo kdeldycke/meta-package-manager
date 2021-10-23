@@ -22,7 +22,6 @@ from functools import partial
 from io import TextIOWrapper
 from operator import getitem
 from pathlib import Path
-from time import perf_counter
 
 import click
 import tomli
@@ -31,10 +30,10 @@ from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list
 from click_extra.colorize import KO, OK, theme, version_option
 from click_extra.commands import command, group
-from click_extra.logging import logger, reset_logger, verbosity_option
+from click_extra.logging import logger
 from click_extra.platform import os_label
 from click_log import ColorFormatter
-from cloup import Context, option, option_group
+from cloup import option, option_group
 
 from . import __version__
 from .base import CLI_FORMATS, CLIError, PackageManager
@@ -54,24 +53,7 @@ XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "apt")
 assert set(ALL_MANAGER_IDS).issuperset(XKCD_MANAGER_ORDER)
 
 
-def timeit():
-    """Print elapsed execution time."""
-    ctx = click.get_current_context()
-    if ctx.obj["time"]:
-        start_time = ctx.obj["start_time"]
-        click.echo(f"Execution time: {perf_counter() - start_time:0.3f} seconds.")
-
-
-CONTEXT_SETTINGS = Context.settings(
-    show_default=True,
-    auto_envvar_prefix="MPM",
-    align_option_groups=False,
-    show_constraints=True,
-    show_subcommand_aliases=True,
-)
-
-
-@group(context_settings=CONTEXT_SETTINGS)
+@group()
 @option_group(
     "Package manager selection options",
     option(
@@ -151,18 +133,6 @@ CONTEXT_SETTINGS = Context.settings(
         default=True,
         help="Print per-manager package statistics.",
     ),
-    option(
-        "--time/--no-time",
-        default=False,
-        help="Measure and print elapsed execution time.",
-    ),
-    option(
-        "--no-color",
-        "--no-ansi",
-        is_flag=True,
-        default=False,
-        help="Strip out all colors and all ANSI codes.",
-    ),
 )
 @option(
     "-C",
@@ -177,9 +147,7 @@ CONTEXT_SETTINGS = Context.settings(
     callback=load_conf,
     expose_value=False,
 )
-@verbosity_option()
 @version_option(version=__version__, print_env_info=True)
-@click.help_option("-h", "--help")
 @click.pass_context
 def mpm(
     ctx,
@@ -193,22 +161,8 @@ def mpm(
     output_format,
     sort_by,
     stats,
-    time,
-    no_color,
 ):
     """Common CLI options and behavior for multiple package managers."""
-    # Take timestamp snapshot.
-    start_time = perf_counter() if time else None
-
-    # Neutralize color by removing configuration for each levels.
-    if no_color:
-        ColorFormatter.colors = {level: {} for level in ColorFormatter.colors}
-
-    # Print log level.
-    level = logger.level
-    level_name = logging._levelToName.get(level, level)
-    logger.debug(f"Verbosity set to {level_name}.")
-
     # Select the subset of manager to target, and apply manager-level options.
     selected_managers = select_managers(
         keep=manager if not xkcd else XKCD_MANAGER_ORDER,
@@ -225,6 +179,8 @@ def mpm(
     )
 
     # Silence all log message for JSON rendering unless in debug mode.
+    level = logger.level
+    level_name = logging._levelToName.get(level, level)
     if output_format == "json" and level_name != "DEBUG":
         logger.setLevel(logging.CRITICAL * 2)
 
@@ -238,13 +194,7 @@ def mpm(
         "output_format": output_format,
         "sort_by": sort_by,
         "stats": stats,
-        "time": time,
-        "start_time": start_time,
-        "color": not no_color,
     }
-
-    ctx.call_on_close(reset_logger)
-    ctx.call_on_close(timeit)
 
 
 @command(short_help="List supported package managers and their location.")

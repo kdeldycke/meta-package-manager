@@ -191,10 +191,9 @@ class CLISubCommandTests:
         assert not result.stderr
 
     @pytest.mark.parametrize("opt_stats", ("--stats", "--no-stats", None))
-    @pytest.mark.parametrize("opt_timer", ("--time", "--no-time", None))
-    def test_options(self, invoke, subcmd, opt_stats, opt_timer):
+    def test_stats(self, invoke, subcmd, opt_stats):
         """Test the result on all combinations of optional options."""
-        result = invoke(opt_stats, opt_timer, subcmd)
+        result = invoke(opt_stats, subcmd)
         assert result.exit_code == 0
 
     strict_selection_match = True

@@ -40,7 +40,7 @@ from .config import load_conf
 from .output import (
     RENDERING_MODES,
     SORTABLE_FIELDS,
-    json,
+    print_json,
     print_stats,
     print_table,
     table_formatter,
@@ -225,7 +225,7 @@ def managers(ctx):
                 {expt.error for expt in manager.cli_errors}
             )
 
-        click.echo(json(manager_data), color=False)
+        print_json(manager_data)
         return
 
     # Human-friendly content rendering.
@@ -327,7 +327,7 @@ def installed(ctx):
 
     # Machine-friendly data rendering.
     if output_format == "json":
-        click.echo(json(installed_data), color=False)
+        print_json(installed_data)
         return
 
     # Human-friendly content rendering.
@@ -405,7 +405,7 @@ def search(ctx, extended, exact, query):
 
     # Machine-friendly data rendering.
     if output_format == "json":
-        click.echo(json(matches), color=False)
+        print_json(matches)
         return
 
     # Prepare highlighting helpers.
@@ -577,7 +577,7 @@ def outdated(ctx, cli_format):
 
     # Machine-friendly data rendering.
     if output_format == "json":
-        click.echo(json(outdated_data), color=False)
+        print_json(outdated_data)
         return
 
     # Human-friendly content rendering.

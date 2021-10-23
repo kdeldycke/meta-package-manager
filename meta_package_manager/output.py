@@ -49,10 +49,10 @@ SORTABLE_FIELDS = {
 }
 
 
-def json(data):
-    """Utility function to render data structure into pretty printed JSON.
+def print_json(data):
+    """Utility function to print data structures into pretty printed JSON.
 
-    Also care of internal objects like `TokenizedString` and `Path`:
+    Also care of internal objects like `TokenizedString` and `Path`.
     """
 
     def serialize_objects(obj):
@@ -60,12 +60,16 @@ def json(data):
             return str(obj)
         raise TypeError(repr(obj) + " is not JSON serializable.")
 
-    return json_dumps(
-        data,
-        sort_keys=True,
-        indent=4,
-        separators=(",", ": "),
-        default=serialize_objects,
+    click.echo(
+        json_dumps(
+            data,
+            sort_keys=True,
+            indent=4,
+            separators=(",", ": "),
+            default=serialize_objects,
+        ),
+        # Do not pollute output with ANSI codes.
+        color=False,
     )
 
 

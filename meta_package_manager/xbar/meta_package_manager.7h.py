@@ -171,7 +171,7 @@ def print_menu():
         mpm_installed = True
         # Is mpm too old?
         version_string = (
-            re.compile(r".*\s+(?P<version>[0-9\.]+)$")
+            re.compile(r".*\s+(?P<version>[0-9\.]+)$", re.MULTILINE)
             .search(output)
             .groupdict()["version"]
         )

@@ -100,14 +100,6 @@ meta\_package\_manager.tests.test\_cli\_upgrade module
    :undoc-members:
    :show-inheritance:
 
-meta\_package\_manager.tests.test\_colorize module
---------------------------------------------------
-
-.. automodule:: meta_package_manager.tests.test_colorize
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 meta\_package\_manager.tests.test\_docs module
 ----------------------------------------------
 
@@ -128,14 +120,6 @@ meta\_package\_manager.tests.test\_managers module
 --------------------------------------------------
 
 .. automodule:: meta_package_manager.tests.test_managers
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-meta\_package\_manager.tests.test\_platform module
---------------------------------------------------
-
-.. automodule:: meta_package_manager.tests.test_platform
    :members:
    :undoc-members:
    :show-inheritance:

@@ -196,7 +196,6 @@ jobs:
       # Mpm
       - name: Install mpm and its dependencies
         run: |
-          poetry config virtualenvs.create false
           poetry install --no-interaction --no-ansi
       - name: mpm CLI output for debugging
         run: |

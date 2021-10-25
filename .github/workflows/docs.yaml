@@ -19,7 +19,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install --upgrade poetry
-          poetry config virtualenvs.create false
           poetry install --no-interaction --no-ansi
       - name: Run Sphinx
         run: |
@@ -49,7 +48,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install --upgrade poetry
-          poetry config virtualenvs.create false
           poetry install --no-interaction --no-ansi
       - name: Build documentation
         run: |
@@ -146,7 +144,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install --upgrade poetry
-          poetry config virtualenvs.create false
           poetry install --no-interaction --no-ansi
           sudo apt install graphviz
       - name: Run pipdeptree

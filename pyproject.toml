@@ -69,11 +69,9 @@ classifiers = [
 # List of python versions and their support status:
 # https://en.wikipedia.org/wiki/History_of_Python#Support
 python = "^3.7"
-# XXX Waiting for boltons > 21.0.0 to be released with upstreamed
-# https://github.com/mahmoud/boltons/issues/294
-boltons = { git = "https://github.com/mahmoud/boltons.git", rev = "270e974975984f662f998c8f6eb0ebebd964de82" }
+boltons = "^21.0.0"
 click = "^8.0.2"
-click-extra = { git = "https://github.com/kdeldycke/click-extra.git", rev = "961f327ee1035401fae038f15a0c50dcbcc4ed07" }
+click-extra = "^1.0.1"
 click-log = "^0.3.2"
 cli-helpers = "^2.2.0"
 cloup = "^0.12.1"

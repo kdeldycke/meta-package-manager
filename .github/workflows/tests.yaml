@@ -27,7 +27,9 @@ jobs:
           - "3.7"
           - "3.8"
           - "3.9"
-          - "3.10"
+          # XXX Waiting for boltons > 21.0.0 to be released with upstreamed
+          # Python 3.10 fix: https://github.com/mahmoud/boltons/issues/294
+          # - "3.10"
     steps:
       - uses: actions/checkout@v2.3.5
 

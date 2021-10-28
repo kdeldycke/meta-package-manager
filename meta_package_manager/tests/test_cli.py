@@ -22,14 +22,14 @@ import simplejson as json
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 
-from .. import __version__, config
+from .. import __version__
 from ..cli import RENDERING_MODES
 from ..pool import DEFAULT_MANAGER_IDS
 
 """ Common tests for all CLI basic features and templates for subcommands. """
 
 
-DUMMY_CONF_FILE = """
+TEST_CONF_FILE = """
     # Comment
 
     top_level_param = "to_ignore"
@@ -60,97 +60,8 @@ class TestBaseCLI:
     supposed to work on all platforms, whatever the environment.
     """
 
-    @pytest.mark.parametrize("param", (None, "--help", "-h"))
-    def test_main_help(self, invoke, param):
-        result = invoke(param)
-        assert result.exit_code == 0
-        assert "Usage: " in result.stdout
-        assert not result.stderr
-
-    def test_version(self, invoke):
-        result = invoke("--version")
-        assert result.exit_code == 0
-        assert __version__ in result.stdout
-        assert not result.stderr
-
-    def test_unknown_option(self, invoke):
-        result = invoke("--blah")
-        assert result.exit_code == 2
-        assert not result.stdout
-        assert "Error: No such option: --blah" in result.stderr
-
-    def test_unknown_command(self, invoke):
-        result = invoke("blah")
-        assert result.exit_code == 2
-        assert not result.stdout
-        assert "Error: No such command 'blah'." in result.stderr
-
-    def test_required_command(self, invoke):
-        result = invoke("--verbosity", "DEBUG")
-        assert result.exit_code == 2
-        assert not result.stdout
-        assert "Error: Missing command." in result.stderr
-
-    @pytest.mark.parametrize(
-        "params", (("--version",), ("blah",), ("--config", "random.toml"))
-    )
-    def test_help_eagerness(self, invoke, params):
-        # See: https://click.palletsprojects.com/en/8.0.x/advanced/#callback-evaluation-order
-        result = invoke("--help", params)
-        assert result.exit_code == 0
-        assert "Usage: " in result.stdout
-        assert not result.stderr
-
-    @pytest.mark.parametrize(
-        "params", (("--help",), ("blah",), ("--config", "random.toml"))
-    )
-    def test_version_eagerness(self, invoke, params):
-        result = invoke("--version", params)
-        assert result.exit_code == 0
-        assert __version__ in result.stdout
-        assert not result.stderr
-
-    def test_unset_conf_no_message(self, invoke):
-        result = invoke("managers")
-        assert result.exit_code == 0
-        assert f"Load configuration at " not in result.stderr
-
-    def test_unset_conf_debug_message(self, invoke):
-        result = invoke("--verbosity", "DEBUG", "managers")
-        assert result.exit_code == 0
-        assert (
-            f"debug: Configuration not found at {config.default_conf_path()}"
-            in result.stderr
-        )
-        assert "debug: Ignore configuration file." in result.stderr
-        assert "debug: Loaded configuration: {}" in result.stderr
-
-    def test_conf_not_exist(self, invoke):
-        conf_path = config.default_conf_path().parent / "dummy.toml"
-        result = invoke("--config", str(conf_path), "managers")
-        assert result.exit_code == 2
-        assert f"critical: Configuration not found at {conf_path}" in result.stderr
-
-    def test_conf_not_file(self, invoke):
-        conf_path = config.default_conf_path().parent
-        result = invoke("--config", str(conf_path), "managers")
-        assert result.exit_code == 2
-        assert f"critical: Configuration {conf_path} is not a file." in result.stderr
-
-    def test_read_specific_conf(self, invoke, create_toml):
-        conf_path = create_toml("configuration.extension", DUMMY_CONF_FILE)
-        result = invoke("--config", str(conf_path), "managers")
-        assert result.exit_code == 0
-        assert f"Load configuration at {conf_path}" in result.stderr
-
-    def test_auto_env_var_conf(self, invoke, create_toml):
-        conf_path = create_toml("configuration.extension", DUMMY_CONF_FILE)
-        result = invoke("managers", env={"MPM_CONFIG": str(conf_path)})
-        assert result.exit_code == 0
-        assert f"Load configuration at {conf_path}" in result.stderr
-
     def test_conf_file_overrides_defaults(self, invoke, create_toml):
-        create_toml(config.default_conf_path(), DUMMY_CONF_FILE)
+        create_toml("conf.toml", TEST_CONF_FILE)
         result = invoke("managers")
         assert result.exit_code == 0
         assert " │ pip │ " in result.stdout
@@ -161,7 +72,7 @@ class TestBaseCLI:
         assert "debug: " in result.stderr
 
     def test_conf_file_cli_override(self, invoke, create_toml):
-        create_toml(config.default_conf_path(), DUMMY_CONF_FILE)
+        create_toml("conf.toml", TEST_CONF_FILE)
         result = invoke("--verbosity", "CRITICAL", "managers")
         assert result.exit_code == 0
         assert " │ pip │ " in result.stdout
@@ -182,13 +93,6 @@ class CLISubCommandTests:
     This class doesn't starts with `Test` as it is meant to be used as a
     template, inherited by sub-command specific test cases.
     """
-
-    def test_help(self, invoke, subcmd):
-        result = invoke(subcmd, "--help")
-        assert result.exit_code == 0
-        assert "Usage: " in result.stdout
-        assert flatten([subcmd])[0] in result.stdout
-        assert not result.stderr
 
     @pytest.mark.parametrize("opt_stats", ("--stats", "--no-stats", None))
     def test_stats(self, invoke, subcmd, opt_stats):
@@ -227,54 +131,58 @@ class CLISubCommandTests:
         found_managers = set()
         skipped_managers = set()
 
+        # Strip colors to simplify checks.
+        stdout = strip_ansi(result.stdout)
+        stderr = strip_ansi(result.stderr)
+
         for mid in reference_set:
 
             # List of signals indicating a package manager has been retained by
             # the CLI. Roughly sorted from most specific to more forgiving.
             signals = (
                 # Common "not found" warning message.
-                f"warning: Skip unavailable {mid} manager." in result.stderr,
+                f"warning: Skip unavailable {mid} manager." in stderr,
                 # Common "not implemented" optional command warning message.
                 bool(
                     re.search(
                         fr"warning: {mid} does not implement "
                         r"(search|outdated|upgrade|sync|cleanup|install|upgrade_all) "
                         "command.",
-                        result.stderr,
+                        stderr,
                     )
                 ),
                 # Stats line at the end of output.
-                f"{mid}: " in result.stdout.splitlines()[-1] if result.stdout else "",
+                f"{mid}: " in stdout.splitlines()[-1] if stdout else "",
                 # Match output of managers command.
                 bool(
                     re.search(
                         fr"\s+│\s+{mid}\s+│\s+(✓|✘).+│\s+(✓|✘)",
-                        strip_ansi(result.stdout),
+                        stdout,
                     )
                 ),
                 # Sync command.
-                f"Sync {mid} package info..." in result.stderr,
+                f"Sync {mid} package info..." in stderr,
                 # Upgrade command.
-                f"Updating all outdated packages from {mid}..." in result.stderr,
+                f"Updating all outdated packages from {mid}..." in stderr,
                 # Cleanup command.
-                f"Cleanup {mid}..." in result.stderr,
+                f"Cleanup {mid}..." in stderr,
                 # Log message for backup command.
-                f"Dumping packages from {mid}..." in result.stderr,
+                f"Dumping packages from {mid}..." in stderr,
                 # Restoring message.
-                f"Restore {mid} packages..." in result.stderr,
+                f"Restore {mid} packages..." in stderr,
                 # Warning message for restore command.
-                f"warning: No [{mid}] section found." in result.stderr,
+                f"warning: No [{mid}] section found." in stderr,
                 # Install message.
                 bool(
                     re.search(
                         fr"Install \S+ package from {mid}...",
-                        result.stderr,
+                        stderr,
                     )
                 ),
                 bool(
                     re.search(
                         fr"warning: No \S+ package found on {mid}.",
-                        result.stderr,
+                        stderr,
                     )
                 ),
             )

@@ -28,7 +28,7 @@ import tomli
 import tomli_w
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list
-from click_extra.colorize import KO, OK, theme, version_option
+from click_extra.colorize import KO, OK, theme
 from click_extra.commands import command, group
 from click_extra.logging import logger
 from click_extra.platform import os_label
@@ -36,7 +36,6 @@ from cloup import option, option_group
 
 from . import __version__
 from .base import CLI_FORMATS, CLIError, PackageManager
-from .config import load_conf
 from .output import (
     RENDERING_MODES,
     SORTABLE_FIELDS,
@@ -52,7 +51,7 @@ XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "apt")
 assert set(ALL_MANAGER_IDS).issuperset(XKCD_MANAGER_ORDER)
 
 
-@group()
+@group(version=__version__)
 @option_group(
     "Package manager selection options",
     option(
@@ -133,20 +132,6 @@ assert set(ALL_MANAGER_IDS).issuperset(XKCD_MANAGER_ORDER)
         help="Print per-manager package statistics.",
     ),
 )
-@option(
-    "-C",
-    "--config",
-    metavar="CONFIG_PATH",
-    type=click.Path(path_type=Path, resolve_path=True),
-    # default=default_conf_path(),
-    help="Location of the configuration file.",
-    # Force eagerness so the config option's callback gets the oportunity to set the
-    # default_map values before the other options use them.
-    is_eager=True,
-    callback=load_conf,
-    expose_value=False,
-)
-@version_option(version=__version__, print_env_info=True)
 @click.pass_context
 def mpm(
     ctx,

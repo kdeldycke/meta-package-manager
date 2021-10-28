@@ -209,18 +209,25 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "click-extra"
-version = "1.0.1"
+version = "1.0.2"
 description = "🌈 Extra colorization and configuration file for Click."
 category = "main"
 optional = false
-python-versions = ">=3.7,<4.0"
+python-versions = "^3.7"
+develop = false
 
 [package.dependencies]
-boltons = ">=21.0.0,<22.0.0"
-click = ">=8.0.2,<9.0.0"
-click-log = ">=0.3.2,<0.4.0"
-cloup = ">=0.12.1,<0.13.0"
-tomli = ">=1.2.1,<2.0.0"
+boltons = "^21.0.0"
+click = "^8.0.2"
+click-log = "^0.3.2"
+cloup = "^0.12.1"
+tomli = "^1.2.1"
+
+[package.source]
+type = "git"
+url = "https://github.com/kdeldycke/click-extra.git"
+reference = "409253958c54721b18c51accaf2dc103dbd0aa20"
+resolved_reference = "409253958c54721b18c51accaf2dc103dbd0aa20"
 
 [[package]]
 name = "click-log"
@@ -773,7 +780,7 @@ typing-extensions = {version = ">=3.10.0", markers = "python_version < \"3.10\""
 
 [[package]]
 name = "pyparsing"
-version = "3.0.1"
+version = "3.0.3"
 description = "Python parsing module"
 category = "dev"
 optional = false
@@ -1332,7 +1339,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "4298b39583f64cd1b7de9a1dd11178a0c9d340c3363d487dc20fcb5ec1462aec"
+content-hash = "6d0620c5d06cae38620982054c65103d88332d29887684d2d5ac937ba328a8cb"
 
 [metadata.files]
 alabaster = [
@@ -1450,10 +1457,7 @@ click = [
     {file = "click-8.0.3-py3-none-any.whl", hash = "sha256:353f466495adaeb40b6b5f592f9f91cb22372351c84caeb068132442a4518ef3"},
     {file = "click-8.0.3.tar.gz", hash = "sha256:410e932b050f5eed773c4cda94de75971c89cdb3155a72a0831139a79e5ecb5b"},
 ]
-click-extra = [
-    {file = "click-extra-1.0.1.tar.gz", hash = "sha256:ba41a1e49797b062deecd1de816d54ecacc9598e4e77101aa2489a5de2eef01c"},
-    {file = "click_extra-1.0.1-py3-none-any.whl", hash = "sha256:b39633fd370477b57b369a424e75f61b4bd3b1f0cf92ba8cdee890971db7210d"},
-]
+click-extra = []
 click-log = [
     {file = "click-log-0.3.2.tar.gz", hash = "sha256:16fd1ca3fc6b16c98cea63acf1ab474ea8e676849dc669d86afafb0ed7003124"},
     {file = "click_log-0.3.2-py2.py3-none-any.whl", hash = "sha256:eee14dc37cdf3072158570f00406572f9e03e414accdccfccd4c538df9ae322c"},
@@ -1748,8 +1752,8 @@ pylint = [
     {file = "pylint-2.11.1.tar.gz", hash = "sha256:2c9843fff1a88ca0ad98a256806c82c5a8f86086e7ccbdb93297d86c3f90c436"},
 ]
 pyparsing = [
-    {file = "pyparsing-3.0.1-py3-none-any.whl", hash = "sha256:fd93fc45c47893c300bd98f5dd1b41c0e783eaeb727e7cea210dcc09d64ce7c3"},
-    {file = "pyparsing-3.0.1.tar.gz", hash = "sha256:84196357aa3566d64ad123d7a3c67b0e597a115c4934b097580e5ce220b91531"},
+    {file = "pyparsing-3.0.3-py3-none-any.whl", hash = "sha256:f8d3fe9fc404576c5164f0f0c4e382c96b85265e023c409c43d48f65da9d60d0"},
+    {file = "pyparsing-3.0.3.tar.gz", hash = "sha256:9e3511118010f112a4b4b435ae50e1eaa610cda191acb9e421d60cf5fde83455"},
 ]
 pytest = [
     {file = "pytest-6.2.5-py3-none-any.whl", hash = "sha256:7310f8d27bc79ced999e760ca304d69f6ba6c6649c0b60fb0e04a4a77cacc134"},

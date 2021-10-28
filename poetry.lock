@@ -1192,7 +1192,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "tomli-w"
-version = "0.3.0"
+version = "0.4.0"
 description = "A lil' TOML writer"
 category = "main"
 optional = false
@@ -1332,7 +1332,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "b66bc7152060d06587acf292a09cd254f23b525f2cfb4bb754ea845e47f81aff"
+content-hash = "4ca1601e6b9f96828a27dc65431074bdc20c1af02a571902b549354873b78581"
 
 [metadata.files]
 alabaster = [
@@ -2048,8 +2048,8 @@ tomli = [
     {file = "tomli-1.2.2.tar.gz", hash = "sha256:c6ce0015eb38820eaf32b5db832dbc26deb3dd427bd5f6556cf0acac2c214fee"},
 ]
 tomli-w = [
-    {file = "tomli_w-0.3.0-py3-none-any.whl", hash = "sha256:b33994e455a627ff4b291328d0ccbb679782dc1b3bd002c123c27b5ee19ca490"},
-    {file = "tomli_w-0.3.0.tar.gz", hash = "sha256:207c5f05803aec5a9a578c6aca5c1bbbba9783ad88461f3e180eb8c3c3c48a4b"},
+    {file = "tomli_w-0.4.0-py3-none-any.whl", hash = "sha256:83a8b8df5174e0ab949783200fa0f1e382c5ae5f53d714c226775bc0592c5906"},
+    {file = "tomli_w-0.4.0.tar.gz", hash = "sha256:47643abe03b628b6e214c38cf0816dca7b63888e503ec8580d251e331c0526b6"},
 ]
 tqdm = [
     {file = "tqdm-4.62.3-py2.py3-none-any.whl", hash = "sha256:8dd278a422499cd6b727e6ae4061c40b48fce8b76d1ccbf5d34fca9b7f925b0c"},

@@ -143,7 +143,7 @@ class APM(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, "list", "--json")
+        output = self.run_cli("list", "--json")
 
         if output:
             for package_list in json.loads(output).values():
@@ -245,7 +245,7 @@ class APM(PackageManager):
         if not extended:
             search_args.append("--no-description")
 
-        output = self.run_cli(self.global_args, "search", "--json", search_args, query)
+        output = self.run_cli("search", "--json", search_args, query)
 
         if output:
             for package in json.loads(output):
@@ -285,7 +285,7 @@ class APM(PackageManager):
 
         """
         super().install(package_id)
-        return self.run_cli("install", self.global_args, package_id)
+        return self.run_cli("install", package_id)
 
     @property
     def outdated(self):
@@ -442,7 +442,7 @@ class APM(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args, "outdated", "--compatible", "--json")
+        output = self.run_cli("outdated", "--compatible", "--json")
 
         if output:
             for package in json.loads(output):
@@ -457,7 +457,7 @@ class APM(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, self.global_args, "update", "--no-confirm"]
+        cmd = [self.cli_path, "update", "--no-confirm"]
         if package_id:
             cmd.append(package_id)
         return cmd

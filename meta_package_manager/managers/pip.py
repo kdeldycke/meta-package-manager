@@ -96,9 +96,7 @@ class Pip(PackageManager):
 
         # --quiet is required here to silence warning and error messages
         # mangling the JSON content.
-        output = self.run_cli(
-            self.global_args, "list", "--format=json", "--verbose", "--quiet"
-        )
+        output = self.run_cli("list", "--format=json", "--verbose", "--quiet")
 
         if output:
             for package in json.loads(output):
@@ -140,7 +138,7 @@ class Pip(PackageManager):
         """
         matches = {}
 
-        output = self.run_cli(self.global_args, "search", query)
+        output = self.run_cli("search", query)
 
         if output:
             regexp = re.compile(
@@ -195,7 +193,7 @@ class Pip(PackageManager):
 
         """
         super().install(package_id)
-        return self.run_cli(self.global_args, "install", package_id)
+        return self.run_cli("install", package_id)
 
     @property
     def outdated(self):
@@ -261,7 +259,6 @@ class Pip(PackageManager):
         # --quiet is required here to silence warning and error messages
         # mangling the JSON content.
         output = self.run_cli(
-            self.global_args,
             "list",
             "--format=json",
             "--outdated",

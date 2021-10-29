@@ -74,7 +74,7 @@ class Composer(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, "show", "--format=json")
+        output = self.run_cli("show", "--format=json")
 
         if output:
 
@@ -134,7 +134,7 @@ class Composer(PackageManager):
         if not extended:
             search_args.append("--only-name")
 
-        output = self.run_cli(self.global_args, "search", search_args, query)
+        output = self.run_cli("search", search_args, query)
 
         if output:
 
@@ -170,7 +170,7 @@ class Composer(PackageManager):
 
         """
         super().install(package_id)
-        return self.run_cli(self.global_args, "install", package_id)
+        return self.run_cli("install", package_id)
 
     @property
     def outdated(self):
@@ -202,7 +202,7 @@ class Composer(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args, "outdated", "--format=json")
+        output = self.run_cli("outdated", "--format=json")
 
         if output:
             package_list = json.loads(output)
@@ -233,4 +233,4 @@ class Composer(PackageManager):
         See: https://getcomposer.org/doc/03-cli.md#clear-cache-clearcache-cc
         """
         super().cleanup()
-        self.run_cli(self.global_args, "clear-cache")
+        self.run_cli("clear-cache")

@@ -117,6 +117,11 @@ def test_global_args_type(manager):
 
 
 @all_managers
+def test_prepend_global_args(manager):
+    assert isinstance(manager.prepend_global_args, bool)
+
+
+@all_managers
 def test_requirement(manager):
     """Each manager is required to specify a minimal version."""
     assert isinstance(manager.requirement, str)

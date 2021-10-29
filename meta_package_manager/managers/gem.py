@@ -45,6 +45,7 @@ class Gem(PackageManager):
     cli_search_path = ("/usr/local/opt/ruby/bin/gem", "/usr/local/opt/ruby/bin")
 
     global_args = ("--quiet",)  # Silence command progress meter
+    prepend_global_args = False
 
     @property
     def installed(self):
@@ -74,7 +75,7 @@ class Gem(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli("list", self.global_args)
+        output = self.run_cli("list")
 
         if output:
             regexp = re.compile(r"(\S+) \((.+)\)")
@@ -128,9 +129,7 @@ class Gem(PackageManager):
         if exact:
             search_arg.append("--exact")
 
-        output = self.run_cli(
-            "search", query, "--versions", search_arg, self.global_args
-        )
+        output = self.run_cli("search", query, "--versions", search_arg)
 
         if output:
             regexp = re.compile(
@@ -176,7 +175,9 @@ class Gem(PackageManager):
             12 gems installed
         """
         super().install(package_id)
-        return self.run_cli("install", "--user-install", self.global_args, package_id)
+        return self.run_cli(
+            "install", "--user-install", self.global_args, package_id, skip_globals=True
+        )
 
     @property
     def outdated(self):
@@ -196,7 +197,7 @@ class Gem(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli("outdated", self.global_args)
+        output = self.run_cli("outdated")
 
         if output:
             regexp = re.compile(r"(\S+) \((\S+) < (\S+)\)")
@@ -247,4 +248,4 @@ class Gem(PackageManager):
             Clean up complete
         """
         super().cleanup()
-        self.run_cli("cleanup", self.global_args)
+        self.run_cli("cleanup")

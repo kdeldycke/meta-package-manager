@@ -38,7 +38,7 @@ class NPM(PackageManager):
         6.13.7
     """
 
-    def run_cli(self, *args, force_exec=False):
+    def run_cli(self, *args, **kwargs):
         """Like the common run_cli helper, but silence NPM's JSON output on error.
 
         NPM is prone to breakage if local node version is not in sync:
@@ -54,7 +54,7 @@ class NPM(PackageManager):
               }
             }
         """
-        output = super().run_cli(*args, force_exec=force_exec)
+        output = super().run_cli(*args, **kwargs)
 
         # NPM fatal errors are reported both in <stderr> output and as JSON. So we
         # silence the errors in JSON so they get reported in CLI output (as
@@ -111,7 +111,7 @@ class NPM(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, "--global", "--json", "list")
+        output = self.run_cli("--global", "--json", "list")
 
         if output:
 
@@ -208,7 +208,7 @@ class NPM(PackageManager):
         if not extended:
             search_args.append("--no-description")
 
-        output = self.run_cli(self.global_args, "search", "--json", search_args, query)
+        output = self.run_cli("search", "--json", search_args, query)
 
         if output:
             for package in json.loads(output):
@@ -245,7 +245,6 @@ class NPM(PackageManager):
         """
         super().install(package_id)
         return self.run_cli(
-            self.global_args,
             "--global",
             "--progress=false",
             "--no-update-notifier",
@@ -280,7 +279,6 @@ class NPM(PackageManager):
         outdated = {}
 
         output = self.run_cli(
-            self.global_args,
             "--global",
             "--progress=false",
             "--json",
@@ -308,4 +306,4 @@ class NPM(PackageManager):
             cmd_args.append(f"{package_id}@{version}" if version else package_id)
         else:
             cmd_args.append("update")
-        return [self.cli_path, self.global_args] + cmd_args
+        return [self.cli_path] + cmd_args

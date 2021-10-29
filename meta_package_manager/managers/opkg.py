@@ -45,7 +45,7 @@ class OPKG(PackageManager):
         .. code-block:: shell-session
         """
         super().sync()
-        self.run_cli(self.global_args, "update")
+        self.run_cli("update")
 
     @property
     def installed(self):
@@ -78,7 +78,7 @@ class OPKG(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, "list-installed")
+        output = self.run_cli("list-installed")
 
         if output:
             regexp = re.compile(r"(\S+) - (\S+)")
@@ -100,7 +100,7 @@ class OPKG(PackageManager):
 
         # opkg doesn't have a working 'search', so get all packages and
         # filter the packages later.
-        output = self.run_cli(self.global_args, "list")
+        output = self.run_cli("list")
 
         if output:
             regexp = re.compile(
@@ -155,7 +155,7 @@ class OPKG(PackageManager):
 
         """
         super().install(package_id)
-        return self.run_cli(self.global_args, "install", package_id)
+        return self.run_cli("install", package_id)
 
     @property
     def outdated(self):
@@ -171,7 +171,7 @@ class OPKG(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args, "list-upgradable")
+        output = self.run_cli("list-upgradable")
 
         if output:
             regexp = re.compile(r"(\S+) - (\S+) - (\S+)")
@@ -189,7 +189,7 @@ class OPKG(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, self.global_args, "upgrade"]
+        cmd = [self.cli_path, "upgrade"]
         if package_id:
             cmd.append(package_id)
         return cmd

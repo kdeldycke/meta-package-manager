@@ -52,6 +52,8 @@ class Homebrew(PackageManager):
         Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
     """
 
+    prepend_global_args = False
+
     def sync(self):
         """Fetch content of remote taps.
 
@@ -61,7 +63,7 @@ class Homebrew(PackageManager):
             Already up-to-date.
         """
         super().sync()
-        self.run_cli("update", "--quiet")
+        self.run_cli("update", "--quiet", skip_globals=True)
 
     @property
     def installed(self):
@@ -71,7 +73,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew list --formula --versions
+            ► brew list --versions --formula
             ack 2.14
             apg 2.2.3
             audacity (!) 2.1.2
@@ -86,7 +88,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew list --cask --versions
+            ► brew list --versions --cask
             aerial 1.2beta5
             android-file-transfer latest
             audacity (!) 2.1.2
@@ -107,7 +109,7 @@ class Homebrew(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli("list", self.global_args, "--versions")
+        output = self.run_cli("list", "--versions")
 
         if output:
             regexp = re.compile(r"(\S+)( \(!\))? (.+)")
@@ -141,13 +143,13 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew search --formulae sed
+            ► brew search sed --formulae
             ==> Formulae
             gnu-sed ✔                    libxdg-basedir               minised
 
         .. code-block:: shell-session
 
-            ► brew search --cask sed
+            ► brew search sed --cask
             ==> Casks
             eclipse-dsl                       marsedit
             focused                           physicseditor
@@ -156,20 +158,20 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew search --formulae python
+            ► brew search python --formulae
             ==> Formulae
             app-engine-python   boost-python3   python ✔          python-yq
             boost-python        gst-python      python-markdown   python@3.8 ✔
 
         .. code-block:: shell-session
 
-            ► brew search --formulae "/^ssed$/"
+            ► brew search "/^ssed$/" --formulae
             ==> Formulae
             ssed
 
         .. code-block:: shell-session
 
-            ► brew search --formulae "/^sed$/"
+            ► brew search "/^sed$/" --formulae
             No formula or cask found for "/^sed$/".
             Closed pull requests:
             Merge ba7a794 (https://github.com/Homebrew/linuxbrew-core/pull/198)
@@ -189,7 +191,7 @@ class Homebrew(PackageManager):
         if exact:
             query = f"/^{query}$/"
 
-        output = self.run_cli("search", self.global_args, query)
+        output = self.run_cli("search", query)
 
         if output:
             regexp = re.compile(
@@ -214,7 +216,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew install --formula jpeginfo
+            ► brew install jpeginfo --formula
             ==> Downloading https://ghcr.io/core/jpeginfo/manifests/1.6.1_1-1
             ############################################################## 100.0%
             ==> Downloading https://ghcr.io/core/jpeginfo/blobs/sha256:27bb35884368b83
@@ -225,7 +227,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew install --cask pngyu
+            ► brew install pngyu --cask
             Updating Homebrew...
             ==> Downloading https://nukesaq.github.io/Pngyu/download/Pngyu_mac_101.zip
             ################################################################## 100.0%
@@ -235,7 +237,7 @@ class Homebrew(PackageManager):
 
         """
         super().install(package_id)
-        return self.run_cli("install", self.global_args, package_id)
+        return self.run_cli("install", package_id)
 
     @property
     def outdated(self):
@@ -243,7 +245,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew outdated --formula --json=v2 | jq
+            ► brew outdated --json=v2 --formula | jq
             {
               "formulae": [
                 {
@@ -270,7 +272,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew outdated --cask --json=v2 | jq
+            ► brew outdated --json=v2 --cask | jq
             {
               "formulae": [],
               "casks": [
@@ -289,7 +291,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew outdated --cask --json=v2 --greedy | jq
+            ► brew outdated --json=v2 --greedy --cask | jq
             {
               "formulae": [],
               "casks": [
@@ -324,7 +326,7 @@ class Homebrew(PackageManager):
         outdated = {}
 
         # Build up the list of CLI options.
-        options = [self.global_args, "--json=v2"]
+        options = ["--json=v2"]
         # Includes auto-update packages or not.
         if not self.ignore_auto_updates:
             options.append("--greedy")
@@ -482,7 +484,7 @@ class Homebrew(PackageManager):
 
         """
         super().cleanup()
-        self.run_cli("cleanup", "-s")
+        self.run_cli("cleanup", "-s", skip_globals=True)
 
 
 class Brew(Homebrew):

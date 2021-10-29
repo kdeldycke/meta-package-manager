@@ -59,7 +59,7 @@ class VSCode(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, "--list-extensions", "--show-versions")
+        output = self.run_cli("--list-extensions", "--show-versions")
 
         if output:
             for package in output.splitlines():
@@ -80,4 +80,4 @@ class VSCode(PackageManager):
             ► code --install-extension tamasfe.even-better-toml
         """
         super().install(package_id)
-        return self.run_cli(self.global_args, "--install-extension", package_id)
+        return self.run_cli("--install-extension", package_id)

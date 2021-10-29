@@ -58,7 +58,7 @@ class APT(PackageManager):
             Reading state information...
         """
         super().sync()
-        self.run_cli(self.global_args, "update", "--quiet")
+        self.run_cli("update", "--quiet")
 
     @property
     def installed(self):
@@ -97,7 +97,7 @@ class APT(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, "list", "--installed", "--quiet")
+        output = self.run_cli("list", "--installed", "--quiet")
 
         if output:
             regexp = re.compile(r"(\S+)\/\S+ (\S+) .*")
@@ -176,7 +176,7 @@ class APT(PackageManager):
             # in the CLI output after its execution.
             search_arg = "--full"
 
-        output = self.run_cli(self.global_args, "search", query, "--quiet", search_arg)
+        output = self.run_cli("search", query, "--quiet", search_arg)
 
         if output:
             regexp = re.compile(
@@ -211,7 +211,7 @@ class APT(PackageManager):
 
         """
         super().install(package_id)
-        return self.run_cli("install", self.global_args, package_id)
+        return self.run_cli("install", package_id)
 
     @property
     def outdated(self):
@@ -228,7 +228,7 @@ class APT(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args, "list", "--upgradable", "--quiet")
+        output = self.run_cli("list", "--upgradable", "--quiet")
 
         if output:
             regexp = re.compile(r"(\S+)\/\S+ (\S+).*\[upgradable from: (\S+)\]")
@@ -246,7 +246,7 @@ class APT(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, self.global_args, "update"]
+        cmd = [self.cli_path, "update"]
         if package_id:
             cmd.append(package_id)
         return cmd
@@ -260,8 +260,8 @@ class APT(PackageManager):
         """
         super().cleanup()
         # Cannot use self.run_cli() because of sudo.
-        self.run("sudo", self.cli_path, self.global_args, "-y", "autoremove")
-        self.run("sudo", self.cli_path, self.global_args, "clean")
+        self.run("sudo", self.cli_path, "-y", "autoremove")
+        self.run("sudo", self.cli_path, "clean")
 
 
 class APT_Mint(APT):

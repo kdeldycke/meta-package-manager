@@ -103,7 +103,14 @@ class PackageManager:
     global_args = ()
     """Global list of options used for each call to the package manager CLI.
 
+    Automaticcaly added to each :py:func:`meta_package_manager.base.PackageManager.run_cli`
+    call.
+
     Usually used to force silencing, low verbosity or no color output.
+    """
+
+    prepend_global_args = True
+    """Add the global args either at the begginning (``True``) or the end (``False``) of the CLI.
     """
 
     stop_on_error = False
@@ -202,7 +209,9 @@ class PackageManager:
         """
         if self.executable:
             # Invoke the manager.
-            output = self.run_cli(self.version_cli_options, force_exec=True)
+            output = self.run_cli(
+                self.version_cli_options, skip_globals=True, force_exec=True
+            )
 
             # Extract the version with the regex.
             if output:
@@ -309,13 +318,24 @@ class PackageManager:
 
         return output
 
-    def run_cli(self, *args, force_exec=False):
+    def run_cli(self, *args, skip_globals=False, force_exec=False):
         """Shortcut utility to the ``run`` method above, that is explicitly using the
         binary set by the ``cli_path`` property.
 
+        ``global_args`` are automaticcaly added before the provided args unless
+        ``prepend_global_args`` is ``False``. if ``skip_globals`` is ``True`` global arguments
+        are not added whatsoever to the list of provided ``args``.
+
         Also offer the possibility to force the execution and completion of the command
-        regardless of the instance --dry-run and --stop-on-error user options.
+        regardless of ``--dry-run`` and ``--stop-on-error`` user options.
         """
+        # Prepare the full list of CLI arguments.
+        if not skip_globals:
+            if self.prepend_global_args:
+                args = list(self.global_args) + list(args)
+            else:
+                args = list(args) + list(self.global_args)
+
         # Temporarily replace --dry-run and --stop-on-error user options with our own.
         if force_exec:
             user_options = (self.dry_run, self.stop_on_error)

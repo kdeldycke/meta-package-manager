@@ -76,9 +76,7 @@ class Yarn(PackageManager):
             ► yarn global --json list --depth 0
             (...)
         """
-        output = self.run_cli(
-            "global", "--json", self.global_args, "list", "--depth", "0"
-        )
+        output = self.run_cli("global", "--json", "list", "--depth", "0")
         return self.parse(output)
 
     def search(self, query, extended, exact):
@@ -171,7 +169,7 @@ class Yarn(PackageManager):
                 f"Fuzzy search not supported for {self.id}. Fallback to Exact."
             )
 
-        output = self.run_cli(self.global_args, "--json", "info", query)
+        output = self.run_cli("--json", "info", query)
 
         if output:
             result = json.loads(output)
@@ -200,7 +198,7 @@ class Yarn(PackageManager):
 
         """
         super().install(package_id)
-        return self.run_cli(self.global_args, "install", package_id)
+        return self.run_cli("install", package_id)
 
     @property
     def outdated(self):
@@ -215,9 +213,7 @@ class Yarn(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(
-            "--json", self.global_args, "outdated", "--cwd", self.global_dir
-        )
+        output = self.run_cli("--json", "outdated", "--cwd", self.global_dir)
 
         if not output:
             return outdated
@@ -246,7 +242,7 @@ class Yarn(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, "global", self.global_args]
+        cmd = [self.cli_path, "global"]
 
         if package_id:
             cmd.append("add")
@@ -262,4 +258,4 @@ class Yarn(PackageManager):
         See: https://yarnpkg.com/cli/cache/clean
         """
         super().cleanup()
-        self.run_cli(self.global_args, "cache", "clean", "--all")
+        self.run_cli("cache", "clean", "--all")

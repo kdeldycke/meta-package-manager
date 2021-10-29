@@ -56,7 +56,7 @@ class MAS(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, "list")
+        output = self.run_cli("list")
 
         if output:
             regexp = re.compile(r"(\d+) (.*) \((\S+)\)$")
@@ -96,7 +96,7 @@ class MAS(PackageManager):
                 f"Extended search not supported for {self.id}. Fallback to Fuzzy."
             )
 
-        output = self.run_cli(self.global_args, "search", query)
+        output = self.run_cli("search", query)
 
         if output:
             regexp = re.compile(
@@ -136,7 +136,7 @@ class MAS(PackageManager):
 
         """
         super().install(package_id)
-        return self.run_cli(self.global_args, "install", package_id)
+        return self.run_cli("install", package_id)
 
     @property
     def outdated(self):
@@ -154,7 +154,7 @@ class MAS(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args, "outdated")
+        output = self.run_cli("outdated")
 
         if output:
             regexp = re.compile(r"(\d+) (.*) \((\S+) -> (\S+)\)$")
@@ -180,7 +180,7 @@ class MAS(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, self.global_args, "upgrade"]
+        cmd = [self.cli_path, "upgrade"]
         if package_id:
             cmd.append(package_id)
         return cmd

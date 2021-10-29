@@ -58,7 +58,6 @@ class Flatpak(PackageManager):
         installed = {}
 
         output = self.run_cli(
-            self.global_args,
             "list",
             "--app",
             "--columns=name,application,version",
@@ -97,7 +96,7 @@ class Flatpak(PackageManager):
                 f"Extended search not supported for {self.id}. Fallback to Fuzzy."
             )
 
-        output = self.run_cli(self.global_args, "search", query, "--ostree-verbose")
+        output = self.run_cli("search", query, "--ostree-verbose")
 
         if output:
             regexp = re.compile(
@@ -143,7 +142,7 @@ class Flatpak(PackageManager):
 
         """
         super().install(package_id)
-        return self.run_cli(self.global_args, "install", package_id)
+        return self.run_cli("install", package_id)
 
     @property
     def outdated(self):
@@ -159,7 +158,6 @@ class Flatpak(PackageManager):
         outdated = {}
 
         output = self.run_cli(
-            self.global_args,
             "remote-ls",
             "--app",
             "--updates",
@@ -177,7 +175,6 @@ class Flatpak(PackageManager):
                     name, package_id, latest_version = match.groups()
 
                     info_installed_output = self.run_cli(
-                        self.global_args,
                         "info",
                         "--ostree-verbose",
                         package_id,
@@ -220,4 +217,4 @@ class Flatpak(PackageManager):
         /flatpak-command-reference.html#flatpak-repair
         """
         super().cleanup()
-        self.run_cli(self.global_args, "repair", "--user")
+        self.run_cli("repair", "--user")

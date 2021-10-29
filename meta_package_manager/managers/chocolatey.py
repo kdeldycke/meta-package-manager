@@ -32,6 +32,7 @@ class Choco(PackageManager):
     name = "Chocolatey"
 
     global_args = ("--no-progress", "--no-color")
+    prepend_global_args = False
 
     """
     .. code-block:: shell-session
@@ -56,9 +57,7 @@ class Choco(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(
-            "list", "--local-only", "--limit-output", self.global_args
-        )
+        output = self.run_cli("list", "--local-only", "--limit-output")
 
         if output:
             regexp = re.compile(r"(.+)\|(.+)")
@@ -117,7 +116,7 @@ class Choco(PackageManager):
         if exact:
             query_params.append("--exact")
 
-        output = self.run_cli("search", query, query_params, self.global_args)
+        output = self.run_cli("search", query, query_params)
 
         if output:
             regexp = re.compile(r"(.+)\|(.+)")
@@ -139,9 +138,7 @@ class Choco(PackageManager):
             ► choco install ccleaner --yes --limit-output --no-progress --no-color
         """
         super().install(package_id)
-        return self.run_cli(
-            "install", package_id, "--yes", "--limit-output", self.global_args
-        )
+        return self.run_cli("install", package_id, "--yes", "--limit-output")
 
     @property
     def outdated(self):
@@ -161,7 +158,7 @@ class Choco(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli("outdated", "--limit-output", self.global_args)
+        output = self.run_cli("outdated", "--limit-output")
 
         if output:
             regexp = re.compile(r"(.+)\|(.+)\|(.+)\|.+")

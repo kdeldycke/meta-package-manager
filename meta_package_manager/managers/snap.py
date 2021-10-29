@@ -56,7 +56,7 @@ class Snap(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli(self.global_args, "list")
+        output = self.run_cli("list")
 
         if output:
             for package in output.splitlines()[1:]:
@@ -82,7 +82,7 @@ class Snap(PackageManager):
         """
         matches = {}
 
-        output = self.run_cli(self.global_args, "find", query)
+        output = self.run_cli("find", query)
 
         if output:
 
@@ -122,7 +122,7 @@ class Snap(PackageManager):
 
         """
         super().install(package_id)
-        return self.run_cli(self.global_args, "install", package_id)
+        return self.run_cli("install", package_id)
 
     @property
     def outdated(self):
@@ -138,16 +138,14 @@ class Snap(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli(self.global_args, "refresh", "--list")
+        output = self.run_cli("refresh", "--list")
 
         if output and len(output.splitlines()) > 1:
             for package in output.splitlines()[1:]:
                 package_id = package.split()[0]
                 latest_version = package.split()[1]
                 installed_version = (
-                    self.run_cli(self.global_args, "list", package_id)
-                    .splitlines()[-1]
-                    .split()[1]
+                    self.run_cli("list", package_id).splitlines()[-1].split()[1]
                 )
                 outdated[package_id] = {
                     "id": package_id,

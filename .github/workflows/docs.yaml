@@ -151,6 +151,8 @@ jobs:
           poetry run pipdeptree --packages meta-package-manager
           --graph-output png > ./docs/images/dependencies.png
       - uses: peter-evans/create-pull-request@v3.10.1
+        # Only triggers on version tagging.
+        if: startsWith(github.ref, 'refs/tags/v')
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Regenerate dependency graph"

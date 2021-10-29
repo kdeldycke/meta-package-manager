@@ -17,6 +17,7 @@
 
 import logging
 import re
+from collections import namedtuple
 from datetime import datetime
 from functools import partial
 from io import TextIOWrapper
@@ -172,25 +173,30 @@ def mpm(
     if output_format != "json":
         table_formatter.format_name = output_format
 
-    # Load up global options to the context.
-    ctx.obj = {
-        "selected_managers": selected_managers,
-        "output_format": output_format,
-        "sort_by": sort_by,
-        "stats": stats,
-    }
+    # Load up current and new global options to the context for subcommand consumption.
+    ctx.obj = namedtuple(
+        "GlobalOptions",
+        (
+            "selected_managers",
+            "output_format",
+            "sort_by",
+            "stats",
+        ),
+        defaults=(
+            selected_managers,
+            output_format,
+            sort_by,
+            stats,
+        ),
+    )()
 
 
 @command(short_help="List supported package managers and their location.")
 @click.pass_context
 def managers(ctx):
     """List all supported package managers and their presence on the system."""
-    selected_managers = ctx.obj["selected_managers"]
-    output_format = ctx.obj["output_format"]
-    sort_by = ctx.obj["sort_by"]
-
     # Machine-friendly data rendering.
-    if output_format == "json":
+    if ctx.obj.output_format == "json":
         manager_data = {}
         # Build up the data structure of manager metadata.
         fields = (
@@ -203,7 +209,7 @@ def managers(ctx):
             "fresh",
             "available",
         )
-        for manager in selected_managers:
+        for manager in ctx.obj.selected_managers:
             manager_data[manager.id] = {fid: getattr(manager, fid) for fid in fields}
             # Serialize errors at the last minute to gather all we encountered.
             manager_data[manager.id]["errors"] = list(
@@ -215,7 +221,7 @@ def managers(ctx):
 
     # Human-friendly content rendering.
     table = []
-    for manager in selected_managers:
+    for manager in ctx.obj.selected_managers:
 
         # Build up the OS column content.
         os_infos = OK if manager.supported else KO
@@ -262,7 +268,7 @@ def managers(ctx):
             ("Version", "version"),
         ),
         table,
-        sort_by,
+        ctx.obj.sort_by,
     )
 
 
@@ -270,9 +276,7 @@ def managers(ctx):
 @click.pass_context
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
-    selected_managers = ctx.obj["selected_managers"]
-
-    for manager in selected_managers:
+    for manager in ctx.obj.selected_managers:
         manager.sync()
 
 
@@ -280,9 +284,7 @@ def sync(ctx):
 @click.pass_context
 def cleanup(ctx):
     """Cleanup local data and temporary artifacts."""
-    selected_managers = ctx.obj["selected_managers"]
-
-    for manager in selected_managers:
+    for manager in ctx.obj.selected_managers:
         manager.cleanup()
 
 
@@ -290,15 +292,10 @@ def cleanup(ctx):
 @click.pass_context
 def installed(ctx):
     """List all packages installed on the system from all managers."""
-    selected_managers = ctx.obj["selected_managers"]
-    output_format = ctx.obj["output_format"]
-    sort_by = ctx.obj["sort_by"]
-    stats = ctx.obj["stats"]
-
     # Build-up a global dict of installed packages per manager.
     installed_data = {}
 
-    for manager in selected_managers:
+    for manager in ctx.obj.selected_managers:
         installed_data[manager.id] = {
             "id": manager.id,
             "name": manager.name,
@@ -311,7 +308,7 @@ def installed(ctx):
         )
 
     # Machine-friendly data rendering.
-    if output_format == "json":
+    if ctx.obj.output_format == "json":
         print_json(installed_data)
         return
 
@@ -337,10 +334,10 @@ def installed(ctx):
             ("Installed version", "version"),
         ),
         table,
-        sort_by,
+        ctx.obj.sort_by,
     )
 
-    if stats:
+    if ctx.obj.stats:
         print_stats(installed_data)
 
 
@@ -360,15 +357,10 @@ def installed(ctx):
 @click.pass_context
 def search(ctx, extended, exact, query):
     """Search packages from all managers."""
-    selected_managers = ctx.obj["selected_managers"]
-    output_format = ctx.obj["output_format"]
-    sort_by = ctx.obj["sort_by"]
-    stats = ctx.obj["stats"]
-
     # Build-up a global list of package matches per manager.
     matches = {}
 
-    for manager in selected_managers:
+    for manager in ctx.obj.selected_managers:
 
         # Allow managers to not implement search.
         try:
@@ -389,7 +381,7 @@ def search(ctx, extended, exact, query):
         )
 
     # Machine-friendly data rendering.
-    if output_format == "json":
+    if ctx.obj.output_format == "json":
         print_json(matches)
         return
 
@@ -451,10 +443,10 @@ def search(ctx, extended, exact, query):
             ("Latest version", "version"),
         ),
         table,
-        sort_by,
+        ctx.obj.sort_by,
     )
 
-    if stats:
+    if ctx.obj.stats:
         print_stats(matches)
 
 
@@ -463,10 +455,11 @@ def search(ctx, extended, exact, query):
 @click.pass_context
 def install(ctx, package_id):
     """Install the provided package using one of the provided package manager."""
-    selected_managers = list(ctx.obj["selected_managers"])
+    # Cast generator to tuple because of reuse.
+    selected_managers = tuple(ctx.obj.selected_managers)
 
     logger.info(
-        f"Package manager order: {', '.join([m.id for m in selected_managers])}"
+        f"Package manager order: {', '.join([m.id for m in ctx.obj.selected_managers])}"
     )
 
     for manager in selected_managers:
@@ -517,17 +510,12 @@ def install(ctx, package_id):
 @click.pass_context
 def outdated(ctx, cli_format):
     """List available package upgrades and their versions for each manager."""
-    selected_managers = ctx.obj["selected_managers"]
-    output_format = ctx.obj["output_format"]
-    sort_by = ctx.obj["sort_by"]
-    stats = ctx.obj["stats"]
-
     render_cli = partial(PackageManager.render_cli, cli_format=cli_format)
 
     # Build-up a global list of outdated packages per manager.
     outdated_data = {}
 
-    for manager in selected_managers:
+    for manager in ctx.obj.selected_managers:
 
         try:
             packages = tuple(map(dict, manager.outdated.values()))
@@ -561,7 +549,7 @@ def outdated(ctx, cli_format):
         )
 
     # Machine-friendly data rendering.
-    if output_format == "json":
+    if ctx.obj.output_format == "json":
         print_json(outdated_data)
         return
 
@@ -589,10 +577,10 @@ def outdated(ctx, cli_format):
             ("Latest version", None),
         ),
         table,
-        sort_by,
+        ctx.obj.sort_by,
     )
 
-    if stats:
+    if ctx.obj.stats:
         print_stats(outdated_data)
 
 
@@ -600,9 +588,7 @@ def outdated(ctx, cli_format):
 @click.pass_context
 def upgrade(ctx):
     """Perform a full package upgrade on all available managers."""
-    selected_managers = ctx.obj["selected_managers"]
-
-    for manager in selected_managers:
+    for manager in ctx.obj.selected_managers:
         logger.info(f"Updating all outdated packages from {manager.id}...")
         try:
             output = manager.upgrade_all()
@@ -627,9 +613,6 @@ def backup(ctx, toml_output):
 
     The TOML file can then be safely consumed by the `mpm restore` command.
     """
-    selected_managers = ctx.obj["selected_managers"]
-    stats = ctx.obj["stats"]
-
     is_stdout = isinstance(toml_output, TextIOWrapper)
     toml_filepath = toml_output.name if is_stdout else Path(toml_output.name).resolve()
     logger.info(f"Backup package list to {toml_filepath}")
@@ -649,7 +632,7 @@ def backup(ctx, toml_output):
     installed_data = {}
 
     # Create one section for each package manager.
-    for manager in selected_managers:
+    for manager in ctx.obj.selected_managers:
         logger.info(f"Dumping packages from {manager.id}...")
         installed_packages = manager.installed.values()
 
@@ -668,7 +651,7 @@ def backup(ctx, toml_output):
 
     toml_output.write(doc)
 
-    if stats:
+    if ctx.obj.stats:
         print_stats(installed_data)
 
 
@@ -681,8 +664,6 @@ def restore(ctx, toml_files):
 
     Version specified in the TOML file is ignored in the current implementation.
     """
-    selected_managers = ctx.obj["selected_managers"]
-
     for toml_input in toml_files:
 
         is_stdin = isinstance(toml_input, TextIOWrapper)
@@ -700,7 +681,7 @@ def restore(ctx, toml_files):
             sections = ", ".join(ignored_sections)
             logger.info(f"Ignore {sections} section{plural}.")
 
-        for manager in selected_managers:
+        for manager in ctx.obj.selected_managers:
             if manager.id not in doc:
                 logger.warning(f"No [{manager.id}] section found.")
                 continue

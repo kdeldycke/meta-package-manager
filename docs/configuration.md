@@ -13,5 +13,5 @@ verbosity = "DEBUG"
 manager = ["brew", "cask"]
 
 [mpm.search]
-exact = True
+exact = true
 ```

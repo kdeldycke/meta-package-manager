@@ -1,11 +1,11 @@
 ---
 name: Labels
 "on":
-  # Only the develop branch has authority on the project management. This will
+  # Only the main branch has authority on the project management. This will
   # prevent any other tagging or release activity interfer with the project.
   push:
     branches:
-      - develop
+      - main
 
 jobs:
 

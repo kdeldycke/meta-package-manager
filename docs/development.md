@@ -31,10 +31,7 @@ Which boils down to the following rules of thumb regarding stability:
 
 ## Build status
 
-| Branch    | {gh}`main <tree/main>`                                                                                                                                                                                                          | {gh}`develop <tree/develop>`                                                                                                                                                                                                          |
-|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Unittests | [![Unittests status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Amain) | [![Unittests status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=develop)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Adevelop) |
-| Coverage  | [![Coverage status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/badge.svg)](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main)                                                        | [![Coverage status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop/graph/badge.svg)](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop)                                                        |
+{gh}`main branch <tree/main>`: [![Unittests status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Amain) [![Coverage status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/badge.svg)](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main)
 
 ## Setup a development environment
 
@@ -45,7 +42,7 @@ Check out latest development branch:
 ``` shell-session
 $ git clone git@github.com:kdeldycke/meta-package-manager.git
 $ cd ./meta-package-manager
-$ git checkout develop
+$ git checkout main
 ```
 
 Install package in editable mode with all development dependencies:
@@ -88,16 +85,13 @@ The documentation you’re currently reading can be built locally with
 $ poetry run sphinx-build -b html ./docs ./docs/html
 ```
 
-To update the auto-generated API documention:
-
-``` shell-session
-$ poetry run sphinx-apidoc -f -o ./docs .
-```
+The generation of API documention is
+{gh}`covered by a dedicated workflow <blob/develop/.github/workflows/docs.yaml>`.
 
 ## Screenshots
 
-Once in a while, the maintainers of the project will refresh screenshots found
-in the documentation and the `readme.md` file at the root of project.
+Project screenshots found in the documentation and the `readme.md` file
+needs to be refreshed by hand once in a while.
 
 To produce clean and fancy terminals screenshots, use either:
 
@@ -107,32 +101,31 @@ To produce clean and fancy terminals screenshots, use either:
 
 ## Changelog
 
-From time to time, especially before a release, the maintainers will review and
-rewrite the changelog to make it clean and readable. The idea is to have it
-stay in the spirit of the [keep a changelog
+Before a release, the maintainers will review and rewrite the changelog to make
+it clean and readable. Inspiration can be drawn from the [keep a changelog
 manifesto](https://keepachangelog.com).
 
-Most (if not all) changes can be derived by simply comparing the last tagged
-release with the `develop` branch:
-`https://github.com/kdeldycke/meta-package-manager/compare/vX.X.X...develop`.
+Changes can be derived by simply comparing the last tagged release with the
+`main` branch:
+`https://github.com/kdeldycke/meta-package-manager/compare/vX.X.X...main`.
 This direct link should be available at the top of the {doc}`/changelog`.
 
 ## Release process
 
-Check you are starting from a clean `develop` branch:
+Check you are starting from a clean `main` branch:
 
 ``` shell-session
-$ git checkout develop
+$ git checkout main
 ```
 
-Revision should already be set to the next version, so we just need to set the
-released date in the changelog:
+Revision should already be set to the next version, so we just need to update
+the released date in the changelog:
 
 ``` shell-session
 $ vi ./changelog.md
 ```
 
-Create a release commit, tag it and merge it back to `main` branch:
+Create a release commit and tag it:
 
 ``` shell-session
 $ git add ./meta_package_manager/__init__.py ./changelog.md
@@ -140,55 +133,27 @@ $ git commit -m "Release vX.Y.Z"
 $ git tag "vX.Y.Z"
 $ git push
 $ git push --tags
-$ git checkout main
-$ git pull
-$ git merge "vX.Y.Z"
-$ git push
-```
-
-The next phases of the release process are automated and should be picked up by
-GitHub actions. If not, the next section details the manual deployment process.
-
-## Manual build and deployment
-
-Build packages:
-
-``` shell-session
-$ poetry build
-```
-
-For a smooth release, you also need to [validate the rendering of package’s
-long description on
-PyPi](https://packaging.python.org/guides/making-a-pypi-friendly-readme/#validating-restructuredtext-markup),
-as well as metadata:
-
-``` shell-session
-$ poetry check
-$ poetry run twine check ./dist/*
-```
-
-Publish packaging to [PyPi](https://pypi.python.org):
-
-``` shell-session
-$ poetry publish
 ```
 
 Update revision with [bump2version](https://github.com/c4urself/bump2version)
-and set it back to development state by increasing the `patch` level.
+and set it back to development state by incrementing the `patch` number.
 
 ``` shell-session
-$ git checkout develop
 $ poetry run bumpversion --verbose patch
+$ vi ./changelog.md
 $ git add ./meta_package_manager/__init__.py ./changelog.md
 $ git commit -m "Post release version bump."
 $ git push
 ```
 
+The next steps of the release process are automated and should be picked up by
+the {gh}`build workflow <blob/develop/.github/workflows/build.yaml>`.
+
 ## Version bump
 
-Versions are automatically bumped to their next `patch` revision at release
-(see above). In the middle of your development, if the upcoming release is no
-longer bug-fix only, or gets really important, feel free to bump to the next
+Versions are bumped to their next `patch` revision during the release process
+(as noted above). In the middle of your development, if the upcoming release is
+no longer bug-fix only, or gets really important, feel free to bump to the next
 `minor` or `major`:
 
 ``` shell-session

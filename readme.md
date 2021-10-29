@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/kdeldycke/meta-package-manager/">
-    <img src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/images/logo-banner.svg" alt="Meta Package Manager">
+    <img src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/images/logo-banner.svg" alt="Meta Package Manager">
   </a>
 </p>
 
@@ -13,11 +13,11 @@ release](https://img.shields.io/pypi/v/meta-package-manager.svg)](https://pypi.p
 [![Python
 versions](https://img.shields.io/pypi/pyversions/meta-package-manager.svg)](https://pypi.python.org/pypi/meta-package-manager)
 [![Unittests
-status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=develop)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Adevelop)
+status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Amain)
 [![Documentation
-status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/docs.yaml/badge.svg?branch=develop)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/docs.yaml?query=branch%3Adevelop)
+status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/docs.yaml/badge.svg?branch=main)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/docs.yaml?query=branch%3Amain)
 [![Coverage
-status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop/graph/badge.svg)](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop)
+status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/badge.svg)](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main)
 
 **What is Meta Package Manager?**
 
@@ -30,9 +30,9 @@ status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/develop/grap
 
 ## Features
 
-<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/images/mpm-outdated-cli.png"/>
+<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/images/mpm-outdated-cli.png"/>
 
-<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/develop/docs/images/mpm-managers-cli.png"/>
+<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/images/mpm-managers-cli.png"/>
 
 - Inventory and list all package managers available on the system.
 - Supports macOS, Linux and Windows.

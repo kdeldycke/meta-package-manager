@@ -2,10 +2,10 @@
 name: Autofix
 "on":
   push:
-    # Only targets develop branch to avoid amplification effects of auto-fixing
+    # Only targets main branch to avoid amplification effects of auto-fixing
     # the exact same stuff in multiple non-rebased branches.
     branches:
-      - 'develop'
+      - main
 
 jobs:
 

@@ -17,7 +17,7 @@ For now the easiest way to have new package managers supported is to:
 2.  Identify an already implemented package manager that is similar to the new
     one you’d like to add.
 3.  Duplicate its already existing definition file in the
-    {gh}`/managers subfolder <tree/develop/meta_package_manager/managers>`.
+    {gh}`/managers subfolder <tree/main/meta_package_manager/managers>`.
 4.  Adapt the new file to the particularities of the new package manager. Read
     the {doc}`/falsehoods` to anticipate edge-cases.
 5.  Fix the code until the unittests passes. Most of all metadata and format

@@ -1,6 +1,6 @@
 # Changelog
 
-## {gh}`4.8.0 (unreleased) <compare/v4.7.0...develop>`
+## {gh}`4.8.0 (unreleased) <compare/v4.7.0...main>`
 
 ``` {important}
 This version is not released yet and is under active development.
@@ -14,6 +14,7 @@ This version is not released yet and is under active development.
 * [mpm] Add dependency on `click-extra`.
 * [mpm] Use `sphinx-click` to auto-generate CLI documentation.
 * [mpm] Autofix Markdown content with `mdformat`.
+* [mpm] Simplify project management by abandoning the dual use of `main`/`develop` branches.
 
 
 ## {gh}`4.7.0 (2021-10-13) <compare/v4.6.0...v4.7.0>`

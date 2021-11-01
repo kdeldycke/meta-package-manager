@@ -32,8 +32,8 @@ from click_extra.run import INDENT, PROMPT, run
 
 from .version import parse_version
 
-# Rendering format of CLI in JSON fields.
 CLI_FORMATS = frozenset({"plain", "fragments", "xbar"})
+"""Rendering format of CLI in JSON fields."""
 
 
 class CLIError(Exception):

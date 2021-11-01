@@ -80,7 +80,7 @@ tomli = "^1.2.1"
 tomli_w = "^0.4.0"
 
 [tool.poetry.dev-dependencies]
-black = "^21.9b0"
+black = "^21.10b0"
 bump2version = "^1.0.1"
 check-wheel-contents = "^0.3.3"
 coverage = { extras = ["toml"], version = "^6.0" }

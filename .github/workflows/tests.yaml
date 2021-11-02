@@ -31,7 +31,7 @@ jobs:
           # Python 3.10 fix: https://github.com/mahmoud/boltons/issues/294
           # - "3.10"
     steps:
-      - uses: actions/checkout@v2.3.5
+      - uses: actions/checkout@v2.4.0
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2.2.2

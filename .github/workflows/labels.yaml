@@ -13,7 +13,7 @@ jobs:
     name: Generate and sync labels
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2.3.5
+      - uses: actions/checkout@v2.4.0
       - uses: actions/setup-python@v2.2.2
         with:
           # XXX Force Python 3.9 to not have 3.10 as default.

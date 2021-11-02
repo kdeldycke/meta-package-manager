@@ -13,7 +13,7 @@ jobs:
     name: Generate Sphinx doc and create a PR
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2.3.5
+      - uses: actions/checkout@v2.4.0
       - uses: actions/setup-python@v2.2.2
       - name: Install Sphinx
         run: |
@@ -42,7 +42,7 @@ jobs:
     name: Deploy Sphinx doc
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2.3.5
+      - uses: actions/checkout@v2.4.0
       - uses: actions/setup-python@v2.2.2
       - name: Install Sphinx
         run: |
@@ -63,7 +63,7 @@ jobs:
     name: Fix typos and create a PR
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2.3.5
+      - uses: actions/checkout@v2.4.0
       - uses: sobolevn/misspell-fixer-action@0.1.0
       - uses: peter-evans/create-pull-request@v3.10.1
         with:
@@ -84,7 +84,7 @@ jobs:
     name: Optimize images
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2.3.5
+      - uses: actions/checkout@v2.4.0
       - uses: calibreapp/image-actions@1.1.0
         id: image_actions
         with:
@@ -111,7 +111,7 @@ jobs:
     name: Update .mailmap and create a PR
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2.3.5
+      - uses: actions/checkout@v2.4.0
         with:
           # Fetch all history to extract all contributors.
           fetch-depth: 0
@@ -138,7 +138,7 @@ jobs:
     name: Update dependency image and create a PR
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2.3.5
+      - uses: actions/checkout@v2.4.0
       - uses: actions/setup-python@v2.2.2
       - name: Install pipdeptree
         run: |

@@ -82,7 +82,7 @@ tomli_w = "^0.4.0"
 black = "^21.10b0"
 bump2version = "^1.0.1"
 check-wheel-contents = "^0.3.3"
-coverage = { extras = ["toml"], version = "^6.0" }
+coverage = { extras = ["toml"], version = "^6.1" }
 furo = "^2021.9.22"
 isort = "^5.9.3"
 # https://mdformat.readthedocs.io/en/stable/users/plugins.html

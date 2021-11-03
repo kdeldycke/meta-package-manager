@@ -145,6 +145,7 @@ Then create a release commit and tag it:
 $ git add ./changelog.md
 $ git commit -m "Release vX.Y.Z"
 $ git tag "vX.Y.Z"
+$ git push
 $ git push --tags
 ```
 

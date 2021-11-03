@@ -112,49 +112,51 @@ This direct link should be available at the top of the {doc}`/changelog`.
 
 ## Release process
 
-Check you are starting from a clean `main` branch:
+Make sure you are starting from a clean `main` branch:
 
 ``` shell-session
 $ git checkout main
 ```
 
-Revision should already be set to the next version, so we just need to update
-the released date in the changelog:
+Revision should already be set to the next version, so we just need to prepare
+the changelog:
+
+  - Set the released date to today
+
+    ``` shell-session
+    $ sed -i "s/(unreleased)/(`date +'%Y-%m-%d'`)/" ./changelog.md
+    ```
+
+  - Update the comparison URL (replace `X.X.X` with the version to be released):
+
+    ``` shell-session
+    $ sed -i "s/\.\.\.main>/\.\.\.vX.X.X>/" ./changelog.md
+    ```
+
+  - Remove the warning message:
+
+    ``` shell-session
+    $ sed -i "/^\`\`\`/,/^$/ d" ./changelog.md
+    ```
+
+Then create a release commit and tag it:
 
 ``` shell-session
-$ vi ./changelog.md
-```
-
-Create a release commit and tag it:
-
-``` shell-session
-$ git add ./meta_package_manager/__init__.py ./changelog.md
+$ git add ./changelog.md
 $ git commit -m "Release vX.Y.Z"
 $ git tag "vX.Y.Z"
-$ git push
 $ git push --tags
 ```
 
-Update revision with [bump2version](https://github.com/c4urself/bump2version)
-and set it back to development state by incrementing the `patch` number.
-
-``` shell-session
-$ poetry run bumpversion --verbose patch
-$ vi ./changelog.md
-$ git add ./meta_package_manager/__init__.py ./changelog.md
-$ git commit -m "Post release version bump."
-$ git push
-```
-
-The next steps of the release process are automated and should be picked up by
-the {gh}`build workflow <blob/develop/.github/workflows/build.yaml>`.
+The next steps of the release process are automated and should be picked up
 
 ## Version bump
 
 Versions are bumped to their next `patch` revision during the release process
-(as noted above). In the middle of your development, if the upcoming release is
-no longer bug-fix only, or gets really important, feel free to bump to the next
-`minor` or `major`:
+above by the {gh}`build workflow <blob/develop/.github/workflows/build.yaml>`.
+
+In the middle of your development, if the upcoming release is no longer bug-fix
+only, feel free to bump to the next `minor`:
 
 ``` shell-session
 $ poetry run bumpversion --verbose minor
@@ -162,3 +164,5 @@ $ git add ./meta_package_manager/__init__.py ./changelog.md
 $ git commit -m "Next release no longer bug-fix only. Bump revision."
 $ git push
 ```
+
+For really big changes, bump the `major`.

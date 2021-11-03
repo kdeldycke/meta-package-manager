@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 * [mpm] Remove direct dependency on `click-log`.
+* [mpm] Automate post-release version bump.
 
 
 ## {gh}`4.8.0 (2021-11-01) <compare/v4.7.0...v4.8.0>`

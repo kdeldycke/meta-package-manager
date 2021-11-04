@@ -22,22 +22,11 @@ from pathlib import Path
 
 import click
 from boltons.strutils import strip_ansi
-from cli_helpers.tabular_output import TabularOutputFormatter
-from click_extra.platform import is_windows
+from click_extra.tabulate import TabularOutputFormatter
 from simplejson import dumps as json_dumps
 
 from . import __version__
 from .version import TokenizedString
-
-# Initialize the table formatter.
-table_formatter = TabularOutputFormatter()
-
-
-# Register all rendering modes for table data.
-RENDERING_MODES = {"json"}
-RENDERING_MODES.update(table_formatter.supported_formats)
-RENDERING_MODES = frozenset(RENDERING_MODES)
-
 
 # List of fields IDs allowed to be sorted.
 SORTABLE_FIELDS = {
@@ -47,6 +36,17 @@ SORTABLE_FIELDS = {
     "package_name",
     "version",
 }
+
+
+def not_implemented_json(data, headers, **kwargs):
+    raise NotImplementedError(
+        "JSON rendering is not generic and need specific subcommand implementation."
+    )
+
+
+# Add our custom JSON format to the output formatter. Link it to a dummy renderer
+# as we plan to intercept the JSON settings in each subcommand.
+TabularOutputFormatter.register_new_formatter("json", not_implemented_json)
 
 
 def print_json(data):
@@ -112,12 +112,10 @@ def print_table(header_defs, rows, sort_key=None):
             sorting_key.append(key)
         return tuple(sorting_key)
 
-    for line in table_formatter.format_output(
+    ctx = click.get_current_context()
+    ctx.find_root().print_table(
         sorted(rows, key=sort_method), header_labels, disable_numparse=True
-    ):
-        if is_windows():
-            line = line.encode("utf-8")
-        click.echo(line)
+    )
 
 
 def print_stats(data):

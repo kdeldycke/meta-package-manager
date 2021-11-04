@@ -33,18 +33,12 @@ from click_extra.colorize import KO, OK, theme
 from click_extra.commands import command, group
 from click_extra.logging import logger
 from click_extra.platform import os_label
+from click_extra.tabulate import TabularOutputFormatter, table_format_option
 from cloup import option, option_group
 
 from . import __version__
 from .base import CLI_FORMATS, CLIError, PackageManager
-from .output import (
-    RENDERING_MODES,
-    SORTABLE_FIELDS,
-    print_json,
-    print_stats,
-    print_table,
-    table_formatter,
-)
+from .output import SORTABLE_FIELDS, print_json, print_stats, print_table
 from .pool import ALL_MANAGER_IDS, select_managers
 from .version import TokenizedString
 
@@ -112,11 +106,12 @@ assert set(ALL_MANAGER_IDS).issuperset(XKCD_MANAGER_ORDER)
 )
 @option_group(
     "Output options",
-    option(
+    table_format_option(
         "-o",
         "--output-format",
-        type=click.Choice(sorted(RENDERING_MODES), case_sensitive=False),
-        default="psql_unicode",
+        type=click.Choice(
+            sorted(TabularOutputFormatter._output_formats), case_sensitive=False
+        ),
         help="Rendering mode of the output.",
     ),
     option(
@@ -143,7 +138,6 @@ def mpm(
     ignore_auto_updates,
     stop_on_error,
     dry_run,
-    output_format,
     sort_by,
     stats,
 ):
@@ -166,25 +160,19 @@ def mpm(
     # Silence all log message for JSON rendering unless in debug mode.
     level = logger.level
     level_name = logging._levelToName.get(level, level)
-    if output_format == "json" and level_name != "DEBUG":
+    if ctx.find_root().table_formatter.format_name == "json" and level_name != "DEBUG":
         logger.setLevel(logging.CRITICAL * 2)
-
-    # Setup the table formatter.
-    if output_format != "json":
-        table_formatter.format_name = output_format
 
     # Load up current and new global options to the context for subcommand consumption.
     ctx.obj = namedtuple(
         "GlobalOptions",
         (
             "selected_managers",
-            "output_format",
             "sort_by",
             "stats",
         ),
         defaults=(
             selected_managers,
-            output_format,
             sort_by,
             stats,
         ),
@@ -196,7 +184,7 @@ def mpm(
 def managers(ctx):
     """List all supported package managers and their presence on the system."""
     # Machine-friendly data rendering.
-    if ctx.obj.output_format == "json":
+    if ctx.find_root().table_formatter.format_name == "json":
         manager_data = {}
         # Build up the data structure of manager metadata.
         fields = (
@@ -308,7 +296,7 @@ def installed(ctx):
         )
 
     # Machine-friendly data rendering.
-    if ctx.obj.output_format == "json":
+    if ctx.find_root().table_formatter.format_name == "json":
         print_json(installed_data)
         return
 
@@ -381,7 +369,7 @@ def search(ctx, extended, exact, query):
         )
 
     # Machine-friendly data rendering.
-    if ctx.obj.output_format == "json":
+    if ctx.find_root().table_formatter.format_name == "json":
         print_json(matches)
         return
 
@@ -549,7 +537,7 @@ def outdated(ctx, cli_format):
         )
 
     # Machine-friendly data rendering.
-    if ctx.obj.output_format == "json":
+    if ctx.find_root().table_formatter.format_name == "json":
         print_json(outdated_data)
         return
 

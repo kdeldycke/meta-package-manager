@@ -19,11 +19,10 @@ import re
 
 import pytest
 import simplejson as json
-from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
+from click_extra.tabulate import TabularOutputFormatter
 
 from .. import __version__
-from ..cli import RENDERING_MODES
 from ..pool import DEFAULT_MANAGER_IDS
 
 """ Common tests for all CLI basic features and templates for subcommands. """
@@ -290,104 +289,16 @@ class CLITableTests:
     A table output is also allowed to be rendered as JSON.
     """
 
-    # List of all supported rendering modes IDs, their expected output and the other
-    # mode they are allowed to conflict with.
-    expected_renderings = {
-        "ascii": ("---+---", None),
-        "csv": (",", None),
-        "csv-tab": ("\t", None),
-        "double": ("═══╬═══", None),
-        "fancy_grid": ("═══╪═══", "psql_unicode"),
-        "github": ("---|---", None),
-        "grid": ("===+===", "ascii"),
-        "html": ("<table>", None),
-        "jira": (" || ", None),
-        "json": ('": {', None),
-        "latex": ("\\hline", None),
-        "latex_booktabs": ("\\toprule", None),
-        "mediawiki": ('{| class="wikitable" ', "jira"),
-        "minimal": ("  ", None),
-        "moinmoin": (" ''' || ''' ", "jira"),
-        "orgtbl": ("---+---", None),
-        "pipe": ("---|:---", None),
-        "plain": ("  ", None),
-        "psql": ("---+---", None),
-        "psql_unicode": ("───┼───", None),
-        "rst": ("===  ===", None),
-        "simple": ("---  ---", None),
-        "textile": (" |_. ", None),
-        "tsv": ("\t", None),
-        "vertical": ("***[ 1. row ]***", None),
-    }
-
-    def test_recognized_modes(self):
-        """Check all rendering modes proposed by the table module are
-        accounted for."""
-        assert RENDERING_MODES == set(self.expected_renderings.keys())
-
-    def test_default_table_rendering(self, invoke, subcmd):
-        """Check default rendering is psql_unicode."""
-        result = invoke(subcmd)
-        assert result.exit_code == 0
-
-        expected = self.expected_renderings["psql_unicode"][0]
-
-        # If no package found, check that no table gets rendered. Else, check
-        # the selected mode is indeed rendered in <stdout>, so the CLI result
-        # can be grep-ed.
-        if result.stdout.startswith("0 package total ("):
-            assert expected not in result.stdout
-        else:
-            assert expected in result.stdout
-
-        assert expected not in result.stderr
-
-    @pytest.mark.parametrize(
-        "mode,expected,conflict",
-        (pytest.param(*v, id=v[0]) for v in map(flatten, expected_renderings.items())),
-    )
-    def test_all_table_rendering(self, invoke, subcmd, mode, expected, conflict):
-        """Check that from all rendering modes, only the selected one appears
-        in <stdout> and only there. Any other mode are not expected neither in
-        <stdout> or <stderr>.
-        """
+    @pytest.mark.parametrize("mode", TabularOutputFormatter._output_formats)
+    def test_all_table_rendering(self, invoke, subcmd, mode):
         result = invoke("--output-format", mode, subcmd)
         assert result.exit_code == 0
 
-        # If no package found, check that no table gets rendered. Else, check
-        # the selected mode is indeed rendered in <stdout>, so the CLI result
-        # can be grep-ed.
-        if result.stdout.startswith("0 package total ("):
-            # CSV mode will match on comma.
-            if mode != "csv":
-                assert expected not in result.stdout
-        else:
-            assert expected in result.stdout
+    def test_json_output(self, invoke, subcmd):
+        """JSON output is expected to be parseable if read from <stdout>.
 
-        # Collect all possible unique traces from all possible rendering modes.
-        unexpected_traces = {
-            v[0]
-            for v in self.expected_renderings.values()
-            # Exclude obvious character sequences shorter than 3 characters to
-            # eliminate false negative.
-            if len(v[0]) > 2
-        }
-        # Remove overlapping edge-cases.
-        if conflict:
-            unexpected_traces.remove(self.expected_renderings[conflict][0])
-
-        for unexpected in unexpected_traces:
-            if unexpected != expected:
-                # The unexpected trace is not the selected one, it should not
-                # appears at all in stdout.
-                assert unexpected not in result.stdout
-            # Any expected output from all rendering modes must not appears in
-            # <stderr>, including the selected one.
-            assert unexpected not in result.stderr
-
-    def test_json_debug_output(self, invoke, subcmd):
-        """Output is expected to be parseable if read from <stdout> even in
-        debug level as these messages are redirected to <stderr>.
+        Debug level messages are redirected to <stderr> and are not supposed to
+        interfer with this behavior.
 
         Also checks that JSON output format is not supported by all commands.
         """

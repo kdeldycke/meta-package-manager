@@ -6,7 +6,9 @@
 This version is not released yet and is under active development.
 ```
 
-* [mpm] Remove direct dependency on `click-log`.
+* [mpm] Switch default table rendering to `rounded_outline`.
+* [mpm] Rely on `click-extra` for table rendering and tests.
+* [mpm] Remove direct dependencies on `click-log` and `cli-helpers`.
 * [mpm] Automate post-release version bump.
 
 

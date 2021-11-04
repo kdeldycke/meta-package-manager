@@ -24,7 +24,7 @@ jobs:
         run: |
           poetry run isort .
           poetry run black .
-      - uses: peter-evans/create-pull-request@v3.10.1
+      - uses: peter-evans/create-pull-request@v3.11.0
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Format Python code"
@@ -52,7 +52,7 @@ jobs:
       - name: Auto-format Markdown
         run: >
           find ./ -iname "*.md" -exec mdformat --wrap 79 "{}" \;
-      - uses: peter-evans/create-pull-request@v3.10.1
+      - uses: peter-evans/create-pull-request@v3.11.0
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Format Markdown"
@@ -79,7 +79,7 @@ jobs:
         run: >
           find ./ -type f -name '*.json' -print -exec
           jsonlint --in-place "{}" \;
-      - uses: peter-evans/create-pull-request@v3.10.1
+      - uses: peter-evans/create-pull-request@v3.11.0
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Format JSON content"
@@ -106,7 +106,7 @@ jobs:
         run: >
           git ignore-io --replace emacs git linux macos nohup python vim
           virtualenv visualstudiocode windows
-      - uses: peter-evans/create-pull-request@v3.10.1
+      - uses: peter-evans/create-pull-request@v3.11.0
         with:
           author: "Kevin Deldycke <kevin@deldycke.com>"
           commit-message: "[autofix] Regenerate .gitignore"

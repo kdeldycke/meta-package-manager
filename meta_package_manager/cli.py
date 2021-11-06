@@ -33,12 +33,18 @@ from click_extra.colorize import KO, OK, theme
 from click_extra.commands import command, group
 from click_extra.logging import logger
 from click_extra.platform import os_label
-from click_extra.tabulate import TabularOutputFormatter, table_format_option
+from click_extra.tabulate import table_format_option
 from cloup import option, option_group
 
 from . import __version__
 from .base import CLI_FORMATS, CLIError, PackageManager
-from .output import SORTABLE_FIELDS, print_json, print_stats, print_table
+from .output import (
+    SORTABLE_FIELDS,
+    TabularOutputFormatter,
+    print_json,
+    print_stats,
+    print_table,
+)
 from .pool import ALL_MANAGER_IDS, select_managers
 from .version import TokenizedString
 

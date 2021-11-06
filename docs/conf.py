@@ -11,7 +11,7 @@ toml_config = tomli.loads(toml_path.read_text())
 
 # Redistribute pyproject.toml config to Sphinx.
 project_id = toml_config["tool"]["poetry"]["name"]
-version = toml_config["tool"]["poetry"]["version"]
+version = release = toml_config["tool"]["poetry"]["version"]
 url = toml_config["tool"]["poetry"]["homepage"]
 author = ", ".join(
     (a.split("<")[0].strip() for a in toml_config["tool"]["poetry"]["authors"])
@@ -20,8 +20,6 @@ author = ", ".join(
 # Title-case each word of the project ID.
 project = " ".join((word.title() for word in project_id.split("-")))
 htmlhelp_basename = project_id
-
-release = version
 
 # Addons.
 extensions = [
@@ -41,21 +39,9 @@ extensions = [
 
 master_doc = "index"
 
-# We use our own copyright template instead of the default as the latter strip
-# HTML content.
-html_show_copyright = False
-copyright = (
-    f"<a href='https://kevin.deldycke.com'>{author}</a> and <a href='{url}"
-    "/graphs/contributors'>contributors</a>"
-)
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 nitpicky = True
-
-# We need a recent sphinx because of the last update format.
-needs_sphinx = "2.4"
-html_last_updated_fmt = "YYYY-MM-dd"
-templates_path = ["templates"]
 
 # Both the class’ and the __init__ method’s docstring are concatenated and
 # inserted.
@@ -83,3 +69,9 @@ html_logo = "images/logo-square.svg"
 html_theme_options = {
     "sidebar_hide_name": True,
 }
+
+# Footer content.
+html_last_updated_fmt = "%Y-%m-%d"
+copyright = f"{author} and contributors"
+html_show_copyright = True
+html_show_sphinx = False

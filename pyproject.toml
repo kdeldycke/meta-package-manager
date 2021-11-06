@@ -96,7 +96,7 @@ myst-parser = "^0.15.2"
 pipdeptree = { extras = ["graphviz"], version = "^2.2.0" }
 pylint = "^2.11.1"
 pytest = "^6.2.5"
-# More pytest plugins at: http://plugincompat.herokuapp.com .
+# More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html
 pytest-cov = "^3.0.0"
 pytest-randomly = "^3.10.1"
 pyyaml = "^6.0"

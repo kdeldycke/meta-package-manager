@@ -987,7 +987,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "sphinx"
-version = "4.2.0"
+version = "4.3.0"
 description = "Python documentation generator"
 category = "dev"
 optional = false
@@ -1331,7 +1331,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "a2fa7c1762edb3915b221e64bc8b5bb139887e7a47ce11001ea3064dd52afbd2"
+content-hash = "6078193569d7a4941a167a7581fa2779c22c443af7e3866af16d1182a5311a2f"
 
 [metadata.files]
 alabaster = [
@@ -1510,9 +1510,6 @@ coverage = [
     {file = "coverage-6.1.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e14bceb1f3ae8a14374be2b2d7bc12a59226872285f91d66d301e5f41705d4d6"},
     {file = "coverage-6.1.1-cp39-cp39-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:0147f7833c41927d84f5af9219d9b32f875c0689e5e74ac8ca3cb61e73a698f9"},
     {file = "coverage-6.1.1-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:b1d0a1bce919de0dd8da5cff4e616b2d9e6ebf3bd1410ff645318c3dd615010a"},
-    {file = "coverage-6.1.1-cp39-cp39-musllinux_1_1_aarch64.whl", hash = "sha256:ae6de0e41f44794e68d23644636544ed8003ce24845f213b24de097cbf44997f"},
-    {file = "coverage-6.1.1-cp39-cp39-musllinux_1_1_i686.whl", hash = "sha256:db2797ed7a7e883b9ab76e8e778bb4c859fc2037d6fd0644d8675e64d58d1653"},
-    {file = "coverage-6.1.1-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:c40966b683d92869b72ea3c11fd6b99a091fd30e12652727eca117273fc97366"},
     {file = "coverage-6.1.1-cp39-cp39-win32.whl", hash = "sha256:a11a2c019324fc111485e79d55907e7289e53d0031275a6c8daed30690bc50c0"},
     {file = "coverage-6.1.1-cp39-cp39-win_amd64.whl", hash = "sha256:4d8b453764b9b26b0dd2afb83086a7c3f9379134e340288d2a52f8a91592394b"},
     {file = "coverage-6.1.1-pp36-none-any.whl", hash = "sha256:3b270c6b48d3ff5a35deb3648028ba2643ad8434b07836782b1139cf9c66313f"},
@@ -2016,8 +2013,8 @@ soupsieve = [
     {file = "soupsieve-2.3.tar.gz", hash = "sha256:e4860f889dfa88774c07da0b276b70c073b6470fa1a4a8350800bb7bce3dcc76"},
 ]
 sphinx = [
-    {file = "Sphinx-4.2.0-py3-none-any.whl", hash = "sha256:98a535c62a4fcfcc362528592f69b26f7caec587d32cd55688db580be0287ae0"},
-    {file = "Sphinx-4.2.0.tar.gz", hash = "sha256:94078db9184491e15bce0a56d9186e0aec95f16ac20b12d00e06d4e36f1058a6"},
+    {file = "Sphinx-4.3.0-py3-none-any.whl", hash = "sha256:7e2b30da5f39170efcd95c6270f07669d623c276521fee27ad6c380f49d2bf5b"},
+    {file = "Sphinx-4.3.0.tar.gz", hash = "sha256:6d051ab6e0d06cba786c4656b0fe67ba259fe058410f49e95bee6e49c4052cbf"},
 ]
 sphinx-click = [
     {file = "sphinx-click-3.0.2.tar.gz", hash = "sha256:29896dd12bfaacb566a8c7af2e2b675d010d69b0c5aad3b52495d4842358b15b"},

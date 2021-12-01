@@ -106,7 +106,7 @@ sphinx-copybutton = "^0.4.0"
 sphinx-issues = "^1.2.0"
 sphinx_tabs = "^3.2.0"
 sphinxext-opengraph = "^0.4.2"
-twine = "^3.5.0"
+twine = "^3.7.0"
 yamllint = "^1.26.3"
 
 [tool.poetry.scripts]

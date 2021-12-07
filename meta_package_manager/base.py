@@ -270,11 +270,17 @@ class PackageManager:
         """Run a shell command, return the output and accumulate error messages.
 
         args is allowed to be a nested structure of iterables, in which case it will
-        be flatten, then each item within casted to strings.
+        be recursively flatten, and each item within casted to strings.
 
-        Internally reuse the run() method from the xbar plugin, but adds logs at the
-        appropriate level, removes ANSI escape codes, returns ready-to-use strings, and
-        takes --dry-run and --stop-on-error into account.
+        Running commands with that method:
+          * adds logs at the appropriate level
+          * removes ANSI escape codes from ``<stdout>`` and ``<stderr>``
+          * returns ready-to-use normalized strings (dedented and stripped)
+          * let ``--dry-run`` and ``--stop-on-error`` have effect on execution
+
+        ..todo:
+
+            Move ``--dry-run`` option and this method to click-extra?
         """
         # Casting to string helps serialize Path and Version objects.
         args = list(map(str, flatten(args)))
@@ -293,10 +299,10 @@ class PackageManager:
 
         # Normalize messages.
         if error:
-            error = strip_ansi(error)
+            error = dedent(strip_ansi(error).strip())
             error = error if error else None
         if output:
-            output = strip_ansi(output)
+            output = dedent(strip_ansi(output).strip())
             output = output if output else None
 
         # Log <stdout> and <stderr> output.

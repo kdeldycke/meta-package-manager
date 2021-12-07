@@ -419,13 +419,14 @@ class Homebrew(PackageManager):
         return cmd
 
     def cleanup(self):
-        """Scrub the cache, including latest version's downloads.
+        """Scrub the cache, including latest version's downloads. Also remove unused
+        dependencies.
 
         Downloads for all installed formulae and casks will not be deleted.
 
         .. code-block:: shell-session
 
-            ► brew cleanup -s
+            ► brew cleanup -s --prune=all
             Removing: ~/Library/Caches/Homebrew/node--1.bottle.tar.gz... (9MB)
             Warning: Skipping sdl2: most recent version 2.0.12_1 not installed
             Removing: ~/Library/Caches/Homebrew/Cask/aerial--1.8.1.zip... (5MB)
@@ -436,55 +437,33 @@ class Homebrew(PackageManager):
 
         More doc at: https://docs.brew.sh/Manpage#cleanup-options-formulacask
 
-        TODO: add autoremove command from brew 2.5.9
-        https://github.com/Homebrew/brew/pull/9047
+        .. code-block:: shell-session
 
-        ❯ brew autoremove
-        ==> Uninstalling 17 unneeded formulae:
-        atkmm
-        c-ares
-        cairomm
-        glibmm
-        gtkmm3
-        highlight
-        jansson
-        libmaxminddb
-        libsigc++@2
-        libsmi
-        lua
-        lua@5.1
-        nasm
-        nghttp2
-        openblas
-        pangomm
-        texi2html
-        Uninstalling /usr/local/Cellar/nghttp2/1.41.0_1... (26 files, 2.7MB)
-        Uninstalling /usr/local/Cellar/highlight/3.59... (558 files, 3.5MB)
+            ► brew autoremove
+            ==> Uninstalling 17 unneeded formulae:
+            gtkmm3
+            highlight
+            lua@5.1
+            nasm
+            nghttp2
+            texi2html
+            Uninstalling /usr/local/Cellar/nghttp2/1.41.0_1... (26 files, 2.7MB)
+            Uninstalling /usr/local/Cellar/highlight/3.59... (558 files, 3.5MB)
 
-        Warning: The following highlight configuration files have not been removed!
-        If desired, remove them manually with `rm -rf`:
-          /usr/local/etc/highlight
-          /usr/local/etc/highlight/filetypes.conf
-          /usr/local/etc/highlight/filetypes.conf.default
-        Uninstalling /usr/local/Cellar/gtkmm3/3.24.2_1... (1,903 files, 173.7MB)
-        Uninstalling /usr/local/Cellar/texi2html/5.0... (279 files, 6.2MB)
-        Uninstalling /usr/local/Cellar/lua@5.1/5.1.5_8... (22 files, 245.6KB)
-        Uninstalling /usr/local/Cellar/nasm/2.15.05... (29 files, 2.9MB)
-        Uninstalling /usr/local/Cellar/libsmi/0.5.0... (476 files, 20.1MB)
-        Uninstalling /usr/local/Cellar/openblas/0.3.12_1... (23 files, 120.2MB)
-        Uninstalling /usr/local/Cellar/libmaxminddb/1.4.3... (32 files, 164.3KB)
-        Uninstalling /usr/local/Cellar/jansson/2.13.1... (11 files, 169.0KB)
-        Uninstalling /usr/local/Cellar/c-ares/1.16.1_1... (84 files, 539.0KB)
-        Uninstalling /usr/local/Cellar/lua/5.3.5_1... (28 files, 274.5KB)
-        Uninstalling /usr/local/Cellar/pangomm/2.42.1_2... (353 files, 5.6MB)
-        Uninstalling /usr/local/Cellar/atkmm/2.28.0_2... (231 files, 5.1MB)
-        Uninstalling /usr/local/Cellar/glibmm/2.64.2... (1,736 files, 47.7MB)
-        Uninstalling /usr/local/Cellar/cairomm/1.12.2_1... (258 files, 3.9MB)
-        Uninstalling /usr/local/Cellar/libsigc++@2/2.10.4... (44 files, 1.3MB)
+            Warning: The following highlight configuration files have not been removed!
+            If desired, remove them manually with `rm -rf`:
+              /usr/local/etc/highlight
+              /usr/local/etc/highlight/filetypes.conf
+              /usr/local/etc/highlight/filetypes.conf.default
+            Uninstalling /usr/local/Cellar/gtkmm3/3.24.2_1... (1,903 files, 173.7MB)
+            Uninstalling /usr/local/Cellar/texi2html/5.0... (279 files, 6.2MB)
+            Uninstalling /usr/local/Cellar/lua@5.1/5.1.5_8... (22 files, 245.6KB)
+            Uninstalling /usr/local/Cellar/nasm/2.15.05... (29 files, 2.9MB)
 
         """
         super().cleanup()
-        self.run_cli("cleanup", "-s", skip_globals=True)
+        self.run_cli("autoremove", skip_globals=True)
+        self.run_cli("cleanup", "-s", "--prune=all", skip_globals=True)
 
 
 class Brew(Homebrew):

@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+* [brew,cask] Thorough cleanup: call `autoremove` commands to remove unused
+  dependencies and use `--prune=all` to scrub the whole cache.
 * [mpm] Switch default table rendering to `rounded_outline`.
 * [mpm] Rely on `click-extra` for table rendering and tests.
 * [mpm] Remove direct dependencies on `click-log` and `cli-helpers`.

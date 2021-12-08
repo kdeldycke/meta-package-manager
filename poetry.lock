@@ -209,7 +209,7 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "click-extra"
-version = "1.2.2"
+version = "1.3.0"
 description = "🌈 Extra colorization and configuration file for Click."
 category = "main"
 optional = false
@@ -221,6 +221,7 @@ cli-helpers = ">=2.2.0,<3.0.0"
 click = ">=8.0.2,<9.0.0"
 click-log = ">=0.3.2,<0.4.0"
 cloup = ">=0.12.1,<0.13.0"
+pyyaml = ">=6.0.0,<7.0.0"
 tabulate = {version = ">=0.8.9,<0.9.0", extras = ["widechars"]}
 tomli = ">=1.2.2,<2.0.0"
 
@@ -850,7 +851,7 @@ python-versions = "*"
 name = "pyyaml"
 version = "6.0"
 description = "YAML parser and emitter for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -1451,8 +1452,8 @@ click = [
     {file = "click-8.0.3.tar.gz", hash = "sha256:410e932b050f5eed773c4cda94de75971c89cdb3155a72a0831139a79e5ecb5b"},
 ]
 click-extra = [
-    {file = "click-extra-1.2.2.tar.gz", hash = "sha256:3f6d5bd94724c6a77c2e8834018019e33b2139b1dfc932410c3d656b1b2d799d"},
-    {file = "click_extra-1.2.2-py3-none-any.whl", hash = "sha256:8874b8d7dac1e51f290ea8ba8422050d7e90bcead5cd7ac2ee4dae0bbfd335ca"},
+    {file = "click-extra-1.3.0.tar.gz", hash = "sha256:4b55eee6eacbbd5c44039e664819343f6fbb6a258b5d21c98c76876174c755a8"},
+    {file = "click_extra-1.3.0-py3-none-any.whl", hash = "sha256:aa21525cc31c7159d95482305da56dc39ac5fd8e1ef64c03c0225921ae5d1df6"},
 ]
 click-log = [
     {file = "click-log-0.3.2.tar.gz", hash = "sha256:16fd1ca3fc6b16c98cea63acf1ab474ea8e676849dc669d86afafb0ed7003124"},

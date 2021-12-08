@@ -209,7 +209,7 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "click-extra"
-version = "1.2.2"
+version = "1.3.0"
 description = "🌈 Extra colorization and configuration file for Click."
 category = "main"
 optional = false
@@ -221,6 +221,7 @@ cli-helpers = ">=2.2.0,<3.0.0"
 click = ">=8.0.2,<9.0.0"
 click-log = ">=0.3.2,<0.4.0"
 cloup = ">=0.12.1,<0.13.0"
+pyyaml = ">=6.0.0,<7.0.0"
 tabulate = {version = ">=0.8.9,<0.9.0", extras = ["widechars"]}
 tomli = ">=1.2.2,<2.0.0"
 
@@ -850,7 +851,7 @@ python-versions = "*"
 name = "pyyaml"
 version = "6.0"
 description = "YAML parser and emitter for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -987,7 +988,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "sphinx"
-version = "4.2.0"
+version = "4.3.1"
 description = "Python documentation generator"
 category = "dev"
 optional = false
@@ -1331,7 +1332,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "bd5e242d8f06e3a6224f06dd401239719fe8ad3e7ac4b578418f12713333d9e1"
+content-hash = "bdf51f74a45daa03ea31f542fc66a8e1f303f79b3a2bb58fc172c5e822e09f15"
 
 [metadata.files]
 alabaster = [
@@ -1451,8 +1452,8 @@ click = [
     {file = "click-8.0.3.tar.gz", hash = "sha256:410e932b050f5eed773c4cda94de75971c89cdb3155a72a0831139a79e5ecb5b"},
 ]
 click-extra = [
-    {file = "click-extra-1.2.2.tar.gz", hash = "sha256:3f6d5bd94724c6a77c2e8834018019e33b2139b1dfc932410c3d656b1b2d799d"},
-    {file = "click_extra-1.2.2-py3-none-any.whl", hash = "sha256:8874b8d7dac1e51f290ea8ba8422050d7e90bcead5cd7ac2ee4dae0bbfd335ca"},
+    {file = "click-extra-1.3.0.tar.gz", hash = "sha256:4b55eee6eacbbd5c44039e664819343f6fbb6a258b5d21c98c76876174c755a8"},
+    {file = "click_extra-1.3.0-py3-none-any.whl", hash = "sha256:aa21525cc31c7159d95482305da56dc39ac5fd8e1ef64c03c0225921ae5d1df6"},
 ]
 click-log = [
     {file = "click-log-0.3.2.tar.gz", hash = "sha256:16fd1ca3fc6b16c98cea63acf1ab474ea8e676849dc669d86afafb0ed7003124"},
@@ -2013,8 +2014,8 @@ soupsieve = [
     {file = "soupsieve-2.3.tar.gz", hash = "sha256:e4860f889dfa88774c07da0b276b70c073b6470fa1a4a8350800bb7bce3dcc76"},
 ]
 sphinx = [
-    {file = "Sphinx-4.2.0-py3-none-any.whl", hash = "sha256:98a535c62a4fcfcc362528592f69b26f7caec587d32cd55688db580be0287ae0"},
-    {file = "Sphinx-4.2.0.tar.gz", hash = "sha256:94078db9184491e15bce0a56d9186e0aec95f16ac20b12d00e06d4e36f1058a6"},
+    {file = "Sphinx-4.3.1-py3-none-any.whl", hash = "sha256:048dac56039a5713f47a554589dc98a442b39226a2b9ed7f82797fcb2fe9253f"},
+    {file = "Sphinx-4.3.1.tar.gz", hash = "sha256:32a5b3e9a1b176cc25ed048557d4d3d01af635e6b76c5bc7a43b0a34447fbd45"},
 ]
 sphinx-click = [
     {file = "sphinx-click-3.0.2.tar.gz", hash = "sha256:29896dd12bfaacb566a8c7af2e2b675d010d69b0c5aad3b52495d4842358b15b"},

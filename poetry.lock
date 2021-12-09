@@ -501,7 +501,7 @@ python-versions = "*"
 
 [[package]]
 name = "mdformat"
-version = "0.7.10"
+version = "0.7.11"
 description = "CommonMark compliant Markdown formatter"
 category = "dev"
 optional = false
@@ -509,7 +509,7 @@ python-versions = ">=3.7,<4.0"
 
 [package.dependencies]
 importlib-metadata = {version = ">=3.6.0", markers = "python_version < \"3.10\""}
-markdown-it-py = ">=1.0.0b2,<2.0.0"
+markdown-it-py = ">=1.0.0b2,<3.0.0"
 tomli = ">=1.1.0"
 typing-extensions = {version = ">=3.7.4", markers = "python_version < \"3.8\""}
 
@@ -1333,7 +1333,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "fd9057d437861c3d046f3c5d942b227f348732915d771e283989a9d12aecfe56"
+content-hash = "812ccdbdfe1491ea8413bd854cb8261617cc9d14857e67c7857d00e632492567"
 
 [metadata.files]
 alabaster = [
@@ -1694,8 +1694,8 @@ mccabe = [
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
 ]
 mdformat = [
-    {file = "mdformat-0.7.10-py3-none-any.whl", hash = "sha256:27bd8ebecb3c02ac90ccef93702b16587e8dc6f302a90b8d7381cad6b72c69e1"},
-    {file = "mdformat-0.7.10.tar.gz", hash = "sha256:bb086c56445a56d2d256e3b47504ccb96d03628f091f4d687cd456944ca91158"},
+    {file = "mdformat-0.7.11-py3-none-any.whl", hash = "sha256:5129f4d64b6f3a265c348affe51fd41e5eadbaf95dc0fda182830f9428c1e727"},
+    {file = "mdformat-0.7.11.tar.gz", hash = "sha256:0e44b6402a7f80e9a707ef6886e63ea87bea7203627466dbe3898f9d16d51e1b"},
 ]
 mdformat-black = [
     {file = "mdformat-black-0.1.1.tar.gz", hash = "sha256:57cad92aee314b87dee52a795cdb52469ab166589d2771e3ad3dd19db907ab62"},

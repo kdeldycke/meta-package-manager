@@ -25,4 +25,4 @@ jobs:
           poetry run pylint meta_package_manager
 
   lint-yaml:
-    uses: kdeldycke/workflows/blob/main/.github/workflows/lint.yaml@main
+    uses: kdeldycke/workflows/.github/workflows/lint.yaml@main

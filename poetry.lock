@@ -557,7 +557,7 @@ test = ["pytest (>=6.0,<7.0)", "coverage", "pytest-cov"]
 
 [[package]]
 name = "mdformat-gfm"
-version = "0.3.4"
+version = "0.3.5"
 description = "Mdformat plugin for GitHub Flavored Markdown compatibility"
 category = "dev"
 optional = false
@@ -567,7 +567,7 @@ python-versions = ">=3.7,<4.0"
 markdown-it-py = {version = "*", extras = ["linkify"]}
 mdformat = ">=0.7.5,<0.8.0"
 mdformat-tables = ">=0.4.0"
-mdit-py-plugins = ">=0.2.0,<0.3.0"
+mdit-py-plugins = ">=0.2.0,<0.4.0"
 
 [[package]]
 name = "mdformat-myst"
@@ -1333,7 +1333,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "fd9057d437861c3d046f3c5d942b227f348732915d771e283989a9d12aecfe56"
+content-hash = "9bcb3003660ba958e3d58b91ebab5f2db456f4d82566810408bf4f49ce6461d7"
 
 [metadata.files]
 alabaster = [
@@ -1710,8 +1710,8 @@ mdformat-frontmatter = [
     {file = "mdformat_frontmatter-0.4.1.tar.gz", hash = "sha256:15d3eed1543849d4fe72b1f75b8dffd8b49750c5149186591a1b9617178e2aa2"},
 ]
 mdformat-gfm = [
-    {file = "mdformat-gfm-0.3.4.tar.gz", hash = "sha256:9d1d2bc487866f09971ef7e9f602b313e79b1c20d463dc23f144d32fc4864e9e"},
-    {file = "mdformat_gfm-0.3.4-py3-none-any.whl", hash = "sha256:c7f79545f83afb8196188924e6f0b2f8e4a63341f3e81d01da14e8bab79d185f"},
+    {file = "mdformat-gfm-0.3.5.tar.gz", hash = "sha256:5ee5f0de1d3b56d5edfced023bfff0aeed958be328e5460dac3221ac1b61ce7c"},
+    {file = "mdformat_gfm-0.3.5-py3-none-any.whl", hash = "sha256:1e627edc7665b59e008b3b9e5decc18c40cbd625c196d77e5ea3bc624e80ac8a"},
 ]
 mdformat-myst = [
     {file = "mdformat_myst-0.1.4-py3-none-any.whl", hash = "sha256:d6c08220620adf9a8c002b9fd48d1514e0b23c7306a0797c79c392dbe0e8ad3d"},

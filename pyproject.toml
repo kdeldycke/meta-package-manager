@@ -94,7 +94,7 @@ mdformat_myst = "^0.1.4"
 mdformat_tables = "^0.4.1"
 myst-parser = "^0.15.2"
 pipdeptree = { extras = ["graphviz"], version = "^2.2.0" }
-pylint = "^2.11.1"
+pylint = "^2.12.2"
 pytest = "^6.2.5"
 # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html
 pytest-cov = "^3.0.0"

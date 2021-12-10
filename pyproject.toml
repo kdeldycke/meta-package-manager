@@ -114,7 +114,7 @@ mpm = 'meta_package_manager.cli:mpm'
 [tool.black]
 # "You should include all Python versions that you want your code to run under."
 # Source: https://github.com/psf/black/issues/751
-target-version = ['py37', 'py38', 'py39']
+target-version = ['py37', 'py38', 'py39', 'py310']
 
 [tool.isort]
 # https://pycqa.github.io/isort/docs/configuration/black_compatibility/

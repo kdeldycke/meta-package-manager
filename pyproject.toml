@@ -94,7 +94,6 @@ mdformat_myst = "^0.1.4"
 mdformat_tables = "^0.4.1"
 myst-parser = "^0.15.2"
 pipdeptree = { extras = ["graphviz"], version = "^2.2.0" }
-pylint = "^2.11.1"
 pytest = "^6.2.5"
 # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html
 pytest-cov = "^3.0.0"
@@ -124,7 +123,6 @@ include_trailing_comma = true
 
 [tool.pylint.MASTER]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html
-output-format = "colorized"
 fail-under = "8"
 [tool.pylint."messages control"]
 # List messages with: $ pylint --list-msgs
@@ -132,13 +130,6 @@ fail-under = "8"
 # W0511: fixme
 # W1203: logging-fstring-interpolation
 disable = "C0114, W0511, W1203"
-[tool.pylint.LOGGING]
-# The type of string formatting that logging methods do. `old` means using %
-# formatting, `new` is for `{}` formatting.
-logging-format-style = "new"
-[tool.pylint.FORMAT]
-# Aligns to black's config: https://github.com/psf/black/blob/master/docs/compatible_configs.md#pylint
-max-line-length = "88"
 
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml

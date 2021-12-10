@@ -64,17 +64,7 @@ $ poetry run pytest
 
 ## Coding style
 
-Run [black](https://github.com/psf/black) to auto-format Python code:
-
-``` shell-session
-$ poetry run black .
-```
-
-Then run [Pylint](https://docs.pylint.org) code style checks:
-
-``` shell-session
-$ poetry run pylint meta_package_manager
-```
+{gh}`Code linting is handled by a workflow <blob/develop/.github/workflows/lint.yaml>`.
 
 ## Documentation
 

@@ -76,17 +76,17 @@ assert set(ALL_MANAGER_IDS).issuperset(XKCD_MANAGER_ORDER)
         "--all-managers",
         is_flag=True,
         default=False,
-        help="Force evaluation of all package manager implemented by mpm, even those not"
-        "supported by the current platform. Still applies filtering by --manager and "
-        "--exclude options before calling the subcommand.",
+        help="Force evaluation of all package manager implemented by mpm, even those "
+        "not supported by the current platform. Still applies filtering by --manager "
+        "and --exclude options before calling the subcommand.",
     ),
     option(
         "-x",
         "--xkcd",
         is_flag=True,
         default=False,
-        help="Forces the subset of package managers to the order defined in XKCD #1654 "
-        "comic, i.e. {}.".format(", ".join(map(theme.choice, XKCD_MANAGER_ORDER))),
+        help="Preset manager selection as defined by XKCD #1654, i.e. "
+        "{}.".format(", ".join(map(theme.choice, XKCD_MANAGER_ORDER))),
     ),
 )
 @option_group(

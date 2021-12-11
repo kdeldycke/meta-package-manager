@@ -83,6 +83,8 @@ bump2version = "^1.0.1"
 check-wheel-contents = "^0.3.3"
 coverage = { extras = ["toml"], version = "^6.2" }
 furo = "^2021.11.23"
+# Temporarily cap graphvix to address https://github.com/naiquevin/pipdeptree/issues/157
+graphviz = "<0.18.1"
 isort = "^5.10.1"
 # https://mdformat.readthedocs.io/en/stable/users/plugins.html
 mdformat = "^0.7.10"

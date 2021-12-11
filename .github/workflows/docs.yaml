@@ -44,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2.4.0
       - uses: actions/setup-python@v2.3.1
-          with:
+        with:
           # XXX Force Python 3.9 to not have 3.10 as default.
           # Waiting for boltons > 21.0.0 to be released with upstreamed
           # Python 3.10 fix: https://github.com/mahmoud/boltons/issues/294

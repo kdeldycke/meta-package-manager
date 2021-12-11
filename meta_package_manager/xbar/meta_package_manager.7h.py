@@ -193,7 +193,7 @@ def print_menu():
                 "param2=pip",
                 "param3=install",
                 "param4=--upgrade",
-                f"param5=meta-package-manager>={min_version_str}",
+                f'param5="meta-package-manager>={min_version_str}"',
                 "terminal=true",
                 "refresh=true",
                 FONTS["error"],

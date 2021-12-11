@@ -19,7 +19,7 @@
 from functools import partial
 
 import pytest
-from click_extra.tests.conftest import create_toml
+from click_extra.tests.conftest import create_config
 from click_extra.tests.conftest import invoke as invoke_extra
 from click_extra.tests.conftest import runner
 

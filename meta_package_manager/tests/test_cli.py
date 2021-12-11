@@ -59,8 +59,8 @@ class TestBaseCLI:
     supposed to work on all platforms, whatever the environment.
     """
 
-    def test_conf_file_overrides_defaults(self, invoke, create_toml):
-        conf_path = create_toml("conf.toml", TEST_CONF_FILE)
+    def test_conf_file_overrides_defaults(self, invoke, create_config):
+        conf_path = create_config("conf.toml", TEST_CONF_FILE)
         result = invoke("--config", str(conf_path), "managers", color=False)
         assert result.exit_code == 0
         assert " │ pip │ " in result.stdout
@@ -70,8 +70,8 @@ class TestBaseCLI:
         assert "cask" not in result.stdout
         assert "debug: " in result.stderr
 
-    def test_conf_file_cli_override(self, invoke, create_toml):
-        conf_path = create_toml("conf.toml", TEST_CONF_FILE)
+    def test_conf_file_cli_override(self, invoke, create_config):
+        conf_path = create_config("conf.toml", TEST_CONF_FILE)
         result = invoke(
             "--config",
             str(conf_path),

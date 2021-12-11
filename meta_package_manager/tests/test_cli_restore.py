@@ -22,10 +22,10 @@ from .test_cli import CLISubCommandTests
 
 
 @pytest.fixture
-def subcmd(create_toml):
+def subcmd(create_config):
     """Seed common subcommand tests with a dummy file and content to allow the
     CLI to not fail on required file input."""
-    toml_path = create_toml(
+    toml_path = create_config(
         "dummy.toml",
         """
         [dummy_manager]
@@ -36,8 +36,8 @@ def subcmd(create_toml):
 
 
 class TestRestore(CLISubCommandTests):
-    def test_default_all_managers(self, invoke, create_toml):
-        toml_path = create_toml(
+    def test_default_all_managers(self, invoke, create_config):
+        toml_path = create_config(
             "all-managers.toml",
             "".join(
                 (
@@ -58,8 +58,8 @@ class TestRestore(CLISubCommandTests):
         self.check_manager_selection(result)
 
     @pytest.mark.parametrize("mid", DEFAULT_MANAGER_IDS)
-    def test_single_manager(self, invoke, create_toml, mid):
-        toml_path = create_toml(
+    def test_single_manager(self, invoke, create_config, mid):
+        toml_path = create_config(
             "all-managers.toml",
             "".join(
                 (
@@ -78,8 +78,8 @@ class TestRestore(CLISubCommandTests):
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 
-    def test_ignore_unrecognized_manager(self, invoke, create_toml):
-        toml_path = create_toml(
+    def test_ignore_unrecognized_manager(self, invoke, create_config):
+        toml_path = create_config(
             "unrecognized.toml",
             """
             [random_section]
@@ -92,8 +92,8 @@ class TestRestore(CLISubCommandTests):
         assert "unrecognized.toml" in result.stderr
         assert "Ignore [random_section] section" in result.stderr
 
-    def test_restore_single_manager(self, invoke, create_toml):
-        toml_path = create_toml(
+    def test_restore_single_manager(self, invoke, create_config):
+        toml_path = create_config(
             "pip-npm-dummy.toml",
             """
             [pip]
@@ -110,8 +110,8 @@ class TestRestore(CLISubCommandTests):
         assert "Restore pip" not in result.stderr
         assert "Restore npm" in result.stderr
 
-    def test_restore_excluded_manager(self, invoke, create_toml):
-        toml_path = create_toml(
+    def test_restore_excluded_manager(self, invoke, create_config):
+        toml_path = create_config(
             "pip-npm-dummy.toml",
             """
             [pip]
@@ -128,8 +128,8 @@ class TestRestore(CLISubCommandTests):
         assert "Restore pip" in result.stderr
         assert "Restore npm" not in result.stderr
 
-    def test_empty_manager(self, invoke, create_toml):
-        toml_path = create_toml(
+    def test_empty_manager(self, invoke, create_config):
+        toml_path = create_config(
             "pip-empty.toml",
             """
             [pip]

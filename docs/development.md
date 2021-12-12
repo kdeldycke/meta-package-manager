@@ -151,7 +151,7 @@ only, feel free to bump to the next `minor`:
 
 ``` shell-session
 $ poetry run bumpversion --verbose minor
-$ git add ./meta_package_manager/__init__.py ./changelog.md
+$ git add ./meta_package_manager/__init__.py ./changelog.md ./.bumpversion.cfg
 $ git commit -m "Next release no longer bug-fix only. Bump revision."
 $ git push
 ```

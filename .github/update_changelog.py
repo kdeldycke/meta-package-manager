@@ -21,7 +21,7 @@ import configparser
 from pathlib import Path
 
 # Extract current version as per bump2version.
-config_file = Path(__file__).parent.joinpath("../setup.cfg").resolve()
+config_file = Path(__file__).parent.joinpath("../.bumpversion.cfg").resolve()
 print(f"Open {config_file}")
 config = configparser.ConfigParser()
 config.read_string(config_file.read_text())

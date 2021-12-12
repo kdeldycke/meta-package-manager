@@ -4,10 +4,10 @@
   - meta_package_manager/tests/*xbar*
 
 "🔩 CI/CD":
+  - .bumpversion.cfg
   - .github/**/*
   - .gitignore
   - pyproject.toml
-  - setup.cfg
 
 "📗 documentation":
   - docs/**/*

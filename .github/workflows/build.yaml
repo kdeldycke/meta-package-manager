@@ -19,7 +19,7 @@ jobs:
           poetry install --no-interaction --no-ansi
           poetry build --no-interaction --no-ansi
       - name: Attach packages to workflow run for later inspection and debugging
-        uses: actions/upload-artifact@v2.3.0
+        uses: actions/upload-artifact@v2.3.1
         with:
           name: mpm-python-packages
           path: ./dist/*

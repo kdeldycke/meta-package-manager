@@ -78,22 +78,12 @@ tomli = "^1.2.1"
 tomli_w = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
-black = "^21.10b0"
 bump2version = "^1.0.1"
 check-wheel-contents = "^0.3.3"
 coverage = { extras = ["toml"], version = "^6.2" }
 furo = "^2021.11.23"
 # Temporarily cap graphvix to address https://github.com/naiquevin/pipdeptree/issues/157
 graphviz = "<0.18.1"
-isort = "^5.10.1"
-# https://mdformat.readthedocs.io/en/stable/users/plugins.html
-mdformat = "^0.7.10"
-mdformat-black = "^0.1.1"
-mdformat-config = "^0.1.3"
-mdformat_frontmatter = "^0.4.1"
-mdformat-gfm = "^0.3.4"
-mdformat_myst = "^0.1.4"
-mdformat_tables = "^0.4.1"
 myst-parser = "^0.15.2"
 pipdeptree = { extras = ["graphviz"], version = "^2.2.0" }
 pytest = "^6.2.5"
@@ -117,15 +107,8 @@ mpm = 'meta_package_manager.cli:mpm'
 # Source: https://github.com/psf/black/issues/751
 target-version = ['py37', 'py38', 'py39', 'py310']
 
-[tool.isort]
-# https://pycqa.github.io/isort/docs/configuration/black_compatibility/
-multi_line_output = 3
-line_length = 88
-include_trailing_comma = true
-
 [tool.pylint.MASTER]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html
-fail-under = "8"
 [tool.pylint."messages control"]
 # List messages with: $ pylint --list-msgs
 # C0114: missing-module-docstring

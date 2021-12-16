@@ -12,7 +12,7 @@ This version is not released yet and is under active development.
 * [mpm] Rely on `click-extra` for table rendering and tests.
 * [mpm] Remove direct dependencies on `click-log` and `cli-helpers`.
 * [mpm] Automate post-release version bump.
-* [mpm] Outsource linting workflow definition to external repository.
+* [mpm] Outsource some workflow definition to external repository.
 * [mpm] Fix generation of dependency graph.
 
 

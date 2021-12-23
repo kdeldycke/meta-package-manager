@@ -84,7 +84,7 @@ coverage = { extras = ["toml"], version = "^6.2" }
 furo = "^2021.11.23"
 # Temporarily cap graphvix to address https://github.com/naiquevin/pipdeptree/issues/157
 graphviz = "<0.18.1"
-myst-parser = "^0.15.2"
+myst-parser = "^0.16.1"
 pipdeptree = { extras = ["graphviz"], version = "^2.2.0" }
 pytest = "^6.2.5"
 # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html

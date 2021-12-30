@@ -12,7 +12,7 @@
 "📗 documentation":
   - docs/**/*
   - .mailmap
-  - LICENSE
+  - license
   - readme.md
 
 "📦 manager: apm":

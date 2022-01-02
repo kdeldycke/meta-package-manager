@@ -93,7 +93,7 @@ List all supported package managers and their status on current system (macOS
 in this case):
 
 ``` shell-session
-$ mpm -a managers
+$ mpm --all-managers managers
 ╭────────────────────┬──────────┬────────────────┬───────────────────────────┬────────────┬──────────╮
 │ Package manager    │ ID       │ Supported      │ CLI                       │ Executable │ Version  │
 ├────────────────────┼──────────┼────────────────┼───────────────────────────┼────────────┼──────────┤

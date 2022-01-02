@@ -48,7 +48,7 @@ package](https://github.com/pypa/pip/issues/4551) with a single command. `mpm`
 adds that missing feature:
 
 ``` shell-session
-$ mpm --manager pip upgrade
+$ mpm --pip upgrade
 Updating all outdated packages from pip...
 warning: pip doesn't seems to implement a full upgrade subcommand. Call
 single-package upgrade CLI one by one.
@@ -102,7 +102,7 @@ $ mpm search broot
 ```
 
 ``` shell-session
-$ mpm --manager brew install broot
+$ mpm --brew install broot
 Package manager order: brew
 Install broot package from brew...
 (...)

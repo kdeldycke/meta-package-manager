@@ -143,6 +143,6 @@ selection_cases = {
 )
 def select_managers(kwargs, expected):
     """We use tuple everywhere so we can check that select_managers() conserve the
-    soriginal order."""
+    original order."""
     selection = select_managers(**kwargs)
     assert tuple(selection) == expected

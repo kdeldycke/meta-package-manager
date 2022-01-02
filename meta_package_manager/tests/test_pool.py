@@ -71,6 +71,14 @@ selection_cases = {
         {"keep": ("apm",)},
         ("apm",),
     ),
+    "list_input": (
+        {"keep": ["apm"]},
+        ("apm",),
+    ),
+    "set_input": (
+        {"keep": {"apm"}},
+        ("apm",),
+    ),
     "duplicate_selectors": (
         {"keep": ("apm", "apm")},
         ("apm",),

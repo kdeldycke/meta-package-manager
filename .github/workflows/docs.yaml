@@ -10,7 +10,7 @@ name: Docs
 jobs:
 
   docs:
-    uses: kdeldycke/workflows/.github/workflows/docs.yaml@v0.3.5
+    uses: kdeldycke/workflows/.github/workflows/docs.yaml@v0.4.0
 
   documentation:
     name: Generate Sphinx doc and create a PR

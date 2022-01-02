@@ -228,16 +228,37 @@ class CLISubCommandTests:
         "args,expected",
         [
             pytest.param(("--manager", "apm"), {"apm"}, id="single_selector"),
+            pytest.param(("--apm",), {"apm"}, id="single_flag_selector"),
             pytest.param(("--manager", "apm") * 2, {"apm"}, id="duplicate_selectors"),
+            pytest.param(("--apm",) * 2, {"apm"}, id="duplicate_flag_selectors"),
+            pytest.param(
+                (
+                    "--manager",
+                    "apm",
+                    "--apm",
+                ),
+                {"apm"},
+                id="duplicate_mixed_selectors",
+            ),
             pytest.param(
                 ("--manager", "apm", "--manager", "gem"),
                 {"apm", "gem"},
                 id="multiple_selectors",
             ),
             pytest.param(
+                ("--manager", "apm", "--gem"),
+                {"apm", "gem"},
+                id="multiple_mixed_selectors",
+            ),
+            pytest.param(
                 ("--manager", "gem", "--manager", "apm"),
                 {"apm", "gem"},
                 id="ordered_selectors",
+            ),
+            pytest.param(
+                ("--gem", "--manager", "apm"),
+                {"apm", "gem"},
+                id="ordered_mixed_selectors",
             ),
             pytest.param(
                 ("--exclude", "apm"),

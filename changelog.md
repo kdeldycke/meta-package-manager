@@ -6,6 +6,9 @@
 This version is not released yet and is under active development.
 ```
 
+* [mpm] Add single manager selector aliases: `--apm`, `--apt`, `--apt-mint`,
+  `--brew`, `--cask`. `--choco`, `--composer`, `--flatpak`, `--gem`, `--mas`,
+  `--npm`, `--opkg`, `--pip`, `--snap`, `--vscode` and `--yarn`.
 * [brew,cask] Thorough cleanup: call `autoremove` commands to remove unused
   dependencies and use `--prune=all` to scrub the whole cache.
 * [mpm] Switch default table rendering to `rounded_outline`.

@@ -52,6 +52,27 @@ XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "apt")
 assert set(ALL_MANAGER_IDS).issuperset(XKCD_MANAGER_ORDER)
 
 
+def add_manager_to_selection(ctx, param, selected):
+    """Store singular manager flag selection in the context."""
+    if selected:
+        if ctx.obj is None:
+            ctx.obj = {"single_manager_selector": []}
+        ctx.obj["single_manager_selector"].append(param.name)
+
+
+def single_manager_selectors():
+    """Dynamiccaly creates a dedicated flag selector for each manager."""
+    for manager_id in ALL_MANAGER_IDS:
+        yield option(
+            f"--{manager_id}",
+            is_flag=True,
+            default=False,
+            help=f"Alias to --manager {manager_id}.",
+            expose_value=False,
+            callback=add_manager_to_selection,
+        )
+
+
 @group(version=__version__)
 @option_group(
     "Package manager selection options",
@@ -88,6 +109,7 @@ assert set(ALL_MANAGER_IDS).issuperset(XKCD_MANAGER_ORDER)
         help="Preset manager selection as defined by XKCD #1654, i.e. "
         "{}.".format(", ".join(map(theme.choice, XKCD_MANAGER_ORDER))),
     ),
+    *single_manager_selectors(),
 )
 @option_group(
     "Manager's options",
@@ -148,6 +170,11 @@ def mpm(
     stats,
 ):
     """Common CLI options and behavior for multiple package managers."""
+
+    # Update the list of selected managers with single selectors.
+    if ctx.obj:
+        manager = list(manager) + ctx.obj.get("single_manager_selector", [])
+
     # Select the subset of manager to target, and apply manager-level options.
     selected_managers = select_managers(
         keep=manager if not xkcd else XKCD_MANAGER_ORDER,

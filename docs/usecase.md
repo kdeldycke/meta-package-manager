@@ -92,12 +92,12 @@ repositories, then choose your preferred package manager to install it:
 
 ``` shell-session
 $ mpm search broot
-┌────────────────┬───────┬───────────┬──────────────────┐
+╭────────────────┬───────┬───────────┬──────────────────╮
 │ Package name   │ ID    │ Manager   │ Latest version   │
 ├────────────────┼───────┼───────────┼──────────────────┤
 │ broot          │ broot │ brew      │ 0.1.0            │
 │ broot          │ broot │ pip       │ 0.1.1            │
-└────────────────┴───────┴───────────┴──────────────────┘
+╰────────────────┴───────┴───────────┴──────────────────╯
 2 packages total (brew: 1, pip: 1, cask: 0, gem: 0, mas: 0, npm: 0).
 ```
 

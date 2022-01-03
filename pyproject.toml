@@ -81,7 +81,7 @@ tomli_w = "^1.0.0"
 bump2version = "^1.0.1"
 check-wheel-contents = "^0.3.3"
 coverage = { extras = ["toml"], version = "^6.2" }
-furo = "^2021.11.23"
+furo = "^2022.1.2"
 # Temporarily cap graphvix to address https://github.com/naiquevin/pipdeptree/issues/157
 graphviz = "<0.18.1"
 myst-parser = "^0.16.1"

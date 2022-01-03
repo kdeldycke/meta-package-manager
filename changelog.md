@@ -1,5 +1,11 @@
 # Changelog
 
+## {gh}`4.9.1 (unreleased) <compare/v4.9.0...main>`
+
+```{{important}}
+This version is not released yet and is under active development.
+```
+
 ## {gh}`4.9.0 (2022-01-03) <compare/v4.8.0...v4.9.0>`
 
 * [mpm] Add single manager selector aliases: `--apm`, `--apt`, `--apt-mint`,

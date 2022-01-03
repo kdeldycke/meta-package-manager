@@ -6,7 +6,9 @@
 This version is not released yet and is under active development.
 ```
 
-- Experiment with changelog automation.
+- Automate minor and major version bump.
+- Add a debug workflow for troubleshooting.
+- Experiment with outsourced changelog and release automation.
 
 ## {gh}`4.9.0 (2022-01-03) <compare/v4.8.0...v4.9.0>`
 

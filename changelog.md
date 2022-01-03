@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- Experiment with changelog automation.
+
 ## {gh}`4.9.0 (2022-01-03) <compare/v4.8.0...v4.9.0>`
 
 * [mpm] Add single manager selector aliases: `--apm`, `--apt`, `--apt-mint`,

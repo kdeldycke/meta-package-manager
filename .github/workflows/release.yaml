@@ -1,0 +1,15 @@
+---
+name: Release
+
+"on":
+  workflow_call:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+
+  release:
+    uses: kdeldycke/workflows/.github/workflows/release.yaml@v0.4.1

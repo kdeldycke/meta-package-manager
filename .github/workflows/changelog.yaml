@@ -1,0 +1,18 @@
+---
+name: Changelog & versions
+"on":
+  push:
+    branches:
+      - main
+    paths:
+      - changelog.md
+      - .bumpversion.cfg
+      - .github/workflows/*.yaml
+  schedule:
+    # Run daily so the changelog date in prepare-release job is kept up to date
+    - cron: "23 0 * * *"
+
+jobs:
+
+  changelog:
+    uses: kdeldycke/workflows/.github/workflows/changelog.yaml@v0.4.1

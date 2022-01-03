@@ -10,4 +10,4 @@ name: Release
 jobs:
 
   release:
-    uses: kdeldycke/workflows/.github/workflows/release.yaml@v0.4.2
+    uses: kdeldycke/workflows/.github/workflows/release.yaml@v0.4.3

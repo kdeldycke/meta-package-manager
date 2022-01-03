@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - Automate minor and major version bump.
+- Automate release preparation workflow.
 - Add a debug workflow for troubleshooting.
 - Experiment with outsourced changelog and release automation.
 

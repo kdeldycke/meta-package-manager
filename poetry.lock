@@ -40,6 +40,14 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 pytz = ">=2015.7"
 
 [[package]]
+name = "backports.cached-property"
+version = "1.0.1"
+description = "cached_property() - computed once per instance, cached as attribute"
+category = "dev"
+optional = false
+python-versions = ">=3.6.0"
+
+[[package]]
 name = "beautifulsoup4"
 version = "4.10.0"
 description = "Screen-scraping library"
@@ -84,14 +92,6 @@ optional = false
 python-versions = ">=3.5"
 
 [[package]]
-name = "cached-property"
-version = "1.5.2"
-description = "A decorator for caching properties in classes."
-category = "dev"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "certifi"
 version = "2021.10.8"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -123,7 +123,7 @@ unicode_backport = ["unicodedata2"]
 
 [[package]]
 name = "check-wheel-contents"
-version = "0.3.3"
+version = "0.3.4"
 description = "Check your wheels have the right contents"
 category = "dev"
 optional = false
@@ -131,11 +131,11 @@ python-versions = "~=3.6"
 
 [package.dependencies]
 attrs = ">=18.1"
-cached-property = {version = ">=1.5,<2.0", markers = "python_version < \"3.8\""}
+"backports.cached-property" = {version = "*", markers = "python_version < \"3.8\""}
 click = ">=7.0"
 packaging = "*"
 pydantic = ">=1.7,<2.0"
-tomli = ">=1.2,<2.0"
+tomli = ">=1.2,<3.0"
 wheel-filename = ">=1.1,<2.0"
 
 [[package]]
@@ -1038,7 +1038,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "d5951886207cb8795a8ead6187f70b88b5f6a4ff943d4b422c64379a00f4e9b3"
+content-hash = "67adde8023c5fc4bd0c8cbd8475493440eeb2e4bb71fcd19bf174b10ea3addf4"
 
 [metadata.files]
 alabaster = [
@@ -1057,6 +1057,10 @@ babel = [
     {file = "Babel-2.9.1-py2.py3-none-any.whl", hash = "sha256:ab49e12b91d937cd11f0b67cb259a57ab4ad2b59ac7a3b41d6c06c0ac5b0def9"},
     {file = "Babel-2.9.1.tar.gz", hash = "sha256:bc0c176f9f6a994582230df350aa6e05ba2ebe4b3ac317eab29d9be5d2768da0"},
 ]
+"backports.cached-property" = [
+    {file = "backports.cached-property-1.0.1.tar.gz", hash = "sha256:1a5ef1e750f8bc7d0204c807aae8e0f450c655be0cf4b30407a35fd4bb27186c"},
+    {file = "backports.cached_property-1.0.1-py3-none-any.whl", hash = "sha256:687b5fe14be40aadcf547cae91337a1fdb84026046a39370274e54d3fe4fb4f9"},
+]
 beautifulsoup4 = [
     {file = "beautifulsoup4-4.10.0-py3-none-any.whl", hash = "sha256:9a315ce70049920ea4572a4055bc4bd700c940521d36fc858205ad4fcde149bf"},
     {file = "beautifulsoup4-4.10.0.tar.gz", hash = "sha256:c23ad23c521d818955a4151a67d81580319d4bf548d3d49f4223ae041ff98891"},
@@ -1072,10 +1076,6 @@ boltons = [
 bump2version = [
     {file = "bump2version-1.0.1-py2.py3-none-any.whl", hash = "sha256:37f927ea17cde7ae2d7baf832f8e80ce3777624554a653006c9144f8017fe410"},
     {file = "bump2version-1.0.1.tar.gz", hash = "sha256:762cb2bfad61f4ec8e2bdf452c7c267416f8c70dd9ecb1653fd0bbb01fa936e6"},
-]
-cached-property = [
-    {file = "cached-property-1.5.2.tar.gz", hash = "sha256:9fa5755838eecbb2d234c3aa390bd80fbd3ac6b6869109bfc1b499f7bd89a130"},
-    {file = "cached_property-1.5.2-py2.py3-none-any.whl", hash = "sha256:df4f613cf7ad9a588cc381aaf4a512d26265ecebd5eb9e1ba12f1319eb85a6a0"},
 ]
 certifi = [
     {file = "certifi-2021.10.8-py2.py3-none-any.whl", hash = "sha256:d62a0163eb4c2344ac042ab2bdf75399a71a2d8c7d47eac2e2ee91b9d6339569"},
@@ -1138,8 +1138,8 @@ charset-normalizer = [
     {file = "charset_normalizer-2.0.9-py3-none-any.whl", hash = "sha256:1eecaa09422db5be9e29d7fc65664e6c33bd06f9ced7838578ba40d58bdf3721"},
 ]
 check-wheel-contents = [
-    {file = "check-wheel-contents-0.3.3.tar.gz", hash = "sha256:f180da620e19dcc6f00875b335c55f5615f4b64a0e19a2713e127c353c49bf34"},
-    {file = "check_wheel_contents-0.3.3-py3-none-any.whl", hash = "sha256:5af01d699b5d3360bfc995f5fba26a076f9786417fffdbc3323b3a8bf0b77547"},
+    {file = "check-wheel-contents-0.3.4.tar.gz", hash = "sha256:056cc04a66416e5a52b66c294199865081b163ef92abac723126d6838466c11d"},
+    {file = "check_wheel_contents-0.3.4-py3-none-any.whl", hash = "sha256:bbd2ea64db5fb4700eca15f84dc3c0d620f5dbe48c6467f5a2ef010bda54a4cb"},
 ]
 cli-helpers = [
     {file = "cli_helpers-2.2.0-py3-none-any.whl", hash = "sha256:3ed557793aa4ef5529c792e6a9c55f84ae798997d4a5107352219221023b4a81"},

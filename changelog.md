@@ -1,5 +1,11 @@
 # Changelog
 
+## {gh}`4.9.5 (unreleased) <compare/v4.9.4...main>`
+
+```{{important}}
+This version is not released yet and is under active development.
+```
+
 ## {gh}`4.9.4 (2022-01-04) <compare/v4.9.3...v4.9.4>`
 
 - [mpm] Re-integrate artefacts in GitHub release on tagging.

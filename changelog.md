@@ -1,5 +1,11 @@
 # Changelog
 
+## {gh}`4.9.2 (unreleased) <compare/v4.9.1...main>`
+
+```{{important}}
+This version is not released yet and is under active development.
+```
+
 ## {gh}`4.9.1 (2022-01-04) <compare/v4.9.0...v4.9.1>`
 
 - [mpm] Automate minor and major version bump.

@@ -2,7 +2,7 @@
 
 All `mpm` options defaults can be specified with a configuration file.
 
-# Location
+## Location
 
 Location depends on OS (see [`click-extra` doc](https://github.com/kdeldycke/click-extra/blob/v1.3.0/click_extra/config.py#L49-L63)):
 
@@ -10,7 +10,7 @@ Location depends on OS (see [`click-extra` doc](https://github.com/kdeldycke/cli
 
     * Windows: `C:\Users\<user>\AppData\Roaming\mpm\config.toml`
 
-# Sample
+## Sample
 
 ``` toml
 # My default configuration file.

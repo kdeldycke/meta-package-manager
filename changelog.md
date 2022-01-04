@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`4.9.2 (unreleased) <compare/v4.9.1...main>`
-
-```{{important}}
-This version is not released yet and is under active development.
-```
+## {gh}`4.9.2 (2022-01-04) <compare/v4.9.1...v4.9.2>`
 
 - [mpm] Regenerate GitHub release content body dynamiccaly on tagging.
 

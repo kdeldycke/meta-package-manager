@@ -79,7 +79,7 @@ tomli_w = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 bump2version = "^1.0.1"
-check-wheel-contents = "^0.3.3"
+check-wheel-contents = "^0.3.4"
 coverage = { extras = ["toml"], version = "^6.2" }
 furo = "^2022.1.2"
 # Temporarily cap graphvix to address https://github.com/naiquevin/pipdeptree/issues/157

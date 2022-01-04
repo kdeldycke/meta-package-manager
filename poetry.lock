@@ -792,19 +792,19 @@ rtd = ["sphinx", "ipython", "sphinx-book-theme"]
 
 [[package]]
 name = "sphinx-issues"
-version = "1.2.0"
+version = "2.0.0"
 description = "A Sphinx extension for linking to your project's issue tracker"
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 
 [package.dependencies]
 sphinx = "*"
 
 [package.extras]
-dev = ["pytest", "flake8 (==3.6.0)", "pre-commit (==1.13.0)", "tox", "mock", "flake8-bugbear (==18.8.0)"]
-lint = ["flake8 (==3.6.0)", "pre-commit (==1.13.0)", "flake8-bugbear (==18.8.0)"]
-tests = ["pytest", "mock"]
+dev = ["pytest", "flake8 (==3.9.2)", "flake8-bugbear (==20.11.1)", "pre-commit (>=2.7,<3.0)", "tox"]
+lint = ["flake8 (==3.9.2)", "flake8-bugbear (==20.11.1)", "pre-commit (>=2.7,<3.0)"]
+tests = ["pytest"]
 
 [[package]]
 name = "sphinx-tabs"
@@ -1038,7 +1038,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "7cc4e39f06a272c6a1ed068788adb05938a060bd2dc6fa31fd199169f438924a"
+content-hash = "d5951886207cb8795a8ead6187f70b88b5f6a4ff943d4b422c64379a00f4e9b3"
 
 [metadata.files]
 alabaster = [
@@ -1599,8 +1599,8 @@ sphinx-copybutton = [
     {file = "sphinx_copybutton-0.4.0-py3-none-any.whl", hash = "sha256:4340d33c169dac6dd82dce2c83333412aa786a42dd01a81a8decac3b130dc8b0"},
 ]
 sphinx-issues = [
-    {file = "sphinx-issues-1.2.0.tar.gz", hash = "sha256:845294736c7ac4c09c706f13431f709e1164037cbb00f6bf623ae16eccf509f3"},
-    {file = "sphinx_issues-1.2.0-py2.py3-none-any.whl", hash = "sha256:1208e1869742b7800a45b3c47ab987b87b2ad2024cbc36e0106e8bba3549dd22"},
+    {file = "sphinx-issues-2.0.0.tar.gz", hash = "sha256:16aa6967739b100abdac2e4145928ce79f6492e20023eca8e6a85e505ad2b3cb"},
+    {file = "sphinx_issues-2.0.0-py3-none-any.whl", hash = "sha256:138f66916eeb3319d68285b1ddd2de987ca1bec1b7a1c01b30e5595e72bb6e42"},
 ]
 sphinx-tabs = [
     {file = "sphinx-tabs-3.2.0.tar.gz", hash = "sha256:33137914ed9b276e6a686d7a337310ee77b1dae316fdcbce60476913a152e0a4"},

@@ -33,7 +33,7 @@ Which boils down to the following rules of thumb regarding stability:
 
 {gh}`main branch <tree/main>`: [![Unittests status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Amain) [![Coverage status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/badge.svg)](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main)
 
-## Setup a development environment
+## Setup environment
 
 This **step is required** for all the other sections from this page.
 
@@ -56,7 +56,7 @@ Now you’re ready to hack and abuse git!
 
 ## Unit-tests
 
-Install test dependencies and run unit-tests:
+Run unit-tests with:
 
 ``` shell-session
 $ poetry run pytest
@@ -64,7 +64,7 @@ $ poetry run pytest
 
 ## Coding style
 
-{gh}`Code linting is handled by a workflow <blob/develop/.github/workflows/lint.yaml>`.
+{gh}`Code linting is handled by a workflow <blob/main/.github/workflows/lint.yaml>`.
 
 ## Documentation
 
@@ -76,7 +76,7 @@ $ poetry run sphinx-build -b html ./docs ./docs/html
 ```
 
 The generation of API documention is
-{gh}`covered by a dedicated workflow <blob/develop/.github/workflows/docs.yaml>`.
+{gh}`covered by a dedicated workflow <blob/main/.github/workflows/docs.yaml>`.
 
 ## Screenshots
 
@@ -95,65 +95,30 @@ Before a release, the maintainers will review and rewrite the changelog to make
 it clean and readable. Inspiration can be drawn from the [keep a changelog
 manifesto](https://keepachangelog.com).
 
-Changes can be derived by simply comparing the last tagged release with the
-`main` branch:
-`https://github.com/kdeldycke/meta-package-manager/compare/vX.X.X...main`.
-This direct link should be available at the top of the {doc}`/changelog`.
+Changes can be inspected by using the comparison URL between the last tagged
+version and the `main` branch. This link is available at the top of the
+{doc}`/changelog`.
 
 ## Release process
 
-Make sure you are starting from a clean `main` branch:
+All steps of the release process and version management are automated in the
+{gh}`changelog.yaml <blob/main/.github/workflows/changelog.yaml>` and
+{gh}`release.yaml <blob/main/.github/workflows/release.yaml>` and workflows.
 
-``` shell-session
-$ git checkout main
-```
+All there's left to do is to:
 
-Revision should already be set to the next version, so we just need to prepare
-the changelog:
-
-  - Set the released date to today
-
-    ``` shell-session
-    $ sed -i "s/(unreleased)/(`date +'%Y-%m-%d'`)/" ./changelog.md
-    ```
-
-  - Update the comparison URL (replace `X.X.X` with the version to be released):
-
-    ``` shell-session
-    $ sed -i "s/\.\.\.main>/\.\.\.vX.X.X>/" ./changelog.md
-    ```
-
-  - Remove the warning message:
-
-    ``` shell-session
-    $ sed -i "/^\`\`\`/,/^$/ d" ./changelog.md
-    ```
-
-Then create a release commit and tag it:
-
-``` shell-session
-$ git add ./changelog.md
-$ git commit -m "Release vX.Y.Z"
-$ git tag "vX.Y.Z"
-$ git push
-$ git push --tags
-```
-
-The next steps of the release process are automated and should be picked up
+- {gh}`check the open draft prepare-release PR <workflows/pulls?q=is%3Apr+is%3Aopen+head%3Aprepare-release>`
+  and its changes,
+- click the `Ready for review` button,
+- click the `Rebase and merge` button,
+- let the workflows tag the release and set back the `main` branch into a
+  development state.
 
 ## Version bump
 
 Versions are bumped to their next `patch` revision during the release process
-above by the {gh}`build workflow <blob/develop/.github/workflows/build.yaml>`.
+above by the {gh}`release.yaml workflow <blob/main/.github/workflows/release.yaml>`.
 
-In the middle of your development, if the upcoming release is no longer bug-fix
-only, feel free to bump to the next `minor`:
-
-``` shell-session
-$ poetry run bumpversion --verbose minor
-$ git add ./meta_package_manager/__init__.py ./changelog.md ./.bumpversion.cfg
-$ git commit -m "Next release no longer bug-fix only. Bump revision."
-$ git push
-```
-
-For really big changes, bump the `major`.
+At any point during development, you can bump the version by merging either the
+`minor-version-increment` or `major-version-increment` branch, each available
+in their own PR.

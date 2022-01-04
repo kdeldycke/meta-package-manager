@@ -10,7 +10,7 @@ name: Release
 jobs:
 
   release:
-    uses: kdeldycke/workflows/.github/workflows/release.yaml@v0.4.6
+    uses: kdeldycke/workflows/.github/workflows/release.yaml@v0.4.7
     with:
       github-release-body: |
         [🐍 Available on PyPi](https://pypi.org/project/meta-package-manager/${{

@@ -6,10 +6,10 @@
 This version is not released yet and is under active development.
 ```
 
-- Automate minor and major version bump.
-- Automate release preparation workflow.
-- Add a debug workflow for troubleshooting.
-- Experiment with outsourced changelog and release automation.
+- [mpm] Automate minor and major version bump.
+- [mpm] Automate release preparation workflow.
+- [mpm] Trigger tagging, build and version bump on release event.
+- [mpm] Add a debug workflow for troubleshooting.
 
 ## {gh}`4.9.0 (2022-01-03) <compare/v4.8.0...v4.9.0>`
 

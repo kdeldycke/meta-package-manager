@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- [mpm] Re-integrate artefacts in GitHub release on tagging.
+
 ## {gh}`4.9.3 (2022-01-04) <compare/v4.9.2...v4.9.3>`
 
 - [mpm] Fix GitHub release's content update.

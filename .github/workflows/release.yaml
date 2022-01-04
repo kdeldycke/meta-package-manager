@@ -12,23 +12,6 @@ jobs:
   release:
     uses: kdeldycke/workflows/.github/workflows/release.yaml@v0.4.7
 
-  github-release:
-    # Same as https://github.com/kdeldycke/workflows/blob/main/.github/workflows/release.yaml::github-release job,
-    # but with our own custom dynamic body.
-    name: GitHub release update
-    needs: release
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Update GitHub release with dynamic body
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ needs.release.outputs.tagged_version }}
-          body: |
-            [🐍 Available on PyPi](https://pypi.org/project/meta-package-manager/${{
-            needs.release.outputs.tagged_version }}/)
-
   build:
     name: Build, check and publish package
     needs: release
@@ -60,3 +43,15 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
+      # Same as https://github.com/kdeldycke/workflows/blob/main/.github/workflows/release.yaml::github-release job,
+      # but with our own custom dynamic body and attached artefacts.
+      - name: Update GitHub release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ needs.release.outputs.tagged_version }}
+          files: ./dist/*
+          body: |
+            [🐍 Available on PyPi](https://pypi.org/project/meta-package-manager/${{
+            needs.release.outputs.tagged_version }}/)

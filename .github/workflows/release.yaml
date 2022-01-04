@@ -10,7 +10,7 @@ name: Release
 jobs:
 
   release:
-    uses: kdeldycke/workflows/.github/workflows/release.yaml@v0.4.7
+    uses: kdeldycke/workflows/.github/workflows/release.yaml@v0.4.8
 
   build:
     name: Build, check and publish package

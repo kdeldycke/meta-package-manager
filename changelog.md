@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- [mpm] Regenerate GitHub release content body dynamiccaly on tagging.
+
 ## {gh}`4.9.1 (2022-01-04) <compare/v4.9.0...v4.9.1>`
 
 - [mpm] Automate minor and major version bump.

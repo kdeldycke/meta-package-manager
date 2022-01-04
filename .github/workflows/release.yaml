@@ -11,20 +11,26 @@ jobs:
 
   release:
     uses: kdeldycke/workflows/.github/workflows/release.yaml@v0.4.7
-    with:
-      github-release-body: |
-        [🐍 Available on PyPi](https://pypi.org/project/meta-package-manager/${{
-        needs.git-tag.outputs.tagged_version }}/)
 
-
-  build:
-    name: Build, check and publish package after release
+  github-release:
+    name: GitHub release update
     needs: release
     runs-on: ubuntu-20.04
     steps:
-      - name: Print version
-        run: |
-          echo "Tagged version: ${{ needs.release.outputs.tagged_version }}"
+      - name: Update GitHub release with dynamic body
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          body: |
+            [🐍 Available on PyPi](https://pypi.org/project/meta-package-manager/${{
+            needs.release.outputs.tagged_version }}/)
+
+  build:
+    name: Build, check and publish package
+    needs: release
+    runs-on: ubuntu-20.04
+    steps:
       - uses: actions/checkout@v2.4.0
       - uses: actions/setup-python@v2.3.1
       - name: Build package

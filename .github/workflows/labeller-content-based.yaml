@@ -11,21 +11,13 @@ jobs:
     name: Issue & PR labeller based on content
     runs-on: ubuntu-20.04
     steps:
-      # XXX DEBUG info
-      # I need to identify how to skip this whole labelling for issues and PRs
-      # created by bots and other GitHub actions.
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
       - uses: Naturalclar/issue-action@v2.0.2
-        # TODO: skip this step if this workflow was created/triggered by a bot
-        # or another GitHub action. That way we can prevent content-rich PRs
-        # (like those produced by dependabot) to be overly tagged with extra
-        # labels.
-        if: github.sender.type != 'Bot'
-        # if: github.actor == 'dependabot[bot]'
-        # if: github.sender.login == 'dependabot[bot]'
+        # Skip this step if this workflow was created/triggered by a bot. That way we can prevent content-rich PRs
+        # (like those produced by dependabot) to be overly tagged with extra labels.
+        if: >
+          ${{ github.event.sender.type != 'Bot'
+          && github.actor != 'dependabot[bot]'
+          && github.actor != 'dependabot-preview[bot]' }}
         with:
           parameters: >
             [

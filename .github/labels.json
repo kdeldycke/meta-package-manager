@@ -1,45 +1,5 @@
 [
   {
-    "name": "✨ enhancement",
-    "color": "#84b6eb",
-    "description": "Improvement or change of an existing feature"
-  },
-  {
-    "name": "❓ question",
-    "color": "#d876e3",
-    "description": "Further information is requested"
-  },
-  {
-    "name": "🆕 feature request",
-    "color": "#fbca04",
-    "description": "Something not existing yet that need to be implemented"
-  },
-  {
-    "name": "🆘 help wanted",
-    "color": "#008672",
-    "description": "Extra attention is needed"
-  },
-  {
-    "name": "🌱 good first issue",
-    "color": "#7057ff",
-    "description": "A place for newcomers to start contributing"
-  },
-  {
-    "name": "🎲 can't reproduce",
-    "color": "#fec1c1",
-    "description": "Root cause unlikely to come from the project"
-  },
-  {
-    "name": "🐛 bug",
-    "color": "#d73a4a",
-    "description": "Something isn't working, or a fix is proposed"
-  },
-  {
-    "name": "📗 documentation",
-    "color": "#006b75",
-    "description": "Update to non-code (manual, readme, tutorial, docstrings, ...) and its generation"
-  },
-  {
     "name": "📦 manager: apm",
     "color": "#bfdadc",
     "description": "apm"
@@ -110,11 +70,6 @@
     "description": "vscode"
   },
   {
-    "name": "🔄 duplicate",
-    "color": "#cfd3d7",
-    "description": "This issue or pull request already exists"
-  },
-  {
     "name": "🔌 BitBar plugin",
     "color": "#fef2c0",
     "description": "Plugin code, documentation or features related to BitBar"
@@ -123,11 +78,6 @@
     "name": "🔌 xbar plugin",
     "color": "#fef2c0",
     "description": "Plugin code, documentation or features related to xbar"
-  },
-  {
-    "name": "👷 CI/CD",
-    "color": "#dbca13",
-    "description": "Tests, automation and management of the project"
   },
   {
     "name": "🖥 platform: Linux",
@@ -143,10 +93,5 @@
     "name": "🖥 platform: macOS",
     "color": "#bfd4f2",
     "description": "macOS"
-  },
-  {
-    "name": "🚫 wont do/fix",
-    "color": "#eeeeee",
-    "description": "This will not be worked on"
   }
 ]

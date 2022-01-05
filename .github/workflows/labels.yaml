@@ -58,6 +58,6 @@ jobs:
     uses: kdeldycke/workflows/.github/workflows/labels.yaml@v0.5.1
     needs: generate-labels
     with:
-      label-files: |-
+      label-files: |
         https://raw.githubusercontent.com/kdeldycke/workflows/main/.github/labels.yaml
         .github/labels-extra.json

@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-""" Utilities to manage GitHub labels to use in issues and PR management.
+""" Utilities to manage extra labels to use for GitHub issues and PRs.
 """
 
 from boltons.iterutils import flatten
@@ -37,26 +37,6 @@ LABELS = [
         "#fef2c0",
         "Plugin code, documentation or features related to xbar",
     ),
-    ("🐛 bug", "#d73a4a", "Something isn't working, or a fix is proposed"),
-    ("🔩 CI/CD", "#dbca13", "Tests, automation and management of the project"),
-    (
-        "📗 documentation",
-        "#006b75",
-        "Update to non-code (manual, readme, tutorial, docstrings, ...) and "
-        "its generation",
-    ),
-    ("🔄 duplicate", "#cfd3d7", "This issue or pull request already exists"),
-    ("✨ enhancement", "#84b6eb", "Improvement or change of an existing feature"),
-    (
-        "🆕 feature request",
-        "#fbca04",
-        "Something not existing yet that need to be implemented",
-    ),
-    ("🌱 good first issue", "#7057ff", "A place for newcomers to start contributing"),
-    ("🆘 help wanted", "#008672", "Extra attention is needed"),
-    ("🎲 can't reproduce", "#fec1c1", "Root cause unlikely to come from the project"),
-    ("❓ question", "#d876e3", "Further information is requested"),
-    ("🚫 wont do/fix", "#eeeeee", "This will not be worked on"),
 ]
 
 

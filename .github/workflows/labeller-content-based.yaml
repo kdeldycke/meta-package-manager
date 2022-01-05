@@ -39,21 +39,27 @@ jobs:
                "keywords": ["bug", "error", "traceback", "fix"]},
 
               {"labels": [
-                "🔩 CI/CD"],
-               "keywords": ["ci-cd", "cicd", ".github", "workflow", "actions"]},
+                "🆙 changelog"],
+               "keywords": [
+                  "change-log"]},
+
+              {"labels": [
+                "👷 CI/CD"],
+               "keywords": ["ci-cd", "cicd", ".github", "coverage", "workflow", "actions", "gitignore"]},
+
+              {"labels": [
+                "📦 dependencies"],
+               "keywords": [
+                  "dependabot", "poetry.lock", "poetry", "pyproject.toml"]},
 
               {"labels": [
                 "📗 documentation"],
                "keywords": [
-                  "sphinx", "readme", "markdown", "typo"]},
+                  "sphinx", "readme", "markdown", "typo", "docstring", "mailmap", "license"]},
 
               {"labels": [
-                "✨ enhancement"],
-               "keywords": ["add"]},
-
-              {"labels": [
-                "🆘 help wanted"],
-               "keywords": ["help"]},
+                "💖 sponsor"],
+               "keywords": ["sponsor", "funding"]},
 
                {"labels": [
                   "📦 manager: apm",

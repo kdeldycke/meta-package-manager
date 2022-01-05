@@ -10,7 +10,11 @@ name: Labels
 jobs:
 
   labels:
-    name: Generate and sync labels
+    uses: kdeldycke/workflows/.github/workflows/labels.yaml@v0.5.1
+
+  generate-labels:
+    name: Generate extra labels
+    needs: labels
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2.4.0
@@ -49,6 +53,6 @@ jobs:
             }}/actions/runs/${{ github.run_id }}) as defined by [workflow
             action](https://github.com/${{ github.repository
             }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
-          labels: "🔩 CI/CD"
+          labels: "👷 CI/CD"
           assignees: kdeldycke
           branch: update-labels

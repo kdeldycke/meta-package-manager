@@ -1,19 +1,35 @@
 ---
 "🔌 xbar plugin":
-  - meta_package_manager/xbar/*
   - meta_package_manager/tests/*xbar*
+  - meta_package_manager/xbar/*
 
-"🔩 CI/CD":
-  - .bumpversion.cfg
+"🆙 changelog":
+  - .github/workflows/changelog.yaml
+  - .github/workflows/release.yaml
+  - changelog.md
+
+"👷 CI/CD":
   - .github/**/*
+  - .github/workflows/release.yaml
+  - .bumpversion.cfg
   - .gitignore
+
+"📦 dependencies":
+  - .github/dependabot.yaml
+  - poetry.lock
   - pyproject.toml
 
 "📗 documentation":
+  - .github/**/*label*
+  - .github/workflows/docs.yaml
+  - .github/code-of-conduct.md
   - docs/**/*
   - .mailmap
   - license
   - readme.md
+
+"💖 sponsor":
+  - .github/funding.yml
 
 "📦 manager: apm":
   - meta_package_manager/managers/apm*

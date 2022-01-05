@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- [mpm] Reused external label maintainance workflows and definitions.
+
 ## {gh}`4.9.4 (2022-01-04) <compare/v4.9.3...v4.9.4>`
 
 - [mpm] Re-integrate artefacts in GitHub release on tagging.

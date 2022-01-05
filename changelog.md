@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - [mpm] Reused external label maintainance workflows and definitions.
+- [mpm] Add our custom labels to external syncing workflow.
 
 ## {gh}`4.9.4 (2022-01-04) <compare/v4.9.3...v4.9.4>`
 

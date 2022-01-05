@@ -1,20 +1,14 @@
 ---
 name: Labels
 "on":
-  # Only the main branch has authority on the project management. This will
-  # prevent any other tagging or release activity interfer with the project.
   push:
     branches:
       - main
 
 jobs:
 
-  labels:
-    uses: kdeldycke/workflows/.github/workflows/labels.yaml@v0.5.1
-
   generate-labels:
     name: Generate extra labels
-    needs: labels
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2.4.0
@@ -37,7 +31,7 @@ jobs:
           # Remove untracked directories and files.
           git clean -fd
           # Temporarily stash our target file.
-          git stash -- ./.github/labels.json
+          git stash -- ./.github/labels-extra.json
           # Reset all repository.
           git checkout --force
           # Restore modified file. Do not fail if no file has been stashed.
@@ -60,3 +54,11 @@ jobs:
           labels: "👷 CI/CD"
           assignees: kdeldycke
           branch: update-labels
+
+  labels:
+    uses: kdeldycke/workflows/.github/workflows/labels.yaml@v0.5.1
+    needs: generate-labels
+    with:
+      label-files: |-
+        https://raw.githubusercontent.com/kdeldycke/workflows/main/.github/labels.yaml
+        .github/labels-extra.json

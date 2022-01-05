@@ -42,7 +42,6 @@ jobs:
 
             </details>
           labels: "📗 documentation"
-          assignees: kdeldycke
           branch: update-doc
 
   deploy-docs:
@@ -107,5 +106,4 @@ jobs:
 
             </details>
           labels: "📦 dependencies, 📗 documentation"
-          assignees: kdeldycke
           branch: update-deps-image

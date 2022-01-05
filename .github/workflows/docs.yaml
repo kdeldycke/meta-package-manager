@@ -28,15 +28,19 @@ jobs:
           poetry run sphinx-apidoc -f -o ./docs .
       - uses: peter-evans/create-pull-request@v3.12.0
         with:
-          author: "Kevin Deldycke <kevin@deldycke.com>"
+          assignees: ${{ github.actor }}
           commit-message: "[autofix] Update Sphinx apidoc"
           title: "[autofix] Update Sphinx apidoc"
           body: >
-            [Auto-generated on run
-            #${{ github.run_id }}](https://github.com/${{ github.repository
-            }}/actions/runs/${{ github.run_id }}) as defined by [workflow
-            action](https://github.com/${{ github.repository
-            }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
+            <details><summary><code>Workflow metadata</code></summary>
+
+
+            > [Auto-generated on run `#${{ github.run_id }}`](${{ github.event.repository.html_url }}/actions/runs/${{
+            github.run_id }}) by `${{ github.job }}` job from [`docs.yaml`](${{ github.event.repository.html_url
+            }}/blob/${{ github.sha }}/.github/workflows/docs.yaml) workflow.
+
+
+            </details>
           labels: "📗 documentation"
           assignees: kdeldycke
           branch: update-doc
@@ -89,15 +93,19 @@ jobs:
         # Only triggers on version tagging.
         if: startsWith(github.ref, 'refs/tags/v')
         with:
-          author: "Kevin Deldycke <kevin@deldycke.com>"
+          assignees: ${{ github.actor }}
           commit-message: "[autofix] Regenerate dependency graph"
           title: "[autofix] Regenerate dependency graph"
           body: >
-            [Auto-generated on run
-            #${{ github.run_id }}](https://github.com/${{ github.repository
-            }}/actions/runs/${{ github.run_id }}) as defined by [workflow
-            action](https://github.com/${{ github.repository
-            }}/blob/${{ github.base_ref }}/.github/workflows/autofix.yaml).
+            <details><summary><code>Workflow metadata</code></summary>
+
+
+            > [Auto-generated on run `#${{ github.run_id }}`](${{ github.event.repository.html_url }}/actions/runs/${{
+            github.run_id }}) by `${{ github.job }}` job from [`docs.yaml`](${{ github.event.repository.html_url
+            }}/blob/${{ github.sha }}/.github/workflows/docs.yaml) workflow.
+
+
+            </details>
           labels: "📦 dependencies, 📗 documentation"
           assignees: kdeldycke
           branch: update-deps-image

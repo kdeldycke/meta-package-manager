@@ -44,15 +44,19 @@ jobs:
           git stash pop || true
       - uses: peter-evans/create-pull-request@v3.12.0
         with:
-          author: "Kevin Deldycke <kevin@deldycke.com>"
-          commit-message: "[github] Update project labels."
-          title: '[github] Update project labels'
+          assignees: ${{ github.actor }}
+          commit-message: "[github] Update extra labels."
+          title: "[github] Update extra labels"
           body: >
-            [Auto-generated on run
-            #${{ github.run_id }}](https://github.com/${{ github.repository
-            }}/actions/runs/${{ github.run_id }}) as defined by [workflow
-            action](https://github.com/${{ github.repository
-            }}/blob/${{ github.base_ref }}/.github/workflows/labels.yaml).
+            <details><summary><code>Workflow metadata</code></summary>
+
+
+            > [Auto-generated on run `#${{ github.run_id }}`](${{ github.event.repository.html_url }}/actions/runs/${{
+            github.run_id }}) by `${{ github.job }}` job from [`docs.yaml`](${{ github.event.repository.html_url
+            }}/blob/${{ github.sha }}/.github/workflows/labels.yaml) workflow.
+
+
+            </details>
           labels: "👷 CI/CD"
           assignees: kdeldycke
           branch: update-labels

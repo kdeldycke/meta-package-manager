@@ -20,8 +20,9 @@
 
 from pathlib import Path
 
-from meta_package_manager.labels import LABELS
 from simplejson import dumps as json_dumps
+
+from meta_package_manager.labels import LABELS
 
 
 def write_labels():

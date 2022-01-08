@@ -1,16 +1,75 @@
 ---
 name: Labeller (file-based)
 "on":
-  - pull_request_target
+  pull_request_target:
 
 jobs:
+
   labeller:
-    name: Issue & PR labeller based on changed files
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2.4.0
-      - uses: actions/labeler@v3.0.2
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          configuration-path: ".github/labeller-file-based.yaml"
-          sync-labels: true
+    uses: kdeldycke/workflows/.github/workflows/labeller-file-based.yaml@v0.6.0
+    with:
+      extra-rules: |
+        "🔌 xbar plugin":
+          - meta_package_manager/tests/*xbar*
+          - meta_package_manager/xbar/*
+
+        "📦 manager: apm":
+          - meta_package_manager/managers/apm*
+          - meta_package_manager/tests/*apm*
+
+        "📦 manager: brew":
+          - meta_package_manager/managers/homebrew*
+          - meta_package_manager/tests/*homebrew*
+
+        "📦 manager: cask":
+          - meta_package_manager/managers/homebrew*
+          - meta_package_manager/tests/*homebrew*
+
+        "📦 manager: choco":
+          - meta_package_manager/managers/chocolatey*
+          - meta_package_manager/tests/*chocolatey*
+
+        "📦 manager: composer":
+          - meta_package_manager/managers/composer*
+          - meta_package_manager/tests/*composer*
+
+        "📦 manager: dpkg-like":
+          - meta_package_manager/managers/apt*
+          - meta_package_manager/managers/dpkg*
+          - meta_package_manager/managers/opkg*
+          - meta_package_manager/tests/*apt*
+          - meta_package_manager/tests/*dpkg*
+          - meta_package_manager/tests/*opkg*
+
+        "📦 manager: flatpak":
+          - meta_package_manager/managers/flatpak*
+          - meta_package_manager/tests/*flatpak*
+
+        "📦 manager: gem":
+          - meta_package_manager/managers/gem*
+          - meta_package_manager/tests/*gem*
+
+        "📦 manager: mas":
+          - meta_package_manager/managers/mas*
+          - meta_package_manager/tests/*mas*
+
+        "📦 manager: mpm":
+          - meta_package_manager/*
+
+        "📦 manager: npm-like":
+          - meta_package_manager/managers/npm*
+          - meta_package_manager/managers/yarn*
+          - meta_package_manager/tests/*npm*
+          - meta_package_manager/tests/*yarn*
+
+        "📦 manager: pip":
+          - meta_package_manager/managers/pip*
+          - meta_package_manager/tests/*pip*
+
+        "📦 manager: snap":
+          - meta_package_manager/managers/snap*
+          - meta_package_manager/tests/*snap*
+
+        "📦 manager: vscode":
+          - meta_package_manager/managers/vscode*
+          - meta_package_manager/tests/*vscode*

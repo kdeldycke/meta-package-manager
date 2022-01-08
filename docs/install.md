@@ -2,20 +2,22 @@
 
 ## With `pip`
 
-This package is [available on
-PyPi](https://pypi.python.org/pypi/meta-package-manager), so you can install
-the latest stable release and its dependencies with a simple `pip` call:
+This package is
+[available on PyPi](https://pypi.python.org/pypi/meta-package-manager), so you
+can install the latest stable release and its dependencies with a simple `pip`
+call:
 
-``` shell-session
+```shell-session
 $ pip install meta-package-manager
 ```
 
-See also [pip installation
-instructions](https://pip.pypa.io/en/stable/installing/).
+See also
+[pip installation instructions](https://pip.pypa.io/en/stable/installing/).
 
-````` {admonition} Danger: **Misleading package names**
-:class: danger
-
+````{admonition} Danger: **Misleading package names**
+---
+class: danger
+---
 ```{eval-rst}
 .. figure:: images/angry-paper-box.png
     :align: right
@@ -25,14 +27,14 @@ instructions](https://pip.pypa.io/en/stable/installing/).
 [*`mpm`*, the Python module](https://pypi.python.org/pypi/mpm), is not the same
 as **`meta-package-manager`**. Only the later provides the {command}`mpm` CLI
 *per-se*. The former has nothing to do with the current project.
-`````
+````
 
 ## Shell completion
 
-Completion for popular shell [rely on Click
-feature](https://click.palletsprojects.com/en/8.0.x/shell-completion/).
+Completion for popular shell
+[rely on Click feature](https://click.palletsprojects.com/en/8.0.x/shell-completion/).
 
-``` {eval-rst}
+```{eval-rst}
 .. tabs::
 
   .. group-tab:: Bash
@@ -63,7 +65,7 @@ feature](https://click.palletsprojects.com/en/8.0.x/shell-completion/).
 Alternatively, export the generated completion code as a static script to be
 executed:
 
-``` {eval-rst}
+```{eval-rst}
 .. tabs::
 
   .. group-tab:: Bash
@@ -97,7 +99,7 @@ executed:
        _MPM_COMPLETE=fish_source mpm > ~/.config/fish/completions/mpm.fish
 ```
 
-``` {todo}
+```{todo}
 Replace [`sphinx_tabs`](https://github.com/executablebooks/sphinx-tabs) by
 [`sphinx-inline-tabs`](https://github.com/pradyunsg/sphinx-inline-tabs#readme) once the latter
 [supports Python < 3.8](https://github.com/pradyunsg/sphinx-inline-tabs/issues/24).
@@ -107,7 +109,9 @@ Replace [`sphinx_tabs`](https://github.com/executablebooks/sphinx-tabs) by
 
 FYI, here is a graph of Python package dependencies:
 
-``` {image} images/dependencies.png
-:alt: Meta Package Manager dependency graph
-:align: center
+```{image} images/dependencies.png
+---
+alt: Meta Package Manager dependency graph
+align: center
+---
 ```

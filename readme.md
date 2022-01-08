@@ -8,16 +8,11 @@
 <img align="right" width="20%" height="20%" src="http://imgs.xkcd.com/comics/universal_install_script.png"/>
 </a>
 
-[![Last
-release](https://img.shields.io/pypi/v/meta-package-manager.svg)](https://pypi.python.org/pypi/meta-package-manager)
-[![Python
-versions](https://img.shields.io/pypi/pyversions/meta-package-manager.svg)](https://pypi.python.org/pypi/meta-package-manager)
-[![Unittests
-status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Amain)
-[![Documentation
-status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/docs.yaml/badge.svg?branch=main)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/docs.yaml?query=branch%3Amain)
-[![Coverage
-status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/badge.svg)](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main)
+[![Last release](https://img.shields.io/pypi/v/meta-package-manager.svg)](https://pypi.python.org/pypi/meta-package-manager)
+[![Python versions](https://img.shields.io/pypi/pyversions/meta-package-manager.svg)](https://pypi.python.org/pypi/meta-package-manager)
+[![Unittests status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Amain)
+[![Documentation status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/docs.yaml/badge.svg?branch=main)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/docs.yaml?query=branch%3Amain)
+[![Coverage status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/badge.svg)](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main)
 
 **What is Meta Package Manager?**
 
@@ -26,7 +21,7 @@ status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/b
   managers instead of videos
 - `mpm` solves [XKCD #1654: Universal Install Script](https://xkcd.com/1654/)
 
----
+______________________________________________________________________
 
 ## Features
 
@@ -48,8 +43,8 @@ status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/b
   selectors).
 - Export results in JSON or user-friendly tables.
 - Shell auto-completion for Bash, Zsh and Fish.
-- Provides a [xbar
-  plugin](https://kdeldycke.github.io/meta-package-manager/xbar.html) for
+- Provides a
+  [xbar plugin](https://kdeldycke.github.io/meta-package-manager/xbar.html) for
   friendly macOS integration.
 - Because `mpm` try to wrap all other package managers, it became another
   pathological case of [XKCD #927: Standards](https://xkcd.com/927/)
@@ -57,7 +52,7 @@ status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/b
 ## Supported package managers
 
 | Package manager                                                           | Min. version | macOS | Linux | Windows | `sync` | `installed` |                               `search`                                | `install` | `outdated` | `upgrade` | `cleanup` |
-|---------------------------------------------------------------------------|--------------|:-----:|:-----:|:-------:|:------:|:-----------:|:---------------------------------------------------------------------:|:---------:|:----------:|:---------:|:---------:|
+| ------------------------------------------------------------------------- | ------------ | :---: | :---: | :-----: | :----: | :---------: | :-------------------------------------------------------------------: | :-------: | :--------: | :-------: | :-------: |
 | [`apm`](https://atom.io/packages)                                         | 1.0.0        |   ✓   |   ✓   |    ✓    |        |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |           |
 | [`apt`](https://wiki.debian.org/Apt)                                      | 1.0.0        |       |   ✓   |         |   ✓    |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
 | [`apt-mint`](https://github.com/kdeldycke/meta-package-manager/issues/52) | 1.0.0        |       |   ✓   |         |   ✓    |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
@@ -77,22 +72,22 @@ status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/b
 
 ## Quickstart
 
-1.  Install `mpm` with `pip`:
+1. Install `mpm` with `pip`:
 
-    ``` shell-session
-    $ pip install meta-package-manager
-    ```
+   ```shell-session
+   $ pip install meta-package-manager
+   ```
 
-Other [alternatives installation
-methods](https://kdeldycke.github.io/meta-package-manager/install.html) are
-available in the documentation.
+Other
+[alternatives installation methods](https://kdeldycke.github.io/meta-package-manager/install.html)
+are available in the documentation.
 
 ## List managers
 
 List all supported package managers and their status on current system (macOS
 in this case):
 
-``` shell-session
+```shell-session
 $ mpm --all-managers managers
 ╭────────────────────┬──────────┬────────────────┬───────────────────────────┬────────────┬──────────╮
 │ Package manager    │ ID       │ Supported      │ CLI                       │ Executable │ Version  │
@@ -120,7 +115,7 @@ $ mpm --all-managers managers
 
 List all packages installed on current system:
 
-``` shell-session
+```shell-session
 $ mpm installed
 ╭─────────────────────────────┬─────────────────────────────┬─────────┬────────────────────╮
 │ Package name                │ ID                          │ Manager │ Installed version  │
@@ -149,7 +144,7 @@ $ mpm installed
 
 List all packages installed for which an upgrade is available:
 
-``` shell-session
+```shell-session
 $ mpm outdated
 ╭──────────────┬─────────────┬─────────┬───────────────────┬────────────────╮
 │ Package name │ ID          │ Manager │ Installed version │ Latest version │
@@ -170,8 +165,8 @@ $ mpm outdated
 
 More documentation is available in:
 
-- the [detailed help
-  screens](https://kdeldycke.github.io/meta-package-manager/cli-help.html)
-- the [list of
-  use-cases](https://kdeldycke.github.io/meta-package-manager/usecase.html)
+- the
+  [detailed help screens](https://kdeldycke.github.io/meta-package-manager/cli-help.html)
+- the
+  [list of use-cases](https://kdeldycke.github.io/meta-package-manager/usecase.html)
   where you’ll find inspiration on how to leverage `mpm` power

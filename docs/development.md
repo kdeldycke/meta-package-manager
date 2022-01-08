@@ -2,10 +2,10 @@
 
 ## Philosophy
 
-1.  First create something that works (to provide business value).
-2.  Then something that’s beautiful (to lower maintenance costs).
-3.  Finally works on performance (to avoid wasting time on premature
-    optimizations).
+1. First create something that works (to provide business value).
+1. Then something that’s beautiful (to lower maintenance costs).
+1. Finally works on performance (to avoid wasting time on premature
+   optimizations).
 
 ## Stability policy
 
@@ -31,7 +31,9 @@ Which boils down to the following rules of thumb regarding stability:
 
 ## Build status
 
-{gh}`main branch <tree/main>`: [![Unittests status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Amain) [![Coverage status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/badge.svg)](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main)
+{gh}`main branch <tree/main>`:
+[![Unittests status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Amain)
+[![Coverage status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/badge.svg)](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main)
 
 ## Setup environment
 
@@ -39,7 +41,7 @@ This **step is required** for all the other sections from this page.
 
 Check out latest development branch:
 
-``` shell-session
+```shell-session
 $ git clone git@github.com:kdeldycke/meta-package-manager.git
 $ cd ./meta-package-manager
 $ git checkout main
@@ -47,7 +49,7 @@ $ git checkout main
 
 Install package in editable mode with all development dependencies:
 
-``` shell-session
+```shell-session
 $ pip install poetry
 $ poetry install
 ```
@@ -58,7 +60,7 @@ Now you’re ready to hack and abuse git!
 
 Run unit-tests with:
 
-``` shell-session
+```shell-session
 $ poetry run pytest
 ```
 
@@ -71,7 +73,7 @@ $ poetry run pytest
 The documentation you’re currently reading can be built locally with
 [Sphinx](https://www.sphinx-doc.org):
 
-``` shell-session
+```shell-session
 $ poetry run sphinx-build -b html ./docs ./docs/html
 ```
 
@@ -80,8 +82,8 @@ The generation of API documention is
 
 ## Screenshots
 
-Project screenshots found in the documentation and the `readme.md` file
-needs to be refreshed by hand once in a while.
+Project screenshots found in the documentation and the `readme.md` file needs
+to be refreshed by hand once in a while.
 
 To produce clean and fancy terminals screenshots, use either:
 
@@ -92,8 +94,8 @@ To produce clean and fancy terminals screenshots, use either:
 ## Changelog
 
 Before a release, the maintainers will review and rewrite the changelog to make
-it clean and readable. Inspiration can be drawn from the [keep a changelog
-manifesto](https://keepachangelog.com).
+it clean and readable. Inspiration can be drawn from the
+[keep a changelog manifesto](https://keepachangelog.com).
 
 Changes can be inspected by using the comparison URL between the last tagged
 version and the `main` branch. This link is available at the top of the
@@ -117,7 +119,8 @@ All there's left to do is to:
 ## Version bump
 
 Versions are bumped to their next `patch` revision during the release process
-above by the {gh}`release.yaml workflow <blob/main/.github/workflows/release.yaml>`.
+above by the
+{gh}`release.yaml workflow <blob/main/.github/workflows/release.yaml>`.
 
 At any point during development, you can bump the version by merging either the
 `minor-version-increment` or `major-version-increment` branch, each available

@@ -39,7 +39,7 @@ jobs:
         run: |
           poetry publish --dry-run --no-interaction
       - name: Push package to public PyPi repository
-        uses: pypa/gh-action-pypi-publish@v1.4.2
+        uses: pypa/gh-action-pypi-publish@v1.5.0
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}

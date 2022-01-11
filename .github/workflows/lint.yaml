@@ -2,9 +2,6 @@
 name: Lint
 "on":
   push:
-    branches-ignore:
-      # Skip linting on prepare-release branch as it points to a tagged URL that does not exist yet.
-      - prepare-release
 
 jobs:
 

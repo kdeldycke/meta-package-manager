@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`4.9.7 (unreleased) <compare/v4.9.6...main>`
-
-```{{important}}
-This version is not released yet and is under active development.
-```
+## {gh}`4.9.7 (2022-01-11) <compare/v4.9.6...v4.9.7>`
 
 - \[mpm\] Add release version in artefacts produced by Poetry builds.
 - \[mpm\] Pass local PyPi token to reused workflow to fix publishing.

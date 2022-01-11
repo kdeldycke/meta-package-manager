@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`4.9.5 (unreleased) <compare/v4.9.4...main>`
-
-```{{important}}
-This version is not released yet and is under active development.
-```
+## {gh}`4.9.5 (2022-01-11) <compare/v4.9.4...v4.9.5>`
 
 - \[mpm\] Use external workflow for package building and publishing via Poetry.
 - \[mpm\] Reused external label maintainance workflows and definitions.

@@ -11,4 +11,4 @@ name: Release
 jobs:
 
   release:
-    uses: kdeldycke/workflows/.github/workflows/release.yaml@v0.7.16
+    uses: kdeldycke/workflows/.github/workflows/release.yaml@v0.7.17

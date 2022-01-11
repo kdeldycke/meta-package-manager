@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Fix detection of Poetry in build workflow.
+
 ## {gh}`4.9.5 (2022-01-11) <compare/v4.9.4...v4.9.5>`
 
 - \[mpm\] Use external workflow for package building and publishing via Poetry.

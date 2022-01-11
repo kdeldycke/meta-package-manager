@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`4.9.6 (unreleased) <compare/v4.9.5...main>`
-
-```{{important}}
-This version is not released yet and is under active development.
-```
+## {gh}`4.9.6 (2022-01-11) <compare/v4.9.5...v4.9.6>`
 
 - \[mpm\] Fix detection of Poetry in build workflow.
 

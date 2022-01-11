@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[mpm\] Add release version in artefacts produced by Poetry builds.
+- \[mpm\] Pass local PyPi token to reused workflow to fix publishing.
 
 ## {gh}`4.9.6 (2022-01-11) <compare/v4.9.5...v4.9.6>`
 

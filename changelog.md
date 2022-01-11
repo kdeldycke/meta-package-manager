@@ -6,6 +6,7 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Use external workflow for package build and publishing via Poetry.
 - \[mpm\] Reused external label maintainance workflows and definitions.
 - \[mpm\] Add our custom labels to external syncing workflow.
 - \[mpm\] Auto-label sponsors.

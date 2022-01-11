@@ -1,6 +1,7 @@
 ---
 name: Release
 "on":
+  push:
   pull_request:
     branches:
       - main
@@ -10,48 +11,4 @@ name: Release
 jobs:
 
   release:
-    uses: kdeldycke/workflows/.github/workflows/release.yaml@v0.6.3
-
-  build:
-    name: Build, check and publish package
-    needs: release
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2.4.0
-      - uses: actions/setup-python@v2.3.1
-      - name: Build package
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade poetry
-          poetry install --no-interaction --no-ansi
-          poetry build --no-interaction --no-ansi
-      - name: Attach packages to workflow run for later inspection and debugging
-        uses: actions/upload-artifact@v2.3.1
-        with:
-          name: mpm-python-packages
-          path: ./dist/*
-      - name: Validates package metadata
-        run: |
-          poetry check --no-interaction --no-ansi
-          poetry run twine check ./dist/*
-          poetry run check-wheel-contents ./dist/*.whl
-      - name: Test publishing
-        run: |
-          poetry publish --dry-run --no-interaction
-      - name: Push package to public PyPi repository
-        uses: pypa/gh-action-pypi-publish@v1.4.2
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
-      # Same as https://github.com/kdeldycke/workflows/blob/main/.github/workflows/release.yaml::github-release job,
-      # but with our own custom dynamic body and attached artefacts.
-      - name: Update GitHub release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ needs.release.outputs.tagged_version }}
-          files: ./dist/*
-          body: |
-            [🐍 Available on PyPi](https://pypi.org/project/meta-package-manager/${{
-            needs.release.outputs.tagged_version }}/)
+    uses: kdeldycke/workflows/.github/workflows/release.yaml@v0.7.16

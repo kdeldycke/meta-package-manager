@@ -2,9 +2,8 @@
 name: Debug
 "on":
   push:
-  pull_request:
 
 jobs:
 
   debug:
-    uses: kdeldycke/workflows/.github/workflows/debug.yaml@v0.6.3
+    uses: kdeldycke/workflows/.github/workflows/debug.yaml@v0.7.16

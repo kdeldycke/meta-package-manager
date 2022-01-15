@@ -602,7 +602,7 @@ rtd = ["sphinx", "ipython", "sphinx-book-theme"]
 
 [[package]]
 name = "sphinx-issues"
-version = "2.0.0"
+version = "3.0.1"
 description = "A Sphinx extension for linking to your project's issue tracker"
 category = "dev"
 optional = false
@@ -612,9 +612,9 @@ python-versions = ">=3.6"
 sphinx = "*"
 
 [package.extras]
-dev = ["pytest", "flake8 (==3.9.2)", "flake8-bugbear (==20.11.1)", "pre-commit (>=2.7,<3.0)", "tox"]
+dev = ["pytest (>=6.2.0)", "flake8 (==3.9.2)", "flake8-bugbear (==20.11.1)", "pre-commit (>=2.7,<3.0)", "tox"]
 lint = ["flake8 (==3.9.2)", "flake8-bugbear (==20.11.1)", "pre-commit (>=2.7,<3.0)"]
-tests = ["pytest"]
+tests = ["pytest (>=6.2.0)"]
 
 [[package]]
 name = "sphinx-tabs"
@@ -797,7 +797,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "e0c40f822699f4bf1cdcaec3f34be56e0fbc20458fcd0f4a33b47e3739c8b529"
+content-hash = "f2cc60f1043c43f131ae535b10c072292899a55a72cb11eba7257d0f945e8cca"
 
 [metadata.files]
 alabaster = [
@@ -1198,8 +1198,8 @@ sphinx-copybutton = [
     {file = "sphinx_copybutton-0.4.0-py3-none-any.whl", hash = "sha256:4340d33c169dac6dd82dce2c83333412aa786a42dd01a81a8decac3b130dc8b0"},
 ]
 sphinx-issues = [
-    {file = "sphinx-issues-2.0.0.tar.gz", hash = "sha256:16aa6967739b100abdac2e4145928ce79f6492e20023eca8e6a85e505ad2b3cb"},
-    {file = "sphinx_issues-2.0.0-py3-none-any.whl", hash = "sha256:138f66916eeb3319d68285b1ddd2de987ca1bec1b7a1c01b30e5595e72bb6e42"},
+    {file = "sphinx-issues-3.0.1.tar.gz", hash = "sha256:b7c1dc1f4808563c454d11c1112796f8c176cdecfee95f0fd2302ef98e21e3d6"},
+    {file = "sphinx_issues-3.0.1-py3-none-any.whl", hash = "sha256:8b25dc0301159375468f563b3699af7a63720fd84caf81c1442036fcd418b20c"},
 ]
 sphinx-tabs = [
     {file = "sphinx-tabs-3.2.0.tar.gz", hash = "sha256:33137914ed9b276e6a686d7a337310ee77b1dae316fdcbce60476913a152e0a4"},

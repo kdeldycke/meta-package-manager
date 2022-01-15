@@ -102,7 +102,7 @@ def test_labeller_rules():
         ".github/workflows/labeller-content-based.yaml"
     ).read_text()
     assert "Naturalclar/issue-action" in content
-    json_rules = load(content, Loader=Loader)["jobs"]["labeller"]["steps"][1]["with"][
+    json_rules = load(content, Loader=Loader)["jobs"]["labeller"]["steps"][0]["with"][
         "parameters"
     ]
     rules = json.loads(json_rules)

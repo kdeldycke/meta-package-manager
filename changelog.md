@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`4.9.9 (unreleased) <compare/v4.9.8...main>`
-
-```{{important}}
-This version is not released yet and is under active development.
-```
+## {gh}`4.9.9 (2022-01-15) <compare/v4.9.8...v4.9.9>`
 
 - \[mpm\] Fix upload of build artefacts in GitHub release.
 

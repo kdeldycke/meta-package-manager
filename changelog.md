@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Fix upload of build artefacts in GitHub release.
+
 ## {gh}`4.9.8 (2022-01-15) <compare/v4.9.7...v4.9.8>`
 
 - \[mpm\] Fix propagation of build artefacts to GitHub release and PyPi.

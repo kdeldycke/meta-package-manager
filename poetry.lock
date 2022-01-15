@@ -217,7 +217,7 @@ doc = ["myst-parser", "sphinx-copybutton", "sphinx-design", "sphinx-inline-tabs"
 
 [[package]]
 name = "graphviz"
-version = "0.18"
+version = "0.19.1"
 description = "Simple Python interface for Graphviz"
 category = "dev"
 optional = false
@@ -226,7 +226,7 @@ python-versions = ">=3.6"
 [package.extras]
 dev = ["tox (>=3)", "flake8", "pep8-naming", "wheel", "twine"]
 docs = ["sphinx (>=1.8)", "sphinx-autodoc-typehints", "sphinx-rtd-theme"]
-test = ["pytest (>=6)", "pytest-mock (>=2)", "mock (>=3)", "pytest-cov"]
+test = ["pytest (>=6)", "pytest-mock (>=3)", "mock (>=4)", "pytest-cov", "coverage"]
 
 [[package]]
 name = "idna"
@@ -797,7 +797,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "37cfb65ab3ac9384bda5b75d853be6a111593b8b221c3f5f7402be9ca0a7c355"
+content-hash = "e0c40f822699f4bf1cdcaec3f34be56e0fbc20458fcd0f4a33b47e3739c8b529"
 
 [metadata.files]
 alabaster = [
@@ -921,8 +921,8 @@ furo = [
     {file = "furo-2022.1.2.tar.gz", hash = "sha256:b217f218cbcd423ffbfe69baa79389d4ecebf2d86f0d593c44ef31da7b5aed30"},
 ]
 graphviz = [
-    {file = "graphviz-0.18-py3-none-any.whl", hash = "sha256:f8bab3bf3eda40ab259bb96f786811b5dec6fd6957fa70a5b1977534e1ee2a40"},
-    {file = "graphviz-0.18.zip", hash = "sha256:0f04e5f939d3a839b524283d590e941892c56e75e60e0f5238c431264f490022"},
+    {file = "graphviz-0.19.1-py3-none-any.whl", hash = "sha256:f34088c08be2ec16279dfa9c3b4ff3d1453c5c67597a33e2819b000e18d4c546"},
+    {file = "graphviz-0.19.1.zip", hash = "sha256:09ed0cde452d015fe77c4845a210eb642f28d245f5bc250d4b97808cb8f49078"},
 ]
 idna = [
     {file = "idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},

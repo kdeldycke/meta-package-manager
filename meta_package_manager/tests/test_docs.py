@@ -118,7 +118,9 @@ def test_labeller_rules():
 
     assert rules_labels
     # Check that all canonical labels are referenced in rules.
-    assert (canonical_labels - {'🔌 BitBar plugin', '📦 manager: mpm'}).issubset(rules_labels)
+    assert (canonical_labels - {"🔌 BitBar plugin", "📦 manager: mpm"}).issubset(
+        rules_labels
+    )
 
     rules_managers = Counter(
         {

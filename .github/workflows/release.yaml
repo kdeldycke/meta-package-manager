@@ -1,12 +1,11 @@
 ---
 name: Build & release
 "on":
+  # Target are chosen so that all commits get a chance to have their build tested.
   push:
-  pull_request:
     branches:
       - main
-    types:
-      - closed
+  pull_request:
 
 jobs:
 

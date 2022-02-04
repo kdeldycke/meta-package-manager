@@ -83,7 +83,7 @@ coverage = { extras = ["toml"], version = "^6.2" }
 furo = "^2022.1.2"
 myst-parser = "^0.16.1"
 pipdeptree = { extras = ["graphviz"], version = "^2.2.1" }
-pytest = "^6.2.5"
+pytest = "^7.0.0"
 # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html
 pytest-cov = "^3.0.0"
 pytest-randomly = "^3.11.0"

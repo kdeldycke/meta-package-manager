@@ -80,7 +80,7 @@ python-versions = "*"
 
 [[package]]
 name = "charset-normalizer"
-version = "2.0.10"
+version = "2.0.12"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 category = "dev"
 optional = false
@@ -91,7 +91,7 @@ unicode_backport = ["unicodedata2"]
 
 [[package]]
 name = "cli-helpers"
-version = "2.2.0"
+version = "2.2.1"
 description = "Helpers for building command-line apps"
 category = "main"
 optional = false
@@ -233,7 +233,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "importlib-metadata"
-version = "4.10.0"
+version = "4.11.0"
 description = "Read metadata from Python packages"
 category = "main"
 optional = false
@@ -272,7 +272,7 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "markdown-it-py"
-version = "2.0.0"
+version = "2.0.1"
 description = "Python port of markdown-it. Markdown parsing, done right!"
 category = "dev"
 optional = false
@@ -391,7 +391,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "pyparsing"
-version = "3.0.6"
+version = "3.0.7"
 description = "Python parsing module"
 category = "dev"
 optional = false
@@ -722,7 +722,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "typing-extensions"
-version = "4.0.1"
+version = "4.1.0"
 description = "Backported and Experimental Type Hints for Python 3.6+"
 category = "main"
 optional = false
@@ -800,12 +800,12 @@ certifi = [
     {file = "certifi-2021.10.8.tar.gz", hash = "sha256:78884e7c1d4b00ce3cea67b44566851c4343c120abd683433ce934a68ea58872"},
 ]
 charset-normalizer = [
-    {file = "charset-normalizer-2.0.10.tar.gz", hash = "sha256:876d180e9d7432c5d1dfd4c5d26b72f099d503e8fcc0feb7532c9289be60fcbd"},
-    {file = "charset_normalizer-2.0.10-py3-none-any.whl", hash = "sha256:cb957888737fc0bbcd78e3df769addb41fd1ff8cf950dc9e7ad7793f1bf44455"},
+    {file = "charset-normalizer-2.0.12.tar.gz", hash = "sha256:2857e29ff0d34db842cd7ca3230549d1a697f96ee6d3fb071cfa6c7393832597"},
+    {file = "charset_normalizer-2.0.12-py3-none-any.whl", hash = "sha256:6881edbebdb17b39b4eaaa821b438bf6eddffb4468cf344f09f89def34a8b1df"},
 ]
 cli-helpers = [
-    {file = "cli_helpers-2.2.0-py3-none-any.whl", hash = "sha256:3ed557793aa4ef5529c792e6a9c55f84ae798997d4a5107352219221023b4a81"},
-    {file = "cli_helpers-2.2.0.tar.gz", hash = "sha256:733f65d8c921e0cffa8f7ae4c8735bd7ecdffec383c5246f647ddd0fddb33448"},
+    {file = "cli_helpers-2.2.1-py3-none-any.whl", hash = "sha256:e1a67c6e2cd95857fe50f7640549c65af8df5c4d7666af4e6d8c8ee7dbb694b4"},
+    {file = "cli_helpers-2.2.1.tar.gz", hash = "sha256:0ccc1cfcda1ac64dc7ed83d7013055cf19e5979d29e56c21f3b692de01555aae"},
 ]
 click = [
     {file = "click-8.0.3-py3-none-any.whl", hash = "sha256:353f466495adaeb40b6b5f592f9f91cb22372351c84caeb068132442a4518ef3"},
@@ -890,8 +890,8 @@ imagesize = [
     {file = "imagesize-1.3.0.tar.gz", hash = "sha256:cd1750d452385ca327479d45b64d9c7729ecf0b3969a58148298c77092261f9d"},
 ]
 importlib-metadata = [
-    {file = "importlib_metadata-4.10.0-py3-none-any.whl", hash = "sha256:b7cf7d3fef75f1e4c80a96ca660efbd51473d7e8f39b5ab9210febc7809012a4"},
-    {file = "importlib_metadata-4.10.0.tar.gz", hash = "sha256:92a8b58ce734b2a4494878e0ecf7d79ccd7a128b5fc6014c401e0b61f006f0f6"},
+    {file = "importlib_metadata-4.11.0-py3-none-any.whl", hash = "sha256:6affcdb3aec542dd98df8211e730bba6c5f2bec8288d47bacacde898f548c9ad"},
+    {file = "importlib_metadata-4.11.0.tar.gz", hash = "sha256:9e5e553bbba1843cb4a00823014b907616be46ee503d2b9ba001d214a8da218f"},
 ]
 iniconfig = [
     {file = "iniconfig-1.1.1-py2.py3-none-any.whl", hash = "sha256:011e24c64b7f47f6ebd835bb12a743f2fbe9a26d4cecaa7f53bc4f35ee9da8b3"},
@@ -902,8 +902,8 @@ jinja2 = [
     {file = "Jinja2-3.0.3.tar.gz", hash = "sha256:611bb273cd68f3b993fabdc4064fc858c5b47a973cb5aa7999ec1ba405c87cd7"},
 ]
 markdown-it-py = [
-    {file = "markdown-it-py-2.0.0.tar.gz", hash = "sha256:c138a596f6c9988e0b5fa3299bc38ffa76c75076bc178e8dfac40a84343c7022"},
-    {file = "markdown_it_py-2.0.0-py3-none-any.whl", hash = "sha256:15cc69c5b7c493ba8603722b710e39ce3fab2961994179fb4fa1c99b070d2059"},
+    {file = "markdown-it-py-2.0.1.tar.gz", hash = "sha256:7b5c153ae1ab2cde00a33938bce68f3ad5d68fbe363f946de7d28555bed4e08a"},
+    {file = "markdown_it_py-2.0.1-py3-none-any.whl", hash = "sha256:31974138ca8cafbcb62213f4974b29571b940e78364584729233f59b8dfdb8bd"},
 ]
 markupsafe = [
     {file = "MarkupSafe-2.0.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:d8446c54dc28c01e5a2dbac5a25f071f6653e6e40f3a8818e8b45d790fe6ef53"},
@@ -1005,8 +1005,8 @@ pygments = [
     {file = "Pygments-2.11.2.tar.gz", hash = "sha256:4e426f72023d88d03b2fa258de560726ce890ff3b630f88c21cbb8b2503b8c6a"},
 ]
 pyparsing = [
-    {file = "pyparsing-3.0.6-py3-none-any.whl", hash = "sha256:04ff808a5b90911829c55c4e26f75fa5ca8a2f5f36aa3a51f68e27033341d3e4"},
-    {file = "pyparsing-3.0.6.tar.gz", hash = "sha256:d9bdec0013ef1eb5a84ab39a3b3868911598afa494f5faa038647101504e2b81"},
+    {file = "pyparsing-3.0.7-py3-none-any.whl", hash = "sha256:a6c06a88f252e6c322f65faf8f418b16213b51bdfaece0524c1c1bc30c63c484"},
+    {file = "pyparsing-3.0.7.tar.gz", hash = "sha256:18ee9022775d270c55187733956460083db60b37d0d0fb357445f3094eed3eea"},
 ]
 pytest = [
     {file = "pytest-7.0.1-py3-none-any.whl", hash = "sha256:9ce3ff477af913ecf6321fe337b93a2c0dcf2a0a1439c43f5452112c1e4280db"},
@@ -1199,8 +1199,8 @@ tomli-w = [
     {file = "tomli_w-1.0.0.tar.gz", hash = "sha256:f463434305e0336248cac9c2dc8076b707d8a12d019dd349f5c1e382dd1ae1b9"},
 ]
 typing-extensions = [
-    {file = "typing_extensions-4.0.1-py3-none-any.whl", hash = "sha256:7f001e5ac290a0c0401508864c7ec868be4e701886d5b573a9528ed3973d9d3b"},
-    {file = "typing_extensions-4.0.1.tar.gz", hash = "sha256:4ca091dea149f945ec56afb48dae714f21e8692ef22a395223bcd328961b6a0e"},
+    {file = "typing_extensions-4.1.0-py3-none-any.whl", hash = "sha256:c13180fbaa7cd97065a4915ceba012bdb31dc34743e63ddee16360161d358414"},
+    {file = "typing_extensions-4.1.0.tar.gz", hash = "sha256:ba97c5143e5bb067b57793c726dd857b1671d4b02ced273ca0538e71ff009095"},
 ]
 urllib3 = [
     {file = "urllib3-1.26.8-py2.py3-none-any.whl", hash = "sha256:000ca7f471a233c2251c6c7023ee85305721bfdf18621ebff4fd17a8653427ed"},

@@ -2,12 +2,14 @@
 hide-toc: true
 ---
 
-``` {include} ../readme.md
+```{include} ../readme.md
 ```
 
-``` {toctree}
-:maxdepth: 2
-:hidden:
+```{toctree}
+---
+maxdepth: 2
+hidden:
+---
 install
 usecase
 cli-help
@@ -16,10 +18,12 @@ xbar
 falsehoods
 ```
 
-``` {toctree}
-:caption: Development
-:maxdepth: 2
-:hidden:
+```{toctree}
+---
+caption: Development
+maxdepth: 2
+hidden:
+---
 contributing
 development
 API <meta_package_manager>

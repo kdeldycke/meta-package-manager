@@ -151,7 +151,7 @@ class CLISubCommandTests:
                 # Common "not implemented" optional command warning message.
                 bool(
                     re.search(
-                        fr"warning: {mid} does not implement "
+                        rf"warning: {mid} does not implement "
                         r"(search|outdated|upgrade|sync|cleanup|install|upgrade_all) "
                         "command.",
                         stderr,
@@ -162,7 +162,7 @@ class CLISubCommandTests:
                 # Match output of managers command.
                 bool(
                     re.search(
-                        fr"\s+│\s+{mid}\s+│\s+(✓|✘).+│\s+(✓|✘)",
+                        rf"\s+│\s+{mid}\s+│\s+(✓|✘).+│\s+(✓|✘)",
                         stdout,
                     )
                 ),
@@ -181,13 +181,13 @@ class CLISubCommandTests:
                 # Install message.
                 bool(
                     re.search(
-                        fr"Install \S+ package from {mid}...",
+                        rf"Install \S+ package from {mid}...",
                         stderr,
                     )
                 ),
                 bool(
                     re.search(
-                        fr"warning: No \S+ package found on {mid}.",
+                        rf"warning: No \S+ package found on {mid}.",
                         stderr,
                     )
                 ),

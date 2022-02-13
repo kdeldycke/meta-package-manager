@@ -40,7 +40,6 @@ class TestRestore(CLISubCommandTests):
         toml_path = create_config(
             "all-managers.toml",
             "".join(
-                (
                     """
             [{}]
             blah = 123
@@ -48,7 +47,6 @@ class TestRestore(CLISubCommandTests):
                         m
                     )
                     for m in ALL_MANAGER_IDS
-                )
             ),
         )
 
@@ -62,7 +60,6 @@ class TestRestore(CLISubCommandTests):
         toml_path = create_config(
             "all-managers.toml",
             "".join(
-                (
                     """
             [{}]
             blah = 123
@@ -70,7 +67,6 @@ class TestRestore(CLISubCommandTests):
                         m
                     )
                     for m in ALL_MANAGER_IDS
-                )
             ),
         )
 

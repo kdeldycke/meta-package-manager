@@ -155,7 +155,7 @@ class TokenizedString:
         """
         if isinstance(value, TokenizedString):
             return value
-        return super(TokenizedString, cls).__new__(cls)
+        return super().__new__(cls)
 
     def __init__(self, value, separator="-"):
         if isinstance(value, TokenizedString):
@@ -166,7 +166,7 @@ class TokenizedString:
         elif isinstance(value, str):
             self.string = value.strip()
         else:
-            raise TypeError("{} not supported".format(type(value)))
+            raise TypeError(f"{type(value)} not supported")
         self.tokens = tuple(self.tokenize(self.string))
         self.separator = separator
 

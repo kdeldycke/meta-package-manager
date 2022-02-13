@@ -79,7 +79,7 @@ tomli_w = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 bump2version = "^1.0.1"
-coverage = { extras = ["toml"], version = "^6.2" }
+coverage = { extras = ["toml"], version = "^6.3" }
 furo = "^2022.1.2"
 myst-parser = "^0.16.1"
 pytest = "^6.2.5"

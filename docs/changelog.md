@@ -1,2 +1,2 @@
-``` {include} ../changelog.md
+```{include} ../changelog.md
 ```

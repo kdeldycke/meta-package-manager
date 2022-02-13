@@ -98,7 +98,7 @@ def run(*args):
 
 def pp(params):
     """Print all parameters separated by a pipe. Ignore empty items."""
-    print(" | ".join((p for p in params if p)))
+    print(" | ".join(p for p in params if p))
 
 
 def print_error_header():
@@ -220,8 +220,8 @@ def print_menu():
     managers = sorted(json.loads(output).values(), key=itemgetter("name"))
 
     # Print menu bar icon with number of available upgrades.
-    total_outdated = sum((len(m["packages"]) for m in managers))
-    total_errors = sum((len(m.get("errors", [])) for m in managers))
+    total_outdated = sum(len(m["packages"]) for m in managers)
+    total_errors = sum(len(m.get("errors", [])) for m in managers)
     pp(
         [
             "↑{}{}".format(

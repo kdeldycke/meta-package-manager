@@ -32,7 +32,7 @@ def write_labels():
     # Debug messages.
     for label_name, _, _ in sorted(LABELS):
         print(f"Generated label: {label_name}")
-    print("{} labels generated.".format(len(LABELS)))
+    print(f"{len(LABELS)} labels generated.")
     print(f"Saving to: {json_file}")
 
     # Save to json definition file.

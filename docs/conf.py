@@ -14,11 +14,11 @@ project_id = toml_config["tool"]["poetry"]["name"]
 version = release = toml_config["tool"]["poetry"]["version"]
 url = toml_config["tool"]["poetry"]["homepage"]
 author = ", ".join(
-    (a.split("<")[0].strip() for a in toml_config["tool"]["poetry"]["authors"])
+    a.split("<")[0].strip() for a in toml_config["tool"]["poetry"]["authors"]
 )
 
 # Title-case each word of the project ID.
-project = " ".join((word.title() for word in project_id.split("-")))
+project = " ".join(word.title() for word in project_id.split("-"))
 htmlhelp_basename = project_id
 
 # Addons.

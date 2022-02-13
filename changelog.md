@@ -6,6 +6,10 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Use external workflow for dependency graph generation and Python code
+  modernization.
+- \[mpm\] Remove dev dependency on `pipdeptree`.
+
 ## {gh}`4.9.9 (2022-01-15) <compare/v4.9.8...v4.9.9>`
 
 - \[mpm\] Fix upload of build artefacts in GitHub release.

@@ -73,7 +73,6 @@ boltons = "^21.0.0"
 click = "^8.0.2"
 click-extra = "^1.2.0"
 cloup = "^0.12.1"
-simplejson = "^3.17.5"
 tomli = "^1.2.1"
 tomli_w = "^1.0.0"
 

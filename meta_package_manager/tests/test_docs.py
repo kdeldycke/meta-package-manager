@@ -15,11 +15,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+import json
 import re
 from collections import Counter
 from pathlib import Path
 
-import simplejson as json
 import tomli
 from boltons.iterutils import flatten
 from click_extra.platform import OS_DEFINITIONS, os_label

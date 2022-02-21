@@ -17,8 +17,9 @@
 
 # pylint: disable=redefined-outer-name
 
+import json
+
 import pytest
-import simplejson as json
 from boltons.iterutils import same
 
 from ..pool import DEFAULT_MANAGER_IDS

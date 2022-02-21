@@ -17,13 +17,13 @@
 
 """ Helpers and utilities to render and print content. """
 
+import json
 from operator import itemgetter
 from pathlib import Path
 
 import click
 from boltons.strutils import strip_ansi
 from click_extra.tabulate import TabularOutputFormatter
-from simplejson import dumps as json_dumps
 
 from . import __version__
 from .version import TokenizedString
@@ -61,7 +61,7 @@ def print_json(data):
         raise TypeError(repr(obj) + " is not JSON serializable.")
 
     click.echo(
-        json_dumps(
+        json.dumps(
             data,
             sort_keys=True,
             indent=4,

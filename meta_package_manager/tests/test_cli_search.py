@@ -17,11 +17,11 @@
 
 # pylint: disable=redefined-outer-name
 
+import json
 import re
 from time import sleep
 
 import pytest
-import simplejson as json
 from boltons.iterutils import same
 from click_extra.tests.conftest import unless_macos
 

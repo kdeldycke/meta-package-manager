@@ -17,10 +17,10 @@
 
 # pylint: disable=redefined-outer-name
 
+import json
 from string import ascii_lowercase, digits
 
 import pytest
-import simplejson as json
 from boltons.iterutils import same
 
 from ..pool import DEFAULT_MANAGER_IDS

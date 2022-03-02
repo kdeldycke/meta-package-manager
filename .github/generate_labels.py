@@ -18,9 +18,8 @@
 """ Utilities to manage GitHub labels to use in issues and PR management.
 """
 
+import json
 from pathlib import Path
-
-from simplejson import dumps as json_dumps
 
 from meta_package_manager.labels import LABELS
 
@@ -40,7 +39,7 @@ def write_labels():
         dict(zip(["name", "color", "description"], label)) for label in sorted(LABELS)
     ]
     json_file.write_text(
-        json_dumps(
+        json.dumps(
             label_defs,
             indent=2,
             separators=(",", ": "),

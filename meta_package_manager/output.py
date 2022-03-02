@@ -21,8 +21,8 @@ import json
 from operator import itemgetter
 from pathlib import Path
 
-import click
 from boltons.strutils import strip_ansi
+from click_extra import echo, get_current_context, style
 from click_extra.tabulate import TabularOutputFormatter
 
 from . import __version__
@@ -60,7 +60,7 @@ def print_json(data):
             return str(obj)
         raise TypeError(repr(obj) + " is not JSON serializable.")
 
-    click.echo(
+    echo(
         json.dumps(
             data,
             sort_keys=True,
@@ -79,7 +79,7 @@ def print_table(header_defs, rows, sort_key=None):
     if not rows:
         return
 
-    header_labels = (click.style(label, bold=True) for label, _ in header_defs)
+    header_labels = (style(label, bold=True) for label, _ in header_defs)
 
     # Check there is no duplicate column IDs.
     header_ids = [col_id for _, col_id in header_defs if col_id]
@@ -112,7 +112,7 @@ def print_table(header_defs, rows, sort_key=None):
             sorting_key.append(key)
         return tuple(sorting_key)
 
-    ctx = click.get_current_context()
+    ctx = get_current_context()
     ctx.find_root().print_table(
         sorted(rows, key=sort_method), header_labels, disable_numparse=True
     )
@@ -131,4 +131,4 @@ def print_stats(data):
     if per_manager_totals:
         per_manager_totals = f" ({per_manager_totals})"
     plural = "s" if total_installed > 1 else ""
-    click.echo(f"{total_installed} package{plural} total{per_manager_totals}.")
+    echo(f"{total_installed} package{plural} total{per_manager_totals}.")

@@ -24,17 +24,26 @@ from io import TextIOWrapper
 from operator import getitem
 from pathlib import Path
 
-import click
 import tomli
 import tomli_w
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list
+from click_extra import (
+    STRING,
+    Choice,
+    File,
+    argument,
+    command,
+    echo,
+    group,
+    option,
+    option_group,
+    pass_context,
+)
 from click_extra.colorize import KO, OK, theme
-from click_extra.commands import command, group
 from click_extra.logging import logger
 from click_extra.platform import os_label
 from click_extra.tabulate import table_format_option
-from cloup import option, option_group
 
 from . import __version__
 from .base import CLI_FORMATS, CLIError, PackageManager
@@ -79,7 +88,7 @@ def single_manager_selectors():
     option(
         "-m",
         "--manager",
-        type=click.Choice(ALL_MANAGER_IDS, case_sensitive=False),
+        type=Choice(ALL_MANAGER_IDS, case_sensitive=False),
         multiple=True,
         help="Restrict sub-command to a subset of package managers. Repeat to "
         "select multiple managers. The order in which options are provided defines the "
@@ -88,7 +97,7 @@ def single_manager_selectors():
     option(
         "-e",
         "--exclude",
-        type=click.Choice(ALL_MANAGER_IDS, case_sensitive=False),
+        type=Choice(ALL_MANAGER_IDS, case_sensitive=False),
         multiple=True,
         help="Exclude a package manager. Repeat to exclude multiple managers.",
     ),
@@ -137,7 +146,7 @@ def single_manager_selectors():
     table_format_option(
         "-o",
         "--output-format",
-        type=click.Choice(
+        type=Choice(
             sorted(TabularOutputFormatter._output_formats), case_sensitive=False
         ),
         help="Rendering mode of the output.",
@@ -145,7 +154,7 @@ def single_manager_selectors():
     option(
         "-s",
         "--sort-by",
-        type=click.Choice(sorted(SORTABLE_FIELDS), case_sensitive=False),
+        type=Choice(sorted(SORTABLE_FIELDS), case_sensitive=False),
         default="manager_id",
         help="Sort results.",
     ),
@@ -156,7 +165,7 @@ def single_manager_selectors():
         help="Print per-manager package statistics.",
     ),
 )
-@click.pass_context
+@pass_context
 def mpm(
     ctx,
     manager,
@@ -213,7 +222,7 @@ def mpm(
 
 
 @command(short_help="List supported package managers and their location.")
-@click.pass_context
+@pass_context
 def managers(ctx):
     """List all supported package managers and their presence on the system."""
     # Machine-friendly data rendering.
@@ -294,7 +303,7 @@ def managers(ctx):
 
 
 @command(short_help="Sync local package info.")
-@click.pass_context
+@pass_context
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
     for manager in ctx.obj.selected_managers:
@@ -302,7 +311,7 @@ def sync(ctx):
 
 
 @command(short_help="Cleanup local data.")
-@click.pass_context
+@pass_context
 def cleanup(ctx):
     """Cleanup local data and temporary artifacts."""
     for manager in ctx.obj.selected_managers:
@@ -310,7 +319,7 @@ def cleanup(ctx):
 
 
 @command(short_help="List installed packages.")
-@click.pass_context
+@pass_context
 def installed(ctx):
     """List all packages installed on the system from all managers."""
     # Build-up a global dict of installed packages per manager.
@@ -374,8 +383,8 @@ def installed(ctx):
     default=False,
     help="Only returns exact matches, or enable fuzzy search in substrings.",
 )
-@click.argument("query", type=click.STRING, required=True)
-@click.pass_context
+@argument("query", type=STRING, required=True)
+@pass_context
 def search(ctx, extended, exact, query):
     """Search packages from all managers."""
     # Build-up a global list of package matches per manager.
@@ -472,8 +481,8 @@ def search(ctx, extended, exact, query):
 
 
 @command(short_help="Install a package.")
-@click.argument("package_id", type=click.STRING, required=True)
-@click.pass_context
+@argument("package_id", type=STRING, required=True)
+@pass_context
 def install(ctx, package_id):
     """Install the provided package using one of the provided package manager."""
     # Cast generator to tuple because of reuse.
@@ -516,7 +525,7 @@ def install(ctx, package_id):
         # Restore default value.
         manager.stop_on_error = default_value
 
-        click.echo(output)
+        echo(output)
         return
 
 
@@ -524,11 +533,11 @@ def install(ctx, package_id):
 @option(
     "-c",
     "--cli-format",
-    type=click.Choice(sorted(CLI_FORMATS), case_sensitive=False),
+    type=Choice(sorted(CLI_FORMATS), case_sensitive=False),
     default="plain",
     help="Format of CLI fields in JSON output.",
 )
-@click.pass_context
+@pass_context
 def outdated(ctx, cli_format):
     """List available package upgrades and their versions for each manager."""
     render_cli = partial(PackageManager.render_cli, cli_format=cli_format)
@@ -606,7 +615,7 @@ def outdated(ctx, cli_format):
 
 
 @command(short_help="Upgrade all packages.")
-@click.pass_context
+@pass_context
 def upgrade(ctx):
     """Perform a full package upgrade on all available managers."""
     for manager in ctx.obj.selected_managers:
@@ -622,8 +631,8 @@ def upgrade(ctx):
 
 
 @command(short_help="Save installed packages to a TOML file.")
-@click.argument("toml_output", type=click.File("w"), default="-")
-@click.pass_context
+@argument("toml_output", type=File("w"), default="-")
+@pass_context
 def backup(ctx, toml_output):
     """Dump the list of installed packages to a TOML file.
 
@@ -677,8 +686,8 @@ def backup(ctx, toml_output):
 
 
 @command(short_help="Install packages in batch as specified by TOML files.")
-@click.argument("toml_files", type=click.File("r"), required=True, nargs=-1)
-@click.pass_context
+@argument("toml_files", type=File("r"), required=True, nargs=-1)
+@pass_context
 def restore(ctx, toml_files):
     """Read TOML files then install or upgrade each package referenced in
     them.
@@ -709,7 +718,7 @@ def restore(ctx, toml_files):
             logger.info(f"Restore {manager.id} packages...")
             for package_id, version in doc[manager.id].items():
                 output = manager.install(package_id)
-                click.echo(output)
+                echo(output)
 
 
 # Group sub-command in sections.

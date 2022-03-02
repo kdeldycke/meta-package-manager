@@ -8,7 +8,7 @@ This version is not released yet and is under active development.
 
 - \[mpm\] Use external workflow for dependency graph generation and Python code
   modernization.
-- \[mpm\] Remove dev dependency on `simplejson` and `pipdeptree`.
+- \[mpm\] Remove direct dependency on `cloup`, `simplejson` and `pipdeptree`.
 
 ## {gh}`4.9.9 (2022-01-15) <compare/v4.9.8...v4.9.9>`
 

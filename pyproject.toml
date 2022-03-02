@@ -71,9 +71,8 @@ classifiers = [
 python = "^3.7"
 boltons = "^21.0.0"
 click = "^8.0.2"
-click-extra = "^1.2.0"
-cloup = "^0.12.1"
-tomli = "^1.2.1"
+click-extra = "^1.6.1"
+tomli = "^2.0.1"
 tomli_w = "^1.0.0"
 
 [tool.poetry.dev-dependencies]

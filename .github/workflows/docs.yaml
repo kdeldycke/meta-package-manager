@@ -16,7 +16,7 @@ jobs:
     name: Generate Sphinx doc and create a PR
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.0.0
       - uses: actions/setup-python@v3.0.0
       - name: Install Sphinx
         run: |
@@ -48,7 +48,7 @@ jobs:
     name: Deploy Sphinx doc
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.0.0
       - uses: actions/setup-python@v3.0.0
         with:
           # XXX Force Python 3.9 to not have 3.10 as default.

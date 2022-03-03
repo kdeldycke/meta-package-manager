@@ -6,6 +6,10 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Fix execution error on Python 3.10 by updating `click-extra`. Closes
+  {issue}`467`.
+- \[mpm\] Reactivate all unittests on Python 3.10.
+- \[mpm\] Remove artifial capping of Python 3.9 to some workflows.
 - \[mpm\] Use external workflow for dependency graph generation and Python code
   modernization.
 - \[mpm\] Remove direct dependency on `cloup`, `simplejson` and `pipdeptree`.

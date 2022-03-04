@@ -118,7 +118,7 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "click-extra"
-version = "1.6.2"
+version = "1.6.4"
 description = "🌈 Extra colorization and configuration file for Click."
 category = "main"
 optional = false
@@ -801,8 +801,8 @@ click = [
     {file = "click-8.0.4.tar.gz", hash = "sha256:8458d7b1287c5fb128c90e23381cf99dcde74beaf6c7ff6384ce84d6fe090adb"},
 ]
 click-extra = [
-    {file = "click-extra-1.6.2.tar.gz", hash = "sha256:b32febd9707bfe712e910da0feacb815d949f7187f86062d7f0db96acc62f48a"},
-    {file = "click_extra-1.6.2-py3-none-any.whl", hash = "sha256:72a60a2929adbd5dd6d227ca7fadf11f0f183a645ea0faf98d6257c0ad042370"},
+    {file = "click-extra-1.6.4.tar.gz", hash = "sha256:456dadbc7c3bfaa5b7364dc2bc4507a65ebc52b4a8e4c76aa946bc107e5a93cc"},
+    {file = "click_extra-1.6.4-py3-none-any.whl", hash = "sha256:96f5747cf71741ec040ef60f33d31e4fb7da22f1d782e7653c97d88e1c508e41"},
 ]
 click-log = [
     {file = "click-log-0.3.2.tar.gz", hash = "sha256:16fd1ca3fc6b16c98cea63acf1ab474ea8e676849dc669d86afafb0ed7003124"},

@@ -1,5 +1,11 @@
 # Changelog
 
+## {gh}`4.9.11 (unreleased) <compare/v4.9.10...main>`
+
+```{{important}}
+This version is not released yet and is under active development.
+```
+
 ## {gh}`4.9.10 (2022-03-09) <compare/v4.9.9...v4.9.10>`
 
 - \[mpm\] Fix execution error on Python 3.10 by updating `click-extra`. Closes

@@ -34,5 +34,5 @@ following config file:
 
 ```toml
 [mpm]
-exclude = ["pip"]
+exclude = [ "pip",]
 ```

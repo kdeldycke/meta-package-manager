@@ -1,6 +1,6 @@
 # Changelog
 
-## {gh}`4.9.11 (unreleased) <compare/v4.9.10...main>`
+## {gh}`4.10.0 (unreleased) <compare/v4.9.10...main>`
 
 ```{{important}}
 This version is not released yet and is under active development.

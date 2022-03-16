@@ -6,6 +6,9 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Always run unittest in parrallel. Adds development dependency on
+  `pytest-xdist` and `psutil`.
+
 ## {gh}`4.9.10 (2022-03-09) <compare/v4.9.9...v4.9.10>`
 
 - \[mpm\] Fix execution error on Python 3.10 by updating `click-extra`. Closes

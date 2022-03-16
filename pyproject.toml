@@ -84,6 +84,7 @@ pytest = "^7.1.0"
 # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html
 pytest-cov = "^3.0.0"
 pytest-randomly = "^3.11.0"
+pytest-xdist = { extras = ["psutil"], version = "^2.5.0" }
 pyyaml = "^6.0"
 sphinx = "^4.4.0"
 sphinx-click = "^3.1.0"
@@ -111,7 +112,7 @@ disable = "C0114, W0511, W1203"
 
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml
-addopts = "--durations=10 --cov-report term --cov=meta_package_manager"
+addopts = "--numprocesses auto --durations=10 --cov-report term --cov=meta_package_manager"
 xfail_strict = true
 
 [tool.coverage.paths]

@@ -27,7 +27,7 @@ from ..version import parse_version
 class Composer(PackageManager):
 
     name = "PHP's Composer"
-    global_args = ("global",)
+    pre_args = ("global",)
     platforms = frozenset({LINUX, MACOS, WINDOWS})
     requirement = "1.4.0"
 
@@ -218,10 +218,14 @@ class Composer(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, self.global_args, "update"]
-        if package_id:
-            cmd.append(package_id)
-        return cmd
+        return (
+            self.pre_cmds,
+            self.cli_path,
+            self.pre_args,
+            "update",
+            self.post_args,
+            package_id,
+        )
 
     def cleanup(self):
         """Runs:

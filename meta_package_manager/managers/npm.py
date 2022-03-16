@@ -301,10 +301,21 @@ class NPM(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None, version=None):
-        cmd_args = ["--global", "--progress=false", "--no-update-notifier"]
+        cmd_args = []
         if package_id:
-            cmd_args.append("install")
-            cmd_args.append(f"{package_id}@{version}" if version else package_id)
+            cmd_args += [
+                "install",
+                f"{package_id}@{version}" if version else package_id,
+            ]
         else:
-            cmd_args.append("update")
-        return [self.cli_path] + cmd_args
+            cmd_args += ["update"]
+        return (
+            self.pre_cmds,
+            self.cli_path,
+            self.pre_args,
+            "--global",
+            "--progress=false",
+            "--no-update-notifier",
+            cmd_args,
+            self.post_args,
+        )

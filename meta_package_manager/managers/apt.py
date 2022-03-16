@@ -246,10 +246,14 @@ class APT(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, "update"]
-        if package_id:
-            cmd.append(package_id)
-        return cmd
+        return (
+            self.pre_cmds,
+            self.cli_path,
+            self.pre_args,
+            "update",
+            package_id,
+            self.post_args,
+        )
 
     def cleanup(self):
         """Runs:
@@ -257,11 +261,20 @@ class APT(PackageManager):
         .. code-block:: shell-session
 
             ► sudo apt-get -y autoremove
+            ► sudo apt-get -y clean
         """
         super().cleanup()
         # Cannot use self.run_cli() because of sudo.
-        self.run("sudo", self.cli_path, "-y", "autoremove")
-        self.run("sudo", self.cli_path, "clean")
+        for commands in (("-y", "autoremove"), "clean"):
+            self.run(
+                self.pre_cmds,
+                "sudo",
+                self.cli_path,
+                self.pre_args,
+                commands,
+                self.post_args,
+                extra_env=self.extra_env,
+            )
 
 
 class APT_Mint(APT):

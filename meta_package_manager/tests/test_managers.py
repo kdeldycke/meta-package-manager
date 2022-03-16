@@ -109,16 +109,24 @@ def test_cli_path(manager):
 @all_managers
 def test_global_args_type(manager):
     """Check that definitions returns CLI args as a list of strings."""
-    assert isinstance(manager.global_args, tuple)
-    for arg in manager.global_args:
-        assert arg
-        assert isinstance(arg, str)
-        assert set(arg).issubset(ascii_letters + digits + "-=")
+    for global_args in (manager.pre_cmds, manager.pre_args, manager.post_args):
+        assert isinstance(global_args, tuple)
+        for arg in global_args:
+            assert arg
+            assert isinstance(arg, str)
+            assert set(arg).issubset(ascii_letters + digits + "-=")
 
 
 @all_managers
-def test_prepend_global_args(manager):
-    assert isinstance(manager.prepend_global_args, bool)
+def test_global_env_type(manager):
+    """Check that definitions environment variables as a dict of strings."""
+    assert manager.extra_env is None or isinstance(manager.extra_env, dict)
+    if manager.extra_env:
+        for key, value in manager.extra_env.items():
+            for item in (key, value):
+                assert item
+                assert isinstance(item, str)
+                assert set(item).issubset(ascii_letters + digits + "_-")
 
 
 @all_managers
@@ -175,20 +183,20 @@ def test_available(manager):
 
 @all_managers
 def test_cli_type(manager):
-    """Check that all methods returning a CLI is either not implemented or returns a list."""
+    """Check that all methods returning a CLI is either not implemented or returns a tuple."""
     try:
         result = manager.upgrade_cli("dummy_package_id")
     except Exception as excpt:
         assert isinstance(excpt, NotImplementedError)
     else:
-        assert isinstance(result, list)
+        assert isinstance(result, tuple)
 
     try:
         result = manager.upgrade_all_cli()
     except Exception as excpt:
         assert isinstance(excpt, NotImplementedError)
     else:
-        assert isinstance(result, list)
+        assert isinstance(result, tuple)
 
 
 @all_managers

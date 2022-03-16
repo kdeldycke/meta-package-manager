@@ -243,15 +243,19 @@ class Yarn(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, "global"]
-
+        cmd_args = []
         if package_id:
-            cmd.append("add")
-            cmd.append(package_id)
+            cmd_args += ["add", package_id]
         else:
-            cmd.append("upgrade")
-
-        return cmd
+            cmd_args += ["upgrade"]
+        return (
+            self.pre_cmds,
+            self.cli_path,
+            self.pre_args,
+            "global",
+            cmd_args,
+            self.post_args,
+        )
 
     def cleanup(self):
         """Remove the shared cache files.

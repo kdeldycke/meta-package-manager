@@ -31,8 +31,7 @@ class Choco(PackageManager):
 
     name = "Chocolatey"
 
-    global_args = ("--no-progress", "--no-color")
-    prepend_global_args = False
+    post_args = ("--no-progress", "--no-color")
 
     """
     .. code-block:: shell-session
@@ -185,11 +184,13 @@ class Choco(PackageManager):
 
             ► choco upgrade all --yes --limit-output --no-progress --no-color
         """
-        return [
+        return (
+            self.pre_cmds,
             self.cli_path,
             "upgrade",
             package_id,
+            self.pre_args,
             "--yes",
             "--limit-output",
-            self.global_args,
-        ]
+            self.post_args,
+        )

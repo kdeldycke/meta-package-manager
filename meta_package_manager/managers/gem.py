@@ -44,8 +44,7 @@ class Gem(PackageManager):
     # Help mpm a little bit in its search for the `gem` binary.
     cli_search_path = ("/usr/local/opt/ruby/bin/gem", "/usr/local/opt/ruby/bin")
 
-    global_args = ("--quiet",)  # Silence command progress meter
-    prepend_global_args = False
+    post_args = ("--quiet",)  # Silence command progress meter
 
     @property
     def installed(self):
@@ -176,7 +175,12 @@ class Gem(PackageManager):
         """
         super().install(package_id)
         return self.run_cli(
-            "install", "--user-install", self.global_args, package_id, skip_globals=True
+            self.pre_args,
+            "install",
+            "--user-install",
+            self.post_args,
+            package_id,
+            skip_globals=True,
         )
 
     @property
@@ -215,7 +219,6 @@ class Gem(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, "update", "--user-install", self.global_args]
         # Installs require `sudo` on system ruby.
         # I (@tresni) recommend doing something like:
         #     ► sudo dseditgroup -o edit -a -t user wheel
@@ -224,9 +227,15 @@ class Gem(PackageManager):
         # uncomment it and save.)
         # if self.cli_path == '/usr/bin/gem':
         #     cmd.insert(0, '/usr/bin/sudo')
-        if package_id:
-            cmd.append(package_id)
-        return cmd
+        return (
+            self.pre_cmds,
+            self.cli_path,
+            self.pre_args,
+            "update",
+            "--user-install",
+            self.post_args,
+            package_id,
+        )
 
     def cleanup(self):
         """ Run ``gem cleanup`` CLI.

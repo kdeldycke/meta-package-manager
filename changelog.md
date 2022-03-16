@@ -6,6 +6,9 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Allow for package managers to simultaneously set a list of
+  pre-commands and environment variables, as well as global arguments before
+  and after the custom ones.
 - \[mpm\] Always run unittest in parrallel. Adds development dependency on
   `pytest-xdist` and `psutil`.
 

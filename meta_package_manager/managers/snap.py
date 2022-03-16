@@ -27,7 +27,7 @@ class Snap(PackageManager):
 
     requirement = "2.0.0"
 
-    global_args = ("--color=never",)
+    pre_args = ("--color=never",)
 
     version_regex = r"snap\s+(?P<version>\S+)"
     """
@@ -160,7 +160,11 @@ class Snap(PackageManager):
         """Snap has an auto-update function, but snaps can be updated
         manually.
         """
-        cmd = [self.cli_path, self.global_args, "refresh"]
-        if package_id:
-            cmd.append(package_id)
-        return cmd
+        return (
+            self.pre_cmds,
+            self.cli_path,
+            self.pre_args,
+            "refresh",
+            self.post_args,
+            package_id,
+        )

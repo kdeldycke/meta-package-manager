@@ -100,17 +100,30 @@ class PackageManager:
     works well on all platforms.
     """
 
-    global_args = ()
-    """Global list of options used for each call to the package manager CLI.
+    extra_env = None
+    """Additional environment variables to add to the current context.
+
+    Automaticcaly applied on each :py:func:`meta_package_manager.base.PackageManager.run_cli`
+    calls.
+    """
+
+    pre_cmds = ()
+    """Global list of pre-commands to add before before invoked CLI.
 
     Automaticcaly added to each :py:func:`meta_package_manager.base.PackageManager.run_cli`
     call.
 
-    Usually used to force silencing, low verbosity or no color output.
+    Used to prepend ``sudo`` or other CLIs.
     """
 
-    prepend_global_args = True
-    """Add the global args either at the begginning (``True``) or the end (``False``) of the CLI.
+    pre_args = ()
+    post_args = ()
+    """Global list of options used before and after the invoked package manager CLI.
+
+    Automaticcaly added to each :py:func:`meta_package_manager.base.PackageManager.run_cli`
+    call.
+
+    Essentially used to force silencing, low verbosity or no-color output.
     """
 
     stop_on_error = False
@@ -210,7 +223,9 @@ class PackageManager:
         if self.executable:
             # Invoke the manager.
             output = self.run_cli(
-                self.version_cli_options, skip_globals=True, force_exec=True
+                self.version_cli_options,
+                skip_globals=True,
+                force_exec=True,
             )
 
             # Extract the version with the regex.
@@ -266,11 +281,12 @@ class PackageManager:
         """
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
-    def run(self, *args):
+    def run(self, *args, extra_env=None):
         """Run a shell command, return the output and accumulate error messages.
 
-        args is allowed to be a nested structure of iterables, in which case it will
-        be recursively flatten, and each item within casted to strings.
+        ``args`` is allowed to be a nested structure of iterables, in which case it will
+        be recursively flatten, then ``None`` will be discarded, and finally each item
+        casted to strings.
 
         Running commands with that method:
           * adds logs at the appropriate level
@@ -283,7 +299,7 @@ class PackageManager:
             Move ``--dry-run`` option and this method to click-extra?
         """
         # Casting to string helps serialize Path and Version objects.
-        args = list(map(str, flatten(args)))
+        args = tuple(map(str, filter(None.__ne__, flatten(args))))
         args_str = theme.invoked_command(" ".join(args))
         cli_msg = f"{PROMPT}{args_str}"
 
@@ -295,7 +311,7 @@ class PackageManager:
             logger.warning(f"Dry-run: {cli_msg}")
         else:
             logger.debug(cli_msg)
-            code, output, error = run(*args)
+            code, output, error = run(*args, extra_env=extra_env)
 
         # Normalize messages.
         if error:
@@ -328,19 +344,25 @@ class PackageManager:
         """Shortcut utility to the ``run`` method above, that is explicitly using the
         binary set by the ``cli_path`` property.
 
-        ``global_args`` are automaticcaly added before the provided args unless
-        ``prepend_global_args`` is ``False``. if ``skip_globals`` is ``True`` global arguments
-        are not added whatsoever to the list of provided ``args``.
+        ``self.extra_env`` is used for environment variables during execution.
 
-        Also offer the possibility to force the execution and completion of the command
-        regardless of ``--dry-run`` and ``--stop-on-error`` user options.
+        ``self.pre_cmd`` global is added before the CLI path.
+
+        ``self.pre_args`` and ``self.post_args`` globals are added before and after
+        the provided args.
+
+        If ``skip_globals`` is ``True`` global environment variables, pre-commands and
+        arguments are not added whatsoever and the CLI is run bare, not unlike a call to the plain ``run()``.
+
+        Also offer by the way of the ``force_exec`` parameter the possibility to force
+        the execution and completion of the command regardless of ``--dry-run`` and
+        ``--stop-on-error`` user options.
         """
         # Prepare the full list of CLI arguments.
+        extra_env = None
         if not skip_globals:
-            if self.prepend_global_args:
-                args = list(self.global_args) + list(args)
-            else:
-                args = list(args) + list(self.global_args)
+            args = list(self.pre_args) + list(args) + list(self.post_args)
+            extra_env = self.extra_env
 
         # Temporarily replace --dry-run and --stop-on-error user options with our own.
         if force_exec:
@@ -348,7 +370,7 @@ class PackageManager:
             self.dry_run, self.stop_on_error = False, False
 
         # Execute the command.
-        output = self.run(self.cli_path, args)
+        output = self.run(self.pre_cmds, self.cli_path, args, extra_env=extra_env)
 
         # Restore user options for --dry-run and --stop-on-error.
         if force_exec:
@@ -411,7 +433,7 @@ class PackageManager:
 
     def upgrade(self, package_id=None):
         """Perform the upgrade of the provided package to latest version."""
-        return self.run(self.upgrade_cli(package_id))
+        return self.run(self.upgrade_cli(package_id), extra_env=self.extra_env)
 
     def upgrade_all_cli(self):
         """Return a shell-compatible full-CLI to upgrade all packages.
@@ -427,7 +449,7 @@ class PackageManager:
         fall-back to calling single-package upgrade one by one.
         """
         try:
-            return self.run(self.upgrade_all_cli())
+            return self.run(self.upgrade_all_cli(), extra_env=self.extra_env)
         except NotImplementedError:
             logger.warning(f"{self.id} does not implement upgrade_all command.")
             logger.info(f"Call single-package upgrade CLI one by one.")
@@ -447,7 +469,7 @@ class PackageManager:
         * ``fragments`` returns a list of strings
         * ``xbar`` returns a CLI with parameters formatted into the xbar dialect
         """
-        assert isinstance(cmd, list)
+        assert isinstance(cmd, tuple)
         assert cli_format in CLI_FORMATS
         cmd = map(str, flatten(cmd))  # Serialize Path instances.
 

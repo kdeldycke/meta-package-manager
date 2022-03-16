@@ -45,14 +45,8 @@ class TestXbarPlugin:
         ),
     ]
 
-    def xbar_output_checks(self, checklist, env=None):
-        if env:
-            for var, value in env.items():
-                os.environ[var] = value
-        code, output, error = run_cmd(xbar.__file__)
-        if env:
-            for var in env:
-                del os.environ[var]
+    def xbar_output_checks(self, checklist, extra_env=None):
+        code, output, error = run_cmd(xbar.__file__, extra_env=extra_env)
         assert code == 0
         assert error is None
 
@@ -97,5 +91,5 @@ class TestXbarPlugin:
                     True,
                 ),
             ],
-            env={"VAR_SUBMENU_LAYOUT": "True"},
+            extra_env={"VAR_SUBMENU_LAYOUT": "True"},
         )

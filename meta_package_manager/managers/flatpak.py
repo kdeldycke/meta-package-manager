@@ -201,10 +201,15 @@ class Flatpak(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, self.global_args, "update", "--noninteractive"]
-        if package_id:
-            cmd.append(package_id)
-        return cmd
+        return (
+            self.pre_cmds,
+            self.cli_path,
+            self.pre_args,
+            "update",
+            "--noninteractive",
+            self.post_args,
+            package_id,
+        )
 
     def cleanup(self):
         """Runs:

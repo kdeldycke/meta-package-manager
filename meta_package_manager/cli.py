@@ -570,7 +570,7 @@ def outdated(ctx, cli_format):
             except NotImplementedError:
                 # Fallback on mpm itself which is capable of simulating a full
                 # upgrade.
-                upgrade_all_cli = ["mpm", "--manager", manager.id, "upgrade"]
+                upgrade_all_cli = ("mpm", "--manager", manager.id, "upgrade")
             outdated_data[manager.id]["upgrade_all_cli"] = render_cli(upgrade_all_cli)
 
         # Serialize errors at the last minute to gather all we encountered.

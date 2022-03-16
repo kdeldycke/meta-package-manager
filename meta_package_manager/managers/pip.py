@@ -41,13 +41,13 @@ class Pip(PackageManager):
     # default `python` CLI tied to the Python 2.x ecosystem.
     cli_names = ("python3", "python")
 
-    global_args = (
+    pre_args = (
         "-m",
         "pip",  # Canonical call to Python's pip module.
         "--no-color",  # Suppress colored output.
     )
 
-    version_cli_options = tuple(list(global_args) + ["--version"])
+    version_cli_options = tuple(list(pre_args) + ["--version"])
     version_regex = r"pip\s+(?P<version>\S+)"
     """
     .. code-block:: shell-session
@@ -293,14 +293,15 @@ class Pip(PackageManager):
                   Successfully uninstalled six-1.14.0
             Successfully installed six-1.15.0
         """
-        return [
+        return (
             self.cli_path,
-            self.global_args,
+            self.pre_args,
             "install",
             "--user",
             "--upgrade",
+            self.post_args,
             package_id,
-        ]
+        )
 
     def upgrade_all_cli(self):
         """Pip lacks support of a proper full upgrade command. Raising an

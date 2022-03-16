@@ -180,7 +180,11 @@ class MAS(PackageManager):
         return outdated
 
     def upgrade_cli(self, package_id=None):
-        cmd = [self.cli_path, "upgrade"]
-        if package_id:
-            cmd.append(package_id)
-        return cmd
+        return (
+            self.pre_cmds,
+            self.cli_path,
+            self.pre_args,
+            "upgrade",
+            package_id,
+            self.post_args,
+        )

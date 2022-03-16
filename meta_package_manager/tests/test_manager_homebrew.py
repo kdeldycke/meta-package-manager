@@ -51,10 +51,13 @@ def install_cask():
         git_checkout(package_id, commit)
         # Install the cask but bypass its local cache auto-update: we want to
         # force brew to rely on our formula from the past.
-        os.environ["HOMEBREW_NO_AUTO_UPDATE"] = "1"
-        code, output, error = run_cmd("brew", "reinstall", "--cask", package_id)
-        # Reset our temporary environment variable.
-        del os.environ["HOMEBREW_NO_AUTO_UPDATE"]
+        code, output, error = run_cmd(
+            "brew",
+            "reinstall",
+            "--cask",
+            package_id,
+            extra_env={"HOMEBREW_NO_AUTO_UPDATE": "1"},
+        )
         # Restore old formula to its most recent version.
         git_checkout(package_id, "HEAD")
         # Check the cask has been properly installed.

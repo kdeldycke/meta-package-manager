@@ -413,10 +413,14 @@ class Homebrew(PackageManager):
             ==> Purging files for version 2.0.7 of Cask aerial
             🍺  aerial was successfully upgraded!
         """
-        cmd = [self.cli_path, "upgrade", self.global_args]
-        if package_id:
-            cmd.append(package_id)
-        return cmd
+        return (
+            self.pre_cmds,
+            self.cli_path,
+            "upgrade",
+            self.pre_args,
+            self.post_args,
+            package_id,
+        )
 
     def cleanup(self):
         """Scrub the cache, including latest version's downloads. Also remove unused
@@ -471,7 +475,7 @@ class Brew(Homebrew):
     name = "Homebrew Formulae"
     cli_names = ("brew",)
 
-    global_args = ("--formula",)
+    post_args = ("--formula",)
 
 
 class Cask(Homebrew):
@@ -481,4 +485,6 @@ class Cask(Homebrew):
     name = "Homebrew Cask"
     cli_names = ("brew",)
 
-    global_args = ("--cask",)
+    post_args = ("--cask",)
+    # HOMEBREW_CASK_OPTS = "--no-quarantine"
+    # HOMEBREW_NO_AUTO_UPDATE=1

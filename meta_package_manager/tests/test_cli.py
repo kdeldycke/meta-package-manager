@@ -66,8 +66,8 @@ class TestBaseCLI:
         assert " │ pip │ " in result.stdout
         assert " │ npm │ " in result.stdout
         assert " │ gem │ " in result.stdout
-        assert "brew" not in result.stdout
-        assert "cask" not in result.stdout
+        assert " brew " not in result.stdout
+        assert " brew cask " not in result.stdout
         assert "debug: " in result.stderr
 
     def test_conf_file_cli_override(self, invoke, create_config):
@@ -84,8 +84,8 @@ class TestBaseCLI:
         assert " │ pip │ " in result.stdout
         assert " │ npm │ " in result.stdout
         assert " │ gem │ " in result.stdout
-        assert "brew" not in result.stdout
-        assert "cask" not in result.stdout
+        assert " brew " not in result.stdout
+        assert " cask " not in result.stdout
         assert "error: " not in result.stderr
         assert "warning: " not in result.stderr
         assert "info: " not in result.stderr

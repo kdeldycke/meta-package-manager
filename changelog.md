@@ -11,6 +11,8 @@ This version is not released yet and is under active development.
   and after the custom ones.
 - \[mpm\] Always run unittest in parrallel. Adds development dependency on
   `pytest-xdist` and `psutil`.
+- \[mpm\] Use the `tomllib` from the standard library starting with Python
+  3.11.
 
 ## {gh}`4.9.10 (2022-03-09) <compare/v4.9.9...v4.9.10>`
 

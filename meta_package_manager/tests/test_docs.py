@@ -17,14 +17,19 @@
 
 import json
 import re
+import sys
 from collections import Counter
 from pathlib import Path
 
-import tomli
 from boltons.iterutils import flatten
 from click_extra.platform import OS_DEFINITIONS, os_label
 from click_extra.tests.conftest import unless_linux
 from yaml import Loader, load
+
+if sys.version_info >= (3, 11):
+     import tomllib
+ else:
+     import tomli as tomllib
 
 from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_LABELS, PLATFORM_PREFIX
 from ..pool import ALL_MANAGER_IDS, pool
@@ -46,7 +51,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 def test_project_metadata():
     # Fetch general information about the project from pyproject.toml.
     toml_path = Path(__file__).parent.joinpath("../../pyproject.toml").resolve()
-    toml_config = tomli.loads(toml_path.read_text())
+    toml_config = tomllib.loads(toml_path.read_text())
     # Check all managers are referenced in Python package keywords.
     assert set(ALL_MANAGER_IDS).issubset(toml_config["tool"]["poetry"]["keywords"])
 

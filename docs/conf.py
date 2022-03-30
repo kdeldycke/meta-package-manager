@@ -1,12 +1,16 @@
+import sys
 from pathlib import Path
 
-import tomli
+if sys.version_info >= (3, 11):
+     import tomllib
+ else:
+     import tomli as tomllib
 
 project_path = Path(__file__).parent.parent.resolve()
 
 # Fetch general information about the project from pyproject.toml.
 toml_path = project_path / "pyproject.toml"
-toml_config = tomli.loads(toml_path.read_text())
+toml_config = tomllib.loads(toml_path.read_text())
 
 # Redistribute pyproject.toml config to Sphinx.
 project_id = toml_config["tool"]["poetry"]["name"]

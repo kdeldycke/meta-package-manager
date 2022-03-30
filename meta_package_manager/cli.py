@@ -17,6 +17,7 @@
 
 import logging
 import re
+import sys
 from collections import namedtuple
 from datetime import datetime
 from functools import partial
@@ -24,7 +25,6 @@ from io import TextIOWrapper
 from operator import getitem
 from pathlib import Path
 
-import tomli
 import tomli_w
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import complement_int_list, int_ranges_from_int_list
@@ -44,6 +44,11 @@ from click_extra.colorize import KO, OK, theme
 from click_extra.logging import logger
 from click_extra.platform import os_label
 from click_extra.tabulate import table_format_option
+
+if sys.version_info >= (3, 11):
+     import tomllib
+ else:
+     import tomli as tomllib
 
 from . import __version__
 from .base import CLI_FORMATS, CLIError, PackageManager
@@ -700,7 +705,7 @@ def restore(ctx, toml_files):
         toml_filepath = toml_input.name if is_stdin else Path(toml_input.name).resolve()
         logger.info(f"Load package list from {toml_filepath}")
 
-        doc = tomli.loads(toml_input.read())
+        doc = tomllib.loads(toml_input.read())
 
         # List unrecognized sections.
         ignored_sections = [

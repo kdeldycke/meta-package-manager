@@ -46,9 +46,9 @@ from click_extra.platform import os_label
 from click_extra.tabulate import table_format_option
 
 if sys.version_info >= (3, 11):
-     import tomllib
- else:
-     import tomli as tomllib
+    import tomllib
+else:
+    import tomli as tomllib
 
 from . import __version__
 from .base import CLI_FORMATS, CLIError, PackageManager

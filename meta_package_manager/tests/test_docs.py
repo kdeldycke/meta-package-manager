@@ -28,7 +28,7 @@ from yaml import Loader, load
 
 if sys.version_info >= (3, 11):
      import tomllib
- else:
+else:
      import tomli as tomllib
 
 from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_LABELS, PLATFORM_PREFIX

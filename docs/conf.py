@@ -3,7 +3,7 @@ from pathlib import Path
 
 if sys.version_info >= (3, 11):
      import tomllib
- else:
+else:
      import tomli as tomllib
 
 project_path = Path(__file__).parent.parent.resolve()

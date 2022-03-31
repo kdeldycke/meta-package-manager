@@ -70,8 +70,8 @@ classifiers = [
 # https://en.wikipedia.org/wiki/History_of_Python#Support
 python = "^3.7"
 boltons = "^21.0.0"
-click = "^8.0.2"
-click-extra = "^1.6.4"
+click = "^8.1.1"
+click-extra = "<1.7.0"
 tomli = { version = "^2.0.1", python = "< 3.11" }
 tomli_w = "^1.0.0"
 

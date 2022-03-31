@@ -13,6 +13,8 @@ This version is not released yet and is under active development.
   `pytest-xdist` and `psutil`.
 - \[mpm\] Use the `tomllib` from the standard library starting with Python
   3.11.
+- \[mpm\] Cap `click-extra` requirement to `<1.7.0` to fix regression. Closes
+  {issue}`518`.
 
 ## {gh}`4.9.10 (2022-03-09) <compare/v4.9.9...v4.9.10>`
 

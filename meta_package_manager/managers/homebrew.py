@@ -52,7 +52,12 @@ class Homebrew(PackageManager):
         Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
     """
 
-    prepend_global_args = False
+    extra_env = {
+        # Disable analytics.
+        "HOMEBREW_NO_ANALYTICS": "1",
+        # Disable configuration hints to reduce verbosity.
+        "HOMEBREW_NO_ENV_HINTS": "1",
+    }
 
     def sync(self):
         """Fetch content of remote taps.

@@ -27,9 +27,9 @@ from click_extra.tests.conftest import unless_linux
 from yaml import Loader, load
 
 if sys.version_info >= (3, 11):
-     import tomllib
+    import tomllib
 else:
-     import tomli as tomllib
+    import tomli as tomllib
 
 from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_LABELS, PLATFORM_PREFIX
 from ..pool import ALL_MANAGER_IDS, pool

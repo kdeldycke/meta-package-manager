@@ -150,7 +150,9 @@ def print_menu():
     code = None
     error = None
     try:
-        process = subprocess.run(("mpm", "--version"), capture_output=True, encoding="utf-8")
+        process = subprocess.run(
+            ("mpm", "--version"), capture_output=True, encoding="utf-8"
+        )
         code = process.returncode
         error = process.stderr
     except FileNotFoundError as excpt:
@@ -197,15 +199,19 @@ def print_menu():
     subprocess.run(("mpm", "sync"))
 
     # Fetch outdated package form all package manager available on the system.
-    process = subprocess.run((
-        "mpm",
-        "--verbosity",
-        "ERROR",
-        "--output-format",
-        "json",
-        "outdated",
-        "--cli-format",
-        "xbar"), capture_output=True, encoding="utf-8"
+    process = subprocess.run(
+        (
+            "mpm",
+            "--verbosity",
+            "ERROR",
+            "--output-format",
+            "json",
+            "outdated",
+            "--cli-format",
+            "xbar",
+        ),
+        capture_output=True,
+        encoding="utf-8",
     )
 
     # Bail-out immediately on errors related to mpm self-execution or if mpm is

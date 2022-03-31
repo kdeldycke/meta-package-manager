@@ -9,9 +9,6 @@ name: Changelog & versions
       - .bumpversion.cfg
       - .github/workflows/changelog.yaml
       - .github/workflows/release.yaml
-  schedule:
-    # Run daily so the changelog date in prepare-release job is kept up to date
-    - cron: "23 0 * * *"
 
 jobs:
 

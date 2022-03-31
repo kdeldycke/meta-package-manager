@@ -71,7 +71,7 @@ classifiers = [
 python = "^3.7"
 boltons = "^21.0.0"
 click = "^8.1.1"
-click-extra = "<1.7.0"
+click-extra = { git = "https://github.com/kdeldycke/click-extra.git", rev = "b9fa8b8d984aa939718e4c4d2d0b2d7a8e695bd0" }
 tomli = { version = "^2.0.1", python = "< 3.11" }
 tomli_w = "^1.0.0"
 

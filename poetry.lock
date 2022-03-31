@@ -118,26 +118,33 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "click-extra"
-version = "1.6.4"
+version = "1.7.1"
 description = "🌈 Extra colorization and configuration file for Click."
 category = "main"
 optional = false
-python-versions = ">=3.7,<4.0"
+python-versions = "^3.7"
+develop = false
 
 [package.dependencies]
-boltons = ">=21.0.0,<22.0.0"
-cli-helpers = ">=2.2.0,<3.0.0"
-click = ">=8.0.4,<9.0.0"
-click-log = ">=0.3.2,<0.4.0"
-cloup = ">=0.13.0,<0.14.0"
-pyyaml = ">=6.0.0,<7.0.0"
-requests = ">=2.27.1,<3.0.0"
-tabulate = {version = ">=0.8.9,<0.9.0", extras = ["widechars"]}
-tomli = ">=2.0.0,<3.0.0"
+boltons = "^21.0.0"
+cli-helpers = "^2.2.0"
+click = "^8.1.1"
+click-log = "^0.4.0"
+cloup = "^0.13.0"
+pyyaml = "^6.0.0"
+requests = "^2.27.1"
+tabulate = {version = "^0.8.9", extras = ["widechars"]}
+tomli = {version = "^2.0.0", markers = "python_version < \"3.11\""}
+
+[package.source]
+type = "git"
+url = "https://github.com/kdeldycke/click-extra.git"
+reference = "b9fa8b8d984aa939718e4c4d2d0b2d7a8e695bd0"
+resolved_reference = "b9fa8b8d984aa939718e4c4d2d0b2d7a8e695bd0"
 
 [[package]]
 name = "click-log"
-version = "0.3.2"
+version = "0.4.0"
 description = "Logging integration for Click"
 category = "main"
 optional = false
@@ -806,7 +813,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "77a3a2e12b052219a6a8e4d55fa1776bc0fea6eb0eed42ac0e58e69945cfec9d"
+content-hash = "e152ca1f980634392ccaf55b429fa01bd4734b6eb7bad19380b73eaba3f6ff1e"
 
 [metadata.files]
 alabaster = [
@@ -853,13 +860,10 @@ click = [
     {file = "click-8.1.1-py3-none-any.whl", hash = "sha256:5e0d195c2067da3136efb897449ec1e9e6c98282fbf30d7f9e164af9be901a6b"},
     {file = "click-8.1.1.tar.gz", hash = "sha256:7ab900e38149c9872376e8f9b5986ddcaf68c0f413cf73678a0bca5547e6f976"},
 ]
-click-extra = [
-    {file = "click-extra-1.6.4.tar.gz", hash = "sha256:456dadbc7c3bfaa5b7364dc2bc4507a65ebc52b4a8e4c76aa946bc107e5a93cc"},
-    {file = "click_extra-1.6.4-py3-none-any.whl", hash = "sha256:96f5747cf71741ec040ef60f33d31e4fb7da22f1d782e7653c97d88e1c508e41"},
-]
+click-extra = []
 click-log = [
-    {file = "click-log-0.3.2.tar.gz", hash = "sha256:16fd1ca3fc6b16c98cea63acf1ab474ea8e676849dc669d86afafb0ed7003124"},
-    {file = "click_log-0.3.2-py2.py3-none-any.whl", hash = "sha256:eee14dc37cdf3072158570f00406572f9e03e414accdccfccd4c538df9ae322c"},
+    {file = "click-log-0.4.0.tar.gz", hash = "sha256:3970f8570ac54491237bcdb3d8ab5e3eef6c057df29f8c3d1151a51a9c23b975"},
+    {file = "click_log-0.4.0-py2.py3-none-any.whl", hash = "sha256:a43e394b528d52112af599f2fc9e4b7cf3c15f94e53581f74fa6867e68c91756"},
 ]
 cloup = [
     {file = "cloup-0.13.0-py2.py3-none-any.whl", hash = "sha256:2b389c85f26e910a27c491ffa8ebc41a79431a320b8f1a49b1614fdd2f2b43cf"},

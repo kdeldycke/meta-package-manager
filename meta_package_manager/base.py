@@ -28,7 +28,7 @@ from boltons.typeutils import classproperty
 from click_extra.colorize import theme
 from click_extra.logging import logger
 from click_extra.platform import CURRENT_OS_ID
-from click_extra.run import INDENT, PROMPT, run
+from click_extra.run import INDENT, PROMPT, run_cmd
 
 from .version import parse_version
 
@@ -311,15 +311,13 @@ class PackageManager:
             logger.warning(f"Dry-run: {cli_msg}")
         else:
             logger.debug(cli_msg)
-            code, output, error = run(*args, extra_env=extra_env)
+            code, output, error = run_cmd(*args, extra_env=extra_env, print_output=False)
 
         # Normalize messages.
         if error:
             error = dedent(strip_ansi(error).strip())
-            error = error if error else None
         if output:
             output = dedent(strip_ansi(output).strip())
-            output = output if output else None
 
         # Log <stdout> and <stderr> output.
         if output:

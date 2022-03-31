@@ -16,9 +16,10 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
+import subprocess
 from collections import Counter
 
-from click_extra.run import run_cmd
+from click_extra.run import extend_env
 from click_extra.tests.conftest import unless_macos
 
 from .. import xbar
@@ -45,15 +46,16 @@ class TestXbarPlugin:
     ]
 
     def xbar_output_checks(self, checklist, extra_env=None):
-        code, output, error = run_cmd(xbar.__file__, extra_env=extra_env)
-        assert code == 0
-        assert error is None
+        process = subprocess.run(xbar.__file__, capture_output=True, encoding="utf-8" , env=extend_env(extra_env))
+
+        assert process.returncode == 0
+        assert not process.stderr
 
         checks = checklist + self.common_checklist
 
         match_counter = Counter()
 
-        for line in output.splitlines():
+        for line in process.stdout.splitlines():
             # The line is expected to match at least one regexp.
             matches = False
             for index, (regex, _) in enumerate(checks):
@@ -62,7 +64,7 @@ class TestXbarPlugin:
                     match_counter[index] += 1
                     break
             if not matches:
-                print(repr(output))
+                print(repr(process.stdout))
                 raise Exception(f"xbar output line {line!r} did not match any regexp.")
 
         # Check all required regexp did match at least once.

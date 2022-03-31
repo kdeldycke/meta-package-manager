@@ -24,8 +24,8 @@ Python 3.7.3 or newer.
 import json
 import os
 import re
+import subprocess
 from operator import itemgetter
-from subprocess import PIPE, Popen
 
 SUBMENU_LAYOUT = bool(
     os.environ.get("VAR_SUBMENU_LAYOUT", False)
@@ -78,21 +78,6 @@ def fix_environment():
             "/opt/local/sbin",
             os.environ.get("PATH", ""),
         )
-    )
-
-
-def run(*args):
-    """Run a shell command, return error code, output and error message."""
-    assert isinstance(args, tuple)
-    try:
-        process = Popen(args, stdout=PIPE, stderr=PIPE)
-    except OSError:
-        return None, None, f"`{args[0]}` executable not found."
-    output, error = process.communicate()
-    return (
-        process.returncode,
-        output.decode("utf-8") if output else None,
-        error.decode("utf-8") if error else None,
     )
 
 
@@ -162,7 +147,14 @@ def print_menu():
     See: https://github.com/matryer/xbar#plugin-api
     """
     # Search for generic mpm CLI on system.
-    code, output, error = run("mpm", "--version")
+    code = None
+    error = None
+    try:
+        process = subprocess.run(("mpm", "--version"), capture_output=True, encoding="utf-8")
+        code = process.returncode
+        error = process.stderr
+    except FileNotFoundError as excpt:
+        error = excpt
 
     mpm_installed = False
     mpm_up_to_date = False
@@ -172,7 +164,7 @@ def print_menu():
         # Is mpm too old?
         version_string = (
             re.compile(r".*\s+(?P<version>[0-9\.]+)$", re.MULTILINE)
-            .search(output)
+            .search(process.stdout)
             .groupdict()["version"]
         )
         mpm_version = tuple(map(int, version_string.split(".")))
@@ -202,22 +194,29 @@ def print_menu():
         return
 
     # Force a sync of all local package databases.
-    run("mpm", "sync")
+    subprocess.run(("mpm", "sync"))
 
     # Fetch outdated package form all package manager available on the system.
-    _, output, error = run(
-        "mpm", "--output-format", "json", "outdated", "--cli-format", "xbar"
+    process = subprocess.run((
+        "mpm",
+        "--verbosity",
+        "ERROR",
+        "--output-format",
+        "json",
+        "outdated",
+        "--cli-format",
+        "xbar"), capture_output=True, encoding="utf-8"
     )
 
     # Bail-out immediately on errors related to mpm self-execution or if mpm is
     # not able to produce any output.
-    if error or not output:
+    if process.stderr or not process.sdout:
         print_error_header()
-        print_error(error)
+        print_error(process.stderr)
         return
 
     # Sort outdated packages by manager's name.
-    managers = sorted(json.loads(output).values(), key=itemgetter("name"))
+    managers = sorted(json.loads(process.stdout).values(), key=itemgetter("name"))
 
     # Print menu bar icon with number of available upgrades.
     total_outdated = sum(len(m["packages"]) for m in managers)

@@ -15,10 +15,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import os
+import subprocess
 
 import pytest
-from click_extra.run import run_cmd
+from click_extra.run import extend_env
 from click_extra.tests.conftest import destructive, unless_macos
 
 # Default location of Homebrew Cask formulas on macOS. This is supposed to be a
@@ -33,45 +33,46 @@ def install_cask():
     packages = set()
 
     def git_checkout(package_id, commit):
-        code, _, _ = run_cmd(
+        process = subprocess.run((
             "git", "-C", CASK_PATH, "checkout", commit, f"{package_id}.rb"
-        )
-        assert code == 0
+        ))
+        assert process.returncode == 0
 
     def _install_cask(package_id, commit):
         packages.add(package_id)
         # Deepen homebrew repository copy so we can dig into the past.
         # Arbitrary set oldest reference to 2018-01-01, which gives us enough
         # to dig into the past.
-        code, _, _ = run_cmd(
+        process = subprocess.run((
             "git", "-C", CASK_PATH, "fetch", "--shallow-since=2018-01-01"
-        )
-        assert code == 0
+        ))
+        assert process.returncode == 0
         # Fetch locally the old version of the Cask's formula.
         git_checkout(package_id, commit)
         # Install the cask but bypass its local cache auto-update: we want to
         # force brew to rely on our formula from the past.
-        code, output, error = run_cmd(
+        process = subprocess.run((
             "brew",
             "reinstall",
             "--cask",
-            package_id,
-            extra_env={"HOMEBREW_NO_AUTO_UPDATE": "1"},
+            package_id)
+            , capture_output=True, encoding="utf-8",
+            env=extend_env({"HOMEBREW_NO_AUTO_UPDATE": "1"})
         )
         # Restore old formula to its most recent version.
         git_checkout(package_id, "HEAD")
         # Check the cask has been properly installed.
-        assert code == 0
-        if error:
-            assert "is already installed" not in error
-        assert f"{package_id} was successfully installed!" in output
-        return output
+        assert process.returncode == 0
+        if process.stderr:
+            assert "is already installed" not in process.stderr
+        assert f"{package_id} was successfully installed!" in process.stdout
+        return process.stdout
 
     yield _install_cask
 
     # Remove all installed packages.
     for package_id in packages:
-        run_cmd("brew", "uninstall", "--cask", "--force", package_id)
+        subprocess.run(("brew", "uninstall", "--cask", "--force", package_id))
 
 
 @destructive

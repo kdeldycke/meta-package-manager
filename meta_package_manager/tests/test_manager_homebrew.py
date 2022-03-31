@@ -33,9 +33,9 @@ def install_cask():
     packages = set()
 
     def git_checkout(package_id, commit):
-        process = subprocess.run((
-            "git", "-C", CASK_PATH, "checkout", commit, f"{package_id}.rb"
-        ))
+        process = subprocess.run(
+            ("git", "-C", CASK_PATH, "checkout", commit, f"{package_id}.rb")
+        )
         assert process.returncode == 0
 
     def _install_cask(package_id, commit):
@@ -43,21 +43,19 @@ def install_cask():
         # Deepen homebrew repository copy so we can dig into the past.
         # Arbitrary set oldest reference to 2018-01-01, which gives us enough
         # to dig into the past.
-        process = subprocess.run((
-            "git", "-C", CASK_PATH, "fetch", "--shallow-since=2018-01-01"
-        ))
+        process = subprocess.run(
+            ("git", "-C", CASK_PATH, "fetch", "--shallow-since=2018-01-01")
+        )
         assert process.returncode == 0
         # Fetch locally the old version of the Cask's formula.
         git_checkout(package_id, commit)
         # Install the cask but bypass its local cache auto-update: we want to
         # force brew to rely on our formula from the past.
-        process = subprocess.run((
-            "brew",
-            "reinstall",
-            "--cask",
-            package_id)
-            , capture_output=True, encoding="utf-8",
-            env=extend_env({"HOMEBREW_NO_AUTO_UPDATE": "1"})
+        process = subprocess.run(
+            ("brew", "reinstall", "--cask", package_id),
+            capture_output=True,
+            encoding="utf-8",
+            env=extend_env({"HOMEBREW_NO_AUTO_UPDATE": "1"}),
         )
         # Restore old formula to its most recent version.
         git_checkout(package_id, "HEAD")

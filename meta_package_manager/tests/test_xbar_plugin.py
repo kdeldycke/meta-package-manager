@@ -46,7 +46,12 @@ class TestXbarPlugin:
     ]
 
     def xbar_output_checks(self, checklist, extra_env=None):
-        process = subprocess.run(xbar.__file__, capture_output=True, encoding="utf-8" , env=extend_env(extra_env))
+        process = subprocess.run(
+            xbar.__file__,
+            capture_output=True,
+            encoding="utf-8",
+            env=extend_env(extra_env),
+        )
 
         assert process.returncode == 0
         assert not process.stderr

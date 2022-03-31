@@ -311,7 +311,9 @@ class PackageManager:
             logger.warning(f"Dry-run: {cli_msg}")
         else:
             logger.debug(cli_msg)
-            code, output, error = run_cmd(*args, extra_env=extra_env, print_output=False)
+            code, output, error = run_cmd(
+                *args, extra_env=extra_env, print_output=False
+            )
 
         # Normalize messages.
         if error:

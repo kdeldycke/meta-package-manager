@@ -196,7 +196,7 @@ def print_menu():
         return
 
     # Force a sync of all local package databases.
-    subprocess.run(("mpm", "sync"))
+    subprocess.run(("mpm", "--verbosity", "ERROR", "sync"))
 
     # Fetch outdated package form all package manager available on the system.
     process = subprocess.run(

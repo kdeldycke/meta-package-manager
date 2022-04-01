@@ -216,7 +216,7 @@ def print_menu():
 
     # Bail-out immediately on errors related to mpm self-execution or if mpm is
     # not able to produce any output.
-    if process.stderr or not process.sdout:
+    if process.stderr or not process.stdout:
         print_error_header()
         print_error(process.stderr)
         return

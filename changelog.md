@@ -8,6 +8,7 @@ This version is not released yet and is under active development.
 
 - \[brew,cask\] Disable analytics and env hints in logs.
 - \[xbar\] Fix log verbosity and unittests for xbar plugin.
+- \[mpm\] Show in debug logs the extra environment variable used for CLIs.
 - \[mpm\] Enforce code structure in package manager definition files.
 - \[mpm\] Fix documentation generation.
 

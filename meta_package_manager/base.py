@@ -32,7 +32,7 @@ from boltons.strutils import strip_ansi
 from boltons.typeutils import classproperty
 from click_extra.colorize import theme
 from click_extra.platform import CURRENT_OS_ID
-from click_extra.run import INDENT, PROMPT, run_cmd
+from click_extra.run import INDENT, format_cli, run_cmd
 
 from . import logger
 from .version import parse_version
@@ -305,8 +305,7 @@ class PackageManager:
         """
         # Casting to string helps serialize Path and Version objects.
         args = tuple(map(str, filter(None.__ne__, flatten(args))))
-        args_str = theme.invoked_command(" ".join(args))
-        cli_msg = f"{PROMPT}{args_str}"
+        cli_msg = format_cli(args, extra_env)
 
         code = 0
         output = None

@@ -10,7 +10,6 @@ name: Tests
 jobs:
 
   tests:
-    name: Install package managers and run unittests
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

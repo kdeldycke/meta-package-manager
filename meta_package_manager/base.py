@@ -17,11 +17,16 @@
 
 import os
 import re
+import sys
 from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
 
-from boltons.cacheutils import cachedproperty
+if sys.version_info >= (3, 8):
+    from functools import cached_property
+else:
+    from boltons.cacheutils import cachedproperty as cached_property
+
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from boltons.typeutils import classproperty
@@ -175,7 +180,7 @@ class PackageManager:
         """
         return cls.__name__ == "PackageManager" or not cls.cli_names
 
-    @cachedproperty
+    @cached_property
     def cli_path(self):
         """Fully qualified path to the package manager CLI.
 
@@ -213,7 +218,7 @@ class PackageManager:
 
         return cli_path
 
-    @cachedproperty
+    @cached_property
     def version(self):
         """Invoke the manager and extract its own reported version string.
 
@@ -238,12 +243,12 @@ class PackageManager:
                 logger.debug(f"Extracted version: {version_string}")
                 return parse_version(version_string)
 
-    @cachedproperty
+    @cached_property
     def supported(self):
         """Is the package manager supported on that platform?"""
         return CURRENT_OS_ID in self.platforms
 
-    @cachedproperty
+    @cached_property
     def executable(self):
         """Is the package manager CLI can be executed by the current user?"""
         if not self.cli_path:
@@ -253,7 +258,7 @@ class PackageManager:
             return False
         return True
 
-    @cachedproperty
+    @cached_property
     def fresh(self):
         """Does the package manager match the version requirement?"""
         # Version is mandatory.
@@ -268,7 +273,7 @@ class PackageManager:
                 return False
         return True
 
-    @cachedproperty
+    @cached_property
     def available(self):
         """Is the package manager available and ready-to-use on the system?
 

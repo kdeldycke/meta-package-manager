@@ -16,8 +16,13 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import json
+import sys
 
-from boltons.cacheutils import cachedproperty
+if sys.version_info >= (3, 8):
+    from functools import cached_property
+else:
+    from boltons.cacheutils import cachedproperty as cached_property
+
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from .. import logger
@@ -80,7 +85,7 @@ class Yarn(PackageManager):
         output = self.run_cli("global", "--json", "list", "--depth", "0")
         return self.parse(output)
 
-    @cachedproperty
+    @cached_property
     def global_dir(self):
         return self.run_cli("global", "dir", force_exec=True).rstrip()
 

@@ -18,9 +18,14 @@
 """ Registration, indexing and caching of package manager supported by mpm. """
 
 import inspect
-from functools import cached_property
+import sys
 from importlib import import_module
 from pathlib import Path
+
+if sys.version_info >= (3, 8):
+    from functools import cached_property
+else:
+    from boltons.cacheutils import cachedproperty as cached_property
 
 from boltons.iterutils import unique
 

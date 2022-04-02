@@ -358,9 +358,8 @@ class PackageManager:
         If ``skip_globals`` is ``True`` global environment variables, pre-commands and
         arguments are not added whatsoever and the CLI is run bare, not unlike a call to the plain ``run()``.
 
-        Also offer by the way of the ``force_exec`` parameter the possibility to force
-        the execution and completion of the command regardless of ``--dry-run`` and
-        ``--stop-on-error`` user options.
+        ``force_exec`` parameter ignores the ``--dry-run`` and ``--stop-on-error`` user options to force
+        the execution and completion of the command.
         """
         # Prepare the full list of CLI arguments.
         extra_env = None

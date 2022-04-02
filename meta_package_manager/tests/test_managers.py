@@ -29,7 +29,7 @@ from click_extra.platform import OS_DEFINITIONS
 
 from ..base import PackageManager
 from ..cli import XKCD_MANAGER_ORDER
-from ..pool import ALL_MANAGER_IDS, pool
+from ..pool import pool
 from ..version import TokenizedString
 
 """ Test the structure, data and types returned by all package managers.
@@ -61,12 +61,12 @@ def test_name(manager):
 
 
 def test_unique_names():
-    assert len({m.name for m in pool.values()}) == len(ALL_MANAGER_IDS)
+    assert len({m.name for m in pool.values()}) == len(pool.all_manager_ids)
 
 
 def test_xkcd_set():
     assert len(unique(XKCD_MANAGER_ORDER)) == len(XKCD_MANAGER_ORDER)
-    assert set(ALL_MANAGER_IDS).issuperset(XKCD_MANAGER_ORDER)
+    assert set(pool.all_manager_ids).issuperset(XKCD_MANAGER_ORDER)
 
 
 @all_managers

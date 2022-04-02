@@ -19,7 +19,7 @@
 
 import pytest
 
-from ..pool import DEFAULT_MANAGER_IDS
+from ..pool import pool
 from .test_cli import CLISubCommandTests
 
 
@@ -29,7 +29,7 @@ def subcmd():
 
 
 class TestSync(CLISubCommandTests):
-    @pytest.mark.parametrize("mid", DEFAULT_MANAGER_IDS)
+    @pytest.mark.parametrize("mid", pool.default_manager_ids)
     def test_single_manager(self, invoke, subcmd, mid):
         result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0

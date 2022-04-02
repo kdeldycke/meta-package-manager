@@ -32,7 +32,7 @@ else:
     import tomli as tomllib
 
 from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_LABELS, PLATFORM_PREFIX
-from ..pool import ALL_MANAGER_IDS, pool
+from ..pool import pool
 
 """ Test all non-code artifacts depending on manager definitions.
 
@@ -53,7 +53,7 @@ def test_project_metadata():
     toml_path = Path(__file__).parent.joinpath("../../pyproject.toml").resolve()
     toml_config = tomllib.loads(toml_path.read_text())
     # Check all managers are referenced in Python package keywords.
-    assert set(ALL_MANAGER_IDS).issubset(toml_config["tool"]["poetry"]["keywords"])
+    assert set(pool.all_manager_ids).issubset(toml_config["tool"]["poetry"]["keywords"])
 
 
 def test_changelog():
@@ -70,7 +70,7 @@ def test_changelog():
             assert entry["category"]
             assert set(entry["category"].split(",")).issubset(
                 flatten(
-                    (ALL_MANAGER_IDS, OS_DEFINITIONS.keys(), "mpm", "bitbar", "xbar")
+                    (pool.all_manager_ids, OS_DEFINITIONS.keys(), "mpm", "bitbar", "xbar")
                 )
             )
 

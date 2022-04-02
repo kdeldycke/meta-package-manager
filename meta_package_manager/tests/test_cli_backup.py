@@ -19,7 +19,7 @@
 
 import pytest
 
-from ..pool import DEFAULT_MANAGER_IDS
+from ..pool import pool
 from .test_cli import CLISubCommandTests
 
 
@@ -47,7 +47,7 @@ class TestBackup(CLISubCommandTests):
         assert "mpm-packages.toml" in result.stderr
         self.check_manager_selection(result)
 
-    @pytest.mark.parametrize("mid", DEFAULT_MANAGER_IDS)
+    @pytest.mark.parametrize("mid", pool.default_manager_ids)
     def test_single_manager_file_output(self, mid, invoke, subcmd):
         result = invoke("--manager", mid, subcmd, "mpm-packages.toml")
         assert result.exit_code == 0

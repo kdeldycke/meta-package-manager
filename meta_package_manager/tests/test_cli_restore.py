@@ -17,7 +17,7 @@
 
 import pytest
 
-from ..pool import ALL_MANAGER_IDS, DEFAULT_MANAGER_IDS
+from ..pool import pool
 from .test_cli import CLISubCommandTests
 
 
@@ -46,7 +46,7 @@ class TestRestore(CLISubCommandTests):
             """.format(
                     m
                 )
-                for m in ALL_MANAGER_IDS
+                for m in pool.all_manager_ids
             ),
         )
 
@@ -55,7 +55,7 @@ class TestRestore(CLISubCommandTests):
         assert "all-managers.toml" in result.stderr
         self.check_manager_selection(result)
 
-    @pytest.mark.parametrize("mid", DEFAULT_MANAGER_IDS)
+    @pytest.mark.parametrize("mid", pool.default_manager_ids)
     def test_single_manager(self, invoke, create_config, mid):
         toml_path = create_config(
             "all-managers.toml",
@@ -66,7 +66,7 @@ class TestRestore(CLISubCommandTests):
             """.format(
                     m
                 )
-                for m in ALL_MANAGER_IDS
+                for m in pool.all_manager_ids
             ),
         )
 

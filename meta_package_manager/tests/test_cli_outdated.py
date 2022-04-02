@@ -23,7 +23,7 @@ from string import ascii_lowercase, digits
 import pytest
 from boltons.iterutils import same
 
-from ..pool import DEFAULT_MANAGER_IDS
+from ..pool import pool
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
@@ -36,7 +36,7 @@ XBAR_KEYWORDS = frozenset({"shell"}.union({f"param{i}" for i in range(1, 10)}))
 
 
 class TestOutdated(CLISubCommandTests, CLITableTests):
-    @pytest.mark.parametrize("mid", DEFAULT_MANAGER_IDS)
+    @pytest.mark.parametrize("mid", pool.default_manager_ids)
     def test_single_manager(self, invoke, mid, subcmd):
         result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0
@@ -49,7 +49,7 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
 
         assert data
         assert isinstance(data, dict)
-        assert set(data).issubset(DEFAULT_MANAGER_IDS)
+        assert set(data).issubset(pool.default_manager_ids)
 
         for manager_id, info in data.items():
             assert isinstance(manager_id, str)

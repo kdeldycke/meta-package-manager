@@ -22,7 +22,7 @@ import json
 import pytest
 from boltons.iterutils import same
 
-from ..pool import DEFAULT_MANAGER_IDS
+from ..pool import pool
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
@@ -32,7 +32,7 @@ def subcmd():
 
 
 class TestInstalled(CLISubCommandTests, CLITableTests):
-    @pytest.mark.parametrize("mid", DEFAULT_MANAGER_IDS)
+    @pytest.mark.parametrize("mid", pool.default_manager_ids)
     def test_single_manager(self, invoke, subcmd, mid):
         result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0
@@ -43,7 +43,7 @@ class TestInstalled(CLISubCommandTests, CLITableTests):
         assert result.exit_code == 0
         data = json.loads(result.stdout)
 
-        assert set(data).issubset(DEFAULT_MANAGER_IDS)
+        assert set(data).issubset(pool.default_manager_ids)
 
         for manager_id, info in data.items():
             assert isinstance(manager_id, str)

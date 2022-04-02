@@ -114,7 +114,7 @@ class ManagerPool:
     def default_manager_ids(self):
         """ All manager IDs supported on the current platform.
 
-        Must keep the same order defined by ALL_MANAGER_IDS.
+        Must keep the same order defined by pool.all_manager_ids.
         """
         return tuple(mid for mid in self.all_manager_ids if self.register.get(mid).supported)
 
@@ -186,7 +186,3 @@ class ManagerPool:
             yield manager
 
 pool = ManagerPool()
-
-ALL_MANAGER_IDS = pool.all_manager_ids
-DEFAULT_MANAGER_IDS = pool.default_manager_ids
-UNSUPPORTED_MANAGER_IDS = pool.unsupported_manager_ids

@@ -25,7 +25,7 @@ import pytest
 from boltons.iterutils import same
 from click_extra.tests.conftest import unless_macos
 
-from ..pool import DEFAULT_MANAGER_IDS
+from ..pool import pool
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
@@ -35,7 +35,7 @@ def subcmd():
 
 
 class TestSearch(CLISubCommandTests, CLITableTests):
-    @pytest.mark.parametrize("mid", DEFAULT_MANAGER_IDS)
+    @pytest.mark.parametrize("mid", pool.default_manager_ids)
     def test_single_manager(self, invoke, subcmd, mid):
         result = invoke("--manager", mid, subcmd)
         assert result.exit_code == 0
@@ -48,7 +48,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
         assert data
         assert isinstance(data, dict)
-        assert set(data).issubset(DEFAULT_MANAGER_IDS)
+        assert set(data).issubset(pool.default_manager_ids)
 
         for manager_id, info in data.items():
             assert isinstance(manager_id, str)

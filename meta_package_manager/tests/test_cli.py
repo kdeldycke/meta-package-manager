@@ -23,7 +23,7 @@ from boltons.strutils import strip_ansi
 from click_extra.tabulate import TabularOutputFormatter
 
 from .. import __version__
-from ..pool import DEFAULT_MANAGER_IDS
+from ..pool import pool
 
 """ Common tests for all CLI basic features and templates for subcommands. """
 
@@ -113,8 +113,8 @@ class CLISubCommandTests:
     def check_manager_selection(
         cls,
         result,
-        selected=DEFAULT_MANAGER_IDS,
-        reference_set=DEFAULT_MANAGER_IDS,
+        selected=pool.default_manager_ids,
+        reference_set=pool.default_manager_ids,
     ):
         """Check that user-selected managers are found in CLI's output.
 
@@ -262,17 +262,17 @@ class CLISubCommandTests:
             ),
             pytest.param(
                 ("--exclude", "apm"),
-                set(DEFAULT_MANAGER_IDS) - {"apm"},
+                set(pool.default_manager_ids) - {"apm"},
                 id="single_exclusion",
             ),
             pytest.param(
                 ("--exclude", "apm") * 2,
-                set(DEFAULT_MANAGER_IDS) - {"apm"},
+                set(pool.default_manager_ids) - {"apm"},
                 id="duplicate_exclusions",
             ),
             pytest.param(
                 ("--exclude", "apm", "--exclude", "gem"),
-                set(DEFAULT_MANAGER_IDS) - {"apm", "gem"},
+                set(pool.default_manager_ids) - {"apm", "gem"},
                 id="multiple_exclusions",
             ),
             pytest.param(

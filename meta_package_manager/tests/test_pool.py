@@ -18,7 +18,7 @@
 import pytest
 
 from ..cli import mpm
-from ..pool import ALL_MANAGER_IDS, DEFAULT_MANAGER_IDS, UNSUPPORTED_MANAGER_IDS, pool
+from ..pool import pool
 
 """ Test the pool and its content. """
 
@@ -26,8 +26,8 @@ from ..pool import ALL_MANAGER_IDS, DEFAULT_MANAGER_IDS, UNSUPPORTED_MANAGER_IDS
 def test_manager_count():
     """Check all implemented package managers are accounted for, and unique."""
     assert len(pool) == 16
-    assert len(pool) == len(ALL_MANAGER_IDS)
-    assert ALL_MANAGER_IDS == tuple(sorted(set(pool)))
+    assert len(pool) == len(pool.all_manager_ids)
+    assert pool.all_manager_ids == tuple(sorted(set(pool)))
 
 
 def test_cached_pool():
@@ -35,23 +35,23 @@ def test_cached_pool():
     assert pool is pool
 
 
-@pytest.mark.parametrize("manager_id", DEFAULT_MANAGER_IDS)
+@pytest.mark.parametrize("manager_id", pool.default_manager_ids)
 def test_supported_managers(manager_id):
     assert pool[manager_id].supported is True
 
 
-@pytest.mark.parametrize("manager_id", UNSUPPORTED_MANAGER_IDS)
+@pytest.mark.parametrize("manager_id", pool.unsupported_manager_ids)
 def test_unsupported_managers(manager_id):
     assert pool[manager_id].supported is False
 
 
 def test_manager_groups():
-    assert len(DEFAULT_MANAGER_IDS) + len(UNSUPPORTED_MANAGER_IDS) == len(
-        ALL_MANAGER_IDS
+    assert len(pool.default_manager_ids) + len(pool.unsupported_manager_ids) == len(
+        pool.all_manager_ids
     )
     assert (
-        tuple(sorted(set(DEFAULT_MANAGER_IDS).union(UNSUPPORTED_MANAGER_IDS)))
-        == ALL_MANAGER_IDS
+        tuple(sorted(set(pool.default_manager_ids).union(pool.unsupported_manager_ids)))
+        == pool.all_manager_ids
     )
 
 
@@ -86,15 +86,15 @@ selection_cases = {
     ),
     "single_exclusion": (
         {"drop": ("apm")},
-        tuple(mid for mid in DEFAULT_MANAGER_IDS if mid != "apm"),
+        tuple(mid for mid in pool.default_manager_ids if mid != "apm"),
     ),
     "duplicate_exclusions": (
         {"drop": ("apm", "apm")},
-        tuple(mid for mid in DEFAULT_MANAGER_IDS if mid != "apm"),
+        tuple(mid for mid in pool.default_manager_ids if mid != "apm"),
     ),
     "multiple_exclusions": (
         {"drop": ("apm", "gem")},
-        tuple(mid for mid in DEFAULT_MANAGER_IDS if mid not in ("apm", "gem")),
+        tuple(mid for mid in pool.default_manager_ids if mid not in ("apm", "gem")),
     ),
     "selector_priority": (
         {"keep": ("apm"), "drop": ("gem")},
@@ -106,23 +106,23 @@ selection_cases = {
     ),
     "default_selection": (
         {},
-        DEFAULT_MANAGER_IDS,
+        pool.default_manager_ids,
     ),
     "drop_unsupported": (
         {"drop_unsupported": True},
-        DEFAULT_MANAGER_IDS,
+        pool.default_manager_ids,
     ),
     "keep_unsupported": (
         {"drop_unsupported": False},
-        ALL_MANAGER_IDS,
+        pool.all_manager_ids,
     ),
     "drop_inactive": (
         {"drop_inactive": True},
-        tuple(mid for mid in DEFAULT_MANAGER_IDS if pool[mid].available),
+        tuple(mid for mid in pool.default_manager_ids if pool[mid].available),
     ),
     "keep_inactive": (
         {"drop_inactive": False},
-        DEFAULT_MANAGER_IDS,
+        pool.default_manager_ids,
     ),
 }
 

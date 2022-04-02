@@ -18,7 +18,7 @@
 import pytest
 from click_extra.tests.conftest import destructive
 
-from ..pool import ALL_MANAGER_IDS
+from ..pool import pool
 from .test_cli import CLISubCommandTests
 
 
@@ -59,7 +59,7 @@ class TestInstall(CLISubCommandTests):
         "vscode": "tamasfe.even-better-toml",
         "yarn": "markdown",
     }
-    assert set(PACKAGE_IDS) == set(ALL_MANAGER_IDS)
+    assert set(PACKAGE_IDS) == set(pool.all_manager_ids)
 
     @destructive
     @pytest.mark.parametrize(
@@ -68,7 +68,7 @@ class TestInstall(CLISubCommandTests):
     def test_single_manager_install(self, invoke, mid, package_id):
         result = invoke("--manager", mid, "install", package_id)
         assert result.exit_code == 0
-        self.check_manager_selection(result, {mid}, reference_set=ALL_MANAGER_IDS)
+        self.check_manager_selection(result, {mid}, reference_set=pool.all_manager_ids)
 
 
 destructive()(TestInstall.test_stats)

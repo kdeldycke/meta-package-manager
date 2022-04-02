@@ -74,22 +74,37 @@ class PackageManager:
 
     """Base class from which all package manager definitions inherits."""
 
+    @classproperty
+    def id(cls):
+        """Return package manager's ID. Defaults based on class name.
+
+        This ID must be unique among all package manager definitions and
+        lower-case as they're used as feature flags for the :command:`mpm` CLI.
+        """
+        return cls.__name__.lower().replace("_", "-")
+
+    @classproperty
+    def name(cls):
+        """Return package manager's common name. Defaults based on class name."""
+        return cls.__name__
+
     platforms = frozenset()
     """List of platforms supported by the manager."""
 
     requirement = None
     """Minimal required version."""
 
-    version_cli_options = ("--version",)
-    """List of options to get the version from the package manager CLI."""
+    @classproperty
+    def cli_names(cls):
+        """List of CLI names the package manager is known as.
 
-    version_regex = r"(?P<version>\S+)"
-    """ Regular expression used to extract the version number from the result of the CLI
-    run with the options above. It doesn't matter if the regex returns unsanitized
-    and crappy string. The ``version()`` method will clean and normalized it.
+        The supported CLI names are ordered by priority. This is used for example to
+        help out the search of the right binary in the case of the python3/python2
+        transition.
 
-    By default match the first part that is space-separated.
-    """
+        Is derived by default from the manager's ID.
+        """
+        return (cls.id,)
 
     cli_search_path = ()
     """ List of additional path to help mpm hunt down the package manager CLI.
@@ -126,6 +141,17 @@ class PackageManager:
     Essentially used to force silencing, low verbosity or no-color output.
     """
 
+    version_cli_options = ("--version",)
+    """List of options to get the version from the package manager CLI."""
+
+    version_regex = r"(?P<version>\S+)"
+    """ Regular expression used to extract the version number from the result of the CLI
+    run with the options above. It doesn't matter if the regex returns unsanitized
+    and crappy string. The ``version()`` method will clean and normalized it.
+
+    By default match the first part that is space-separated.
+    """
+
     stop_on_error = False
     """Tell the manager to either raise or continue on errors."""
 
@@ -139,32 +165,6 @@ class PackageManager:
     def __init__(self):
         # Log of all encountered CLI errors.
         self.cli_errors = []
-
-    @classproperty
-    def id(cls):
-        """Return package manager's ID. Defaults based on class name.
-
-        This ID must be unique among all package manager definitions and
-        lower-case as they're used as feature flags for the :command:`mpm` CLI.
-        """
-        return cls.__name__.lower().replace("_", "-")
-
-    @classproperty
-    def name(cls):
-        """Return package manager's common name. Defaults based on class name."""
-        return cls.__name__
-
-    @classproperty
-    def cli_names(cls):
-        """List of CLI names the package manager is known as.
-
-        The supported CLI names are ordered by priority. This is used for example to
-        help out the search of the right binary in the case of the python3/python2
-        transition.
-
-        Is derived by default from the manager's ID.
-        """
-        return (cls.id,)
 
     @classproperty
     def virtual(cls):
@@ -378,26 +378,22 @@ class PackageManager:
 
         return output
 
-    def sync(self):
-        """Refresh local manager metadata from remote repository."""
-        if self.sync.__func__.__qualname__ == PackageManager.sync.__qualname__:
-            logger.warning(f"{self.id} does not implement sync command.")
-            return
-        logger.info(f"Sync {self.id} package info...")
-
-    def cleanup(self):
-        """Remove left-overs and unused packages."""
-        if self.cleanup.__func__.__qualname__ == PackageManager.cleanup.__qualname__:
-            logger.warning(f"{self.id} does not implement cleanup command.")
-            return
-        logger.info(f"Cleanup {self.id}...")
-
     @property
     def installed(self):
         """List packages currently installed on the system.
 
         Returns a dict indexed by package IDs. Each item is a dict with
         package ID, name and version.
+        """
+        raise NotImplementedError
+
+    @property
+    def outdated(self):
+        """List currently installed packages having a new version available.
+
+        Returns a dict indexed by package IDs. Each item is a dict with
+        package ID, name, current installed version and latest upgradeable
+        version.
         """
         raise NotImplementedError
 
@@ -417,15 +413,6 @@ class PackageManager:
             return
         logger.info(f"Install {package_id} package from {self.id}...")
 
-    @property
-    def outdated(self):
-        """List currently installed packages having a new version available.
-
-        Returns a dict indexed by package IDs. Each item is a dict with
-        package ID, name, current installed version and latest upgradeable
-        version.
-        """
-        raise NotImplementedError
 
     def upgrade_cli(self, package_id=None):
         """Return a shell-compatible full-CLI to upgrade a package."""
@@ -485,3 +472,17 @@ class PackageManager:
             param_id = "shell" if index == 0 else f"param{index}"
             xbar_params.append(f"{param_id}={param_value}")
         return " | ".join(xbar_params)
+
+    def sync(self):
+        """Refresh local manager metadata from remote repository."""
+        if self.sync.__func__.__qualname__ == PackageManager.sync.__qualname__:
+            logger.warning(f"{self.id} does not implement sync command.")
+            return
+        logger.info(f"Sync {self.id} package info...")
+
+    def cleanup(self):
+        """Remove left-overs and unused packages."""
+        if self.cleanup.__func__.__qualname__ == PackageManager.cleanup.__qualname__:
+            logger.warning(f"{self.id} does not implement cleanup command.")
+            return
+        logger.info(f"Cleanup {self.id}...")

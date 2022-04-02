@@ -17,9 +17,9 @@
 
 import re
 
-from .. import logger
 from click_extra.platform import LINUX
 
+from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
@@ -78,6 +78,62 @@ class Flatpak(PackageManager):
                         "installed_version": parse_version(installed_version),
                     }
         return installed
+
+    @property
+    def outdated(self):
+        """Fetch outdated packages from ``flatpak remote-ls`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            ► flatpak remote-ls --app --updates --ostree-verbose
+            GNOME Dictionary    org.gnome.Dictionary    3.26.0  stable  x86_64
+        """
+        outdated = {}
+
+        output = self.run_cli(
+            "remote-ls",
+            "--app",
+            "--updates",
+            "--columns=name,application,version",
+            "--ostree-verbose",
+        )
+
+        if output:
+            regexp = re.compile(
+                r"(?P<name>.+?)\t(?P<package_id>\S+)\t?(?P<latest_version>.*)"
+            )
+            for package in output.splitlines():
+                match = regexp.match(package)
+                if match:
+                    name, package_id, latest_version = match.groups()
+
+                    info_installed_output = self.run_cli(
+                        "info",
+                        "--ostree-verbose",
+                        package_id,
+                    )
+                    current_version = re.search(
+                        r"version:\s(?P<version>\S.*?)\n",
+                        info_installed_output,
+                        re.IGNORECASE,
+                    )
+
+                    installed_version = (
+                        current_version.group("version")
+                        if current_version
+                        else "unknow"
+                    )
+
+                    outdated[package_id] = {
+                        "id": package_id,
+                        "name": name,
+                        "latest_version": parse_version(latest_version),
+                        "installed_version": parse_version(installed_version),
+                    }
+
+        return outdated
 
     def search(self, query, extended, exact):
         """Fetch matching packages from ``flatpak search`` output.
@@ -143,62 +199,6 @@ class Flatpak(PackageManager):
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
-
-    @property
-    def outdated(self):
-        """Fetch outdated packages from ``flatpak remote-ls`` output.
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► flatpak remote-ls --app --updates --ostree-verbose
-            GNOME Dictionary    org.gnome.Dictionary    3.26.0  stable  x86_64
-        """
-        outdated = {}
-
-        output = self.run_cli(
-            "remote-ls",
-            "--app",
-            "--updates",
-            "--columns=name,application,version",
-            "--ostree-verbose",
-        )
-
-        if output:
-            regexp = re.compile(
-                r"(?P<name>.+?)\t(?P<package_id>\S+)\t?(?P<latest_version>.*)"
-            )
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    name, package_id, latest_version = match.groups()
-
-                    info_installed_output = self.run_cli(
-                        "info",
-                        "--ostree-verbose",
-                        package_id,
-                    )
-                    current_version = re.search(
-                        r"version:\s(?P<version>\S.*?)\n",
-                        info_installed_output,
-                        re.IGNORECASE,
-                    )
-
-                    installed_version = (
-                        current_version.group("version")
-                        if current_version
-                        else "unknow"
-                    )
-
-                    outdated[package_id] = {
-                        "id": package_id,
-                        "name": name,
-                        "latest_version": parse_version(latest_version),
-                        "installed_version": parse_version(installed_version),
-                    }
-
-        return outdated
 
     def upgrade_cli(self, package_id=None):
         return (

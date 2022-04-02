@@ -43,23 +43,6 @@ class APT(PackageManager):
         apt 1.2.15 (amd64)
     """
 
-    def sync(self):
-        """
-        .. code-block:: shell-session
-
-            ► apt update --quiet
-            Hit:1 http://archive.ubuntu.com xenial InRelease
-            Get:2 http://archive.ubuntu.com xenial-updates InRelease [102 kB]
-            Get:3 http://archive.ubuntu.com xenial-security InRelease [102 kB]
-            Get:4 http://archive.ubuntu.com xenial/main Translation-en [568 kB]
-            Fetched 6,868 kB in 2s (2,680 kB/s)
-            Reading package lists...
-            Building dependency tree...
-            Reading state information...
-        """
-        super().sync()
-        self.run_cli("update", "--quiet")
-
     @property
     def installed(self):
         """Fetch installed packages from ``apt list`` output.
@@ -112,6 +95,38 @@ class APT(PackageManager):
                     }
 
         return installed
+
+    @property
+    def outdated(self):
+        """Fetch outdated packages from ``apt list`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            ► apt list --upgradable --quiet
+            Listing...
+            apt/xenial-updates 1.2.19 amd64 [upgradable from: 1.2.15ubuntu0.2]
+            nano/xenial-updates 2.5.3-2ubuntu2 amd64 [upgradable from: 2.5.3-2]
+        """
+        outdated = {}
+
+        output = self.run_cli("list", "--upgradable", "--quiet")
+
+        if output:
+            regexp = re.compile(r"(\S+)\/\S+ (\S+).*\[upgradable from: (\S+)\]")
+            for package in output.splitlines():
+                match = regexp.match(package)
+                if match:
+                    package_id, latest_version, installed_version = match.groups()
+                    outdated[package_id] = {
+                        "id": package_id,
+                        "name": package_id,
+                        "latest_version": parse_version(latest_version),
+                        "installed_version": parse_version(installed_version),
+                    }
+
+        return outdated
 
     def search(self, query, extended, exact):
         """Fetch matching packages from ``apt search`` output.
@@ -213,38 +228,6 @@ class APT(PackageManager):
         super().install(package_id)
         return self.run_cli("install", package_id)
 
-    @property
-    def outdated(self):
-        """Fetch outdated packages from ``apt list`` output.
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► apt list --upgradable --quiet
-            Listing...
-            apt/xenial-updates 1.2.19 amd64 [upgradable from: 1.2.15ubuntu0.2]
-            nano/xenial-updates 2.5.3-2ubuntu2 amd64 [upgradable from: 2.5.3-2]
-        """
-        outdated = {}
-
-        output = self.run_cli("list", "--upgradable", "--quiet")
-
-        if output:
-            regexp = re.compile(r"(\S+)\/\S+ (\S+).*\[upgradable from: (\S+)\]")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, latest_version, installed_version = match.groups()
-                    outdated[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "latest_version": parse_version(latest_version),
-                        "installed_version": parse_version(installed_version),
-                    }
-
-        return outdated
-
     def upgrade_cli(self, package_id=None):
         return (
             self.pre_cmds,
@@ -254,6 +237,23 @@ class APT(PackageManager):
             package_id,
             self.post_args,
         )
+
+    def sync(self):
+        """
+        .. code-block:: shell-session
+
+            ► apt update --quiet
+            Hit:1 http://archive.ubuntu.com xenial InRelease
+            Get:2 http://archive.ubuntu.com xenial-updates InRelease [102 kB]
+            Get:3 http://archive.ubuntu.com xenial-security InRelease [102 kB]
+            Get:4 http://archive.ubuntu.com xenial/main Translation-en [568 kB]
+            Fetched 6,868 kB in 2s (2,680 kB/s)
+            Reading package lists...
+            Building dependency tree...
+            Reading state information...
+        """
+        super().sync()
+        self.run_cli("update", "--quiet")
 
     def cleanup(self):
         """Runs:

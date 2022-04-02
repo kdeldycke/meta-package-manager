@@ -26,11 +26,11 @@ from ..version import TokenizedString, parse_version
 
 class NPM(PackageManager):
 
+    name = "Node's npm"
+
     platforms = frozenset({LINUX, MACOS, WINDOWS})
 
     requirement = "4.0.0"
-
-    name = "Node's npm"
 
     """
     .. code-block:: shell-session
@@ -129,6 +129,53 @@ class NPM(PackageManager):
             remap(json.loads(output), visit=visit)
 
         return installed
+
+    @property
+    def outdated(self):
+        """Fetch outdated packages from ``npm outdated`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            ► npm --global --progress=false --json outdated
+            {
+              "my-linked-package": {
+                "current": "0.0.0-development",
+                "wanted": "linked",
+                "latest": "linked",
+                "location": "/Users/..."
+              },
+              "npm": {
+                "current": "3.10.3",
+                "wanted": "3.10.5",
+                "latest": "3.10.5",
+                "location": "/Users/..."
+              }
+            }
+        """
+        outdated = {}
+
+        output = self.run_cli(
+            "--global",
+            "--progress=false",
+            "--json",
+            "--no-update-notifier",
+            "outdated",
+        )
+
+        if output:
+            for package_id, values in json.loads(output).items():
+                if values["wanted"] == "linked":
+                    continue
+                outdated[package_id] = {
+                    "id": f"{package_id}@{values['latest']}",
+                    "name": package_id,
+                    "installed_version": parse_version(values["current"]),
+                    "latest_version": parse_version(values["latest"]),
+                }
+
+        return outdated
 
     def search(self, query, extended, exact):
         """Fetch matching packages from ``npm search`` output.
@@ -252,53 +299,6 @@ class NPM(PackageManager):
             "install",
             package_id,
         )
-
-    @property
-    def outdated(self):
-        """Fetch outdated packages from ``npm outdated`` output.
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► npm --global --progress=false --json outdated
-            {
-              "my-linked-package": {
-                "current": "0.0.0-development",
-                "wanted": "linked",
-                "latest": "linked",
-                "location": "/Users/..."
-              },
-              "npm": {
-                "current": "3.10.3",
-                "wanted": "3.10.5",
-                "latest": "3.10.5",
-                "location": "/Users/..."
-              }
-            }
-        """
-        outdated = {}
-
-        output = self.run_cli(
-            "--global",
-            "--progress=false",
-            "--json",
-            "--no-update-notifier",
-            "outdated",
-        )
-
-        if output:
-            for package_id, values in json.loads(output).items():
-                if values["wanted"] == "linked":
-                    continue
-                outdated[package_id] = {
-                    "id": f"{package_id}@{values['latest']}",
-                    "name": package_id,
-                    "installed_version": parse_version(values["current"]),
-                    "latest_version": parse_version(values["latest"]),
-                }
-
-        return outdated
 
     def upgrade_cli(self, package_id=None, version=None):
         cmd_args = []

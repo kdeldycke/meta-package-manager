@@ -37,16 +37,6 @@ class OPKG(PackageManager):
         opkg version 0.3.6 (libsolv 0.7.5)
     """
 
-    def sync(self):
-        """
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-        """
-        super().sync()
-        self.run_cli("update")
-
     @property
     def installed(self):
         """Fetch installed packages from ``opkg list-installed`` output.
@@ -93,6 +83,37 @@ class OPKG(PackageManager):
                     }
 
         return installed
+
+    @property
+    def outdated(self):
+        """Fetch outdated packages from ``opkg list-upgradable`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            ► opkg list-upgradable
+            openpli-bootlogo - 20190717-r0 - 20190718-r0
+            enigma2-hotplug - 2.7+git1720+55c6b34-r0 - 2.7+git1722+daf2f52-r0
+        """
+        outdated = {}
+
+        output = self.run_cli("list-upgradable")
+
+        if output:
+            regexp = re.compile(r"(\S+) - (\S+) - (\S+)")
+            for package in output.splitlines():
+                match = regexp.match(package)
+                if match:
+                    package_id, installed_version, latest_version = match.groups()
+                    outdated[package_id] = {
+                        "id": package_id,
+                        "name": package_id,
+                        "latest_version": parse_version(latest_version),
+                        "installed_version": parse_version(installed_version),
+                    }
+
+        return outdated
 
     def search(self, query, extended, exact):
         """Simulate search by listing all packages."""
@@ -157,37 +178,6 @@ class OPKG(PackageManager):
         super().install(package_id)
         return self.run_cli("install", package_id)
 
-    @property
-    def outdated(self):
-        """Fetch outdated packages from ``opkg list-upgradable`` output.
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► opkg list-upgradable
-            openpli-bootlogo - 20190717-r0 - 20190718-r0
-            enigma2-hotplug - 2.7+git1720+55c6b34-r0 - 2.7+git1722+daf2f52-r0
-        """
-        outdated = {}
-
-        output = self.run_cli("list-upgradable")
-
-        if output:
-            regexp = re.compile(r"(\S+) - (\S+) - (\S+)")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, installed_version, latest_version = match.groups()
-                    outdated[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "latest_version": parse_version(latest_version),
-                        "installed_version": parse_version(installed_version),
-                    }
-
-        return outdated
-
     def upgrade_cli(self, package_id=None):
         return (
             self.pre_cmds,
@@ -197,3 +187,13 @@ class OPKG(PackageManager):
             self.post_args,
             package_id,
         )
+
+    def sync(self):
+        """
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+        """
+        super().sync()
+        self.run_cli("update")

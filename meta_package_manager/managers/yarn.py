@@ -18,9 +18,9 @@
 import json
 
 from boltons.cacheutils import cachedproperty
-from .. import logger
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
+from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
@@ -79,6 +79,51 @@ class Yarn(PackageManager):
         """
         output = self.run_cli("global", "--json", "list", "--depth", "0")
         return self.parse(output)
+
+    @cachedproperty
+    def global_dir(self):
+        return self.run_cli("global", "dir", force_exec=True).rstrip()
+
+    @property
+    def outdated(self):
+        """Fetch outdated packages from ``yarn outdated`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            ► yarn --json outdated --cwd
+            (...)
+        """
+        outdated = {}
+
+        output = self.run_cli("--json", "outdated", "--cwd", self.global_dir)
+
+        if not output:
+            return outdated
+
+        packages = []
+        for line in output.splitlines():
+            if not line:
+                continue
+            obj = json.loads(line)
+            if obj["type"] == "table":
+                packages = obj["data"]["body"]
+                break
+
+        for package in packages:
+            package_id = package[0]
+            values = {"current": package[1], "wanted": package[2], "latest": package[3]}
+
+            if values["wanted"] == "linked":
+                continue
+            outdated[package_id] = {
+                "id": package_id + "@" + values["latest"],
+                "name": package_id,
+                "installed_version": parse_version(values["current"]),
+                "latest_version": parse_version(values["latest"]),
+            }
+        return outdated
 
     def search(self, query, extended, exact):
         """Call ``yarn info`` and only works for exact match.
@@ -186,10 +231,6 @@ class Yarn(PackageManager):
 
         return matches
 
-    @cachedproperty
-    def global_dir(self):
-        return self.run_cli("global", "dir", force_exec=True).rstrip()
-
     def install(self, package_id):
         """Install one package.
 
@@ -200,47 +241,6 @@ class Yarn(PackageManager):
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
-
-    @property
-    def outdated(self):
-        """Fetch outdated packages from ``yarn outdated`` output.
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► yarn --json outdated --cwd
-            (...)
-        """
-        outdated = {}
-
-        output = self.run_cli("--json", "outdated", "--cwd", self.global_dir)
-
-        if not output:
-            return outdated
-
-        packages = []
-        for line in output.splitlines():
-            if not line:
-                continue
-            obj = json.loads(line)
-            if obj["type"] == "table":
-                packages = obj["data"]["body"]
-                break
-
-        for package in packages:
-            package_id = package[0]
-            values = {"current": package[1], "wanted": package[2], "latest": package[3]}
-
-            if values["wanted"] == "linked":
-                continue
-            outdated[package_id] = {
-                "id": package_id + "@" + values["latest"],
-                "name": package_id,
-                "installed_version": parse_version(values["current"]),
-                "latest_version": parse_version(values["latest"]),
-            }
-        return outdated
 
     def upgrade_cli(self, package_id=None):
         cmd_args = []

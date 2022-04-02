@@ -109,6 +109,89 @@ class Pip(PackageManager):
 
         return installed
 
+    @property
+    def outdated(self):
+        """ Fetch outdated packages.
+
+        .. code-block:: shell-session
+
+            ► python -m pip --no-color list --format=json --outdated \
+            > --verbose --quiet | jq
+            [
+              {
+                "latest_filetype": "wheel",
+                "version": "0.7.9",
+                "name": "alabaster",
+                "latest_version": "0.7.10",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": "pip"
+              },
+              {
+                "latest_filetype": "wheel",
+                "version": "0.9999999",
+                "name": "html5lib",
+                "latest_version": "0.999999999",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": "pip"
+               },
+              {
+                "latest_filetype": "wheel",
+                "version": "2.8",
+                "name": "Jinja2",
+                "latest_version": "2.9.5",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": "pip"
+               },
+              {
+                "latest_filetype": "wheel",
+                "version": "0.5.3",
+                "name": "mccabe",
+                "latest_version": "0.6.1",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": "pip"
+               },
+              {
+                "latest_filetype": "wheel",
+                "version": "2.2.0",
+                "name": "pycodestyle",
+                "latest_version": "2.3.1",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": "pip"
+               },
+              {
+                "latest_filetype": "wheel",
+                "version": "2.1.3",
+                "name": "Pygments",
+                "latest_version": "2.2.0",
+                "location": "/usr/local/lib/python3.7/site-packages",
+                "installer": ""
+               }
+            ]
+        """
+        outdated = {}
+
+        # --quiet is required here to silence warning and error messages
+        # mangling the JSON content.
+        output = self.run_cli(
+            "list",
+            "--format=json",
+            "--outdated",
+            "--verbose",
+            "--quiet",
+        )
+
+        if output:
+            for package in json.loads(output):
+                package_id = package["name"]
+                outdated[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(package["version"]),
+                    "latest_version": parse_version(package["latest_version"]),
+                }
+
+        return outdated
+
     def search_xxx_disabled(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -194,89 +277,6 @@ class Pip(PackageManager):
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
-
-    @property
-    def outdated(self):
-        """ Fetch outdated packages.
-
-        .. code-block:: shell-session
-
-            ► python -m pip --no-color list --format=json --outdated \
-            > --verbose --quiet | jq
-            [
-              {
-                "latest_filetype": "wheel",
-                "version": "0.7.9",
-                "name": "alabaster",
-                "latest_version": "0.7.10",
-                "location": "/usr/local/lib/python3.7/site-packages",
-                "installer": "pip"
-              },
-              {
-                "latest_filetype": "wheel",
-                "version": "0.9999999",
-                "name": "html5lib",
-                "latest_version": "0.999999999",
-                "location": "/usr/local/lib/python3.7/site-packages",
-                "installer": "pip"
-               },
-              {
-                "latest_filetype": "wheel",
-                "version": "2.8",
-                "name": "Jinja2",
-                "latest_version": "2.9.5",
-                "location": "/usr/local/lib/python3.7/site-packages",
-                "installer": "pip"
-               },
-              {
-                "latest_filetype": "wheel",
-                "version": "0.5.3",
-                "name": "mccabe",
-                "latest_version": "0.6.1",
-                "location": "/usr/local/lib/python3.7/site-packages",
-                "installer": "pip"
-               },
-              {
-                "latest_filetype": "wheel",
-                "version": "2.2.0",
-                "name": "pycodestyle",
-                "latest_version": "2.3.1",
-                "location": "/usr/local/lib/python3.7/site-packages",
-                "installer": "pip"
-               },
-              {
-                "latest_filetype": "wheel",
-                "version": "2.1.3",
-                "name": "Pygments",
-                "latest_version": "2.2.0",
-                "location": "/usr/local/lib/python3.7/site-packages",
-                "installer": ""
-               }
-            ]
-        """
-        outdated = {}
-
-        # --quiet is required here to silence warning and error messages
-        # mangling the JSON content.
-        output = self.run_cli(
-            "list",
-            "--format=json",
-            "--outdated",
-            "--verbose",
-            "--quiet",
-        )
-
-        if output:
-            for package in json.loads(output):
-                package_id = package["name"]
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(package["version"]),
-                    "latest_version": parse_version(package["latest_version"]),
-                }
-
-        return outdated
 
     def upgrade_cli(self, package_id):
         """Build-up package upgrade CLI.

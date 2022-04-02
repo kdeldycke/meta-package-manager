@@ -17,22 +17,22 @@
 
 import re
 
-from .. import logger
 from click_extra.platform import MACOS
 
+from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
 
 class MAS(PackageManager):
 
+    name = "Mac AppStore"
+
     platforms = frozenset({MACOS})
 
     # 'mas search' output has been fixed in 1.6.1:
     # https://github.com/mas-cli/mas/pull/205
     requirement = "1.6.1"
-
-    name = "Mac AppStore"
 
     version_cli_options = ("version",)
     """
@@ -74,6 +74,47 @@ class MAS(PackageManager):
                     }
 
         return installed
+
+    @property
+    def outdated(self):
+        """Fetch outdated packages from ``mas outdated`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            ► mas outdated
+
+        .. todo
+
+            An example of ``mas outdated`` output is missing above.
+        """
+        outdated = {}
+
+        output = self.run_cli("outdated")
+
+        if output:
+            regexp = re.compile(r"(\d+) (.*) \((\S+) -> (\S+)\)$")
+            for package in output.splitlines():
+                match = regexp.match(package)
+                if match:
+                    (
+                        package_id,
+                        package_name,
+                        installed_version,
+                        latest_version,
+                    ) = match.groups()
+                    outdated[package_id] = {
+                        "id": package_id,
+                        "name": package_name,
+                        "latest_version": parse_version(latest_version),
+                        # Normalize unknown version. See:
+                        # https://github.com/mas-cli/mas/commit
+                        # /1859eaedf49f6a1ebefe8c8d71ec653732674341
+                        "installed_version": parse_version(installed_version),
+                    }
+
+        return outdated
 
     def search(self, query, extended, exact):
         """Fetch matching packages from ``mas search`` output.
@@ -137,47 +178,6 @@ class MAS(PackageManager):
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
-
-    @property
-    def outdated(self):
-        """Fetch outdated packages from ``mas outdated`` output.
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► mas outdated
-
-        .. todo
-
-            An example of ``mas outdated`` output is missing above.
-        """
-        outdated = {}
-
-        output = self.run_cli("outdated")
-
-        if output:
-            regexp = re.compile(r"(\d+) (.*) \((\S+) -> (\S+)\)$")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    (
-                        package_id,
-                        package_name,
-                        installed_version,
-                        latest_version,
-                    ) = match.groups()
-                    outdated[package_id] = {
-                        "id": package_id,
-                        "name": package_name,
-                        "latest_version": parse_version(latest_version),
-                        # Normalize unknown version. See:
-                        # https://github.com/mas-cli/mas/commit
-                        # /1859eaedf49f6a1ebefe8c8d71ec653732674341
-                        "installed_version": parse_version(installed_version),
-                    }
-
-        return outdated
 
     def upgrade_cli(self, package_id=None):
         return (

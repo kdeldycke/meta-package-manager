@@ -17,18 +17,18 @@
 
 import re
 
-from .. import logger
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
+from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
 
 class Gem(PackageManager):
 
-    platforms = frozenset({LINUX, MACOS, WINDOWS})
-
     name = "Ruby Gems"
+
+    platforms = frozenset({LINUX, MACOS, WINDOWS})
 
     # Default to the version shipped with the latest maintained macOS version,
     # i.e. macOS 10.13 High Sierra, which is bundled with gem 2.5.2.
@@ -95,6 +95,41 @@ class Gem(PackageManager):
                     }
 
         return installed
+
+    @property
+    def outdated(self):
+        """Fetch outdated packages from ``gem outdated`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            ► gem outdated
+            did_you_mean (1.0.0 < 1.0.2)
+            io-console (0.4.5 < 0.4.6)
+            json (1.8.3 < 2.0.1)
+            minitest (5.8.3 < 5.9.0)
+            power_assert (0.2.6 < 0.3.0)
+            psych (2.0.17 < 2.1.0)
+        """
+        outdated = {}
+
+        output = self.run_cli("outdated")
+
+        if output:
+            regexp = re.compile(r"(\S+) \((\S+) < (\S+)\)")
+            for package in output.splitlines():
+                match = regexp.match(package)
+                if match:
+                    package_id, current_version, latest_version = match.groups()
+                    outdated[package_id] = {
+                        "id": package_id,
+                        "name": package_id,
+                        "installed_version": parse_version(current_version),
+                        "latest_version": parse_version(latest_version),
+                    }
+
+        return outdated
 
     def search(self, query, extended, exact):
         """Fetch matching packages from ``gem search`` output.
@@ -182,41 +217,6 @@ class Gem(PackageManager):
             package_id,
             skip_globals=True,
         )
-
-    @property
-    def outdated(self):
-        """Fetch outdated packages from ``gem outdated`` output.
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► gem outdated
-            did_you_mean (1.0.0 < 1.0.2)
-            io-console (0.4.5 < 0.4.6)
-            json (1.8.3 < 2.0.1)
-            minitest (5.8.3 < 5.9.0)
-            power_assert (0.2.6 < 0.3.0)
-            psych (2.0.17 < 2.1.0)
-        """
-        outdated = {}
-
-        output = self.run_cli("outdated")
-
-        if output:
-            regexp = re.compile(r"(\S+) \((\S+) < (\S+)\)")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, current_version, latest_version = match.groups()
-                    outdated[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "installed_version": parse_version(current_version),
-                        "latest_version": parse_version(latest_version),
-                    }
-
-        return outdated
 
     def upgrade_cli(self, package_id=None):
         # Installs require `sudo` on system ruby.

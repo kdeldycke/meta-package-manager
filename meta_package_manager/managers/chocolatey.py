@@ -25,11 +25,11 @@ from ..version import parse_version
 
 class Choco(PackageManager):
 
+    name = "Chocolatey"
+
     platforms = frozenset({WINDOWS})
 
     requirement = "0.10.4"
-
-    name = "Chocolatey"
 
     post_args = ("--no-progress", "--no-color")
 
@@ -71,6 +71,41 @@ class Choco(PackageManager):
                     }
 
         return installed
+
+    @property
+    def outdated(self):
+        """Fetch outdated packages.
+
+        .. code-block:: shell-session
+
+            ► choco outdated --limit-output --no-progress --no-color
+            7zip.commandline|16.02.0.20170209|16.02.0.20170209|false
+            7zip.portable|18.1|18.1|false
+            atom|1.23.3|1.24.0|false
+            autohotkey.portable|1.1.28.00|1.1.28.00|false
+            bulkrenameutility|3.0.0.1|3.0.0.1|false
+            bulkrenameutility.install|3.0.0.1|3.0.0.1|false
+            calibre|3.17.0|3.17.0|false
+            chocolatey|0.10.8|0.10.8|false
+        """
+        outdated = {}
+
+        output = self.run_cli("outdated", "--limit-output")
+
+        if output:
+            regexp = re.compile(r"(.+)\|(.+)\|(.+)\|.+")
+            for package in output.splitlines():
+                match = regexp.match(package)
+                if match:
+                    package_id, installed_version, latest_version = match.groups()
+                    outdated[package_id] = {
+                        "id": package_id,
+                        "name": package_id,
+                        "latest_version": parse_version(latest_version),
+                        "installed_version": parse_version(installed_version),
+                    }
+
+        return outdated
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -138,41 +173,6 @@ class Choco(PackageManager):
         """
         super().install(package_id)
         return self.run_cli("install", package_id, "--yes", "--limit-output")
-
-    @property
-    def outdated(self):
-        """Fetch outdated packages.
-
-        .. code-block:: shell-session
-
-            ► choco outdated --limit-output --no-progress --no-color
-            7zip.commandline|16.02.0.20170209|16.02.0.20170209|false
-            7zip.portable|18.1|18.1|false
-            atom|1.23.3|1.24.0|false
-            autohotkey.portable|1.1.28.00|1.1.28.00|false
-            bulkrenameutility|3.0.0.1|3.0.0.1|false
-            bulkrenameutility.install|3.0.0.1|3.0.0.1|false
-            calibre|3.17.0|3.17.0|false
-            chocolatey|0.10.8|0.10.8|false
-        """
-        outdated = {}
-
-        output = self.run_cli("outdated", "--limit-output")
-
-        if output:
-            regexp = re.compile(r"(.+)\|(.+)\|(.+)\|.+")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, installed_version, latest_version = match.groups()
-                    outdated[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "latest_version": parse_version(latest_version),
-                        "installed_version": parse_version(installed_version),
-                    }
-
-        return outdated
 
     def upgrade_cli(self, package_id="all"):
         """

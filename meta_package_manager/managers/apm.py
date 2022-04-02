@@ -25,9 +25,9 @@ from ..version import TokenizedString, parse_version
 
 class APM(PackageManager):
 
-    platforms = frozenset({LINUX, MACOS, WINDOWS})
-
     name = "Atom's apm"
+
+    platforms = frozenset({LINUX, MACOS, WINDOWS})
 
     requirement = "1.0.0"
 
@@ -157,136 +157,6 @@ class APM(PackageManager):
                     }
 
         return installed
-
-    def search(self, query, extended, exact):
-        """Fetch matching packages from ``apm search`` output.
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-            ► apm search python --json | jq
-            [
-              {
-                "name": "atom-python-run",
-                "main": "./lib/atom-python-run.js",
-                "version": "0.7.3",
-                "description": "Run a python source file.",
-                "keywords": [
-                  "python"
-                ],
-                "repository": "https://github.com/foreshadow/atom-python-run",
-                "license": "MIT",
-                "engines": {
-                  "atom": ">=1.0.0 <2.0.0"
-                },
-                "dependencies": {},
-                "readme": "Blah blah",
-                "downloads": 41379,
-                "stargazers_count": 16
-              },
-              {
-                "name": "build-python",
-                "version": "0.6.3",
-                "description": "Atom Build provider for python/python3",
-                "repository": "https://github.com/idleberg/atom-build-python",
-                "license": "MIT",
-                "keywords": [
-                  "buildprovider",
-                  "compile",
-                  "python",
-                  "python3",
-                  "linter",
-                  "lint"
-                ],
-                "main": "lib/provider.js",
-                "engines": {
-                  "atom": ">=1.0.0 <2.0.0"
-                },
-                "providedServices": {
-                  "builder": {
-                    "description": "Compiles Python",
-                    "versions": {
-                      "2.0.0": "provideBuilder"
-                    }
-                  }
-                },
-                "package-deps": [
-                  "build"
-                ],
-                "dependencies": {
-                  "atom-package-deps": "^4.3.1"
-                },
-                "devDependencies": {
-                  "babel-eslint": "^7.1.1",
-                  "coffeelint-stylish": "^0.1.2",
-                  "eslint": "^3.13.1",
-                  "eslint-config-atom-build": "^4.0.0",
-                  "gulp": "github:gulpjs/gulp#4.0",
-                  "gulp-coffeelint": "^0.6.0",
-                  "gulp-debug": "^3.0.0",
-                  "gulp-jshint": "^2.0.4",
-                  "gulp-jsonlint": "^1.2.0",
-                  "gulp-lesshint": "^2.1.0",
-                  "jshint": "^2.9.4"
-                },
-                "scripts": {
-                  "test": "gulp lint"
-                },
-                "readme": "Blah blah",
-                "downloads": 2838,
-                "stargazers_count": 0
-              },
-              (...)
-            ]
-        """
-        matches = {}
-
-        search_args = []
-        if not extended:
-            search_args.append("--no-description")
-
-        output = self.run_cli("search", "--json", search_args, query)
-
-        if output:
-            for package in json.loads(output):
-                package_id = package["name"]
-
-                # Exclude packages not featuring the search query in their ID
-                # or name.
-                if not extended:
-                    query_parts = set(map(str, TokenizedString(query)))
-                    pkg_parts = set(map(str, TokenizedString(package_id)))
-                    if not query_parts.issubset(pkg_parts):
-                        continue
-
-                # Filters out fuzzy matches, only keep stricly matching
-                # packages.
-                if exact and query != package_id:
-                    continue
-
-                matches[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": parse_version(package["version"]),
-                }
-
-        return matches
-
-    def install(self, package_id):
-        """Install one package.
-
-        .. code-block:: shell-session
-
-            ► apm install image-view
-            The image-view package is bundled with Atom and should not be explicitly installed.
-            You can run `apm uninstall image-view` to uninstall it and then the version bundled
-            with Atom will be used.
-            Installing image-view to /Users/kde/.atom/packages ✓
-
-        """
-        super().install(package_id)
-        return self.run_cli("install", package_id)
 
     @property
     def outdated(self):
@@ -456,6 +326,136 @@ class APM(PackageManager):
                 }
 
         return outdated
+
+    def search(self, query, extended, exact):
+        """Fetch matching packages from ``apm search`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+            ► apm search python --json | jq
+            [
+              {
+                "name": "atom-python-run",
+                "main": "./lib/atom-python-run.js",
+                "version": "0.7.3",
+                "description": "Run a python source file.",
+                "keywords": [
+                  "python"
+                ],
+                "repository": "https://github.com/foreshadow/atom-python-run",
+                "license": "MIT",
+                "engines": {
+                  "atom": ">=1.0.0 <2.0.0"
+                },
+                "dependencies": {},
+                "readme": "Blah blah",
+                "downloads": 41379,
+                "stargazers_count": 16
+              },
+              {
+                "name": "build-python",
+                "version": "0.6.3",
+                "description": "Atom Build provider for python/python3",
+                "repository": "https://github.com/idleberg/atom-build-python",
+                "license": "MIT",
+                "keywords": [
+                  "buildprovider",
+                  "compile",
+                  "python",
+                  "python3",
+                  "linter",
+                  "lint"
+                ],
+                "main": "lib/provider.js",
+                "engines": {
+                  "atom": ">=1.0.0 <2.0.0"
+                },
+                "providedServices": {
+                  "builder": {
+                    "description": "Compiles Python",
+                    "versions": {
+                      "2.0.0": "provideBuilder"
+                    }
+                  }
+                },
+                "package-deps": [
+                  "build"
+                ],
+                "dependencies": {
+                  "atom-package-deps": "^4.3.1"
+                },
+                "devDependencies": {
+                  "babel-eslint": "^7.1.1",
+                  "coffeelint-stylish": "^0.1.2",
+                  "eslint": "^3.13.1",
+                  "eslint-config-atom-build": "^4.0.0",
+                  "gulp": "github:gulpjs/gulp#4.0",
+                  "gulp-coffeelint": "^0.6.0",
+                  "gulp-debug": "^3.0.0",
+                  "gulp-jshint": "^2.0.4",
+                  "gulp-jsonlint": "^1.2.0",
+                  "gulp-lesshint": "^2.1.0",
+                  "jshint": "^2.9.4"
+                },
+                "scripts": {
+                  "test": "gulp lint"
+                },
+                "readme": "Blah blah",
+                "downloads": 2838,
+                "stargazers_count": 0
+              },
+              (...)
+            ]
+        """
+        matches = {}
+
+        search_args = []
+        if not extended:
+            search_args.append("--no-description")
+
+        output = self.run_cli("search", "--json", search_args, query)
+
+        if output:
+            for package in json.loads(output):
+                package_id = package["name"]
+
+                # Exclude packages not featuring the search query in their ID
+                # or name.
+                if not extended:
+                    query_parts = set(map(str, TokenizedString(query)))
+                    pkg_parts = set(map(str, TokenizedString(package_id)))
+                    if not query_parts.issubset(pkg_parts):
+                        continue
+
+                # Filters out fuzzy matches, only keep stricly matching
+                # packages.
+                if exact and query != package_id:
+                    continue
+
+                matches[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(package["version"]),
+                }
+
+        return matches
+
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► apm install image-view
+            The image-view package is bundled with Atom and should not be explicitly installed.
+            You can run `apm uninstall image-view` to uninstall it and then the version bundled
+            with Atom will be used.
+            Installing image-view to /Users/kde/.atom/packages ✓
+
+        """
+        super().install(package_id)
+        return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
         return (

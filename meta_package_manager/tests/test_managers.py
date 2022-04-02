@@ -15,6 +15,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+import ast
+import inspect
 import re
 from operator import attrgetter
 from pathlib import Path, PurePath
@@ -25,6 +27,7 @@ import pytest
 from boltons.iterutils import unique
 from click_extra.platform import OS_DEFINITIONS
 
+from ..base import PackageManager
 from ..cli import XKCD_MANAGER_ORDER
 from ..pool import ALL_MANAGER_IDS, pool
 from ..version import TokenizedString
@@ -37,13 +40,6 @@ new package manager definitions.
 
 # Parametrization decorators.
 all_managers = pytest.mark.parametrize("manager", pool.values(), ids=attrgetter("id"))
-
-
-# def test_content_order
-#   Use AST to check the way the manager definition file is structure.
-#   Ultimate nitpicking tool.
-#   Have the class properties and methods ordered as in the same way the Base
-#   class is.
 
 
 @pytest.mark.parametrize("manager_id,manager", pool.items())
@@ -280,3 +276,31 @@ def test_cleanup_type(manager):
     if manager.available:
         assert isinstance(manager.cleanup, MethodType)
         assert manager.cleanup() is None
+
+
+# Build the canonical reference from the base class.
+# The class' internal dict is sorted with the same order the code is structured. No need for AST parsing.
+props_ref = tuple(prop for prop in PackageManager.__dict__.keys() if not prop.startswith('_'))
+
+# Check the code of each file registered in the pool.
+@pytest.mark.parametrize("manager_file", pool.manager_files, ids=attrgetter("name"))
+def test_content_order(manager_file):
+    """Lint each package manager definition file to check its code structure is the same as the canonical
+    PackageManager base class. """
+
+    tree = ast.parse(manager_file.read_text())
+
+    # Analyse each class.
+    for klass in (n for n in tree.body if isinstance(n, ast.ClassDef)):
+
+        # Collect in order the IDs of all properties (ast.Assign) and functions in the class.
+        collected_props = []
+        for node in klass.body:
+            if isinstance(node, ast.Assign):
+                collected_props.extend([t.id for t in node.targets])
+            if isinstance(node, ast.FunctionDef):
+                collected_props.append(node.name)
+
+        enforced_props = tuple(p for p in collected_props if p in props_ref)
+        expected_order = tuple(p for p in props_ref if p in collected_props)
+        assert enforced_props == expected_order

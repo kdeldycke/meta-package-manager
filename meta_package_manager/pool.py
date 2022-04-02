@@ -38,6 +38,9 @@ class ManagerPool:
     manager_subfolder = "managers"
     """Relative subfolder where to search for manager definition files."""
 
+    manager_files = set()
+    """Path of files containing package manager definitions."""
+
     @cached_property
     def register(self):
         """Search for package manager definitions locally and store them into an
@@ -62,6 +65,7 @@ class ManagerPool:
                     logger.debug(f"Found {klass!r}")
                     manager = klass()
                     register[manager.id] = manager
+                    self.manager_files.add(py_file)
                 else:
                     logger.debug(f"{klass!r} is not a valid manager definition")
 

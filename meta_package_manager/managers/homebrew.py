@@ -18,9 +18,9 @@
 import json
 import re
 
-from .. import logger
 from click_extra.platform import LINUX, MACOS
 
+from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
@@ -42,6 +42,13 @@ class Homebrew(PackageManager):
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     cli_names = None
 
+    extra_env = {
+        # Disable analytics.
+        "HOMEBREW_NO_ANALYTICS": "1",
+        # Disable configuration hints to reduce verbosity.
+        "HOMEBREW_NO_ENV_HINTS": "1",
+    }
+
     version_regex = r"Homebrew\s+(?P<version>\S+)"
     """
     .. code-block:: shell-session
@@ -51,24 +58,6 @@ class Homebrew(PackageManager):
         Homebrew/homebrew-core (git revision 533d; last commit 2018-12-28)
         Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
     """
-
-    extra_env = {
-        # Disable analytics.
-        "HOMEBREW_NO_ANALYTICS": "1",
-        # Disable configuration hints to reduce verbosity.
-        "HOMEBREW_NO_ENV_HINTS": "1",
-    }
-
-    def sync(self):
-        """Fetch content of remote taps.
-
-        .. code-block:: shell-session
-
-            ► brew update --quiet
-            Already up-to-date.
-        """
-        super().sync()
-        self.run_cli("update", "--quiet", skip_globals=True)
 
     @property
     def installed(self):
@@ -131,118 +120,6 @@ class Homebrew(PackageManager):
                     }
 
         return installed
-
-    def search(self, query, extended, exact):
-        """Fetch matching packages from ``brew search`` output.
-
-        .. code-block:: shell-session
-
-            ► brew search sed
-            ==> Formulae
-            gnu-sed ✔                    libxdg-basedir               minised
-            ==> Casks
-            eclipse-dsl                       marsedit
-            focused                           physicseditor
-            google-adwords-editor             prefs-editor
-            licensed                          subclassed-mnemosyne
-
-        .. code-block:: shell-session
-
-            ► brew search sed --formulae
-            ==> Formulae
-            gnu-sed ✔                    libxdg-basedir               minised
-
-        .. code-block:: shell-session
-
-            ► brew search sed --cask
-            ==> Casks
-            eclipse-dsl                       marsedit
-            focused                           physicseditor
-            google-adwords-editor             prefs-editor
-            licensed                          subclassed-mnemosyne
-
-        .. code-block:: shell-session
-
-            ► brew search python --formulae
-            ==> Formulae
-            app-engine-python   boost-python3   python ✔          python-yq
-            boost-python        gst-python      python-markdown   python@3.8 ✔
-
-        .. code-block:: shell-session
-
-            ► brew search "/^ssed$/" --formulae
-            ==> Formulae
-            ssed
-
-        .. code-block:: shell-session
-
-            ► brew search "/^sed$/" --formulae
-            No formula or cask found for "/^sed$/".
-            Closed pull requests:
-            Merge ba7a794 (https://github.com/Homebrew/linuxbrew-core/pull/198)
-            R: disable Tcl (https://github.com/Homebrew/homebrew-core/pull/521)
-            (...)
-
-        More doc at: https://docs.brew.sh/Manpage#search-texttext
-        """
-        matches = {}
-
-        if extended:
-            logger.warning(
-                f"Extended search not supported for {self.id}. Fallback to Fuzzy."
-            )
-
-        # Use regexp for exact match.
-        if exact:
-            query = f"/^{query}$/"
-
-        output = self.run_cli("search", query)
-
-        if output:
-            regexp = re.compile(
-                r"""
-                (?:==>\s\S+\s)?           # Ignore section starting with '==>'.
-                (?P<package_id>[^\s✔]+)   # Anything not a whitespace or ✔.
-                """,
-                re.VERBOSE,
-            )
-
-            for package_id in regexp.findall(output):
-                matches[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": None,
-                }
-
-        return matches
-
-    def install(self, package_id):
-        """Install one package.
-
-        .. code-block:: shell-session
-
-            ► brew install jpeginfo --formula
-            ==> Downloading https://ghcr.io/core/jpeginfo/manifests/1.6.1_1-1
-            ############################################################## 100.0%
-            ==> Downloading https://ghcr.io/core/jpeginfo/blobs/sha256:27bb35884368b83
-            ==> Downloading from https://pkg.githubcontent.com/ghcr1/blobs/sha256:27bb3
-            ############################################################## 100.0%
-            ==> Pouring jpeginfo--1.6.1_1.big_sur.bottle.1.tar.gz
-            🍺  /usr/local/Cellar/jpeginfo/1.6.1_1: 7 files, 77.6KB
-
-        .. code-block:: shell-session
-
-            ► brew install pngyu --cask
-            Updating Homebrew...
-            ==> Downloading https://nukesaq.github.io/Pngyu/download/Pngyu_mac_101.zip
-            ################################################################## 100.0%
-            ==> Installing Cask pngyu
-            ==> Moving App 'Pngyu.app' to '/Applications/Pngyu.app'
-            🍺  pngyu was successfully installed!
-
-        """
-        super().install(package_id)
-        return self.run_cli("install", package_id)
 
     @property
     def outdated(self):
@@ -361,6 +238,120 @@ class Homebrew(PackageManager):
 
         return outdated
 
+    def search(self, query, extended, exact):
+        """Fetch matching packages from ``brew search`` output.
+
+        .. code-block:: shell-session
+
+            ► brew search sed
+            ==> Formulae
+            gnu-sed ✔                    libxdg-basedir               minised
+            ==> Casks
+            eclipse-dsl                       marsedit
+            focused                           physicseditor
+            google-adwords-editor             prefs-editor
+            licensed                          subclassed-mnemosyne
+
+        .. code-block:: shell-session
+
+            ► brew search sed --formulae
+            ==> Formulae
+            gnu-sed ✔                    libxdg-basedir               minised
+
+        .. code-block:: shell-session
+
+            ► brew search sed --cask
+            ==> Casks
+            eclipse-dsl                       marsedit
+            focused                           physicseditor
+            google-adwords-editor             prefs-editor
+            licensed                          subclassed-mnemosyne
+
+        .. code-block:: shell-session
+
+            ► brew search python --formulae
+            ==> Formulae
+            app-engine-python   boost-python3   python ✔          python-yq
+            boost-python        gst-python      python-markdown   python@3.8 ✔
+
+        .. code-block:: shell-session
+
+            ► brew search "/^ssed$/" --formulae
+            ==> Formulae
+            ssed
+
+        .. code-block:: shell-session
+
+            ► brew search "/^sed$/" --formulae
+            No formula or cask found for "/^sed$/".
+            Closed pull requests:
+            Merge ba7a794 (https://github.com/Homebrew/linuxbrew-core/pull/198)
+            R: disable Tcl (https://github.com/Homebrew/homebrew-core/pull/521)
+            (...)
+
+        More doc at: https://docs.brew.sh/Manpage#search-texttext
+        """
+        matches = {}
+
+        if extended:
+            logger.warning(
+                f"Extended search not supported for {self.id}. Fallback to Fuzzy."
+            )
+
+        # Use regexp for exact match.
+        if exact:
+            query = f"/^{query}$/"
+
+        output = self.run_cli("search", query)
+
+        if output:
+            regexp = re.compile(
+                r"""
+                (?:==>\s\S+\s)?           # Ignore section starting with '==>'.
+                (?P<package_id>[^\s✔]+)   # Anything not a whitespace or ✔.
+                """,
+                re.VERBOSE,
+            )
+
+            for package_id in regexp.findall(output):
+                matches[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": None,
+                }
+
+        return matches
+
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► brew install jpeginfo --formula
+            ==> Downloading https://ghcr.io/core/jpeginfo/manifests/1.6.1_1-1
+            ############################################################## 100.0%
+            ==> Downloading https://ghcr.io/core/jpeginfo/blobs/sha256:27bb35884368b83
+            ==> Downloading from https://pkg.githubcontent.com/ghcr1/blobs/sha256:27bb3
+            ############################################################## 100.0%
+            ==> Pouring jpeginfo--1.6.1_1.big_sur.bottle.1.tar.gz
+            🍺  /usr/local/Cellar/jpeginfo/1.6.1_1: 7 files, 77.6KB
+
+        .. code-block:: shell-session
+
+            ► brew install pngyu --cask
+            Updating Homebrew...
+            ==> Downloading https://nukesaq.github.io/Pngyu/download/Pngyu_mac_101.zip
+            ################################################################## 100.0%
+            ==> Installing Cask pngyu
+            ==> Moving App 'Pngyu.app' to '/Applications/Pngyu.app'
+            🍺  pngyu was successfully installed!
+
+        """
+        super().install(package_id)
+        # TODO: HOMEBREW_NO_AUTO_UPDATE=1
+        # Source: https://news.ycombinator.com/item?id=29079837
+        return self.run_cli("install", package_id)
+
     def upgrade_cli(self, package_id=None):
         """Returns the right CLI depending on weither formula or cask are
         concerned:
@@ -427,6 +418,18 @@ class Homebrew(PackageManager):
             package_id,
         )
 
+
+    def sync(self):
+        """Fetch content of remote taps.
+
+        .. code-block:: shell-session
+
+            ► brew update --quiet
+            Already up-to-date.
+        """
+        super().sync()
+        self.run_cli("update", "--quiet", skip_globals=True)
+
     def cleanup(self):
         """Scrub the cache, including latest version's downloads. Also remove unused
         dependencies.
@@ -478,6 +481,7 @@ class Homebrew(PackageManager):
 class Brew(Homebrew):
 
     name = "Homebrew Formulae"
+
     cli_names = ("brew",)
 
     post_args = ("--formula",)
@@ -485,11 +489,15 @@ class Brew(Homebrew):
 
 class Cask(Homebrew):
 
+    name = "Homebrew Cask"
+
     # Casks are only available on macOS, not Linux.
     platforms = frozenset({MACOS})
-    name = "Homebrew Cask"
+
     cli_names = ("brew",)
 
     post_args = ("--cask",)
+
+    # XXX test these options
     # HOMEBREW_CASK_OPTS = "--no-quarantine"
     # HOMEBREW_NO_AUTO_UPDATE=1

@@ -27,9 +27,10 @@ from ..version import parse_version
 class Composer(PackageManager):
 
     name = "PHP's Composer"
-    pre_args = ("global",)
     platforms = frozenset({LINUX, MACOS, WINDOWS})
     requirement = "1.4.0"
+
+    pre_args = ("global",)
 
     version_regex = r"Composer\s+version\s+(?P<version>\S+)"
     """
@@ -88,6 +89,51 @@ class Composer(PackageManager):
                 }
 
         return installed
+
+    @property
+    def outdated(self):
+        """Fetch outdated packages from ``composer global outdated`` output.
+
+        Raw CLI output samples:
+
+        .. code-block:: shell-session
+
+        ► composer global outdated --format=json
+        {
+            "installed": [
+                {
+                    "name": "illuminate/contracts",
+                    "version": "v5.7.2",
+                    "latest": "v5.7.3",
+                    "latest-status": "semver-safe-update",
+                    "description": "The Illuminate Contracts package."
+                },
+                {
+                    "name": "illuminate/support",
+                    "version": "v5.7.2",
+                    "latest": "v5.7.3",
+                    "latest-status": "semver-safe-update",
+                    "description": "The Illuminate Support package."
+                }
+            ]
+        }
+        """
+        outdated = {}
+
+        output = self.run_cli("outdated", "--format=json")
+
+        if output:
+            package_list = json.loads(output)
+            for package in package_list["installed"]:
+                package_id = package["name"]
+                outdated[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(package["version"]),
+                    "latest_version": parse_version(package["latest"]),
+                }
+
+        return outdated
 
     def search(self, query, extended, exact):
         """Fetch matching packages from ``composer search`` output.
@@ -171,51 +217,6 @@ class Composer(PackageManager):
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
-
-    @property
-    def outdated(self):
-        """Fetch outdated packages from ``composer global outdated`` output.
-
-        Raw CLI output samples:
-
-        .. code-block:: shell-session
-
-        ► composer global outdated --format=json
-        {
-            "installed": [
-                {
-                    "name": "illuminate/contracts",
-                    "version": "v5.7.2",
-                    "latest": "v5.7.3",
-                    "latest-status": "semver-safe-update",
-                    "description": "The Illuminate Contracts package."
-                },
-                {
-                    "name": "illuminate/support",
-                    "version": "v5.7.2",
-                    "latest": "v5.7.3",
-                    "latest-status": "semver-safe-update",
-                    "description": "The Illuminate Support package."
-                }
-            ]
-        }
-        """
-        outdated = {}
-
-        output = self.run_cli("outdated", "--format=json")
-
-        if output:
-            package_list = json.loads(output)
-            for package in package_list["installed"]:
-                package_id = package["name"]
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(package["version"]),
-                    "latest_version": parse_version(package["latest"]),
-                }
-
-        return outdated
 
     def upgrade_cli(self, package_id=None):
         return (

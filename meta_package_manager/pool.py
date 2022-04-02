@@ -15,14 +15,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-""" Registration, indexing and caching of package manager definitions. """
+""" Registration, indexing and caching of package manager supported by mpm. """
 
 import inspect
 from functools import cached_property
 from importlib import import_module
 from pathlib import Path
 
-from boltons.cacheutils import LRI, cached
 from boltons.iterutils import unique
 
 from . import logger
@@ -30,6 +29,7 @@ from .base import PackageManager
 
 
 class ManagerPool:
+    """A dict-like register indexing all supported package managers."""
 
     ALLOWED_EXTRA_OPTION = frozenset({"ignore_auto_updates", "stop_on_error", "dry_run"})
     """List of extra options that are allowed to be set on managers during the use of the
@@ -38,11 +38,8 @@ class ManagerPool:
     manager_subfolder = "managers"
     """Relative subfolder where to search for manager definition files."""
 
-    # Cache of the global pool of registered manager definitions.
-    #register = {}
-
     @cached_property
-    def pool(self):
+    def register(self):
         """Search for package manager definitions locally and store them into an
         internal register.
 
@@ -51,10 +48,6 @@ class ManagerPool:
             2 - are sub-classes of PackageManager, and
             3 - are not virtual (i.e. have a non null `cli_names` property).
         """
-        # Register has already been populated, return it.
-        #if self.register:
-        #    return self.register
-
         register = {}
 
         # Populate empty register.
@@ -78,23 +71,23 @@ class ManagerPool:
     # Emulates some dict methods.
 
     def __len__(self):
-        return len(self.pool)
+        return len(self.register)
 
     def __getitem__(self, key):
-        return self.pool[key]
+        return self.register[key]
 
     def __iter__(self):
-        for key in self.pool:
+        for key in self.register:
             yield key
 
     def __contains__(self, key):
-        return key in self.pool
+        return key in self.register
 
     def values(self):
-        return self.pool.values()
+        return self.register.values()
 
     def items(self):
-        return self.pool.items()
+        return self.register.items()
 
 
     # Pre-compute all sorts of constants.
@@ -106,7 +99,7 @@ class ManagerPool:
         Is a list of sorted items to provide consistency across all UI, and reproducability in
         the order package managers are evaluated.
         """
-        return tuple(sorted(self.pool))
+        return tuple(sorted(self.register))
 
     @cached_property
     def default_manager_ids(self):
@@ -114,7 +107,7 @@ class ManagerPool:
 
         Must keep the same order defined by ALL_MANAGER_IDS.
         """
-        return tuple(mid for mid in self.all_manager_ids if self.pool[mid].supported)
+        return tuple(mid for mid in self.all_manager_ids if self.register.get(mid).supported)
 
     @cached_property
     def unsupported_manager_ids(self):
@@ -167,7 +160,7 @@ class ManagerPool:
 
         # Deduplicate managers IDs while preserving order, then remove excluded managers.
         for manager_id in (mid for mid in unique(selected_ids) if mid not in drop):
-            manager = self.pool[manager_id]
+            manager = self.register.get(manager_id)
 
             # TODO: check if not implemeted before calling .available. It saves one call to the package manager CLI.
 

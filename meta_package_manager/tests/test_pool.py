@@ -25,14 +25,14 @@ from ..pool import ALL_MANAGER_IDS, DEFAULT_MANAGER_IDS, UNSUPPORTED_MANAGER_IDS
 
 def test_manager_count():
     """Check all implemented package managers are accounted for, and unique."""
-    assert len(pool.pool) == 16
-    assert len(pool.pool) == len(ALL_MANAGER_IDS)
-    assert ALL_MANAGER_IDS == tuple(sorted(set(pool.pool)))
+    assert len(pool) == 16
+    assert len(pool) == len(ALL_MANAGER_IDS)
+    assert ALL_MANAGER_IDS == tuple(sorted(set(pool)))
 
 
 def test_cached_pool():
-    assert pool.pool == pool.pool
-    assert pool.pool is pool.pool
+    assert pool == pool
+    assert pool is pool
 
 
 @pytest.mark.parametrize("manager_id", DEFAULT_MANAGER_IDS)

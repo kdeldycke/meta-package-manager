@@ -36,7 +36,9 @@ from .base import PackageManager
 class ManagerPool:
     """A dict-like register indexing all supported package managers."""
 
-    ALLOWED_EXTRA_OPTION = frozenset({"ignore_auto_updates", "stop_on_error", "dry_run"})
+    ALLOWED_EXTRA_OPTION = frozenset(
+        {"ignore_auto_updates", "stop_on_error", "dry_run"}
+    )
     """List of extra options that are allowed to be set on managers during the use of the
     :py:func:`meta_package_manager.managers.select_managers` helper below."""
 
@@ -59,7 +61,9 @@ class ManagerPool:
         register = {}
 
         # Populate empty register.
-        for py_file in Path(__file__).parent.joinpath(self.manager_subfolder).glob("*.py"):
+        for py_file in (
+            Path(__file__).parent.joinpath(self.manager_subfolder).glob("*.py")
+        ):
             logger.debug(f"Search manager definitions in {py_file}")
             module = import_module(
                 f".{self.manager_subfolder}.{py_file.stem}", package=__package__
@@ -75,7 +79,6 @@ class ManagerPool:
                     logger.debug(f"{klass!r} is not a valid manager definition")
 
         return register
-
 
     # Emulates some dict methods.
 
@@ -99,12 +102,11 @@ class ManagerPool:
     def items(self):
         return self.register.items()
 
-
     # Pre-compute all sorts of constants.
 
     @cached_property
     def all_manager_ids(self):
-        """ All recognized manager IDs.
+        """All recognized manager IDs.
 
         Is a list of sorted items to provide consistency across all UI, and reproducability in
         the order package managers are evaluated.
@@ -113,15 +115,17 @@ class ManagerPool:
 
     @cached_property
     def default_manager_ids(self):
-        """ All manager IDs supported on the current platform.
+        """All manager IDs supported on the current platform.
 
         Must keep the same order defined by pool.all_manager_ids.
         """
-        return tuple(mid for mid in self.all_manager_ids if self.register.get(mid).supported)
+        return tuple(
+            mid for mid in self.all_manager_ids if self.register.get(mid).supported
+        )
 
     @cached_property
     def unsupported_manager_ids(self):
-        """ All manager IDs unsupported on the current platform.
+        """All manager IDs unsupported on the current platform.
 
         Order is not important here as this list will be used to discard managers from selection
         sets.
@@ -157,7 +161,9 @@ class ManagerPool:
         Returns a generator producing a manager object one after the other.
         """
         if not keep:
-            keep = self.default_manager_ids if drop_unsupported else self.all_manager_ids
+            keep = (
+                self.default_manager_ids if drop_unsupported else self.all_manager_ids
+            )
         if not drop:
             drop = set()
         assert set(self.all_manager_ids).issuperset(keep)
@@ -185,5 +191,6 @@ class ManagerPool:
                 setattr(manager, param, value)
 
             yield manager
+
 
 pool = ManagerPool()

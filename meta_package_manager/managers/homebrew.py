@@ -416,7 +416,6 @@ class Homebrew(PackageManager):
             package_id,
         )
 
-
     def sync(self):
         """Fetch content of remote taps.
 

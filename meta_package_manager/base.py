@@ -416,7 +416,6 @@ class PackageManager:
             return
         logger.info(f"Install {package_id} package from {self.id}...")
 
-
     def upgrade_cli(self, package_id=None):
         """Return a shell-compatible full-CLI to upgrade a package."""
         raise NotImplementedError

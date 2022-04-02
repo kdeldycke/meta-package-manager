@@ -280,13 +280,15 @@ def test_cleanup_type(manager):
 
 # Build the canonical reference from the base class.
 # The class' internal dict is sorted with the same order the code is structured. No need for AST parsing.
-props_ref = tuple(prop for prop in PackageManager.__dict__.keys() if not prop.startswith('_'))
+props_ref = tuple(
+    prop for prop in PackageManager.__dict__.keys() if not prop.startswith("_")
+)
 
 # Check the code of each file registered in the pool.
 @pytest.mark.parametrize("manager_file", pool.manager_files, ids=attrgetter("name"))
 def test_content_order(manager_file):
     """Lint each package manager definition file to check its code structure is the same as the canonical
-    PackageManager base class. """
+    PackageManager base class."""
 
     tree = ast.parse(manager_file.read_text())
 

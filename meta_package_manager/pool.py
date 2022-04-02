@@ -88,8 +88,7 @@ class ManagerPool:
     get = __getitem__
 
     def __iter__(self):
-        for key in self.register:
-            yield key
+        yield from self.register
 
     def __contains__(self, key):
         return key in self.register
@@ -127,9 +126,9 @@ class ManagerPool:
         Order is not important here as this list will be used to discard managers from selection
         sets.
         """
-        return tuple((
+        return tuple(
             mid for mid in self.all_manager_ids if mid not in self.default_manager_ids
-        ))
+        )
 
     def select_managers(
         self,

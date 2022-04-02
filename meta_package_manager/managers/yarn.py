@@ -18,7 +18,7 @@
 import json
 
 from boltons.cacheutils import cachedproperty
-from click_extra.logging import logger
+from .. import logger
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from ..base import PackageManager

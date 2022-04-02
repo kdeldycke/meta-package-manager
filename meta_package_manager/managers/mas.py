@@ -17,7 +17,7 @@
 
 import re
 
-from click_extra.logging import logger
+from .. import logger
 from click_extra.platform import MACOS
 
 from ..base import PackageManager

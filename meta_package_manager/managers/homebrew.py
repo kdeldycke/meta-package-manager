@@ -18,7 +18,7 @@
 import json
 import re
 
-from click_extra.logging import logger
+from .. import logger
 from click_extra.platform import LINUX, MACOS
 
 from ..base import PackageManager

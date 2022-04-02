@@ -33,7 +33,6 @@ from click_extra import (
     Choice,
     File,
     argument,
-    command,
     echo,
     group,
     option,

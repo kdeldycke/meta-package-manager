@@ -179,11 +179,11 @@ def test_labeller_rules():
 
             # Check managers sharing the same label shares the same platforms.
             supported_platforms = [
-                pool()[mid].platforms
+                pool.get(mid).platforms
                 for mid, lbl in MANAGER_LABELS.items()
-                # Relying on pool() restrict our checks, as the pool exclude
+                # Relying on pool restrict our checks, as the pool exclude
                 # non-locally supported managers.
-                if lbl == manager_label and mid in pool()
+                if lbl == manager_label and mid in pool
             ]
             assert len(set(supported_platforms)) == 1
 

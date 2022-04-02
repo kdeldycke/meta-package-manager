@@ -7,6 +7,8 @@ This version is not released yet and is under active development.
 ```
 
 - \[brew,cask\] Disable analytics and env hints in logs.
+- \[xbar\] Fix log verbosity and unittests for xbar plugin.
+- \[mpm\] Fix documentation generation.
 
 ## {gh}`4.10.0 (2022-03-31) <compare/v4.9.10...v4.10.0>`
 

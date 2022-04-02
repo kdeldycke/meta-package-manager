@@ -59,11 +59,11 @@ class CLIError(Exception):
         return indent(
             dedent(
                 f"""
-            Return code: {self.code}
-            Output:
-            {indented_output}
-            Error:
-            {indented_error}"""
+                Return code: {self.code}
+                Output:
+                {indented_output}
+                Error:
+                {indented_error}"""
             ),
             INDENT,
         )

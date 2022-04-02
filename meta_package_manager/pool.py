@@ -85,6 +85,8 @@ class ManagerPool:
     def __getitem__(self, key):
         return self.register[key]
 
+    get = __getitem__
+
     def __iter__(self):
         for key in self.register:
             yield key

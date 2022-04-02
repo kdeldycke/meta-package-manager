@@ -47,6 +47,9 @@ class Homebrew(PackageManager):
         "HOMEBREW_NO_ANALYTICS": "1",
         # Disable configuration hints to reduce verbosity.
         "HOMEBREW_NO_ENV_HINTS": "1",
+        # Do not let brew mix the update operation with others. Mpm has a separate "sync" command for that.
+        # This silo-ed behavior has been requested by user since the beginning of mpm: https://github.com/kdeldycke/meta-package-manager/issues/36
+        "HOMEBREW_NO_AUTO_UPDATE": "1",
     }
 
     version_regex = r"Homebrew\s+(?P<version>\S+)"
@@ -339,7 +342,6 @@ class Homebrew(PackageManager):
         .. code-block:: shell-session
 
             ► brew install pngyu --cask
-            Updating Homebrew...
             ==> Downloading https://nukesaq.github.io/Pngyu/download/Pngyu_mac_101.zip
             ################################################################## 100.0%
             ==> Installing Cask pngyu
@@ -348,8 +350,6 @@ class Homebrew(PackageManager):
 
         """
         super().install(package_id)
-        # TODO: HOMEBREW_NO_AUTO_UPDATE=1
-        # Source: https://news.ycombinator.com/item?id=29079837
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
@@ -392,10 +392,6 @@ class Homebrew(PackageManager):
         .. code-block:: shell-session
 
             ► brew upgrade --cask
-            Updating Homebrew...
-            ==> Auto-updated Homebrew!
-            Updated Homebrew from 1654de327 to cfa03c8cc.
-            Updated 2 taps (homebrew/core and homebrew/cask).
             ==> Casks with `auto_updates` or `version :latest` will not be upgraded
             ==> Upgrading 1 outdated packages:
             aerial 2.0.7 -> 2.0.8
@@ -428,7 +424,7 @@ class Homebrew(PackageManager):
             Already up-to-date.
         """
         super().sync()
-        self.run_cli("update", "--quiet", skip_globals=True)
+        self.run_cli("update", "--quiet")
 
     def cleanup(self):
         """Scrub the cache, including latest version's downloads. Also remove unused
@@ -500,4 +496,3 @@ class Cask(Homebrew):
 
     # XXX test these options
     # HOMEBREW_CASK_OPTS = "--no-quarantine"
-    # HOMEBREW_NO_AUTO_UPDATE=1

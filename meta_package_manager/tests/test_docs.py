@@ -70,7 +70,13 @@ def test_changelog():
             assert entry["category"]
             assert set(entry["category"].split(",")).issubset(
                 flatten(
-                    (pool.all_manager_ids, OS_DEFINITIONS.keys(), "mpm", "bitbar", "xbar")
+                    (
+                        pool.all_manager_ids,
+                        OS_DEFINITIONS.keys(),
+                        "mpm",
+                        "bitbar",
+                        "xbar",
+                    )
                 )
             )
 

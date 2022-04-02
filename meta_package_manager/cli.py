@@ -231,7 +231,9 @@ def mpm(
     )()
 
 
-@mpm.command(short_help="List supported package managers and their location.", section=EXPLORE)
+@mpm.command(
+    short_help="List supported package managers and their location.", section=EXPLORE
+)
 @pass_context
 def managers(ctx):
     """List all supported package managers and their presence on the system."""
@@ -707,7 +709,10 @@ def backup(ctx, toml_output):
         print_stats(installed_data)
 
 
-@mpm.command(short_help="Install packages in batch as specified by TOML files.", section=SNAPSHOTS)
+@mpm.command(
+    short_help="Install packages in batch as specified by TOML files.",
+    section=SNAPSHOTS,
+)
 @argument("toml_files", type=File("r"), required=True, nargs=-1)
 @pass_context
 def restore(ctx, toml_files):

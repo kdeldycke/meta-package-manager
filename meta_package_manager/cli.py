@@ -41,7 +41,6 @@ from click_extra import (
     pass_context,
 )
 from click_extra.colorize import KO, OK, theme
-from click_extra.logging import logger
 from click_extra.platform import os_label
 from click_extra.tabulate import table_format_option
 
@@ -50,7 +49,9 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib
 
-from . import __version__
+from cloup import Section
+
+from . import __version__, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .output import (
     SORTABLE_FIELDS,
@@ -59,11 +60,16 @@ from .output import (
     print_stats,
     print_table,
 )
-from .pool import ALL_MANAGER_IDS, select_managers
+from .pool import pool
 from .version import TokenizedString
 
+# Sub-command sections.
+EXPLORE = Section("Explore commands")
+MAINTENANCE = Section("Maintainance commands")
+SNAPSHOTS = Section("Package snapshots commands")
+
+
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "apt")
-assert set(ALL_MANAGER_IDS).issuperset(XKCD_MANAGER_ORDER)
 
 
 def add_manager_to_selection(ctx, param, selected):
@@ -76,7 +82,7 @@ def add_manager_to_selection(ctx, param, selected):
 
 def single_manager_selectors():
     """Dynamiccaly creates a dedicated flag selector for each manager."""
-    for manager_id in ALL_MANAGER_IDS:
+    for manager_id in pool.all_manager_ids:
         yield option(
             f"--{manager_id}",
             is_flag=True,
@@ -93,7 +99,7 @@ def single_manager_selectors():
     option(
         "-m",
         "--manager",
-        type=Choice(ALL_MANAGER_IDS, case_sensitive=False),
+        type=Choice(pool.all_manager_ids, case_sensitive=False),
         multiple=True,
         help="Restrict sub-command to a subset of package managers. Repeat to "
         "select multiple managers. The order in which options are provided defines the "
@@ -102,7 +108,7 @@ def single_manager_selectors():
     option(
         "-e",
         "--exclude",
-        type=Choice(ALL_MANAGER_IDS, case_sensitive=False),
+        type=Choice(pool.all_manager_ids, case_sensitive=False),
         multiple=True,
         help="Exclude a package manager. Repeat to exclude multiple managers.",
     ),
@@ -190,7 +196,7 @@ def mpm(
         manager = list(manager) + ctx.obj.get("single_manager_selector", [])
 
     # Select the subset of manager to target, and apply manager-level options.
-    selected_managers = select_managers(
+    selected_managers = pool.select_managers(
         keep=manager if not xkcd else XKCD_MANAGER_ORDER,
         drop=exclude,
         drop_unsupported=not all_managers,
@@ -226,7 +232,8 @@ def mpm(
     )()
 
 
-@command(short_help="List supported package managers and their location.")
+
+@mpm.command(short_help="List supported package managers and their location.", section=EXPLORE)
 @pass_context
 def managers(ctx):
     """List all supported package managers and their presence on the system."""
@@ -307,23 +314,7 @@ def managers(ctx):
     )
 
 
-@command(short_help="Sync local package info.")
-@pass_context
-def sync(ctx):
-    """Sync local package metadata and info from external sources."""
-    for manager in ctx.obj.selected_managers:
-        manager.sync()
-
-
-@command(short_help="Cleanup local data.")
-@pass_context
-def cleanup(ctx):
-    """Cleanup local data and temporary artifacts."""
-    for manager in ctx.obj.selected_managers:
-        manager.cleanup()
-
-
-@command(short_help="List installed packages.")
+@mpm.command(short_help="List installed packages.", section=EXPLORE)
 @pass_context
 def installed(ctx):
     """List all packages installed on the system from all managers."""
@@ -376,7 +367,152 @@ def installed(ctx):
         print_stats(installed_data)
 
 
-@command(short_help="Search packages.")
+@mpm.command(short_help="Install a package.", section=MAINTENANCE)
+@argument("package_id", type=STRING, required=True)
+@pass_context
+def install(ctx, package_id):
+    """Install the provided package using one of the provided package manager."""
+    # Cast generator to tuple because of reuse.
+    selected_managers = tuple(ctx.obj.selected_managers)
+
+    logger.info(
+        f"Package manager order: {', '.join([m.id for m in ctx.obj.selected_managers])}"
+    )
+
+    for manager in selected_managers:
+        logger.debug(f"Try to install {package_id} with {manager.id}.")
+
+        # Is the package available on this manager?
+        matches = None
+        try:
+            matches = manager.search(extended=False, exact=True, query=package_id)
+        except NotImplementedError:
+            logger.warning(
+                f"No way to search for {package_id} with {manager.id}. Try to directly install it."
+            )
+        else:
+            if not matches:
+                logger.warning(f"No {package_id} package found on {manager.id}.")
+                continue
+            assert len(matches) == 1
+
+        # Allow install subcommand to fail.
+        default_value = manager.stop_on_error
+        manager.stop_on_error = True
+        try:
+            output = manager.install(package_id)
+        except CLIError:
+            logger.warning(f"Could not install {package_id} with {manager.id}.")
+
+            # Restore default value.
+            manager.stop_on_error = default_value
+
+            continue
+
+        # Restore default value.
+        manager.stop_on_error = default_value
+
+        echo(output)
+        return
+
+
+@mpm.command(short_help="List outdated packages.", section=EXPLORE)
+@option(
+    "-c",
+    "--cli-format",
+    type=Choice(sorted(CLI_FORMATS), case_sensitive=False),
+    default="plain",
+    help="Format of CLI fields in JSON output.",
+)
+@pass_context
+def outdated(ctx, cli_format):
+    """List available package upgrades and their versions for each manager."""
+    render_cli = partial(PackageManager.render_cli, cli_format=cli_format)
+
+    # Build-up a global list of outdated packages per manager.
+    outdated_data = {}
+
+    for manager in ctx.obj.selected_managers:
+
+        try:
+            packages = tuple(map(dict, manager.outdated.values()))
+        except NotImplementedError:
+            logger.warning(f"{manager.id} does not implement outdated command.")
+            continue
+
+        for info in packages:
+            info.update({"upgrade_cli": render_cli(manager.upgrade_cli(info["id"]))})
+
+        outdated_data[manager.id] = {
+            "id": manager.id,
+            "name": manager.name,
+            "packages": packages,
+        }
+
+        # Do not include the full-upgrade CLI if we did not detect any outdated
+        # package.
+        if packages:
+            try:
+                upgrade_all_cli = manager.upgrade_all_cli()
+            except NotImplementedError:
+                # Fallback on mpm itself which is capable of simulating a full
+                # upgrade.
+                upgrade_all_cli = ("mpm", "--manager", manager.id, "upgrade")
+            outdated_data[manager.id]["upgrade_all_cli"] = render_cli(upgrade_all_cli)
+
+        # Serialize errors at the last minute to gather all we encountered.
+        outdated_data[manager.id]["errors"] = list(
+            {expt.error for expt in manager.cli_errors}
+        )
+
+    # Machine-friendly data rendering.
+    if ctx.find_root().table_formatter.format_name == "json":
+        print_json(outdated_data)
+        return
+
+    # Human-friendly content rendering.
+    table = []
+    for manager_id, outdated_pkg in outdated_data.items():
+        table += [
+            (
+                info["name"],
+                info["id"],
+                manager_id,
+                info["installed_version"] if info["installed_version"] else "?",
+                info["latest_version"],
+            )
+            for info in outdated_pkg["packages"]
+        ]
+
+    # Sort and print table.
+    print_table(
+        (
+            ("Package name", "package_name"),
+            ("ID", "package_id"),
+            ("Manager", "manager_id"),
+            ("Installed version", "version"),
+            ("Latest version", None),
+        ),
+        table,
+        ctx.obj.sort_by,
+    )
+
+    if ctx.obj.stats:
+        print_stats(outdated_data)
+
+
+# TODO: make it a --search-strategy=[exact, fuzzy, extended]
+# Add details helps => exact: is case-sensitive, and keep all non-alnum chars
+# fuzzy: query is case-insensitive, stripped-out of non-alnum chars and
+# tokenized (no order sensitive)
+# extended, same as fuzzy, but do not limit search to package name and ID.
+# extended to description and other metadata depending on manager support.
+# Modes:
+#  1. strict (--exact)
+#  2. substring (regex, no case, no split)
+#  3. fuzzy (token-based)
+#  4. extended (+ metadata)
+@mpm.command(short_help="Search packages.", section=EXPLORE)
 @option(
     "--extended/--package-name",
     default=False,
@@ -485,141 +621,7 @@ def search(ctx, extended, exact, query):
         print_stats(matches)
 
 
-@command(short_help="Install a package.")
-@argument("package_id", type=STRING, required=True)
-@pass_context
-def install(ctx, package_id):
-    """Install the provided package using one of the provided package manager."""
-    # Cast generator to tuple because of reuse.
-    selected_managers = tuple(ctx.obj.selected_managers)
-
-    logger.info(
-        f"Package manager order: {', '.join([m.id for m in ctx.obj.selected_managers])}"
-    )
-
-    for manager in selected_managers:
-        logger.debug(f"Try to install {package_id} with {manager.id}.")
-
-        # Is the package available on this manager?
-        matches = None
-        try:
-            matches = manager.search(extended=False, exact=True, query=package_id)
-        except NotImplementedError:
-            logger.warning(
-                f"No way to search for {package_id} with {manager.id}. Try to directly install it."
-            )
-        else:
-            if not matches:
-                logger.warning(f"No {package_id} package found on {manager.id}.")
-                continue
-            assert len(matches) == 1
-
-        # Allow install subcommand to fail.
-        default_value = manager.stop_on_error
-        manager.stop_on_error = True
-        try:
-            output = manager.install(package_id)
-        except CLIError:
-            logger.warning(f"Could not install {package_id} with {manager.id}.")
-
-            # Restore default value.
-            manager.stop_on_error = default_value
-
-            continue
-
-        # Restore default value.
-        manager.stop_on_error = default_value
-
-        echo(output)
-        return
-
-
-@command(short_help="List outdated packages.")
-@option(
-    "-c",
-    "--cli-format",
-    type=Choice(sorted(CLI_FORMATS), case_sensitive=False),
-    default="plain",
-    help="Format of CLI fields in JSON output.",
-)
-@pass_context
-def outdated(ctx, cli_format):
-    """List available package upgrades and their versions for each manager."""
-    render_cli = partial(PackageManager.render_cli, cli_format=cli_format)
-
-    # Build-up a global list of outdated packages per manager.
-    outdated_data = {}
-
-    for manager in ctx.obj.selected_managers:
-
-        try:
-            packages = tuple(map(dict, manager.outdated.values()))
-        except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement outdated command.")
-            continue
-
-        for info in packages:
-            info.update({"upgrade_cli": render_cli(manager.upgrade_cli(info["id"]))})
-
-        outdated_data[manager.id] = {
-            "id": manager.id,
-            "name": manager.name,
-            "packages": packages,
-        }
-
-        # Do not include the full-upgrade CLI if we did not detect any outdated
-        # package.
-        if packages:
-            try:
-                upgrade_all_cli = manager.upgrade_all_cli()
-            except NotImplementedError:
-                # Fallback on mpm itself which is capable of simulating a full
-                # upgrade.
-                upgrade_all_cli = ("mpm", "--manager", manager.id, "upgrade")
-            outdated_data[manager.id]["upgrade_all_cli"] = render_cli(upgrade_all_cli)
-
-        # Serialize errors at the last minute to gather all we encountered.
-        outdated_data[manager.id]["errors"] = list(
-            {expt.error for expt in manager.cli_errors}
-        )
-
-    # Machine-friendly data rendering.
-    if ctx.find_root().table_formatter.format_name == "json":
-        print_json(outdated_data)
-        return
-
-    # Human-friendly content rendering.
-    table = []
-    for manager_id, outdated_pkg in outdated_data.items():
-        table += [
-            (
-                info["name"],
-                info["id"],
-                manager_id,
-                info["installed_version"] if info["installed_version"] else "?",
-                info["latest_version"],
-            )
-            for info in outdated_pkg["packages"]
-        ]
-
-    # Sort and print table.
-    print_table(
-        (
-            ("Package name", "package_name"),
-            ("ID", "package_id"),
-            ("Manager", "manager_id"),
-            ("Installed version", "version"),
-            ("Latest version", None),
-        ),
-        table,
-        ctx.obj.sort_by,
-    )
-
-    if ctx.obj.stats:
-        print_stats(outdated_data)
-
-
-@command(short_help="Upgrade all packages.")
+@mpm.command(short_help="Upgrade all packages.", section=MAINTENANCE)
 @pass_context
 def upgrade(ctx):
     """Perform a full package upgrade on all available managers."""
@@ -635,7 +637,23 @@ def upgrade(ctx):
             logger.info(output)
 
 
-@command(short_help="Save installed packages to a TOML file.")
+@mpm.command(short_help="Sync local package info.", section=MAINTENANCE)
+@pass_context
+def sync(ctx):
+    """Sync local package metadata and info from external sources."""
+    for manager in ctx.obj.selected_managers:
+        manager.sync()
+
+
+@mpm.command(short_help="Cleanup local data.", section=MAINTENANCE)
+@pass_context
+def cleanup(ctx):
+    """Cleanup local data and temporary artifacts."""
+    for manager in ctx.obj.selected_managers:
+        manager.cleanup()
+
+
+@mpm.command(short_help="Save installed packages to a TOML file.", section=SNAPSHOTS)
 @argument("toml_output", type=File("w"), default="-")
 @pass_context
 def backup(ctx, toml_output):
@@ -690,7 +708,7 @@ def backup(ctx, toml_output):
         print_stats(installed_data)
 
 
-@command(short_help="Install packages in batch as specified by TOML files.")
+@mpm.command(short_help="Install packages in batch as specified by TOML files.", section=SNAPSHOTS)
 @argument("toml_files", type=File("r"), required=True, nargs=-1)
 @pass_context
 def restore(ctx, toml_files):
@@ -709,7 +727,7 @@ def restore(ctx, toml_files):
 
         # List unrecognized sections.
         ignored_sections = [
-            f"[{section}]" for section in doc if section not in ALL_MANAGER_IDS
+            f"[{section}]" for section in doc if section not in pool.all_manager_ids
         ]
         if ignored_sections:
             plural = "s" if len(ignored_sections) > 1 else ""
@@ -724,27 +742,3 @@ def restore(ctx, toml_files):
             for package_id, version in doc[manager.id].items():
                 output = manager.install(package_id)
                 echo(output)
-
-
-# Group sub-command in sections.
-mpm.section(
-    "Explore commands",
-    managers,
-    installed,
-    outdated,
-    search,
-)
-
-mpm.section(
-    "Maintainance commands",
-    install,
-    upgrade,
-    sync,
-    cleanup,
-)
-
-mpm.section(
-    "Package snapshots commands",
-    backup,
-    restore,
-)

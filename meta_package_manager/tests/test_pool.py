@@ -18,38 +18,31 @@
 import pytest
 
 from ..cli import mpm
-from ..pool import (
-    ALL_MANAGER_IDS,
-    ALLOWED_EXTRA_OPTION,
-    DEFAULT_MANAGER_IDS,
-    UNSUPPORTED_MANAGER_IDS,
-    pool,
-    select_managers,
-)
+from ..pool import ALL_MANAGER_IDS, DEFAULT_MANAGER_IDS, UNSUPPORTED_MANAGER_IDS, pool
 
 """ Test the pool and its content. """
 
 
 def test_manager_count():
     """Check all implemented package managers are accounted for, and unique."""
-    assert len(pool()) == 16
-    assert len(pool()) == len(ALL_MANAGER_IDS)
-    assert ALL_MANAGER_IDS == tuple(sorted(set(pool())))
+    assert len(pool.pool) == 16
+    assert len(pool.pool) == len(ALL_MANAGER_IDS)
+    assert ALL_MANAGER_IDS == tuple(sorted(set(pool.pool)))
 
 
 def test_cached_pool():
-    assert pool() == pool()
-    assert pool() is pool()
+    assert pool.pool == pool.pool
+    assert pool.pool is pool.pool
 
 
 @pytest.mark.parametrize("manager_id", DEFAULT_MANAGER_IDS)
 def test_supported_managers(manager_id):
-    assert pool()[manager_id].supported is True
+    assert pool[manager_id].supported is True
 
 
 @pytest.mark.parametrize("manager_id", UNSUPPORTED_MANAGER_IDS)
 def test_unsupported_managers(manager_id):
-    assert pool()[manager_id].supported is False
+    assert pool[manager_id].supported is False
 
 
 def test_manager_groups():
@@ -63,7 +56,7 @@ def test_manager_groups():
 
 
 def test_extra_option_allowlist():
-    assert ALLOWED_EXTRA_OPTION.issubset(opt.name for opt in mpm.params)
+    assert pool.ALLOWED_EXTRA_OPTION.issubset(opt.name for opt in mpm.params)
 
 
 selection_cases = {
@@ -125,7 +118,7 @@ selection_cases = {
     ),
     "drop_inactive": (
         {"drop_inactive": True},
-        tuple(mid for mid in DEFAULT_MANAGER_IDS if pool()[mid].available),
+        tuple(mid for mid in DEFAULT_MANAGER_IDS if pool[mid].available),
     ),
     "keep_inactive": (
         {"drop_inactive": False},
@@ -144,5 +137,5 @@ selection_cases = {
 def select_managers(kwargs, expected):
     """We use tuple everywhere so we can check that select_managers() conserve the
     original order."""
-    selection = select_managers(**kwargs)
+    selection = pool.select_managers(**kwargs)
     assert tuple(selection) == expected

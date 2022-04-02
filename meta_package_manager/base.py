@@ -26,10 +26,10 @@ from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from boltons.typeutils import classproperty
 from click_extra.colorize import theme
-from click_extra.logging import logger
 from click_extra.platform import CURRENT_OS_ID
 from click_extra.run import INDENT, PROMPT, run_cmd
 
+from . import logger
 from .version import parse_version
 
 CLI_FORMATS = frozenset({"plain", "fragments", "xbar"})

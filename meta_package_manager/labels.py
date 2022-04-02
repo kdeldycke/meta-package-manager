@@ -67,7 +67,7 @@ for platform_id in ALL_OS_LABELS:
 
 
 # Create one label per manager. Add mpm as its own manager.
-non_grouped_managers = set(pool()) - set(flatten(MANAGER_GROUPS.values())) | {CLI_NAME}
+non_grouped_managers = set(pool.pool) - set(flatten(MANAGER_GROUPS.values())) | {CLI_NAME}
 for manager_id in non_grouped_managers:
     label_id = f"{MANAGER_PREFIX}{manager_id}"
     LABELS.append((label_id, MANAGER_COLOR, manager_id))

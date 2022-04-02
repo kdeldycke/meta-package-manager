@@ -22,8 +22,10 @@ from string import ascii_letters, ascii_lowercase, digits
 from types import MethodType
 
 import pytest
+from boltons.iterutils import unique
 from click_extra.platform import OS_DEFINITIONS
 
+from ..cli import XKCD_MANAGER_ORDER
 from ..pool import ALL_MANAGER_IDS, pool
 from ..version import TokenizedString
 
@@ -34,10 +36,17 @@ new package manager definitions.
 """
 
 # Parametrization decorators.
-all_managers = pytest.mark.parametrize("manager", pool().values(), ids=attrgetter("id"))
+all_managers = pytest.mark.parametrize("manager", pool.pool.values(), ids=attrgetter("id"))
 
 
-@pytest.mark.parametrize("manager_id,manager", pool().items())
+# def test_content_order
+#   Use AST to check the way the manager definition file is structure.
+#   Ultimate nitpicking tool.
+#   Have the class properties and methods ordered as in the same way the Base
+#   class is.
+
+
+@pytest.mark.parametrize("manager_id,manager", pool.pool.items())
 def test_ascii_id(manager_id, manager):
     """All package manager IDs should be short ASCII strings."""
     assert manager_id
@@ -56,7 +65,12 @@ def test_name(manager):
 
 
 def test_unique_names():
-    assert len({m.name for m in pool().values()}) == len(ALL_MANAGER_IDS)
+    assert len({m.name for m in pool.pool.values()}) == len(ALL_MANAGER_IDS)
+
+
+def test_xkcd_set():
+    assert len(unique(XKCD_MANAGER_ORDER)) == len(XKCD_MANAGER_ORDER)
+    assert set(ALL_MANAGER_IDS).issuperset(XKCD_MANAGER_ORDER)
 
 
 @all_managers

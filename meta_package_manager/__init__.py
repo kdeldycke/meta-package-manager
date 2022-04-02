@@ -29,3 +29,5 @@ __version__ = "4.10.1"
     __version__ = '1.2.3'        # Final Release
     __version__ = '1.2.3.post1'  # Post Release 1
 """
+
+from click_extra.logging import logger

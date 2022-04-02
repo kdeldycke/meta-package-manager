@@ -195,6 +195,12 @@ def mpm(
     if ctx.obj:
         manager = list(manager) + ctx.obj.get("single_manager_selector", [])
 
+    # Silence all log message for JSON rendering unless in debug mode.
+    level = logger.level
+    level_name = logging._levelToName.get(level, level)
+    if ctx.find_root().table_formatter.format_name == "json" and level_name != "DEBUG":
+        logger.setLevel(logging.CRITICAL * 2)
+
     # Select the subset of manager to target, and apply manager-level options.
     selected_managers = pool.select_managers(
         keep=manager if not xkcd else XKCD_MANAGER_ORDER,
@@ -210,12 +216,6 @@ def mpm(
         dry_run=dry_run,
     )
 
-    # Silence all log message for JSON rendering unless in debug mode.
-    level = logger.level
-    level_name = logging._levelToName.get(level, level)
-    if ctx.find_root().table_formatter.format_name == "json" and level_name != "DEBUG":
-        logger.setLevel(logging.CRITICAL * 2)
-
     # Load up current and new global options to the context for subcommand consumption.
     ctx.obj = namedtuple(
         "GlobalOptions",
@@ -230,7 +230,6 @@ def mpm(
             stats,
         ),
     )()
-
 
 
 @mpm.command(short_help="List supported package managers and their location.", section=EXPLORE)

@@ -366,55 +366,6 @@ def installed(ctx):
         print_stats(installed_data)
 
 
-@mpm.command(short_help="Install a package.", section=MAINTENANCE)
-@argument("package_id", type=STRING, required=True)
-@pass_context
-def install(ctx, package_id):
-    """Install the provided package using one of the provided package manager."""
-    # Cast generator to tuple because of reuse.
-    selected_managers = tuple(ctx.obj.selected_managers)
-
-    logger.info(
-        f"Package manager order: {', '.join([m.id for m in ctx.obj.selected_managers])}"
-    )
-
-    for manager in selected_managers:
-        logger.debug(f"Try to install {package_id} with {manager.id}.")
-
-        # Is the package available on this manager?
-        matches = None
-        try:
-            matches = manager.search(extended=False, exact=True, query=package_id)
-        except NotImplementedError:
-            logger.warning(
-                f"No way to search for {package_id} with {manager.id}. Try to directly install it."
-            )
-        else:
-            if not matches:
-                logger.warning(f"No {package_id} package found on {manager.id}.")
-                continue
-            assert len(matches) == 1
-
-        # Allow install subcommand to fail.
-        default_value = manager.stop_on_error
-        manager.stop_on_error = True
-        try:
-            output = manager.install(package_id)
-        except CLIError:
-            logger.warning(f"Could not install {package_id} with {manager.id}.")
-
-            # Restore default value.
-            manager.stop_on_error = default_value
-
-            continue
-
-        # Restore default value.
-        manager.stop_on_error = default_value
-
-        echo(output)
-        return
-
-
 @mpm.command(short_help="List outdated packages.", section=EXPLORE)
 @option(
     "-c",
@@ -618,6 +569,56 @@ def search(ctx, extended, exact, query):
 
     if ctx.obj.stats:
         print_stats(matches)
+
+
+@mpm.command(short_help="Install a package.", section=MAINTENANCE)
+@argument("package_id", type=STRING, required=True)
+# TODO: add a --force/--reinstall flag
+@pass_context
+def install(ctx, package_id):
+    """Install the provided package using one of the provided package manager."""
+    # Cast generator to tuple because of reuse.
+    selected_managers = tuple(ctx.obj.selected_managers)
+
+    logger.info(
+        f"Package manager order: {', '.join([m.id for m in ctx.obj.selected_managers])}"
+    )
+
+    for manager in selected_managers:
+        logger.debug(f"Try to install {package_id} with {manager.id}.")
+
+        # Is the package available on this manager?
+        matches = None
+        try:
+            matches = manager.search(extended=False, exact=True, query=package_id)
+        except NotImplementedError:
+            logger.warning(
+                f"No way to search for {package_id} with {manager.id}. Try to directly install it."
+            )
+        else:
+            if not matches:
+                logger.warning(f"No {package_id} package found on {manager.id}.")
+                continue
+            assert len(matches) == 1
+
+        # Allow install subcommand to fail.
+        default_value = manager.stop_on_error
+        manager.stop_on_error = True
+        try:
+            output = manager.install(package_id)
+        except CLIError:
+            logger.warning(f"Could not install {package_id} with {manager.id}.")
+
+            # Restore default value.
+            manager.stop_on_error = default_value
+
+            continue
+
+        # Restore default value.
+        manager.stop_on_error = default_value
+
+        echo(output)
+        return
 
 
 @mpm.command(short_help="Upgrade all packages.", section=MAINTENANCE)

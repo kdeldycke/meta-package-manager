@@ -68,7 +68,7 @@ MAINTENANCE = Section("Maintainance commands")
 SNAPSHOTS = Section("Package snapshots commands")
 
 
-XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "apt")
+XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt")
 
 
 def add_manager_to_selection(ctx, param, selected):

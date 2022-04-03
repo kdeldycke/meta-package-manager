@@ -210,12 +210,11 @@ class Gem(PackageManager):
         """
         super().install(package_id)
         return self.run_cli(
-            self.pre_args,
             "install",
             "--user-install",
             self.post_args,
             package_id,
-            skip_globals=True,
+            auto_post_args=False,
         )
 
     def upgrade_cli(self, package_id=None):

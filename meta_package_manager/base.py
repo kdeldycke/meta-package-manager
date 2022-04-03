@@ -229,7 +229,9 @@ class PackageManager:
             # Invoke the manager.
             output = self.run_cli(
                 self.version_cli_options,
-                skip_globals=True,
+                auto_pre_cmds=False,
+                auto_pre_args=False,
+                auto_post_args=False,
                 force_exec=True,
             )
 
@@ -344,28 +346,63 @@ class PackageManager:
 
         return output
 
-    def run_cli(self, *args, skip_globals=False, force_exec=False):
-        """Shortcut utility to the ``run`` method above, that is explicitly using the
-        binary set by the ``cli_path`` property.
+    def run_cli(
+        self,
+        *args,
+        auto_extra_env=True,
+        auto_pre_cmds=True,
+        auto_pre_args=True,
+        auto_post_args=True,
+        force_exec=False
+    ):
+        """Run the package manager CLI by reusing all globals set on its definition.
 
-        ``self.extra_env`` is used for environment variables during execution.
+        This method build the CLI by combining all globals and then execute it with the ``run``
+        method above.
 
-        ``self.pre_cmd`` global is added before the CLI path.
+        It helps avoiding repeating the boilerplate elements of a CLI and makes the code easier to read.
+        Just pass the specific ``*args`` and the full CLI string will be composed out of the globals,
+        following this schema:
 
-        ``self.pre_args`` and ``self.post_args`` globals are added before and after
-        the provided args.
+        .. code-block:: shell-session
 
-        If ``skip_globals`` is ``True`` global environment variables, pre-commands and
-        arguments are not added whatsoever and the CLI is run bare, not unlike a call to the plain ``run()``.
+            $ <self.extra_env> <self.pre_cmds> <self.cli_path> <self.pre_args> <*args> <self.post_args>
+
+        * ``self.extra_env`` is used for environment variables during execution.
+
+        * ``self.pre_cmds`` is added before the CLI path.
+
+        * ``self.cli_path`` is used as the main CLI to execute.
+
+        * ``self.pre_args`` and ``self.post_args`` globals are added before and after
+          the provided ``*args``.
+
+        Each additional set of element can be disabled with their respective flag:
+        * ``auto_extra_env=False`` to not automaticcaly add ``self.extra_env`` to the CLI
+        * ``auto_pre_cmds=False``  to not automaticcaly add ``self.pre_cmds`` to the CLI
+        * ``auto_pre_args=False``  to not automaticcaly add ``self.pre_args`` to the CLI
+        * ``auto_post_args=False`` to not automaticcaly add ``self.post_args`` to the CLI
 
         ``force_exec`` parameter ignores the ``--dry-run`` and ``--stop-on-error`` user options to force
         the execution and completion of the command.
         """
+        cli = []
+
         # Prepare the full list of CLI arguments.
-        extra_env = None
-        if not skip_globals:
-            args = list(self.pre_args) + list(args) + list(self.post_args)
-            extra_env = self.extra_env
+        if auto_pre_cmds:
+            cli.extend(self.pre_cmds)
+
+        cli.append(self.cli_path)
+
+        if auto_pre_args:
+            cli.extend(self.pre_args)
+
+        cli.extend(args)
+
+        if auto_post_args:
+            cli.extend(self.post_args)
+
+        extra_env = self.extra_env if auto_extra_env else None
 
         # Temporarily replace --dry-run and --stop-on-error user options with our own.
         if force_exec:
@@ -373,7 +410,7 @@ class PackageManager:
             self.dry_run, self.stop_on_error = False, False
 
         # Execute the command.
-        output = self.run(self.pre_cmds, self.cli_path, args, extra_env=extra_env)
+        output = self.run(*cli, extra_env=extra_env)
 
         # Restore user options for --dry-run and --stop-on-error.
         if force_exec:

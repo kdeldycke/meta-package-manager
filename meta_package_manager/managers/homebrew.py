@@ -425,7 +425,7 @@ class Homebrew(PackageManager):
             Already up-to-date.
         """
         super().sync()
-        self.run_cli("update", "--quiet")
+        self.run_cli("update", "--quiet", auto_post_args=False)
 
     def cleanup(self):
         """Scrub the cache, including latest version's downloads. Also remove unused
@@ -471,8 +471,8 @@ class Homebrew(PackageManager):
 
         """
         super().cleanup()
-        self.run_cli("autoremove", skip_globals=True)
-        self.run_cli("cleanup", "-s", "--prune=all", skip_globals=True)
+        self.run_cli("autoremove", auto_post_args=False)
+        self.run_cli("cleanup", "-s", "--prune=all", auto_post_args=False)
 
 
 class Brew(Homebrew):

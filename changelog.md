@@ -6,7 +6,7 @@
 This version is not released yet and is under active development.
 ```
 
-* \[brew,cask\] Fix execution of `sync` command.
+- \[brew,cask\] Fix execution of `sync` command.
 
 ## {gh}`4.11.0 (2022-04-03) <compare/v4.10.0...v4.11.0>`
 

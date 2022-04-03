@@ -25,6 +25,11 @@
     "description": "composer"
   },
   {
+    "name": "📦 manager: dnf",
+    "color": "#bfdadc",
+    "description": "dnf"
+  },
+  {
     "name": "📦 manager: dpkg-like",
     "color": "#bfdadc",
     "description": "apt, apt-mint, dpkg, opkg"

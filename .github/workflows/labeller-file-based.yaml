@@ -33,6 +33,10 @@ jobs:
           - meta_package_manager/managers/composer*
           - meta_package_manager/tests/*composer*
 
+        "📦 manager: dnf":
+          - meta_package_manager/managers/dnf*
+          - meta_package_manager/tests/*dnf*
+
         "📦 manager: dpkg-like":
           - meta_package_manager/managers/apt*
           - meta_package_manager/managers/dpkg*

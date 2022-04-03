@@ -147,6 +147,12 @@ jobs:
           sudo add-apt-repository -y ppa:alexlarsson/flatpak
           sudo apt install -y flatpak
 
+      # DNF
+      - name: Linux - Install DNF
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt install -y dnf
+
       # Snap
       - name: Linux - Upgrade Snapd
         if: runner.os == 'Linux'

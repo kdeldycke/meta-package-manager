@@ -77,6 +77,11 @@ jobs:
               "keywords": ["choco", "chocolatey"]},
 
               {"labels": [
+                "📦 manager: dnf",
+                "🖥 platform: Linux"],
+              "keywords": ["dnf", "rpm", "fedora"]},
+
+              {"labels": [
                 "📦 manager: composer",
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",

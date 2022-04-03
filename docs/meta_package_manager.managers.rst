@@ -36,6 +36,14 @@ meta\_package\_manager.managers.composer module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.managers.dnf module
+------------------------------------------
+
+.. automodule:: meta_package_manager.managers.dnf
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.managers.flatpak module
 ----------------------------------------------
 

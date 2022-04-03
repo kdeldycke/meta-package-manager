@@ -290,7 +290,7 @@ def test_content_order(manager_file):
     """Lint each package manager definition file to check its code structure is the same as the canonical
     PackageManager base class."""
 
-    tree = ast.parse(manager_file.read_text())
+    tree = ast.parse(manager_file.read_bytes())
 
     # Analyse each class.
     for klass in (n for n in tree.body if isinstance(n, ast.ClassDef)):

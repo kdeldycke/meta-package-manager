@@ -36,7 +36,7 @@ jobs:
                   "change-log"]},
 
               {"labels": [
-                "👷 CI/CD"],
+                "🤖 ci"],
                "keywords": ["ci-cd", "cicd", ".github", "coverage", "workflow", "actions", "gitignore"]},
 
               {"labels": [

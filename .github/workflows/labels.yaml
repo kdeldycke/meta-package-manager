@@ -46,7 +46,7 @@ jobs:
 
 
             </details>
-          labels: "👷 CI/CD"
+          labels: "🤖 ci"
           branch: update-labels
 
   labels:

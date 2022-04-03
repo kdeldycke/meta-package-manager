@@ -116,7 +116,12 @@ class OPKG(PackageManager):
         return outdated
 
     def search(self, query, extended, exact):
-        """Simulate search by listing all packages."""
+        """Simulate search by listing all packages.
+
+        .. code-block:: shell-session
+
+            ► opkg list
+        """
         matches = {}
 
         # opkg doesn't have a working 'search', so get all packages and
@@ -173,27 +178,26 @@ class OPKG(PackageManager):
         .. code-block:: shell-session
 
             ► opkg install enigma2-hotplug
-
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        return (
-            self.pre_cmds,
-            self.cli_path,
-            self.pre_args,
+        """
+        .. code-block:: shell-session
+
+            ► opkg upgrade enigma2-hotplug
+        """
+        return self.build_cli(
             "upgrade",
-            self.post_args,
             package_id,
         )
 
     def sync(self):
         """
-
-        Raw CLI output samples:
-
         .. code-block:: shell-session
+
+            ► opkg update
         """
         super().sync()
         self.run_cli("update")

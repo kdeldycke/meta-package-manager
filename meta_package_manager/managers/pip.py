@@ -62,7 +62,7 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            ► python -m pip list --no-color --format=json --verbose --quiet \
+            ► python -m pip --no-color list --format=json --verbose --quiet \
             > | jq
             [
              {
@@ -293,13 +293,10 @@ class Pip(PackageManager):
                   Successfully uninstalled six-1.14.0
             Successfully installed six-1.15.0
         """
-        return (
-            self.cli_path,
-            self.pre_args,
+        return self.build_cli(
             "install",
             "--user",
             "--upgrade",
-            self.post_args,
             package_id,
         )
 

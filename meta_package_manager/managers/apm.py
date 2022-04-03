@@ -334,7 +334,7 @@ class APM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apm search python --json | jq
+            ► apm search --json python | jq
             [
               {
                 "name": "atom-python-run",
@@ -408,6 +408,10 @@ class APM(PackageManager):
               },
               (...)
             ]
+
+        .. code-block:: shell-session
+
+            ► apm search --no-description --json python | jq
         """
         matches = {}
 
@@ -415,7 +419,7 @@ class APM(PackageManager):
         if not extended:
             search_args.append("--no-description")
 
-        output = self.run_cli("search", "--json", search_args, query)
+        output = self.run_cli("search", search_args, "--json", query)
 
         if output:
             for package in json.loads(output):
@@ -452,18 +456,18 @@ class APM(PackageManager):
             You can run `apm uninstall image-view` to uninstall it and then the version bundled
             with Atom will be used.
             Installing image-view to /Users/kde/.atom/packages ✓
-
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        return (
-            self.pre_cmds,
-            self.cli_path,
+        """
+        .. code-block:: shell-session
+
+            ► apm update --no-confirm image-view
+        """
+        return self.build_cli(
             "update",
-            self.pre_args,
             "--no-confirm",
-            self.post_args,
             package_id,
         )

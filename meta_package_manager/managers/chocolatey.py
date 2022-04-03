@@ -184,13 +184,9 @@ class Choco(PackageManager):
 
             ► choco upgrade all --yes --limit-output --no-progress --no-color
         """
-        return (
-            self.pre_cmds,
-            self.cli_path,
+        return self.build_cli(
             "upgrade",
             package_id,
-            self.pre_args,
             "--yes",
             "--limit-output",
-            self.post_args,
         )

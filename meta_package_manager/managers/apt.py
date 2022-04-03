@@ -133,7 +133,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt search abc --names-only --quiet
+            ► apt search abc --quiet --names-only
             Sorting...
             Full Text Search...
             abcde/xenial 2.7.1-1 all
@@ -153,7 +153,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt search "^sed$" --names-only --quiet
+            ► apt search "^sed$" --quiet --names-only
             Sorting...
             Full Text Search...
             sed/xenial 2.1.9-3 all
@@ -161,7 +161,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt search abc --full --quiet
+            ► apt search abc --quiet --full
             Sorting...
             Full Text Search...
             abcde/xenial 2.7.1-1 all
@@ -222,21 +222,18 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt install --quiet bat
-
+            ► apt install bat
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        return (
-            self.pre_cmds,
-            self.cli_path,
-            self.pre_args,
-            "update",
-            package_id,
-            self.post_args,
-        )
+        """
+        .. code-block:: shell-session
+
+            ► apt update bat
+        """
+        return self.build_cli("update", package_id)
 
     def sync(self):
         """
@@ -260,21 +257,12 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo apt-get -y autoremove
-            ► sudo apt-get -y clean
+            ► sudo apt -y autoremove
+            ► sudo apt clean
         """
         super().cleanup()
-        # Cannot use self.run_cli() because of sudo.
         for commands in (("-y", "autoremove"), "clean"):
-            self.run(
-                self.pre_cmds,
-                "sudo",
-                self.cli_path,
-                self.pre_args,
-                commands,
-                self.post_args,
-                extra_env=self.extra_env,
-            )
+            self.run_cli(commands, override_pre_cmds=("sudo",))
 
 
 class APT_Mint(APT):

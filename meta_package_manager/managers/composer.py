@@ -219,14 +219,12 @@ class Composer(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        return (
-            self.pre_cmds,
-            self.cli_path,
-            self.pre_args,
-            "update",
-            self.post_args,
-            package_id,
-        )
+        """
+        .. code-block:: shell-session
+
+            ► composer global update illuminate/contracts
+        """
+        return self.build_cli("update", package_id)
 
     def cleanup(self):
         """Runs:

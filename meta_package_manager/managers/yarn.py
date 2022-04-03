@@ -87,6 +87,12 @@ class Yarn(PackageManager):
 
     @cached_property
     def global_dir(self):
+        """
+        .. code-block:: shell-session
+
+            ► yarn global dir
+            (...)
+        """
         return self.run_cli("global", "dir", force_exec=True).rstrip()
 
     @property
@@ -97,7 +103,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn --json outdated --cwd
+            ► yarn --json outdated --cwd <self.global_dir>
             (...)
         """
         outdated = {}
@@ -248,22 +254,31 @@ class Yarn(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
+        """
+        .. code-block:: shell-session
+
+            ► yarn global add python
+
+        .. code-block:: shell-session
+
+            ► yarn global upgrade
+        """
         cmd_args = []
         if package_id:
             cmd_args += ["add", package_id]
         else:
             cmd_args += ["upgrade"]
-        return (
-            self.pre_cmds,
-            self.cli_path,
-            self.pre_args,
+        return self.build_cli(
             "global",
-            cmd_args,
-            self.post_args,
+            *cmd_args,
         )
 
     def cleanup(self):
         """Remove the shared cache files.
+
+        .. code-block:: shell-session
+
+            ► yarn cache clean --all
 
         See: https://yarnpkg.com/cli/cache/clean
         """

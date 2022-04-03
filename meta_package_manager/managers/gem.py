@@ -104,7 +104,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            ► gem outdated
+            ► gem outdated --quiet
             did_you_mean (1.0.0 < 1.0.2)
             io-console (0.4.5 < 0.4.6)
             json (1.8.3 < 2.0.1)
@@ -191,7 +191,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            ► gem install --user-install markdown
+            ► gem install --user-install --quiet markdown
             Fetching kramdown-2.3.1.gem
             Fetching concurrent-ruby-1.1.9.gem
             (...)
@@ -218,32 +218,34 @@ class Gem(PackageManager):
         )
 
     def upgrade_cli(self, package_id=None):
-        # Installs require `sudo` on system ruby.
-        # I (@tresni) recommend doing something like:
-        #     ► sudo dseditgroup -o edit -a -t user wheel
-        # And then do `visudo` to make it so the `wheel` group does not require
-        # a password. There is a line already there for it, you just need to
-        # uncomment it and save.)
-        # if self.cli_path == '/usr/bin/gem':
-        #     cmd.insert(0, '/usr/bin/sudo')
-        return (
-            self.pre_cmds,
-            self.cli_path,
-            self.pre_args,
+        """
+        .. code-block:: shell-session
+
+            ► gem update --user-install --quiet markdown
+
+        Installs require ``sudo`` on system ruby. I (@tresni) recommend doing something like:
+
+        .. code-block:: shell-session
+
+            ► sudo dseditgroup -o edit -a -t user wheel
+
+        And then do ``visudo`` to make it so the ``wheel`` group does not require
+        a password. There is a line already there for it, you just need to
+        uncomment it and save.
+        """
+        return self.build_cli(
             "update",
             "--user-install",
             self.post_args,
             package_id,
+            auto_post_args=False,
         )
 
     def cleanup(self):
-        """ Run ``gem cleanup`` CLI.
-
-        Raw CLI output samples:
-
+        """
         .. code-block:: shell-session
 
-            ► gem cleanup
+            ► gem cleanup --quiet
             Cleaning up installed gems...
             Attempting to uninstall test-unit-3.2.9
             Unable to uninstall test-unit-3.2.9:

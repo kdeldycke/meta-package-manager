@@ -48,7 +48,7 @@ class Snap(PackageManager):
         Raw CLI output samples:
 
         .. code-block:: shell-session
-            ► snap list
+            ► snap --color=never list
             Name    Version    Rev   Aufzeichnung   Herausgeber     Hinweise
             core    16-2.44.1  8935  latest/stable  canonical✓      core
             wechat  2.0        7     latest/stable  ubuntu-dawndiy  -
@@ -78,7 +78,7 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
 
-            ► snap refresh --list
+            ► snap --color=never refresh --list
             Name            Version  Rev  Herausgeber     Hinweise
             standard-notes  3.3.5    8    standardnotes✓  -
         """
@@ -106,7 +106,7 @@ class Snap(PackageManager):
         """Fetch matching packages from ``snap find`` output.
 
         .. code-block:: shell-session
-            ► snap find doc
+            ► snap --color=never find doc
             Name       Version      Herausgeber  Hinweise  Zusammenfassung
             journey    2.14.3       2appstudio   -         Your private diary.
             nextcloud  17.0.5snap1  nextcloud✓   -         Nextcloud Server
@@ -150,21 +150,19 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
 
-            ► snap install standard-notes
-
+            ► snap --color=never install standard-notes
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """Snap has an auto-update function, but snaps can be updated
-        manually.
+        """Snap has an auto-update function, but snaps can be updated manually.
+
+        .. code-block:: shell-session
+
+            ► snap --color=never refresh standard-notes
         """
-        return (
-            self.pre_cmds,
-            self.cli_path,
-            self.pre_args,
+        return self.build_cli(
             "refresh",
-            self.post_args,
             package_id,
         )

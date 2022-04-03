@@ -346,6 +346,70 @@ class PackageManager:
 
         return output
 
+    def build_cli(
+        self,
+        *args,
+        auto_pre_cmds=True,
+        auto_pre_args=True,
+        auto_post_args=True,
+        override_pre_cmds=False,
+        override_pre_args=False,
+        override_post_args=False
+    ):
+        """Build the package manager CLI by combining the custom ``*args`` with the PM's global parameters.
+
+        Returns a tuple of strings.
+
+        Helps the construction of CLI's repeating patterns and makes the code easier to read. Just pass the
+        specific ``*args`` and the full CLI string will be composed out of the globals,
+        following this schema:
+
+        .. code-block:: shell-session
+
+            $ <self.pre_cmds> <self.cli_path> <self.pre_args> <*args> <self.post_args>
+
+        * ``self.pre_cmds`` is added before the CLI path.
+
+        * ``self.cli_path`` is used as the main binary to execute.
+
+        * ``self.pre_args`` and ``self.post_args`` globals are added before and after
+          the provided ``*args``.
+
+        Each additional set of elements can be disabled with their respective flag:
+        * ``auto_pre_cmds=False``  to skip the automatic addition of ``self.pre_cmds``
+        * ``auto_pre_args=False``  to skip the automatic addition of ``self.pre_args``
+        * ``auto_post_args=False`` to skip the automatic addition of ``self.post_args``
+
+        Each global set of elements can be locally overriden with:
+        * ``override_pre_cmds=tuple()``
+        * ``override_pre_args=tuple()``
+        * ``override_post_args=tuple()``
+        """
+        cli = []
+
+        # Prepare the full list of CLI arguments.
+        if override_pre_cmds:
+            assert isinstance(override_pre_cmds, tuple)
+        elif auto_pre_cmds:
+            cli.extend(self.pre_cmds)
+
+        cli.append(self.cli_path)
+
+        if override_pre_args:
+            assert isinstance(override_pre_args, tuple)
+        elif auto_pre_args:
+            cli.extend(self.pre_args)
+
+        if args:
+            cli.extend(args)
+
+        if override_post_args:
+            assert isinstance(override_post_args, tuple)
+        elif auto_post_args:
+            cli.extend(self.post_args)
+
+        return tuple(cli)
+
     def run_cli(
         self,
         *args,
@@ -353,56 +417,42 @@ class PackageManager:
         auto_pre_cmds=True,
         auto_pre_args=True,
         auto_post_args=True,
+        override_extra_env=False,
+        override_pre_cmds=False,
+        override_pre_args=False,
+        override_post_args=False,
         force_exec=False
     ):
-        """Run the package manager CLI by reusing all globals set on its definition.
+        """Build and run the package manager CLI by combining the custom ``*args`` with the PM's global parameters.
 
-        This method build the CLI by combining all globals and then execute it with the ``run``
-        method above.
+        After the CLI is built with the ``build_cli`` method, it is executed with the ``run`` method.
 
-        It helps avoiding repeating the boilerplate elements of a CLI and makes the code easier to read.
-        Just pass the specific ``*args`` and the full CLI string will be composed out of the globals,
-        following this schema:
+        It reuse the ``build_cli`` method parameters and extend them with:
 
-        .. code-block:: shell-session
-
-            $ <self.extra_env> <self.pre_cmds> <self.cli_path> <self.pre_args> <*args> <self.post_args>
-
-        * ``self.extra_env`` is used for environment variables during execution.
-
-        * ``self.pre_cmds`` is added before the CLI path.
-
-        * ``self.cli_path`` is used as the main CLI to execute.
-
-        * ``self.pre_args`` and ``self.post_args`` globals are added before and after
-          the provided ``*args``.
-
-        Each additional set of element can be disabled with their respective flag:
-        * ``auto_extra_env=False`` to not automaticcaly add ``self.extra_env`` to the CLI
-        * ``auto_pre_cmds=False``  to not automaticcaly add ``self.pre_cmds`` to the CLI
-        * ``auto_pre_args=False``  to not automaticcaly add ``self.pre_args`` to the CLI
-        * ``auto_post_args=False`` to not automaticcaly add ``self.post_args`` to the CLI
+        * ``self.extra_env`` for environment variables during execution.
+        * ``auto_extra_env=False``  to skip the automatic addition of ``self.extra_env``
+        * ``override_extra_env=dict()``
 
         ``force_exec`` parameter ignores the ``--dry-run`` and ``--stop-on-error`` user options to force
         the execution and completion of the command.
         """
-        cli = []
+        cli = list(self.build_cli(
+            *args,
+            auto_pre_cmds=auto_pre_cmds,
+            auto_pre_args=auto_pre_args,
+            auto_post_args=auto_post_args,
+            override_pre_cmds=override_pre_cmds,
+            override_pre_args=override_pre_args,
+            override_post_args=override_post_args,
+        ))
 
         # Prepare the full list of CLI arguments.
-        if auto_pre_cmds:
-            cli.extend(self.pre_cmds)
-
-        cli.append(self.cli_path)
-
-        if auto_pre_args:
-            cli.extend(self.pre_args)
-
-        cli.extend(args)
-
-        if auto_post_args:
-            cli.extend(self.post_args)
-
-        extra_env = self.extra_env if auto_extra_env else None
+        extra_env = None
+        if override_extra_env:
+            assert isinstance(override_extra_env, dict)
+            extra_env = override_extra_env
+        elif auto_extra_env:
+            extra_env = self.extra_env
 
         # Temporarily replace --dry-run and --stop-on-error user options with our own.
         if force_exec:

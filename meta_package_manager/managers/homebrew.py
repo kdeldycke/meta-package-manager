@@ -406,13 +406,24 @@ class Homebrew(PackageManager):
             ==> Moving Screen Saver to '/Users/kde/Library/Screen Savers/Aerial.saver'.
             ==> Purging files for version 2.0.7 of Cask aerial
             🍺  aerial was successfully upgraded!
+
+        .. code-block:: shell-session
+
+            ► brew upgrade dupeguru --cask
+            ==> Upgrading 1 outdated package:
+            dupeguru 4.2.0 -> 4.2.1
+            ==> Upgrading dupeguru
+            ==> Downloading https://github.com/arsenetar/dupeguru/releases/download/4.2.1/dupeguru_macOS_Qt_4.2.1.zi
+            ==> Downloading from https://objects.githubusercontent.com/github-production-release-asset-2e65be/108563
+            ######################################################################## 100.0%
+            ==> Backing App 'dupeguru.app' up to '/opt/homebrew/Caskroom/dupeguru/4.2.0/dupeguru.app'
+            ==> Removing App '/Applications/dupeguru.app'
+            ==> Moving App 'dupeguru.app' to '/Applications/dupeguru.app'
+            ==> Purging files for version 4.2.0 of Cask dupeguru
+            🍺  dupeguru was successfully upgraded!
         """
-        return (
-            self.pre_cmds,
-            self.cli_path,
+        return self.build_cli(
             "upgrade",
-            self.pre_args,
-            self.post_args,
             package_id,
         )
 

@@ -87,7 +87,7 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            ► flatpak remote-ls --app --updates --ostree-verbose
+            ► flatpak remote-ls --app --updates --columns=name,application,version --ostree-verbose
             GNOME Dictionary    org.gnome.Dictionary    3.26.0  stable  x86_64
         """
         outdated = {}
@@ -201,15 +201,12 @@ class Flatpak(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        return (
-            self.pre_cmds,
-            self.cli_path,
-            self.pre_args,
-            "update",
-            "--noninteractive",
-            self.post_args,
-            package_id,
-        )
+        """
+        .. code-block:: shell-session
+
+            ► flatpak update --noninteractive org.gnome.Dictionary
+        """
+        return self.build_cli("update", "--noninteractive", package_id)
 
     def cleanup(self):
         """Runs:

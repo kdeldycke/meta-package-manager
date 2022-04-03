@@ -75,7 +75,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm list --global --json | jq
+            ► npm --global --json list | jq
             {
               "dependencies": {
                 "npm": {
@@ -138,7 +138,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --json outdated
+            ► npm --global --progress=false --json --no-update-notifier outdated
             {
               "my-linked-package": {
                 "current": "0.0.0-development",
@@ -184,7 +184,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm search python --json | jq
+            ► npm search --json python | jq
             [
               {
                 "name": "python",
@@ -249,6 +249,10 @@ class NPM(PackageManager):
               },
               (...)
             ]
+
+        .. code-block:: shell-session
+
+            ► npm search --json --no-description python | jq
         """
         matches = {}
 
@@ -289,7 +293,6 @@ class NPM(PackageManager):
         .. code-block:: shell-session
 
             ► npm --global --progress=false --no-update-notifier install raven
-
         """
         super().install(package_id)
         return self.run_cli(
@@ -301,21 +304,24 @@ class NPM(PackageManager):
         )
 
     def upgrade_cli(self, package_id=None, version=None):
-        cmd_args = []
+        """
+        .. code-block:: shell-session
+
+            ► npm --global --progress=false --no-update-notifier install raven
+
+        .. code-block:: shell-session
+
+            ► npm --global --progress=false --no-update-notifier update
+        """
+        cmd_args = ["update"]
         if package_id:
-            cmd_args += [
+            cmd_args = [
                 "install",
                 f"{package_id}@{version}" if version else package_id,
             ]
-        else:
-            cmd_args += ["update"]
-        return (
-            self.pre_cmds,
-            self.cli_path,
-            self.pre_args,
+        return self.build_cli(
             "--global",
             "--progress=false",
             "--no-update-notifier",
-            cmd_args,
-            self.post_args,
+            *cmd_args
         )

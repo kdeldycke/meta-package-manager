@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`4.11.0 (unreleased) <compare/v4.10.0...main>`
-
-```{{important}}
-This version is not released yet and is under active development.
-```
+## {gh}`4.11.0 (2022-04-03) <compare/v4.10.0...v4.11.0>`
 
 - \[brew,cask\] Do not let homebrew auto-update on other commands. Refs {issue}`36`.
 - \[brew,cask\] Disable analytics and env hints in logs.

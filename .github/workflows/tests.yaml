@@ -149,7 +149,9 @@ jobs:
 
       # DNF
       - name: Linux - Install DNF
-        if: runner.os == 'Linux'
+        # XXX DNF has been added in Ubuntu 21.04, not before.
+        if: matrix.os == 'ubuntu-21.04'
+        # if: runner.os == 'Linux'
         run: |
           sudo apt install -y dnf
 

@@ -60,6 +60,7 @@ ______________________________________________________________________
 | [`cask`](https://caskroom.github.io)                                      | 2.7.0        |   ✓   |       |         |   ✓    |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
 | [`choco`](https://chocolatey.org)                                         | 0.10.4       |       |       |    ✓    |   ✓    |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
 | [`composer`](https://getcomposer.org)                                     | 1.4.0        |   ✓   |   ✓   |    ✓    |   ✓    |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
+| [`dnf`](https://github.com/rpm-software-management/dnf)                                     | 4.0.0        |   ✓   |   ✓   |    ✓    |   ✓    |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
 | [`flatpak`](https://flatpak.org)                                          | 1.2.0        |       |   ✓   |         |        |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
 | [`gem`](https://rubygems.org)                                             | 2.5.0        |   ✓   |   ✓   |    ✓    |        |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |     ✓     |
 | [`mas`](https://github.com/argon/mas)                                     | 1.6.1        |   ✓   |       |         |        |      ✓      |                                   ✓                                   |     ✓     |     ✓      |     ✓     |           |
@@ -99,6 +100,7 @@ $ mpm --all-managers managers
 │ Homebrew Cask      │ cask     │ ✓              │ ✓ /usr/local/bin/brew     │ ✓          │ ✓ 3.2.16 │
 │ Chocolatey         │ choco    │ ✘ Windows only │ ✘ choco not found         │            │          │
 │ PHP's Composer     │ composer │ ✓              │ ✓ /usr/local/bin/composer │ ✓          │ ✓ 2.1.8  │
+│ DNF                │ dnf      │ ✘ Linux only   │ ✘ dnf not found           │            │          │
 │ Flatpak            │ flatpak  │ ✘ Linux only   │ ✘ flatpak not found       │            │          │
 │ Ruby Gems          │ gem      │ ✓              │ ✓ /usr/bin/gem            │ ✓          │ ✓ 3.0.3  │
 │ Mac AppStore       │ mas      │ ✓              │ ✓ /usr/local/bin/mas      │ ✓          │ ✓ 1.8.3  │

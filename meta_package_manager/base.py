@@ -310,8 +310,8 @@ class PackageManager:
         cli_msg = format_cli(args, extra_env)
 
         code = 0
-        output = ''
-        error = ''
+        output = ""
+        error = ""
 
         if self.dry_run:
             logger.warning(f"Dry-run: {cli_msg}")
@@ -354,7 +354,7 @@ class PackageManager:
         auto_post_args=True,
         override_pre_cmds=False,
         override_pre_args=False,
-        override_post_args=False
+        override_post_args=False,
     ):
         """Build the package manager CLI by combining the custom ``*args`` with the PM's global parameters.
 
@@ -421,7 +421,7 @@ class PackageManager:
         override_pre_cmds=False,
         override_pre_args=False,
         override_post_args=False,
-        force_exec=False
+        force_exec=False,
     ):
         """Build and run the package manager CLI by combining the custom ``*args`` with the PM's global parameters.
 
@@ -436,15 +436,17 @@ class PackageManager:
         ``force_exec`` parameter ignores the ``--dry-run`` and ``--stop-on-error`` user options to force
         the execution and completion of the command.
         """
-        cli = list(self.build_cli(
-            *args,
-            auto_pre_cmds=auto_pre_cmds,
-            auto_pre_args=auto_pre_args,
-            auto_post_args=auto_post_args,
-            override_pre_cmds=override_pre_cmds,
-            override_pre_args=override_pre_args,
-            override_post_args=override_post_args,
-        ))
+        cli = list(
+            self.build_cli(
+                *args,
+                auto_pre_cmds=auto_pre_cmds,
+                auto_pre_args=auto_pre_args,
+                auto_post_args=auto_post_args,
+                override_pre_cmds=override_pre_cmds,
+                override_pre_args=override_pre_args,
+                override_post_args=override_post_args,
+            )
+        )
 
         # Prepare the full list of CLI arguments.
         extra_env = None

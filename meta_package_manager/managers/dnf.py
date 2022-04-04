@@ -40,9 +40,7 @@ class DNF(PackageManager):
         4.9.0
     """
 
-    pre_args = (
-        "--color=never",
-    )
+    pre_args = ("--color=never",)
 
     list_cmd_regexp = re.compile(r"(\S+)\.\S+\s+(\S+)\s+\S+")
 
@@ -161,7 +159,9 @@ class DNF(PackageManager):
             ► sudo dnf --color=never --assumeyes install pip
         """
         super().install(package_id)
-        return self.run_cli("--assumeyes", "install", package_id, override_pre_cmds=("sudo",))
+        return self.run_cli(
+            "--assumeyes", "install", package_id, override_pre_cmds=("sudo",)
+        )
 
     def upgrade_cli(self, package_id=None):
         """

@@ -33,6 +33,8 @@ class DNF(PackageManager):
 
     requirement = "4.0.0"
 
+    cli_names = ("dnf", "yum")
+
     """
     .. code-block:: shell-session
 

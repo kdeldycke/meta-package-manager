@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[dnf\] Add support for `dnf`. Closes {issue}`516`, refs {issue}`415`.
+- \[dnf\] Allow `yum` to act as `dnf`. Closes {issue}`415`.
 - \[brew,cask\] Fix execution of `sync` command.
 
 ## {gh}`4.11.0 (2022-04-03) <compare/v4.10.0...v4.11.0>`

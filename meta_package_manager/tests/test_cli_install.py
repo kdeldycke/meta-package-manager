@@ -49,6 +49,7 @@ class TestInstall(CLISubCommandTests):
         "cask": "pngyu",
         "choco": "ccleaner",
         "composer": "illuminate/contracts",
+        "dnf": "usd",
         "flatpak": "org.gnome.Dictionary",
         "gem": "markdown",
         "mas": "747648890",  # Telegram

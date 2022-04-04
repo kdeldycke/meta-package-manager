@@ -236,12 +236,11 @@ class PackageManager:
             )
 
             # Extract the version with the regex.
-            if output:
-                version_string = (
-                    re.compile(self.version_regex, re.MULTILINE | re.VERBOSE)
-                    .search(output)
-                    .groupdict()
-                ).get("version")
+            parts = re.compile(self.version_regex, re.MULTILINE | re.VERBOSE).search(
+                output
+            )
+            if parts:
+                version_string = parts.groupdict().get("version")
                 logger.debug(f"Extracted version: {version_string}")
                 return parse_version(version_string)
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## {gh}`4.12.1 (unreleased) <compare/v4.12.0...main>`
+
+```{{important}}
+This version is not released yet and is under active development.
+```
+
 ## {gh}`4.12.0 (2022-04-04) <compare/v4.11.0...v4.12.0>`
 
 - \[dnf\] Add support for `dnf`. Closes {issue}`516`, refs {issue}`415`.

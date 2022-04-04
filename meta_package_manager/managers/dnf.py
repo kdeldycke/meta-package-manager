@@ -103,6 +103,57 @@ class DNF(PackageManager):
 
         return outdated
 
+    def search(self, query, extended, exact):
+        """
+        .. code-block:: shell-session
+
+            ► dnf --color=never search usd
+            Last metadata expiration check: 0:06:37 ago on Sun 03 Apr 2022.
+            =================== Name Exactly Matched: usd =====================
+            usd.aarch64 : 3D VFX pipeline interchange file format
+            =================== Name & Summary Matched: usd ===================
+            python3-usd.aarch64 : Development files for USD
+            usd-devel.aarch64 : Development files for USD
+            ======================= Name Matched: usd =========================
+            lvm2-dbusd.noarch : LVM2 D-Bus daemon
+            usd-libs.aarch64 : Universal Scene Description library
+        """
+        matches = {}
+
+        output = self.run_cli("search", query)
+
+        regexp = re.compile(r"(\S+)\.\S+\s:\s(\S+)")
+
+        for line in output.splitlines()[1:]:
+            # Skip section headers.
+            if line.startswith("="):
+                continue
+
+            # Extract package ID and description.
+            match = regexp.match(line)
+            if match:
+                package_id, description = match.groups()
+
+                # Any line matches in extended mode.
+                if not extended:
+
+                    # Skip package if ID does not exactly match the query in exact mode.
+                    if exact:
+                        if package_id != query:
+                            continue
+                    # Skip package if query is not found in ID.
+                    else:
+                        if query not in package_id:
+                            continue
+
+                matches[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": None,
+                }
+
+        return matches
+
     def install(self, package_id):
         """
         .. code-block:: shell-session

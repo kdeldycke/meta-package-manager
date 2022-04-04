@@ -53,8 +53,8 @@ jobs:
         # Source: https://stackoverflow.com/questions/45782694/how-to-remove-the-shallow-clone-warning-from-homebrew
         if: matrix.os == 'macos-10.15'
         run: |
-          git -C "$(brew --repo homebrew/core)" fetch --unshallow
-          git -C "$(brew --repo homebrew/cask)" fetch --unshallow
+          git -C "$(brew --repo homebrew/core)" fetch --unshallow || true
+          git -C "$(brew --repo homebrew/cask)" fetch --unshallow || true
       - name: Linux - Install Homebrew
         if: runner.os == 'Linux'
         run: >

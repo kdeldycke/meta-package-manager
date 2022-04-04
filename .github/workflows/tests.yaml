@@ -53,7 +53,10 @@ jobs:
         # https://github.com/Homebrew/brew/pull/9447
         if: matrix.os == 'macos-10.15'
         run: |
-          git -C /usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask fetch --unshallow
+          git -C "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core" fetch
+          git -C "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core" fetch --unshallow
+          git -C "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask" fetch
+          git -C "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask" fetch --unshallow
       - name: macOS - Upgrade Homebrew
         if: runner.os == 'macOS'
         run: |

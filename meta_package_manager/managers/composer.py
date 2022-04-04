@@ -182,28 +182,25 @@ class Composer(PackageManager):
 
         output = self.run_cli("search", search_args, query)
 
-        if output:
+        regexp = re.compile(
+            r"""
+            ^(?P<package_id>\S+\/\S+)
+            (?P<description> .*)?
+            """,
+            re.MULTILINE | re.VERBOSE,
+        )
 
-            regexp = re.compile(
-                r"""
-                ^(?P<package_id>\S+\/\S+)
-                (?P<description> .*)?
-                """,
-                re.MULTILINE | re.VERBOSE,
-            )
+        for package_id, description in regexp.findall(output):
+            # Filters out fuzzy matches, only keep stricly matching
+            # packages.
+            if exact and query != package_id:
+                continue
 
-            for package_id, description in regexp.findall(output):
-
-                # Filters out fuzzy matches, only keep stricly matching
-                # packages.
-                if exact and query != package_id:
-                    continue
-
-                matches[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": None,
-                }
+            matches[package_id] = {
+                "id": package_id,
+                "name": package_id,
+                "latest_version": None,
+            }
 
         return matches
 

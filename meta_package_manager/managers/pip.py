@@ -223,40 +223,39 @@ class Pip(PackageManager):
 
         output = self.run_cli("search", query)
 
-        if output:
-            regexp = re.compile(
-                r"""
-                ^(?P<package_id>\S+)  # A string with a char at least.
-                \                     # A space.
-                \((?P<version>.*?)\)  # Content between parenthesis.
-                [ ]+-                 # A space or more, then a dash.
-                (?P<description>      # Start of the multi-line desc group.
-                    (?:[ ]+.*\s)+     # Lines of strings prefixed by spaces.
-                )
-                """,
-                re.MULTILINE | re.VERBOSE,
+        regexp = re.compile(
+            r"""
+            ^(?P<package_id>\S+)  # A string with a char at least.
+            \                     # A space.
+            \((?P<version>.*?)\)  # Content between parenthesis.
+            [ ]+-                 # A space or more, then a dash.
+            (?P<description>      # Start of the multi-line desc group.
+                (?:[ ]+.*\s)+     # Lines of strings prefixed by spaces.
             )
+            """,
+            re.MULTILINE | re.VERBOSE,
+        )
 
-            for package_id, version, description in regexp.findall(output):
+        for package_id, version, description in regexp.findall(output):
 
-                # Exclude packages not featuring the search query in their ID
-                # or name.
-                if not extended:
-                    query_parts = set(map(str, TokenizedString(query)))
-                    pkg_parts = set(map(str, TokenizedString(package_id)))
-                    if not query_parts.issubset(pkg_parts):
-                        continue
-
-                # Filters out fuzzy matches, only keep stricly matching
-                # packages.
-                if exact and query != package_id:
+            # Exclude packages not featuring the search query in their ID
+            # or name.
+            if not extended:
+                query_parts = set(map(str, TokenizedString(query)))
+                pkg_parts = set(map(str, TokenizedString(package_id)))
+                if not query_parts.issubset(pkg_parts):
                     continue
 
-                matches[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": parse_version(version),
-                }
+            # Filters out fuzzy matches, only keep stricly matching
+            # packages.
+            if exact and query != package_id:
+                continue
+
+            matches[package_id] = {
+                "id": package_id,
+                "name": package_id,
+                "latest_version": parse_version(version),
+            }
 
         return matches
 

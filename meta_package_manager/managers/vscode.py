@@ -62,14 +62,13 @@ class VSCode(PackageManager):
 
         output = self.run_cli("--list-extensions", "--show-versions")
 
-        if output:
-            for package in output.splitlines():
-                package_id, installed_version = package.split("@")
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(installed_version),
-                }
+        for package in output.splitlines():
+            package_id, installed_version = package.split("@")
+            installed[package_id] = {
+                "id": package_id,
+                "name": package_id,
+                "installed_version": parse_version(installed_version),
+            }
 
         return installed
 

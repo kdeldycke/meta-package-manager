@@ -76,23 +76,22 @@ class Gem(PackageManager):
 
         output = self.run_cli("list")
 
-        if output:
-            regexp = re.compile(r"(\S+) \((.+)\)")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, versions = match.groups()
-                    # Guess latest installed version.
-                    version = max(
-                        parse_version(v)
-                        for v in re.compile(r",|default:| ").split(versions)
-                        if v
-                    )
-                    installed[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "installed_version": version,
-                    }
+        regexp = re.compile(r"(\S+) \((.+)\)")
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                package_id, versions = match.groups()
+                # Guess latest installed version.
+                version = max(
+                    parse_version(v)
+                    for v in re.compile(r",|default:| ").split(versions)
+                    if v
+                )
+                installed[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": version,
+                }
 
         return installed
 
@@ -116,18 +115,17 @@ class Gem(PackageManager):
 
         output = self.run_cli("outdated")
 
-        if output:
-            regexp = re.compile(r"(\S+) \((\S+) < (\S+)\)")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, current_version, latest_version = match.groups()
-                    outdated[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "installed_version": parse_version(current_version),
-                        "latest_version": parse_version(latest_version),
-                    }
+        regexp = re.compile(r"(\S+) \((\S+) < (\S+)\)")
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                package_id, current_version, latest_version = match.groups()
+                outdated[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(current_version),
+                    "latest_version": parse_version(latest_version),
+                }
 
         return outdated
 
@@ -165,24 +163,24 @@ class Gem(PackageManager):
 
         output = self.run_cli("search", query, "--versions", search_arg)
 
-        if output:
-            regexp = re.compile(
-                r"""
-                (?P<package_id>\S+)     # Any string.
-                \                       # A space.
-                \(                      # Start of content in parenthesis.
-                    (?P<version>\S+)    # Version string.
-                    (?:\ \S+)?          # Optional platform value after space.
-                \)
-                """,
-                re.VERBOSE,
-            )
-            for package_id, version in regexp.findall(output):
-                matches[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": parse_version(version),
-                }
+        regexp = re.compile(
+            r"""
+            (?P<package_id>\S+)     # Any string.
+            \                       # A space.
+            \(                      # Start of content in parenthesis.
+                (?P<version>\S+)    # Version string.
+                (?:\ \S+)?          # Optional platform value after space.
+            \)
+            """,
+            re.VERBOSE,
+        )
+
+        for package_id, version in regexp.findall(output):
+            matches[package_id] = {
+                "id": package_id,
+                "name": package_id,
+                "latest_version": parse_version(version),
+            }
 
         return matches
 
@@ -212,7 +210,7 @@ class Gem(PackageManager):
         return self.run_cli(
             "install",
             "--user-install",
-            self.post_args,
+            *self.post_args,
             package_id,
             auto_post_args=False,
         )
@@ -236,7 +234,7 @@ class Gem(PackageManager):
         return self.build_cli(
             "update",
             "--user-install",
-            self.post_args,
+            *self.post_args,
             package_id,
             auto_post_args=False,
         )

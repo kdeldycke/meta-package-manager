@@ -64,19 +64,20 @@ class Flatpak(PackageManager):
             "--ostree-verbose",
         )
 
-        if output:
-            regexp = re.compile(
-                r"(?P<name>.+?)\t(?P<package_id>\S+)\t?(?P<latest_version>.*)"
-            )
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    name, package_id, installed_version = match.groups()
-                    installed[package_id] = {
-                        "id": package_id,
-                        "name": name,
-                        "installed_version": parse_version(installed_version),
-                    }
+        regexp = re.compile(
+            r"(?P<name>.+?)\t(?P<package_id>\S+)\t?(?P<latest_version>.*)"
+        )
+
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                name, package_id, installed_version = match.groups()
+                installed[package_id] = {
+                    "id": package_id,
+                    "name": name,
+                    "installed_version": parse_version(installed_version),
+                }
+
         return installed
 
     @property
@@ -100,38 +101,39 @@ class Flatpak(PackageManager):
             "--ostree-verbose",
         )
 
-        if output:
-            regexp = re.compile(
-                r"(?P<name>.+?)\t(?P<package_id>\S+)\t?(?P<latest_version>.*)"
-            )
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    name, package_id, latest_version = match.groups()
+        regexp = re.compile(
+            r"(?P<name>.+?)\t(?P<package_id>\S+)\t?(?P<latest_version>.*)"
+        )
 
-                    info_installed_output = self.run_cli(
-                        "info",
-                        "--ostree-verbose",
-                        package_id,
-                    )
-                    current_version = re.search(
-                        r"version:\s(?P<version>\S.*?)\n",
-                        info_installed_output,
-                        re.IGNORECASE,
-                    )
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                name, package_id, latest_version = match.groups()
 
-                    installed_version = (
-                        current_version.group("version")
-                        if current_version
-                        else "unknow"
-                    )
+                info_installed_output = self.run_cli(
+                    "info",
+                    "--ostree-verbose",
+                    package_id,
+                )
 
-                    outdated[package_id] = {
-                        "id": package_id,
-                        "name": name,
-                        "latest_version": parse_version(latest_version),
-                        "installed_version": parse_version(installed_version),
-                    }
+                current_version = re.search(
+                    r"version:\s(?P<version>\S.*?)\n",
+                    info_installed_output,
+                    re.IGNORECASE,
+                )
+
+                installed_version = (
+                    current_version.group("version")
+                    if current_version
+                    else "unknow"
+                )
+
+                outdated[package_id] = {
+                    "id": package_id,
+                    "name": name,
+                    "latest_version": parse_version(latest_version),
+                    "installed_version": parse_version(installed_version),
+                }
 
         return outdated
 
@@ -154,38 +156,36 @@ class Flatpak(PackageManager):
 
         output = self.run_cli("search", query, "--ostree-verbose")
 
-        if output:
-            regexp = re.compile(
-                r"""
-                ^(?P<package_name>\S+)\t
-                (?P<description>\S+)\t
-                (?P<package_id>\S+)\t
-                (?P<version>\S+)\t
-                (?P<branch>\S+)\t
-                (?P<remotes>.+)
-                """,
-                re.VERBOSE,
-            )
+        regexp = re.compile(
+            r"""
+            ^(?P<package_name>\S+)\t
+            (?P<description>\S+)\t
+            (?P<package_id>\S+)\t
+            (?P<version>\S+)\t
+            (?P<branch>\S+)\t
+            (?P<remotes>.+)
+            """,
+            re.VERBOSE,
+        )
 
-            for (
-                package_name,
-                description,
-                package_id,
-                version,
-                branch,
-                remotes,
-            ) in regexp.findall(output):
+        for (
+            package_name,
+            description,
+            package_id,
+            version,
+            branch,
+            remotes,
+        ) in regexp.findall(output):
 
-                # Filters out fuzzy matches, only keep stricly matching
-                # packages.
-                if exact and query not in (package_id, package_name):
-                    continue
+            # Filters out fuzzy matches, only keep stricly matching packages.
+            if exact and query not in (package_id, package_name):
+                continue
 
-                matches[package_id] = {
-                    "id": package_id,
-                    "name": package_name,
-                    "latest_version": parse_version(version),
-                }
+            matches[package_id] = {
+                "id": package_id,
+                "name": package_name,
+                "latest_version": parse_version(version),
+            }
 
         return matches
 

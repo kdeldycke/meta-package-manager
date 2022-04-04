@@ -110,9 +110,6 @@ class Yarn(PackageManager):
 
         output = self.run_cli("--json", "outdated", "--cwd", self.global_dir)
 
-        if not output:
-            return outdated
-
         packages = []
         for line in output.splitlines():
             if not line:
@@ -134,6 +131,7 @@ class Yarn(PackageManager):
                 "installed_version": parse_version(values["current"]),
                 "latest_version": parse_version(values["latest"]),
             }
+
         return outdated
 
     def search(self, query, extended, exact):

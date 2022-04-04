@@ -82,17 +82,16 @@ class APT(PackageManager):
 
         output = self.run_cli("list", "--installed", "--quiet")
 
-        if output:
-            regexp = re.compile(r"(\S+)\/\S+ (\S+) .*")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, installed_version = match.groups()
-                    installed[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "installed_version": parse_version(installed_version),
-                    }
+        regexp = re.compile(r"(\S+)\/\S+ (\S+) .*")
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                package_id, installed_version = match.groups()
+                installed[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(installed_version),
+                }
 
         return installed
 
@@ -113,18 +112,17 @@ class APT(PackageManager):
 
         output = self.run_cli("list", "--upgradable", "--quiet")
 
-        if output:
-            regexp = re.compile(r"(\S+)\/\S+ (\S+).*\[upgradable from: (\S+)\]")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, latest_version, installed_version = match.groups()
-                    outdated[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "latest_version": parse_version(latest_version),
-                        "installed_version": parse_version(installed_version),
-                    }
+        regexp = re.compile(r"(\S+)\/\S+ (\S+).*\[upgradable from: (\S+)\]")
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                package_id, latest_version, installed_version = match.groups()
+                outdated[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(latest_version),
+                    "installed_version": parse_version(installed_version),
+                }
 
         return outdated
 
@@ -193,27 +191,26 @@ class APT(PackageManager):
 
         output = self.run_cli("search", query, "--quiet", search_arg)
 
-        if output:
-            regexp = re.compile(
-                r"""
-                ^(?P<package_id>\S+)  # A string with a char at least.
-                /.+\                  # A slash, any string, then a space.
-                (?P<version>.+)       # Any string.
-                \                     # A space.
-                (?:.+)\n              # Any string ending the line.
-                (?P<description>      # Start of the multi-line desc group.
-                    (?:\ \ .+\n)+     # Lines of strings prefixed by 2 spaces.
-                )
-                """,
-                re.MULTILINE | re.VERBOSE,
+        regexp = re.compile(
+            r"""
+            ^(?P<package_id>\S+)  # A string with a char at least.
+            /.+\                  # A slash, any string, then a space.
+            (?P<version>.+)       # Any string.
+            \                     # A space.
+            (?:.+)\n              # Any string ending the line.
+            (?P<description>      # Start of the multi-line desc group.
+                (?:\ \ .+\n)+     # Lines of strings prefixed by 2 spaces.
             )
+            """,
+            re.MULTILINE | re.VERBOSE,
+        )
 
-            for package_id, version, description in regexp.findall(output):
-                matches[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": parse_version(version),
-                }
+        for package_id, version, description in regexp.findall(output):
+            matches[package_id] = {
+                "id": package_id,
+                "name": package_id,
+                "latest_version": parse_version(version),
+            }
 
         return matches
 
@@ -261,8 +258,8 @@ class APT(PackageManager):
             ► sudo apt clean
         """
         super().cleanup()
-        for commands in (("-y", "autoremove"), "clean"):
-            self.run_cli(commands, override_pre_cmds=("sudo",))
+        for commands in (("-y", "autoremove"), ("clean",)):
+            self.run_cli(*commands, override_pre_cmds=("sudo",))
 
 
 class APT_Mint(APT):

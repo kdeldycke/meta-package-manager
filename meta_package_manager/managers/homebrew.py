@@ -110,19 +110,18 @@ class Homebrew(PackageManager):
 
         output = self.run_cli("list", "--versions")
 
-        if output:
-            regexp = re.compile(r"(\S+)( \(!\))? (.+)")
-            for pkg_info in output.splitlines():
-                match = regexp.match(pkg_info)
-                if match:
-                    package_id, removed, versions = match.groups()
-                    installed[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "installed_version":
-                        # Keep highest version found.
-                        max(map(parse_version, versions.split())),
-                    }
+        regexp = re.compile(r"(\S+)( \(!\))? (.+)")
+        for pkg_info in output.splitlines():
+            match = regexp.match(pkg_info)
+            if match:
+                package_id, removed, versions = match.groups()
+                installed[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version":
+                    # Keep highest version found.
+                    max(map(parse_version, versions.split())),
+                }
 
         return installed
 
@@ -309,21 +308,20 @@ class Homebrew(PackageManager):
 
         output = self.run_cli("search", query)
 
-        if output:
-            regexp = re.compile(
-                r"""
-                (?:==>\s\S+\s)?           # Ignore section starting with '==>'.
-                (?P<package_id>[^\s✔]+)   # Anything not a whitespace or ✔.
-                """,
-                re.VERBOSE,
-            )
+        regexp = re.compile(
+            r"""
+            (?:==>\s\S+\s)?           # Ignore section starting with '==>'.
+            (?P<package_id>[^\s✔]+)   # Anything not a whitespace or ✔.
+            """,
+            re.VERBOSE,
+        )
 
-            for package_id in regexp.findall(output):
-                matches[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": None,
-                }
+        for package_id in regexp.findall(output):
+            matches[package_id] = {
+                "id": package_id,
+                "name": package_id,
+                "latest_version": None,
+            }
 
         return matches
 

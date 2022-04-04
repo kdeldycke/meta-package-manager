@@ -58,17 +58,16 @@ class Choco(PackageManager):
 
         output = self.run_cli("list", "--local-only", "--limit-output")
 
-        if output:
-            regexp = re.compile(r"(.+)\|(.+)")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, installed_version = match.groups()
-                    installed[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "installed_version": parse_version(installed_version),
-                    }
+        regexp = re.compile(r"(.+)\|(.+)")
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                package_id, installed_version = match.groups()
+                installed[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(installed_version),
+                }
 
         return installed
 
@@ -92,18 +91,17 @@ class Choco(PackageManager):
 
         output = self.run_cli("outdated", "--limit-output")
 
-        if output:
-            regexp = re.compile(r"(.+)\|(.+)\|(.+)\|.+")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, installed_version, latest_version = match.groups()
-                    outdated[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "latest_version": parse_version(latest_version),
-                        "installed_version": parse_version(installed_version),
-                    }
+        regexp = re.compile(r"(.+)\|(.+)\|(.+)\|.+")
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                package_id, installed_version, latest_version = match.groups()
+                outdated[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(latest_version),
+                    "installed_version": parse_version(installed_version),
+                }
 
         return outdated
 
@@ -152,15 +150,13 @@ class Choco(PackageManager):
 
         output = self.run_cli("search", query, query_params)
 
-        if output:
-            regexp = re.compile(r"(.+)\|(.+)")
-
-            for package_id, latest_version in regexp.findall(output):
-                matches[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": parse_version(latest_version),
-                }
+        regexp = re.compile(r"(.+)\|(.+)")
+        for package_id, latest_version in regexp.findall(output):
+            matches[package_id] = {
+                "id": package_id,
+                "name": package_id,
+                "latest_version": parse_version(latest_version),
+            }
 
         return matches
 

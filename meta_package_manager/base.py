@@ -310,8 +310,8 @@ class PackageManager:
         cli_msg = format_cli(args, extra_env)
 
         code = 0
-        output = None
-        error = None
+        output = ''
+        error = ''
 
         if self.dry_run:
             logger.warning(f"Dry-run: {cli_msg}")
@@ -385,30 +385,30 @@ class PackageManager:
         * ``override_pre_args=tuple()``
         * ``override_post_args=tuple()``
         """
-        cli = []
+        params = []
 
         # Prepare the full list of CLI arguments.
         if override_pre_cmds:
             assert isinstance(override_pre_cmds, tuple)
         elif auto_pre_cmds:
-            cli.extend(self.pre_cmds)
+            params.extend(self.pre_cmds)
 
-        cli.append(self.cli_path)
+        params.append(self.cli_path)
 
         if override_pre_args:
             assert isinstance(override_pre_args, tuple)
         elif auto_pre_args:
-            cli.extend(self.pre_args)
+            params.extend(self.pre_args)
 
         if args:
-            cli.extend(args)
+            params.extend(args)
 
         if override_post_args:
             assert isinstance(override_post_args, tuple)
         elif auto_post_args:
-            cli.extend(self.post_args)
+            params.extend(self.post_args)
 
-        return tuple(cli)
+        return tuple(params)
 
     def run_cli(
         self,

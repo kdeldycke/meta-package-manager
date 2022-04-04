@@ -320,8 +320,5 @@ class NPM(PackageManager):
                 f"{package_id}@{version}" if version else package_id,
             ]
         return self.build_cli(
-            "--global",
-            "--progress=false",
-            "--no-update-notifier",
-            *cmd_args
+            "--global", "--progress=false", "--no-update-notifier", *cmd_args
         )

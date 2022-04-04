@@ -58,20 +58,19 @@ class MAS(PackageManager):
 
         output = self.run_cli("list")
 
-        if output:
-            regexp = re.compile(r"(\d+) (.*) \((\S+)\)$")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, package_name, installed_version = match.groups()
-                    installed[package_id] = {
-                        "id": package_id,
-                        "name": package_name,
-                        # Normalize unknown version. See:
-                        # https://github.com/mas-cli/mas/commit
-                        # /1859eaedf49f6a1ebefe8c8d71ec653732674341
-                        "installed_version": parse_version(installed_version),
-                    }
+        regexp = re.compile(r"(\d+) (.*) \((\S+)\)$")
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                package_id, package_name, installed_version = match.groups()
+                installed[package_id] = {
+                    "id": package_id,
+                    "name": package_name,
+                    # Normalize unknown version. See:
+                    # https://github.com/mas-cli/mas/commit
+                    # /1859eaedf49f6a1ebefe8c8d71ec653732674341
+                    "installed_version": parse_version(installed_version),
+                }
 
         return installed
 
@@ -93,26 +92,25 @@ class MAS(PackageManager):
 
         output = self.run_cli("outdated")
 
-        if output:
-            regexp = re.compile(r"(\d+) (.*) \((\S+) -> (\S+)\)$")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    (
-                        package_id,
-                        package_name,
-                        installed_version,
-                        latest_version,
-                    ) = match.groups()
-                    outdated[package_id] = {
-                        "id": package_id,
-                        "name": package_name,
-                        "latest_version": parse_version(latest_version),
-                        # Normalize unknown version. See:
-                        # https://github.com/mas-cli/mas/commit
-                        # /1859eaedf49f6a1ebefe8c8d71ec653732674341
-                        "installed_version": parse_version(installed_version),
-                    }
+        regexp = re.compile(r"(\d+) (.*) \((\S+) -> (\S+)\)$")
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                (
+                    package_id,
+                    package_name,
+                    installed_version,
+                    latest_version,
+                ) = match.groups()
+                outdated[package_id] = {
+                    "id": package_id,
+                    "name": package_name,
+                    "latest_version": parse_version(latest_version),
+                    # Normalize unknown version. See:
+                    # https://github.com/mas-cli/mas/commit
+                    # /1859eaedf49f6a1ebefe8c8d71ec653732674341
+                    "installed_version": parse_version(installed_version),
+                }
 
         return outdated
 
@@ -139,32 +137,29 @@ class MAS(PackageManager):
 
         output = self.run_cli("search", query)
 
-        if output:
-            regexp = re.compile(
-                r"""
-                (?P<package_id>\d+)
-                \s+
-                (?P<package_name>.+?)
-                \s+
-                \(
-                    (?P<version>\S+)
-                \)
-                """,
-                re.MULTILINE | re.VERBOSE,
-            )
+        regexp = re.compile(
+            r"""
+            (?P<package_id>\d+)
+            \s+
+            (?P<package_name>.+?)
+            \s+
+            \(
+                (?P<version>\S+)
+            \)
+            """,
+            re.MULTILINE | re.VERBOSE,
+        )
 
-            for package_id, package_name, version in regexp.findall(output):
-
-                # Filters out fuzzy matches, only keep stricly matching
-                # packages.
-                if exact and query not in (package_id, package_name):
-                    continue
-
-                matches[package_id] = {
-                    "id": package_id,
-                    "name": package_name,
-                    "latest_version": parse_version(version),
-                }
+        for package_id, package_name, version in regexp.findall(output):
+            # Filters out fuzzy matches, only keep stricly matching
+            # packages.
+            if exact and query not in (package_id, package_name):
+                continue
+            matches[package_id] = {
+                "id": package_id,
+                "name": package_name,
+                "latest_version": parse_version(version),
+            }
 
         return matches
 

@@ -58,15 +58,14 @@ class Snap(PackageManager):
 
         output = self.run_cli("list")
 
-        if output:
-            for package in output.splitlines()[1:]:
-                package_id = package.split()[0]
-                installed_version = package.split()[1]
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(installed_version),
-                }
+        for package in output.splitlines()[1:]:
+            package_id = package.split()[0]
+            installed_version = package.split()[1]
+            installed[package_id] = {
+                "id": package_id,
+                "name": package_id,
+                "installed_version": parse_version(installed_version),
+            }
 
         return installed
 
@@ -86,19 +85,18 @@ class Snap(PackageManager):
 
         output = self.run_cli("refresh", "--list")
 
-        if output and len(output.splitlines()) > 1:
-            for package in output.splitlines()[1:]:
-                package_id = package.split()[0]
-                latest_version = package.split()[1]
-                installed_version = (
-                    self.run_cli("list", package_id).splitlines()[-1].split()[1]
-                )
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": parse_version(latest_version),
-                    "installed_version": parse_version(installed_version),
-                }
+        for package in output.splitlines()[1:]:
+            package_id = package.split()[0]
+            latest_version = package.split()[1]
+            installed_version = (
+                self.run_cli("list", package_id).splitlines()[-1].split()[1]
+            )
+            outdated[package_id] = {
+                "id": package_id,
+                "name": package_id,
+                "latest_version": parse_version(latest_version),
+                "installed_version": parse_version(installed_version),
+            }
 
         return outdated
 
@@ -116,33 +114,31 @@ class Snap(PackageManager):
 
         output = self.run_cli("find", query)
 
-        if output:
+        for package in output.splitlines()[1:]:
 
-            for package in output.splitlines()[1:]:
+            package_id = package.split()[0]
+            version = package.split()[1]
+            description = " ".join(map(str, package.split()[4:]))
 
-                package_id = package.split()[0]
-                version = package.split()[1]
-                description = " ".join(map(str, package.split()[4:]))
+            # Skip all non-stricly matching package IDs in exact mode.
+            if exact:
+                if query != package_id:
+                    continue
 
-                # Skip all non-stricly matching package IDs in exact mode.
-                if exact:
-                    if query != package_id:
+            else:
+                # Exclude packages not featuring the search query in their
+                # ID or name.
+                if not extended:
+                    query_parts = set(map(str, TokenizedString(query)))
+                    pkg_parts = set(map(str, TokenizedString(package_id)))
+                    if not query_parts.issubset(pkg_parts):
                         continue
 
-                else:
-                    # Exclude packages not featuring the search query in their
-                    # ID or name.
-                    if not extended:
-                        query_parts = set(map(str, TokenizedString(query)))
-                        pkg_parts = set(map(str, TokenizedString(package_id)))
-                        if not query_parts.issubset(pkg_parts):
-                            continue
-
-                matches[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": parse_version(version),
-                }
+            matches[package_id] = {
+                "id": package_id,
+                "name": package_id,
+                "latest_version": parse_version(version),
+            }
         return matches
 
     def install(self, package_id):

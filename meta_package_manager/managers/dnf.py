@@ -62,16 +62,15 @@ class DNF(PackageManager):
 
         output = self.run_cli("list", "--installed")
 
-        if output:
-            for package in output.splitlines()[1:]:
-                match = self.list_cmd_regexp.match(package)
-                if match:
-                    package_id, installed_version = match.groups()
-                    installed[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "installed_version": parse_version(installed_version),
-                    }
+        for package in output.splitlines()[1:]:
+            match = self.list_cmd_regexp.match(package)
+            if match:
+                package_id, installed_version = match.groups()
+                installed[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(installed_version),
+                }
 
         return installed
 
@@ -92,16 +91,15 @@ class DNF(PackageManager):
 
         output = self.run_cli("list", "--upgrades")
 
-        if output:
-            for package in output.splitlines()[2:]:
-                match = self.list_cmd_regexp.match(package)
-                if match:
-                    package_id, latest_version = match.groups()
-                    outdated[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "latest_version": parse_version(latest_version),
-                    }
+        for package in output.splitlines()[2:]:
+            match = self.list_cmd_regexp.match(package)
+            if match:
+                package_id, latest_version = match.groups()
+                outdated[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(latest_version),
+                }
 
         return outdated
 

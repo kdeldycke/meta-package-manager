@@ -70,17 +70,16 @@ class OPKG(PackageManager):
 
         output = self.run_cli("list-installed")
 
-        if output:
-            regexp = re.compile(r"(\S+) - (\S+)")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, installed_version = match.groups()
-                    installed[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "installed_version": parse_version(installed_version),
-                    }
+        regexp = re.compile(r"(\S+) - (\S+)")
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                package_id, installed_version = match.groups()
+                installed[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(installed_version),
+                }
 
         return installed
 
@@ -100,18 +99,17 @@ class OPKG(PackageManager):
 
         output = self.run_cli("list-upgradable")
 
-        if output:
-            regexp = re.compile(r"(\S+) - (\S+) - (\S+)")
-            for package in output.splitlines():
-                match = regexp.match(package)
-                if match:
-                    package_id, installed_version, latest_version = match.groups()
-                    outdated[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "latest_version": parse_version(latest_version),
-                        "installed_version": parse_version(installed_version),
-                    }
+        regexp = re.compile(r"(\S+) - (\S+) - (\S+)")
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                package_id, installed_version, latest_version = match.groups()
+                outdated[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(latest_version),
+                    "installed_version": parse_version(installed_version),
+                }
 
         return outdated
 
@@ -128,47 +126,42 @@ class OPKG(PackageManager):
         # filter the packages later.
         output = self.run_cli("list")
 
-        if output:
-            regexp = re.compile(
-                r"""
-                (?P<package_id>\S+)
-                \ -\
-                (?P<version>\S+)
-                \ -\
-                (?P<description>.+)
-                """,
-                re.VERBOSE | re.MULTILINE,
-            )
+        regexp = re.compile(
+            r"""
+            (?P<package_id>\S+)
+            \ -\
+            (?P<version>\S+)
+            \ -\
+            (?P<description>.+)
+            """,
+            re.VERBOSE | re.MULTILINE,
+        )
 
-            for package_id, version, description in regexp.findall(output):
+        for package_id, version, description in regexp.findall(output):
+            # Skip all non-stricly matching package IDs in exact mode.
+            if exact:
+                if query != package_id:
+                    continue
+            else:
+                # All other modes search for matching in package IDs and
+                # names.
+                searched_content = set(map(str, TokenizedString(package_id)))
 
-                # Skip all non-stricly matching package IDs in exact mode.
-                if exact:
-                    if query != package_id:
-                        continue
+                # Also search within the description in extended mode.
+                if extended:
+                    searched_content.update(set(map(str, TokenizedString(description))))
 
-                else:
-                    # All other modes search for matching in package IDs and
-                    # names.
-                    searched_content = set(map(str, TokenizedString(package_id)))
+                # Skip package if not all sub-strings are present in the
+                # searched content.
+                query_parts = set(map(str, TokenizedString(query)))
+                if not query_parts.issubset(searched_content):
+                    continue
 
-                    # Also search within the description in extended mode.
-                    if extended:
-                        searched_content.update(
-                            set(map(str, TokenizedString(description)))
-                        )
-
-                    # Skip package if not all sub-strings are present in the
-                    # searched content.
-                    query_parts = set(map(str, TokenizedString(query)))
-                    if not query_parts.issubset(searched_content):
-                        continue
-
-                matches[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": parse_version(version),
-                }
+            matches[package_id] = {
+                "id": package_id,
+                "name": package_id,
+                "latest_version": parse_version(version),
+            }
 
         return matches
 

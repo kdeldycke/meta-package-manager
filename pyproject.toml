@@ -113,7 +113,7 @@ disable = "C0114, W0511, W1203"
 
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml
-addopts = "--numprocesses auto --durations=10 --cov-report term --cov=meta_package_manager"
+addopts = "--numprocesses 0 --durations=10 --cov-report term --cov=meta_package_manager"
 xfail_strict = true
 
 [tool.coverage.paths]

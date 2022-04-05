@@ -196,15 +196,15 @@ def test_cli_type(manager):
     """Check that all methods returning a CLI is either not implemented or returns a tuple."""
     try:
         result = manager.upgrade_cli("dummy_package_id")
-    except Exception as excpt:
-        assert isinstance(excpt, NotImplementedError)
+    except Exception as ex:
+        assert isinstance(ex, NotImplementedError)
     else:
         assert isinstance(result, tuple)
 
     try:
         result = manager.upgrade_all_cli()
-    except Exception as excpt:
-        assert isinstance(excpt, NotImplementedError)
+    except Exception as ex:
+        assert isinstance(ex, NotImplementedError)
     else:
         assert isinstance(result, tuple)
 
@@ -229,8 +229,8 @@ def test_search_type(manager):
     if manager.available:
         try:
             matches = manager.search("python", extended=True, exact=False)
-        except Exception as excpt:
-            assert isinstance(excpt, NotImplementedError)
+        except Exception as ex:
+            assert isinstance(ex, NotImplementedError)
         else:
             assert isinstance(matches, dict)
             for pkg in matches.values():
@@ -248,8 +248,8 @@ def test_outdated_type(manager):
     if manager.available:
         try:
             result = manager.outdated
-        except Exception as excpt:
-            assert isinstance(excpt, NotImplementedError)
+        except Exception as ex:
+            assert isinstance(ex, NotImplementedError)
         else:
             assert isinstance(result, dict)
             for pkg in manager.outdated.values():

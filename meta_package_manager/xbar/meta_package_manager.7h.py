@@ -155,8 +155,8 @@ def print_menu():
         )
         code = process.returncode
         error = process.stderr
-    except FileNotFoundError as excpt:
-        error = excpt
+    except FileNotFoundError as ex:
+        error = ex
 
     mpm_installed = False
     mpm_up_to_date = False

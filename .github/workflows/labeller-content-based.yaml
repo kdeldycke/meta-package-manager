@@ -45,7 +45,7 @@ jobs:
                   "dependabot", "poetry.lock", "poetry", "pyproject.toml"]},
 
               {"labels": [
-                "📗 documentation"],
+                "📚 documentation"],
                "keywords": [
                   "sphinx", "readme", "markdown", "typo", "docstring", "mailmap", "license"]},
 

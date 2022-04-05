@@ -41,7 +41,7 @@ jobs:
 
 
             </details>
-          labels: "📗 documentation"
+          labels: "📚 documentation"
           branch: update-doc
 
   deploy-docs:

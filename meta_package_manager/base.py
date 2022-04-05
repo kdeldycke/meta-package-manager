@@ -242,6 +242,7 @@ class PackageManager:
                 # See: https://github.com/kdeldycke/meta-package-manager/issues/542
                 # Check for "OSError: [WinError 193] %1 is not a valid Win32 application" error.
                 if getattr(ex, "winerror") == 193:
+                    logger.debug(f"{self.cli_path} is not a valid Windows application.")
                     # Declare CLI as un-executable.
                     self.executable = False
                     return

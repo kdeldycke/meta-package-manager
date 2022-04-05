@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Make CLI path evaluation more robust on Windows. Closes {issue}`542`.
+
 ## {gh}`4.12.0 (2022-04-04) <compare/v4.11.0...v4.12.0>`
 
 - \[dnf\] Add support for `dnf`. Closes {issue}`516`, refs {issue}`415`.

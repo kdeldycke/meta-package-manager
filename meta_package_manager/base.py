@@ -227,13 +227,26 @@ class PackageManager:
         """
         if self.executable:
             # Invoke the manager.
-            output = self.run_cli(
-                self.version_cli_options,
-                auto_pre_cmds=False,
-                auto_pre_args=False,
-                auto_post_args=False,
-                force_exec=True,
-            )
+            try:
+                output = self.run_cli(
+                    self.version_cli_options,
+                    auto_pre_cmds=False,
+                    auto_pre_args=False,
+                    auto_post_args=False,
+                    force_exec=True,
+                )
+            # Catch false-positive CLIs.
+            except OSError as ex:
+                # In the environment on Windows, extension of available executables are
+                # ignored as they're plenty: .EXE, .CMD, .BAT, ...
+                # See: https://github.com/kdeldycke/meta-package-manager/issues/542
+                # Check for "OSError: [WinError 193] %1 is not a valid Win32 application" error.
+                if getattr(ex, "winerror") == 193:
+                    # Declare CLI as un-executable.
+                    self.executable = False
+                    return
+                # Unidentified error: re-raise.
+                raise
 
             # Extract the version with the regex.
             parts = re.compile(self.version_regex, re.MULTILINE | re.VERBOSE).search(
@@ -255,7 +268,7 @@ class PackageManager:
         if not self.cli_path:
             return False
         if not os.access(self.cli_path, os.X_OK):
-            logger.debug(f"{self.cli_path} not executable.")
+            logger.debug(f"{self.cli_path} is not allowed to be executed.")
             return False
         return True
 

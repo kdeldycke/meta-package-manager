@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`4.12.1 (unreleased) <compare/v4.12.0...main>`
-
-```{{important}}
-This version is not released yet and is under active development.
-```
+## {gh}`4.12.1 (2022-04-05) <compare/v4.12.0...v4.12.1>`
 
 - \[mpm\] Make CLI path evaluation more robust on Windows. Closes {issue}`542`.
 

@@ -57,6 +57,10 @@ jobs:
         run: |
           unset HOMEBREW_BREW_GIT_REMOTE HOMEBREW_CORE_GIT_REMOTE
           brew update-reset
+          git -C "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core" fetch
+          git -C "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core" fetch --unshallow
+          git -C "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask" fetch
+          git -C "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask" fetch --unshallow
       - name: macOS - Upgrade Homebrew
         if: runner.os == 'macOS'
         run: |

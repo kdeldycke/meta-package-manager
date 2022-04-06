@@ -8,12 +8,23 @@
 ![](images/xbar-plugin-submenu-layout.png)
 ```
 
+## Location
+
 A copy of the latest stable version of the xbar plugin for `mpm` is always
 [available on xbar website](https://xbarapp.com/docs/plugins/Dev/meta_package_manager.7h.py.html)
 and
 [plugin repository](https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py).
 
-## Development constraints
+It can be located dynamiccaly with the dedicated `--xbar-plugin-path` option:
+
+```shell-session
+$ poetry run mpm --xbar-plugin-path
+~/meta-package-manager/meta_package_manager/xbar/meta_package_manager.7h.py
+```
+
+This is handy to pre-populate xbar with some plugins, [as I do in my dotfiles via symlinks](https://github.com/kdeldycke/dotfiles/blob/c04296d29e5f5ce48687f79554b265b3e89d5dbb/install.sh#L230).
+
+## Python >=3.7.3 required
 
 xbar plugins are self-contained scripts. As such, the
 `meta_package_manager.7h.py` needs to be able to run without any extra

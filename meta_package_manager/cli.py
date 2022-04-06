@@ -50,7 +50,7 @@ else:
 
 from cloup import Section
 
-from . import __version__, logger
+from . import __version__, logger, xbar
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .output import (
     SORTABLE_FIELDS,
@@ -90,6 +90,23 @@ def single_manager_selectors():
             expose_value=False,
             callback=add_manager_to_selection,
         )
+
+
+def xbar_plugin_path(ctx, param, value):
+    """Print the location of the xbar plugin.
+
+    Replaces the fully-qualified home directory by its shorthand if applicable.
+    """
+    if value:
+        xbar_path = Path(xbar.__file__).expanduser().resolve()
+        home_dir = Path.home()
+        if xbar_path.is_relative_to(home_dir):
+            home_shorthand = Path("~")
+            shorten_xbar_path = home_shorthand / xbar_path.relative_to(home_dir)
+            assert shorten_xbar_path.expanduser().resolve() == xbar_path
+            xbar_path = shorten_xbar_path
+        echo(xbar_path)
+        ctx.exit()
 
 
 @group(version=__version__)
@@ -174,6 +191,15 @@ def single_manager_selectors():
         default=True,
         help="Print per-manager package statistics.",
     ),
+)
+@option(
+    "--xbar-plugin-path",
+    is_flag=True,
+    default=False,
+    expose_value=False,
+    is_eager=True,
+    callback=xbar_plugin_path,
+    help="Print location of the mpm xbar plugin.",
 )
 @pass_context
 def mpm(

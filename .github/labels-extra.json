@@ -60,6 +60,11 @@
     "description": "npm, yarn"
   },
   {
+    "name": "📦 manager: pacman",
+    "color": "#bfdadc",
+    "description": "pacman"
+  },
+  {
     "name": "📦 manager: pip",
     "color": "#bfdadc",
     "description": "pip"

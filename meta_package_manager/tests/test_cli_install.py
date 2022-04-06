@@ -55,6 +55,7 @@ class TestInstall(CLISubCommandTests):
         "mas": "747648890",  # Telegram
         "npm": "raven",
         "opkg": "enigma2-hotplug",
+        "pacman": "manjaro-hello",
         "pip": "arrow",
         "snap": "standard-notes",
         "vscode": "tamasfe.even-better-toml",

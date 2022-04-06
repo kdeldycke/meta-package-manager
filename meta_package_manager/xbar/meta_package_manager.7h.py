@@ -8,57 +8,76 @@
 # <xbar.image>https://i.imgur.com/CiQpQ42.png</xbar.image>
 # <xbar.abouturl>https://github.com/kdeldycke/meta-package-manager</xbar.abouturl>
 # <xbar.var>boolean(VAR_SUBMENU_LAYOUT=false): Group packages into manager sub-menus.</xbar.var>
+# <xbar.var>boolean(VAR_TABLE_RENDERING=false): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
+# <swiftbar.environment>['VAR_SUBMENU_LAYOUT': false, 'VAR_TABLE_RENDERING': false]</swiftbar.environment>
 
 """
-xbar plugin for Meta Package Manager (a.k.a. the :command:`mpm` CLI).
+Xbar and SwiftBar plugin for Meta Package Manager (i.e. the :command:`mpm` CLI).
 
 Default update cycle is set to 7 hours so we have a chance to get user's
 attention once a day. Higher frequency might ruin the system as all checks are
 quite resource intensive, and Homebrew might hit GitHub's API calls quota.
 
-Minimal xbar requirement is macOS Catalina (10.15), which deprecates Python
-2.x, and ships with Python 3.7.3. So this plugin is required to work with
-Python 3.7.3 or newer.
+Minimal requirement is macOS Catalina (10.15) for both Xbar and SwiftBar.
+Catalina deprecates Python 2.x, and ships with Python 3.7.3. So this plugin is
+required to work with Python 3.7.3 or newer.
+
+- Xbar automaticcaly bridge plugin options between its UI and environment
+variable on script execution. See:
+https://xbarapp.com/docs/2021/03/14/variables-in-xbar.html
+
+- This is in progress for SwiftBar at:
+https://github.com/swiftbar/SwiftBar/issues/160
 """
 
 import json
 import os
 import re
 import subprocess
-from operator import itemgetter
 
-SUBMENU_LAYOUT = bool(
-    os.environ.get("VAR_SUBMENU_LAYOUT", False)
-    in {True, 1, "True", "true", "1", "y", "yes", "Yes"}
-)
-""" Define the rendering mode of outdated packages list.
+
+def get_bool(var, default=False):
+    """Utility to normalize boolean environment variables."""
+    value = os.environ.get(var, None)
+    if value is None:
+        return default
+    return bool(value in {True, 1, "True", "true", "1", "y", "yes", "Yes"})
+
+
+SUBMENU_LAYOUT = get_bool("VAR_SUBMENU_LAYOUT", False)
+""" Group packages into manager sub-menus.
 
 If ``True``, will replace the default flat layout with an alternative structure
-where all upgrade actions are grouped into submenus, one for each manager.
+where actions are grouped into submenus, one for each manager.
+"""
 
-xbar automaticcaly bridge that option between its UI and environment variable
-on script execution.
-See: https://xbarapp.com/docs/2021/03/14/variables-in-xbar.html
+
+TABLE_RENDERING = get_bool("VAR_TABLE_RENDERING", True)
+""" Aligns package names and versions, like a table, for easier visual parsing.
+
+If ``True``, will aligns all items using a fixed-width font.
 """
 
 
 # Make it easier to change font, sizes and colors of the output
-# See https://github.com/matryer/xbar#writing-plugins for details
-# An alternate "good looking" font is "font=NotoMono size=13" (not installed
-# on macOS by default though) that matches the system font quite well.
+MONOSPACE = "font=Menlo size=12"
 FONTS = {
     "normal": "",  # Use default system font
     "summary": "",  # Package summary
     "package": "",  # Indiviual packages
-    "error": "color=red | font=Menlo | size=12",  # Errors
+    "error": f"{MONOSPACE} color=red",  # Errors
 }
-# Use a monospaced font when using submenus.
-if SUBMENU_LAYOUT:
-    FONTS["summary"] = "font=Menlo | size=12"
+# Use a monospaced font on table-like rendering.
+if TABLE_RENDERING:
+    FONTS.update(dict.fromkeys(["summary", "package"], MONOSPACE))
 
 
-# mpm v4.2.0 was the first supporting the new xbar plugin parameter format.
 MPM_MIN_VERSION = (4, 2, 0)
+"""Mpm v4.2.0 was the first supporting the new xbar plugin parameter format."""
+
+
+is_swift_bar = get_bool("SWIFTBAR")
+"""SwiftBar is kind enough to warn us of its presence."""
 
 
 def fix_environment():
@@ -81,14 +100,21 @@ def fix_environment():
     )
 
 
-def pp(params):
-    """Print all parameters separated by a pipe. Ignore empty items."""
-    print(" | ".join(p for p in params if p))
+def pp(*args):
+    """Print the item line.
+
+    First argument is the label, separated with a pipe to all other non-empty
+    parameters."""
+    line = args[0]
+    params = " ".join(p for p in args[1:] if p)
+    if params:
+        line += f" | {params}"
+    print(line)
 
 
 def print_error_header():
-    """Generic header for blockng error."""
-    pp(("❌", "dropdown=false"))
+    """Generic header for blocking error."""
+    pp("❗️", "dropdown=false")
     print("---")
 
 
@@ -97,33 +123,19 @@ def print_error(message, submenu=""):
 
     A red, fixed-width font is used to preserve traceback and exception layout.
     """
-    for line in message.strip().splitlines():
-        pp([f"{submenu}{line}", FONTS["error"], "trim=false", "emojize=false"])
+    # Cast to string as we might directly pass exceptions for rendering.
+    for line in str(message).strip().splitlines():
+        pp(f"{submenu}{line}", FONTS["error"], "emojize=false", "trim=false")
 
 
-def print_cli_item(item):
+def print_cli_item(*args):
     """Print two CLI entries:
     * one that is silent
     * a second one that is the exact copy of the above but forces the execution
       by the way of a visible terminal
     """
-    pp(item + ["terminal=false"])
-    pp(item + ["terminal=true", "alternate=true"])
-
-
-def print_package_items(packages, submenu=""):
-    """Print a menu entry for each outdated packages available for upgrade."""
-    for pkg_info in packages:
-        print_cli_item(
-            [
-                f"{submenu}{pkg_info['name']} "
-                f"{pkg_info['installed_version']} → {pkg_info['latest_version']}",
-                pkg_info["upgrade_cli"],
-                "refresh=true",
-                FONTS["package"],
-                "emojize=false",
-            ]
-        )
+    pp(*args, "terminal=false")
+    pp(*args, "terminal=true", "alternate=true")
 
 
 def print_upgrade_all_item(manager, submenu=""):
@@ -132,19 +144,21 @@ def print_upgrade_all_item(manager, submenu=""):
         if SUBMENU_LAYOUT:
             print("-----")
         print_cli_item(
-            [
-                f"{submenu}Upgrade all",
-                manager["upgrade_all_cli"],
-                "refresh=true",
-                FONTS["normal"],
-            ]
+            f"{submenu}🆙 Upgrade all {manager['id']} packages",
+            # Retro-compatibility with xbar-style pipe-separated parameters.
+            # See: https://github.com/swiftbar/SwiftBar/issues/306
+            manager["upgrade_all_cli"].replace(" | ", " "),
+            FONTS["normal"],
+            "refresh=true",
         )
 
 
 def print_menu():
-    """Print menu structure using xbar's plugin API.
+    """Print menu structure using the common parameters shared by Xbar and SwiftBar.
 
-    See: https://github.com/matryer/xbar#plugin-api
+    See:
+    - https://github.com/matryer/xbar-plugins/blob/main/CONTRIBUTING.md#plugin-api
+    - https://github.com/swiftbar/SwiftBar#plugin-api
     """
     # Search for generic mpm CLI on system.
     code = None
@@ -180,25 +194,23 @@ def print_menu():
         action_msg = "Install" if not mpm_installed else "Upgrade"
         min_version_str = ".".join(map(str, MPM_MIN_VERSION))
         pp(
-            [
-                f"{action_msg} mpm CLI >= v{min_version_str}",
-                "shell=python3",
-                "param1=-m",
-                "param2=pip",
-                "param3=install",
-                "param4=--upgrade",
-                f'param5="meta-package-manager>={min_version_str}"',
-                "terminal=true",
-                "refresh=true",
-                FONTS["error"],
-            ]
+            f"{action_msg} mpm CLI >= v{min_version_str}",
+            FONTS["error"],
+            "refresh=true",
+            "terminal=true",
+            "shell=python3",
+            "param1=-m",
+            "param2=pip",
+            "param3=install",
+            "param4=--upgrade",
+            f'param5=\\"meta-package-manager>={min_version_str}\\"',  # fmt: skip
         )
         return
 
     # Force a sync of all local package databases.
     subprocess.run(("mpm", "--verbosity", "ERROR", "sync"))
 
-    # Fetch outdated package form all package manager available on the system.
+    # Fetch outdated package from all package manager available on the system.
     process = subprocess.run(
         (
             "mpm",
@@ -221,61 +233,108 @@ def print_menu():
         print_error(process.stderr)
         return
 
-    # Sort outdated packages by manager's name.
-    managers = sorted(json.loads(process.stdout).values(), key=itemgetter("name"))
+    # Let mpm set the order in which managers will be sorted.
+    managers = json.loads(process.stdout).values()
 
     # Print menu bar icon with number of available upgrades.
     total_outdated = sum(len(m["packages"]) for m in managers)
     total_errors = sum(len(m.get("errors", [])) for m in managers)
     pp(
+        (f"🎁↑{total_outdated}" if total_outdated else "📦✓")
+        + (f" ⚠️{total_errors}" if total_errors else ""),
+        "dropdown=false",
+    )
+
+    # Prefix for section content.
+    submenu = "--" if SUBMENU_LAYOUT else ""
+
+    # String used to separate the left and right columns.
+    col_sep = "  " if TABLE_RENDERING else " "
+    up_sep = " → "
+
+    # Compute global lenght constant.
+    global_outdated_len = max([len(str(len(m["packages"]))) for m in managers])
+    package_str = "package"
+    right_col_len = global_outdated_len + len(package_str) + 1  # +1 for plural
+
+    # Global maximum lenght of labels.
+    global_len_name = max([len(p["name"]) for m in managers for p in m["packages"]])
+    global_len_manager = max([len(m["id"]) for m in managers])
+    global_len_left = max((global_len_manager, global_len_name))
+    global_len_installed = max(
+        [len(p["installed_version"]) for m in managers for p in m["packages"]]
+    )
+    global_len_latest = max(
+        [len(p["latest_version"]) for m in managers for p in m["packages"]]
+    )
+    global_len_right = max(
         [
-            "↑{}{}".format(
-                total_outdated, f" ⚠️{total_errors}" if total_errors else ""
-            ),
-            "dropdown=false",
+            right_col_len,
+            global_len_installed + len(up_sep) + global_len_latest,
         ]
     )
 
-    # Print a full detailed section for each manager.
-    submenu = "--" if SUBMENU_LAYOUT else ""
-
-    if SUBMENU_LAYOUT:
-        # Compute maximal manager's name length.
-        label_max_length = max(len(m["name"]) for m in managers)
-        max_outdated = max(len(m["packages"]) for m in managers)
-        print("---")
-
     for manager in managers:
-        package_label = "package{}".format("s" if len(manager["packages"]) > 1 else "")
+        plural = "s" if len(manager["packages"]) > 1 else ""
+        package_label = f"{package_str}{plural}"
+
+        name_max_len = installed_max_len = latest_max_len = 0
 
         if SUBMENU_LAYOUT:
-            # Non-flat layout use a compact table-like rendering of manager
-            # summary.
-            pp(
-                [
-                    "{error}{0:<{max_length}} {1:>{max_outdated}} {2:<8}".format(
-                        manager["name"] + ":",
-                        len(manager["packages"]),
-                        package_label,
-                        error="⚠️ " if manager.get("errors", None) else "",
-                        max_length=label_max_length + 1,
-                        max_outdated=len(str(max_outdated)),
-                    ),
-                    FONTS["summary"],
-                    "emojize=false",
-                ]
-            )
-        else:
-            print("---")
-            pp(
-                [
-                    f"{len(manager['packages'])} outdated {manager['name']} {package_label}",
-                    FONTS["summary"],
-                    "emojize=false",
-                ]
+            error = "⚠️ " if manager.get("errors", None) else ""
+
+        if TABLE_RENDERING:
+
+            if SUBMENU_LAYOUT:
+                # Re-define layout maximum dimensions for each manager.
+                left_col_len = global_len_manager
+                if manager["packages"]:
+                    name_max_len = max(len(p["name"]) for p in manager["packages"])
+                    installed_max_len = max(
+                        len(p["installed_version"]) for p in manager["packages"]
+                    )
+                    latest_max_len = max(
+                        len(p["latest_version"]) for p in manager["packages"]
+                    )
+
+            else:
+                # Layout constraints are defined accross all managers.
+                left_col_len = name_max_len = global_len_left
+                installed_max_len = global_len_installed
+                latest_max_len = global_len_latest
+                right_col_len = global_len_right
+
+            outdated_label = (
+                f"{len(manager['packages']):>{global_outdated_len}} {package_label:<8}"
             )
 
-        print_package_items(manager["packages"], submenu)
+            header = f"{manager['id']:<{left_col_len}}{col_sep}{outdated_label:>{right_col_len}}"
+
+        # Variable-width / non-table / non-monospaced rendering.
+        else:
+            header = (
+                f"{len(manager['packages'])} outdated {manager['name']} {package_label}"
+            )
+
+        # Print section separator before printing the manager header.
+        print("---")
+        # Print section header.
+        pp(f"{error}{header}", FONTS["summary"])
+
+        # Print a menu entry for each outdated packages.
+        for pkg_info in manager["packages"]:
+            print_cli_item(
+                f"{submenu}{pkg_info['name']:<{name_max_len}}"
+                + col_sep
+                + f"{pkg_info['installed_version']:>{installed_max_len}}"
+                + up_sep
+                + f"{pkg_info['latest_version']:<{latest_max_len}}",
+                FONTS["package"],
+                "refresh=true",
+                # Retro-compatibility with xbar-style pipe-separated parameters.
+                # See: https://github.com/swiftbar/SwiftBar/issues/306
+                pkg_info["upgrade_cli"].replace(" | ", " "),
+            )
 
         print_upgrade_all_item(manager, submenu)
 

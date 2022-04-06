@@ -6,9 +6,10 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Add `--xbar-plugin-path` option.
+
 ## {gh}`4.12.1 (2022-04-05) <compare/v4.12.0...v4.12.1>`
 
-- \[mpm\] Add `--xbar-plugin-path` option.
 - \[mpm\] Make CLI path evaluation more robust on Windows. Closes {issue}`542`.
 
 ## {gh}`4.12.0 (2022-04-04) <compare/v4.11.0...v4.12.0>`

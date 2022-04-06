@@ -253,19 +253,19 @@ def print_menu():
     up_sep = " → "
 
     # Compute global lenght constant.
-    global_outdated_len = max([len(str(len(m["packages"]))) for m in managers])
+    global_outdated_len = max(len(str(len(m["packages"]))) for m in managers)
     package_str = "package"
     right_col_len = global_outdated_len + len(package_str) + 1  # +1 for plural
 
     # Global maximum lenght of labels.
-    global_len_name = max([len(p["name"]) for m in managers for p in m["packages"]])
-    global_len_manager = max([len(m["id"]) for m in managers])
+    global_len_name = max(len(p["name"]) for m in managers for p in m["packages"])
+    global_len_manager = max(len(m["id"]) for m in managers)
     global_len_left = max((global_len_manager, global_len_name))
     global_len_installed = max(
-        [len(p["installed_version"]) for m in managers for p in m["packages"]]
+        len(p["installed_version"]) for m in managers for p in m["packages"]
     )
     global_len_latest = max(
-        [len(p["latest_version"]) for m in managers for p in m["packages"]]
+        len(p["latest_version"]) for m in managers for p in m["packages"]
     )
     global_len_right = max(
         [

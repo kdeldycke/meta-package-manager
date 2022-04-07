@@ -19,7 +19,15 @@ jobs:
           - ubuntu-20.04
           - ubuntu-18.04
           - macos-11.0
-          - macos-10.15
+          # Brew on macOS 10.15 image is plagged with shallow clone issues, for which I spent too much
+          # time trying to fix. See:
+          # https://stackoverflow.com/questions/45782694/how-to-remove-the-shallow-clone-warning-from-homebrew
+          # https://stackoverflow.com/questions/65320304/error-while-updating-homebrew-on-my-macbook-pro-big-sur
+          # https://github.com/Homebrew/brew/pull/9383
+          # https://github.com/Homebrew/brew/pull/9447
+          # https://github.com/Homebrew/brew/issues/9420
+          # https://github.com/Homebrew/brew/issues/12791
+          # - macos-10.15
           - windows-2022
           - windows-2019
         python-version:
@@ -199,20 +207,6 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           rm -rf .coverage*
-      - name: macOS - Fix shallow clone
-        # Sources:
-        # https://stackoverflow.com/questions/45782694/how-to-remove-the-shallow-clone-warning-from-homebrew
-        # https://stackoverflow.com/questions/65320304/error-while-updating-homebrew-on-my-macbook-pro-big-sur
-        # https://github.com/Homebrew/brew/pull/9383
-        # https://github.com/Homebrew/brew/pull/9447
-        # https://github.com/Homebrew/brew/issues/9420
-        # https://github.com/Homebrew/brew/issues/12791
-        if: matrix.os == 'macos-10.15'
-        run: |
-          unset HOMEBREW_BREW_GIT_REMOTE HOMEBREW_CORE_GIT_REMOTE
-          brew update-reset
-          git -C "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core" fetch
-          git -C "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask" fetch
 
       # Mpm
       - name: Install mpm and its dependencies

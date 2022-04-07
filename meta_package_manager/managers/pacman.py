@@ -41,7 +41,6 @@ class Pacman(PackageManager):
          '--'
                             This program may be freely redistributed under
                             the terms of the GNU General Public License.
-
     """
 
     @property
@@ -88,7 +87,7 @@ class Pacman(PackageManager):
         .. code-block:: shell-session
 
             ► pacman -Qu
-            linux 4.19.1.arch1-1 -> 4.19.2.arch1-1 
+            linux 4.19.1.arch1-1 -> 4.19.2.arch1-1
             linux-headers 4.19.1.arch1-1 -> 4.19.2.arch1-1
         """
         outdated = {}
@@ -126,7 +125,7 @@ class Pacman(PackageManager):
             ► pacman -S firefox
         """
         return self.build_cli("-S", package_id)
-    
+
     def sync(self):
         super().sync()
         self.run_cli("-Sy")

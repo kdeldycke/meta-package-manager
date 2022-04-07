@@ -107,6 +107,7 @@ $ mpm --all-managers managers
 │ Mac AppStore       │ mas      │ ✓              │ ✓ /usr/local/bin/mas      │ ✓          │ ✓ 1.8.3  │
 │ Node's npm         │ npm      │ ✓              │ ✓ /usr/local/bin/npm      │ ✓          │ ✓ 7.24.0 │
 │ OPKG               │ opkg     │ ✘ Linux only   │ ✘ opkg not found          │            │          │
+│ Pacman             │ pacman   │ ✘ Linux only   │ ✘ pacman not found        │            │          │
 │ Pip                │ pip      │ ✓              │ ✓ /usr/local/bin/python3  │ ✓          │ ✓ 21.2.4 │
 │ Snap               │ snap     │ ✘ Linux only   │ ✘ snap not found          │            │          │
 │ Visual Studio Code │ vscode   │ ✓              │ ✓ /usr/local/bin/code     │ ✓          │ ✓ 1.61.0 │

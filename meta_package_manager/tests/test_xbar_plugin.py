@@ -19,6 +19,7 @@ import re
 import subprocess
 from collections import Counter
 
+import pytest
 from click_extra.run import extend_env
 from click_extra.tests.conftest import unless_macos
 
@@ -80,6 +81,7 @@ class TestXbarPlugin:
                     f"{regex!r} regex did not match any plugin output line."
                 )
 
+    @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
     @pytest.mark.parametrize("submenu_layout", (True, False, None))
     @pytest.mark.parametrize("table_rendering", (True, False, None))
     def test_rendering(self, submenu_layout, table_rendering):

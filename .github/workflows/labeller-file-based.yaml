@@ -66,6 +66,10 @@ jobs:
           - meta_package_manager/tests/*npm*
           - meta_package_manager/tests/*yarn*
 
+        "📦 manager: pacman":
+          - meta_package_manager/managers/pacman*
+          - meta_package_manager/tests/*pacman*
+
         "📦 manager: pip":
           - meta_package_manager/managers/pip*
           - meta_package_manager/tests/*pip*

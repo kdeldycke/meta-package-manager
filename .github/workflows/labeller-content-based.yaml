@@ -118,6 +118,11 @@ jobs:
                "keywords": ["npm", "node", "yarn"]},
 
               {"labels": [
+                "📦 manager: pacman",
+                "🖥 platform: Linux"],
+              "keywords": ["pacman", "arch"]},
+
+              {"labels": [
                 "📦 manager: pip",
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",

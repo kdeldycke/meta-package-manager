@@ -92,6 +92,14 @@ meta\_package\_manager.managers.opkg module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.managers.pacman module
+---------------------------------------------
+
+.. automodule:: meta_package_manager.managers.pacman
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.managers.pip module
 ------------------------------------------
 

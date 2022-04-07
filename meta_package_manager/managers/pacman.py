@@ -20,7 +20,8 @@ import re
 from click_extra.platform import LINUX
 
 from ..base import PackageManager
-from ..version import TokenizedString, parse_version
+from ..version import parse_version
+
 
 class Pacman(PackageManager):
 
@@ -73,7 +74,7 @@ class Pacman(PackageManager):
                 installed[package_id] = {
                     "id": package_id,
                     "name": package_id,
-                    "installed_version": parse_version(installed_version)
+                    "installed_version": parse_version(installed_version),
                 }
 
         return installed
@@ -164,7 +165,10 @@ class Pacman(PackageManager):
 
         output = self.run_cli("-Ss", query)
 
-        regexp = re.compile(r"(?P<package_id>\S+)\s+(?P<version>\S+).*\n\s+(?P<description>.+)", re.MULTILINE | re.VERBOSE)
+        regexp = re.compile(
+            r"(?P<package_id>\S+)\s+(?P<version>\S+).*\n\s+(?P<description>.+)",
+            re.MULTILINE | re.VERBOSE,
+        )
 
         for package_id, version, description in regexp.findall(output):
             matches[package_id] = {

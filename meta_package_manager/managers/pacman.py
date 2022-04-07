@@ -108,51 +108,6 @@ class Pacman(PackageManager):
                 }
         return outdated
 
-    def install(self, package_id):
-        """Install one package.
-
-        .. code-block:: shell-session
-
-            ► pacman --noconfirm --sync firefox
-        """
-        super().install(package_id)
-        return self.run_cli("--sync", package_id)
-
-    def upgrade_cli(self, package_id=None):
-        """Upgrade one package.
-
-        .. code-block:: shell-session
-
-            ► pacman --noconfirm --sync firefox
-        """
-        return self.build_cli("--sync", package_id)
-
-    def sync(self):
-        """
-        .. code-block:: shell-session
-
-            ► pacman --noconfirm --sync --refresh
-        """
-        super().sync()
-        self.run_cli("--sync", "--refresh")
-
-    def cleanup(self):
-        """
-        .. code-block:: shell-session
-
-            ► pacman --noconfirm --sync --clean --clean
-        """
-        super().cleanup()
-        self.run_cli("--sync", "--clean", "--clean")
-
-    def upgrade_all_cli(self):
-        """
-        .. code-block:: shell-session
-
-            ► pacman --noconfirm --sync --refresh --sysupgrade
-        """
-        return self.build_cli("--sync", "--refresh", "--sysupgrade")
-
     def search(self, query, extended, exact):
         """
         code-block:: shell-session
@@ -193,3 +148,48 @@ class Pacman(PackageManager):
             }
 
         return matches
+
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► pacman --noconfirm --sync firefox
+        """
+        super().install(package_id)
+        return self.run_cli("--sync", package_id)
+
+    def upgrade_cli(self, package_id=None):
+        """Upgrade one package.
+
+        .. code-block:: shell-session
+
+            ► pacman --noconfirm --sync firefox
+        """
+        return self.build_cli("--sync", package_id)
+
+    def upgrade_all_cli(self):
+        """
+        .. code-block:: shell-session
+
+            ► pacman --noconfirm --sync --refresh --sysupgrade
+        """
+        return self.build_cli("--sync", "--refresh", "--sysupgrade")
+
+    def sync(self):
+        """
+        .. code-block:: shell-session
+
+            ► pacman --noconfirm --sync --refresh
+        """
+        super().sync()
+        self.run_cli("--sync", "--refresh")
+
+    def cleanup(self):
+        """
+        .. code-block:: shell-session
+
+            ► pacman --noconfirm --sync --clean --clean
+        """
+        super().cleanup()
+        self.run_cli("--sync", "--clean", "--clean")

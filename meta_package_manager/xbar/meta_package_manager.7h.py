@@ -36,15 +36,26 @@ import re
 import subprocess
 
 
-def get_bool(var, default=False):
-    """Utility to normalize boolean environment variables."""
+def getenv_str(var, default=None):
+    """Utility to get environment variables.
+
+    Note that all environment variables are strings.
+    Always returns a lowered-case string."""
     value = os.environ.get(var, None)
     if value is None:
         return default
-    return bool(value in {True, 1, "True", "true", "1", "y", "yes", "Yes"})
+    return str(value).lower()
 
 
-SUBMENU_LAYOUT = get_bool("VAR_SUBMENU_LAYOUT", False)
+def getenv_bool(var, default=False):
+    """Utility to normalize boolean environment variables."""
+    value = getenv_str(var)
+    if value is None:
+        return default
+    return bool(value in {"1", "true", "y", "yes"})
+
+
+SUBMENU_LAYOUT = getenv_bool("VAR_SUBMENU_LAYOUT", False)
 """ Group packages into manager sub-menus.
 
 If ``True``, will replace the default flat layout with an alternative structure
@@ -52,7 +63,7 @@ where actions are grouped into submenus, one for each manager.
 """
 
 
-TABLE_RENDERING = get_bool("VAR_TABLE_RENDERING", True)
+TABLE_RENDERING = getenv_bool("VAR_TABLE_RENDERING", True)
 """ Aligns package names and versions, like a table, for easier visual parsing.
 
 If ``True``, will aligns all items using a fixed-width font.
@@ -76,8 +87,12 @@ MPM_MIN_VERSION = (4, 2, 0)
 """Mpm v4.2.0 was the first supporting the new xbar plugin parameter format."""
 
 
-is_swift_bar = get_bool("SWIFTBAR")
+is_swift_bar = getenv_bool("SWIFTBAR")
 """SwiftBar is kind enough to warn us of its presence."""
+
+
+dark_mode = getenv_str("OS_APPEARANCE", "light") == 'dark' if is_swift_bar else getenv_bool("XBARDarkMode")
+"""Detect dark mode."""
 
 
 def fix_environment():
@@ -125,7 +140,7 @@ def print_error(message, submenu=""):
     """
     # Cast to string as we might directly pass exceptions for rendering.
     for line in str(message).strip().splitlines():
-        pp(f"{submenu}{line}", FONTS["error"], "emojize=false", "trim=false")
+        pp(f"{submenu}{line}", FONTS["error"], "trim=false", "ansi=false", "emojize=false", "symbolize=false")
 
 
 def print_cli_item(*args):
@@ -195,15 +210,15 @@ def print_menu():
         min_version_str = ".".join(map(str, MPM_MIN_VERSION))
         pp(
             f"{action_msg} mpm CLI >= v{min_version_str}",
-            FONTS["error"],
-            "refresh=true",
-            "terminal=true",
             "shell=python3",
             "param1=-m",
             "param2=pip",
             "param3=install",
             "param4=--upgrade",
             f'param5=\\"meta-package-manager>={min_version_str}\\"',  # fmt: skip
+            FONTS["error"],  # fmt: skip
+            "refresh=true",
+            "terminal=true",
         )
         return
 
@@ -329,11 +344,11 @@ def print_menu():
                 + f"{pkg_info['installed_version']:>{installed_max_len}}"
                 + up_sep
                 + f"{pkg_info['latest_version']:<{latest_max_len}}",
-                FONTS["package"],
-                "refresh=true",
                 # Retro-compatibility with xbar-style pipe-separated parameters.
                 # See: https://github.com/swiftbar/SwiftBar/issues/306
                 pkg_info["upgrade_cli"].replace(" | ", " "),
+                FONTS["package"],
+                "refresh=true",
             )
 
         print_upgrade_all_item(manager, submenu)

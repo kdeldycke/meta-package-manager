@@ -118,22 +118,29 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "click-extra"
-version = "1.8.0"
+version = "1.9.0"
 description = "🌈 Extra colorization and configuration file for Click."
 category = "main"
 optional = false
-python-versions = ">=3.7,<4.0"
+python-versions = "^3.7"
+develop = false
 
 [package.dependencies]
-boltons = ">=21.0.0,<22.0.0"
-cli-helpers = ">=2.2.0,<3.0.0"
-click = ">=8.1.1,<9.0.0"
-click-log = ">=0.4.0,<0.5.0"
-cloup = ">=0.13.0,<0.14.0"
-pyyaml = ">=6.0.0,<7.0.0"
-requests = ">=2.27.1,<3.0.0"
-tabulate = {version = ">=0.8.9,<0.9.0", extras = ["widechars"]}
-tomli = {version = ">=2.0.0,<3.0.0", markers = "python_version < \"3.11\""}
+boltons = "^21.0.0"
+cli-helpers = "^2.2.0"
+click = "^8.1.1"
+click-log = "^0.4.0"
+cloup = "^0.13.0"
+pyyaml = "^6.0.0"
+requests = "^2.27.1"
+tabulate = {version = "^0.8.9", extras = ["widechars"]}
+tomli = {version = "^2.0.0", markers = "python_version < \"3.11\""}
+
+[package.source]
+type = "git"
+url = "https://github.com/kdeldycke/click-extra.git"
+reference = "main"
+resolved_reference = "fecf7de882eab1ba8dd9edd8ba3f746f39f372ea"
 
 [[package]]
 name = "click-log"
@@ -853,10 +860,7 @@ click = [
     {file = "click-8.1.2-py3-none-any.whl", hash = "sha256:24e1a4a9ec5bf6299411369b208c1df2188d9eb8d916302fe6bf03faed227f1e"},
     {file = "click-8.1.2.tar.gz", hash = "sha256:479707fe14d9ec9a0757618b7a100a0ae4c4e236fac5b7f80ca68028141a1a72"},
 ]
-click-extra = [
-    {file = "click-extra-1.8.0.tar.gz", hash = "sha256:282a675c4bcb7fa602547e60e5f7beff5dbd834a98970f9e9d949eabb25bfc63"},
-    {file = "click_extra-1.8.0-py3-none-any.whl", hash = "sha256:319c93e92f912aa3a971f7c1a24ac6c69a769ddc1767a1db14d3b16aac0bcd78"},
-]
+click-extra = []
 click-log = [
     {file = "click-log-0.4.0.tar.gz", hash = "sha256:3970f8570ac54491237bcdb3d8ab5e3eef6c057df29f8c3d1151a51a9c23b975"},
     {file = "click_log-0.4.0-py2.py3-none-any.whl", hash = "sha256:a43e394b528d52112af599f2fc9e4b7cf3c15f94e53581f74fa6867e68c91756"},

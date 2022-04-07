@@ -30,22 +30,23 @@ class TestXbarPlugin:
 
     common_checklist = [
         # Menubar line. Required.
-        (r"↑\d+ (⚠️\d+ )?\| dropdown=false$", True),
-        # Package upgrade line. Optional: there might be no package to
-        # upgrade.
-        (r"(--)?.+ \S+ → \S+ \| shell=.+$", False),
-        # Submenu marker line. Required.
+        (r"(🎁↑\d+|📦✓)( ⚠️\d+)? \| dropdown=false$", True),
+        # Submenus and sections marker. Required.
         (r"-{3,5}$", True),
         # Upgrade all line. Required.
-        (r"(--)?Upgrade all \| shell=.+$", False),
+        (
+            r"(--)?🆙 Upgrade all \S+ packages? \| shell=\S+( param\d+=\S+)+ refresh=true terminal=(false|true alternate=true)$",
+            True,
+        ),
         # Error line. Optional.
         (
-            r"(--)?.+ \| color=red \| font=Menlo \| size=12 \| trim=false \| emojize=false$",
+            r"(--)?.+ \| font=Menlo size=12 color=red trim=false ansi=false emojize=false symbolize=false$",
             False,
         ),
     ]
 
-    def xbar_output_checks(self, checklist, extra_env=None):
+    def plugin_output_checks(self, checklist, extra_env=None):
+        """Run the plugin script and check its output against the checklist."""
         process = subprocess.run(
             xbar.__file__,
             capture_output=True,
@@ -61,7 +62,7 @@ class TestXbarPlugin:
         match_counter = Counter()
 
         for line in process.stdout.splitlines():
-            # The line is expected to match at least one regexp.
+            # The line is expected to match at least one regex.
             matches = False
             for index, (regex, _) in enumerate(checks):
                 if re.match(regex, line):
@@ -69,33 +70,50 @@ class TestXbarPlugin:
                     match_counter[index] += 1
                     break
             if not matches:
-                print(repr(process.stdout))
-                raise Exception(f"xbar output line {line!r} did not match any regexp.")
+                print(process.stdout)
+                raise Exception(f"plugin output line {line!r} did not match any regex.")
 
-        # Check all required regexp did match at least once.
+        # Check all required regex did match at least once.
         for index, (regex, required) in enumerate(checks):
             if required and not match_counter[index]:
                 raise Exception(
-                    f"{regex!r} regex did not match any xbar plugin output line."
+                    f"{regex!r} regex did not match any plugin output line."
                 )
 
-    def test_simple_call(self):
-        """Check default rendering is flat: no submenu."""
-        self.xbar_output_checks(
-            [
-                # Summary package statistics. Required.
-                (r"\d+ outdated .+ packages? \| emojize=false$", True),
-            ]
-        )
-
-    def test_submenu_rendering(self):
-        self.xbar_output_checks(
-            [
-                # Submenu entry line with summary. Required.
+    @pytest.mark.parametrize("submenu_layout", (True, False, None))
+    @pytest.mark.parametrize("table_rendering", (True, False, None))
+    def test_rendering(self, submenu_layout, table_rendering):
+        extra_checks = []
+        if table_rendering is False:
+            extra_checks.extend(
                 (
-                    r".+:\s+\d+ package(s| ) \| font=Menlo \| size=12 \| emojize=false$",
-                    True,
-                ),
-            ],
-            extra_env={"VAR_SUBMENU_LAYOUT": "True"},
-        )
+                    # Package manager section header.
+                    (r"\d+ outdated .+ packages?", True),
+                    # Package upgrade line.
+                    (
+                        r"(--)?\S+ \S+ → \S+ \| shell=\S+( param\d+=\S+)+ refresh=true terminal=(false|true alternate=true)$",
+                        True,
+                    ),
+                )
+            )
+        # Default case is VAR_TABLE_RENDERING=true.
+        else:
+            extra_checks.extend(
+                (
+                    # Package manager section header.
+                    (r"\S+\s+\d+ package(s| ) \| font=Menlo size=12", True),
+                    # Package upgrade line.
+                    (
+                        r"(--)?\S+\s+\S+ → \S+\s+\| shell=\S+( param\d+=\S+)+ font=Menlo size=12 refresh=true terminal=(false|true alternate=true)?$",
+                        True,
+                    ),
+                )
+            )
+
+        extra_env = {}
+        if submenu_layout is not None:
+            extra_env["VAR_SUBMENU_LAYOUT"] = str(submenu_layout)
+        if table_rendering is not None:
+            extra_env["VAR_TABLE_RENDERING"] = str(table_rendering)
+
+        self.plugin_output_checks(extra_checks, extra_env=extra_env)

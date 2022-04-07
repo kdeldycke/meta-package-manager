@@ -15,8 +15,10 @@ For now the easiest way to have new package managers supported is to:
    one you’d like to add.
 1. Duplicate its already existing definition file in the
    {gh}`/managers subfolder <tree/main/meta_package_manager/managers>`.
-1. Adapt the new file to the particularities of the new package manager. Read
-   the {doc}`/falsehoods` to anticipate edge-cases.
+1. Adapt the new file to the particularities of the new package manager:
+   - Read the {doc}`/falsehoods` to anticipate edge-cases.
+   - Always use `--long-form-option` wherever you can to have self-documenting CLIs.
+   - Add at least one capture of the CLI output in the docstring to help future maintainer.
 1. Fix the code until the unittests passes. Most of all metadata and format
    constraints for new managers are enforced in the unittest suite. See the
    {doc}`/development` page for more technical details.

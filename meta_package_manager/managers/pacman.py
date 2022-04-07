@@ -52,7 +52,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pacman --query
+            ► pacman --noconfirm --query
             a52dec 0.7.4-11
             aalib 1.4rc5-14
             abseil-cpp 20211102.0-2
@@ -87,13 +87,13 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pacman -Qu
+            ► pacman --noconfirm --query --upgrades
             linux 4.19.1.arch1-1 -> 4.19.2.arch1-1
             linux-headers 4.19.1.arch1-1 -> 4.19.2.arch1-1
         """
         outdated = {}
 
-        output = self.run_cli("-Qu")
+        output = self.run_cli("--query", "--upgrades")
 
         regexp = re.compile(r"(\S+) (\S+) -> (\S+)")
         for package in output.splitlines():
@@ -113,36 +113,51 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pacman -S firefox
+            ► pacman --noconfirm --sync firefox
         """
         super().install(package_id)
-        return self.run_cli("-S", package_id)
+        return self.run_cli("--sync", package_id)
 
     def upgrade_cli(self, package_id=None):
         """Upgrade one package.
 
         .. code-block:: shell-session
 
-            ► pacman -S firefox
+            ► pacman --noconfirm --sync firefox
         """
-        return self.build_cli("-S", package_id)
+        return self.build_cli("--sync", package_id)
 
     def sync(self):
+        """
+        .. code-block:: shell-session
+
+            ► pacman --noconfirm --sync --refresh
+        """
         super().sync()
-        self.run_cli("-Sy")
+        self.run_cli("--sync", "--refresh")
 
     def cleanup(self):
+        """
+        .. code-block:: shell-session
+
+            ► pacman --noconfirm --sync --clean --clean
+        """
         super().cleanup()
-        self.run_cli("-Scc")
+        self.run_cli("--sync", "--clean", "--clean")
 
     def upgrade_all_cli(self):
-        return self.build_cli("-Syu")
+        """
+        .. code-block:: shell-session
+
+            ► pacman --noconfirm --sync --refresh --sysupgrade
+        """
+        return self.build_cli("--sync", "--refresh", "--sysupgrade")
 
     def search(self, query, extended, exact):
         """
         code-block:: shell-session
 
-            ► pacman -Ss fire
+            ► pacman --noconfirm --sync --search fire
             extra/dump_syms 0.0.7-1
                 Symbol dumper for Firefox
             extra/firefox 99.0-1
@@ -163,7 +178,7 @@ class Pacman(PackageManager):
         if exact:
             query = f"^{query}$"
 
-        output = self.run_cli("-Ss", query)
+        output = self.run_cli("--sync", "--search", query)
 
         regexp = re.compile(
             r"(?P<package_id>\S+)\s+(?P<version>\S+).*\n\s+(?P<description>.+)",

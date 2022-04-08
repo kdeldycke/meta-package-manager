@@ -80,7 +80,7 @@ tomli_w = "^1.0.0"
 [tool.poetry.dev-dependencies]
 bump2version = "^1.0.1"
 coverage = { extras = ["toml"], version = "^6.3" }
-furo = "^2022.3.4"
+furo = "^2022.4.7"
 myst-parser = "^0.17.0"
 pytest = "^7.1.1"
 # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html

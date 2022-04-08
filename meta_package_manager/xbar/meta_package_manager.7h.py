@@ -34,6 +34,7 @@ import json
 import os
 import re
 import subprocess
+from configparser import RawConfigParser
 
 
 def getenv_str(var, default=None):
@@ -52,7 +53,8 @@ def getenv_bool(var, default=False):
     value = getenv_str(var)
     if value is None:
         return default
-    return bool(value in {"1", "true", "y", "yes"})
+    # See: https://github.com/python/cpython/blob/89192c46da7b984811ff3bd648f8e827e4ef053c/Lib/configparser.py#L597-L599
+    return RawConfigParser.BOOLEAN_STATES.get[value]
 
 
 SUBMENU_LAYOUT = getenv_bool("VAR_SUBMENU_LAYOUT", False)

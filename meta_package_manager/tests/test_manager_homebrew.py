@@ -18,7 +18,7 @@
 import subprocess
 
 import pytest
-from click_extra.run import extend_env
+from click_extra.run import env_copy
 from click_extra.tests.conftest import destructive, unless_macos
 
 # Default location of Homebrew Cask formulas on macOS. This is supposed to be a
@@ -55,7 +55,7 @@ def install_cask():
             ("brew", "reinstall", "--cask", package_id),
             capture_output=True,
             encoding="utf-8",
-            env=extend_env({"HOMEBREW_NO_AUTO_UPDATE": "1"}),
+            env=env_copy({"HOMEBREW_NO_AUTO_UPDATE": "1"}),
         )
         # Restore old formula to its most recent version.
         git_checkout(package_id, "HEAD")

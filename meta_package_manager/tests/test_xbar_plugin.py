@@ -20,7 +20,7 @@ import subprocess
 from collections import Counter
 
 import pytest
-from click_extra.run import extend_env
+from click_extra.run import env_copy
 from click_extra.tests.conftest import unless_macos
 
 from .. import xbar
@@ -52,7 +52,7 @@ class TestXbarPlugin:
             xbar.__file__,
             capture_output=True,
             encoding="utf-8",
-            env=extend_env(extra_env),
+            env=env_copy(extra_env),
         )
 
         assert process.returncode == 0

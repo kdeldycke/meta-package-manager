@@ -49,11 +49,14 @@ def getenv_str(var, default=None):
 
 
 def getenv_bool(var, default=False):
-    """Utility to normalize boolean environment variables."""
+    """Utility to normalize boolean environment variables.
+
+    Relies on ``configparser.RawConfigParser.BOOLEAN_STATES`` to translate strings into boolean. See:
+    https://github.com/python/cpython/blob/89192c46da7b984811ff3bd648f8e827e4ef053c/Lib/configparser.py#L597-L599
+    """
     value = getenv_str(var)
     if value is None:
         return default
-    # See: https://github.com/python/cpython/blob/89192c46da7b984811ff3bd648f8e827e4ef053c/Lib/configparser.py#L597-L599
     return RawConfigParser.BOOLEAN_STATES[value]
 
 

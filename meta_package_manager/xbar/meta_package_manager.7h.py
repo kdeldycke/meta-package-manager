@@ -54,7 +54,7 @@ def getenv_bool(var, default=False):
     if value is None:
         return default
     # See: https://github.com/python/cpython/blob/89192c46da7b984811ff3bd648f8e827e4ef053c/Lib/configparser.py#L597-L599
-    return RawConfigParser.BOOLEAN_STATES.get[value]
+    return RawConfigParser.BOOLEAN_STATES[value]
 
 
 SUBMENU_LAYOUT = getenv_bool("VAR_SUBMENU_LAYOUT", False)

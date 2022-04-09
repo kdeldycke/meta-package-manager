@@ -32,7 +32,7 @@ class Pacman(PackageManager):
     pre_args = ("--noconfirm",)
 
     version_regex = r".*Pacman\s+v(?P<version>\S+)"
-    """
+    r"""
     .. code-block:: shell-session
         ► pacman --version
 

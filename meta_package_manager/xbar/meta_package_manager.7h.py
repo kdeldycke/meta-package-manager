@@ -235,7 +235,7 @@ def print_menu():
             # https://github.com/matryer/xbar/issues/831
             # https://github.com/swiftbar/SwiftBar/issues/308
             # Fallback to the only version that is working on SwiftBar.
-            f'param5=\\"meta-package-manager>={min_version_str}\\"'
+            f'param5=\\"meta-package-manager>={min_version_str}\\"',
             FONTS["error"],
             "refresh=true",
             "terminal=true",

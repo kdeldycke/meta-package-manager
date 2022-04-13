@@ -155,7 +155,7 @@ def print_error(message, submenu=""):
             "trim=false",
             "ansi=false",
             "emojize=false",
-            "symbolize=false",
+            "symbolize=false" if is_swift_bar else "",
         )
 
 

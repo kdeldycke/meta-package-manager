@@ -15,8 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-""" Utilities to manage extra labels to use for GitHub issues and PRs.
-"""
+"""Utilities to manage extra labels to use for GitHub issues and PRs."""
 
 from boltons.iterutils import flatten
 from click_extra.platform import ALL_OS_LABELS

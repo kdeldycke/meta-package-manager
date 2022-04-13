@@ -83,14 +83,17 @@ class PackageManager:
     def id(cls):
         """Return package manager's ID. Defaults based on class name.
 
-        This ID must be unique among all package manager definitions and
-        lower-case as they're used as feature flags for the :command:`mpm` CLI.
+        This ID must be unique among all package manager definitions and lower-case as
+        they're used as feature flags for the :command:`mpm` CLI.
         """
         return cls.__name__.lower().replace("_", "-")
 
     @classproperty
     def name(cls):
-        """Return package manager's common name. Defaults based on class name."""
+        """Return package manager's common name.
+
+        Defaults based on class name.
+        """
         return cls.__name__
 
     platforms = frozenset()
@@ -175,8 +178,8 @@ class PackageManager:
     def virtual(cls):
         """Should we expose the package manager to the user?
 
-        Virtual package manager are just skeleton classes used to factorize
-        code among managers of the same family.
+        Virtual package manager are just skeleton classes used to factorize code among
+        managers of the same family.
         """
         return cls.__name__ == "PackageManager" or not cls.cli_names
 
@@ -305,7 +308,8 @@ class PackageManager:
     def cleanup_cli(cls, *args):
         """Flatten recusive iterables, remove `None`s, and cast to string each element.
 
-        Helps serialize Path and Version objects."""
+        Helps serialize Path and Version objects.
+        """
         return tuple(map(str, filter(None.__ne__, flatten(args))))
 
     def run(self, *args, extra_env=None):
@@ -376,7 +380,8 @@ class PackageManager:
         override_pre_args=False,
         override_post_args=False,
     ):
-        """Build the package manager CLI by combining the custom ``*args`` with the PM's global parameters.
+        """Build the package manager CLI by combining the custom ``*args`` with the PM's
+        global parameters.
 
         Returns a tuple of strings.
 
@@ -443,7 +448,8 @@ class PackageManager:
         override_post_args=False,
         force_exec=False,
     ):
-        """Build and run the package manager CLI by combining the custom ``*args`` with the PM's global parameters.
+        """Build and run the package manager CLI by combining the custom ``*args`` with
+        the PM's global parameters.
 
         After the CLI is built with the ``build_cli`` method, it is executed with the ``run`` method.
 
@@ -492,8 +498,8 @@ class PackageManager:
     def installed(self):
         """List packages currently installed on the system.
 
-        Returns a dict indexed by package IDs. Each item is a dict with
-        package ID, name and version.
+        Returns a dict indexed by package IDs. Each item is a dict with package ID, name
+        and version.
         """
         raise NotImplementedError
 
@@ -501,18 +507,16 @@ class PackageManager:
     def outdated(self):
         """List currently installed packages having a new version available.
 
-        Returns a dict indexed by package IDs. Each item is a dict with
-        package ID, name, current installed version and latest upgradeable
-        version.
+        Returns a dict indexed by package IDs. Each item is a dict with package ID,
+        name, current installed version and latest upgradeable version.
         """
         raise NotImplementedError
 
     def search(self, query, extended, exact):
         """Search packages whose ID contain exact or partial query.
 
-        Returns a dict indexed by package IDs. Each item is a dict with
-        package ID, name, version and a boolean indicating if the match is
-        exact or partial.
+        Returns a dict indexed by package IDs. Each item is a dict with package ID,
+        name, version and a boolean indicating if the match is exact or partial.
         """
         raise NotImplementedError
 
@@ -534,15 +538,16 @@ class PackageManager:
     def upgrade_all_cli(self):
         """Return a shell-compatible full-CLI to upgrade all packages.
 
-        Piggy-back on upgrade_cli() by default, which we'll call without a package_id parameter.
+        Piggy-back on upgrade_cli() by default, which we'll call without a package_id
+        parameter.
         """
         return self.upgrade_cli()
 
     def upgrade_all(self):
         """Perform a full upgrade of all outdated packages to latest versions.
 
-        If the manager doesn't implements a full upgrade one-liner, then
-        fall-back to calling single-package upgrade one by one.
+        If the manager doesn't implements a full upgrade one-liner, then fall-back to
+        calling single-package upgrade one by one.
         """
         try:
             return self.run(self.upgrade_all_cli(), extra_env=self.extra_env)

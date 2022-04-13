@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-""" Helpers and utilities to parse and compare version numbers. """
+"""Helpers and utilities to parse and compare version numbers."""
 
 import operator
 import re
@@ -46,8 +46,9 @@ class Token:
         """Convert a string or an integer to a `(string, integer)` couple.
 
         Returns together the original string and its integer representation if
-        convertion is successful and lossless. Else returns the original string
-        and `None`."""
+        convertion is successful and lossless. Else returns the original string and
+        `None`.
+        """
         try:
             integer = int(string)
         except ValueError:
@@ -66,9 +67,7 @@ class Token:
         return string, integer
 
     def __init__(self, value):
-        """Instantiates a Token from alphanumeric strings or non-negative
-        integers.
-        """
+        """Instantiates a Token from alphanumeric strings or non-negative integers."""
         # Check provided value.
         if isinstance(value, str):
             if not value.isalnum():
@@ -145,14 +144,13 @@ class TokenizedString:
     tokens = ()
 
     def __hash__(self):
-        """A `TokenizedString` is made unique by its original string and tuple
-        of parsed tokens."""
+        """A `TokenizedString` is made unique by its original string and tuple of parsed
+        tokens."""
         return hash((self.string, self.separator, self.tokens))
 
     def __new__(cls, value, *args, **kwargs):
         """Return same object if a TokenizedString parameter is used at
-        instanciation.
-        """
+        instanciation."""
         if isinstance(value, TokenizedString):
             return value
         return super().__new__(cls)
@@ -181,8 +179,7 @@ class TokenizedString:
 
     @classmethod
     def tokenize(cls, string):
-        """Tokenize a string: ignore case and split at each non-alphanumeric
-        characters.
+        """Tokenize a string: ignore case and split at each non-alphanumeric characters.
 
         Returns a tuple of Token instances. Which allows for comparison between
         strings and integers. That way we get natural, user-friendly sorting of
@@ -204,9 +201,7 @@ class TokenizedString:
     """ TokenizedString can be compared as tuples. """
 
     def __iter__(self):
-        """`TokenizedString` essentially are a wrapper around a tuple of
-        `Token`.
-        """
+        """`TokenizedString` essentially are a wrapper around a tuple of `Token`."""
         return iter(self.tokens)
 
     def __eq__(self, other):

@@ -216,8 +216,7 @@ class Gem(PackageManager):
         )
 
     def upgrade_cli(self, package_id=None):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
             ► gem update --user-install --quiet markdown
 
@@ -240,20 +239,19 @@ class Gem(PackageManager):
         )
 
     def cleanup(self):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► gem cleanup --quiet
-            Cleaning up installed gems...
-            Attempting to uninstall test-unit-3.2.9
-            Unable to uninstall test-unit-3.2.9:
-                Gem::FilePermissionError: You don't have write permissions \
-                for the /Library/Ruby/Gems/2.6.0 directory.
-            Attempting to uninstall did_you_mean-1.3.0
-            Unable to uninstall did_you_mean-1.3.0:
-                Gem::FilePermissionError: You don't have write permissions \
-                for the /Library/Ruby/Gems/2.6.0 directory.
-            Clean up complete
+        ► gem cleanup --quiet
+        Cleaning up installed gems...
+        Attempting to uninstall test-unit-3.2.9
+        Unable to uninstall test-unit-3.2.9:
+            Gem::FilePermissionError: You don't have write permissions \
+            for the /Library/Ruby/Gems/2.6.0 directory.
+        Attempting to uninstall did_you_mean-1.3.0
+        Unable to uninstall did_you_mean-1.3.0:
+            Gem::FilePermissionError: You don't have write permissions \
+            for the /Library/Ruby/Gems/2.6.0 directory.
+        Clean up complete
         """
         super().cleanup()
         self.run_cli("cleanup")

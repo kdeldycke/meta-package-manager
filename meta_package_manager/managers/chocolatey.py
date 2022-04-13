@@ -136,7 +136,6 @@ class Choco(PackageManager):
 
             ► choco search virtualbox --exact --limit-output --no-progress --no-color
             virtualbox|6.1.0
-
         """
         matches = {}
 
@@ -171,8 +170,7 @@ class Choco(PackageManager):
         return self.run_cli("install", package_id, "--yes", "--limit-output")
 
     def upgrade_cli(self, package_id="all"):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
             ► choco upgrade ccleaner --yes --limit-output --no-progress --no-color
 

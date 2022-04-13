@@ -11,8 +11,7 @@
 # <xbar.var>boolean(VAR_TABLE_RENDERING=false): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
 # <swiftbar.environment>['VAR_SUBMENU_LAYOUT': false, 'VAR_TABLE_RENDERING': false]</swiftbar.environment>
 
-"""
-Xbar and SwiftBar plugin for Meta Package Manager (i.e. the :command:`mpm` CLI).
+"""Xbar and SwiftBar plugin for Meta Package Manager (i.e. the :command:`mpm` CLI).
 
 Default update cycle is set to 7 hours so we have a chance to get user's
 attention once a day. Higher frequency might ruin the system as all checks are
@@ -40,8 +39,9 @@ from configparser import RawConfigParser
 def getenv_str(var, default=None):
     """Utility to get environment variables.
 
-    Note that all environment variables are strings.
-    Always returns a lowered-case string."""
+    Note that all environment variables are strings. Always returns a lowered-case
+    string.
+    """
     value = os.environ.get(var, None)
     if value is None:
         return default
@@ -107,11 +107,11 @@ dark_mode = (
 def fix_environment():
     """Tweak environment variable to find non-default system-wide binaries.
 
-    macOS does not put ``/usr/local/bin`` or ``/opt/local/bin`` in the ``PATH``
-    for GUI apps. For some package managers this is a problem. Additioanlly
-    Homebrew and Macports are using different pathes. So, to make sure we can
-    always get to the necessary binaries, we overload the path. Current
-    preference order would equate to Homebrew, Macports, then system.
+    macOS does not put ``/usr/local/bin`` or ``/opt/local/bin`` in the ``PATH`` for GUI
+    apps. For some package managers this is a problem. Additioanlly Homebrew and
+    Macports are using different pathes. So, to make sure we can always get to the
+    necessary binaries, we overload the path. Current preference order would equate to
+    Homebrew, Macports, then system.
     """
     os.environ["PATH"] = ":".join(
         (
@@ -128,7 +128,8 @@ def pp(*args):
     """Print the item line.
 
     First argument is the label, separated with a pipe to all other non-empty
-    parameters."""
+    parameters.
+    """
     line = args[0]
     params = " ".join(p for p in args[1:] if p)
     if params:
@@ -161,6 +162,7 @@ def print_error(message, submenu=""):
 
 def print_cli_item(*args):
     """Print two CLI entries:
+
     * one that is silent
     * a second one that is the exact copy of the above but forces the execution
       by the way of a visible terminal

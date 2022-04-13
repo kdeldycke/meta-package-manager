@@ -225,26 +225,21 @@ class APT(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► apt update bat
+        ► apt update bat
         """
         return self.build_cli("update", package_id)
 
     def sync(self):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► apt update --quiet
-            Hit:1 http://archive.ubuntu.com xenial InRelease
-            Get:2 http://archive.ubuntu.com xenial-updates InRelease [102 kB]
-            Get:3 http://archive.ubuntu.com xenial-security InRelease [102 kB]
-            Get:4 http://archive.ubuntu.com xenial/main Translation-en [568 kB]
-            Fetched 6,868 kB in 2s (2,680 kB/s)
-            Reading package lists...
-            Building dependency tree...
-            Reading state information...
+        ► apt update --quiet Hit:1 http://archive.ubuntu.com xenial InRelease Get:2
+        http://archive.ubuntu.com xenial-updates InRelease [102 kB] Get:3
+        http://archive.ubuntu.com xenial-security InRelease [102 kB] Get:4
+        http://archive.ubuntu.com xenial/main Translation-en [568 kB] Fetched 6,868 kB
+        in 2s (2,680 kB/s) Reading package lists... Building dependency tree... Reading
+        state information...
         """
         super().sync()
         self.run_cli("update", "--quiet")

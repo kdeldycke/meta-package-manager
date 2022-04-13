@@ -169,27 +169,24 @@ class Pacman(PackageManager):
         return self.build_cli("--sync", package_id)
 
     def upgrade_all_cli(self):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► pacman --noconfirm --sync --refresh --sysupgrade
+        ► pacman --noconfirm --sync --refresh --sysupgrade
         """
         return self.build_cli("--sync", "--refresh", "--sysupgrade")
 
     def sync(self):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► pacman --noconfirm --sync --refresh
+        ► pacman --noconfirm --sync --refresh
         """
         super().sync()
         self.run_cli("--sync", "--refresh")
 
     def cleanup(self):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► pacman --noconfirm --sync --clean --clean
+        ► pacman --noconfirm --sync --clean --clean
         """
         super().cleanup()
         self.run_cli("--sync", "--clean", "--clean")

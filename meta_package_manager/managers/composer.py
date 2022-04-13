@@ -210,16 +210,14 @@ class Composer(PackageManager):
         .. code-block:: shell-session
 
             ► composer global install illuminate/contracts
-
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► composer global update illuminate/contracts
+        ► composer global update illuminate/contracts
         """
         return self.build_cli("update", package_id)
 

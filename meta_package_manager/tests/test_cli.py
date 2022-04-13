@@ -48,8 +48,7 @@ TEST_CONF_FILE = """
 
 class TestBaseCLI:
 
-    """This collection is testing basic CLI behavior shared by all
-    subcommands.
+    """This collection is testing basic CLI behavior shared by all subcommands.
 
     Also regroups tests not involving subcommands.
 
@@ -96,8 +95,8 @@ class CLISubCommandTests:
 
     """All these tests runs on each subcommand.
 
-    This class doesn't starts with `Test` as it is meant to be used as a
-    template, inherited by sub-command specific test cases.
+    This class doesn't starts with `Test` as it is meant to be used as a template,
+    inherited by sub-command specific test cases.
     """
 
     @pytest.mark.parametrize("opt_stats", ("--stats", "--no-stats", None))

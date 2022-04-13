@@ -87,11 +87,9 @@ class Yarn(PackageManager):
 
     @cached_property
     def global_dir(self):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► yarn global dir
-            (...)
+        ► yarn global dir (...)
         """
         return self.run_cli("global", "dir", force_exec=True).rstrip()
 
@@ -246,14 +244,12 @@ class Yarn(PackageManager):
         .. code-block:: shell-session
 
             ► yarn install python
-
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
             ► yarn global add python
 

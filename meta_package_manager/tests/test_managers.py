@@ -158,7 +158,10 @@ def test_version_cli_options(manager):
 
 @all_managers
 def test_version_regex(manager):
-    """Version regex is required. Check it compiles and match has a version group."""
+    """Version regex is required.
+
+    Check it compiles and match has a version group.
+    """
     assert isinstance(manager.version_regex, str)
     regex = re.compile(manager.version_regex)
     assert "version" in regex.groupindex
@@ -192,7 +195,8 @@ def test_available(manager):
 
 @all_managers
 def test_cli_type(manager):
-    """Check that all methods returning a CLI is either not implemented or returns a tuple."""
+    """Check that all methods returning a CLI is either not implemented or returns a
+    tuple."""
     try:
         result = manager.upgrade_cli("dummy_package_id")
     except Exception as ex:
@@ -286,8 +290,8 @@ props_ref = tuple(
 # Check the code of each file registered in the pool.
 @pytest.mark.parametrize("manager_file", pool.manager_files, ids=attrgetter("name"))
 def test_content_order(manager_file):
-    """Lint each package manager definition file to check its code structure is the same as the canonical
-    PackageManager base class."""
+    """Lint each package manager definition file to check its code structure is the same
+    as the canonical PackageManager base class."""
 
     tree = ast.parse(manager_file.read_bytes())
 

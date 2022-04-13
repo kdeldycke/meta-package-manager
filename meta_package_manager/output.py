@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-""" Helpers and utilities to render and print content. """
+"""Helpers and utilities to render and print content."""
 
 import json
 from operator import itemgetter

@@ -96,7 +96,11 @@ is_swift_bar = getenv_bool("SWIFTBAR")
 """SwiftBar is kind enough to warn us of its presence."""
 
 
-dark_mode = getenv_str("OS_APPEARANCE", "light") == 'dark' if is_swift_bar else getenv_bool("XBARDarkMode")
+dark_mode = (
+    getenv_str("OS_APPEARANCE", "light") == "dark"
+    if is_swift_bar
+    else getenv_bool("XBARDarkMode")
+)
 """Detect dark mode."""
 
 
@@ -145,7 +149,14 @@ def print_error(message, submenu=""):
     """
     # Cast to string as we might directly pass exceptions for rendering.
     for line in str(message).strip().splitlines():
-        pp(f"{submenu}{line}", FONTS["error"], "trim=false", "ansi=false", "emojize=false", "symbolize=false")
+        pp(
+            f"{submenu}{line}",
+            FONTS["error"],
+            "trim=false",
+            "ansi=false",
+            "emojize=false",
+            "symbolize=false",
+        )
 
 
 def print_cli_item(*args):

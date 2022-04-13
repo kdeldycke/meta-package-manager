@@ -301,6 +301,13 @@ class PackageManager:
         """
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
+    @classmethod
+    def cleanup_cli(cls, *args):
+        """Flatten recusive iterables, remove `None`s, and cast to string each element.
+
+        Helps serialize Path and Version objects."""
+        return tuple(map(str, filter(None.__ne__, flatten(args))))
+
     def run(self, *args, extra_env=None):
         """Run a shell command, return the output and accumulate error messages.
 
@@ -319,7 +326,7 @@ class PackageManager:
             Move ``--dry-run`` option and this method to click-extra?
         """
         # Casting to string helps serialize Path and Version objects.
-        args = tuple(map(str, filter(None.__ne__, flatten(args))))
+        args = self.cleanup_cli(args)
         cli_msg = format_cli(args, extra_env)
 
         code = 0
@@ -421,7 +428,7 @@ class PackageManager:
         elif auto_post_args:
             params.extend(self.post_args)
 
-        return tuple(params)
+        return self.cleanup_cli(params)
 
     def run_cli(
         self,
@@ -449,16 +456,14 @@ class PackageManager:
         ``force_exec`` parameter ignores the ``--dry-run`` and ``--stop-on-error`` user options to force
         the execution and completion of the command.
         """
-        cli = list(
-            self.build_cli(
-                *args,
-                auto_pre_cmds=auto_pre_cmds,
-                auto_pre_args=auto_pre_args,
-                auto_post_args=auto_post_args,
-                override_pre_cmds=override_pre_cmds,
-                override_pre_args=override_pre_args,
-                override_post_args=override_post_args,
-            )
+        cli = self.build_cli(
+            *args,
+            auto_pre_cmds=auto_pre_cmds,
+            auto_pre_args=auto_pre_args,
+            auto_post_args=auto_post_args,
+            override_pre_cmds=override_pre_cmds,
+            override_pre_args=override_pre_args,
+            override_post_args=override_post_args,
         )
 
         # Prepare the full list of CLI arguments.

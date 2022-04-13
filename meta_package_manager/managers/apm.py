@@ -461,10 +461,9 @@ class APM(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► apm update --no-confirm image-view
+        ► apm update --no-confirm image-view
         """
         return self.build_cli(
             "update",

@@ -169,7 +169,6 @@ class MAS(PackageManager):
         .. code-block:: shell-session
 
             ► mas install 945397020
-
         """
         super().install(package_id)
         return self.run_cli("install", package_id)

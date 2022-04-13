@@ -29,8 +29,7 @@ class Homebrew(PackageManager):
 
     """Virtual package manager shared by brew and cask CLI defined below.
 
-    Homebrew is the umbrella project providing both brew and brew cask
-    commands.
+    Homebrew is the umbrella project providing both brew and brew cask commands.
     """
 
     platforms = frozenset({LINUX, MACOS})
@@ -347,7 +346,6 @@ class Homebrew(PackageManager):
             ==> Installing Cask pngyu
             ==> Moving App 'Pngyu.app' to '/Applications/Pngyu.app'
             🍺  pngyu was successfully installed!
-
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
@@ -477,7 +475,6 @@ class Homebrew(PackageManager):
             Uninstalling /usr/local/Cellar/texi2html/5.0... (279 files, 6.2MB)
             Uninstalling /usr/local/Cellar/lua@5.1/5.1.5_8... (22 files, 245.6KB)
             Uninstalling /usr/local/Cellar/nasm/2.15.05... (29 files, 2.9MB)
-
         """
         super().cleanup()
         self.run_cli("autoremove", auto_post_args=False)

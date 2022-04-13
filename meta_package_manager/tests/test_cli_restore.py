@@ -23,8 +23,8 @@ from .test_cli import CLISubCommandTests
 
 @pytest.fixture
 def subcmd(create_config):
-    """Seed common subcommand tests with a dummy file and content to allow the
-    CLI to not fail on required file input."""
+    """Seed common subcommand tests with a dummy file and content to allow the CLI to
+    not fail on required file input."""
     toml_path = create_config(
         "dummy.toml",
         """

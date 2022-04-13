@@ -58,7 +58,7 @@ class Pip(PackageManager):
 
     @property
     def installed(self):
-        """ Fetch installed packages.
+        """Fetch installed packages.
 
         .. code-block:: shell-session
 
@@ -111,7 +111,7 @@ class Pip(PackageManager):
 
     @property
     def outdated(self):
-        """ Fetch outdated packages.
+        """Fetch outdated packages.
 
         .. code-block:: shell-session
 
@@ -272,7 +272,6 @@ class Pip(PackageManager):
             Requirement already satisfied: six>=1.5 in python3.9/site-packages (1.16.0)
             Installing collected packages: python-dateutil, arrow
             Successfully installed arrow-1.1.1 python-dateutil-2.8.2
-
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
@@ -300,8 +299,8 @@ class Pip(PackageManager):
         )
 
     def upgrade_all_cli(self):
-        """Pip lacks support of a proper full upgrade command. Raising an
-        error let the parent class upgrade packages one by one.
+        """Pip lacks support of a proper full upgrade command. Raising an error let the
+        parent class upgrade packages one by one.
 
         See: https://github.com/pypa/pip/issues/59
         """

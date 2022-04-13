@@ -304,8 +304,7 @@ class NPM(PackageManager):
         )
 
     def upgrade_cli(self, package_id=None, version=None):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
             ► npm --global --progress=false --no-update-notifier install raven
 

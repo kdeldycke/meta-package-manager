@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-""" Registration, indexing and caching of package manager supported by mpm. """
+"""Registration, indexing and caching of package manager supported by mpm."""
 
 import inspect
 import sys
@@ -108,8 +108,8 @@ class ManagerPool:
     def all_manager_ids(self):
         """All recognized manager IDs.
 
-        Is a list of sorted items to provide consistency across all UI, and reproducability in
-        the order package managers are evaluated.
+        Is a list of sorted items to provide consistency across all UI, and
+        reproducability in the order package managers are evaluated.
         """
         return tuple(sorted(self.register))
 
@@ -127,8 +127,8 @@ class ManagerPool:
     def unsupported_manager_ids(self):
         """All manager IDs unsupported on the current platform.
 
-        Order is not important here as this list will be used to discard managers from selection
-        sets.
+        Order is not important here as this list will be used to discard managers from
+        selection sets.
         """
         return tuple(
             mid for mid in self.all_manager_ids if mid not in self.default_manager_ids
@@ -143,8 +143,8 @@ class ManagerPool:
         # implements=None,
         **extra_options,
     ):
-        """Utility method to extract a subset of the manager pool based on selection list
-        (`keep` parameter) and exclusion list (`drop` parameter) criterion.
+        """Utility method to extract a subset of the manager pool based on selection
+        list (`keep` parameter) and exclusion list (`drop` parameter) criterion.
 
         By default, all managers supported on the current platform are selected. Unless
         `drop_unsupported` is set to False, in which case all managers implemented by mpm

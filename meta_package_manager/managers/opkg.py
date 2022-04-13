@@ -176,10 +176,9 @@ class OPKG(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► opkg upgrade enigma2-hotplug
+        ► opkg upgrade enigma2-hotplug
         """
         return self.build_cli(
             "upgrade",
@@ -187,10 +186,9 @@ class OPKG(PackageManager):
         )
 
     def sync(self):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► opkg update
+        ► opkg update
         """
         super().sync()
         self.run_cli("update")

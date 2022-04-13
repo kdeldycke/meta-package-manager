@@ -742,8 +742,7 @@ def backup(ctx, toml_output):
 @argument("toml_files", type=File("r"), required=True, nargs=-1)
 @pass_context
 def restore(ctx, toml_files):
-    """Read TOML files then install or upgrade each package referenced in
-    them.
+    """Read TOML files then install or upgrade each package referenced in them.
 
     Version specified in the TOML file is ignored in the current implementation.
     """

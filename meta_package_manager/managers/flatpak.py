@@ -193,16 +193,14 @@ class Flatpak(PackageManager):
         .. code-block:: shell-session
 
             ► flatpak install org.gnome.Dictionary
-
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► flatpak update --noninteractive org.gnome.Dictionary
+        ► flatpak update --noninteractive org.gnome.Dictionary
         """
         return self.build_cli("update", "--noninteractive", package_id)
 

@@ -83,8 +83,9 @@ def test_changelog():
 
 @unless_linux
 def test_labeller_rules():
-    """This covers the dynamic production of labels by GitHub action. As such it
-    only targets Linux. See: https://github.com/kdeldycke/meta-package-manager/blob
+    """This covers the dynamic production of labels by GitHub action. As such it only
+    targets Linux. See: https://github.com/kdeldycke/meta-package-manager/blob.
+
     /bd666e291c783fe480015c9aae3beab19b12774c/.github/workflows/labels.yaml#L14
     """
 

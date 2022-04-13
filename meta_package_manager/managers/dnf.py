@@ -48,15 +48,12 @@ class DNF(PackageManager):
 
     @property
     def installed(self):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► dnf --color=never list --installed
-            Installed Packages
-            acl.x86_64               2.2.53-1.el8                          @anaconda
-            audit.x86_64             3.0-0.10.20180831git0047a6c.el8       @anaconda
-            audit-libs.x86_64        3.0-0.10.20180831git0047a6c.el8       @anaconda
-            (...)
+        ► dnf --color=never list --installed Installed Packages acl.x86_64
+        2.2.53-1.el8                          @anaconda audit.x86_64
+        3.0-0.10.20180831git0047a6c.el8       @anaconda audit-libs.x86_64
+        3.0-0.10.20180831git0047a6c.el8       @anaconda (...)
         """
         installed = {}
 
@@ -76,16 +73,12 @@ class DNF(PackageManager):
 
     @property
     def outdated(self):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► dnf --color=never list --upgrades
-            Last metadata expiration check: 0:22:12 ago on Sun 03 Apr 2022.
-            Available Upgrades
-            acl.x86_64               2.2.53-1.el8                          updates
-            audit.x86_64             3.0-0.10.20180831git0047a6c.el8       updates
-            audit-libs.x86_64        3.0-0.10.20180831git0047a6c.el8       updates
-            (...)
+        ► dnf --color=never list --upgrades Last metadata expiration check: 0:22:12 ago
+        on Sun 03 Apr 2022. Available Upgrades acl.x86_64               2.2.53-1.el8
+        updates audit.x86_64             3.0-0.10.20180831git0047a6c.el8       updates
+        audit-libs.x86_64        3.0-0.10.20180831git0047a6c.el8       updates (...)
         """
         outdated = {}
 
@@ -104,19 +97,18 @@ class DNF(PackageManager):
         return outdated
 
     def search(self, query, extended, exact):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► dnf --color=never search usd
-            Last metadata expiration check: 0:06:37 ago on Sun 03 Apr 2022.
-            =================== Name Exactly Matched: usd =====================
-            usd.aarch64 : 3D VFX pipeline interchange file format
-            =================== Name & Summary Matched: usd ===================
-            python3-usd.aarch64 : Development files for USD
-            usd-devel.aarch64 : Development files for USD
-            ======================= Name Matched: usd =========================
-            lvm2-dbusd.noarch : LVM2 D-Bus daemon
-            usd-libs.aarch64 : Universal Scene Description library
+        ► dnf --color=never search usd
+        Last metadata expiration check: 0:06:37 ago on Sun 03 Apr 2022.
+        =================== Name Exactly Matched: usd =====================
+        usd.aarch64 : 3D VFX pipeline interchange file format
+        =================== Name & Summary Matched: usd ===================
+        python3-usd.aarch64 : Development files for USD
+        usd-devel.aarch64 : Development files for USD
+        ======================= Name Matched: usd =========================
+        lvm2-dbusd.noarch : LVM2 D-Bus daemon
+        usd-libs.aarch64 : Universal Scene Description library
         """
         matches = {}
 
@@ -155,10 +147,9 @@ class DNF(PackageManager):
         return matches
 
     def install(self, package_id):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► sudo dnf --color=never --assumeyes install pip
+        ► sudo dnf --color=never --assumeyes install pip
         """
         super().install(package_id)
         return self.run_cli(
@@ -166,8 +157,7 @@ class DNF(PackageManager):
         )
 
     def upgrade_cli(self, package_id=None):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
             ► sudo dnf --color=never --assumeyes upgrade pip
 
@@ -178,20 +168,17 @@ class DNF(PackageManager):
         return self.build_cli("upgrade", package_id)
 
     def sync(self):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► dnf --color=never check-update
+        ► dnf --color=never check-update
         """
         super().sync()
         self.run_cli("check-update")
 
     def cleanup(self):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
-            ► sudo dnf --color=never --assumeyes autoremove
-            ► dnf --color=never clean all
+        ► sudo dnf --color=never --assumeyes autoremove ► dnf --color=never clean all
         """
         super().cleanup()
         self.run_cli("--assumeyes", "autoremove", override_pre_cmds=("sudo",))

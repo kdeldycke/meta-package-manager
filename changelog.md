@@ -12,6 +12,7 @@ This version is not released yet and is under active development.
 - \[xbar\] Improve alignment of labels in monospaced font rendering.
 - \[xbar\] Tweak icons.
 - \[mpm\] Add `--xbar-plugin-path` option.
+- \[mpm\] Fix file not found error on non-Windows platform during version checking.
 
 ## {gh}`4.12.1 (2022-04-05) <compare/v4.12.0...v4.12.1>`
 

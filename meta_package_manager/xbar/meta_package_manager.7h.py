@@ -231,8 +231,12 @@ def print_menu():
             "param2=pip",
             "param3=install",
             "param4=--upgrade",
-            f'param5=\\"meta-package-manager>={min_version_str}\\"',  # fmt: skip
-            FONTS["error"],  # fmt: skip
+            # XXX This seems broken beyond repair. No amount of workaround works. See:
+            # https://github.com/matryer/xbar/issues/831
+            # https://github.com/swiftbar/SwiftBar/issues/308
+            # Fallback to the only version that is working on SwiftBar.
+            f'param5=\\"meta-package-manager>={min_version_str}\\"'
+            FONTS["error"],
             "refresh=true",
             "terminal=true",
         )

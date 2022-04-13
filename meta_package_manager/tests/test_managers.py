@@ -16,7 +16,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import ast
-import inspect
 import re
 from operator import attrgetter
 from pathlib import Path, PurePath

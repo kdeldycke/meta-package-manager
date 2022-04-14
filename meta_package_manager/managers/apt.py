@@ -131,7 +131,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt search abc --quiet --names-only
+            ► apt search abc --quiet
             Sorting...
             Full Text Search...
             abcde/xenial 2.7.1-1 all
@@ -151,7 +151,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt search "^sed$" --quiet --names-only
+            ► apt search "^sed$" --quiet
             Sorting...
             Full Text Search...
             sed/xenial 2.1.9-3 all
@@ -179,7 +179,7 @@ class APT(PackageManager):
         """
         matches = {}
 
-        search_arg = "--names-only"
+        search_arg = ""
         if exact:
             # Realy on apt regexp support to speed-up exact match.
             query = f"^{query}$"

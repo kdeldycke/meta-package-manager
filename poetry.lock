@@ -118,7 +118,7 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "click-extra"
-version = "2.0.1"
+version = "2.0.2"
 description = "🌈 Extra colorization and configuration loading for Click."
 category = "main"
 optional = false

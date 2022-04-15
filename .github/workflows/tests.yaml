@@ -10,7 +10,6 @@ name: Tests
 jobs:
 
   tests:
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         # See what each os came pre-installed with at:
@@ -30,13 +29,22 @@ jobs:
           # - macos-10.15
           - windows-2022
           - windows-2019
+        container:
+          - "ubuntu:bionic"
+          - "fedora:31"
+          - "opensuse/leap:42.3"
+          - "centos8"
         python-version:
           - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"
-          # tomllib hasn't been integrated yet in Python 3.11.0-alpha.6
-          #- "3.11.0-alpha - 3.11.0"
+          # tomllib has been added in Python 3.11.0-alpha.7
+          # - "3.11.0-alpha.7 - 3.11.0"
+
+    runs-on: ${{ matrix.os }}
+    container: ${{ startsWith(matrix.os, 'ubuntu-') && matrix.container }}
+
     steps:
       - uses: actions/checkout@v3.0.1
 

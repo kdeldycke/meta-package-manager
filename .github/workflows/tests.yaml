@@ -33,7 +33,7 @@ jobs:
           #- "ubuntu:bionic"
           #- "fedora:31"
           #- "opensuse/leap:42.3"
-          - "centos8"
+          - "centos7"
           -
           - ""
         python-version:

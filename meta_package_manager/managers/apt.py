@@ -181,7 +181,7 @@ class APT(PackageManager):
 
         search_arg = "--names-only"
         if exact:
-            # Realy on apt regexp support to speed-up exact match.
+            # Rely on apt regexp support to speed-up exact match.
             query = f"^{query}$"
         # Extended search are always non-exact.
         elif extended:

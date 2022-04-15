@@ -8,6 +8,7 @@ This version is not released yet and is under active development.
 
 - \[pacman\] Add support for `pacman`. Closes {issue}`416`.
 - \[apt-mint\] Fix search. Closes {issue}`572` and {pr}`573`.
+- \[apt-mint\] Fix `--apt-mint` shortcut option.
 - \[xbar\] Add support for SwiftBar.
 - \[xbar\] Add new `TABLE_RENDERING` option to plugin.
 - \[xbar\] Improve alignment of labels in monospaced font rendering.

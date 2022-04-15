@@ -258,7 +258,7 @@ class PackageManager:
             )
             if parts:
                 version_string = parts.groupdict().get("version")
-                logger.debug(f"Extracted version: {version_string}")
+                logger.debug(f"Extracted version: {version_string!r}")
                 return parse_version(version_string)
 
     @cached_property

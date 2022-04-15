@@ -286,7 +286,7 @@ class PackageManager:
             if self.version < parse_version(self.requirement):
                 logger.debug(
                     f"{self.id} {self.version} is older than "
-                    "{self.requirement} version requirement."
+                    f"{self.requirement} version requirement."
                 )
                 return False
         return True

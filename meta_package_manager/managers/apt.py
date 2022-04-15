@@ -275,3 +275,50 @@ class APT_Mint(APT):
         ► apt version apt
         1.6.11
     """
+
+    def search(self, query, extended, exact):
+        """
+        .. code-block:: shell-session
+
+            ► /usr/local/bin/apt search --quiet sed
+            v   librust-slog-2.5+erased-serde-dev  -
+            p   python3-blessed                    - Practical wrapper
+            i   sed                                - GNU stream editor
+            p   sed:i386                           - GNU stream editor
+
+        .. code-block:: shell-session
+
+            ► /usr/local/bin/apt search --quiet ^sed$
+            i   sed              - GNU stream editor
+            p   sed:i386         - GNU stream editor
+        """
+        matches = {}
+
+        if exact:
+            # Rely on apt regexp support to speed-up exact match.
+            query = f"^{query}$"
+
+        output = self.run_cli("search", "--quiet", query)
+
+        regexp = re.compile(
+            r"""
+            \S                       # One non-space character.
+            \s+                      # One space or more.
+            (?P<package_id>[^\s:]+)  # Any non-space until whitespace or semi-colon.
+            (?:\:\S+)?               # Optional arch suffix after package and semi-colon.
+            \s+                      # One space or more.
+            -                        # A dash.
+            \ ?                      # An optional space.
+            (?P<description>\S+)?    # Optional non-space string.
+            """,
+            re.VERBOSE,
+        )
+
+        for package_id, description in regexp.findall(output):
+            matches[package_id] = {
+                "id": package_id,
+                "name": package_id,
+                "latest_version": None,
+            }
+
+        return matches

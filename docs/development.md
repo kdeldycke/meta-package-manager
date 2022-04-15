@@ -50,11 +50,21 @@ $ git checkout main
 Install package in editable mode with all development dependencies:
 
 ```shell-session
-$ pip install poetry
+$ python3 -m pip install poetry
 $ poetry install
 ```
 
 Now you’re ready to hack and abuse git!
+
+## Test `mpm` development version
+
+After the steps above, you are free to play with the bleeding edge version of `mpm`:
+
+```shell-session
+$ poetry run mpm --version
+mpm, version 4.13.0-dev
+(...)
+```
 
 ## Unit-tests
 

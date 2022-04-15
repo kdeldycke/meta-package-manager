@@ -76,7 +76,11 @@ def add_manager_to_selection(ctx, param, selected):
     if selected:
         if ctx.obj is None:
             ctx.obj = {"single_manager_selector": []}
-        ctx.obj["single_manager_selector"].append(param.name)
+        # Parameter's name is transformed into a Python identifier on instanciation.
+        # Reverse the process to get our value.
+        # Example: "--apt-mint" => "apt_mint" => "apt-mint"
+        manager_id = param.name.replace("_", "-")
+        ctx.obj["single_manager_selector"].append(manager_id)
 
 
 def single_manager_selectors():

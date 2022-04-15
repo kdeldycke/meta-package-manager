@@ -223,6 +223,13 @@ class CLISubCommandTests:
         assert result.exit_code == 0
         self.check_manager_selection(result)
 
+    @pytest.mark.parametrize("mid", pool.default_manager_ids)
+    def test_manager_shortcuts(self, invoke, subcmd, mid):
+        """Test each manager selection shortcut."""
+        result = invoke(f"--{mid}", subcmd)
+        assert result.exit_code == 0
+        self.check_manager_selection(result)
+
     @pytest.mark.parametrize(
         "args,expected",
         [

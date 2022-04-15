@@ -10,6 +10,7 @@ name: Tests
 jobs:
 
   tests:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         # See what each os came pre-installed with at:
@@ -43,15 +44,6 @@ jobs:
           - "3.10"
           # tomllib has been added in Python 3.11.0-alpha.7
           # - "3.11.0-alpha.7 - 3.11.0"
-
-        exclude:
-          # Exlude all containers
-          - os: macos-11.0
-            container: "centos8"
-
-    runs-on: ${{ matrix.os }}
-    container: ${{ matrix.container }}
-
     steps:
       - uses: actions/checkout@v3.0.1
 

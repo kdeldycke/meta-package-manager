@@ -75,4 +75,5 @@ class TestInstall(CLISubCommandTests):
 
 destructive()(TestInstall.test_stats)
 destructive()(TestInstall.test_default_all_managers)
+destructive()(TestInstall.test_manager_shortcuts)
 destructive()(TestInstall.test_manager_selection)

@@ -53,4 +53,5 @@ class TestUpgrade(CLISubCommandTests):
 
 destructive()(TestUpgrade.test_stats)
 destructive()(TestUpgrade.test_default_all_managers)
+destructive()(TestUpgrade.test_manager_shortcuts)
 destructive()(TestUpgrade.test_manager_selection)

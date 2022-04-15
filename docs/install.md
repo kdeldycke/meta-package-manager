@@ -1,20 +1,6 @@
 # Installation
 
-## With `pip`
-
-This package is
-[available on PyPi](https://pypi.python.org/pypi/meta-package-manager), so you
-can install the latest stable release and its dependencies with a simple `pip`
-call:
-
-```shell-session
-$ pip install meta-package-manager
-```
-
-See also
-[pip installation instructions](https://pip.pypa.io/en/stable/installing/).
-
-````{admonition} Danger: **Misleading package names**
+````{admonition} Danger: **Misleading package name**
 ---
 class: danger
 ---
@@ -24,10 +10,65 @@ class: danger
     :figwidth: 50px
 ```
 
-[*`mpm`*, the Python module](https://pypi.python.org/pypi/mpm), is not the same
-as **`meta-package-manager`**. Only the later provides the {command}`mpm` CLI
-*per-se*. The former has nothing to do with the current project.
+There is a *`mpm`* Python module on PyPi that has nothing to do with this project. Avoid it!
+
+The **real package is named `meta-package-manager`**. Only the latter provides the {command}`mpm` CLI
+you're looking for.
 ````
+
+## `pip` install
+
+You can install the latest stable release and its dependencies with a simple `pip`
+call:
+
+```shell-session
+$ python -m pip install meta-package-manager
+```
+
+On some system, due to the Python 2.x to 3.x migration, you'll have to call `python3` directly:
+
+```shell-session
+$ python3 -m pip install meta-package-manager
+```
+
+Other variations includes:
+
+```shell-session
+$ pip install meta-package-manager
+```
+
+```shell-session
+$ pip3 install meta-package-manager
+```
+
+If you have difficulties to use `pip`, see
+[`pip`'s own installation instructions](https://pip.pypa.io/en/stable/installing/).
+
+## Run `mpm`
+
+Meta package manager should now be available system-wide:
+
+```shell-session
+$ mpm --version
+mpm, version 4.13.0
+(...)
+```
+
+If not, you can directly execute the module from Python:
+
+```shell-session
+$ python -m meta_package_manager --version
+python -m meta_package_manager, version 4.13.0
+(...)
+```
+
+Or on some systems:
+
+```shell-session
+$ python3 -m meta_package_manager --version
+python -m meta_package_manager, version 4.13.0
+(...)
+```
 
 ## Shell completion
 

@@ -17,6 +17,7 @@
 
 import json
 import re
+import subprocess
 
 import pytest
 from boltons.strutils import strip_ansi
@@ -48,15 +49,26 @@ TEST_CONF_FILE = """
 
 class TestBaseCLI:
 
-    """This collection is testing basic CLI behavior shared by all subcommands.
-
-    Also regroups tests not involving subcommands.
+    """This collection is testing basic CLI behavior without involving any subcommands.
 
     Also includes a bunch of tests performed once on an arbitrary sub-command,
     for situation when the tested behavior is shared by all subcommands. The
     arbitrary sub-command is `managers`, as it is a safe read-only operation
     supposed to work on all platforms, whatever the environment.
     """
+
+    def test_executable_module(self):
+        process = subprocess.run(
+            ("python", "-m", "meta_package_manager", "--version"),
+            capture_output=True,
+            encoding="utf-8"
+        )
+
+        assert process.returncode == 0
+        assert process.stdout.startswith(
+            f"python -m meta_package_manager, version {__version__}\n"
+        )
+        assert not process.stderr
 
     def test_conf_file_overrides_defaults(self, invoke, create_config):
         conf_path = create_config("conf.toml", TEST_CONF_FILE)

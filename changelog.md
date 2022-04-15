@@ -13,6 +13,7 @@ This version is not released yet and is under active development.
 - \[xbar\] Add new `TABLE_RENDERING` option to plugin.
 - \[xbar\] Improve alignment of labels in monospaced font rendering.
 - \[xbar\] Tweak icons.
+- \[mpm\] Allow the `meta_package_manager` module to be directly executed.
 - \[mpm\] Add `--xbar-plugin-path` option.
 - \[mpm\] Fix normalization of CLI arguments.
 - \[mpm\] Fix file not found error on non-Windows platform during version checking.

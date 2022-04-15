@@ -65,9 +65,7 @@ class TestBaseCLI:
         )
 
         assert process.returncode == 0
-        assert process.stdout.startswith(
-            f"python -m meta_package_manager, version {__version__}\n"
-        )
+        assert process.stdout.startswith(f"mpm, version {__version__}\n")
         assert not process.stderr
 
     def test_conf_file_overrides_defaults(self, invoke, create_config):

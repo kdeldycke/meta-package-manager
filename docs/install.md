@@ -58,7 +58,7 @@ If not, you can directly execute the module from Python:
 
 ```shell-session
 $ python -m meta_package_manager --version
-python -m meta_package_manager, version 4.13.0
+mpm, version 4.13.0
 (...)
 ```
 
@@ -66,7 +66,7 @@ Or on some systems:
 
 ```shell-session
 $ python3 -m meta_package_manager --version
-python -m meta_package_manager, version 4.13.0
+mpm, version 4.13.0
 (...)
 ```
 

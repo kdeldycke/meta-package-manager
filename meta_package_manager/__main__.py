@@ -34,6 +34,9 @@ if sys.path[0] in ("", os.getcwd()):
 
 
 if __name__ == "__main__":
+
     from meta_package_manager.cli import mpm
 
-    mpm()
+    # Execute the CLI but force its name to not let Click defaults to:
+    # "python -m meta_package_manager".
+    mpm(prog_name=mpm.name)

@@ -42,7 +42,7 @@ $ pip3 install meta-package-manager
 ```
 
 If you have difficulties to use `pip`, see
-[`pip`'s own installation instructions](https://pip.pypa.io/en/stable/installing/).
+[`pip`'s own installation instructions](https://pip.pypa.io/en/stable/installation/).
 
 ## Run `mpm`
 

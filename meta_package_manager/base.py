@@ -245,7 +245,8 @@ class PackageManager:
                 # In the environment on Windows, extension of available executables are
                 # ignored as they're plenty: .EXE, .CMD, .BAT, ...
                 # See: https://github.com/kdeldycke/meta-package-manager/issues/542
-                # Check for "OSError: [WinError 193] %1 is not a valid Win32 application" error.
+                # Check for "OSError: [WinError 193] %1 is not a valid Win32
+                # application" error.
                 if getattr(ex, "winerror", None) == 193:
                     logger.debug(
                         f"{theme.invoked_command(self.cli_path)} is not a valid Windows application."

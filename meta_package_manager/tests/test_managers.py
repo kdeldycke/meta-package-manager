@@ -282,7 +282,8 @@ def test_cleanup_type(manager):
 
 
 # Build the canonical reference from the base class.
-# The class' internal dict is sorted with the same order the code is structured. No need for AST parsing.
+# The class' internal dict is sorted with the same order the code is
+# structured. No need for AST parsing.
 props_ref = tuple(
     prop for prop in PackageManager.__dict__.keys() if not prop.startswith("_")
 )
@@ -298,7 +299,8 @@ def test_content_order(manager_file):
     # Analyse each class.
     for klass in (n for n in tree.body if isinstance(n, ast.ClassDef)):
 
-        # Collect in order the IDs of all properties (ast.Assign) and functions in the class.
+        # Collect in order the IDs of all properties (ast.Assign) and functions in
+        # the class.
         collected_props = []
         for node in klass.body:
             if isinstance(node, ast.Assign):

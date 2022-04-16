@@ -115,10 +115,16 @@ def fix_environment():
     """
     os.environ["PATH"] = ":".join(
         (
+            # Homebrew Apple silicon.
+            "/opt/homebrew/bin",
+            "/opt/homebrew/sbin",
+            # Homebrew Intel.
             "/usr/local/bin",
             "/usr/local/sbin",
+            # Macports.
             "/opt/local/bin",
             "/opt/local/sbin",
+            # System.
             os.environ.get("PATH", ""),
         )
     )

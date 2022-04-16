@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[mpm\] Replace `sphinx_tabs` by `sphinx-design`.
+- \[xbar\] Fix location of `mpm` binary on Apple Silicon machines.
 
 ## {gh}`4.13.0 (2022-04-16) <compare/v4.12.1...v4.13.0>`
 

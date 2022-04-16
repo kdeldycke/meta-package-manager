@@ -40,13 +40,6 @@ def install_cask():
 
     def _install_cask(package_id, commit):
         packages.add(package_id)
-        # Deepen homebrew repository copy so we can dig into the past.
-        # Arbitrary set oldest reference to 2018-01-01, which gives us enough
-        # to dig into the past.
-        process = subprocess.run(
-            ("git", "-C", CASK_PATH, "fetch", "--shallow-since=2018-01-01")
-        )
-        assert process.returncode == 0
         # Fetch locally the old version of the Cask's formula.
         git_checkout(package_id, commit)
         # Install the cask but bypass its local cache auto-update: we want to

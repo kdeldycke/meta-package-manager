@@ -115,7 +115,8 @@ disable = "C0114, W0511, W1203"
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml
 # --full-trace: have a full traceback printed on KeyboardInterrupt
-addopts = "--full-trace --numprocesses auto --dist loadgroup --durations=10 --cov-report term --cov=meta_package_manager"
+#addopts = "--full-trace --numprocesses auto --dist loadgroup --durations=10 --cov-report term --cov=meta_package_manager"
+addopts = "--full-trace --numprocesses 0 --durations=10 --cov-report term --cov=meta_package_manager"
 xfail_strict = true
 
 [tool.coverage.paths]

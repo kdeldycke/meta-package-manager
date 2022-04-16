@@ -55,6 +55,11 @@ jobs:
       ### ready to use for mpm.
 
       # Homebrew
+      - name: macOS - Fix Homebrew shallow clone
+        if: runner.os == 'macOS'
+        run: |
+          git -C /usr/local/Homebrew/Library/Taps/homebrew/homebrew-core fetch --unshallow
+          git -C /usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask fetch --unshallow
       - name: macOS - Upgrade Homebrew
         if: runner.os == 'macOS'
         run: |

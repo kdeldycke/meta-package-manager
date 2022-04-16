@@ -217,7 +217,9 @@ class PackageManager:
         elif not cli_path.is_file():
             logger.warning(f"{theme.invoked_command(cli_path)} is not a file.")
         else:
-            logger.debug(f"{theme.invoked_command(name)} CLI found at {theme.invoked_command(cli_path)}")
+            logger.debug(
+                f"{theme.invoked_command(name)} CLI found at {theme.invoked_command(cli_path)}"
+            )
 
         return cli_path
 
@@ -245,7 +247,9 @@ class PackageManager:
                 # See: https://github.com/kdeldycke/meta-package-manager/issues/542
                 # Check for "OSError: [WinError 193] %1 is not a valid Win32 application" error.
                 if getattr(ex, "winerror", None) == 193:
-                    logger.debug(f"{theme.invoked_command(self.cli_path)} is not a valid Windows application.")
+                    logger.debug(
+                        f"{theme.invoked_command(self.cli_path)} is not a valid Windows application."
+                    )
                     # Declare CLI as un-executable.
                     self.executable = False
                     return

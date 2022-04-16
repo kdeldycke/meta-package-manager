@@ -51,17 +51,17 @@ class TestBaseCLI:
 
     """This collection is testing basic CLI behavior without involving any subcommands.
 
-    Also includes a bunch of tests performed once on an arbitrary sub-command,
-    for situation when the tested behavior is shared by all subcommands. The
-    arbitrary sub-command is `managers`, as it is a safe read-only operation
-    supposed to work on all platforms, whatever the environment.
+    Also includes a bunch of tests performed once on an arbitrary sub-command, for
+    situation when the tested behavior is shared by all subcommands. The arbitrary sub-
+    command is `managers`, as it is a safe read-only operation supposed to work on all
+    platforms, whatever the environment.
     """
 
     def test_executable_module(self):
         process = subprocess.run(
             ("python", "-m", "meta_package_manager", "--version"),
             capture_output=True,
-            encoding="utf-8"
+            encoding="utf-8",
         )
 
         assert process.returncode == 0

@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`4.13.0 (unreleased) <compare/v4.12.1...main>`
-
-```{{important}}
-This version is not released yet and is under active development.
-```
+## {gh}`4.13.0 (2022-04-16) <compare/v4.12.1...v4.13.0>`
 
 - \[pacman\] Add support for `pacman`. Closes {issue}`416`.
 - \[apt-mint\] Fix search. Closes {issue}`572` and {pr}`573`.

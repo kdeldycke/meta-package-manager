@@ -90,7 +90,7 @@ class TestXbarPlugin:
             extra_checks.extend(
                 (
                     # Package manager section header.
-                    (r"\d+ outdated .+ packages?", True),
+                    (r"(⚠️ )?\d+ outdated .+ packages?", True),
                     # Package upgrade line.
                     (
                         r"(--)?\S+ \S+ → \S+ \| shell=\S+( param\d+=\S+)+ refresh=true terminal=(false|true alternate=true)$",
@@ -103,7 +103,7 @@ class TestXbarPlugin:
             extra_checks.extend(
                 (
                     # Package manager section header.
-                    (r"\S+\s+\d+ package(s| ) \| font=Menlo size=12", True),
+                    (r"(⚠️ )?\S+\s+\d+ package(s| ) \| font=Menlo size=12", True),
                     # Package upgrade line.
                     (
                         r"(--)?\S+\s+\S+ → \S+\s+\| shell=\S+( param\d+=\S+)+ font=Menlo size=12 refresh=true terminal=(false|true alternate=true)?$",

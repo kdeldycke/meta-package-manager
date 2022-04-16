@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-""" Allow the module to be run as a CLI. I.e.:
+"""Allow the module to be run as a CLI. I.e.:
 
 .. code-block:: shell-session.
 

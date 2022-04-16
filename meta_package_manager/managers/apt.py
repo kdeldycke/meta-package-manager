@@ -277,8 +277,7 @@ class APT_Mint(APT):
     """
 
     def search(self, query, extended, exact):
-        """
-        .. code-block:: shell-session
+        """.. code-block:: shell-session.
 
             ► /usr/local/bin/apt search --quiet sed
             v   librust-slog-2.5+erased-serde-dev  -

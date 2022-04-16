@@ -47,7 +47,8 @@ class Homebrew(PackageManager):
         # Disable configuration hints to reduce verbosity.
         "HOMEBREW_NO_ENV_HINTS": "1",
         # Do not let brew mix the update operation with others. Mpm has a separate "sync" command for that.
-        # This silo-ed behavior has been requested by user since the beginning of mpm: https://github.com/kdeldycke/meta-package-manager/issues/36
+        # This silo-ed behavior has been requested by user since the beginning of
+        # mpm: https://github.com/kdeldycke/meta-package-manager/issues/36
         "HOMEBREW_NO_AUTO_UPDATE": "1",
         # See: https://docs.brew.sh/FAQ#why-cant-i-open-a-mac-app-from-an-unidentified-developer
         # "HOMEBREW_CASK_OPTS": "--no-quarantine",

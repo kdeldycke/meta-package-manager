@@ -174,11 +174,13 @@ class ManagerPool:
         # Only keeps the subset selected by the user.
         selected_ids = keep
 
-        # Deduplicate managers IDs while preserving order, then remove excluded managers.
+        # Deduplicate managers IDs while preserving order, then remove excluded
+        # managers.
         for manager_id in (mid for mid in unique(selected_ids) if mid not in drop):
             manager = self.register.get(manager_id)
 
-            # TODO: check if not implemeted before calling .available. It saves one call to the package manager CLI.
+            # TODO: check if not implemeted before calling .available. It saves one
+            # call to the package manager CLI.
 
             # Filters out inactive managers.
             if drop_inactive and not manager.available:

@@ -36,12 +36,14 @@ class TestXbarPlugin:
         (r"-{3,5}$", True),
         # Upgrade all line. Required.
         (
-            r"(--)?🆙 Upgrade all \S+ packages? \| shell=\S+( param\d+=\S+)+ refresh=true terminal=(false|true alternate=true)$",
+            r"(--)?🆙 Upgrade all \S+ packages? \| shell=\S+( param\d+=\S+)+ "
+            r"refresh=true terminal=(false|true alternate=true)$",
             True,
         ),
         # Error line. Optional.
         (
-            r"(--)?.+ \| font=Menlo size=12 color=red trim=false ansi=false emojize=false symbolize=false$",
+            r"(--)?.+ \| font=Menlo size=12 color=red trim=false "
+            r"ansi=false emojize=false( symbolize=false)?$",
             False,
         ),
     ]
@@ -93,7 +95,8 @@ class TestXbarPlugin:
                     (r"(⚠️ )?\d+ outdated .+ packages?", True),
                     # Package upgrade line.
                     (
-                        r"(--)?\S+ \S+ → \S+ \| shell=\S+( param\d+=\S+)+ refresh=true terminal=(false|true alternate=true)$",
+                        r"(--)?\S+ \S+ → \S+ \| shell=\S+( param\d+=\S+)+ "
+                        r"refresh=true terminal=(false|true alternate=true)$",
                         True,
                     ),
                 )
@@ -106,7 +109,8 @@ class TestXbarPlugin:
                     (r"(⚠️ )?\S+\s+\d+ package(s| ) \| font=Menlo size=12", True),
                     # Package upgrade line.
                     (
-                        r"(--)?\S+\s+\S+ → \S+\s+\| shell=\S+( param\d+=\S+)+ font=Menlo size=12 refresh=true terminal=(false|true alternate=true)?$",
+                        r"(--)?\S+\s+\S+ → \S+\s+\| shell=\S+( param\d+=\S+)+ "
+                        r"font=Menlo size=12 refresh=true terminal=(false|true alternate=true)?$",
                         True,
                     ),
                 )

@@ -73,78 +73,78 @@ mpm, version 4.13.0
 ## Shell completion
 
 Completion for popular shell
-[rely on Click feature](https://click.palletsprojects.com/en/8.0.x/shell-completion/).
+[rely on Click feature](https://click.palletsprojects.com/en/8.1.x/shell-completion/).
 
-```{eval-rst}
-.. tabs::
+`````{tab-set}
 
-  .. group-tab:: Bash
+````{tab-item} Bash
+:sync: bash
+Add this to ``~/.bashrc``:
 
-    Add this to ``~/.bashrc``:
-
-    .. code-block:: bash
-
-        eval "$(_MPM_COMPLETE=bash_source mpm)"
-
-  .. group-tab:: Zsh
-
-    Add this to ``~/.zshrc``:
-
-    .. code-block:: zsh
-
-        eval "$(_MPM_COMPLETE=zsh_source mpm)"
-
-  .. group-tab:: Fish
-
-    Add this to ``~/.config/fish/completions/mpm.fish``:
-
-    .. code-block:: fish
-
-        eval (env _MPM_COMPLETE=fish_source mpm)
+```{code-block} bash
+eval "$(_MPM_COMPLETE=bash_source mpm)"
 ```
+````
+
+````{tab-item} Zsh
+:sync: zsh
+Add this to ``~/.zshrc``:
+
+```{code-block} zsh
+eval "$(_MPM_COMPLETE=zsh_source mpm)"
+```
+````
+
+````{tab-item} Fish
+:sync: fish
+Add this to ``~/.config/fish/completions/mpm.fish``:
+
+```{code-block} zsh
+eval (env _MPM_COMPLETE=fish_source mpm)
+```
+````
+
+`````
 
 Alternatively, export the generated completion code as a static script to be
 executed:
 
-```{eval-rst}
-.. tabs::
+`````{tab-set}
 
-  .. group-tab:: Bash
-
-    .. code-block:: shell-session
-
-        $ _MPM_COMPLETE=bash_source mpm > ~/.mpm-complete.bash
-
-    Then source it from ``~/.bashrc``:
-
-    .. code-block:: bash
-
-        . ~/.mpm-complete.bash
-
-  .. group-tab:: Zsh
-
-    .. code-block:: shell-session
-
-        $ _MPM_COMPLETE=zsh_source mpm > ~/.mpm-complete.zsh
-
-    Then source it from ``~/.zshrc``:
-
-    .. code-block:: zsh
-
-        . ~/.mpm.zsh
-
-  .. group-tab:: Fish
-
-    .. code-block:: fish
-
-       _MPM_COMPLETE=fish_source mpm > ~/.config/fish/completions/mpm.fish
+````{tab-item} Bash
+:sync: bash
+```{code-block} shell-session
+$ _MPM_COMPLETE=bash_source mpm > ~/.mpm-complete.bash
 ```
 
-```{todo}
-Replace [`sphinx_tabs`](https://github.com/executablebooks/sphinx-tabs) by
-[`sphinx-inline-tabs`](https://github.com/pradyunsg/sphinx-inline-tabs#readme) once the latter
-[supports Python < 3.8](https://github.com/pradyunsg/sphinx-inline-tabs/issues/24).
+Then source it from ``~/.bashrc``:
+
+```{code-block} bash
+. ~/.mpm-complete.bash
 ```
+````
+
+````{tab-item} Zsh
+:sync: zsh
+```{code-block} shell-session
+$ _MPM_COMPLETE=zsh_source mpm > ~/.mpm-complete.zsh
+```
+
+Then source it from ``~/.zshrc``:
+
+```{code-block} zsh
+. ~/.mpm.zsh
+```
+````
+
+````{tab-item} Fish
+:sync: fish
+```{code-block} fish
+_MPM_COMPLETE=fish_source mpm > ~/.config/fish/completions/mpm.fish
+```
+````
+
+`````
 
 ## Python dependencies
 

@@ -30,14 +30,18 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.extlinks",
     "sphinx.ext.viewcode",
-    "sphinx_tabs.tabs",
     # Adds a copy button to code blocks.
     "sphinx_copybutton",
+    "sphinx_design",
     # Link to GitHub issues and PRs.
     "sphinx_issues",
     "sphinxext.opengraph",
     "myst_parser",
     "sphinx_click",
+]
+
+myst_enable_extensions = [
+    "colon_fence",
 ]
 
 master_doc = "index"

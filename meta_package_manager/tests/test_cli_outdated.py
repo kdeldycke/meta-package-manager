@@ -101,7 +101,9 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
                 assert isinstance(infos["upgrade_cli"], list)
                 assert same(map(type, infos["upgrade_cli"]), str)
 
-    @pytest.mark.parametrize("cli_format,separator", (("xbar", " | "), ("swiftbar", " ")))
+    @pytest.mark.parametrize(
+        "cli_format,separator", (("xbar", " | "), ("swiftbar", " "))
+    )
     def test_cli_format_bar_plugin(self, invoke, subcmd, cli_format, separator):
         result = invoke("--output-format", "json", subcmd, "--cli-format", cli_format)
         for outdated in json.loads(result.stdout).values():

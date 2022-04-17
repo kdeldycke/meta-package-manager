@@ -82,11 +82,11 @@ jobs:
       - name: "Linux - Ubuntu 18.04 - Install npm requirements"
         if: matrix.os == 'ubuntu-18.04'
         run: |
-          sudo apt install -y node-gyp nodejs-dev libssl1.0-dev
+          sudo apt install --yes node-gyp nodejs-dev libssl1.0-dev
       - name: Linux - Install npm
         if: runner.os == 'Linux'
         run: |
-          sudo apt install -y npm
+          sudo apt install --yes npm
       - name: macOS - Install npm
         if: runner.os == 'macOS'
         run: |
@@ -109,7 +109,7 @@ jobs:
           echo "deb https://dl.yarnpkg.com/debian/ stable main" \
             | sudo tee /etc/apt/sources.list.d/yarn.list
           sudo apt update
-          sudo apt install -y yarn
+          sudo apt install --yes yarn
       - name: Windows - Install Yarn
         if: runner.os == 'Windows'
         run: |
@@ -138,7 +138,7 @@ jobs:
           echo "deb https://packagecloud.io/AtomEditor/atom/any/ any main" \
             | sudo tee /etc/apt/sources.list.d/atom.list
           sudo apt update
-          sudo apt install -y atom
+          sudo apt install --yes atom
       - name: Windows - Install Atom
         if: runner.os == 'Windows'
         run: |
@@ -154,8 +154,8 @@ jobs:
       - name: Linux - Install Flatpak
         if: runner.os == 'Linux'
         run: |
-          sudo add-apt-repository -y ppa:alexlarsson/flatpak
-          sudo apt install -y flatpak
+          sudo add-apt-repository --yes ppa:alexlarsson/flatpak
+          sudo apt install --yes flatpak
 
       # DNF
       - name: Linux - Install DNF
@@ -163,13 +163,13 @@ jobs:
         if: matrix.os == 'ubuntu-21.04'
         # if: runner.os == 'Linux'
         run: |
-          sudo apt install -y dnf
+          sudo apt install --yes dnf
 
       # Snap
       - name: Linux - Upgrade Snapd
         if: runner.os == 'Linux'
         run: |
-          sudo apt install -y snapd
+          sudo apt install --yes snapd
 
       # VSCode
       - name: macOS - Install VSCode

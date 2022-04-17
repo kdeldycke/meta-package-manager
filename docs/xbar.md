@@ -1,12 +1,35 @@
-# xbar plugin
+# Xbar and SwiftBar plugin
 
-```{sidebar} Default layout
-![](images/xbar-plugin-flat-layout.png)
+## Screenshots
+
+Here are the different layouts the plugin is capable of producing based on 2 variables:
+
+- `SUBMENU_LAYOUT = False`
+- `TABLE_RENDERING = True`
+
+### SwiftBar
+
+````{grid} 1 2 3 4
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>SUBMENU_LAYOUT = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>TABLE_RENDERING = False</code></span>
+:img-top: images/swiftbar-flatmenu-standard-rendering.png
+:link: images/swiftbar-flatmenu-standard-rendering.png
 ```
 
-```{sidebar} Submenu layout
-![](images/xbar-plugin-submenu-layout.png)
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>SUBMENU_LAYOUT = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>TABLE_RENDERING = True</code></span>
+:img-top: images/swiftbar-flatmenu-table-rendering.png
+:link: images/swiftbar-flatmenu-table-rendering.png
 ```
+
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>SUBMENU_LAYOUT = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>TABLE_RENDERING = True</code></span>
+:img-top: images/swiftbar-submenu-table-rendering.png
+:link: images/swiftbar-submenu-table-rendering.png
+```
+
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>SUBMENU_LAYOUT = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>TABLE_RENDERING = False</code></span>
+:img-top: images/swiftbar-submenu-strandard-rendering.png
+:link: images/swiftbar-submenu-strandard-rendering.png
+```
+````
 
 ## Location
 

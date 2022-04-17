@@ -70,6 +70,32 @@ mpm, version 4.13.0
 (...)
 ```
 
+## Password prompts and `sudo`
+
+The majority of package managers on Linux requires `sudo` to perform system-wide operations.
+
+On other OSes you'll be prompted to enter your password to install kernel extensions:
+
+```shell-session
+$ brew install --cask macfuse
+==> Caveats
+macfuse requires a kernel extension to work.
+If the installation fails, retry after you enable it in:
+  System Preferences → Security & Privacy → General
+
+For more information, refer to vendor documentation or this Apple Technical Note:
+  https://developer.apple.com/library/content/technotes/tn2459/_index.html
+
+==> Downloading https://github.com/osxfuse/osxfuse/releases/download/macfuse-4.2.5/macfuse-4.2.5.dmg
+Already downloaded: /Users/kde/Library/Caches/Homebrew/downloads/d7961d772f16bad95962f1a780b545a5dbb4788ec6e1ec757994bb5296397b1c--macfuse-4.2.5.dmg
+==> Installing Cask macfuse
+==> Running installer for macfuse; your password may be necessary.
+Package installers may write to any location; options such as `--appdir` are ignored.
+Password:
+```
+
+Both cases are not handled gracefully by `mpm`, which [doesn't support (yet) interactive password](https://github.com/kdeldycke/meta-package-manager/issues/33) management and capture.
+
 ## Shell completion
 
 Completion for popular shell

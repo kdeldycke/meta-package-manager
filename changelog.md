@@ -10,6 +10,10 @@ This version is not released yet and is under active development.
   Closes {issue}`496` and {issue}`579`.
 - \[snap\] Fix command argument order. Address {issue}`579`.
 - \[xbar\] Fix location of `mpm` binary on Apple Silicon machines.
+- \[mpm\] Replace `sphinx_tabs` by `sphinx-design`.
+- \[mpm\] Add SwiftBar plugin screenshots.
+- \[mpm\] Remove date-based shallowing of Homebrew git repository in unittests
+  and considers the local runner copy to already be unshallowed.
 
 ## {gh}`4.13.0 (2022-04-16) <compare/v4.12.1...v4.13.0>`
 

@@ -96,6 +96,15 @@ Password:
 
 Both cases are not handled gracefully by `mpm`, which [doesn't support (yet) interactive password](https://github.com/kdeldycke/meta-package-manager/issues/33) management and capture.
 
+A workaround on Linux is to install `mpm` with `sudo`, so you'll be able to invoke it with `sudo` too:
+
+```shell-session
+$ sudo python3 -m pip install meta-package-manager
+(...)
+$ sudo python3 -m meta_package_manager upgrade
+(...)
+```
+
 ## Shell completion
 
 Completion for popular shell

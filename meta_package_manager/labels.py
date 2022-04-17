@@ -29,7 +29,7 @@ LABELS = [
     (
         "🔌 bar-plugin",
         "#fef2c0",
-        "Xbar/SwiftBar plugin code, documentation and features"
+        "Xbar/SwiftBar plugin code, documentation and features",
     ),
 ]
 

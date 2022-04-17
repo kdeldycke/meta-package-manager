@@ -40,6 +40,7 @@ keywords = [
     'visual studio code',
     'vscode',
     'xbar',
+    'swiftbar',
     'yarn',
 ]
 classifiers = [
@@ -137,7 +138,7 @@ ignore = [
     #   meta_package_manager/tests/__init__.py
     "W002",
     # W004: Module is not located at importable path:
-    #   meta_package_manager/xbar/meta_package_manager.7h.py
+    #   meta_package_manager/bar_plugin/meta_package_manager.7h.py
     "W004",
 ]
 

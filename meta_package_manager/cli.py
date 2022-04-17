@@ -50,7 +50,7 @@ else:
 
 from cloup import Section
 
-from . import __version__, logger, xbar
+from . import __version__, bar_plugin, logger
 from .base import CLI_FORMATS, CLIError, PackageManager
 from .output import (
     SORTABLE_FIELDS,
@@ -96,20 +96,20 @@ def single_manager_selectors():
         )
 
 
-def xbar_plugin_path(ctx, param, value):
-    """Print the location of the xbar plugin.
+def bar_plugin_path(ctx, param, value):
+    """Print the location of the Xbar/SwiftBar plugin.
 
     Replaces the fully-qualified home directory by its shorthand if applicable.
     """
     if value:
-        xbar_path = Path(xbar.__file__).expanduser().resolve()
+        bar_path = Path(bar_plugin.__file__).expanduser().resolve()
         home_dir = Path.home()
-        if xbar_path.is_relative_to(home_dir):
+        if bar_path.is_relative_to(home_dir):
             home_shorthand = Path("~")
-            shorten_xbar_path = home_shorthand / xbar_path.relative_to(home_dir)
-            assert shorten_xbar_path.expanduser().resolve() == xbar_path
-            xbar_path = shorten_xbar_path
-        echo(xbar_path)
+            shorten_bar_path = home_shorthand / bar_path.relative_to(home_dir)
+            assert shorten_bar_path.expanduser().resolve() == bar_path
+            bar_path = shorten_bar_path
+        echo(bar_path)
         ctx.exit()
 
 
@@ -197,13 +197,13 @@ def xbar_plugin_path(ctx, param, value):
     ),
 )
 @option(
-    "--xbar-plugin-path",
+    "--bar-plugin-path",
     is_flag=True,
     default=False,
     expose_value=False,
     is_eager=True,
-    callback=xbar_plugin_path,
-    help="Print location of the mpm xbar plugin.",
+    callback=bar_plugin_path,
+    help="Print location of the mpm Xbar/SwiftBar plugin.",
 )
 @pass_context
 def mpm(

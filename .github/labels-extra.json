@@ -80,14 +80,9 @@
     "description": "vscode"
   },
   {
-    "name": "🔌 BitBar plugin",
+    "name": "🔌 bar-plugin",
     "color": "#fef2c0",
-    "description": "Plugin code, documentation or features related to BitBar"
-  },
-  {
-    "name": "🔌 xbar plugin",
-    "color": "#fef2c0",
-    "description": "Plugin code, documentation or features related to xbar"
+    "description": "Xbar/SwiftBar plugin code, documentation and features"
   },
   {
     "name": "🖥 platform: Linux",

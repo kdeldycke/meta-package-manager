@@ -23,11 +23,11 @@ import pytest
 from click_extra.run import env_copy
 from click_extra.tests.conftest import unless_macos
 
-from .. import xbar
+from .. import bar_plugin
 
 
 @unless_macos
-class TestXbarPlugin:
+class TestBarPlugin:
 
     common_checklist = [
         # Menubar line. Required.
@@ -51,7 +51,7 @@ class TestXbarPlugin:
     def plugin_output_checks(self, checklist, extra_env=None):
         """Run the plugin script and check its output against the checklist."""
         process = subprocess.run(
-            xbar.__file__,
+            bar_plugin.__file__,
             capture_output=True,
             encoding="utf-8",
             env=env_copy(extra_env),

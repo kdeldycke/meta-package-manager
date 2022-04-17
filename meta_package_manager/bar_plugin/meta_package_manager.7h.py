@@ -88,8 +88,9 @@ if TABLE_RENDERING:
     FONTS.update(dict.fromkeys(["summary", "package"], MONOSPACE))
 
 
-MPM_MIN_VERSION = (4, 2, 0)
-"""Mpm v4.2.0 was the first supporting the new xbar plugin parameter format."""
+MPM_MIN_VERSION = (4, 14, 0)
+"""Mpm v4.14.0 was the first supporting direct execution from the module and
+`--cli-format swiftbar` option."""
 
 
 is_swift_bar = getenv_bool("SWIFTBAR")
@@ -263,7 +264,7 @@ def print_menu():
             "json",
             "outdated",
             "--cli-format",
-            "xbar",
+            "swiftbar",
         ),
         capture_output=True,
         encoding="utf-8",

@@ -6,12 +6,16 @@
 This version is not released yet and is under active development.
 ```
 
+- \[bar-plugin\] Rename all reference of `xbar` to the generic `bar-plugin` label.
+- \[mpm\] Rename `--xbar-plugin-path` option to `--bar-plugin-path`.
+- \[mpm\] Add a `--cli-format swiftbar` option.
+
 ## {gh}`4.13.1 (2022-04-17) <compare/v4.13.0...v4.13.1>`
 
 - \[apt\] Add missing `sudo` pre-commands for `apt` calls that requires it.
   Closes {issue}`496` and {issue}`579`.
 - \[snap\] Fix command argument order. Address {issue}`579`.
-- \[xbar\] Fix location of `mpm` binary on Apple Silicon machines.
+- \[bar-plugin\] Fix location of `mpm` binary on Apple Silicon machines.
 - \[mpm\] Replace `sphinx_tabs` by `sphinx-design`.
 - \[mpm\] Add SwiftBar plugin screenshots.
 - \[mpm\] Remove date-based shallowing of Homebrew git repository in unittests
@@ -22,10 +26,10 @@ This version is not released yet and is under active development.
 - \[pacman\] Add support for `pacman`. Closes {issue}`416`.
 - \[apt-mint\] Fix search. Closes {issue}`572` and {pr}`573`.
 - \[apt-mint\] Fix `--apt-mint` shortcut option.
-- \[xbar\] Add support for SwiftBar.
-- \[xbar\] Add new `TABLE_RENDERING` option to plugin.
-- \[xbar\] Improve alignment of labels in monospaced font rendering.
-- \[xbar\] Tweak icons.
+- \[bar-plugin\] Add support for SwiftBar.
+- \[bar-plugin\] Add new `TABLE_RENDERING` option to plugin.
+- \[bar-plugin\] Improve alignment of labels in monospaced font rendering.
+- \[bar-plugin\] Tweak icons.
 - \[mpm\] Allow the `meta_package_manager` module to be directly executed.
 - \[mpm\] Add `--xbar-plugin-path` option.
 - \[mpm\] Fix normalization of CLI arguments.
@@ -46,7 +50,7 @@ This version is not released yet and is under active development.
 
 - \[brew,cask\] Do not let homebrew auto-update on other commands. Refs {issue}`36`.
 - \[brew,cask\] Disable analytics and env hints in logs.
-- \[xbar\] Fix log verbosity and unittests for xbar plugin.
+- \[bar-plugin\] Fix log verbosity and unittests for xbar plugin.
 - \[mpm\] Show in debug logs the extra environment variable used for CLIs.
 - \[mpm\] Enforce code structure in package manager definition files.
 - \[mpm\] Fix documentation generation.
@@ -180,7 +184,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Add a global `-d`/`--dry-run` option.
 - \[apt\] Add dedicated `apt-mint` manager to handle the special case of `apt`
   on Linux Mint.
-- \[xbar\] Let xbar plugin check minimal mpm version requirement.
+- \[bar-plugin\] Let xbar plugin check minimal mpm version requirement.
 - \[mpm\] Use regexpes to extract package manager versions.
 - \[mpm\] Add beta `windows-2022` CI/CD build target.
 - \[mpm\] Remove all the unused utilities to discard some table rendering on
@@ -207,27 +211,27 @@ This version is not released yet and is under active development.
   with `MPM_`.
 - \[mpm\] Let Click produce default values in help screen.
 - \[mpm\] Replace `tomlkit` dependency by `tomli` and `tomli_w`.
-- \[xbar\] Fix xbar plugin output format.
-- \[xbar\] Rename `VAR_SUBMENU_lAYOUT` environment variable to
+- \[bar-plugin\] Fix xbar plugin output format.
+- \[bar-plugin\] Rename `VAR_SUBMENU_lAYOUT` environment variable to
   `VAR_SUBMENU_LAYOUT`.
 - \[mpm\] Remove support for `--cli-format bitbar` option. Use `xbar` value
   instead.
 
 ## {gh}`4.1.0 (2021-05-01) <compare/v4.0.0...v4.1.0>`
 
-- \[xbar\] Add new `Submenu layout` boolean option in xbar plugin UI.
-- \[xbar\] Rename `XBAR_MPM_SUBMENU` environment variable to
+- \[bar-plugin\] Add new `Submenu layout` boolean option in xbar plugin UI.
+- \[bar-plugin\] Rename `XBAR_MPM_SUBMENU` environment variable to
   `VAR_SUBMENU_lAYOUT`.
 - \[mpm\] Allow search of multiple CLI names for a package manager.
 - \[pip\] Fix search of `python3` binary on macOS. Closes {issue}`247`.
 
 ## {gh}`4.0.0 (2021-04-27) <compare/v3.6.0...v4.0.0>`
 
-- \[xbar\] Upgrade BitBar plugin to new xbar format.
-- \[xbar\] Drop xbar plugin requirement on Python 2.x and bump it up to Python
+- \[bar-plugin\] Upgrade BitBar plugin to new xbar format.
+- \[bar-plugin\] Drop xbar plugin requirement on Python 2.x and bump it up to Python
   3.7.3.
-- \[xbar\] Update references of BitBar to xbar.
-- \[xbar\] Rename `BITBAR_MPM_SUBMENU` environment variable to
+- \[bar-plugin\] Update references of BitBar to xbar.
+- \[bar-plugin\] Rename `BITBAR_MPM_SUBMENU` environment variable to
   `XBAR_MPM_SUBMENU`.
 - \[mpm\] Rename `--cli-format bitbar` option to `--cli-format xbar`.
 - \[mpm\] Auto-generate API documentation via a GitHub action workflow.
@@ -289,7 +293,7 @@ This version is not released yet and is under active development.
 
 - \[yarn\] Set minimal requirement to 1.20.0.
 - \[yarn\] Fix deprecated global arguments.
-- \[bitbar\] Force refresh of local package databases before fetching outdated
+- \[bar-plugin\] Force refresh of local package databases before fetching outdated
   ones.
 - \[mpm\] Add utilities to read a config TOML file. Refs {issue}`66`.
 - \[mpm\] Auto-format Python code with Black.
@@ -305,9 +309,9 @@ This version is not released yet and is under active development.
 
 ## {gh}`3.3.0 (2020-06-23) <compare/v3.2.0...v3.3.0>`
 
-- \[bitbar\] Each entry in the drop-down menu can now be called into a terminal
+- \[bar-plugin\] Each entry in the drop-down menu can now be called into a terminal
   to track the execution by holding the `Option` key.
-- \[bitbar\] Fix rendering of upgrade CLI in Bitbar dialect.
+- \[bar-plugin\] Fix rendering of upgrade CLI in Bitbar dialect.
 - \[mpm\] Hint for lack of `sync` and `cleanup` support by managers.
 - \[mpm\] Do not print table headers if there is no row to print.
 - \[mpm\] Always print non-fatal `<stderr>` output as warning mode.
@@ -340,7 +344,7 @@ This version is not released yet and is under active development.
   {issue}`9`.
 - \[mpm\] Print table rendering, stats and timing in console output instead of
   logger to allow them to be greppable.
-- \[bitbar\] Test plugin with Python 2.7.
+- \[bar-plugin\] Test plugin with Python 2.7.
 - \[mpm\] Allow for manager-specific search path to help hunting down CLIs.
 - \[mpm\] Highlight CLI and indent results in debug output.
 - \[mpm\] Bump dependency to `pylint 2.5` and `cli-helpers 2.0`.
@@ -441,7 +445,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Removes direct dependency on `tabulate`.
 - \[cask\] Fix minimal version check for `cask`. Closes {issue}`41` and
   {pr}`44`.
-- \[bitbar\] Do not run BitBar plugin unittests but on macOS.
+- \[bar-plugin\] Do not run BitBar plugin unittests but on macOS.
 
 ## {gh}`2.6.1 (2017-11-05) <compare/v2.6.0...v2.6.1>`
 
@@ -484,7 +488,7 @@ This version is not released yet and is under active development.
 
 - \[mpm\] Add new `list` operation. Closes {issue}`20`.
 - \[mas\] Fix upgrade of `mas` packages. Closes {issue}`32`.
-- \[bitbar\] Document BitBar plugin release process.
+- \[bar-plugin\] Document BitBar plugin release process.
 - \[mpm\] Colorize check-marks in CLI output.
 - \[mpm\] Decouple `sync` and `outdated` actions in all managers.
 - \[mpm\] Cache output of `outdated` command.
@@ -498,12 +502,12 @@ This version is not released yet and is under active development.
 - \[mpm\] Add a list of *Falsehoods Programmers Believe About Package
   Managers*.
 - \[mpm\] Add a `.mailmap` config file to consolidate contributor's identity.
-- \[bitbar\] Make it easier to change the font, size and color of text in
+- \[bar-plugin\] Make it easier to change the font, size and color of text in
   BitBar plugin.
-- \[bitbar\] Move error icon in BitBar plugin to the front of manager name.
+- \[bar-plugin\] Move error icon in BitBar plugin to the front of manager name.
 - \[cask\] Fix parsing of `cask` packages with multiple names. Closes
   {issue}`26`.
-- \[bitbar\] Move BitBar plugin documentation to dedicated page.
+- \[bar-plugin\] Move BitBar plugin documentation to dedicated page.
 - \[mpm\] Fix exceptions when commands gives no output. Closes {issue}`29` and
   {pr}`31`.
 - \[cask\] Fix `cask update` deprecation warning. Closes {issue}`28`.
@@ -517,8 +521,8 @@ This version is not released yet and is under active development.
 - \[mpm\] Allow restriction of package managers to a platform. Closes
   {issue}`7`.
 - \[mpm\] Include `supported` property in `mpm managers` sub-command.
-- \[bitbar\] Add optional submenu rendering for BitBar plugin. Closes {pr}`23`.
-- \[bitbar\] Move `Upgrade all` menu entry to the bottom of each section in
+- \[bar-plugin\] Add optional submenu rendering for BitBar plugin. Closes {pr}`23`.
+- \[bar-plugin\] Move `Upgrade all` menu entry to the bottom of each section in
   BitBar plugin.
 - \[pip\] Allow destructive unittests in Travis CI jobs.
 - \[pip\] Allow usage of `pip2` and `pip3` managers on Linux.
@@ -529,24 +533,24 @@ This version is not released yet and is under active development.
 
 - \[brew,cask\] Fix parsing of non-point releases of `brew` and `cask`
   versions. Closes {issue}`15`.
-- \[bitbar\] Do not render emoji in BitBar plugin menu entries.
-- \[bitbar\] Do not trim error messages rendered in BitBar plugin.
+- \[bar-plugin\] Do not render emoji in BitBar plugin menu entries.
+- \[bar-plugin\] Do not trim error messages rendered in BitBar plugin.
 - \[mpm\] Do not strip CLI output. Keep original format.
 - \[mpm\] Fix full changelog link.
 
 ## {gh}`2.1.0 (2016-12-14) <compare/v2.0.0...v2.1.0>`
 
-- \[bitbar\] Adjust rendering of BitBar plugin errors.
+- \[bar-plugin\] Adjust rendering of BitBar plugin errors.
 - \[mpm\] Fix fetching of log level names in Python 3.4+.
 - \[mpm\] Print CLI output in unittests.
 - \[mpm\] Print more debug info in unittests when CLI produce tracebacks.
 - \[macos\] Drop support and unittests on Mac OS X 10.9.
 - \[macos\] Add new macOS 10.12 target for Travis CI builds.
-- \[bitbar\] Move BitBar plugin within the Python module.
+- \[bar-plugin\] Move BitBar plugin within the Python module.
 - \[mpm\] Show unmet version requirements in table output for `mpm managers`
   sub-command.
 - \[mpm\] Fix duplicates in outdated packages by indexing them by ID.
-- \[bitbar\] Unittest simple call of BitBar plugin.
+- \[bar-plugin\] Unittest simple call of BitBar plugin.
 - \[mpm\] Always print the raw, un-normalized version of managers, as reported
   by themselves.
 - \[mpm\] Fetch version of all managers.
@@ -555,8 +559,8 @@ This version is not released yet and is under active development.
 - \[mpm\] Always remove ANSI codes from CLI output.
 - \[mpm\] Fix rendering of unicode logs.
 - \[mpm\] Bump requirement to `click_log >= 0.1.5`.
-- \[bitbar\] Force `LANG` environment variable to `en_US.UTF-8`.
-- \[mpm,bitbar\] Share same code path for CLI execution between `mpm` and
+- \[bar-plugin\] Force `LANG` environment variable to `en_US.UTF-8`.
+- \[mpm,bar-plugin\] Share same code path for CLI execution between `mpm` and
   BitBar plugin.
 - \[mpm\] Add a `-d`/`--dry-run` option to `mpm upgrade` sub-command.
 - \[macos\] Remove hard-requirement on `macOS` platform. Refs {issue}`7`.
@@ -565,8 +569,8 @@ This version is not released yet and is under active development.
 
 ## {gh}`2.0.0 (2016-12-04) <compare/v1.12.0...v2.0.0>`
 
-- \[bitbar\] Rewrite BitBar plugin based on `mpm`. Closes {issue}`13`.
-- \[bitbar\] Render errors with a monospaced font in BitBar plugin.
+- \[bar-plugin\] Rewrite BitBar plugin based on `mpm`. Closes {issue}`13`.
+- \[bar-plugin\] Render errors with a monospaced font in BitBar plugin.
 - \[mpm\] Add missing `CHANGES.rst` in `MANIFEST.in`.
 - \[mpm\] Make wheels generated under Python 2 environnment available for
   Python 3 too.
@@ -588,7 +592,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Differentiate packages names and IDs. Closes {issue}`11`.
 - \[mpm\] Sort list of outdated packages by lower-cased package names first.
 - \[mpm\] Add `upgrade_cli` field for each outdated packages in JSON output.
-- \[mpm,bitbar\] Allow user to choose rendering of `upgrade_cli` field to
+- \[mpm,bar-plugin\] Allow user to choose rendering of `upgrade_cli` field to
   either one-liner, fragments or BitBar format. Closes {issue}`14`.
 - \[mpm\] Include errors reported by each manager in JSON output of
   `mpm outdated` command.
@@ -657,7 +661,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Split `CHANGES.rst` out of `README.rst`.
 - \[mpm\] Add Travis CI configuration.
 - \[mpm\] Use semver-like 3-components version number.
-- \[bitbar\] Copy all BitBar plugin code to Python module.
+- \[bar-plugin\] Copy all BitBar plugin code to Python module.
 - \[mpm\] Give each supported package manager its own module file.
 - \[mpm\] Add minimal `mpm` meta CLI to list supported package managers.
 - \[mpm\] Add default `bumpversion`, `isort`, `nosetests`, `coverage`, `pep8`

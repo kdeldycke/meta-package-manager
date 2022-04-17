@@ -27,14 +27,9 @@ CLI_NAME = "mpm"
 # Format: label name, color, optional description.
 LABELS = [
     (
-        "🔌 BitBar plugin",
+        "🔌 bar-plugin",
         "#fef2c0",
-        "Plugin code, documentation or features related to BitBar",
-    ),
-    (
-        "🔌 xbar plugin",
-        "#fef2c0",
-        "Plugin code, documentation or features related to xbar",
+        "Xbar/SwiftBar plugin code, documentation and features"
     ),
 ]
 

@@ -44,7 +44,7 @@ ______________________________________________________________________
 - Export results in JSON or user-friendly tables.
 - Shell auto-completion for Bash, Zsh and Fish.
 - Provides a
-  [xbar plugin](https://kdeldycke.github.io/meta-package-manager/xbar.html) for
+  [Xbar/SwiftBar plugin](https://kdeldycke.github.io/meta-package-manager/bar-plugin.html) for
   friendly macOS integration.
 - Because `mpm` try to wrap all other package managers, it became another
   pathological case of [XKCD #927: Standards](https://xkcd.com/927/)

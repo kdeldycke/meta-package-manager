@@ -74,8 +74,7 @@ def test_changelog():
                         pool.all_manager_ids,
                         OS_DEFINITIONS.keys(),
                         "mpm",
-                        "bitbar",
-                        "xbar",
+                        "bar-plugin",
                     )
                 )
             )

@@ -22,9 +22,9 @@ jobs:
           parameters: >
             [
               {"labels": [
-                "🔌 xbar plugin",
+                "🔌 bar-plugin",
                 "🖥 platform: macOS"],
-               "keywords": ["xbar"]},
+               "keywords": ["xbar", "swiftbar"]},
 
               {"labels": [
                 "🐛 bug"],

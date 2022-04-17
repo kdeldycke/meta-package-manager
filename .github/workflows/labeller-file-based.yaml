@@ -9,9 +9,9 @@ jobs:
     uses: kdeldycke/workflows/.github/workflows/labeller-file-based.yaml@v1.4.1
     with:
       extra-rules: |
-        "🔌 xbar plugin":
-          - meta_package_manager/tests/*xbar*
-          - meta_package_manager/xbar/*
+        "🔌 bar-plugin":
+          - meta_package_manager/tests/*bar_plugin*
+          - meta_package_manager/bar_plugin/*
 
         "📦 manager: apm":
           - meta_package_manager/managers/apm*

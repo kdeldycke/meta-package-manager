@@ -6,6 +6,7 @@
 This version is not released yet and is under active development.
 ```
 
+- \[snap\] Fix command argument order. Closes {issue}`579`.
 - \[mpm\] Replace `sphinx_tabs` by `sphinx-design`.
 - \[xbar\] Fix location of `mpm` binary on Apple Silicon machines.
 

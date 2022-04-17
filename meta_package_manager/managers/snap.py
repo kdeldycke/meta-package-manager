@@ -27,7 +27,7 @@ class Snap(PackageManager):
 
     requirement = "2.0.0"
 
-    pre_args = ("--color=never",)
+    post_args = ("--color=never",)
 
     version_regex = r"snap\s+(?P<version>\S+)"
     """
@@ -48,7 +48,7 @@ class Snap(PackageManager):
         Raw CLI output samples:
 
         .. code-block:: shell-session
-            ► snap --color=never list
+            ► snap list --color=never
             Name    Version    Rev   Aufzeichnung   Herausgeber     Hinweise
             core    16-2.44.1  8935  latest/stable  canonical✓      core
             wechat  2.0        7     latest/stable  ubuntu-dawndiy  -
@@ -77,7 +77,7 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
 
-            ► snap --color=never refresh --list
+            ► snap refresh --list --color=never
             Name            Version  Rev  Herausgeber     Hinweise
             standard-notes  3.3.5    8    standardnotes✓  -
         """
@@ -104,7 +104,7 @@ class Snap(PackageManager):
         """Fetch matching packages from ``snap find`` output.
 
         .. code-block:: shell-session
-            ► snap --color=never find doc
+            ► snap find doc --color=never
             Name       Version      Herausgeber  Hinweise  Zusammenfassung
             journey    2.14.3       2appstudio   -         Your private diary.
             nextcloud  17.0.5snap1  nextcloud✓   -         Nextcloud Server
@@ -146,7 +146,7 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
 
-            ► snap --color=never install standard-notes
+            ► snap install standard-notes --color=never
         """
         super().install(package_id)
         return self.run_cli("install", package_id)
@@ -156,7 +156,7 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
 
-            ► snap --color=never refresh standard-notes
+            ► snap refresh standard-notes --color=never
         """
         return self.build_cli(
             "refresh",

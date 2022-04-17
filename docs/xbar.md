@@ -47,7 +47,7 @@ $ poetry run mpm --xbar-plugin-path
 
 This is handy to pre-populate xbar with some plugins, [as I do in my dotfiles via symlinks](https://github.com/kdeldycke/dotfiles/blob/c04296d29e5f5ce48687f79554b265b3e89d5dbb/install.sh#L230).
 
-## Python >=3.7.3 required
+## Python `>=3.7.3` required
 
 xbar plugins are self-contained scripts. As such, the
 `meta_package_manager.7h.py` needs to be able to run without any extra
@@ -113,14 +113,14 @@ to the
 1. Create a new branch and switch to it:
 
    ```shell-session
-   $ git branch meta-package-manager-v230
-   $ git checkout meta-package-manager-v230
+   $ git branch "meta-package-manager-v4.13.1"
+   $ git checkout "meta-package-manager-v4.13.1"
    ```
 
 1. Replace existing copy of the plugin with the latest tagged version:
 
    ```shell-session
-   $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v2.3.0/meta_package_manager/xbar/meta_package_manager.7h.py
+   $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v4.13.1/meta_package_manager/xbar/meta_package_manager.7h.py
    $ mv ./meta_package_manager.7h.py ./Dev/
    $ chmod 755 ./Dev/meta_package_manager.7h.py
    ```
@@ -129,13 +129,13 @@ to the
 
    ```shell-session
    $ git add ./Dev/meta_package_manager.7h.py
-   $ git commit -m 'Upgrade to Meta Package Manager plugin v2.3.0.'
+   $ git commit -m "Upgrade to Meta Package Manager plugin v4.13.1"
    ```
 
 1. Push new branch:
 
    ```shell-session
-   $ git push --set-upstream origin meta-package-manager-v230
+   $ git push --set-upstream origin "meta-package-manager-v4.13.1"
    ```
 
 1. [Create a pull-request](https://help.github.com/articles/creating-a-pull-request/)

@@ -1,31 +1,36 @@
 # Xbar and SwiftBar plugin
 
+The Meta Package Manager project is actively maintaining a plugin that is both compatible with
+[Xbar](https://github.com/matryer/xbar) and [SwiftBar](https://github.com/swiftbar/SwiftBar).
+
+The plugin is written in Python and is a small wrapper around the `mpm` CLI.
+
 ## Screenshots
 
-Here are the different layouts the plugin is capable of producing based on 2 variables:
+The plugin is configurable with these environment variables:
 
-- `SUBMENU_LAYOUT = False`
-- `TABLE_RENDERING = True`
+- `VAR_SUBMENU_LAYOUT`: defaults to `False`.
+- `VAR_TABLE_RENDERING`: defaults to `True`.
 
 ### SwiftBar
 
 ````{grid} 1 2 3 4
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>SUBMENU_LAYOUT = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>TABLE_RENDERING = False</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_SUBMENU_LAYOUT = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
 :img-top: images/swiftbar-flatmenu-standard-rendering.png
 :link: images/swiftbar-flatmenu-standard-rendering.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>SUBMENU_LAYOUT = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>TABLE_RENDERING = True</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_SUBMENU_LAYOUT = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span></br>(default)
 :img-top: images/swiftbar-flatmenu-table-rendering.png
 :link: images/swiftbar-flatmenu-table-rendering.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>SUBMENU_LAYOUT = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>TABLE_RENDERING = True</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_SUBMENU_LAYOUT = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span>
 :img-top: images/swiftbar-submenu-table-rendering.png
 :link: images/swiftbar-submenu-table-rendering.png
 ```
 
-```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>SUBMENU_LAYOUT = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>TABLE_RENDERING = False</code></span>
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_SUBMENU_LAYOUT = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
 :img-top: images/swiftbar-submenu-strandard-rendering.png
 :link: images/swiftbar-submenu-strandard-rendering.png
 ```
@@ -33,27 +38,27 @@ Here are the different layouts the plugin is capable of producing based on 2 var
 
 ## Location
 
-A copy of the latest stable version of the xbar plugin for `mpm` is always
-[available on xbar website](https://xbarapp.com/docs/plugins/Dev/meta_package_manager.7h.py.html)
+A copy of the latest stable version of the plugin is
+[available on Xbar website](https://xbarapp.com/docs/plugins/Dev/meta_package_manager.7h.py.html)
 and
 [plugin repository](https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py).
 
-It can be located dynamiccaly with the dedicated `--xbar-plugin-path` option:
+Once `mpm` is installed on your system, it can dynamiccaly be located with the dedicated `--xbar-plugin-path` option:
 
 ```shell-session
-$ poetry run mpm --xbar-plugin-path
+$ mpm --xbar-plugin-path
 ~/meta-package-manager/meta_package_manager/xbar/meta_package_manager.7h.py
 ```
 
-This is handy to pre-populate xbar with some plugins, [as I do in my dotfiles via symlinks](https://github.com/kdeldycke/dotfiles/blob/c04296d29e5f5ce48687f79554b265b3e89d5dbb/install.sh#L230).
+This is handy to pre-populate Xbar/SwiftBar with some plugins, [as I do in my dotfiles via symlinks](https://github.com/kdeldycke/dotfiles/blob/c04296d29e5f5ce48687f79554b265b3e89d5dbb/install.sh#L230).
 
 ## Python `>=3.7.3` required
 
-xbar plugins are self-contained scripts. As such, the
+Xbar plugins are self-contained scripts. As such,
 `meta_package_manager.7h.py` needs to be able to run without any extra
 dependency, on the pre-installed Python distribution that ships with macOS.
 
-xbar itself
+Xbar itself
 [requires macOS Catalina or newer (>= 10.15)](https://github.com/matryer/xbar/blame/2d063e0e46a0e427aedef62dc047b0065602cd40/README.md#L9).
 The embedded
 [Python 2.x on this platform is deprecated](https://developer.apple.com/documentation/macos-release-notes/macos-catalina-10_15-release-notes):
@@ -96,12 +101,12 @@ A release is ready when both the package and the plugin reach a stable state.
 If the plugin has been changed between releases, a
 [copy of the plugin is pushed](https://github.com/matryer/xbar-plugins/pulls?q=is%3Apr%20%22Meta%20Package%20Manager%22)
 to the
-[official xbar plugin repository](https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py).
+[official Xbar plugin repository](https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py).
 
 ## Release process
 
 1. [Fork](https://help.github.com/articles/fork-a-repo/) the official
-   [xbar plugin repository](https://github.com/matryer/xbar-plugins).
+   [Xbar plugin repository](https://github.com/matryer/xbar-plugins).
 
 1. Fetch a local copy of the fork:
 

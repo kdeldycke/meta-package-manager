@@ -612,7 +612,7 @@ def install(ctx, package_id):
     selected_managers = tuple(ctx.obj.selected_managers)
 
     logger.info(
-        f"Package manager order: {', '.join([m.id for m in ctx.obj.selected_managers])}"
+        f"Package manager order: {', '.join([m.id for m in selected_managers])}"
     )
 
     for manager in selected_managers:

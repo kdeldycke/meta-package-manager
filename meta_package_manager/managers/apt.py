@@ -28,30 +28,31 @@ class APT(PackageManager):
     """Base package manager shared by variation of the apt command.
 
     Documentation:
-    http://manpages.ubuntu.com/manpages/xenial/man8/apt.8.html
+    - https://wiki.debian.org/AptCLI
+    - http://manpages.ubuntu.com/manpages/xenial/man8/apt.8.html
     """
 
     platforms = frozenset({LINUX})
 
     requirement = "1.0.0"
 
+    post_args = ("--yes", "--quiet")
+
     version_regex = r"apt\s+(?P<version>\S+)"
     """
     .. code-block:: shell-session
 
         ► apt --version
-        apt 1.2.15 (amd64)
+        apt 2.0.6 (amd64)
     """
 
     @property
     def installed(self):
         """Fetch installed packages from ``apt list`` output.
 
-        Raw CLI output samples:
-
         .. code-block:: shell-session
 
-            ► apt list --installed --quiet
+            ► apt list --installed --yes --quiet
             Listing...
             adduser/xenial,now 3.113+nmu3ubuntu4 all [installed]
             base-files/xenial-updates,now 9.4ubuntu4.3 amd64 [installed]
@@ -80,7 +81,7 @@ class APT(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli("list", "--installed", "--quiet")
+        output = self.run_cli("list", "--installed")
 
         regexp = re.compile(r"(\S+)\/\S+ (\S+) .*")
         for package in output.splitlines():
@@ -99,18 +100,16 @@ class APT(PackageManager):
     def outdated(self):
         """Fetch outdated packages from ``apt list`` output.
 
-        Raw CLI output samples:
-
         .. code-block:: shell-session
 
-            ► apt list --upgradable --quiet
+            ► apt list --upgradable --yes --quiet
             Listing...
             apt/xenial-updates 1.2.19 amd64 [upgradable from: 1.2.15ubuntu0.2]
             nano/xenial-updates 2.5.3-2ubuntu2 amd64 [upgradable from: 2.5.3-2]
         """
         outdated = {}
 
-        output = self.run_cli("list", "--upgradable", "--quiet")
+        output = self.run_cli("list", "--upgradable")
 
         regexp = re.compile(r"(\S+)\/\S+ (\S+).*\[upgradable from: (\S+)\]")
         for package in output.splitlines():
@@ -131,7 +130,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt search abc --quiet --names-only
+            ► apt search abc --names-only --yes --quiet
             Sorting...
             Full Text Search...
             abcde/xenial 2.7.1-1 all
@@ -151,7 +150,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt search "^sed$" --quiet --names-only
+            ► apt search ^sed$ --names-only --yes --quiet
             Sorting...
             Full Text Search...
             sed/xenial 2.1.9-3 all
@@ -159,7 +158,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt search abc --quiet --full
+            ► apt search abc --full --yes --quiet
             Sorting...
             Full Text Search...
             abcde/xenial 2.7.1-1 all
@@ -175,7 +174,7 @@ class APT(PackageManager):
 
             midi/xenial 20160103-1 amd64
               converter from ABC to MIDI format and back
-              (...)
+            (...)
         """
         matches = {}
 
@@ -189,7 +188,7 @@ class APT(PackageManager):
             # in the CLI output after its execution.
             search_arg = "--full"
 
-        output = self.run_cli("search", query, "--quiet", search_arg)
+        output = self.run_cli("search", query, search_arg)
 
         regexp = re.compile(
             r"""
@@ -219,42 +218,55 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt install bat
+            ► sudo apt install git --yes --quiet
         """
         super().install(package_id)
-        return self.run_cli("install", package_id)
+        return self.run_cli("install", package_id, override_pre_cmds=("sudo",))
 
     def upgrade_cli(self, package_id=None):
-        """.. code-block:: shell-session.
+        """ Generates the upgrade CLI.
 
-        ► apt update bat
+        .. code-block:: shell-session.
+
+            ► sudo apt install --only-upgrade git --yes --quiet
+
+        .. code-block:: shell-session.
+
+            ► sudo apt upgrade --yes --quiet
         """
-        return self.build_cli("update", package_id)
+        if package_id:
+            return self.build_cli("install", "--only-upgrade", package_id, override_pre_cmds=("sudo",))
+        return self.build_cli("upgrade", override_pre_cmds=("sudo",))
 
     def sync(self):
-        """.. code-block:: shell-session.
+        """Sync package metadata.
 
-        ► apt update --quiet Hit:1 http://archive.ubuntu.com xenial InRelease Get:2
-        http://archive.ubuntu.com xenial-updates InRelease [102 kB] Get:3
-        http://archive.ubuntu.com xenial-security InRelease [102 kB] Get:4
-        http://archive.ubuntu.com xenial/main Translation-en [568 kB] Fetched 6,868 kB
-        in 2s (2,680 kB/s) Reading package lists... Building dependency tree... Reading
-        state information...
+        .. code-block:: shell-session
+
+            ► sudo apt update --yes --quiet
+            Hit:1 http://archive.ubuntu.com xenial InRelease
+            Get:2 http://archive.ubuntu.com xenial-updates InRelease [102 kB]
+            Get:3 http://archive.ubuntu.com xenial-security InRelease [102 kB]
+            Get:4 http://archive.ubuntu.com xenial/main Translation-en [568 kB]
+            Fetched 6,868 kB in 2s (2,680 kB/s)
+            Reading package lists...
+            Building dependency tree...
+            Reading state information...
         """
         super().sync()
-        self.run_cli("update", "--quiet")
+        self.run_cli("update", override_pre_cmds=("sudo",))
 
     def cleanup(self):
         """Runs:
 
         .. code-block:: shell-session
 
-            ► sudo apt -y autoremove
-            ► sudo apt clean
+            ► sudo apt autoremove --yes --quiet
+            ► sudo apt clean --yes --quiet
         """
         super().cleanup()
-        for commands in (("-y", "autoremove"), ("clean",)):
-            self.run_cli(*commands, override_pre_cmds=("sudo",))
+        for command in ("autoremove", "clean"):
+            self.run_cli(command, override_pre_cmds=("sudo",))
 
 
 class APT_Mint(APT):
@@ -279,7 +291,7 @@ class APT_Mint(APT):
     def search(self, query, extended, exact):
         """.. code-block:: shell-session.
 
-            ► /usr/local/bin/apt search --quiet sed
+            ► /usr/local/bin/apt search sed --yes --quiet
             v   librust-slog-2.5+erased-serde-dev  -
             p   python3-blessed                    - Practical wrapper
             i   sed                                - GNU stream editor
@@ -287,7 +299,7 @@ class APT_Mint(APT):
 
         .. code-block:: shell-session
 
-            ► /usr/local/bin/apt search --quiet ^sed$
+            ► /usr/local/bin/apt search ^sed$ --yes --quiet
             i   sed              - GNU stream editor
             p   sed:i386         - GNU stream editor
         """
@@ -297,7 +309,7 @@ class APT_Mint(APT):
             # Rely on apt regexp support to speed-up exact match.
             query = f"^{query}$"
 
-        output = self.run_cli("search", "--quiet", query)
+        output = self.run_cli("search", query)
 
         regexp = re.compile(
             r"""

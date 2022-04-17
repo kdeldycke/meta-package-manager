@@ -6,8 +6,9 @@
 This version is not released yet and is under active development.
 ```
 
-- \[snap\] Fix command argument order. Closes {issue}`579`.
-- \[mpm\] Replace `sphinx_tabs` by `sphinx-design`.
+- \[apt\] Add missing `sudo` pre-commands for `apt` calls that requires it.
+  Closes {issue}`496` and {issue}`579`.
+- \[snap\] Fix command argument order. Address {issue}`579`.
 - \[xbar\] Fix location of `mpm` binary on Apple Silicon machines.
 
 ## {gh}`4.13.0 (2022-04-16) <compare/v4.12.1...v4.13.0>`

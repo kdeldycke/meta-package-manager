@@ -309,6 +309,12 @@ class PackageManager:
         # is executable, and
         # match the version requirement.
         """
+        logger.debug(
+            f"{self.id} is supported: {self.supported}; "
+            f"found at: {self.cli_path}; "
+            f"is executable: {self.executable}; "
+            f"is fresh: {self.fresh}."
+        )
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
     @classmethod

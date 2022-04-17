@@ -1,13 +1,13 @@
-meta\_package\_manager.xbar package
-===================================
+meta\_package\_manager.bar\_plugin package
+==========================================
 
 Submodules
 ----------
 
-meta\_package\_manager.xbar.meta\_package\_manager module
----------------------------------------------------------
+meta\_package\_manager.bar\_plugin.meta\_package\_manager module
+----------------------------------------------------------------
 
-.. automodule:: meta_package_manager.xbar.meta_package_manager
+.. automodule:: meta_package_manager.bar_plugin.meta_package_manager
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ meta\_package\_manager.xbar.meta\_package\_manager module
 Module contents
 ---------------
 
-.. automodule:: meta_package_manager.xbar
+.. automodule:: meta_package_manager.bar_plugin
    :members:
    :undoc-members:
    :show-inheritance:

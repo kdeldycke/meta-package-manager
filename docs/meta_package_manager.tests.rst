@@ -12,6 +12,14 @@ meta\_package\_manager.tests.conftest module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.tests.test\_bar\_plugin module
+-----------------------------------------------------
+
+.. automodule:: meta_package_manager.tests.test_bar_plugin
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.tests.test\_cli module
 ---------------------------------------------
 
@@ -136,14 +144,6 @@ meta\_package\_manager.tests.test\_version module
 -------------------------------------------------
 
 .. automodule:: meta_package_manager.tests.test_version
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-meta\_package\_manager.tests.test\_xbar\_plugin module
-------------------------------------------------------
-
-.. automodule:: meta_package_manager.tests.test_xbar_plugin
    :members:
    :undoc-members:
    :show-inheritance:

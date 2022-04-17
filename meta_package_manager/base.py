@@ -264,7 +264,9 @@ class PackageManager:
             if parts:
                 version_string = parts.groupdict().get("version")
                 logger.debug(f"Extracted version: {version_string!r}")
-                return parse_version(version_string)
+                parsed_version = parse_version(version_string)
+                logger.debug(f"Parsed version: {parsed_version!r}")
+                return parsed_version
 
     @cached_property
     def supported(self):

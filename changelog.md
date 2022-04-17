@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`4.13.1 (unreleased) <compare/v4.13.0...main>`
-
-```{important}
-This version is not released yet and is under active development.
-```
+## {gh}`4.13.1 (2022-04-17) <compare/v4.13.0...v4.13.1>`
 
 - \[apt\] Add missing `sudo` pre-commands for `apt` calls that requires it.
   Closes {issue}`496` and {issue}`579`.

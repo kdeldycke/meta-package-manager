@@ -224,7 +224,7 @@ class APT(PackageManager):
         return self.run_cli("install", package_id, override_pre_cmds=("sudo",))
 
     def upgrade_cli(self, package_id=None):
-        """ Generates the upgrade CLI.
+        """Generates the upgrade CLI.
 
         .. code-block:: shell-session.
 
@@ -235,7 +235,9 @@ class APT(PackageManager):
             ► sudo apt upgrade --yes --quiet
         """
         if package_id:
-            return self.build_cli("install", "--only-upgrade", package_id, override_pre_cmds=("sudo",))
+            return self.build_cli(
+                "install", "--only-upgrade", package_id, override_pre_cmds=("sudo",)
+            )
         return self.build_cli("upgrade", override_pre_cmds=("sudo",))
 
     def sync(self):

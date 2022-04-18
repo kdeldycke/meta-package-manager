@@ -34,6 +34,7 @@ import os
 import re
 import subprocess
 from configparser import RawConfigParser
+from unittest.mock import patch
 
 
 def getenv_str(var, default=None):
@@ -105,8 +106,8 @@ dark_mode = (
 """Detect dark mode."""
 
 
-def fix_environment():
-    """Tweak environment variable to find non-default system-wide binaries.
+def extended_environment():
+    """Returns a tweaked environment extending global path to find non-default system-wide binaries.
 
     macOS does not put ``/usr/local/bin`` or ``/opt/local/bin`` in the ``PATH`` for GUI
     apps. For some package managers this is a problem. Additioanlly Homebrew and
@@ -114,7 +115,9 @@ def fix_environment():
     necessary binaries, we overload the path. Current preference order would equate to
     Homebrew, Macports, then system.
     """
-    os.environ["PATH"] = ":".join(
+    # Cast to dict to make a copy and prevent modification of the global environment.
+    env_copy = dict(os.environ)
+    env_copy["PATH"] = ":".join(
         (
             # Homebrew Apple silicon.
             "/opt/homebrew/bin",
@@ -129,7 +132,7 @@ def fix_environment():
             os.environ.get("PATH", ""),
         )
     )
-
+    return env_copy
 
 def pp(*args):
     """Print the item line.
@@ -388,5 +391,7 @@ def print_menu():
 
 
 if __name__ == "__main__":
-    fix_environment()
-    print_menu()
+
+    # Wrap plugin execution with our custom environment variables to avoid leaks.
+    with patch.dict("os.environ", extended_environment()):
+        print_menu()

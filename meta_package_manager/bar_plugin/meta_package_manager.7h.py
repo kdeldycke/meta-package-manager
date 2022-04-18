@@ -109,7 +109,8 @@ dark_mode = (
 
 
 def extended_environment():
-    """Returns a tweaked environment extending global path to find non-default system-wide binaries.
+    """Returns a tweaked environment extending global path to find non-default system-
+    wide binaries.
 
     macOS does not put ``/usr/local/bin`` or ``/opt/local/bin`` in the ``PATH`` for GUI
     apps. For some package managers this is a problem. Additioanlly Homebrew and
@@ -140,8 +141,9 @@ def extended_environment():
 def locate_python():
     """Find the location of the default Python executable on the system.
 
-    This plugin being run by Python, we have the one called by Xbar/SwiftBar to fallback to. But before that,
-    we attempt to locate it by respecting the environment variables.
+    This plugin being run by Python, we have the one called by Xbar/SwiftBar to fallback
+    to. But before that, we attempt to locate it by respecting the environment
+    variables.
     """
     # Search for a Python executable in the environment.
     for py_name in ("python", "python3"):

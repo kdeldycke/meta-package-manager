@@ -14,7 +14,7 @@ install
 usecase
 cli-help
 configuration
-xbar
+bar-plugin
 falsehoods
 ```
 

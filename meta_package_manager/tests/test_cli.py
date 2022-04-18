@@ -18,6 +18,7 @@
 import json
 import re
 import subprocess
+from shutil import which
 
 import pytest
 from boltons.strutils import strip_ansi
@@ -58,8 +59,16 @@ class TestBaseCLI:
     """
 
     def test_executable_module(self):
+        # Locate Python executable
+        for py_name in ("python", "python3"):
+            py_path = which(py_name)
+            if py_path:
+                break
+
+        assert py_path
+
         process = subprocess.run(
-            ("python", "-m", "meta_package_manager", "--version"),
+            (py_path, "-m", "meta_package_manager", "--version"),
             capture_output=True,
             encoding="utf-8",
         )

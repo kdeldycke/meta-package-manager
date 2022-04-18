@@ -36,6 +36,30 @@ The plugin is configurable with these environment variables:
 ```
 ````
 
+### Xbar
+
+````{grid} 1 2 3 4
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_SUBMENU_LAYOUT = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
+:img-top: images/xbar-flatmenu-standard-rendering.png
+:link: images/xbar-flatmenu-standard-rendering.png
+```
+
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_SUBMENU_LAYOUT = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span></br>(default)
+:img-top: images/xbar-flatmenu-table-rendering.png
+:link: images/xbar-flatmenu-table-rendering.png
+```
+
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_SUBMENU_LAYOUT = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span>
+:img-top: images/xbar-submenu-table-rendering.png
+:link: images/xbar-submenu-table-rendering.png
+```
+
+```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_SUBMENU_LAYOUT = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
+:img-top: images/xbar-submenu-strandard-rendering.png
+:link: images/xbar-submenu-strandard-rendering.png
+```
+````
+
 ## Location
 
 A copy of the latest stable version of the plugin is

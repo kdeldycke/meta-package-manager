@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[bar-plugin\] Rename all reference of `xbar` to the generic `bar-plugin` label.
+- \[bar-plugin\] Improve search for Python and `mpm` executable.
 - \[bar-plugin\] Prevent leaks when modifying environment variables.
 - \[mpm\] Rename `--xbar-plugin-path` option to `--bar-plugin-path`.
 - \[mpm\] Add a `--cli-format swiftbar` option.

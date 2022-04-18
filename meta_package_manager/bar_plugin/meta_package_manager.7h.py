@@ -33,7 +33,9 @@ import json
 import os
 import re
 import subprocess
+import sys
 from configparser import RawConfigParser
+from shutil import which
 from unittest.mock import patch
 
 
@@ -134,6 +136,22 @@ def extended_environment():
     )
     return env_copy
 
+
+def locate_python():
+    """Find the location of the default Python executable on the system.
+
+    This plugin being run by Python, we have the one called by Xbar/SwiftBar to fallback to. But before that,
+    we attempt to locate it by respecting the environment variables.
+    """
+    # Search for a Python executable in the environment.
+    for py_name in ("python", "python3"):
+        py_path = which(py_name)
+        if py_path:
+            return py_path
+    # Returns the Python executable used to execute this script.
+    return sys.executable
+
+
 def pp(*args):
     """Print the item line.
 
@@ -203,12 +221,19 @@ def print_menu():
     - https://github.com/matryer/xbar-plugins/blob/main/CONTRIBUTING.md#plugin-api
     - https://github.com/swiftbar/SwiftBar#plugin-api
     """
-    # Search for generic mpm CLI on system.
+    py_path = locate_python()
+
+    # Search for mpm execution alternatives, either direct mpm call or via Python.
+    mpm_exec = (which("mpm"),)
+    if not mpm_exec:
+        mpm_exec = (py_path, "-m", "meta_package_manager")
+
+    # Test mpm execution.
     code = None
     error = None
     try:
         process = subprocess.run(
-            ("mpm", "--version"), capture_output=True, encoding="utf-8"
+            (*mpm_exec, "--version"), capture_output=True, encoding="utf-8"
         )
         code = process.returncode
         error = process.stderr
@@ -237,8 +262,8 @@ def print_menu():
         action_msg = "Install" if not mpm_installed else "Upgrade"
         min_version_str = ".".join(map(str, MPM_MIN_VERSION))
         pp(
-            f"{action_msg} mpm CLI >= v{min_version_str}",
-            "shell=python3",
+            f"{action_msg} mpm >= v{min_version_str}",
+            f"shell={py_path()}",
             "param1=-m",
             "param2=pip",
             "param3=install",
@@ -255,12 +280,12 @@ def print_menu():
         return
 
     # Force a sync of all local package databases.
-    subprocess.run(("mpm", "--verbosity", "ERROR", "sync"))
+    subprocess.run((*mpm_exec, "--verbosity", "ERROR", "sync"))
 
     # Fetch outdated package from all package manager available on the system.
     process = subprocess.run(
         (
-            "mpm",
+            *mpm_exec,
             "--verbosity",
             "ERROR",
             "--output-format",

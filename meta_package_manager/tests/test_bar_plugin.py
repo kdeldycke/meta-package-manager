@@ -123,3 +123,22 @@ class TestBarPlugin:
             extra_env["VAR_TABLE_RENDERING"] = str(table_rendering)
 
         self.plugin_output_checks(extra_checks, extra_env=extra_env)
+
+    @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
+    @pytest.mark.parametrize("shell_args",
+        (
+            ("/bin/bash",),
+            ("/bin/zsh",),
+            ("/usr/bin/env", "bash"),
+            ("/usr/bin/env", "zsh"),
+        )
+    )
+    def test_shells(self, shell_args):
+        """Test execution of plugin on different shells.
+
+        See the list of shell supported by SwiftBar at:
+        https://github.com/swiftbar/SwiftBar/commit/366695d594884fe141bc1752ab0f25d2c43334fa
+        """
+        process = subprocess.run((*shell_args, "-c", "-l", bar_plugin.__file__))
+        assert process.returncode == 0
+        assert not process.stderr

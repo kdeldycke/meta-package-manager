@@ -5,7 +5,7 @@
 # <xbar.author.github>kdeldycke</xbar.author.github>
 # <xbar.desc>List outdated packages and manage upgrades.</xbar.desc>
 # <xbar.dependencies>python,mpm</xbar.dependencies>
-# <xbar.image>https://i.imgur.com/CiQpQ42.png</xbar.image>
+# <xbar.image>https://i.imgur.com/B5wdxIc.png</xbar.image>
 # <xbar.abouturl>https://github.com/kdeldycke/meta-package-manager</xbar.abouturl>
 # <xbar.var>boolean(VAR_SUBMENU_LAYOUT=false): Group packages into manager sub-menus.</xbar.var>
 # <xbar.var>boolean(VAR_TABLE_RENDERING=false): Aligns package names and versions in a table for easier visual parsing.</xbar.var>

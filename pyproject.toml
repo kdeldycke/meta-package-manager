@@ -90,7 +90,7 @@ pytest-randomly = "^3.11.0"
 pytest-xdist = { extras = ["psutil"], version = "^2.5.0" }
 pyyaml = "^6.0"
 sphinx = "^4.5.0"
-sphinx-click = "^4.0.0"
+sphinx-click = "^4.0.3"
 sphinx-copybutton = "^0.5.0"
 sphinx-design = "^0.0.13"
 sphinx-issues = "^3.0.1"

@@ -140,10 +140,13 @@ def print_stats(data):
     echo(f"{total_installed} package{plural} total{per_manager_totals}.")
 
 
-class BarPluginRenderer:
+class BarPluginRenderer(MPMPlugin):
     """All utilities used to render output compatible with both Xbar and SwiftBar plugin dialect.
 
-    We choose to move all the layout-related code into mpm to allow for more complex rendering and intricte layouts.
+    The minimal code to locate ``mpm`` and call it and print its output resides in the plugin itself.
+
+    All other stuff, especially the layout-related code is managed here, to allow for more complex
+    rendering, intricate layouts and easier updates.
     """
 
     PLUGIN_DIALECTS = frozenset({"xbar", "swiftbar"})
@@ -189,8 +192,8 @@ class BarPluginRenderer:
         * a second one that is the exact copy of the above but forces the execution
         by the way of a visible terminal
         """
-        MPMPlugin.pp(*args, "terminal=false")
-        MPMPlugin.pp(*args, "terminal=true", "alternate=true")
+        self.pp(*args, "terminal=false")
+        self.pp(*args, "terminal=true", "alternate=true")
 
     def print_upgrade_all_item(self, manager, submenu=""):
         """Print the menu entry to upgrade all outdated package of a manager."""
@@ -210,7 +213,7 @@ class BarPluginRenderer:
         # Print menu bar icon with number of available upgrades.
         total_outdated = sum(len(m["packages"]) for m in managers)
         total_errors = sum(len(m.get("errors", [])) for m in managers)
-        MPMPlugin.pp(
+        self.pp(
             (f"🎁↑{total_outdated}" if total_outdated else "📦✓")
             + (f" ⚠️{total_errors}" if total_errors else ""),
             "dropdown=false",
@@ -291,7 +294,7 @@ class BarPluginRenderer:
             error = ""
             if self.submenu_layout and manager.get("errors", None):
                 error = "⚠️ "
-            MPMPlugin.pp(f"{error}{header}", bar_plugin.FONTS["summary"])
+            self.pp(f"{error}{header}", bar_plugin.FONTS["summary"])
 
             # Print a menu entry for each outdated packages.
             for pkg_info in manager["packages"]:
@@ -310,7 +313,7 @@ class BarPluginRenderer:
 
             for error_msg in manager.get("errors", []):
                 print("-----" if self.submenu_layout else "---")
-                MPMPlugin.print_error(error_msg, submenu)
+                self.print_error(error_msg, submenu)
 
     def render(self, outdated_data):
         # Capture all print statement.

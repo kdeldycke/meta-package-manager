@@ -18,19 +18,25 @@
 """Helpers and utilities to render and print content."""
 
 import builtins
-import io
 import json
+import sys
 from functools import partial
+from io import StringIO
 from operator import itemgetter
 from pathlib import Path
 from unittest.mock import patch
+
+if sys.version_info >= (3, 8):
+    from functools import cached_property
+else:
+    from boltons.cacheutils import cachedproperty as cached_property
 
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from click_extra import echo, get_current_context, style
 from click_extra.tabulate import TabularOutputFormatter
 
-from . import __version__, bar_plugin
+from . import __version__
 from .bar_plugin import MPMPlugin
 from .version import TokenizedString
 
@@ -149,14 +155,21 @@ class BarPluginRenderer(MPMPlugin):
     rendering, intricate layouts and easier updates.
     """
 
-    PLUGIN_DIALECTS = frozenset({"xbar", "swiftbar"})
-    """List of supported plugin rendering formats."""
+    @cached_property
+    def submenu_layout(self):
+        """ Group packages into manager sub-menus.
 
-    def __init__(self, dialect="swiftbar", submenu_layout=False, table_rendering=True):
-        assert dialect in self.PLUGIN_DIALECTS
-        self.dialect = dialect
-        self.submenu_layout = submenu_layout
-        self.table_rendering = table_rendering
+        If ``True``, will replace the default flat layout with an alternative structure
+        where actions are grouped into submenus, one for each manager.
+        """
+        return self.getenv_bool("VAR_SUBMENU_LAYOUT", False)
+
+    @cached_property
+    def dark_mode(self):
+        """Detect dark mode by inspecting environment variables."""
+        if self.is_swiftbar:
+            return self.getenv_str("OS_APPEARANCE", "light") == "dark"
+        return self.getenv_bool("XBARDarkMode")
 
     @staticmethod
     def render_cli(cmd_args, plugin_format=False):
@@ -188,9 +201,9 @@ class BarPluginRenderer(MPMPlugin):
     def print_cli_item(self, *args):
         """Print two CLI entries:
 
-        * one that is silent
-        * a second one that is the exact copy of the above but forces the execution
-        by the way of a visible terminal
+        - one that is silent
+        - a second one that is the exact copy of the above but forces the execution
+          by the way of a visible terminal
         """
         self.pp(*args, "terminal=false")
         self.pp(*args, "terminal=true", "alternate=true")
@@ -203,12 +216,13 @@ class BarPluginRenderer(MPMPlugin):
             self.print_cli_item(
                 f"{submenu}🆙 Upgrade all {manager['id']} packages",
                 manager["upgrade_all_cli"],
-                bar_plugin.FONTS["normal"],
+                self.default_font,
                 "refresh=true",
             )
 
     def _render(self, outdated_data):
         managers = outdated_data.values()
+        font = self.monospace_font if self.table_rendering else self.default_font
 
         # Print menu bar icon with number of available upgrades.
         total_outdated = sum(len(m["packages"]) for m in managers)
@@ -294,7 +308,7 @@ class BarPluginRenderer(MPMPlugin):
             error = ""
             if self.submenu_layout and manager.get("errors", None):
                 error = "⚠️ "
-            self.pp(f"{error}{header}", bar_plugin.FONTS["summary"])
+            self.pp(f"{error}{header}", font)
 
             # Print a menu entry for each outdated packages.
             for pkg_info in manager["packages"]:
@@ -305,7 +319,7 @@ class BarPluginRenderer(MPMPlugin):
                     + up_sep
                     + f"{pkg_info['latest_version']:<{latest_max_len}}",
                     pkg_info["upgrade_cli"],
-                    bar_plugin.FONTS["package"],
+                    font,
                     "refresh=true",
                 )
 
@@ -317,7 +331,7 @@ class BarPluginRenderer(MPMPlugin):
 
     def render(self, outdated_data):
         # Capture all print statement.
-        capture = io.StringIO()
+        capture = StringIO()
         print_capture = partial(print, file=capture)
         with patch.object(builtins, "print", new=print_capture):
             self._render(outdated_data)

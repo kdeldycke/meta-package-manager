@@ -6,14 +6,13 @@
 This version is not released yet and is under active development.
 ```
 
+- \[bar-plugin\] Add new `DEFAULT_FONT` and `MONOSPACE_FONT` variable.
 - \[bar-plugin\] Rename all reference of `xbar` to the generic `bar-plugin` label.
 - \[bar-plugin\] Improve search for Python and `mpm` executable.
 - \[bar-plugin\] Restructure the plugin ↔ mpm relationship to delegate all
   plugin layout and rendering logic to `mpm`.
 - \[bar-plugin\] Prevent leaks when modifying environment variables.
-- \[mpm\] Add new `--plugin`, `--plugin-submenu-layout`/`--plugin-flat-layout`,
-  `--plugin-aligned-columns`/`--plugin-no-alignment`,
-  `--plugin-dark-mode`/`--plugin-light-mode` options to `outdated` command.
+- \[mpm\] Add new `--plugin-output` option to `outdated` command.
 - \[mpm\] Rename `--xbar-plugin-path` option to `--bar-plugin-path`.
 - \[mpm\] Remove `-c`/`--cli-format` option.
 - \[mpm\] Use short-form selection option and fully-qualified path in

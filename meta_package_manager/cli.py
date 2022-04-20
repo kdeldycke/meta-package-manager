@@ -399,34 +399,16 @@ def installed(ctx):
 
 
 @mpm.command(short_help="List outdated packages.", section=EXPLORE)
-@option_group(
-    "Xbar/SwiftBar plugin options",
-    option(
-        "--plugin",
-        type=Choice(sorted(BarPluginRenderer.PLUGIN_DIALECTS), case_sensitive=False),
-        help="Output results for direct consumption by an Xbar/SwiftBar-compatible plugin.",
-    ),
-    option(
-        "--plugin-submenu-layout/--plugin-flat-layout",
-        is_flag=True,
-        default=False,
-        help="Group packages into a sub-menu for each manager.",
-    ),
-    option(
-        "--plugin-aligned-columns/--plugin-no-alignment",
-        is_flag=True,
-        default=True,
-        help="Aligns package names and versions in a table for easier visual parsing.",
-    ),
-    option(
-        "--plugin-dark-mode/--plugin-light-mode",
-        is_flag=True,
-        default=False,
-        help="Tweak output for dark or light colors environment.",
-    ),
+@option(
+    "--plugin-output",
+    is_flag=True,
+    default=False,
+    help="Output results for direct consumption by an Xbar/SwiftBar-compatible plugin."
+    " The layout is dynamic depending on environment variables set by both Xbar and "
+    "SwiftBar.",
 )
 @pass_context
-def outdated(ctx, plugin, plugin_submenu_layout, plugin_aligned_columns, plugin_dark_mode):
+def outdated(ctx, plugin_output):
     """List available package upgrades and their versions for each manager."""
     # Build-up a global list of outdated packages per manager.
     outdated_data = {}
@@ -440,7 +422,7 @@ def outdated(ctx, plugin, plugin_submenu_layout, plugin_aligned_columns, plugin_
             continue
 
         for info in packages:
-            info.update({"upgrade_cli": BarPluginRenderer.render_cli(manager.upgrade_cli(info["id"]), plugin_format=plugin)})
+            info.update({"upgrade_cli": BarPluginRenderer.render_cli(manager.upgrade_cli(info["id"]), plugin_format=plugin_output)})
 
         outdated_data[manager.id] = {
             "id": manager.id,
@@ -457,7 +439,7 @@ def outdated(ctx, plugin, plugin_submenu_layout, plugin_aligned_columns, plugin_
                 # Fallback on mpm itself which is capable of simulating a full upgrade.
                 mpm_exec = bar_plugin.MPMPlugin().mpm_exec
                 upgrade_all_cli = (*mpm_exec, f"--{manager.id}", "upgrade")
-            outdated_data[manager.id]["upgrade_all_cli"] = BarPluginRenderer.render_cli(upgrade_all_cli, plugin_format=plugin)
+            outdated_data[manager.id]["upgrade_all_cli"] = BarPluginRenderer.render_cli(upgrade_all_cli, plugin_format=plugin_output)
 
         # Serialize errors at the last minute to gather all we encountered.
         outdated_data[manager.id]["errors"] = list(
@@ -470,11 +452,8 @@ def outdated(ctx, plugin, plugin_submenu_layout, plugin_aligned_columns, plugin_
         return
 
     # Xbar/SwiftBar-friendly plugin rendering.
-    if plugin:
-        BarPluginRenderer(
-            dialect=plugin,
-            submenu_layout=plugin_submenu_layout,
-            table_rendering=plugin_aligned_columns).print(outdated_data)
+    if plugin_output:
+        BarPluginRenderer().print(outdated_data)
         return
 
     # Human-friendly content rendering.

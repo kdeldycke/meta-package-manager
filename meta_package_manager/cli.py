@@ -69,6 +69,7 @@ SNAPSHOTS = Section("Package snapshots commands")
 
 
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt")
+"""Sequence of package managers as defined by XKCD #1654."""
 
 
 def add_manager_to_selection(ctx, param, selected):

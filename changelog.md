@@ -18,6 +18,8 @@ This version is not released yet and is under active development.
 - \[mpm\] Remove `-c`/`--cli-format` option.
 - \[mpm\] Use short-form selection option and fully-qualified path in
   `mpm`-based upgrade-all CLIs produced by `outdated` command.
+- \[mpm\] Fix local overriding of CLI parameters leading to missing `sudo`
+  pre-command. Closes {issue}`579`.
 
 ## {gh}`4.13.1 (2022-04-17) <compare/v4.13.0...v4.13.1>`
 

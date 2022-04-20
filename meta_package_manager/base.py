@@ -425,6 +425,7 @@ class PackageManager:
         # Prepare the full list of CLI arguments.
         if override_pre_cmds:
             assert isinstance(override_pre_cmds, tuple)
+            params.extend(override_pre_cmds)
         elif auto_pre_cmds:
             params.extend(self.pre_cmds)
 
@@ -432,6 +433,7 @@ class PackageManager:
 
         if override_pre_args:
             assert isinstance(override_pre_args, tuple)
+            params.extend(override_pre_args)
         elif auto_pre_args:
             params.extend(self.pre_args)
 
@@ -440,6 +442,7 @@ class PackageManager:
 
         if override_post_args:
             assert isinstance(override_post_args, tuple)
+            params.extend(override_post_args)
         elif auto_post_args:
             params.extend(self.post_args)
 

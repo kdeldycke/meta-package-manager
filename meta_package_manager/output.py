@@ -164,8 +164,9 @@ class BarPluginRenderer:
         If ``plugin_format`` is ``True`` returns a string compatible with Xbar and SwiftBar plugin format,
         i.e. this schema:
 
-            shell=cmd_args[0] param1=cmd_args[1] param2=cmd_args[2] param2=cmd_args[2] ...
+        .. code-block::
 
+            shell=cmd_args[0] param1=cmd_args[1] param2=cmd_args[2] param2=cmd_args[2] ...
         """
         assert isinstance(cmd_args, tuple)
         # Serialize Path instances.

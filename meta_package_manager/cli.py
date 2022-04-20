@@ -404,25 +404,25 @@ def installed(ctx):
     option(
         "--plugin",
         type=Choice(sorted(BarPluginRenderer.PLUGIN_DIALECTS), case_sensitive=False),
-        help="Render the results for direct consumption by an Xbar/SwiftBar-compatible plugin.",
+        help="Output results for direct consumption by an Xbar/SwiftBar-compatible plugin.",
     ),
     option(
         "--plugin-submenu-layout/--plugin-flat-layout",
         is_flag=True,
         default=False,
-        help="",
+        help="Group packages into a sub-menu for each manager.",
     ),
     option(
         "--plugin-aligned-columns/--plugin-no-alignment",
         is_flag=True,
         default=True,
-        help="",
+        help="Aligns package names and versions in a table for easier visual parsing.",
     ),
     option(
         "--plugin-dark-mode/--plugin-light-mode",
         is_flag=True,
         default=False,
-        help="",
+        help="Tweak output for dark or light colors environment.",
     ),
 )
 @pass_context

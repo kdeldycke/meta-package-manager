@@ -17,15 +17,21 @@
 
 """Helpers and utilities to render and print content."""
 
+import builtins
+import io
 import json
+from functools import partial
 from operator import itemgetter
 from pathlib import Path
+from unittest.mock import patch
 
+from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from click_extra import echo, get_current_context, style
 from click_extra.tabulate import TabularOutputFormatter
 
-from . import __version__
+from . import __version__, bar_plugin
+from .bar_plugin import MPMPlugin
 from .version import TokenizedString
 
 # List of fields IDs allowed to be sorted.
@@ -132,3 +138,187 @@ def print_stats(data):
         per_manager_totals = f" ({per_manager_totals})"
     plural = "s" if total_installed > 1 else ""
     echo(f"{total_installed} package{plural} total{per_manager_totals}.")
+
+
+class BarPluginRenderer:
+    """All utilities used to render output compatible with both Xbar and SwiftBar plugin dialect.
+
+    We choose to move all the layout-related code into mpm to allow for more complex rendering and intricte layouts.
+    """
+
+    PLUGIN_DIALECTS = frozenset({"xbar", "swiftbar"})
+    """List of supported plugin rendering formats."""
+
+    def __init__(self, dialect="swiftbar", submenu_layout=False, table_rendering=True):
+        assert dialect in self.PLUGIN_DIALECTS
+        self.dialect = dialect
+        self.submenu_layout = submenu_layout
+        self.table_rendering = table_rendering
+
+    @staticmethod
+    def render_cli(cmd_args, plugin_format=False):
+        """Return a formatted CLI in the requested format.
+
+        Returns a space-separated strings build on ``cmd_args`` list.
+
+        If ``plugin_format`` is ``True`` returns a string compatible with Xbar and SwiftBar plugin format,
+        i.e. this schema:
+
+            shell=cmd_args[0] param1=cmd_args[1] param2=cmd_args[2] param2=cmd_args[2] ...
+
+        """
+        assert isinstance(cmd_args, tuple)
+        # Serialize Path instances.
+        cmd_args = map(str, flatten(cmd_args))
+
+        if not plugin_format:
+            return " ".join(cmd_args)
+
+        # Renders CLI into the *bar plugin dialect.
+        plugin_params = []
+        for index, param_value in enumerate(cmd_args):
+            param_id = "shell" if index == 0 else f"param{index}"
+            plugin_params.append(f"{param_id}={param_value}")
+        return " ".join(plugin_params)
+
+    def print_cli_item(self, *args):
+        """Print two CLI entries:
+
+        * one that is silent
+        * a second one that is the exact copy of the above but forces the execution
+        by the way of a visible terminal
+        """
+        MPMPlugin.pp(*args, "terminal=false")
+        MPMPlugin.pp(*args, "terminal=true", "alternate=true")
+
+    def print_upgrade_all_item(self, manager, submenu=""):
+        """Print the menu entry to upgrade all outdated package of a manager."""
+        if manager.get("upgrade_all_cli"):
+            if self.submenu_layout:
+                print("-----")
+            self.print_cli_item(
+                f"{submenu}🆙 Upgrade all {manager['id']} packages",
+                manager["upgrade_all_cli"],
+                bar_plugin.FONTS["normal"],
+                "refresh=true",
+            )
+
+    def _render(self, outdated_data):
+        managers = outdated_data.values()
+
+        # Print menu bar icon with number of available upgrades.
+        total_outdated = sum(len(m["packages"]) for m in managers)
+        total_errors = sum(len(m.get("errors", [])) for m in managers)
+        MPMPlugin.pp(
+            (f"🎁↑{total_outdated}" if total_outdated else "📦✓")
+            + (f" ⚠️{total_errors}" if total_errors else ""),
+            "dropdown=false",
+        )
+
+        # Prefix for section content.
+        submenu = "--" if self.submenu_layout else ""
+
+        # String used to separate the left and right columns.
+        col_sep = "  " if self.table_rendering else " "
+        up_sep = " → "
+
+        # Compute global length constant.
+        global_outdated_len = max(len(str(len(m["packages"]))) for m in managers)
+        package_str = "package"
+        right_col_len = global_outdated_len + len(package_str) + 1  # +1 for plural
+
+        # Global maximum length of labels.
+        global_len_name = max(len(p["name"]) for m in managers for p in m["packages"])
+        global_len_manager = max(len(m["id"]) for m in managers)
+        global_len_left = max((global_len_manager, global_len_name))
+        global_len_installed = max(
+            len(p["installed_version"]) for m in managers for p in m["packages"]
+        )
+        global_len_latest = max(
+            len(p["latest_version"]) for m in managers for p in m["packages"]
+        )
+        global_len_right = max(
+            [
+                right_col_len,
+                global_len_installed + len(up_sep) + global_len_latest,
+            ]
+        )
+
+        for manager in managers:
+            plural = "s" if len(manager["packages"]) > 1 else ""
+            package_label = f"{package_str}{plural}"
+
+            name_max_len = installed_max_len = latest_max_len = 0
+
+            if self.table_rendering:
+
+                if self.submenu_layout:
+                    # Re-define layout maximum dimensions for each manager.
+                    left_col_len = global_len_manager
+                    if manager["packages"]:
+                        name_max_len = max(len(p["name"]) for p in manager["packages"])
+                        installed_max_len = max(
+                            len(p["installed_version"]) for p in manager["packages"]
+                        )
+                        latest_max_len = max(
+                            len(p["latest_version"]) for p in manager["packages"]
+                        )
+
+                else:
+                    # Layout constraints are defined across all managers.
+                    left_col_len = name_max_len = global_len_left
+                    installed_max_len = global_len_installed
+                    latest_max_len = global_len_latest
+                    right_col_len = global_len_right
+
+                outdated_label = (
+                    f"{len(manager['packages']):>{global_outdated_len}} {package_label:<8}"
+                )
+
+                header = f"{manager['id']:<{left_col_len}}{col_sep}{outdated_label:>{right_col_len}}"
+
+            # Variable-width / non-table / non-monospaced rendering.
+            else:
+                header = (
+                    f"{len(manager['packages'])} outdated {manager['name']} {package_label}"
+                )
+
+            # Print section separator before printing the manager header.
+            print("---")
+
+            # Print section header.
+            error = ""
+            if self.submenu_layout and manager.get("errors", None):
+                error = "⚠️ "
+            MPMPlugin.pp(f"{error}{header}", bar_plugin.FONTS["summary"])
+
+            # Print a menu entry for each outdated packages.
+            for pkg_info in manager["packages"]:
+                self.print_cli_item(
+                    f"{submenu}{pkg_info['name']:<{name_max_len}}"
+                    + col_sep
+                    + f"{pkg_info['installed_version']:>{installed_max_len}}"
+                    + up_sep
+                    + f"{pkg_info['latest_version']:<{latest_max_len}}",
+                    pkg_info["upgrade_cli"],
+                    bar_plugin.FONTS["package"],
+                    "refresh=true",
+                )
+
+            self.print_upgrade_all_item(manager, submenu)
+
+            for error_msg in manager.get("errors", []):
+                print("-----" if self.submenu_layout else "---")
+                MPMPlugin.print_error(error_msg, submenu)
+
+    def render(self, outdated_data):
+        # Capture all print statement.
+        capture = io.StringIO()
+        print_capture = partial(print, file=capture)
+        with patch.object(builtins, "print", new=print_capture):
+            self._render(outdated_data)
+        return capture.getvalue()
+
+    def print(self, outdated_data):
+        # Capturing the output of the plugin and re-printing it will introduce an extra line returns, hence the extra rstrip() call.
+        echo(self.render(outdated_data).rstrip())

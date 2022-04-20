@@ -87,32 +87,3 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
                 assert isinstance(pkg["latest_version"], str)
                 assert isinstance(pkg["name"], str)
                 assert isinstance(pkg["upgrade_cli"], str)
-
-    def test_cli_format_plain(self, invoke, subcmd):
-        result = invoke("--output-format", "json", subcmd, "--cli-format", "plain")
-        for outdated in json.loads(result.stdout).values():
-            for infos in outdated["packages"]:
-                assert isinstance(infos["upgrade_cli"], str)
-
-    def test_cli_format_fragments(self, invoke, subcmd):
-        result = invoke("--output-format", "json", subcmd, "--cli-format", "fragments")
-        for outdated in json.loads(result.stdout).values():
-            for infos in outdated["packages"]:
-                assert isinstance(infos["upgrade_cli"], list)
-                assert same(map(type, infos["upgrade_cli"]), str)
-
-    @pytest.mark.parametrize(
-        "cli_format,separator", (("xbar", " | "), ("swiftbar", " "))
-    )
-    def test_cli_format_bar_plugin(self, invoke, subcmd, cli_format, separator):
-        result = invoke("--output-format", "json", subcmd, "--cli-format", cli_format)
-        for outdated in json.loads(result.stdout).values():
-            for infos in outdated["packages"]:
-                assert isinstance(infos["upgrade_cli"], str)
-                assert "param1=" in infos["upgrade_cli"]
-                for param in infos["upgrade_cli"].split(separator):
-                    k, v = param.split("=", 1)
-                    assert k in BAR_PLUGIN_KEYWORDS
-                    assert set(v.lower()).issubset(
-                        digits + ascii_lowercase + './-_+="\\@:'
-                    )

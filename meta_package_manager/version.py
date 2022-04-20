@@ -90,6 +90,12 @@ class Token:
     def __str__(self):
         return self.string
 
+    def __len__(self):
+        return len(self.string)
+
+    def __format__(self, format_spec):
+        return self.string.__format__(format_spec)
+
     def __int__(self):
         return self.integer
 
@@ -173,6 +179,12 @@ class TokenizedString:
 
     def __str__(self):
         return self.string
+
+    def __len__(self):
+        return len(self.string)
+
+    def __format__(self, format_spec):
+        return self.string.__format__(format_spec)
 
     def pretty_print(self):
         return self.separator.join(map(str, self.tokens))

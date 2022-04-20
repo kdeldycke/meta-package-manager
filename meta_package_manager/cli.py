@@ -20,7 +20,6 @@ import re
 import sys
 from collections import namedtuple
 from datetime import datetime
-from functools import partial
 from io import TextIOWrapper
 from operator import getitem
 from pathlib import Path
@@ -51,9 +50,10 @@ else:
 from cloup import Section
 
 from . import __version__, bar_plugin, logger
-from .base import CLI_FORMATS, CLIError, PackageManager
+from .base import CLIError
 from .output import (
     SORTABLE_FIELDS,
+    BarPluginRenderer,
     TabularOutputFormatter,
     print_json,
     print_stats,
@@ -398,18 +398,35 @@ def installed(ctx):
 
 
 @mpm.command(short_help="List outdated packages.", section=EXPLORE)
-@option(
-    "-c",
-    "--cli-format",
-    type=Choice(sorted(CLI_FORMATS), case_sensitive=False),
-    default="plain",
-    help="Format of CLI fields in JSON output.",
+@option_group(
+    "Xbar/SwiftBar plugin options",
+    option(
+        "--plugin",
+        type=Choice(sorted(BarPluginRenderer.PLUGIN_DIALECTS), case_sensitive=False),
+        help="Render the results for direct consumption by an Xbar/SwiftBar-compatible plugin.",
+    ),
+    option(
+        "--plugin-submenu-layout/--plugin-flat-layout",
+        is_flag=True,
+        default=False,
+        help="",
+    ),
+    option(
+        "--plugin-aligned-columns/--plugin-no-alignment",
+        is_flag=True,
+        default=True,
+        help="",
+    ),
+    option(
+        "--plugin-dark-mode/--plugin-light-mode",
+        is_flag=True,
+        default=False,
+        help="",
+    ),
 )
 @pass_context
-def outdated(ctx, cli_format):
+def outdated(ctx, plugin, plugin_submenu_layout, plugin_aligned_columns, plugin_dark_mode):
     """List available package upgrades and their versions for each manager."""
-    render_cli = partial(PackageManager.render_cli, cli_format=cli_format)
-
     # Build-up a global list of outdated packages per manager.
     outdated_data = {}
 
@@ -422,7 +439,7 @@ def outdated(ctx, cli_format):
             continue
 
         for info in packages:
-            info.update({"upgrade_cli": render_cli(manager.upgrade_cli(info["id"]))})
+            info.update({"upgrade_cli": BarPluginRenderer.render_cli(manager.upgrade_cli(info["id"]), plugin_format=plugin)})
 
         outdated_data[manager.id] = {
             "id": manager.id,
@@ -436,10 +453,10 @@ def outdated(ctx, cli_format):
             try:
                 upgrade_all_cli = manager.upgrade_all_cli()
             except NotImplementedError:
-                # Fallback on mpm itself which is capable of simulating a full
-                # upgrade.
-                upgrade_all_cli = ("mpm", "--manager", manager.id, "upgrade")
-            outdated_data[manager.id]["upgrade_all_cli"] = render_cli(upgrade_all_cli)
+                # Fallback on mpm itself which is capable of simulating a full upgrade.
+                mpm_exec = bar_plugin.MPMPlugin().mpm_exec
+                upgrade_all_cli = (*mpm_exec, f"--{manager.id}", "upgrade")
+            outdated_data[manager.id]["upgrade_all_cli"] = BarPluginRenderer.render_cli(upgrade_all_cli, plugin_format=plugin)
 
         # Serialize errors at the last minute to gather all we encountered.
         outdated_data[manager.id]["errors"] = list(
@@ -449,6 +466,14 @@ def outdated(ctx, cli_format):
     # Machine-friendly data rendering.
     if ctx.find_root().table_formatter.format_name == "json":
         print_json(outdated_data)
+        return
+
+    # Xbar/SwiftBar-friendly plugin rendering.
+    if plugin:
+        BarPluginRenderer(
+            dialect=plugin,
+            submenu_layout=plugin_submenu_layout,
+            table_rendering=plugin_aligned_columns).print(outdated_data)
         return
 
     # Human-friendly content rendering.

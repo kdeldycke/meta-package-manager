@@ -29,7 +29,6 @@ https://xbarapp.com/docs/2021/03/14/variables-in-xbar.html
 https://github.com/swiftbar/SwiftBar/issues/160
 """
 
-import json
 import os
 import re
 import subprocess
@@ -37,6 +36,11 @@ import sys
 from configparser import RawConfigParser
 from shutil import which
 from unittest.mock import patch
+
+if sys.version_info >= (3, 8):
+    from functools import cached_property
+else:
+    cached_property = property
 
 
 def getenv_str(var, default=None):
@@ -77,7 +81,6 @@ TABLE_RENDERING = getenv_bool("VAR_TABLE_RENDERING", True)
 If ``True``, will aligns all items using a fixed-width font.
 """
 
-
 # Make it easier to change font, sizes and colors of the output
 MONOSPACE = "font=Menlo size=12"
 FONTS = {
@@ -91,334 +94,215 @@ if TABLE_RENDERING:
     FONTS.update(dict.fromkeys(["summary", "package"], MONOSPACE))
 
 
-MPM_MIN_VERSION = (4, 14, 0)
-"""Mpm v4.14.0 was the first supporting direct execution from the module and
-`--cli-format swiftbar` option."""
+MPM_MIN_VERSION = (5, 0, 0)
+"""Mpm v5.0.0 was the first version taking care of the layout rendering."""
 
 
-is_swift_bar = getenv_bool("SWIFTBAR")
-"""SwiftBar is kind enough to warn us of its presence."""
+IS_SWIFTBAR = getenv_bool("SWIFTBAR")
+"""SwiftBar is kind enough to tell us about its presence."""
 
 
-dark_mode = (
+DARK_MODE = (
     getenv_str("OS_APPEARANCE", "light") == "dark"
-    if is_swift_bar
+    if IS_SWIFTBAR
     else getenv_bool("XBARDarkMode")
 )
 """Detect dark mode."""
 
 
-def extended_environment():
-    """Returns a tweaked environment extending global path to find non-default system-
-    wide binaries.
+class MPMPlugin:
+    """Implements the minimal code necessary to locate and call the ``mpm`` CLI on the system.
 
-    macOS does not put ``/usr/local/bin`` or ``/opt/local/bin`` in the ``PATH`` for GUI
-    apps. For some package managers this is a problem. Additioanlly Homebrew and
-    Macports are using different pathes. So, to make sure we can always get to the
-    necessary binaries, we overload the path. Current preference order would equate to
-    Homebrew, Macports, then system.
+    Once ``mpm`` is located, we can rely on it to produce the main output of the plugin.
+
+    The output must supports both Xbar and SwiftBar:
+        - https://github.com/matryer/xbar-plugins/blob/main/CONTRIBUTING.md#plugin-api
+        - https://github.com/swiftbar/SwiftBar#plugin-api
     """
-    # Cast to dict to make a copy and prevent modification of the global environment.
-    env_copy = dict(os.environ)
-    env_copy["PATH"] = ":".join(
-        (
-            # Homebrew Apple silicon.
-            "/opt/homebrew/bin",
-            "/opt/homebrew/sbin",
-            # Homebrew Intel.
-            "/usr/local/bin",
-            "/usr/local/sbin",
-            # Macports.
-            "/opt/local/bin",
-            "/opt/local/sbin",
-            # System.
-            os.environ.get("PATH", ""),
+
+    @staticmethod
+    def extended_environment():
+        """Returns a tweaked environment extending global path to find non-default system-
+        wide binaries.
+
+        macOS does not put ``/usr/local/bin`` or ``/opt/local/bin`` in the ``PATH`` for GUI
+        apps. For some package managers this is a problem. Additioanlly Homebrew and
+        Macports are using different pathes. So, to make sure we can always get to the
+        necessary binaries, we overload the path. Current preference order would equate to
+        Homebrew, Macports, then system.
+        """
+        # Cast to dict to make a copy and prevent modification of the global environment.
+        env_copy = dict(os.environ)
+        env_copy["PATH"] = ":".join(
+            (
+                # Homebrew Apple silicon.
+                "/opt/homebrew/bin",
+                "/opt/homebrew/sbin",
+                # Homebrew Intel.
+                "/usr/local/bin",
+                "/usr/local/sbin",
+                # Macports.
+                "/opt/local/bin",
+                "/opt/local/sbin",
+                # System.
+                os.environ.get("PATH", ""),
+            )
         )
-    )
-    return env_copy
+        return env_copy
 
+    @staticmethod
+    def locate_bin(*bin_names):
+        """Find the location of an executable binary on the system.
 
-def locate_python():
-    """Find the location of the default Python executable on the system.
+        Provides as many binary names as you need, the first one found will be returned. Both plain name and full path
+        are supported.
+        """
+        for name in bin_names:
+            path = which(name)
+            if path:
+                return path
 
-    This plugin being run by Python, we have the one called by Xbar/SwiftBar to fallback
-    to. But before that, we attempt to locate it by respecting the environment
-    variables.
-    """
-    # Search for a Python executable in the environment.
-    for py_name in ("python", "python3"):
-        py_path = which(py_name)
-        if py_path:
-            return py_path
-    # Returns the Python executable used to execute this script.
-    return sys.executable
+    @cached_property
+    def python_path(self):
+        """ Returns the system's Python binary path.
 
+        This plugin being run from Python, we have the one called by Xbar/SwiftBar to fallback
+        to (i.e. ``sys.executable``). But before that, we attempt to locate it by respecting the environment
+        variables.
+        """
+        return self.locate_bin("python", "python3", sys.executable)
 
-def pp(*args):
-    """Print the item line.
+    @cached_property
+    def mpm_exec(self):
+        """Search for mpm execution alternatives, either direct ``mpm`` call or as an executable Python module."""
+        mpm_exec = (self.locate_bin("mpm"),)
+        if not mpm_exec:
+            mpm_exec = (self.python_path, "-m", "meta_package_manager")
+        return mpm_exec
 
-    First argument is the label, separated with a pipe to all other non-empty
-    parameters.
-    """
-    line = args[0]
-    params = " ".join(p for p in args[1:] if p)
-    if params:
-        line += f" | {params}"
-    print(line)
+    @staticmethod
+    def pp(*args):
+        """Print one menu-line with the Xbar/SwiftBar dialect.
 
+        First argument is the menu-line label, separated by a pipe to all other non-empty parameters, themselves separated by a space.
+        """
+        line = []
+        for param in args:
+            if param:
+                if len(line) == 1:
+                    line.append("|")
+                line.append(param)
+        print(*line, sep=' ')
 
-def print_error_header():
-    """Generic header for blocking error."""
-    pp("❗️", "dropdown=false")
-    print("---")
-
-
-def print_error(message, submenu=""):
-    """Print a formatted error line by line.
-
-    A red, fixed-width font is used to preserve traceback and exception layout.
-    """
-    # Cast to string as we might directly pass exceptions for rendering.
-    for line in str(message).strip().splitlines():
-        pp(
-            f"{submenu}{line}",
-            FONTS["error"],
-            "trim=false",
-            "ansi=false",
-            "emojize=false",
-            "symbolize=false" if is_swift_bar else "",
-        )
-
-
-def print_cli_item(*args):
-    """Print two CLI entries:
-
-    * one that is silent
-    * a second one that is the exact copy of the above but forces the execution
-      by the way of a visible terminal
-    """
-    pp(*args, "terminal=false")
-    pp(*args, "terminal=true", "alternate=true")
-
-
-def print_upgrade_all_item(manager, submenu=""):
-    """Print the menu entry to upgrade all outdated package of a manager."""
-    if manager.get("upgrade_all_cli"):
-        if SUBMENU_LAYOUT:
-            print("-----")
-        print_cli_item(
-            f"{submenu}🆙 Upgrade all {manager['id']} packages",
-            # Retro-compatibility with xbar-style pipe-separated parameters.
-            # See: https://github.com/swiftbar/SwiftBar/issues/306
-            manager["upgrade_all_cli"].replace(" | ", " "),
-            FONTS["normal"],
-            "refresh=true",
-        )
-
-
-def print_menu():
-    """Print menu structure using the common parameters shared by Xbar and SwiftBar.
-
-    See:
-    - https://github.com/matryer/xbar-plugins/blob/main/CONTRIBUTING.md#plugin-api
-    - https://github.com/swiftbar/SwiftBar#plugin-api
-    """
-    py_path = locate_python()
-
-    # Search for mpm execution alternatives, either direct mpm call or via Python.
-    mpm_exec = (which("mpm"),)
-    if not mpm_exec:
-        mpm_exec = (py_path, "-m", "meta_package_manager")
-
-    # Test mpm execution.
-    code = None
-    error = None
-    try:
-        process = subprocess.run(
-            (*mpm_exec, "--version"), capture_output=True, encoding="utf-8"
-        )
-        code = process.returncode
-        error = process.stderr
-    except FileNotFoundError as ex:
-        error = ex
-
-    mpm_installed = False
-    mpm_up_to_date = False
-    # Is mpm CLI installed on the system?
-    if not code and not error:
-        mpm_installed = True
-        # Is mpm too old?
-        version_string = (
-            re.compile(r".*\s+(?P<version>[0-9\.]+)$", re.MULTILINE)
-            .search(process.stdout)
-            .groupdict()["version"]
-        )
-        mpm_version = tuple(map(int, version_string.split(".")))
-        if mpm_version >= MPM_MIN_VERSION:
-            mpm_up_to_date = True
-
-    if not mpm_installed or not mpm_up_to_date:
-        print_error_header()
-        print_error(error)
+    @staticmethod
+    def print_error_header():
+        """Generic header for blocking error."""
+        MPMPlugin.pp("❗️", "dropdown=false")
         print("---")
-        action_msg = "Install" if not mpm_installed else "Upgrade"
-        min_version_str = ".".join(map(str, MPM_MIN_VERSION))
-        pp(
-            f"{action_msg} mpm >= v{min_version_str}",
-            f"shell={py_path()}",
-            "param1=-m",
-            "param2=pip",
-            "param3=install",
-            "param4=--upgrade",
-            # XXX This seems broken beyond repair. No amount of workaround works. See:
-            # https://github.com/matryer/xbar/issues/831
-            # https://github.com/swiftbar/SwiftBar/issues/308
-            # Fallback to the only version that is working on SwiftBar.
-            f'param5=\\"meta-package-manager>={min_version_str}\\"',
-            FONTS["error"],
-            "refresh=true",
-            "terminal=true",
-        )
-        return
 
-    # Force a sync of all local package databases.
-    subprocess.run((*mpm_exec, "--verbosity", "ERROR", "sync"))
+    @staticmethod
+    def print_error(message, submenu=""):
+        """Print a formatted error line by line.
 
-    # Fetch outdated package from all package manager available on the system.
-    process = subprocess.run(
-        (
-            *mpm_exec,
-            "--verbosity",
-            "ERROR",
-            "--output-format",
-            "json",
-            "outdated",
-            "--cli-format",
-            "swiftbar",
-        ),
-        capture_output=True,
-        encoding="utf-8",
-    )
-
-    # Bail-out immediately on errors related to mpm self-execution or if mpm is
-    # not able to produce any output.
-    if process.stderr or not process.stdout:
-        print_error_header()
-        print_error(process.stderr)
-        return
-
-    # Let mpm set the order in which managers will be sorted.
-    managers = json.loads(process.stdout).values()
-
-    # Print menu bar icon with number of available upgrades.
-    total_outdated = sum(len(m["packages"]) for m in managers)
-    total_errors = sum(len(m.get("errors", [])) for m in managers)
-    pp(
-        (f"🎁↑{total_outdated}" if total_outdated else "📦✓")
-        + (f" ⚠️{total_errors}" if total_errors else ""),
-        "dropdown=false",
-    )
-
-    # Prefix for section content.
-    submenu = "--" if SUBMENU_LAYOUT else ""
-
-    # String used to separate the left and right columns.
-    col_sep = "  " if TABLE_RENDERING else " "
-    up_sep = " → "
-
-    # Compute global length constant.
-    global_outdated_len = max(len(str(len(m["packages"]))) for m in managers)
-    package_str = "package"
-    right_col_len = global_outdated_len + len(package_str) + 1  # +1 for plural
-
-    # Global maximum length of labels.
-    global_len_name = max(len(p["name"]) for m in managers for p in m["packages"])
-    global_len_manager = max(len(m["id"]) for m in managers)
-    global_len_left = max((global_len_manager, global_len_name))
-    global_len_installed = max(
-        len(p["installed_version"]) for m in managers for p in m["packages"]
-    )
-    global_len_latest = max(
-        len(p["latest_version"]) for m in managers for p in m["packages"]
-    )
-    global_len_right = max(
-        [
-            right_col_len,
-            global_len_installed + len(up_sep) + global_len_latest,
-        ]
-    )
-
-    for manager in managers:
-        plural = "s" if len(manager["packages"]) > 1 else ""
-        package_label = f"{package_str}{plural}"
-
-        name_max_len = installed_max_len = latest_max_len = 0
-
-        if SUBMENU_LAYOUT:
-            error = "⚠️ " if manager.get("errors", None) else ""
-
-        if TABLE_RENDERING:
-
-            if SUBMENU_LAYOUT:
-                # Re-define layout maximum dimensions for each manager.
-                left_col_len = global_len_manager
-                if manager["packages"]:
-                    name_max_len = max(len(p["name"]) for p in manager["packages"])
-                    installed_max_len = max(
-                        len(p["installed_version"]) for p in manager["packages"]
-                    )
-                    latest_max_len = max(
-                        len(p["latest_version"]) for p in manager["packages"]
-                    )
-
-            else:
-                # Layout constraints are defined across all managers.
-                left_col_len = name_max_len = global_len_left
-                installed_max_len = global_len_installed
-                latest_max_len = global_len_latest
-                right_col_len = global_len_right
-
-            outdated_label = (
-                f"{len(manager['packages']):>{global_outdated_len}} {package_label:<8}"
+        A red, fixed-width font is used to preserve traceback and exception layout.
+        """
+        # Cast to string as we might directly pass exceptions for rendering.
+        for line in str(message).strip().splitlines():
+            MPMPlugin.pp(
+                f"{submenu}{line}",
+                FONTS["error"],
+                "trim=false",
+                "ansi=false",
+                "emojize=false",
+                "symbolize=false" if IS_SWIFTBAR else "",
             )
 
-            header = f"{manager['id']:<{left_col_len}}{col_sep}{outdated_label:>{right_col_len}}"
-
-        # Variable-width / non-table / non-monospaced rendering.
-        else:
-            header = (
-                f"{len(manager['packages'])} outdated {manager['name']} {package_label}"
+    def print_menu(self):
+        """Print the main menu."""
+        # Test mpm execution.
+        code = None
+        error = None
+        try:
+            process = subprocess.run(
+                (*self.mpm_exec, "--version"), capture_output=True, encoding="utf-8"
             )
+            code = process.returncode
+            error = process.stderr
+        except FileNotFoundError as ex:
+            error = ex
 
-        # Print section separator before printing the manager header.
-        print("---")
-        # Print section header.
-        pp(f"{error}{header}", FONTS["summary"])
+        mpm_installed = False
+        mpm_up_to_date = False
+        # Is mpm CLI installed on the system?
+        if not code and not error:
+            mpm_installed = True
+            # Is mpm too old?
+            version_string = (
+                re.compile(r".*\s+(?P<version>[0-9\.]+)$", re.MULTILINE)
+                .search(process.stdout)
+                .groupdict()["version"]
+            )
+            mpm_version = tuple(map(int, version_string.split(".")))
+            if mpm_version >= MPM_MIN_VERSION:
+                mpm_up_to_date = True
 
-        # Print a menu entry for each outdated packages.
-        for pkg_info in manager["packages"]:
-            print_cli_item(
-                f"{submenu}{pkg_info['name']:<{name_max_len}}"
-                + col_sep
-                + f"{pkg_info['installed_version']:>{installed_max_len}}"
-                + up_sep
-                + f"{pkg_info['latest_version']:<{latest_max_len}}",
-                # Retro-compatibility with xbar-style pipe-separated parameters.
-                # See: https://github.com/swiftbar/SwiftBar/issues/306
-                pkg_info["upgrade_cli"].replace(" | ", " "),
-                FONTS["package"],
+        if not mpm_installed or not mpm_up_to_date:
+            self.print_error_header()
+            self.print_error(error)
+            print("---")
+            action_msg = "Install" if not mpm_installed else "Upgrade"
+            min_version_str = ".".join(map(str, MPM_MIN_VERSION))
+            self.pp(
+                f"{action_msg} mpm >= v{min_version_str}",
+                f"shell={self.python_path}",
+                "param1=-m",
+                "param2=pip",
+                "param3=install",
+                "param4=--upgrade",
+                # XXX This seems broken beyond repair. No amount of workaround works. See:
+                # https://github.com/matryer/xbar/issues/831
+                # https://github.com/swiftbar/SwiftBar/issues/308
+                # Fallback to the only version that is working on SwiftBar.
+                f'param5=\\"meta-package-manager>={min_version_str}\\"',
+                FONTS["error"],
                 "refresh=true",
+                "terminal=true",
             )
+            return
 
-        print_upgrade_all_item(manager, submenu)
+        # Force a sync of all local package databases.
+        subprocess.run((*self.mpm_exec, "--verbosity", "ERROR", "sync"))
 
-        for error_msg in manager.get("errors", []):
-            print("-----" if SUBMENU_LAYOUT else "---")
-            print_error(error_msg, submenu)
+        # Fetch outdated packages from all package managers available on the system.
+        # We defer all rendering to mpm itself so it can compute more intricate layouts.
+        process = subprocess.run(
+            (
+                *self.mpm_exec,
+                "--verbosity",
+                "ERROR",
+                "outdated",
+                "--plugin",
+                "swiftbar" if IS_SWIFTBAR else "xbar",
+                "--plugin-submenu-layout" if SUBMENU_LAYOUT else "--plugin-flat-layout",
+                "--plugin-aligned-columns" if TABLE_RENDERING else "--plugin-no-alignment",
+                "--plugin-dark-mode" if DARK_MODE else "--plugin-light-mode",
+            ),
+            capture_output=True,
+            encoding="utf-8",
+        )
+
+        # Bail-out immediately on errors related to mpm self-execution or if mpm is
+        # not able to produce any output.
+        if process.stderr or not process.stdout:
+            self.print_error_header()
+            self.print_error(process.stderr)
+        else:
+            # Capturing the output of mpm and re-printing it will introduce an extra line returns, hence the extra rstrip() call.
+            print(process.stdout.rstrip())
 
 
 if __name__ == "__main__":
 
-    # Wrap plugin execution with our custom environment variables to avoid leaks.
-    with patch.dict("os.environ", extended_environment()):
-        print_menu()
+    # Wrap plugin execution with our custom environment variables to avoid environment leaks.
+    with patch.dict("os.environ", MPMPlugin.extended_environment()):
+        MPMPlugin().print_menu()

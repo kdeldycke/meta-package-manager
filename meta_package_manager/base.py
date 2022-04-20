@@ -37,9 +37,6 @@ from click_extra.run import INDENT, format_cli, run_cmd
 from . import logger
 from .version import parse_version
 
-CLI_FORMATS = frozenset({"plain", "fragments", "xbar", "swiftbar"})
-"""Rendering format of CLI in JSON fields."""
-
 
 class CLIError(Exception):
 
@@ -574,33 +571,6 @@ class PackageManager:
                     log.append(output)
             if log:
                 return "\n".join(log)
-
-    @staticmethod
-    def render_cli(cmd, cli_format="plain"):
-        """Return a formatted CLI in the requested format.
-
-        * ``plain`` returns a simple string
-        * ``fragments`` returns a list of strings
-        * ``xbar`` returns a CLI with parameters formatted into the xbar dialect based on a pipe separator (`|`)
-        * ``swiftbar`` similar to ``xbar`` but use spaces as separators instead of pipes
-        """
-        assert isinstance(cmd, tuple)
-        assert cli_format in CLI_FORMATS
-        cmd = map(str, flatten(cmd))  # Serialize Path instances.
-
-        if cli_format == "fragments":
-            return list(cmd)
-
-        if cli_format == "plain":
-            return " ".join(cmd)
-
-        # Renders the CLI into one of the *bar dialect.
-        bar_params = []
-        for index, param_value in enumerate(cmd):
-            param_id = "shell" if index == 0 else f"param{index}"
-            bar_params.append(f"{param_id}={param_value}")
-        sep = " | " if cli_format == "xbar" else " "
-        return sep.join(bar_params)
 
     def sync(self):
         """Refresh local manager metadata from remote repository."""

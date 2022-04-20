@@ -8,9 +8,16 @@ This version is not released yet and is under active development.
 
 - \[bar-plugin\] Rename all reference of `xbar` to the generic `bar-plugin` label.
 - \[bar-plugin\] Improve search for Python and `mpm` executable.
+- \[bar-plugin\] Restructure the plugin ↔ mpm relationship to delegate all
+  plugin layout and rendering logic to `mpm`.
 - \[bar-plugin\] Prevent leaks when modifying environment variables.
+- \[mpm\] Add new `--plugin`, `--plugin-submenu-layout`/`--plugin-flat-layout`,
+  `--plugin-aligned-columns`/`--plugin-no-alignment`,
+  `--plugin-dark-mode`/`--plugin-light-mode` options to `outdated` command.
 - \[mpm\] Rename `--xbar-plugin-path` option to `--bar-plugin-path`.
-- \[mpm\] Add a `--cli-format swiftbar` option.
+- \[mpm\] Remove `-c`/`--cli-format` option.
+- \[mpm\] Use short-form selection option and fully-qualified path in
+  `mpm`-based upgrade-all CLIs produced by `outdated` command.
 
 ## {gh}`4.13.1 (2022-04-17) <compare/v4.13.0...v4.13.1>`
 

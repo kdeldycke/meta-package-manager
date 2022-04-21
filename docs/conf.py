@@ -61,7 +61,8 @@ autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
 todo_include_todos = True
 
 # GitHub pre-implemented shortcuts.
-issues_github_path = f"kdeldycke/{project_id}"
+github_user = "kdeldycke"
+issues_github_path = f"{github_user}/{project_id}"
 
 # External reference shortcuts.
 github_project = f"https://github.com/{issues_github_path}"
@@ -75,6 +76,18 @@ html_title = project
 html_logo = "images/logo-square.svg"
 html_theme_options = {
     "sidebar_hide_name": True,
+}
+
+# Activates edit links.
+html_context = {
+    # XXX Temporary activate RTD while we wait for https://github.com/pradyunsg/furo/pull/426 to
+    # reach upstream.
+    "READTHEDOCS": True,
+    "conf_py_path": "/docs/",
+    "display_github": True,
+    "github_user": github_user,
+    "github_repo": project_id,
+    "github_version": "main",
 }
 
 # Footer content.

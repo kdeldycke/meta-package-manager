@@ -8,10 +8,11 @@
 # <xbar.image>https://i.imgur.com/B5wdxIc.png</xbar.image>
 # <xbar.abouturl>https://github.com/kdeldycke/meta-package-manager</xbar.abouturl>
 # <xbar.var>boolean(VAR_SUBMENU_LAYOUT=false): Group packages into a sub-menu for each manager.</xbar.var>
-# <xbar.var>boolean(VAR_TABLE_RENDERING=false): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
-# <xbar.var>string(VAR_DEFAULT_FONT=""): Default font to use for non-monospaced.</xbar.var>
-# <xbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Default font for monospace fonts, uncluding errors.</xbar.var>
-# <swiftbar.environment>['VAR_SUBMENU_LAYOUT': false, 'VAR_TABLE_RENDERING': false, 'VAR_DEFAULT_FONT': '', 'VAR_MONOSPACE_FONT': 'font=Menlo size=12']</swiftbar.environment>
+# <xbar.var>boolean(VAR_TABLE_RENDERING=true): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
+# XXX Deactive font-related options for Xbar. Default variable value does not allow `=` character in Xbar. See: https://github.com/matryer/xbar/issues/832
+# <!--xbar.var>string(VAR_DEFAULT_FONT=""): Default font to use for non-monospaced text.</xbar.var-->
+# <!--xbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Default configuration for monospace fonts, including errors. Is used for table rendering.</xbar.var-->
+# <swiftbar.environment>[VAR_SUBMENU_LAYOUT: false, VAR_TABLE_RENDERING: true, VAR_DEFAULT_FONT: , VAR_MONOSPACE_FONT: font=Menlo size=12]</swiftbar.environment>
 
 """Xbar and SwiftBar plugin for Meta Package Manager (i.e. the :command:`mpm` CLI).
 
@@ -132,12 +133,12 @@ class MPMPlugin:
     @cached_property
     def default_font(self):
         """Make it easier to change font, sizes and colors of the output."""
-        return self.normalize_params(self.getenv_bool("VAR_DEFAULT_FONT", ""))
+        return self.normalize_params(self.getenv_str("VAR_DEFAULT_FONT", ""))
 
     @cached_property
     def monospace_font(self):
         """Make it easier to change font, sizes and colors of the output."""
-        return self.normalize_params(self.getenv_bool("VAR_MONOSPACE_FONT", "font=Menlo size=12"))
+        return self.normalize_params(self.getenv_str("VAR_MONOSPACE_FONT", "font=Menlo size=12"))
 
     @cached_property
     def error_font(self):

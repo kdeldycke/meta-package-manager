@@ -13,6 +13,8 @@ This version is not released yet and is under active development.
   plugin layout and rendering logic to `mpm`.
 - \[bar-plugin\] Prevent leaks when modifying environment variables.
 - \[mpm\] Add new `--plugin-output` option to `outdated` command.
+- \[mpm\] Add `tabulate` as direct dependency and refactor table aligment in
+  plugin around it.
 - \[mpm\] Rename `--xbar-plugin-path` option to `--bar-plugin-path`.
 - \[mpm\] Remove `-c`/`--cli-format` option.
 - \[mpm\] Use short-form selection option and fully-qualified path in

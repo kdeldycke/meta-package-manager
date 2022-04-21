@@ -106,7 +106,7 @@ class TestBarPlugin:
             extra_checks.extend(
                 (
                     # Package manager section header.
-                    (r"(⚠️ )?\S+\s+\d+ package(s| ) \| font=Menlo size=12", True),
+                    (r"(⚠️ )?\S+ - \d+ packages?\s+\| font=Menlo size=12", True),
                     # Package upgrade line.
                     (
                         r"(--)?\S+\s+\S+ → \S+\s+\| shell=\S+( param\d+=\S+)+ "

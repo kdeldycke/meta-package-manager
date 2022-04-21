@@ -35,6 +35,7 @@ from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from click_extra import echo, get_current_context, style
 from click_extra.tabulate import TabularOutputFormatter
+from tabulate import DataRow, TableFormat, tabulate
 
 from . import __version__
 from .bar_plugin import MPMPlugin
@@ -220,6 +221,40 @@ class BarPluginRenderer(MPMPlugin):
                 "refresh=true",
             )
 
+    plain_table_format = TableFormat(
+        lineabove=None,
+        linebelowheader=None,
+        linebetweenrows=None,
+        linebelow=None,
+        headerrow=DataRow("", " ", ""),
+        datarow=DataRow("", " ", ""),
+        padding=0,
+        with_header_hide=None,
+    )
+    """Simple rendering format with single-space separated columns."""
+
+    @staticmethod
+    def render_table(table_data):
+        """ Render a table data with pre-configured alignment.
+
+        .. code-block:: python
+            >>> table_data = [
+            ...     ('xmlrpc', '0.3.1', '→', '0.4'),
+            ...     ('blockblock', '5.33,VHSDGataYCcV8xqv5TSZA', '→', '5.39'),
+            ...     ('sed', '2', '→', '2021.0328'),
+            ... ]
+            >>> print(render_table(table_data))
+            xmlrpc                          0.3.1 → 0.4
+            blockblock 5.33,VHSDGataYCcV8xqv5TSZA → 5.39
+            sed                                 2 → 2021.0328
+        """
+        return tabulate(
+            table_data,
+            tablefmt=BarPluginRenderer.plain_table_format,
+            colalign=("left", "right", "center", "left"),
+            disable_numparse=True
+        )
+
     def _render(self, outdated_data):
         managers = outdated_data.values()
         font = self.monospace_font if self.table_rendering else self.default_font
@@ -236,70 +271,22 @@ class BarPluginRenderer(MPMPlugin):
         # Prefix for section content.
         submenu = "--" if self.submenu_layout else ""
 
-        # String used to separate the left and right columns.
-        col_sep = "  " if self.table_rendering else " "
-        up_sep = " → "
-
-        # Compute global length constant.
-        global_outdated_len = max(len(str(len(m["packages"]))) for m in managers)
-        package_str = "package"
-        right_col_len = global_outdated_len + len(package_str) + 1  # +1 for plural
-
-        # Global maximum length of labels.
-        global_len_name = max(len(p["name"]) for m in managers for p in m["packages"])
-        global_len_manager = max(len(m["id"]) for m in managers)
-        global_len_left = max((global_len_manager, global_len_name))
-        global_len_installed = max(
-            len(p["installed_version"]) for m in managers for p in m["packages"]
-        )
-        global_len_latest = max(
-            len(p["latest_version"]) for m in managers for p in m["packages"]
-        )
-        global_len_right = max(
-            [
-                right_col_len,
-                global_len_installed + len(up_sep) + global_len_latest,
-            ]
-        )
-
         for manager in managers:
-            plural = "s" if len(manager["packages"]) > 1 else ""
-            package_label = f"{package_str}{plural}"
+            package_count = len(manager["packages"])
+            plural = "s" if package_count > 1 else ""
+            package_label = f"package{plural}"
 
-            name_max_len = installed_max_len = latest_max_len = 0
+            table = ((p['name'], p['installed_version'], "→", p['latest_version']) for p in manager["packages"])
 
+            # Table-like rendering
             if self.table_rendering:
-
-                if self.submenu_layout:
-                    # Re-define layout maximum dimensions for each manager.
-                    left_col_len = global_len_manager
-                    if manager["packages"]:
-                        name_max_len = max(len(p["name"]) for p in manager["packages"])
-                        installed_max_len = max(
-                            len(p["installed_version"]) for p in manager["packages"]
-                        )
-                        latest_max_len = max(
-                            len(p["latest_version"]) for p in manager["packages"]
-                        )
-
-                else:
-                    # Layout constraints are defined across all managers.
-                    left_col_len = name_max_len = global_len_left
-                    installed_max_len = global_len_installed
-                    latest_max_len = global_len_latest
-                    right_col_len = global_len_right
-
-                outdated_label = (
-                    f"{len(manager['packages']):>{global_outdated_len}} {package_label:<8}"
-                )
-
-                header = f"{manager['id']:<{left_col_len}}{col_sep}{outdated_label:>{right_col_len}}"
+                header = f"{manager['id']} - {package_count} {package_label}"
+                formatted_lines = self.render_table(table).splitlines()
 
             # Variable-width / non-table / non-monospaced rendering.
             else:
-                header = (
-                    f"{len(manager['packages'])} outdated {manager['name']} {package_label}"
-                )
+                header = f"{package_count} outdated {manager['name']} {package_label}"
+                formatted_lines = (" ".join(l for l in table))
 
             # Print section separator before printing the manager header.
             print("---")
@@ -311,14 +298,10 @@ class BarPluginRenderer(MPMPlugin):
             self.pp(f"{error}{header}", font)
 
             # Print a menu entry for each outdated packages.
-            for pkg_info in manager["packages"]:
+            for index, line in enumerate(formatted_lines):
                 self.print_cli_item(
-                    f"{submenu}{pkg_info['name']:<{name_max_len}}"
-                    + col_sep
-                    + f"{pkg_info['installed_version']:>{installed_max_len}}"
-                    + up_sep
-                    + f"{pkg_info['latest_version']:<{latest_max_len}}",
-                    pkg_info["upgrade_cli"],
+                    f"{submenu}{line}",
+                    manager["packages"][index]['upgrade_cli'],
                     font,
                     "refresh=true",
                 )

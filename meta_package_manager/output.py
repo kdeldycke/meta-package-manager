@@ -286,7 +286,7 @@ class BarPluginRenderer(MPMPlugin):
             # Variable-width / non-table / non-monospaced rendering.
             else:
                 header = f"{package_count} outdated {manager['name']} {package_label}"
-                formatted_lines = (" ".join(l for l in table))
+                formatted_lines = (" ".join(str(l) for l in table))
 
             # Print section separator before printing the manager header.
             print("---")

@@ -276,17 +276,24 @@ class BarPluginRenderer(MPMPlugin):
             plural = "s" if package_count > 1 else ""
             package_label = f"package{plural}"
 
-            table = ((p['name'], p['installed_version'], "→", p['latest_version']) for p in manager["packages"])
+            table = [
+                ((p['name'], p['installed_version'], "→", p['latest_version']), p['upgrade_cli'])
+                for p in manager["packages"]
+            ]
 
             # Table-like rendering
             if self.table_rendering:
                 header = f"{manager['id']} - {package_count} {package_label}"
-                formatted_lines = self.render_table(table).splitlines()
+                formatted_lines = self.render_table([p[0] for p in table]).splitlines()
 
             # Variable-width / non-table / non-monospaced rendering.
             else:
                 header = f"{package_count} outdated {manager['name']} {package_label}"
-                formatted_lines = (" ".join(str(l) for l in table))
+                formatted_lines = [" ".join(map(str, p[0])) for p in table]
+
+            upgrade_cli_list = [p[1] for p in table]
+
+            assert len(formatted_lines) == len(upgrade_cli_list)
 
             # Print section separator before printing the manager header.
             print("---")
@@ -298,13 +305,8 @@ class BarPluginRenderer(MPMPlugin):
             self.pp(f"{error}{header}", font)
 
             # Print a menu entry for each outdated packages.
-            for index, line in enumerate(formatted_lines):
-                self.print_cli_item(
-                    f"{submenu}{line}",
-                    manager["packages"][index]['upgrade_cli'],
-                    font,
-                    "refresh=true",
-                )
+            for line, upgrade_cli in zip(formatted_lines, upgrade_cli_list):
+                self.print_cli_item(f"{submenu}{line}", upgrade_cli, font, "refresh=true")
 
             self.print_upgrade_all_item(manager, submenu)
 

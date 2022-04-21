@@ -218,11 +218,9 @@ class MPMPlugin:
     def print_menu(self):
         """Print the main menu."""
         # Test mpm execution.
-        code = None
         error = None
         try:
             process = run((*self.mpm_exec, "--version"), capture_output=True, encoding="utf-8")
-            code = process.returncode
             error = process.stderr
         except FileNotFoundError as ex:
             error = ex
@@ -230,7 +228,7 @@ class MPMPlugin:
         mpm_installed = False
         mpm_up_to_date = False
         # Is mpm CLI installed on the system?
-        if not code and not error:
+        if not process.returncode and not error:
             mpm_installed = True
             # Is mpm too old?
             version_string = (

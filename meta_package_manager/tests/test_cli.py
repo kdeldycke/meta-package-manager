@@ -25,6 +25,7 @@ from boltons.strutils import strip_ansi
 from click_extra.tabulate import TabularOutputFormatter
 
 from .. import __version__
+from ..bar_plugin import MPMPlugin
 from ..pool import pool
 
 """ Common tests for all CLI basic features and templates for subcommands. """
@@ -59,12 +60,8 @@ class TestBaseCLI:
     """
 
     def test_executable_module(self):
-        # Locate Python executable
-        for py_name in ("python", "python3"):
-            py_path = which(py_name)
-            if py_path:
-                break
-
+        # Locate Python executable.
+        py_path = MPMPlugin.locate_bin("python", "python3")
         assert py_path
 
         process = subprocess.run(

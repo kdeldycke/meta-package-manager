@@ -16,17 +16,15 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import logging
-import re
 import sys
 from collections import namedtuple
 from datetime import datetime
+from functools import partial
 from io import TextIOWrapper
-from operator import getitem
 from pathlib import Path
 
 import tomli_w
 from boltons.cacheutils import LRI, cached
-from boltons.strutils import complement_int_list, int_ranges_from_int_list
 from click_extra import (
     STRING,
     Choice,
@@ -38,7 +36,7 @@ from click_extra import (
     option_group,
     pass_context,
 )
-from click_extra.colorize import KO, OK, theme
+from click_extra.colorize import KO, OK, highlight, theme
 from click_extra.platform import os_label
 from click_extra.tabulate import table_format_option
 
@@ -544,47 +542,15 @@ def search(ctx, extended, exact, query):
 
     # Prepare highlighting helpers.
     query_parts = {query}.union(map(str, TokenizedString(query)))
-
-    @cached(LRI(max_size=1000))
-    def highlight(string):
-        # Ranges of character indices flagged for highlighting.
-        ranges = set()
-
-        for part in query_parts:
-            # Search for occurrences of query parts in original string.
-            occurrences = (
-                match.start() for match in re.finditer(part, string, re.IGNORECASE)
-            )
-            # Flag matching substrings for highlighting.
-            for match_start in occurrences:
-                match_end = match_start + len(part) - 1
-                ranges.add(f"{match_start}-{match_end}")
-
-        # Reduce index ranges, compute complement ranges, transform them to
-        # list of integers.
-        ranges = ",".join(ranges)
-        bold_ranges = int_ranges_from_int_list(ranges)
-        normal_ranges = int_ranges_from_int_list(
-            complement_int_list(ranges, range_end=len(string))
-        )
-
-        # Apply style to range of characters flagged as matching.
-        styled_str = ""
-        for i, j in sorted(bold_ranges + normal_ranges):
-            segment = getitem(string, slice(i, j + 1))
-            if (i, j) in bold_ranges:
-                segment = theme.search(segment)
-            styled_str += segment
-
-        return styled_str
+    highlight_query = cached(LRI(max_size=1000))(partial(highlight, substrings=query_parts, styling_method=theme.search, ignore_case=True))
 
     # Human-friendly content rendering.
     table = []
     for manager_id, matching_pkg in matches.items():
         table += [
             (
-                highlight(info["name"]),
-                highlight(info["id"]),
+                highlight_query(info["name"]),
+                highlight_query(info["id"]),
                 manager_id,
                 info["latest_version"] if info["latest_version"] else "?",
             )

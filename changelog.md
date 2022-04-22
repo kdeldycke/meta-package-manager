@@ -21,6 +21,7 @@ This version is not released yet and is under active development.
   `mpm`-based upgrade-all CLIs produced by `outdated` command.
 - \[mpm\] Fix local overriding of CLI parameters leading to missing `sudo`
   pre-command. Closes {issue}`579`.
+- \[mpm\] Use string highlighting code from `click-extra >= 2.1.0`.
 - \[mpm\] Add edit links to documentation.
 
 ## {gh}`4.13.1 (2022-04-17) <compare/v4.13.0...v4.13.1>`

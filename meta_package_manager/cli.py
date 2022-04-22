@@ -420,7 +420,13 @@ def outdated(ctx, plugin_output):
             continue
 
         for info in packages:
-            info.update({"upgrade_cli": BarPluginRenderer.render_cli(manager.upgrade_cli(info["id"]), plugin_format=plugin_output)})
+            info.update(
+                {
+                    "upgrade_cli": BarPluginRenderer.render_cli(
+                        manager.upgrade_cli(info["id"]), plugin_format=plugin_output
+                    )
+                }
+            )
 
         outdated_data[manager.id] = {
             "id": manager.id,
@@ -437,7 +443,9 @@ def outdated(ctx, plugin_output):
                 # Fallback on mpm itself which is capable of simulating a full upgrade.
                 mpm_exec = bar_plugin.MPMPlugin().mpm_exec
                 upgrade_all_cli = (*mpm_exec, f"--{manager.id}", "upgrade")
-            outdated_data[manager.id]["upgrade_all_cli"] = BarPluginRenderer.render_cli(upgrade_all_cli, plugin_format=plugin_output)
+            outdated_data[manager.id]["upgrade_all_cli"] = BarPluginRenderer.render_cli(
+                upgrade_all_cli, plugin_format=plugin_output
+            )
 
         # Serialize errors at the last minute to gather all we encountered.
         outdated_data[manager.id]["errors"] = list(
@@ -542,7 +550,14 @@ def search(ctx, extended, exact, query):
 
     # Prepare highlighting helpers.
     query_parts = {query}.union(map(str, TokenizedString(query)))
-    highlight_query = cached(LRI(max_size=1000))(partial(highlight, substrings=query_parts, styling_method=theme.search, ignore_case=True))
+    highlight_query = cached(LRI(max_size=1000))(
+        partial(
+            highlight,
+            substrings=query_parts,
+            styling_method=theme.search,
+            ignore_case=True,
+        )
+    )
 
     # Human-friendly content rendering.
     table = []

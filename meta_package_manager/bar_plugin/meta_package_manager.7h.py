@@ -47,7 +47,8 @@ else:
 
 
 class MPMPlugin:
-    """Implements the minimal code necessary to locate and call the ``mpm`` CLI on the system.
+    """Implements the minimal code necessary to locate and call the ``mpm`` CLI on the
+    system.
 
     Once ``mpm`` is located, we can rely on it to produce the main output of the plugin.
 
@@ -61,16 +62,17 @@ class MPMPlugin:
 
     @staticmethod
     def extended_environment():
-        """Returns a tweaked environment extending global path to find non-default system-
-        wide binaries.
+        """Returns a tweaked environment extending global path to find non-default
+        system- wide binaries.
 
-        macOS does not put ``/usr/local/bin`` or ``/opt/local/bin`` in the ``PATH`` for GUI
-        apps. For some package managers this is a problem. Additioanlly Homebrew and
+        macOS does not put ``/usr/local/bin`` or ``/opt/local/bin`` in the ``PATH`` for
+        GUI apps. For some package managers this is a problem. Additioanlly Homebrew and
         Macports are using different pathes. So, to make sure we can always get to the
-        necessary binaries, we overload the path. Current preference order would equate to
-        Homebrew, Macports, then system.
+        necessary binaries, we overload the path. Current preference order would equate
+        to Homebrew, Macports, then system.
         """
-        # Cast to dict to make a copy and prevent modification of the global environment.
+        # Cast to dict to make a copy and prevent modification of the global
+        # environment.
         env_copy = dict(os.environ)
         env_copy["PATH"] = ":".join(
             (
@@ -124,7 +126,7 @@ class MPMPlugin:
 
     @cached_property
     def table_rendering(self):
-        """ Aligns package names and versions, like a table, for easier visual parsing.
+        """Aligns package names and versions, like a table, for easier visual parsing.
 
         If ``True``, will aligns all items using a fixed-width font.
         """
@@ -138,11 +140,13 @@ class MPMPlugin:
     @cached_property
     def monospace_font(self):
         """Make it easier to change font, sizes and colors of the output."""
-        return self.normalize_params(self.getenv_str("VAR_MONOSPACE_FONT", "font=Menlo size=12"))
+        return self.normalize_params(
+            self.getenv_str("VAR_MONOSPACE_FONT", "font=Menlo size=12")
+        )
 
     @cached_property
     def error_font(self):
-        """Error font is based on monospace font"""
+        """Error font is based on monospace font."""
         return self.normalize_params(f"{self.monospace_font} color=red")
 
     @cached_property
@@ -154,8 +158,8 @@ class MPMPlugin:
     def locate_bin(*bin_names):
         """Find the location of an executable binary on the system.
 
-        Provides as many binary names as you need, the first one found will be returned. Both plain name and full path
-        are supported.
+        Provides as many binary names as you need, the first one found will be returned.
+        Both plain name and full path are supported.
         """
         for name in bin_names:
             path = which(name)
@@ -164,17 +168,18 @@ class MPMPlugin:
 
     @cached_property
     def python_path(self):
-        """ Returns the system's Python binary path.
+        """Returns the system's Python binary path.
 
-        This plugin being run from Python, we have the one called by Xbar/SwiftBar to fallback
-        to (i.e. ``sys.executable``). But before that, we attempt to locate it by respecting the environment
-        variables.
+        This plugin being run from Python, we have the one called by Xbar/SwiftBar to
+        fallback to (i.e. ``sys.executable``). But before that, we attempt to locate it
+        by respecting the environment variables.
         """
         return self.locate_bin("python", "python3", sys.executable)
 
     @cached_property
     def mpm_exec(self):
-        """Search for mpm execution alternatives, either direct ``mpm`` call or as an executable Python module."""
+        """Search for mpm execution alternatives, either direct ``mpm`` call or as an
+        executable Python module."""
         mpm_exec = (self.locate_bin("mpm"),)
         if not mpm_exec:
             mpm_exec = (self.python_path, "-m", "meta_package_manager")
@@ -184,7 +189,8 @@ class MPMPlugin:
     def pp(*args):
         """Print one menu-line with the Xbar/SwiftBar dialect.
 
-        First argument is the menu-line label, separated by a pipe to all other non-empty parameters, themselves separated by a space.
+        First argument is the menu-line label, separated by a pipe to all other non-
+        empty parameters, themselves separated by a space.
         """
         line = []
         for param in args:
@@ -192,7 +198,7 @@ class MPMPlugin:
                 if len(line) == 1:
                     line.append("|")
                 line.append(param)
-        print(*line, sep=' ')
+        print(*line, sep=" ")
 
     @staticmethod
     def print_error_header():
@@ -221,7 +227,9 @@ class MPMPlugin:
         # Test mpm execution.
         error = None
         try:
-            process = run((*self.mpm_exec, "--version"), capture_output=True, encoding="utf-8")
+            process = run(
+                (*self.mpm_exec, "--version"), capture_output=True, encoding="utf-8"
+            )
             error = process.stderr
         except FileNotFoundError as ex:
             error = ex
@@ -282,12 +290,14 @@ class MPMPlugin:
             self.print_error_header()
             self.print_error(process.stderr)
         else:
-            # Capturing the output of mpm and re-printing it will introduce an extra line returns, hence the extra rstrip() call.
+            # Capturing the output of mpm and re-printing it will introduce an extra
+            # line returns, hence the extra rstrip() call.
             print(process.stdout.rstrip())
 
 
 if __name__ == "__main__":
 
-    # Wrap plugin execution with our custom environment variables to avoid environment leaks.
+    # Wrap plugin execution with our custom environment variables to avoid
+    # environment leaks.
     with patch.dict("os.environ", MPMPlugin.extended_environment()):
         MPMPlugin().print_menu()

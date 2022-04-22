@@ -15,12 +15,12 @@ I recommend SwiftBar over Xbar, as the later has 2 outstanding issues:
 
 The plugin is configurable with these environment variables:
 
-| Variable name | Description | Type | Defaults | SwiftBar support | Xbar support |
-| --------- | ----- | ----- | --------- |:---------:|:---------:|
-| `VAR_SUBMENU_LAYOUT` | Group packages into a sub-menu for each manager. | Boolean | `False` | ✅ | ✅ |
-| `VAR_TABLE_RENDERING` | Aligns package names and versions in a table for easier visual parsing. | Boolean | `True` | ✅ | ✅ |
-| `VAR_DEFAULT_FONT` | Default font to use for non-monospaced text. | String | Empty | ✅ | [❌*](https://github.com/matryer/xbar/issues/832) |
-| `VAR_MONOSPACE_FONT` | Default configuration for monospace fonts, including errors. Is used for table rendering. | String | `font=Menlo size=12` | ✅ | [❌*](https://github.com/matryer/xbar/issues/832) |
+| Variable name         | Description                                                                               | Type    | Defaults             | SwiftBar support |                   Xbar support                    |
+| --------------------- | ----------------------------------------------------------------------------------------- | ------- | -------------------- | :--------------: | :-----------------------------------------------: |
+| `VAR_SUBMENU_LAYOUT`  | Group packages into a sub-menu for each manager.                                          | Boolean | `False`              |        ✅         |                         ✅                         |
+| `VAR_TABLE_RENDERING` | Aligns package names and versions in a table for easier visual parsing.                   | Boolean | `True`               |        ✅         |                         ✅                         |
+| `VAR_DEFAULT_FONT`    | Default font to use for non-monospaced text.                                              | String  | Empty                |        ✅         | [❌\*](https://github.com/matryer/xbar/issues/832) |
+| `VAR_MONOSPACE_FONT`  | Default configuration for monospace fonts, including errors. Is used for table rendering. | String  | `font=Menlo size=12` |        ✅         | [❌\*](https://github.com/matryer/xbar/issues/832) |
 
 ## Screenshots
 

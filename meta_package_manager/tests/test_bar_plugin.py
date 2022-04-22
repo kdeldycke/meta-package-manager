@@ -125,13 +125,14 @@ class TestBarPlugin:
         self.plugin_output_checks(extra_checks, extra_env=extra_env)
 
     @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
-    @pytest.mark.parametrize("shell_args",
+    @pytest.mark.parametrize(
+        "shell_args",
         (
             ("/bin/bash",),
             ("/bin/zsh",),
             ("/usr/bin/env", "bash"),
             ("/usr/bin/env", "zsh"),
-        )
+        ),
     )
     def test_shells(self, shell_args):
         """Test execution of plugin on different shells.

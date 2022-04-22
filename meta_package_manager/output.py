@@ -148,7 +148,8 @@ def print_stats(data):
 
 
 class BarPluginRenderer(MPMPlugin):
-    """All utilities used to render output compatible with both Xbar and SwiftBar plugin dialect.
+    """All utilities used to render output compatible with both Xbar and SwiftBar plugin
+    dialect.
 
     The minimal code to locate ``mpm`` and call it and print its output resides in the plugin itself.
 
@@ -158,7 +159,7 @@ class BarPluginRenderer(MPMPlugin):
 
     @cached_property
     def submenu_layout(self):
-        """ Group packages into manager sub-menus.
+        """Group packages into manager sub-menus.
 
         If ``True``, will replace the default flat layout with an alternative structure
         where actions are grouped into submenus, one for each manager.
@@ -235,7 +236,7 @@ class BarPluginRenderer(MPMPlugin):
 
     @staticmethod
     def render_table(table_data):
-        """ Render a table data with pre-configured alignment.
+        """Render a table data with pre-configured alignment.
 
         .. code-block:: python
             >>> table_data = [
@@ -252,7 +253,7 @@ class BarPluginRenderer(MPMPlugin):
             table_data,
             tablefmt=BarPluginRenderer.plain_table_format,
             colalign=("left", "right", "center", "left"),
-            disable_numparse=True
+            disable_numparse=True,
         )
 
     def _render(self, outdated_data):
@@ -277,7 +278,10 @@ class BarPluginRenderer(MPMPlugin):
             package_label = f"package{plural}"
 
             table = [
-                ((p['name'], p['installed_version'], "→", p['latest_version']), p['upgrade_cli'])
+                (
+                    (p["name"], p["installed_version"], "→", p["latest_version"]),
+                    p["upgrade_cli"],
+                )
                 for p in manager["packages"]
             ]
 
@@ -306,7 +310,9 @@ class BarPluginRenderer(MPMPlugin):
 
             # Print a menu entry for each outdated packages.
             for line, upgrade_cli in zip(formatted_lines, upgrade_cli_list):
-                self.print_cli_item(f"{submenu}{line}", upgrade_cli, font, "refresh=true")
+                self.print_cli_item(
+                    f"{submenu}{line}", upgrade_cli, font, "refresh=true"
+                )
 
             self.print_upgrade_all_item(manager, submenu)
 
@@ -323,5 +329,6 @@ class BarPluginRenderer(MPMPlugin):
         return capture.getvalue()
 
     def print(self, outdated_data):
-        # Capturing the output of the plugin and re-printing it will introduce an extra line returns, hence the extra rstrip() call.
+        # Capturing the output of the plugin and re-printing it will introduce an
+        # extra line returns, hence the extra rstrip() call.
         echo(self.render(outdated_data).rstrip())

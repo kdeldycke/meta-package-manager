@@ -1,0 +1,267 @@
+# Copyright Kevin Deldycke <kevin@deldycke.com> and contributors.
+# All Rights Reserved.
+#
+# This program is Free Software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+import re
+
+from click_extra.platform import LINUX
+
+from ..base import PackageManager
+from ..version import parse_version
+
+
+class Emerge(PackageManager):
+    """
+
+    Documentation:
+    - https://wiki.gentoo.org/wiki/Portage#emerge
+    - https://dev.gentoo.org/~zmedico/portage/doc/man/emerge.1.html
+
+    See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
+    """
+
+    platforms = frozenset({LINUX})
+
+    requirement = "3.0.0"
+
+    version_regex = r"Portage\s+(?P<version>\S+)"
+    """
+    .. code-block:: shell-session
+
+        ► emerge --version
+        Portage 3.0.30 (python 3.9.9-final-0, gcc-11.2.1, 5.15.32-gentoo-r1 x86_64)
+    """
+
+    @property
+    def installed(self):
+        """Fetch installed packages.
+
+        .. code-block:: shell-session
+
+            ► qlist --installed --verbose --nocolor
+            acct-group/audio-0-r1
+            acct-group/cron-0
+            app-admin/hddtemp-0.3_beta15-r29
+            app-admin/perl-cleaner-2.30
+            app-admin/system-config-printer-1.5.16-r1
+            app-arch/p7zip-16.02-r8
+        """
+        installed = {}
+
+        output = self.run_cli("--installed", "--verbose", "--nocolor", override_cli_path="qlist")
+
+        regexp = re.compile(
+            r"""
+            (
+                ?P<package_id>\S+   # Non-whitespace string...
+                (?!-r)              # ...if not directly followred by the "-r" string.
+            )
+            -                       # A dash.
+            (
+                ?P<version>[^\s-]+  # Any non-whitespace/non-dash string.
+                (?:-r\d+)?          # Optional revision suffix led by a dash (non-grouped).
+            )
+            """,
+            re.VERBOSE
+        )
+
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                package_id, installed_version = match.groups()
+                installed[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(installed_version),
+                }
+
+        return installed
+
+    @property
+    def outdated(self):
+        """Fetch outdated packages.
+
+        .. code-block:: shell-session
+
+            ► emerge --update --deep --pretend --columns --color n --nospinner @world
+            [blocks  B     ] app-text/dos2unix
+            [ebuild   N    ] app-games/qstat   [25c]
+            [ebuild    R   ] sys-apps/sed      [2.4.7-r6]
+            [ebuild       U] net-fs/samba      [2.2.8_pre1]      [2.2.7a]
+            [ebuild       U] sys-devel/distcc  [2.16]            [2.13-r1] USE=ipv6* -gtk
+            [ebuild r     U] dev-libs/icu      [50.1.1:0/50.1.1] [50.1-r2:0/50.1]
+            [ebuild r  R   ] dev-libs/libxml2  [2.9.0-r1:2]       USE=icu
+        """
+        outdated = {}
+
+        output = self.run_cli("--update", "--deep", "--pretend", "--columns", "--color", "n", "--nospinner", "@world")
+
+        regexp = re.compile(
+            r"""
+            \[.+\]                                  # Update state.
+            \                                       # A space.
+            (?P<package_id>\S+)                     # Non-whitespace string.
+            \s+                                     # Any spacing.
+            (?:\[                                   # Non-matching group starting with a '['.
+                (?P<latest_version>[^\s\/:]+)       # Any non-spaced string until a ':' or '/' is met.
+                \S*                                 # Left-over parts of the version, after a ':' or '/'.
+            \])?                                    # Optional group ending with a ']'.
+            \s+                                     # Any spacing.
+            (?:\[                                   # Non-matching group starting with a '['.
+                (?P<installed_version>[^\s\/:]+)    # Any non-spaced string until a ':' or '/' is met.
+                \S*                                 # Left-over parts of the version, after a ':' or '/'.
+            \])?                                    # Optional group ending with a ']'.
+            """,
+            re.VERBOSE
+        )
+
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                package_id, latest_version, installed_version = match.groups()
+                outdated[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "latest_version": parse_version(latest_version),
+                    "installed_version": parse_version(installed_version),
+                }
+        return outdated
+
+    def search(self, query, extended, exact):
+        """Fetch matching packages.
+
+        .. code-block:: shell-session
+
+            ► emerge --search --color n --nospinner blah
+
+            [ Results for search key : blah ]
+            Searching...
+
+            *  sys-process/htop
+                Latest version available: 1.0.2-r1
+                Latest version installed: [ Not Installed ]
+                Size of files: 380 KiB
+                Homepage:      http://htop.sourceforge.net
+                Description:   interactive process viewer
+                License:       BSD GPL-2
+
+            *  x11-drivers/nvidia-drivers
+                Latest version available: 455.45.01-r1
+                Latest version installed: [ Not Installed ]
+                Size of files: 180.214 KiB
+                Homepage:      https://www.nvidia.com/Download/Find.aspx
+                Description:   NVIDIA Accelerated Graphics Driver
+                License:       GPL-2 NVIDIA-r2
+
+            [ Applications found : 2 ]
+
+        .. code-block:: shell-session
+
+            ► emerge --search --color n --nospinner %^sed$
+
+        .. code-block:: shell-session
+
+            ► emerge --searchdesc --color n --nospinner sed
+
+        .. code-block:: shell-session
+
+            ► emerge --searchdesc --color n --nospinner %^sed$
+        """
+        matches = {}
+
+        search_param = "--search"
+        if extended:
+            search_param = "--searchdesc"
+
+        if exact:
+            query = f"%^{query}$"
+
+        output = self.run_cli(search_param, "--color", "n", "--nospinner", query)
+
+        regexp = re.compile(
+            r"""
+            ^\*\s+(?P<package_id>\S+)\n
+            \s+Latest\ version\ available:\s+(?P<latest_version>\S+)\n
+            """,
+            re.MULTILINE | re.VERBOSE,
+        )
+
+        for package_id, version in regexp.findall(output):
+            matches[package_id] = {
+                "id": package_id,
+                "name": package_id,
+                "latest_version": parse_version(version),
+            }
+
+        return matches
+
+    def install(self, package_id):
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► sudo emerge --color n --nospinner dev-vcs/git
+        """
+        super().install(package_id)
+        return self.run_cli("--color", "n", "--nospinner", package_id, override_pre_cmds=("sudo",))
+
+    def upgrade_cli(self, package_id="@world"):
+        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
+
+        .. code-block:: shell-session
+
+            ► sudo emerge --update --newuse --deep --color n --nospinner @world
+
+        .. code-block:: shell-session
+
+            ► sudo emerge --update --color n --nospinner dev-vcs/git
+        """
+        update_params = ()
+        if package_id == "@world":
+            update_params = ("--newuse", "--deep")
+
+        return self.build_cli("--update", *update_params, "--color", "n", "--nospinner", package_id, override_pre_cmds=("sudo",))
+
+    def sync(self):
+        """Sync package metadata.
+
+        .. code-block:: shell-session
+
+            ► sudo emerge --sync --color n --nospinner
+        """
+        super().sync()
+        self.run_cli("--sync", "--color", "n", "--nospinner", override_pre_cmds=("sudo",))
+
+    def cleanup(self):
+        """Removes things we don't need anymore.
+
+        An update is forced before calling clean commands, as pointed by the emerge documentation:
+
+        > As a safety measure, depclean will not remove any packages unless *all*
+        > required dependencies have been resolved. As a consequence, it is often
+        > necessary to run `emerge --update --newuse --deep @world` prior to depclean.
+
+        .. code-block:: shell-session
+
+            ► sudo emerge --update --newuse --deep --color n --nospinner @world
+            ► sudo emerge --depclean
+            ► sudo eclean distfiles
+        """
+        super().cleanup()
+        # Forces an upgrade first, as recommended by emerge documentation.
+        self.upgrade()
+        self.run_cli("--depclean", override_pre_cmds=("sudo",))
+        self.run_cli("distfiles", override_cli_path="eclean", override_pre_cmds=("sudo",))

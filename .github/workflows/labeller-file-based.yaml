@@ -45,6 +45,10 @@ jobs:
           - meta_package_manager/tests/*dpkg*
           - meta_package_manager/tests/*opkg*
 
+        "📦 manager: emerge":
+          - meta_package_manager/managers/emerge*
+          - meta_package_manager/tests/*emerge*
+
         "📦 manager: flatpak":
           - meta_package_manager/managers/flatpak*
           - meta_package_manager/tests/*flatpak*

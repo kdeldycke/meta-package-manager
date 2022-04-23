@@ -387,6 +387,7 @@ class PackageManager:
         auto_pre_args=True,
         auto_post_args=True,
         override_pre_cmds=False,
+        override_cli_path=False,
         override_pre_args=False,
         override_post_args=False,
     ):
@@ -429,7 +430,11 @@ class PackageManager:
         elif auto_pre_cmds:
             params.extend(self.pre_cmds)
 
-        params.append(self.cli_path)
+        if override_cli_path:
+            assert isinstance(override_pre_cmds, str)
+            params.append(override_cli_path)
+        else:
+            params.append(self.cli_path)
 
         if override_pre_args:
             assert isinstance(override_pre_args, tuple)
@@ -457,6 +462,7 @@ class PackageManager:
         auto_post_args=True,
         override_extra_env=False,
         override_pre_cmds=False,
+        override_cli_path=False,
         override_pre_args=False,
         override_post_args=False,
         force_exec=False,
@@ -481,6 +487,7 @@ class PackageManager:
             auto_pre_args=auto_pre_args,
             auto_post_args=auto_post_args,
             override_pre_cmds=override_pre_cmds,
+            override_cli_path=override_cli_path,
             override_pre_args=override_pre_args,
             override_post_args=override_post_args,
         )

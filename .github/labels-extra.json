@@ -35,6 +35,11 @@
     "description": "apt, apt-mint, dpkg, opkg"
   },
   {
+    "name": "📦 manager: emerge",
+    "color": "#bfdadc",
+    "description": "emerge"
+  },
+  {
     "name": "📦 manager: flatpak",
     "color": "#bfdadc",
     "description": "flatpak"

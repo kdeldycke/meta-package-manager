@@ -94,6 +94,11 @@ jobs:
                "keywords": ["apt", "apt-mint", "aptitude", "dpkg", "opkg"]},
 
               {"labels": [
+                "📦 manager: emerge",
+                "🖥 platform: Linux"],
+               "keywords": ["emerge"]},
+
+              {"labels": [
                 "📦 manager: flatpak",
                 "🖥 platform: Linux"],
                "keywords": ["flatpak", "flat"]},

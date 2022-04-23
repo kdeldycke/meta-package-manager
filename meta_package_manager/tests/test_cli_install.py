@@ -50,6 +50,7 @@ class TestInstall(CLISubCommandTests):
         "choco": "ccleaner",
         "composer": "illuminate/contracts",
         "dnf": "usd",
+        "emerge": "dev-vcs/git",
         "flatpak": "org.gnome.Dictionary",
         "gem": "markdown",
         "mas": "747648890",  # Telegram

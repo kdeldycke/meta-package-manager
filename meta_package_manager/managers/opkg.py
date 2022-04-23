@@ -187,9 +187,11 @@ class OPKG(PackageManager):
         return self.build_cli("upgrade", package_id)
 
     def sync(self):
-        """.. code-block:: shell-session
+        """Removes things we don't need anymore.
 
-        ► opkg update
+        .. code-block:: shell-session
+
+            ► opkg update
         """
         super().sync()
         self.run_cli("update")

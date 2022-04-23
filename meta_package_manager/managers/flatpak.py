@@ -40,9 +40,7 @@ class Flatpak(PackageManager):
 
     @property
     def installed(self):
-        """Fetch installed packages from ``flatpak list`` output.
-
-        Raw CLI output samples:
+        """Fetch installed packages.
 
         .. code-block:: shell-session
 
@@ -82,9 +80,7 @@ class Flatpak(PackageManager):
 
     @property
     def outdated(self):
-        """Fetch outdated packages from ``flatpak remote-ls`` output.
-
-        Raw CLI output samples:
+        """Fetch outdated packages.
 
         .. code-block:: shell-session
 
@@ -136,9 +132,7 @@ class Flatpak(PackageManager):
         return outdated
 
     def search(self, query, extended, exact):
-        """Fetch matching packages from ``flatpak search`` output.
-
-        Raw CLI output samples:
+        """Fetch matching packages.
 
         .. code-block:: shell-session
 
@@ -198,21 +192,27 @@ class Flatpak(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """.. code-block:: shell-session.
+        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
 
-        ► flatpak update --noninteractive org.gnome.Dictionary
+        .. code-block:: shell-session
+
+            ► flatpak update --noninteractive
+
+        .. code-block:: shell-session
+
+            ► flatpak update --noninteractive org.gnome.Dictionary
         """
         return self.build_cli("update", "--noninteractive", package_id)
 
     def cleanup(self):
-        """Runs:
+        """Removes things we don't need anymore.
+
+        See:
+        https://docs.flatpak.org/en/latest/flatpak-command-reference.html#flatpak-repair
 
         .. code-block:: shell-session
 
             ► flatpak repair --user
-
-        See: https://docs.flatpak.org/en/latest
-        /flatpak-command-reference.html#flatpak-repair
         """
         super().cleanup()
         self.run_cli("repair", "--user")

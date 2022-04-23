@@ -46,9 +46,7 @@ class APM(PackageManager):
 
     @property
     def installed(self):
-        """Fetch installed packages from ``apm list`` output.
-
-        Raw CLI output samples:
+        """Fetch installed packages.
 
         .. code-block:: shell-session
 
@@ -160,9 +158,7 @@ class APM(PackageManager):
 
     @property
     def outdated(self):
-        """Fetch outdated packages from ``apm outdated`` output.
-
-        Raw CLI output samples:
+        """Fetch outdated packages.
 
         .. code-block:: shell-session
 
@@ -328,9 +324,7 @@ class APM(PackageManager):
         return outdated
 
     def search(self, query, extended, exact):
-        """Fetch matching packages from ``apm search`` output.
-
-        Raw CLI output samples:
+        """Fetch matching packages.
 
         .. code-block:: shell-session
 
@@ -461,12 +455,14 @@ class APM(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """.. code-block:: shell-session.
+        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
 
-        ► apm update --no-confirm image-view
+        .. code-block:: shell-session
+
+            ► apm update --no-confirm
+
+        .. code-block:: shell-session
+
+            ► apm update --no-confirm image-view
         """
-        return self.build_cli(
-            "update",
-            "--no-confirm",
-            package_id,
-        )
+        return self.build_cli("update", "--no-confirm", package_id)

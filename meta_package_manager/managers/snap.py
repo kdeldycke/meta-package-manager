@@ -43,9 +43,7 @@ class Snap(PackageManager):
 
     @property
     def installed(self):
-        """Fetch installed packages from ``snap list`` output.
-
-        Raw CLI output samples:
+        """Fetch installed packages.
 
         .. code-block:: shell-session
             ► snap list --color=never
@@ -71,9 +69,7 @@ class Snap(PackageManager):
 
     @property
     def outdated(self):
-        """Fetch outdated packages from ``snap refresh --list`` output.
-
-        Raw CLI output samples:
+        """Fetch outdated packages.
 
         .. code-block:: shell-session
 
@@ -101,7 +97,7 @@ class Snap(PackageManager):
         return outdated
 
     def search(self, query, extended, exact):
-        """Fetch matching packages from ``snap find`` output.
+        """Fetch matching packages.
 
         .. code-block:: shell-session
             ► snap find doc --color=never
@@ -152,13 +148,16 @@ class Snap(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """Snap has an auto-update function, but snaps can be updated manually.
+        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
+
+        Snap has an auto-update function, but snaps can be updated manually.
+
+        .. code-block:: shell-session
+
+            ► snap refresh --color=never
 
         .. code-block:: shell-session
 
             ► snap refresh standard-notes --color=never
         """
-        return self.build_cli(
-            "refresh",
-            package_id,
-        )
+        return self.build_cli("refresh", package_id)

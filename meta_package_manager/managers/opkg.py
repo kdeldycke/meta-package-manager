@@ -39,9 +39,7 @@ class OPKG(PackageManager):
 
     @property
     def installed(self):
-        """Fetch installed packages from ``opkg list-installed`` output.
-
-        Raw CLI output samples:
+        """Fetch installed packages.
 
         .. code-block:: shell-session
             ► opkg list-installed
@@ -85,9 +83,7 @@ class OPKG(PackageManager):
 
     @property
     def outdated(self):
-        """Fetch outdated packages from ``opkg list-upgradable`` output.
-
-        Raw CLI output samples:
+        """Fetch outdated packages.
 
         .. code-block:: shell-session
 
@@ -114,7 +110,9 @@ class OPKG(PackageManager):
         return outdated
 
     def search(self, query, extended, exact):
-        """Simulate search by listing all packages.
+        """Fetch matching packages.
+
+        Simulate search by listing all packages.
 
         .. code-block:: shell-session
 
@@ -176,17 +174,20 @@ class OPKG(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """.. code-block:: shell-session.
+        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
 
-        ► opkg upgrade enigma2-hotplug
+        .. code-block:: shell-session
+
+            ► opkg upgrade
+
+        .. code-block:: shell-session
+
+            ► opkg upgrade enigma2-hotplug
         """
-        return self.build_cli(
-            "upgrade",
-            package_id,
-        )
+        return self.build_cli("upgrade", package_id)
 
     def sync(self):
-        """.. code-block:: shell-session.
+        """.. code-block:: shell-session
 
         ► opkg update
         """

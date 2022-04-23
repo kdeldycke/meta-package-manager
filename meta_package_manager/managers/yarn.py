@@ -75,34 +75,32 @@ class Yarn(PackageManager):
 
     @property
     def installed(self):
-        """Fetch installed packages from ``yarn list`` output.
+        """Fetch installed packages.
 
         .. code-block:: shell-session
 
             ► yarn global --json list --depth 0
-            (...)
         """
         output = self.run_cli("global", "--json", "list", "--depth", "0")
         return self.parse(output)
 
     @cached_property
     def global_dir(self):
-        """.. code-block:: shell-session.
+        """Locate the global directory.
 
-        ► yarn global dir (...)
+        .. code-block:: shell-session
+
+            ► yarn global dir
         """
         return self.run_cli("global", "dir", force_exec=True).rstrip()
 
     @property
     def outdated(self):
-        """Fetch outdated packages from ``yarn outdated`` output.
-
-        Raw CLI output samples:
+        """Fetch outdated packages.
 
         .. code-block:: shell-session
 
             ► yarn --json outdated --cwd <self.global_dir>
-            (...)
         """
         outdated = {}
 
@@ -133,7 +131,9 @@ class Yarn(PackageManager):
         return outdated
 
     def search(self, query, extended, exact):
-        """Call ``yarn info`` and only works for exact match.
+        """Fetch matching packages.
+
+        Call ``yarn info`` and only works for exact match.
 
         Yarn maintainers have decided not to implement a dedicated ``search``
         command:
@@ -249,32 +249,31 @@ class Yarn(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """.. code-block:: shell-session.
+        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
 
-            ► yarn global add python
+       .. code-block:: shell-session
+
+            ► yarn global upgrade
 
         .. code-block:: shell-session
 
-            ► yarn global upgrade
+            ► yarn global add python
         """
         cmd_args = []
         if package_id:
             cmd_args += ["add", package_id]
         else:
             cmd_args += ["upgrade"]
-        return self.build_cli(
-            "global",
-            *cmd_args,
-        )
+        return self.build_cli("global", *cmd_args)
 
     def cleanup(self):
-        """Remove the shared cache files.
+        """Removes things we don't need anymore.
+
+        See: https://yarnpkg.com/cli/cache/clean
 
         .. code-block:: shell-session
 
             ► yarn cache clean --all
-
-        See: https://yarnpkg.com/cli/cache/clean
         """
         super().cleanup()
         self.run_cli("cache", "clean", "--all")

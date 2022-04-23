@@ -66,9 +66,7 @@ class Homebrew(PackageManager):
 
     @property
     def installed(self):
-        """List installed packages from ``brew list`` output.
-
-        Raw CLI output samples:
+        """Fetch installed packages.
 
         .. code-block:: shell-session
 
@@ -127,7 +125,7 @@ class Homebrew(PackageManager):
 
     @property
     def outdated(self):
-        """Fetch outdated packages from ``brew outdated`` output.
+        """Fetch outdated packages.
 
         .. code-block:: shell-session
 
@@ -243,7 +241,7 @@ class Homebrew(PackageManager):
         return outdated
 
     def search(self, query, extended, exact):
-        """Fetch matching packages from ``brew search`` output.
+        """Fetch matching packages.
 
         .. code-block:: shell-session
 
@@ -352,8 +350,7 @@ class Homebrew(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """Returns the right CLI depending on weither formula or cask are
-        concerned:
+        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
 
         ``brew`` and ``cask`` share the same command.
 
@@ -419,13 +416,10 @@ class Homebrew(PackageManager):
             ==> Purging files for version 4.2.0 of Cask dupeguru
             🍺  dupeguru was successfully upgraded!
         """
-        return self.build_cli(
-            "upgrade",
-            package_id,
-        )
+        return self.build_cli("upgrade", package_id)
 
     def sync(self):
-        """Fetch content of remote taps.
+        """Sync package metadata.
 
         .. code-block:: shell-session
 
@@ -436,7 +430,9 @@ class Homebrew(PackageManager):
         self.run_cli("update", "--quiet", auto_post_args=False)
 
     def cleanup(self):
-        """Scrub the cache, including latest version's downloads. Also remove unused
+        """Removes things we don't need anymore.
+
+        Scrub the cache, including latest version's downloads. Also remove unused
         dependencies.
 
         Downloads for all installed formulae and casks will not be deleted.

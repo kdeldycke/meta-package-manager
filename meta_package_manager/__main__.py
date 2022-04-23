@@ -17,7 +17,7 @@
 
 """Allow the module to be run as a CLI. I.e.:
 
-.. code-block:: shell-session.
+.. code-block:: shell-session
 
     $ python -m meta_package_manager
 

@@ -24,6 +24,9 @@ from ..version import parse_version
 
 
 class Pacman(PackageManager):
+    """
+    See command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
+    """
 
     platforms = frozenset({LINUX})
 
@@ -46,9 +49,7 @@ class Pacman(PackageManager):
 
     @property
     def installed(self):
-        """Fetch installed packages from ``pacman --query`` output.
-
-        Raw CLI output sample:
+        """Fetch installed packages.
 
         .. code-block:: shell-session
 
@@ -81,9 +82,7 @@ class Pacman(PackageManager):
 
     @property
     def outdated(self):
-        """Fetch outdated packages from ``pacman -Qu`` output.
-
-        Raw CLI output samples:
+        """Fetch outdated packages.
 
         .. code-block:: shell-session
 
@@ -109,8 +108,9 @@ class Pacman(PackageManager):
         return outdated
 
     def search(self, query, extended, exact):
-        """
-        code-block:: shell-session
+        """Fetch matching packages.
+
+        .. code-block:: shell-session
 
             ► pacman --noconfirm --sync --search fire
             extra/dump_syms 0.0.7-1
@@ -160,7 +160,7 @@ class Pacman(PackageManager):
         return self.run_cli("--sync", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """Upgrade one package.
+        """Generates the CLI to upgrade the package provided as parameter.
 
         .. code-block:: shell-session
 
@@ -169,24 +169,30 @@ class Pacman(PackageManager):
         return self.build_cli("--sync", package_id)
 
     def upgrade_all_cli(self):
-        """.. code-block:: shell-session.
+        """Generates the CLI to upgrade all packages.
 
-        ► pacman --noconfirm --sync --refresh --sysupgrade
+        .. code-block:: shell-session
+
+            ► pacman --noconfirm --sync --refresh --sysupgrade
         """
         return self.build_cli("--sync", "--refresh", "--sysupgrade")
 
     def sync(self):
-        """.. code-block:: shell-session.
+        """Sync package metadata.
 
-        ► pacman --noconfirm --sync --refresh
+        .. code-block:: shell-session
+
+            ► pacman --noconfirm --sync --refresh
         """
         super().sync()
         self.run_cli("--sync", "--refresh")
 
     def cleanup(self):
-        """.. code-block:: shell-session.
+        """Removes things we don't need anymore.
 
-        ► pacman --noconfirm --sync --clean --clean
+        .. code-block:: shell-session
+
+            ► pacman --noconfirm --sync --clean --clean
         """
         super().cleanup()
         self.run_cli("--sync", "--clean", "--clean")

@@ -170,17 +170,14 @@ class Choco(PackageManager):
         return self.run_cli("install", package_id, "--yes", "--limit-output")
 
     def upgrade_cli(self, package_id="all"):
-        """.. code-block:: shell-session.
-
-            ► choco upgrade ccleaner --yes --limit-output --no-progress --no-color
+        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
 
         .. code-block:: shell-session
 
             ► choco upgrade all --yes --limit-output --no-progress --no-color
+
+        .. code-block:: shell-session
+
+            ► choco upgrade ccleaner --yes --limit-output --no-progress --no-color
         """
-        return self.build_cli(
-            "upgrade",
-            package_id,
-            "--yes",
-            "--limit-output",
-        )
+        return self.build_cli("upgrade", package_id, "--yes", "--limit-output")

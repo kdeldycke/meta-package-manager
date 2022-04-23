@@ -104,14 +104,13 @@ class Token:
         """Does the Token got a pure integer representation?"""
         return self.integer is not None
 
-    """ In the best case, try to comparison Token to integers.
+    """ Compare the current Token instance to the other as intergers if both can be losslessly interpreted as pure integers.
 
-    If one or the two is an integer but not the other, we convert all to
-    string to allow comparison.
+    If one at least is not an integer, we convert all of them to string to allow comparison.
     """
 
     def _match_type(self, other):
-        """Returns the safe type with which we can compare two values."""
+        """Returns the safe type with which we can compare the two values."""
         if self.isint:
             if isinstance(other, int):
                 return int
@@ -196,6 +195,8 @@ class TokenizedString:
         Returns a tuple of Token instances. Which allows for comparison between
         strings and integers. That way we get natural, user-friendly sorting of
         version numbers. That we can get with simple Python, see:
+
+        .. code-block:: python
 
             >>> '2019.0.1' > '9.3'
             False

@@ -42,9 +42,7 @@ class Composer(PackageManager):
 
     @property
     def installed(self):
-        """Fetch installed packages from ``composer global show`` output.
-
-        Raw CLI output samples:
+        """Fetch installed packages.
 
         .. code-block:: shell-session
 
@@ -92,31 +90,29 @@ class Composer(PackageManager):
 
     @property
     def outdated(self):
-        """Fetch outdated packages from ``composer global outdated`` output.
-
-        Raw CLI output samples:
+        """Fetch outdated packages.
 
         .. code-block:: shell-session
 
-        ► composer global outdated --format=json
-        {
-            "installed": [
-                {
-                    "name": "illuminate/contracts",
-                    "version": "v5.7.2",
-                    "latest": "v5.7.3",
-                    "latest-status": "semver-safe-update",
-                    "description": "The Illuminate Contracts package."
-                },
-                {
-                    "name": "illuminate/support",
-                    "version": "v5.7.2",
-                    "latest": "v5.7.3",
-                    "latest-status": "semver-safe-update",
-                    "description": "The Illuminate Support package."
-                }
-            ]
-        }
+            ► composer global outdated --format=json
+            {
+                "installed": [
+                    {
+                        "name": "illuminate/contracts",
+                        "version": "v5.7.2",
+                        "latest": "v5.7.3",
+                        "latest-status": "semver-safe-update",
+                        "description": "The Illuminate Contracts package."
+                    },
+                    {
+                        "name": "illuminate/support",
+                        "version": "v5.7.2",
+                        "latest": "v5.7.3",
+                        "latest-status": "semver-safe-update",
+                        "description": "The Illuminate Support package."
+                    }
+                ]
+            }
         """
         outdated = {}
 
@@ -136,7 +132,7 @@ class Composer(PackageManager):
         return outdated
 
     def search(self, query, extended, exact):
-        """Fetch matching packages from ``composer search`` output.
+        """Fetch matching packages.
 
         .. code-block:: shell-session
 
@@ -215,20 +211,26 @@ class Composer(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """.. code-block:: shell-session.
+        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
 
-        ► composer global update illuminate/contracts
+        .. code-block:: shell-session
+
+            ► composer global update
+
+        .. code-block:: shell-session
+
+            ► composer global update illuminate/contracts
         """
         return self.build_cli("update", package_id)
 
     def cleanup(self):
-        """Runs:
+        """Removes things we don't need anymore.
+
+        See: https://getcomposer.org/doc/03-cli.md#clear-cache-clearcache-cc
 
         .. code-block:: shell-session
 
             ► composer global clear-cache
-
-        See: https://getcomposer.org/doc/03-cli.md#clear-cache-clearcache-cc
         """
         super().cleanup()
         self.run_cli("clear-cache")

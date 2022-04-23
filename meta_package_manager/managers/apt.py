@@ -30,6 +30,8 @@ class APT(PackageManager):
     Documentation:
     - https://wiki.debian.org/AptCLI
     - http://manpages.ubuntu.com/manpages/xenial/man8/apt.8.html
+
+    See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
     """
 
     platforms = frozenset({LINUX})
@@ -48,7 +50,7 @@ class APT(PackageManager):
 
     @property
     def installed(self):
-        """Fetch installed packages from ``apt list`` output.
+        """Fetch installed packages.
 
         .. code-block:: shell-session
 
@@ -98,7 +100,7 @@ class APT(PackageManager):
 
     @property
     def outdated(self):
-        """Fetch outdated packages from ``apt list`` output.
+        """Fetch outdated packages.
 
         .. code-block:: shell-session
 
@@ -126,7 +128,7 @@ class APT(PackageManager):
         return outdated
 
     def search(self, query, extended, exact):
-        """Fetch matching packages from ``apt search`` output.
+        """Fetch matching packages.
 
         .. code-block:: shell-session
 
@@ -224,15 +226,15 @@ class APT(PackageManager):
         return self.run_cli("install", package_id, override_pre_cmds=("sudo",))
 
     def upgrade_cli(self, package_id=None):
-        """Generates the upgrade CLI.
+        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
 
-        .. code-block:: shell-session.
-
-            ► sudo apt install --only-upgrade git --yes --quiet
-
-        .. code-block:: shell-session.
+        .. code-block:: shell-session
 
             ► sudo apt upgrade --yes --quiet
+
+        .. code-block:: shell-session
+
+            ► sudo apt install --only-upgrade git --yes --quiet
         """
         if package_id:
             return self.build_cli(
@@ -259,7 +261,7 @@ class APT(PackageManager):
         self.run_cli("update", override_pre_cmds=("sudo",))
 
     def cleanup(self):
-        """Runs:
+        """Removes things we don't need anymore.
 
         .. code-block:: shell-session
 
@@ -291,7 +293,9 @@ class APT_Mint(APT):
     """
 
     def search(self, query, extended, exact):
-        """.. code-block:: shell-session.
+        """Fetch matching packages.
+
+        .. code-block:: shell-session
 
             ► /usr/local/bin/apt search sed --yes --quiet
             v   librust-slog-2.5+erased-serde-dev  -

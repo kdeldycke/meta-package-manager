@@ -44,9 +44,7 @@ class MAS(PackageManager):
 
     @property
     def installed(self):
-        """Fetch installed packages from ``mas list`` output.
-
-        Raw CLI output samples:
+        """Fetch installed packages.
 
         .. code-block:: shell-session
 
@@ -76,17 +74,11 @@ class MAS(PackageManager):
 
     @property
     def outdated(self):
-        """Fetch outdated packages from ``mas outdated`` output.
-
-        Raw CLI output samples:
+        """Fetch outdated packages.
 
         .. code-block:: shell-session
 
             ► mas outdated
-
-        .. todo
-
-            An example of ``mas outdated`` output is missing above.
         """
         outdated = {}
 
@@ -115,9 +107,7 @@ class MAS(PackageManager):
         return outdated
 
     def search(self, query, extended, exact):
-        """Fetch matching packages from ``mas search`` output.
-
-        Raw CLI output samples:
+        """Fetch matching packages.
 
         .. code-block:: shell-session
 
@@ -174,7 +164,14 @@ class MAS(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        return self.build_cli(
-            "upgrade",
-            package_id,
-        )
+        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
+
+        .. code-block:: shell-session
+
+            ► mas upgrade
+
+        .. code-block:: shell-session
+
+            ► mas upgrade 945397020
+        """
+        return self.build_cli("upgrade", package_id)

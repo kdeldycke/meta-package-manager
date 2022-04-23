@@ -69,9 +69,7 @@ class NPM(PackageManager):
 
     @property
     def installed(self):
-        """Fetch installed packages from ``npm list`` output.
-
-        Raw CLI output samples:
+        """Fetch installed packages.
 
         .. code-block:: shell-session
 
@@ -132,9 +130,7 @@ class NPM(PackageManager):
 
     @property
     def outdated(self):
-        """Fetch outdated packages from ``npm outdated`` output.
-
-        Raw CLI output samples:
+        """Fetch outdated packages.
 
         .. code-block:: shell-session
 
@@ -178,7 +174,7 @@ class NPM(PackageManager):
         return outdated
 
     def search(self, query, extended, exact):
-        """Fetch matching packages from ``npm search`` output.
+        """Fetch matching packages.
 
         Doc: https://docs.npmjs.com/cli/search.html
 
@@ -304,13 +300,15 @@ class NPM(PackageManager):
         )
 
     def upgrade_cli(self, package_id=None, version=None):
-        """.. code-block:: shell-session.
-
-            ► npm --global --progress=false --no-update-notifier install raven
+        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
 
         .. code-block:: shell-session
 
             ► npm --global --progress=false --no-update-notifier update
+
+        .. code-block:: shell-session
+
+            ► npm --global --progress=false --no-update-notifier install raven
         """
         cmd_args = ["update"]
         if package_id:

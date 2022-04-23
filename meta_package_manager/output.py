@@ -41,7 +41,6 @@ from . import __version__
 from .bar_plugin import MPMPlugin
 from .version import TokenizedString
 
-# List of fields IDs allowed to be sorted.
 SORTABLE_FIELDS = {
     "manager_id",
     "manager_name",
@@ -49,6 +48,7 @@ SORTABLE_FIELDS = {
     "package_name",
     "version",
 }
+"""List of fields IDs allowed to be sorted."""
 
 
 def not_implemented_json(data, headers, **kwargs):

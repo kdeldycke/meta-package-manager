@@ -277,7 +277,7 @@ class Pip(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id):
-        """Build-up package upgrade CLI.
+        """Generates the CLI to upgrade the package provided as parameter.
 
         .. code-block:: shell-session
 
@@ -291,15 +291,12 @@ class Pip(PackageManager):
                   Successfully uninstalled six-1.14.0
             Successfully installed six-1.15.0
         """
-        return self.build_cli(
-            "install",
-            "--user",
-            "--upgrade",
-            package_id,
-        )
+        return self.build_cli("install", "--user", "--upgrade", package_id)
 
     def upgrade_all_cli(self):
-        """Pip lacks support of a proper full upgrade command. Raising an error let the
+        """Generates the CLI to upgrade all packages.
+
+        Pip lacks support of a proper full upgrade command. Raising an error let the
         parent class upgrade packages one by one.
 
         See: https://github.com/pypa/pip/issues/59

@@ -20,6 +20,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Remove `-c`/`--cli-format` option.
 - \[mpm\] Use short-form selection option and fully-qualified path in
   `mpm`-based upgrade-all CLIs produced by `outdated` command.
+- \[mpm\] Add dedicated execution path for running sudo-prefixed commands.
 - \[mpm\] Fix local overriding of CLI parameters leading to missing `sudo`
   pre-command. Closes {issue}`579`.
 - \[mpm\] Use string highlighting code from `click-extra >= 2.1.0`.

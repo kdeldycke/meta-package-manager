@@ -223,7 +223,7 @@ class APT(PackageManager):
             ► sudo apt install git --yes --quiet
         """
         super().install(package_id)
-        return self.run_cli("install", package_id, override_pre_cmds=("sudo",))
+        return self.run_cli("install", package_id, sudo=True)
 
     def upgrade_cli(self, package_id=None):
         """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
@@ -237,10 +237,8 @@ class APT(PackageManager):
             ► sudo apt install --only-upgrade git --yes --quiet
         """
         if package_id:
-            return self.build_cli(
-                "install", "--only-upgrade", package_id, override_pre_cmds=("sudo",)
-            )
-        return self.build_cli("upgrade", override_pre_cmds=("sudo",))
+            return self.build_cli("install", "--only-upgrade", package_id, sudo=True)
+        return self.build_cli("upgrade", sudo=True)
 
     def sync(self):
         """Sync package metadata.
@@ -258,7 +256,7 @@ class APT(PackageManager):
             Reading state information...
         """
         super().sync()
-        self.run_cli("update", override_pre_cmds=("sudo",))
+        self.run_cli("update", sudo=True)
 
     def cleanup(self):
         """Removes things we don't need anymore.
@@ -270,7 +268,7 @@ class APT(PackageManager):
         """
         super().cleanup()
         for command in ("autoremove", "clean"):
-            self.run_cli(command, override_pre_cmds=("sudo",))
+            self.run_cli(command, sudo=True)
 
 
 class APT_Mint(APT):

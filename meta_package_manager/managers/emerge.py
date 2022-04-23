@@ -216,7 +216,7 @@ class Emerge(PackageManager):
             ► sudo emerge --color n --nospinner dev-vcs/git
         """
         super().install(package_id)
-        return self.run_cli("--color", "n", "--nospinner", package_id, override_pre_cmds=("sudo",))
+        return self.run_cli("--color", "n", "--nospinner", package_id, sudo=True)
 
     def upgrade_cli(self, package_id="@world"):
         """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
@@ -233,7 +233,7 @@ class Emerge(PackageManager):
         if package_id == "@world":
             update_params = ("--newuse", "--deep")
 
-        return self.build_cli("--update", *update_params, "--color", "n", "--nospinner", package_id, override_pre_cmds=("sudo",))
+        return self.build_cli("--update", *update_params, "--color", "n", "--nospinner", package_id, sudo=True)
 
     def sync(self):
         """Sync package metadata.
@@ -243,7 +243,7 @@ class Emerge(PackageManager):
             ► sudo emerge --sync --color n --nospinner
         """
         super().sync()
-        self.run_cli("--sync", "--color", "n", "--nospinner", override_pre_cmds=("sudo",))
+        self.run_cli("--sync", "--color", "n", "--nospinner", sudo=True)
 
     def cleanup(self):
         """Removes things we don't need anymore.
@@ -263,5 +263,6 @@ class Emerge(PackageManager):
         super().cleanup()
         # Forces an upgrade first, as recommended by emerge documentation.
         self.upgrade()
-        self.run_cli("--depclean", override_pre_cmds=("sudo",))
-        self.run_cli("distfiles", override_cli_path="eclean", override_pre_cmds=("sudo",))
+        self.run_cli("--depclean", sudo=True)
+        # XXX
+        self.run_cli("distfiles", override_cli_path="eclean", sudo=True)

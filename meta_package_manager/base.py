@@ -390,6 +390,7 @@ class PackageManager:
         override_cli_path=False,
         override_pre_args=False,
         override_post_args=False,
+        sudo=False,
     ):
         """Build the package manager CLI by combining the custom ``*args`` with the PM's
         global parameters.
@@ -402,7 +403,7 @@ class PackageManager:
 
         .. code-block:: shell-session
 
-            $ <self.pre_cmds> <self.cli_path> <self.pre_args> <*args> <self.post_args>
+            $ [<self.pre_cmds>|sudo] <self.cli_path> <self.pre_args> <*args> <self.post_args>
 
         * ``self.pre_cmds`` is added before the CLI path.
 
@@ -418,13 +419,25 @@ class PackageManager:
 
         Each global set of elements can be locally overriden with:
         * ``override_pre_cmds=tuple()``
+        * ``override_cli_path=str``
         * ``override_pre_args=tuple()``
         * ``override_post_args=tuple()``
+
+        On linux, the command can be ran with `sudo` if the parameter of the same name is set to `True`.
+        In which case `override_pre_cmds` are not allowed and `auto_pre_cmds` is forced to `False`.
         """
         params = []
 
-        # Prepare the full list of CLI arguments.
-        if override_pre_cmds:
+        # Sudo replaces any pre-command, be it overriden or automatic.
+        if sudo:
+            if not is_linux():
+                raise NotImplementedError("sudo only supported on Linux.")
+            if override_pre_cmds:
+                raise ValueError("Pre-commands not allowed if sudo is requested.")
+            if auto_pre_cmds:
+                auto_pre_cmds = False
+            params.add("sudo")
+        elif override_pre_cmds:
             assert isinstance(override_pre_cmds, tuple)
             params.extend(override_pre_cmds)
         elif auto_pre_cmds:
@@ -466,6 +479,7 @@ class PackageManager:
         override_pre_args=False,
         override_post_args=False,
         force_exec=False,
+        sudo=False,
     ):
         """Build and run the package manager CLI by combining the custom ``*args`` with
         the PM's global parameters.
@@ -490,6 +504,7 @@ class PackageManager:
             override_cli_path=override_cli_path,
             override_pre_args=override_pre_args,
             override_post_args=override_post_args,
+            sudo=sudo,
         )
 
         # Prepare the full list of CLI arguments.

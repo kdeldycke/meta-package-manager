@@ -166,9 +166,7 @@ class DNF(PackageManager):
             ► sudo dnf --color=never --assumeyes install pip
         """
         super().install(package_id)
-        return self.run_cli(
-            "--assumeyes", "install", package_id, override_pre_cmds=("sudo",)
-        )
+        return self.run_cli("--assumeyes", "install", package_id, sudo=True)
 
     def upgrade_cli(self, package_id=None):
         """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
@@ -181,7 +179,7 @@ class DNF(PackageManager):
 
             ► sudo dnf --color=never --assumeyes upgrade pip
         """
-        return self.build_cli("upgrade", package_id)
+        return self.build_cli("upgrade", package_id, sudo=True)
 
     def sync(self):
         """Sync package metadata.
@@ -202,5 +200,5 @@ class DNF(PackageManager):
             ► dnf --color=never clean all
         """
         super().cleanup()
-        self.run_cli("--assumeyes", "autoremove", override_pre_cmds=("sudo",))
+        self.run_cli("--assumeyes", "autoremove", sudo=True)
         self.run_cli("clean", "all")

@@ -46,6 +46,7 @@ class Snap(PackageManager):
         """Fetch installed packages.
 
         .. code-block:: shell-session
+
             ► snap list --color=never
             Name    Version    Rev   Aufzeichnung   Herausgeber     Hinweise
             core    16-2.44.1  8935  latest/stable  canonical✓      core
@@ -100,6 +101,7 @@ class Snap(PackageManager):
         """Fetch matching packages.
 
         .. code-block:: shell-session
+
             ► snap find doc --color=never
             Name       Version      Herausgeber  Hinweise  Zusammenfassung
             journey    2.14.3       2appstudio   -         Your private diary.

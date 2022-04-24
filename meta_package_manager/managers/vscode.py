@@ -79,5 +79,4 @@ class VSCode(PackageManager):
 
             ► code --install-extension tamasfe.even-better-toml
         """
-        super().install(package_id)
         return self.run_cli("--install-extension", package_id)

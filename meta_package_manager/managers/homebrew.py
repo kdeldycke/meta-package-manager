@@ -345,7 +345,6 @@ class Homebrew(PackageManager):
             ==> Moving App 'Pngyu.app' to '/Applications/Pngyu.app'
             🍺  pngyu was successfully installed!
         """
-        super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
@@ -425,7 +424,6 @@ class Homebrew(PackageManager):
             ► brew update --quiet
             Already up-to-date.
         """
-        super().sync()
         self.run_cli("update", "--quiet", auto_post_args=False)
 
     def cleanup(self):
@@ -472,7 +470,6 @@ class Homebrew(PackageManager):
             Uninstalling /usr/local/Cellar/lua@5.1/5.1.5_8... (22 files, 245.6KB)
             Uninstalling /usr/local/Cellar/nasm/2.15.05... (29 files, 2.9MB)
         """
-        super().cleanup()
         self.run_cli("autoremove", auto_post_args=False)
         self.run_cli("cleanup", "-s", "--prune=all", auto_post_args=False)
 

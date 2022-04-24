@@ -51,6 +51,11 @@ def test_ascii_id(manager_id, manager):
     assert manager_id == manager.id
 
 
+def test_xkcd_set():
+    assert len(unique(XKCD_MANAGER_ORDER)) == len(XKCD_MANAGER_ORDER)
+    assert set(pool.all_manager_ids).issuperset(XKCD_MANAGER_ORDER)
+
+
 @all_managers
 def test_name(manager):
     """Check all managers have a name."""
@@ -63,17 +68,22 @@ def test_unique_names():
     assert len({m.name for m in pool.values()}) == len(pool.all_manager_ids)
 
 
-def test_xkcd_set():
-    assert len(unique(XKCD_MANAGER_ORDER)) == len(XKCD_MANAGER_ORDER)
-    assert set(pool.all_manager_ids).issuperset(XKCD_MANAGER_ORDER)
-
-
 @all_managers
 def test_platforms(manager):
     """Check that definitions returns supported platforms as a frozenset."""
     assert manager.platforms
     assert isinstance(manager.platforms, frozenset)
     assert manager.platforms.issubset(OS_DEFINITIONS)
+
+
+@all_managers
+def test_requirement(manager):
+    """Each manager is required to specify a minimal version or ``None``."""
+    if manager.requirement is not None:
+        assert isinstance(manager.requirement, str)
+        assert set(manager.requirement).issubset(digits + ".")
+        # Check provided string is lossless once passed via TokenizedString.
+        assert str(TokenizedString(manager.requirement)) == manager.requirement
 
 
 @all_managers
@@ -85,12 +95,6 @@ def test_cli_names_type(manager):
         assert isinstance(name, str)
         assert name.isalnum()
         assert PurePath(name).name == name
-
-
-@all_managers
-def test_virtual(manager):
-    """Check the manager as a defined virtual property."""
-    assert isinstance(manager.virtual, bool)
 
 
 @all_managers
@@ -107,27 +111,7 @@ def test_cli_search_path(manager):
 
 
 @all_managers
-def test_cli_path(manager):
-    if manager.cli_path is not None:
-        assert isinstance(manager.cli_path, Path)
-        assert manager.cli_path.is_absolute()
-        assert not manager.cli_path.is_reserved()
-        assert manager.cli_path.is_file()
-
-
-@all_managers
-def test_global_args_type(manager):
-    """Check that definitions returns CLI args as a list of strings."""
-    for global_args in (manager.pre_cmds, manager.pre_args, manager.post_args):
-        assert isinstance(global_args, tuple)
-        for arg in global_args:
-            assert arg
-            assert isinstance(arg, str)
-            assert set(arg).issubset(ascii_letters + digits + "-=")
-
-
-@all_managers
-def test_global_env_type(manager):
+def test_extra_env_type(manager):
     """Check that definitions environment variables as a dict of strings."""
     assert manager.extra_env is None or isinstance(manager.extra_env, dict)
     if manager.extra_env:
@@ -139,12 +123,14 @@ def test_global_env_type(manager):
 
 
 @all_managers
-def test_requirement(manager):
-    """Each manager is required to specify a minimal version."""
-    assert isinstance(manager.requirement, str)
-    assert set(manager.requirement).issubset(digits + ".")
-    # Check provided string is lossless once passed via TokenizedString.
-    assert str(TokenizedString(manager.requirement)) == manager.requirement
+def test_global_args_type(manager):
+    """Check that definitions returns CLI args as a list of strings."""
+    for global_args in (manager.pre_cmds, manager.pre_args, manager.post_args):
+        assert isinstance(global_args, tuple)
+        for arg in global_args:
+            assert arg
+            assert isinstance(arg, str)
+            assert set(arg).issubset(ascii_letters + digits + "-=+")
 
 
 @all_managers
@@ -165,6 +151,21 @@ def test_version_regex(manager):
     assert isinstance(manager.version_regex, str)
     regex = re.compile(manager.version_regex)
     assert "version" in regex.groupindex
+
+
+@all_managers
+def test_virtual(manager):
+    """Check the manager as a defined virtual property."""
+    assert isinstance(manager.virtual, bool)
+
+
+@all_managers
+def test_cli_path(manager):
+    if manager.cli_path is not None:
+        assert isinstance(manager.cli_path, Path)
+        assert manager.cli_path.is_absolute()
+        assert not manager.cli_path.is_reserved()
+        assert manager.cli_path.is_file()
 
 
 @all_managers
@@ -193,61 +194,32 @@ def test_available(manager):
     assert isinstance(manager.available, bool)
 
 
-@all_managers
-def test_cli_type(manager):
-    """Check that all methods returning a CLI is either not implemented or returns a
-    tuple."""
-    try:
-        result = manager.upgrade_cli("dummy_package_id")
-    except Exception as ex:
-        assert isinstance(ex, NotImplementedError)
-    else:
-        assert isinstance(result, tuple)
-
-    try:
-        result = manager.upgrade_all_cli()
-    except Exception as ex:
-        assert isinstance(ex, NotImplementedError)
-    else:
-        assert isinstance(result, tuple)
+# TODO:
+#def test_args_cleanup():
 
 
 @all_managers
 def test_installed_type(manager):
-    """Check that all installed operations returns a dict of dicts."""
-    if manager.available:
-        assert isinstance(manager.installed, dict)
-        for pkg in manager.installed.values():
-            assert isinstance(pkg, dict)
-            assert set(pkg) == {"id", "name", "installed_version"}
-            assert isinstance(pkg["id"], str)
-            assert isinstance(pkg["name"], str)
-            if pkg["installed_version"] is not None:
-                assert isinstance(pkg["installed_version"], TokenizedString)
-
-
-@all_managers
-def test_search_type(manager):
-    """Check that all search operations returns a dict of dicts."""
+    """All installed operations are either not implemented or returns a dict of dicts."""
     if manager.available:
         try:
-            matches = manager.search("python", extended=True, exact=False)
+            result = manager.installed
         except Exception as ex:
             assert isinstance(ex, NotImplementedError)
         else:
-            assert isinstance(matches, dict)
-            for pkg in matches.values():
+            assert isinstance(result, dict)
+            for pkg in manager.installed.values():
                 assert isinstance(pkg, dict)
-                assert set(pkg) == {"id", "name", "latest_version"}
+                assert set(pkg) == {"id", "name", "installed_version"}
                 assert isinstance(pkg["id"], str)
                 assert isinstance(pkg["name"], str)
-                if pkg["latest_version"] is not None:
-                    assert isinstance(pkg["latest_version"], TokenizedString)
+                if pkg["installed_version"] is not None:
+                    assert isinstance(pkg["installed_version"], TokenizedString)
 
 
 @all_managers
 def test_outdated_type(manager):
-    """Check that all outdated operations returns a dict of dicts."""
+    """All outdated operations are either not implemented or returns a dict of dicts."""
     if manager.available:
         try:
             result = manager.outdated
@@ -266,19 +238,73 @@ def test_outdated_type(manager):
 
 
 @all_managers
-def test_sync_type(manager):
-    """Check that sync operation return nothing."""
+def test_search_type(manager):
+    """All search operations are either not implemented or returns a dict of dicts."""
+    assert isinstance(manager.search, MethodType)
     if manager.available:
-        assert isinstance(manager.sync, MethodType)
-        assert manager.sync() is None
+        try:
+            matches = manager.search("python", extended=True, exact=False)
+        except Exception as ex:
+            assert isinstance(ex, NotImplementedError)
+        else:
+            assert isinstance(matches, dict)
+            for pkg in matches.values():
+                assert isinstance(pkg, dict)
+                assert set(pkg) == {"id", "name", "latest_version"}
+                assert isinstance(pkg["id"], str)
+                assert isinstance(pkg["name"], str)
+                if pkg["latest_version"] is not None:
+                    assert isinstance(pkg["latest_version"], TokenizedString)
+
+
+@all_managers
+def test_upgrade_cli_type(manager):
+    """All methods returning an upgrade CLI are either not implemented or returns a tuple."""
+    assert isinstance(manager.upgrade_cli, MethodType)
+    try:
+        result = manager.upgrade_cli("dummy_package_id")
+    except Exception as ex:
+        assert isinstance(ex, NotImplementedError)
+    else:
+        assert isinstance(result, tuple)
+
+
+@all_managers
+def test_upgrade_all_cli_type(manager):
+    """All methods returning an upgrade-all CLI are either not implemented or returns a tuple."""
+    assert isinstance(manager.upgrade_all_cli, MethodType)
+    try:
+        result = manager.upgrade_all_cli()
+    except Exception as ex:
+        assert isinstance(ex, NotImplementedError)
+    else:
+        assert isinstance(result, tuple)
+
+
+@all_managers
+def test_sync_type(manager):
+    """Sync operations are either not implemented or returns nothing."""
+    assert isinstance(manager.sync, MethodType)
+    if manager.available:
+        try:
+            result = manager.sync()
+        except Exception as ex:
+            assert isinstance(ex, NotImplementedError)
+        else:
+            assert result is None
 
 
 @all_managers
 def test_cleanup_type(manager):
-    """Check that cleanup operation return nothing."""
+    """Cleanup operations are either not implemented or returns nothing."""
+    assert isinstance(manager.cleanup, MethodType)
     if manager.available:
-        assert isinstance(manager.cleanup, MethodType)
-        assert manager.cleanup() is None
+        try:
+            result = manager.cleanup()
+        except Exception as ex:
+            assert isinstance(ex, NotImplementedError)
+        else:
+            assert result is None
 
 
 # Build the canonical reference from the base class.

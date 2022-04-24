@@ -171,7 +171,6 @@ class OPKG(PackageManager):
 
             ► opkg install enigma2-hotplug
         """
-        super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
@@ -194,5 +193,4 @@ class OPKG(PackageManager):
 
             ► opkg update
         """
-        super().sync()
         self.run_cli("update")

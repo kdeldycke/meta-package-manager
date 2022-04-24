@@ -167,7 +167,7 @@ class CLISubCommandTests:
                 bool(
                     re.search(
                         rf"warning: {mid} does not implement "
-                        r"(search|outdated|upgrade|sync|cleanup|install|upgrade_all) "
+                        r"(installed|outdated|search|install|upgrade|upgrade_all|sync|cleanup) "
                         "command.",
                         stderr,
                     )
@@ -181,18 +181,6 @@ class CLISubCommandTests:
                         stdout,
                     )
                 ),
-                # Sync command.
-                f"Sync {mid} package info..." in stderr,
-                # Upgrade command.
-                f"Updating all outdated packages from {mid}..." in stderr,
-                # Cleanup command.
-                f"Cleanup {mid}..." in stderr,
-                # Log message for backup command.
-                f"Dumping packages from {mid}..." in stderr,
-                # Restoring message.
-                f"Restore {mid} packages..." in stderr,
-                # Warning message for restore command.
-                f"warning: No [{mid}] section found." in stderr,
                 # Install message.
                 bool(
                     re.search(
@@ -206,6 +194,18 @@ class CLISubCommandTests:
                         stderr,
                     )
                 ),
+                # Upgrade command.
+                f"Updating all outdated packages from {mid}..." in stderr,
+                # Sync command.
+                f"Sync {mid} package info..." in stderr,
+                # Cleanup command.
+                f"Cleanup {mid}..." in stderr,
+                # Log message for backup command.
+                f"Dumping packages from {mid}..." in stderr,
+                # Warning message for restore command.
+                f"warning: No [{mid}] section found." in stderr,
+                # Restoring message.
+                f"Restore {mid} packages..." in stderr,
             )
 
             if True in signals:

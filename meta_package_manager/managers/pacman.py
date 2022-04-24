@@ -158,7 +158,6 @@ class Pacman(PackageManager):
 
             ► pacman --noconfirm --sync firefox
         """
-        super().install(package_id)
         return self.run_cli("--sync", package_id)
 
     def upgrade_cli(self, package_id=None):
@@ -185,7 +184,6 @@ class Pacman(PackageManager):
 
             ► pacman --noconfirm --sync --refresh
         """
-        super().sync()
         self.run_cli("--sync", "--refresh")
 
     def cleanup(self):
@@ -195,5 +193,4 @@ class Pacman(PackageManager):
 
             ► pacman --noconfirm --sync --clean --clean
         """
-        super().cleanup()
         self.run_cli("--sync", "--clean", "--clean")

@@ -222,7 +222,6 @@ class APT(PackageManager):
 
             ► sudo apt install git --yes --quiet
         """
-        super().install(package_id)
         return self.run_cli("install", package_id, sudo=True)
 
     def upgrade_cli(self, package_id=None):
@@ -257,7 +256,6 @@ class APT(PackageManager):
             Building dependency tree...
             Reading state information...
         """
-        super().sync()
         self.run_cli("update", sudo=True)
 
     def cleanup(self):
@@ -268,7 +266,6 @@ class APT(PackageManager):
             ► sudo apt autoremove --yes --quiet
             ► sudo apt clean --yes --quiet
         """
-        super().cleanup()
         for command in ("autoremove", "clean"):
             self.run_cli(command, sudo=True)
 

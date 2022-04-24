@@ -207,7 +207,6 @@ class Composer(PackageManager):
 
             ► composer global install illuminate/contracts
         """
-        super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
@@ -232,5 +231,4 @@ class Composer(PackageManager):
 
             ► composer global clear-cache
         """
-        super().cleanup()
         self.run_cli("clear-cache")

@@ -273,7 +273,6 @@ class Pip(PackageManager):
             Installing collected packages: python-dateutil, arrow
             Successfully installed arrow-1.1.1 python-dateutil-2.8.2
         """
-        super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id):

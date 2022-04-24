@@ -166,7 +166,6 @@ class Choco(PackageManager):
 
             ► choco install ccleaner --yes --limit-output --no-progress --no-color
         """
-        super().install(package_id)
         return self.run_cli("install", package_id, "--yes", "--limit-output")
 
     def upgrade_cli(self, package_id="all"):

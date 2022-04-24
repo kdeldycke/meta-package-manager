@@ -160,7 +160,6 @@ class MAS(PackageManager):
 
             ► mas install 945397020
         """
-        super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):

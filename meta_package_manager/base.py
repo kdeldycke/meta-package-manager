@@ -560,6 +560,8 @@ class PackageManager:
                 },
                 (...)
             }
+
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
         raise NotImplementedError
 
@@ -591,6 +593,8 @@ class PackageManager:
                 },
                 (...)
             }
+
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
         raise NotImplementedError
 
@@ -618,6 +622,8 @@ class PackageManager:
                 },
                 (...)
             }
+
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
         raise NotImplementedError
 
@@ -626,10 +632,7 @@ class PackageManager:
 
         Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
-        if self.install.__func__.__qualname__ == PackageManager.install.__qualname__:
-            logger.warning(f"{self.id} does not implement install command.")
-            return
-        logger.info(f"Install {package_id} package from {self.id}...")
+        raise NotImplementedError
 
     def upgrade_cli(self, package_id=None):
         """Returns the complete CLI to upgrade the package provided as ``package_id`` parameter.
@@ -676,30 +679,25 @@ class PackageManager:
             return self.run(self.upgrade_all_cli(), extra_env=self.extra_env)
         except NotImplementedError:
             logger.warning(f"{self.id} does not implement upgrade_all command.")
-            logger.info(f"Call single-package upgrade CLI one by one.")
-            log = ""
-            for package_id in self.outdated:
-                output = self.upgrade(package_id)
-                if output:
-                    log += f"\n{output}"
-            return log
+
+        logger.info(f"Fallback to calling single-package upgrade one by one.")
+        log = ""
+        for package_id in self.outdated:
+            output = self.upgrade(package_id)
+            if output:
+                log += f"\n{output}"
+        return log
 
     def sync(self):
         """Refresh package metadata from remote repositories.
 
         Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
-        if self.sync.__func__.__qualname__ == PackageManager.sync.__qualname__:
-            logger.warning(f"{self.id} does not implement sync command.")
-            return
-        logger.info(f"Sync {self.id} package info...")
+        raise NotImplementedError
 
     def cleanup(self):
         """Removes left-overs, orphaned dependencies,
 
         Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
-        if self.cleanup.__func__.__qualname__ == PackageManager.cleanup.__qualname__:
-            logger.warning(f"{self.id} does not implement cleanup command.")
-            return
-        logger.info(f"Cleanup {self.id}...")
+        raise NotImplementedError

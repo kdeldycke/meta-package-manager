@@ -22,6 +22,7 @@ from datetime import datetime
 from functools import partial
 from io import TextIOWrapper
 from pathlib import Path
+from unittest.mock import patch
 
 import tomli_w
 from boltons.cacheutils import LRI, cached
@@ -351,10 +352,17 @@ def installed(ctx):
     installed_data = {}
 
     for manager in ctx.obj.selected_managers:
+
+        try:
+            packages = tuple(manager.installed.values())
+        except NotImplementedError:
+            logger.warning(f"{manager.id} does not implement installed command.")
+            continue
+
         installed_data[manager.id] = {
             "id": manager.id,
             "name": manager.name,
-            "packages": list(manager.installed.values()),
+            "packages": packages,
         }
 
         # Serialize errors at the last minute to gather all we encountered.
@@ -441,8 +449,10 @@ def outdated(ctx, plugin_output):
                 upgrade_all_cli = manager.upgrade_all_cli()
             except NotImplementedError:
                 # Fallback on mpm itself which is capable of simulating a full upgrade.
+                logger.warning(f"{manager.id} does not implement upgrade_all command.")
                 mpm_exec = bar_plugin.MPMPlugin().mpm_exec
                 upgrade_all_cli = (*mpm_exec, f"--{manager.id}", "upgrade")
+                logger.debug(f"Fallback to direct mpm call: {upgrade_all_cli}")
             outdated_data[manager.id]["upgrade_all_cli"] = BarPluginRenderer.render_cli(
                 upgrade_all_cli, plugin_format=plugin_output
             )
@@ -525,9 +535,8 @@ def search(ctx, extended, exact, query):
 
     for manager in ctx.obj.selected_managers:
 
-        # Allow managers to not implement search.
         try:
-            results = manager.search(query, extended, exact).values()
+            results = tuple(manager.search(query, extended, exact).values())
         except NotImplementedError:
             logger.warning(f"{manager.id} does not implement search command.")
             continue
@@ -535,7 +544,7 @@ def search(ctx, extended, exact, query):
         matches[manager.id] = {
             "id": manager.id,
             "name": manager.name,
-            "packages": list(results),
+            "packages": results,
         }
 
         # Serialize errors at the last minute to gather all we encountered.
@@ -609,30 +618,26 @@ def install(ctx, package_id):
         try:
             matches = manager.search(extended=False, exact=True, query=package_id)
         except NotImplementedError:
-            logger.warning(
-                f"No way to search for {package_id} with {manager.id}. Try to directly install it."
-            )
+            logger.warning(f"{manager.id} does not implement search command.")
+            logger.info(f"{package_id} existence unconfirmed, try to directly install it...")
         else:
             if not matches:
                 logger.warning(f"No {package_id} package found on {manager.id}.")
                 continue
             assert len(matches) == 1
 
-        # Allow install subcommand to fail.
-        default_value = manager.stop_on_error
-        manager.stop_on_error = True
-        try:
-            output = manager.install(package_id)
-        except CLIError:
-            logger.warning(f"Could not install {package_id} with {manager.id}.")
-
-            # Restore default value.
-            manager.stop_on_error = default_value
-
-            continue
-
-        # Restore default value.
-        manager.stop_on_error = default_value
+        # Allow install subcommand to fail to have the oportunity to catch the CLIError exception and print
+        # a comprehensive message.
+        with patch.object(manager, 'stop_on_error', True):
+            try:
+                logger.info(f"Install {package_id} package from {manager.id}...")
+                output = manager.install(package_id)
+            except NotImplementedError:
+                logger.warning(f"{manager.id} does not implement install command.")
+                continue
+            except CLIError:
+                logger.warning(f"Could not install {package_id} with {manager.id}.")
+                continue
 
         echo(output)
         return
@@ -647,7 +652,7 @@ def upgrade(ctx):
         try:
             output = manager.upgrade_all()
         except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement upgrade command.")
+            logger.warning(f"{manager.id} does not implement upgrade_all command.")
             continue
 
         if output:
@@ -659,7 +664,11 @@ def upgrade(ctx):
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
     for manager in ctx.obj.selected_managers:
-        manager.sync()
+        logger.info(f"Sync {manager.id} package info...")
+        try:
+            manager.sync()
+        except NotImplementedError:
+            logger.warning(f"{manager.id} does not implement sync command.")
 
 
 @mpm.command(short_help="Cleanup local data.", section=MAINTENANCE)
@@ -667,7 +676,11 @@ def sync(ctx):
 def cleanup(ctx):
     """Cleanup local data and temporary artifacts."""
     for manager in ctx.obj.selected_managers:
-        manager.cleanup()
+        logger.info(f"Cleanup {manager.id}...")
+        try:
+            manager.cleanup()
+        except NotImplementedError:
+            logger.warning(f"{manager.id} does not implement cleanup command.")
 
 
 @mpm.command(short_help="Save installed packages to a TOML file.", section=SNAPSHOTS)
@@ -704,16 +717,21 @@ def backup(ctx, toml_output):
     # Create one section for each package manager.
     for manager in ctx.obj.selected_managers:
         logger.info(f"Dumping packages from {manager.id}...")
-        installed_packages = manager.installed.values()
+
+        try:
+            packages = manager.installed.values()
+        except NotImplementedError:
+            logger.warning(f"{manager.id} does not implement installed command.")
+            continue
 
         # Prepare data for stats.
         installed_data[manager.id] = {
             "id": manager.id,
-            "packages": installed_packages,
+            "packages": packages,
         }
 
         pkg_data = dict(
-            sorted((p["id"], str(p["installed_version"])) for p in installed_packages)
+            sorted((p["id"], str(p["installed_version"])) for p in packages)
         )
 
         if pkg_data:
@@ -759,5 +777,7 @@ def restore(ctx, toml_files):
                 continue
             logger.info(f"Restore {manager.id} packages...")
             for package_id, version in doc[manager.id].items():
+                # Let the command fail if the package manager doesn't implement the install operation.
+                logger.info(f"Install {package_id} package from {manager.id}...")
                 output = manager.install(package_id)
                 echo(output)

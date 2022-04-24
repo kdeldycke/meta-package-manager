@@ -215,7 +215,6 @@ class Emerge(PackageManager):
 
             ► sudo emerge --color n --nospinner dev-vcs/git
         """
-        super().install(package_id)
         return self.run_cli("--color", "n", "--nospinner", package_id, sudo=True)
 
     def upgrade_cli(self, package_id="@world"):
@@ -242,7 +241,6 @@ class Emerge(PackageManager):
 
             ► sudo emerge --sync --color n --nospinner
         """
-        super().sync()
         self.run_cli("--sync", "--color", "n", "--nospinner", sudo=True)
 
     def cleanup(self):
@@ -260,7 +258,6 @@ class Emerge(PackageManager):
             ► sudo emerge --depclean
             ► sudo eclean distfiles
         """
-        super().cleanup()
         # Forces an upgrade first, as recommended by emerge documentation.
         self.upgrade()
         self.run_cli("--depclean", sudo=True)

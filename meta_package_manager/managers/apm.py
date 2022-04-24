@@ -451,7 +451,6 @@ class APM(PackageManager):
             with Atom will be used.
             Installing image-view to /Users/kde/.atom/packages ✓
         """
-        super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):

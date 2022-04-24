@@ -13,6 +13,8 @@ This version is not released yet and is under active development.
 - \[bar-plugin\] Restructure the plugin ↔ mpm relationship to delegate all
   plugin layout and rendering logic to `mpm`.
 - \[bar-plugin\] Prevent leaks when modifying environment variables.
+- \[mpm\] Allow `installed` and `outdated` commands to be optionally
+  implemented by package managers.
 - \[mpm\] Add new `--plugin-output` option to `outdated` command.
 - \[mpm\] Add `tabulate` as direct dependency and refactor table aligment in
   plugin around it.

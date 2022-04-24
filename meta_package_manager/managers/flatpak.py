@@ -188,7 +188,6 @@ class Flatpak(PackageManager):
 
             ► flatpak install org.gnome.Dictionary
         """
-        super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
@@ -214,5 +213,4 @@ class Flatpak(PackageManager):
 
             ► flatpak repair --user
         """
-        super().cleanup()
         self.run_cli("repair", "--user")

@@ -202,7 +202,6 @@ class Gem(PackageManager):
             Done installing documentation for (...) markdown after 19 seconds
             12 gems installed
         """
-        super().install(package_id)
         return self.run_cli(
             "install",
             "--user-install",
@@ -257,5 +256,4 @@ class Gem(PackageManager):
                 for the /Library/Ruby/Gems/2.6.0 directory.
             Clean up complete
         """
-        super().cleanup()
         self.run_cli("cleanup")

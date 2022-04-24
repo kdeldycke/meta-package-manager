@@ -290,7 +290,6 @@ class NPM(PackageManager):
 
             ► npm --global --progress=false --no-update-notifier install raven
         """
-        super().install(package_id)
         return self.run_cli(
             "--global",
             "--progress=false",

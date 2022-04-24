@@ -165,7 +165,6 @@ class DNF(PackageManager):
 
             ► sudo dnf --color=never --assumeyes install pip
         """
-        super().install(package_id)
         return self.run_cli("--assumeyes", "install", package_id, sudo=True)
 
     def upgrade_cli(self, package_id=None):
@@ -188,7 +187,6 @@ class DNF(PackageManager):
 
             ► dnf --color=never check-update
         """
-        super().sync()
         self.run_cli("check-update")
 
     def cleanup(self):
@@ -199,6 +197,5 @@ class DNF(PackageManager):
             ► sudo dnf --color=never --assumeyes autoremove
             ► dnf --color=never clean all
         """
-        super().cleanup()
         self.run_cli("--assumeyes", "autoremove", sudo=True)
         self.run_cli("clean", "all")

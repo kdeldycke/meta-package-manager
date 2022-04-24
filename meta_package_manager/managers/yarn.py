@@ -245,7 +245,6 @@ class Yarn(PackageManager):
 
             ► yarn install python
         """
-        super().install(package_id)
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
@@ -274,5 +273,4 @@ class Yarn(PackageManager):
 
             ► yarn cache clean --all
         """
-        super().cleanup()
         self.run_cli("cache", "clean", "--all")

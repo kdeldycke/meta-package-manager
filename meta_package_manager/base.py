@@ -102,7 +102,12 @@ class PackageManager:
     """List of platforms supported by the manager."""
 
     requirement = None
-    """Minimal required version."""
+    """Minimal required version.
+
+    Should be a string parseable by :py:class:`meta_package_manager.version.parse_version`.
+
+    Defaults to ``None``, which deactivate version check entirely.
+    """
 
     @classproperty
     def cli_names(cls):

@@ -321,7 +321,7 @@ class PackageManager:
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
     @classmethod
-    def cleanup_cli(cls, *args):
+    def args_cleanup(cls, *args):
         """Flatten recusive iterables, remove all ``None``, and cast each element to strings.
 
         Helps serialize :py:class:`pathlib.Path` and :py:class:`meta_package_manager.version.TokenizedString` objects.
@@ -346,7 +346,7 @@ class PackageManager:
             Move :option:`mpm --dry-run` option and this method to `click-extra <https://github.com/kdeldycke/click-extra>`_.
         """
         # Casting to string helps serialize Path and Version objects.
-        args = self.cleanup_cli(args)
+        args = self.args_cleanup(args)
         cli_msg = format_cli(args, extra_env)
 
         code = 0
@@ -472,7 +472,7 @@ class PackageManager:
         elif auto_post_args:
             params.extend(self.post_args)
 
-        return self.cleanup_cli(params)
+        return self.args_cleanup(params)
 
     def run_cli(
         self,

@@ -44,6 +44,14 @@ meta\_package\_manager.managers.dnf module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.managers.emerge module
+---------------------------------------------
+
+.. automodule:: meta_package_manager.managers.emerge
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.managers.flatpak module
 ----------------------------------------------
 

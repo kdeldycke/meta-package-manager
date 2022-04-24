@@ -21,6 +21,7 @@ keywords = [
     'chocotaley',
     'composer',
     'dnf',
+    'emerge',
     'flatpak',
     'gem',
     'homebrew',

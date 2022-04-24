@@ -677,13 +677,12 @@ class PackageManager:
         except NotImplementedError:
             logger.warning(f"{self.id} does not implement upgrade_all command.")
             logger.info(f"Call single-package upgrade CLI one by one.")
-            log = []
+            log = ""
             for package_id in self.outdated:
                 output = self.upgrade(package_id)
                 if output:
-                    log.append(output)
-            if log:
-                return "\n".join(log)
+                    log += f"\n{output}"
+            return log
 
     def sync(self):
         """Refresh package metadata from remote repositories.

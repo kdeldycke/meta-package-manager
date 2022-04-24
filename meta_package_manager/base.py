@@ -31,7 +31,7 @@ from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from boltons.typeutils import classproperty
 from click_extra.colorize import theme
-from click_extra.platform import CURRENT_OS_ID
+from click_extra.platform import CURRENT_OS_ID, is_linux
 from click_extra.run import INDENT, format_cli, run_cmd
 
 from . import logger

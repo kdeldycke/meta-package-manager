@@ -236,9 +236,11 @@ class APT(PackageManager):
 
             ► sudo apt install --only-upgrade git --yes --quiet
         """
+        params = ("upgrade",)
         if package_id:
-            return self.build_cli("install", "--only-upgrade", package_id, sudo=True)
-        return self.build_cli("upgrade", sudo=True)
+            params = ("install", "--only-upgrade", package_id)
+
+        return self.build_cli(*params, sudo=True)
 
     def sync(self):
         """Sync package metadata.

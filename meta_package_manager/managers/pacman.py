@@ -164,18 +164,17 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pacman --noconfirm --sync firefox
-        """
-        return self.build_cli("--sync", package_id)
-
-    def upgrade_all_cli(self):
-        """Generates the CLI to upgrade all packages.
+            ► pacman --noconfirm --sync --refresh --sysupgrade
 
         .. code-block:: shell-session
 
-            ► pacman --noconfirm --sync --refresh --sysupgrade
+            ► pacman --noconfirm --sync firefox
         """
-        return self.build_cli("--sync", "--refresh", "--sysupgrade")
+        params = ("--refresh", "--sysupgrade")
+        if package_id:
+            params = (package_id,)
+
+        return self.build_cli("--sync", *params)
 
     def sync(self):
         """Sync package metadata.

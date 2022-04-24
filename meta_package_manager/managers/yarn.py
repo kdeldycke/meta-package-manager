@@ -259,11 +259,10 @@ class Yarn(PackageManager):
 
             ► yarn global add python
         """
-        cmd_args = []
+        cmd_args = ("upgrade",)
         if package_id:
-            cmd_args += ["add", package_id]
-        else:
-            cmd_args += ["upgrade"]
+            cmd_args = ("add", package_id)
+
         return self.build_cli("global", *cmd_args)
 
     def cleanup(self):

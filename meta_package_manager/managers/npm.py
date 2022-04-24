@@ -310,12 +310,13 @@ class NPM(PackageManager):
 
             ► npm --global --progress=false --no-update-notifier install raven
         """
-        cmd_args = ["update"]
+        cmd_args = ("update",)
         if package_id:
-            cmd_args = [
+            cmd_args = (
                 "install",
                 f"{package_id}@{version}" if version else package_id,
-            ]
+            )
+
         return self.build_cli(
             "--global", "--progress=false", "--no-update-notifier", *cmd_args
         )

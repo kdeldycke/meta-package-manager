@@ -200,6 +200,23 @@ jobs:
         run: |
           python -m pip install --upgrade pip
 
+      # SteamCMD
+      - name: macOS - Install SteamCMD
+        if: runner.os == 'macOS'
+        run: |
+          brew install --cask steamcmd
+      - name: Linux - Install SteamCMD
+        if: runner.os == 'Linux'
+        run: |
+          sudo add-apt-repository --yes multiverse
+          sudo dpkg --add-architecture i386
+          sudo apt update
+          sudo apt install lib32gcc-s1 steamcmd
+      - name: Windows - Install SteamCMD
+        if: runner.os == 'Windows'
+        run: |
+          choco install steamcmd
+
       # Prepare env for tests
       - name: Upgrade Poetry
         run: |

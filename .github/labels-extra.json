@@ -80,6 +80,11 @@
     "description": "snap"
   },
   {
+    "name": "📦 manager: steamcmd",
+    "color": "#bfdadc",
+    "description": "steamcmd"
+  },
+  {
     "name": "📦 manager: vscode",
     "color": "#bfdadc",
     "description": "vscode"

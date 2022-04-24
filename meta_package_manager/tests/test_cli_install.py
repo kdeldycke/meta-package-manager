@@ -59,6 +59,7 @@ class TestInstall(CLISubCommandTests):
         "pacman": "manjaro-hello",
         "pip": "arrow",
         "snap": "standard-notes",
+        "steamcmd": "",
         "vscode": "tamasfe.even-better-toml",
         "yarn": "markdown",
     }

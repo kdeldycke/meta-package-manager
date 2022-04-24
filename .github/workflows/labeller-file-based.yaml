@@ -82,6 +82,10 @@ jobs:
           - meta_package_manager/managers/snap*
           - meta_package_manager/tests/*snap*
 
+        "📦 manager: steamcmd":
+          - meta_package_manager/managers/steamcmd*
+          - meta_package_manager/tests/*steamcmd*
+
         "📦 manager: vscode":
           - meta_package_manager/managers/vscode*
           - meta_package_manager/tests/*vscode*

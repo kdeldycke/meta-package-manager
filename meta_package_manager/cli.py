@@ -67,8 +67,11 @@ MAINTENANCE = Section("Maintainance commands")
 SNAPSHOTS = Section("Package snapshots commands")
 
 
-XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt")
-"""Sequence of package managers as defined by XKCD #1654."""
+XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
+"""Sequence of package managers as defined by `XKCD #1654: Universal Install Script <https://xkcd.com/1654/>`_.
+
+See the corresponding `implementation rationale in issue #10 <https://github.com/kdeldycke/meta-package-manager/issues/10>`_.
+"""
 
 
 def add_manager_to_selection(ctx, param, selected):

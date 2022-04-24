@@ -140,6 +140,13 @@ jobs:
                "keywords": ["snap"]},
 
               {"labels": [
+                "📦 manager: steamcmd",
+                "🖥 platform: Linux",
+                "🖥 platform: macOS",
+                "🖥 platform: Windows"],
+               "keywords": ["steamcmd", "steam", "valve"]},
+
+              {"labels": [
                 "📦 manager: vscode",
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",

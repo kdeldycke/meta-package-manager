@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[emerge\] Add `emerge` support.
+- \[steamcmd\] Add `steamcmd` support. Refs {issue}`10`.
 - \[bar-plugin\] Add new `DEFAULT_FONT` and `MONOSPACE_FONT` variable.
 - \[bar-plugin\] Rename all reference of `xbar` to the generic `bar-plugin` label.
 - \[bar-plugin\] Improve search for Python and `mpm` executable.

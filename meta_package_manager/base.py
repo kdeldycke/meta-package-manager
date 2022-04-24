@@ -18,9 +18,11 @@
 import os
 import re
 import sys
+from contextlib import nullcontext
 from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
+from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
     from functools import cached_property
@@ -515,17 +517,15 @@ class PackageManager:
         elif auto_extra_env:
             extra_env = self.extra_env
 
+        # No-op context manager without any effects.
+        local_option1 = local_option2 = nullcontext()
         # Temporarily replace --dry-run and --stop-on-error user options with our own.
         if force_exec:
-            user_options = (self.dry_run, self.stop_on_error)
-            self.dry_run, self.stop_on_error = False, False
-
-        # Execute the command.
-        output = self.run(*cli, extra_env=extra_env)
-
-        # Restore user options for --dry-run and --stop-on-error.
-        if force_exec:
-            self.dry_run, self.stop_on_error = user_options
+            local_option1 = patch.object(self, 'dry_run', False)
+            local_option2 = patch.object(self, 'stop_on_error', False)
+        # Execute the command with eventual local options.
+        with local_option1, local_option2:
+            output = self.run(*cli, extra_env=extra_env)
 
         return output
 

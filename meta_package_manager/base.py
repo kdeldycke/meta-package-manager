@@ -436,7 +436,7 @@ class PackageManager:
                 raise ValueError("Pre-commands not allowed if sudo is requested.")
             if auto_pre_cmds:
                 auto_pre_cmds = False
-            params.add("sudo")
+            params.append("sudo")
         elif override_pre_cmds:
             assert isinstance(override_pre_cmds, tuple)
             params.extend(override_pre_cmds)

@@ -25,11 +25,11 @@ Catalina deprecates Python 2.x, and ships with Python 3.7.3. So this plugin is
 required to work with Python 3.7.3 or newer.
 
 - Xbar automaticcaly bridge plugin options between its UI and environment
-variable on script execution. See:
-https://xbarapp.com/docs/2021/03/14/variables-in-xbar.html
+  variable on script execution. See:
+  https://xbarapp.com/docs/2021/03/14/variables-in-xbar.html
 
 - This is in progress for SwiftBar at:
-https://github.com/swiftbar/SwiftBar/issues/160
+  https://github.com/swiftbar/SwiftBar/issues/160
 """
 
 import os

@@ -29,6 +29,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.todo",
     "sphinx.ext.extlinks",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
     # Adds a copy button to code blocks.
     "sphinx_copybutton",
@@ -37,9 +38,11 @@ extensions = [
     "sphinx_issues",
     "sphinxext.opengraph",
     "myst_parser",
+    "sphinx.ext.autosectionlabel",
     "sphinx_click",
 ]
 
+# https://myst-parser.readthedocs.io/en/latest/syntax/optional.html
 myst_enable_extensions = [
     "colon_fence",
 ]
@@ -58,6 +61,7 @@ autodoc_member_order = "bysource"
 autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
+# https://www.sphinx-doc.org/en/master/usage/extensions/todo.html
 todo_include_todos = True
 
 # GitHub pre-implemented shortcuts.
@@ -69,6 +73,14 @@ github_project = f"https://github.com/{issues_github_path}"
 extlinks = {
     "gh": (f"{github_project}/%s", "GitHub: %s"),
 }
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+}
+
+# Prefix document path to section labels, to use:
+# `path/to/file:heading` instead of just `heading`
+autosectionlabel_prefix_document = True
 
 # Theme config.
 html_theme = "furo"

@@ -96,7 +96,7 @@ class Homebrew(PackageManager):
             tunnelblick 3.6.8_build_4625 3.6.9_build_4685
             virtualbox 5.1.8-111374 5.1.10-112026
 
-        .. todo
+        .. todo::
 
             Use the ``removed`` variable to detect removed packages (which are
             reported with a ``(!)`` flag). See:
@@ -116,9 +116,8 @@ class Homebrew(PackageManager):
                 installed[package_id] = {
                     "id": package_id,
                     "name": package_id,
-                    "installed_version":
                     # Keep highest version found.
-                    max(map(parse_version, versions.split())),
+                    "installed_version": max(map(parse_version, versions.split())),
                 }
 
         return installed

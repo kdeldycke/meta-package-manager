@@ -238,7 +238,8 @@ class BarPluginRenderer(MPMPlugin):
     def render_table(table_data):
         """Render a table data with pre-configured alignment.
 
-        .. code-block:: python
+        .. code-block:: pycon
+
             >>> table_data = [
             ...     ('xmlrpc', '0.3.1', '→', '0.4'),
             ...     ('blockblock', '5.33,VHSDGataYCcV8xqv5TSZA', '→', '5.39'),

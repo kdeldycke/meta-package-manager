@@ -80,10 +80,13 @@ class PackageManager:
 
     @classproperty
     def id(cls):
-        """Return package manager's ID. Defaults based on class name.
+        """Returns package manager's ID.
 
-        This ID must be unique among all package manager definitions and lower-case as
-        they're used as feature flags for the :command:`mpm` CLI.
+        Derived by defaults from the lower-cased class name in which underscores ``_`` are replaced
+        by dashes ``-``.
+
+        This ID must be unique among all package manager definitions and lower-case, as
+        they're used as feature flags for the :program:`mpm` CLI.
         """
         return cls.__name__.lower().replace("_", "-")
 
@@ -114,7 +117,7 @@ class PackageManager:
         return (cls.id,)
 
     cli_search_path = ()
-    """ List of additional path to help mpm hunt down the package manager CLI.
+    """ List of additional path to help :program:`mpm` hunt down the package manager CLI.
 
     Should be a list of strings whose order dictatate the search sequence.
 
@@ -135,7 +138,7 @@ class PackageManager:
     Automaticcaly added to each :py:func:`meta_package_manager.base.PackageManager.run_cli`
     call.
 
-    Used to prepend ``sudo`` or other CLIs.
+    Used to prepend `sudo <https://www.sudo.ws>`_ or other system utilities.
     """
 
     pre_args = ()
@@ -154,7 +157,8 @@ class PackageManager:
     version_regex = r"(?P<version>\S+)"
     """ Regular expression used to extract the version number from the result of the CLI
     run with the options above. It doesn't matter if the regex returns unsanitized
-    and crappy string. The ``version()`` method will clean and normalized it.
+    and crappy string. The :py:func:`meta_package_manager.base.PackageManager.version`
+    method will clean and normalized it.
 
     By default match the first part that is space-separated.
     """
@@ -190,7 +194,7 @@ class PackageManager:
         names within several system path.
 
         Only checks if the file exists. Its executability will be assessed later. See
-        the ``self.executable`` method below.
+        the :py:func:`meta_package_manager.base.PackageManager.executable` method below.
 
         Returns ``None`` if no CLI was found or those found were not a file.
         """
@@ -226,8 +230,8 @@ class PackageManager:
     def version(self):
         """Invoke the manager and extract its own reported version string.
 
-        Returns a parsed and normalized version in the form of a `TokenizedString`
-        instance.
+        Returns a parsed and normalized version in the form of a
+        :py:class:`meta_package_manager.version.TokenizedString` instance.
         """
         if self.executable:
             # Invoke the manager.
@@ -301,12 +305,12 @@ class PackageManager:
     def available(self):
         """Is the package manager available and ready-to-use on the system?
 
-        Returns True only if the main CLI:
+        Returns ``True`` only if the main CLI:
 
-        # is supported on the current platform,
-        # was found on the system,
-        # is executable, and
-        # match the version requirement.
+        1. is :py:attr:`supported on the current platform <meta_package_manager.base.PackageManager.supported>`,
+        2. was :py:attr:`found on the system <meta_package_manager.base.PackageManager.cli_path>`,
+        3. is :py:attr:`executable <meta_package_manager.base.PackageManager.executable>`, and
+        4. :py:attr:`match the version requirement <meta_package_manager.base.PackageManager.fresh>`.
         """
         logger.debug(
             f"{self.id} is supported: {self.supported}; "
@@ -318,9 +322,9 @@ class PackageManager:
 
     @classmethod
     def cleanup_cli(cls, *args):
-        """Flatten recusive iterables, remove `None`s, and cast to string each element.
+        """Flatten recusive iterables, remove all ``None``, and cast each element to strings.
 
-        Helps serialize Path and Version objects.
+        Helps serialize :py:class:`pathlib.Path` and :py:class:`meta_package_manager.version.TokenizedString` objects.
         """
         return tuple(map(str, filter(None.__ne__, flatten(args))))
 
@@ -331,15 +335,15 @@ class PackageManager:
         be recursively flatten, then ``None`` will be discarded, and finally each item
         casted to strings.
 
-        Running commands with that method:
-          * adds logs at the appropriate level
-          * removes ANSI escape codes from ``<stdout>`` and ``<stderr>``
-          * returns ready-to-use normalized strings (dedented and stripped)
-          * let ``--dry-run`` and ``--stop-on-error`` have effect on execution
+        Running commands with that method takes care of:
+          * adding logs at the appropriate level
+          * removing ANSI escape codes from :py:attr:`subprocess.CompletedProcess.stdout` and :py:attr:`subprocess.CompletedProcess.stderr`
+          * returning ready-to-use normalized strings (dedented and stripped)
+          * letting :option:`mpm --dry-run` and :option:`mpm --stop-on-error` have expected effect on execution
 
-        ..todo:
+        .. todo::
 
-            Move ``--dry-run`` option and this method to click-extra?
+            Move :option:`mpm --dry-run` option and this method to `click-extra <https://github.com/kdeldycke/click-extra>`_.
         """
         # Casting to string helps serialize Path and Version objects.
         args = self.cleanup_cli(args)
@@ -394,7 +398,7 @@ class PackageManager:
         override_post_args=False,
         sudo=False,
     ):
-        """Build the package manager CLI by combining the custom ``*args`` with the PM's
+        """Build the package manager CLI by combining the custom ``*args`` with the package manager's
         global parameters.
 
         Returns a tuple of strings.
@@ -407,26 +411,28 @@ class PackageManager:
 
             $ [<self.pre_cmds>|sudo] <self.cli_path> <self.pre_args> <*args> <self.post_args>
 
-        * ``self.pre_cmds`` is added before the CLI path.
+        * :py:attr:`self.pre_cmds <meta_package_manager.base.PackageManager.pre_cmds>` is added before the CLI path.
 
-        * ``self.cli_path`` is used as the main binary to execute.
+        * :py:attr:`self.cli_path <meta_package_manager.base.PackageManager.cli_path>` is used as the main binary to execute.
 
-        * ``self.pre_args`` and ``self.post_args`` globals are added before and after
+        * :py:attr:`self.pre_args <meta_package_manager.base.PackageManager.pre_args>` and :py:attr:`self.post_args <meta_package_manager.base.PackageManager.post_args>`  globals are added before and after
           the provided ``*args``.
 
         Each additional set of elements can be disabled with their respective flag:
-        * ``auto_pre_cmds=False``  to skip the automatic addition of ``self.pre_cmds``
-        * ``auto_pre_args=False``  to skip the automatic addition of ``self.pre_args``
-        * ``auto_post_args=False`` to skip the automatic addition of ``self.post_args``
+
+        * ``auto_pre_cmds=False``  to skip the automatic addition of :py:attr:`self.pre_cmds <meta_package_manager.base.PackageManager.pre_cmds>`
+        * ``auto_pre_args=False``  to skip the automatic addition of :py:attr:`self.pre_args <meta_package_manager.base.PackageManager.pre_args>`
+        * ``auto_post_args=False`` to skip the automatic addition of :py:attr:`self.post_args <meta_package_manager.base.PackageManager.post_args>`
 
         Each global set of elements can be locally overriden with:
+
         * ``override_pre_cmds=tuple()``
         * ``override_cli_path=str``
         * ``override_pre_args=tuple()``
         * ``override_post_args=tuple()``
 
-        On linux, the command can be ran with `sudo` if the parameter of the same name is set to `True`.
-        In which case `override_pre_cmds` are not allowed and `auto_pre_cmds` is forced to `False`.
+        On linux, the command can be ran with `sudo <https://www.sudo.ws>`_ if the parameter of the same name is set to ``True``.
+        In which case the ``override_pre_cmds`` parameter is not allowed to be set and the ``auto_pre_cmds`` parameter is forced to ``False``.
         """
         params = []
 
@@ -484,18 +490,18 @@ class PackageManager:
         sudo=False,
     ):
         """Build and run the package manager CLI by combining the custom ``*args`` with
-        the PM's global parameters.
+        the package manager's global parameters.
 
-        After the CLI is built with the ``build_cli`` method, it is executed with the ``run`` method.
+        After the CLI is built with the :py:meth:`meta_package_manager.base.PackageManager.build_cli` method, it is executed with
+        the :py:meth:`meta_package_manager.base.PackageManager.run` method, augmented with
+        environment variables from :py:attr:`self.extra_env <meta_package_manager.base.PackageManager.extra_env>`.
 
-        It reuse the ``build_cli`` method parameters and extend them with:
+        All parameters are the same as :py:meth:`meta_package_manager.base.PackageManager.build_cli`, plus:
 
-        * ``self.extra_env`` for environment variables during execution.
-        * ``auto_extra_env=False``  to skip the automatic addition of ``self.extra_env``
-        * ``override_extra_env=dict()``
-
-        ``force_exec`` parameter ignores the ``--dry-run`` and ``--stop-on-error`` user options to force
-        the execution and completion of the command.
+        * ``auto_extra_env=False`` to skip the automatic addition of :py:attr:`self.extra_env <meta_package_manager.base.PackageManager.extra_env>`
+        * ``override_extra_env=dict()`` to locally overrides the later
+        * ``force_exec`` ignores the :option:`mpm --dry-run` and :option:`mpm --stop-on-error` options to force
+          the execution and completion of the command.
         """
         cli = self.build_cli(
             *args,
@@ -533,56 +539,138 @@ class PackageManager:
     def installed(self):
         """List packages currently installed on the system.
 
-        Returns a dict indexed by package IDs. Each item is a dict with package ID, name
-        and version.
+        Returns a ``dict`` indexed by package ``id``. Each item is a ``dict`` with:
+
+        - (repeating) package's ``id``
+        - ``name`` (often the same as ``id``)
+        - current ``installed_version``
+
+        .. code-block:: python
+
+            {
+                "ack": {
+                    "id": "ack",
+                    "name": "ack",
+                    "installed_version": "3.5.0",
+                },
+                "aom": {
+                    "id": "aom",
+                    "name": "aom",
+                    "installed_version": "3.3.0",
+                },
+                (...)
+            }
         """
         raise NotImplementedError
 
     @property
     def outdated(self):
-        """List currently installed packages having a new version available.
+        """List installed packages with available upgrades.
 
-        Returns a dict indexed by package IDs. Each item is a dict with package ID,
-        name, current installed version and latest upgradeable version.
+        Returns a ``dict`` indexed by package ``id``. Each item is a ``dict`` with:
+
+        - (repeating) package's ``id``
+        - ``name`` (often the same as ``id``)
+        - current ``installed_version``
+        - ``latest_version`` available for upgrade
+
+        .. code-block:: python
+
+            {
+                "awscli": {
+                    "id": "awscli",
+                    "name": "awscli",
+                    "installed_version": "2.5.6",
+                    "latest_version": "2.5.8",
+                },
+                "git": {
+                    "id": "git",
+                    "name": "git",
+                    "installed_version": "2.35.3",
+                    "latest_version": "2.36.0",
+                },
+                (...)
+            }
         """
         raise NotImplementedError
 
     def search(self, query, extended, exact):
-        """Search packages whose ID contain exact or partial query.
+        """Search packages available for install.
 
-        Returns a dict indexed by package IDs. Each item is a dict with package ID,
-        name, version and a boolean indicating if the match is exact or partial.
+        Returns a ``dict`` indexed by package ``id``. Each item is a ``dict`` with:
+
+        - (repeating) package's ``id``
+        - ``name`` (often the same as ``id``)
+        - ``latest_version`` available for install
+
+        .. code-block:: python
+
+            {
+                "google": {
+                    "id": "google",
+                    "name": "google",
+                    "latest_version": "2.1.0",
+                },
+                "@google-cloud/storage": {
+                    "id": "@google-cloud/storage",
+                    "name": "@google-cloud/storage",
+                    "latest_version": "5.19.3",
+                },
+                (...)
+            }
         """
         raise NotImplementedError
 
     def install(self, package_id):
-        """Install one package and one only."""
+        """Install one package and one only.
+
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        """
         if self.install.__func__.__qualname__ == PackageManager.install.__qualname__:
             logger.warning(f"{self.id} does not implement install command.")
             return
         logger.info(f"Install {package_id} package from {self.id}...")
 
     def upgrade_cli(self, package_id=None):
-        """Return a shell-compatible full-CLI to upgrade a package."""
+        """Returns the complete CLI to upgrade the package provided as ``package_id`` parameter.
+
+        If ``package_id`` is ``None``, the returned CLI is expected be the one that is used to upgrade
+        all outdated packages on the system.
+        """
         raise NotImplementedError
 
     def upgrade(self, package_id=None):
-        """Perform the upgrade of the provided package to latest version."""
+        """Perform the upgrade of the provided package to latest version.
+
+        Executes the CLI provided by :py:meth:`meta_package_manager.base.PackageManager.upgrade_cli`.
+        """
         return self.run(self.upgrade_cli(package_id), extra_env=self.extra_env)
 
     def upgrade_all_cli(self):
-        """Return a shell-compatible full-CLI to upgrade all packages.
+        """Returns the complete CLI to upgrade all outdated packages on the system.
 
-        Piggy-back on upgrade_cli() by default, which we'll call without a package_id
-        parameter.
+        By default, returns the result of the :py:meth:`meta_package_manager.base.PackageManager.upgrade_cli`
+        method, without a ``package_id`` parameter.
+
+        This dedicated method allows some package manager to return a CLI that is very different from the
+        one returned by :py:meth:`meta_package_manager.base.PackageManager.upgrade_cli`.
+
+        It can also be used to ``raise NotImplementedError`` on some managers to signal to :program:`mpm` that
+        the package manager has no proper support for a full upgrade command. See for example
+        :py:meth:`meta_package_manager.managers.pip.Pip.upgrade_all_cli`.
         """
         return self.upgrade_cli()
 
     def upgrade_all(self):
-        """Perform a full upgrade of all outdated packages to latest versions.
+        """Perform a full upgrade of all outdated packages on the system.
 
-        If the manager doesn't implements a full upgrade one-liner, then fall-back to
-        calling single-package upgrade one by one.
+        Executes the CLI provided by :py:meth:`meta_package_manager.base.PackageManager.upgrade_all_cli`.
+
+        If the manager doesn't provides a full upgrade one-liner (i.e. if
+        :py:meth:`meta_package_manager.base.PackageManager.upgrade_all_cli` raises
+        :py:exc:`NotImplementedError`), then the list of all outdated packages will be fetched
+        (via :py:meth:`meta_package_manager.base.PackageManager.outdated`) and each package will be
+        updated one by one by a :py:meth:`meta_package_manager.base.PackageManager.upgrade` call.
         """
         try:
             return self.run(self.upgrade_all_cli(), extra_env=self.extra_env)
@@ -598,14 +686,20 @@ class PackageManager:
                 return "\n".join(log)
 
     def sync(self):
-        """Refresh local manager metadata from remote repository."""
+        """Refresh package metadata from remote repositories.
+
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        """
         if self.sync.__func__.__qualname__ == PackageManager.sync.__qualname__:
             logger.warning(f"{self.id} does not implement sync command.")
             return
         logger.info(f"Sync {self.id} package info...")
 
     def cleanup(self):
-        """Remove left-overs and unused packages."""
+        """Removes left-overs, orphaned dependencies,
+
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        """
         if self.cleanup.__func__.__qualname__ == PackageManager.cleanup.__qualname__:
             logger.warning(f"{self.id} does not implement cleanup command.")
             return

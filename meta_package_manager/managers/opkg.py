@@ -42,6 +42,7 @@ class OPKG(PackageManager):
         """Fetch installed packages.
 
         .. code-block:: shell-session
+
             ► opkg list-installed
             3rd-party-feed-configs - 1.1-r0
             aio-grab - 1.0+git71+c79e264-r0
@@ -187,7 +188,7 @@ class OPKG(PackageManager):
         return self.build_cli("upgrade", package_id)
 
     def sync(self):
-        """Removes things we don't need anymore.
+        """Sync package metadata.
 
         .. code-block:: shell-session
 

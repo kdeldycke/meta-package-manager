@@ -141,7 +141,7 @@ class CLISubCommandTests:
 
         This explain the use of ``set()`` everywhere.
 
-        .. todo:
+        .. todo::
 
             Parametrize/fixturize signals to pin point output depending on
             subcommand.

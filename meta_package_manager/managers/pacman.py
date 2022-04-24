@@ -35,8 +35,10 @@ class Pacman(PackageManager):
     pre_args = ("--noconfirm",)
 
     version_regex = r".*Pacman\s+v(?P<version>\S+)"
-    r"""
+    """Search version right after the `Pacman ` string.
+
     .. code-block:: shell-session
+
         ► pacman --version
 
          .--.                  Pacman v6.0.1 - libalpm v13.0.1

@@ -27,7 +27,7 @@
   {
     "name": "📦 manager: dnf",
     "color": "#bfdadc",
-    "description": "dnf"
+    "description": "dnf, yum"
   },
   {
     "name": "📦 manager: dpkg-like",
@@ -37,7 +37,7 @@
   {
     "name": "📦 manager: emerge",
     "color": "#bfdadc",
-    "description": "emerge"
+    "description": "emerge, portage"
   },
   {
     "name": "📦 manager: flatpak",

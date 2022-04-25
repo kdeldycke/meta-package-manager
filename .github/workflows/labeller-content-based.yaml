@@ -24,16 +24,16 @@ jobs:
               {"labels": [
                 "🔌 bar-plugin",
                 "🖥 platform: macOS"],
-               "keywords": ["xbar", "swiftbar"]},
+               "keywords": ["xbar", "swiftbar", "plugin"]},
 
               {"labels": [
                 "🐛 bug"],
-               "keywords": ["bug", "error", "traceback", "fix"]},
+               "keywords": ["bug", "error", "traceback", "fix", "exception"]},
 
               {"labels": [
                 "🆙 changelog"],
                "keywords": [
-                  "change-log"]},
+                  "change-log", "changelog"]},
 
               {"labels": [
                 "🤖 ci"],
@@ -79,7 +79,7 @@ jobs:
               {"labels": [
                 "📦 manager: dnf",
                 "🖥 platform: Linux"],
-              "keywords": ["dnf", "rpm", "fedora"]},
+              "keywords": ["dnf", "yum", "rpm", "fedora", "redhat", "rhel"]},
 
               {"labels": [
                 "📦 manager: composer",
@@ -91,12 +91,12 @@ jobs:
               {"labels": [
                 "📦 manager: dpkg-like",
                 "🖥 platform: Linux"],
-               "keywords": ["apt", "apt-mint", "aptitude", "dpkg", "opkg"]},
+               "keywords": ["apt", "apt-mint", "aptitude", "dpkg", "opkg", "ubuntu", "debian", "mint"]},
 
               {"labels": [
                 "📦 manager: emerge",
                 "🖥 platform: Linux"],
-               "keywords": ["emerge"]},
+               "keywords": ["emerge", "portage", "gentoo"]},
 
               {"labels": [
                 "📦 manager: flatpak",
@@ -151,16 +151,16 @@ jobs:
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",
                 "🖥 platform: Windows"],
-               "keywords": ["vscode"]},
+               "keywords": ["vscode", "visual studio code", "visual studio"]},
 
               {"labels": [
                 "📦 manager: zypper",
                 "🖥 platform: Linux"],
-               "keywords": ["zypper"]},
+               "keywords": ["zypper", "opensuse", "suse"]},
 
               {"labels": [
                 "🖥 platform: Linux"],
-               "keywords": ["linux", "ubuntu", "debian", "suse", "opensuse", "arch", "gentoo"]},
+               "keywords": ["linux"]},
 
               {"labels": [
                 "🖥 platform: macOS"],

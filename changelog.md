@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`5.0.0 (unreleased) <compare/v4.13.1...main>`
-
-```{important}
-This version is not released yet and is under active development.
-```
+## {gh}`5.0.0 (2022-04-25) <compare/v4.13.1...v5.0.0>`
 
 - \[zypper\] Add `zypper` support for Suse and OpenSuse. Closes {issue}`566`.
 - \[emerge\] Add `emerge` support.

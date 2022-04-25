@@ -34,7 +34,7 @@ class DNF(PackageManager):
 
     requirement = "4.0.0"
 
-    cli_names = ("dnf", "yum")
+    cli_names = ("dnf",)
 
     """
     .. code-block:: shell-session
@@ -200,3 +200,9 @@ class DNF(PackageManager):
         """
         self.run_cli("--assumeyes", "autoremove", sudo=True)
         self.run_cli("clean", "all")
+
+
+class YUM(DNF):
+    """yum is dnf is yum"""
+
+    cli_names = ("yum",)

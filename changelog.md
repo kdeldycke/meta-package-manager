@@ -9,6 +9,7 @@ This version is not released yet and is under active development.
 - \[zypper\] Add `zypper` support for Suse and OpenSuse. Closes {issue}`566`.
 - \[emerge\] Add `emerge` support.
 - \[steamcmd\] Add `steamcmd` support. Refs {issue}`10`.
+- \[yum\] Add dedicated `yum` package manager. Refs {issue}`415`.
 - \[bar-plugin\] Add new `DEFAULT_FONT` and `MONOSPACE_FONT` variable.
 - \[bar-plugin\] Rename all reference of `xbar` to the generic `bar-plugin` label.
 - \[bar-plugin\] Improve search for Python and `mpm` executable.
@@ -62,7 +63,7 @@ This version is not released yet and is under active development.
 ## {gh}`4.12.0 (2022-04-04) <compare/v4.11.0...v4.12.0>`
 
 - \[dnf\] Add support for `dnf`. Closes {issue}`516`, refs {issue}`415`.
-- \[dnf\] Allow `yum` to act as `dnf`. Closes {issue}`415`.
+- \[yum\] Allow `yum` to act as `dnf`. Closes {issue}`415`.
 - \[brew,cask\] Fix execution of `sync` command.
 - \[mpm\] Fix extraction of version. Closes {issue}`536`.
 

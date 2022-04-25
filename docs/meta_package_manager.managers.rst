@@ -124,6 +124,14 @@ meta\_package\_manager.managers.snap module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.managers.steamcmd module
+-----------------------------------------------
+
+.. automodule:: meta_package_manager.managers.steamcmd
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.managers.vscode module
 ---------------------------------------------
 

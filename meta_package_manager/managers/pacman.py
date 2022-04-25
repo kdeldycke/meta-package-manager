@@ -24,9 +24,7 @@ from ..version import parse_version
 
 
 class Pacman(PackageManager):
-    """
-    See command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
-    """
+    """See command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta."""
 
     platforms = frozenset({LINUX})
 

@@ -211,7 +211,8 @@ jobs:
           sudo add-apt-repository --yes multiverse
           sudo dpkg --add-architecture i386
           sudo apt update
-          sudo apt install lib32gcc-s1 steamcmd
+          sudo apt install --yes lib32gcc-s1
+          sudo apt install --yes steamcmd
       - name: Windows - Install SteamCMD
         if: runner.os == 'Windows'
         run: |

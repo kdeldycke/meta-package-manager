@@ -116,7 +116,7 @@ class Zypper(PackageManager):
         for key, group in groupby(fresh_packages, key_func):
             yield {
                 'id': key,
-                'version': max((parse_version(p['@edition']) for p in group))
+                'version': max(parse_version(p['@edition']) for p in group)
             }
 
     @property

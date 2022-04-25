@@ -33,7 +33,7 @@ class Pacman(PackageManager):
     pre_args = ("--noconfirm",)
 
     version_regex = r".*Pacman\s+v(?P<version>\S+)"
-    """Search version right after the ``Pacman `` string.
+    r"""Search version right after the ``Pacman `` string.
 
     .. code-block:: shell-session
 

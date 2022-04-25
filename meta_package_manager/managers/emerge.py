@@ -61,7 +61,9 @@ class Emerge(PackageManager):
         """
         installed = {}
 
-        output = self.run_cli("--installed", "--verbose", "--nocolor", override_cli_path="qlist")
+        output = self.run_cli(
+            "--installed", "--verbose", "--nocolor", override_cli_path="qlist"
+        )
 
         regexp = re.compile(
             r"""
@@ -75,7 +77,7 @@ class Emerge(PackageManager):
                 (?:-r\d+)?          # Optional revision suffix led by a dash (non-grouped).
             )
             """,
-            re.VERBOSE
+            re.VERBOSE,
         )
 
         for package in output.splitlines():
@@ -107,7 +109,16 @@ class Emerge(PackageManager):
         """
         outdated = {}
 
-        output = self.run_cli("--update", "--deep", "--pretend", "--columns", "--color", "n", "--nospinner", "@world")
+        output = self.run_cli(
+            "--update",
+            "--deep",
+            "--pretend",
+            "--columns",
+            "--color",
+            "n",
+            "--nospinner",
+            "@world",
+        )
 
         regexp = re.compile(
             r"""
@@ -125,7 +136,7 @@ class Emerge(PackageManager):
                 \S*                                 # Left-over parts of the version, after a ':' or '/'.
             \])?                                    # Optional group ending with a ']'.
             """,
-            re.VERBOSE
+            re.VERBOSE,
         )
 
         for package in output.splitlines():
@@ -218,7 +229,8 @@ class Emerge(PackageManager):
         return self.run_cli("--color", "n", "--nospinner", package_id, sudo=True)
 
     def upgrade_cli(self, package_id="@world"):
-        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
+        """Generates the CLI to upgrade all packages (default) or only the one provided
+        as parameter.
 
         .. code-block:: shell-session
 
@@ -232,7 +244,15 @@ class Emerge(PackageManager):
         if package_id == "@world":
             update_params = ("--newuse", "--deep")
 
-        return self.build_cli("--update", *update_params, "--color", "n", "--nospinner", package_id, sudo=True)
+        return self.build_cli(
+            "--update",
+            *update_params,
+            "--color",
+            "n",
+            "--nospinner",
+            package_id,
+            sudo=True,
+        )
 
     def sync(self):
         """Sync package metadata.

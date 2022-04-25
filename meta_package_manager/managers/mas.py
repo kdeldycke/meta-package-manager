@@ -163,7 +163,8 @@ class MAS(PackageManager):
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None):
-        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
+        """Generates the CLI to upgrade all packages (default) or only the one provided
+        as parameter.
 
         .. code-block:: shell-session
 

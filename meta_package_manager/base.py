@@ -327,7 +327,8 @@ class PackageManager:
 
     @classmethod
     def args_cleanup(cls, *args):
-        """Flatten recusive iterables, remove all ``None``, and cast each element to strings.
+        """Flatten recusive iterables, remove all ``None``, and cast each element to
+        strings.
 
         Helps serialize :py:class:`pathlib.Path` and :py:class:`meta_package_manager.version.TokenizedString` objects.
         """
@@ -403,8 +404,8 @@ class PackageManager:
         override_post_args=False,
         sudo=False,
     ):
-        """Build the package manager CLI by combining the custom ``*args`` with the package manager's
-        global parameters.
+        """Build the package manager CLI by combining the custom ``*args`` with the
+        package manager's global parameters.
 
         Returns a tuple of strings.
 
@@ -532,8 +533,8 @@ class PackageManager:
         local_option1 = local_option2 = nullcontext()
         # Temporarily replace --dry-run and --stop-on-error user options with our own.
         if force_exec:
-            local_option1 = patch.object(self, 'dry_run', False)
-            local_option2 = patch.object(self, 'stop_on_error', False)
+            local_option1 = patch.object(self, "dry_run", False)
+            local_option2 = patch.object(self, "stop_on_error", False)
         # Execute the command with eventual local options.
         with local_option1, local_option2:
             output = self.run(*cli, extra_env=extra_env)
@@ -640,10 +641,11 @@ class PackageManager:
         raise NotImplementedError
 
     def upgrade_cli(self, package_id=None):
-        """Returns the complete CLI to upgrade the package provided as ``package_id`` parameter.
+        """Returns the complete CLI to upgrade the package provided as ``package_id``
+        parameter.
 
-        If ``package_id`` is ``None``, the returned CLI is expected be the one that is used to upgrade
-        all outdated packages on the system.
+        If ``package_id`` is ``None``, the returned CLI is expected be the one that is
+        used to upgrade all outdated packages on the system.
         """
         raise NotImplementedError
 

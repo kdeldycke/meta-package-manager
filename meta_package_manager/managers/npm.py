@@ -299,7 +299,8 @@ class NPM(PackageManager):
         )
 
     def upgrade_cli(self, package_id=None, version=None):
-        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
+        """Generates the CLI to upgrade all packages (default) or only the one provided
+        as parameter.
 
         .. code-block:: shell-session
 

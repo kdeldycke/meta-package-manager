@@ -195,12 +195,13 @@ def test_available(manager):
 
 
 # TODO:
-#def test_args_cleanup():
+# def test_args_cleanup():
 
 
 @all_managers
 def test_installed_type(manager):
-    """All installed operations are either not implemented or returns a dict of dicts."""
+    """All installed operations are either not implemented or returns a dict of
+    dicts."""
     if manager.available:
         try:
             result = manager.installed
@@ -259,7 +260,8 @@ def test_search_type(manager):
 
 @all_managers
 def test_upgrade_cli_type(manager):
-    """All methods returning an upgrade CLI are either not implemented or returns a tuple."""
+    """All methods returning an upgrade CLI are either not implemented or returns a
+    tuple."""
     assert isinstance(manager.upgrade_cli, MethodType)
     try:
         result = manager.upgrade_cli("dummy_package_id")
@@ -271,7 +273,8 @@ def test_upgrade_cli_type(manager):
 
 @all_managers
 def test_upgrade_all_cli_type(manager):
-    """All methods returning an upgrade-all CLI are either not implemented or returns a tuple."""
+    """All methods returning an upgrade-all CLI are either not implemented or returns a
+    tuple."""
     assert isinstance(manager.upgrade_all_cli, MethodType)
     try:
         result = manager.upgrade_all_cli()

@@ -622,7 +622,9 @@ def install(ctx, package_id):
             matches = manager.search(extended=False, exact=True, query=package_id)
         except NotImplementedError:
             logger.warning(f"{manager.id} does not implement search command.")
-            logger.info(f"{package_id} existence unconfirmed, try to directly install it...")
+            logger.info(
+                f"{package_id} existence unconfirmed, try to directly install it..."
+            )
         else:
             if not matches:
                 logger.warning(f"No {package_id} package found on {manager.id}.")
@@ -631,7 +633,7 @@ def install(ctx, package_id):
 
         # Allow install subcommand to fail to have the oportunity to catch the CLIError exception and print
         # a comprehensive message.
-        with patch.object(manager, 'stop_on_error', True):
+        with patch.object(manager, "stop_on_error", True):
             try:
                 logger.info(f"Install {package_id} package from {manager.id}...")
                 output = manager.install(package_id)
@@ -780,7 +782,8 @@ def restore(ctx, toml_files):
                 continue
             logger.info(f"Restore {manager.id} packages...")
             for package_id, version in doc[manager.id].items():
-                # Let the command fail if the package manager doesn't implement the install operation.
+                # Let the command fail if the package manager doesn't implement the
+                # install operation.
                 logger.info(f"Install {package_id} package from {manager.id}...")
                 output = manager.install(package_id)
                 echo(output)

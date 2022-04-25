@@ -212,6 +212,11 @@ jobs:
           sudo dpkg --add-architecture i386
           sudo apt update
           sudo apt install --yes lib32gcc-s1
+          # Accept Steam license.
+          # Source: https://askubuntu.com/a/1017487
+          echo steam steam/question select "I AGREE" | sudo debconf-set-selections
+          echo steam steam/license note '' | sudo debconf-set-selections
+          sudo debconf-show steam
           sudo apt install --yes steam
           sudo apt install --yes steamcmd
       - name: Windows - Install SteamCMD

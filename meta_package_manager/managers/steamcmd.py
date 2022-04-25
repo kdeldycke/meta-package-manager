@@ -66,7 +66,8 @@ class SteamCMD(PackageManager):
         return self.run_cli("+app_update", package_id, "validate")
 
     def upgrade_cli(self, package_id):
-        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
+        """Generates the CLI to upgrade all packages (default) or only the one provided
+        as parameter.
 
         .. code-block:: shell-session
 
@@ -77,7 +78,7 @@ class SteamCMD(PackageManager):
     def upgrade_all_cli(self):
         """Generates the CLI to upgrade all packages.
 
-        SteamCMD lacks support of a proper full upgrade command. Raising an error let the
-        parent class upgrade packages one by one.
+        SteamCMD lacks support of a proper full upgrade command. Raising an error let
+        the parent class upgrade packages one by one.
         """
         raise NotImplementedError

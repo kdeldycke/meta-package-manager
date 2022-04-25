@@ -40,7 +40,13 @@ class Zypper(PackageManager):
 
     requirement = "1.14.0"
 
-    pre_args = ("--no-color", "--no-abbrev", "--non-interactive", "--no-cd", "--no-refresh")
+    pre_args = (
+        "--no-color",
+        "--no-abbrev",
+        "--non-interactive",
+        "--no-cd",
+        "--no-refresh",
+    )
 
     version_regex = r"zypper\s+(?P<version>\S+)"
     """
@@ -51,7 +57,8 @@ class Zypper(PackageManager):
     """
 
     def _search(self, *args):
-        """Utility method to parse and interpret results of the ``zypper search`` command.
+        """Utility method to parse and interpret results of the ``zypper search``
+        command.
 
         This is reused by the ``installed`` and ``search`` operations.
 
@@ -96,27 +103,35 @@ class Zypper(PackageManager):
             "--details",
             # ...but comes with duplicate results due to source packages, different arch and old releases.
             # So we filters them out to only keep proper packages.
-            "--type", "package",
+            "--type",
+            "package",
             # Additional search arguments.
             *args,
         )
 
-        package_list = xmltodict.parse(output).get('stream', {}).get('search-result', {}).get('solvable-list', {}).get('solvable', [])
+        package_list = (
+            xmltodict.parse(output)
+            .get("stream", {})
+            .get("search-result", {})
+            .get("solvable-list", {})
+            .get("solvable", [])
+        )
 
         # Group packages by ID.
-        key_func = itemgetter('@name')
+        key_func = itemgetter("@name")
 
         # Skip old packages reported in the results as 'other-version'.
         fresh_packages = sorted(
-            (p for p in package_list if p.get('@status') != 'other-version'),
-            key=key_func
+            (p for p in package_list if p.get("@status") != "other-version"),
+            key=key_func,
         )
 
-        # Returns the highest version for a package ID among all repositories and arch variations.
+        # Returns the highest version for a package ID among all repositories and
+        # arch variations.
         for key, group in groupby(fresh_packages, key_func):
             yield {
-                'id': key,
-                'version': max(parse_version(p['@edition']) for p in group)
+                "id": key,
+                "version": max(parse_version(p["@edition"]) for p in group),
             }
 
     @property
@@ -130,11 +145,11 @@ class Zypper(PackageManager):
         installed = {}
 
         for package in self._search("--installed-only"):
-            package_id = package['id']
+            package_id = package["id"]
             installed[package_id] = {
                 "id": package_id,
                 "name": package_id,
-                "installed_version": package['version'],
+                "installed_version": package["version"],
             }
 
         return installed
@@ -170,15 +185,21 @@ class Zypper(PackageManager):
 
         output = self.run_cli("--xmlout", "list-updates")
 
-        package_list = xmltodict.parse(output).get('stream', {}).get('update-status', {}).get('update-list', {}).get('update', [])
+        package_list = (
+            xmltodict.parse(output)
+            .get("stream", {})
+            .get("update-status", {})
+            .get("update-list", {})
+            .get("update", [])
+        )
 
         for package in package_list:
-            package_id = package['@name']
+            package_id = package["@name"]
             outdated[package_id] = {
                 "id": package_id,
                 "name": package_id,
-                "latest_version": parse_version(package['@edition']),
-                "installed_version": parse_version(package['@edition-old']),
+                "latest_version": parse_version(package["@edition"]),
+                "installed_version": parse_version(package["@edition-old"]),
             }
         return outdated
 
@@ -210,11 +231,11 @@ class Zypper(PackageManager):
             search_param.append("--match-exact")
 
         for package in self._search(*search_param, query):
-            package_id = package['id']
+            package_id = package["id"]
             matches[package_id] = {
                 "id": package_id,
                 "name": package_id,
-                "installed_version": package['version'],
+                "installed_version": package["version"],
             }
 
         return matches
@@ -229,7 +250,8 @@ class Zypper(PackageManager):
         return self.run_cli("install", package_id, sudo=True)
 
     def upgrade_cli(self, package_id=None):
-        """Generates the CLI to upgrade all packages (default) or only the one provided as parameter.
+        """Generates the CLI to upgrade all packages (default) or only the one provided
+        as parameter.
 
         .. code-block:: shell-session
 

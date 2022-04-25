@@ -212,6 +212,7 @@ jobs:
           sudo dpkg --add-architecture i386
           sudo apt update
           sudo apt install --yes lib32gcc-s1
+          sudo apt install --yes steam
           sudo apt install --yes steamcmd
       - name: Windows - Install SteamCMD
         if: runner.os == 'Windows'

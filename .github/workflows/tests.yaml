@@ -165,6 +165,13 @@ jobs:
         run: |
           sudo apt install --yes dnf
 
+      # Zypper
+      - name: Linux - Install Zypper
+        # XXX Zypper has been added in Ubuntu 20.04, not before.
+        if: matrix.os == 'ubuntu-20.04'
+        run: |
+          sudo apt install --yes zypper
+
       # Snap
       - name: Linux - Upgrade Snapd
         if: runner.os == 'Linux'

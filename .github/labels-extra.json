@@ -90,6 +90,11 @@
     "description": "vscode"
   },
   {
+    "name": "📦 manager: zypper",
+    "color": "#bfdadc",
+    "description": "zypper"
+  },
+  {
     "name": "🔌 bar-plugin",
     "color": "#fef2c0",
     "description": "Xbar/SwiftBar plugin code, documentation and features"

@@ -140,6 +140,14 @@ meta\_package\_manager.managers.yarn module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.managers.zypper module
+---------------------------------------------
+
+.. automodule:: meta_package_manager.managers.zypper
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

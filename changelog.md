@@ -6,6 +6,7 @@
 This version is not released yet and is under active development.
 ```
 
+- \[zypper\] Add `zypper` support for Suse and OpenSuse. Closes {issue}`566`.
 - \[emerge\] Add `emerge` support.
 - \[steamcmd\] Add `steamcmd` support. Refs {issue}`10`.
 - \[bar-plugin\] Add new `DEFAULT_FONT` and `MONOSPACE_FONT` variable.

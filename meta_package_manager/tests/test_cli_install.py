@@ -62,6 +62,7 @@ class TestInstall(CLISubCommandTests):
         "steamcmd": "",
         "vscode": "tamasfe.even-better-toml",
         "yarn": "markdown",
+        "zypper": "git",
     }
     assert set(PACKAGE_IDS) == set(pool.all_manager_ids)
 

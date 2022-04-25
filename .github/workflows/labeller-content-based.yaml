@@ -154,8 +154,13 @@ jobs:
                "keywords": ["vscode"]},
 
               {"labels": [
+                "📦 manager: zypper",
                 "🖥 platform: Linux"],
-               "keywords": ["linux", "ubuntu", "debian"]},
+               "keywords": ["zypper"]},
+
+              {"labels": [
+                "🖥 platform: Linux"],
+               "keywords": ["linux", "ubuntu", "debian", "suse", "opensuse", "arch", "gentoo"]},
 
               {"labels": [
                 "🖥 platform: macOS"],

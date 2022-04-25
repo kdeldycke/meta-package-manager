@@ -89,3 +89,7 @@ jobs:
         "📦 manager: vscode":
           - meta_package_manager/managers/vscode*
           - meta_package_manager/tests/*vscode*
+
+        "📦 manager: zypper":
+          - meta_package_manager/managers/zypper*
+          - meta_package_manager/tests/*zypper*

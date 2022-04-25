@@ -203,6 +203,6 @@ class DNF(PackageManager):
 
 
 class YUM(DNF):
-    """yum is dnf is yum"""
+    """yum is dnf is yum."""
 
     cli_names = ("yum",)

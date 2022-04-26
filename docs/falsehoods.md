@@ -71,3 +71,4 @@ Pre-required reads:
 
 1. Implementing a meta package manager
    [is not a futile pursuit](https://xkcd.com/1654/).
+1. [Package managers don't need their own conference](https://packaging-con.org).

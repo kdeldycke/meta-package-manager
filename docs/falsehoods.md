@@ -63,7 +63,7 @@ Pre-required reads:
 1. Package managers do not remove user data.
 1. Package managers
    [can bootstrap themselves](https://github.com/Homebrew/brew/blob/master/docs/Common-Issues.md#brew-complains-about-absence-of-command-line-tools).
-1. Package managers supports maultiple architectures.
+1. Package managers supports multiple architectures.
 1. You
    [only need one package manager](https://utcc.utoronto.ca/~cks/space/blog/tech/PackageManagersTwoTypes).
 

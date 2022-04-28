@@ -38,7 +38,7 @@ class APT(PackageManager):
 
     requirement = "1.0.0"
 
-    post_args = ("--quiet")
+    post_args = ("--quiet",)
 
     version_regex = r"apt\s+(?P<version>\S+)"
     """

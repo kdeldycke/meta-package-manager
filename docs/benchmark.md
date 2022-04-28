@@ -7,132 +7,132 @@ but there might be a greater need for such tools out there. Here is a list of so
 
 ## Package manager support
 
-| Manager | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
-| --------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
-| `0install`      |       |                |               |              |              |
-| `antigen`       |       |       ✓        |               |              |              |
-| `antibody`      |       |       ✓        |               |              |              |
-| `apm`           |   ✓   |       ✓        |               |              |              |
-| `apk`           |       |                |       ✓       |      ✓       |              |
-| `apt`           |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| `apt-cyg`       |       |                |               |      ✓       |              |
-| `apt-mint`      |   ✓   |                |               |              |              |
-| `asdf`          |       |       ✓        |               |              |              |
-| `bin`           |       |       ✓        |               |              |              |
-| `brew`          |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| `cargo`         |       |       ✓        |               |              |              |
-| `cask`          |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| `cave`          |       |                |               |      ✓       |              |
-| `chezmoi`       |       |       ✓        |               |              |              |
-| `chocolatey`    |   ✓   |       ✓        |       ✓       |              |              |
-| `choosenim`     |       |       ✓        |               |              |              |
-| `chromebrew`    |       |                |               |              |      ✓       |
-| `composer`      |   ✓   |       ✓        |               |              |              |
-| `containers`    |       |       ✓        |               |              |              |
-| `conda`         |       |       ✓        |       ✓       |      ✓       |              |
-| `dein`          |       |       ✓        |               |              |              |
-| `deno`          |       |       ✓        |               |              |              |
-| `dnf`           |   ✓   |                |       ✓       |              |      ✓       |
-| `dotnet`        |       |       ✓        |               |              |              |
-| `emacs`         |       |       ✓        |               |              |              |
-| `emerge`        |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| `eopkg`         |       |                |               |              |      ✓       |
-| `etc-update`    |       |       ✓        |               |              |              |
-| `fwupdmgr`      |       |       ✓        |               |              |              |
-| `fisher`        |       |       ✓        |               |              |              |
-| `flatpak`       |   ✓   |       ✓        |               |              |      ✓       |
-| `flutter`       |       |       ✓        |               |              |              |
-| `fossil`        |       |       ✓        |               |              |              |
-| `gem`           |   ✓   |       ✓        |               |              |      ✓       |
-| `gcloud`        |       |       ✓        |               |              |              |
-| `git`           |       |       ✓        |               |              |              |
-| `gnome-shell`   |       |       ✓        |               |              |              |
-| `go`            |       |       ✓        |               |              |              |
-| `guix`          |       |                |               |              |      ✓       |
-| `haxelib`       |       |       ✓        |               |              |              |
-| `home-manager`  |       |       ✓        |               |              |              |
-| `jetpack`       |       |       ✓        |               |              |              |
-| `kakoune`       |       |       ✓        |               |              |              |
-| `krew`          |       |       ✓        |               |              |              |
-| `macports`      |       |       ✓        |       ✓       |      ✓       |      ✓       |
-| `mas`           |   ✓   |       ✓        |               |              |              |
-| `macos`         |       |       ✓        |               |              |              |
-| `micro`         |       |       ✓        |               |              |              |
-| `myrepos`       |       |       ✓        |               |              |              |
-| `neobundle`     |       |       ✓        |               |              |              |
-| `nix`           |       |       ✓        |               |              |      ✓       |
-| `npm`           |   ✓   |       ✓        |               |              |      ✓       |
-| `oh-my-zsh`     |       |       ✓        |               |              |              |
-| `opam`          |       |       ✓        |               |              |              |
-| `opkg`          |   ✓   |                |               |      ✓       |              |
-| `pacman`        |   ✓   |       ✓        |               |      ✓       |      ✓       |
-| `pacstall`      |       |       ✓        |               |              |              |
-| `paru`          |       |       ✓        |               |              |              |
-| `pearl`         |       |       ✓        |               |              |              |
-| `pikaur`        |       |       ✓        |               |              |              |
-| `pihole`        |       |       ✓        |               |              |              |
-| `pip`           |   ✓   |       ✓        |       ✓       |              |      ✓       |
-| `pipx`          |       |       ✓        |               |              |              |
-| `pkg`           |       |       ✓        |               |              |      ✓       |
-| `pkg-mgr`       |       |                |               |              |      ✓       |
-| `pkg-tools`     |       |                |               |      ✓       |              |
-| `pkgin`         |       |       ✓        |               |              |              |
-| `pkgng`         |       |                |               |      ✓       |              |
-| `plug`          |       |       ✓        |               |              |              |
-| `pnpm`          |       |       ✓        |               |              |              |
-| `podman`        |       |       ✓        |               |              |              |
-| `powershell`    |       |       ✓        |               |              |              |
-| `raco`          |       |       ✓        |               |              |              |
-| `rtcl`          |       |       ✓        |               |              |              |
-| `rustup`        |       |       ✓        |               |              |              |
-| `scoop`         |       |       ✓        |       ✓       |              |      ✓       |
-| `sdkman`        |       |       ✓        |               |              |              |
-| `sheldon`       |       |       ✓        |               |              |              |
-| `silnite`       |       |       ✓        |               |              |              |
-| `slapt-get`     |       |                |               |              |      ✓       |
-| `snap`          |   ✓   |       ✓        |               |              |      ✓       |
-| `spack`         |       |                |               |              |              |
-| `spicetify`     |       |       ✓        |               |              |              |
-| `steamcmd`      |   ✓   |                |               |              |              |
-| `stack`         |       |       ✓        |               |              |              |
-| `sun-tools`     |       |                |               |      ✓       |              |
-| `swupd`         |       |                |               |      ✓       |              |
-| `system`        |       |       ✓        |               |              |              |
-| `tazpkg`        |       |                |               |      ✓       |              |
-| `tldr`          |       |       ✓        |               |              |              |
-| `tlmgr`         |       |       ✓        |       ✓       |      ✓       |              |
-| `toolbx`        |       |       ✓        |               |              |              |
-| `trizen`        |       |       ✓        |               |              |              |
-| `vagrant`       |       |       ✓        |               |              |              |
-| `vcpkg`         |       |       ✓        |               |              |              |
-| `vundle`        |       |       ✓        |               |              |              |
-| `nala`          |       |                |               |              |              |
-| `voom`          |       |       ✓        |               |              |              |
-| `vscode`        |   ✓   |                |               |              |              |
-| `winget`        |       |       ✓        |               |              |              |
-| `wsl`           |       |       ✓        |               |              |              |
-| `xbps`          |       |                |       ✓       |      ✓       |      ✓       |
-| `yadm`          |       |       ✓        |               |              |              |
-| `yarn`          |   ✓   |       ✓        |               |              |              |
-| `yay`           |       |       ✓        |               |              |              |
-| `yum`           |   ✓   |                |               |      ✓       |      ✓       |
-| `zim`           |       |       ✓        |               |              |              |
-| `zinit`         |       |       ✓        |               |              |              |
-| `zplug`         |       |       ✓        |               |              |              |
-| `zr`            |       |       ✓        |               |              |              |
-| `zypper`        |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Manager        | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| -------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
+| `0install`     |       |                |               |              |              |
+| `antigen`      |       |       ✓        |               |              |              |
+| `antibody`     |       |       ✓        |               |              |              |
+| `apm`          |   ✓   |       ✓        |               |              |              |
+| `apk`          |       |                |       ✓       |      ✓       |              |
+| `apt`          |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| `apt-cyg`      |       |                |               |      ✓       |              |
+| `apt-mint`     |   ✓   |                |               |              |              |
+| `asdf`         |       |       ✓        |               |              |              |
+| `bin`          |       |       ✓        |               |              |              |
+| `brew`         |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| `cargo`        |       |       ✓        |               |              |              |
+| `cask`         |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| `cave`         |       |                |               |      ✓       |              |
+| `chezmoi`      |       |       ✓        |               |              |              |
+| `chocolatey`   |   ✓   |       ✓        |       ✓       |              |              |
+| `choosenim`    |       |       ✓        |               |              |              |
+| `chromebrew`   |       |                |               |              |      ✓       |
+| `composer`     |   ✓   |       ✓        |               |              |              |
+| `containers`   |       |       ✓        |               |              |              |
+| `conda`        |       |       ✓        |       ✓       |      ✓       |              |
+| `dein`         |       |       ✓        |               |              |              |
+| `deno`         |       |       ✓        |               |              |              |
+| `dnf`          |   ✓   |                |       ✓       |              |      ✓       |
+| `dotnet`       |       |       ✓        |               |              |              |
+| `emacs`        |       |       ✓        |               |              |              |
+| `emerge`       |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| `eopkg`        |       |                |               |              |      ✓       |
+| `etc-update`   |       |       ✓        |               |              |              |
+| `fwupdmgr`     |       |       ✓        |               |              |              |
+| `fisher`       |       |       ✓        |               |              |              |
+| `flatpak`      |   ✓   |       ✓        |               |              |      ✓       |
+| `flutter`      |       |       ✓        |               |              |              |
+| `fossil`       |       |       ✓        |               |              |              |
+| `gem`          |   ✓   |       ✓        |               |              |      ✓       |
+| `gcloud`       |       |       ✓        |               |              |              |
+| `git`          |       |       ✓        |               |              |              |
+| `gnome-shell`  |       |       ✓        |               |              |              |
+| `go`           |       |       ✓        |               |              |              |
+| `guix`         |       |                |               |              |      ✓       |
+| `haxelib`      |       |       ✓        |               |              |              |
+| `home-manager` |       |       ✓        |               |              |              |
+| `jetpack`      |       |       ✓        |               |              |              |
+| `kakoune`      |       |       ✓        |               |              |              |
+| `krew`         |       |       ✓        |               |              |              |
+| `macports`     |       |       ✓        |       ✓       |      ✓       |      ✓       |
+| `mas`          |   ✓   |       ✓        |               |              |              |
+| `macos`        |       |       ✓        |               |              |              |
+| `micro`        |       |       ✓        |               |              |              |
+| `myrepos`      |       |       ✓        |               |              |              |
+| `neobundle`    |       |       ✓        |               |              |              |
+| `nix`          |       |       ✓        |               |              |      ✓       |
+| `npm`          |   ✓   |       ✓        |               |              |      ✓       |
+| `oh-my-zsh`    |       |       ✓        |               |              |              |
+| `opam`         |       |       ✓        |               |              |              |
+| `opkg`         |   ✓   |                |               |      ✓       |              |
+| `pacman`       |   ✓   |       ✓        |               |      ✓       |      ✓       |
+| `pacstall`     |       |       ✓        |               |              |              |
+| `paru`         |       |       ✓        |               |              |              |
+| `pearl`        |       |       ✓        |               |              |              |
+| `pikaur`       |       |       ✓        |               |              |              |
+| `pihole`       |       |       ✓        |               |              |              |
+| `pip`          |   ✓   |       ✓        |       ✓       |              |      ✓       |
+| `pipx`         |       |       ✓        |               |              |              |
+| `pkg`          |       |       ✓        |               |              |      ✓       |
+| `pkg-mgr`      |       |                |               |              |      ✓       |
+| `pkg-tools`    |       |                |               |      ✓       |              |
+| `pkgin`        |       |       ✓        |               |              |              |
+| `pkgng`        |       |                |               |      ✓       |              |
+| `plug`         |       |       ✓        |               |              |              |
+| `pnpm`         |       |       ✓        |               |              |              |
+| `podman`       |       |       ✓        |               |              |              |
+| `powershell`   |       |       ✓        |               |              |              |
+| `raco`         |       |       ✓        |               |              |              |
+| `rtcl`         |       |       ✓        |               |              |              |
+| `rustup`       |       |       ✓        |               |              |              |
+| `scoop`        |       |       ✓        |       ✓       |              |      ✓       |
+| `sdkman`       |       |       ✓        |               |              |              |
+| `sheldon`      |       |       ✓        |               |              |              |
+| `silnite`      |       |       ✓        |               |              |              |
+| `slapt-get`    |       |                |               |              |      ✓       |
+| `snap`         |   ✓   |       ✓        |               |              |      ✓       |
+| `spack`        |       |                |               |              |              |
+| `spicetify`    |       |       ✓        |               |              |              |
+| `steamcmd`     |   ✓   |                |               |              |              |
+| `stack`        |       |       ✓        |               |              |              |
+| `sun-tools`    |       |                |               |      ✓       |              |
+| `swupd`        |       |                |               |      ✓       |              |
+| `system`       |       |       ✓        |               |              |              |
+| `tazpkg`       |       |                |               |      ✓       |              |
+| `tldr`         |       |       ✓        |               |              |              |
+| `tlmgr`        |       |       ✓        |       ✓       |      ✓       |              |
+| `toolbx`       |       |       ✓        |               |              |              |
+| `trizen`       |       |       ✓        |               |              |              |
+| `vagrant`      |       |       ✓        |               |              |              |
+| `vcpkg`        |       |       ✓        |               |              |              |
+| `vundle`       |       |       ✓        |               |              |              |
+| `nala`         |       |                |               |              |              |
+| `voom`         |       |       ✓        |               |              |              |
+| `vscode`       |   ✓   |                |               |              |              |
+| `winget`       |       |       ✓        |               |              |              |
+| `wsl`          |       |       ✓        |               |              |              |
+| `xbps`         |       |                |       ✓       |      ✓       |      ✓       |
+| `yadm`         |       |       ✓        |               |              |              |
+| `yarn`         |   ✓   |       ✓        |               |              |              |
+| `yay`          |       |       ✓        |               |              |              |
+| `yum`          |   ✓   |                |               |      ✓       |      ✓       |
+| `zim`          |       |       ✓        |               |              |              |
+| `zinit`        |       |       ✓        |               |              |              |
+| `zplug`        |       |       ✓        |               |              |              |
+| `zr`           |       |       ✓        |               |              |              |
+| `zypper`       |   ✓   |                |       ✓       |      ✓       |      ✓       |
 
 ## Operating system support
 
-| OS | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
-| ---------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
-| macOS            |   🍎   |       🍎        |       🍎       |      🍎       |      🍎       |
-| Linux            |   🐧   |       🐧        |       🐧       |      🐧       |      🐧       |
-| Windows          |   🪟   |       🪟        |       🪟       |              |              |
+| OS      | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| ------- | :---: | :------------: | :-----------: | :----------: | :----------: |
+| macOS   |   🍎   |       🍎        |       🍎       |      🍎       |      🍎       |
+| Linux   |   🐧   |       🐧        |       🐧       |      🐧       |      🐧       |
+| Windows |   🪟   |       🪟        |       🪟       |              |              |
 
 ## Operations
 
-| Operation              | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| Operation               | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
 | ----------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
 | List available managers |   ✓   |                |               |              |              |
 | List installed packages |   ✓   |                |       ✓       |              |      ✓       |
@@ -148,10 +148,9 @@ but there might be a greater need for such tools out there. Here is a list of so
 | Backup                  |   ✓   |                |               |              |              |
 | Restore                 |   ✓   |                |               |              |              |
 
-
 ## Features
 
-| Feature                              | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| Feature                               | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
 | ------------------------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
 | Package manager autodetection         |   ✓   |       ✓        |               |              |              |
 | Unified CLI and options               |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |

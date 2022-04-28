@@ -38,7 +38,7 @@ class APT(PackageManager):
 
     requirement = "1.0.0"
 
-    post_args = ("--yes", "--quiet")
+    post_args = ("--quiet")
 
     version_regex = r"apt\s+(?P<version>\S+)"
     """
@@ -54,7 +54,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt list --installed --yes --quiet
+            ► apt list --installed --quiet
             Listing...
             adduser/xenial,now 3.113+nmu3ubuntu4 all [installed]
             base-files/xenial-updates,now 9.4ubuntu4.3 amd64 [installed]
@@ -104,7 +104,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt list --upgradable --yes --quiet
+            ► apt list --upgradable --quiet
             Listing...
             apt/xenial-updates 1.2.19 amd64 [upgradable from: 1.2.15ubuntu0.2]
             nano/xenial-updates 2.5.3-2ubuntu2 amd64 [upgradable from: 2.5.3-2]
@@ -132,7 +132,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt search abc --names-only --yes --quiet
+            ► apt search abc --names-only --quiet
             Sorting...
             Full Text Search...
             abcde/xenial 2.7.1-1 all
@@ -152,7 +152,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt search ^sed$ --names-only --yes --quiet
+            ► apt search ^sed$ --names-only --quiet
             Sorting...
             Full Text Search...
             sed/xenial 2.1.9-3 all
@@ -160,7 +160,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt search abc --full --yes --quiet
+            ► apt search abc --full --quiet
             Sorting...
             Full Text Search...
             abcde/xenial 2.7.1-1 all
@@ -222,7 +222,7 @@ class APT(PackageManager):
 
             ► sudo apt install git --yes --quiet
         """
-        return self.run_cli("install", package_id, sudo=True)
+        return self.run_cli("install", package_id, "--yes", sudo=True)
 
     def upgrade_cli(self, package_id=None):
         """Generates the CLI to upgrade all packages (default) or only the one provided
@@ -240,7 +240,7 @@ class APT(PackageManager):
         if package_id:
             params = ("install", "--only-upgrade", package_id)
 
-        return self.build_cli(*params, sudo=True)
+        return self.build_cli(*params, "--yes", sudo=True)
 
     def sync(self):
         """Sync package metadata.
@@ -257,7 +257,7 @@ class APT(PackageManager):
             Building dependency tree...
             Reading state information...
         """
-        self.run_cli("update", sudo=True)
+        self.run_cli("update", "--yes", sudo=True)
 
     def cleanup(self):
         """Removes things we don't need anymore.
@@ -268,7 +268,7 @@ class APT(PackageManager):
             ► sudo apt clean --yes --quiet
         """
         for command in ("autoremove", "clean"):
-            self.run_cli(command, sudo=True)
+            self.run_cli(command, "--yes", sudo=True)
 
 
 class APT_Mint(APT):
@@ -295,7 +295,7 @@ class APT_Mint(APT):
 
         .. code-block:: shell-session
 
-            ► /usr/local/bin/apt search sed --yes --quiet
+            ► /usr/local/bin/apt search sed --quiet
             v   librust-slog-2.5+erased-serde-dev  -
             p   python3-blessed                    - Practical wrapper
             i   sed                                - GNU stream editor
@@ -303,7 +303,7 @@ class APT_Mint(APT):
 
         .. code-block:: shell-session
 
-            ► /usr/local/bin/apt search ^sed$ --yes --quiet
+            ► /usr/local/bin/apt search ^sed$ --quiet
             i   sed              - GNU stream editor
             p   sed:i386         - GNU stream editor
         """

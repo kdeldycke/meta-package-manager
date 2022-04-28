@@ -16,7 +16,7 @@ cli-help
 configuration
 bar-plugin
 falsehoods
-alternatives
+benchmark
 ```
 
 ```{toctree}

@@ -8,6 +8,7 @@ This version is not released yet and is under active development.
 
 - \[apt\] Fix commands incompatible with `--yes` option. Closes {issue}`625`.
 - \[mpm\] Add `topgrade` and `pacaptr` in the list of benchmarked alternatives.
+- \[mpm\] Rename `alternative` page to `benchmark`.
 - \[mpm\] Fix label unittests.
 
 ## {gh}`5.0.0 (2022-04-25) <compare/v4.13.1...v5.0.0>`

@@ -1,13 +1,13 @@
-# Alternatives
+# Benchmark
 
 Attempting to unifying all package managers is a Sisyphean task.
 
-But it seems I was not the only one trying to solve that problem so there might be a greater need
-for such tools out there. Here is a list of some related projects I stumbled into.
+This did not prevent me or others to try to solve that problem. It is not easy to explain why
+but there might be a greater need for such tools out there. Here is a list of some related projects I stumbled into and how they compares to `mpm`.
 
-## Benchmark
+## Package manager support
 
-| Package manager | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| Manager | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
 | --------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
 | `0install`      |       |                |               |              |              |
 | `antigen`       |       |       ✓        |               |              |              |
@@ -122,13 +122,17 @@ for such tools out there. Here is a list of some related projects I stumbled int
 | `zr`            |       |       ✓        |               |              |              |
 | `zypper`        |   ✓   |                |       ✓       |      ✓       |      ✓       |
 
-| Operating system | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+## Operating system support
+
+| OS | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
 | ---------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
 | macOS            |   🍎   |       🍎        |       🍎       |      🍎       |      🍎       |
 | Linux            |   🐧   |       🐧        |       🐧       |      🐧       |      🐧       |
 | Windows          |   🪟   |       🪟        |       🪟       |              |              |
 
-| Operations              | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+## Operations
+
+| Operation              | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
 | ----------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
 | List available managers |   ✓   |                |               |              |              |
 | List installed packages |   ✓   |                |       ✓       |              |      ✓       |
@@ -144,7 +148,10 @@ for such tools out there. Here is a list of some related projects I stumbled int
 | Backup                  |   ✓   |                |               |              |              |
 | Restore                 |   ✓   |                |               |              |              |
 
-| Features                              | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+
+## Features
+
+| Feature                              | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
 | ------------------------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
 | Package manager autodetection         |   ✓   |       ✓        |               |              |              |
 | Unified CLI and options               |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
@@ -168,12 +175,16 @@ for such tools out there. Here is a list of some related projects I stumbled int
 | [XKCD #1654](https://xkcd.com/1654/)  |   ✓   |                |               |              |              |
 | [Xbar/SwiftBar plugin](bar-plugin.md) |   ✓   |                |               |              |              |
 
+## Metadata
+
 | Metadata            | `mpm`   | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
 | ------------------- | :------ | :------------- | :------------ | :----------- | :----------- |
 | License             | GPL-2.0 | GPL-3.0        | GPL-3.0       | Custom       | GPL-3.0      |
 | Implementation      | Python  | Rust           | Rust          | Shell        | C++          |
 | Version benchmarked | `5.0.0` | `8.3.1`        | `0.15.2`      | `3.0.7`      | `2.3`        |
 | Benchmark date      | 2022-04 | 2022-04        | 2022-04       | 2022-04      | 2022-04      |
+
+## Project's URL
 
 [^1]: <https://github.com/r-darwish/topgrade>
 

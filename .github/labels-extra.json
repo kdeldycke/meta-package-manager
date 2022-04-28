@@ -25,9 +25,9 @@
     "description": "composer"
   },
   {
-    "name": "📦 manager: dnf",
+    "name": "📦 manager: dnf-like",
     "color": "#bfdadc",
-    "description": "dnf"
+    "description": "dnf, yum"
   },
   {
     "name": "📦 manager: dpkg-like",
@@ -88,11 +88,6 @@
     "name": "📦 manager: vscode",
     "color": "#bfdadc",
     "description": "vscode"
-  },
-  {
-    "name": "📦 manager: yum",
-    "color": "#bfdadc",
-    "description": "yum"
   },
   {
     "name": "📦 manager: zypper",

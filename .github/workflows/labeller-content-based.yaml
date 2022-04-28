@@ -77,7 +77,7 @@ jobs:
               "keywords": ["choco", "chocolatey"]},
 
               {"labels": [
-                "📦 manager: dnf",
+                "📦 manager: dnf-like",
                 "🖥 platform: Linux"],
               "keywords": ["dnf", "yum", "rpm", "fedora", "redhat", "rhel"]},
 

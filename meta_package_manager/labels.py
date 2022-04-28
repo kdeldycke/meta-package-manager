@@ -41,6 +41,7 @@ MANAGER_LABELS = {}
 
 # Some managers sharing some roots will be grouped together.
 MANAGER_GROUPS = {
+    "dnf-like": {"dnf", "yum"},
     "dpkg-like": {"dpkg", "apt", "apt-mint", "opkg"},
     "npm-like": {"npm", "yarn"},
 }

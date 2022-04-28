@@ -33,7 +33,7 @@ jobs:
           - meta_package_manager/managers/composer*
           - meta_package_manager/tests/*composer*
 
-        "📦 manager: dnf":
+        "📦 manager: dnf-like":
           - meta_package_manager/managers/dnf*
           - meta_package_manager/tests/*dnf*
 

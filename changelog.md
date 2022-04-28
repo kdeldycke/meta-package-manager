@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Regroup `dnf` and `yum` labels.
+
 ## {gh}`5.0.1 (2022-04-28) <compare/v5.0.0...v5.0.1>`
 
 - \[apt\] Fix commands incompatible with `--yes` option. Closes {issue}`625`.

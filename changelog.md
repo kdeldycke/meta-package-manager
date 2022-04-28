@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`5.0.1 (unreleased) <compare/v5.0.0...main>`
-
-```{important}
-This version is not released yet and is under active development.
-```
+## {gh}`5.0.1 (2022-04-28) <compare/v5.0.0...v5.0.1>`
 
 - \[apt\] Fix commands incompatible with `--yes` option. Closes {issue}`625`.
 - \[mpm\] Add `topgrade` and `pacaptr` in the list of benchmarked alternatives.

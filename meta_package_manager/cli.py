@@ -100,7 +100,7 @@ def single_manager_selectors():
 
 
 def bar_plugin_path(ctx, param, value):
-    """Print the location of the `Xbar/SwiftBar plugin <bar-plugin.md>`_.
+    """Print the location of the :doc:`Xbar/SwiftBar plugin <bar-plugin>`.
 
     Returns the normalized path of the `meta_package_manager.7h.py <https://github.com/kdeldycke/meta-package-manager/meta_package_manager/bar_plugin/meta_package_manager.7h.py>`_ file that is distributed with this Python module. This
     is made available under the :option:`mpm --bar-plugin-path` option:

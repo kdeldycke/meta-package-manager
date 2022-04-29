@@ -214,13 +214,9 @@ class Yarn(PackageManager):
         matches = {}
 
         if extended:
-            logger.warning(
-                f"Extended search not supported for {self.id}. Fallback to Fuzzy."
-            )
-        elif not exact:
-            logger.warning(
-                f"Fuzzy search not supported for {self.id}. Fallback to Exact."
-            )
+            logger.warning(f"{self.id} does not implement extended search operation.")
+        if not exact:
+            logger.warning(f"{self.id} does not implement non-exact search operation.")
 
         output = self.run_cli("--json", "info", query)
 

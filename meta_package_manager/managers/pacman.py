@@ -19,6 +19,7 @@ import re
 
 from click_extra.platform import LINUX
 
+from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
@@ -129,6 +130,9 @@ class Pacman(PackageManager):
                 Asturian language pack for Firefox
         """
         matches = {}
+
+        if extended:
+            logger.warning(f"{self.id} does not implement extended search operation.")
 
         if exact:
             query = f"^{query}$"

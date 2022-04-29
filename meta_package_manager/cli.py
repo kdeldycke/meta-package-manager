@@ -61,10 +61,10 @@ from .output import (
 from .pool import pool
 from .version import TokenizedString
 
-# Sub-command sections.
-EXPLORE = Section("Explore commands")
-MAINTENANCE = Section("Maintainance commands")
-SNAPSHOTS = Section("Package snapshots commands")
+# Subcommand sections.
+EXPLORE = Section("Explore subcommands")
+MAINTENANCE = Section("Maintainance subcommands")
+SNAPSHOTS = Section("Package snapshots subcommands")
 
 
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
@@ -87,7 +87,7 @@ def add_manager_to_selection(ctx, param, selected):
 
 
 def single_manager_selectors():
-    """Dynamiccaly creates a dedicated flag selector for each manager."""
+    """Dynamiccaly creates a dedicated flag selector alias for each manager."""
     for manager_id in pool.all_manager_ids:
         yield option(
             f"--{manager_id}",
@@ -124,9 +124,9 @@ def bar_plugin_path(ctx, param, value):
         "--manager",
         type=Choice(pool.all_manager_ids, case_sensitive=False),
         multiple=True,
-        help="Restrict sub-command to a subset of package managers. Repeat to "
+        help="Restrict subcommand to a subset of package managers. Repeat to "
         "select multiple managers. The order in which options are provided defines the "
-        "order in which sub-commands will process them.",
+        "order in which subcommands will process them.",
     ),
     option(
         "-e",
@@ -140,7 +140,7 @@ def bar_plugin_path(ctx, param, value):
         "--all-managers",
         is_flag=True,
         default=False,
-        help="Force evaluation of all package manager implemented by mpm, even those "
+        help="Force evaluation of all package manager recognized by mpm, even those "
         "not supported by the current platform. Still applies filtering by --manager "
         "and --exclude options before calling the subcommand.",
     ),
@@ -160,7 +160,7 @@ def bar_plugin_path(ctx, param, value):
         "--ignore-auto-updates/--include-auto-updates",
         default=True,
         help="Report all outdated packages, including those tagged as "
-        "auto-updating. Only applies to 'outdated' and 'upgrade' commands.",
+        "auto-updating. Only applies to outdated and upgrade subcommands.",
     ),
     option(
         "--stop-on-error/--continue-on-error",
@@ -206,7 +206,7 @@ def bar_plugin_path(ctx, param, value):
     expose_value=False,
     is_eager=True,
     callback=bar_plugin_path,
-    help="Print location of the mpm Xbar/SwiftBar plugin.",
+    help="Print location of the Xbar/SwiftBar plugin.",
 )
 @pass_context
 def mpm(
@@ -269,7 +269,7 @@ def mpm(
 )
 @pass_context
 def managers(ctx):
-    """List all supported package managers and their presence on the system."""
+    """List all supported package managers and autodetect their presence on the system."""
     # Machine-friendly data rendering.
     if ctx.find_root().table_formatter.format_name == "json":
         manager_data = {}
@@ -359,7 +359,7 @@ def installed(ctx):
         try:
             packages = tuple(manager.installed.values())
         except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement installed command.")
+            logger.warning(f"{manager.id} does not implement installed operation.")
             continue
 
         installed_data[manager.id] = {
@@ -413,7 +413,7 @@ def installed(ctx):
     is_flag=True,
     default=False,
     help="Output results for direct consumption by an Xbar/SwiftBar-compatible plugin."
-    " The layout is dynamic depending on environment variables set by both Xbar and "
+    " The layout is dynamic and depends on environment variables set by both Xbar and "
     "SwiftBar.",
 )
 @pass_context
@@ -427,7 +427,7 @@ def outdated(ctx, plugin_output):
         try:
             packages = tuple(map(dict, manager.outdated.values()))
         except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement outdated command.")
+            logger.warning(f"{manager.id} does not implement outdated operation.")
             continue
 
         for info in packages:
@@ -452,7 +452,7 @@ def outdated(ctx, plugin_output):
                 upgrade_all_cli = manager.upgrade_all_cli()
             except NotImplementedError:
                 # Fallback on mpm itself which is capable of simulating a full upgrade.
-                logger.warning(f"{manager.id} does not implement upgrade_all command.")
+                logger.warning(f"{manager.id} does not implement upgrade_all operation.")
                 mpm_exec = bar_plugin.MPMPlugin().mpm_exec
                 upgrade_all_cli = (*mpm_exec, f"--{manager.id}", "upgrade")
                 logger.debug(f"Fallback to direct mpm call: {upgrade_all_cli}")
@@ -541,7 +541,7 @@ def search(ctx, extended, exact, query):
         try:
             results = tuple(manager.search(query, extended, exact).values())
         except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement search command.")
+            logger.warning(f"{manager.id} does not implement search operation.")
             continue
 
         matches[manager.id] = {
@@ -621,7 +621,7 @@ def install(ctx, package_id):
         try:
             matches = manager.search(extended=False, exact=True, query=package_id)
         except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement search command.")
+            logger.warning(f"{manager.id} does not implement search operation.")
             logger.info(
                 f"{package_id} existence unconfirmed, try to directly install it..."
             )
@@ -638,7 +638,7 @@ def install(ctx, package_id):
                 logger.info(f"Install {package_id} package from {manager.id}...")
                 output = manager.install(package_id)
             except NotImplementedError:
-                logger.warning(f"{manager.id} does not implement install command.")
+                logger.warning(f"{manager.id} does not implement install operation.")
                 continue
             except CLIError:
                 logger.warning(f"Could not install {package_id} with {manager.id}.")
@@ -657,7 +657,7 @@ def upgrade(ctx):
         try:
             output = manager.upgrade_all()
         except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement upgrade_all command.")
+            logger.warning(f"{manager.id} does not implement upgrade_all operation.")
             continue
 
         if output:
@@ -673,19 +673,19 @@ def sync(ctx):
         try:
             manager.sync()
         except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement sync command.")
+            logger.warning(f"{manager.id} does not implement sync operation.")
 
 
 @mpm.command(short_help="Cleanup local data.", section=MAINTENANCE)
 @pass_context
 def cleanup(ctx):
-    """Cleanup local data and temporary artifacts."""
+    """Cleanup local data, temporary artifacts and removes orphaned dependencies."""
     for manager in ctx.obj.selected_managers:
         logger.info(f"Cleanup {manager.id}...")
         try:
             manager.cleanup()
         except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement cleanup command.")
+            logger.warning(f"{manager.id} does not implement cleanup operation.")
 
 
 @mpm.command(short_help="Save installed packages to a TOML file.", section=SNAPSHOTS)
@@ -699,7 +699,7 @@ def backup(ctx, toml_output):
     the result written in a file on disk, specify the output file like so:
     `mpm backup ./mpm-packages.toml`.
 
-    The TOML file can then be safely consumed by the `mpm restore` command.
+    The TOML file can then be safely consumed by the `mpm restore` subcommand.
     """
     is_stdout = isinstance(toml_output, TextIOWrapper)
     toml_filepath = toml_output.name if is_stdout else Path(toml_output.name).resolve()
@@ -726,7 +726,7 @@ def backup(ctx, toml_output):
         try:
             packages = manager.installed.values()
         except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement installed command.")
+            logger.warning(f"{manager.id} does not implement installed operation.")
             continue
 
         # Prepare data for stats.

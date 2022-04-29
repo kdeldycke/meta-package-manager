@@ -168,7 +168,7 @@ class CLISubCommandTests:
                     re.search(
                         rf"warning: {mid} does not implement "
                         r"(installed|outdated|search|install|upgrade|upgrade_all|sync|cleanup) "
-                        "command.",
+                        "operation.",
                         stderr,
                     )
                 ),

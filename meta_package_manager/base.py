@@ -437,7 +437,7 @@ class PackageManager:
         * ``override_pre_args=tuple()``
         * ``override_post_args=tuple()``
 
-        On linux, the command can be ran with `sudo <https://www.sudo.ws>`_ if the parameter of the same name is set to ``True``.
+        On linux, the command can be run with `sudo <https://www.sudo.ws>`_ if the parameter of the same name is set to ``True``.
         In which case the ``override_pre_cmds`` parameter is not allowed to be set and the ``auto_pre_cmds`` parameter is forced to ``False``.
         """
         params = []
@@ -666,7 +666,7 @@ class PackageManager:
         one returned by :py:meth:`meta_package_manager.base.PackageManager.upgrade_cli`.
 
         It can also be used to ``raise NotImplementedError`` on some managers to signal to :program:`mpm` that
-        the package manager has no proper support for a full upgrade command. See for example
+        the package manager has no proper support for a full upgrade operation. See for example
         :py:meth:`meta_package_manager.managers.pip.Pip.upgrade_all_cli`.
         """
         return self.upgrade_cli()
@@ -685,9 +685,9 @@ class PackageManager:
         try:
             return self.run(self.upgrade_all_cli(), extra_env=self.extra_env)
         except NotImplementedError:
-            logger.warning(f"{self.id} does not implement upgrade_all command.")
+            logger.warning(f"{self.id} does not implement upgrade_all operation.")
 
-        logger.info(f"Fallback to calling single-package upgrade one by one.")
+        logger.info(f"Fallback to calling upgrade operation on each outdated package.")
         log = ""
         for package_id in self.outdated:
             output = self.upgrade(package_id)

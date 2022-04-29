@@ -100,9 +100,22 @@ def single_manager_selectors():
 
 
 def bar_plugin_path(ctx, param, value):
-    """Print the location of the Xbar/SwiftBar plugin.
+    """Print the location of the `Xbar/SwiftBar plugin <bar-plugin.md>`_.
 
-    Replaces the fully-qualified home directory by its shorthand if applicable.
+    Returns the normalized path of the `meta_package_manager.7h.py <https://github.com/kdeldycke/meta-package-manager/meta_package_manager/bar_plugin/meta_package_manager.7h.py>`_ file that is distributed with this Python module. This
+    is made available under the :option:`mpm --bar-plugin-path` option:
+
+    .. code-block:: shell-session
+
+        $ mpm --bar-plugin-path
+        ~/Library/Python/3.9/lib/python/site-packages/meta_package_manager/bar_plugin/meta_package_manager.7h.py
+
+    This is handy for deployment and initial configuration of Xbar/SwiftBar. I personnly use this in `my dotfiles <https://github.com/kdeldycke/dotfiles>`_.
+
+    Notice that the fully-qualified home directory get rplaces by its shorthand (``~``) if applicable:
+
+    - the full ``/home/user/.python/site-packages/mpm/meta_package_manager.7h.py`` path is simplified as  ``~/.python/site-packages/mpm/meta_package_manager.7h.py``,
+    - while ``/usr/bin/python3.9/mpm/bar_plugin/mpm.7h.py`` is returned as-is.
     """
     if value:
         bar_path = Path(bar_plugin.__file__).expanduser().resolve()

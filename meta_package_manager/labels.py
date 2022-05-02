@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Utilities to manage extra labels to use for GitHub issues and PRs."""
+"""Utilities to generate extra labels to use for GitHub issues and PRs."""
 
 from boltons.iterutils import flatten
 from click_extra.platform import ALL_OS_LABELS
@@ -23,8 +23,8 @@ from click_extra.platform import ALL_OS_LABELS
 from .pool import pool
 
 CLI_NAME = "mpm"
+"""Main CLI ID."""
 
-# Format: label name, color, optional description.
 LABELS = [
     (
         "🔌 bar-plugin",
@@ -32,26 +32,36 @@ LABELS = [
         "Xbar/SwiftBar plugin code, documentation and features",
     ),
 ]
+"""Structure: ``("label_name", "color", "optional_description")``."""
 
 
-# Maps platform and manager ID to their labels.
 PLATFORM_LABELS = {}
+""" Maps all platform IDs to their labels. """
+
+
 MANAGER_LABELS = {}
+""" Maps all manager IDs to their labels. """
 
 
-# Some managers sharing some roots will be grouped together.
 MANAGER_GROUPS = {
     "dnf-like": {"dnf", "yum"},
     "dpkg-like": {"dpkg", "apt", "apt-mint", "opkg"},
     "npm-like": {"npm", "yarn"},
 }
+"""Managers sharing some roots or implementation will be grouped together."""
 
 
-# Define generated labels prefixes and colors.
 PLATFORM_PREFIX = "🖥 platform: "
+"""Default platform label prefix."""
+
 PLATFORM_COLOR = "#bfd4f2"
+"""Default platform label color."""
+
 MANAGER_PREFIX = "📦 manager: "
+"""Default manager label prefix."""
+
 MANAGER_COLOR = "#bfdadc"
+"""Default manager label color."""
 
 
 # Create one label per platform.

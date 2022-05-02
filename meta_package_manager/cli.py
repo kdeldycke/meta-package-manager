@@ -70,7 +70,7 @@ SNAPSHOTS = Section("Package snapshots subcommands")
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
 """Sequence of package managers as defined by `XKCD #1654: Universal Install Script <https://xkcd.com/1654/>`_.
 
-See the corresponding `implementation rationale in issue #10 <https://github.com/kdeldycke/meta-package-manager/issues/10>`_.
+See the corresponding :issue:`implementation rationale in issue #10 <10>`.
 """
 
 

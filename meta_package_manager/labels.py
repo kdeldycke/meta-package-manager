@@ -36,7 +36,7 @@ LABELS = [
 
 
 PLATFORM_LABELS = {}
-""" Maps all platform IDs to their labels. """
+""" Maps all platform names to their labels. """
 
 
 MANAGER_LABELS = {}
@@ -65,10 +65,10 @@ MANAGER_COLOR = "#bfdadc"
 
 
 # Create one label per platform.
-for platform_id in ALL_OS_LABELS:
-    label_id = f"{PLATFORM_PREFIX}{platform_id}"
-    LABELS.append((label_id, PLATFORM_COLOR, platform_id))
-    PLATFORM_LABELS[platform_id] = label_id
+for platform_name in ALL_OS_LABELS:
+    label_id = f"{PLATFORM_PREFIX}{platform_name}"
+    LABELS.append((label_id, PLATFORM_COLOR, platform_name))
+    PLATFORM_LABELS[platform_name] = label_id
 
 
 # Create one label per manager. Add mpm as its own manager.

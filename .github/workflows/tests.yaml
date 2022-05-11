@@ -203,9 +203,15 @@ jobs:
           sudo gem update --system
 
       # Pip
-      - name: Upgrade Pip
+      - name: Upgrade pip
         run: |
           python -m pip install --upgrade pip
+
+      # Pipx
+      - name: Install pipx
+        run: |
+          python -m pip install --user pipx
+          python -m pipx ensurepath
 
       # SteamCMD
       - name: macOS - Install SteamCMD

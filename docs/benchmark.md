@@ -72,7 +72,7 @@ but there might be a greater need for such tools out there. Here is a list of so
 | `pikaur`       |       |       ✓        |               |              |              |
 | `pihole`       |       |       ✓        |               |              |              |
 | `pip`          |   ✓   |       ✓        |       ✓       |              |      ✓       |
-| `pipx`         |       |       ✓        |               |              |              |
+| `pipx`         |   ✓   |       ✓        |               |              |              |
 | `pkg`          |       |       ✓        |               |              |      ✓       |
 | `pkg-mgr`      |       |                |               |              |      ✓       |
 | `pkg-tools`    |       |                |               |      ✓       |              |
@@ -180,8 +180,8 @@ but there might be a greater need for such tools out there. Here is a list of so
 | ------------------- | :------ | :------------- | :------------ | :----------- | :----------- |
 | License             | GPL-2.0 | GPL-3.0        | GPL-3.0       | Custom       | GPL-3.0      |
 | Implementation      | Python  | Rust           | Rust          | Shell        | C++          |
-| Version benchmarked | `5.0.0` | `8.3.1`        | `0.15.2`      | `3.0.7`      | `2.3`        |
-| Benchmark date      | 2022-04 | 2022-04        | 2022-04       | 2022-04      | 2022-04      |
+| Version benchmarked | `5.1.0` | `8.3.1`        | `0.15.2`      | `3.0.7`      | `2.3`        |
+| Benchmark date      | 2022-05 | 2022-04        | 2022-04       | 2022-04      | 2022-04      |
 
 ## Project's URL
 

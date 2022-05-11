@@ -132,7 +132,7 @@ jobs:
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",
                 "🖥 platform: Windows"],
-               "keywords": ["pip"]},
+               "keywords": ["pip", "pipx"]},
 
               {"labels": [
                 "📦 manager: snap",

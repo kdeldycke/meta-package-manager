@@ -74,7 +74,7 @@ jobs:
           - meta_package_manager/managers/pacman*
           - meta_package_manager/tests/*pacman*
 
-        "📦 manager: pip":
+        "📦 manager: pip-like":
           - meta_package_manager/managers/pip*
           - meta_package_manager/tests/*pip*
 

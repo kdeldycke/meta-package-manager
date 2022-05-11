@@ -47,6 +47,7 @@ MANAGER_GROUPS = {
     "dnf-like": {"dnf", "yum"},
     "dpkg-like": {"dpkg", "apt", "apt-mint", "opkg"},
     "npm-like": {"npm", "yarn"},
+    "pip-like": {"pip", "pipx"},
 }
 """Managers sharing some roots or implementation will be grouped together."""
 

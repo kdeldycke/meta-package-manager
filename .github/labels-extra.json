@@ -70,9 +70,9 @@
     "description": "pacman"
   },
   {
-    "name": "📦 manager: pip",
+    "name": "📦 manager: pip-like",
     "color": "#bfdadc",
-    "description": "pip"
+    "description": "pip, pipx"
   },
   {
     "name": "📦 manager: snap",

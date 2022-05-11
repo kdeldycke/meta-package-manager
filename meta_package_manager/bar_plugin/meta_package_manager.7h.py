@@ -24,7 +24,7 @@ Minimal requirement is macOS Catalina (10.15) for both Xbar and SwiftBar.
 Catalina deprecates Python 2.x, and ships with Python 3.7.3. So this plugin is
 required to work with Python 3.7.3 or newer.
 
-- Xbar automaticcaly bridge plugin options between its UI and environment
+- Xbar automatically bridge plugin options between its UI and environment
   variable on script execution. See:
   https://xbarapp.com/docs/2021/03/14/variables-in-xbar.html
 

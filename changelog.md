@@ -359,7 +359,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Auto-fix common typos.
 - \[mpm\] Lint JSON files.
 - \[mpm\] Automate GitHub label generation and synchronization.
-- \[mpm\] Automaticcaly applies labels on PRs and issues depending on their
+- \[mpm\] Automatically applies labels on PRs and issues depending on their
   changed files and content.
 - \[mpm\] Check label rules against manager definitions. Adds development
   dependency on `PyYAML`.

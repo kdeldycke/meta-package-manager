@@ -126,21 +126,21 @@ class PackageManager:
 
     Should be a list of strings whose order dictatate the search sequence.
 
-    Most of the time unnecessay: :py:func:`meta_package_manager.base.PackageManager.cli_path`
+    Most of the time unnecessary: :py:func:`meta_package_manager.base.PackageManager.cli_path`
     works well on all platforms.
     """
 
     extra_env = None
     """Additional environment variables to add to the current context.
 
-    Automaticcaly applied on each :py:func:`meta_package_manager.base.PackageManager.run_cli`
+    Automatically applied on each :py:func:`meta_package_manager.base.PackageManager.run_cli`
     calls.
     """
 
     pre_cmds = ()
     """Global list of pre-commands to add before before invoked CLI.
 
-    Automaticcaly added to each :py:func:`meta_package_manager.base.PackageManager.run_cli`
+    Automatically added to each :py:func:`meta_package_manager.base.PackageManager.run_cli`
     call.
 
     Used to prepend `sudo <https://www.sudo.ws>`_ or other system utilities.
@@ -150,7 +150,7 @@ class PackageManager:
     post_args = ()
     """Global list of options used before and after the invoked package manager CLI.
 
-    Automaticcaly added to each :py:func:`meta_package_manager.base.PackageManager.run_cli`
+    Automatically added to each :py:func:`meta_package_manager.base.PackageManager.run_cli`
     call.
 
     Essentially used to force silencing, low verbosity or no-color output.
@@ -172,7 +172,7 @@ class PackageManager:
     """Tell the manager to either raise or continue on errors."""
 
     ignore_auto_updates = True
-    """Some managers can report or ignore packages which have their own auto-update mecanism.
+    """Some managers can report or ignore packages which have their own auto-update mechanism.
     """
 
     dry_run = False
@@ -195,7 +195,7 @@ class PackageManager:
     def cli_path(self):
         """Fully qualified path to the package manager CLI.
 
-        Automaticaly search the location of the CLI in the system. Try multiple CLI
+        Automatically search the location of the CLI in the system. Try multiple CLI
         names within several system path.
 
         Only checks if the file exists. Its executability will be assessed later. See
@@ -327,7 +327,7 @@ class PackageManager:
 
     @classmethod
     def args_cleanup(cls, *args):
-        """Flatten recusive iterables, remove all ``None``, and cast each element to
+        """Flatten recursive iterables, remove all ``None``, and cast each element to
         strings.
 
         Helps serialize :py:class:`pathlib.Path` and :py:class:`meta_package_manager.version.TokenizedString` objects.

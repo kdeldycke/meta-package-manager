@@ -15,7 +15,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Helpers and utilities to render and print content."""
+"""Helpers and utilities to render and print content.
+
+.. todo::
+
+    Some of these are good candidates for upstream contribution to ``click.extra``.
+"""
 
 import builtins
 import json
@@ -51,15 +56,22 @@ SORTABLE_FIELDS = {
 """List of fields IDs allowed to be sorted."""
 
 
-def not_implemented_json(data, headers, **kwargs):
+def not_implemented_json_handler(data, headers, **kwargs):
+    """Dummy `TabularOutputFormatter <https://cli-helpers.readthedocs.io/en/latest/api.html#cli_helpers.tabular_output.TabularOutputFormatter>`_ renderer.
+
+    Raises a :py:exc:`NotImplementedError` exception as this handler is not designed to be used as-is by `tabulate module <https://github.com/astanin/python-tabulate>`_. Its only purpose is
+    to serve as a signal to detect leaks in our custom JSON rendering code path.
+    """
     raise NotImplementedError(
         "JSON rendering is not generic and need specific subcommand implementation."
     )
 
 
-# Add our custom JSON format to the output formatter. Link it to a dummy renderer
-# as we plan to intercept the JSON settings in each subcommand.
-TabularOutputFormatter.register_new_formatter("json", not_implemented_json)
+TabularOutputFormatter.register_new_formatter("json", not_implemented_json_handler)
+"""Register our custom JSON rendering option to `TabularOutputFormatter <https://cli-helpers.readthedocs.io/en/latest/api.html#cli_helpers.tabular_output.TabularOutputFormatter>`_.
+
+Link it to the dummy :function:`not_implemented_json_handler` renderer as we plan to intercept the JSON option before the tabular renderer has a chance to call it.
+"""
 
 
 def print_json(data):

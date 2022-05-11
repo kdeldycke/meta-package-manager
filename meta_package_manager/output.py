@@ -57,10 +57,13 @@ SORTABLE_FIELDS = {
 
 
 def not_implemented_json_handler(data, headers, **kwargs):
-    """Dummy `TabularOutputFormatter <https://cli-helpers.readthedocs.io/en/latest/api.html#cli_helpers.tabular_output.TabularOutputFormatter>`_ renderer.
+    """Dummy `TabularOutputFormatter <https://cli-helpers.readthedocs.io/en/latest/api.h
+    tml#cli_helpers.tabular_output.TabularOutputFormatter>`_ renderer.
 
-    Raises a :py:exc:`NotImplementedError` exception as this handler is not designed to be used as-is by `tabulate module <https://github.com/astanin/python-tabulate>`_. Its only purpose is
-    to serve as a signal to detect leaks in our custom JSON rendering code path.
+    Raises a :py:exc:`NotImplementedError` exception as this handler is not designed to
+    be used as-is by `tabulate module <https://github.com/astanin/python-tabulate>`_.
+    Its only purpose is to serve as a signal to detect leaks in our custom JSON
+    rendering code path.
     """
     raise NotImplementedError(
         "JSON rendering is not generic and need specific subcommand implementation."

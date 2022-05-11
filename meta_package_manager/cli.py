@@ -282,7 +282,8 @@ def mpm(
 )
 @pass_context
 def managers(ctx):
-    """List all supported package managers and autodetect their presence on the system."""
+    """List all supported package managers and autodetect their presence on the
+    system."""
     # Machine-friendly data rendering.
     if ctx.find_root().table_formatter.format_name == "json":
         manager_data = {}
@@ -465,7 +466,9 @@ def outdated(ctx, plugin_output):
                 upgrade_all_cli = manager.upgrade_all_cli()
             except NotImplementedError:
                 # Fallback on mpm itself which is capable of simulating a full upgrade.
-                logger.warning(f"{manager.id} does not implement upgrade_all operation.")
+                logger.warning(
+                    f"{manager.id} does not implement upgrade_all operation."
+                )
                 mpm_exec = bar_plugin.MPMPlugin().mpm_exec
                 upgrade_all_cli = (*mpm_exec, f"--{manager.id}", "upgrade")
                 logger.debug(f"Fallback to direct mpm call: {upgrade_all_cli}")

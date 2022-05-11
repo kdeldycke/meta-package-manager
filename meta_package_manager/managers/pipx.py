@@ -38,7 +38,9 @@ class Pipx(PackageManager):
 
         if output:
             for package_id, package_info in json.loads(output)["venvs"].items():
-                package_version = package_info["metadata"]["main_package"]["package_version"]
+                package_version = package_info["metadata"]["main_package"][
+                    "package_version"
+                ]
                 installed[package_id] = {
                     "id": package_id,
                     "name": package_id,

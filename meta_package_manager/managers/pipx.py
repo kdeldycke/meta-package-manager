@@ -20,10 +20,11 @@ import json
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from ..base import PackageManager
-from ..version import  parse_version
+from ..version import parse_version
 
 
 class Pipx(PackageManager):
+
     platforms = frozenset({MACOS, LINUX, WINDOWS})
 
     requirement = "1.0.0"
@@ -32,7 +33,7 @@ class Pipx(PackageManager):
     def installed(self):
         """Fetch installed packages."""
         installed = {}
-  
+
         output = self.run_cli("list", "--json")
 
         if output:

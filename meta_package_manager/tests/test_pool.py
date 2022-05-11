@@ -25,7 +25,7 @@ from ..pool import pool
 
 def test_manager_count():
     """Check all implemented package managers are accounted for, and unique."""
-    assert len(pool) == 22
+    assert len(pool) == 23
     assert len(pool) == len(pool.all_manager_ids)
     assert pool.all_manager_ids == tuple(sorted(set(pool)))
 

@@ -35,6 +35,7 @@ keywords = [
     'pacman',
     'php composer',
     'pip',
+    'pipx',
     'plugin',
     'portage',
     'ruby',

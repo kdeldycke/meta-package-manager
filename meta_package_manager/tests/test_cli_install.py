@@ -58,6 +58,7 @@ class TestInstall(CLISubCommandTests):
         "opkg": "enigma2-hotplug",
         "pacman": "manjaro-hello",
         "pip": "arrow",
+        "pipx": "pycowsay",
         "snap": "standard-notes",
         "steamcmd": "",
         "vscode": "tamasfe.even-better-toml",

@@ -56,4 +56,4 @@ class Pipx(PackageManager):
 
     def upgrade_all_cli(self):
         """Upgrade all packages."""
-        raise self.build_cli("upgrade-all")
+        return self.build_cli("upgrade-all")

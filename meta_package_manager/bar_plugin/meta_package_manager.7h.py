@@ -58,7 +58,7 @@ class MPMPlugin:
     """
 
     mpm_min_version = (5, 0, 0)
-    """Mpm v5.1.0 was the first version taking care of the complete layout rendering."""
+    """Mpm v5.0.0 was the first version taking care of the complete layout rendering."""
 
     @staticmethod
     def extended_environment():

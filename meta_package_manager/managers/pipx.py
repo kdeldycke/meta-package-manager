@@ -28,10 +28,54 @@ class Pipx(PackageManager):
     platforms = frozenset({MACOS, LINUX, WINDOWS})
 
     requirement = "1.0.0"
+    """
+    .. code-block:: shell-session
+
+        ► pipx --version
+        1.0.0
+    """
 
     @property
     def installed(self):
-        """Fetch installed packages."""
+        """Fetch installed packages.
+
+        .. code-block:: shell-session
+
+            ► pipx list --json | jq
+            {
+              "pipx_spec_version": "0.1",
+              "venvs": {
+                  "pycowsay": {
+                    "metadata": {
+                      "injected_packages": {},
+                      "main_package": {
+                        "app_paths": [
+                          {
+                            "__Path__": "/Users/kde/.local/pipx/venvs/pycowsay/bin/pycowsay",
+                            "__type__": "Path"
+                          }
+                        ],
+                        "app_paths_of_dependencies": {},
+                        "apps": [
+                          "pycowsay"
+                        ],
+                        "apps_of_dependencies": [],
+                        "include_apps": true,
+                        "include_dependencies": false,
+                        "package": "pycowsay",
+                        "package_or_url": "pycowsay",
+                        "package_version": "0.0.0.1",
+                        "pip_args": [],
+                        "suffix": ""
+                      },
+                    "pipx_metadata_version": "0.2",
+                    "python_version": "Python 3.10.4",
+                    "venv_args": []
+                  }
+                }
+              }
+            }
+        """
         installed = {}
 
         output = self.run_cli("list", "--json")
@@ -50,7 +94,16 @@ class Pipx(PackageManager):
         return installed
 
     def install(self, package_id):
-        """Install one package."""
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            ► pipx install pycowsay
+            installed package pycowsay 0.0.0.1, installed using Python 3.10.4
+            These apps are now globally available
+                - pycowsay
+            done! ✨ 🌟 ✨
+        """
         return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id):

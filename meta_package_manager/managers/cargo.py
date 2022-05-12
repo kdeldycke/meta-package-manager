@@ -100,6 +100,26 @@ class Cargo(PackageManager):
 
         return matches
 
+    @property
+    def installed(self):
+        installed = {}
+
+        output = self.run_cli("install", "--list")
+
+        regexp = re.compile(r"^(?P<package_id>\S+)\s+v(?P<package_version>\S+):$")
+
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                package_id, package_version = match.groups()
+                installed[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(package_version),
+                }
+
+        return installed
+
     def install(self, package_id):
         """Install one package.
 

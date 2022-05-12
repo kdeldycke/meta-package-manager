@@ -57,6 +57,7 @@ ______________________________________________________________________
 | [`apt`](https://wiki.debian.org/AptCLI)                                   | 1.0.0        |       |   🐧   |         |      ✓      |     ✓      |                                   ✓                                   |     ✓     |     ✓     |   ✓    |     ✓     |
 | [`apt-mint`](https://github.com/kdeldycke/meta-package-manager/issues/52) | 1.0.0        |       |   🐧   |         |      ✓      |     ✓      |                                   ✓                                   |     ✓     |     ✓     |   ✓    |     ✓     |
 | [`brew`](https://brew.sh)                                                 | 2.7.0        |   🍎   |   🐧   |         |      ✓      |     ✓      |                                   ✓                                   |     ✓     |     ✓     |   ✓    |     ✓     |
+| [`cargo`](https://doc.rust-lang.org/cargo/)                                 | 1.0.0      |    🍎    |   🐧   |  🪟   |            |            |                                   ✓                                   |     ✓      |           |        |           |
 | [`cask`](https://caskroom.github.io)                                      | 2.7.0        |   🍎   |       |         |      ✓      |     ✓      |                                   ✓                                   |     ✓     |     ✓     |   ✓    |     ✓     |
 | [`choco`](https://chocolatey.org)                                         | 0.10.4       |       |       |    🪟    |      ✓      |     ✓      |                                   ✓                                   |     ✓     |     ✓     |        |           |
 | [`composer`](https://getcomposer.org)                                     | 1.4.0        |   🍎   |   🐧   |    🪟    |      ✓      |     ✓      |                                   ✓                                   |     ✓     |     ✓     |        |     ✓     |
@@ -76,7 +77,7 @@ ______________________________________________________________________
 | [`yarn`](https://yarnpkg.com)                                             | 1.21.0       |   🍎   |   🐧   |    🪟    |      ✓      |     ✓      |                                   ✓                                   |     ✓     |     ✓     |        |     ✓     |
 | [`yum`](http://yum.baseurl.org)                                           | 4.0.0        |       |   🐧   |         |      ✓      |     ✓      |                                   ✓                                   |     ✓     |     ✓     |   ✓    |     ✓     |
 | [`zypper`](https://en.opensuse.org/Portal:Zypper)                         | 1.14.0       |       |   🐧   |         |      ✓      |     ✓      |                                   ✓                                   |     ✓     |     ✓     |   ✓    |     ✓     |
-| [`cargo`](https://crates.io/crates/cargo)                                 | None         |      |   🐧   |        |      ✓      |            |                                   ✓                                   |     ✓      |           |        |           |
+
 ## Quickstart
 
 1. Install `mpm` with `pip`:
@@ -103,6 +104,7 @@ $ mpm --all-managers managers
 │ APT                │ apt      │ ✘ Linux only   │ ✓ /usr/bin/apt            │ ✓          │ ✘            │
 │ Linux Mint's apt   │ apt-mint │ ✘ Linux only   │ ✓ /usr/bin/apt            │ ✓          │ ✘            │
 │ Homebrew Formulae  │ brew     │ ✓              │ ✓ /usr/local/bin/brew     │ ✓          │ ✓ 3.2.16     │
+│ Cargo              │ cargo    │ ✓              │ ✓ /opt/homebrew/bin/cargo │ ✓          │ ✓ 1.59.0     │
 │ Homebrew Cask      │ cask     │ ✓              │ ✓ /usr/local/bin/brew     │ ✓          │ ✓ 3.2.16     │
 │ Chocolatey         │ choco    │ ✘ Windows only │ ✘ choco not found         │            │              │
 │ PHP's Composer     │ composer │ ✓              │ ✓ /usr/local/bin/composer │ ✓          │ ✓ 2.1.8      │
@@ -121,7 +123,6 @@ $ mpm --all-managers managers
 │ Node's yarn        │ yarn     │ ✓              │ ✘ yarn not found          │            │              │
 │ YUM                │ yum      │ ✘ Linux only   │ ✘ yum not found           │            │              │
 │ Zypper             │ zypper   │ ✘ Linux only   │ ✘ zypper not found        │            │              │
-| Cargo              | cargo    | ✘ Linux only   │ ✘ cargo not found         │            │              │
 ╰────────────────────┴──────────┴────────────────┴───────────────────────────┴────────────┴──────────────╯
 ```
 

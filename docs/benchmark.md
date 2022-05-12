@@ -20,7 +20,7 @@ but there might be a greater need for such tools out there. Here is a list of so
 | `asdf`         |       |       ✓        |               |              |              |
 | `bin`          |       |       ✓        |               |              |              |
 | `brew`         |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| `cargo`        |       |       ✓        |               |              |              |
+| `cargo`        |   ✓   |       ✓        |               |              |              |
 | `cask`         |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
 | `cave`         |       |                |               |      ✓       |              |
 | `chezmoi`      |       |       ✓        |               |              |              |

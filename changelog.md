@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[pipx\] Add `pipx` support. Closes {issue}`468`.
+- \[cargo\] Add `cargo` support. Closes {issue}`633`.
 - \[mpm\] Regroup `dnf` and `yum` labels.
 
 ## {gh}`5.0.1 (2022-04-28) <compare/v5.0.0...v5.0.1>`

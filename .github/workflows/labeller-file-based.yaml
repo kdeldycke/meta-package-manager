@@ -21,6 +21,10 @@ jobs:
           - meta_package_manager/managers/homebrew*
           - meta_package_manager/tests/*homebrew*
 
+        "📦 manager: cargo":
+          - meta_package_manager/managers/cargo*
+          - meta_package_manager/tests/*cargo*
+
         "📦 manager: cask":
           - meta_package_manager/managers/homebrew*
           - meta_package_manager/tests/*homebrew*

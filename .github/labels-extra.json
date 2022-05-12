@@ -10,6 +10,11 @@
     "description": "brew"
   },
   {
+    "name": "📦 manager: cargo",
+    "color": "#bfdadc",
+    "description": "cargo"
+  },
+  {
     "name": "📦 manager: cask",
     "color": "#bfdadc",
     "description": "cask"

@@ -46,6 +46,7 @@ class TestInstall(CLISubCommandTests):
         "apt": "wget",
         "apt-mint": "exiftool",
         "brew": "jpeginfo",
+        "cargo": "colorous",
         "cask": "pngyu",
         "choco": "ccleaner",
         "composer": "illuminate/contracts",

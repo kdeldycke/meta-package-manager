@@ -69,7 +69,10 @@ class Cargo(PackageManager):
 
         output = self.run_cli("search", "--color", "never", "--quiet", "--limit", "100", query)
 
-        regexp = re.compile(r"(?P<package_id>.+)\s+=\s+\"(?P<version>.+)\"\s+#\s+(?P<description>.+)")
+        regexp = re.compile(
+            r"^(?P<package_id>\S+)\s+=\s+\"(?P<version>\S+)\"\s+#\s+(?P<description>.+)$",
+            re.MULTILINE,
+        )
 
         for package_id, version, description in regexp.findall(output):
 

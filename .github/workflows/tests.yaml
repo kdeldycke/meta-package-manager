@@ -96,6 +96,20 @@ jobs:
         run: |
           npm install --global npm
 
+      # Cargo
+      - name: macOS - Install Cargo
+        if: runner.os == 'macOS'
+        run: |
+          brew install rust
+      - name: Linux - Install Cargo
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt install --yes cargo
+      - name: Windows - Install Yarn
+        if: runner.os == 'Windows'
+        run: |
+          choco install rust
+
       # Yarn
       - name: macOS - Install Yarn
         if: runner.os == 'macOS'

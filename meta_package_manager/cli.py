@@ -645,7 +645,7 @@ def install(ctx, package_id):
             if not matches:
                 logger.warning(f"No {package_id} package found on {manager.id}.")
                 continue
-            assert len(matches) == 1
+            assert len(matches) >= 1
 
         # Allow install subcommand to fail to have the oportunity to catch the CLIError exception and print
         # a comprehensive message.

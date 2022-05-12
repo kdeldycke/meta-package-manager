@@ -20,6 +20,14 @@ meta\_package\_manager.managers.apt module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.managers.cargo module
+--------------------------------------------
+
+.. automodule:: meta_package_manager.managers.cargo
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.managers.chocolatey module
 -------------------------------------------------
 

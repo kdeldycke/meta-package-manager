@@ -204,6 +204,10 @@ class Pip(PackageManager):
             API because of unmanageable high-load. See:
             https://github.com/pypa/pip/issues/5216#issuecomment-744605466
 
+        .. caution:
+            Search is extended by default so we manually refilters results to either
+            exlude non-extended or non-exact matches.
+
         .. code-block:: shell-session
 
             ► python -m pip --no-color search abc

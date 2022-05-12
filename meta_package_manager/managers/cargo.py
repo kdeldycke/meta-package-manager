@@ -16,7 +16,11 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
-from .. import logger
+
+from click_extra.platform import LINUX, MACOS, WINDOWS
+
+from ..base import PackageManager
+from ..version import TokenizedString, parse_version
 
 
 class Cargo(PackageManager):
@@ -38,9 +42,17 @@ class Cargo(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
+        .. caution:
+            Search is extended by default and connot be changed, so we manually refilters
+            results to either exlude non-extended or non-exact matches.
+
+        .. danger:
+            `Cargo limits search to 100 results <https://doc.rust-lang.org/cargo/commands/cargo-search.html#search-options>`_,
+            and because CLI output is refiltered as mentionned above, the final results can't be garanteed.
+
         .. code-block:: shell-session
 
-            ► cargo search python
+            ► cargo search --color never --quiet --limit 100 python
             python = "0.0.0"                  # Python.
             pyo3-asyncio = "0.16.0"           # PyO3 utilities for Python's Asyncio library
             pyo3-asyncio-macros = "0.16.0"    # Proc Macro Attributes for PyO3 Asyncio
@@ -48,24 +60,38 @@ class Cargo(PackageManager):
             pyenv-python = "0.4.0"            # A pyenv shim for python that's much faster than pyenv.
             python-launcher = "1.0.0"         # The Python launcher for Unix
             py-spy = "0.3.11"                 # Sampling profiler for Python programs
-            python_mixin = "0.0.0"            # Deprecated in favour of `external_mixin`. Use Python to generate your Rust, right in your Rus…
+            python_mixin = "0.0.0"            # Use Python to generate your Rust, right in your Rus…
             pyflow = "0.3.1"                  # A modern Python installation and dependency manager
             pypackage = "0.0.3"               # A modern Python dependency manager
             ... and 1664 crates more (use --limit N to see more)
-
         """
-        if extended:
-            logger.warning(f"{self.id} does not implement extended search operation.")
         matches = {}
-        search_args = []
-        output = self.run_cli("search", query)
-        regexp = re.compile(r"(?P<package_id>.*) = \"(?P<version>.*)\" *# (?P<dscription>.*)")
+
+        output = self.run_cli("search", "--color", "never", "--quiet", "--limit", "100", query)
+
+        regexp = re.compile(r"(?P<package_id>.+)\s+=\s+\"(?P<version>.+)\"\s+#\s+(?P<description>.+)")
+
         for package_id, version, description in regexp.findall(output):
+
+            # Exclude packages not featuring the search query in their ID
+            # or name.
+            if not extended:
+                query_parts = set(map(str, TokenizedString(query)))
+                pkg_parts = set(map(str, TokenizedString(package_id)))
+                if not query_parts.issubset(pkg_parts):
+                    continue
+
+            # Filters out fuzzy matches, only keep stricly matching
+            # packages.
+            if exact and query != package_id:
+                continue
+
             matches[package_id] = {
                 "id": package_id,
                 "name": package_id,
                 "latest_version": parse_version(version),
             }
+
         return matches
 
     def install(self, package_id):

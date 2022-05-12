@@ -31,6 +31,12 @@ class Cargo(PackageManager):
 
     requirement = "1.0.0"
 
+    pre_args = (
+        "--color",
+        "never",  # Suppress colored output.
+        "--quiet",  # Do not print cargo log messages.
+    )
+
     version_regex = r"cargo\s+(?P<version>\S+)"
     """
     .. code-block:: shell-session
@@ -52,7 +58,7 @@ class Cargo(PackageManager):
 
         .. code-block:: shell-session
 
-            ► cargo search --color never --quiet --limit 100 python
+            ► cargo --color never --quiet search --limit 100 python
             python = "0.0.0"                  # Python.
             pyo3-asyncio = "0.16.0"           # PyO3 utilities for Python's Asyncio library
             pyo3-asyncio-macros = "0.16.0"    # Proc Macro Attributes for PyO3 Asyncio
@@ -67,7 +73,7 @@ class Cargo(PackageManager):
         """
         matches = {}
 
-        output = self.run_cli("search", "--color", "never", "--quiet", "--limit", "100", query)
+        output = self.run_cli("search", "--limit", "100", query)
 
         regexp = re.compile(r"(?P<package_id>.+)\s+=\s+\"(?P<version>.+)\"\s+#\s+(?P<description>.+)")
 
@@ -97,21 +103,21 @@ class Cargo(PackageManager):
     def install(self, package_id):
         """Install one package.
 
-                .. code-block:: shell-session
+        .. code-block:: shell-session
 
-                    ► cargo install -q bore-cli
-                        Updating crates.io index
-                      Downloaded bore-cli v0.4.0
-                      Downloaded 1 crate (20.9 KB) in 0.26s
-                      Installing bore-cli v0.4.0
-                      Downloaded serde_derive v1.0.137
-                      Downloaded unicode-xid v0.2.3
-                      Downloaded clap_lex v0.2.0
-                      [snip]
-                      Compiling bore-cli v0.4.0
-                        Finished release [optimized] target(s) in 1m 06s
-                       Replacing /home/mawoka/.cargo/bin/bore
-                        Replaced package `bore-cli v0.2.3` with `bore-cli v0.4.0` (executable `bore`)
-                """
-        res = self.run_cli("install", "-q", package_id)
+            ► cargo --color never install bore-cli
+              Updating crates.io index
+            Downloaded bore-cli v0.4.0
+            Downloaded 1 crate (20.9 KB) in 0.26s
+            Installing bore-cli v0.4.0
+            Downloaded serde_derive v1.0.137
+            Downloaded unicode-xid v0.2.3
+            Downloaded clap_lex v0.2.0
+            (...)
+            Compiling bore-cli v0.4.0
+              Finished release [optimized] target(s) in 1m 06s
+             Replacing /home/mawoka/.cargo/bin/bore
+              Replaced package `bore-cli v0.2.3` with `bore-cli v0.4.0` (executable `bore`)
+        """
+        res = self.run_cli("install", package_id)
         return res

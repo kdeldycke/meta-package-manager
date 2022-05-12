@@ -20,9 +20,18 @@ from .. import logger
 
 
 class Cargo(PackageManager):
-    platforms = frozenset({LINUX})
-    name = "cargo"
-    id = "cargo"
+
+    platforms = frozenset({MACOS, LINUX, WINDOWS})
+
+    requirement = "1.0.0"
+
+    version_regex = r"cargo\s+(?P<version>\S+)"
+    """
+    .. code-block:: shell-session
+
+        ► cargo --version
+        cargo 1.59.0
+    """
 
     def search(self, query, extended, exact):
         """Fetch matching packages.

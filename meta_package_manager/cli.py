@@ -645,6 +645,7 @@ def install(ctx, package_id):
             if not matches:
                 logger.warning(f"No {package_id} package found on {manager.id}.")
                 continue
+            # Prevents any incomplete or bad implementation of exact search.
             if len(matches) != 1:
                 raise ValueError("Exact search returned multiple packages.")
 

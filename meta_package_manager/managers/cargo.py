@@ -21,6 +21,8 @@ from .. import logger
 
 class Cargo(PackageManager):
 
+    name = "Rust's cargo"
+
     platforms = frozenset({MACOS, LINUX, WINDOWS})
 
     requirement = "1.0.0"

@@ -104,7 +104,7 @@ $ mpm --all-managers managers
 │ APT                │ apt      │ ✘ Linux only   │ ✓ /usr/bin/apt            │ ✓          │ ✘            │
 │ Linux Mint's apt   │ apt-mint │ ✘ Linux only   │ ✓ /usr/bin/apt            │ ✓          │ ✘            │
 │ Homebrew Formulae  │ brew     │ ✓              │ ✓ /usr/local/bin/brew     │ ✓          │ ✓ 3.2.16     │
-│ Cargo              │ cargo    │ ✓              │ ✓ /opt/homebrew/bin/cargo │ ✓          │ ✓ 1.59.0     │
+│ Rust's cargo       │ cargo    │ ✓              │ ✓ /opt/homebrew/bin/cargo │ ✓          │ ✓ 1.59.0     │
 │ Homebrew Cask      │ cask     │ ✓              │ ✓ /usr/local/bin/brew     │ ✓          │ ✓ 3.2.16     │
 │ Chocolatey         │ choco    │ ✘ Windows only │ ✘ choco not found         │            │              │
 │ PHP's Composer     │ composer │ ✓              │ ✓ /usr/local/bin/composer │ ✓          │ ✓ 2.1.8      │

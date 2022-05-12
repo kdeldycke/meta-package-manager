@@ -60,7 +60,7 @@ class TestInstall(CLISubCommandTests):
         "pip": "arrow",
         "pipx": "pycowsay",
         "snap": "standard-notes",
-        "steamcmd": "",
+        "steamcmd": "740",
         "vscode": "tamasfe.even-better-toml",
         "yarn": "markdown",
         "yum": "usd",

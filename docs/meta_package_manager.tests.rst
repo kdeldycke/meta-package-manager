@@ -44,10 +44,10 @@ meta\_package\_manager.tests.test\_cli\_cleanup module
    :undoc-members:
    :show-inheritance:
 
-meta\_package\_manager.tests.test\_cli\_install module
-------------------------------------------------------
+meta\_package\_manager.tests.test\_cli\_install\_remove module
+--------------------------------------------------------------
 
-.. automodule:: meta_package_manager.tests.test_cli_install
+.. automodule:: meta_package_manager.tests.test_cli_install_remove
    :members:
    :undoc-members:
    :show-inheritance:

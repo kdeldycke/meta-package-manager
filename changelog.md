@@ -1,5 +1,11 @@
 # Changelog
 
+## {gh}`5.1.1 (unreleased) <compare/v5.1.0...main>`
+
+```{important}
+This version is not released yet and is under active development.
+```
+
 ## {gh}`5.1.0 (2022-05-15) <compare/v5.0.1...v5.1.0>`
 
 - \[pipx\] Add `pipx` support. Closes {issue}`468`.

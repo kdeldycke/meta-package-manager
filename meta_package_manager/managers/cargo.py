@@ -102,6 +102,16 @@ class Cargo(PackageManager):
 
     @property
     def installed(self):
+        """Fetch installed packages.
+
+        .. code-block:: shell-session
+
+            ► cargo --color never --quiet install --list
+            bore-cli v0.4.0:
+                bore
+            ripgrep v13.0.0:
+                rg
+        """
         installed = {}
 
         output = self.run_cli("install", "--list")

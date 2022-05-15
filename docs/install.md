@@ -16,6 +16,14 @@ The **real package is named `meta-package-manager`**. Only the latter provides t
 you're looking for.
 ````
 
+## `pipx` install
+
+Easiest way is to use [`pipx`](https://pypa.github.io/pipx/):
+
+```shell-session
+$ pipx install meta-package-manager
+```
+
 ## `pip` install
 
 You can install the latest stable release and its dependencies with a simple `pip`

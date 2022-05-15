@@ -117,6 +117,7 @@ $ mpm --all-managers managers
 │ OPKG               │ opkg     │ ✘ Linux only   │ ✘ opkg not found          │            │              │
 │ Pacman             │ pacman   │ ✘ Linux only   │ ✘ pacman not found        │            │              │
 │ Pip                │ pip      │ ✓              │ ✓ /usr/local/bin/python3  │ ✓          │ ✓ 21.2.4     │
+│ Pipx               │ pipx     │ ✓              │ ✓ /opt/homebrew/bin/pipx  │ ✓          │ ✓ 1.0.0      │
 │ Snap               │ snap     │ ✘ Linux only   │ ✘ snap not found          │            │              │
 │ SteamCMD           │ steamcmd │ ✓              │ ✓ /opt/local/bin/steamcmd │ ✓          │ ✓ 1648077083 │
 │ Visual Studio Code │ vscode   │ ✓              │ ✓ /usr/local/bin/code     │ ✓          │ ✓ 1.61.0     │

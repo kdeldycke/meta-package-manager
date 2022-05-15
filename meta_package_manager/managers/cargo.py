@@ -45,6 +45,36 @@ class Cargo(PackageManager):
         cargo 1.59.0
     """
 
+    @property
+    def installed(self):
+        """Fetch installed packages.
+
+        .. code-block:: shell-session
+
+            ► cargo --color never --quiet install --list
+            bore-cli v0.4.0:
+                bore
+            ripgrep v13.0.0:
+                rg
+        """
+        installed = {}
+
+        output = self.run_cli("install", "--list")
+
+        regexp = re.compile(r"^(?P<package_id>\S+)\s+v(?P<package_version>\S+):$")
+
+        for package in output.splitlines():
+            match = regexp.match(package)
+            if match:
+                package_id, package_version = match.groups()
+                installed[package_id] = {
+                    "id": package_id,
+                    "name": package_id,
+                    "installed_version": parse_version(package_version),
+                }
+
+        return installed
+
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -88,36 +118,6 @@ class Cargo(PackageManager):
             }
 
         return matches
-
-    @property
-    def installed(self):
-        """Fetch installed packages.
-
-        .. code-block:: shell-session
-
-            ► cargo --color never --quiet install --list
-            bore-cli v0.4.0:
-                bore
-            ripgrep v13.0.0:
-                rg
-        """
-        installed = {}
-
-        output = self.run_cli("install", "--list")
-
-        regexp = re.compile(r"^(?P<package_id>\S+)\s+v(?P<package_version>\S+):$")
-
-        for package in output.splitlines():
-            match = regexp.match(package)
-            if match:
-                package_id, package_version = match.groups()
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(package_version),
-                }
-
-        return installed
 
     def install(self, package_id):
         """Install one package.

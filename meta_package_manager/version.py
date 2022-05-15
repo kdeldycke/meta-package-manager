@@ -29,7 +29,7 @@ ALNUM_EXTRACTOR = re.compile("(\\d+ | [a-z]+)", re.VERBOSE)
 class Token:
     """A token is a normalized word, persisting its lossless integer variant.
 
-    Support natural comparison with `str` and `int` types.
+    Support natural comparison with ``str`` and ``int`` types.
 
     We mainly use them here to compare versions and package IDs.
     """
@@ -42,32 +42,32 @@ class Token:
         return hash((self.string, self.integer))
 
     @staticmethod
-    def str_to_int(string):
-        """Convert a string or an integer to a `(string, integer)` couple.
+    def str_to_int(value):
+        """Convert a ``str`` or an ``int`` to a ``(string, integer)`` couple.
 
         Returns together the original string and its integer representation if
-        convertion is successful and lossless. Else returns the original string and
-        `None`.
+        convertion is successful and lossless. Else, returns the original value and
+        ``None``.
         """
         try:
-            integer = int(string)
+            integer = int(value)
         except ValueError:
-            return str(string), None
-        string = str(string)
+            return str(value), None
+        value = str(value)
 
         # Double-check the string <> integer lossless transform.
-        str_int = string.lstrip("0")
+        str_int = value.lstrip("0")
         if not str_int:
             str_int = "0"
         if str(integer) != str_int:
             raise TypeError(
-                f"{string!r} string is not equivalent to {integer!r} integer."
+                f"{value!r} string is not equivalent to {integer!r} integer."
             )
 
-        return string, integer
+        return value, integer
 
     def __init__(self, value):
-        """Instantiates a Token from alphanumeric strings or non-negative integers."""
+        """Instantiates a ``Token`` from an alphanumeric string or a non-negative integer."""
         # Check provided value.
         if isinstance(value, str):
             if not value.isalnum():
@@ -101,10 +101,10 @@ class Token:
 
     @property
     def isint(self):
-        """Does the Token got a pure integer representation?"""
+        """Does the ``Token`` got an equivalent pure integer representation?"""
         return self.integer is not None
 
-    """ Compare the current Token instance to the other as intergers if both can be losslessly interpreted as pure integers.
+    """ Compare the current ``Token`` instance to the other as integers if both can be losslessly interpreted as pure integers.
 
     If one at least is not an integer, we convert all of them to string to allow comparison.
     """
@@ -141,7 +141,7 @@ class TokenizedString:
 
     """Tokenize a string for user-friendly sorting.
 
-    Essentially a wrapper around a tuple of `Token` instances.
+    Essentially a wrapper around a list of ``Token`` instances.
     """
 
     separator = None
@@ -149,12 +149,12 @@ class TokenizedString:
     tokens = ()
 
     def __hash__(self):
-        """A `TokenizedString` is made unique by its original string and tuple of parsed
+        """A ``TokenizedString`` is made unique by its original string and tuple of parsed
         tokens."""
         return hash((self.string, self.separator, self.tokens))
 
     def __new__(cls, value, *args, **kwargs):
-        """Return same object if a TokenizedString parameter is used at
+        """Return same object if a ``TokenizedString`` parameter is used at
         instanciation."""
         if isinstance(value, TokenizedString):
             return value
@@ -192,18 +192,7 @@ class TokenizedString:
     def tokenize(cls, string):
         """Tokenize a string: ignore case and split at each non-alphanumeric characters.
 
-        Returns a tuple of Token instances. Which allows for comparison between
-        strings and integers. That way we get natural, user-friendly sorting of
-        version numbers. That we can get with simple Python, see:
-
-        .. code-block:: python
-
-            >>> '2019.0.1' > '9.3'
-            False
-            >>> ('2019', '0', '1') > ('9', '3')
-            False
-            >>> (2019, 0, 1) > (9, 3)
-            True
+        Returns a list of ``Token`` instances.
         """
         normalized_str = strutils.asciify(string).lower().decode()
 
@@ -211,10 +200,25 @@ class TokenizedString:
             if segment.isalnum():
                 yield Token(segment)
 
-    """ TokenizedString can be compared as tuples. """
+    """ ``TokenizedString`` can be compared as tuples as-is.
+
+    Thanks to the ``Token`` subobject we can compare a mix of strings and integers.
+    That way we get natural, user-friendly sorting of version numbers.
+
+    Something we cannot have with simple Python types to compare versions:
+
+    .. code-block:: python
+
+        >>> '2019.0.1' > '9.3'
+        False
+        >>> ('2019', '0', '1') > ('9', '3')
+        False
+        >>> (2019, 0, 1) > (9, 3)
+        True
+    """
 
     def __iter__(self):
-        """`TokenizedString` essentially are a wrapper around a tuple of `Token`."""
+        """``TokenizedString`` are essentially a wrapper around a tuple of ``Token`` objects."""
         return iter(self.tokens)
 
     def __eq__(self, other):
@@ -243,4 +247,4 @@ class TokenizedString:
 
 
 parse_version = partial(TokenizedString, separator=".")
-""" Utility method tweaking TokenizedString for dot-based serialization. """
+""" Utility method tweaking ``TokenizedString`` for dot-based serialization. """

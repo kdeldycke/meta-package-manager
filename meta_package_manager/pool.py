@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Registration, indexing and caching of package manager supported by mpm."""
+"""Registration, indexing and caching of package manager supported by ``mpm``."""
 
 import inspect
 import sys
@@ -34,16 +34,16 @@ from .base import PackageManager
 
 
 class ManagerPool:
-    """A dict-like register indexing all supported package managers."""
+    """A dict-like register, indexing all supported package managers."""
 
     ALLOWED_EXTRA_OPTION = frozenset(
         {"ignore_auto_updates", "stop_on_error", "dry_run"}
     )
     """List of extra options that are allowed to be set on managers during the use of the
-    :py:func:`meta_package_manager.managers.select_managers` helper below."""
+    :py:func:`meta_package_manager.pool.ManagerPool.select_managers` helper below."""
 
     manager_subfolder = "managers"
-    """Relative subfolder where to search for manager definition files."""
+    """Relative subfolder where manager definition files are stored."""
 
     manager_files = set()
     """Path of files containing package manager definitions."""
@@ -54,9 +54,10 @@ class ManagerPool:
         internal register.
 
         Is considered valid package manager, definitions classes which:
-            1 - are located in the `managers` subfolder, and
-            2 - are sub-classes of PackageManager, and
-            3 - are not virtual (i.e. have a non null `cli_names` property).
+
+        #. are located in the :py:prop:`meta_package_manager.pool.ManagerPool.manager_subfolder` subfolder, and
+        #. are sub-classes of :py:class:`meta_package_manager.base.PackageManager`, and
+        #. are not :py:prop:`meta_package_manager.base.PackageManager.virtual` (i.e. have a non-null :py:prop:`meta_package_manager.base.PackageManager.cli_names` property).
         """
         register = {}
 
@@ -108,7 +109,7 @@ class ManagerPool:
     def all_manager_ids(self):
         """All recognized manager IDs.
 
-        Is a list of sorted items to provide consistency across all UI, and
+        Returns a list of sorted items to provide consistency across all UI, and
         reproducability in the order package managers are evaluated.
         """
         return tuple(sorted(self.register))
@@ -117,7 +118,7 @@ class ManagerPool:
     def default_manager_ids(self):
         """All manager IDs supported on the current platform.
 
-        Must keep the same order defined by pool.all_manager_ids.
+        Must keep the same order defined by :py:prop:`meta_package_manager.pool.ManagerPool.all_manager_ids`.
         """
         return tuple(
             mid for mid in self.all_manager_ids if self.register.get(mid).supported
@@ -144,21 +145,21 @@ class ManagerPool:
         **extra_options,
     ):
         """Utility method to extract a subset of the manager pool based on selection
-        list (`keep` parameter) and exclusion list (`drop` parameter) criterion.
+        list (``keep`` parameter) and exclusion list (``drop`` parameter) criterion.
 
         By default, all managers supported on the current platform are selected. Unless
-        `drop_unsupported` is set to False, in which case all managers implemented by mpm
+        ``drop_unsupported`` is set to ``False``, in which case all managers implemented by ``mpm``
         are selected, regardless of their supported platform.
 
-        `drop_inactive` filters out managers that where not found on the system.
+        ``drop_inactive`` filters out managers that where not found on the system.
 
-        XXX Pre-filtering out manager which doesn't implements some property can be done with
-        XXX the `implements` parameter.
+        .. todo:
+            Code the pre-filtering of managers which do not implements a given property. This might be done with
+            a new ``implements`` parameter.
 
-        Finally, `extra_options` parameters are fed to the manager objects from the pool to
-        set some options.
+        Finally, ``extra_options`` parameters are fed to manager objects to set some additional options.
 
-        Returns a generator producing a manager object one after the other.
+        Returns a generator producing a manager instance one after the other.
         """
         if not keep:
             keep = (

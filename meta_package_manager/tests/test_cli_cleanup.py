@@ -31,6 +31,6 @@ def subcmd():
 class TestCleanup(CLISubCommandTests):
     @pytest.mark.parametrize("mid", pool.default_manager_ids)
     def test_single_manager(self, invoke, subcmd, mid):
-        result = invoke("--manager", mid, subcmd)
+        result = invoke(f"--{mid}", subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})

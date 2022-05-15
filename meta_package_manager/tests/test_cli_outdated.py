@@ -38,7 +38,7 @@ BAR_PLUGIN_KEYWORDS = frozenset({"shell"}.union({f"param{i}" for i in range(1, 1
 class TestOutdated(CLISubCommandTests, CLITableTests):
     @pytest.mark.parametrize("mid", pool.default_manager_ids)
     def test_single_manager(self, invoke, mid, subcmd):
-        result = invoke("--manager", mid, subcmd)
+        result = invoke(f"--{mid}", subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 

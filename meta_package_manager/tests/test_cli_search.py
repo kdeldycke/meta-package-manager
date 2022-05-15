@@ -37,7 +37,7 @@ def subcmd():
 class TestSearch(CLISubCommandTests, CLITableTests):
     @pytest.mark.parametrize("mid", pool.default_manager_ids)
     def test_single_manager(self, invoke, subcmd, mid):
-        result = invoke("--manager", mid, subcmd)
+        result = invoke(f"--{mid}", subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 
@@ -79,14 +79,14 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     @unless_macos
     def test_unicode_search(self, invoke):
         """See #16."""
-        result = invoke("--manager", "cask", "search", "ubersicht")
+        result = invoke("--cask", "search", "ubersicht")
         assert result.exit_code == 0
         assert "ubersicht" in result.stdout
         # XXX search command is not fetching yet detailed package infos like
         # names.
         assert "Übersicht" not in result.stdout
 
-        result = invoke("--manager", "cask", "search", "Übersicht")
+        result = invoke("--cask", "search", "Übersicht")
         assert result.exit_code == 0
         assert "ubersicht" in result.stdout
         assert "Übersicht" not in result.stdout
@@ -108,7 +108,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     @skip_pip_search
     def test_exact_search_tokenizer_one_result(self, invoke):
         sleep(2)
-        result = invoke("--manager", "pip", "search", "--exact", "sed", color=False)
+        result = invoke("--pip", "search", "--exact", "sed", color=False)
         assert result.exit_code == 0
         assert "1 package total" in result.stdout
         assert " sed " in result.stdout
@@ -119,7 +119,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     )
     def test_exact_search_tokenizer_no_result(self, invoke, query):
         sleep(2)
-        result = invoke("--manager", "pip", "search", "--exact", query)
+        result = invoke("--pip", "search", "--exact", query)
         assert result.exit_code == 0
         assert "0 package total" in result.stdout
         assert "sed" not in result.stdout
@@ -128,7 +128,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     @pytest.mark.parametrize("query", ("", "_", "_seD-@"))
     def test_fuzzy_search_tokenizer_no_results(self, invoke, query):
         sleep(2)
-        result = invoke("--manager", "pip", "search", query)
+        result = invoke("--pip", "search", query)
         assert result.exit_code == 0
         assert "0 package total" in result.stdout
         assert "sed" not in result.stdout
@@ -137,7 +137,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     @pytest.mark.parametrize("query", ("sed", "SED", "SeD", "sEd*", "*sED*"))
     def test_fuzzy_search_tokenizer_multiple_results(self, invoke, query):
         sleep(2)
-        result = invoke("--manager", "pip", "search", query, color=False)
+        result = invoke("--pip", "search", query, color=False)
         assert result.exit_code == 0
         assert "2 packages total" in result.stdout
         assert " sed " in result.stdout
@@ -147,7 +147,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     @pytest.mark.parametrize("query", ("", "_", "_seD-@"))
     def test_extended_search_tokenizeri_no_results(self, invoke, query):
         sleep(2)
-        result = invoke("--manager", "pip", "search", "--extended", query)
+        result = invoke("--pip", "search", "--extended", query)
         assert result.exit_code == 0
         assert "0 package total" in result.stdout
         assert "sed" not in result.stdout
@@ -156,7 +156,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     @pytest.mark.parametrize("query", ("sed", "SED", "SeD", "sEd*", "*sED*"))
     def test_extended_search_tokenizeri_multiple_results(self, invoke, query):
         sleep(2)
-        result = invoke("--manager", "pip", "search", "--extended", query)
+        result = invoke("--pip", "search", "--extended", query)
         assert result.exit_code == 0
         last_line = result.stdout.splitlines()[-1]
         assert last_line

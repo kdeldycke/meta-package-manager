@@ -80,19 +80,19 @@ class TestCask:
 
         # Ubersicht is not reported as outdated because is tagged as
         # auto-update.
-        result = invoke("--manager", "cask", "outdated")
+        result = invoke("--cask", "outdated")
         assert result.exit_code == 0
         assert "ubersicht" not in result.stdout
         assert "Übersicht" not in result.stdout
 
         # Try with explicit option.
-        result = invoke("--ignore-auto-updates", "--manager", "cask", "outdated")
+        result = invoke("--ignore-auto-updates", "--cask", "outdated")
         assert result.exit_code == 0
         assert "ubersicht" not in result.stdout
         assert "Übersicht" not in result.stdout
 
         # Look for reported available upgrade.
-        result = invoke("--include-auto-updates", "--manager", "cask", "outdated")
+        result = invoke("--include-auto-updates", "--cask", "outdated")
         assert result.exit_code == 0
         assert "ubersicht" in result.stdout
         # Outdated subcommand does not fetch the unicode name by default.
@@ -107,7 +107,7 @@ class TestCask:
         assert "XLD.app" in output
 
         # Look for reported available upgrade.
-        result = invoke("--include-auto-updates", "--manager", "cask", "outdated")
+        result = invoke("--include-auto-updates", "--cask", "outdated")
         assert result.exit_code == 0
         assert "xld" in result.stdout
         # Outdated subcommand does not fetch the unicode name by default.

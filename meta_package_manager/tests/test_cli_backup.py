@@ -49,7 +49,7 @@ class TestBackup(CLISubCommandTests):
 
     @pytest.mark.parametrize("mid", pool.default_manager_ids)
     def test_single_manager_file_output(self, mid, invoke, subcmd):
-        result = invoke("--manager", mid, subcmd, "mpm-packages.toml")
+        result = invoke(f"--{mid}", subcmd, "mpm-packages.toml")
         assert result.exit_code == 0
         assert "mpm-packages.toml" in result.stderr
         self.check_manager_selection(result, {mid})

@@ -74,7 +74,7 @@ class TestInstall(CLISubCommandTests):
         "mid,package_id", (pytest.param(*v, id=v[0]) for v in PACKAGE_IDS.items())
     )
     def test_single_manager_install(self, invoke, mid, package_id):
-        result = invoke("--manager", mid, "install", package_id)
+        result = invoke(f"--{mid}", "install", package_id)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid}, reference_set=pool.all_manager_ids)
 

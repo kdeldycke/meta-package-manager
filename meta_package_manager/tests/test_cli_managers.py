@@ -34,19 +34,19 @@ def subcmd():
 class TestManagers(CLISubCommandTests, CLITableTests):
     @pytest.mark.parametrize("mid", pool.default_manager_ids)
     def test_default_managers(self, invoke, subcmd, mid):
-        result = invoke("--manager", mid, subcmd)
+        result = invoke(f"--{mid}", subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 
     @pytest.mark.parametrize("mid", pool.all_manager_ids)
     def test_all_managers(self, invoke, subcmd, mid):
-        result = invoke("--manager", mid, "--all-managers", subcmd)
+        result = invoke(f"--{mid}", "--all-managers", subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid}, reference_set=pool.all_manager_ids)
 
     @pytest.mark.parametrize("mid", pool.unsupported_manager_ids)
     def test_unsupported_managers(self, invoke, subcmd, mid):
-        result = invoke("--manager", mid, subcmd)
+        result = invoke(f"--{mid}", subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, set())
 

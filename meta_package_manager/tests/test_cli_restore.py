@@ -70,7 +70,7 @@ class TestRestore(CLISubCommandTests):
             ),
         )
 
-        result = invoke("--manager", mid, "restore", str(toml_path))
+        result = invoke(f"--{mid}", "restore", str(toml_path))
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 
@@ -100,7 +100,7 @@ class TestRestore(CLISubCommandTests):
             """,
         )
 
-        result = invoke("--manager", "npm", "restore", str(toml_path))
+        result = invoke("--npm", "restore", str(toml_path))
         assert result.exit_code == 0
         assert "pip-npm-dummy.toml" in result.stderr
         assert "Restore pip" not in result.stderr

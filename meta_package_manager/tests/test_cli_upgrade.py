@@ -39,14 +39,14 @@ class TestUpgrade(CLISubCommandTests):
 
     @pytest.mark.parametrize("mid", pool.default_manager_ids)
     def test_single_manager_dry_run(self, invoke, subcmd, mid):
-        result = invoke("--manager", mid, "--dry-run", subcmd)
+        result = invoke(f"--{mid}", "--dry-run", subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 
     @destructive
     @pytest.mark.parametrize("mid", pool.default_manager_ids)
     def test_single_manager(self, invoke, subcmd, mid):
-        result = invoke("--manager", mid, subcmd)
+        result = invoke(f"--{mid}", subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 

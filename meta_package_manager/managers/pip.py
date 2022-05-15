@@ -239,7 +239,9 @@ class Pip(PackageManager):
             re.MULTILINE | re.VERBOSE,
         )
 
-        for package_id, version, description in self.refilter(regexp.findall(output), query, extended, exact):
+        for package_id, version, description in self.refilter(
+            regexp.findall(output), query, extended, exact
+        ):
 
             matches[package_id] = {
                 "id": package_id,

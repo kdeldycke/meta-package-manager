@@ -78,9 +78,9 @@ Link it to the dummy :function:`not_implemented_json_handler` renderer as we pla
 
 
 def print_json(data):
-    """Utility function to print data structures into pretty printed JSON.
+    """Pretty-print Python data to JSON and output results to ``<stdout>``.
 
-    Also care of internal objects like `TokenizedString` and `Path`.
+    Serialize :py:class:`pathlib.Path` and :py:class:`meta_package_manager.version.TokenizedString` objects.
     """
 
     def serialize_objects(obj):
@@ -102,7 +102,17 @@ def print_json(data):
 
 
 def print_table(header_defs, rows, sort_key=None):
-    """Utility to print a table and sort its content."""
+    """Print a table.
+
+    ``header_defs`` parameter is an ordered list of tuple whose first item is the column's label and the second the column's ID. Example:
+
+    .. code-block:: python
+
+        [("Column 1", "column1"), ("User's name", "name"), ("Package manager", "manager_id"), ...]
+
+    Rows can be sorted by providing the column's ID to ``sort_key`` parameter. By default, ``None`` means the table will be sorted
+    in the order of columns provided by ``header_defs``.
+    """
     # Do not print anything, not even table headers if no rows.
     if not rows:
         return
@@ -147,7 +157,14 @@ def print_table(header_defs, rows, sort_key=None):
 
 
 def print_stats(data):
-    """Print statistics."""
+    """Prints statistics to ``stdout``: total packages and a break down by package manager.
+
+    Prints something like:
+
+    .. code-block:: text
+
+        16 packages total (brew: 2, pip: 2, apm: 2, gem: 2, cask: 2, mas: 2, vscode: 2, npm: 2, composer: 0).
+    """
     manager_stats = {infos["id"]: len(infos["packages"]) for infos in data.values()}
     total_installed = sum(manager_stats.values())
     per_manager_totals = ", ".join(
@@ -166,10 +183,12 @@ class BarPluginRenderer(MPMPlugin):
     """All utilities used to render output compatible with both Xbar and SwiftBar plugin
     dialect.
 
-    The minimal code to locate ``mpm`` and call it and print its output resides in the plugin itself.
+    The minimal code to locate ``mpm``, then call it and print its output resides in the plugin itself at
+    :py:meth:`meta_package_manager.bar_plugin.MPMPlugin.mpm_exec`.
 
-    All other stuff, especially the layout-related code is managed here, to allow for more complex
-    rendering, intricate layouts and easier updates.
+    All other stuff, especially the rendering code, is managed here, to allow for more complex
+    layouts relying on external Python dependencies. This also limits the number of required updates on the
+    plugin itself.
     """
 
     @cached_property
@@ -178,12 +197,20 @@ class BarPluginRenderer(MPMPlugin):
 
         If ``True``, will replace the default flat layout with an alternative structure
         where actions are grouped into submenus, one for each manager.
+
+        Value is sourced from the ``VAR_SUBMENU_LAYOUT`` environment variable.
         """
         return self.getenv_bool("VAR_SUBMENU_LAYOUT", False)
 
     @cached_property
     def dark_mode(self):
-        """Detect dark mode by inspecting environment variables."""
+        """Detect dark mode by inspecting environment variables.
+
+        Value is sourced from two environment variables depending on the plugin:
+
+        - ``OS_APPEARANCE`` for SwiftBar
+        - ``XBARDarkMode`` for XBar
+        """
         if self.is_swiftbar:
             return self.getenv_str("OS_APPEARANCE", "light") == "dark"
         return self.getenv_bool("XBARDarkMode")
@@ -247,11 +274,11 @@ class BarPluginRenderer(MPMPlugin):
         padding=0,
         with_header_hide=None,
     )
-    """Simple rendering format with single-space separated columns."""
+    """Simple rendering format with single-space separated columns used in the function below."""
 
     @staticmethod
     def render_table(table_data):
-        """Render a table data with pre-configured alignment.
+        """Renders a table data with pre-configured alignment centered around the third column.
 
         .. code-block:: pycon
 
@@ -273,6 +300,8 @@ class BarPluginRenderer(MPMPlugin):
         )
 
     def _render(self, outdated_data):
+        """Main method implementing the final structured rendering in *Bar plugin dialect.
+        """
         managers = outdated_data.values()
         font = self.monospace_font if self.table_rendering else self.default_font
 
@@ -337,7 +366,7 @@ class BarPluginRenderer(MPMPlugin):
                 self.print_error(error_msg, submenu)
 
     def render(self, outdated_data):
-        # Capture all print statement.
+        """Wraps the :py:meth:`meta_package_manager.output.BarPluginRenderer._render` function above to capture all ``print`` statements."""
         capture = StringIO()
         print_capture = partial(print, file=capture)
         with patch.object(builtins, "print", new=print_capture):
@@ -345,6 +374,8 @@ class BarPluginRenderer(MPMPlugin):
         return capture.getvalue()
 
     def print(self, outdated_data):
-        # Capturing the output of the plugin and re-printing it will introduce an
-        # extra line returns, hence the extra rstrip() call.
+        """Print the final plugin rendering to ``<stdout>``.
+
+        Capturing the output of the plugin and re-printing it will introduce an extra line return, hence the extra call to ``rstrip()``.
+        """
         echo(self.render(outdated_data).rstrip())

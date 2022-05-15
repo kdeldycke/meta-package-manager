@@ -27,7 +27,8 @@ def subcmd():
     return "install", "arrow"
 
 
-class TestInstall(CLISubCommandTests):
+class TestInstallRemove(CLISubCommandTests):
+    """Install and remove operations are siblings and sensible, so we regroup them under the same test suite."""
 
     strict_selection_match = False
     """ Install sub-command try each user-selected manager until it find one providing
@@ -35,8 +36,9 @@ class TestInstall(CLISubCommandTests):
     managers will be called, so we allow the CLI output checks to partially match.
     """
 
-    def test_no_package_id(self, invoke):
-        result = invoke("install")
+    @pytest.mark.parametrize("operation", ("install", "remove"))
+    def test_no_package_id(self, invoke, operation):
+        result = invoke(operation)
         assert result.exit_code == 2
         assert not result.stdout
         assert "Error: Missing argument 'PACKAGE_ID'." in result.stderr
@@ -73,13 +75,16 @@ class TestInstall(CLISubCommandTests):
     @pytest.mark.parametrize(
         "mid,package_id", (pytest.param(*v, id=v[0]) for v in PACKAGE_IDS.items())
     )
-    def test_single_manager_install(self, invoke, mid, package_id):
+    def test_single_manager_install_and_remove(self, invoke, mid, package_id):
         result = invoke(f"--{mid}", "install", package_id)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid}, reference_set=pool.all_manager_ids)
 
+        result = invoke(f"--{mid}", "remove", package_id)
+        assert result.exit_code == 0
+        self.check_manager_selection(result, {mid}, reference_set=pool.all_manager_ids)
 
-destructive()(TestInstall.test_stats)
-destructive()(TestInstall.test_default_all_managers)
-destructive()(TestInstall.test_manager_shortcuts)
-destructive()(TestInstall.test_manager_selection)
+destructive()(TestInstallRemove.test_stats)
+destructive()(TestInstallRemove.test_default_all_managers)
+destructive()(TestInstallRemove.test_manager_shortcuts)
+destructive()(TestInstallRemove.test_manager_selection)

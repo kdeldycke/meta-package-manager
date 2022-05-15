@@ -719,6 +719,13 @@ class PackageManager:
                 log += f"\n{output}"
         return log
 
+    def remove(self, package_id):
+        """Remove one package and one only.
+
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        """
+        raise NotImplementedError
+
     def sync(self):
         """Refresh package metadata from remote repositories.
 

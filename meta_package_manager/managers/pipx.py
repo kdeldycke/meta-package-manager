@@ -113,3 +113,13 @@ class Pipx(PackageManager):
     def upgrade_all_cli(self):
         """Upgrade all packages."""
         return self.build_cli("upgrade-all")
+
+    def remove(self, package_id):
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            ► pipx uninstall pycowsay
+            uninstalled pycowsay! ✨ 🌟 ✨
+        """
+        return self.run_cli("uninstall", package_id)

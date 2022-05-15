@@ -293,3 +293,12 @@ class Pip(PackageManager):
         See: https://github.com/pypa/pip/issues/59
         """
         raise NotImplementedError
+
+    def remove(self, package_id):
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            ► python -m pip --no-color uninstall arrow
+        """
+        return self.run_cli("uninstall", package_id)

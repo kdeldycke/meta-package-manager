@@ -139,7 +139,7 @@ but there might be a greater need for such tools out there. Here is a list of so
 | List outdated packages  |   ✓   |                |       ✓       |              |      ✓       |
 | Search packages         |   ✓   |                |       ✓       |      ✓       |      ✓       |
 | Install a package       |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Remove a package        |       |                |       ✓       |      ✓       |      ✓       |
+| Remove a package        |   ✓   |                |       ✓       |      ✓       |      ✓       |
 | Upgrade single package  |   ✓   |                |       ✓       |              |      ✓       |
 | Upgrade all packages    |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
 | Sync                    |   ✓   |                |       ✓       |      ✓       |      ✓       |

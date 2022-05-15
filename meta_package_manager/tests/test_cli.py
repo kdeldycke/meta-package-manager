@@ -167,7 +167,7 @@ class CLISubCommandTests:
                 bool(
                     re.search(
                         rf"warning: {mid} does not implement "
-                        r"(installed|outdated|search|install|upgrade|upgrade_all|sync|cleanup) "
+                        r"(installed|outdated|search|install|upgrade|upgrade_all|remove|sync|cleanup) "
                         "operation.",
                         stderr,
                     )
@@ -181,7 +181,7 @@ class CLISubCommandTests:
                         stdout,
                     )
                 ),
-                # Install message.
+                # Install messages.
                 bool(
                     re.search(
                         rf"Install \S+ package from {mid}\.\.\.",
@@ -196,6 +196,19 @@ class CLISubCommandTests:
                 ),
                 # Upgrade command.
                 f"Updating all outdated packages from {mid}..." in stderr,
+                # Remove messages.
+                bool(
+                    re.search(
+                        rf"Remove \S+ package from {mid}\.\.\.",
+                        stderr,
+                    )
+                ),
+                bool(
+                    re.search(
+                        rf"warning: \S+ was not installed by {mid}\.",
+                        stderr,
+                    )
+                ),
                 # Sync command.
                 f"Sync {mid} package info..." in stderr,
                 # Cleanup command.

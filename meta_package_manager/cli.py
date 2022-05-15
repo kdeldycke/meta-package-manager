@@ -621,7 +621,7 @@ def search(ctx, extended, exact, query):
 # TODO: add a --force/--reinstall flag
 @pass_context
 def install(ctx, package_id):
-    """Install the provided package using one of the provided package manager."""
+    """Install the provided package using one of the selected package manager."""
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(ctx.obj.selected_managers)
 
@@ -680,6 +680,54 @@ def upgrade(ctx):
 
         if output:
             logger.info(output)
+
+
+@mpm.command(short_help="Remove a package.", section=MAINTENANCE)
+@argument("package_id", type=STRING, required=True)
+@pass_context
+def remove(ctx, package_id):
+    """Remove the provided package using one of the selected package manager."""
+    # Cast generator to tuple because of reuse.
+    selected_managers = tuple(ctx.obj.selected_managers)
+
+    logger.info(
+        f"Package manager order: {', '.join([m.id for m in selected_managers])}"
+    )
+
+    for manager in selected_managers:
+        logger.debug(f"Try to remove {package_id} with {manager.id}.")
+
+        # Is the package installed with this manager?
+        installed = set()
+        try:
+            installed = {package["id"] for package in manager.installed.values()}
+        except NotImplementedError:
+            logger.warning(f"{manager.id} does not implement installed operation.")
+            logger.info(
+                f"{package_id} existence unconfirmed, try to directly remove it..."
+            )
+        else:
+            match = package_id in installed
+            if not match:
+                logger.warning(f"{package_id} was not installed by {manager.id}.")
+                continue
+            logger.info(f"{package_id} has been installed by {manager.id}.")
+
+        # Allow remove subcommand to fail to have the oportunity to catch the CLIError exception and print
+        # a comprehensive message.
+        with patch.object(manager, "stop_on_error", True):
+            try:
+                logger.info(f"Remove {package_id} package with {manager.id}...")
+                output = manager.remove(package_id)
+            except NotImplementedError:
+                logger.warning(f"{manager.id} does not implement remove operation.")
+                continue
+            except CLIError:
+                logger.warning(f"Could not remove {package_id} with {manager.id}.")
+                continue
+
+        echo(output)
+        return
 
 
 @mpm.command(short_help="Sync local package info.", section=MAINTENANCE)

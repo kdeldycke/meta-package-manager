@@ -184,13 +184,13 @@ class CLISubCommandTests:
                 # Install message.
                 bool(
                     re.search(
-                        rf"Install \S+ package from {mid}...",
+                        rf"Install \S+ package from {mid}\.\.\.",
                         stderr,
                     )
                 ),
                 bool(
                     re.search(
-                        rf"warning: No \S+ package found on {mid}.",
+                        rf"warning: No \S+ package found on {mid}\.",
                         stderr,
                     )
                 ),

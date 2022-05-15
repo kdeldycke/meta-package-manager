@@ -67,7 +67,8 @@ class Token:
         return value, integer
 
     def __init__(self, value):
-        """Instantiates a ``Token`` from an alphanumeric string or a non-negative integer."""
+        """Instantiates a ``Token`` from an alphanumeric string or a non-negative
+        integer."""
         # Check provided value.
         if isinstance(value, str):
             if not value.isalnum():
@@ -149,8 +150,8 @@ class TokenizedString:
     tokens = ()
 
     def __hash__(self):
-        """A ``TokenizedString`` is made unique by its original string and tuple of parsed
-        tokens."""
+        """A ``TokenizedString`` is made unique by its original string and tuple of
+        parsed tokens."""
         return hash((self.string, self.separator, self.tokens))
 
     def __new__(cls, value, *args, **kwargs):
@@ -218,7 +219,8 @@ class TokenizedString:
     """
 
     def __iter__(self):
-        """``TokenizedString`` are essentially a wrapper around a tuple of ``Token`` objects."""
+        """``TokenizedString`` are essentially a wrapper around a tuple of ``Token``
+        objects."""
         return iter(self.tokens)
 
     def __eq__(self, other):

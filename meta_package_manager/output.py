@@ -157,7 +157,8 @@ def print_table(header_defs, rows, sort_key=None):
 
 
 def print_stats(data):
-    """Prints statistics to ``stdout``: total packages and a break down by package manager.
+    """Prints statistics to ``stdout``: total packages and a break down by package
+    manager.
 
     Prints something like:
 
@@ -278,7 +279,8 @@ class BarPluginRenderer(MPMPlugin):
 
     @staticmethod
     def render_table(table_data):
-        """Renders a table data with pre-configured alignment centered around the third column.
+        """Renders a table data with pre-configured alignment centered around the third
+        column.
 
         .. code-block:: pycon
 
@@ -300,8 +302,8 @@ class BarPluginRenderer(MPMPlugin):
         )
 
     def _render(self, outdated_data):
-        """Main method implementing the final structured rendering in *Bar plugin dialect.
-        """
+        """Main method implementing the final structured rendering in *Bar plugin
+        dialect."""
         managers = outdated_data.values()
         font = self.monospace_font if self.table_rendering else self.default_font
 
@@ -366,7 +368,8 @@ class BarPluginRenderer(MPMPlugin):
                 self.print_error(error_msg, submenu)
 
     def render(self, outdated_data):
-        """Wraps the :py:meth:`meta_package_manager.output.BarPluginRenderer._render` function above to capture all ``print`` statements."""
+        """Wraps the :py:meth:`meta_package_manager.output.BarPluginRenderer._render`
+        function above to capture all ``print`` statements."""
         capture = StringIO()
         print_capture = partial(print, file=capture)
         with patch.object(builtins, "print", new=print_capture):
@@ -376,6 +379,7 @@ class BarPluginRenderer(MPMPlugin):
     def print(self, outdated_data):
         """Print the final plugin rendering to ``<stdout>``.
 
-        Capturing the output of the plugin and re-printing it will introduce an extra line return, hence the extra call to ``rstrip()``.
+        Capturing the output of the plugin and re-printing it will introduce an extra
+        line return, hence the extra call to ``rstrip()``.
         """
         echo(self.render(outdated_data).rstrip())

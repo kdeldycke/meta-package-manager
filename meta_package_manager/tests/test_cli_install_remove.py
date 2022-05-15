@@ -28,7 +28,8 @@ def subcmd():
 
 
 class TestInstallRemove(CLISubCommandTests):
-    """Install and remove operations are siblings and sensible, so we regroup them under the same test suite."""
+    """Install and remove operations are siblings and sensible, so we regroup them under
+    the same test suite."""
 
     strict_selection_match = False
     """ Install sub-command try each user-selected manager until it find one providing
@@ -83,6 +84,7 @@ class TestInstallRemove(CLISubCommandTests):
         result = invoke(f"--{mid}", "remove", package_id)
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid}, reference_set=pool.all_manager_ids)
+
 
 destructive()(TestInstallRemove.test_stats)
 destructive()(TestInstallRemove.test_default_all_managers)

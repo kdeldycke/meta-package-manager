@@ -604,13 +604,14 @@ class PackageManager:
         """
         raise NotImplementedError
 
-
     def refilter(self, results, query, extended, exact):
-        """Manually refilters search results against ``extended`` and ``exact`` parameters.
+        """Manually refilters search results against ``extended`` and ``exact``
+        parameters.
 
-        Some package managers returns unbounded search results, and don't support finer search criterions.
-        In which case we consider the results as extended by default, and use this method to manually refilters
-        results to either exclude non-extended or non-exact matches.
+        Some package managers returns unbounded search results, and don't support finer
+        search criterions. In which case we consider the results as extended by default,
+        and use this method to manually refilters results to either exclude non-extended
+        or non-exact matches.
         """
         for package_id, version, description in results:
 

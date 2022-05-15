@@ -122,7 +122,9 @@ class Snap(PackageManager):
             re.MULTILINE,
         )
 
-        for package_id, version, description in self.refilter(regexp.findall(output.split('\n', 1)[1]), query, extended, exact):
+        for package_id, version, description in self.refilter(
+            regexp.findall(output.split("\n", 1)[1]), query, extended, exact
+        ):
 
             matches[package_id] = {
                 "id": package_id,

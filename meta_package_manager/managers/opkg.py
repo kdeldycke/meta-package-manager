@@ -135,7 +135,9 @@ class OPKG(PackageManager):
             re.VERBOSE | re.MULTILINE,
         )
 
-        for package_id, version, description in self.refilter(regexp.findall(output), query, extended, exact):
+        for package_id, version, description in self.refilter(
+            regexp.findall(output), query, extended, exact
+        ):
 
             matches[package_id] = {
                 "id": package_id,

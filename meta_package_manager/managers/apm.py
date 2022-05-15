@@ -421,7 +421,12 @@ class APM(PackageManager):
 
         if output:
 
-            for package_id, version, description in self.refilter(map(itemgetter("name", "version", "description"), json.loads(output)), query, extended, exact):
+            for package_id, version, description in self.refilter(
+                map(itemgetter("name", "version", "description"), json.loads(output)),
+                query,
+                extended,
+                exact,
+            ):
 
                 matches[package_id] = {
                     "id": package_id,

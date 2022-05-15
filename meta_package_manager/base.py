@@ -37,7 +37,7 @@ from click_extra.platform import CURRENT_OS_ID, is_linux
 from click_extra.run import INDENT, format_cli, run_cmd
 
 from . import logger
-from .version import parse_version
+from .version import TokenizedString, parse_version
 
 
 class CLIError(Exception):
@@ -603,6 +603,29 @@ class PackageManager:
         Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
         raise NotImplementedError
+
+
+    def refilter(self, results, query, extended, exact):
+        """Manually refilters search results against ``extended`` and ``exact`` parameters.
+
+        Some package managers returns unbounded search results, and don't support finer search criterions.
+        In which case we consider the results as extended by default, and use this method to manually refilters
+        results to either exclude non-extended or non-exact matches.
+        """
+        for package_id, version, description in results:
+
+            # Exclude packages not featuring the search query in their ID or name.
+            if not extended:
+                query_parts = set(map(str, TokenizedString(query)))
+                pkg_parts = set(map(str, TokenizedString(package_id)))
+                if not query_parts.issubset(pkg_parts):
+                    continue
+
+            # Filters out fuzzy matches, only keep stricly matching packages.
+            if exact and query != package_id:
+                continue
+
+            yield package_id, version, description
 
     def search(self, query, extended, exact):
         """Search packages available for install.

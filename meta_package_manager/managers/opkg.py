@@ -20,7 +20,7 @@ import re
 from click_extra.platform import LINUX
 
 from ..base import PackageManager
-from ..version import TokenizedString, parse_version
+from ..version import parse_version
 
 
 class OPKG(PackageManager):
@@ -113,7 +113,8 @@ class OPKG(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
-        Simulate search by listing all packages.
+        .. caution:
+            Search is simulated by listing all packages, then results are manually filtered.
 
         .. code-block:: shell-session
 
@@ -121,8 +122,6 @@ class OPKG(PackageManager):
         """
         matches = {}
 
-        # opkg doesn't have a working 'search', so get all packages and
-        # filter the packages later.
         output = self.run_cli("list")
 
         regexp = re.compile(
@@ -136,25 +135,7 @@ class OPKG(PackageManager):
             re.VERBOSE | re.MULTILINE,
         )
 
-        for package_id, version, description in regexp.findall(output):
-            # Skip all non-stricly matching package IDs in exact mode.
-            if exact:
-                if query != package_id:
-                    continue
-            else:
-                # All other modes search for matching in package IDs and
-                # names.
-                searched_content = set(map(str, TokenizedString(package_id)))
-
-                # Also search within the description in extended mode.
-                if extended:
-                    searched_content.update(set(map(str, TokenizedString(description))))
-
-                # Skip package if not all sub-strings are present in the
-                # searched content.
-                query_parts = set(map(str, TokenizedString(query)))
-                if not query_parts.issubset(searched_content):
-                    continue
+        for package_id, version, description in self.refilter(regexp.findall(output), query, extended, exact):
 
             matches[package_id] = {
                 "id": package_id,

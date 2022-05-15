@@ -20,7 +20,7 @@ import re
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from ..base import PackageManager
-from ..version import TokenizedString, parse_version
+from ..version import parse_version
 
 
 class Cargo(PackageManager):
@@ -49,8 +49,7 @@ class Cargo(PackageManager):
         """Fetch matching packages.
 
         .. caution:
-            Search is extended by default and connot be changed, so we manually refilters
-            results to either exlude non-extended or non-exact matches.
+            Search is extended by default, results are manually refiltered.
 
         .. danger:
             `Cargo limits search to 100 results <https://doc.rust-lang.org/cargo/commands/cargo-search.html#search-options>`_,
@@ -80,20 +79,7 @@ class Cargo(PackageManager):
             re.MULTILINE,
         )
 
-        for package_id, version, description in regexp.findall(output):
-
-            # Exclude packages not featuring the search query in their ID
-            # or name.
-            if not extended:
-                query_parts = set(map(str, TokenizedString(query)))
-                pkg_parts = set(map(str, TokenizedString(package_id)))
-                if not query_parts.issubset(pkg_parts):
-                    continue
-
-            # Filters out fuzzy matches, only keep stricly matching
-            # packages.
-            if exact and query != package_id:
-                continue
+        for package_id, version, description in self.refilter(regexp.findall(output), query, extended, exact):
 
             matches[package_id] = {
                 "id": package_id,

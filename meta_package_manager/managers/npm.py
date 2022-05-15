@@ -16,12 +16,13 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import json
+from operator import itemgetter
 
 from boltons.iterutils import remap
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from ..base import PackageManager
-from ..version import TokenizedString, parse_version
+from ..version import parse_version
 
 
 class NPM(PackageManager):
@@ -178,6 +179,9 @@ class NPM(PackageManager):
 
         Doc: https://docs.npmjs.com/cli/search.html
 
+        .. caution:
+            Search is extended by default, results are manually refiltered.
+
         .. code-block:: shell-session
 
             ► npm search --json python | jq
@@ -259,26 +263,13 @@ class NPM(PackageManager):
         output = self.run_cli("search", "--json", search_args, query)
 
         if output:
-            for package in json.loads(output):
-                package_id = package["name"]
 
-                # Exclude packages not featuring the search query in their ID
-                # or name.
-                if not extended:
-                    query_parts = set(map(str, TokenizedString(query)))
-                    pkg_parts = set(map(str, TokenizedString(package_id)))
-                    if not query_parts.issubset(pkg_parts):
-                        continue
-
-                # Filters out fuzzy matches, only keep stricly matching
-                # packages.
-                if exact and query != package_id:
-                    continue
+            for package_id, version, description in self.refilter(map(itemgetter("name", "version", "description"), json.loads(output)), query, extended, exact):
 
                 matches[package_id] = {
                     "id": package_id,
                     "name": package_id,
-                    "latest_version": parse_version(package["version"]),
+                    "latest_version": parse_version(version),
                 }
 
         return matches

@@ -15,6 +15,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+import re
+
 from click_extra.platform import LINUX
 
 from ..base import PackageManager
@@ -100,6 +102,9 @@ class Snap(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
+        .. caution:
+            Search is extended by default, results are manually refiltered.
+
         .. code-block:: shell-session
 
             ► snap find doc --color=never
@@ -112,31 +117,19 @@ class Snap(PackageManager):
 
         output = self.run_cli("find", query)
 
-        for package in output.splitlines()[1:]:
+        regexp = re.compile(
+            r"^(?P<package_id>\S+)\s+(?P<version>\S+)\s+\S+\s+\S+\s+(?P<description>.+)$",
+            re.MULTILINE,
+        )
 
-            package_id = package.split()[0]
-            version = package.split()[1]
-            description = " ".join(map(str, package.split()[4:]))
-
-            # Skip all non-stricly matching package IDs in exact mode.
-            if exact:
-                if query != package_id:
-                    continue
-
-            else:
-                # Exclude packages not featuring the search query in their
-                # ID or name.
-                if not extended:
-                    query_parts = set(map(str, TokenizedString(query)))
-                    pkg_parts = set(map(str, TokenizedString(package_id)))
-                    if not query_parts.issubset(pkg_parts):
-                        continue
+        for package_id, version, description in self.refilter(regexp.findall(output.split('\n', 1)[1]), query, extended, exact):
 
             matches[package_id] = {
                 "id": package_id,
                 "name": package_id,
                 "latest_version": parse_version(version),
             }
+
         return matches
 
     def install(self, package_id):

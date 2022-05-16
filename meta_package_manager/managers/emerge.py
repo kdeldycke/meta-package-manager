@@ -49,6 +49,12 @@ class Emerge(PackageManager):
     def installed(self):
         """Fetch installed packages.
 
+        .. warning::
+            This suppose the ``qlist`` binary is available and present on the system. We
+            do not search for it or try to resolves its canonical path with
+            :py:attr:`PackageManager.cli_path <meta_package_manager.base.PackageManager.cli_path>`,
+            as we do for the reference ``emerge`` binary.
+
         .. code-block:: shell-session
 
             ► qlist --installed --verbose --nocolor
@@ -265,11 +271,17 @@ class Emerge(PackageManager):
     def cleanup(self):
         """Removes things we don't need anymore.
 
-        An update is forced before calling clean commands, as pointed by the emerge documentation:
+        An update is forced before calling the clean commands, as `pointed to by the emerge documentation <https://wiki.gentoo.org/wiki/Gentoo_Cheat_Sheet#Recommended_method>`_:
 
         > As a safety measure, depclean will not remove any packages unless *all*
         > required dependencies have been resolved. As a consequence, it is often
         > necessary to run `emerge --update --newuse --deep @world` prior to depclean.
+
+        .. warning::
+            This suppose the ``eclean`` binary is available and present on the system. We
+            do not search for it or try to resolves its canonical path with
+            :py:attr:`PackageManager.cli_path <meta_package_manager.base.PackageManager.cli_path>`,
+            as we do for the reference ``emerge`` binary.
 
         .. code-block:: shell-session
 
@@ -280,5 +292,4 @@ class Emerge(PackageManager):
         # Forces an upgrade first, as recommended by emerge documentation.
         self.upgrade()
         self.run_cli("--depclean", sudo=True)
-        # XXX
         self.run_cli("distfiles", override_cli_path="eclean", sudo=True)

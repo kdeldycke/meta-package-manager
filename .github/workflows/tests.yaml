@@ -17,7 +17,7 @@ jobs:
         # https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners
         os:
           - ubuntu-20.04
-          - ubuntu-18.04
+          # - ubuntu-18.04
           - macos-11.0
           # Brew on macOS 10.15 image is plagged with shallow clone issues, for which I spent too much
           # time trying to fix. See:

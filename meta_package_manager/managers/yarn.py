@@ -133,11 +133,11 @@ class Yarn(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
-        Call ``yarn info`` and only works for exact match.
+        .. warning::
+            Yarn maintainers have `decided to not implement a dedicated search
+            command <https://github.com/yarnpkg/yarn/issues/778#issuecomment-253146299>`_.
 
-        Yarn maintainers have decided not to implement a dedicated ``search``
-        command:
-        https://github.com/yarnpkg/yarn/issues/778#issuecomment-253146299
+            Search is simulated by a direct call to ``yarn info``, and as a result only works for exact match.
 
         .. code-block:: shell-session
 
@@ -211,8 +211,6 @@ class Yarn(PackageManager):
               }
             }
         """
-        matches = {}
-
         if extended:
             logger.warning(f"{self.id} does not implement extended search operation.")
         if not exact:
@@ -226,13 +224,12 @@ class Yarn(PackageManager):
             if result["type"] == "inspect":
                 package = result["data"]
                 package_id = package["name"]
-                matches[package_id] = {
+                yield {
                     "id": package_id,
                     "name": package_id,
+                    "description": package["description"],
                     "latest_version": parse_version(package["version"]),
                 }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

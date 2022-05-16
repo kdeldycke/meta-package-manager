@@ -20,6 +20,7 @@ from operator import itemgetter
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
+from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
@@ -327,8 +328,8 @@ class APM(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
-        .. caution:
-            Search is extended by default, results are manually refiltered.
+        .. caution::
+            Search does not supports exact matching.
 
         .. code-block:: shell-session
 
@@ -411,7 +412,8 @@ class APM(PackageManager):
 
             ► apm search --no-description --json python | jq
         """
-        matches = {}
+        if exact:
+            logger.warning(f"{self.id} does not implement exact search operation.")
 
         search_args = []
         if not extended:
@@ -420,21 +422,13 @@ class APM(PackageManager):
         output = self.run_cli("search", search_args, "--json", query)
 
         if output:
-
-            for package_id, version, description in self.refilter(
-                map(itemgetter("name", "version", "description"), json.loads(output)),
-                query,
-                extended,
-                exact,
-            ):
-
-                matches[package_id] = {
+            for package_id, version, description in map(itemgetter("name", "version", "description"), json.loads(output)):
+                yield {
                     "id": package_id,
                     "name": package_id,
+                    "description": description,
                     "latest_version": parse_version(version),
                 }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

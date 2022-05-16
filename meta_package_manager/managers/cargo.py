@@ -19,6 +19,7 @@ import re
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
+from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
@@ -78,8 +79,9 @@ class Cargo(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
-        .. caution:
-            Search is extended by default, results are manually refiltered.
+        .. caution::
+            Search does not support extended or exact matching. So we returns the best subset of results and let
+            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them.
 
         .. danger:
             `Cargo limits search to 100 results <https://doc.rust-lang.org/cargo/commands/cargo-search.html#search-options>`_,
@@ -100,7 +102,10 @@ class Cargo(PackageManager):
             pypackage = "0.0.3"               # A modern Python dependency manager
             ... and 1664 crates more (use --limit N to see more)
         """
-        matches = {}
+        if extended:
+            logger.warning(f"{self.id} does not implement extended search operation.")
+        if exact:
+            logger.warning(f"{self.id} does not implement exact search operation.")
 
         output = self.run_cli("search", "--limit", "100", query)
 
@@ -109,17 +114,13 @@ class Cargo(PackageManager):
             re.MULTILINE,
         )
 
-        for package_id, version, description in self.refilter(
-            regexp.findall(output), query, extended, exact
-        ):
-
-            matches[package_id] = {
+        for package_id, version, description in regexp.findall(output):
+            yield {
                 "id": package_id,
                 "name": package_id,
+                "description": description,
                 "latest_version": parse_version(version),
             }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

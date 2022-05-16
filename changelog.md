@@ -7,6 +7,8 @@ This version is not released yet and is under active development.
 ```
 
 - \[mpm,pip,pipx\] Add `remove` operation.
+- \[mpm\] Add description in search results.
+- \[mpm\] Always refilters search results manually to refine gross matchings.
 
 ## {gh}`5.1.0 (2022-05-15) <compare/v5.0.1...v5.1.0>`
 

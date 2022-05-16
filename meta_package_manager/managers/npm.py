@@ -21,6 +21,7 @@ from operator import itemgetter
 from boltons.iterutils import remap
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
+from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
@@ -179,8 +180,8 @@ class NPM(PackageManager):
 
         Doc: https://docs.npmjs.com/cli/search.html
 
-        .. caution:
-            Search is extended by default, results are manually refiltered.
+        .. caution::
+            Search does not supports exact matching.
 
         .. code-block:: shell-session
 
@@ -254,7 +255,8 @@ class NPM(PackageManager):
 
             ► npm search --json --no-description python | jq
         """
-        matches = {}
+        if exact:
+            logger.warning(f"{self.id} does not implement exact search operation.")
 
         search_args = []
         if not extended:
@@ -263,21 +265,13 @@ class NPM(PackageManager):
         output = self.run_cli("search", "--json", search_args, query)
 
         if output:
-
-            for package_id, version, description in self.refilter(
-                map(itemgetter("name", "version", "description"), json.loads(output)),
-                query,
-                extended,
-                exact,
-            ):
-
-                matches[package_id] = {
+            for package_id, version, description in map(itemgetter("name", "version", "description"), json.loads(output)):
+                yield {
                     "id": package_id,
                     "name": package_id,
+                    "description": description,
                     "latest_version": parse_version(version),
                 }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

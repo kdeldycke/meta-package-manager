@@ -242,6 +242,9 @@ class Homebrew(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
+        .. caution::
+            Search does not supports extended mode.
+
         .. code-block:: shell-session
 
             ► brew search sed
@@ -292,12 +295,8 @@ class Homebrew(PackageManager):
 
         More doc at: https://docs.brew.sh/Manpage#search-texttext
         """
-        matches = {}
-
         if extended:
-            logger.warning(
-                f"Extended search not supported for {self.id}. Fallback to Fuzzy."
-            )
+            logger.warning(f"{self.id} does not implement extended search operation.")
 
         # Use regexp for exact match.
         if exact:
@@ -314,13 +313,12 @@ class Homebrew(PackageManager):
         )
 
         for package_id in regexp.findall(output):
-            matches[package_id] = {
+            yield {
                 "id": package_id,
                 "name": package_id,
+                "description": None,
                 "latest_version": None,
             }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

@@ -137,8 +137,6 @@ class Choco(PackageManager):
             ► choco search virtualbox --exact --limit-output --no-progress --no-color
             virtualbox|6.1.0
         """
-        matches = {}
-
         query_params = ["--limit-output"]
 
         if not extended:
@@ -151,13 +149,12 @@ class Choco(PackageManager):
 
         regexp = re.compile(r"(.+)\|(.+)")
         for package_id, latest_version in regexp.findall(output):
-            matches[package_id] = {
+            yield {
                 "id": package_id,
                 "name": package_id,
+                "description": None,
                 "latest_version": parse_version(latest_version),
             }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

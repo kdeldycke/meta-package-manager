@@ -17,6 +17,7 @@
 
 import ast
 import re
+import types
 from operator import attrgetter
 from pathlib import Path, PurePath
 from string import ascii_letters, ascii_lowercase, digits
@@ -240,7 +241,7 @@ def test_outdated_type(manager):
 
 @all_managers
 def test_search_type(manager):
-    """All search operations are either not implemented or returns a dict of dicts."""
+    """All search operations are either not implemented or returns a generator of dicts."""
     assert isinstance(manager.search, MethodType)
     if manager.available:
         try:
@@ -248,12 +249,14 @@ def test_search_type(manager):
         except Exception as ex:
             assert isinstance(ex, NotImplementedError)
         else:
-            assert isinstance(matches, dict)
-            for pkg in matches.values():
+            assert isinstance(matches, types.GeneratorType)
+            for pkg in matches:
                 assert isinstance(pkg, dict)
-                assert set(pkg) == {"id", "name", "latest_version"}
+                assert set(pkg) == {"id", "name", "description", "latest_version"}
                 assert isinstance(pkg["id"], str)
                 assert isinstance(pkg["name"], str)
+                if pkg["description"] is not None:
+                    assert isinstance(pkg["description"], str)
                 if pkg["latest_version"] is not None:
                     assert isinstance(pkg["latest_version"], TokenizedString)
 

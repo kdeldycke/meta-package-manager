@@ -128,6 +128,9 @@ class Gem(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
+        .. caution::
+            Search does not supports extended mode.
+
         .. code-block:: shell-session
 
             ► gem search python --versions --quiet
@@ -146,12 +149,8 @@ class Gem(PackageManager):
             ► gem search python --versions --exact --quiet
             python (0.0.1)
         """
-        matches = {}
-
         if extended:
-            logger.warning(
-                f"Extended search not supported for {self.id}. Fallback to Fuzzy."
-            )
+            logger.warning(f"{self.id} does not implement extended search operation.")
 
         search_arg = []
         if exact:
@@ -172,13 +171,12 @@ class Gem(PackageManager):
         )
 
         for package_id, version in regexp.findall(output):
-            matches[package_id] = {
+            yield {
                 "id": package_id,
                 "name": package_id,
+                "description": None,
                 "latest_version": parse_version(version),
             }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

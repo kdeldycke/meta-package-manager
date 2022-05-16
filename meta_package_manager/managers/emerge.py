@@ -191,8 +191,6 @@ class Emerge(PackageManager):
 
             ► emerge --searchdesc --color n --nospinner %^sed$
         """
-        matches = {}
-
         search_param = "--search"
         if extended:
             search_param = "--searchdesc"
@@ -206,18 +204,19 @@ class Emerge(PackageManager):
             r"""
             ^\*\s+(?P<package_id>\S+)\n
             \s+Latest\ version\ available:\s+(?P<latest_version>\S+)\n
+            (?:\s+.+\n)+?
+            \s+Description:\s+(?P<description>.+)\n
             """,
             re.MULTILINE | re.VERBOSE,
         )
 
-        for package_id, version in regexp.findall(output):
-            matches[package_id] = {
+        for package_id, version, description in regexp.findall(output):
+            yield {
                 "id": package_id,
                 "name": package_id,
+                "description": description,
                 "latest_version": parse_version(version),
             }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

@@ -604,16 +604,62 @@ class PackageManager:
         """
         raise NotImplementedError
 
-    def refilter(self, results, query, extended, exact):
-        """Manually refilters search results against ``extended`` and ``exact``
-        parameters.
+    def search(self, query, extended, exact):
+        """Search packages available for install.
 
-        Some package managers returns unbounded search results, and don't support finer
-        search criterions. In which case we consider the results as extended by default,
-        and use this method to manually refilters results to either exclude non-extended
-        or non-exact matches.
+        Returns a generator yielding ``dict`` items containing:
+
+        - the package's ``id`` as a string
+        - its ``name`` (often the same as ``id``) as a string
+        - ``description`` as a string or ``None`` if not available
+        - ``latest_version`` available for install, as a :py:class:`meta_package_manager.version.TokenizedString` instance or ``None``
+
+        .. code-block:: python
+
+            (
+                {
+                    "id": "google",
+                    "name": "google",
+                    "description": "Library to interact with Google.",
+                    "latest_version": <TokenizedString 2.1.0 => ('2', '1', '0')>,
+                },
+                {
+                    "id": "@google-cloud/storage",
+                    "name": "Google cloud storage",
+                    "description": None,
+                    "latest_version": None,
+                },
+                (...)
+            )
+
+        There is no need for this method to be perfect and sensitive to ``extended`` and ``exact`` parameters. If the package manager
+        is not supporting these kind of options out of the box, just returns the closest subset of matching package you can
+        come up with. Finer refiltering will happens in the :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` method below.
+
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
-        for package_id, version, description in results:
+        raise NotImplementedError
+
+    def refiltered_search(self, query, extended, exact):
+        """Returns search results with extra manual refiltering to refine gross matchings.
+
+        Some package managers returns unbounded results, and don't support finer
+        search criterions. In which case we use this method to manually refilters
+        :py:meth:`meta_package_manager.base.PackageManager.search`
+        results to either exclude non-extended
+        or non-exact matches.
+
+        Returns a generator producing the same data as the :py:meth:`meta_package_manager.base.PackageManager.search` method above.
+
+        There is no need to have this method implemented by package manager definitions. Just implement the core
+        :py:meth:`meta_package_manager.base.PackageManager.search` method and produce results as precise as possible.
+        """
+        for match in self.search(query, extended, exact):
+
+            package_id = match["id"]
+            package_name = match["name"]
+            description = match["description"]
+            version = match["latest_version"]
 
             # Exclude packages not featuring the search query in their ID or name.
             if not extended:
@@ -623,39 +669,10 @@ class PackageManager:
                     continue
 
             # Filters out fuzzy matches, only keep stricly matching packages.
-            if exact and query != package_id:
+            if exact and query not in (package_id, package_name):
                 continue
 
-            yield package_id, version, description
-
-    def search(self, query, extended, exact):
-        """Search packages available for install.
-
-        Returns a ``dict`` indexed by package ``id``. Each item is a ``dict`` with:
-
-        - (repeating) package's ``id``
-        - ``name`` (often the same as ``id``)
-        - ``latest_version`` available for install
-
-        .. code-block:: python
-
-            {
-                "google": {
-                    "id": "google",
-                    "name": "google",
-                    "latest_version": "2.1.0",
-                },
-                "@google-cloud/storage": {
-                    "id": "@google-cloud/storage",
-                    "name": "@google-cloud/storage",
-                    "latest_version": "5.19.3",
-                },
-                (...)
-            }
-
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
-        """
-        raise NotImplementedError
+            yield match
 
     def install(self, package_id):
         """Install one package and one only.

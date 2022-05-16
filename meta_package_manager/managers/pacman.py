@@ -111,6 +111,9 @@ class Pacman(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
+        .. caution::
+            Search does not supports extended matching.
+
         .. code-block:: shell-session
 
             ► pacman --noconfirm --sync --search fire
@@ -129,8 +132,6 @@ class Pacman(PackageManager):
             extra/firefox-i18n-ast 99.0-1
                 Asturian language pack for Firefox
         """
-        matches = {}
-
         if extended:
             logger.warning(f"{self.id} does not implement extended search operation.")
 
@@ -145,13 +146,12 @@ class Pacman(PackageManager):
         )
 
         for package_id, version, description in regexp.findall(output):
-            matches[package_id] = {
+            yield {
                 "id": package_id,
                 "name": package_id,
+                "description": description,
                 "latest_version": parse_version(version),
             }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

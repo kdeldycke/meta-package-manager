@@ -20,6 +20,7 @@ import re
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
+from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
@@ -134,6 +135,9 @@ class Composer(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
+        .. caution::
+            Search does not supports exact matching.
+
         .. code-block:: shell-session
 
             ► composer global search symfony
@@ -170,7 +174,8 @@ class Composer(PackageManager):
             ► search global --only-name pythonphp/pythonphp
             pythonphp/pythonphp
         """
-        matches = {}
+        if exact:
+            logger.warning(f"{self.id} does not implement exact search operation.")
 
         search_args = []
         if not extended:
@@ -187,18 +192,12 @@ class Composer(PackageManager):
         )
 
         for package_id, description in regexp.findall(output):
-            # Filters out fuzzy matches, only keep stricly matching
-            # packages.
-            if exact and query != package_id:
-                continue
-
-            matches[package_id] = {
+            yield {
                 "id": package_id,
                 "name": package_id,
+                "description": description,
                 "latest_version": None,
             }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

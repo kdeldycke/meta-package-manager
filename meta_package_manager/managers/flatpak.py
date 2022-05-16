@@ -134,17 +134,19 @@ class Flatpak(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
+        .. caution::
+            Search does not support extended or exact matching. So we returns the best subset of results and let
+            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them.
+
         .. code-block:: shell-session
 
             ► flatpak search gitg --ostree-verbose
             gitg    GUI for git        org.gnome.gitg  3.32.1  stable  flathub
         """
-        matches = {}
-
         if extended:
-            logger.warning(
-                f"Extended search not supported for {self.id}. Fallback to Fuzzy."
-            )
+            logger.warning(f"{self.id} does not implement extended search operation.")
+        if exact:
+            logger.warning(f"{self.id} does not implement exact search operation.")
 
         output = self.run_cli("search", query, "--ostree-verbose")
 
@@ -168,18 +170,12 @@ class Flatpak(PackageManager):
             branch,
             remotes,
         ) in regexp.findall(output):
-
-            # Filters out fuzzy matches, only keep stricly matching packages.
-            if exact and query not in (package_id, package_name):
-                continue
-
-            matches[package_id] = {
+            yield {
                 "id": package_id,
                 "name": package_name,
+                "description": description,
                 "latest_version": parse_version(version),
             }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

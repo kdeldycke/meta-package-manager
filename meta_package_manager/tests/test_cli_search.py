@@ -69,12 +69,14 @@ class TestSearch(CLISubCommandTests, CLITableTests):
             for pkg in info["packages"]:
                 assert isinstance(pkg, dict)
 
-                assert set(pkg) == {"id", "latest_version", "name"}
+                assert set(pkg) == {"id", "name", "description", "latest_version"}
 
                 assert isinstance(pkg["id"], str)
+                assert isinstance(pkg["name"], str)
+                if pkg["description"] is not None:
+                    assert isinstance(pkg["description"], str)
                 if pkg["latest_version"] is not None:
                     assert isinstance(pkg["latest_version"], str)
-                assert isinstance(pkg["name"], str)
 
     @unless_macos
     def test_unicode_search(self, invoke):

@@ -222,8 +222,6 @@ class Zypper(PackageManager):
 
             ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh --xmlout search --details --type package --search-description --match-exact kopete
         """
-        matches = {}
-
         search_param = []
         if extended:
             search_param.append("--search-description")
@@ -232,13 +230,12 @@ class Zypper(PackageManager):
 
         for package in self._search(*search_param, query):
             package_id = package["id"]
-            matches[package_id] = {
+            yield {
                 "id": package_id,
                 "name": package_id,
+                "description": None,
                 "installed_version": package["version"],
             }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

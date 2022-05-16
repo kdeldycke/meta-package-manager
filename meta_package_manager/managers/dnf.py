@@ -19,6 +19,7 @@ import re
 
 from click_extra.platform import LINUX
 
+from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
@@ -109,6 +110,10 @@ class DNF(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
+        .. caution::
+            Search does not support extended or exact matching. So we returns the best subset of results and let
+            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them.
+
         .. code-block:: shell-session
 
             ► dnf --color=never search usd
@@ -122,7 +127,10 @@ class DNF(PackageManager):
             lvm2-dbusd.noarch : LVM2 D-Bus daemon
             usd-libs.aarch64 : Universal Scene Description library
         """
-        matches = {}
+        if extended:
+            logger.warning(f"{self.id} does not implement extended search operation.")
+        if exact:
+            logger.warning(f"{self.id} does not implement exact search operation.")
 
         output = self.run_cli("search", query)
 
@@ -137,26 +145,12 @@ class DNF(PackageManager):
             match = regexp.match(line)
             if match:
                 package_id, description = match.groups()
-
-                # Any line matches in extended mode.
-                if not extended:
-
-                    # Skip package if ID does not exactly match the query in exact mode.
-                    if exact:
-                        if package_id != query:
-                            continue
-                    # Skip package if query is not found in ID.
-                    else:
-                        if query not in package_id:
-                            continue
-
-                matches[package_id] = {
+                yield {
                     "id": package_id,
                     "name": package_id,
+                    "description": description,
                     "latest_version": None,
                 }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

@@ -19,6 +19,7 @@ import re
 
 from click_extra.platform import LINUX
 
+from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
@@ -178,8 +179,6 @@ class APT(PackageManager):
               converter from ABC to MIDI format and back
             (...)
         """
-        matches = {}
-
         search_arg = "--names-only"
         if exact:
             # Rely on apt regexp support to speed-up exact match.
@@ -207,13 +206,12 @@ class APT(PackageManager):
         )
 
         for package_id, version, description in regexp.findall(output):
-            matches[package_id] = {
+            yield {
                 "id": package_id,
                 "name": package_id,
+                "description": description,
                 "latest_version": parse_version(version),
             }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.
@@ -293,6 +291,9 @@ class APT_Mint(APT):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
+        .. caution::
+            Search does not supports extended matching.
+
         .. code-block:: shell-session
 
             ► /usr/local/bin/apt search sed --quiet
@@ -307,7 +308,8 @@ class APT_Mint(APT):
             i   sed              - GNU stream editor
             p   sed:i386         - GNU stream editor
         """
-        matches = {}
+        if extended:
+            logger.warning(f"{self.id} does not implement extended search operation.")
 
         if exact:
             # Rely on apt regexp support to speed-up exact match.
@@ -330,10 +332,9 @@ class APT_Mint(APT):
         )
 
         for package_id, description in regexp.findall(output):
-            matches[package_id] = {
+            yield {
                 "id": package_id,
                 "name": package_id,
+                "description": description,
                 "latest_version": None,
             }
-
-        return matches

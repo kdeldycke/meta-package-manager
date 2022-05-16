@@ -19,6 +19,7 @@ import re
 
 from click_extra.platform import LINUX
 
+from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
@@ -113,14 +114,21 @@ class OPKG(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
-        .. caution:
-            Search is simulated by listing all packages, then results are manually filtered.
+        .. warning::
+            There is no search command so we simulate it by listing all packages.
+
+        .. caution::
+            Search does not support extended or exact matching. So we returns the best subset of results and let
+            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them.
 
         .. code-block:: shell-session
 
             ► opkg list
         """
-        matches = {}
+        if extended:
+            logger.warning(f"{self.id} does not implement extended search operation.")
+        if exact:
+            logger.warning(f"{self.id} does not implement exact search operation.")
 
         output = self.run_cli("list")
 
@@ -135,17 +143,13 @@ class OPKG(PackageManager):
             re.VERBOSE | re.MULTILINE,
         )
 
-        for package_id, version, description in self.refilter(
-            regexp.findall(output), query, extended, exact
-        ):
-
-            matches[package_id] = {
+        for package_id, version, description in regexp.findall(output):
+            yield {
                 "id": package_id,
                 "name": package_id,
+                "description": description,
                 "latest_version": parse_version(version),
             }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

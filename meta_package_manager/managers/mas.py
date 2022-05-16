@@ -109,6 +109,10 @@ class MAS(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
+        .. caution::
+            Search does not support extended or exact matching. So we returns the best subset of results and let
+            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them.
+
         .. code-block:: shell-session
 
             ► mas search python
@@ -118,12 +122,10 @@ class MAS(PackageManager):
               1164498373  PythonGames     (1.0)
               1400050251  Pythonic        (1.0.0)
         """
-        matches = {}
-
         if extended:
-            logger.warning(
-                f"Extended search not supported for {self.id}. Fallback to Fuzzy."
-            )
+            logger.warning(f"{self.id} does not implement extended search operation.")
+        if exact:
+            logger.warning(f"{self.id} does not implement exact search operation.")
 
         output = self.run_cli("search", query)
 
@@ -141,17 +143,12 @@ class MAS(PackageManager):
         )
 
         for package_id, package_name, version in regexp.findall(output):
-            # Filters out fuzzy matches, only keep stricly matching
-            # packages.
-            if exact and query not in (package_id, package_name):
-                continue
-            matches[package_id] = {
+            yield {
                 "id": package_id,
                 "name": package_name,
+                "description": None,
                 "latest_version": parse_version(version),
             }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

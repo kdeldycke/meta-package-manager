@@ -555,7 +555,7 @@ def search(ctx, extended, exact, query):
     for manager in ctx.obj.selected_managers:
 
         try:
-            results = tuple(manager.search(query, extended, exact).values())
+            results = tuple(manager.refiltered_search(query, extended, exact))
         except NotImplementedError:
             logger.warning(f"{manager.id} does not implement search operation.")
             continue
@@ -635,7 +635,7 @@ def install(ctx, package_id):
         # Is the package available on this manager?
         matches = None
         try:
-            matches = manager.search(extended=False, exact=True, query=package_id)
+            matches = tuple(manager.refiltered_search(extended=False, exact=True, query=package_id))
         except NotImplementedError:
             logger.warning(f"{manager.id} does not implement search operation.")
             logger.info(

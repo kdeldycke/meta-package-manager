@@ -19,8 +19,9 @@ import re
 
 from click_extra.platform import LINUX
 
+from .. import logger
 from ..base import PackageManager
-from ..version import TokenizedString, parse_version
+from ..version import parse_version
 
 
 class Snap(PackageManager):
@@ -102,8 +103,9 @@ class Snap(PackageManager):
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
-        .. caution:
-            Search is extended by default, results are manually refiltered.
+        .. caution::
+            Search is extended by default. So we returns the best subset of results and let
+            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them
 
         .. code-block:: shell-session
 
@@ -113,7 +115,10 @@ class Snap(PackageManager):
             nextcloud  17.0.5snap1  nextcloud✓   -         Nextcloud Server
             skype      8.58.0.93    skype✓       classic   One Skype for all.
         """
-        matches = {}
+        if not extended:
+            logger.warning(f"{self.id} does not implement non-extended search operation.")
+        if exact:
+            logger.warning(f"{self.id} does not implement exact search operation.")
 
         output = self.run_cli("find", query)
 
@@ -122,17 +127,13 @@ class Snap(PackageManager):
             re.MULTILINE,
         )
 
-        for package_id, version, description in self.refilter(
-            regexp.findall(output.split("\n", 1)[1]), query, extended, exact
-        ):
-
-            matches[package_id] = {
+        for package_id, version, description in regexp.findall(output.split("\n", 1)[1]):
+            yield {
                 "id": package_id,
                 "name": package_id,
+                "description": description,
                 "latest_version": parse_version(version),
             }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

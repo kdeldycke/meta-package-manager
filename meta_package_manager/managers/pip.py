@@ -20,6 +20,7 @@ import re
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
+from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
@@ -195,7 +196,7 @@ class Pip(PackageManager):
     def search_xxx_disabled(self, query, extended, exact):
         """Fetch matching packages.
 
-        .. warning:
+        .. warning::
             That function was previously named ``search`` but has been renamed
             to make it invisible from the ``mpm`` framework, disabling search
             feature altogether for ``pip``.
@@ -204,8 +205,9 @@ class Pip(PackageManager):
             API because of unmanageable high-load. See:
             https://github.com/pypa/pip/issues/5216#issuecomment-744605466
 
-        .. caution:
-            Search is extended by default, results are manually refiltered.
+        .. caution::
+            Search is extended by default. So we returns the best subset of results and let
+            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them
 
         .. code-block:: shell-session
 
@@ -222,7 +224,10 @@ class Pip(PackageManager):
             collective.js.abcjs (1.10)  - UNKNOWN
             cosmo (1.0.5)               - Python ABC sampler
         """
-        matches = {}
+        if not extended:
+            logger.warning(f"{self.id} does not implement non-extended search operation.")
+        if exact:
+            logger.warning(f"{self.id} does not implement exact search operation.")
 
         output = self.run_cli("search", query)
 
@@ -239,17 +244,13 @@ class Pip(PackageManager):
             re.MULTILINE | re.VERBOSE,
         )
 
-        for package_id, version, description in self.refilter(
-            regexp.findall(output), query, extended, exact
-        ):
-
-            matches[package_id] = {
+        for package_id, version, description in regexp.findall(output):
+            yield {
                 "id": package_id,
                 "name": package_id,
+                "description": description,
                 "latest_version": parse_version(version),
             }
-
-        return matches
 
     def install(self, package_id):
         """Install one package.

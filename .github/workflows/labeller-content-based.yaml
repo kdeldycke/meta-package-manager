@@ -135,7 +135,7 @@ jobs:
               "keywords": ["pacman", "arch"]},
 
               {"labels": [
-                "📦 manager: pip",
+                "📦 manager: pip-like",
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",
                 "🖥 platform: Windows"],

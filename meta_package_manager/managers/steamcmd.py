@@ -61,7 +61,7 @@ class SteamCMD(PackageManager):
 
         .. code-block:: shell-session
 
-            ►steamcmd +app_update 740 validate +quit
+            ► steamcmd +app_update 740 validate +quit
         """
         return self.run_cli("+app_update", package_id, "validate")
 

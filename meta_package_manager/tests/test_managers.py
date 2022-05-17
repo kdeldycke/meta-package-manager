@@ -241,7 +241,8 @@ def test_outdated_type(manager):
 
 @all_managers
 def test_search_type(manager):
-    """All search operations are either not implemented or returns a generator of dicts."""
+    """All search operations are either not implemented or returns a generator of
+    dicts."""
     assert isinstance(manager.search, MethodType)
     if manager.available:
         try:

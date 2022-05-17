@@ -10,6 +10,12 @@ name: Changelog & versions
       - .github/workflows/changelog.yaml
       - .github/workflows/release.yaml
 
+concurrency:
+  # Group workflow jobs so new commits cancels in-progress execution triggered by previous commits.
+  # Source: https://mail.python.org/archives/list/pypa-committers@python.org/thread/PCBCQMJF64JGRBOX7E2EE4YLKHT4DI55/
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 jobs:
 
   changelog:

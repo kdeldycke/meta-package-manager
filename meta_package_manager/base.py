@@ -641,7 +641,8 @@ class PackageManager:
         raise NotImplementedError
 
     def refiltered_search(self, query, extended, exact):
-        """Returns search results with extra manual refiltering to refine gross matchings.
+        """Returns search results with extra manual refiltering to refine gross
+        matchings.
 
         Some package managers returns unbounded results, and don't support finer
         search criterions. In which case we use this method to manually refilters

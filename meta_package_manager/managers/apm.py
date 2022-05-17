@@ -422,7 +422,9 @@ class APM(PackageManager):
         output = self.run_cli("search", search_args, "--json", query)
 
         if output:
-            for package_id, version, description in map(itemgetter("name", "version", "description"), json.loads(output)):
+            for package_id, version, description in map(
+                itemgetter("name", "version", "description"), json.loads(output)
+            ):
                 yield {
                     "id": package_id,
                     "name": package_id,

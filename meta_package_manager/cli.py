@@ -635,7 +635,9 @@ def install(ctx, package_id):
         # Is the package available on this manager?
         matches = None
         try:
-            matches = tuple(manager.refiltered_search(extended=False, exact=True, query=package_id))
+            matches = tuple(
+                manager.refiltered_search(extended=False, exact=True, query=package_id)
+            )
         except NotImplementedError:
             logger.warning(f"{manager.id} does not implement search operation.")
             logger.info(

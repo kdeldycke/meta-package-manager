@@ -116,7 +116,9 @@ class Snap(PackageManager):
             skype      8.58.0.93    skype✓       classic   One Skype for all.
         """
         if not extended:
-            logger.warning(f"{self.id} does not implement non-extended search operation.")
+            logger.warning(
+                f"{self.id} does not implement non-extended search operation."
+            )
         if exact:
             logger.warning(f"{self.id} does not implement exact search operation.")
 
@@ -127,7 +129,9 @@ class Snap(PackageManager):
             re.MULTILINE,
         )
 
-        for package_id, version, description in regexp.findall(output.split("\n", 1)[1]):
+        for package_id, version, description in regexp.findall(
+            output.split("\n", 1)[1]
+        ):
             yield {
                 "id": package_id,
                 "name": package_id,

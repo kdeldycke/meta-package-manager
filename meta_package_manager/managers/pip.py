@@ -225,7 +225,9 @@ class Pip(PackageManager):
             cosmo (1.0.5)               - Python ABC sampler
         """
         if not extended:
-            logger.warning(f"{self.id} does not implement non-extended search operation.")
+            logger.warning(
+                f"{self.id} does not implement non-extended search operation."
+            )
         if exact:
             logger.warning(f"{self.id} does not implement exact search operation.")
 

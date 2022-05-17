@@ -2,7 +2,8 @@
 name: Tests
 "on":
   push:
-    - main
+    branches:
+      - main
   pull_request:
   schedule:
     # Run tests every Monday at 9:17 to catch regressions.

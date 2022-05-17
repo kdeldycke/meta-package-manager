@@ -185,13 +185,10 @@ class Zypper(PackageManager):
 
         output = self.run_cli("--xmlout", "list-updates")
 
-        package_list = (
-            xmltodict.parse(output)
-            .get("stream", {})
-            .get("update-status", {})
-            .get("update-list", {})
-            .get("update", [])
-        )
+        package_list = []
+        update_list = xmltodict.parse(output).get("stream", {}).get("update-status", {}).get("update-list", {})
+        if update_list:
+            package_list = update_list.get("update", [])
 
         for package in package_list:
             package_id = package["@name"]

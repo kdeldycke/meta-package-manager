@@ -16,4 +16,4 @@ concurrency:
 jobs:
 
   docs:
-    uses: kdeldycke/workflows/.github/workflows/docs.yaml@v1.4.1
+    uses: kdeldycke/workflows/.github/workflows/docs.yaml@v1.4.2

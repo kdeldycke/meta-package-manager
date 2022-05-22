@@ -12,7 +12,7 @@ concurrency:
 jobs:
 
   labeller:
-    uses: kdeldycke/workflows/.github/workflows/labeller-file-based.yaml@v1.4.1
+    uses: kdeldycke/workflows/.github/workflows/labeller-file-based.yaml@v1.4.2
     with:
       extra-rules: |
         "🔌 bar-plugin":

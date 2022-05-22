@@ -12,4 +12,4 @@ concurrency:
 jobs:
 
   debug:
-    uses: kdeldycke/workflows/.github/workflows/debug.yaml@v1.4.1
+    uses: kdeldycke/workflows/.github/workflows/debug.yaml@v1.4.2

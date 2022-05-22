@@ -10,6 +10,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Add description in search results.
 - \[mpm\] Always refilters search results manually to refine gross matchings.
 - \[mpm\] Group workflow jobs so new commits cancels in-progress execution triggered by previous commits.
+- \[mpm\] Run tests on early Python 3.11 releases.
 
 ## {gh}`5.1.0 (2022-05-15) <compare/v5.0.1...v5.1.0>`
 

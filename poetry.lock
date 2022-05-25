@@ -118,7 +118,7 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "click-extra"
-version = "2.1.0"
+version = "2.1.1"
 description = "🌈 Extra colorization and configuration loading for Click."
 category = "main"
 optional = false
@@ -129,7 +129,7 @@ boltons = ">=21.0.0,<22.0.0"
 cli-helpers = ">=2.2.0,<3.0.0"
 click = ">=8.1.1,<9.0.0"
 click-log = ">=0.4.0,<0.5.0"
-cloup = ">=0.13.0,<0.14.0"
+cloup = ">=0.14.0,<0.15.0"
 commentjson = ">=0.9.0,<0.10.0"
 mergedeep = ">=1.3.4,<2.0.0"
 pyyaml = ">=6.0.0,<7.0.0"
@@ -137,7 +137,7 @@ regex = ">=2022.3.15,<2023.0.0"
 requests = ">=2.27.1,<3.0.0"
 tabulate = {version = ">=0.8.9,<0.9.0", extras = ["widechars"]}
 tomli = {version = ">=2.0.1,<3.0.0", markers = "python_version < \"3.11\""}
-xmltodict = ">=0.12.0,<0.13.0"
+xmltodict = ">=0.12,<0.14"
 
 [[package]]
 name = "click-log"
@@ -152,7 +152,7 @@ click = "*"
 
 [[package]]
 name = "cloup"
-version = "0.13.1"
+version = "0.14.0"
 description = "Adds features to Click: option groups, constraints, subcommand sections and help themes."
 category = "main"
 optional = false
@@ -856,7 +856,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "a67294f43d00d190326e5eb0dc869091da94f1a75ff2b91d4843e05de9b21e56"
+content-hash = "f106081b3e61f1ac8f5b52812427e9674097420053b05997988b3c4398e5d355"
 
 [metadata.files]
 alabaster = [
@@ -904,16 +904,16 @@ click = [
     {file = "click-8.1.3.tar.gz", hash = "sha256:7682dc8afb30297001674575ea00d1814d808d6a36af415a82bd481d37ba7b8e"},
 ]
 click-extra = [
-    {file = "click-extra-2.1.0.tar.gz", hash = "sha256:0b4fe5af0be4430b62ea1362c4680592628ebd8667e851b83b870f988a62cc29"},
-    {file = "click_extra-2.1.0-py3-none-any.whl", hash = "sha256:45fea4d14091ef0ea810027a2523ed34fb46bc0147c71654062b7cc4584f9f64"},
+    {file = "click-extra-2.1.1.tar.gz", hash = "sha256:a0ee6dcc2b42c3ae3f2f0172b830a8b215fed5802249bb98c7ef979d7030fd40"},
+    {file = "click_extra-2.1.1-py3-none-any.whl", hash = "sha256:24b5abf1c283058e74a300d4ed10b3c8b45bcb4e11c255bf963de70743462547"},
 ]
 click-log = [
     {file = "click-log-0.4.0.tar.gz", hash = "sha256:3970f8570ac54491237bcdb3d8ab5e3eef6c057df29f8c3d1151a51a9c23b975"},
     {file = "click_log-0.4.0-py2.py3-none-any.whl", hash = "sha256:a43e394b528d52112af599f2fc9e4b7cf3c15f94e53581f74fa6867e68c91756"},
 ]
 cloup = [
-    {file = "cloup-0.13.1-py2.py3-none-any.whl", hash = "sha256:04a29a483e122c04f401547dcbce451ce002ff3e392308122619d5b9009f321f"},
-    {file = "cloup-0.13.1.tar.gz", hash = "sha256:ea0acc67eed994b86e79b70d76bc2ea525b7f98f3cd8e63696896d549597ef4d"},
+    {file = "cloup-0.14.0-py2.py3-none-any.whl", hash = "sha256:ce996ab614225046c1a1f739dda504ac0d823117f30dc5d1696021f70f7e91ff"},
+    {file = "cloup-0.14.0.tar.gz", hash = "sha256:4dec7e43905b7771884cda4f13ab8b7537bceaee467a92655e7660797ab08c47"},
 ]
 colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},

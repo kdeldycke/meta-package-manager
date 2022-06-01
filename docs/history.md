@@ -22,3 +22,7 @@ With its complexity increasing, it was
 [decided to move the plugin](https://github.com/matryer/xbar-plugins/issues/525)
 to {gh}`its own repository <>`. For details, see the
 [migration script](https://gist.github.com/kdeldycke/13712cb70e9c1cf4f338eb10dcc059f0).
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=kdeldycke/meta-package-manager&type=Date)](https://star-history.com/#kdeldycke/meta-package-manager&Date)

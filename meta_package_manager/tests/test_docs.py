@@ -129,7 +129,7 @@ def test_labeller_rules():
 
     assert rules_labels
     # Check that all canonical labels are referenced in rules.
-    assert (canonical_labels - {"🔌 bar-plugin", "📦 manager: mpm"}).issubset(
+    assert (canonical_labels - {"🔌 bar-plugin", "📦 manager: apm"}).issubset(
         rules_labels
     )
 

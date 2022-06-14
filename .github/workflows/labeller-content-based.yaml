@@ -132,7 +132,7 @@ jobs:
               {"labels": [
                 "📦 manager: pacman",
                 "🖥 platform: Linux"],
-              "keywords": ["pacman", "arch"]},
+              "keywords": ["pacman", "arch", "yay"]},
 
               {"labels": [
                 "📦 manager: pip-like",

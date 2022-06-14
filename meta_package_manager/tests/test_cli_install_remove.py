@@ -67,6 +67,7 @@ class TestInstallRemove(CLISubCommandTests):
         "steamcmd": "740",
         "vscode": "tamasfe.even-better-toml",
         "yarn": "markdown",
+        "yay": "meta-package-manager",
         "yum": "usd",
         "zypper": "git",
     }

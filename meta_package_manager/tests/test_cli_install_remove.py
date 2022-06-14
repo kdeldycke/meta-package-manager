@@ -67,6 +67,7 @@ class TestInstallRemove(CLISubCommandTests):
         "steamcmd": "740",
         "vscode": "tamasfe.even-better-toml",
         "yarn": "markdown",
+        # Install mpm with itself: https://aur.archlinux.org/packages/meta-package-manager
         "yay": "meta-package-manager",
         "yum": "usd",
         "zypper": "git",

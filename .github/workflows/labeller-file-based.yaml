@@ -83,6 +83,8 @@ jobs:
         "📦 manager: pacman":
           - meta_package_manager/managers/pacman*
           - meta_package_manager/tests/*pacman*
+          - meta_package_manager/managers/yay*
+          - meta_package_manager/tests/*yay*
 
         "📦 manager: pip-like":
           - meta_package_manager/managers/pip*

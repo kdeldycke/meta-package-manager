@@ -196,3 +196,13 @@ class Pacman(PackageManager):
             ► pacman --noconfirm --sync --clean --clean
         """
         self.run_cli("--sync", "--clean", "--clean")
+
+    def remove(self, package_id):
+        """Removes a package.
+        
+        .. code-block:: shell-session
+
+            ► pacman --noconfirm --remove firefox
+        """
+
+        self.run_cli("--remove", package_id)

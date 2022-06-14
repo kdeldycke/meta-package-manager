@@ -41,7 +41,7 @@ If you have difficulties to use `pip`, see
 ````
 
 ````{tab-item} Arch Linux
-[`mpm` is available on AUR](https://aur.archlinux.org/packages/meta-package-manager):
+`mpm` is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager):
 
 ```{code-block} shell-session
 $ yay -S meta-package-manager

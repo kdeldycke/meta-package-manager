@@ -1,5 +1,45 @@
 # Installation
 
+`````{tab-set}
+
+````{tab-item} pipx
+Easiest way is to use [`pipx`](https://pypa.github.io/pipx/):
+
+```{code-block} shell-session
+$ pipx install meta-package-manager
+```
+
+`pipx` is to `pip` what `npx` is to `npm`: a clean way to install and run Python applications in isolated environments.
+````
+
+````{tab-item} pip
+You can install the latest stable release and its dependencies with a simple `pip`
+call:
+
+```{code-block} shell-session
+$ python -m pip install meta-package-manager
+```
+
+On some system, due to the Python 2.x to 3.x migration, you'll have to call `python3` directly:
+
+```{code-block} shell-session
+$ python3 -m pip install meta-package-manager
+```
+
+Other variations includes:
+
+```{code-block} shell-session
+$ pip install meta-package-manager
+```
+
+```{code-block} shell-session
+$ pip3 install meta-package-manager
+```
+
+If you have difficulties to use `pip`, see
+[`pip`'s own installation instructions](https://pip.pypa.io/en/stable/installation/).
+`````
+
 ````{admonition} Danger: **Misleading package name**
 ---
 class: danger
@@ -15,42 +55,6 @@ There is a *`mpm`* Python module on PyPi that has nothing to do with this projec
 The **real package is named `meta-package-manager`**. Only the latter provides the {command}`mpm` CLI
 you're looking for.
 ````
-
-## `pipx` install
-
-Easiest way is to use [`pipx`](https://pypa.github.io/pipx/):
-
-```shell-session
-$ pipx install meta-package-manager
-```
-
-## `pip` install
-
-You can install the latest stable release and its dependencies with a simple `pip`
-call:
-
-```shell-session
-$ python -m pip install meta-package-manager
-```
-
-On some system, due to the Python 2.x to 3.x migration, you'll have to call `python3` directly:
-
-```shell-session
-$ python3 -m pip install meta-package-manager
-```
-
-Other variations includes:
-
-```shell-session
-$ pip install meta-package-manager
-```
-
-```shell-session
-$ pip3 install meta-package-manager
-```
-
-If you have difficulties to use `pip`, see
-[`pip`'s own installation instructions](https://pip.pypa.io/en/stable/installation/).
 
 ## Run `mpm`
 

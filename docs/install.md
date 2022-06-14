@@ -38,6 +38,16 @@ $ pip3 install meta-package-manager
 
 If you have difficulties to use `pip`, see
 [`pip`'s own installation instructions](https://pip.pypa.io/en/stable/installation/).
+````
+
+````{tab-item} Arch Linux
+[`mpm` is available on AUR](https://aur.archlinux.org/packages/meta-package-manager):
+
+```{code-block} shell-session
+$ yay -S meta-package-manager
+```
+````
+
 `````
 
 ````{admonition} Danger: **Misleading package name**

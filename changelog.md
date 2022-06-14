@@ -9,6 +9,7 @@ This version is not released yet and is under active development.
 - \[mpm,pip,pipx\] Add `remove` operation.
 - \[mpm\] Add description in search results.
 - \[mpm\] Always refilters search results manually to refine gross matchings.
+- \[mpm\] Document Arch Linux installation. Refs {issue}`527`.
 - \[mpm\] Group workflow jobs so new commits cancels in-progress execution triggered by previous commits.
 - \[mpm\] Run tests on early Python 3.11 releases.
 

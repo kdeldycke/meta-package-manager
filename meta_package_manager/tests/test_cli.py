@@ -18,7 +18,6 @@
 import json
 import re
 import subprocess
-from shutil import which
 
 import pytest
 from boltons.strutils import strip_ansi

@@ -18,7 +18,6 @@
 # pylint: disable=redefined-outer-name
 
 import json
-from string import ascii_lowercase, digits
 
 import pytest
 from boltons.iterutils import same

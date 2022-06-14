@@ -80,7 +80,7 @@ jobs:
           - meta_package_manager/tests/*npm*
           - meta_package_manager/tests/*yarn*
 
-        "📦 manager: pacman":
+        "📦 manager: pacman-like":
           - meta_package_manager/managers/pacman*
           - meta_package_manager/tests/*pacman*
           - meta_package_manager/managers/yay*

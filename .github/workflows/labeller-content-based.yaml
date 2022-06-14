@@ -130,7 +130,7 @@ jobs:
                "keywords": ["npm", "node", "yarn"]},
 
               {"labels": [
-                "📦 manager: pacman",
+                "📦 manager: pacman-like",
                 "🖥 platform: Linux"],
               "keywords": ["pacman", "arch", "yay"]},
 

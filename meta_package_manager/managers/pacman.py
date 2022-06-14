@@ -199,10 +199,25 @@ class Pacman(PackageManager):
 
     def remove(self, package_id):
         """Removes a package.
-        
+
         .. code-block:: shell-session
 
             ► pacman --noconfirm --remove firefox
         """
 
         self.run_cli("--remove", package_id)
+
+
+class Yay(Pacman):
+    """yay has the commands equivalent to pacman."""
+
+    requirement = "11.0.0"
+
+    version_regex = r".*yay\s+v(?P<version>\S+)"
+    r"""Search version right after the ``yay `` string.
+
+    .. code-block:: shell-session
+
+        ► yay --version
+        yay v11.1.2 - libalpm v13.0.1
+    """

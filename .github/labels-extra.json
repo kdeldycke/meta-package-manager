@@ -70,7 +70,7 @@
     "description": "npm, yarn"
   },
   {
-    "name": "📦 manager: pacman",
+    "name": "📦 manager: pacman-like",
     "color": "#bfdadc",
     "description": "pacman, yay"
   },

@@ -114,7 +114,7 @@ but there might be a greater need for such tools out there. Here is a list of so
 | `xbps`         |       |                |       ✓       |      ✓       |      ✓       |
 | `yadm`         |       |       ✓        |               |              |              |
 | `yarn`         |   ✓   |       ✓        |               |              |              |
-| `yay`          |       |       ✓        |               |              |              |
+| `yay`          |   ✓   |       ✓        |               |              |              |
 | `yum`          |   ✓   |                |               |      ✓       |      ✓       |
 | `zim`          |       |       ✓        |               |              |              |
 | `zinit`        |       |       ✓        |               |              |              |
@@ -181,7 +181,7 @@ but there might be a greater need for such tools out there. Here is a list of so
 | License             | GPL-2.0 | GPL-3.0        | GPL-3.0       | Custom       | GPL-3.0      |
 | Implementation      | Python  | Rust           | Rust          | Shell        | C++          |
 | Version benchmarked | `5.2.0` | `8.3.1`        | `0.15.2`      | `3.0.7`      | `2.3`        |
-| Benchmark date      | 2022-05 | 2022-04        | 2022-04       | 2022-04      | 2022-04      |
+| Benchmark date      | 2022-06 | 2022-04        | 2022-04       | 2022-04      | 2022-04      |
 
 ## Project's URL
 

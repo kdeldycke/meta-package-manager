@@ -29,7 +29,11 @@ def subcmd():
 
 class TestInstallRemove(CLISubCommandTests):
     """Install and remove operations are siblings and sensible, so we regroup them under
-    the same test suite."""
+    the same test suite.
+
+    Install mpm with itself when we can, so we can test externally contributed packaging.
+    See: https://github.com/kdeldycke/meta-package-manager/issues/527
+    """
 
     strict_selection_match = False
     """ Install sub-command try each user-selected manager until it find one providing
@@ -48,7 +52,8 @@ class TestInstallRemove(CLISubCommandTests):
         "apm": "markdown-pdf",
         "apt": "wget",
         "apt-mint": "exiftool",
-        "brew": "jpeginfo",
+        # https://github.com/Hasnep/homebrew-tap/blob/main/Formula/meta-package-manager.rb
+        "brew": "hasnep/tap/meta-package-manager",
         "cargo": "colorous",
         "cask": "pngyu",
         "choco": "ccleaner",
@@ -67,7 +72,6 @@ class TestInstallRemove(CLISubCommandTests):
         "steamcmd": "740",
         "vscode": "tamasfe.even-better-toml",
         "yarn": "markdown",
-        # Install mpm with itself:
         # https://aur.archlinux.org/packages/meta-package-manager
         "yay": "meta-package-manager",
         "yum": "usd",

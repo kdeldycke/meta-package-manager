@@ -40,14 +40,32 @@ If you have difficulties to use `pip`, see
 [`pip`'s own installation instructions](https://pip.pypa.io/en/stable/installation/).
 ````
 
+````{tab-item} brew
+An `mpm` formula has been contributed by [@Hasnep](https://github.com/Hasnep) and is [available at `hasnep/tap/meta-package-manager`](https://github.com/Hasnep/homebrew-tap/blob/main/Formula/meta-package-manager.rb):
+
+```{code-block} shell-session
+$ brew install hasnep/tap/meta-package-manager
+```
+````
+
 ````{tab-item} Arch Linux
-`mpm` is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager):
+An `mpm` package has been contributed by [@autinerd](https://github.com/autinerd) and is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager):
 
 ```{code-block} shell-session
 $ yay -S meta-package-manager
 ```
 ````
 
+````{tab-item} mpm
+In a funny twist, `mpm` can be installed by itself:
+
+```{code-block} shell-session
+$ mpm --brew install meta-package-manager
+$ mpm --pip  install meta-package-manager
+$ mpm --pipx install meta-package-manager
+$ mpm --yay  install meta-package-manager
+```
+````
 `````
 
 ````{admonition} Danger: **Misleading package name**

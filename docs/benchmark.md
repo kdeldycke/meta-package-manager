@@ -174,6 +174,17 @@ but there might be a greater need for such tools out there. Here is a list of so
 | [XKCD #1654](https://xkcd.com/1654/)  |   ✓   |                |               |              |              |
 | [Xbar/SwiftBar plugin](bar-plugin.md) |   ✓   |                |               |              |              |
 
+## Distribution
+
+| Package manager                               | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| ------------------------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
+| Linux distributions         |   [![Packaging status](https://repology.org/badge/vertical-allrepos/meta-package-manager.svg)](https://repology.org/project/meta-package-manager/versions)   |      [![Packaging status](https://repology.org/badge/vertical-allrepos/topgrade.svg)](https://repology.org/project/topgrade/versions)   |               |        [![Packaging status](https://repology.org/badge/vertical-allrepos/pacapt.svg)](https://repology.org/project/pacapt/versions)    |      [![Packaging status](https://repology.org/badge/vertical-allrepos/sysget.svg)](https://repology.org/project/sysget/versions)   |
+| Homebrew | [✓](https://github.com/Hasnep/homebrew-tap/blob/main/Formula/meta-package-manager.rb) | [✓](https://github.com/Homebrew/homebrew-core/blob/master/Formula/topgrade.rb) | [✓](https://github.com/rami3l/pacaptr#brew) | [✓](https://github.com/Homebrew/homebrew-core/blob/master/Formula/pacapt.rb) | |
+| Macports |  | [✓](https://ports.macports.org/port/topgrade/)  |  |  | |
+| Chocolatey |  |   | [✓](https://community.chocolatey.org/packages/pacaptr) |  | |
+| Crates.io |  |  [✓](https://crates.io/crates/topgrade) | [✓](https://crates.io/crates/pacaptr) |  | |
+| PyPi | [✓](https://pypi.org/project/meta-package-manager/) |   |  |  | |
+
 ## Metadata
 
 | Metadata            | `mpm`   | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |

@@ -66,8 +66,10 @@ class TestInstallRemove(CLISubCommandTests):
         "npm": "raven",
         "opkg": "enigma2-hotplug",
         "pacman": "manjaro-hello",
-        "pip": "arrow",
-        "pipx": "pycowsay",
+        # https://pypi.org/project/meta-package-manager
+        "pip": "meta-package-manager",
+        # https://pypi.org/project/meta-package-manager
+        "pipx": "meta-package-manager",
         "snap": "standard-notes",
         "steamcmd": "740",
         "vscode": "tamasfe.even-better-toml",

@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- \[paru\] Add `paru` support.
+
 ## {gh}`5.2.0 (2022-06-16) <compare/v5.1.0...v5.2.0>`
 
 - \[yay\] Add `yay` support. Refs {issue}`527`.

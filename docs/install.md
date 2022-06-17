@@ -52,6 +52,10 @@ $ brew install hasnep/tap/meta-package-manager
 An `mpm` package has been contributed by [@autinerd](https://github.com/autinerd) and is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager):
 
 ```{code-block} shell-session
+$ paru -S meta-package-manager
+```
+
+```{code-block} shell-session
 $ yay -S meta-package-manager
 ```
 ````
@@ -61,6 +65,7 @@ In a funny twist, `mpm` can be installed by itself:
 
 ```{code-block} shell-session
 $ mpm --brew install meta-package-manager
+$ mpm --paru install meta-package-manager
 $ mpm --pip  install meta-package-manager
 $ mpm --pipx install meta-package-manager
 $ mpm --yay  install meta-package-manager

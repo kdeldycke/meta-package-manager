@@ -67,7 +67,7 @@ but there might be a greater need for such tools out there. Here is a list of so
 | `opkg`         |   ✓   |                |               |      ✓       |              |
 | `pacman`       |   ✓   |       ✓        |               |      ✓       |      ✓       |
 | `pacstall`     |       |       ✓        |               |              |              |
-| `paru`         |       |       ✓        |               |              |              |
+| `paru`         |   ✓   |       ✓        |               |              |              |
 | `pearl`        |       |       ✓        |               |              |              |
 | `pikaur`       |       |       ✓        |               |              |              |
 | `pihole`       |       |       ✓        |               |              |              |

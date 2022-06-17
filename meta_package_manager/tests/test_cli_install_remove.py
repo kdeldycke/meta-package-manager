@@ -66,6 +66,8 @@ class TestInstallRemove(CLISubCommandTests):
         "npm": "raven",
         "opkg": "enigma2-hotplug",
         "pacman": "manjaro-hello",
+        # https://aur.archlinux.org/packages/meta-package-manager
+        "paru": "meta-package-manager",
         # https://pypi.org/project/meta-package-manager
         "pip": "meta-package-manager",
         # https://pypi.org/project/meta-package-manager

@@ -208,6 +208,22 @@ class Pacman(PackageManager):
         self.run_cli("--sync", "--clean", "--clean")
 
 
+class Paru(Pacman):
+    """``paru`` wraps ``pacman`` and shadows its options."""
+
+    # v1.9.3 is the first version implementing the --sysupgrade option.
+    requirement = "1.9.3"
+
+    version_regex = r"paru\s+v(?P<version>\S+)"
+    r"""Search version right after the ``paru`` string.
+
+    .. code-block:: shell-session
+
+        ► paru --version
+        paru v1.10.0 - libalpm v13.0.1
+    """
+
+
 class Yay(Pacman):
     """yay has the commands equivalent to pacman."""
 

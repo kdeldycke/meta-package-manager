@@ -28,7 +28,11 @@ from ..version import parse_version
 class Composer(PackageManager):
 
     name = "PHP's Composer"
+
+    homepage_url = "https://getcomposer.org"
+
     platforms = frozenset({LINUX, MACOS, WINDOWS})
+
     requirement = "1.4.0"
 
     pre_args = ("global",)

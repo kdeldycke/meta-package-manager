@@ -31,6 +31,8 @@ class DNF(PackageManager):
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
     """
 
+    homepage_url = "https://github.com/rpm-software-management/dnf"
+
     platforms = frozenset({LINUX})
 
     requirement = "4.0.0"
@@ -198,5 +200,7 @@ class DNF(PackageManager):
 
 class YUM(DNF):
     """yum is dnf is yum."""
+
+    homepage_url = "http://yum.baseurl.org"
 
     cli_names = ("yum",)

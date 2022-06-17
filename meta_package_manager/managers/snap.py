@@ -26,6 +26,8 @@ from ..version import parse_version
 
 class Snap(PackageManager):
 
+    homepage_url = "https://snapcraft.io"
+
     platforms = frozenset({LINUX})
 
     requirement = "2.0.0"

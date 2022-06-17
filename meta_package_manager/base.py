@@ -98,6 +98,9 @@ class PackageManager:
         """
         return cls.__name__
 
+    homepage_url = None
+    """Home page of the project, only used in documentation for reference."""
+
     platforms = frozenset()
     """List of platforms supported by the manager."""
 

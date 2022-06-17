@@ -34,6 +34,8 @@ class Yarn(PackageManager):
 
     name = "Node's yarn"
 
+    homepage_url = "https://yarnpkg.com"
+
     platforms = frozenset({LINUX, MACOS, WINDOWS})
 
     requirement = "1.21.0"

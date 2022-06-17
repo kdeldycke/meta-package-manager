@@ -28,6 +28,8 @@ class Cargo(PackageManager):
 
     name = "Rust's cargo"
 
+    homepage_url = "https://doc.rust-lang.org/cargo/"
+
     platforms = frozenset({MACOS, LINUX, WINDOWS})
 
     requirement = "1.0.0"

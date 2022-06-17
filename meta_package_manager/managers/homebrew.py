@@ -477,6 +477,8 @@ class Brew(Homebrew):
 
     name = "Homebrew Formulae"
 
+    homepage_url = "https://brew.sh"
+
     cli_names = ("brew",)
 
     post_args = ("--formula",)
@@ -485,6 +487,8 @@ class Brew(Homebrew):
 class Cask(Homebrew):
 
     name = "Homebrew Cask"
+
+    homepage_url = "https://caskroom.github.io"
 
     # Casks are only available on macOS, not Linux.
     platforms = frozenset({MACOS})

@@ -34,6 +34,8 @@ class Pip(PackageManager):
     Source: https://snarky.ca/why-you-should-use-python-m-pip/
     """
 
+    homepage_url = "https://pypi.org"
+
     platforms = frozenset({MACOS, LINUX, WINDOWS})
 
     requirement = "10.0.0"

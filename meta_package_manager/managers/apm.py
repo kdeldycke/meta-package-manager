@@ -29,6 +29,8 @@ class APM(PackageManager):
 
     name = "Atom's apm"
 
+    homepage_url = "https://atom.io/packages"
+
     platforms = frozenset({LINUX, MACOS, WINDOWS})
 
     requirement = "1.0.0"

@@ -30,6 +30,8 @@ class NPM(PackageManager):
 
     name = "Node's npm"
 
+    homepage_url = "https://www.npmjs.com"
+
     platforms = frozenset({LINUX, MACOS, WINDOWS})
 
     requirement = "4.0.0"

@@ -27,6 +27,8 @@ from ..version import parse_version
 class Pacman(PackageManager):
     """See command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta."""
 
+    homepage_url = "https://wiki.archlinux.org/title/pacman"
+
     platforms = frozenset({LINUX})
 
     requirement = "5.0.0"
@@ -211,6 +213,8 @@ class Pacman(PackageManager):
 class Paru(Pacman):
     """``paru`` wraps ``pacman`` and shadows its options."""
 
+    homepage_url = "https://github.com/Morganamilo/paru"
+
     # v1.9.3 is the first version implementing the --sysupgrade option.
     requirement = "1.9.3"
 
@@ -226,6 +230,8 @@ class Paru(Pacman):
 
 class Yay(Pacman):
     """``yay`` wraps ``pacman`` and shadows its options."""
+
+    homepage_url = "https://github.com/Jguer/yay"
 
     requirement = "11.0.0"
 

@@ -35,6 +35,8 @@ class APT(PackageManager):
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
     """
 
+    homepage_url = "https://wiki.debian.org/AptCLI"
+
     platforms = frozenset({LINUX})
 
     requirement = "1.0.0"
@@ -277,6 +279,8 @@ class APT_Mint(APT):
     """
 
     name = "Linux Mint's apt"
+
+    homepage_url = "https://github.com/kdeldycke/meta-package-manager/issues/52"
 
     cli_names = ("apt",)
 

@@ -25,6 +25,7 @@ from types import MethodType
 
 import pytest
 from boltons.iterutils import unique
+from boltons.urlutils import URL
 from click_extra.platform import OS_DEFINITIONS
 
 from ..base import PackageManager
@@ -67,6 +68,15 @@ def test_name(manager):
 
 def test_unique_names():
     assert len({m.name for m in pool.values()}) == len(pool.all_manager_ids)
+
+
+@all_managers
+def test_homepage_url(manager):
+    assert manager.homepage_url
+    assert isinstance(manager.homepage_url, str)
+    location = URL(manager.homepage_url)
+    assert location
+    assert location.scheme.lower() in ("http", "https")
 
 
 @all_managers

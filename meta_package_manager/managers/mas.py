@@ -28,6 +28,8 @@ class MAS(PackageManager):
 
     name = "Mac AppStore"
 
+    homepage_url = "https://github.com/argon/mas"
+
     platforms = frozenset({MACOS})
 
     # 'mas search' output has been fixed in 1.6.1:

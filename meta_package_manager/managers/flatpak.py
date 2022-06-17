@@ -26,6 +26,8 @@ from ..version import parse_version
 
 class Flatpak(PackageManager):
 
+    homepage_url = "https://flatpak.org"
+
     platforms = frozenset({LINUX})
 
     requirement = "1.2.0"

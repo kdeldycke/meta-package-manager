@@ -25,6 +25,8 @@ from ..version import parse_version
 
 class Pipx(PackageManager):
 
+    homepage_url = "https://pypa.github.io/pipx/"
+
     platforms = frozenset({MACOS, LINUX, WINDOWS})
 
     requirement = "1.0.0"

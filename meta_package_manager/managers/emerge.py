@@ -33,6 +33,8 @@ class Emerge(PackageManager):
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
     """
 
+    homepage_url = "https://wiki.gentoo.org/wiki/Portage#emerge"
+
     platforms = frozenset({LINUX})
 
     requirement = "3.0.0"

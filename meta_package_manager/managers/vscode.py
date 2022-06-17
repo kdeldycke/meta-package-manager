@@ -28,6 +28,8 @@ class VSCode(PackageManager):
 
     name = "Visual Studio Code"
 
+    homepage_url = "https://code.visualstudio.com"
+
     platforms = frozenset({LINUX, MACOS, WINDOWS})
 
     requirement = "1.60.0"

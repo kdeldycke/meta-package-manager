@@ -26,6 +26,8 @@ from ..version import parse_version
 
 class OPKG(PackageManager):
 
+    homepage_url = "https://git.yoctoproject.org/cgit/cgit.cgi/opkg/"
+
     platforms = frozenset({LINUX})
 
     requirement = "0.2.0"

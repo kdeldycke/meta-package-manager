@@ -28,6 +28,8 @@ class Gem(PackageManager):
 
     name = "Ruby Gems"
 
+    homepage_url = "https://rubygems.org"
+
     platforms = frozenset({LINUX, MACOS, WINDOWS})
 
     # Default to the version shipped with the latest maintained macOS version,

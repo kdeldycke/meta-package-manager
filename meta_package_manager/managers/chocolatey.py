@@ -27,6 +27,8 @@ class Choco(PackageManager):
 
     name = "Chocolatey"
 
+    homepage_url = "https://chocolatey.org"
+
     platforms = frozenset({WINDOWS})
 
     requirement = "0.10.4"

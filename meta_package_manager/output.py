@@ -56,6 +56,39 @@ SORTABLE_FIELDS = {
 """List of fields IDs allowed to be sorted."""
 
 
+def colored_diff(a, b, style_common=None, style_a=None, style_b=None):
+    """Highlight the most common left part between ``a`` and ``b`` strings and their trailing differences.
+
+    Always returns 2 strings.
+    """
+    # Set defaults stling methods.
+    style_common = partial(style, fg="bright_black")
+    style_a = partial(style, fg="red")
+    style_b = partial(style, fg="green")
+
+    if isinstance(a, TokenizedString):
+        a = str(a)
+    if isinstance(b, TokenizedString):
+        b = str(b)
+
+    common_size = 0
+    if a and b:
+        while (min(len(a), len(b)) - 1) >= common_size and a[common_size] == b[common_size]:
+            common_size += 1
+
+    # Styling of common and different parts.
+    colored_a = ""
+    colored_b = ""
+    if common_size:
+        colored_a = colored_b = style_common(a[:common_size])
+    if a:
+        colored_a += style_a(a[common_size:])
+    if b:
+        colored_b += style_b(b[common_size:])
+
+    return colored_a, colored_b
+
+
 def not_implemented_json_handler(data, headers, **kwargs):
     """Dummy `TabularOutputFormatter <https://cli-helpers.readthedocs.io/en/latest/api.h
     tml#cli_helpers.tabular_output.TabularOutputFormatter>`_ renderer.

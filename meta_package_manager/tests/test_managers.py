@@ -249,6 +249,16 @@ def test_outdated_type(manager):
                 assert isinstance(pkg["latest_version"], TokenizedString)
 
 
+@pytest.mark.parametrize("query,query_parts", (
+    ("cli-l-cli", {"cli", "l"}),
+    ("ab12--cd34", {"ab12", "cd34"}),
+    ("123/extra.34", {"123", "extra", "34"}),
+    ("AB ab", {"AB", "ab"}),
+))
+def test_query_parts(query, query_parts):
+    assert PackageManager.query_parts(query) == query_parts
+
+
 @all_managers
 def test_search_type(manager):
     """All search operations are either not implemented or returns a generator of

@@ -643,6 +643,14 @@ class PackageManager:
         """
         raise NotImplementedError
 
+    @classmethod
+    def query_parts(cls, query):
+        """Returns a set of all contiguous alphanumeric string segments.
+
+        Contrary to :py:class:`meta_package_manager.version.TokenizedString`, do no splits on colated number/alphabetic junctions.
+        """
+        return {p for p in re.split(r"\W+", query) if p}
+
     def refiltered_search(self, query, extended, exact):
         """Returns search results with extra manual refiltering to refine gross
         matchings.
@@ -665,11 +673,14 @@ class PackageManager:
             description = match["description"]
             version = match["latest_version"]
 
-            # Exclude packages not featuring the search query in their ID or name.
+            # Exclude packages not featuring parts of the search query in their ID or name.
             if not extended:
-                query_parts = set(map(str, TokenizedString(query)))
-                pkg_parts = set(map(str, TokenizedString(package_id)))
-                if not query_parts.issubset(pkg_parts):
+                confirmed_match = False
+                for part in {p.lower() for p in self.query_parts(query)}:
+                    if part in (package_id + package_name).lower():
+                        confirmed_match = True
+                        continue
+                if not confirmed_match:
                     continue
 
             # Filters out fuzzy matches, only keep stricly matching packages.

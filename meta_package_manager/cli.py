@@ -49,11 +49,12 @@ else:
 from cloup import Section
 
 from . import __version__, bar_plugin, logger
-from .base import CLIError
+from .base import CLIError, PackageManager
 from .output import (
     SORTABLE_FIELDS,
     BarPluginRenderer,
     TabularOutputFormatter,
+    colored_diff,
     print_json,
     print_stats,
     print_table,
@@ -494,16 +495,20 @@ def outdated(ctx, plugin_output):
     # Human-friendly content rendering.
     table = []
     for manager_id, outdated_pkg in outdated_data.items():
-        table += [
-            (
-                info["name"],
-                info["id"],
-                manager_id,
+        for info in outdated_pkg["packages"]:
+            installed_version, latest_version = colored_diff(
                 info["installed_version"] if info["installed_version"] else "?",
-                info["latest_version"],
+                info["latest_version"]
             )
-            for info in outdated_pkg["packages"]
-        ]
+            table.append(
+                (
+                    info["name"],
+                    info["id"],
+                    manager_id,
+                    installed_version,
+                    latest_version,
+                )
+            )
 
     # Sort and print table.
     print_table(
@@ -577,7 +582,7 @@ def search(ctx, extended, exact, query):
         return
 
     # Prepare highlighting helpers.
-    query_parts = {query}.union(map(str, TokenizedString(query)))
+    query_parts = {query}.union(PackageManager.query_parts(query))
     highlight_query = cached(LRI(max_size=1000))(
         partial(
             highlight,

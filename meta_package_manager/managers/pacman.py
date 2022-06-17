@@ -225,12 +225,12 @@ class Paru(Pacman):
 
 
 class Yay(Pacman):
-    """yay has the commands equivalent to pacman."""
+    """``yay`` wraps ``pacman`` and shadows its options."""
 
     requirement = "11.0.0"
 
-    version_regex = r".*yay\s+v(?P<version>\S+)"
-    r"""Search version right after the ``yay `` string.
+    version_regex = r"yay\s+v(?P<version>\S+)"
+    r"""Search version right after the ``yay`` string.
 
     .. code-block:: shell-session
 

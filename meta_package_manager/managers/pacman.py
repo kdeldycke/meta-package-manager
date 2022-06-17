@@ -160,36 +160,35 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pacman --noconfirm --sync firefox
+            ► sudo pacman --noconfirm --sync firefox
         """
-        return self.run_cli("--sync", package_id)
+        return self.run_cli("--sync", package_id, sudo=True)
 
     def upgrade_cli(self, package_id=None):
         """Generates the CLI to upgrade the package provided as parameter.
 
         .. code-block:: shell-session
 
-            ► pacman --noconfirm --sync --refresh --sysupgrade
+            ► sudo pacman --noconfirm --sync --refresh --sysupgrade
 
         .. code-block:: shell-session
 
-            ► pacman --noconfirm --sync firefox
+            ► sudo pacman --noconfirm --sync firefox
         """
         params = ("--refresh", "--sysupgrade")
         if package_id:
             params = (package_id,)
 
-        return self.build_cli("--sync", *params)
+        return self.build_cli("--sync", *params, sudo=True)
 
     def remove(self, package_id):
         """Removes a package.
 
         .. code-block:: shell-session
 
-            ► pacman --noconfirm --remove firefox
+            ► sudo pacman --noconfirm --remove firefox
         """
-
-        self.run_cli("--remove", package_id)
+        self.run_cli("--remove", package_id, sudo=True)
 
     def sync(self):
         """Sync package metadata.
@@ -205,9 +204,9 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pacman --noconfirm --sync --clean --clean
+            ► sudo pacman --noconfirm --sync --clean --clean
         """
-        self.run_cli("--sync", "--clean", "--clean")
+        self.run_cli("--sync", "--clean", "--clean", sudo=True)
 
 
 class Paru(Pacman):

@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[paru\] Add `paru` support.
+- \[pacman,paru,yay\] Run `install`, `upgrade`, `remove` and `cleanup` operations with `sudo`.
 - \[mpm\] Colorize version differences in `outdated` operation output.
 - \[mpm\] Add manager homepage URL metadata.
 

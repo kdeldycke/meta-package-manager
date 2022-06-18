@@ -20,7 +20,6 @@ import re
 
 from click_extra.platform import LINUX, MACOS
 
-from .. import logger
 from ..base import PackageManager
 from ..version import parse_version
 
@@ -287,22 +286,62 @@ class Homebrew(PackageManager):
         .. code-block:: shell-session
 
             ► brew search "/^sed$/" --formulae
-            No formula or cask found for "/^sed$/".
-            Closed pull requests:
-            Merge ba7a794 (https://github.com/Homebrew/linuxbrew-core/pull/198)
-            R: disable Tcl (https://github.com/Homebrew/homebrew-core/pull/521)
-            (...)
+            Error: No formula or cask found for "/^sed$/".
 
-        More doc at: https://docs.brew.sh/Manpage#search-texttext
+        .. code-block:: shell-session
+
+            ► brew search tetris --formulae --desc
+            ==> Formulae
+            bastet: Bastard Tetris
+            netris: Networked variant of tetris
+            vitetris: Terminal-based Tetris clone
+            yetris: Customizable Tetris for the terminal
+
+        .. code-block:: shell-session
+
+            ► brew search tetris --cask --desc
+            ==> Casks
+            not-tetris: (Not Tetris) [no description]
+            tetrio: (TETR.IO) Free-to-play Tetris clone
+
+        More doc at: https://docs.brew.sh/Manpage#search--s-options-textregex-
         """
+        # Keep track of package IDs already matched by the first extended search pass.
+        matched_ids = set()
+
+        # Additional search on description only.
         if extended:
-            logger.warning(f"{self.id} does not implement extended search operation.")
 
-        # Use regexp for exact match.
-        if exact:
-            query = f"/^{query}$/"
+            output = self.run_cli("search", query, "--desc")
 
-        output = self.run_cli("search", query)
+            regexp = re.compile(
+                r"""
+                (?:==>\s\S+\s)?           # Ignore section starting with '==>'.
+                (?P<package_id>\S+)       # Any non-empty characters.
+                :                         # Semi-colon.
+                (                         # Optional group start (ignored below with "_" variable).
+                    \s+                   # Blank characters.
+                    \(                    # Opening parenthesis.
+                    (?P<package_name>.+)  # Any string.
+                    \)                    # Closing parenthesis.
+                )?                        # Optional group end.
+                \s+                       # Blank characters.
+                (?P<description>.+)       # Any string.
+                """,
+                re.VERBOSE,
+            )
+
+            for package_id, _, package_name, description in regexp.findall(output):
+                matched_ids.add(package_id)
+                yield {
+                    "id": package_id,
+                    "name": package_name,
+                    "description": description if description != "[no description]" else None,
+                    "latest_version": None,
+                }
+
+        # Use regexp if exact match is requested.
+        output = self.run_cli("search", f"/^{query}$/" if exact else query)
 
         regexp = re.compile(
             r"""
@@ -313,12 +352,14 @@ class Homebrew(PackageManager):
         )
 
         for package_id in regexp.findall(output):
-            yield {
-                "id": package_id,
-                "name": package_id,
-                "description": None,
-                "latest_version": None,
-            }
+            # Deduplicate search results.
+            if package_id not in matched_ids:
+                yield {
+                    "id": package_id,
+                    "name": package_id,
+                    "description": None,
+                    "latest_version": None,
+                }
 
     def install(self, package_id):
         """Install one package.

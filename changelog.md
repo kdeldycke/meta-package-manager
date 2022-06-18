@@ -8,6 +8,7 @@ This version is not released yet and is under active development.
 
 - \[paru\] Add `paru` support.
 - \[pacman,paru,yay\] Run `install`, `upgrade`, `remove` and `cleanup` operations with `sudo`.
+- \[brew,cask\] Implement extended search on description.
 - \[mpm\] Colorize version differences in `outdated` operation output.
 - \[mpm\] Add manager homepage URL metadata.
 - \[mpm\] Keep results matching description in `--extended` search mode.

@@ -107,7 +107,16 @@ class Homebrew(PackageManager):
 
         output = self.run_cli("list", "--versions")
 
-        regexp = re.compile(r"(\S+)( \(!\))? (.+)")
+        regexp = re.compile(
+            r"""
+            (?P<package_id>\S+)     # Any non-empty characters.
+            (?P<removed> \(!\))?    # Package removed flag.
+            \                       # A space.
+            (?P<versions>.+)        # Versions.
+            """,
+            re.VERBOSE,
+        )
+
         for pkg_info in output.splitlines():
             match = regexp.match(pkg_info)
             if match:

@@ -655,38 +655,49 @@ class PackageManager:
         """Returns search results with extra manual refiltering to refine gross
         matchings.
 
-        Some package managers returns unbounded results, and don't support finer
+        Some package managers returns unbounded results, and/or don't support fine
         search criterions. In which case we use this method to manually refilters
-        :py:meth:`meta_package_manager.base.PackageManager.search`
-        results to either exclude non-extended
-        or non-exact matches.
+        :py:meth:`meta_package_manager.base.PackageManager.search` results to either
+        exclude non-extended or non-exact matches.
 
-        Returns a generator producing the same data as the :py:meth:`meta_package_manager.base.PackageManager.search` method above.
+        Returns a generator producing the same data as the
+        :py:meth:`meta_package_manager.base.PackageManager.search` method above.
 
-        There is no need to have this method implemented by package manager definitions. Just implement the core
-        :py:meth:`meta_package_manager.base.PackageManager.search` method and produce results as precise as possible.
+        .. tip::
+
+            If you are implementing a package manager definition, do not waste time to
+            filter CLI results. Let this method do this job.
+
+            Instead, just implement the core
+            :py:meth:`meta_package_manager.base.PackageManager.search` method above and
+            try to produce results as precise as possible using the native filtering
+            capabilities of the package manager CLI.
         """
         for match in self.search(query, extended, exact):
+            # Look by default into package ID and name.
+            search_content = {match["id"], match["name"]}
 
-            package_id = match["id"]
-            package_name = match["name"]
-            description = match["description"]
-            version = match["latest_version"]
-
-            # Exclude packages not featuring parts of the search query in their ID or name.
-            if not extended:
-                confirmed_match = False
-                for part in {p.lower() for p in self.query_parts(query)}:
-                    if part in (package_id + package_name).lower():
-                        confirmed_match = True
-                        continue
-                if not confirmed_match:
-                    continue
-
-            # Filters out fuzzy matches, only keep stricly matching packages.
-            if exact and query not in (package_id, package_name):
+            # Rejects fuzzy results: only keep packages stricly matching on ID or name.
+            if exact and query not in search_content:
                 continue
 
+            # Add description to the list of content to look into.
+            if extended:
+                search_content.add(match["description"])
+
+            # Normalize searched content.
+            search_content = ''.join({s.lower() for s in search_content if s})
+
+            # Exclude packages not matching any part of the query.
+            confirmed_match = False
+            for part in {p.lower() for p in self.query_parts(query)}:
+                if part in search_content:
+                    confirmed_match = True
+                    break
+            if not confirmed_match:
+                continue
+
+            # Report the package as matching.
             yield match
 
     def install(self, package_id):

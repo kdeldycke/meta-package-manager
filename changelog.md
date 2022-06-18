@@ -10,6 +10,7 @@ This version is not released yet and is under active development.
 - \[pacman,paru,yay\] Run `install`, `upgrade`, `remove` and `cleanup` operations with `sudo`.
 - \[mpm\] Colorize version differences in `outdated` operation output.
 - \[mpm\] Add manager homepage URL metadata.
+- \[mpm\] Keep results matching description in `--extended` search mode.
 
 ## {gh}`5.2.0 (2022-06-16) <compare/v5.1.0...v5.2.0>`
 

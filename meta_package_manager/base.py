@@ -607,6 +607,14 @@ class PackageManager:
         """
         raise NotImplementedError
 
+    @classmethod
+    def query_parts(cls, query):
+        """Returns a set of all contiguous alphanumeric string segments.
+
+        Contrary to :py:class:`meta_package_manager.version.TokenizedString`, do no splits on colated number/alphabetic junctions.
+        """
+        return {p for p in re.split(r"\W+", query) if p}
+
     def search(self, query, extended, exact):
         """Search packages available for install.
 
@@ -642,14 +650,6 @@ class PackageManager:
         Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
         raise NotImplementedError
-
-    @classmethod
-    def query_parts(cls, query):
-        """Returns a set of all contiguous alphanumeric string segments.
-
-        Contrary to :py:class:`meta_package_manager.version.TokenizedString`, do no splits on colated number/alphabetic junctions.
-        """
-        return {p for p in re.split(r"\W+", query) if p}
 
     def refiltered_search(self, query, extended, exact):
         """Returns search results with extra manual refiltering to refine gross

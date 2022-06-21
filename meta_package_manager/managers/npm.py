@@ -34,6 +34,12 @@ class NPM(PackageManager):
 
     requirement = "4.0.0"
 
+    pre_args = (
+        "--global",
+        "--progress=false",
+        "--no-update-notifier",
+    )
+
     """
     .. code-block:: shell-session
 
@@ -48,7 +54,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --json --no-update-notifier outdated
+            ► npm --global --progress=false --no-update-notifier --json outdated
             {
               "error": {
                 "code": "ERR_OUT_OF_RANGE",
@@ -75,7 +81,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --json list | jq
+            ► npm --global --progress=false --no-update-notifier --json list | jq
             {
               "dependencies": {
                 "npm": {
@@ -112,7 +118,7 @@ class NPM(PackageManager):
         """
         installed = []
 
-        output = self.run_cli("--global", "--json", "list")
+        output = self.run_cli("--json", "list")
 
         if output:
 
@@ -132,7 +138,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --json --no-update-notifier outdated
+            ► npm --global --progress=false --no-update-notifier --json outdated
             {
               "my-linked-package": {
                 "current": "0.0.0-development",
@@ -148,13 +154,7 @@ class NPM(PackageManager):
               }
             }
         """
-        output = self.run_cli(
-            "--global",
-            "--progress=false",
-            "--json",
-            "--no-update-notifier",
-            "outdated",
-        )
+        output = self.run_cli("--json", "outdated")
 
         if output:
             for package_id, values in json.loads(output).items():
@@ -176,7 +176,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm search --json python | jq
+            ► npm --global --progress=false --no-update-notifier search --json python | jq
             [
               {
                 "name": "python",
@@ -244,7 +244,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm search --json --no-description python | jq
+            ► npm --global --progress=false --no-update-notifier search --json --no-description python | jq
         """
         if exact:
             logger.warning(f"{self.id} does not implement exact search operation.")
@@ -270,13 +270,7 @@ class NPM(PackageManager):
 
             ► npm --global --progress=false --no-update-notifier install raven
         """
-        return self.run_cli(
-            "--global",
-            "--progress=false",
-            "--no-update-notifier",
-            "install",
-            package_id,
-        )
+        return self.run_cli("install", package_id)
 
     def upgrade_cli(self, package_id=None, version=None):
         """Generates the CLI to upgrade all packages (default) or only the one provided
@@ -297,6 +291,4 @@ class NPM(PackageManager):
                 f"{package_id}@{version}" if version else package_id,
             )
 
-        return self.build_cli(
-            "--global", "--progress=false", "--no-update-notifier", *cmd_args
-        )
+        return self.build_cli(*cmd_args)

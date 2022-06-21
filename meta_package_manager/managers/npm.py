@@ -16,14 +16,12 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import json
-from operator import itemgetter
 
 from boltons.iterutils import remap
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from .. import logger
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class NPM(PackageManager):
@@ -112,7 +110,7 @@ class NPM(PackageManager):
                     },
             (...)
         """
-        installed = {}
+        installed = []
 
         output = self.run_cli("--global", "--json", "list")
 
@@ -121,11 +119,7 @@ class NPM(PackageManager):
             def visit(path, key, value):
                 if key == "version":
                     package_id = path[-1]
-                    installed[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "installed_version": parse_version(value),
-                    }
+                    installed.append(Package(id=package_id, installed_version=value))
                 return True
 
             remap(json.loads(output), visit=visit)
@@ -154,8 +148,6 @@ class NPM(PackageManager):
               }
             }
         """
-        outdated = {}
-
         output = self.run_cli(
             "--global",
             "--progress=false",
@@ -168,14 +160,11 @@ class NPM(PackageManager):
             for package_id, values in json.loads(output).items():
                 if values["wanted"] == "linked":
                     continue
-                outdated[package_id] = {
-                    "id": f"{package_id}@{values['latest']}",
-                    "name": package_id,
-                    "installed_version": parse_version(values["current"]),
-                    "latest_version": parse_version(values["latest"]),
-                }
-
-        return outdated
+                yield Package(
+                    id=f"{package_id}@{values['latest']}",
+                    installed_version=values["current"],
+                    latest_version=values["latest"],
+                )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -267,15 +256,12 @@ class NPM(PackageManager):
         output = self.run_cli("search", "--json", search_args, query)
 
         if output:
-            for package_id, version, description in map(
-                itemgetter("name", "version", "description"), json.loads(output)
-            ):
-                yield {
-                    "id": package_id,
-                    "name": package_id,
-                    "description": description,
-                    "latest_version": parse_version(version),
-                }
+            for pkg in json.loads(output):
+                yield Package(
+                    id=pkg.get("name"),
+                    description=pkg.get("description"),
+                    latest_version=pkg.get("version"),
+                )
 
     def install(self, package_id):
         """Install one package.

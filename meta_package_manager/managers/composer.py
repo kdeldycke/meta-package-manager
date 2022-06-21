@@ -21,8 +21,7 @@ import re
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from .. import logger
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class Composer(PackageManager):
@@ -76,22 +75,12 @@ class Composer(PackageManager):
                 },
             (...)
         """
-        installed = {}
-
         output = self.run_cli("show", "--format=json")
-
         if output:
-
             package_list = json.loads(output)
             for package in package_list["installed"]:
                 package_id = package["name"]
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(package["version"]),
-                }
-
-        return installed
+                yield Package(id=package_id, installed_version=package["version"])
 
     @property
     def outdated(self):
@@ -119,22 +108,17 @@ class Composer(PackageManager):
                 ]
             }
         """
-        outdated = {}
-
         output = self.run_cli("outdated", "--format=json")
 
         if output:
             package_list = json.loads(output)
             for package in package_list["installed"]:
                 package_id = package["name"]
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(package["version"]),
-                    "latest_version": parse_version(package["latest"]),
-                }
-
-        return outdated
+                yield Package(
+                    id=package_id,
+                    installed_version=package["version"],
+                    latest_version=package["latest"],
+                )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -196,12 +180,7 @@ class Composer(PackageManager):
         )
 
         for package_id, description in regexp.findall(output):
-            yield {
-                "id": package_id,
-                "name": package_id,
-                "description": description,
-                "latest_version": None,
-            }
+            yield Package(id=package_id, description=description)
 
     def install(self, package_id):
         """Install one package.

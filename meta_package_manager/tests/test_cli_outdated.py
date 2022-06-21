@@ -22,6 +22,7 @@ import json
 import pytest
 from boltons.iterutils import same
 
+from ..base import Package
 from ..pool import pool
 from .test_cli import CLISubCommandTests, CLITableTests
 
@@ -73,16 +74,8 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
             for pkg in info["packages"]:
                 assert isinstance(pkg, dict)
 
-                assert set(pkg) == {
-                    "id",
-                    "installed_version",
-                    "latest_version",
-                    "name",
-                    "upgrade_cli",
-                }
+                fields = set(Package.__dataclass_fields__).union({"upgrade_cli"})
+                assert set(pkg) == fields
 
-                assert isinstance(pkg["id"], str)
-                assert isinstance(pkg["installed_version"], str)
-                assert isinstance(pkg["latest_version"], str)
-                assert isinstance(pkg["name"], str)
-                assert isinstance(pkg["upgrade_cli"], str)
+                for f in fields:
+                    assert isinstance(pkg[f], str) or pkg[f] is None

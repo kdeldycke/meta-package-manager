@@ -19,8 +19,7 @@ import re
 
 from click_extra.platform import WINDOWS
 
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class Choco(PackageManager):
@@ -56,8 +55,6 @@ class Choco(PackageManager):
             gimp|2.8.14.1
             git|1.9.5.20150114
         """
-        installed = {}
-
         output = self.run_cli("list", "--local-only", "--limit-output")
 
         regexp = re.compile(r"(.+)\|(.+)")
@@ -65,13 +62,7 @@ class Choco(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, installed_version = match.groups()
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(installed_version),
-                }
-
-        return installed
+                yield Package(id=package_id, installed_version=installed_version)
 
     @property
     def outdated(self):
@@ -89,8 +80,6 @@ class Choco(PackageManager):
             calibre|3.17.0|3.17.0|false
             chocolatey|0.10.8|0.10.8|false
         """
-        outdated = {}
-
         output = self.run_cli("outdated", "--limit-output")
 
         regexp = re.compile(r"(.+)\|(.+)\|(.+)\|.+")
@@ -98,14 +87,11 @@ class Choco(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, installed_version, latest_version = match.groups()
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": parse_version(latest_version),
-                    "installed_version": parse_version(installed_version),
-                }
-
-        return outdated
+                yield Package(
+                    id=package_id,
+                    latest_version=latest_version,
+                    installed_version=installed_version,
+                )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -151,12 +137,7 @@ class Choco(PackageManager):
 
         regexp = re.compile(r"(.+)\|(.+)")
         for package_id, latest_version in regexp.findall(output):
-            yield {
-                "id": package_id,
-                "name": package_id,
-                "description": None,
-                "latest_version": parse_version(latest_version),
-            }
+            yield Package(id=package_id, latest_version=latest_version)
 
     def install(self, package_id):
         """Install one package.

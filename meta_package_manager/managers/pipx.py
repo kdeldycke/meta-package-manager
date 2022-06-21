@@ -19,8 +19,7 @@ import json
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class Pipx(PackageManager):
@@ -78,22 +77,14 @@ class Pipx(PackageManager):
               }
             }
         """
-        installed = {}
-
         output = self.run_cli("list", "--json")
 
         if output:
             for package_id, package_info in json.loads(output)["venvs"].items():
-                package_version = package_info["metadata"]["main_package"][
-                    "package_version"
-                ]
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(package_version),
-                }
-
-        return installed
+                yield Package(
+                    id=package_id,
+                    installed_version=package_info["metadata"]["main_package"]["package_version"],
+                )
 
     def install(self, package_id):
         """Install one package.

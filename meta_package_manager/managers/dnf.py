@@ -20,8 +20,7 @@ import re
 from click_extra.platform import LINUX
 
 from .. import logger
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class DNF(PackageManager):
@@ -63,21 +62,13 @@ class DNF(PackageManager):
             audit-libs.x86_64  3.0-0.10.20180831git0047a6c.el8      @anaconda
             (...)
         """
-        installed = {}
-
         output = self.run_cli("list", "--installed")
 
         for package in output.splitlines()[1:]:
             match = self.list_cmd_regexp.match(package)
             if match:
                 package_id, installed_version = match.groups()
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(installed_version),
-                }
-
-        return installed
+                yield Package(id=package_id, installed_version=installed_version)
 
     @property
     def outdated(self):
@@ -93,21 +84,13 @@ class DNF(PackageManager):
             audit-libs.x86_64        3.0-0.10.20180831git0047a6c.el8     updates
             (...)
         """
-        outdated = {}
-
         output = self.run_cli("list", "--upgrades")
 
         for package in output.splitlines()[2:]:
             match = self.list_cmd_regexp.match(package)
             if match:
                 package_id, latest_version = match.groups()
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": parse_version(latest_version),
-                }
-
-        return outdated
+                yield Package(id=package_id, latest_version=latest_version)
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -147,12 +130,7 @@ class DNF(PackageManager):
             match = regexp.match(line)
             if match:
                 package_id, description = match.groups()
-                yield {
-                    "id": package_id,
-                    "name": package_id,
-                    "description": description,
-                    "latest_version": None,
-                }
+                yield Package(id=package_id, description=description)
 
     def install(self, package_id):
         """Install one package.

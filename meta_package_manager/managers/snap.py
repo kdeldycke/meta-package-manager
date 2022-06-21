@@ -20,8 +20,7 @@ import re
 from click_extra.platform import LINUX
 
 from .. import logger
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class Snap(PackageManager):
@@ -58,20 +57,12 @@ class Snap(PackageManager):
             wechat  2.0        7     latest/stable  ubuntu-dawndiy  -
             pdftk   2.02-4     9     latest/stable  smoser          -
         """
-        installed = {}
-
         output = self.run_cli("list")
 
         for package in output.splitlines()[1:]:
             package_id = package.split()[0]
             installed_version = package.split()[1]
-            installed[package_id] = {
-                "id": package_id,
-                "name": package_id,
-                "installed_version": parse_version(installed_version),
-            }
-
-        return installed
+            yield Package(id=package_id, installed_version=installed_version)
 
     @property
     def outdated(self):
@@ -83,8 +74,6 @@ class Snap(PackageManager):
             Name            Version  Rev  Herausgeber     Hinweise
             standard-notes  3.3.5    8    standardnotes✓  -
         """
-        outdated = {}
-
         output = self.run_cli("refresh", "--list")
 
         for package in output.splitlines()[1:]:
@@ -93,14 +82,11 @@ class Snap(PackageManager):
             installed_version = (
                 self.run_cli("list", package_id).splitlines()[-1].split()[1]
             )
-            outdated[package_id] = {
-                "id": package_id,
-                "name": package_id,
-                "latest_version": parse_version(latest_version),
-                "installed_version": parse_version(installed_version),
-            }
-
-        return outdated
+            yield Package(
+                id=package_id,
+                latest_version=latest_version,
+                installed_version=installed_version,
+            )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -134,12 +120,11 @@ class Snap(PackageManager):
         for package_id, version, description in regexp.findall(
             output.split("\n", 1)[1]
         ):
-            yield {
-                "id": package_id,
-                "name": package_id,
-                "description": description,
-                "latest_version": parse_version(version),
-            }
+            yield Package(
+                id=package_id,
+                description=description,
+                latest_version=version,
+            )
 
     def install(self, package_id):
         """Install one package.

@@ -20,8 +20,7 @@ import re
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from .. import logger
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class Cargo(PackageManager):
@@ -60,8 +59,6 @@ class Cargo(PackageManager):
             ripgrep v13.0.0:
                 rg
         """
-        installed = {}
-
         output = self.run_cli("install", "--list")
 
         regexp = re.compile(r"^(?P<package_id>\S+)\s+v(?P<package_version>\S+):$")
@@ -70,13 +67,7 @@ class Cargo(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, package_version = match.groups()
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(package_version),
-                }
-
-        return installed
+                yield Package(id=package_id, installed_version=package_version)
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -117,12 +108,11 @@ class Cargo(PackageManager):
         )
 
         for package_id, version, description in regexp.findall(output):
-            yield {
-                "id": package_id,
-                "name": package_id,
-                "description": description,
-                "latest_version": parse_version(version),
-            }
+            yield Package(
+                id=package_id,
+                description=description,
+                latest_version=version,
+            )
 
     def install(self, package_id):
         """Install one package.

@@ -22,6 +22,7 @@ import json
 import pytest
 from boltons.iterutils import same
 
+from ..base import Package
 from ..pool import pool
 from .test_cli import CLISubCommandTests, CLITableTests
 
@@ -63,8 +64,8 @@ class TestInstalled(CLISubCommandTests, CLITableTests):
             for pkg in info["packages"]:
                 assert isinstance(pkg, dict)
 
-                assert set(pkg) == {"id", "installed_version", "name"}
+                fields = set(Package.__dataclass_fields__)
+                assert set(pkg) == fields
 
-                assert isinstance(pkg["id"], str)
-                assert isinstance(pkg["installed_version"], str)
-                assert isinstance(pkg["name"], str)
+                for f in fields:
+                    assert isinstance(pkg[f], str) or pkg[f] is None

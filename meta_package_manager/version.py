@@ -19,6 +19,7 @@
 
 import operator
 import re
+from copy import deepcopy
 from functools import partial
 
 from boltons import strutils
@@ -156,15 +157,32 @@ class TokenizedString:
 
     def __new__(cls, value, *args, **kwargs):
         """Return same object if a ``TokenizedString`` parameter is used at
-        instanciation."""
-        if isinstance(value, TokenizedString):
+        instanciation.
+
+        .. hint::
+
+            If :py:meth:`object.__new__` returns an instance of ``cls``, then the new instance's
+            :py:meth:`object.__init__` method will be invoked.
+
+        .. seealso::
+
+            An alternative would be to `merge __init__ with __new__ <https://stackoverflow.com/a/53482003>`_.
+        """
+        if value is None:
+            return None
+        # Returns the instance as-is if of the same class. Do not reparse it.
+        if value and isinstance(value, TokenizedString):
             return value
+        # Create a brand new instance. __init__() will be auto-magiccaly called after that.
         return super().__new__(cls)
 
     def __init__(self, value, separator="-"):
+        """Parse and tokenize the provided raw ``value``."""
         if isinstance(value, TokenizedString):
-            # Skip initialization for instance of the class.
+            # Skip initialization for instance of the class, as this __init__() gets called
+            # auto-magiccaly eveytime the __new__() method above returns a TokenizedString instance.
             return
+        # Our canonical __init__() starts here.
         if isinstance(value, int):
             self.string = str(value)
         elif isinstance(value, str):
@@ -173,6 +191,28 @@ class TokenizedString:
             raise TypeError(f"{type(value)} not supported")
         self.tokens = tuple(self.tokenize(self.string))
         self.separator = separator
+
+    def __deepcopy__(self, memo):
+        """Generic recursive deep copy of the current instance.
+
+        This is required to make the :py:meth:`copy.deepcopy` called within
+        :py:meth:`dataclasses.asdict` working, because the defaults implementation doesn't know how to
+        handle the ``value`` parameter provided in the
+        :py:meth:`meta_package_manager.version.TokenizedString.__init__` method above.
+
+        .. seealso::
+
+            https://stackoverflow.com/a/57181955
+        """
+        # Extract the class of the object
+        cls = self.__class__
+        # Create a new instance of the object based on extracted class
+        instance = super(TokenizedString, self).__new__(cls)
+        memo[id(self)] = instance
+        for k, v in self.__dict__.items():
+            # Recursively copy the whole tree of objects.
+            setattr(instance, k, deepcopy(v, memo))
+        return instance
 
     def __repr__(self):
         return f"<TokenizedString {self.string} => {self.tokens}>"

@@ -15,13 +15,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import json
-
-from boltons.iterutils import remap
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from ..base import PackageManager
-from ..version import TokenizedString, parse_version
+from ..base import Package, PackageManager
 
 
 class VSCode(PackageManager):
@@ -60,19 +56,11 @@ class VSCode(PackageManager):
             tamasfe.even-better-toml@0.14.2
             trond-snekvik.simple-rst@1.5.0
         """
-        installed = {}
-
         output = self.run_cli("--list-extensions", "--show-versions")
 
         for package in output.splitlines():
             package_id, installed_version = package.split("@")
-            installed[package_id] = {
-                "id": package_id,
-                "name": package_id,
-                "installed_version": parse_version(installed_version),
-            }
-
-        return installed
+            yield Package(id=package_id, installed_version=installed_version)
 
     def install(self, package_id):
         """Install one package.

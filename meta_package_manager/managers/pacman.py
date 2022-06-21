@@ -20,8 +20,7 @@ import re
 from click_extra.platform import LINUX
 
 from .. import logger
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class Pacman(PackageManager):
@@ -66,8 +65,6 @@ class Pacman(PackageManager):
             acpi 1.7-3
             acpid 2.0.33-1
         """
-        installed = {}
-
         output = self.run_cli("--query")
 
         regexp = re.compile(r"(\S+) (\S+)")
@@ -75,13 +72,7 @@ class Pacman(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, installed_version = match.groups()
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(installed_version),
-                }
-
-        return installed
+                yield Package(id=package_id, installed_version=installed_version)
 
     @property
     def outdated(self):
@@ -93,8 +84,6 @@ class Pacman(PackageManager):
             linux 4.19.1.arch1-1 -> 4.19.2.arch1-1
             linux-headers 4.19.1.arch1-1 -> 4.19.2.arch1-1
         """
-        outdated = {}
-
         output = self.run_cli("--query", "--upgrades")
 
         regexp = re.compile(r"(\S+) (\S+) -> (\S+)")
@@ -102,13 +91,11 @@ class Pacman(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, installed_version, latest_version = match.groups()
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": parse_version(latest_version),
-                    "installed_version": parse_version(installed_version),
-                }
-        return outdated
+                yield Package(
+                    id=package_id,
+                    latest_version=latest_version,
+                    installed_version=installed_version
+                )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -148,12 +135,11 @@ class Pacman(PackageManager):
         )
 
         for package_id, version, description in regexp.findall(output):
-            yield {
-                "id": package_id,
-                "name": package_id,
-                "description": description,
-                "latest_version": parse_version(version),
-            }
+            yield Package(
+                id=package_id,
+                description=description,
+                latest_version=version,
+            )
 
     def install(self, package_id):
         """Install one package.

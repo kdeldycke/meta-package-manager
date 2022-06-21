@@ -20,7 +20,7 @@ import re
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from .. import logger
-from ..base import PackageManager
+from ..base import Package, PackageManager
 from ..version import parse_version
 
 
@@ -72,8 +72,6 @@ class Gem(PackageManager):
             sqlite3 (1.3.7)
             test-unit (2.0.0.0)
         """
-        installed = {}
-
         output = self.run_cli("list")
 
         regexp = re.compile(r"(\S+) \((.+)\)")
@@ -87,13 +85,7 @@ class Gem(PackageManager):
                     for v in re.compile(r",|default:| ").split(versions)
                     if v
                 )
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": version,
-                }
-
-        return installed
+                yield Package(id=package_id, installed_version=version)
 
     @property
     def outdated(self):
@@ -109,8 +101,6 @@ class Gem(PackageManager):
             power_assert (0.2.6 < 0.3.0)
             psych (2.0.17 < 2.1.0)
         """
-        outdated = {}
-
         output = self.run_cli("outdated")
 
         regexp = re.compile(r"(\S+) \((\S+) < (\S+)\)")
@@ -118,14 +108,11 @@ class Gem(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, current_version, latest_version = match.groups()
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(current_version),
-                    "latest_version": parse_version(latest_version),
-                }
-
-        return outdated
+                yield Package(
+                    id=package_id,
+                    installed_version=current_version,
+                    latest_version=latest_version,
+                )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -173,12 +160,7 @@ class Gem(PackageManager):
         )
 
         for package_id, version in regexp.findall(output):
-            yield {
-                "id": package_id,
-                "name": package_id,
-                "description": None,
-                "latest_version": parse_version(version),
-            }
+            yield Package(id=package_id, latest_version=version)
 
     def install(self, package_id):
         """Install one package.

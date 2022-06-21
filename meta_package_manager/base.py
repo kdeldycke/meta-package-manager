@@ -19,6 +19,7 @@ import os
 import re
 import sys
 from contextlib import nullcontext
+from dataclasses import dataclass
 from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
@@ -37,7 +38,7 @@ from click_extra.platform import CURRENT_OS_ID, is_linux
 from click_extra.run import INDENT, format_cli, run_cmd
 
 from . import logger
-from .version import TokenizedString, parse_version
+from .version import parse_version
 
 
 class CLIError(Exception):
@@ -72,6 +73,25 @@ class CLIError(Exception):
             " ".join(self.error.split()), width=60, placeholder="(...)"
         )
         return f"<{self.__class__.__name__}({self.code}, {error_excerpt!r})>"
+
+
+@dataclass
+class Package:
+    """Lightweight representation of a package and its metadata."""
+
+    id: str
+    name: str = None
+    description: str = None
+    installed_version: str = None
+    latest_version: str = None
+
+    def __post_init__(self):
+        #
+        if not self.name:
+            self.name = self.id
+        # Make sure version strings are parsed into proper objects.
+        self.installed_version = parse_version(self.installed_version)
+        self.latest_version = parse_version(self.latest_version)
 
 
 class PackageManager:
@@ -675,7 +695,7 @@ class PackageManager:
         """
         for match in self.search(query, extended, exact):
             # Look by default into package ID and name.
-            search_content = {match["id"], match["name"]}
+            search_content = {match.id, match.name}
 
             # Rejects fuzzy results: only keep packages stricly matching on ID or name.
             if exact and query not in search_content:
@@ -683,10 +703,10 @@ class PackageManager:
 
             # Add description to the list of content to look into.
             if extended:
-                search_content.add(match["description"])
+                search_content.add(match.description)
 
             # Normalize searched content.
-            search_content = ''.join({s.lower() for s in search_content if s})
+            search_content = "".join({s.lower() for s in search_content if s})
 
             # Exclude packages not matching any part of the query.
             confirmed_match = False

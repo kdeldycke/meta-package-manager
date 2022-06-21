@@ -16,13 +16,11 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import json
-from operator import itemgetter
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from .. import logger
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class APM(PackageManager):
@@ -144,21 +142,16 @@ class APM(PackageManager):
               ]
             }
         """
-        installed = {}
-
         output = self.run_cli("list", "--json")
 
         if output:
             for package_list in json.loads(output).values():
-                for package in package_list:
-                    package_id = package["name"]
-                    installed[package_id] = {
-                        "id": package_id,
-                        "name": package_id,
-                        "installed_version": parse_version(package["version"]),
-                    }
-
-        return installed
+                for pkg in package_list:
+                    yield Package(
+                        id=pkg["name"],
+                        description=pkg["description"],
+                        installed_version=pkg["version"],
+                    )
 
     @property
     def outdated(self):
@@ -311,21 +304,16 @@ class APM(PackageManager):
               }
             ]
         """
-        outdated = {}
-
         output = self.run_cli("outdated", "--compatible", "--json")
 
         if output:
-            for package in json.loads(output):
-                package_id = package["name"]
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(package["version"]),
-                    "latest_version": parse_version(package["latestVersion"]),
-                }
-
-        return outdated
+            for pkg in json.loads(output):
+                yield Package(
+                    id=pkg["name"],
+                    description=pkg["description"],
+                    installed_version=pkg["version"],
+                    latest_version=pkg["latestVersion"],
+                )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -424,15 +412,12 @@ class APM(PackageManager):
         output = self.run_cli("search", search_args, "--json", query)
 
         if output:
-            for package_id, version, description in map(
-                itemgetter("name", "version", "description"), json.loads(output)
-            ):
-                yield {
-                    "id": package_id,
-                    "name": package_id,
-                    "description": description,
-                    "latest_version": parse_version(version),
-                }
+            for pkg in json.loads(output):
+                yield Package(
+                    id=pkg["name"],
+                    description=pkg["description"],
+                    latest_version=pkg["version"],
+                )
 
     def install(self, package_id):
         """Install one package.

@@ -20,8 +20,7 @@ import re
 from click_extra.platform import LINUX
 
 from .. import logger
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class Flatpak(PackageManager):
@@ -55,8 +54,6 @@ class Flatpak(PackageManager):
             Syncthing GTK             me.kozec.syncthingtk             v0.9.4.3
             Builder                   org.flatpak.Builder
         """
-        installed = {}
-
         output = self.run_cli(
             "list",
             "--app",
@@ -72,13 +69,11 @@ class Flatpak(PackageManager):
             match = regexp.match(package)
             if match:
                 name, package_id, installed_version = match.groups()
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": name,
-                    "installed_version": parse_version(installed_version),
-                }
-
-        return installed
+                yield Package(
+                    id=package_id,
+                    name=name,
+                    installed_version=installed_version,
+                )
 
     @property
     def outdated(self):
@@ -89,8 +84,6 @@ class Flatpak(PackageManager):
             ► flatpak remote-ls --app --updates --columns=name,application,version --ostree-verbose
             GNOME Dictionary    org.gnome.Dictionary    3.26.0  stable  x86_64
         """
-        outdated = {}
-
         output = self.run_cli(
             "remote-ls",
             "--app",
@@ -124,14 +117,12 @@ class Flatpak(PackageManager):
                     current_version.group("version") if current_version else "unknow"
                 )
 
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": name,
-                    "latest_version": parse_version(latest_version),
-                    "installed_version": parse_version(installed_version),
-                }
-
-        return outdated
+                yield Package(
+                    id=package_id,
+                    name=name,
+                    latest_version=latest_version,
+                    installed_version=installed_version,
+                )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -172,12 +163,12 @@ class Flatpak(PackageManager):
             branch,
             remotes,
         ) in regexp.findall(output):
-            yield {
-                "id": package_id,
-                "name": package_name,
-                "description": description,
-                "latest_version": parse_version(version),
-            }
+            yield Package(
+                id=package_id,
+                name=package_name,
+                description=description,
+                latest_version=version,
+            )
 
     def install(self, package_id):
         """Install one package.

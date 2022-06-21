@@ -26,8 +26,7 @@ else:
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from .. import logger
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class Yarn(PackageManager):
@@ -47,34 +46,6 @@ class Yarn(PackageManager):
         1.22.11
     """
 
-    def parse(self, output):
-        packages = {}
-
-        if not output:
-            return packages
-
-        for line in output.splitlines():
-            if not line:
-                continue
-            obj = json.loads(line)
-            if obj["type"] != "info":
-                continue
-            package = self.parse_info(obj)
-            packages[package["id"]] = package
-        return packages
-
-    @staticmethod
-    def parse_info(obj):
-        data = obj["data"].replace("has binaries:", "")
-        parts = data.replace('"', "").split("@")
-        package_id = parts[0]
-        version = parts[1]
-        return {
-            "id": package_id,
-            "name": package_id,
-            "installed_version": parse_version(version),
-        }
-
     @property
     def installed(self):
         """Fetch installed packages.
@@ -84,7 +55,19 @@ class Yarn(PackageManager):
             ► yarn global --json list --depth 0
         """
         output = self.run_cli("global", "--json", "list", "--depth", "0")
-        return self.parse(output)
+
+        if output:
+            for line in output.splitlines():
+                if not line:
+                    continue
+                obj = json.loads(line)
+                if obj["type"] != "info":
+                    continue
+                data = obj["data"].replace("has binaries:", "")
+                parts = data.replace('"', "").split("@")
+                package_id = parts[0]
+                version = parts[1]
+                yield Package(id=package_id, installed_version=version)
 
     @cached_property
     def global_dir(self):
@@ -104,8 +87,6 @@ class Yarn(PackageManager):
 
             ► yarn --json outdated --cwd <self.global_dir>
         """
-        outdated = {}
-
         output = self.run_cli("--json", "outdated", "--cwd", self.global_dir)
 
         packages = []
@@ -123,14 +104,11 @@ class Yarn(PackageManager):
 
             if values["wanted"] == "linked":
                 continue
-            outdated[package_id] = {
-                "id": package_id + "@" + values["latest"],
-                "name": package_id,
-                "installed_version": parse_version(values["current"]),
-                "latest_version": parse_version(values["latest"]),
-            }
-
-        return outdated
+            yield Package(
+                id=package_id + "@" + values["latest"],
+                installed_version=values["current"],
+                latest_version=values["latest"],
+            )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -226,12 +204,11 @@ class Yarn(PackageManager):
             if result["type"] == "inspect":
                 package = result["data"]
                 package_id = package["name"]
-                yield {
-                    "id": package_id,
-                    "name": package_id,
-                    "description": package["description"],
-                    "latest_version": parse_version(package["version"]),
-                }
+                yield Package(
+                    id=package_id,
+                    description=package["description"],
+                    latest_version=package["version"],
+                )
 
     def install(self, package_id):
         """Install one package.

@@ -19,8 +19,7 @@ import re
 
 from click_extra.platform import LINUX
 
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class Emerge(PackageManager):
@@ -67,8 +66,6 @@ class Emerge(PackageManager):
             app-admin/system-config-printer-1.5.16-r1
             app-arch/p7zip-16.02-r8
         """
-        installed = {}
-
         output = self.run_cli(
             "--installed", "--verbose", "--nocolor", override_cli_path="qlist"
         )
@@ -92,13 +89,7 @@ class Emerge(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, installed_version = match.groups()
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(installed_version),
-                }
-
-        return installed
+                yield Package(id=package_id, installed_version=installed_version)
 
     @property
     def outdated(self):
@@ -115,8 +106,6 @@ class Emerge(PackageManager):
             [ebuild r     U] dev-libs/icu      [50.1.1:0/50.1.1] [50.1-r2:0/50.1]
             [ebuild r  R   ] dev-libs/libxml2  [2.9.0-r1:2]       USE=icu
         """
-        outdated = {}
-
         output = self.run_cli(
             "--update",
             "--deep",
@@ -151,13 +140,11 @@ class Emerge(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, latest_version, installed_version = match.groups()
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": parse_version(latest_version),
-                    "installed_version": parse_version(installed_version),
-                }
-        return outdated
+                yield Package(
+                    id=package_id,
+                    latest_version=latest_version,
+                    installed_version=installed_version,
+                )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -219,12 +206,11 @@ class Emerge(PackageManager):
         )
 
         for package_id, version, description in regexp.findall(output):
-            yield {
-                "id": package_id,
-                "name": package_id,
-                "description": description,
-                "latest_version": parse_version(version),
-            }
+            yield Package(
+                id=package_id,
+                description=description,
+                latest_version=version,
+            )
 
     def install(self, package_id):
         """Install one package.

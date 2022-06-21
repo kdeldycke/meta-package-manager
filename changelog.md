@@ -12,6 +12,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Colorize version differences in `outdated` operation output.
 - \[mpm\] Add manager homepage URL metadata.
 - \[mpm\] Keep results matching description in `--extended` search mode.
+- \[mpm\] Simplify `installed`, `outdated` and `search` operation by relying on generators and a `package` dataclass.
 
 ## {gh}`5.2.0 (2022-06-16) <compare/v5.1.0...v5.2.0>`
 

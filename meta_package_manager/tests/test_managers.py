@@ -28,7 +28,7 @@ from boltons.iterutils import unique
 from boltons.urlutils import URL
 from click_extra.platform import OS_DEFINITIONS
 
-from ..base import PackageManager
+from ..base import Package, PackageManager
 from ..cli import XKCD_MANAGER_ORDER
 from ..pool import pool
 from ..version import TokenizedString
@@ -219,14 +219,11 @@ def test_installed_type(manager):
         except Exception as ex:
             assert isinstance(ex, NotImplementedError)
         else:
-            assert isinstance(result, dict)
-            for pkg in manager.installed.values():
-                assert isinstance(pkg, dict)
-                assert set(pkg) == {"id", "name", "installed_version"}
-                assert isinstance(pkg["id"], str)
-                assert isinstance(pkg["name"], str)
-                if pkg["installed_version"] is not None:
-                    assert isinstance(pkg["installed_version"], TokenizedString)
+            # XXX There is an exception in the way npm.installed is implemented as it use a recursive
+            # boltons.remap strategy to parse the tree-like JSON.
+            assert isinstance(result, (list, types.GeneratorType))
+            for pkg in result:
+                assert isinstance(pkg, Package)
 
 
 @all_managers
@@ -238,15 +235,9 @@ def test_outdated_type(manager):
         except Exception as ex:
             assert isinstance(ex, NotImplementedError)
         else:
-            assert isinstance(result, dict)
-            for pkg in manager.outdated.values():
-                assert isinstance(pkg, dict)
-                assert set(pkg) == {"id", "name", "installed_version", "latest_version"}
-                assert isinstance(pkg["id"], str)
-                assert isinstance(pkg["name"], str)
-                if pkg["installed_version"] is not None:
-                    assert isinstance(pkg["installed_version"], TokenizedString)
-                assert isinstance(pkg["latest_version"], TokenizedString)
+            assert isinstance(result, types.GeneratorType)
+            for pkg in result:
+                assert isinstance(pkg, Package)
 
 
 @pytest.mark.parametrize("query,query_parts", (
@@ -272,14 +263,7 @@ def test_search_type(manager):
         else:
             assert isinstance(matches, types.GeneratorType)
             for pkg in matches:
-                assert isinstance(pkg, dict)
-                assert set(pkg) == {"id", "name", "description", "latest_version"}
-                assert isinstance(pkg["id"], str)
-                assert isinstance(pkg["name"], str)
-                if pkg["description"] is not None:
-                    assert isinstance(pkg["description"], str)
-                if pkg["latest_version"] is not None:
-                    assert isinstance(pkg["latest_version"], TokenizedString)
+                assert isinstance(pkg, Package)
 
 
 @all_managers

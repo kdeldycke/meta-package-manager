@@ -21,8 +21,7 @@ import re
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from .. import logger
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class Pip(PackageManager):
@@ -95,8 +94,6 @@ class Pip(PackageManager):
               (...)
             ]
         """
-        installed = {}
-
         # --quiet is required here to silence warning and error messages
         # mangling the JSON content.
         output = self.run_cli("list", "--format=json", "--verbose", "--quiet")
@@ -104,13 +101,7 @@ class Pip(PackageManager):
         if output:
             for package in json.loads(output):
                 package_id = package["name"]
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(package["version"]),
-                }
-
-        return installed
+                yield Package(id=package_id, installed_version=package["version"])
 
     @property
     def outdated(self):
@@ -171,8 +162,6 @@ class Pip(PackageManager):
                }
             ]
         """
-        outdated = {}
-
         # --quiet is required here to silence warning and error messages
         # mangling the JSON content.
         output = self.run_cli(
@@ -186,14 +175,11 @@ class Pip(PackageManager):
         if output:
             for package in json.loads(output):
                 package_id = package["name"]
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(package["version"]),
-                    "latest_version": parse_version(package["latest_version"]),
-                }
-
-        return outdated
+                yield Package(
+                    id=package_id,
+                    installed_version=package["version"],
+                    latest_version=package["latest_version"],
+                )
 
     def search_xxx_disabled(self, query, extended, exact):
         """Fetch matching packages.
@@ -249,12 +235,11 @@ class Pip(PackageManager):
         )
 
         for package_id, version, description in regexp.findall(output):
-            yield {
-                "id": package_id,
-                "name": package_id,
-                "description": description,
-                "latest_version": parse_version(version),
-            }
+            yield Package(
+                id=package_id,
+                description=description,
+                latest_version=version,
+            )
 
     def install(self, package_id):
         """Install one package.

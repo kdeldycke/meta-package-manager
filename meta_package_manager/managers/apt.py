@@ -20,8 +20,7 @@ import re
 from click_extra.platform import LINUX
 
 from .. import logger
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class APT(PackageManager):
@@ -84,8 +83,6 @@ class APT(PackageManager):
             gcc-6-base/xenial,now 6.0.1-0ubuntu1 amd64 [installed]
             groff-base/xenial,now 1.22.3-7 amd64 [installed,automatic]
         """
-        installed = {}
-
         output = self.run_cli("list", "--installed")
 
         regexp = re.compile(r"(\S+)\/\S+ (\S+) .*")
@@ -93,13 +90,7 @@ class APT(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, installed_version = match.groups()
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(installed_version),
-                }
-
-        return installed
+                yield Package(id=package_id, installed_version=installed_version)
 
     @property
     def outdated(self):
@@ -112,8 +103,6 @@ class APT(PackageManager):
             apt/xenial-updates 1.2.19 amd64 [upgradable from: 1.2.15ubuntu0.2]
             nano/xenial-updates 2.5.3-2ubuntu2 amd64 [upgradable from: 2.5.3-2]
         """
-        outdated = {}
-
         output = self.run_cli("list", "--upgradable")
 
         regexp = re.compile(r"(\S+)\/\S+ (\S+).*\[upgradable from: (\S+)\]")
@@ -121,14 +110,11 @@ class APT(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, latest_version, installed_version = match.groups()
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": parse_version(latest_version),
-                    "installed_version": parse_version(installed_version),
-                }
-
-        return outdated
+                yield Package(
+                    id=package_id,
+                    latest_version=latest_version,
+                    installed_version=installed_version,
+                )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -208,12 +194,7 @@ class APT(PackageManager):
         )
 
         for package_id, version, description in regexp.findall(output):
-            yield {
-                "id": package_id,
-                "name": package_id,
-                "description": description,
-                "latest_version": parse_version(version),
-            }
+            yield Package(id=package_id, description=description, latest_version=version)
 
     def install(self, package_id):
         """Install one package.
@@ -336,9 +317,4 @@ class APT_Mint(APT):
         )
 
         for package_id, description in regexp.findall(output):
-            yield {
-                "id": package_id,
-                "name": package_id,
-                "description": description,
-                "latest_version": None,
-            }
+            yield Package(id=package_id, description=description)

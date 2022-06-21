@@ -15,14 +15,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import re
 from itertools import groupby
 from operator import itemgetter
 
 import xmltodict
 from click_extra.platform import LINUX
 
-from ..base import PackageManager
+from ..base import Package, PackageManager
 from ..version import parse_version
 
 
@@ -144,17 +143,8 @@ class Zypper(PackageManager):
 
             ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh --xmlout search --details --type package --installed-only
         """
-        installed = {}
-
         for package in self._search("--installed-only"):
-            package_id = package["id"]
-            installed[package_id] = {
-                "id": package_id,
-                "name": package_id,
-                "installed_version": package["version"],
-            }
-
-        return installed
+            yield Package(id=package["id"], installed_version=package["version"])
 
     @property
     def outdated(self):
@@ -183,8 +173,6 @@ class Zypper(PackageManager):
                 </update-status>
             </stream>
         """
-        outdated = {}
-
         output = self.run_cli("--xmlout", "list-updates")
 
         package_list = []
@@ -198,14 +186,12 @@ class Zypper(PackageManager):
             package_list = update_list.get("update", [])
 
         for package in package_list:
-            package_id = package["@name"]
-            outdated[package_id] = {
-                "id": package_id,
-                "name": package_id,
-                "latest_version": parse_version(package["@edition"]),
-                "installed_version": parse_version(package["@edition-old"]),
-            }
-        return outdated
+            yield Package(
+                id=package["@name"],
+                description=package.get("description"),
+                latest_version=package["@edition"],
+                installed_version=package["@edition-old"],
+            )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -233,13 +219,7 @@ class Zypper(PackageManager):
             search_param.append("--match-exact")
 
         for package in self._search(*search_param, query):
-            package_id = package["id"]
-            yield {
-                "id": package_id,
-                "name": package_id,
-                "description": None,
-                "installed_version": package["version"],
-            }
+            yield Package(id=package["id"], installed_version=package["version"])
 
     def install(self, package_id):
         """Install one package.

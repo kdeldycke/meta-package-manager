@@ -17,10 +17,11 @@
 
 import json
 import re
+from operator import methodcaller
 
 from click_extra.platform import LINUX, MACOS
 
-from ..base import PackageManager
+from ..base import Package, PackageManager
 from ..version import parse_version
 
 
@@ -103,8 +104,6 @@ class Homebrew(PackageManager):
             /reporting_bugs/uninstall_wrongly_reports_cask_as_not_installed.md
             and https://github.com/kdeldycke/meta-package-manager/issues/17 .
         """
-        installed = {}
-
         output = self.run_cli("list", "--versions")
 
         regexp = re.compile(
@@ -117,18 +116,10 @@ class Homebrew(PackageManager):
             re.VERBOSE,
         )
 
-        for pkg_info in output.splitlines():
-            match = regexp.match(pkg_info)
-            if match:
-                package_id, removed, versions = match.groups()
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    # Keep highest version found.
-                    "installed_version": max(map(parse_version, versions.split())),
-                }
-
-        return installed
+        for package_id, removed, versions in map(methodcaller("groups"), regexp.finditer(output)):
+            # Keep highest version found.
+            version = max(map(parse_version, versions.split()))
+            yield Package(id=package_id, installed_version=version)
 
     @property
     def outdated(self):
@@ -214,8 +205,6 @@ class Homebrew(PackageManager):
               ]
             }
         """
-        outdated = {}
-
         # Build up the list of CLI options.
         options = ["--json=v2"]
         # Includes auto-update packages or not.
@@ -228,7 +217,7 @@ class Homebrew(PackageManager):
         if output:
             package_list = json.loads(output)
             for pkg_info in package_list["formulae"] + package_list["casks"]:
-                package_id = pkg_info["name"]
+
                 version = pkg_info["installed_versions"]
                 if not isinstance(version, str):
                     version = max(map(parse_version, version))
@@ -238,14 +227,11 @@ class Homebrew(PackageManager):
                 if version == latest_version:
                     continue
 
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(version),
-                    "latest_version": parse_version(latest_version),
-                }
-
-        return outdated
+                yield Package(
+                    id=pkg_info["name"],
+                    installed_version=version,
+                    latest_version=latest_version,
+                )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -320,7 +306,6 @@ class Homebrew(PackageManager):
 
         # Additional search on description only.
         if extended:
-
             output = self.run_cli("search", query, "--desc")
 
             regexp = re.compile(
@@ -342,15 +327,16 @@ class Homebrew(PackageManager):
 
             for package_id, _, package_name, description in regexp.findall(output):
                 matched_ids.add(package_id)
-                yield {
-                    "id": package_id,
-                    "name": package_name,
-                    "description": description if description != "[no description]" else None,
-                    "latest_version": None,
-                }
+                pkg = Package(id=package_id, name=package_name)
+                if description != "[no description]":
+                    pkg.description = description
+                yield pkg
 
         # Use regexp if exact match is requested.
-        output = self.run_cli("search", f"/^{query}$/" if exact else query)
+        if exact:
+            query = f"/^{query}$/"
+
+        output = self.run_cli("search", query)
 
         regexp = re.compile(
             r"""
@@ -363,12 +349,7 @@ class Homebrew(PackageManager):
         for package_id in regexp.findall(output):
             # Deduplicate search results.
             if package_id not in matched_ids:
-                yield {
-                    "id": package_id,
-                    "name": package_id,
-                    "description": None,
-                    "latest_version": None,
-                }
+                yield Package(id=package_id)
 
     def install(self, package_id):
         """Install one package.

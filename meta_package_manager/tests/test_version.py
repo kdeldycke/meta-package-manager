@@ -15,6 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+import copy
 from random import shuffle
 
 import pytest
@@ -134,14 +135,14 @@ def test_token_hash():
 
 
 @pytest.mark.parametrize(
-    "value", (0, 123, -1, "0", "1.2.3", "abc", "A-B-C", "123   a bc \n")
+    "value", (None, 0, 123, -1, "0", "1.2.3", "abc", "A-B-C", "123   a bc \n")
 )
 def test_tokenized_string_allowed_instanciation(value):
     TokenizedString(value)
 
 
 @pytest.mark.parametrize(
-    "value", (None, 1.0, [1, 2, 3], (1, 2, 3), {1, 2, 3}, {"a": 1, "b": 2})
+    "value", (1.0, [1, 2, 3], (1, 2, 3), {1, 2, 3}, {"a": 1, "b": 2})
 )
 def test_tokenized_string_unauthorized_instanciation(value):
     with pytest.raises(TypeError):
@@ -159,10 +160,22 @@ def test_tokenized_string_hash():
     )
 
 
+def test_tokenized_string_noop_instanciation():
+    assert TokenizedString(None) is None
+
+
 def test_tokenized_string_idempotent_instanciation():
     tok1 = TokenizedString("1.2.3")
     tok2 = TokenizedString(tok1)
     assert tok1 is tok2
+    assert hash(tok1) == hash(tok2)
+    assert tok1 == tok2
+
+
+def test_tokenized_string_deepcopy():
+    tok1 = TokenizedString("1.2.3")
+    tok2 = copy.deepcopy(tok1)
+    assert tok1 is not tok2
     assert hash(tok1) == hash(tok2)
     assert tok1 == tok2
 

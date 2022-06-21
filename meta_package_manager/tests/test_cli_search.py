@@ -25,6 +25,7 @@ import pytest
 from boltons.iterutils import same
 from click_extra.tests.conftest import unless_macos
 
+from ..base import Package
 from ..pool import pool
 from .test_cli import CLISubCommandTests, CLITableTests
 
@@ -69,14 +70,11 @@ class TestSearch(CLISubCommandTests, CLITableTests):
             for pkg in info["packages"]:
                 assert isinstance(pkg, dict)
 
-                assert set(pkg) == {"id", "name", "description", "latest_version"}
+                fields = set(Package.__dataclass_fields__)
+                assert set(pkg) == fields
 
-                assert isinstance(pkg["id"], str)
-                assert isinstance(pkg["name"], str)
-                if pkg["description"] is not None:
-                    assert isinstance(pkg["description"], str)
-                if pkg["latest_version"] is not None:
-                    assert isinstance(pkg["latest_version"], str)
+                for f in fields:
+                    assert isinstance(pkg[f], str) or pkg[f] is None
 
     @unless_macos
     def test_unicode_search(self, invoke):

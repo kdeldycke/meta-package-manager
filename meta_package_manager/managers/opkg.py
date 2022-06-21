@@ -20,8 +20,7 @@ import re
 from click_extra.platform import LINUX
 
 from .. import logger
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class OPKG(PackageManager):
@@ -68,8 +67,6 @@ class OPKG(PackageManager):
             busybox-syslog - 1.31.0-r0
             busybox-udhcpc - 1.31.0-r0
         """
-        installed = {}
-
         output = self.run_cli("list-installed")
 
         regexp = re.compile(r"(\S+) - (\S+)")
@@ -77,13 +74,7 @@ class OPKG(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, installed_version = match.groups()
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "installed_version": parse_version(installed_version),
-                }
-
-        return installed
+                yield Package(id=package_id, installed_version=installed_version)
 
     @property
     def outdated(self):
@@ -95,8 +86,6 @@ class OPKG(PackageManager):
             openpli-bootlogo - 20190717-r0 - 20190718-r0
             enigma2-hotplug - 2.7+git1720+55c6b34-r0 - 2.7+git1722+daf2f52-r0
         """
-        outdated = {}
-
         output = self.run_cli("list-upgradable")
 
         regexp = re.compile(r"(\S+) - (\S+) - (\S+)")
@@ -104,14 +93,11 @@ class OPKG(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, installed_version, latest_version = match.groups()
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_id,
-                    "latest_version": parse_version(latest_version),
-                    "installed_version": parse_version(installed_version),
-                }
-
-        return outdated
+                yield Package(
+                    id=package_id,
+                    latest_version=latest_version,
+                    installed_version=installed_version,
+                )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -146,12 +132,7 @@ class OPKG(PackageManager):
         )
 
         for package_id, version, description in regexp.findall(output):
-            yield {
-                "id": package_id,
-                "name": package_id,
-                "description": description,
-                "latest_version": parse_version(version),
-            }
+            yield Package(id=package_id, description=description, latest_version=version)
 
     def install(self, package_id):
         """Install one package.

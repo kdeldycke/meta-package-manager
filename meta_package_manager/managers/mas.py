@@ -20,8 +20,7 @@ import re
 from click_extra.platform import MACOS
 
 from .. import logger
-from ..base import PackageManager
-from ..version import parse_version
+from ..base import Package, PackageManager
 
 
 class MAS(PackageManager):
@@ -51,28 +50,29 @@ class MAS(PackageManager):
         .. code-block:: shell-session
 
             ► mas list
-            408981434 iMovie (10.1.4)
-            747648890 Telegram (2.30)
+            1569813296  1Password for Safari                 (2.3.5)
+            1295203466  Microsoft Remote Desktop             (10.7.6)
+            409183694   Keynote                              (12.0)
+            1408727408  com.adriangranados.wifiexplorerlite  (1.5.5)
+            409203825   Numbers                              (12.0)
         """
-        installed = {}
-
         output = self.run_cli("list")
 
-        regexp = re.compile(r"(\d+) (.*) \((\S+)\)$")
-        for package in output.splitlines():
-            match = regexp.match(package)
-            if match:
-                package_id, package_name, installed_version = match.groups()
-                installed[package_id] = {
-                    "id": package_id,
-                    "name": package_name,
-                    # Normalize unknown version. See:
-                    # https://github.com/mas-cli/mas/commit
-                    # /1859eaedf49f6a1ebefe8c8d71ec653732674341
-                    "installed_version": parse_version(installed_version),
-                }
+        regexp = re.compile(
+            r"""
+            (?P<package_id>\d+)
+            \s+
+            (?P<package_name>.+?)
+            \s+
+            \(
+                (?P<version>\S+)
+            \)
+            """,
+            re.MULTILINE | re.VERBOSE,
+        )
 
-        return installed
+        for package_id, package_name, version in regexp.findall(output):
+            yield Package(id=package_id, name=package_name, installed_version=version)
 
     @property
     def outdated(self):
@@ -81,32 +81,38 @@ class MAS(PackageManager):
         .. code-block:: shell-session
 
             ► mas outdated
+            409183694  Keynote (11.0 -> 12.0)
+            1176895641 Spark   (2.11.20 -> 2.11.21)
         """
-        outdated = {}
-
         output = self.run_cli("outdated")
 
-        regexp = re.compile(r"(\d+) (.*) \((\S+) -> (\S+)\)$")
-        for package in output.splitlines():
-            match = regexp.match(package)
-            if match:
-                (
-                    package_id,
-                    package_name,
-                    installed_version,
-                    latest_version,
-                ) = match.groups()
-                outdated[package_id] = {
-                    "id": package_id,
-                    "name": package_name,
-                    "latest_version": parse_version(latest_version),
-                    # Normalize unknown version. See:
-                    # https://github.com/mas-cli/mas/commit
-                    # /1859eaedf49f6a1ebefe8c8d71ec653732674341
-                    "installed_version": parse_version(installed_version),
-                }
+        regexp = re.compile(
+            r"""
+            (?P<package_id>\d+)
+            \s+
+            (?P<package_name>.+?)
+            \s+
+            \(
+                (?P<installed_version>\S+)
+                \s+->\s+
+                (?P<latest_version>\S+)
+            \)
+            """,
+            re.MULTILINE | re.VERBOSE,
+        )
 
-        return outdated
+        for (
+            package_id,
+            package_name,
+            installed_version,
+            latest_version,
+        ) in regexp.findall(output):
+            yield Package(
+                id=package_id,
+                name=package_name,
+                installed_version=installed_version,
+                latest_version=latest_version,
+            )
 
     def search(self, query, extended, exact):
         """Fetch matching packages.
@@ -145,12 +151,7 @@ class MAS(PackageManager):
         )
 
         for package_id, package_name, version in regexp.findall(output):
-            yield {
-                "id": package_id,
-                "name": package_name,
-                "description": None,
-                "latest_version": parse_version(version),
-            }
+            yield Package(id=package_id, name=package_name, latest_version=version)
 
     def install(self, package_id):
         """Install one package.

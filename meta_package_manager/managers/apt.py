@@ -194,7 +194,9 @@ class APT(PackageManager):
         )
 
         for package_id, version, description in regexp.findall(output):
-            yield Package(id=package_id, description=description, latest_version=version)
+            yield Package(
+                id=package_id, description=description, latest_version=version
+            )
 
     def install(self, package_id):
         """Install one package.

@@ -57,7 +57,8 @@ SORTABLE_FIELDS = {
 
 
 def colored_diff(a, b, style_common=None, style_a=None, style_b=None):
-    """Highlight the most common left part between ``a`` and ``b`` strings and their trailing differences.
+    """Highlight the most common left part between ``a`` and ``b`` strings and their
+    trailing differences.
 
     Always returns 2 strings.
     """
@@ -73,7 +74,9 @@ def colored_diff(a, b, style_common=None, style_a=None, style_b=None):
 
     common_size = 0
     if a and b:
-        while (min(len(a), len(b)) - 1) >= common_size and a[common_size] == b[common_size]:
+        while (min(len(a), len(b)) - 1) >= common_size and a[common_size] == b[
+            common_size
+        ]:
             common_size += 1
 
     # Styling of common and different parts.

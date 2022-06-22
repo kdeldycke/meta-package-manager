@@ -240,12 +240,15 @@ def test_outdated_type(manager):
                 assert isinstance(pkg, Package)
 
 
-@pytest.mark.parametrize("query,query_parts", (
-    ("cli-l-cli", {"cli", "l"}),
-    ("ab12--cd34", {"ab12", "cd34"}),
-    ("123/extra.34", {"123", "extra", "34"}),
-    ("AB ab", {"AB", "ab"}),
-))
+@pytest.mark.parametrize(
+    "query,query_parts",
+    (
+        ("cli-l-cli", {"cli", "l"}),
+        ("ab12--cd34", {"ab12", "cd34"}),
+        ("123/extra.34", {"123", "extra", "34"}),
+        ("AB ab", {"AB", "ab"}),
+    ),
+)
 def test_query_parts(query, query_parts):
     assert PackageManager.query_parts(query) == query_parts
 

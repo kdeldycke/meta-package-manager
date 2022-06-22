@@ -163,7 +163,8 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     def test_search_highlight(self, invoke):
         """We search on cargo as it is available on all platforms.
 
-        The search on the small ``co`` string is producing all variations of multiple ``co`` substring matches and highlights.
+        The search on the small ``co`` string is producing all variations of multiple
+        ``co`` substring matches and highlights.
         """
         result = invoke("--cargo", "search", "co")
         assert result.exit_code == 0

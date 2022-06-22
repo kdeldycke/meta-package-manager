@@ -173,14 +173,16 @@ class TokenizedString:
         # Returns the instance as-is if of the same class. Do not reparse it.
         if value and isinstance(value, TokenizedString):
             return value
-        # Create a brand new instance. __init__() will be auto-magiccaly called after that.
+        # Create a brand new instance. __init__() will be auto-magiccaly called
+        # after that.
         return super().__new__(cls)
 
     def __init__(self, value, separator="-"):
         """Parse and tokenize the provided raw ``value``."""
         if isinstance(value, TokenizedString):
             # Skip initialization for instance of the class, as this __init__() gets called
-            # auto-magiccaly eveytime the __new__() method above returns a TokenizedString instance.
+            # auto-magiccaly eveytime the __new__() method above returns a
+            # TokenizedString instance.
             return
         # Our canonical __init__() starts here.
         if isinstance(value, int):

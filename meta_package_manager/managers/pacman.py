@@ -94,7 +94,7 @@ class Pacman(PackageManager):
                 yield Package(
                     id=package_id,
                     latest_version=latest_version,
-                    installed_version=installed_version
+                    installed_version=installed_version,
                 )
 
     def search(self, query, extended, exact):

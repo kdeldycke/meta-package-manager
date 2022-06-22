@@ -116,7 +116,9 @@ class Homebrew(PackageManager):
             re.VERBOSE,
         )
 
-        for package_id, removed, versions in map(methodcaller("groups"), regexp.finditer(output)):
+        for package_id, removed, versions in map(
+            methodcaller("groups"), regexp.finditer(output)
+        ):
             # Keep highest version found.
             version = max(map(parse_version, versions.split()))
             yield Package(id=package_id, installed_version=version)

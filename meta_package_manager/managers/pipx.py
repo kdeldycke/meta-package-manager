@@ -83,7 +83,9 @@ class Pipx(PackageManager):
             for package_id, package_info in json.loads(output)["venvs"].items():
                 yield Package(
                     id=package_id,
-                    installed_version=package_info["metadata"]["main_package"]["package_version"],
+                    installed_version=package_info["metadata"]["main_package"][
+                        "package_version"
+                    ],
                 )
 
     def install(self, package_id):

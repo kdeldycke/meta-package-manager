@@ -202,7 +202,7 @@ class PackageManager:
     """Do not actually perform any action, just simulate CLI calls."""
 
     def __init__(self):
-        # Log of all encountered CLI errors.
+        """Initialize a ``self.cli_errors`` list to accumulate all CLI errors encountered by the package mananger."""
         self.cli_errors = []
 
     @classproperty

@@ -79,17 +79,9 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     @unless_macos
     def test_unicode_search(self, invoke):
         """See #16."""
-        result = invoke("--cask", "search", "ubersicht")
+        result = invoke("--mas", "search", "钉钉")
         assert result.exit_code == 0
-        assert "ubersicht" in result.stdout
-        # XXX search command is not fetching yet detailed package infos like
-        # names.
-        assert "Übersicht" not in result.stdout
-
-        result = invoke("--cask", "search", "Übersicht")
-        assert result.exit_code == 0
-        assert "ubersicht" in result.stdout
-        assert "Übersicht" not in result.stdout
+        assert "钉钉" in result.stdout
 
     # PyPi's online search API was at first rate-limited. So we added an artificial
     # 2-seconds delay to prevent the following error:
@@ -167,3 +159,24 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         assert same(msg_match.groups())
         # We should find lots of results for this package search.
         assert int(msg_match.groups()[0]) >= 20
+
+    def test_search_highlight(self, invoke):
+        """We search on cargo as it is available on all platforms.
+
+        The search on the small ``co`` string is producing all variations of multiple ``co`` substring matches and highlights.
+        """
+        result = invoke("--cargo", "search", "co")
+        assert result.exit_code == 0
+        # co
+        assert "│ \x1b[32m\x1b[1mco\x1b[0m " in result.stdout
+        # acco
+        assert "│ ac\x1b[32m\x1b[1mco\x1b[0m " in result.stdout
+        # bicoro
+        assert "│ bi\x1b[32m\x1b[1mco\x1b[0mro " in result.stdout
+        # cocomo-core
+        assert (
+            "│ \x1b[32m\x1b[1mcoco\x1b[0mmo-\x1b[32m\x1b[1mco\x1b[0mre "
+            in result.stdout
+        )
+        # cocomo-tui
+        assert "│ \x1b[32m\x1b[1mcoco\x1b[0mmo-tui " in result.stdout

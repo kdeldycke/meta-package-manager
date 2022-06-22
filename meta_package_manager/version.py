@@ -207,7 +207,7 @@ class TokenizedString:
         # Extract the class of the object
         cls = self.__class__
         # Create a new instance of the object based on extracted class
-        instance = super(TokenizedString, self).__new__(cls)
+        instance = super().__new__(cls)
         memo[id(self)] = instance
         for k, v in self.__dict__.items():
             # Recursively copy the whole tree of objects.

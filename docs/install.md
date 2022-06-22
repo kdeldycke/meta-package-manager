@@ -46,6 +46,16 @@ An `mpm` formula has been contributed by [@Hasnep](https://github.com/Hasnep) an
 ```{code-block} shell-session
 $ brew install hasnep/tap/meta-package-manager
 ```
+
+```{admonition} Broken Homebrew
+:class: note
+
+If for any reason `brew` gets broken by this external repository, you can easely fix it running:
+
+```{code-block} shell-session
+$ brew untap hasnep/tap
+$ brew install hasnep/tap/meta-package-manager
+```
 ````
 
 ````{tab-item} Arch Linux

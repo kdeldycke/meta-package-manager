@@ -645,7 +645,7 @@ docs = ["furo", "myst-parser", "sphinx-copybutton", "sphinx-inline-tabs", "ipyth
 
 [[package]]
 name = "sphinx-click"
-version = "4.1.0"
+version = "4.2.0"
 description = "Sphinx extension that automatically documents click applications"
 category = "dev"
 optional = false
@@ -871,7 +871,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "d5f9caea394bfe0b36bba5bc056f5a9b41a49a3e3b62de958b6a7a02dd94a398"
+content-hash = "459825aaeec57ad735befae0b235fc2b3a6378ac604279e808ee5d5ac892680e"
 
 [metadata.files]
 alabaster = [
@@ -1294,8 +1294,8 @@ sphinx-basic-ng = [
     {file = "sphinx_basic_ng-0.0.1a11.tar.gz", hash = "sha256:bf9a8fda0379c7d2ab51c9543f2b18e014b77fb295b49d64f3c1a910c863b34f"},
 ]
 sphinx-click = [
-    {file = "sphinx-click-4.1.0.tar.gz", hash = "sha256:fedebd39991243ec5cfa1c9e483db7ea2621b3df2012315c89c6f1f3722f192b"},
-    {file = "sphinx_click-4.1.0-py3-none-any.whl", hash = "sha256:60d6507bf623e20e9cbab732d19fc4890cc36a394c82ba8e2320f9f9fdc4571e"},
+    {file = "sphinx-click-4.2.0.tar.gz", hash = "sha256:8429705474ebb009de5603c35b6a7bfe8501dbdb12d847cbb01f18277d4b7d9a"},
+    {file = "sphinx_click-4.2.0-py3-none-any.whl", hash = "sha256:3ba8c97a40deaf09245c540accc4ac5c1d2942eaed0fa598403cdbf04a9cf95f"},
 ]
 sphinx-copybutton = [
     {file = "sphinx-copybutton-0.5.0.tar.gz", hash = "sha256:a0c059daadd03c27ba750da534a92a63e7a36a7736dcf684f26ee346199787f6"},

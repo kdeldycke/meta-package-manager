@@ -22,6 +22,7 @@ from collections import namedtuple
 from datetime import datetime
 from functools import partial
 from io import TextIOWrapper
+from operator import attrgetter
 from pathlib import Path
 from unittest.mock import patch
 
@@ -712,7 +713,7 @@ def remove(ctx, package_id):
         # Is the package installed with this manager?
         installed = set()
         try:
-            installed = {package["id"] for package in manager.installed.values()}
+            installed = map(attrgetter("id"), manager.installed)
         except NotImplementedError:
             logger.warning(f"{manager.id} does not implement installed operation.")
             logger.info(

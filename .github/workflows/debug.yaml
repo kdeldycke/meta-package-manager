@@ -6,4 +6,4 @@ name: Debug
 jobs:
 
   debug:
-    uses: kdeldycke/workflows/.github/workflows/debug.yaml@v1.4.2
+    uses: kdeldycke/workflows/.github/workflows/debug.yaml@v1.5.0

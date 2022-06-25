@@ -19,4 +19,4 @@ concurrency:
 jobs:
 
   changelog:
-    uses: kdeldycke/workflows/.github/workflows/changelog.yaml@v1.5.0
+    uses: kdeldycke/workflows/.github/workflows/changelog.yaml@v1.5.1

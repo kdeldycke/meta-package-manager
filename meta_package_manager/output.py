@@ -315,6 +315,8 @@ class BarPluginRenderer(MPMPlugin):
         """Renders a table data with pre-configured alignment centered around the third
         column.
 
+        Returns a list of strings, one item per line.
+
         .. code-block:: pycon
 
             >>> table_data = [
@@ -327,12 +329,14 @@ class BarPluginRenderer(MPMPlugin):
             blockblock 5.33,VHSDGataYCcV8xqv5TSZA → 5.39
             sed                                 2 → 2021.0328
         """
+        if not table_data:
+            return []
         return tabulate(
             table_data,
             tablefmt=BarPluginRenderer.plain_table_format,
             colalign=("left", "right", "center", "left"),
             disable_numparse=True,
-        )
+        ).splitlines()
 
     def _render(self, outdated_data):
         """Main method implementing the final structured rendering in *Bar plugin
@@ -368,7 +372,7 @@ class BarPluginRenderer(MPMPlugin):
             # Table-like rendering
             if self.table_rendering:
                 header = f"{manager['id']} - {package_count} {package_label}"
-                formatted_lines = self.render_table([p[0] for p in table]).splitlines()
+                formatted_lines = self.render_table([p[0] for p in table])
 
             # Variable-width / non-table / non-monospaced rendering.
             else:

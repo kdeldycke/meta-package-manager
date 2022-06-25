@@ -11,6 +11,7 @@ This version is not released yet and is under active development.
 - \[brew,cask\] Implement extended search on description.
 - \[mas\] Fix parsing of variable-lenght output in `installed` and `outdated` operations.
 - \[npm\] Apply global variables to all operations.
+- \[bar-plugin\] Fix rendering of package managers without outdated packages. Closes {issue}`631`.
 - \[mpm\] Colorize version differences in `outdated` operation output.
 - \[mpm\] Add manager homepage URL metadata.
 - \[mpm\] Keep results matching description in `--extended` search mode.

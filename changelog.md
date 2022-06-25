@@ -10,7 +10,7 @@ This version is not released yet and is under active development.
 - \[pacman,paru,yay\] Run `install`, `upgrade`, `remove` and `cleanup` operations with `sudo`.
 - \[brew,cask\] Implement extended search on description.
 - \[cargo\] Implement `remove` operation.
-- \[mas\] Fix parsing of variable-lenght output in `installed` and `outdated` operations.
+- \[mas\] Fix parsing of variable-length output in `installed` and `outdated` operations.
 - \[npm\] Apply global variables to all operations.
 - \[bar-plugin\] Fix rendering of package managers without outdated packages. Closes {issue}`631`.
 - \[mpm\] Colorize version differences in `outdated` operation output.

@@ -135,3 +135,13 @@ class Cargo(PackageManager):
         """
         res = self.run_cli("install", package_id)
         return res
+
+    def remove(self, package_id):
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            ► cargo --color never uninstall bore-cli
+                Removing /Users/me/.cargo/bin/bore
+        """
+        return self.run_cli("uninstall", package_id)

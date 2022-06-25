@@ -1,5 +1,11 @@
 # Changelog
 
+## {gh}`5.3.1 (unreleased) <compare/v5.3.0...main>`
+
+```{important}
+This version is not released yet and is under active development.
+```
+
 ## {gh}`5.3.0 (2022-06-25) <compare/v5.2.0...v5.3.0>`
 
 - \[paru\] Add `paru` support.

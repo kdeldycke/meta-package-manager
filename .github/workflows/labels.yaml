@@ -7,8 +7,8 @@ name: Labels
 
 concurrency:
   # Group workflow jobs so new commits cancels in-progress execution triggered by previous commits.
-  # Source: https://twitter.com/sebastienlorber/status/1495776331287646209
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  # Source: https://mail.python.org/archives/list/pypa-committers@python.org/thread/PCBCQMJF64JGRBOX7E2EE4YLKHT4DI55/
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:

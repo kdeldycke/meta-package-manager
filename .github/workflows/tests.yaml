@@ -91,22 +91,10 @@ jobs:
           choco upgrade chocolatey
 
       # NPM
-      - name: "Linux - Ubuntu 18.04 - Install npm requirements"
-        if: matrix.os == 'ubuntu-18.04'
-        run: |
-          sudo apt install --yes node-gyp nodejs-dev libssl1.0-dev
-      - name: Linux - Install npm
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt install --yes npm
-      - name: macOS - Install npm
-        if: runner.os == 'macOS'
-        run: |
-          brew install npm
-      - name: Windows - Upgrade npm
-        if: runner.os == 'Windows'
-        run: |
-          npm install --global npm
+      - name: Install npm
+        uses: actions/setup-node@v3.3.0
+        with:
+          node-version: 16
 
       # Cargo
       - name: macOS - Install Cargo

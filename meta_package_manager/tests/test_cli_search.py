@@ -98,7 +98,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     skip_pip_search = pytest.mark.skip(reason="pip search is deprecated")
 
     @skip_pip_search
-    def test_exact_search_tokenizer_one_result(self, invoke):
+    def test_exact_search_one_result(self, invoke):
         sleep(2)
         result = invoke("--pip", "search", "--exact", "sed", color=False)
         assert result.exit_code == 0
@@ -109,7 +109,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     @pytest.mark.parametrize(
         "query", ("SED", "SeD", "sEd*", "*sED*", "_seD-@", "", "_")
     )
-    def test_exact_search_tokenizer_no_result(self, invoke, query):
+    def test_exact_search_no_result(self, invoke, query):
         sleep(2)
         result = invoke("--pip", "search", "--exact", query)
         assert result.exit_code == 0
@@ -118,7 +118,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
     @skip_pip_search
     @pytest.mark.parametrize("query", ("", "_", "_seD-@"))
-    def test_fuzzy_search_tokenizer_no_results(self, invoke, query):
+    def test_fuzzy_search_no_results(self, invoke, query):
         sleep(2)
         result = invoke("--pip", "search", query)
         assert result.exit_code == 0
@@ -127,7 +127,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
     @skip_pip_search
     @pytest.mark.parametrize("query", ("sed", "SED", "SeD", "sEd*", "*sED*"))
-    def test_fuzzy_search_tokenizer_multiple_results(self, invoke, query):
+    def test_fuzzy_search_multiple_results(self, invoke, query):
         sleep(2)
         result = invoke("--pip", "search", query, color=False)
         assert result.exit_code == 0
@@ -137,7 +137,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
     @skip_pip_search
     @pytest.mark.parametrize("query", ("", "_", "_seD-@"))
-    def test_extended_search_tokenizeri_no_results(self, invoke, query):
+    def test_extended_search_no_results(self, invoke, query):
         sleep(2)
         result = invoke("--pip", "search", "--extended", query)
         assert result.exit_code == 0
@@ -146,7 +146,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
     @skip_pip_search
     @pytest.mark.parametrize("query", ("sed", "SED", "SeD", "sEd*", "*sED*"))
-    def test_extended_search_tokenizeri_multiple_results(self, invoke, query):
+    def test_extended_search_multiple_results(self, invoke, query):
         sleep(2)
         result = invoke("--pip", "search", "--extended", query)
         assert result.exit_code == 0

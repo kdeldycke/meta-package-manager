@@ -86,7 +86,8 @@ class Package:
     latest_version: str = None
 
     def __post_init__(self):
-        # XXX A name is not required but the table rendering code is not capable of rendering None values yet.
+        # XXX A name is not required but the table rendering code is not capable
+        # of rendering None values yet.
         if not self.name:
             self.name = self.id
         # Make sure version strings are parsed into proper objects.
@@ -202,7 +203,8 @@ class PackageManager:
     """Do not actually perform any action, just simulate CLI calls."""
 
     def __init__(self):
-        """Initialize a ``self.cli_errors`` list to accumulate all CLI errors encountered by the package mananger."""
+        """Initialize a ``self.cli_errors`` list to accumulate all CLI errors
+        encountered by the package mananger."""
         self.cli_errors = []
 
     @classproperty

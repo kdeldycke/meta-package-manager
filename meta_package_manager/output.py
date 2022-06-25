@@ -42,7 +42,6 @@ from click_extra import echo, get_current_context, style
 from click_extra.tabulate import TabularOutputFormatter
 from tabulate import DataRow, TableFormat, tabulate
 
-from . import __version__
 from .bar_plugin import MPMPlugin
 from .version import TokenizedString
 

@@ -86,7 +86,7 @@ class Package:
     latest_version: str = None
 
     def __post_init__(self):
-        #
+        # XXX A name is not required but the table rendering code is not capable of rendering None values yet.
         if not self.name:
             self.name = self.id
         # Make sure version strings are parsed into proper objects.

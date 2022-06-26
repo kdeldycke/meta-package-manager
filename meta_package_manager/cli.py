@@ -308,7 +308,7 @@ def managers(ctx):
             )
 
         print_json(manager_data)
-        return
+        ctx.exit()
 
     # Human-friendly content rendering.
     table = []
@@ -392,7 +392,7 @@ def installed(ctx):
     # Machine-friendly data rendering.
     if ctx.find_root().table_formatter.format_name == "json":
         print_json(installed_data)
-        return
+        ctx.exit()
 
     # Human-friendly content rendering.
     table = []
@@ -486,12 +486,12 @@ def outdated(ctx, plugin_output):
     # Machine-friendly data rendering.
     if ctx.find_root().table_formatter.format_name == "json":
         print_json(outdated_data)
-        return
+        ctx.exit()
 
     # Xbar/SwiftBar-friendly plugin rendering.
     if plugin_output:
         BarPluginRenderer().print(outdated_data)
-        return
+        ctx.exit()
 
     # Human-friendly content rendering.
     table = []
@@ -585,7 +585,7 @@ def search(ctx, extended, exact, query):
     # Machine-friendly data rendering.
     if ctx.find_root().table_formatter.format_name == "json":
         print_json(matches)
-        return
+        ctx.exit()
 
     # Prepare highlighting helpers.
     query_parts = {query}.union(PackageManager.query_parts(query))
@@ -805,7 +805,7 @@ def remove(ctx, package_id):
                 continue
 
         echo(output)
-        return
+        ctx.exit()
 
 
 @mpm.command(short_help="Sync local package info.", section=MAINTENANCE)
@@ -851,11 +851,12 @@ def backup(ctx, toml_output):
 
     if not is_stdout:
         if toml_filepath.exists() and not toml_filepath.is_file():
-            logger.error("Target file exist and is not a file.")
-            return
+            logger.fatal("Target file exist and is not a file.")
+            ctx.exit(2)
+
         if toml_filepath.suffix.lower() != ".toml":
-            logger.error("Target file is not a TOML file.")
-            return
+            logger.fatal("Target file is not a TOML file.")
+            ctx.exit(2)
 
     # Leave some metadata as comment.
     write = toml_output.write

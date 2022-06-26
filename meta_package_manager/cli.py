@@ -676,12 +676,12 @@ def install(ctx, package_id):
                 continue
 
         echo(output)
-        return
+        ctx.exit()
 
 
 @mpm.command(short_help="Upgrade packages.", section=MAINTENANCE)
 @option(
-    "-a",
+    "-A",
     "--all",
     is_flag=True,
     default=False,

@@ -7,7 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[mpm\] Allow global `upgrade` of a subset of packages from the command line.
-- \[mpm\] Add a `-a/--all` option to `upgrade` operation.
+- \[mpm\] Add a `-A/--all` option to `upgrade` operation.
 - \[pipx\] Implement `outdated` operation.
 - \[mpm\] Rename all `*-like` labels to `*-based` to help finer identification of families.
 

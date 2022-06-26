@@ -363,7 +363,7 @@ def managers(ctx):
     )
 
 
-@mpm.command(short_help="List installed packages.", section=EXPLORE)
+@mpm.command(aliases=["list"], short_help="List installed packages.", section=EXPLORE)
 @pass_context
 def installed(ctx):
     """List all packages installed on the system from all managers."""
@@ -679,7 +679,7 @@ def install(ctx, package_id):
         ctx.exit()
 
 
-@mpm.command(short_help="Upgrade packages.", section=MAINTENANCE)
+@mpm.command(aliases=["update"], short_help="Upgrade packages.", section=MAINTENANCE)
 @option(
     "-A",
     "--all",
@@ -760,7 +760,7 @@ def upgrade(ctx, all, package_ids):
             logger.info(output)
 
 
-@mpm.command(short_help="Remove a package.", section=MAINTENANCE)
+@mpm.command(aliases=["uninstall"], short_help="Remove a package.", section=MAINTENANCE)
 @argument("package_id", type=STRING, required=True)
 @pass_context
 def remove(ctx, package_id):

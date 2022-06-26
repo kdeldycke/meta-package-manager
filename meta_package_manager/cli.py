@@ -364,8 +364,16 @@ def managers(ctx):
 
 
 @mpm.command(aliases=["list"], short_help="List installed packages.", section=EXPLORE)
+@option(
+    "-d",
+    "--duplicates",
+    is_flag=True,
+    default=False,
+    help="Only list installed packages sharing the same ID. Implies "
+    "`--sort_by package_id` to make duplicates easier to compare between themselves.",
+)
 @pass_context
-def installed(ctx):
+def installed(ctx, duplicates):
     """List all packages installed on the system by each manager."""
     # Build-up a global dict of installed packages per manager.
     installed_data = {}
@@ -389,6 +397,30 @@ def installed(ctx):
             {expt.error for expt in manager.cli_errors}
         )
 
+    # Filters out non-duplicate packages.
+    if duplicates:
+        # Re-group packages by their IDs.
+        package_sources = {}
+        for manager_id, installed_pkg in installed_data.items():
+            for package in installed_pkg["packages"]:
+                package_sources.setdefault(package["id"], set()).add(manager_id)
+        logger.debug(f"Managers sourcing each package: {package_sources}")
+
+        # Identify package IDs shared by multiple managers.
+        duplicates_ids = {
+            pid for pid, managers in package_sources.items() if len(managers) > 1
+        }
+        logger.debug(f"Duplicates: {duplicates_ids}")
+
+        # Remove non-duplicates from results.
+        for manager_id in installed_data.keys():
+            duplicate_packages = tuple(
+                p
+                for p in installed_data[manager_id]["packages"]
+                if p["id"] in duplicates_ids
+            )
+            installed_data[manager_id]["packages"] = duplicate_packages
+
     # Machine-friendly data rendering.
     if ctx.find_root().table_formatter.format_name == "json":
         print_json(installed_data)
@@ -407,7 +439,13 @@ def installed(ctx):
             for info in installed_pkg["packages"]
         ]
 
-    # Sort and print table.
+    # Force sorting by package ID in duplicate mode.
+    sort_by = ctx.obj.sort_by
+    if duplicates:
+        logger.info("Force table sorting on package ID because of --duplicates option.")
+        sort_by = "package_id"
+
+    # Print table.
     print_table(
         (
             ("Package name", "package_name"),
@@ -416,7 +454,7 @@ def installed(ctx):
             ("Installed version", "version"),
         ),
         table,
-        ctx.obj.sort_by,
+        sort_by,
     )
 
     if ctx.obj.stats:
@@ -734,7 +772,7 @@ def upgrade(ctx, all, package_ids):
         for package in manager.installed:
             if package.id in package_ids:
                 package_sources.setdefault(package.id, set()).add(manager.id)
-    logger.debug(f"Managers recognizing each package: {package_sources}")
+    logger.debug(f"Managers sourcing each package: {package_sources}")
 
     for package_id in package_ids:
 

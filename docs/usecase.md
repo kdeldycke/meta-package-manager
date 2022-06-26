@@ -115,32 +115,30 @@ read the documentation (if it even exists).
 
 ## Deduplicate packages
 
-Use the `search` command to hunt down packages that were installed via multiple
-managers.
-
-One exemple I had on my machine, in which `httpie` was both installed by the
-way of `brew` and `pip`:
-
 ```shell-session
-$ mpm installed | grep httpie
-│ httpie  │ httpie  │ brew  │ 2.1.0  │
-│ httpie  │ httpie  │ pip   │ 2.1.0  │
+$ mpm list --duplicates
+╭──────────────┬──────┬─────────┬───────────────────╮
+│ Package name │ ID   │ Manager │ Installed version │
+├──────────────┼──────┼─────────┼───────────────────┤
+│ blah         │ blah │ cargo   │ 0.0.0             │
+│ blah         │ blah │ gem     │ 0.0.2             │
+│ blah         │ blah │ npm     │ 5.2.1             │
+│ blah         │ blah │ pip     │ 0.1.12            │
+│ six          │ six  │ brew    │ 1.16.0_2          │
+│ six          │ six  │ pip     │ 1.16.0            │
+╰──────────────┴──────┴─────────┴───────────────────╯
+6 packages total (pip: 2, brew: 1, cargo: 1, gem: 1, npm: 1, cask: 0).
 ```
 
-Now you can easely remove one of them, and no longer have to think hard about
+Now you can easely remove some of them, and no longer have to think hard about
 which is which.
 
 ```shell-session
-$ python -m pip uninstall httpie
-Found existing installation: httpie 2.1.0
-Uninstalling httpie-2.1.0:
-  Would remove:
-    /usr/local/bin/http
-    /usr/local/bin/https
-    /usr/local/lib/python3.7/site-packages/httpie-2.1.0.dist-info/*
-    /usr/local/lib/python3.7/site-packages/httpie/*
-Proceed (y/n)? y
-  Successfully uninstalled httpie-2.1.0
+$ mpm --cargo uninstall blah
+$ mpm --gem   uninstall blah
+$ mpm --pip   uninstall blah
+
+$ mpm --pip uninstall six
 ```
 
 ```{todo}

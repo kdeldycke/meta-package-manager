@@ -6,6 +6,7 @@
 This version is not released yet and is under active development.
 ```
 
+- \[pipx\] Implement `outdated` operation.
 - \[mpm\] Rename all `*-like` labels to `*-based` to help finer identification of families.
 
 ## {gh}`5.3.0 (2022-06-25) <compare/v5.2.0...v5.3.0>`

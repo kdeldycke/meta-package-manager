@@ -16,6 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import json
+from operator import attrgetter
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
@@ -87,6 +88,71 @@ class Pipx(PackageManager):
                         "package_version"
                     ],
                 )
+
+    @property
+    def outdated(self):
+        """Fetch outdated packages.
+
+        .. todo::
+
+            Mimicks ``Pip.outdated()`` operation. There probably is a way to factorize it.
+
+        .. code-block:: shell-session
+
+            ► pipx runpip poetry list --no-color --format=json --outdated \
+            > --verbose --quiet | jq
+            [
+              {
+                "name": "charset-normalizer",
+                "version": "2.0.12",
+                "location": "~/.local/pipx/venvs/poetry/lib/python3.10/site-packages",
+                "installer": "pip",
+                "latest_version": "2.1.0",
+                "latest_filetype": "wheel"
+              },
+              {
+                "name": "packaging",
+                "version": "20.9",
+                "location": "~/.local/pipx/venvs/poetry/lib/python3.10/site-packages",
+                "installer": "pip",
+                "latest_version": "21.3",
+                "latest_filetype": "wheel"
+              },
+              {
+                "name": "virtualenv",
+                "version": "20.14.1",
+                "location": "~/.local/pipx/venvs/poetry/lib/python3.10/site-packages",
+                "installer": "pip",
+                "latest_version": "20.15.0",
+                "latest_filetype": "wheel"
+              }
+            ]
+        """
+        for main_package_id in map(attrgetter("id"), self.installed):
+
+            # --quiet is required here to silence warning and error messages
+            # mangling the JSON content.
+            output = self.run_cli(
+                "runpip",
+                main_package_id,
+                "list",
+                "--no-color",
+                "--format=json",
+                "--outdated",
+                "--verbose",
+                "--quiet",
+            )
+
+            if output:
+                for sub_package in json.loads(output):
+                    # Only report the main package as outdated, silencing its dependencies.
+                    sub_package_id = sub_package["name"]
+                    if sub_package_id == main_package_id:
+                        yield Package(
+                            id=sub_package_id,
+                            installed_version=sub_package["version"],
+                            latest_version=sub_package["latest_version"],
+                        )
 
     def install(self, package_id):
         """Install one package.

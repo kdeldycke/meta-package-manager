@@ -84,7 +84,7 @@ jobs:
               "keywords": ["choco", "chocolatey"]},
 
               {"labels": [
-                "📦 manager: dnf-like",
+                "📦 manager: dnf-based",
                 "🖥 platform: Linux"],
               "keywords": ["dnf", "yum", "rpm", "fedora", "redhat", "rhel"]},
 
@@ -96,7 +96,7 @@ jobs:
               "keywords": ["composer", "php"]},
 
               {"labels": [
-                "📦 manager: dpkg-like",
+                "📦 manager: dpkg-based",
                 "🖥 platform: Linux"],
                "keywords": ["apt", "apt-mint", "aptitude", "dpkg", "opkg", "ubuntu", "debian", "mint"]},
 
@@ -123,19 +123,19 @@ jobs:
                "keywords": ["mas", "app store", "app-store"]},
 
               {"labels": [
-                "📦 manager: npm-like",
+                "📦 manager: npm-based",
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",
                 "🖥 platform: Windows"],
                "keywords": ["npm", "node", "yarn"]},
 
               {"labels": [
-                "📦 manager: pacman-like",
+                "📦 manager: pacman-based",
                 "🖥 platform: Linux"],
               "keywords": ["pacman", "arch", "paru", "yay"]},
 
               {"labels": [
-                "📦 manager: pip-like",
+                "📦 manager: pip-based",
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",
                 "🖥 platform: Windows"],

@@ -30,12 +30,12 @@
     "description": "composer"
   },
   {
-    "name": "📦 manager: dnf-like",
+    "name": "📦 manager: dnf-based",
     "color": "#bfdadc",
     "description": "dnf, yum"
   },
   {
-    "name": "📦 manager: dpkg-like",
+    "name": "📦 manager: dpkg-based",
     "color": "#bfdadc",
     "description": "apt, apt-mint, dpkg, opkg"
   },
@@ -65,17 +65,17 @@
     "description": "mpm"
   },
   {
-    "name": "📦 manager: npm-like",
+    "name": "📦 manager: npm-based",
     "color": "#bfdadc",
     "description": "npm, yarn"
   },
   {
-    "name": "📦 manager: pacman-like",
+    "name": "📦 manager: pacman-based",
     "color": "#bfdadc",
     "description": "pacman, paru, yay"
   },
   {
-    "name": "📦 manager: pip-like",
+    "name": "📦 manager: pip-based",
     "color": "#bfdadc",
     "description": "pip, pipx"
   },

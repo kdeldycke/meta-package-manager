@@ -44,11 +44,11 @@ MANAGER_LABELS = {}
 
 
 MANAGER_GROUPS = {
-    "dnf-like": {"dnf", "yum"},
-    "dpkg-like": {"dpkg", "apt", "apt-mint", "opkg"},
-    "npm-like": {"npm", "yarn"},
-    "pacman-like": {"pacman", "paru", "yay"},
-    "pip-like": {"pip", "pipx"},
+    "dnf-based": {"dnf", "yum"},
+    "dpkg-based": {"dpkg", "apt", "apt-mint", "opkg"},
+    "npm-based": {"npm", "yarn"},
+    "pacman-based": {"pacman", "paru", "yay"},
+    "pip-based": {"pip", "pipx"},
 }
 """Managers sharing some roots or implementation will be grouped together."""
 

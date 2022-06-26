@@ -25,8 +25,7 @@ else:
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from .. import logger
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, only_exact_search
 
 
 class Yarn(PackageManager):
@@ -110,6 +109,7 @@ class Yarn(PackageManager):
                 latest_version=values["latest"],
             )
 
+    @only_exact_search
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -191,11 +191,6 @@ class Yarn(PackageManager):
               }
             }
         """
-        if extended:
-            logger.warning(f"{self.id} does not implement extended search operation.")
-        if not exact:
-            logger.warning(f"{self.id} does not implement non-exact search operation.")
-
         output = self.run_cli("--json", "info", query)
 
         if output:

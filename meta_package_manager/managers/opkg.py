@@ -19,8 +19,7 @@ import re
 
 from click_extra.platform import LINUX
 
-from .. import logger
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, no_exact_search, no_extended_search
 
 
 class OPKG(PackageManager):
@@ -99,6 +98,8 @@ class OPKG(PackageManager):
                     installed_version=installed_version,
                 )
 
+    @no_exact_search
+    @no_extended_search
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -113,11 +114,6 @@ class OPKG(PackageManager):
 
             ► opkg list
         """
-        if extended:
-            logger.warning(f"{self.id} does not implement extended search operation.")
-        if exact:
-            logger.warning(f"{self.id} does not implement exact search operation.")
-
         output = self.run_cli("list")
 
         regexp = re.compile(

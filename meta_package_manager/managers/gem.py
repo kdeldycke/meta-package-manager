@@ -19,8 +19,7 @@ import re
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from .. import logger
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, no_extended_search
 from ..version import parse_version
 
 
@@ -114,6 +113,7 @@ class Gem(PackageManager):
                     latest_version=latest_version,
                 )
 
+    @no_extended_search
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -138,9 +138,6 @@ class Gem(PackageManager):
             ► gem search python --versions --exact --quiet
             python (0.0.1)
         """
-        if extended:
-            logger.warning(f"{self.id} does not implement extended search operation.")
-
         search_arg = []
         if exact:
             search_arg.append("--exact")

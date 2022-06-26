@@ -19,8 +19,7 @@ import re
 
 from click_extra.platform import LINUX
 
-from .. import logger
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, only_extended_search
 
 
 class Snap(PackageManager):
@@ -88,12 +87,13 @@ class Snap(PackageManager):
                 installed_version=installed_version,
             )
 
+    @only_extended_search
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
         .. caution::
             Search is extended by default. So we returns the best subset of results and let
-            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them
+            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them.
 
         .. code-block:: shell-session
 
@@ -103,13 +103,6 @@ class Snap(PackageManager):
             nextcloud  17.0.5snap1  nextcloud✓   -         Nextcloud Server
             skype      8.58.0.93    skype✓       classic   One Skype for all.
         """
-        if not extended:
-            logger.warning(
-                f"{self.id} does not implement non-extended search operation."
-            )
-        if exact:
-            logger.warning(f"{self.id} does not implement exact search operation.")
-
         output = self.run_cli("find", query)
 
         regexp = re.compile(

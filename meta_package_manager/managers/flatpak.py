@@ -19,8 +19,7 @@ import re
 
 from click_extra.platform import LINUX
 
-from .. import logger
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, no_exact_search, no_extended_search
 
 
 class Flatpak(PackageManager):
@@ -124,6 +123,8 @@ class Flatpak(PackageManager):
                     installed_version=installed_version,
                 )
 
+    @no_exact_search
+    @no_extended_search
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -136,11 +137,6 @@ class Flatpak(PackageManager):
             ► flatpak search gitg --ostree-verbose
             gitg    GUI for git        org.gnome.gitg  3.32.1  stable  flathub
         """
-        if extended:
-            logger.warning(f"{self.id} does not implement extended search operation.")
-        if exact:
-            logger.warning(f"{self.id} does not implement exact search operation.")
-
         output = self.run_cli("search", query, "--ostree-verbose")
 
         regexp = re.compile(

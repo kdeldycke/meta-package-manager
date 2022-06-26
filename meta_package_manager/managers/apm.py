@@ -19,8 +19,7 @@ import json
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from .. import logger
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, no_exact_search
 
 
 class APM(PackageManager):
@@ -315,6 +314,7 @@ class APM(PackageManager):
                     latest_version=pkg["latestVersion"],
                 )
 
+    @no_exact_search
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -402,9 +402,6 @@ class APM(PackageManager):
 
             ► apm search --no-description --json python | jq
         """
-        if exact:
-            logger.warning(f"{self.id} does not implement exact search operation.")
-
         search_args = []
         if not extended:
             search_args.append("--no-description")

@@ -19,8 +19,7 @@ import re
 
 from click_extra.platform import LINUX
 
-from .. import logger
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, no_extended_search
 
 
 class Pacman(PackageManager):
@@ -97,6 +96,7 @@ class Pacman(PackageManager):
                     installed_version=installed_version,
                 )
 
+    @no_extended_search
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -121,9 +121,6 @@ class Pacman(PackageManager):
             extra/firefox-i18n-ast 99.0-1
                 Asturian language pack for Firefox
         """
-        if extended:
-            logger.warning(f"{self.id} does not implement extended search operation.")
-
         if exact:
             query = f"^{query}$"
 

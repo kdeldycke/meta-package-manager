@@ -20,8 +20,7 @@ import json
 from boltons.iterutils import remap
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from .. import logger
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, no_exact_search
 
 
 class NPM(PackageManager):
@@ -166,6 +165,7 @@ class NPM(PackageManager):
                     latest_version=values["latest"],
                 )
 
+    @no_exact_search
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -246,9 +246,6 @@ class NPM(PackageManager):
 
             ► npm --global --progress=false --no-update-notifier search --json --no-description python | jq
         """
-        if exact:
-            logger.warning(f"{self.id} does not implement exact search operation.")
-
         search_args = []
         if not extended:
             search_args.append("--no-description")

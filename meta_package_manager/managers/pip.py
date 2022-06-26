@@ -20,8 +20,7 @@ import re
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from .. import logger
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, only_extended_search
 
 
 class Pip(PackageManager):
@@ -181,6 +180,7 @@ class Pip(PackageManager):
                     latest_version=package["latest_version"],
                 )
 
+    @only_extended_search
     def search_xxx_disabled(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -212,13 +212,6 @@ class Pip(PackageManager):
             collective.js.abcjs (1.10)  - UNKNOWN
             cosmo (1.0.5)               - Python ABC sampler
         """
-        if not extended:
-            logger.warning(
-                f"{self.id} does not implement non-extended search operation."
-            )
-        if exact:
-            logger.warning(f"{self.id} does not implement exact search operation.")
-
         output = self.run_cli("search", query)
 
         regexp = re.compile(

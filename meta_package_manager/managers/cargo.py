@@ -19,8 +19,7 @@ import re
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from .. import logger
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, no_exact_search, no_extended_search
 
 
 class Cargo(PackageManager):
@@ -69,6 +68,8 @@ class Cargo(PackageManager):
                 package_id, package_version = match.groups()
                 yield Package(id=package_id, installed_version=package_version)
 
+    @no_exact_search
+    @no_extended_search
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -95,11 +96,6 @@ class Cargo(PackageManager):
             pypackage = "0.0.3"               # A modern Python dependency manager
             ... and 1664 crates more (use --limit N to see more)
         """
-        if extended:
-            logger.warning(f"{self.id} does not implement extended search operation.")
-        if exact:
-            logger.warning(f"{self.id} does not implement exact search operation.")
-
         output = self.run_cli("search", "--limit", "100", query)
 
         regexp = re.compile(

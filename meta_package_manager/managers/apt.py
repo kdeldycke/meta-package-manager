@@ -19,8 +19,7 @@ import re
 
 from click_extra.platform import LINUX
 
-from .. import logger
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, no_extended_search
 
 
 class APT(PackageManager):
@@ -275,6 +274,7 @@ class APT_Mint(APT):
         1.6.11
     """
 
+    @no_extended_search
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -295,9 +295,6 @@ class APT_Mint(APT):
             i   sed              - GNU stream editor
             p   sed:i386         - GNU stream editor
         """
-        if extended:
-            logger.warning(f"{self.id} does not implement extended search operation.")
-
         if exact:
             # Rely on apt regexp support to speed-up exact match.
             query = f"^{query}$"

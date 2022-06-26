@@ -19,8 +19,7 @@ import re
 
 from click_extra.platform import LINUX
 
-from .. import logger
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, no_exact_search, no_extended_search
 
 
 class DNF(PackageManager):
@@ -92,6 +91,8 @@ class DNF(PackageManager):
                 package_id, latest_version = match.groups()
                 yield Package(id=package_id, latest_version=latest_version)
 
+    @no_exact_search
+    @no_extended_search
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -112,11 +113,6 @@ class DNF(PackageManager):
             lvm2-dbusd.noarch : LVM2 D-Bus daemon
             usd-libs.aarch64 : Universal Scene Description library
         """
-        if extended:
-            logger.warning(f"{self.id} does not implement extended search operation.")
-        if exact:
-            logger.warning(f"{self.id} does not implement exact search operation.")
-
         output = self.run_cli("search", query)
 
         regexp = re.compile(r"(\S+)\.\S+\s:\s(\S+)")

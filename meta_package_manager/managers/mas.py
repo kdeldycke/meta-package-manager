@@ -19,8 +19,7 @@ import re
 
 from click_extra.platform import MACOS
 
-from .. import logger
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, no_exact_search, no_extended_search
 
 
 class MAS(PackageManager):
@@ -114,6 +113,8 @@ class MAS(PackageManager):
                 latest_version=latest_version,
             )
 
+    @no_exact_search
+    @no_extended_search
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -130,11 +131,6 @@ class MAS(PackageManager):
               1164498373  PythonGames     (1.0)
               1400050251  Pythonic        (1.0.0)
         """
-        if extended:
-            logger.warning(f"{self.id} does not implement extended search operation.")
-        if exact:
-            logger.warning(f"{self.id} does not implement exact search operation.")
-
         output = self.run_cli("search", query)
 
         regexp = re.compile(

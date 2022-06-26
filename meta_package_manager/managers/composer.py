@@ -20,8 +20,7 @@ import re
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from .. import logger
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, no_exact_search
 
 
 class Composer(PackageManager):
@@ -120,6 +119,7 @@ class Composer(PackageManager):
                     latest_version=package["latest"],
                 )
 
+    @no_exact_search
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -162,9 +162,6 @@ class Composer(PackageManager):
             ► search global --only-name pythonphp/pythonphp
             pythonphp/pythonphp
         """
-        if exact:
-            logger.warning(f"{self.id} does not implement exact search operation.")
-
         search_args = []
         if not extended:
             search_args.append("--only-name")

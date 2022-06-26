@@ -838,7 +838,11 @@ def cleanup(ctx):
             logger.warning(f"{manager.id} does not implement cleanup operation.")
 
 
-@mpm.command(short_help="Save installed packages to a TOML file.", section=SNAPSHOTS)
+@mpm.command(
+    aliases=["lock", "freeze"],
+    short_help="Save installed packages to a TOML file.",
+    section=SNAPSHOTS,
+)
 @argument("toml_output", type=File("w"), default="-")
 @pass_context
 def backup(ctx, toml_output):

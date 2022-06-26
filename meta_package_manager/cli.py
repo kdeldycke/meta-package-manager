@@ -679,18 +679,83 @@ def install(ctx, package_id):
         return
 
 
-@mpm.command(short_help="Upgrade all packages.", section=MAINTENANCE)
+@mpm.command(short_help="Upgrade packages.", section=MAINTENANCE)
+@option(
+    "-a",
+    "--all",
+    is_flag=True,
+    default=False,
+    help="Upgrade all outdated packages.",
+)
+@argument("package_ids", type=STRING, nargs=-1)
 @pass_context
-def upgrade(ctx):
-    """Perform a full package upgrade on all available managers."""
-    for manager in ctx.obj.selected_managers:
-        logger.info(f"Updating all outdated packages from {manager.id}...")
-        try:
-            output = manager.upgrade_all()
-        except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement upgrade_all operation.")
+def upgrade(ctx, all, package_ids):
+    """Upgrade one or more outdated packages."""
+    if not all and not package_ids:
+        logger.fatal("No package provided for upgrade.")
+        ctx.exit(2)
+
+    # Deduplicate entries.
+    package_ids = set(package_ids)
+
+    # Full upgrade.
+    if all:
+        if package_ids:
+            logger.debug(
+                f"Ignore provided {', '.join(sorted(package_ids))} packages and proceed to a full upgrade..."
+            )
+        for manager in ctx.obj.selected_managers:
+            logger.info(f"Upgrade all outdated packages from {manager.id}...")
+            try:
+                output = manager.upgrade_all()
+            except NotImplementedError:
+                logger.warning(
+                    f"{manager.id} does not implement upgrade_all operation."
+                )
+                continue
+            if output:
+                logger.info(output)
+        ctx.exit()
+
+    # Specific list of package to upgrade has been requested. We need to validate them before proceeding.
+
+    # Cast generator to tuple because of reuse.
+    selected_managers = tuple(ctx.obj.selected_managers)
+
+    # For each package, we list the managers they were sourced from.
+    package_sources = {}
+    for manager in selected_managers:
+        for package in manager.installed:
+            if package.id in package_ids:
+                package_sources.setdefault(package.id, set()).add(manager.id)
+    logger.debug(f"Managers recognizing each package: {package_sources}")
+
+    for package_id in package_ids:
+
+        # Skip unrecognized packages.
+        if package_id not in package_sources:
+            logger.error(
+                f"{package_id} is not recognized by any of the selected manager."
+                f" Skip its upgrade."
+            )
             continue
 
+        # A package to upgrade that was sourced from multiple managers leads to undefined
+        # behavior. What should we do in this case? Upgrade the package with each manager? Only the first one? A random one?
+        # We choose to play it safe and simply report this ambiguous situation to the user and skip the package.
+        managers = package_sources[package_id]
+        if len(managers) > 1:
+            logger.error(
+                f"{package_id} was sourced from multiple managers: {', '.join(sorted(managers))}."
+                " Skip its upgrade."
+            )
+            continue
+
+        assert len(managers) == 1
+        manager_id = managers.pop()
+        manager = pool.get(manager_id)
+        logger.info(f"Proceed to upgrade {package_id} with {manager_id}...")
+        output = manager.upgrade(package_id)
         if output:
             logger.info(output)
 

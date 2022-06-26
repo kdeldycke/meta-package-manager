@@ -139,7 +139,7 @@ def bar_plugin_path(ctx, param, value):
         "--manager",
         type=Choice(pool.all_manager_ids, case_sensitive=False),
         multiple=True,
-        help="Restrict subcommand to a subset of package managers. Repeat to "
+        help="Restrict subcommand to a subset of managers. Repeat to "
         "select multiple managers. The order in which options are provided defines the "
         "order in which subcommands will process them.",
     ),
@@ -148,14 +148,14 @@ def bar_plugin_path(ctx, param, value):
         "--exclude",
         type=Choice(pool.all_manager_ids, case_sensitive=False),
         multiple=True,
-        help="Exclude a package manager. Repeat to exclude multiple managers.",
+        help="Exclude a manager. Repeat to exclude multiple managers.",
     ),
     option(
         "-a",
         "--all-managers",
         is_flag=True,
         default=False,
-        help="Force evaluation of all package manager recognized by mpm, even those "
+        help="Force evaluation of all manager recognized by mpm, even those "
         "not supported by the current platform. Still applies filtering by --manager "
         "and --exclude options before calling the subcommand.",
     ),
@@ -236,7 +236,7 @@ def mpm(
     sort_by,
     stats,
 ):
-    """Common CLI options and behavior for multiple package managers."""
+    """Common CLI options and behavior for managers."""
 
     # Update the list of selected managers with single selectors.
     if ctx.obj:
@@ -366,7 +366,7 @@ def managers(ctx):
 @mpm.command(aliases=["list"], short_help="List installed packages.", section=EXPLORE)
 @pass_context
 def installed(ctx):
-    """List all packages installed on the system from all managers."""
+    """List all packages installed on the system by each manager."""
     # Build-up a global dict of installed packages per manager.
     installed_data = {}
 
@@ -428,9 +428,9 @@ def installed(ctx):
     "--plugin-output",
     is_flag=True,
     default=False,
-    help="Output results for direct consumption by an Xbar/SwiftBar-compatible plugin."
-    " The layout is dynamic and depends on environment variables set by both Xbar and "
-    "SwiftBar.",
+    help="Output results for direct consumption by an Xbar/SwiftBar-compatible plugin. "
+    "The layout is dynamic and depends on environment variables set by either Xbar "
+    "or SwiftBar.",
 )
 @pass_context
 def outdated(ctx, plugin_output):
@@ -554,7 +554,7 @@ def outdated(ctx, plugin_output):
 @argument("query", type=STRING, required=True)
 @pass_context
 def search(ctx, extended, exact, query):
-    """Search packages from all managers."""
+    """Search each manager for a package name, ID or description matching the query."""
     # Build-up a global list of package matches per manager.
     matches = {}
 
@@ -632,7 +632,7 @@ def search(ctx, extended, exact, query):
 # TODO: add a --force/--reinstall flag
 @pass_context
 def install(ctx, package_id):
-    """Install the provided package using one of the selected package manager."""
+    """Install the provided package ID using one of the selected manager."""
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(ctx.obj.selected_managers)
 
@@ -685,12 +685,18 @@ def install(ctx, package_id):
     "--all",
     is_flag=True,
     default=False,
-    help="Upgrade all outdated packages.",
+    help="Upgrade all outdated packages. "
+    "Will make the command ignore package IDs provided as parameters.",
 )
 @argument("package_ids", type=STRING, nargs=-1)
 @pass_context
 def upgrade(ctx, all, package_ids):
-    """Upgrade one or more outdated packages."""
+    """Upgrade one or more outdated packages.
+
+    Unknown packages will be skipped.
+
+    Packages recognized by multiple managers will be identified and skipped.
+    """
     if not all and not package_ids:
         logger.fatal("No package provided for upgrade.")
         ctx.exit(2)
@@ -764,7 +770,7 @@ def upgrade(ctx, all, package_ids):
 @argument("package_id", type=STRING, required=True)
 @pass_context
 def remove(ctx, package_id):
-    """Remove the provided package using one of the selected package manager."""
+    """Remove the provided package using one of the selected manager."""
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(ctx.obj.selected_managers)
 
@@ -865,7 +871,7 @@ def backup(ctx, toml_output):
 
     installed_data = {}
 
-    # Create one section for each package manager.
+    # Create one section for each manager.
     for manager in ctx.obj.selected_managers:
         logger.info(f"Dumping packages from {manager.id}...")
 
@@ -933,7 +939,7 @@ def restore(ctx, toml_files):
                 continue
             logger.info(f"Restore {manager.id} packages...")
             for package_id, version in doc[manager.id].items():
-                # Let the command fail if the package manager doesn't implement the
+                # Let the command fail if the manager doesn't implement the
                 # install operation.
                 logger.info(f"Install {package_id} package from {manager.id}...")
                 output = manager.install(package_id)

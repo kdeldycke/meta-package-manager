@@ -194,7 +194,13 @@ class CLISubCommandTests:
                     )
                 ),
                 # Upgrade command.
-                f"Updating all outdated packages from {mid}..." in stderr,
+                f"Upgrade all outdated packages from {mid}..." in stderr,
+                bool(
+                    re.search(
+                        rf"Proceed to upgrade \S+ with {mid}\.\.\.",
+                        stderr,
+                    )
+                ),
                 # Remove messages.
                 bool(
                     re.search(

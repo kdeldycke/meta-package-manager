@@ -11,6 +11,7 @@ This version is not released yet and is under active development.
 - \[mpm\] add a `-d`/`--duplicates` option to `installed` operation to only show packages sharing the same ID accross multiple managers.
 - \[mpm\] Alias `list` operation to `installed`, `uninstall` to `remove`, `update` to `upgrade` and `lock`/`freeze` to `backup`.
 - \[pipx\] Implement `outdated` operation.
+- \[pip\] Do not wait for user confirmation on `remove` operation.
 - \[mpm\] Rename all `*-like` labels to `*-based` to help finer identification of families.
 
 ## {gh}`5.3.0 (2022-06-25) <compare/v5.2.0...v5.3.0>`

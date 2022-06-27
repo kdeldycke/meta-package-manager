@@ -282,6 +282,6 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            ► python -m pip --no-color uninstall arrow
+            ► python -m pip --no-color uninstall --yes arrow
         """
-        return self.run_cli("uninstall", package_id)
+        return self.run_cli("uninstall", "--yes", package_id)

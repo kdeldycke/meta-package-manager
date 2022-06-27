@@ -3,7 +3,7 @@
 Attempting to unify all package managers is a Sisyphean task.
 
 This did not prevent me or others to try to solve that problem. It is not easy to explain why
-but there might be a greater need for such tools out there. Here is a list of some related projects I stumbled into and how they compares to `mpm`.
+but [there might be a greater need for such tools](usecase.md) out there. Here is a list of some related projects I stumbled into and how they compares to `mpm`.
 
 ## Package manager support
 
@@ -136,16 +136,17 @@ but there might be a greater need for such tools out there. Here is a list of so
 | ----------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
 | List available managers |   ✓   |                |               |              |              |
 | List installed packages |   ✓   |                |       ✓       |              |      ✓       |
+| List duplicate packages |   ✓   |                |               |              |              |
 | List outdated packages  |   ✓   |                |       ✓       |              |      ✓       |
 | Search packages         |   ✓   |                |       ✓       |      ✓       |      ✓       |
 | Install a package       |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Remove a package        |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Remove / Uninstall a package |   ✓   |                |       ✓       |      ✓       |      ✓       |
 | Upgrade single package  |   ✓   |                |       ✓       |              |      ✓       |
 | Upgrade all packages    |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
 | Sync                    |   ✓   |                |       ✓       |      ✓       |      ✓       |
 | Cleanup: caches         |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
 | Cleanup: orphans        |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Backup                  |   ✓   |                |               |              |              |
+| Backup / Lock / Freeze  |   ✓   |                |               |              |              |
 | Restore                 |   ✓   |                |               |              |              |
 
 ## Features
@@ -160,6 +161,7 @@ but there might be a greater need for such tools out there. Here is a list of so
 | Configurable output                   |   ✓   |                |               |              |              |
 | Sortable output                       |   ✓   |                |               |              |              |
 | Colored output                        |   ✓   |       ✓        |               |              |              |
+| Version parsing and diff              |   ✓   |                |               |              |              |
 | JSON export                           |   ✓   |                |               |              |              |
 | CSV export                            |   ✓   |                |               |              |              |
 | Markup export                         |   ✓   |                |               |              |              |
@@ -191,7 +193,7 @@ but there might be a greater need for such tools out there. Here is a list of so
 | ------------------- | :------ | :------------- | :------------ | :----------- | :----------- |
 | License             | GPL-2.0 | GPL-3.0        | GPL-3.0       | Custom       | GPL-3.0      |
 | Implementation      | Python  | Rust           | Rust          | Shell        | C++          |
-| Version benchmarked | `5.2.0` | `8.3.1`        | `0.15.2`      | `3.0.7`      | `2.3`        |
+| Version benchmarked | `5.4.0` | `8.3.1`        | `0.15.2`      | `3.0.7`      | `2.3`        |
 | Benchmark date      | 2022-06 | 2022-04        | 2022-04       | 2022-04      | 2022-04      |
 
 ## Project's URL

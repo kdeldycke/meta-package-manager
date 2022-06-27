@@ -20,7 +20,8 @@ import json
 from boltons.iterutils import remap
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from ..base import Package, PackageManager, no_exact_search
+from ..base import Package, PackageManager
+from ..capabilities import search_capabilities
 
 
 class NPM(PackageManager):
@@ -165,7 +166,7 @@ class NPM(PackageManager):
                     latest_version=values["latest"],
                 )
 
-    @no_exact_search
+    @search_capabilities(exact_support=False)
     def search(self, query, extended, exact):
         """Fetch matching packages.
 

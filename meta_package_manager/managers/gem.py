@@ -19,7 +19,8 @@ import re
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from ..base import Package, PackageManager, no_extended_search
+from ..base import Package, PackageManager
+from ..capabilities import search_capabilities
 from ..version import parse_version
 
 
@@ -113,7 +114,7 @@ class Gem(PackageManager):
                     latest_version=latest_version,
                 )
 
-    @no_extended_search
+    @search_capabilities(extended_support=False)
     def search(self, query, extended, exact):
         """Fetch matching packages.
 

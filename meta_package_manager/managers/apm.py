@@ -19,7 +19,8 @@ import json
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from ..base import Package, PackageManager, no_exact_search
+from ..base import Package, PackageManager
+from ..capabilities import search_capabilities
 
 
 class APM(PackageManager):
@@ -314,7 +315,7 @@ class APM(PackageManager):
                     latest_version=pkg["latestVersion"],
                 )
 
-    @no_exact_search
+    @search_capabilities(exact_support=False)
     def search(self, query, extended, exact):
         """Fetch matching packages.
 

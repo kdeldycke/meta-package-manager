@@ -201,6 +201,12 @@ def bar_plugin_path(ctx, param, value):
         help="Rendering mode of the output.",
     ),
     option(
+        "--description",
+        is_flag=True,
+        default=False,
+        help="Show package description in results.",
+    ),
+    option(
         "-s",
         "--sort-by",
         type=Choice(sorted(SORTABLE_FIELDS), case_sensitive=False),
@@ -233,6 +239,7 @@ def mpm(
     ignore_auto_updates,
     stop_on_error,
     dry_run,
+    description,
     sort_by,
     stats,
 ):
@@ -268,11 +275,13 @@ def mpm(
         "GlobalOptions",
         (
             "selected_managers",
+            "description",
             "sort_by",
             "stats",
         ),
         defaults=(
             selected_managers,
+            description,
             sort_by,
             stats,
         ),
@@ -570,29 +579,34 @@ def outdated(ctx, plugin_output):
 # Add details helps => exact: is case-sensitive, and keep all non-alnum chars
 # fuzzy: query is case-insensitive, stripped-out of non-alnum chars and
 # tokenized (no order sensitive)
-# extended, same as fuzzy, but do not limit search to package name and ID.
+# extended, same as fuzzy, but do not limit search to package ID and name.
 # extended to description and other metadata depending on manager support.
 # Modes:
-#  1. strict (--exact)
+#  1. strict (--exact, on ID or name)
 #  2. substring (regex, no case, no split)
 #  3. fuzzy (token-based)
-#  4. extended (+ metadata)
+#  4. extended (fuzzy + metadata)
 @mpm.command(short_help="Search packages.", section=EXPLORE)
 @option(
-    "--extended/--package-name",
+    "--extended/--id-name-only",
     default=False,
-    help="Extend search to additional package metadata like description, "
-    "instead of restricting it package ID and name.",
+    help="Extend search to description, instead of restricting it to package ID and name. Implies --description.",
 )
 @option(
     "--exact/--fuzzy",
     default=False,
-    help="Only returns exact matches, or enable fuzzy search in substrings.",
+    help="Only returns exact matches on package ID or name.",
 )
 @argument("query", type=STRING, required=True)
 @pass_context
 def search(ctx, extended, exact, query):
-    """Search each manager for a package name, ID or description matching the query."""
+    """Search each manager for a package ID, name or description matching the query."""
+    # --extended implies --description.
+    show_description = ctx.obj.description
+    if extended and not ctx.obj.description:
+        logger.warning("--extended option forces --description option.")
+        show_description = True
+
     # Build-up a global list of package matches per manager.
     matches = {}
 
@@ -639,27 +653,31 @@ def search(ctx, extended, exact, query):
     # Human-friendly content rendering.
     table = []
     for manager_id, matching_pkg in matches.items():
-        table += [
-            (
-                highlight_query(info["name"]),
-                highlight_query(info["id"]),
+        for pkg in matching_pkg["packages"]:
+            line = [
+                highlight_query(pkg["name"]) if pkg["name"] else "",
+                highlight_query(pkg["id"]) if pkg["id"] else "",
                 manager_id,
-                info["latest_version"] if info["latest_version"] else "?",
-            )
-            for info in matching_pkg["packages"]
-        ]
+                pkg["latest_version"] if pkg["latest_version"] else "?",
+            ]
+            if show_description:
+                line.append(
+                    highlight_query(pkg.get("description"))
+                    if pkg.get("description")
+                    else ""
+                )
+            table.append(line)
 
     # Sort and print table.
-    print_table(
-        (
-            ("Package name", "package_name"),
-            ("ID", "package_id"),
-            ("Manager", "manager_id"),
-            ("Latest version", "version"),
-        ),
-        table,
-        ctx.obj.sort_by,
-    )
+    headers = [
+        ("Package name", "package_name"),
+        ("ID", "package_id"),
+        ("Manager", "manager_id"),
+        ("Latest version", "version"),
+    ]
+    if show_description:
+        headers.append(("Description", "description"))
+    print_table(headers, table, ctx.obj.sort_by)
 
     if ctx.obj.stats:
         print_stats(matches)

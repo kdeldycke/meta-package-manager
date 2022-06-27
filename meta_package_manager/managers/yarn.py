@@ -25,7 +25,8 @@ else:
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from ..base import Package, PackageManager, only_exact_search
+from ..base import Package, PackageManager
+from ..capabilities import search_capabilities
 
 
 class Yarn(PackageManager):
@@ -109,7 +110,7 @@ class Yarn(PackageManager):
                 latest_version=values["latest"],
             )
 
-    @only_exact_search
+    @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query, extended, exact):
         """Fetch matching packages.
 
@@ -198,9 +199,8 @@ class Yarn(PackageManager):
 
             if result["type"] == "inspect":
                 package = result["data"]
-                package_id = package["name"]
                 yield Package(
-                    id=package_id,
+                    id=package["name"],
                     description=package["description"],
                     latest_version=package["version"],
                 )

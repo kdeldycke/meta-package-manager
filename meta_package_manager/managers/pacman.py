@@ -19,7 +19,8 @@ import re
 
 from click_extra.platform import LINUX
 
-from ..base import Package, PackageManager, no_extended_search
+from ..base import Package, PackageManager
+from ..capabilities import search_capabilities
 
 
 class Pacman(PackageManager):
@@ -96,7 +97,7 @@ class Pacman(PackageManager):
                     installed_version=installed_version,
                 )
 
-    @no_extended_search
+    @search_capabilities(extended_support=False)
     def search(self, query, extended, exact):
         """Fetch matching packages.
 

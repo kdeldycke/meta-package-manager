@@ -20,7 +20,8 @@ import re
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from ..base import Package, PackageManager, only_extended_search
+from ..base import Package, PackageManager
+from ..capabilities import search_capabilities
 
 
 class Pip(PackageManager):
@@ -180,7 +181,7 @@ class Pip(PackageManager):
                     latest_version=package["latest_version"],
                 )
 
-    @only_extended_search
+    @search_capabilities(extended_support=False, exact_support=False)
     def search_xxx_disabled(self, query, extended, exact):
         """Fetch matching packages.
 

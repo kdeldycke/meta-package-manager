@@ -19,7 +19,8 @@ import re
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from ..base import Package, PackageManager, no_exact_search, no_extended_search
+from ..base import Package, PackageManager
+from ..capabilities import search_capabilities
 
 
 class Cargo(PackageManager):
@@ -68,8 +69,7 @@ class Cargo(PackageManager):
                 package_id, package_version = match.groups()
                 yield Package(id=package_id, installed_version=package_version)
 
-    @no_exact_search
-    @no_extended_search
+    @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query, extended, exact):
         """Fetch matching packages.
 

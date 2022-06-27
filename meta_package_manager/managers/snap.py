@@ -19,7 +19,8 @@ import re
 
 from click_extra.platform import LINUX
 
-from ..base import Package, PackageManager, only_extended_search
+from ..base import Package, PackageManager
+from ..capabilities import search_capabilities
 
 
 class Snap(PackageManager):
@@ -87,7 +88,7 @@ class Snap(PackageManager):
                 installed_version=installed_version,
             )
 
-    @only_extended_search
+    @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query, extended, exact):
         """Fetch matching packages.
 

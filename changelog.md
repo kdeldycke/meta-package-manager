@@ -9,6 +9,9 @@ This version is not released yet and is under active development.
 - \[mpm\] Allow global `upgrade` of a subset of packages from the command line.
 - \[mpm\] Add a `-A`/`--all` option to `upgrade` operation.
 - \[mpm\] add a `-d`/`--duplicates` option to `installed` operation to only show packages sharing the same ID accross multiple managers.
+- \[mpm\] Add a global `--description` option but implement it for `search` operation only.
+- \[mpm\] Always show description for `--extended` search. Closes {issue}`503`.
+- \[mpm\] Rename `--package-name` search option to `--id-name-only`.
 - \[mpm\] Alias `list` operation to `installed`, `uninstall` to `remove`, `update` to `upgrade` and `lock`/`freeze` to `backup`.
 - \[pipx\] Implement `outdated` operation.
 - \[pip\] Do not wait for user confirmation on `remove` operation.
@@ -33,7 +36,7 @@ This version is not released yet and is under active development.
 
 - \[yay\] Add `yay` support. Refs {issue}`527`.
 - \[mpm,pip,pipx,pacman\] Add `remove` operation.
-- \[mpm\] Add description in search results.
+- \[mpm\] Add description in search results. Refs {issue}`503`.
 - \[mpm\] Always refilters search results manually to refine gross matchings.
 - \[mpm\] Document `brew` and Arch Linux installation. Refs {issue}`527`.
 - \[mpm\] Benchmark distribution of all `mpm` alternatives.

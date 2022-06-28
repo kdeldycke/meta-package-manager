@@ -742,9 +742,11 @@ def install(ctx, package_id):
 def upgrade(ctx, all, package_ids):
     """Upgrade one or more outdated packages.
 
-    Unknown packages will be skipped.
+    Upgrade will only proceed if no ambiguity is uncovered. Packages recognized by multiple
+    managers will be skipped. You can remove that ambiguity by carefully specifiying the subset of
+    managers to consider for upgrade.
 
-    Packages recognized by multiple managers will be identified and skipped.
+    Unknown packages will be skipped.
     """
     if not all and not package_ids:
         logger.fatal("No package provided for upgrade.")

@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`5.4.0 (unreleased) <compare/v5.3.0...main>`
-
-```{important}
-This version is not released yet and is under active development.
-```
+## {gh}`5.4.0 (2022-06-28) <compare/v5.3.0...v5.4.0>`
 
 - \[mpm\] Allow global `upgrade` of a subset of packages from the command line if no ambiguity is identified.
 - \[mpm\] Add a `-A`/`--all` option to `upgrade` operation.

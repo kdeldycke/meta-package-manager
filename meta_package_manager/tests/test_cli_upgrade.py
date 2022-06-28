@@ -24,7 +24,7 @@ from .test_cli import CLISubCommandTests
 
 @pytest.fixture
 def subcmd():
-    return "upgrade"
+    return "upgrade", "--all"
 
 
 class TestUpgrade(CLISubCommandTests):
@@ -32,32 +32,32 @@ class TestUpgrade(CLISubCommandTests):
     """All tests here should me marked as destructive unless --dry-run parameter is
     passed."""
 
-    def test_all_managers_no_package(self, invoke, subcmd):
-        result = invoke(subcmd)
+    def test_all_managers_no_package(self, invoke):
+        result = invoke("upgrade")
         assert result.exit_code == 2
         assert "No package provided for upgrade." in result.stderr
 
     @pytest.mark.parametrize("mid", pool.default_manager_ids)
-    def test_single_manager_no_package(self, invoke, subcmd, mid):
-        result = invoke(f"--{mid}", subcmd)
+    def test_single_manager_no_package(self, invoke, mid):
+        result = invoke(f"--{mid}", "upgrade")
         assert result.exit_code == 2
         assert "No package provided for upgrade." in result.stderr
 
-    def test_all_managers_dry_run_upgrade_all(self, invoke, subcmd):
-        result = invoke("--dry-run", subcmd, "--all")
+    def test_all_managers_dry_run_upgrade_all(self, invoke):
+        result = invoke("--dry-run", "upgrade", "--all")
         assert result.exit_code == 0
         self.check_manager_selection(result)
 
     @pytest.mark.parametrize("mid", pool.default_manager_ids)
-    def test_single_manager_dry_run_upgrade_all(self, invoke, subcmd, mid):
-        result = invoke(f"--{mid}", "--dry-run", subcmd, "--all")
+    def test_single_manager_dry_run_upgrade_all(self, invoke, mid):
+        result = invoke(f"--{mid}", "--dry-run", "upgrade", "--all")
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 
     @destructive
     @pytest.mark.parametrize("mid", pool.default_manager_ids)
-    def test_single_manager_upgrade_all(self, invoke, subcmd, mid):
-        result = invoke(f"--{mid}", subcmd, "--all")
+    def test_single_manager_upgrade_all(self, invoke, mid):
+        result = invoke(f"--{mid}", "upgrade", "--all")
         assert result.exit_code == 0
         self.check_manager_selection(result, {mid})
 

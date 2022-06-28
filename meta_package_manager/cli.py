@@ -18,7 +18,7 @@
 import dataclasses
 import logging
 import sys
-from collections import namedtuple
+from collections import Counter, namedtuple
 from contextlib import contextmanager
 from datetime import datetime
 from functools import partial
@@ -460,7 +460,7 @@ def installed(ctx, duplicates):
     )
 
     if ctx.obj.stats:
-        print_stats(installed_data)
+        print_stats(Counter({k: len(v["packages"]) for k, v in installed_data.items()}))
 
 
 @mpm.command(short_help="List outdated packages.", section=EXPLORE)
@@ -565,7 +565,7 @@ def outdated(ctx, plugin_output):
     )
 
     if ctx.obj.stats:
-        print_stats(outdated_data)
+        print_stats(Counter({k: len(v["packages"]) for k, v in outdated_data.items()}))
 
 
 # TODO: make it a --search-strategy=[exact, fuzzy, extended]
@@ -673,7 +673,7 @@ def search(ctx, extended, exact, query):
     print_table(headers, table, ctx.obj.sort_by)
 
     if ctx.obj.stats:
-        print_stats(matches)
+        print_stats(Counter({k: len(v["packages"]) for k, v in matches.items()}))
 
 
 @mpm.command(short_help="Install a package.", section=MAINTENANCE)
@@ -1044,16 +1044,7 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
             f.write(tomli_w.dumps({manager_id: packages}))
 
     if ctx.obj.stats:
-        # Prepare data for stats.
-        print_stats(
-            {
-                manager_id: {
-                    "id": manager_id,
-                    "packages": packages,
-                }
-                for manager_id, packages in installed_data.items()
-            }
-        )
+        print_stats(Counter({k: len(v) for k, v in installed_data.items()}))
 
 
 @mpm.command(

@@ -25,6 +25,7 @@
 import builtins
 import json
 import sys
+from collections import Counter
 from functools import partial
 from io import StringIO
 from operator import itemgetter
@@ -191,8 +192,8 @@ def print_table(header_defs, rows, sort_key=None):
     )
 
 
-def print_stats(data):
-    """Prints statistics to ``stdout``: total packages and a break down by package
+def print_stats(manager_stats: Counter) -> None:
+    """Prints statistics to ``<stdout>``: total packages and a break down by package
     manager.
 
     Prints something like:
@@ -201,18 +202,16 @@ def print_stats(data):
 
         16 packages total (brew: 2, pip: 2, apm: 2, gem: 2, cask: 2, mas: 2, vscode: 2, npm: 2, composer: 0).
     """
-    manager_stats = {infos["id"]: len(infos["packages"]) for infos in data.values()}
-    total_installed = sum(manager_stats.values())
-    per_manager_totals = ", ".join(
-        (
-            f"{k}: {v}"
-            for k, v in sorted(manager_stats.items(), key=itemgetter(1), reverse=True)
+    if manager_stats:
+        per_manager_totals = (
+            f" ({', '.join(f'{k}: {v}' for k, v in manager_stats.most_common())})"
         )
-    )
-    if per_manager_totals:
-        per_manager_totals = f" ({per_manager_totals})"
-    plural = "s" if total_installed > 1 else ""
-    echo(f"{total_installed} package{plural} total{per_manager_totals}.")
+    if sys.version_info >= (3, 10):
+        total = manager_stats.total()
+    else:
+        total = sum(manager_stats.values())
+    plural = "s" if total > 1 else ""
+    echo(f"{total} package{plural} total{per_manager_totals}.")
 
 
 class BarPluginRenderer(MPMPlugin):

@@ -774,7 +774,8 @@ def upgrade(ctx, all, package_ids):
                 logger.info(output)
         ctx.exit()
 
-    # Specific list of package to upgrade has been requested. We need to validate them before proceeding.
+    # Specific list of package to upgrade has been requested. We need to
+    # validate them before proceeding.
 
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(ctx.obj.selected_managers)
@@ -799,7 +800,8 @@ def upgrade(ctx, all, package_ids):
 
         # A package to upgrade that was sourced from multiple managers leads to undefined
         # behavior. What should we do in this case? Upgrade the package with each manager? Only the first one? A random one?
-        # We choose to play it safe and simply report this ambiguous situation to the user and skip the package.
+        # We choose to play it safe and simply report this ambiguous situation to
+        # the user and skip the package.
         managers = package_sources[package_id]
         if len(managers) > 1:
             logger.error(
@@ -995,7 +997,8 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
 
     @contextmanager
     def file_writer(filepath):
-        """A context-aware file writer which default to stdout if no path is provided."""
+        """A context-aware file writer which default to stdout if no path is
+        provided."""
         if is_stdout(filepath):
             yield sys.stdout
         else:
@@ -1020,13 +1023,15 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
                 continue
 
             for pkg in packages:
-                # Only update version in that mode if the package is already referenced into original TOML file.
+                # Only update version in that mode if the package is already referenced
+                # into original TOML file.
                 if update_version:
                     if pkg["id"] in installed_data.get(manager.id, {}):
                         installed_data[manager.id][pkg["id"]] = str(
                             pkg["installed_version"]
                         )
-                # Insert installed package in data structure for standard dump and merge mode.
+                # Insert installed package in data structure for standard dump and merge
+                # mode.
                 else:
                     installed_data.setdefault(manager.id, {})[pkg["id"]] = str(
                         pkg["installed_version"]

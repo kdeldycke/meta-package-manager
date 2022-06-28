@@ -35,7 +35,8 @@ def invoke(invoke_extra):
 
 @pytest.fixture(scope="class")
 def subcmd():
-    """Fixture used in ``test_cli_*.py`` files to set the sub-command arguments in all CLI calls.
+    """Fixture used in ``test_cli_*.py`` files to set the sub-command arguments in all
+    CLI calls.
 
     Must returns a string or an iterable of strings. Defaults to ``None``, which allows
     tests relying on this fixture to selectively skip running.

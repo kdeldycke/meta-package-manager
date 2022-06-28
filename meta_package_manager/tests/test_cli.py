@@ -77,9 +77,8 @@ class TestBaseCLI:
         conf_path = create_config("conf.toml", TEST_CONF_FILE)
         result = invoke("--config", str(conf_path), "managers", color=False)
         assert result.exit_code == 0
-        assert " │ pip │ " in result.stdout
-        assert " │ npm │ " in result.stdout
-        assert " │ gem │ " in result.stdout
+        for mid in ("pip", "npm", "gem"):
+            assert re.search(rf"│ {mid}\s+│ ", result.stdout)
         assert " brew " not in result.stdout
         assert " brew cask " not in result.stdout
         assert "debug: " in result.stderr
@@ -95,9 +94,8 @@ class TestBaseCLI:
             color=False,
         )
         assert result.exit_code == 0
-        assert " │ pip │ " in result.stdout
-        assert " │ npm │ " in result.stdout
-        assert " │ gem │ " in result.stdout
+        for mid in ("pip", "npm", "gem"):
+            assert re.search(rf"│ {mid}\s+│ ", result.stdout)
         assert " brew " not in result.stdout
         assert " cask " not in result.stdout
         assert "error: " not in result.stderr
@@ -176,7 +174,7 @@ class CLISubCommandTests:
                 # Match output of managers command.
                 bool(
                     re.search(
-                        rf"\s+│\s+{mid}\s+│\s+(✓|✘).+│\s+(✓|✘)",
+                        rf"│\s+{mid}\s+│.+│\s+(✓|✘).+│\s+(✓|✘)",
                         stdout,
                     )
                 ),
@@ -272,11 +270,7 @@ class CLISubCommandTests:
             pytest.param(("--manager", "apm") * 2, {"apm"}, id="duplicate_selectors"),
             pytest.param(("--apm",) * 2, {"apm"}, id="duplicate_flag_selectors"),
             pytest.param(
-                (
-                    "--manager",
-                    "apm",
-                    "--apm",
-                ),
+                ("--manager", "apm", "--apm"),
                 {"apm"},
                 id="duplicate_mixed_selectors",
             ),

@@ -342,8 +342,8 @@ def managers(ctx):
 
         table.append(
             (
-                manager.name,
                 getattr(theme, "success" if manager.fresh else "error")(manager.id),
+                manager.name,
                 os_infos,
                 cli_infos,
                 OK if manager.executable else "",
@@ -353,8 +353,8 @@ def managers(ctx):
 
     print_table(
         (
-            ("Package manager", "manager_name"),
-            ("ID", "manager_id"),
+            ("Manager ID", "manager_id"),
+            ("Name", "manager_name"),
             ("Supported", None),
             ("CLI", None),
             ("Executable", None),
@@ -433,8 +433,8 @@ def installed(ctx, duplicates):
     for manager_id, installed_pkg in installed_data.items():
         table += [
             (
-                info["name"],
                 info["id"],
+                info["name"],
                 manager_id,
                 info["installed_version"] if info["installed_version"] else "?",
             )
@@ -450,8 +450,8 @@ def installed(ctx, duplicates):
     # Print table.
     print_table(
         (
-            ("Package name", "package_name"),
-            ("ID", "package_id"),
+            ("Package ID", "package_id"),
+            ("Name", "package_name"),
             ("Manager", "manager_id"),
             ("Installed version", "version"),
         ),
@@ -543,8 +543,8 @@ def outdated(ctx, plugin_output):
             )
             table.append(
                 (
-                    info["name"],
                     info["id"],
+                    info["name"],
                     manager_id,
                     installed_version,
                     latest_version,
@@ -554,8 +554,8 @@ def outdated(ctx, plugin_output):
     # Sort and print table.
     print_table(
         (
-            ("Package name", "package_name"),
-            ("ID", "package_id"),
+            ("Package ID", "package_id"),
+            ("Name", "package_name"),
             ("Manager", "manager_id"),
             ("Installed version", "version"),
             ("Latest version", None),
@@ -648,8 +648,8 @@ def search(ctx, extended, exact, query):
     for manager_id, matching_pkg in matches.items():
         for pkg in matching_pkg["packages"]:
             line = [
-                highlight_query(pkg["name"]) if pkg["name"] else "",
                 highlight_query(pkg["id"]) if pkg["id"] else "",
+                highlight_query(pkg["name"]) if pkg["name"] else "",
                 manager_id,
                 pkg["latest_version"] if pkg["latest_version"] else "?",
             ]
@@ -663,8 +663,8 @@ def search(ctx, extended, exact, query):
 
     # Sort and print table.
     headers = [
-        ("Package name", "package_name"),
-        ("ID", "package_id"),
+        ("Package ID", "package_id"),
+        ("Name", "package_name"),
         ("Manager", "manager_id"),
         ("Latest version", "version"),
     ]

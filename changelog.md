@@ -9,7 +9,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Allow global `upgrade` of a subset of packages from the command line if not ambiguity is identified.
 - \[mpm\] Add a `-A`/`--all` option to `upgrade` operation.
 - \[mpm\] add a `-d`/`--duplicates` option to `installed` operation to only show packages sharing the same ID accross multiple managers.
-- \[mpm\] Add a global `--description` option but implement it for `search` operation only.
+- \[mpm\] Add a global `--description` option but only implement it for `search` operation.
 - \[mpm\] Always show description for `--extended` search. Closes {issue}`503`.
 - \[mpm\] Rename `--package-name` search option to `--id-name-only`.
 - \[mpm\] Add operation aliases:

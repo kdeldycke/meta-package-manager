@@ -22,6 +22,14 @@ meta\_package\_manager.base module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.capabilities module
+------------------------------------------
+
+.. automodule:: meta_package_manager.capabilities
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.cli module
 ---------------------------------
 

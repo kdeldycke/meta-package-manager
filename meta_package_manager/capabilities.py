@@ -23,8 +23,8 @@ from . import logger
 
 
 def search_capabilities(extended_support=True, exact_support=True):
-    """Decorator factory to be used on ``search()`` operations to signal ``mpm`` framework
-    manager's capabilities."""
+    """Decorator factory to be used on ``search()`` operations to signal ``mpm``
+    framework manager's capabilities."""
 
     def decorator(function):
         @wraps(function)

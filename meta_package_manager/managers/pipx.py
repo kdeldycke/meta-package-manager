@@ -145,7 +145,8 @@ class Pipx(PackageManager):
 
             if output:
                 for sub_package in json.loads(output):
-                    # Only report the main package as outdated, silencing its dependencies.
+                    # Only report the main package as outdated, silencing its
+                    # dependencies.
                     sub_package_id = sub_package["name"]
                     if sub_package_id == main_package_id:
                         yield Package(

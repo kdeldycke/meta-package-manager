@@ -19,6 +19,7 @@ import dataclasses
 import logging
 import sys
 from collections import namedtuple
+from contextlib import contextmanager
 from datetime import datetime
 from functools import partial
 from io import TextIOWrapper
@@ -28,17 +29,9 @@ from unittest.mock import patch
 
 import tomli_w
 from boltons.cacheutils import LRI, cached
-from click_extra import (
-    STRING,
-    Choice,
-    File,
-    argument,
-    echo,
-    group,
-    option,
-    option_group,
-    pass_context,
-)
+from click_extra import STRING, Choice, File
+from click_extra import Path as ClickPath
+from click_extra import argument, echo, group, option, option_group, pass_context
 from click_extra.colorize import KO, OK, highlight, theme
 from click_extra.platform import os_label
 from click_extra.tabulate import table_format_option
@@ -895,74 +888,170 @@ def cleanup(ctx):
 
 
 @mpm.command(
-    aliases=["lock", "freeze"],
+    aliases=["lock", "freeze", "snapshot"],
     short_help="Save installed packages to a TOML file.",
     section=SNAPSHOTS,
 )
-@argument("toml_output", type=File("w"), default="-")
+@option(
+    "--overwrite",
+    "--force",
+    "--replace",
+    is_flag=True,
+    default=False,
+    help="Allow the provided TOML file to be silently wiped out if it already exists.",
+)
+@option(
+    "--merge",
+    is_flag=True,
+    default=False,
+    help="Read the provided TOML file and update each entry with the version currently installed on the system. Requires the [TOML_PATH] argument.",
+)
+@option(
+    "--update-version",
+    is_flag=True,
+    default=False,
+    help="Read the provided TOML file and update each existing entry with the version currently installed on the system. Requires the [TOML_PATH] argument.",
+)
+@argument(
+    "toml_path",
+    type=ClickPath(
+        dir_okay=False,
+        writable=True,
+        resolve_path=True,
+        allow_dash=True,
+        path_type=Path,
+    ),
+    default="-",
+)
 @pass_context
-def backup(ctx, toml_output):
+def backup(ctx, overwrite, merge, update_version, toml_path):
     """Dump the list of installed packages to a TOML file.
 
     By default the generated TOML content is displayed directly in the console
     output. So `mpm backup` is the same as a call to `mpm backup -`. To have
     the result written in a file on disk, specify the output file like so:
-    `mpm backup ./mpm-packages.toml`.
+    `mpm backup packages.toml`.
 
-    The TOML file can then be safely consumed by the `mpm restore` subcommand.
+    Files produced by this subcommand can be safely consumed by `mpm restore`.
     """
-    is_stdout = isinstance(toml_output, TextIOWrapper)
-    toml_filepath = toml_output.name if is_stdout else Path(toml_output.name).resolve()
-    logger.info(f"Backup package list to {toml_filepath}")
 
-    if not is_stdout:
-        if toml_filepath.exists() and not toml_filepath.is_file():
-            logger.fatal("Target file exist and is not a file.")
+    def is_stdout(filepath):
+        return str(filepath) == "-"
+
+    if is_stdout(toml_path):
+        if merge:
+            logger.fatal(
+                "--merge requires the [TOML_PATH] argument to point to a file."
+            )
+            ctx.exit(2)
+        if update_version:
+            logger.fatal(
+                "--update-version requires the [TOML_PATH] argument to point to a file."
+            )
+            ctx.exit(2)
+        if overwrite:
+            logger.warning("Ignore the --overwrite/--force/--replace option.")
+        logger.info(f"Print installed package list to {sys.stdout.name}")
+
+    else:
+        if merge and update_version:
+            logger.fatal("--merge and --update-version are mutually exclusive.")
             ctx.exit(2)
 
-        if toml_filepath.suffix.lower() != ".toml":
+        if merge:
+            logger.info(f"Merge all installed packages into {toml_path}")
+        elif update_version:
+            logger.info(
+                f"Update in-place all versions of installed packages found in {toml_path}"
+            )
+        else:
+            logger.info(f"Dump all installed packages into {toml_path}")
+
+        if toml_path.exists():
+            if overwrite:
+                logger.warning("Target file exist and will be overwritten.")
+            else:
+                if merge or update_version:
+                    logger.warning("Ignore the --overwrite/--force/--replace option.")
+                else:
+                    logger.fatal("Target file exist and will be overwritten.")
+                    ctx.exit(2)
+        elif merge:
+            logger.fatal("--merge requires an existing file.")
+            ctx.exit(2)
+        elif update_version:
+            logger.fatal("--update-version requires an existing file.")
+            ctx.exit(2)
+
+        if toml_path.suffix.lower() != ".toml":
             logger.fatal("Target file is not a TOML file.")
             ctx.exit(2)
 
-    # Leave some metadata as comment.
-    write = toml_output.write
-    write(f"# Generated by mpm v{__version__}.\n")
-    write(f"# Timestamp: {datetime.now().isoformat()}.\n")
-
     installed_data = {}
+    if merge or update_version:
+        installed_data = tomllib.loads(toml_path.read_text())
 
-    # Create one section for each manager.
-    for manager in ctx.obj.selected_managers:
-        logger.info(f"Dumping packages from {manager.id}...")
+    @contextmanager
+    def file_writer(filepath):
+        """A context-aware file writer which default to stdout if no path is provided."""
+        if is_stdout(filepath):
+            yield sys.stdout
+        else:
+            writer = filepath.open("w")
+            yield writer
+            writer.close()
 
-        try:
-            packages = tuple(map(dataclasses.asdict, manager.installed))
-        except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement installed operation.")
-            continue
+    with file_writer(toml_path) as f:
 
-        # Prepare data for stats.
-        installed_data[manager.id] = {
-            "id": manager.id,
-            "packages": packages,
-        }
+        # Leave some metadata as comment.
+        f.write(f"# Generated by mpm v{__version__}.\n")
+        f.write(f"# Timestamp: {datetime.now().isoformat()}.\n")
 
-        if packages:
-            write("\n")
-            write(
-                tomli_w.dumps(
-                    {
-                        manager.id: dict(
-                            sorted(
-                                (p["id"], str(p["installed_version"])) for p in packages
-                            )
+        # Create one section for each manager.
+        for manager in ctx.obj.selected_managers:
+            logger.info(f"Dumping packages from {manager.id}...")
+
+            try:
+                packages = tuple(map(dataclasses.asdict, manager.installed))
+            except NotImplementedError:
+                logger.warning(f"{manager.id} does not implement installed operation.")
+                continue
+
+            for pkg in packages:
+                # Only update version in that mode if the package is already referenced into original TOML file.
+                if update_version:
+                    if pkg["id"] in installed_data.get(manager.id, {}):
+                        installed_data[manager.id][pkg["id"]] = str(
+                            pkg["installed_version"]
                         )
-                    }
+                # Insert installed package in data structure for standard dump and merge mode.
+                else:
+                    installed_data.setdefault(manager.id, {})[pkg["id"]] = str(
+                        pkg["installed_version"]
+                    )
+
+            # Re-sort package list.
+            if installed_data.get(manager.id):
+                installed_data[manager.id] = dict(
+                    sorted(installed_data[manager.id].items())
                 )
-            )
+
+        # Write each section separated by an empy line for readability.
+        for manager_id, packages in installed_data.items():
+            f.write("\n")
+            f.write(tomli_w.dumps({manager_id: packages}))
 
     if ctx.obj.stats:
-        print_stats(installed_data)
+        # Prepare data for stats.
+        print_stats(
+            {
+                manager_id: {
+                    "id": manager_id,
+                    "packages": packages,
+                }
+                for manager_id, packages in installed_data.items()
+            }
+        )
 
 
 @mpm.command(

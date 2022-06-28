@@ -12,7 +12,14 @@ This version is not released yet and is under active development.
 - \[mpm\] Add a global `--description` option but implement it for `search` operation only.
 - \[mpm\] Always show description for `--extended` search. Closes {issue}`503`.
 - \[mpm\] Rename `--package-name` search option to `--id-name-only`.
-- \[mpm\] Alias `list` operation to `installed`, `uninstall` to `remove`, `update` to `upgrade` and `lock`/`freeze` to `backup`.
+- \[mpm\] Add operation aliases:
+  - `list` → `installed`
+  - `uninstall` → `remove`
+  - `update` → `upgrade`
+  - `lock`/`freeze`/`snapshot` → `backup`
+- \[mpm\] Add a `--merge` option on `backup` operation to update target TOML file with new installed packages.
+- \[mpm\] Add an `--update-version` option on `backup` operation to only update version in the target TOML file.
+- \[mpm\] Add a `--overwrite`/`--force`/`--replace` option on `backup` operation to force TOML overwrite if destination file exists.
 - \[pipx\] Implement `outdated` operation.
 - \[pip\] Do not wait for user confirmation on `remove` operation.
 - \[mpm\] Rename all `*-like` labels to `*-based` to help finer identification of families.

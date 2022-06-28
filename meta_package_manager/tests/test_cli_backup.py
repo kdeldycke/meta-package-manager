@@ -32,13 +32,13 @@ class TestBackup(CLISubCommandTests):
     def test_default_all_managers_output_to_console(self, invoke, subcmd):
         result = invoke(subcmd)
         assert result.exit_code == 0
-        assert "Backup package list to <stdout>" in result.stderr
+        assert "Print installed package list to <stdout>" in result.stderr
         self.check_manager_selection(result)
 
     def test_output_to_console(self, invoke, subcmd):
         result = invoke(subcmd, "-")
         assert result.exit_code == 0
-        assert "Backup package list to <stdout>" in result.stderr
+        assert "Print installed package list to <stdout>" in result.stderr
         self.check_manager_selection(result)
 
     def test_output_to_file(self, invoke, subcmd):

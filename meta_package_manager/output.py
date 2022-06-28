@@ -202,6 +202,7 @@ def print_stats(manager_stats: Counter) -> None:
 
         16 packages total (brew: 2, pip: 2, apm: 2, gem: 2, cask: 2, mas: 2, vscode: 2, npm: 2, composer: 0).
     """
+    per_manager_totals = ""
     if manager_stats:
         per_manager_totals = (
             f" ({', '.join(f'{k}: {v}' for k, v in manager_stats.most_common())})"

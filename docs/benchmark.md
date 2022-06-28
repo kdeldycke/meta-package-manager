@@ -132,22 +132,22 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 
 ## Operations
 
-| Operation               | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
-| ----------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
-| List available managers |   ✓   |                |               |              |              |
-| List installed packages |   ✓   |                |       ✓       |              |      ✓       |
-| List duplicate packages |   ✓   |                |               |              |              |
-| List outdated packages  |   ✓   |                |       ✓       |              |      ✓       |
-| Search packages         |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Install a package       |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Operation                    | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| ---------------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
+| List available managers      |   ✓   |                |               |              |              |
+| List installed packages      |   ✓   |                |       ✓       |              |      ✓       |
+| List duplicate packages      |   ✓   |                |               |              |              |
+| List outdated packages       |   ✓   |                |       ✓       |              |      ✓       |
+| Search packages              |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Install a package            |   ✓   |                |       ✓       |      ✓       |      ✓       |
 | Remove / Uninstall a package |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Upgrade single package  |   ✓   |                |       ✓       |              |      ✓       |
-| Upgrade all packages    |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Sync                    |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Cleanup: caches         |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Cleanup: orphans        |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Backup / Lock / Freeze  |   ✓   |                |               |              |              |
-| Restore                 |   ✓   |                |               |              |              |
+| Upgrade single package       |   ✓   |                |       ✓       |              |      ✓       |
+| Upgrade all packages         |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| Sync                         |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Cleanup: caches              |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| Cleanup: orphans             |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| Backup / Lock / Freeze       |   ✓   |                |               |              |              |
+| Restore                      |   ✓   |                |               |              |              |
 
 ## Features
 

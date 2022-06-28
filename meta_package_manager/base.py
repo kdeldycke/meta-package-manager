@@ -357,7 +357,7 @@ class PackageManager:
 
         Helps serialize :py:class:`pathlib.Path` and :py:class:`meta_package_manager.version.TokenizedString` objects.
         """
-        return tuple(map(str, filter(None.__ne__, flatten(args))))
+        return tuple(str(arg) for arg in flatten(args) if arg is not None)
 
     def run(self, *args, extra_env=None):
         """Run a shell command, return the output and accumulate error messages.

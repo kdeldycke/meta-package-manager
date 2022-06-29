@@ -45,8 +45,8 @@ jobs:
       - uses: peter-evans/create-pull-request@v4.0.4
         with:
           assignees: ${{ github.actor }}
-          commit-message: "[docs] Update readme."
-          title: "[docs] Update readme."
+          commit-message: "[autofix] Update readme"
+          title: "[autofix] Update readme"
           body: >
             <details><summary><code>Workflow metadata</code></summary>
 

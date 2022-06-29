@@ -30,11 +30,8 @@ jobs:
           python -m pip install --upgrade poetry
           poetry install --no-interaction --no-ansi
       - name: Update readme
-        shell: python
         run: |
-          from meta_package_manager.inventory import update_readme
-
-          update_readme()
+          poetry run python -c 'from meta_package_manager.inventory import update_readme; update_readme()'
       - name: Discard all local changes but the readme
         run: |
           # Remove untracked directories and files.

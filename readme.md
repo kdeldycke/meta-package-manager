@@ -50,7 +50,7 @@ ______________________________________________________________________
 - Because `mpm` try to wrap all other package managers, it became another
   pathological case of [XKCD #927: Standards](https://xkcd.com/927/)
 
-## Supported package managers
+## Supported package managers and operations
 
 | Package manager                                                           | Min. version | macOS | Linux | Windows | `installed` | `outdated` |                               `search`                                | `install` | `upgrade` | `remove` | `sync` | `cleanup` |
 | ------------------------------------------------------------------------- | ------------ | :---: | :---: | :-----: | :---------: | :--------: | :-------------------------------------------------------------------: | :-------: | :-------: | :------: | :----: | :-------: |

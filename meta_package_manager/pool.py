@@ -197,3 +197,37 @@ class ManagerPool:
 
 
 pool = ManagerPool()
+
+
+OPERATION_IDS = (
+    "installed",
+    "outdated",
+    "search",
+    "install",
+    "upgrade",
+    "remove",
+    "sync",
+    "cleanup",
+)
+
+def implements(manager: PackageManager, operation_id: str) -> bool:
+    """Inspect manager implementation to check for proper support of an operation."""
+    logger.debug(f"Is {manager} implementing the {operation_id} operation?")
+    assert operation_id in OPERATION_IDS
+
+    # Derive the method ID that is hinting at proper implementation of the operation.
+    # Special case for `upgrade` for which `upgrade_cli()` is the minimal method from which the manager is capable of executing all upgrade operations.
+    method_id = "upgrade_cli" if operation_id == "upgrade" else operation_id
+
+    # If none of the classes in the inheritance hierarchy up to the base one implements the operation, then we can be certain
+    # the manager doesn't implement the operation at all.
+    for klass in manager.__class__.mro():
+        if klass is PackageManager:
+            return False
+        # Presence of the operation function is not enough to rules out proper implementation, as it can
+        # be a method that raises NotImplemented error anyway. See for instance the upgrade_all_cli in pip.py:
+        # https://github.com/kdeldycke/meta-package-manager/blob/4acc003bd268a59f5a79cf317be6d25a90878f6d/meta_package_manager/managers/pip.py#L271-L279
+        if method_id in klass.__dict__:
+            return True
+
+    raise NotImplementedError(f"Can't guess {manager} implementation of {operation_id} operation.")

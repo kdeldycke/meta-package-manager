@@ -15,13 +15,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+import sys
 from importlib.machinery import SourceFileLoader
+from importlib.util import module_from_spec, spec_from_loader
 from pathlib import Path
 
-# Manually import Xbar/SwiftBar plugin source code as a module, because of its
-# non Python-compliant filename. The double extension made the first dot
-# interpreted as a submodule.
-SourceFileLoader(
+""" Import manually the *Bar plugin source code as a module.
+
+This is necessary because of its non Python-compliant filename. The double
+``.7h.py`` extension made the first dot interpreted as a submodule.
+"""
+loader = SourceFileLoader(
     __name__,
     str(Path(__file__).parent.joinpath("meta_package_manager.7h.py").resolve()),
-).load_module()
+)
+spec = spec_from_loader(loader.name, loader)
+module = module_from_spec(spec)
+loader.exec_module(module)
+sys.modules[__name__] = module

@@ -48,7 +48,6 @@ class TestBarPlugin:
         ),
     ]
 
-    @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
     def plugin_output_checks(self, checklist, extra_env=None):
         """Run the plugin script and check its output against the checklist."""
         process = subprocess.run(

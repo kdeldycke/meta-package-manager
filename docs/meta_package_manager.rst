@@ -38,6 +38,14 @@ meta\_package\_manager.cli module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.inventory module
+---------------------------------------
+
+.. automodule:: meta_package_manager.inventory
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.labels module
 ------------------------------------
 

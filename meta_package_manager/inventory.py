@@ -31,8 +31,8 @@ def manager_operations():
     headers = [
         "Package manager",
         "Min. version",
-        "macOS",
         "Linux",
+        "macOS",
         "Windows",
     ]
     headers.extend(f"`{oid}`" for oid in OPERATION_IDS)
@@ -43,8 +43,8 @@ def manager_operations():
         line = [
             f"[`{mid}`]({m.homepage_url})",
             f"{m.requirement}",
+            "🐧" if LINUX in m.platforms else '',
             "🍎" if MACOS in m.platforms else '',
-            "" if LINUX in m.platforms else '',
             "🪟" if WINDOWS in m.platforms else '',
         ]
         for operation_id in OPERATION_IDS:

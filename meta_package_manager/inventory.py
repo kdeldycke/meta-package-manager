@@ -39,7 +39,6 @@ def manager_operations():
 
     table = []
     for mid, m in sorted(pool.items()):
-        #import pdb; pdb.set_trace()
         line = [
             f"[`{mid}`]({m.homepage_url})",
             f"{m.requirement}",

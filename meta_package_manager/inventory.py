@@ -22,10 +22,11 @@ from pathlib import Path
 from click_extra.platform import LINUX, MACOS, WINDOWS
 from tabulate import tabulate
 
-from .pool import OPERATION_IDS, implements, pool
+from .base import Operations
+from .pool import pool
 
 
-def manager_operations():
+def manager_operations() -> str:
     """Inspect manager and print a matrix of their current implementation."""
     # Build up the column titles.
     headers = [
@@ -35,27 +36,24 @@ def manager_operations():
         "macOS",
         "Windows",
     ]
-    headers.extend(f"`{oid}`" for oid in OPERATION_IDS)
+    headers.extend(f"`{op.name}`" for op in Operations)
 
     table = []
     for mid, m in sorted(pool.items()):
         line = [
             f"[`{mid}`]({m.homepage_url})",
             f"{m.requirement}",
-            "🐧" if LINUX in m.platforms else '',
-            "🍎" if MACOS in m.platforms else '',
-            "🪟" if WINDOWS in m.platforms else '',
+            "🐧" if LINUX in m.platforms else "",
+            "🍎" if MACOS in m.platforms else "",
+            "🪟" if WINDOWS in m.platforms else "",
         ]
-        for operation_id in OPERATION_IDS:
-            line.append("✓" if implements(m, operation_id) else "")
+        for op in Operations:
+            line.append("✓" if m.implements(op) else "")
         table.append(line)
 
     # Set each colomn alignment.
-    alignments = [
-        "left","left",
-        "center","center","center"
-    ]
-    alignments.extend(["center"] * len(OPERATION_IDS))
+    alignments = ["left", "left", "center", "center", "center"]
+    alignments.extend(["center"] * len(Operations))
 
     output = tabulate(
         table,
@@ -77,17 +75,17 @@ def manager_operations():
         elif align == "right":
             sep = f"{'-' * (max_len - 1)}:"
         else:
-            sep = '-' * max_len
+            sep = "-" * max_len
         separators.append(sep)
     header_separator = f"| {' | '.join(separators)} |"
 
     lines = output.splitlines()
     lines[1] = header_separator
 
-    return '\n'.join(lines)
+    return "\n".join(lines)
 
 
-def update_readme():
+def update_readme() -> None:
     """Update `readme.md` at the root of the project with the implementation table for each manager we support."""
     # Load-up `readme.md`.
     readme = Path(__file__).parent.parent.joinpath("readme.md").resolve()
@@ -96,7 +94,7 @@ def update_readme():
     # Extract pre- and post-content surounding the section we're trying to update.
     section_title = "## Supported package managers and operations"
     pre_content, section_start = content.split(section_title, 1)
-    post_content = section_start.split('##', 1)[1]
+    post_content = section_start.split("##", 1)[1]
 
     # Reconstruct the readme with our updated section.
     readme.write_text(

@@ -20,9 +20,11 @@ import re
 import sys
 from contextlib import nullcontext
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
+from typing import Iterator
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -39,6 +41,24 @@ from click_extra.run import INDENT, format_cli, run_cmd
 
 from . import logger
 from .version import parse_version
+
+Operations = Enum(
+    "Operations",
+    (
+        "installed",
+        "outdated",
+        "search",
+        "install",
+        "upgrade",
+        "remove",
+        "sync",
+        "cleanup",
+    ),
+)
+"""Recognize operation IDs that are implemented by package manager with their specific CLI invokation.
+
+Each operation has its own CLI subcommand.
+"""
 
 
 class CLIError(Exception):
@@ -206,6 +226,28 @@ class PackageManager:
         """Initialize a ``self.cli_errors`` list to accumulate all CLI errors
         encountered by the package mananger."""
         self.cli_errors = []
+
+    @classmethod
+    def implements(cls, op: Operations) -> bool:
+        """Inspect manager implementation to check for proper support of an operation."""
+        logger.debug(f"Is {cls} implementing {op}?")
+
+        # Derive the method ID that is hinting at proper implementation of the operation.
+        # Special case for `upgrade` for which `upgrade_cli()` is the minimal method from which the manager is capable of executing all upgrade operations.
+        method_id = "upgrade_cli" if op == Operations.upgrade else op.name
+
+        # If none of the classes in the inheritance hierarchy up to the base one implements the operation, then we can be certain
+        # the manager doesn't implement the operation at all.
+        for klass in cls.mro():
+            if klass is PackageManager:
+                return False
+            # Presence of the operation function is not enough to rules out proper implementation, as it can
+            # be a method that raises NotImplemented error anyway. See for instance the upgrade_all_cli in pip.py:
+            # https://github.com/kdeldycke/meta-package-manager/blob/4acc003bd268a59f5a79cf317be6d25a90878f6d/meta_package_manager/managers/pip.py#L271-L279
+            if method_id in klass.__dict__:
+                return True
+
+        raise NotImplementedError(f"Can't guess {cls} implementation of {op}.")
 
     @classproperty
     def virtual(cls):

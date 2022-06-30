@@ -19,8 +19,10 @@
 
 import inspect
 import sys
+from collections.abc import Iterable
 from importlib import import_module
 from pathlib import Path
+from typing import Iterator, Optional
 
 if sys.version_info >= (3, 8):
     from functools import cached_property
@@ -30,7 +32,7 @@ else:
 from boltons.iterutils import unique
 
 from . import logger
-from .base import PackageManager
+from .base import Operations, PackageManager
 
 
 class ManagerPool:
@@ -137,13 +139,13 @@ class ManagerPool:
 
     def select_managers(
         self,
-        keep=None,
-        drop=None,
-        drop_unsupported=True,
-        drop_inactive=True,
-        # implements=None,
-        **extra_options,
-    ):
+        keep: Optional[Iterable] = None,
+        drop: Optional[Iterable] = None,
+        drop_unsupported: bool = True,
+        drop_inactive: bool = True,
+        operation: Optional[Operations] = None,
+        **extra_options: bool,
+    ) -> Iterator[PackageManager]:
         """Utility method to extract a subset of the manager pool based on selection
         list (``keep`` parameter) and exclusion list (``drop`` parameter) criterion.
 
@@ -153,9 +155,7 @@ class ManagerPool:
 
         ``drop_inactive`` filters out managers that where not found on the system.
 
-        .. todo:
-            Code the pre-filtering of managers which do not implements a given property. This might be done with
-            a new ``implements`` parameter.
+        ``operation`` filters out managers which do not implements the provided operation.
 
         Finally, ``extra_options`` parameters are fed to manager objects to set some additional options.
 
@@ -180,8 +180,11 @@ class ManagerPool:
         for manager_id in (mid for mid in unique(selected_ids) if mid not in drop):
             manager = self.register.get(manager_id)
 
-            # TODO: check if not implemeted before calling .available. It saves one
+            # Check if operation is not implemeted before calling `.available`. It saves one
             # call to the package manager CLI.
+            if operation and not manager.implements(operation):
+                logger.warning(f"{manager_id} does not implement {operation}.")
+                continue
 
             # Filters out inactive managers.
             if drop_inactive and not manager.available:
@@ -197,37 +200,3 @@ class ManagerPool:
 
 
 pool = ManagerPool()
-
-
-OPERATION_IDS = (
-    "installed",
-    "outdated",
-    "search",
-    "install",
-    "upgrade",
-    "remove",
-    "sync",
-    "cleanup",
-)
-
-def implements(manager: PackageManager, operation_id: str) -> bool:
-    """Inspect manager implementation to check for proper support of an operation."""
-    logger.debug(f"Is {manager} implementing the {operation_id} operation?")
-    assert operation_id in OPERATION_IDS
-
-    # Derive the method ID that is hinting at proper implementation of the operation.
-    # Special case for `upgrade` for which `upgrade_cli()` is the minimal method from which the manager is capable of executing all upgrade operations.
-    method_id = "upgrade_cli" if operation_id == "upgrade" else operation_id
-
-    # If none of the classes in the inheritance hierarchy up to the base one implements the operation, then we can be certain
-    # the manager doesn't implement the operation at all.
-    for klass in manager.__class__.mro():
-        if klass is PackageManager:
-            return False
-        # Presence of the operation function is not enough to rules out proper implementation, as it can
-        # be a method that raises NotImplemented error anyway. See for instance the upgrade_all_cli in pip.py:
-        # https://github.com/kdeldycke/meta-package-manager/blob/4acc003bd268a59f5a79cf317be6d25a90878f6d/meta_package_manager/managers/pip.py#L271-L279
-        if method_id in klass.__dict__:
-            return True
-
-    raise NotImplementedError(f"Can't guess {manager} implementation of {operation_id} operation.")

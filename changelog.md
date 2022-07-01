@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[mpm\] Keep the operation matrix on the `readme.md` in sync with current code by inspecting implementation.
+- \[mpm\] Add type hints. Closes {issue}`655`.
 
 ## {gh}`5.4.0 (2022-06-28) <compare/v5.3.0...v5.4.0>`
 

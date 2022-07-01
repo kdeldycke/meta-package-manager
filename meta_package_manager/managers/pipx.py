@@ -17,6 +17,7 @@
 
 import json
 from operator import attrgetter
+from typing import Iterator, Optional
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
@@ -38,7 +39,7 @@ class Pipx(PackageManager):
     """
 
     @property
-    def installed(self):
+    def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
         .. code-block:: shell-session
@@ -90,7 +91,7 @@ class Pipx(PackageManager):
                 )
 
     @property
-    def outdated(self):
+    def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
         .. todo::
@@ -155,7 +156,7 @@ class Pipx(PackageManager):
                             latest_version=sub_package["latest_version"],
                         )
 
-    def install(self, package_id):
+    def install(self, package_id: str) -> str:
         """Install one package.
 
         .. code-block:: shell-session
@@ -168,15 +169,15 @@ class Pipx(PackageManager):
         """
         return self.run_cli("install", package_id)
 
-    def upgrade_cli(self, package_id):
+    def upgrade_cli(self, package_id: str) -> tuple[str]:
         """Upgrade the package provided as parameter."""
         return self.build_cli("upgrade", package_id)
 
-    def upgrade_all_cli(self):
+    def upgrade_all_cli(self) -> tuple[str, ...]:
         """Upgrade all packages."""
         return self.build_cli("upgrade-all")
 
-    def remove(self, package_id):
+    def remove(self, package_id: str) -> str:
         """Remove one package.
 
         .. code-block:: shell-session

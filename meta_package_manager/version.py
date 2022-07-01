@@ -21,6 +21,7 @@ import operator
 import re
 from copy import deepcopy
 from functools import partial
+from typing import Iterator, Optional, Union
 
 from boltons import strutils
 
@@ -35,15 +36,15 @@ class Token:
     We mainly use them here to compare versions and package IDs.
     """
 
-    string = None
-    integer = None
+    string: str
+    integer: Optional[int] = None
 
     def __hash__(self):
         """A Token is made unique by a tuple of its immutable internal data."""
         return hash((self.string, self.integer))
 
     @staticmethod
-    def str_to_int(value):
+    def str_to_int(value: Union[str, int]) -> tuple[str, Optional[int]]:
         """Convert a ``str`` or an ``int`` to a ``(string, integer)`` couple.
 
         Returns together the original string and its integer representation if
@@ -67,7 +68,7 @@ class Token:
 
         return value, integer
 
-    def __init__(self, value):
+    def __init__(self, value: Union[str, int]) -> None:
         """Instantiates a ``Token`` from an alphanumeric string or a non-negative
         integer."""
         # Check provided value.
@@ -83,26 +84,26 @@ class Token:
         # Parse user-value and stores its string and integer representations.
         self.string, self.integer = self.str_to_int(value)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Prints internal string and number values for debug."""
         return "<Token:{}>".format(
             ",".join((f"{k}={v!r}" for k, v in self.__dict__.items()))
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.string
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.string)
 
-    def __format__(self, format_spec):
+    def __format__(self, format_spec) -> str:
         return self.string.__format__(format_spec)
 
-    def __int__(self):
+    def __int__(self) -> Optional[int]:
         return self.integer
 
     @property
-    def isint(self):
+    def isint(self) -> bool:
         """Does the ``Token`` got an equivalent pure integer representation?"""
         return self.integer is not None
 
@@ -146,9 +147,9 @@ class TokenizedString:
     Essentially a wrapper around a list of ``Token`` instances.
     """
 
-    separator = None
-    string = None
-    tokens = ()
+    separator: str = ""
+    string: str
+    tokens: tuple[Token, ...] = ()
 
     def __hash__(self):
         """A ``TokenizedString`` is made unique by its original string and tuple of
@@ -177,7 +178,7 @@ class TokenizedString:
         # after that.
         return super().__new__(cls)
 
-    def __init__(self, value, separator="-"):
+    def __init__(self, value: Union[str, int], separator: str = "-") -> None:
         """Parse and tokenize the provided raw ``value``."""
         if isinstance(value, TokenizedString):
             # Skip initialization for instance of the class, as this __init__() gets called
@@ -216,23 +217,23 @@ class TokenizedString:
             setattr(instance, k, deepcopy(v, memo))
         return instance
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<TokenizedString {self.string} => {self.tokens}>"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.string
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.string)
 
-    def __format__(self, format_spec):
+    def __format__(self, format_spec) -> str:
         return self.string.__format__(format_spec)
 
-    def pretty_print(self):
+    def pretty_print(self) -> str:
         return self.separator.join(map(str, self.tokens))
 
     @classmethod
-    def tokenize(cls, string):
+    def tokenize(cls, string: str) -> Iterator[Token]:
         """Tokenize a string: ignore case and split at each non-alphanumeric characters.
 
         Returns a list of ``Token`` instances.

@@ -16,6 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
+from typing import Iterator, Optional
 
 from click_extra.platform import LINUX
 
@@ -40,7 +41,7 @@ class Flatpak(PackageManager):
     """
 
     @property
-    def installed(self):
+    def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
         .. code-block:: shell-session
@@ -76,7 +77,7 @@ class Flatpak(PackageManager):
                 )
 
     @property
-    def outdated(self):
+    def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
         .. code-block:: shell-session
@@ -125,7 +126,7 @@ class Flatpak(PackageManager):
                 )
 
     @search_capabilities(extended_support=False, exact_support=False)
-    def search(self, query, extended, exact):
+    def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
         .. caution::
@@ -166,7 +167,7 @@ class Flatpak(PackageManager):
                 latest_version=version,
             )
 
-    def install(self, package_id):
+    def install(self, package_id: str) -> str:
         """Install one package.
 
         .. code-block:: shell-session
@@ -175,7 +176,7 @@ class Flatpak(PackageManager):
         """
         return self.run_cli("install", package_id)
 
-    def upgrade_cli(self, package_id=None):
+    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
@@ -189,7 +190,7 @@ class Flatpak(PackageManager):
         """
         return self.build_cli("update", "--noninteractive", package_id)
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Removes things we don't need anymore.
 
         See:

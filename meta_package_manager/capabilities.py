@@ -16,19 +16,23 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 from functools import wraps
+from typing import Iterable, Iterator, NoReturn, Optional, Pattern, Sequence, Union
 
 from . import logger
+from .base import Package, PackageManager
 
 """Utilities and helper to organize, inspect and audit the capabilities of mpm and package managers."""
 
 
-def search_capabilities(extended_support=True, exact_support=True):
+def search_capabilities(extended_support: bool = True, exact_support: bool = True):
     """Decorator factory to be used on ``search()`` operations to signal ``mpm``
     framework manager's capabilities."""
 
     def decorator(function):
         @wraps(function)
-        def wrapper(self, query, extended, exact):
+        def wrapper(
+            self: PackageManager, query: str, extended: bool, exact: bool
+        ) -> Iterator[Package]:
 
             refilter = False
 
@@ -46,7 +50,7 @@ def search_capabilities(extended_support=True, exact_support=True):
                         f"{self.id} does not implement extended search operation. Refiltering of raw results has been activated."
                     )
 
-            return function(self, query, extended, exact)
+            return function(self, query, extended, exact)  # type: ignore
 
         return wrapper
 

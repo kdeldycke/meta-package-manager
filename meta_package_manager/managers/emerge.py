@@ -16,6 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
+from typing import Iterator, Optional
 
 from click_extra.platform import LINUX
 
@@ -47,7 +48,7 @@ class Emerge(PackageManager):
     """
 
     @property
-    def installed(self):
+    def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
         .. warning::
@@ -92,7 +93,7 @@ class Emerge(PackageManager):
                 yield Package(id=package_id, installed_version=installed_version)
 
     @property
-    def outdated(self):
+    def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
         .. code-block:: shell-session
@@ -146,7 +147,7 @@ class Emerge(PackageManager):
                     installed_version=installed_version,
                 )
 
-    def search(self, query, extended, exact):
+    def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
         .. code-block:: shell-session
@@ -212,7 +213,7 @@ class Emerge(PackageManager):
                 latest_version=version,
             )
 
-    def install(self, package_id):
+    def install(self, package_id: str) -> str:
         """Install one package.
 
         .. code-block:: shell-session
@@ -221,7 +222,7 @@ class Emerge(PackageManager):
         """
         return self.run_cli("--color", "n", "--nospinner", package_id, sudo=True)
 
-    def upgrade_cli(self, package_id="@world"):
+    def upgrade_cli(self, package_id: Optional[str] = "@world") -> tuple[str]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
@@ -247,7 +248,7 @@ class Emerge(PackageManager):
             sudo=True,
         )
 
-    def sync(self):
+    def sync(self) -> None:
         """Sync package metadata.
 
         .. code-block:: shell-session
@@ -256,7 +257,7 @@ class Emerge(PackageManager):
         """
         self.run_cli("--sync", "--color", "n", "--nospinner", sudo=True)
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Removes things we don't need anymore.
 
         An update is forced before calling the clean commands, as `pointed to by the emerge documentation <https://wiki.gentoo.org/wiki/Gentoo_Cheat_Sheet#Recommended_method>`_:

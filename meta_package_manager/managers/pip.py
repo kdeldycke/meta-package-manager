@@ -17,6 +17,7 @@
 
 import json
 import re
+from typing import Iterator, Optional
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
@@ -59,7 +60,7 @@ class Pip(PackageManager):
     """
 
     @property
-    def installed(self):
+    def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
         .. code-block:: shell-session
@@ -104,7 +105,7 @@ class Pip(PackageManager):
                 yield Package(id=package_id, installed_version=package["version"])
 
     @property
-    def outdated(self):
+    def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
         .. code-block:: shell-session
@@ -182,7 +183,10 @@ class Pip(PackageManager):
                 )
 
     @search_capabilities(extended_support=False, exact_support=False)
-    def search_xxx_disabled(self, query, extended, exact):
+    def search_xxx_disabled(
+        self, query: str, extended: bool, exact: bool
+    ) -> Iterator[Package]:
+
         """Fetch matching packages.
 
         .. warning::
@@ -235,7 +239,7 @@ class Pip(PackageManager):
                 latest_version=version,
             )
 
-    def install(self, package_id):
+    def install(self, package_id: str) -> str:
         """Install one package.
 
         .. code-block:: shell-session
@@ -251,7 +255,7 @@ class Pip(PackageManager):
         """
         return self.run_cli("install", package_id)
 
-    def upgrade_cli(self, package_id):
+    def upgrade_cli(self, package_id: str) -> tuple[str]:
         """Generates the CLI to upgrade the package provided as parameter.
 
         .. code-block:: shell-session
@@ -268,7 +272,7 @@ class Pip(PackageManager):
         """
         return self.build_cli("install", "--user", "--upgrade", package_id)
 
-    def upgrade_all_cli(self):
+    def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.
 
         Pip lacks support of a proper full upgrade command. Raising an error let the
@@ -278,7 +282,7 @@ class Pip(PackageManager):
         """
         raise NotImplementedError
 
-    def remove(self, package_id):
+    def remove(self, package_id: str) -> str:
         """Remove one package.
 
         .. code-block:: shell-session

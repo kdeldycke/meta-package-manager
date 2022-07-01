@@ -30,6 +30,6 @@ loader = SourceFileLoader(
     str(Path(__file__).parent.joinpath("meta_package_manager.7h.py").resolve()),
 )
 spec = spec_from_loader(loader.name, loader)
-module = module_from_spec(spec)
+module = module_from_spec(spec)  # type: ignore
 loader.exec_module(module)
 sys.modules[__name__] = module

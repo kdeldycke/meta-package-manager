@@ -16,6 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
+from typing import Iterator, Optional
 
 from click_extra.platform import WINDOWS
 
@@ -42,7 +43,7 @@ class Choco(PackageManager):
     """
 
     @property
-    def installed(self):
+    def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
         .. code-block:: shell-session
@@ -65,7 +66,7 @@ class Choco(PackageManager):
                 yield Package(id=package_id, installed_version=installed_version)
 
     @property
-    def outdated(self):
+    def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
         .. code-block:: shell-session
@@ -93,7 +94,7 @@ class Choco(PackageManager):
                     installed_version=installed_version,
                 )
 
-    def search(self, query, extended, exact):
+    def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
         .. code-block:: shell-session
@@ -139,7 +140,7 @@ class Choco(PackageManager):
         for package_id, latest_version in regexp.findall(output):
             yield Package(id=package_id, latest_version=latest_version)
 
-    def install(self, package_id):
+    def install(self, package_id: str) -> str:
         """Install one package.
 
         .. code-block:: shell-session
@@ -148,7 +149,7 @@ class Choco(PackageManager):
         """
         return self.run_cli("install", package_id, "--yes", "--limit-output")
 
-    def upgrade_cli(self, package_id="all"):
+    def upgrade_cli(self, package_id: str = "all") -> tuple[str]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 

@@ -17,6 +17,7 @@
 
 import json
 import sys
+from typing import Iterator, Optional
 
 if sys.version_info >= (3, 8):
     from functools import cached_property
@@ -47,7 +48,7 @@ class Yarn(PackageManager):
     """
 
     @property
-    def installed(self):
+    def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
         .. code-block:: shell-session
@@ -70,7 +71,7 @@ class Yarn(PackageManager):
                 yield Package(id=package_id, installed_version=version)
 
     @cached_property
-    def global_dir(self):
+    def global_dir(self) -> str:
         """Locate the global directory.
 
         .. code-block:: shell-session
@@ -80,7 +81,7 @@ class Yarn(PackageManager):
         return self.run_cli("global", "dir", force_exec=True).rstrip()
 
     @property
-    def outdated(self):
+    def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
         .. code-block:: shell-session
@@ -111,7 +112,7 @@ class Yarn(PackageManager):
             )
 
     @search_capabilities(extended_support=False, exact_support=False)
-    def search(self, query, extended, exact):
+    def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
         .. warning::
@@ -205,7 +206,7 @@ class Yarn(PackageManager):
                     latest_version=package["version"],
                 )
 
-    def install(self, package_id):
+    def install(self, package_id: str) -> str:
         """Install one package.
 
         .. code-block:: shell-session
@@ -214,7 +215,7 @@ class Yarn(PackageManager):
         """
         return self.run_cli("install", package_id)
 
-    def upgrade_cli(self, package_id=None):
+    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
@@ -232,7 +233,7 @@ class Yarn(PackageManager):
 
         return self.build_cli("global", *cmd_args)
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Removes things we don't need anymore.
 
         See: https://yarnpkg.com/cli/cache/clean

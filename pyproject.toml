@@ -107,6 +107,9 @@ sphinx-copybutton = "^0.5.0"
 sphinx-design = "^0.2.0"
 sphinx-issues = "^3.0.1"
 sphinxext-opengraph = "^0.6.3"
+types-tabulate = "^0.8.11"
+types-xmltodict = "^0.13.0"
+typing-extensions = { version = "^4.2.0", python = "<= 3.8" }
 
 [tool.poetry.scripts]
 mpm = 'meta_package_manager.cli:mpm'
@@ -124,6 +127,26 @@ target-version = ['py37', 'py38', 'py39', 'py310']
 # W0511: fixme
 # W1203: logging-fstring-interpolation
 disable = "C0114, W0511, W1203"
+
+[tool.mypy]
+warn_unused_configs = true
+#python_version = "3.7"
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+warn_unreachable = true
+pretty = true
+
+[[tool.mypy.overrides]]
+module = [
+    "boltons.*",
+    "click_extra.*",
+    "cloup.*",
+    "tabulate.*",
+    "tomli_w.*",
+    "xmltodict.*",
+]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml

@@ -58,7 +58,7 @@ class SteamCMD(PackageManager):
         Loading Steam API...OK
     """
 
-    def install(self, package_id):
+    def install(self, package_id: str) -> str:
         """Install one package.
 
         .. code-block:: shell-session
@@ -67,7 +67,7 @@ class SteamCMD(PackageManager):
         """
         return self.run_cli("+app_update", package_id, "validate")
 
-    def upgrade_cli(self, package_id):
+    def upgrade_cli(self, package_id: str) -> tuple[str]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
@@ -77,7 +77,7 @@ class SteamCMD(PackageManager):
         """
         return self.build_cli("+app_update", package_id, "validate")
 
-    def upgrade_all_cli(self):
+    def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.
 
         SteamCMD lacks support of a proper full upgrade command. Raising an error let

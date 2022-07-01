@@ -18,6 +18,7 @@
 import json
 import re
 from operator import methodcaller
+from typing import Iterator, Optional
 
 from click_extra.platform import LINUX, MACOS
 
@@ -65,7 +66,7 @@ class Homebrew(PackageManager):
     """
 
     @property
-    def installed(self):
+    def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
         .. code-block:: shell-session
@@ -124,7 +125,7 @@ class Homebrew(PackageManager):
             yield Package(id=package_id, installed_version=version)
 
     @property
-    def outdated(self):
+    def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
         .. code-block:: shell-session
@@ -235,7 +236,7 @@ class Homebrew(PackageManager):
                     latest_version=latest_version,
                 )
 
-    def search(self, query, extended, exact):
+    def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
         .. caution::
@@ -353,7 +354,7 @@ class Homebrew(PackageManager):
             if package_id not in matched_ids:
                 yield Package(id=package_id)
 
-    def install(self, package_id):
+    def install(self, package_id: str) -> str:
         """Install one package.
 
         .. code-block:: shell-session
@@ -378,7 +379,7 @@ class Homebrew(PackageManager):
         """
         return self.run_cli("install", package_id)
 
-    def upgrade_cli(self, package_id=None):
+    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
@@ -448,7 +449,7 @@ class Homebrew(PackageManager):
         """
         return self.build_cli("upgrade", package_id)
 
-    def sync(self):
+    def sync(self) -> None:
         """Sync package metadata.
 
         .. code-block:: shell-session
@@ -458,7 +459,7 @@ class Homebrew(PackageManager):
         """
         self.run_cli("update", "--quiet", auto_post_args=False)
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Removes things we don't need anymore.
 
         Scrub the cache, including latest version's downloads. Also remove unused

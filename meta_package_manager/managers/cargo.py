@@ -16,6 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
+from typing import Iterator, Optional
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
@@ -48,7 +49,7 @@ class Cargo(PackageManager):
     """
 
     @property
-    def installed(self):
+    def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
         .. code-block:: shell-session
@@ -70,7 +71,7 @@ class Cargo(PackageManager):
                 yield Package(id=package_id, installed_version=package_version)
 
     @search_capabilities(extended_support=False, exact_support=False)
-    def search(self, query, extended, exact):
+    def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
         .. caution::
@@ -110,7 +111,7 @@ class Cargo(PackageManager):
                 latest_version=version,
             )
 
-    def install(self, package_id):
+    def install(self, package_id: str) -> str:
         """Install one package.
 
         .. code-block:: shell-session
@@ -132,7 +133,7 @@ class Cargo(PackageManager):
         res = self.run_cli("install", package_id)
         return res
 
-    def remove(self, package_id):
+    def remove(self, package_id: str) -> str:
         """Remove one package.
 
         .. code-block:: shell-session

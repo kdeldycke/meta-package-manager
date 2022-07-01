@@ -17,6 +17,7 @@
 
 from itertools import groupby
 from operator import itemgetter
+from typing import Iterator, Optional
 
 import xmltodict
 from click_extra.platform import LINUX
@@ -57,7 +58,7 @@ class Zypper(PackageManager):
         zypper 1.14.11
     """
 
-    def _search(self, *args):
+    def _search(self, *args: str) -> Iterator[dict[str, str]]:
         """Utility method to parse and interpret results of the ``zypper search``
         command.
 
@@ -136,7 +137,7 @@ class Zypper(PackageManager):
             }
 
     @property
-    def installed(self):
+    def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
         .. code-block:: shell-session
@@ -147,7 +148,7 @@ class Zypper(PackageManager):
             yield Package(id=package["id"], installed_version=package["version"])
 
     @property
-    def outdated(self):
+    def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
         .. code-block:: shell-session
@@ -193,7 +194,7 @@ class Zypper(PackageManager):
                 installed_version=package["@edition-old"],
             )
 
-    def search(self, query, extended, exact):
+    def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
         .. code-block:: shell-session
@@ -221,7 +222,7 @@ class Zypper(PackageManager):
         for package in self._search(*search_param, query):
             yield Package(id=package["id"], installed_version=package["version"])
 
-    def install(self, package_id):
+    def install(self, package_id: str) -> str:
         """Install one package.
 
         .. code-block:: shell-session
@@ -230,7 +231,7 @@ class Zypper(PackageManager):
         """
         return self.run_cli("install", package_id, sudo=True)
 
-    def upgrade_cli(self, package_id=None):
+    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
@@ -244,7 +245,7 @@ class Zypper(PackageManager):
         """
         return self.build_cli("update", package_id, sudo=True)
 
-    def sync(self):
+    def sync(self) -> None:
         """Sync package metadata.
 
         .. code-block:: shell-session
@@ -253,7 +254,7 @@ class Zypper(PackageManager):
         """
         self.run_cli("refresh", sudo=True)
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Removes things we don't need anymore.
 
         .. code-block:: shell-session

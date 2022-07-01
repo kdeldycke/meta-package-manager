@@ -30,6 +30,7 @@ from functools import partial
 from io import StringIO
 from operator import itemgetter
 from pathlib import Path
+from typing import Any, Iterator, Optional, Sequence, Union
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -43,7 +44,8 @@ from click_extra import echo, get_current_context, style
 from click_extra.tabulate import TabularOutputFormatter
 from tabulate import DataRow, TableFormat, tabulate
 
-from .bar_plugin import MPMPlugin
+from .bar_plugin import MPMPlugin  # type: ignore
+from .base import PackageManager
 from .version import TokenizedString
 
 SORTABLE_FIELDS = {
@@ -288,14 +290,14 @@ class BarPluginRenderer(MPMPlugin):
         self.pp(*args, "terminal=false")
         self.pp(*args, "terminal=true", "alternate=true")
 
-    def print_upgrade_all_item(self, manager, submenu=""):
+    def print_upgrade_all_item(self, manager: PackageManager, submenu="") -> None:
         """Print the menu entry to upgrade all outdated package of a manager."""
-        if manager.get("upgrade_all_cli"):
+        if manager.__getattribute__("upgrade_all_cli"):
             if self.submenu_layout:
                 print("-----")
             self.print_cli_item(
-                f"{submenu}🆙 Upgrade all {manager['id']} packages",
-                manager["upgrade_all_cli"],
+                f"{submenu}🆙 Upgrade all {manager.id} packages",
+                manager.upgrade_all_cli,
                 self.default_font,
                 "refresh=true",
             )
@@ -313,7 +315,9 @@ class BarPluginRenderer(MPMPlugin):
     """Simple rendering format with single-space separated columns used in the function below."""
 
     @staticmethod
-    def render_table(table_data):
+    def render_table(
+        table_data: Optional[Sequence[Sequence[str]]],
+    ) -> Union[Any, list]:
         """Renders a table data with pre-configured alignment centered around the third
         column.
 
@@ -340,7 +344,7 @@ class BarPluginRenderer(MPMPlugin):
             disable_numparse=True,
         ).splitlines()
 
-    def _render(self, outdated_data):
+    def _render(self, outdated_data) -> None:
         """Main method implementing the final structured rendering in *Bar plugin
         dialect."""
         managers = outdated_data.values()
@@ -406,7 +410,7 @@ class BarPluginRenderer(MPMPlugin):
                 print("-----" if self.submenu_layout else "---")
                 self.print_error(error_msg, submenu)
 
-    def render(self, outdated_data):
+    def render(self, outdated_data) -> str:
         """Wraps the :py:meth:`meta_package_manager.output.BarPluginRenderer._render`
         function above to capture all ``print`` statements."""
         capture = StringIO()
@@ -415,7 +419,7 @@ class BarPluginRenderer(MPMPlugin):
             self._render(outdated_data)
         return capture.getvalue()
 
-    def print(self, outdated_data):
+    def print(self, outdated_data) -> None:
         """Print the final plugin rendering to ``<stdout>``.
 
         Capturing the output of the plugin and re-printing it will introduce an extra

@@ -22,7 +22,7 @@ import sys
 from collections.abc import Iterable
 from importlib import import_module
 from pathlib import Path
-from typing import Iterator, Optional
+from typing import Final, Iterator, Optional
 
 if sys.version_info >= (3, 8):
     from functools import cached_property
@@ -38,16 +38,16 @@ from .base import Operations, PackageManager
 class ManagerPool:
     """A dict-like register, indexing all supported package managers."""
 
-    ALLOWED_EXTRA_OPTION = frozenset(
+    ALLOWED_EXTRA_OPTION: Final = frozenset(
         {"ignore_auto_updates", "stop_on_error", "dry_run"}
     )
     """List of extra options that are allowed to be set on managers during the use of the
     :py:func:`meta_package_manager.pool.ManagerPool.select_managers` helper below."""
 
-    manager_subfolder = "managers"
+    manager_subfolder: Final = "managers"
     """Relative subfolder where manager definition files are stored."""
 
-    manager_files = set()
+    manager_files: set = set()
     """Path of files containing package manager definitions."""
 
     @cached_property
@@ -167,7 +167,7 @@ class ManagerPool:
             )
         if not drop:
             drop = set()
-        assert set(self.all_manager_ids).issuperset(keep)
+        assert set(self.all_manager_ids).issuperset(keep)  # type: ignore
         assert set(self.all_manager_ids).issuperset(drop)
 
         assert self.ALLOWED_EXTRA_OPTION.issuperset(extra_options)

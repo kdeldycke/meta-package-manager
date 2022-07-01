@@ -25,6 +25,7 @@ from functools import partial
 from io import TextIOWrapper
 from operator import attrgetter
 from pathlib import Path
+from typing import Iterator
 from unittest.mock import patch
 
 import tomli_w
@@ -35,6 +36,7 @@ from click_extra import argument, echo, group, option, option_group, pass_contex
 from click_extra.colorize import KO, OK, highlight, theme
 from click_extra.platform import os_label
 from click_extra.tabulate import table_format_option
+from cloup import Option
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -81,7 +83,7 @@ def add_manager_to_selection(ctx, param, selected):
         ctx.obj["single_manager_selector"].append(manager_id)
 
 
-def single_manager_selectors():
+def single_manager_selectors() -> Iterator[Option]:
     """Dynamiccaly creates a dedicated flag selector alias for each manager."""
     for manager_id in pool.all_manager_ids:
         yield option(

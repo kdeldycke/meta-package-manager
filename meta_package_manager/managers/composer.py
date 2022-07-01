@@ -17,6 +17,7 @@
 
 import json
 import re
+from typing import Iterator, Optional
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
@@ -45,7 +46,7 @@ class Composer(PackageManager):
     """
 
     @property
-    def installed(self):
+    def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
         .. code-block:: shell-session
@@ -83,7 +84,7 @@ class Composer(PackageManager):
                 yield Package(id=package_id, installed_version=package["version"])
 
     @property
-    def outdated(self):
+    def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
         .. code-block:: shell-session
@@ -121,7 +122,7 @@ class Composer(PackageManager):
                 )
 
     @search_capabilities(exact_support=False)
-    def search(self, query, extended, exact):
+    def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
         .. caution::
@@ -180,7 +181,7 @@ class Composer(PackageManager):
         for package_id, description in regexp.findall(output):
             yield Package(id=package_id, description=description)
 
-    def install(self, package_id):
+    def install(self, package_id: str) -> str:
         """Install one package.
 
         .. code-block:: shell-session
@@ -189,7 +190,7 @@ class Composer(PackageManager):
         """
         return self.run_cli("install", package_id)
 
-    def upgrade_cli(self, package_id=None):
+    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
@@ -203,7 +204,7 @@ class Composer(PackageManager):
         """
         return self.build_cli("update", package_id)
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Removes things we don't need anymore.
 
         See: https://getcomposer.org/doc/03-cli.md#clear-cache-clearcache-cc

@@ -16,6 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
+from typing import Iterator, Optional
 
 from click_extra.platform import MACOS
 
@@ -44,7 +45,7 @@ class MAS(PackageManager):
     """
 
     @property
-    def installed(self):
+    def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
         .. code-block:: shell-session
@@ -75,7 +76,7 @@ class MAS(PackageManager):
             yield Package(id=package_id, name=package_name, installed_version=version)
 
     @property
-    def outdated(self):
+    def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
         .. code-block:: shell-session
@@ -149,7 +150,7 @@ class MAS(PackageManager):
         for package_id, package_name, version in regexp.findall(output):
             yield Package(id=package_id, name=package_name, latest_version=version)
 
-    def install(self, package_id):
+    def install(self, package_id: str) -> str:
         """Install one package.
 
         .. code-block:: shell-session
@@ -158,7 +159,7 @@ class MAS(PackageManager):
         """
         return self.run_cli("install", package_id)
 
-    def upgrade_cli(self, package_id=None):
+    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 

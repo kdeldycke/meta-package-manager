@@ -13,7 +13,7 @@ consist in having all software up to date.
 one-liner:
 
 ```shell-session
-$ mpm upgrade
+$ mpm upgrade --all
 Updating all outdated packages from brew...
 ==> Upgrading 4 outdated packages:
 gnu-getopt 2.35.1 -> 2.35.2
@@ -48,7 +48,7 @@ For instance,
 with a single command. `mpm` adds that missing feature:
 
 ```shell-session
-$ mpm --pip upgrade
+$ mpm --pip upgrade --all
 Updating all outdated packages from pip...
 warning: pip doesn't seems to implement a full upgrade subcommand. Call
 single-package upgrade CLI one by one.

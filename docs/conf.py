@@ -40,6 +40,7 @@ extensions = [
     "myst_parser",
     "sphinx.ext.autosectionlabel",
     "sphinx_click",
+    "sphinx_autodoc_typehints",
 ]
 
 # https://myst-parser.readthedocs.io/en/latest/syntax/optional.html

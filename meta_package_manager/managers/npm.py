@@ -16,12 +16,12 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import json
-from typing import Iterator, Optional
+from typing import Any, Iterator, Optional, Union
 
 from boltons.iterutils import remap
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from ..base import Package, PackageManager
+from ..base import Package, PackageManager, _Arg, _NestedArgs
 from ..capabilities import search_capabilities
 
 
@@ -48,7 +48,7 @@ class NPM(PackageManager):
         6.13.7
     """
 
-    def run_cli(self, *args: str, **kwargs: bool) -> str:
+    def run_cli(self, *args: Union[_Arg, _NestedArgs], **kwargs: Any) -> str:
         """Like the common run_cli helper, but silence NPM's JSON output on error.
 
         NPM is prone to breakage if local node version is not in sync:
@@ -72,7 +72,7 @@ class NPM(PackageManager):
         # (unless the --stop-on-error option is provided).
         if "--json" in args:
             if output and self.cli_errors:
-                output = None
+                output = ""
 
         return output
 
@@ -131,7 +131,8 @@ class NPM(PackageManager):
 
             remap(json.loads(output), visit=visit)
 
-        return installed
+        for pkg in installed:
+            yield pkg
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -273,7 +274,7 @@ class NPM(PackageManager):
 
     def upgrade_cli(
         self, package_id: Optional[str] = None, version: Optional[str] = None
-    ) -> tuple[str]:
+    ) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
@@ -285,7 +286,7 @@ class NPM(PackageManager):
 
             ► npm --global --progress=false --no-update-notifier install raven
         """
-        cmd_args = ("update",)
+        cmd_args: tuple[str, ...] = ("update",)
         if package_id:
             cmd_args = (
                 "install",

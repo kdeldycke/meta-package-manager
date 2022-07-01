@@ -169,7 +169,7 @@ class Pipx(PackageManager):
         """
         return self.run_cli("install", package_id)
 
-    def upgrade_cli(self, package_id: str) -> tuple[str]:
+    def upgrade_cli(self, package_id: str) -> tuple[str, ...]:
         """Upgrade the package provided as parameter."""
         return self.build_cli("upgrade", package_id)
 

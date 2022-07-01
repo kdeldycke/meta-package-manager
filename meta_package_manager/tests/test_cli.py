@@ -24,7 +24,7 @@ from boltons.strutils import strip_ansi
 from click_extra.tabulate import TabularOutputFormatter
 
 from .. import __version__
-from ..bar_plugin import MPMPlugin
+from ..bar_plugin import MPMPlugin  # type: ignore
 from ..pool import pool
 
 """ Common tests for all CLI basic features and templates for subcommands. """

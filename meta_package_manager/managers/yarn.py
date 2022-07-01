@@ -227,7 +227,7 @@ class Yarn(PackageManager):
 
             ► yarn global add python
         """
-        cmd_args = ("upgrade",)
+        cmd_args: tuple[str, ...] = ("upgrade",)
         if package_id:
             cmd_args = ("add", package_id)
 

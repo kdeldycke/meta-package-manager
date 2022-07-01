@@ -17,13 +17,13 @@
 
 from itertools import groupby
 from operator import itemgetter
-from typing import Iterator, Optional
+from typing import Iterator, Optional, TypedDict
 
 import xmltodict
 from click_extra.platform import LINUX
 
 from ..base import Package, PackageManager
-from ..version import parse_version
+from ..version import TokenizedString, parse_version
 
 
 class Zypper(PackageManager):
@@ -58,7 +58,9 @@ class Zypper(PackageManager):
         zypper 1.14.11
     """
 
-    def _search(self, *args: str) -> Iterator[dict[str, str]]:
+    SearchResult = TypedDict("SearchResult", {"id": str, "version": TokenizedString})
+
+    def _search(self, *args: str) -> Iterator[SearchResult]:
         """Utility method to parse and interpret results of the ``zypper search``
         command.
 

@@ -222,7 +222,7 @@ class Emerge(PackageManager):
         """
         return self.run_cli("--color", "n", "--nospinner", package_id, sudo=True)
 
-    def upgrade_cli(self, package_id: Optional[str] = "@world") -> tuple[str]:
+    def upgrade_cli(self, package_id: Optional[str] = "@world") -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
@@ -234,7 +234,7 @@ class Emerge(PackageManager):
 
             ► sudo emerge --update --color n --nospinner dev-vcs/git
         """
-        update_params = ()
+        update_params: tuple[str, ...] = ()
         if package_id == "@world":
             update_params = ("--newuse", "--deep")
 

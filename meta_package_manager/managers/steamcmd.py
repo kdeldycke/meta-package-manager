@@ -67,7 +67,7 @@ class SteamCMD(PackageManager):
         """
         return self.run_cli("+app_update", package_id, "validate")
 
-    def upgrade_cli(self, package_id: str) -> tuple[str]:
+    def upgrade_cli(self, package_id: str) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 

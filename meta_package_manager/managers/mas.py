@@ -116,7 +116,7 @@ class MAS(PackageManager):
             )
 
     @search_capabilities(extended_support=False, exact_support=False)
-    def search(self, query, extended, exact):
+    def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Fetch matching packages.
 
         .. caution::

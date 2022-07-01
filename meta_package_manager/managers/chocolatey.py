@@ -149,7 +149,7 @@ class Choco(PackageManager):
         """
         return self.run_cli("install", package_id, "--yes", "--limit-output")
 
-    def upgrade_cli(self, package_id: str = "all") -> tuple[str]:
+    def upgrade_cli(self, package_id: str = "all") -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 

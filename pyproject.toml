@@ -143,9 +143,11 @@ module = [
     "boltons.*",
     "click_extra.*",
     "cloup.*",
+    "pytest.*",
     "tabulate.*",
     "tomli_w.*",
     "xmltodict.*",
+    "yaml.*",
 ]
 ignore_missing_imports = true
 

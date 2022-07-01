@@ -24,7 +24,18 @@ from enum import Enum
 from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
-from typing import ContextManager, Iterable, Iterator, Optional, TypeVar, Union, cast
+from typing import (
+    Callable,
+    ContextManager,
+    Iterable,
+    Iterator,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -134,7 +145,7 @@ class PackageManager:
     """Base class from which all package manager definitions inherits."""
 
     @classproperty
-    def id(cls) -> str:
+    def _id_default_getter(cls) -> str:
         """Returns package manager's ID.
 
         Derived by defaults from the lower-cased class name in which underscores ``_`` are replaced
@@ -145,13 +156,17 @@ class PackageManager:
         """
         return cls.__name__.lower().replace("_", "-")  # type: ignore
 
+    id: Union[str, Callable[["PackageManager"], str]] = _id_default_getter
+
     @classproperty
-    def name(cls) -> str:
+    def _name_default_getter(cls) -> str:
         """Return package manager's common name.
 
         Defaults based on class name.
         """
         return cls.__name__  # type: ignore
+
+    name: Union[str, Callable[["PackageManager"], str]] = _name_default_getter
 
     homepage_url: Optional[str] = None
     """Home page of the project, only used in documentation for reference."""
@@ -168,7 +183,7 @@ class PackageManager:
     """
 
     @classproperty
-    def cli_names(cls) -> tuple[str]:
+    def _cli_names_default_getter(cls) -> tuple[str, ...]:
         """List of CLI names the package manager is known as.
 
         The supported CLI names are ordered by priority. This is used for example to
@@ -178,6 +193,12 @@ class PackageManager:
         Is derived by default from the manager's ID.
         """
         return (cls.id,)
+
+    cli_names: Union[
+        tuple[str, ...],
+        None,
+        Callable[["PackageManager"], tuple[str, ...]],
+    ] = _cli_names_default_getter
 
     cli_search_path: tuple[str, ...] = ()
     """ List of additional path to help :program:`mpm` hunt down the package manager CLI.
@@ -214,7 +235,7 @@ class PackageManager:
     Essentially used to force silencing, low verbosity or no-color output.
     """
 
-    version_cli_options: tuple[str] = ("--version",)
+    version_cli_options: tuple[str, ...] = ("--version",)
     """List of options to get the version from the package manager CLI."""
 
     version_regex: str = r"(?P<version>\S+)"
@@ -410,7 +431,7 @@ class PackageManager:
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
     @classmethod
-    def args_cleanup(cls, *args: _NestedArgs) -> tuple[str, ...]:
+    def _args_cleanup(cls, *args: Union[_Arg, _NestedArgs]) -> tuple[str, ...]:
         """Flatten recursive iterables, remove all ``None``, and cast each element to
         strings.
 
@@ -418,7 +439,7 @@ class PackageManager:
         """
         return tuple(str(arg) for arg in flatten(args) if arg is not None)
 
-    def run(self, *args: _NestedArgs, extra_env: _EnvVars = None) -> str:
+    def run(self, *args: Union[_Arg, _NestedArgs], extra_env: _EnvVars = None) -> str:
         """Run a shell command, return the output and accumulate error messages.
 
         ``args`` is allowed to be a nested structure of iterables, in which case it will
@@ -436,7 +457,7 @@ class PackageManager:
             Move :option:`mpm --dry-run` option and this method to `click-extra <https://github.com/kdeldycke/click-extra>`_.
         """
         # Casting to string helps serialize Path and Version objects.
-        clean_args = self.args_cleanup(*args)
+        clean_args = self._args_cleanup(*args)
         cli_msg = format_cli(clean_args, extra_env)
 
         code = 0
@@ -478,7 +499,7 @@ class PackageManager:
 
     def build_cli(
         self,
-        *args: _NestedArgs,
+        *args: Union[_Arg, _NestedArgs],
         auto_pre_cmds: bool = True,
         auto_pre_args: bool = True,
         auto_post_args: bool = True,
@@ -558,11 +579,11 @@ class PackageManager:
         elif auto_post_args:
             params.extend(self.post_args)
 
-        return self.args_cleanup(cast(_NestedArgs, params))
+        return self._args_cleanup(cast(_NestedArgs, params))
 
     def run_cli(
         self,
-        *args: _NestedArgs,
+        *args: Union[_Arg, _NestedArgs],
         auto_extra_env: bool = True,
         auto_pre_cmds: bool = True,
         auto_pre_args: bool = True,
@@ -786,7 +807,7 @@ class PackageManager:
         """
         raise NotImplementedError
 
-    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str]:
+    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
         """Returns the complete CLI to upgrade the package provided as ``package_id``
         parameter.
 
@@ -802,7 +823,7 @@ class PackageManager:
         """
         return self.run(self.upgrade_cli(package_id), extra_env=self.extra_env)
 
-    def upgrade_all_cli(self) -> tuple[str]:
+    def upgrade_all_cli(self) -> tuple[str, ...]:
         """Returns the complete CLI to upgrade all outdated packages on the system.
 
         By default, returns the result of the :py:meth:`meta_package_manager.base.PackageManager.upgrade_cli`

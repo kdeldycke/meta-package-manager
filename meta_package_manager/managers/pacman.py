@@ -160,7 +160,7 @@ class Pacman(PackageManager):
 
             ► sudo pacman --noconfirm --sync firefox
         """
-        params = ("--refresh", "--sysupgrade")
+        params: tuple[str, ...] = ("--refresh", "--sysupgrade")
         if package_id:
             params = (package_id,)
 
@@ -173,7 +173,7 @@ class Pacman(PackageManager):
 
             ► sudo pacman --noconfirm --remove firefox
         """
-        self.run_cli("--remove", package_id, sudo=True)
+        return self.run_cli("--remove", package_id, sudo=True)
 
     def sync(self) -> None:
         """Sync package metadata.

@@ -220,7 +220,7 @@ class APT(PackageManager):
 
             ► sudo apt install --only-upgrade git --yes --quiet
         """
-        params = ("upgrade",)
+        params: tuple[str, ...] = ("upgrade",)
         if package_id:
             params = ("install", "--only-upgrade", package_id)
 
@@ -243,7 +243,7 @@ class APT(PackageManager):
         """
         self.run_cli("update", "--yes", sudo=True)
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Removes things we don't need anymore.
 
         .. code-block:: shell-session

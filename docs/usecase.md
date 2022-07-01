@@ -44,7 +44,7 @@ All package managers are not on-par between themselves. `mpm` is filling the
 gap between managers and implement some missing features.
 
 For instance,
-[`pip` doesn’t can’t upgrade all outdated package](https://github.com/pypa/pip/issues/4551)
+[`pip` can’t upgrade all outdated package](https://github.com/pypa/pip/issues/4551)
 with a single command. `mpm` adds that missing feature:
 
 ```shell-session

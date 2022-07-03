@@ -744,6 +744,9 @@ def install(ctx, package_id):
 def upgrade(ctx, all, package_ids):
     """Upgrade one or more outdated packages.
 
+    Defaults to upgrading all outdated package if none provided as arguments (i.e. assumes
+    -A/--all if no [PACKAGE_IDS]).
+
     Upgrade will only proceed if no ambiguity is uncovered. Packages recognized by multiple
     managers will be skipped. You can remove that ambiguity by carefully specifiying the subset of
     managers to consider for upgrade.
@@ -751,8 +754,8 @@ def upgrade(ctx, all, package_ids):
     Unknown packages will be skipped.
     """
     if not all and not package_ids:
-        logger.fatal("No package provided for upgrade.")
-        ctx.exit(2)
+        logger.warning("No package provided, assume -A/--all option.")
+        all = True
 
     # Deduplicate entries.
     package_ids = set(package_ids)

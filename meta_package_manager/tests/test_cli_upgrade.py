@@ -32,33 +32,40 @@ class TestUpgrade(CLISubCommandTests):
     """All tests here should me marked as destructive unless --dry-run parameter is
     passed."""
 
-    def test_all_managers_no_package(self, invoke):
-        result = invoke("upgrade")
-        assert result.exit_code == 2
-        assert "No package provided for upgrade." in result.stderr
-
-    @pytest.mark.parametrize("mid", pool.default_manager_ids)
-    def test_single_manager_no_package(self, invoke, mid):
-        result = invoke(f"--{mid}", "upgrade")
-        assert result.exit_code == 2
-        assert "No package provided for upgrade." in result.stderr
-
-    def test_all_managers_dry_run_upgrade_all(self, invoke):
-        result = invoke("--dry-run", "upgrade", "--all")
+    @pytest.mark.parametrize("all_option", ("--all", None))
+    def test_all_managers_dry_run_upgrade_all(self, invoke, all_option):
+        result = invoke("--dry-run", "upgrade", all_option)
         assert result.exit_code == 0
+        if not all_option:
+            assert "assume -A/--all option" in result.stdout
+        self.check_manager_selection(result)
+
+    @destructive
+    @pytest.mark.parametrize("all_option", ("--all", None))
+    def test_all_managers_upgrade_all(self, invoke, all_option):
+        result = invoke("upgrade", all_option)
+        assert result.exit_code == 0
+        if not all_option:
+            assert "assume -A/--all option" in result.stdout
         self.check_manager_selection(result)
 
     @pytest.mark.parametrize("mid", pool.default_manager_ids)
-    def test_single_manager_dry_run_upgrade_all(self, invoke, mid):
-        result = invoke(f"--{mid}", "--dry-run", "upgrade", "--all")
+    @pytest.mark.parametrize("all_option", ("--all", None))
+    def test_single_manager_dry_run_upgrade_all(self, invoke, mid, all_option):
+        result = invoke(f"--{mid}", "--dry-run", "upgrade", all_option)
         assert result.exit_code == 0
+        if not all_option:
+            assert "assume -A/--all option" in result.stdout
         self.check_manager_selection(result, {mid})
 
     @destructive
     @pytest.mark.parametrize("mid", pool.default_manager_ids)
-    def test_single_manager_upgrade_all(self, invoke, mid):
-        result = invoke(f"--{mid}", "upgrade", "--all")
+    @pytest.mark.parametrize("all_option", ("--all", None))
+    def test_single_manager_upgrade_all(self, invoke, mid, all_option):
+        result = invoke(f"--{mid}", "upgrade", all_option)
         assert result.exit_code == 0
+        if not all_option:
+            assert "assume -A/--all option" in result.stdout
         self.check_manager_selection(result, {mid})
 
 

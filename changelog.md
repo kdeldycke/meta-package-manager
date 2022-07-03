@@ -6,9 +6,10 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Restore behavior of having `upgrade` assuming `--all` option on a bare call. Closes {issue}`715`.
+- \[cask\] Fix parsing of multiple reported installed versions.
 - \[mpm\] Keep the operation matrix on the `readme.md` in sync with current code by inspecting implementation.
 - \[mpm\] Add type hints. Closes {issue}`655`.
-- \[cask\] Fix parsing of multiple reported installed versions.
 
 ## {gh}`5.4.0 (2022-06-28) <compare/v5.3.0...v5.4.0>`
 

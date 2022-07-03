@@ -15,7 +15,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import dataclasses
 import logging
 import sys
 from collections import Counter, namedtuple
@@ -37,7 +36,6 @@ from click_extra.colorize import KO, OK, highlight, theme
 from click_extra.platform import os_label
 from click_extra.tabulate import table_format_option
 from cloup import Option
-from typing_extensions import TypedDict
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -47,7 +45,7 @@ else:
 from cloup import Section
 
 from . import __version__, bar_plugin, logger
-from .base import CLIError, PackageManager
+from .base import CLIError, Operations, PackageManager, packages_asdict
 from .output import (
     SORTABLE_FIELDS,
     BarPluginRenderer,
@@ -252,13 +250,11 @@ def mpm(
         logger.setLevel(logging.CRITICAL * 2)
 
     # Select the subset of manager to target, and apply manager-level options.
-    selected_managers = pool.select_managers(
+    selected_managers = partial(
+        pool.select_managers,
         keep=manager if not xkcd else XKCD_MANAGER_ORDER,
         drop=exclude,
-        drop_unsupported=not all_managers,
-        # Only keep inactive managers to show them in the "managers" subcommand table.
-        # Filters them out in any other subcommand.
-        drop_inactive=ctx.invoked_subcommand != "managers",
+        keep_unsupported=all_managers,
         # Should we include auto-update packages or not?
         ignore_auto_updates=ignore_auto_updates,
         # Does the manager should raise on error or not.
@@ -291,6 +287,11 @@ def mpm(
 def managers(ctx):
     """List all supported package managers and autodetect their presence on the
     system."""
+    select_params = {
+        # Do not drop inactive managers. Keep them to show off how mpm is reacting to the local platform.
+        "drop_inactive": False,
+    }
+
     # Machine-friendly data rendering.
     if ctx.find_root().table_formatter.format_name == "json":
         manager_data = {}
@@ -305,7 +306,7 @@ def managers(ctx):
             "fresh",
             "available",
         )
-        for manager in ctx.obj.selected_managers:
+        for manager in ctx.obj.selected_managers(**select_params):
             manager_data[manager.id] = {fid: getattr(manager, fid) for fid in fields}
             # Serialize errors at the last minute to gather all we encountered.
             manager_data[manager.id]["errors"] = list(
@@ -317,7 +318,7 @@ def managers(ctx):
 
     # Human-friendly content rendering.
     table = []
-    for manager in ctx.obj.selected_managers:
+    for manager in ctx.obj.selected_managers(**select_params):
 
         # Build up the OS column content.
         os_infos = OK if manager.supported else KO
@@ -382,14 +383,15 @@ def installed(ctx, duplicates):
     """List all packages installed on the system by each manager."""
     # Build-up a global dict of installed packages per manager.
     installed_data = {}
+    fields = (
+        "id",
+        "name",
+        "installed_version",
+    )
 
-    for manager in ctx.obj.selected_managers:
+    for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
 
-        try:
-            packages = tuple(map(dataclasses.asdict, manager.installed))
-        except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement installed operation.")
-            continue
+        packages = tuple(packages_asdict(manager.installed, fields))
 
         installed_data[manager.id] = {
             "id": manager.id,
@@ -480,23 +482,25 @@ def outdated(ctx, plugin_output):
     """List available package upgrades and their versions for each manager."""
     # Build-up a global list of outdated packages per manager.
     outdated_data = {}
+    fields = [
+        "id",
+        "name",
+        "installed_version",
+        "latest_version",
+    ]
+    if plugin_output:
+        fields.extend(["label", "upgrade_cli"])
 
-    for manager in ctx.obj.selected_managers:
+    for manager in ctx.obj.selected_managers(implements_operation=Operations.outdated):
 
-        try:
-            packages = tuple(map(dataclasses.asdict, manager.outdated))
-        except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement outdated operation.")
-            continue
+        packages = tuple(packages_asdict(manager.outdated, tuple(fields)))
 
-        for info in packages:
-            info.update(
-                {
-                    "upgrade_cli": BarPluginRenderer.render_cli(
-                        manager.upgrade_cli(info["id"]), plugin_format=plugin_output
-                    )
-                }
-            )
+        # Re-render upgrade CLI for plugin consumption.
+        if plugin_output:
+            for info in packages:
+                info["upgrade_cli"] = BarPluginRenderer.render_cli(
+                    info["upgrade_cli"], plugin_format=plugin_output
+                )
 
         outdated_data[manager.id] = {
             "id": manager.id,
@@ -504,9 +508,8 @@ def outdated(ctx, plugin_output):
             "packages": packages,
         }
 
-        # Do not include the full-upgrade CLI if we did not detect any outdated
-        # package.
-        if packages:
+        # Only include full-upgrade CLI for plugin.
+        if plugin_output and packages:
             try:
                 upgrade_all_cli = manager.upgrade_all_cli()
             except NotImplementedError:
@@ -515,7 +518,7 @@ def outdated(ctx, plugin_output):
                     f"{manager.id} does not implement upgrade_all operation."
                 )
                 mpm_exec = bar_plugin.MPMPlugin().mpm_exec
-                upgrade_all_cli = (*mpm_exec, f"--{manager.id}", "upgrade")
+                upgrade_all_cli = (*mpm_exec, f"--{manager.id}", "upgrade", "--all")
                 logger.debug(f"Fallback to direct mpm call: {upgrade_all_cli}")
             outdated_data[manager.id]["upgrade_all_cli"] = BarPluginRenderer.render_cli(
                 upgrade_all_cli, plugin_format=plugin_output
@@ -605,24 +608,23 @@ def search(ctx, extended, exact, query):
 
     # Build-up a global list of package matches per manager.
     matches = {}
+    fields = (
+        "id",
+        "name",
+        "latest_version",
+        "description",
+    )
 
-    for manager in ctx.obj.selected_managers:
+    for manager in ctx.obj.selected_managers(implements_operation=Operations.search):
 
-        try:
-            results = tuple(
-                map(
-                    dataclasses.asdict,
-                    manager.refiltered_search(query, extended, exact),
-                )
-            )
-        except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement search operation.")
-            continue
+        packages = tuple(
+            packages_asdict(manager.refiltered_search(query, extended, exact), fields)
+        )
 
         matches[manager.id] = {
             "id": manager.id,
             "name": manager.name,
-            "packages": results,
+            "packages": packages,
         }
 
         # Serialize errors at the last minute to gather all we encountered.
@@ -767,15 +769,11 @@ def upgrade(ctx, all, package_ids):
             logger.debug(
                 f"Ignore provided {', '.join(sorted(package_ids))} packages and proceed to a full upgrade..."
             )
-        for manager in ctx.obj.selected_managers:
+        for manager in ctx.obj.selected_managers(
+            implements_operation=Operations.upgrade_all
+        ):
             logger.info(f"Upgrade all outdated packages from {manager.id}...")
-            try:
-                output = manager.upgrade_all()
-            except NotImplementedError:
-                logger.warning(
-                    f"{manager.id} does not implement upgrade_all operation."
-                )
-                continue
+            output = manager.upgrade_all()
             if output:
                 logger.info(output)
         ctx.exit()
@@ -784,7 +782,9 @@ def upgrade(ctx, all, package_ids):
     # validate them before proceeding.
 
     # Cast generator to tuple because of reuse.
-    selected_managers = tuple(ctx.obj.selected_managers)
+    selected_managers = tuple(
+        ctx.obj.selected_managers(implements_operation=Operations.upgrade)
+    )
 
     # For each package, we list the managers they were sourced from.
     package_sources = {}
@@ -831,7 +831,9 @@ def upgrade(ctx, all, package_ids):
 def remove(ctx, package_id):
     """Remove the provided package using one of the selected manager."""
     # Cast generator to tuple because of reuse.
-    selected_managers = tuple(ctx.obj.selected_managers)
+    selected_managers = tuple(
+        ctx.obj.selected_managers(implements_operation=Operations.remove)
+    )
 
     logger.info(
         f"Package manager order: {', '.join([m.id for m in selected_managers])}"
@@ -877,24 +879,18 @@ def remove(ctx, package_id):
 @pass_context
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
-    for manager in ctx.obj.selected_managers:
+    for manager in ctx.obj.selected_managers(implements_operation=Operations.sync):
         logger.info(f"Sync {manager.id} package info...")
-        try:
-            manager.sync()
-        except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement sync operation.")
+        manager.sync()
 
 
 @mpm.command(short_help="Cleanup local data.", section=MAINTENANCE)
 @pass_context
 def cleanup(ctx):
     """Cleanup local data, temporary artifacts and removes orphaned dependencies."""
-    for manager in ctx.obj.selected_managers:
+    for manager in ctx.obj.selected_managers(implements_operation=Operations.cleanup):
         logger.info(f"Cleanup {manager.id}...")
-        try:
-            manager.cleanup()
-        except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement cleanup operation.")
+        manager.cleanup()
 
 
 @mpm.command(
@@ -998,6 +994,10 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
             ctx.exit(2)
 
     installed_data = {}
+    fields = (
+        "id",
+        "installed_version",
+    )
     if merge or update_version:
         installed_data = tomllib.loads(toml_path.read_text())
 
@@ -1019,14 +1019,12 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
         f.write(f"# Timestamp: {datetime.now().isoformat()}.\n")
 
         # Create one section for each manager.
-        for manager in ctx.obj.selected_managers:
+        for manager in ctx.obj.selected_managers(
+            implements_operation=Operations.installed
+        ):
             logger.info(f"Dumping packages from {manager.id}...")
 
-            try:
-                packages = tuple(map(dataclasses.asdict, manager.installed))
-            except NotImplementedError:
-                logger.warning(f"{manager.id} does not implement installed operation.")
-                continue
+            packages = tuple(packages_asdict(manager.installed, fields))
 
             for pkg in packages:
                 # Only update version in that mode if the package is already referenced
@@ -1086,7 +1084,9 @@ def restore(ctx, toml_files):
             sections = ", ".join(ignored_sections)
             logger.info(f"Ignore {sections} section{plural}.")
 
-        for manager in ctx.obj.selected_managers:
+        for manager in ctx.obj.selected_managers(
+            implements_operation=Operations.install
+        ):
             if manager.id not in doc:
                 logger.warning(f"No [{manager.id}] section found.")
                 continue

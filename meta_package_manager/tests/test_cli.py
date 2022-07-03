@@ -25,6 +25,7 @@ from click_extra.tabulate import TabularOutputFormatter
 
 from .. import __version__
 from ..bar_plugin import MPMPlugin  # type: ignore
+from ..base import Operations
 from ..pool import pool
 
 """ Common tests for all CLI basic features and templates for subcommands. """
@@ -164,8 +165,7 @@ class CLISubCommandTests:
                 bool(
                     re.search(
                         rf"warning: {mid} does not implement "
-                        r"(installed|outdated|search|install|upgrade|upgrade_all|remove|sync|cleanup) "
-                        "operation.",
+                        rf"Operations\.({'|'.join(Operations.__members__.keys() | {'upgrade_all'})}).",
                         stderr,
                     )
                 ),

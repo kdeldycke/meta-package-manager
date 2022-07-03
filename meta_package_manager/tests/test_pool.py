@@ -108,13 +108,13 @@ selection_cases = {
         {},
         pool.default_manager_ids,
     ),
-    "drop_unsupported": (
-        {"drop_unsupported": True},
-        pool.default_manager_ids,
-    ),
     "keep_unsupported": (
-        {"drop_unsupported": False},
+        {"keep_unsupported": True},
         pool.all_manager_ids,
+    ),
+    "drop_unsupported": (
+        {"keep_unsupported": False},
+        pool.default_manager_ids,
     ),
     "drop_inactive": (
         {"drop_inactive": True},

@@ -141,21 +141,21 @@ class ManagerPool:
         self,
         keep: Optional[Iterable] = None,
         drop: Optional[Iterable] = None,
-        drop_unsupported: bool = True,
+        keep_unsupported: bool = False,
         drop_inactive: bool = True,
-        operation: Optional[Operations] = None,
+        implements_operation: Optional[Operations] = None,
         **extra_options: bool,
     ) -> Iterator[PackageManager]:
         """Utility method to extract a subset of the manager pool based on selection
         list (``keep`` parameter) and exclusion list (``drop`` parameter) criterion.
 
-        By default, all managers supported on the current platform are selected. Unless
-        ``drop_unsupported`` is set to ``False``, in which case all managers implemented by ``mpm``
+        By default, only the managers supported by the current platform are selected. Unless
+        ``keep_unsupported`` is set to ``True``, in which case all managers implemented by ``mpm``
         are selected, regardless of their supported platform.
 
         ``drop_inactive`` filters out managers that where not found on the system.
 
-        ``operation`` filters out managers which do not implements the provided operation.
+        ``implements_operation`` filters out managers which do not implements the provided operation.
 
         Finally, ``extra_options`` parameters are fed to manager objects to set some additional options.
 
@@ -163,7 +163,7 @@ class ManagerPool:
         """
         if not keep:
             keep = (
-                self.default_manager_ids if drop_unsupported else self.all_manager_ids
+                self.all_manager_ids if keep_unsupported else self.default_manager_ids
             )
         if not drop:
             drop = set()
@@ -182,8 +182,10 @@ class ManagerPool:
 
             # Check if operation is not implemeted before calling `.available`. It saves one
             # call to the package manager CLI.
-            if operation and not manager.implements(operation):
-                logger.warning(f"{manager_id} does not implement {operation}.")
+            if implements_operation and not manager.implements(implements_operation):
+                logger.warning(
+                    f"{manager_id} does not implement {implements_operation}."
+                )
                 continue
 
             # Filters out inactive managers.

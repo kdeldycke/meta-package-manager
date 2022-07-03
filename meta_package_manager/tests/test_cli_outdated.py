@@ -17,6 +17,7 @@
 
 # pylint: disable=redefined-outer-name
 
+import dataclasses
 import json
 
 import pytest
@@ -74,8 +75,8 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
             for pkg in info["packages"]:
                 assert isinstance(pkg, dict)
 
-                fields = set(Package.__dataclass_fields__).union({"upgrade_cli"})
-                assert set(pkg) == fields
+                fields = {f.name for f in dataclasses.fields(Package)}
+                assert set(pkg).issubset(fields)
 
-                for f in fields:
+                for f in pkg:
                     assert isinstance(pkg[f], str) or pkg[f] is None

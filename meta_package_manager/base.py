@@ -19,7 +19,7 @@ import os
 import re
 import sys
 from contextlib import nullcontext
-from dataclasses import dataclass
+from dataclasses import InitVar, asdict, dataclass
 from enum import Enum
 from pathlib import Path
 from shutil import which
@@ -60,6 +60,7 @@ Operations = Enum(
         "search",
         "install",
         "upgrade",
+        "upgrade_all",
         "remove",
         "sync",
         "cleanup",
@@ -110,16 +111,43 @@ class Package:
     """Lightweight representation of a package and its metadata."""
 
     id: str
+    """ID is required and is the primary key used by the manager. """
+
     name: Optional[str] = None
+
+    label: Optional[str] = None
+    """Label is used in *Bar plugin to display user-friendly entries."""
+
     description: Optional[str] = None
-    # installed_version and latest_version are allowed to temporarily be a string between __init__ and __post_init__.
+
     installed_version: Optional[Union[TokenizedString, str]] = None
     latest_version: Optional[Union[TokenizedString, str]] = None
+    """ ``installed_version`` and ``latest_version`` are allowed to temporarily be a string
+    between ``__init__`` and ``__post_init__``. Once they reach the later, they're parsed and
+    normalized into ``TokenizedString``.
+    """
 
-    def __post_init__(self) -> None:
+    upgrade_cli: Optional[tuple[str, ...]] = None
+
+    manager: InitVar["PackageManager"] = None
+    """Init-only variable user to populate package metadata requiring a lookup from the manager."""
+
+    def __post_init__(self, manager) -> None:
+        self.label = self.name if self.name else self.id
+
         # Make sure version strings are parsed into proper objects.
         self.installed_version = parse_version(self.installed_version)
         self.latest_version = parse_version(self.latest_version)
+
+        try:
+            self.upgrade_cli = manager.upgrade_cli(self.id)
+        except NotImplementedError:
+            pass
+
+
+def packages_asdict(packages: Iterator[Package], keep_fields: tuple[str, ...]):
+    """Returns a list of packages casted to a ``dict`` with only a subset of its fields."""
+    return ({k: v for k, v in asdict(p).items() if k in keep_fields} for p in packages)
 
 
 _EnvVars = Optional[dict[str, str]]
@@ -266,12 +294,18 @@ class PackageManager:
 
     @classmethod
     def implements(cls, op: Operations) -> bool:
-        """Inspect manager implementation to check for proper support of an operation."""
+        """Inspect manager's implementation to check for proper support of an operation."""
         logger.debug(f"Is {cls} implementing {op}?")
 
-        # Derive the method ID that is hinting at proper implementation of the operation.
-        # Special case for `upgrade` for which `upgrade_cli()` is the minimal method from which the manager is capable of executing all upgrade operations.
-        method_id = "upgrade_cli" if op == Operations.upgrade else op.name
+        # Set the method IDs which are the proof of proper implementation.
+        # General case: both the operation and the method implementing it share the same ID.
+        method_ids = {op.name}
+        # Special case for `upgrade`: `upgrade_cli()` is the minimal method.
+        if op == Operations.upgrade:
+            method_ids = {"upgrade_cli"}
+        # For `upgrade_all`, we need either `upgrade_all_cli()` or `upgrade_cli()` as fallback.
+        elif op == Operations.upgrade_all:
+            method_ids = {"upgrade_all_cli", "upgrade_cli"}
 
         # If none of the classes in the inheritance hierarchy up to the base one implements the operation, then we can be certain
         # the manager doesn't implement the operation at all.
@@ -281,8 +315,9 @@ class PackageManager:
             # Presence of the operation function is not enough to rules out proper implementation, as it can
             # be a method that raises NotImplemented error anyway. See for instance the upgrade_all_cli in pip.py:
             # https://github.com/kdeldycke/meta-package-manager/blob/4acc003bd268a59f5a79cf317be6d25a90878f6d/meta_package_manager/managers/pip.py#L271-L279
-            if method_id in klass.__dict__:
-                return True
+            for method_id in method_ids:
+                if method_id in klass.__dict__:
+                    return True
 
         raise NotImplementedError(f"Can't guess {cls} implementation of {op}.")
 
@@ -646,7 +681,7 @@ class PackageManager:
 
     def package(self, *args, **kwargs) -> Package:
         """Produce a ``Package`` object with provided attributes."""
-        return self.package_class(*args, **kwargs)
+        return self.package_class(*args, manager=self, **kwargs)
 
     @property
     def installed(self) -> Iterator[Package]:

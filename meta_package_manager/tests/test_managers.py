@@ -331,16 +331,20 @@ props_ref = tuple(
 
 def test_operation_order():
     """Double check operation IDs are ordered and aligned to the base manager class and CLI implementation."""
-    base_operations = [p for p in props_ref if p in Operations.__members__]
-    assert list(Operations.__members__) == list(base_operations)
+    direct_operation_ids = [
+        op for op in Operations.__members__ if op not in {"upgrade_all"}
+    ]
+
+    base_operations = [p for p in props_ref if p in direct_operation_ids]
+    assert list(direct_operation_ids) == list(base_operations)
 
     cli_tree = ast.parse(Path(__file__).parent.joinpath("../cli.py").read_bytes())
     implemented_operations = [
         n.name
         for n in cli_tree.body
-        if isinstance(n, ast.FunctionDef) and n.name in Operations.__members__
+        if isinstance(n, ast.FunctionDef) and n.name in direct_operation_ids
     ]
-    assert list(Operations.__members__) == list(implemented_operations)
+    assert list(direct_operation_ids) == list(implemented_operations)
 
 
 # Check the code of each file registered in the pool.

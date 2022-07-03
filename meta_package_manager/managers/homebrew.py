@@ -17,11 +17,13 @@
 
 import json
 import re
+from ctypes import Union
 from operator import methodcaller
 from typing import Iterator, Optional
 
 from click_extra.platform import LINUX, MACOS
 
+from .. import logger
 from ..base import Package, PackageManager
 from ..version import parse_version
 
@@ -201,9 +203,9 @@ class Homebrew(PackageManager):
                   "current_version": "4.0.3"
                 },
                 {
-                  "name": "qlcolorcode",
-                  "installed_versions": "3.0.2",
-                  "current_version": "3.1.1"
+                "name": "lg-onscreen-control",
+                "installed_versions": "5.33,cV8xqv5TSZA.upgrading, 5.47,yi5XuIZw6hg",
+                "current_version": "5.48,uYXSwyUCNFBbSch9PFw"
                 }
               ]
             }
@@ -221,18 +223,25 @@ class Homebrew(PackageManager):
             package_list = json.loads(output)
             for pkg_info in package_list["formulae"] + package_list["casks"]:
 
-                version = pkg_info["installed_versions"]
-                if not isinstance(version, str):
-                    version = max(map(parse_version, version))
-                latest_version = pkg_info["current_version"]
+                # Interpret installed versions.
+                versions: Union[str, list[str]] = pkg_info["installed_versions"]
+                if isinstance(versions, str):
+                    versions = versions.split(", ")
+                installed_version = max(map(parse_version, versions))
 
-                # Skip packages in undetermined state.
-                if version == latest_version:
+                latest_version = parse_version(pkg_info["current_version"])
+
+                # Skip packages not offering upgradeable version.
+                package_id = pkg_info["name"]
+                if installed_version == latest_version:
+                    logger.debug(
+                        f"Ignore {package_id} upgrade from {installed_version} to {latest_version}."
+                    )
                     continue
 
                 yield Package(
-                    id=pkg_info["name"],
-                    installed_version=version,
+                    id=package_id,
+                    installed_version=installed_version,
                     latest_version=latest_version,
                 )
 

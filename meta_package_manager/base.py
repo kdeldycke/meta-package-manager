@@ -652,28 +652,6 @@ class PackageManager:
     def installed(self) -> Iterator[Package]:
         """List packages currently installed on the system.
 
-        Returns a ``dict`` indexed by package ``id``. Each item is a ``dict`` with:
-
-        - (repeating) package's ``id``
-        - ``name`` (often the same as ``id``)
-        - current ``installed_version``
-
-        .. code-block:: python
-
-            {
-                "ack": {
-                    "id": "ack",
-                    "name": "ack",
-                    "installed_version": "3.5.0",
-                },
-                "aom": {
-                    "id": "aom",
-                    "name": "aom",
-                    "installed_version": "3.3.0",
-                },
-                (...)
-            }
-
         Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
         raise NotImplementedError
@@ -681,31 +659,6 @@ class PackageManager:
     @property
     def outdated(self) -> Iterator[Package]:
         """List installed packages with available upgrades.
-
-        Returns a ``dict`` indexed by package ``id``. Each item is a ``dict`` with:
-
-        - (repeating) package's ``id``
-        - ``name`` (often the same as ``id``)
-        - current ``installed_version``
-        - ``latest_version`` available for upgrade
-
-        .. code-block:: python
-
-            {
-                "awscli": {
-                    "id": "awscli",
-                    "name": "awscli",
-                    "installed_version": "2.5.6",
-                    "latest_version": "2.5.8",
-                },
-                "git": {
-                    "id": "git",
-                    "name": "git",
-                    "installed_version": "2.35.3",
-                    "latest_version": "2.36.0",
-                },
-                (...)
-            }
 
         Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
@@ -721,31 +674,6 @@ class PackageManager:
 
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Search packages available for install.
-
-        Returns a generator yielding ``dict`` items containing:
-
-        - the package's ``id`` as a string
-        - its ``name`` (often the same as ``id``) as a string
-        - ``description`` as a string or ``None`` if not available
-        - ``latest_version`` available for install, as a :py:class:`meta_package_manager.version.TokenizedString` instance or ``None``
-
-        .. code-block:: python
-
-            (
-                {
-                    "id": "google",
-                    "name": "google",
-                    "description": "Library to interact with Google.",
-                    "latest_version": <TokenizedString 2.1.0 => ('2', '1', '0')>,
-                },
-                {
-                    "id": "@google-cloud/storage",
-                    "name": "Google cloud storage",
-                    "description": None,
-                    "latest_version": None,
-                },
-                (...)
-            )
 
         There is no need for this method to be perfect and sensitive to ``extended`` and ``exact`` parameters. If the package manager
         is not supporting these kind of options out of the box, just returns the closest subset of matching package you can

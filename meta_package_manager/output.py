@@ -30,7 +30,7 @@ from functools import partial
 from io import StringIO
 from operator import itemgetter
 from pathlib import Path
-from typing import Any, Iterator, Optional, Sequence, Union
+from typing import Any, Optional, Sequence, Union
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -45,7 +45,6 @@ from click_extra.tabulate import TabularOutputFormatter
 from tabulate import DataRow, TableFormat, tabulate
 
 from .bar_plugin import MPMPlugin  # type: ignore
-from .base import PackageManager
 from .version import TokenizedString
 
 SORTABLE_FIELDS = {
@@ -292,14 +291,14 @@ class BarPluginRenderer(MPMPlugin):
         self.pp(*args, "terminal=false")
         self.pp(*args, "terminal=true", "alternate=true")
 
-    def print_upgrade_all_item(self, manager: PackageManager, submenu="") -> None:
+    def print_upgrade_all_item(self, manager: dict, submenu: str = "") -> None:
         """Print the menu entry to upgrade all outdated package of a manager."""
-        if manager.__getattribute__("upgrade_all_cli"):
+        if manager.get("upgrade_all_cli"):
             if self.submenu_layout:
                 print("-----")
             self.print_cli_item(
-                f"{submenu}🆙 Upgrade all {manager.id} packages",
-                manager.upgrade_all_cli,
+                f"{submenu}🆙 Upgrade all {manager['id']} packages",
+                manager["upgrade_all_cli"],
                 self.default_font,
                 "refresh=true",
             )

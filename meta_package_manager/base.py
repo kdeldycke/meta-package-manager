@@ -34,7 +34,6 @@ from typing import (
     TypeVar,
     Union,
     cast,
-    overload,
 )
 from unittest.mock import patch
 
@@ -136,6 +135,10 @@ _NestedArgs = Iterable[
 ]
 
 
+T = TypeVar("T")
+_ClassProperty = Union[T, Callable[["PackageManager"], T]]
+
+
 class PackageManager:
 
     """Base class from which all package manager definitions inherits."""
@@ -152,7 +155,7 @@ class PackageManager:
         """
         return cls.__name__.lower().replace("_", "-")  # type: ignore
 
-    id: Union[str, Callable[["PackageManager"], str]] = _id_default_getter
+    id: _ClassProperty[str] = _id_default_getter
 
     @classproperty
     def _name_default_getter(cls) -> str:
@@ -162,7 +165,7 @@ class PackageManager:
         """
         return cls.__name__  # type: ignore
 
-    name: Union[str, Callable[["PackageManager"], str]] = _name_default_getter
+    name: _ClassProperty[str] = _name_default_getter
 
     homepage_url: Optional[str] = None
     """Home page of the project, only used in documentation for reference."""
@@ -178,8 +181,10 @@ class PackageManager:
     Defaults to ``None``, which deactivate version check entirely.
     """
 
+    _CliNames = Union[tuple[Union[str, _ClassProperty[str]], ...], None]
+
     @classproperty
-    def _cli_names_default_getter(cls) -> tuple[str, ...]:
+    def _cli_names_default_getter(cls) -> _CliNames:
         """List of CLI names the package manager is known as.
 
         The supported CLI names are ordered by priority. This is used for example to
@@ -190,11 +195,7 @@ class PackageManager:
         """
         return (cls.id,)
 
-    cli_names: Union[
-        tuple[str, ...],
-        None,
-        Callable[["PackageManager"], tuple[str, ...]],
-    ] = _cli_names_default_getter
+    cli_names: _ClassProperty[_CliNames] = _cli_names_default_getter
 
     cli_search_path: tuple[str, ...] = ()
     """ List of additional path to help :program:`mpm` hunt down the package manager CLI.
@@ -256,7 +257,7 @@ class PackageManager:
     cli_errors: list[CLIError]
     """Accumulate all CLI errors encountered by the package mananger."""
 
-    package_class: Package = Package
+    package_class: Type[Package] = Package
     """The dataclass to use to produce Package objects from the manager."""
 
     def __init__(self) -> None:
@@ -310,11 +311,13 @@ class PackageManager:
         env_path = ":".join(flatten((self.cli_search_path, os.getenv("PATH"))))
 
         # Search for multiple CLI names.
-        for name in self.cli_names:
-            cli_path_found = which(name, mode=os.F_OK, path=env_path)
-            if cli_path_found:
-                break
-            logger.debug(f"{theme.invoked_command(name)} CLI not found.")
+        cli_path_found = False
+        if self.cli_names is not None:
+            for name in self.cli_names:
+                cli_path_found = which(name, mode=os.F_OK, path=env_path)
+                if cli_path_found:
+                    break
+                logger.debug(f"{theme.invoked_command(name)} CLI not found.")
 
         if not cli_path_found:
             return None

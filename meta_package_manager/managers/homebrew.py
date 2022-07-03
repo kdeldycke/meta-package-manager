@@ -224,7 +224,7 @@ class Homebrew(PackageManager):
             for pkg_info in package_list["formulae"] + package_list["casks"]:
 
                 # Interpret installed versions.
-                versions: Union[str, list[str]] = pkg_info["installed_versions"]
+                versions = pkg_info["installed_versions"]
                 if isinstance(versions, str):
                     versions = versions.split(", ")
                 installed_version = max(map(parse_version, versions))

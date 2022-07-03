@@ -37,6 +37,7 @@ from click_extra.colorize import KO, OK, highlight, theme
 from click_extra.platform import os_label
 from click_extra.tabulate import table_format_option
 from cloup import Option
+from typing_extensions import TypedDict
 
 if sys.version_info >= (3, 11):
     import tomllib

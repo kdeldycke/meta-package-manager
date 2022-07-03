@@ -70,7 +70,7 @@ class Flatpak(PackageManager):
             match = regexp.match(package)
             if match:
                 name, package_id, installed_version = match.groups()
-                yield Package(
+                yield self.package(
                     id=package_id,
                     name=name,
                     installed_version=installed_version,
@@ -118,7 +118,7 @@ class Flatpak(PackageManager):
                     current_version.group("version") if current_version else "unknow"
                 )
 
-                yield Package(
+                yield self.package(
                     id=package_id,
                     name=name,
                     latest_version=latest_version,
@@ -160,7 +160,7 @@ class Flatpak(PackageManager):
             branch,
             remotes,
         ) in regexp.findall(output):
-            yield Package(
+            yield self.package(
                 id=package_id,
                 name=package_name,
                 description=description,

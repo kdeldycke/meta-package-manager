@@ -83,7 +83,7 @@ class Pipx(PackageManager):
 
         if output:
             for package_id, package_info in json.loads(output)["venvs"].items():
-                yield Package(
+                yield self.package(
                     id=package_id,
                     installed_version=package_info["metadata"]["main_package"][
                         "package_version"
@@ -150,7 +150,7 @@ class Pipx(PackageManager):
                     # dependencies.
                     sub_package_id = sub_package["name"]
                     if sub_package_id == main_package_id:
-                        yield Package(
+                        yield self.package(
                             id=sub_package_id,
                             installed_version=sub_package["version"],
                             latest_version=sub_package["latest_version"],

@@ -68,7 +68,7 @@ class Cargo(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, package_version = match.groups()
-                yield Package(id=package_id, installed_version=package_version)
+                yield self.package(id=package_id, installed_version=package_version)
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
@@ -105,7 +105,7 @@ class Cargo(PackageManager):
         )
 
         for package_id, version, description in regexp.findall(output):
-            yield Package(
+            yield self.package(
                 id=package_id,
                 description=description,
                 latest_version=version,

@@ -73,7 +73,7 @@ class MAS(PackageManager):
         )
 
         for package_id, package_name, version in regexp.findall(output):
-            yield Package(id=package_id, name=package_name, installed_version=version)
+            yield self.package(id=package_id, name=package_name, installed_version=version)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -108,7 +108,7 @@ class MAS(PackageManager):
             installed_version,
             latest_version,
         ) in regexp.findall(output):
-            yield Package(
+            yield self.package(
                 id=package_id,
                 name=package_name,
                 installed_version=installed_version,
@@ -148,7 +148,7 @@ class MAS(PackageManager):
         )
 
         for package_id, package_name, version in regexp.findall(output):
-            yield Package(id=package_id, name=package_name, latest_version=version)
+            yield self.package(id=package_id, name=package_name, latest_version=version)
 
     def install(self, package_id: str) -> str:
         """Install one package.

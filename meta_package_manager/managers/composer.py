@@ -81,7 +81,7 @@ class Composer(PackageManager):
             package_list = json.loads(output)
             for package in package_list["installed"]:
                 package_id = package["name"]
-                yield Package(id=package_id, installed_version=package["version"])
+                yield self.package(id=package_id, installed_version=package["version"])
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -115,7 +115,7 @@ class Composer(PackageManager):
             package_list = json.loads(output)
             for package in package_list["installed"]:
                 package_id = package["name"]
-                yield Package(
+                yield self.package(
                     id=package_id,
                     installed_version=package["version"],
                     latest_version=package["latest"],
@@ -179,7 +179,7 @@ class Composer(PackageManager):
         )
 
         for package_id, description in regexp.findall(output):
-            yield Package(id=package_id, description=description)
+            yield self.package(id=package_id, description=description)
 
     def install(self, package_id: str) -> str:
         """Install one package.

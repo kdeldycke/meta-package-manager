@@ -63,7 +63,7 @@ class Choco(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, installed_version = match.groups()
-                yield Package(id=package_id, installed_version=installed_version)
+                yield self.package(id=package_id, installed_version=installed_version)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -88,7 +88,7 @@ class Choco(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, installed_version, latest_version = match.groups()
-                yield Package(
+                yield self.package(
                     id=package_id,
                     latest_version=latest_version,
                     installed_version=installed_version,
@@ -138,7 +138,7 @@ class Choco(PackageManager):
 
         regexp = re.compile(r"(.+)\|(.+)")
         for package_id, latest_version in regexp.findall(output):
-            yield Package(id=package_id, latest_version=latest_version)
+            yield self.package(id=package_id, latest_version=latest_version)
 
     def install(self, package_id: str) -> str:
         """Install one package.

@@ -260,6 +260,9 @@ class PackageManager:
     cli_errors: list[CLIError]
     """Accumulate all CLI errors encountered by the package mananger."""
 
+    package_class: Package = Package
+    """The dataclass to use to produce Package objects from the manager."""
+
     def __init__(self) -> None:
         """Initialize ``cli_errors`` list."""
         self.cli_errors = []
@@ -641,6 +644,10 @@ class PackageManager:
             output = self.run(*cli, extra_env=extra_env)
 
         return output
+
+    def package(self, *args, **kwargs) -> Package:
+        """Produce a ``Package`` object with provided attributes."""
+        return self.package_class(*args, **kwargs)
 
     @property
     def installed(self) -> Iterator[Package]:

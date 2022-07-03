@@ -69,7 +69,7 @@ class DNF(PackageManager):
             match = self.list_cmd_regexp.match(package)
             if match:
                 package_id, installed_version = match.groups()
-                yield Package(id=package_id, installed_version=installed_version)
+                yield self.package(id=package_id, installed_version=installed_version)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -91,7 +91,7 @@ class DNF(PackageManager):
             match = self.list_cmd_regexp.match(package)
             if match:
                 package_id, latest_version = match.groups()
-                yield Package(id=package_id, latest_version=latest_version)
+                yield self.package(id=package_id, latest_version=latest_version)
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
@@ -127,7 +127,7 @@ class DNF(PackageManager):
             match = regexp.match(line)
             if match:
                 package_id, description = match.groups()
-                yield Package(id=package_id, description=description)
+                yield self.package(id=package_id, description=description)
 
     def install(self, package_id: str) -> str:
         """Install one package.

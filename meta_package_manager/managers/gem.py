@@ -86,7 +86,7 @@ class Gem(PackageManager):
                     for v in re.compile(r",|default:| ").split(versions)
                     if v
                 )
-                yield Package(id=package_id, installed_version=version)
+                yield self.package(id=package_id, installed_version=version)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -109,7 +109,7 @@ class Gem(PackageManager):
             match = regexp.match(package)
             if match:
                 package_id, current_version, latest_version = match.groups()
-                yield Package(
+                yield self.package(
                     id=package_id,
                     installed_version=current_version,
                     latest_version=latest_version,
@@ -159,7 +159,7 @@ class Gem(PackageManager):
         )
 
         for package_id, version in regexp.findall(output):
-            yield Package(id=package_id, latest_version=version)
+            yield self.package(id=package_id, latest_version=version)
 
     def install(self, package_id: str) -> str:
         """Install one package.

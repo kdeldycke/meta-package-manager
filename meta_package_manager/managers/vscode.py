@@ -62,7 +62,7 @@ class VSCode(PackageManager):
 
         for package in output.splitlines():
             package_id, installed_version = package.split("@")
-            yield Package(id=package_id, installed_version=installed_version)
+            yield self.package(id=package_id, installed_version=installed_version)
 
     def install(self, package_id: str) -> str:
         """Install one package.

@@ -101,8 +101,9 @@ class Pip(PackageManager):
 
         if output:
             for package in json.loads(output):
-                package_id = package["name"]
-                yield Package(id=package_id, installed_version=package["version"])
+                yield self.package(
+                    id=package["name"], installed_version=package["version"]
+                )
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -175,9 +176,8 @@ class Pip(PackageManager):
 
         if output:
             for package in json.loads(output):
-                package_id = package["name"]
-                yield Package(
-                    id=package_id,
+                yield self.package(
+                    id=package["name"],
                     installed_version=package["version"],
                     latest_version=package["latest_version"],
                 )
@@ -233,7 +233,7 @@ class Pip(PackageManager):
         )
 
         for package_id, version, description in regexp.findall(output):
-            yield Package(
+            yield self.package(
                 id=package_id,
                 description=description,
                 latest_version=version,

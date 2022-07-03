@@ -63,7 +63,7 @@ class Snap(PackageManager):
         for package in output.splitlines()[1:]:
             package_id = package.split()[0]
             installed_version = package.split()[1]
-            yield Package(id=package_id, installed_version=installed_version)
+            yield self.package(id=package_id, installed_version=installed_version)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -83,7 +83,7 @@ class Snap(PackageManager):
             installed_version = (
                 self.run_cli("list", package_id).splitlines()[-1].split()[1]
             )
-            yield Package(
+            yield self.package(
                 id=package_id,
                 latest_version=latest_version,
                 installed_version=installed_version,
@@ -115,7 +115,7 @@ class Snap(PackageManager):
         for package_id, version, description in regexp.findall(
             output.split("\n", 1)[1]
         ):
-            yield Package(
+            yield self.package(
                 id=package_id,
                 description=description,
                 latest_version=version,

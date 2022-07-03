@@ -68,7 +68,7 @@ class Yarn(PackageManager):
                 parts = data.replace('"', "").split("@")
                 package_id = parts[0]
                 version = parts[1]
-                yield Package(id=package_id, installed_version=version)
+                yield self.package(id=package_id, installed_version=version)
 
     @cached_property
     def global_dir(self) -> str:
@@ -105,7 +105,7 @@ class Yarn(PackageManager):
 
             if values["wanted"] == "linked":
                 continue
-            yield Package(
+            yield self.package(
                 id=package_id + "@" + values["latest"],
                 installed_version=values["current"],
                 latest_version=values["latest"],
@@ -200,7 +200,7 @@ class Yarn(PackageManager):
 
             if result["type"] == "inspect":
                 package = result["data"]
-                yield Package(
+                yield self.package(
                     id=package["name"],
                     description=package["description"],
                     latest_version=package["version"],

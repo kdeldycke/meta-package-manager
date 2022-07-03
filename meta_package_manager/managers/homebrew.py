@@ -124,7 +124,7 @@ class Homebrew(PackageManager):
         ):
             # Keep highest version found.
             version = max(map(parse_version, versions.split()))
-            yield Package(id=package_id, installed_version=version)
+            yield self.package(id=package_id, installed_version=version)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -239,7 +239,7 @@ class Homebrew(PackageManager):
                     )
                     continue
 
-                yield Package(
+                yield self.package(
                     id=package_id,
                     installed_version=installed_version,
                     latest_version=latest_version,
@@ -339,7 +339,7 @@ class Homebrew(PackageManager):
 
             for package_id, _, package_name, description in regexp.findall(output):
                 matched_ids.add(package_id)
-                pkg = Package(id=package_id, name=package_name)
+                pkg = self.package(id=package_id, name=package_name)
                 if description != "[no description]":
                     pkg.description = description
                 yield pkg
@@ -361,7 +361,7 @@ class Homebrew(PackageManager):
         for package_id in regexp.findall(output):
             # Deduplicate search results.
             if package_id not in matched_ids:
-                yield Package(id=package_id)
+                yield self.package(id=package_id)
 
     def install(self, package_id: str) -> str:
         """Install one package.

@@ -147,7 +147,7 @@ class Zypper(PackageManager):
             ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh --xmlout search --details --type package --installed-only
         """
         for package in self._search("--installed-only"):
-            yield Package(id=package["id"], installed_version=package["version"])
+            yield self.package(id=package["id"], installed_version=package["version"])
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -189,7 +189,7 @@ class Zypper(PackageManager):
             package_list = update_list.get("update", [])
 
         for package in package_list:
-            yield Package(
+            yield self.package(
                 id=package["@name"],
                 description=package.get("description"),
                 latest_version=package["@edition"],
@@ -222,7 +222,7 @@ class Zypper(PackageManager):
             search_param.append("--match-exact")
 
         for package in self._search(*search_param, query):
-            yield Package(id=package["id"], installed_version=package["version"])
+            yield self.package(id=package["id"], installed_version=package["version"])
 
     def install(self, package_id: str) -> str:
         """Install one package.

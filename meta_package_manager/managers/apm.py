@@ -148,7 +148,7 @@ class APM(PackageManager):
         if output:
             for package_list in json.loads(output).values():
                 for pkg in package_list:
-                    yield Package(
+                    yield self.package(
                         id=pkg["name"],
                         description=pkg["description"],
                         installed_version=pkg["version"],
@@ -309,7 +309,7 @@ class APM(PackageManager):
 
         if output:
             for pkg in json.loads(output):
-                yield Package(
+                yield self.package(
                     id=pkg["name"],
                     description=pkg["description"],
                     installed_version=pkg["version"],
@@ -412,7 +412,7 @@ class APM(PackageManager):
 
         if output:
             for pkg in json.loads(output):
-                yield Package(
+                yield self.package(
                     id=pkg["name"],
                     description=pkg["description"],
                     latest_version=pkg["version"],

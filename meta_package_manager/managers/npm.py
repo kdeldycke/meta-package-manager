@@ -126,7 +126,9 @@ class NPM(PackageManager):
             def visit(path, key: str, value: str) -> bool:
                 if key == "version":
                     package_id = path[-1]
-                    installed.append(Package(id=package_id, installed_version=value))
+                    installed.append(
+                        self.package(id=package_id, installed_version=value)
+                    )
                 return True
 
             remap(json.loads(output), visit=visit)
@@ -162,7 +164,7 @@ class NPM(PackageManager):
             for package_id, values in json.loads(output).items():
                 if values["wanted"] == "linked":
                     continue
-                yield Package(
+                yield self.package(
                     id=f"{package_id}@{values['latest']}",
                     installed_version=values["current"],
                     latest_version=values["latest"],
@@ -257,7 +259,7 @@ class NPM(PackageManager):
 
         if output:
             for pkg in json.loads(output):
-                yield Package(
+                yield self.package(
                     id=pkg.get("name"),
                     description=pkg.get("description"),
                     latest_version=pkg.get("version"),

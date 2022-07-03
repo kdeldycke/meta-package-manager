@@ -118,10 +118,6 @@ class Package:
     latest_version: Optional[Union[TokenizedString, str]] = None
 
     def __post_init__(self) -> None:
-        # XXX A name is not required but the table rendering code is not capable
-        # of rendering None values yet.
-        if not self.name:
-            self.name = self.id
         # Make sure version strings are parsed into proper objects.
         self.installed_version = parse_version(self.installed_version)
         self.latest_version = parse_version(self.latest_version)

@@ -183,6 +183,8 @@ def print_table(header_defs, rows, sort_key=None):
         for cell in itemgetter(*sort_order)(line):
             if isinstance(cell, TokenizedString):
                 key = cell
+            elif not cell:
+                key = None
             else:
                 key = TokenizedString(strip_ansi(cell))
             sorting_key.append(key)

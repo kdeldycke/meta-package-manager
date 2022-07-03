@@ -37,7 +37,7 @@ class TestUpgrade(CLISubCommandTests):
         result = invoke("--dry-run", "upgrade", all_option)
         assert result.exit_code == 0
         if not all_option:
-            assert "assume -A/--all option" in result.stdout
+            assert "assume -A/--all option" in result.stderr
         self.check_manager_selection(result)
 
     @destructive
@@ -46,7 +46,7 @@ class TestUpgrade(CLISubCommandTests):
         result = invoke("upgrade", all_option)
         assert result.exit_code == 0
         if not all_option:
-            assert "assume -A/--all option" in result.stdout
+            assert "assume -A/--all option" in result.stderr
         self.check_manager_selection(result)
 
     @pytest.mark.parametrize("mid", pool.default_manager_ids)
@@ -55,7 +55,7 @@ class TestUpgrade(CLISubCommandTests):
         result = invoke(f"--{mid}", "--dry-run", "upgrade", all_option)
         assert result.exit_code == 0
         if not all_option:
-            assert "assume -A/--all option" in result.stdout
+            assert "assume -A/--all option" in result.stderr
         self.check_manager_selection(result, {mid})
 
     @destructive
@@ -65,7 +65,7 @@ class TestUpgrade(CLISubCommandTests):
         result = invoke(f"--{mid}", "upgrade", all_option)
         assert result.exit_code == 0
         if not all_option:
-            assert "assume -A/--all option" in result.stdout
+            assert "assume -A/--all option" in result.stderr
         self.check_manager_selection(result, {mid})
 
 

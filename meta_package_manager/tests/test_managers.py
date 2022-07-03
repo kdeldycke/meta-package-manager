@@ -28,7 +28,7 @@ from boltons.iterutils import unique
 from boltons.urlutils import URL
 from click_extra.platform import OS_DEFINITIONS
 
-from ..base import Package, PackageManager
+from ..base import Operations, Package, PackageManager
 from ..cli import XKCD_MANAGER_ORDER
 from ..pool import pool
 from ..version import TokenizedString
@@ -327,6 +327,21 @@ def test_cleanup_type(manager):
 props_ref = tuple(
     prop for prop in PackageManager.__dict__.keys() if not prop.startswith("_")
 )
+
+
+def test_operation_order():
+    """Double check operation IDs are ordered and aligned to the base manager class and CLI implementation."""
+    base_operations = [p for p in props_ref if p in Operations.__members__]
+    assert list(Operations.__members__) == list(base_operations)
+
+    cli_tree = ast.parse(Path(__file__).parent.joinpath("../cli.py").read_bytes())
+    implemented_operations = [
+        n.name
+        for n in cli_tree.body
+        if isinstance(n, ast.FunctionDef) and n.name in Operations.__members__
+    ]
+    assert list(Operations.__members__) == list(implemented_operations)
+
 
 # Check the code of each file registered in the pool.
 @pytest.mark.parametrize("manager_file", pool.manager_files, ids=attrgetter("name"))

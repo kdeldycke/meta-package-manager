@@ -274,25 +274,27 @@ class NPM(PackageManager):
         """
         return self.run_cli("install", package_id)
 
-    def upgrade_cli(
-        self, package_id: Optional[str] = None, version: Optional[str] = None
-    ) -> tuple[str, ...]:
+    def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
         .. code-block:: shell-session
 
             ► npm --global --progress=false --no-update-notifier update
+        """
+        return self.build_cli("update")
+
+    def upgrade_one_cli(
+        self, package_id: str, version: Optional[str] = None
+    ) -> tuple[str, ...]:
+        """Generates the CLI to upgrade all packages (default) or only the one provided
+        as parameter.
 
         .. code-block:: shell-session
 
             ► npm --global --progress=false --no-update-notifier install raven
         """
-        cmd_args: tuple[str, ...] = ("update",)
-        if package_id:
-            cmd_args = (
-                "install",
-                f"{package_id}@{version}" if version else package_id,
-            )
-
-        return self.build_cli(*cmd_args)
+        return self.build_cli(
+            "install",
+            f"{package_id}@{version}" if version else package_id,
+        )

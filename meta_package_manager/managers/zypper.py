@@ -17,7 +17,7 @@
 
 from itertools import groupby
 from operator import itemgetter
-from typing import Iterator, Optional, TypedDict
+from typing import Iterator, TypedDict
 
 import xmltodict
 from click_extra.platform import LINUX
@@ -233,13 +233,19 @@ class Zypper(PackageManager):
         """
         return self.run_cli("install", package_id, sudo=True)
 
-    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
+    def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
         .. code-block:: shell-session
 
             ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh update
+        """
+        return self.build_cli("update", sudo=True)
+
+    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
+        """Generates the CLI to upgrade all packages (default) or only the one provided
+        as parameter.
 
         .. code-block:: shell-session
 

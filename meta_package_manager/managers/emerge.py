@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
-from typing import Iterator, Optional
+from typing import Iterator
 
 from click_extra.platform import LINUX
 
@@ -222,25 +222,35 @@ class Emerge(PackageManager):
         """
         return self.run_cli("--color", "n", "--nospinner", package_id, sudo=True)
 
-    def upgrade_cli(self, package_id: Optional[str] = "@world") -> tuple[str, ...]:
+    def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
         .. code-block:: shell-session
 
             ► sudo emerge --update --newuse --deep --color n --nospinner @world
+        """
+        return self.build_cli(
+            "--update",
+            "--newuse",
+            "--deep",
+            "--color",
+            "n",
+            "--nospinner",
+            "@world",
+            sudo=True,
+        )
+
+    def upgrade_one_cli(self, package_id) -> tuple[str, ...]:
+        """Generates the CLI to upgrade all packages (default) or only the one provided
+        as parameter.
 
         .. code-block:: shell-session
 
             ► sudo emerge --update --color n --nospinner dev-vcs/git
         """
-        update_params: tuple[str, ...] = ()
-        if package_id == "@world":
-            update_params = ("--newuse", "--deep")
-
         return self.build_cli(
             "--update",
-            *update_params,
             "--color",
             "n",
             "--nospinner",

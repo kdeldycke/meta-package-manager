@@ -17,7 +17,7 @@
 
 import json
 import sys
-from typing import Iterator, Optional
+from typing import Iterator
 
 if sys.version_info >= (3, 8):
     from functools import cached_property
@@ -215,23 +215,25 @@ class Yarn(PackageManager):
         """
         return self.run_cli("install", package_id)
 
-    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
+    def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
         .. code-block:: shell-session
 
             ► yarn global upgrade
+        """
+        return self.build_cli("global", "upgrade")
+
+    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
+        """Generates the CLI to upgrade all packages (default) or only the one provided
+        as parameter.
 
         .. code-block:: shell-session
 
             ► yarn global add python
         """
-        cmd_args: tuple[str, ...] = ("upgrade",)
-        if package_id:
-            cmd_args = ("add", package_id)
-
-        return self.build_cli("global", *cmd_args)
+        return self.build_cli("global", "add", package_id)
 
     def cleanup(self) -> None:
         """Removes things we don't need anymore.

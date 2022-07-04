@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
-from typing import Iterator, Optional
+from typing import Iterator
 
 from click_extra.platform import LINUX
 
@@ -176,13 +176,19 @@ class Flatpak(PackageManager):
         """
         return self.run_cli("install", package_id)
 
-    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
+    def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
         .. code-block:: shell-session
 
             ► flatpak update --noninteractive
+        """
+        return self.build_cli("update", "--noninteractive")
+
+    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
+        """Generates the CLI to upgrade all packages (default) or only the one provided
+        as parameter.
 
         .. code-block:: shell-session
 

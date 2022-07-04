@@ -17,7 +17,7 @@
 
 import json
 import re
-from typing import Iterator, Optional
+from typing import Iterator
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
@@ -255,7 +255,7 @@ class Pip(PackageManager):
         """
         return self.run_cli("install", package_id)
 
-    def upgrade_cli(self, package_id: str) -> tuple[str, ...]:
+    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 
         .. code-block:: shell-session
@@ -269,18 +269,15 @@ class Pip(PackageManager):
                 Uninstalling six-1.14.0:
                   Successfully uninstalled six-1.14.0
             Successfully installed six-1.15.0
+
+        ,, note::
+
+            Pip lacks support of a proper full upgrade command. Raising an error let the
+            parent class upgrade packages one by one.
+
+            See: https://github.com/pypa/pip/issues/59
         """
         return self.build_cli("install", "--user", "--upgrade", package_id)
-
-    def upgrade_all_cli(self) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages.
-
-        Pip lacks support of a proper full upgrade command. Raising an error let the
-        parent class upgrade packages one by one.
-
-        See: https://github.com/pypa/pip/issues/59
-        """
-        raise NotImplementedError
 
     def remove(self, package_id: str) -> str:
         """Remove one package.

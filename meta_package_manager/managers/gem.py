@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
-from typing import Iterator, Optional
+from typing import Iterator
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
@@ -26,6 +26,20 @@ from ..version import parse_version
 
 
 class Gem(PackageManager):
+
+    """
+    ..tip::
+
+        Installs require ``sudo`` on system ruby. I (@tresni) recommend doing something like:
+
+        .. code-block:: shell-session
+
+            ► sudo dseditgroup -o edit -a -t user wheel
+
+        And then do ``visudo`` to make it so the ``wheel`` group does not require
+        a password. There is a line already there for it, you just need to
+        uncomment it and save.
+    """
 
     name = "Ruby Gems"
 
@@ -191,27 +205,28 @@ class Gem(PackageManager):
             auto_post_args=False,
         )
 
-    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
+    def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
         .. code-block:: shell-session
 
             ► gem update --user-install --quiet
+        """
+        return self.build_cli(
+            "update",
+            "--user-install",
+            *self.post_args,
+            auto_post_args=False,
+        )
+
+    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
+        """Generates the CLI to upgrade all packages (default) or only the one provided
+        as parameter.
 
         .. code-block:: shell-session
 
             ► gem update --user-install --quiet markdown
-
-        Installs require ``sudo`` on system ruby. I (@tresni) recommend doing something like:
-
-        .. code-block:: shell-session
-
-            ► sudo dseditgroup -o edit -a -t user wheel
-
-        And then do ``visudo`` to make it so the ``wheel`` group does not require
-        a password. There is a line already there for it, you just need to
-        uncomment it and save.
         """
         return self.build_cli(
             "update",

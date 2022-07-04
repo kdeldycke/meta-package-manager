@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
-from typing import Iterator, Optional
+from typing import Iterator
 
 from click_extra.platform import LINUX
 
@@ -208,23 +208,27 @@ class APT(PackageManager):
         """
         return self.run_cli("install", package_id, "--yes", sudo=True)
 
-    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
+    def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
         .. code-block:: shell-session
 
             ► sudo apt upgrade --yes --quiet
+        """
+        return self.build_cli("upgrade", "--yes", sudo=True)
+
+    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
+        """Generates the CLI to upgrade all packages (default) or only the one provided
+        as parameter.
 
         .. code-block:: shell-session
 
             ► sudo apt install --only-upgrade git --yes --quiet
         """
-        params: tuple[str, ...] = ("upgrade",)
-        if package_id:
-            params = ("install", "--only-upgrade", package_id)
-
-        return self.build_cli(*params, "--yes", sudo=True)
+        return self.build_cli(
+            "install", "--only-upgrade", package_id, "--yes", sudo=True
+        )
 
     def sync(self) -> None:
         """Sync package metadata.

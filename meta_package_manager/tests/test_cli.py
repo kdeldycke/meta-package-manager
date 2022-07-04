@@ -165,7 +165,7 @@ class CLISubCommandTests:
                 bool(
                     re.search(
                         rf"warning: {mid} does not implement "
-                        rf"Operations\.({'|'.join(Operations.__members__.keys() | {'upgrade_all'})}).",
+                        rf"Operations\.({'|'.join(Operations.__members__.keys())}).",
                         stderr,
                     )
                 ),
@@ -192,6 +192,7 @@ class CLISubCommandTests:
                     )
                 ),
                 # Upgrade command.
+                f"warning: {mid} does not implement upgrade_all_cli." in stderr,
                 f"Upgrade all outdated packages from {mid}..." in stderr,
                 bool(
                     re.search(

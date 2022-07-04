@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import re
-from typing import Iterator, Optional
+from typing import Iterator
 
 from click_extra.platform import LINUX
 
@@ -149,22 +149,23 @@ class Pacman(PackageManager):
         """
         return self.run_cli("--sync", package_id, sudo=True)
 
-    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
+    def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 
         .. code-block:: shell-session
 
             ► sudo pacman --noconfirm --sync --refresh --sysupgrade
+        """
+        return self.build_cli("--sync", "--refresh", "--sysupgrade", sudo=True)
+
+    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
+        """Generates the CLI to upgrade the package provided as parameter.
 
         .. code-block:: shell-session
 
             ► sudo pacman --noconfirm --sync firefox
         """
-        params: tuple[str, ...] = ("--refresh", "--sysupgrade")
-        if package_id:
-            params = (package_id,)
-
-        return self.build_cli("--sync", *params, sudo=True)
+        return self.build_cli("--sync", package_id, sudo=True)
 
     def remove(self, package_id: str) -> str:
         """Removes a package.

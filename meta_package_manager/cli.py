@@ -514,9 +514,7 @@ def outdated(ctx, plugin_output):
                 upgrade_all_cli = manager.upgrade_all_cli()
             except NotImplementedError:
                 # Fallback on mpm itself which is capable of simulating a full upgrade.
-                logger.warning(
-                    f"{manager.id} does not implement upgrade_all operation."
-                )
+                logger.warning(f"{manager.id} does not implement upgrade_all_cli.")
                 mpm_exec = bar_plugin.MPMPlugin().mpm_exec
                 upgrade_all_cli = (*mpm_exec, f"--{manager.id}", "upgrade", "--all")
                 logger.debug(f"Fallback to direct mpm call: {upgrade_all_cli}")
@@ -770,10 +768,10 @@ def upgrade(ctx, all, package_ids):
                 f"Ignore provided {', '.join(sorted(package_ids))} packages and proceed to a full upgrade..."
             )
         for manager in ctx.obj.selected_managers(
-            implements_operation=Operations.upgrade_all
+            implements_operation=Operations.upgrade
         ):
             logger.info(f"Upgrade all outdated packages from {manager.id}...")
-            output = manager.upgrade_all()
+            output = manager.upgrade()
             if output:
                 logger.info(output)
         ctx.exit()

@@ -271,12 +271,12 @@ def test_search_type(manager):
 
 
 @all_managers
-def test_upgrade_cli_type(manager):
+def test_upgrade_one_cli_type(manager):
     """All methods returning an upgrade CLI are either not implemented or returns a
     tuple."""
-    assert isinstance(manager.upgrade_cli, MethodType)
+    assert isinstance(manager.upgrade_one_cli, MethodType)
     try:
-        result = manager.upgrade_cli("dummy_package_id")
+        result = manager.upgrade_one_cli("dummy_package_id")
     except Exception as ex:
         assert isinstance(ex, NotImplementedError)
     else:
@@ -349,9 +349,7 @@ props_ref = tuple(collect_props_ref())
 
 def test_operation_order():
     """Double check operation IDs are ordered and aligned to the base manager class and CLI implementation."""
-    direct_operation_ids = [
-        op for op in Operations.__members__ if op not in {"upgrade_all"}
-    ]
+    direct_operation_ids = Operations.__members__.keys()
 
     base_operations = [p for p in props_ref if p in direct_operation_ids]
     assert list(direct_operation_ids) == list(base_operations)

@@ -49,7 +49,6 @@ Operations = Enum(
         "search",
         "install",
         "upgrade",
-        "upgrade_all",
         "remove",
         "sync",
         "cleanup",
@@ -129,7 +128,7 @@ class Package:
         self.latest_version = parse_version(self.latest_version)
 
         try:
-            self.upgrade_cli = manager.upgrade_cli(self.id)
+            self.upgrade_cli = manager.upgrade_one_cli(self.id)
         except NotImplementedError:
             pass
 
@@ -297,12 +296,9 @@ class PackageManager(metaclass=MetaPackageManager):
         # Set the method IDs which are the proof of proper implementation.
         # General case: both the operation and the method implementing it share the same ID.
         method_ids = {op.name}
-        # Special case for `upgrade`: `upgrade_cli()` is the minimal method.
+        # Special case for `upgrade`: we need at least `upgrade_one_cli()` to have full support.
         if op == Operations.upgrade:
-            method_ids = {"upgrade_cli"}
-        # For `upgrade_all`, we need either `upgrade_all_cli()` or `upgrade_cli()` as fallback.
-        elif op == Operations.upgrade_all:
-            method_ids = {"upgrade_all_cli", "upgrade_cli"}
+            method_ids = {"upgrade_one_cli"}
 
         # If none of the classes in the inheritance hierarchy up to the base one implements the operation, then we can be certain
         # the manager doesn't implement the operation at all.
@@ -765,60 +761,52 @@ class PackageManager(metaclass=MetaPackageManager):
         """
         raise NotImplementedError
 
-    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
-        """Returns the complete CLI to upgrade the package provided as ``package_id``
-        parameter.
+    def upgrade_all_cli(self) -> tuple[str, ...]:
+        """Returns the complete CLI to upgrade all outdated packages on the system."""
+        raise NotImplementedError
 
-        If ``package_id`` is ``None``, the returned CLI is expected be the one that is
-        used to upgrade all outdated packages on the system.
-        """
+    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
+        """Returns the complete CLI to upgrade one package and one only."""
         raise NotImplementedError
 
     def upgrade(self, package_id: Optional[str] = None) -> str:
-        """Perform the upgrade of the provided package to latest version.
+        """Perform an upgrade of either all or one package.
 
-        Executes the CLI provided by :py:meth:`meta_package_manager.base.PackageManager.upgrade_cli`.
-        """
-        return self.run(self.upgrade_cli(package_id), extra_env=self.extra_env)
-
-    def upgrade_all_cli(self) -> tuple[str, ...]:
-        """Returns the complete CLI to upgrade all outdated packages on the system.
-
-        By default, returns the result of the :py:meth:`meta_package_manager.base.PackageManager.upgrade_cli`
-        method, without a ``package_id`` parameter.
-
-        This dedicated method allows some package manager to return a CLI that is very different from the
-        one returned by :py:meth:`meta_package_manager.base.PackageManager.upgrade_cli`.
-
-        It can also be used to ``raise NotImplementedError`` on some managers to signal to :program:`mpm` that
-        the package manager has no proper support for a full upgrade operation. See for example
-        :py:meth:`meta_package_manager.managers.pip.Pip.upgrade_all_cli`.
-        """
-        return self.upgrade_cli()
-
-    def upgrade_all(self) -> str:
-        """Perform a full upgrade of all outdated packages on the system.
-
-        Executes the CLI provided by :py:meth:`meta_package_manager.base.PackageManager.upgrade_all_cli`.
+        Executes the CLI provided by either
+        :py:meth:`meta_package_manager.base.PackageManager.upgrade_all_cli` or
+        :py:meth:`meta_package_manager.base.PackageManager.upgrade_one_cli`.
 
         If the manager doesn't provides a full upgrade one-liner (i.e. if
         :py:meth:`meta_package_manager.base.PackageManager.upgrade_all_cli` raises
         :py:exc:`NotImplementedError`), then the list of all outdated packages will be fetched
         (via :py:meth:`meta_package_manager.base.PackageManager.outdated`) and each package will be
-        updated one by one by a :py:meth:`meta_package_manager.base.PackageManager.upgrade` call.
-        """
-        try:
-            return self.run(self.upgrade_all_cli(), extra_env=self.extra_env)
-        except NotImplementedError:
-            logger.warning(f"{self.id} does not implement upgrade_all operation.")
+        updated one by one by calling :py:meth:`meta_package_manager.base.PackageManager.upgrade_one_cli`.
 
-        logger.info(f"Fallback to calling upgrade operation on each outdated package.")
-        log = ""
-        for package in self.outdated:
-            output = self.upgrade(package.id)
-            if output:
-                log += f"\n{output}"
-        return log
+        See for example the case of :py:meth:`meta_package_manager.managers.pip.Pip.upgrade_one_cli`.
+        """
+        if package_id:
+            cli = self.upgrade_one_cli()
+
+        else:
+            try:
+                cli = self.upgrade_all_cli()
+            except NotImplementedError:
+                logger.warning(f"{self.id} does not implement upgrade_all_cli.")
+
+                if not self.implements(Operations.outdated):
+                    raise
+
+                logger.info(
+                    f"Fallback to calling upgrade operation on each outdated package."
+                )
+                log = ""
+                for package in self.outdated:
+                    output = self.upgrade(package.id)
+                    if output:
+                        log += f"\n{output}"
+                return log
+
+        return self.run(cli, extra_env=self.extra_env)
 
     def remove(self, package_id: str) -> str:
         """Remove one package and one only.

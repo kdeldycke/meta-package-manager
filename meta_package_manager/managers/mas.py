@@ -73,7 +73,9 @@ class MAS(PackageManager):
         )
 
         for package_id, package_name, version in regexp.findall(output):
-            yield self.package(id=package_id, name=package_name, installed_version=version)
+            yield self.package(
+                id=package_id, name=package_name, installed_version=version
+            )
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -159,13 +161,19 @@ class MAS(PackageManager):
         """
         return self.run_cli("install", package_id)
 
-    def upgrade_cli(self, package_id: Optional[str] = None) -> tuple[str, ...]:
+    def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
         .. code-block:: shell-session
 
             ► mas upgrade
+        """
+        return self.build_cli("upgrade")
+
+    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
+        """Generates the CLI to upgrade all packages (default) or only the one provided
+        as parameter.
 
         .. code-block:: shell-session
 

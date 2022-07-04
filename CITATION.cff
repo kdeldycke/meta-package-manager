@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+title: "Meta Package Manager"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: "Deldycke"
+    given-names: "Kevin"
+    email: kevin@deldycke.com
+    orcid: "https://orcid.org/0000-0001-9748-9014"
+version: 5.5.0
+url: "https://github.com/kdeldycke/meta-package-manager"

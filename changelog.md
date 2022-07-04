@@ -12,6 +12,9 @@ This version is not released yet and is under active development.
 - \[mpm\] Allow package name to be empty instead of duplicating it to package ID.
 - \[mpm\] Keep the operation matrix on the `readme.md` in sync with current code by inspecting implementation.
 - \[mpm\] Add type hints. Closes {issue}`655`.
+- \[mpm\] Auto-check type hinting in CI.
+- \[mpm\] Render type hints in documentation.
+- \[mpm\] Add metadata for easy citation in academic content.
 
 ## {gh}`5.4.0 (2022-06-28) <compare/v5.3.0...v5.4.0>`
 

@@ -68,7 +68,7 @@ class Emerge(PackageManager):
             app-arch/p7zip-16.02-r8
         """
         # Locate qlist.
-        qlist_path = self.search_cli("eclean")
+        qlist_path = self.search_cli("qlist")
         if not qlist_path:
             raise FileNotFoundError(qlist_path)
 

@@ -785,7 +785,7 @@ class PackageManager(metaclass=MetaPackageManager):
         See for example the case of :py:meth:`meta_package_manager.managers.pip.Pip.upgrade_one_cli`.
         """
         if package_id:
-            cli = self.upgrade_one_cli()
+            cli = self.upgrade_one_cli(package_id)
 
         else:
             try:

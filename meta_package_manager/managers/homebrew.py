@@ -202,9 +202,9 @@ class Homebrew(PackageManager):
                   "current_version": "4.0.3"
                 },
                 {
-                "name": "lg-onscreen-control",
-                "installed_versions": "5.33,cV8xqv5TSZA.upgrading, 5.47,yi5XuIZw6hg",
-                "current_version": "5.48,uYXSwyUCNFBbSch9PFw"
+                  "name": "lg-onscreen-control",
+                  "installed_versions": "5.33,cV8xqv5TSZA.upgrading, 5.47,yi5XuIZw6hg",
+                  "current_version": "5.48,uYXSwyUCNFBbSch9PFw"
                 }
               ]
             }

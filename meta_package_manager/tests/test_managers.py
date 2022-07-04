@@ -16,6 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import ast
+import inspect
 import re
 import types
 from operator import attrgetter
@@ -321,12 +322,29 @@ def test_cleanup_type(manager):
             assert result is None
 
 
-# Build the canonical reference from the base class.
-# The class' internal dict is sorted with the same order the code is
-# structured. No need for AST parsing.
-props_ref = tuple(
-    prop for prop in PackageManager.__dict__.keys() if not prop.startswith("_")
-)
+def collect_props_ref():
+    """Build the canonical reference from the base class.
+
+    We need to parse the AST so we can collect both attributes and naked type annotations.
+    """
+    tree = ast.parse(Path(inspect.getfile(PackageManager)).read_bytes())
+
+    manager_class = None
+    for n in tree.body:
+        if isinstance(n, ast.ClassDef) and n.name == "PackageManager":
+            manager_class = n
+            break
+
+    for node in manager_class.body:
+        if isinstance(node, ast.AnnAssign):
+            yield node.target.id
+        if isinstance(node, ast.Assign):
+            yield from [t.id for t in node.targets]
+        if isinstance(node, ast.FunctionDef):
+            yield node.name
+
+
+props_ref = tuple(collect_props_ref())
 
 
 def test_operation_order():

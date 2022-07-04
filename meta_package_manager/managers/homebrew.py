@@ -42,7 +42,7 @@ class Homebrew(PackageManager):
     requirement = "2.7.0"
 
     # Declare this manager as virtual, i.e. not tied to a real CLI.
-    cli_names = None
+    virtual = True
 
     extra_env = {
         # Disable analytics.

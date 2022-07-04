@@ -24,17 +24,7 @@ from enum import Enum
 from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
-from typing import (
-    Callable,
-    ContextManager,
-    Iterable,
-    Iterator,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import ContextManager, Iterable, Iterator, Optional, Type, Union, cast
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -44,7 +34,6 @@ else:
 
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
-from boltons.typeutils import classproperty
 from click_extra.colorize import theme
 from click_extra.platform import CURRENT_OS_ID, is_linux
 from click_extra.run import INDENT, format_cli, run_cmd
@@ -163,37 +152,44 @@ _NestedArgs = Iterable[
 ]
 
 
-T = TypeVar("T")
-_ClassProperty = Union[T, Callable[["PackageManager"], T]]
+class MetaPackageManager(type):
+    """Custom metaclass used as a class factory for package managers."""
+
+    def __init__(cls, name, bases, dct):
+        """Sets some class defaults, but only if they're not redefined in the final manager class."""
+
+        if "id" not in dct:
+            cls.id = name.lower().replace("_", "-")
+
+        if "name" not in dct:
+            cls.name = name
+
+        if "cli_names" not in dct:
+            cls.cli_names = (cls.id,)
+
+        if "virtual" not in dct:
+            cls.virtual = name == "PackageManager" or not cls.cli_names
 
 
-class PackageManager:
+class PackageManager(metaclass=MetaPackageManager):
 
     """Base class from which all package manager definitions inherits."""
 
-    @classproperty
-    def _id_default_getter(cls) -> str:
-        """Returns package manager's ID.
+    id: str
+    """Package manager's ID.
 
-        Derived by defaults from the lower-cased class name in which underscores ``_`` are replaced
-        by dashes ``-``.
+    Derived by defaults from the lower-cased class name in which underscores ``_`` are replaced
+    by dashes ``-``.
 
-        This ID must be unique among all package manager definitions and lower-case, as
-        they're used as feature flags for the :program:`mpm` CLI.
-        """
-        return cls.__name__.lower().replace("_", "-")  # type: ignore
+    This ID must be unique among all package manager definitions and lower-case, as
+    they're used as feature flags for the :program:`mpm` CLI.
+    """
 
-    id: _ClassProperty[str] = _id_default_getter
+    name: str
+    """Return package manager's common name.
 
-    @classproperty
-    def _name_default_getter(cls) -> str:
-        """Return package manager's common name.
-
-        Defaults based on class name.
-        """
-        return cls.__name__  # type: ignore
-
-    name: _ClassProperty[str] = _name_default_getter
+    Default value is based on class name.
+    """
 
     homepage_url: Optional[str] = None
     """Home page of the project, only used in documentation for reference."""
@@ -209,21 +205,22 @@ class PackageManager:
     Defaults to ``None``, which deactivate version check entirely.
     """
 
-    _CliNames = Union[tuple[Union[str, _ClassProperty[str]], ...], None]
+    cli_names: tuple[str, ...]
+    """List of CLI names the package manager is known as.
 
-    @classproperty
-    def _cli_names_default_getter(cls) -> _CliNames:
-        """List of CLI names the package manager is known as.
+    The supported CLI names are ordered by priority. This is used for example to
+    help out the search of the right binary in the case of the python3/python2
+    transition.
 
-        The supported CLI names are ordered by priority. This is used for example to
-        help out the search of the right binary in the case of the python3/python2
-        transition.
+    Is derived by default from the manager's ID.
+    """
 
-        Is derived by default from the manager's ID.
-        """
-        return (cls.id,)
+    virtual: bool
+    """Should we expose the package manager to the user?
 
-    cli_names: _ClassProperty[_CliNames] = _cli_names_default_getter
+    Virtual package manager are just skeleton classes used to factorize code among
+    managers of the same family.
+    """
 
     cli_search_path: tuple[str, ...] = ()
     """ List of additional path to help :program:`mpm` hunt down the package manager CLI.
@@ -321,15 +318,6 @@ class PackageManager:
 
         raise NotImplementedError(f"Can't guess {cls} implementation of {op}.")
 
-    @classproperty
-    def virtual(cls) -> bool:
-        """Should we expose the package manager to the user?
-
-        Virtual package manager are just skeleton classes used to factorize code among
-        managers of the same family.
-        """
-        return cls.__name__ == "PackageManager" or not cls.cli_names  # type: ignore
-
     @cached_property
     def cli_path(self) -> Union[Path, None]:
         """Fully qualified path to the package manager CLI.
@@ -346,7 +334,7 @@ class PackageManager:
         env_path = ":".join(flatten((self.cli_search_path, os.getenv("PATH"))))
 
         # Search for multiple CLI names.
-        cli_path_found = False
+        cli_path_found = None
         if self.cli_names is not None:
             for name in self.cli_names:
                 cli_path_found = which(name, mode=os.F_OK, path=env_path)
@@ -681,7 +669,8 @@ class PackageManager:
 
     def package(self, *args, **kwargs) -> Package:
         """Produce a ``Package`` object with provided attributes."""
-        return self.package_class(*args, manager=self, **kwargs)
+        kwargs["manager"] = self
+        return self.package_class(*args, **kwargs)
 
     @property
     def installed(self) -> Iterator[Package]:

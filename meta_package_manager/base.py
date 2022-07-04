@@ -314,47 +314,64 @@ class PackageManager(metaclass=MetaPackageManager):
 
         raise NotImplementedError(f"Can't guess {cls} implementation of {op}.")
 
-    @cached_property
-    def cli_path(self) -> Union[Path, None]:
-        """Fully qualified path to the package manager CLI.
+    def search_cli(self, cli_name: str) -> Union[Path, None]:
+        """Search for a CLI on the system.
 
-        Automatically search the location of the CLI in the system. Try multiple CLI
-        names within several system path.
+        Look for the provided ``cli_name`` in this order:
+          * first in paths provided by
+            :py:attr:`cli_search_path <meta_package_manager.base.PackageManager.cli_search_path>`,
+          * then in all the default places specified by the environment varible (i.e. ``os.getenv("PATH")``).
 
-        Only checks if the file exists. Its executability will be assessed later. See
-        the :py:func:`meta_package_manager.base.PackageManager.executable` method below.
+        Only checks if the file exists. Not its executability.
 
-        Returns ``None`` if no CLI was found or those found were not a file.
+        Returns ``None`` if the CLI was not found or is not a file.
+
+        ..caution::
+
+            Symlinks are not resolved, because some manager like Homebrew on Linux relies on some
+            sort of symlink-based trickery to set environment variables.
         """
-        # Check if the path exist in any of the environment locations.
+        # Locally extend the environment to add manager-specific search path.
         env_path = ":".join(flatten((self.cli_search_path, os.getenv("PATH"))))
 
-        # Search for multiple CLI names.
-        cli_path_found = None
-        if self.cli_names is not None:
-            for name in self.cli_names:
-                cli_path_found = which(name, mode=os.F_OK, path=env_path)
-                if cli_path_found:
-                    break
-                logger.debug(f"{theme.invoked_command(name)} CLI not found.")
-
+        cli_path_found = which(cli_name, mode=os.F_OK, path=env_path)
         if not cli_path_found:
+            logger.debug(f"{theme.invoked_command(cli_name)} CLI not found.")
             return None
 
         # Check if path exist and is a file.
-        # Do not resolve symlink here. Some manager like Homebrew on Linux rely on some
-        # sort of synlink trickery to set environment variables.
         cli_path = Path(cli_path_found)
         if not cli_path.exists():
-            raise FileNotFoundError(f"{cli_path}")
+            raise FileNotFoundError(cli_path)
         elif not cli_path.is_file():
             logger.warning(f"{theme.invoked_command(cli_path)} is not a file.")
-        else:
-            logger.debug(
-                f"{theme.invoked_command(name)} CLI found at {theme.invoked_command(cli_path)}"
-            )
+            return None
 
+        logger.debug(
+            f"{theme.invoked_command(cli_name)} CLI found at {theme.invoked_command(cli_path)}"
+        )
         return cli_path
+
+    @cached_property
+    def cli_path(self) -> Union[Path, None]:
+        """Fully qualified path to the canonical package manager binary.
+
+        Automatically search the location of the CLI in the system. Try multiple CLI
+        names provided by :py:attr:`cli_names <meta_package_manager.base.PackageManager.cli_names>`,
+        in all system path provided by
+        :py:attr:`cli_search_path <meta_package_manager.base.PackageManager.cli_search_path>`.
+
+        Executability of the CLI will be separatel assessed later by
+        the :py:func:`meta_package_manager.base.PackageManager.executable` method below.
+        """
+        # Search for multiple CLI names.
+        if self.cli_names is not None:
+            for name in self.cli_names:
+                cli_path_found = self.search_cli(name)
+                if cli_path_found:
+                    return cli_path_found
+
+        return None
 
     @cached_property
     def version(self) -> Union[TokenizedString, None]:

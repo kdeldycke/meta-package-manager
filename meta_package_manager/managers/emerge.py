@@ -67,8 +67,13 @@ class Emerge(PackageManager):
             app-admin/system-config-printer-1.5.16-r1
             app-arch/p7zip-16.02-r8
         """
+        # Locate qlist.
+        qlist_path = self.search_cli("eclean")
+        if not qlist_path:
+            raise FileNotFoundError(qlist_path)
+
         output = self.run_cli(
-            "--installed", "--verbose", "--nocolor", override_cli_path="qlist"
+            "--installed", "--verbose", "--nocolor", override_cli_path=qlist_path
         )
 
         regexp = re.compile(
@@ -290,5 +295,9 @@ class Emerge(PackageManager):
         """
         # Forces an upgrade first, as recommended by emerge documentation.
         self.upgrade()
+
         self.run_cli("--depclean", sudo=True)
-        self.run_cli("distfiles", override_cli_path="eclean", sudo=True)
+
+        eclean_path = self.search_cli("eclean")
+        if eclean_path:
+            self.run_cli("distfiles", override_cli_path=eclean_path, sudo=True)

@@ -71,6 +71,7 @@ classifiers = [
     'Topic :: System :: Installation/Setup',
     'Topic :: System :: Software Distribution',
     'Topic :: Utilities',
+    'Typing :: Typed',
 ]
 
 [tool.poetry.urls]

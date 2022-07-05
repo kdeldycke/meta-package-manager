@@ -249,7 +249,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "imagesize"
-version = "1.4.0"
+version = "1.4.1"
 description = "Getting image size from png/jpeg/jpeg2000/gif file"
 category = "dev"
 optional = false
@@ -902,7 +902,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "0e7767640b01b088a6129a973267bb02457af8c78ad64dbef3697ccef1c5d10b"
+content-hash = "05f6bef2abfaa883a52f424193a8f944cab51518ccfd23d3884b4807e03e3d2f"
 
 [metadata.files]
 alabaster = [
@@ -1031,9 +1031,8 @@ idna = [
     {file = "idna-3.3.tar.gz", hash = "sha256:9d643ff0a55b762d5cdb124b8eaa99c66322e2157b69160bc32796e824360e6d"},
 ]
 imagesize = [
-    {file = "imagesize-1.4.0-py2.py3-none-any.whl", hash = "sha256:4d19f022f0e38e0391e6cdebd8a28b0a7733a787482490e9d056457b97eff861"},
-    {file = "imagesize-1.4.0-py3.10.egg", hash = "sha256:9433e27ec98545b2770f05b5a93d5bb3a8ee10c28ad01225cea91af1ac209335"},
-    {file = "imagesize-1.4.0.tar.gz", hash = "sha256:6ed6ac091716f0a6f1f60f3743069c6dc4c1d8a8e8817f4d7a6976cf3fbb2548"},
+    {file = "imagesize-1.4.1-py2.py3-none-any.whl", hash = "sha256:0d8d18d08f840c19d0ee7ca1fd82490fdc3729b7ac93f49870406ddde8ef8d8b"},
+    {file = "imagesize-1.4.1.tar.gz", hash = "sha256:69150444affb9cb0d5cc5a92b3676f0b2fb7cd9ae39e947a5e11a36b4497cd4a"},
 ]
 importlib-metadata = [
     {file = "importlib_metadata-4.12.0-py3-none-any.whl", hash = "sha256:7401a975809ea1fdc658c3aa4f78cc2195a0e019c5cbc4c06122884e9ae80c23"},

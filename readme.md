@@ -83,11 +83,11 @@ ______________________________________________________________________
 
 ## Quickstart
 
-1. Install `mpm` with `pip`:
+Easiest way is to install `mpm` with [`pipx`](https://pypa.github.io/pipx/):
 
-   ```shell-session
-   $ pip install meta-package-manager
-   ```
+```shell-session
+$ pipx install meta-package-manager
+```
 
 Other
 [alternatives installation methods](https://kdeldycke.github.io/meta-package-manager/install.html)
@@ -130,6 +130,8 @@ $ mpm --all-managers managers
 │ Zypper             │ zypper   │ ✘ Linux only   │ ✘ zypper not found        │            │              │
 ╰────────────────────┴──────────┴────────────────┴───────────────────────────┴────────────┴──────────────╯
 ```
+
+If your favorite manager is not supported yet, you can help! See the [contibution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html).
 
 ## List installed packages
 

@@ -8,4 +8,5 @@ authors:
     email: kevin@deldycke.com
     orcid: "https://orcid.org/0000-0001-9748-9014"
 version: 5.5.0
+date-released: 2022-06-28
 url: "https://github.com/kdeldycke/meta-package-manager"

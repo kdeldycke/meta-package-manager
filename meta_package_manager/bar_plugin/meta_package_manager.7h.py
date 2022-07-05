@@ -32,6 +32,8 @@ required to work with Python 3.7.3 or newer.
   https://github.com/swiftbar/SwiftBar/issues/160
 """
 
+from __future__ import annotations
+
 import os
 import re
 import sys

@@ -17,6 +17,8 @@
 
 """Introspection utilities to produce comparison matrixes between managers."""
 
+from __future__ import annotations
+
 from pathlib import Path
 
 from click_extra.platform import LINUX, MACOS, WINDOWS

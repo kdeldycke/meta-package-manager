@@ -18,6 +18,8 @@
 """ Utilities to manage GitHub labels to use in issues and PR management.
 """
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
 

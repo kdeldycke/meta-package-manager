@@ -17,6 +17,8 @@
 
 """Registration, indexing and caching of package manager supported by ``mpm``."""
 
+from __future__ import annotations
+
 import inspect
 import sys
 from collections.abc import Iterable

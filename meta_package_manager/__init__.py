@@ -17,6 +17,8 @@
 
 """Expose package-wide elements."""
 
+from __future__ import annotations
+
 __version__ = "5.5.0"
 """ Examples of valid version strings according :pep:`440#version-scheme`:
 

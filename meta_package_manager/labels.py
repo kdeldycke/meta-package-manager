@@ -17,6 +17,8 @@
 
 """Utilities to generate extra labels to use for GitHub issues and PRs."""
 
+from __future__ import annotations
+
 from boltons.iterutils import flatten
 from click_extra.platform import ALL_OS_LABELS
 

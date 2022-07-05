@@ -22,6 +22,8 @@
     Some of these are good candidates for upstream contribution to ``click.extra``.
 """
 
+from __future__ import annotations
+
 import builtins
 import json
 import sys

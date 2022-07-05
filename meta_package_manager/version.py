@@ -17,6 +17,8 @@
 
 """Helpers and utilities to parse and compare version numbers."""
 
+from __future__ import annotations
+
 import operator
 import re
 from copy import deepcopy

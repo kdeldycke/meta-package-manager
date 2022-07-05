@@ -26,6 +26,8 @@ Removes empty string and current working directory from the first entry of
 in subcommands when invoked as `python -m meta_package_manager <command>`.
 """
 
+from __future__ import annotations
+
 import os
 import sys
 

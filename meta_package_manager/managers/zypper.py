@@ -17,9 +17,15 @@
 
 from __future__ import annotations
 
+import sys
 from itertools import groupby
 from operator import itemgetter
-from typing import Iterator, TypedDict
+from typing import Iterator
+
+if sys.version_info < (3, 8):
+        from typing_extensions import TypedDict
+else:
+    from typing import TypedDict
 
 import xmltodict
 from click_extra.platform import LINUX

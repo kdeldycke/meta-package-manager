@@ -26,7 +26,7 @@ from enum import Enum
 from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
-from typing import ContextManager, Iterable, Iterator, Optional, Type, Union, cast
+from typing import ContextManager, Dict, Iterable, Iterator, Optional, Type, Union, cast
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -140,7 +140,7 @@ def packages_asdict(packages: Iterator[Package], keep_fields: tuple[str, ...]):
     return ({k: v for k, v in asdict(p).items() if k in keep_fields} for p in packages)
 
 
-_EnvVars = Optional[dict[str, str]]
+_EnvVars = Optional[Dict[str, str]]
 
 # XXX Recursive types are not supported by mypy yet: https://github.com/python/mypy/issues/731
 # _NestedArgs = Iterable[Union[str, Path, None, Iterable["_NestedArgs"]]]

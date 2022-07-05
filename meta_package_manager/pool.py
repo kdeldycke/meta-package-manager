@@ -24,7 +24,12 @@ import sys
 from collections.abc import Iterable
 from importlib import import_module
 from pathlib import Path
-from typing import Final, Iterator, Optional
+from typing import Iterator, Optional
+
+if sys.version_info < (3, 8):
+        from typing_extensions import Final
+else:
+    from typing import Final
 
 if sys.version_info >= (3, 8):
     from functools import cached_property

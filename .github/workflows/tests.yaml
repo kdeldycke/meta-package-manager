@@ -78,7 +78,7 @@ jobs:
               jobs.append({
                   "os": os_id,
                   "python-version": python_version,
-                  "stable": os_stable["os_id"] and python_stable["python_version"],
+                  "stable": os_stable[os_id] and python_stable[python_version],
               })
           matrix = {"include": jobs}
 

@@ -20,29 +20,20 @@ jobs:
 
   tests:
     runs-on: ${{ matrix.os }}
+    # We keep going when a job flagged as not stable fails.
+    continue-on-error: ${{ matrix.stable == false }}
     strategy:
+      fail-fast: false
       matrix:
         # See what each os came pre-installed with at:
         # https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners
         os:
           - ubuntu-20.04
-          # XXX Temporary disable Ubuntu 18.04 which reveals some issues with apt reposytory sync.
-          # - ubuntu-18.04
+          - ubuntu-18.04
           - macos-11.0
-          # XXX Brew on macOS 10.15 image is plagged with shallow clone issues, for which I spent too much
-          # time trying to fix. See:
-          # https://stackoverflow.com/questions/45782694/how-to-remove-the-shallow-clone-warning-from-homebrew
-          # https://stackoverflow.com/questions/65320304/error-while-updating-homebrew-on-my-macbook-pro-big-sur
-          # https://github.com/Homebrew/brew/pull/9383
-          # https://github.com/Homebrew/brew/pull/9447
-          # https://github.com/Homebrew/brew/issues/9420
-          # https://github.com/Homebrew/brew/issues/12791
-          # - macos-10.15
-          # XXX Temporary deactivation of Windows test as they all prematurely ends with the following error:
-          # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-          # C:\hostedtoolcache\windows\Python\3.9.12\x64\lib\threading.py:316: KeyboardInterrupt
-          # - windows-2022
-          # - windows-2019
+          - macos-10.15
+          - windows-2022
+          - windows-2019
         python-version:
           - "3.7"
           - "3.8"
@@ -50,6 +41,38 @@ jobs:
           - "3.10"
           # tomllib has been added in Python 3.11.0-alpha.7
           - "3.11.0-alpha.7 - 3.11.0"
+        # By default all jobs are considered stable.
+        stable: [true]
+        # Explicitely flag some jobs as unstable, i.e. allowed to fail.
+        include:
+          # Ubuntu 18.04 has some issues with apt reposytory sync.
+          - os: ubuntu-18.04
+            stable: false
+          # Brew on macOS 10.15 image is plagged with "shallow clone" issues, for which I spent too much
+          # time trying to fix. See:
+          # https://stackoverflow.com/questions/45782694/how-to-remove-the-shallow-clone-warning-from-homebrew
+          # https://stackoverflow.com/questions/65320304/error-while-updating-homebrew-on-my-macbook-pro-big-sur
+          # https://github.com/Homebrew/brew/pull/9383
+          # https://github.com/Homebrew/brew/pull/9447
+          # https://github.com/Homebrew/brew/issues/9420
+          # https://github.com/Homebrew/brew/issues/12791
+          - os: macos-10.15
+            stable: false
+          # Windows tests all prematurely ends with the following error:
+          # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+          # C:\hostedtoolcache\windows\Python\3.9.12\x64\lib\threading.py:316: KeyboardInterrupt
+          - os: windows-2022
+            stable: false
+          - os: windows-2019
+            stable: false
+          # Python 3.11 runs ends with this error:
+          # File ".../python3.11/site-packages/pip/_vendor/packaging/utils.py", line 34, in canonicalize_name
+          #       value = _canonicalize_regex.sub("-", name).lower()
+          #               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          #   TypeError: expected string or bytes-like object, got 'NoneType'
+          - python-version: "3.11.0-alpha.7 - 3.11.0"
+            stable: false
+
     steps:
       - uses: actions/checkout@v3.0.2
 

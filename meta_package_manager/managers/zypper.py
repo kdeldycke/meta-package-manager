@@ -23,7 +23,7 @@ from operator import itemgetter
 from typing import Iterator
 
 if sys.version_info < (3, 8):
-        from typing_extensions import TypedDict
+    from typing_extensions import TypedDict
 else:
     from typing import TypedDict
 

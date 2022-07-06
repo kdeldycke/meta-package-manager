@@ -59,7 +59,7 @@ jobs:
           }
 
           python_stable = {
-              "3.7: True,
+              "3.7": True,
               "3.8": True,
               "3.9": True,
               "3.10": True,

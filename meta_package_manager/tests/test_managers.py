@@ -351,7 +351,7 @@ props_ref = tuple(collect_props_ref())
 
 def test_operation_order():
     """Double check operation IDs are ordered and aligned to the base manager class and CLI implementation."""
-    direct_operation_ids = Operations.__members__.keys()
+    direct_operation_ids = [op for op in Operations.__members__ if op != "upgrade_all"]
 
     base_operations = [p for p in props_ref if p in direct_operation_ids]
     assert list(direct_operation_ids) == list(base_operations)

@@ -51,6 +51,7 @@ Operations = Enum(
         "search",
         "install",
         "upgrade",
+        "upgrade_all",
         "remove",
         "sync",
         "cleanup",
@@ -293,14 +294,19 @@ class PackageManager(metaclass=MetaPackageManager):
     @classmethod
     def implements(cls, op: Operations) -> bool:
         """Inspect manager's implementation to check for proper support of an operation."""
-        logger.debug(f"Is {cls} implementing {op}?")
+        logger.debug(f"Does {cls} implements {op}?")
 
-        # Set the method IDs which are the proof of proper implementation.
-        # General case: both the operation and the method implementing it share the same ID.
-        method_ids = {op.name}
-        # Special case for `upgrade`: we need at least `upgrade_one_cli()` to have full support.
+        # General case: the operation and the method implementing it shares the same ID.
+        method_deps: tuple[set[str], ...] = ({op.name},)
+
+        # Special case for single-package `upgrade`: we depends on `upgrade_one_cli()`.
         if op == Operations.upgrade:
-            method_ids = {"upgrade_one_cli"}
+            method_deps = ({"installed", "upgrade_one_cli"},)
+
+        # For `upgrade_all`: we depends on eother `upgrade_all_cli()`, or we can simulate the latter with a combination of
+        # `outdated()` and `upgrade_one_cli()`.
+        elif op == Operations.upgrade_all:
+            method_deps = ({"upgrade_all_cli"}, {"outdated", "upgrade_one_cli"})
 
         # If none of the classes in the inheritance hierarchy up to the base one implements the operation, then we can be certain
         # the manager doesn't implement the operation at all.
@@ -310,8 +316,9 @@ class PackageManager(metaclass=MetaPackageManager):
             # Presence of the operation function is not enough to rules out proper implementation, as it can
             # be a method that raises NotImplemented error anyway. See for instance the upgrade_all_cli in pip.py:
             # https://github.com/kdeldycke/meta-package-manager/blob/4acc003bd268a59f5a79cf317be6d25a90878f6d/meta_package_manager/managers/pip.py#L271-L279
-            for method_id in method_ids:
-                if method_id in klass.__dict__:
+            for method_ids in method_deps:
+                all_deps_found = method_ids.issubset(klass.__dict__)
+                if all_deps_found:
                     return True
 
         raise NotImplementedError(f"Can't guess {cls} implementation of {op}.")
@@ -810,11 +817,6 @@ class PackageManager(metaclass=MetaPackageManager):
             try:
                 cli = self.upgrade_all_cli()
             except NotImplementedError:
-                logger.warning(f"{self.id} does not implement upgrade_all_cli.")
-
-                if not self.implements(Operations.outdated):
-                    raise
-
                 logger.info(
                     f"Fallback to calling upgrade operation on each outdated package."
                 )

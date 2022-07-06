@@ -770,7 +770,7 @@ def upgrade(ctx, all, package_ids):
                 f"Ignore provided {', '.join(sorted(package_ids))} packages and proceed to a full upgrade..."
             )
         for manager in ctx.obj.selected_managers(
-            implements_operation=Operations.upgrade
+            implements_operation=Operations.upgrade_all
         ):
             logger.info(f"Upgrade all outdated packages from {manager.id}...")
             output = manager.upgrade()
@@ -781,14 +781,9 @@ def upgrade(ctx, all, package_ids):
     # Specific list of package to upgrade has been requested. We need to
     # validate them before proceeding.
 
-    # Cast generator to tuple because of reuse.
-    selected_managers = tuple(
-        ctx.obj.selected_managers(implements_operation=Operations.upgrade)
-    )
-
     # For each package, we list the managers they were sourced from.
     package_sources = {}
-    for manager in selected_managers:
+    for manager in ctx.obj.selected_managers(implements_operation=Operations.upgrade):
         for package in manager.installed:
             if package.id in package_ids:
                 package_sources.setdefault(package.id, set()).add(manager.id)

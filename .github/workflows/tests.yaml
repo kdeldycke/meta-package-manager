@@ -80,7 +80,7 @@ jobs:
                   "python-version": python_version,
                   "stable": os_stable[os_id] and python_stable[python_version],
               })
-          matrix = {"include": jobs}
+          matrix = json.dumps({"include": jobs})
 
           print(f"::set-output name=matrix::{matrix}")
 

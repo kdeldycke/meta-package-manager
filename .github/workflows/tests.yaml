@@ -200,7 +200,18 @@ jobs:
       # VSCode
       - name: macOS - Install VSCode
         if: runner.os == 'macOS'
+        # XXX Tweak permission to fix this issue:
+        # Hint: https://github.com/Homebrew/discussions/discussions/633#discussioncomment-1400084
+        # > Run brew install --cask visual-studio-code
+        # ==>Downloading https://update.code.visualstudio.com/1.68.1/darwin/stable
+        # ==>Downloading from https://az764295.vo.msecnd.net/stable/35f373630/VSCode-darwin.zip
+        # Warning: macOS's Gatekeeper has been disabled for this Cask
+        # ==>Installing Cask visual-studio-code
+        # ==>Purging files for version 1.68.1 of Cask visual-studio-code
+        # Error: Directory not empty @ dir_s_rmdir - /private/tmp/d20220706-3993-qik29s
+        # Error: Process completed with exit code 1.
         run: |
+          sudo chown -R "$USER" /private/tmp/
           brew install --cask visual-studio-code
       - name: Linux - Install VSCode
         if: runner.os == 'Linux'

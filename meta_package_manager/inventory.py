@@ -88,7 +88,8 @@ def manager_operations() -> str:
 
 
 def update_readme() -> None:
-    """Update `readme.md` at the root of the project with the implementation table for each manager we support."""
+    """Update `readme.md` at the root of the project with the implementation table for
+    each manager we support."""
     # Load-up `readme.md`.
     readme = Path(__file__).parent.parent.joinpath("readme.md").resolve()
     content = readme.read_text()

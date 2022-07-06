@@ -137,7 +137,8 @@ class Package:
 
 
 def packages_asdict(packages: Iterator[Package], keep_fields: tuple[str, ...]):
-    """Returns a list of packages casted to a ``dict`` with only a subset of its fields."""
+    """Returns a list of packages casted to a ``dict`` with only a subset of its
+    fields."""
     return ({k: v for k, v in asdict(p).items() if k in keep_fields} for p in packages)
 
 
@@ -158,7 +159,8 @@ class MetaPackageManager(type):
     """Custom metaclass used as a class factory for package managers."""
 
     def __init__(cls, name, bases, dct):
-        """Sets some class defaults, but only if they're not redefined in the final manager class."""
+        """Sets some class defaults, but only if they're not redefined in the final
+        manager class."""
 
         if "id" not in dct:
             cls.id = name.lower().replace("_", "-")
@@ -293,7 +295,8 @@ class PackageManager(metaclass=MetaPackageManager):
 
     @classmethod
     def implements(cls, op: Operations) -> bool:
-        """Inspect manager's implementation to check for proper support of an operation."""
+        """Inspect manager's implementation to check for proper support of an
+        operation."""
         logger.debug(f"Does {cls} implements {op}?")
 
         # General case: the operation and the method implementing it shares the same ID.

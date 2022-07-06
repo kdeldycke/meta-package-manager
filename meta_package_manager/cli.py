@@ -290,7 +290,8 @@ def managers(ctx):
     """List all supported package managers and autodetect their presence on the
     system."""
     select_params = {
-        # Do not drop inactive managers. Keep them to show off how mpm is reacting to the local platform.
+        # Do not drop inactive managers. Keep them to show off how mpm is reacting
+        # to the local platform.
         "drop_inactive": False,
     }
 
@@ -688,7 +689,9 @@ def search(ctx, extended, exact, query):
 def install(ctx, package_id):
     """Install the provided package ID using one of the selected manager."""
     # Cast generator to tuple because of reuse.
-    selected_managers = tuple(ctx.obj.selected_managers(implements_operation=Operations.install))
+    selected_managers = tuple(
+        ctx.obj.selected_managers(implements_operation=Operations.install)
+    )
 
     logger.info(
         f"Package manager order: {', '.join([m.id for m in selected_managers])}"

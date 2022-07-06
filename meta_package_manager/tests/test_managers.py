@@ -327,7 +327,8 @@ def test_cleanup_type(manager):
 def collect_props_ref():
     """Build the canonical reference from the base class.
 
-    We need to parse the AST so we can collect both attributes and naked type annotations.
+    We need to parse the AST so we can collect both attributes and naked type
+    annotations.
     """
     tree = ast.parse(Path(inspect.getfile(PackageManager)).read_bytes())
 
@@ -350,7 +351,8 @@ props_ref = tuple(collect_props_ref())
 
 
 def test_operation_order():
-    """Double check operation IDs are ordered and aligned to the base manager class and CLI implementation."""
+    """Double check operation IDs are ordered and aligned to the base manager class and
+    CLI implementation."""
     direct_operation_ids = [op for op in Operations.__members__ if op != "upgrade_all"]
 
     base_operations = [p for p in props_ref if p in direct_operation_ids]

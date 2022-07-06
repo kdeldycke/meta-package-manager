@@ -15,6 +15,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Auto-check type hinting in CI.
 - \[mpm\] Render type hints in documentation.
 - \[mpm\] Add metadata for easy citation in academic content.
+- \[mpm\] Deactivate Atom install in macOS tests as it seems broken.
 
 ## {gh}`5.4.0 (2022-06-28) <compare/v5.3.0...v5.4.0>`
 

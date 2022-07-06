@@ -141,10 +141,14 @@ jobs:
           choco install composer
 
       # APM
-      - name: macOS - Install Atom
-        if: runner.os == 'macOS'
-        run: |
-          brew install --cask atom
+      # XXX Atom install is broken on macOS, ending with loads of errors like:
+      # cp: /private/tmp/d20220706-3576-qlmkfl/Atom.app/./Contents/Resources/ca.lproj: unable to copy extended
+      # attributes to /usr/local/Caskroom/atom/1.60.0/Atom.app/Contents/Resources/ca.lproj: No such file or
+      # directory
+      # - name: macOS - Install Atom
+      #   if: runner.os == 'macOS'
+      #   run: |
+      #     brew install --cask atom
       - name: Linux - Install Atom
         if: runner.os == 'Linux'
         run: |

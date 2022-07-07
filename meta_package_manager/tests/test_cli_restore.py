@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import pytest
+from click_extra.tests.conftest import destructive
 
 from ..pool import pool
 from .test_cli import CLISubCommandTests
@@ -38,6 +39,8 @@ def subcmd(create_config):
 
 
 class TestRestore(CLISubCommandTests):
+
+    @destructive
     def test_default_all_managers(self, invoke, create_config):
         toml_path = create_config(
             "all-managers.toml",
@@ -57,6 +60,7 @@ class TestRestore(CLISubCommandTests):
         assert "all-managers.toml" in result.stderr
         self.check_manager_selection(result)
 
+    @destructive
     @pytest.mark.parametrize("mid", pool.default_manager_ids)
     def test_single_manager(self, invoke, create_config, mid):
         toml_path = create_config(
@@ -90,6 +94,7 @@ class TestRestore(CLISubCommandTests):
         assert "unrecognized.toml" in result.stderr
         assert "Ignore [random_section] section" in result.stderr
 
+    @destructive
     def test_restore_single_manager(self, invoke, create_config):
         toml_path = create_config(
             "pip-npm-dummy.toml",
@@ -108,6 +113,7 @@ class TestRestore(CLISubCommandTests):
         assert "Restore pip" not in result.stderr
         assert "Restore npm" in result.stderr
 
+    @destructive
     def test_restore_excluded_manager(self, invoke, create_config):
         toml_path = create_config(
             "pip-npm-dummy.toml",

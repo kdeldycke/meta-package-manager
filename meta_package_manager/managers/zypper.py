@@ -66,7 +66,9 @@ class Zypper(PackageManager):
         zypper 1.14.11
     """
 
-    SearchResult = TypedDict("SearchResult", {"id": str, "version": TokenizedString})
+    class SearchResult(TypedDict):
+        id: str
+        version: TokenizedString
 
     def _search(self, *args: str) -> Iterator[SearchResult]:
         """Utility method to parse and interpret results of the ``zypper search``

@@ -146,11 +146,11 @@ class ManagerPool:
 
     def select_managers(
         self,
-        keep: Optional[Iterable] = None,
-        drop: Optional[Iterable] = None,
+        keep: Iterable | None = None,
+        drop: Iterable | None = None,
         keep_unsupported: bool = False,
         drop_inactive: bool = True,
-        implements_operation: Optional[Operations] = None,
+        implements_operation: Operations | None = None,
         **extra_options: bool,
     ) -> Iterator[PackageManager]:
         """Utility method to extract a subset of the manager pool based on selection

@@ -22,7 +22,7 @@ jobs:
     # There is no way to selective flags collections of elements in a matrix, without having to flag all combinations.
     # This will became unmaintainable and tedious so we use this job to pre-compute which jobs is going to get our
     # "stable" flag.
-    name: "OS/Python/Stable matrix pre-compute"
+    name: "OS/Python/stable matrix pre-compute"
     runs-on: ubuntu-20.04
     outputs:
       test_matrix: ${{ steps.create_matrix.outputs.matrix }}
@@ -37,11 +37,30 @@ jobs:
           # See what each os came pre-installed with at:
           # https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners
 
-          os_stable = {
-              "ubuntu-20.04": True,
+          os_list = {
+              "ubuntu-20.04",
+              "ubuntu-18.04",
+              "macos-11.0",
+              "macos-10.15",
+              "windows-2022",
+              "windows-2019",
+          }
+
+          python_list = {
+              "3.7",
+              "3.8",
+              "3.9",
+              "3.10",
+              "3.11.0-alpha.7 - 3.11.0",
+          }
+
+          # Safety check to ensure there is no overlap between the 2 sets.
+          assert not os_list.intersection(python_list)
+
+          # List of unstable creiterions.
+          unstable = {
               # Ubuntu 18.04 has some issues with apt repository sync.
-              "ubuntu-18.04": False,
-              "macos-11.0": True,
+              {"ubuntu-18.04"},
               # Brew on macOS 10.15 image is plagged with "shallow clone" issues, for which I spent too much
               # time trying to fix. See:
               # https://stackoverflow.com/questions/45782694/how-to-remove-the-shallow-clone-warning-from-homebrew
@@ -50,19 +69,12 @@ jobs:
               # https://github.com/Homebrew/brew/pull/9447
               # https://github.com/Homebrew/brew/issues/9420
               # https://github.com/Homebrew/brew/issues/12791
-              "macos-10.15": False,
+              {"macos-10.15"},
               # Windows tests all prematurely ends with the following error:
               # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
               # C:\hostedtoolcache\windows\Python\3.9.12\x64\lib\threading.py:316: KeyboardInterrupt
-              "windows-2022": False,
-              "windows-2019": False,
-          }
-
-          python_stable = {
-              "3.7": True,
-              "3.8": True,
-              "3.9": True,
-              "3.10": True,
+              {"windows-2022"},
+              {"windows-2019"},
               # tomllib has been added in Python 3.11.0-alpha.7,
               # but Python 3.11 has not been released yet, hence the range.
               # Python 3.11 runs ends with this error:
@@ -70,16 +82,21 @@ jobs:
               #       value = _canonicalize_regex.sub("-", name).lower()
               #               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
               #   TypeError: expected string or bytes-like object, got 'NoneType'
-              "3.11.0-alpha.7 - 3.11.0": False,
+              {"3.11.0-alpha.7 - 3.11.0"},
           }
 
           jobs = []
-          for os_id, python_version in product(os_stable, python_stable):
-              jobs.append({
+          for os_id, python_version in product(os_list, python_list):
+              job = {
                   "os": os_id,
                   "python-version": python_version,
-                  "stable": os_stable[os_id] and python_stable[python_version],
-              })
+                  "state": "stable",
+              }
+              for criterion in unstable:
+                  if criterion.issubset(job.values()):
+                      job["state"] = "unstable"
+                      break
+              jobs.append(job)
           matrix = json.dumps({"include": jobs})
 
           print(f"::set-output name=matrix::{matrix}")
@@ -97,7 +114,7 @@ jobs:
       matrix: ${{ fromJson(needs.test-matrix.outputs.test_matrix) }}
     runs-on: ${{ matrix.os }}
     # We keep going when a job flagged as not stable fails.
-    continue-on-error: ${{ matrix.stable == false }}
+    continue-on-error: ${{ matrix.state == 'unstable' }}
     steps:
       - uses: actions/checkout@v3.0.2
 

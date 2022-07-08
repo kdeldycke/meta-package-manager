@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`5.5.0 (unreleased) <compare/v5.4.0...main>`
-
-```{important}
-This version is not released yet and is under active development.
-```
+## {gh}`5.5.0 (2022-07-08) <compare/v5.4.0...v5.5.0>`
 
 - \[mpm\] Restore behavior of having `upgrade` assuming `--all` option on a bare call. Closes {issue}`715`.
 - \[cask\] Fix parsing of multiple reported installed versions.

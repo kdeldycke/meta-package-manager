@@ -50,7 +50,7 @@ class NPM(PackageManager):
         6.13.7
     """
 
-    def run_cli(self, *args: Union[_Arg, _NestedArgs], **kwargs: Any) -> str:
+    def run_cli(self, *args: _Arg | _NestedArgs, **kwargs: Any) -> str:
         """Like the common run_cli helper, but silence NPM's JSON output on error.
 
         NPM is prone to breakage if local node version is not in sync:
@@ -135,8 +135,7 @@ class NPM(PackageManager):
 
             remap(json.loads(output), visit=visit)
 
-        for pkg in installed:
-            yield pkg
+        yield from installed
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -287,7 +286,7 @@ class NPM(PackageManager):
         return self.build_cli("update")
 
     def upgrade_one_cli(
-        self, package_id: str, version: Optional[str] = None
+        self, package_id: str, version: str | None = None
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.

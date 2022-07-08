@@ -319,8 +319,8 @@ class BarPluginRenderer(MPMPlugin):
 
     @staticmethod
     def render_table(
-        table_data: Optional[Sequence[Sequence[str]]],
-    ) -> Union[Any, list]:
+        table_data: Sequence[Sequence[str]] | None,
+    ) -> Any | list:
         """Renders a table data with pre-configured alignment centered around the third
         column.
 

@@ -104,23 +104,23 @@ class Package:
     id: str
     """ID is required and is the primary key used by the manager. """
 
-    name: Optional[str] = None
+    name: str | None = None
 
-    label: Optional[str] = None
+    label: str | None = None
     """Label is used in *Bar plugin to display user-friendly entries."""
 
-    description: Optional[str] = None
+    description: str | None = None
 
-    installed_version: Optional[Union[TokenizedString, str]] = None
-    latest_version: Optional[Union[TokenizedString, str]] = None
+    installed_version: TokenizedString | str | None = None
+    latest_version: TokenizedString | str | None = None
     """ ``installed_version`` and ``latest_version`` are allowed to temporarily be a string
     between ``__init__`` and ``__post_init__``. Once they reach the later, they're parsed and
     normalized into ``TokenizedString``.
     """
 
-    upgrade_cli: Optional[tuple[str, ...]] = None
+    upgrade_cli: tuple[str, ...] | None = None
 
-    manager: InitVar["PackageManager"] = None
+    manager: InitVar[PackageManager] = None
     """Init-only variable user to populate package metadata requiring a lookup from the manager."""
 
     def __post_init__(self, manager) -> None:
@@ -195,13 +195,13 @@ class PackageManager(metaclass=MetaPackageManager):
     Default value is based on class name.
     """
 
-    homepage_url: Optional[str] = None
+    homepage_url: str | None = None
     """Home page of the project, only used in documentation for reference."""
 
     platforms: frozenset = frozenset()
     """List of platforms supported by the manager."""
 
-    requirement: Optional[str] = None
+    requirement: str | None = None
     """Minimal required version.
 
     Should be a string parseable by :py:class:`meta_package_manager.version.parse_version`.
@@ -286,7 +286,7 @@ class PackageManager(metaclass=MetaPackageManager):
     cli_errors: list[CLIError]
     """Accumulate all CLI errors encountered by the package mananger."""
 
-    package_class: Type[Package] = Package
+    package_class: type[Package] = Package
     """The dataclass to use to produce Package objects from the manager."""
 
     def __init__(self) -> None:
@@ -326,7 +326,7 @@ class PackageManager(metaclass=MetaPackageManager):
 
         raise NotImplementedError(f"Can't guess {cls} implementation of {op}.")
 
-    def search_cli(self, cli_name: str) -> Union[Path, None]:
+    def search_cli(self, cli_name: str) -> Path | None:
         """Search for a CLI on the system.
 
         Look for the provided ``cli_name`` in this order:
@@ -365,7 +365,7 @@ class PackageManager(metaclass=MetaPackageManager):
         return cli_path
 
     @cached_property
-    def cli_path(self) -> Union[Path, None]:
+    def cli_path(self) -> Path | None:
         """Fully qualified path to the canonical package manager binary.
 
         Automatically search the location of the CLI in the system. Try multiple CLI
@@ -386,7 +386,7 @@ class PackageManager(metaclass=MetaPackageManager):
         return None
 
     @cached_property
-    def version(self) -> Union[TokenizedString, None]:
+    def version(self) -> TokenizedString | None:
         """Invoke the manager and extract its own reported version string.
 
         Returns a parsed and normalized version in the form of a
@@ -481,7 +481,7 @@ class PackageManager(metaclass=MetaPackageManager):
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
     @classmethod
-    def _args_cleanup(cls, *args: Union[_Arg, _NestedArgs]) -> tuple[str, ...]:
+    def _args_cleanup(cls, *args: _Arg | _NestedArgs) -> tuple[str, ...]:
         """Flatten recursive iterables, remove all ``None``, and cast each element to
         strings.
 
@@ -489,7 +489,7 @@ class PackageManager(metaclass=MetaPackageManager):
         """
         return tuple(str(arg) for arg in flatten(args) if arg is not None)
 
-    def run(self, *args: Union[_Arg, _NestedArgs], extra_env: _EnvVars = None) -> str:
+    def run(self, *args: _Arg | _NestedArgs, extra_env: _EnvVars = None) -> str:
         """Run a shell command, return the output and accumulate error messages.
 
         ``args`` is allowed to be a nested structure of iterables, in which case it will
@@ -549,14 +549,14 @@ class PackageManager(metaclass=MetaPackageManager):
 
     def build_cli(
         self,
-        *args: Union[_Arg, _NestedArgs],
+        *args: _Arg | _NestedArgs,
         auto_pre_cmds: bool = True,
         auto_pre_args: bool = True,
         auto_post_args: bool = True,
-        override_pre_cmds: Optional[_NestedArgs] = None,
-        override_cli_path: Optional[Path] = None,
-        override_pre_args: Optional[_NestedArgs] = None,
-        override_post_args: Optional[_NestedArgs] = None,
+        override_pre_cmds: _NestedArgs | None = None,
+        override_cli_path: Path | None = None,
+        override_pre_args: _NestedArgs | None = None,
+        override_post_args: _NestedArgs | None = None,
         sudo: bool = False,
     ) -> tuple[str, ...]:
         """Build the package manager CLI by combining the custom ``*args`` with the
@@ -595,7 +595,7 @@ class PackageManager(metaclass=MetaPackageManager):
         On linux, the command can be run with `sudo <https://www.sudo.ws>`_ if the parameter of the same name is set to ``True``.
         In which case the ``override_pre_cmds`` parameter is not allowed to be set and the ``auto_pre_cmds`` parameter is forced to ``False``.
         """
-        params: list[Union[_Arg, _NestedArgs]] = []
+        params: list[_Arg | _NestedArgs] = []
 
         # Sudo replaces any pre-command, be it overriden or automatic.
         if sudo:
@@ -633,16 +633,16 @@ class PackageManager(metaclass=MetaPackageManager):
 
     def run_cli(
         self,
-        *args: Union[_Arg, _NestedArgs],
+        *args: _Arg | _NestedArgs,
         auto_extra_env: bool = True,
         auto_pre_cmds: bool = True,
         auto_pre_args: bool = True,
         auto_post_args: bool = True,
         override_extra_env: _EnvVars = None,
-        override_pre_cmds: Optional[_NestedArgs] = None,
-        override_cli_path: Optional[Path] = None,
-        override_pre_args: Optional[_NestedArgs] = None,
-        override_post_args: Optional[_NestedArgs] = None,
+        override_pre_cmds: _NestedArgs | None = None,
+        override_cli_path: Path | None = None,
+        override_pre_args: _NestedArgs | None = None,
+        override_post_args: _NestedArgs | None = None,
         force_exec: bool = False,
         sudo: bool = False,
     ) -> str:
@@ -798,7 +798,7 @@ class PackageManager(metaclass=MetaPackageManager):
         """Returns the complete CLI to upgrade one package and one only."""
         raise NotImplementedError
 
-    def upgrade(self, package_id: Optional[str] = None) -> str:
+    def upgrade(self, package_id: str | None = None) -> str:
         """Perform an upgrade of either all or one package.
 
         Executes the CLI provided by either

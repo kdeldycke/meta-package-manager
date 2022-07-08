@@ -39,14 +39,14 @@ class Token:
     """
 
     string: str
-    integer: Optional[int] = None
+    integer: int | None = None
 
     def __hash__(self):
         """A Token is made unique by a tuple of its immutable internal data."""
         return hash((self.string, self.integer))
 
     @staticmethod
-    def str_to_int(value: Union[str, int]) -> tuple[str, Optional[int]]:
+    def str_to_int(value: str | int) -> tuple[str, int | None]:
         """Convert a ``str`` or an ``int`` to a ``(string, integer)`` couple.
 
         Returns together the original string and its integer representation if
@@ -70,7 +70,7 @@ class Token:
 
         return value, integer
 
-    def __init__(self, value: Union[str, int]) -> None:
+    def __init__(self, value: str | int) -> None:
         """Instantiates a ``Token`` from an alphanumeric string or a non-negative
         integer."""
         # Check provided value.
@@ -101,7 +101,7 @@ class Token:
     def __format__(self, format_spec) -> str:
         return self.string.__format__(format_spec)
 
-    def __int__(self) -> Optional[int]:
+    def __int__(self) -> int | None:
         return self.integer
 
     @property
@@ -180,7 +180,7 @@ class TokenizedString:
         # after that.
         return super().__new__(cls)
 
-    def __init__(self, value: Union[str, int], separator: str = "-") -> None:
+    def __init__(self, value: str | int, separator: str = "-") -> None:
         """Parse and tokenize the provided raw ``value``."""
         if isinstance(value, TokenizedString):
             # Skip initialization for instance of the class, as this __init__() gets called

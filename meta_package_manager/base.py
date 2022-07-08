@@ -26,7 +26,7 @@ from enum import Enum
 from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
-from typing import ContextManager, Dict, Iterable, Iterator, Optional, Type, Union, cast
+from typing import ContextManager, Dict, Iterable, Iterator, Optional, Union, cast
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):

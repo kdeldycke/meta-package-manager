@@ -39,7 +39,6 @@ def subcmd(create_config):
 
 
 class TestRestore(CLISubCommandTests):
-
     @destructive
     def test_default_all_managers(self, invoke, create_config):
         toml_path = create_config(

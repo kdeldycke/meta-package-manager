@@ -23,7 +23,7 @@ import operator
 import re
 from copy import deepcopy
 from functools import partial
-from typing import Iterator, Optional, Union
+from typing import Iterator
 
 from boltons import strutils
 

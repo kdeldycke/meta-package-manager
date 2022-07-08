@@ -10,5 +10,5 @@ authors:
 version: 5.5.0
 # The release date is kept up to date by the external workflows. See:
 # https://github.com/kdeldycke/workflows/blob/33b704b489c1aa18b7b7efbf963e153e91e1c810/.github/workflows/changelog.yaml#L135-L137
-date-released: 2022-06-28
+date-released: 2022-07-08
 url: "https://github.com/kdeldycke/meta-package-manager"

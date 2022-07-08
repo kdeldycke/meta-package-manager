@@ -164,6 +164,8 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew install npm
+          sudo mkdir -p /usr/local/bin
+          sudo ln -s /usr/bin/npm /usr/local/bin/npm
       - name: Windows - Upgrade npm
         if: runner.os == 'Windows'
         run: |

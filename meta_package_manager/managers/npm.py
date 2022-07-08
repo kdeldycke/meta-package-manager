@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Iterator, Optional, Union
+from typing import Any, Iterator
 
 from boltons.iterutils import remap
 from click_extra.platform import LINUX, MACOS, WINDOWS

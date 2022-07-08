@@ -24,7 +24,7 @@ import sys
 from collections.abc import Iterable
 from importlib import import_module
 from pathlib import Path
-from typing import Iterator, Optional
+from typing import Iterator
 
 if sys.version_info < (3, 8):
     from typing_extensions import Final

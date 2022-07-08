@@ -32,7 +32,7 @@ from functools import partial
 from io import StringIO
 from operator import itemgetter
 from pathlib import Path
-from typing import Any, Optional, Sequence, Union
+from typing import Any, Sequence
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):

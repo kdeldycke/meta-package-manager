@@ -108,20 +108,23 @@ class Snap(PackageManager):
             skype      8.58.0.93    skype✓       classic   One Skype for all.
         """
         output = self.run_cli("find", query)
+        headerless_table = None
+        if output:
+            table = output.split("\n", 1)
+            if len(table) > 1:
+                headerless_table = table[1]
 
-        regexp = re.compile(
-            r"^(?P<package_id>\S+)\s+(?P<version>\S+)\s+\S+\s+\S+\s+(?P<description>.+)$",
-            re.MULTILINE,
-        )
-
-        for package_id, version, description in regexp.findall(
-            output.split("\n", 1)[1]
-        ):
-            yield self.package(
-                id=package_id,
-                description=description,
-                latest_version=version,
+        if headerless_table:
+            regexp = re.compile(
+                r"^(?P<package_id>\S+)\s+(?P<version>\S+)\s+\S+\s+\S+\s+(?P<description>.+)$",
+                re.MULTILINE,
             )
+            for package_id, version, description in regexp.findall(headerless_table):
+                yield self.package(
+                    id=package_id,
+                    description=description,
+                    latest_version=version,
+                )
 
     def install(self, package_id: str) -> str:
         """Install one package.

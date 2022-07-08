@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Eliminate rendering of `None` cells to `<null>` in tables.
+
 ## {gh}`5.5.0 (2022-07-08) <compare/v5.4.0...v5.5.0>`
 
 - \[mpm\] Restore behavior of having `upgrade` assuming `--all` option on a bare call. Closes {issue}`715`.

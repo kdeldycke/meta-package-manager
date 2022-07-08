@@ -337,6 +337,12 @@ class BarPluginRenderer(MPMPlugin):
             xmlrpc                          0.3.1 → 0.4
             blockblock 5.33,VHSDGataYCcV8xqv5TSZA → 5.39
             sed                                 2 → 2021.0328
+
+        ..todo::
+
+            Use upcoming ``tabulate.SEPARATING_LINE`` to produce the whole bar plugin table in one go
+            and have all version numbers from all managers aligned. See:
+            https://github.com/astanin/python-tabulate/commit/dab256d1f64da97720c1459478a3cc0a4ea7a91e
         """
         if not table_data:
             return []
@@ -349,7 +355,13 @@ class BarPluginRenderer(MPMPlugin):
 
     def _render(self, outdated_data) -> None:
         """Main method implementing the final structured rendering in *Bar plugin
-        dialect."""
+        dialect.
+
+        ..todo::
+
+            Wait for ANSI-aware layout in table to be merged upstream so we can highly version
+            differences in bar plugin. See: https://github.com/astanin/python-tabulate/pull/184
+        """
         managers = outdated_data.values()
         font = self.monospace_font if self.table_rendering else self.default_font
 

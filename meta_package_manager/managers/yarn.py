@@ -286,20 +286,6 @@ class Yarn(PackageManager):
         """
         return self.run_cli("global", "add", package_id)
 
-    def remove(self, package_id: str) -> str:
-        """Remove one package.
-
-        .. code-block:: shell-session
-
-            ► yarn global remove awesome-lint
-            yarn global v1.22.19
-            [1/2] 🗑  Removing module awesome-lint...
-            [2/2] 🔨  Regenerating lockfile and installing missing dependencies...
-            success Uninstalled packages.
-            ✨  Done in 0.21s.
-        """
-        return self.run_cli("global", "remove", package_id)
-
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
@@ -353,6 +339,20 @@ class Yarn(PackageManager):
             ✨  Done in 1.77s.
         """
         return self.build_cli("global", "upgrade", package_id, "--latest")
+
+    def remove(self, package_id: str) -> str:
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            ► yarn global remove awesome-lint
+            yarn global v1.22.19
+            [1/2] 🗑  Removing module awesome-lint...
+            [2/2] 🔨  Regenerating lockfile and installing missing dependencies...
+            success Uninstalled packages.
+            ✨  Done in 0.21s.
+        """
+        return self.run_cli("global", "remove", package_id)
 
     def cleanup(self) -> None:
         """Removes things we don't need anymore.

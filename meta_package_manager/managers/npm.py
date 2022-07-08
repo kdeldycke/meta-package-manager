@@ -38,9 +38,16 @@ class NPM(PackageManager):
     requirement = "4.0.0"
 
     pre_args = (
+        # Operates in "global" mode, so that packages are installed into the prefix folder instead of the current working directory.
         "--global",
+        # Suppress the progress bar.
         "--progress=false",
+        # Suppress the update notification when using an older version of npm than the latest.
         "--no-update-notifier",
+        # Hide the message displayed at the end of each install that acknowledges the number of dependencies looking for funding.
+        "--no-fund",
+        # Disable sending of audit reports to the configured registries.
+        "--no-audit",
     )
 
     """
@@ -57,7 +64,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --json outdated
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit --json outdated
             {
               "error": {
                 "code": "ERR_OUT_OF_RANGE",
@@ -84,7 +91,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --json list | jq
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit --json list | jq
             {
               "dependencies": {
                 "npm": {
@@ -143,7 +150,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --json outdated
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit --json outdated | jq
             {
               "my-linked-package": {
                 "current": "0.0.0-development",
@@ -155,7 +162,7 @@ class NPM(PackageManager):
                 "current": "3.10.3",
                 "wanted": "3.10.5",
                 "latest": "3.10.5",
-                "location": "/Users/..."
+                "location": "/opt/homebrew/lib/node_modules/npm"
               }
             }
         """
@@ -166,7 +173,7 @@ class NPM(PackageManager):
                 if values["wanted"] == "linked":
                     continue
                 yield self.package(
-                    id=f"{package_id}@{values['latest']}",
+                    id=f"{package_id}",
                     installed_version=values["current"],
                     latest_version=values["latest"],
                 )
@@ -182,7 +189,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier search --json python | jq
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit search --json python | jq
             [
               {
                 "name": "python",
@@ -250,7 +257,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier search --json --no-description python | jq
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit search --json --no-description python | jq
         """
         search_args = []
         if not extended:
@@ -271,9 +278,11 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier install raven
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit install markdown
+
+            added 3 packages in 3s
         """
-        return self.run_cli("install", package_id)
+        return self.run_cli("install", "--no-fund", "--no-audit", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
@@ -281,21 +290,24 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier update
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit upgrade
         """
         return self.build_cli("update")
 
-    def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
-    ) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages (default) or only the one provided
-        as parameter.
+    def upgrade_one_cli(self, package_id) -> tuple[str, ...]:
+        """Generates the CLI to upgrade the package provided as parameter.
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier install raven
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit upgrade raven
         """
-        return self.build_cli(
-            "install",
-            f"{package_id}@{version}" if version else package_id,
-        )
+        return self.build_cli("upgrade", f"{package_id}")
+
+    def remove(self, package_id: str) -> str:
+        """Remove one package and one only.
+
+        .. code-block:: shell-session
+
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit uninstall raven
+        """
+        return self.run_cli("uninstall", package_id)

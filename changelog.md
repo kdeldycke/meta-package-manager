@@ -8,6 +8,9 @@ This version is not released yet and is under active development.
 
 - \[mpm\] Eliminate rendering of `None` cells to `<null>` in tables.
 - \[mpm\] Add a `--refilter`/`--no-refilter` option to `search` to allow bypassing of `mpm` default refiltering.
+- \[npm\] Implements `remove` operation.
+- \[npm\] Use canonical commands for operations.
+- \[npm\] Reduce output verbosity with `--no-fund` and `--no-audit` options.
 - \[yarn\] Implements `remove` operation.
 - \[yarn\] Fix, document and cleanup all global commands.
 - \[yarn\] Set minimal `yarn` version to `1.20.0`, as it should have been.

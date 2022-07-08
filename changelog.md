@@ -10,6 +10,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Add a `--refilter`/`--no-refilter` option to `search` to allow bypassing of `mpm` default refiltering.
 - \[yarn\] Implements `remove` operation.
 - \[yarn\] Fix, document and cleanup all global commands.
+- \[yarn\] Set minimal `yarn` version to `1.20.0`, as it should have been.
 
 ## {gh}`5.5.0 (2022-07-08) <compare/v5.4.0...v5.5.0>`
 
@@ -394,7 +395,7 @@ This version is not released yet and is under active development.
 
 ## {gh}`3.4.0 (2020-08-18) <compare/v3.3.0...v3.4.0>`
 
-- \[yarn\] Set minimal requirement to 1.20.0.
+- \[yarn\] Set minimal requirement to `1.20.0`.
 - \[yarn\] Fix deprecated global arguments.
 - \[bar-plugin\] Force refresh of local package databases before fetching outdated
   ones.

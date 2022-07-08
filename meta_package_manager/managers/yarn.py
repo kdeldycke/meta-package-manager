@@ -41,7 +41,7 @@ class Yarn(PackageManager):
 
     platforms = frozenset({LINUX, MACOS, WINDOWS})
 
-    requirement = "1.21.0"
+    requirement = "1.20.0"
 
     """
     .. code-block:: shell-session

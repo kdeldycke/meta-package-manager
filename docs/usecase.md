@@ -91,13 +91,13 @@ Back to your terminal, you can easely search for it across all package
 repositories, then choose your preferred package manager to install it:
 
 ```shell-session
-$ mpm search broot
-╭────────────────┬───────┬───────────┬──────────────────╮
-│ Package name   │ ID    │ Manager   │ Latest version   │
-├────────────────┼───────┼───────────┼──────────────────┤
-│ broot          │ broot │ brew      │ 0.1.0            │
-│ broot          │ broot │ pip       │ 0.1.1            │
-╰────────────────┴───────┴───────────┴──────────────────╯
+$ mpm search broot --exact
+╭────────────┬─────────┬────────────────╮
+│ Package ID │ Manager │ Latest version │
+├────────────┼─────────┼────────────────┤
+│ broot      │ brew    │ 0.1.0          │
+│ broot      │ cargo   │ 1.14.1         │
+╰────────────┴─────────┴────────────────╯
 2 packages total (brew: 1, pip: 1, cask: 0, gem: 0, mas: 0, npm: 0).
 ```
 
@@ -117,16 +117,17 @@ read the documentation (if it even exists).
 
 ```shell-session
 $ mpm list --duplicates
-╭──────────────┬──────┬─────────┬───────────────────╮
-│ Package name │ ID   │ Manager │ Installed version │
-├──────────────┼──────┼─────────┼───────────────────┤
-│ blah         │ blah │ cargo   │ 0.0.0             │
-│ blah         │ blah │ gem     │ 0.0.2             │
-│ blah         │ blah │ npm     │ 5.2.1             │
-│ blah         │ blah │ pip     │ 0.1.12            │
-│ six          │ six  │ brew    │ 1.16.0_2          │
-│ six          │ six  │ pip     │ 1.16.0            │
-╰──────────────┴──────┴─────────┴───────────────────╯
+╭──────────────────────┬─────────┬───────────────────╮
+│ Package ID           │ Manager │ Installed version │
+├──────────────────────┼─────────┼───────────────────┤
+│ blah                 │ cargo   │ 0.0.0             │
+│ blah                 │ gem     │ 0.0.2             │
+│ blah                 │ npm     │ 5.2.1             │
+│ coverage             │ pip     │ 6.4.1             │
+│ coverage             │ pipx    │ 6.4.1             │
+│ six                  │ brew    │ 1.16.0_2          │
+│ six                  │ pip     │ 1.16.0            │
+╰──────────────────────┴─────────┴───────────────────╯
 6 packages total (pip: 2, brew: 1, cargo: 1, gem: 1, npm: 1, cask: 0).
 ```
 

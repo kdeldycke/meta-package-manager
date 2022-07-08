@@ -11,6 +11,7 @@ This version is not released yet and is under active development.
 - \[yarn\] Implements `remove` operation.
 - \[yarn\] Fix, document and cleanup all global commands.
 - \[yarn\] Set minimal `yarn` version to `1.20.0`, as it should have been.
+- \[bar-plugin\] Silence all errors but critical ones on `outdated` invokation to prevent a failing manager to block rendering of the plugin output.
 
 ## {gh}`5.5.0 (2022-07-08) <compare/v5.4.0...v5.5.0>`
 

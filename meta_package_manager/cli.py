@@ -597,9 +597,14 @@ def outdated(ctx, plugin_output):
     default=False,
     help="Only returns exact matches on package ID or name.",
 )
+@option(
+    "--refilter/--no-refilter",
+    default=True,
+    help="Let mpm refilters managers' search results.",
+)
 @argument("query", type=STRING, required=True)
 @pass_context
-def search(ctx, extended, exact, query):
+def search(ctx, extended, exact, refilter, query):
     """Search each manager for a package ID, name or description matching the query."""
     # --extended implies --description.
     show_description = ctx.obj.description
@@ -616,10 +621,12 @@ def search(ctx, extended, exact, query):
         "description",
     )
 
+    search_method = "refiltered_search" if refilter else "search"
     for manager in ctx.obj.selected_managers(implements_operation=Operations.search):
-
         packages = tuple(
-            packages_asdict(manager.refiltered_search(query, extended, exact), fields)
+            packages_asdict(
+                getattr(manager, search_method)(query, extended, exact), fields
+            )
         )
 
         matches[manager.id] = {

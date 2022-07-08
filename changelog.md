@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[mpm\] Eliminate rendering of `None` cells to `<null>` in tables.
+- \[mpm\] Add a `--refilter`/`--no-refilter` option to `search` to allow bypassing of `mpm` default refiltering.
 
 ## {gh}`5.5.0 (2022-07-08) <compare/v5.4.0...v5.5.0>`
 

@@ -77,7 +77,7 @@ class TestInstallRemove(CLISubCommandTests):
         "snap": "standard-notes",
         "steamcmd": "740",
         "vscode": "tamasfe.even-better-toml",
-        "yarn": "markdown",
+        "yarn": "awesome-lint",
         # https://aur.archlinux.org/packages/meta-package-manager
         "yay": "meta-package-manager",
         "yum": "usd",

@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from typing import Iterator
 
@@ -56,21 +57,41 @@ class Yarn(PackageManager):
         .. code-block:: shell-session
 
             ► yarn global --json list --depth 0
+            {"type":"activityStart","data":{"id":0}}
+            {"type":"activityTick","data":{"id":0,"name":"awesome-lint@^0.18.0"}}
+            {"type":"activityTick","data":{"id":0,"name":"arrify@^2.0.1"}}
+            {"type":"activityTick","data":{"id":0,"name":"case@^1.6.3"}}
+            {"type":"activityTick","data":{"id":0,"name":"emoji-regex@^9.2.0"}}
+            (...)
+            {"type":"activityEnd","data":{"id":0}}
+            {"type":"progressStart","data":{"id":0,"total":327}}
+            {"type":"progressTick","data":{"id":0,"current":1}}
+            {"type":"progressTick","data":{"id":0,"current":2}}
+            {"type":"progressTick","data":{"id":0,"current":3}}
+            {"type":"progressTick","data":{"id":0,"current":4}}
+            {"type":"progressTick","data":{"id":0,"current":5}}
+            (...)
+            {"type":"progressFinish","data":{"id":0}}
+            {"type":"info","data":"\"awesome-lint@0.18.0\" has binaries:"}
+            {"type":"list","data":{"type":"bins-awesome-lint","items":["awesome-lint"]}}
+
+        .. code-block:: shell-session
+
+            ► yarn global list --depth 0
+            yarn global v1.22.19
+            info "awesome-lint@0.18.0" has binaries:
+               - awesome-lint
+            ✨  Done in 0.13s.
         """
         output = self.run_cli("global", "--json", "list", "--depth", "0")
 
-        if output:
-            for line in output.splitlines():
-                if not line:
-                    continue
-                obj = json.loads(line)
-                if obj["type"] != "info":
-                    continue
-                data = obj["data"].replace("has binaries:", "")
-                parts = data.replace('"', "").split("@")
-                package_id = parts[0]
-                version = parts[1]
-                yield self.package(id=package_id, installed_version=version)
+        regexp = re.compile(
+            r"^.+\"data\":\"\\\"(?P<package_id>\S+)@(?P<version>\S+)\\\" has binaries:\"\}$",
+            re.MULTILINE,
+        )
+
+        for package_id, version in regexp.findall(output):
+            yield self.package(id=package_id, installed_version=version)
 
     @cached_property
     def global_dir(self) -> str:
@@ -79,6 +100,7 @@ class Yarn(PackageManager):
         .. code-block:: shell-session
 
             ► yarn global dir
+            ~/.config/yarn/global
         """
         return self.run_cli("global", "dir", force_exec=True).rstrip()
 
@@ -88,30 +110,68 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn --json outdated --cwd <self.global_dir>
+            ► yarn --json outdated --cwd ~/.config/yarn/global | jq
+            {"type":"warning","data":"package.json: No license field"}
+            {
+              "type": "info",
+              "data":
+                "Color legend : \n"
+                " \"<red>\"    : Major Update backward-incompatible updates \n"
+                " \"<yellow>\" : Minor Update backward-compatible features \n"
+                " \"<green>\"  : Patch Update backward-compatible bug fixes"
+            }
+            {
+              "type": "table",
+              "data": {
+                "head": [
+                  "Package",
+                  "Current",
+                  "Wanted",
+                  "Latest",
+                  "Package Type",
+                  "URL"
+                ],
+                "body": [
+                  [
+                    "markdown",
+                    "0.4.0",
+                    "0.4.0",
+                    "0.5.0",
+                    "dependencies",
+                    "git://github.com/evilstreak/markdown-js.git"
+                  ]
+                ]
+              }
+            }
+
+        .. code-block:: shell-session
+
+            ► yarn outdated --cwd ~/.config/yarn/global
+            yarn outdated v1.22.19
+            warning package.json: No license field
+            info Color legend :
+            "<red>"    : Major Update backward-incompatible updates
+            "<yellow>" : Minor Update backward-compatible features
+            "<green>"  : Patch Update backward-compatible bug fixes
+            Package  Current Wanted Latest Package Type URL
+            markdown 0.4.0   0.4.0  0.5.0  dependencies git://github.com/evilstreak/markdown-js.git
+            ✨  Done in 0.95s.
         """
         output = self.run_cli("--json", "outdated", "--cwd", self.global_dir)
-
-        packages = []
-        for line in output.splitlines():
-            if not line:
-                continue
-            obj = json.loads(line)
-            if obj["type"] == "table":
-                packages = obj["data"]["body"]
-                break
-
-        for package in packages:
-            package_id = package[0]
-            values = {"current": package[1], "wanted": package[2], "latest": package[3]}
-
-            if values["wanted"] == "linked":
-                continue
-            yield self.package(
-                id=package_id + "@" + values["latest"],
-                installed_version=values["current"],
-                latest_version=values["latest"],
-            )
+        if output:
+            for line in output.splitlines():
+                if not line:
+                    continue
+                obj = json.loads(line)
+                if obj["type"] == "table":
+                    for package in obj["data"]["body"]:
+                        if package[2] == "linked":
+                            continue
+                        yield self.package(
+                            id=package[0],
+                            installed_version=package[1],
+                            latest_version=package[3],
+                        )
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
@@ -213,9 +273,32 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn install python
+            ► yarn global add awesome-lint
+            yarn global v1.22.19
+            [1/4] 🔍  Resolving packages...
+            [2/4] 🚚  Fetching packages...
+            [3/4] 🔗  Linking dependencies...
+            [4/4] 🔨  Building fresh packages...
+
+            success Installed "awesome-lint@0.18.0" with binaries:
+                - awesome-lint
+            ✨  Done in 16.15s.
         """
-        return self.run_cli("install", package_id)
+        return self.run_cli("global", "add", package_id)
+
+    def remove(self, package_id: str) -> str:
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            ► yarn global remove awesome-lint
+            yarn global v1.22.19
+            [1/2] 🗑  Removing module awesome-lint...
+            [2/2] 🔨  Regenerating lockfile and installing missing dependencies...
+            success Uninstalled packages.
+            ✨  Done in 0.21s.
+        """
+        return self.run_cli("global", "remove", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
@@ -223,9 +306,30 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn global upgrade
+            ► yarn global upgrade --latest
+            yarn global v1.22.19
+            [1/4] 🔍  Resolving packages...
+            [2/4] 🚚  Fetching packages...
+            [3/4] 🔗  Linking dependencies...
+            [4/4] 🔨  Rebuilding all packages...
+            success Saved lockfile.
+            success Saved 271 new dependencies.
+            info Direct dependencies
+            ├─ awesome-lint@0.18.0
+            └─ markdown@0.5.0
+            info All dependencies
+            ├─ @babel/code-frame@7.18.6
+            ├─ @babel/helper-validator-identifier@7.18.6
+            ├─ @nodelib/fs.scandir@2.1.5
+            ├─ array-to-sentence@1.1.0
+            ├─ array-union@2.1.0
+            ├─ awesome-lint@0.18.0
+            ├─ fs.realpath@1.0.0
+            (...)
+            └─ zwitch@1.0.5
+            ✨  Done in 19.89s.
         """
-        return self.build_cli("global", "upgrade")
+        return self.build_cli("global", "upgrade", "--latest")
 
     def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
@@ -233,9 +337,22 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn global add python
+            ► yarn global upgrade markdown --latest
+            yarn global v1.22.19
+            [1/4] 🔍  Resolving packages...
+            [2/4] 🚚  Fetching packages...
+            [3/4] 🔗  Linking dependencies...
+            [4/4] 🔨  Rebuilding all packages...
+            success Saved lockfile.
+            success Saved 2 new dependencies.
+            info Direct dependencies
+            └─ markdown@0.5.0
+            info All dependencies
+            ├─ markdown@0.5.0
+            └─ nopt@2.1.2
+            ✨  Done in 1.77s.
         """
-        return self.build_cli("global", "add", package_id)
+        return self.build_cli("global", "upgrade", package_id, "--latest")
 
     def cleanup(self) -> None:
         """Removes things we don't need anymore.
@@ -245,5 +362,8 @@ class Yarn(PackageManager):
         .. code-block:: shell-session
 
             ► yarn cache clean --all
+            yarn cache v1.22.19
+            success Cleared cache.
+            ✨  Done in 0.35s.
         """
         self.run_cli("cache", "clean", "--all")

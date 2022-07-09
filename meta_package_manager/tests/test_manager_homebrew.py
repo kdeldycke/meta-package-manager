@@ -71,6 +71,7 @@ def install_cask():
 @destructive
 @unless_macos
 class TestCask:
+    @pytest.mark.xdist_group(name="avoid_concurrent_git_tweaks")
     def test_autoupdate_unicode_name(self, invoke, install_cask):
         """See #16."""
         # Install an old version of a package with a unicode name.
@@ -100,6 +101,7 @@ class TestCask:
         # Outdated subcommand does not fetch the unicode name by default.
         assert "Übersicht" not in result.stdout
 
+    @pytest.mark.xdist_group(name="avoid_concurrent_git_tweaks")
     def test_multiple_names(self, invoke, install_cask):
         """See #26."""
         # Install an old version of a package with multiple names.

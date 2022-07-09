@@ -182,10 +182,12 @@ class MPMPlugin:
     def mpm_exec(self):
         """Search for mpm execution alternatives, either direct ``mpm`` call or as an
         executable Python module."""
-        mpm_exec = (self.locate_bin("mpm"),)
-        if not mpm_exec:
-            mpm_exec = (self.python_path, "-m", "meta_package_manager")
-        return mpm_exec
+        # XXX Local debugging and development.
+        # return "poetry", "run", "mpm"
+        mpm_exec = self.locate_bin("mpm")
+        if mpm_exec:
+            return (mpm_exec,)
+        return self.python_path, "-m", "meta_package_manager"
 
     @staticmethod
     def pp(*args):

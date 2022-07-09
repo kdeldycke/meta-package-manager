@@ -186,7 +186,7 @@ jobs:
       - name: macOS - Install npm
         if: runner.os == 'macOS'
         run: |
-          brew uninstall node@16 npm
+          brew uninstall node@16
           brew install npm
       - name: Windows - Upgrade npm
         if: runner.os == 'Windows'

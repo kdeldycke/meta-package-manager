@@ -222,9 +222,7 @@ def test_installed_type(manager):
         except Exception as ex:
             assert isinstance(ex, NotImplementedError)
         else:
-            # XXX There is an exception in the way npm.installed is implemented as it use a recursive
-            # boltons.remap strategy to parse the tree-like JSON.
-            assert isinstance(result, (list, types.GeneratorType))
+            assert isinstance(result, types.GeneratorType)
             for pkg in result:
                 assert isinstance(pkg, Package)
 

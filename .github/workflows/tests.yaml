@@ -159,10 +159,8 @@ jobs:
           brew update
       - name: Linux - Install Homebrew
         if: runner.os == 'Linux'
-        run: >
-          /bin/bash -c "$(curl -fsSL
-          https://raw.githubusercontent.com/Homebrew/install/master/install.sh
-          )"
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 
       # Apt
       - name: Linux - Upgrade apt
@@ -218,10 +216,8 @@ jobs:
       - name: Linux - Install Yarn
         if: runner.os == 'Linux'
         run: |
-          curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg \
-            | sudo apt-key add -
-          echo "deb https://dl.yarnpkg.com/debian/ stable main" \
-            | sudo tee /etc/apt/sources.list.d/yarn.list
+          curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+          echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
           sudo apt update
           sudo apt install --yes yarn
       - name: Windows - Install Yarn
@@ -251,10 +247,8 @@ jobs:
       - name: Linux - Install Atom
         if: runner.os == 'Linux'
         run: |
-          curl -sSL https://packagecloud.io/AtomEditor/atom/gpgkey \
-            | sudo apt-key add -
-          echo "deb https://packagecloud.io/AtomEditor/atom/any/ any main" \
-            | sudo tee /etc/apt/sources.list.d/atom.list
+          curl -sSL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
+          echo "deb https://packagecloud.io/AtomEditor/atom/any/ any main" | sudo tee /etc/apt/sources.list.d/atom.list
           sudo apt update
           sudo apt install --yes atom
       - name: Windows - Install Atom
@@ -314,7 +308,7 @@ jobs:
           brew install --cask visual-studio-code
       - name: Linux - Install VSCode
         if: runner.os == 'Linux'
-        run:
+        run: |
           sudo snap install --classic code
       - name: Windows - Install VSCode
         if: runner.os == 'Windows'
@@ -383,8 +377,7 @@ jobs:
         # https://github.com/nedbat/coveragepy/issues/512#issuecomment-399707938
         # https://github.com/pytest-dev/pytest-cov/issues/168#issuecomment-327533847
         # https://github.com/pytest-dev/pytest-cov/issues/243
-        run: >
-          poetry run
-          pytest --cov-config=pyproject.toml --cov=./ --cov-report=xml
+        run: |
+          poetry run pytest --cov-config=pyproject.toml --cov=./ --cov-report=xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3.1.0

@@ -368,7 +368,7 @@ jobs:
         # See: https://stackoverflow.com/q/2386975
         if: runner.os != 'Windows'
         run: |
-          sudo find / -name "*.pyc" -delete
+          sudo find / -name "*.pyc" -delete || true
 
       # Mpm
       - name: Install mpm with Poetry

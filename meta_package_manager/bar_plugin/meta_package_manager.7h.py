@@ -284,7 +284,8 @@ class MPMPlugin:
         # We defer all rendering to mpm itself so it can compute more intricate layouts.
         process = run(
             # We silence all errors but the CRITICAL ones. All others will be captured
-            # by mpm in --plugin-output mode and rendered back into each manager section.
+            # by mpm in --plugin-output mode and rendered back into each manager
+            # section.
             (*self.mpm_exec, "--verbosity", "CRITICAL", "outdated", "--plugin-output"),
             capture_output=True,
             encoding="utf-8",

@@ -38,13 +38,16 @@ class NPM(PackageManager):
     requirement = "4.0.0"
 
     pre_args = (
-        # Operates in "global" mode, so that packages are installed into the prefix folder instead of the current working directory.
+        # Operates in "global" mode, so that packages are installed into the
+        # prefix folder instead of the current working directory.
         "--global",
         # Suppress the progress bar.
         "--progress=false",
-        # Suppress the update notification when using an older version of npm than the latest.
+        # Suppress the update notification when using an older version of npm than
+        # the latest.
         "--no-update-notifier",
-        # Hide the message displayed at the end of each install that acknowledges the number of dependencies looking for funding.
+        # Hide the message displayed at the end of each install that acknowledges
+        # the number of dependencies looking for funding.
         "--no-fund",
         # Disable sending of audit reports to the configured registries.
         "--no-audit",

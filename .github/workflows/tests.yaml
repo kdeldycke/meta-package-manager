@@ -362,7 +362,7 @@ jobs:
       - name: Clean-up .pyc leftovers
         if: runner.os != 'Windows'
         run: |
-          find / -name "*.pyc" -delete
+          sudo find / -name "*.pyc" -delete
 
       # Mpm
       - name: Install mpm with Poetry

@@ -359,6 +359,10 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           rm -rf .coverage*
+      - name: Clean-up .pyc leftovers
+        if: runner.os != 'Windows'
+        run: |
+          find / -name "*.pyc" -delete
 
       # Mpm
       - name: Install mpm with Poetry

@@ -35,22 +35,21 @@ def search_capabilities(extended_support: bool = True, exact_support: bool = Tru
         def wrapper(
             self: PackageManager, query: str, extended: bool, exact: bool
         ) -> Iterator[Package]:
-
             refilter = False
-
             if exact:
                 if not exact_support:
                     refilter = True
                     logger.warning(
-                        f"{self.id} does not implement exact search operation. Refiltering of raw results has been activated"
+                        f"{self.id} does not implement exact search operation."
                     )
-
             if extended:
                 if not extended_support:
                     refilter = True
                     logger.warning(
-                        f"{self.id} does not implement extended search operation. Refiltering of raw results has been activated."
+                        f"{self.id} does not implement extended search operation."
                     )
+            if refilter:
+                logger.warning("Refiltering of raw results has been activated.")
 
             return function(self, query, extended, exact)  # type: ignore
 

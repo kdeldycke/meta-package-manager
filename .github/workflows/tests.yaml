@@ -350,10 +350,21 @@ jobs:
         run: |
           choco install steamcmd
 
-      # Prepare env for tests
+      # Mpm
       - name: Upgrade Poetry
         run: |
           python -m pip install --upgrade poetry
+      - name: Install mpm with Poetry
+        run: |
+          poetry install --no-interaction --no-ansi
+      - name: mpm output for debugging
+        run: |
+          poetry run mpm
+          poetry run mpm --version
+          poetry run mpm managers
+          poetry run mpm installed
+
+      # Prepare env for tests
       - name: Hack to fix coverage
         # "Can't combine line data with arc data" error
         if: runner.os != 'Windows'
@@ -369,17 +380,6 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           sudo find / -name "*.pyc" -delete || true
-
-      # Mpm
-      - name: Install mpm with Poetry
-        run: |
-          poetry install --no-interaction --no-ansi
-      - name: mpm output for debugging
-        run: |
-          poetry run mpm
-          poetry run mpm --version
-          poetry run mpm managers
-          poetry run mpm installed
       - name: Tests and coverage report in destructive mode
         env:
           DESTRUCTIVE_TESTS: true

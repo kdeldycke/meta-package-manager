@@ -161,6 +161,11 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+      - name: Homebrew doctor and tap repair
+        if: runner.os != 'Windows'
+        run: |
+          brew doctor
+          brew tap --repair
 
       # Apt
       - name: Linux - Upgrade apt

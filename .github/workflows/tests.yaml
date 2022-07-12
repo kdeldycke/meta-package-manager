@@ -164,7 +164,7 @@ jobs:
       - name: Homebrew doctor and tap repair
         if: runner.os != 'Windows'
         run: |
-          brew doctor
+          brew doctor || true
           brew tap --repair
 
       # Apt

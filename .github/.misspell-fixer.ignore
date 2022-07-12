@@ -1,3 +1,3 @@
 # Whitelist some content to prevent over-fixing of binary files.
 # Inspired by: https://github.com/Techtronix/inspircd/blob/6e7bdeca956d3f1d08138511650cdee493992aa1/.github/workflows/misspell-fixer.yml#L16-L27
-^./docs/benchmark.md:28:choose
+^./docs/benchmark.md:74:choose

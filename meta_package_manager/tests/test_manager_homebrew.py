@@ -26,9 +26,10 @@ from click_extra.tests.conftest import destructive, unless_macos
 
 
 def get_cask_path():
-    """
-    Default location of Homebrew Cask formulas on macOS. This is supposed to be a
-    shallow copy of the following Git repository: https://github.com/Homebrew/homebrew-cask
+    """Default location of Homebrew Cask formulas on macOS.
+
+    This is supposed to be a shallow copy of the following Git repository:
+    https://github.com/Homebrew/homebrew-cask
     """
     process = subprocess.run(
         ("brew", "--repository"),

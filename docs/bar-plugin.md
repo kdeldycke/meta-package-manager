@@ -161,7 +161,7 @@ to the
 1. Replace existing copy of the plugin with the latest tagged version:
 
    ```shell-session
-   $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v4.13.1/meta_package_manager/xbar/meta_package_manager.7h.py
+   $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v4.13.1/meta_package_manager/bar_plugin/meta_package_manager.7h.py
    $ mv ./meta_package_manager.7h.py ./Dev/
    $ chmod 755 ./Dev/meta_package_manager.7h.py
    ```

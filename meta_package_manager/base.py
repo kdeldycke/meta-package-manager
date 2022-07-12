@@ -364,7 +364,7 @@ class PackageManager(metaclass=MetaPackageManager):
         )
         return cli_path
 
-    # @cached_property
+    @property
     def cli_path(self) -> Path | None:
         """Fully qualified path to the canonical package manager binary.
 
@@ -385,7 +385,7 @@ class PackageManager(metaclass=MetaPackageManager):
 
         return None
 
-    # @cached_property
+    @property
     def version(self) -> TokenizedString | None:
         """Invoke the manager and extract its own reported version string.
 
@@ -431,12 +431,12 @@ class PackageManager(metaclass=MetaPackageManager):
                 return parsed_version
         return None
 
-    # @cached_property
+    @property
     def supported(self) -> bool:
         """Is the package manager supported on that platform?"""
         return CURRENT_OS_ID in self.platforms
 
-    # @cached_property
+    @property
     def executable(self) -> bool:
         """Is the package manager CLI can be executed by the current user?"""
         if not self.cli_path:
@@ -446,7 +446,7 @@ class PackageManager(metaclass=MetaPackageManager):
             return False
         return True
 
-    # @cached_property
+    @property
     def fresh(self) -> bool:
         """Does the package manager match the version requirement?"""
         # Version is mandatory.
@@ -461,7 +461,7 @@ class PackageManager(metaclass=MetaPackageManager):
                 return False
         return True
 
-    # @cached_property
+    @property
     def available(self) -> bool:
         """Is the package manager available and ready-to-use on the system?
 

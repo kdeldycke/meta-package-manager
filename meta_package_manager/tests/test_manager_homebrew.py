@@ -18,15 +18,40 @@
 from __future__ import annotations
 
 import subprocess
+from pathlib import Path
 
 import pytest
 from click_extra.run import env_copy
 from click_extra.tests.conftest import destructive, unless_macos
 
-# Default location of Homebrew Cask formulas on macOS. This is supposed to be a
-# shallow copy of the following Git repository:
-# https://github.com/Homebrew/homebrew-cask
-CASK_PATH = "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-cask/Casks/"
+
+def get_cask_path():
+    """
+    Default location of Homebrew Cask formulas on macOS. This is supposed to be a
+    shallow copy of the following Git repository: https://github.com/Homebrew/homebrew-cask
+    """
+    process = subprocess.run(
+        ("brew", "--repository"),
+        capture_output=True,
+        encoding="utf-8",
+    )
+    assert process.returncode == 0
+    assert not process.stderr
+    assert process.stdout
+
+    brew_root = Path(process.stdout.strip())
+    assert brew_root.is_absolute()
+    assert brew_root.exists()
+    assert brew_root.is_dir()
+
+    cask_repo = brew_root.joinpath("Library/Taps/homebrew/homebrew-cask/Casks/")
+    assert cask_repo.is_absolute()
+    assert cask_repo.exists()
+    assert cask_repo.is_dir()
+    return cask_repo
+
+
+CASK_PATH = get_cask_path()
 
 
 @pytest.fixture

@@ -122,33 +122,6 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `zr`           |       |       ✓        |               |              |              |
 | `zypper`       |   ✓   |                |       ✓       |      ✓       |      ✓       |
 
-## Operating system support
-
-| OS      | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
-| ------- | :---: | :------------: | :-----------: | :----------: | :----------: |
-| macOS   |   🍎   |       🍎        |       🍎       |      🍎       |      🍎       |
-| Linux   |   🐧   |       🐧        |       🐧       |      🐧       |      🐧       |
-| Windows |   🪟   |       🪟        |       🪟       |              |              |
-
-## Operations
-
-| Operation                    | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
-| ---------------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
-| List available managers      |   ✓   |                |               |              |              |
-| List installed packages      |   ✓   |                |       ✓       |              |      ✓       |
-| List duplicate packages      |   ✓   |                |               |              |              |
-| List outdated packages       |   ✓   |                |       ✓       |              |      ✓       |
-| Search packages              |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Install a package            |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Remove / Uninstall a package |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Upgrade single package       |   ✓   |                |       ✓       |              |      ✓       |
-| Upgrade all packages         |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Sync                         |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Cleanup: caches              |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Cleanup: orphans             |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Backup / Lock / Freeze       |   ✓   |                |               |              |              |
-| Restore                      |   ✓   |                |               |              |              |
-
 ## Features
 
 | Feature                               | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
@@ -175,6 +148,34 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | Fish auto-completion                  |   ✓   |                |               |              |              |
 | [XKCD #1654](https://xkcd.com/1654/)  |   ✓   |                |               |              |              |
 | [Xbar/SwiftBar plugin](bar-plugin.md) |   ✓   |                |               |              |              |
+
+## Operations
+
+| Operation                    | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| ---------------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
+| List available managers      |   ✓   |                |               |              |              |
+| List installed packages      |   ✓   |                |       ✓       |              |      ✓       |
+| List duplicate packages      |   ✓   |                |               |              |              |
+| List outdated packages       |   ✓   |                |       ✓       |              |      ✓       |
+| Search packages              |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Install a package            |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Remove / Uninstall a package |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Upgrade single package       |   ✓   |                |       ✓       |              |      ✓       |
+| Upgrade all packages         |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| Sync                         |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Cleanup: caches              |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| Cleanup: orphans             |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| Backup / Lock / Freeze       |   ✓   |                |               |              |              |
+| Restore                      |   ✓   |                |               |              |              |
+
+## Operating system support
+
+| OS      | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| ------- | :---: | :------------: | :-----------: | :----------: | :----------: |
+| macOS   |   🍎   |       🍎        |       🍎       |      🍎       |      🍎       |
+| Linux   |   🐧   |       🐧        |       🐧       |      🐧       |      🐧       |
+| Windows |   🪟   |       🪟        |       🪟       |              |              |
+
 
 ## Distribution
 

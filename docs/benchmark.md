@@ -176,7 +176,6 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | Linux   |   🐧   |       🐧        |       🐧       |      🐧       |      🐧       |
 | Windows |   🪟   |       🪟        |       🪟       |              |              |
 
-
 ## Distribution
 
 | Package manager |                                                                                                         `mpm`                                                                                                         |                                                                                        `topgrade`[^1]                                                                                         |                                                                                     `pacaptr`[^2]                                                                                     |                                                                                 `pacapt`[^3]                                                                                  |                                                                                        `sysget`[^4]                                                                                         |

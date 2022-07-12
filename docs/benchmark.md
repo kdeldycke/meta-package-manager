@@ -5,6 +5,52 @@ Attempting to unify all package managers is a Sisyphean task.
 This did not prevent me or others to try to solve that problem. It is not easy to explain why
 but [there might be a greater need for such tools](usecase.md) out there. Here is a list of some related projects I stumbled into and how they compares to `mpm`.
 
+## Features
+
+| Feature                               | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| ------------------------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
+| Package manager autodetection         |   ✓   |       ✓        |               |              |              |
+| Unified CLI and options               |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| Multi-PM execution                    |   ✓   |       ✓        |               |              |              |
+| Package manager priority              |   ✓   |                |               |              |              |
+| Consolidated output                   |   ✓   |                |               |              |              |
+| Configurable output                   |   ✓   |                |               |              |              |
+| Sortable output                       |   ✓   |                |               |              |              |
+| Colored output                        |   ✓   |       ✓        |               |              |              |
+| Version parsing and diff              |   ✓   |                |               |              |              |
+| JSON export                           |   ✓   |                |               |              |              |
+| CSV export                            |   ✓   |                |               |              |              |
+| Markup export                         |   ✓   |                |               |              |              |
+| Configuration file                    |   ✓   |       ✓        |       ✓       |              |      ✓       |
+| Non-interactive                       |   ✓   |       ✓        |       ✓       |              |              |
+| Dry-run                               |   ✓   |       ✓        |       ✓       |              |              |
+| Sudo elevation                        |   ✓   |       ✓        |       ✓       |              |              |
+| Desktop notifications                 |       |       ✓        |               |              |              |
+| Bash auto-completion                  |   ✓   |                |               |              |              |
+| Zsh auto-completion                   |   ✓   |                |               |              |              |
+| Fish auto-completion                  |   ✓   |                |               |              |              |
+| [XKCD #1654](https://xkcd.com/1654/)  |   ✓   |                |               |              |              |
+| [Xbar/SwiftBar plugin](bar-plugin.md) |   ✓   |                |               |              |              |
+
+## Operations
+
+| Operation                    | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| ---------------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
+| List available managers      |   ✓   |                |               |              |              |
+| List installed packages      |   ✓   |                |       ✓       |              |      ✓       |
+| List duplicate packages      |   ✓   |                |               |              |              |
+| List outdated packages       |   ✓   |                |       ✓       |              |      ✓       |
+| Search packages              |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Install a package            |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Remove / Uninstall a package |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Upgrade single package       |   ✓   |                |       ✓       |              |      ✓       |
+| Upgrade all packages         |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| Sync                         |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Cleanup: caches              |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| Cleanup: orphans             |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| Backup / Lock / Freeze       |   ✓   |                |               |              |              |
+| Restore                      |   ✓   |                |               |              |              |
+
 ## Package manager support
 
 | Manager        | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
@@ -121,52 +167,6 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `zplug`        |       |       ✓        |               |              |              |
 | `zr`           |       |       ✓        |               |              |              |
 | `zypper`       |   ✓   |                |       ✓       |      ✓       |      ✓       |
-
-## Features
-
-| Feature                               | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
-| ------------------------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
-| Package manager autodetection         |   ✓   |       ✓        |               |              |              |
-| Unified CLI and options               |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Multi-PM execution                    |   ✓   |       ✓        |               |              |              |
-| Package manager priority              |   ✓   |                |               |              |              |
-| Consolidated output                   |   ✓   |                |               |              |              |
-| Configurable output                   |   ✓   |                |               |              |              |
-| Sortable output                       |   ✓   |                |               |              |              |
-| Colored output                        |   ✓   |       ✓        |               |              |              |
-| Version parsing and diff              |   ✓   |                |               |              |              |
-| JSON export                           |   ✓   |                |               |              |              |
-| CSV export                            |   ✓   |                |               |              |              |
-| Markup export                         |   ✓   |                |               |              |              |
-| Configuration file                    |   ✓   |       ✓        |       ✓       |              |      ✓       |
-| Non-interactive                       |   ✓   |       ✓        |       ✓       |              |              |
-| Dry-run                               |   ✓   |       ✓        |       ✓       |              |              |
-| Sudo elevation                        |   ✓   |       ✓        |       ✓       |              |              |
-| Desktop notifications                 |       |       ✓        |               |              |              |
-| Bash auto-completion                  |   ✓   |                |               |              |              |
-| Zsh auto-completion                   |   ✓   |                |               |              |              |
-| Fish auto-completion                  |   ✓   |                |               |              |              |
-| [XKCD #1654](https://xkcd.com/1654/)  |   ✓   |                |               |              |              |
-| [Xbar/SwiftBar plugin](bar-plugin.md) |   ✓   |                |               |              |              |
-
-## Operations
-
-| Operation                    | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
-| ---------------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
-| List available managers      |   ✓   |                |               |              |              |
-| List installed packages      |   ✓   |                |       ✓       |              |      ✓       |
-| List duplicate packages      |   ✓   |                |               |              |              |
-| List outdated packages       |   ✓   |                |       ✓       |              |      ✓       |
-| Search packages              |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Install a package            |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Remove / Uninstall a package |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Upgrade single package       |   ✓   |                |       ✓       |              |      ✓       |
-| Upgrade all packages         |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Sync                         |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Cleanup: caches              |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Cleanup: orphans             |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Backup / Lock / Freeze       |   ✓   |                |               |              |              |
-| Restore                      |   ✓   |                |               |              |              |
 
 ## Operating system support
 

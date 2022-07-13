@@ -60,6 +60,8 @@ def install_cask():
         process = subprocess.run(
             ("git", "-C", get_cask_path(), "checkout", commit, f"{package_id}.rb")
         )
+        assert not process.stderr
+        print(process.stdout)
         assert process.returncode == 0
 
     def _install_cask(package_id, commit):
@@ -77,10 +79,10 @@ def install_cask():
         # Restore old formula to its most recent version.
         git_checkout(package_id, "HEAD")
         # Check the cask has been properly installed.
-        assert process.returncode == 0
         if process.stderr:
             assert "is already installed" not in process.stderr
         assert f"{package_id} was successfully installed!" in process.stdout
+        assert process.returncode == 0
         return process.stdout
 
     yield _install_cask

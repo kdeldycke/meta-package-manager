@@ -397,3 +397,11 @@ jobs:
           poetry run pytest --cov-config=pyproject.toml --cov=./ --cov-report=xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3.1.0
+
+      # Mpm final state
+      - name: mpm output for debugging
+        run: |
+          poetry run mpm
+          poetry run mpm --version
+          poetry run mpm managers
+          poetry run mpm installed

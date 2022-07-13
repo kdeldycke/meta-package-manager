@@ -42,7 +42,7 @@ class SteamCMD(PackageManager):
     platforms = frozenset({MACOS, LINUX, WINDOWS})
 
     requirement = None
-    """Accept any SteamCMD version as it seems it is hardly versionned at all."""
+    """Accept any SteamCMD version as it seems it is hardly versioned at all."""
 
     post_args = ("+quit",)
 

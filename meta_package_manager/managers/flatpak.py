@@ -117,7 +117,7 @@ class Flatpak(PackageManager):
                 )
 
                 installed_version = (
-                    current_version.group("version") if current_version else "unknow"
+                    current_version.group("version") if current_version else "unknown"
                 )
 
                 yield self.package(

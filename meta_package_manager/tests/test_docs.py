@@ -173,7 +173,7 @@ def test_labeller_rules():
         # No duplicate labels.
         assert len(set(rule["labels"])) == len(rule["labels"])
 
-        # Special checks for rules targetting manager labels.
+        # Special checks for rules targeting manager labels.
         manager_label = canonical_managers.intersection(rule["labels"])
         if manager_label:
 

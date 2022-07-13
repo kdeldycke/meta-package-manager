@@ -119,7 +119,7 @@ class ManagerPool:
         """All recognized manager IDs.
 
         Returns a list of sorted items to provide consistency across all UI, and
-        reproducability in the order package managers are evaluated.
+        reproducibility in the order package managers are evaluated.
         """
         return tuple(sorted(self.register))
 
@@ -187,7 +187,7 @@ class ManagerPool:
         for manager_id in (mid for mid in unique(selected_ids) if mid not in drop):
             manager = self.register.get(manager_id)
 
-            # Check if operation is not implemeted before calling `.available`. It saves one
+            # Check if operation is not implemented before calling `.available`. It saves one
             # call to the package manager CLI.
             if implements_operation and not manager.implements(implements_operation):
                 logger.warning(

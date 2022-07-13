@@ -137,7 +137,7 @@ class CLISubCommandTests:
         matter because:
         * ``<stdout>`` and ``<stderr>`` gets mangled
         * paging is async
-        * we may introduce parrallel execution of manager in the future
+        * we may introduce parallel execution of manager in the future
 
         This explain the use of ``set()`` everywhere.
 

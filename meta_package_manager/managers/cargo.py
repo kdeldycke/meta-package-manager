@@ -82,7 +82,7 @@ class Cargo(PackageManager):
 
         .. danger:
             `Cargo limits search to 100 results <https://doc.rust-lang.org/cargo/commands/cargo-search.html#search-options>`_,
-            and because CLI output is refiltered as mentionned above, the final results can't be garanteed.
+            and because CLI output is refiltered as mentioned above, the final results can't be guaranteed.
 
         .. code-block:: shell-session
 

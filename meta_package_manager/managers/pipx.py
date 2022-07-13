@@ -98,7 +98,7 @@ class Pipx(PackageManager):
 
         .. todo::
 
-            Mimicks ``Pip.outdated()`` operation. There probably is a way to factorize it.
+            Mimics ``Pip.outdated()`` operation. There probably is a way to factorize it.
 
         .. code-block:: shell-session
 

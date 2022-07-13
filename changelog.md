@@ -16,7 +16,7 @@ This version is not released yet and is under active development.
 - \[yarn\] Implements `remove` operation.
 - \[yarn\] Fix, document and cleanup all global commands.
 - \[yarn\] Set minimal `yarn` version to `1.20.0`, as it should have been.
-- \[bar-plugin\] Silence all errors but critical ones on `outdated` invokation to prevent a failing manager to block rendering of the plugin output.
+- \[bar-plugin\] Silence all errors but critical ones on `outdated` invocation to prevent a failing manager to block rendering of the plugin output.
 
 ## {gh}`5.5.0 (2022-07-08) <compare/v5.4.0...v5.5.0>`
 
@@ -108,7 +108,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Allow `installed` and `outdated` commands to be optionally
   implemented by package managers.
 - \[mpm\] Add new `--plugin-output` option to `outdated` command.
-- \[mpm\] Add `tabulate` as direct dependency and refactor table aligment in
+- \[mpm\] Add `tabulate` as direct dependency and refactor table alignment in
   plugin around it.
 - \[mpm\] Rename `--xbar-plugin-path` option to `--bar-plugin-path`.
 - \[mpm\] Remove `-c`/`--cli-format` option.
@@ -170,7 +170,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Allow for package managers to simultaneously set a list of
   pre-commands and environment variables, as well as global arguments before
   and after the custom ones.
-- \[mpm\] Always run unittest in parrallel. Adds development dependency on
+- \[mpm\] Always run unittest in parallel. Adds development dependency on
   `pytest-xdist` and `psutil`.
 - \[mpm\] Use the `tomllib` from the standard library starting with Python
   3.11.
@@ -210,7 +210,7 @@ This version is not released yet and is under active development.
 ## {gh}`4.9.5 (2022-01-11) <compare/v4.9.4...v4.9.5>`
 
 - \[mpm\] Use external workflow for package building and publishing via Poetry.
-- \[mpm\] Reused external label maintainance workflows and definitions.
+- \[mpm\] Reused external label maintenance workflows and definitions.
 - \[mpm\] Add our custom labels to external syncing workflow.
 - \[mpm\] Auto-label sponsors.
 - \[mpm\] Remove changelog code left-overs.
@@ -305,7 +305,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Add new `install` command. Closes {issue}`21`.
 - \[vscode\] Add support for Visual Studio Code plugins.
 - \[mpm\] Finish complete `restore` command implementation. Closes {issue}`38`.
-- \[mpm\] Remove un-enforced poetry-like caret-based version specifiction from
+- \[mpm\] Remove un-enforced poetry-like caret-based version specification from
   TOML backup files.
 - \[mpm\] Forces logger state reset before each CLI call in unittests.
 
@@ -623,7 +623,7 @@ This version is not released yet and is under active development.
 - \[cask\] Fix `cask update` deprecation warning. Closes {issue}`28`.
 - \[mpm\] Activate unittests in Python 3.6.
 - \[mpm\] Replace double by single-width characters in `mpm` output to fix
-  table misalignement. Closes {issue}`30`.
+  table misalignment. Closes {issue}`30`.
 
 ## {gh}`2.2.0 (2016-12-25) <compare/v2.1.1...v2.2.0>`
 
@@ -723,7 +723,7 @@ This version is not released yet and is under active development.
 
 ## {gh}`1.10.0 (2016-10-04) <compare/v1.9.0...v1.10.0>`
 
-- \[mpm\] Add optionnal `version` property on package manager definitions.
+- \[mpm\] Add optional `version` property on package manager definitions.
 - \[mpm\] Allow each package manager to set requirement on its own version.
 - \[mas\] Let `mas` report its own version.
 - \[mas\] Bump minimal requirement of `mas` to 1.3.1.
@@ -746,7 +746,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Rename `package_manager.7h.py` BitBar plugin to
   `meta_package_manager.7h.py`.
 - \[mpm\] Give each package manager its own dedicated short string ID.
-- \[mpm\] Keep a cache of instanciated package manager.
+- \[mpm\] Keep a cache of instantiated package manager.
 - \[mpm\] Add unittests around package manager definitions.
 - \[mpm\] Do not display location of inactive managers, even if hard-coded.
 - \[mpm\] Split-up CLI-producing methods and CLI running methods in

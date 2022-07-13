@@ -177,7 +177,7 @@ def print_table(header_defs, rows, sort_key=None):
         """Serialize line's content for natural sorting.
 
         1. Extract each cell value in the order provided by `sort_order`;
-        2. Strip terminal color formating;
+        2. Strip terminal color formatting;
         3. Then tokenize each cell's content for user-friendly natural sorting.
         """
         sorting_key = []

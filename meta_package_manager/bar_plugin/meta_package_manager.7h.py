@@ -20,10 +20,6 @@ Default update cycle is set to 7 hours so we have a chance to get user's
 attention once a day. Higher frequency might ruin the system as all checks are
 quite resource intensive, and Homebrew might hit GitHub's API calls quota.
 
-Minimal requirement is macOS Catalina (10.15) for both Xbar and SwiftBar.
-Catalina deprecates Python 2.x, and ships with Python 3.7.3. So this plugin is
-required to work with Python 3.7.3 or newer.
-
 - Xbar automatically bridge plugin options between its UI and environment
   variable on script execution. See:
   https://xbarapp.com/docs/2021/03/14/variables-in-xbar.html
@@ -57,6 +53,13 @@ class MPMPlugin:
     The output must supports both Xbar and SwiftBar:
         - https://github.com/matryer/xbar-plugins/blob/main/CONTRIBUTING.md#plugin-api
         - https://github.com/swiftbar/SwiftBar#plugin-api
+    """
+
+    python_min_version = (3, 7, 3)
+    """Minimal requirement is macOS Catalina (10.15) for both Xbar and SwiftBar.
+
+    Catalina deprecates Python 2.x, and ships with Python 3.7.3. So this plugin is
+    required to work with Python 3.7.3 or newer.
     """
 
     mpm_min_version = (5, 0, 0)

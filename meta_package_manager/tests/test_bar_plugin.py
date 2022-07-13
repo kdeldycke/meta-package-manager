@@ -145,3 +145,29 @@ class TestBarPlugin:
         process = subprocess.run((*shell_args, "-c", "-l", bar_plugin.__file__))
         assert process.returncode == 0
         assert not process.stderr
+
+    @pytest.mark.parametrize(
+        "shell_args",
+        (
+            (),
+            ("/bin/bash", "-c"),
+            ("/bin/zsh", "-c"),
+            ("/usr/bin/env",),
+            ("/usr/bin/env", "bash", "-c"),
+            ("/usr/bin/env", "zsh", "-c"),
+        ),
+    )
+    @pytest.mark.parametrize("python_bin", ("python3", "python"))
+    def test_python_shells(self, shell_args, python_bin):
+        """Test Python shells are properly configured in system and all are pointing to v3."""
+        if "-c" in shell_args:
+            args = *shell_args, f"{python_bin} --version"
+        else:
+            args = python_bin, "--version"
+        process = subprocess.run(args, capture_output=True, encoding="utf-8")
+        assert process.returncode == 0
+        assert process.stdout
+        assert not process.stderr
+
+        version = tuple(map(int, process.stdout.split()[1].split(".")))
+        assert version >= bar_plugin.MPMPlugin.python_min_version

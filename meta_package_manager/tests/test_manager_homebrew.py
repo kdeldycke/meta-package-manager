@@ -76,6 +76,9 @@ def install_cask():
             encoding="utf-8",
             env=env_copy({"HOMEBREW_NO_AUTO_UPDATE": "1"}),
         )
+        print(process.stdout)
+        print(process.stderr)
+
         # Restore old formula to its most recent version.
         git_checkout(package_id, "HEAD")
         # Check the cask has been properly installed.

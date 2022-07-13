@@ -9,7 +9,7 @@
 # <xbar.abouturl>https://github.com/kdeldycke/meta-package-manager</xbar.abouturl>
 # <xbar.var>boolean(VAR_SUBMENU_LAYOUT=false): Group packages into a sub-menu for each manager.</xbar.var>
 # <xbar.var>boolean(VAR_TABLE_RENDERING=true): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
-# XXX Deactive font-related options for Xbar. Default variable value does not allow `=` character in Xbar. See: https://github.com/matryer/xbar/issues/832
+# XXX Deactivate font-related options for Xbar. Default variable value does not allow `=` character in Xbar. See: https://github.com/matryer/xbar/issues/832
 # <!--xbar.var>string(VAR_DEFAULT_FONT=""): Default font to use for non-monospaced text.</xbar.var-->
 # <!--xbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Default configuration for monospace fonts, including errors. Is used for table rendering.</xbar.var-->
 # <swiftbar.environment>[VAR_SUBMENU_LAYOUT: false, VAR_TABLE_RENDERING: true, VAR_DEFAULT_FONT: , VAR_MONOSPACE_FONT: font=Menlo size=12]</swiftbar.environment>
@@ -71,8 +71,8 @@ class MPMPlugin:
         system- wide binaries.
 
         macOS does not put ``/usr/local/bin`` or ``/opt/local/bin`` in the ``PATH`` for
-        GUI apps. For some package managers this is a problem. Additioanlly Homebrew and
-        Macports are using different pathes. So, to make sure we can always get to the
+        GUI apps. For some package managers this is a problem. Additionally Homebrew and
+        Macports are using different paths. So, to make sure we can always get to the
         necessary binaries, we overload the path. Current preference order would equate
         to Homebrew, Macports, then system.
         """

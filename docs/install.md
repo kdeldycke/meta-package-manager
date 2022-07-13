@@ -50,7 +50,7 @@ $ brew install hasnep/tap/meta-package-manager
 ```{admonition} Broken Homebrew
 :class: note
 
-If for any reason `brew` gets broken by this external repository, you can easely fix it running:
+If for any reason `brew` gets broken by this external repository, you can easily fix it running:
 
 ```{code-block} shell-session
 $ brew untap hasnep/tap

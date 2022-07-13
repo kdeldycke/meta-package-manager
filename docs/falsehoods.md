@@ -28,7 +28,7 @@ Pre-required reads:
 
 1. Package managers provides the latest version of packages.
 1. Package managers provides clean packages.
-1. Package managers provides stable softwares.
+1. Package managers provides stable software.
 1. Only
    {gh}`one instance of a package manager exist on the system <blob/v2.2.0/meta_package_manager/managers/gem.py#L47-L51>`.
 1. You can downgrade packages.

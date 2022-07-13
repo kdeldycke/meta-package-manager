@@ -61,7 +61,7 @@ from .pool import pool
 
 # Subcommand sections.
 EXPLORE = Section("Explore subcommands")
-MAINTENANCE = Section("Maintainance subcommands")
+MAINTENANCE = Section("Maintenance subcommands")
 SNAPSHOTS = Section("Package snapshots subcommands")
 
 
@@ -77,7 +77,7 @@ def add_manager_to_selection(ctx, param, selected):
     if selected:
         if ctx.obj is None:
             ctx.obj = {"single_manager_selector": []}
-        # Parameter's name is transformed into a Python identifier on instanciation.
+        # Parameter's name is transformed into a Python identifier on instantiation.
         # Reverse the process to get our value.
         # Example: "--apt-mint" => "apt_mint" => "apt-mint"
         manager_id = param.name.replace("_", "-")
@@ -726,7 +726,7 @@ def install(ctx, package_id):
             if len(matches) != 1:
                 raise ValueError("Exact search returned multiple packages.")
 
-        # Allow install subcommand to fail to have the oportunity to catch the CLIError exception and print
+        # Allow install subcommand to fail to have the opportunity to catch the CLIError exception and print
         # a comprehensive message.
         with patch.object(manager, "stop_on_error", True):
             try:
@@ -761,7 +761,7 @@ def upgrade(ctx, all, package_ids):
     -A/--all if no [PACKAGE_IDS]).
 
     Upgrade will only proceed if no ambiguity is uncovered. Packages recognized by multiple
-    managers will be skipped. You can remove that ambiguity by carefully specifiying the subset of
+    managers will be skipped. You can remove that ambiguity by carefully specifying the subset of
     managers to consider for upgrade.
 
     Unknown packages will be skipped.
@@ -863,7 +863,7 @@ def remove(ctx, package_id):
                 continue
             logger.info(f"{package_id} has been installed by {manager.id}.")
 
-        # Allow remove subcommand to fail to have the oportunity to catch the CLIError exception and print
+        # Allow remove subcommand to fail to have the opportunity to catch the CLIError exception and print
         # a comprehensive message.
         with patch.object(manager, "stop_on_error", True):
             try:
@@ -1052,7 +1052,7 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
                     sorted(installed_data[manager.id].items())
                 )
 
-        # Write each section separated by an empy line for readability.
+        # Write each section separated by an empty line for readability.
         for manager_id, packages in installed_data.items():
             f.write("\n")
             f.write(tomli_w.dumps({manager_id: packages}))

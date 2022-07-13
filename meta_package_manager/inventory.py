@@ -94,7 +94,7 @@ def update_readme() -> None:
     readme = Path(__file__).parent.parent.joinpath("readme.md").resolve()
     content = readme.read_text()
 
-    # Extract pre- and post-content surounding the section we're trying to update.
+    # Extract pre- and post-content surrounding the section we're trying to update.
     section_title = "## Supported package managers and operations"
     pre_content, section_start = content.split(section_title, 1)
     post_content = section_start.split("##", 1)[1]

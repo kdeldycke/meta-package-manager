@@ -87,7 +87,7 @@ The documentation you’re currently reading can be built locally with
 $ poetry run sphinx-build -b html ./docs ./docs/html
 ```
 
-The generation of API documention is
+The generation of API documentation is
 {gh}`covered by a dedicated workflow <blob/main/.github/workflows/docs.yaml>`.
 
 ## Screenshots

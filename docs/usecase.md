@@ -87,7 +87,7 @@ feature.
 ## Same package, multiple sources
 
 You just learned of a new CLI you did not known about (`broot`) from a friend.
-Back to your terminal, you can easely search for it across all package
+Back to your terminal, you can easily search for it across all package
 repositories, then choose your preferred package manager to install it:
 
 ```shell-session
@@ -131,7 +131,7 @@ $ mpm list --duplicates
 6 packages total (pip: 2, brew: 1, cargo: 1, gem: 1, npm: 1, cask: 0).
 ```
 
-Now you can easely remove some of them, and no longer have to think hard about
+Now you can easily remove some of them, and no longer have to think hard about
 which is which.
 
 ```shell-session
@@ -207,7 +207,7 @@ Some developers have a hard-time reproducing environment for lambda execution
 onto their local machine. Most of devs use Docker to abstract their runtime
 requirements. But Docker might be too big for some people.
 
-`mpm` can be a lightweigh alternative to Docker here to abstract the runtime
+`mpm` can be a lightweight alternative to Docker here to abstract the runtime
 from their execution environment.
 
 ## Switch systems

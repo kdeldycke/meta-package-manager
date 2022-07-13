@@ -13,7 +13,7 @@ Not a coder? No problem.
 
 You can still provides invaluable information. Open a new issue and document
 there a couple of CLI calls and its output to your manager. With this a contributor or maintainer
-can attempt a blind implementation. From there we'll collectively iterate until we reach a useable level.
+can attempt a blind implementation. From there we'll collectively iterate until we reach a usable level.
 
 This is often the best approach as it sometimes hard to create the same environment as the users.
 

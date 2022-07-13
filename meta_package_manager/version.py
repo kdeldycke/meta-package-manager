@@ -50,7 +50,7 @@ class Token:
         """Convert a ``str`` or an ``int`` to a ``(string, integer)`` couple.
 
         Returns together the original string and its integer representation if
-        convertion is successful and lossless. Else, returns the original value and
+        conversion is successful and lossless. Else, returns the original value and
         ``None``.
         """
         try:
@@ -160,7 +160,7 @@ class TokenizedString:
 
     def __new__(cls, value, *args, **kwargs):
         """Return same object if a ``TokenizedString`` parameter is used at
-        instanciation.
+        instantiation.
 
         .. hint::
 

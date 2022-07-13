@@ -57,7 +57,7 @@ Operations = Enum(
         "cleanup",
     ),
 )
-"""Recognize operation IDs that are implemented by package manager with their specific CLI invokation.
+"""Recognize operation IDs that are implemented by package manager with their specific CLI invocation.
 
 Each operation has its own CLI subcommand.
 """
@@ -284,7 +284,7 @@ class PackageManager(metaclass=MetaPackageManager):
     """Do not actually perform any action, just simulate CLI calls."""
 
     cli_errors: list[CLIError]
-    """Accumulate all CLI errors encountered by the package mananger."""
+    """Accumulate all CLI errors encountered by the package manager."""
 
     package_class: type[Package] = Package
     """The dataclass to use to produce Package objects from the manager."""
@@ -332,7 +332,7 @@ class PackageManager(metaclass=MetaPackageManager):
         Look for the provided ``cli_name`` in this order:
           * first in paths provided by
             :py:attr:`cli_search_path <meta_package_manager.base.PackageManager.cli_search_path>`,
-          * then in all the default places specified by the environment varible (i.e. ``os.getenv("PATH")``).
+          * then in all the default places specified by the environment variable (i.e. ``os.getenv("PATH")``).
 
         Only checks if the file exists. Not its executability.
 
@@ -585,7 +585,7 @@ class PackageManager(metaclass=MetaPackageManager):
         * ``auto_pre_args=False``  to skip the automatic addition of :py:attr:`self.pre_args <meta_package_manager.base.PackageManager.pre_args>`
         * ``auto_post_args=False`` to skip the automatic addition of :py:attr:`self.post_args <meta_package_manager.base.PackageManager.post_args>`
 
-        Each global set of elements can be locally overriden with:
+        Each global set of elements can be locally overridden with:
 
         * ``override_pre_cmds=tuple()``
         * ``override_cli_path=str``
@@ -597,7 +597,7 @@ class PackageManager(metaclass=MetaPackageManager):
         """
         params: list[_Arg | _NestedArgs] = []
 
-        # Sudo replaces any pre-command, be it overriden or automatic.
+        # Sudo replaces any pre-command, be it overridden or automatic.
         if sudo:
             if not is_linux():
                 raise NotImplementedError("sudo only supported on Linux.")
@@ -760,7 +760,7 @@ class PackageManager(metaclass=MetaPackageManager):
             # Look by default into package ID and name.
             search_content = {match.id, match.name}
 
-            # Rejects fuzzy results: only keep packages stricly matching on ID or name.
+            # Rejects fuzzy results: only keep packages strictly matching on ID or name.
             if exact and query not in search_content:
                 continue
 

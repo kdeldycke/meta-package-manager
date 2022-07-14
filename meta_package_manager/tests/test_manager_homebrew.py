@@ -74,7 +74,7 @@ def install_cask():
             ("brew", "reinstall", "--cask", package_id),
             capture_output=True,
             encoding="utf-8",
-            env=env_copy({"HOMEBREW_NO_AUTO_UPDATE": "1"}),
+            # env=env_copy({"HOMEBREW_NO_AUTO_UPDATE": "1"}),
         )
         print(process.stdout)
         print(process.stderr)

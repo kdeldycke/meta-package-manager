@@ -37,19 +37,21 @@ jobs:
           # See what each os came pre-installed with at:
           # https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners
           os_list = {
-              "ubuntu-20.04",
-              "ubuntu-18.04",
+              #"ubuntu-22.04",
+              #"ubuntu-20.04",
+              #"ubuntu-18.04",
+              #"macos-12",
               "macos-11.0",
-              "macos-10.15",
-              "windows-2022",
-              "windows-2019",
+              #"macos-10.15",
+              #"windows-2022",
+              #"windows-2019",
           }
           python_list = {
               "3.7",
-              "3.8",
-              "3.9",
-              "3.10",
-              "3.11.0-alpha.7 - 3.11.0",
+              #"3.8",
+              #"3.9",
+              #"3.10",
+              #"3.11.0-alpha.7 - 3.11.0",
           }
           # Safety check to ensure there is no overlap between the 2 sets.
           assert not os_list.intersection(python_list)

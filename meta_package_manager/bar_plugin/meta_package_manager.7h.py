@@ -72,7 +72,7 @@ class MPMPlugin:
     @staticmethod
     def extended_environment():
         """Returns a tweaked environment extending global path to find non-default
-        system- wide binaries.
+        system-wide binaries.
 
         macOS does not put ``/usr/local/bin`` or ``/opt/local/bin`` in the ``PATH`` for
         GUI apps. For some package managers this is a problem. Additionally Homebrew and

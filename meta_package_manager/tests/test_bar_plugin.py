@@ -52,6 +52,9 @@ class TestBarPlugin:
 
     def plugin_output_checks(self, checklist, extra_env=None):
         """Run the plugin script and check its output against the checklist."""
+
+        print(env_copy(extra_env))
+
         process = subprocess.run(
             bar_plugin.__file__,
             capture_output=True,

@@ -115,7 +115,7 @@ jobs:
     env:
       # Deactivate Homebrew auto-update and verbose output.
       HOMEBREW_NO_ENV_HINTS: "1"
-      HOMEBREW_NO_AUTO_UPDATE": "1"
+      HOMEBREW_NO_AUTO_UPDATE: "1"
     steps:
       - uses: actions/checkout@v3.0.2
 

@@ -173,4 +173,4 @@ class TestBarPlugin:
         assert not process.stderr
 
         version = tuple(map(int, process.stdout.split()[1].split(".")))
-        assert version >= bar_plugin.MPMPlugin.python_min_version
+        assert version >= bar_plugin.python_min_version

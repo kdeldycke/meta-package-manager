@@ -27,12 +27,23 @@ quite resource intensive, and Homebrew might hit GitHub's API calls quota.
 - This is in progress for SwiftBar at:
   https://github.com/swiftbar/SwiftBar/issues/160
 """
+import sys
 
-from __future__ import annotations
+python_min_version = (3, 7, 3)
+"""Minimal requirement is macOS Catalina (10.15) for both Xbar and SwiftBar.
+
+Catalina deprecates Python 2.x, and ships with Python 3.7.3. So this plugin is
+required to work with Python 3.7.3 or newer.
+"""
+
+if sys.version_info < python_min_version:
+    raise SystemError(
+        f"Bar plugin ran with Python {sys.version}, "
+        f"but requires Python >= {'.'.join(map(str, python_min_version))}"
+    )
 
 import os
 import re
-import sys
 from configparser import RawConfigParser
 from shutil import which
 from subprocess import run
@@ -53,13 +64,6 @@ class MPMPlugin:
     The output must supports both Xbar and SwiftBar:
         - https://github.com/matryer/xbar-plugins/blob/main/CONTRIBUTING.md#plugin-api
         - https://github.com/swiftbar/SwiftBar#plugin-api
-    """
-
-    python_min_version = (3, 7, 3)
-    """Minimal requirement is macOS Catalina (10.15) for both Xbar and SwiftBar.
-
-    Catalina deprecates Python 2.x, and ships with Python 3.7.3. So this plugin is
-    required to work with Python 3.7.3 or newer.
     """
 
     mpm_min_version = (5, 0, 0)

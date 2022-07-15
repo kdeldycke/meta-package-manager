@@ -40,18 +40,18 @@ jobs:
               #"ubuntu-22.04",
               #"ubuntu-20.04",
               #"ubuntu-18.04",
-              #"macos-12",
+              "macos-12",
               "macos-11.0",
-              #"macos-10.15",
+              "macos-10.15",
               #"windows-2022",
               #"windows-2019",
           }
           python_list = {
               "3.7",
-              #"3.8",
-              #"3.9",
-              #"3.10",
-              #"3.11.0-alpha.7 - 3.11.0",
+              "3.8",
+              "3.9",
+              "3.10",
+              "3.11.0-alpha.7 - 3.11.0",
           }
           # Safety check to ensure there is no overlap between the 2 sets.
           assert not os_list.intersection(python_list)
@@ -66,7 +66,7 @@ jobs:
               # https://github.com/Homebrew/brew/pull/9447
               # https://github.com/Homebrew/brew/issues/9420
               # https://github.com/Homebrew/brew/issues/12791
-              {"macos-10.15"},
+              #{"macos-10.15"},
               # Windows tests all prematurely ends with the following error:
               # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
               # C:\hostedtoolcache\windows\Python\3.9.12\x64\lib\threading.py:316: KeyboardInterrupt

@@ -61,7 +61,6 @@ def install_cask():
             ("git", "-C", get_cask_path(), "checkout", commit, f"{package_id}.rb")
         )
         assert not process.stderr
-        print(process.stdout)
         assert process.returncode == 0
 
     def _install_cask(package_id, commit):
@@ -74,10 +73,8 @@ def install_cask():
             ("brew", "reinstall", "--cask", package_id),
             capture_output=True,
             encoding="utf-8",
-            # env=env_copy({"HOMEBREW_NO_AUTO_UPDATE": "1"}),
+            env=env_copy({"HOMEBREW_NO_AUTO_UPDATE": "1"}),
         )
-        print(process.stdout)
-        print(process.stderr)
 
         # Restore old formula to its most recent version.
         git_checkout(package_id, "HEAD")

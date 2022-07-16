@@ -385,14 +385,22 @@ jobs:
           poetry run mpm installed
       - name: Python version debug
         run: |
-          python --version || true
-          python3 --version || true
-          /usr/bin/env python --version || true
-          /usr/bin/env python3 --version || true
-          poetry run python --version || true
-          poetry run python3 --version || true
-          poetry run /usr/bin/env python --version || true
-          poetry run /usr/bin/env python3 --version || true
+          python --version
+          python3 --version
+          /usr/bin/env python --version
+          /usr/bin/env python3 --version
+          poetry run python --version
+          poetry run python3 --version
+          poetry run /usr/bin/env python --version
+          poetry run /usr/bin/env python3 --version
+          poetry run /bin/bash -c 'python --version'
+          poetry run /bin/bash -c 'python3 --version'
+          poetry run /bin/bash -c '/usr/bin/env python --version'
+          poetry run /bin/bash -c '/usr/bin/env python3 --version'
+          poetry run /bin/zsh -c 'python --version'
+          poetry run /bin/zsh -c 'python3 --version'
+          poetry run /bin/zsh -c '/usr/bin/env python --version'
+          poetry run /bin/zsh -c '/usr/bin/env python3 --version'
 
       # Prepare env for tests
       - name: Hack to fix coverage

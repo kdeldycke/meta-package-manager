@@ -157,13 +157,21 @@ class TestBarPlugin:
             ("/usr/bin/env", "zsh", "-c"),
         ),
     )
-    @pytest.mark.parametrize("python_bin", ("python3", "python"))
+    @pytest.mark.parametrize(
+        "python_bin",
+        (
+            ("python",),
+            ("python3",),
+            ("/usr/bin/env", "python"),
+            ("/usr/bin/env", "python3"),
+        ),
+    )
     def test_python_shells(self, shell_args, python_bin):
         """Test Python shells are properly configured in system and all are pointing to v3."""
         if "-c" in shell_args:
-            args = *shell_args, f"{python_bin} --version"
+            args = *shell_args, f"{' '.join(python_bin)} --version"
         else:
-            args = python_bin, "--version"
+            args = *python_bin, "--version"
         process = subprocess.run(args, capture_output=True, encoding="utf-8")
         assert process.returncode == 0
         assert process.stdout

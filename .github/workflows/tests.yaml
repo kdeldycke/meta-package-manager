@@ -131,6 +131,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew install python@3.10
+          sudo brew link python@3.10
           # Python 3.9 is the canonical default Python on brew, not 3.10.
           echo "$(brew --prefix python@3.10)/libexec/bin" >> $GITHUB_PATH
           echo "$(brew --prefix python@3.10)/bin"         >> $GITHUB_PATH

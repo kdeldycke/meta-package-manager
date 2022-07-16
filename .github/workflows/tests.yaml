@@ -389,6 +389,10 @@ jobs:
           python3 --version || true
           /usr/bin/env python --version || true
           /usr/bin/env python3 --version || true
+          poetry run python --version || true
+          poetry run python3 --version || true
+          poetry run /usr/bin/env python --version || true
+          poetry run /usr/bin/env python3 --version || true
 
       # Prepare env for tests
       - name: Hack to fix coverage

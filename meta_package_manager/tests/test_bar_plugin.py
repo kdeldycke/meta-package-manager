@@ -51,6 +51,17 @@ def _shell_invokation_matrix():
         # Options.
         (
             "-c",
+            # XXX Login shell defaults to Python 2.7 on GitHub macOS runners and is picked up by surprise for bar plugin tests:
+            # Traceback (most recent call last):
+            #   File "/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/runpy.py",
+            #   line 163, in _run_module_as_main
+            #     mod_name, _Error)
+            #   File "/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/runpy.py",
+            #   line 111, in _get_module_details
+            #     __import__(mod_name)  # Do not catch exceptions initializing package
+            #   File "meta_package_manager/__init__.py", line 33, in <module>
+            #     from click_extra.logging import logger
+            # ImportError: No module named click_extra.logging
             # ("--login", "-c"),
         ),
     )
@@ -91,19 +102,8 @@ class TestBarPlugin:
     def plugin_output_checks(self, checklist, extra_env=None):
         """Run the plugin script and check its output against the checklist."""
 
-        # XXX To make sure masOS' default Python 2.7 is not picked up by surprise for bar plugin tests:
-        # Traceback (most recent call last):
-        #   File "/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/runpy.py",
-        #   line 163, in _run_module_as_main
-        #     mod_name, _Error)
-        #   File "/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/runpy.py",
-        #   line 111, in _get_module_details
-        #     __import__(mod_name)  # Do not catch exceptions initializing package
-        #   File "meta_package_manager/__init__.py", line 33, in <module>
-        #     from click_extra.logging import logger
-        # ImportError: No module named click_extra.logging
         process = subprocess.run(
-            ("python3", bar_plugin.__file__),
+            bar_plugin.__file__,
             capture_output=True,
             encoding="utf-8",
             env=env_copy(extra_env),

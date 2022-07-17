@@ -15,6 +15,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Deactivate login shell tests.
 - \[mpm\] Force Homebrew tap repair in tests.
 - \[mpm\] Dynamiccaly get location of Homebrew Cask formulas in tests.
+- \[mpm\] Install `dnf` in tests as of `ubuntu-22.04`. Closes {issue}`563`.
 - \[mpm\] Add `upgrade_all` operation in support matrix.
 
 ## {gh}`5.5.1 (2022-07-08) <compare/v5.5.0...v5.5.1>`

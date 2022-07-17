@@ -20,12 +20,46 @@ from __future__ import annotations
 import re
 import subprocess
 from collections import Counter
+from itertools import product
 
 import pytest
+from boltons.iterutils import flatten
 from click_extra.run import env_copy
 from click_extra.tests.conftest import unless_macos
 
 from .. import bar_plugin
+from ..base import PackageManager
+
+
+def _invokation_matrix(*iterables):
+    """Pre-compute a matrix of all possible options for invokation."""
+    for args in product(*iterables):
+        yield PackageManager._args_cleanup(args)
+
+
+def _shell_invokation_matrix():
+    """Pre-compute a matrix of all possible options used for shell invokation."""
+    return _invokation_matrix(
+        # Env prefixes.
+        (None, "/usr/bin/env"),
+        # Naked and full binary paths.
+        flatten((bin_id, f"/bin/{bin_id}") for bin_id in ("bash", "zsh")),
+        # Options.
+        (
+            "-c",
+            ("--login", "-c"),
+        ),
+    )
+
+
+def _python_invokation_matrix():
+    """Pre-compute a matrix of all possible options used for python invokation."""
+    return _invokation_matrix(
+        # Env prefixes.
+        (None, "/usr/bin/env"),
+        # Binary paths
+        ("python", "python3"),
+    )
 
 
 @unless_macos
@@ -127,52 +161,31 @@ class TestBarPlugin:
         self.plugin_output_checks(extra_checks, extra_env=extra_env)
 
     @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
-    @pytest.mark.parametrize(
-        "shell_args",
-        (
-            ("/bin/bash",),
-            ("/bin/zsh",),
-            ("/usr/bin/env", "bash"),
-            ("/usr/bin/env", "zsh"),
-        ),
-    )
-    def test_shells(self, shell_args):
+    @pytest.mark.parametrize("shell_args", (None, *_shell_invokation_matrix()))
+    def test_plugin_shell_invokation(self, shell_args):
         """Test execution of plugin on different shells.
 
         See the list of shell supported by SwiftBar at:
         https://github.com/swiftbar/SwiftBar/commit/366695d594884fe141bc1752ab0f25d2c43334fa
         """
-        process = subprocess.run((*shell_args, "-c", "-l", bar_plugin.__file__))
+        process = subprocess.run(
+            PackageManager._args_cleanup(shell_args, bar_plugin.__file__)
+        )
         assert process.returncode == 0
         assert not process.stderr
 
-    @pytest.mark.parametrize(
-        "shell_args",
-        (
-            (),
-            ("/bin/bash", "-c"),
-            ("/bin/zsh", "-c"),
-            ("/usr/bin/env",),
-            ("/usr/bin/env", "bash", "-c"),
-            ("/usr/bin/env", "zsh", "-c"),
-        ),
-    )
-    @pytest.mark.parametrize(
-        "python_bin",
-        (
-            ("python",),
-            ("python3",),
-            ("/usr/bin/env", "python"),
-            ("/usr/bin/env", "python3"),
-        ),
-    )
-    def test_python_shells(self, shell_args, python_bin):
-        """Test Python shells are properly configured in system and all are pointing to v3."""
-        if "-c" in shell_args:
-            args = *shell_args, f"{' '.join(python_bin)} --version"
+    @pytest.mark.parametrize("shell_args", (None, *_shell_invokation_matrix()))
+    @pytest.mark.parametrize("python_args", _python_invokation_matrix())
+    def test_python_shell_invokation(self, shell_args, python_args):
+        """Test any Python shell invokation is properly configured and all are compatible with plugin requirements."""
+        if shell_args is not None:
+            raw_args = *shell_args, f"{' '.join(python_args)} --version"
         else:
-            args = *python_bin, "--version"
-        process = subprocess.run(args, capture_output=True, encoding="utf-8")
+            raw_args = *python_args, "--version"
+        clean_args = PackageManager._args_cleanup(raw_args)
+
+        process = subprocess.run(clean_args, capture_output=True, encoding="utf-8")
+
         assert process.returncode == 0
         assert process.stdout
         assert not process.stderr

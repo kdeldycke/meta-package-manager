@@ -262,10 +262,13 @@ jobs:
           brew install mas
 
       # Flatpak
+      - name: Ubuntu < 22.04 - Setup Flatpak repo
+        if: matrix.os == 'ubuntu-18.04' || matrix.os == 'ubuntu-20.04'
+        run: |
+          sudo add-apt-repository --yes ppa:alexlarsson/flatpak
       - name: Linux - Install Flatpak
         if: runner.os == 'Linux'
         run: |
-          sudo add-apt-repository --yes ppa:alexlarsson/flatpak
           sudo apt install --yes flatpak
 
       # DNF

@@ -270,16 +270,15 @@ jobs:
 
       # DNF
       - name: Linux - Install DNF
-        # XXX DNF has been added in Ubuntu 21.04, not before.
-        if: matrix.os == 'ubuntu-21.04'
-        # if: runner.os == 'Linux'
+        # DNF has only been added in Ubuntu 21.04, not before.
+        if: runner.os == 'Linux' && matrix.os != 'ubuntu-18.04' && matrix.os != 'ubuntu-20.04'
         run: |
           sudo apt install --yes dnf
 
       # Zypper
       - name: Linux - Install Zypper
-        # XXX Zypper has been added in Ubuntu 20.04, not before.
-        if: matrix.os == 'ubuntu-20.04'
+        # Zypper has only been added in Ubuntu 20.04, not before.
+        if: runner.os == 'Linux' && matrix.os != 'ubuntu-18.04'
         run: |
           sudo apt install --yes zypper
 

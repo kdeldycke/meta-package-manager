@@ -38,7 +38,11 @@ def _invokation_matrix(*iterables):
 
 
 def _shell_invokation_matrix():
-    """Pre-compute a matrix of all possible options used for shell invokation."""
+    """Pre-compute a matrix of all possible options used for shell invokation.
+
+    See the list of shell supported by SwiftBar at:
+    https://github.com/swiftbar/SwiftBar/commit/366695d594884fe141bc1752ab0f25d2c43334fa
+    """
     return _invokation_matrix(
         # Env prefixes.
         (None, "/usr/bin/env"),
@@ -86,6 +90,18 @@ class TestBarPlugin:
 
     def plugin_output_checks(self, checklist, extra_env=None):
         """Run the plugin script and check its output against the checklist."""
+
+        # XXX To make sure masOS' default Python 2.7 is not picked up by surprise for bar plugin tests:
+        # Traceback (most recent call last):
+        #   File "/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/runpy.py",
+        #   line 163, in _run_module_as_main
+        #     mod_name, _Error)
+        #   File "/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/runpy.py",
+        #   line 111, in _get_module_details
+        #     __import__(mod_name)  # Do not catch exceptions initializing package
+        #   File "meta_package_manager/__init__.py", line 33, in <module>
+        #     from click_extra.logging import logger
+        # ImportError: No module named click_extra.logging
         process = subprocess.run(
             ("python3", bar_plugin.__file__),
             capture_output=True,
@@ -163,11 +179,7 @@ class TestBarPlugin:
     @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
     @pytest.mark.parametrize("shell_args", (None, *_shell_invokation_matrix()))
     def test_plugin_shell_invokation(self, shell_args):
-        """Test execution of plugin on different shells.
-
-        See the list of shell supported by SwiftBar at:
-        https://github.com/swiftbar/SwiftBar/commit/366695d594884fe141bc1752ab0f25d2c43334fa
-        """
+        """Test execution of plugin on different shells."""
         process = subprocess.run(
             PackageManager._args_cleanup(shell_args, bar_plugin.__file__)
         )

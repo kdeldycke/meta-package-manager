@@ -58,15 +58,6 @@ jobs:
 
           # List of unstable creiterions.
           unstable = [
-              # Brew on macOS 10.15 image is plagged with "shallow clone" issues, for which I spent too much
-              # time trying to fix. See:
-              # https://stackoverflow.com/questions/45782694/how-to-remove-the-shallow-clone-warning-from-homebrew
-              # https://stackoverflow.com/questions/65320304/error-while-updating-homebrew-on-my-macbook-pro-big-sur
-              # https://github.com/Homebrew/brew/pull/9383
-              # https://github.com/Homebrew/brew/pull/9447
-              # https://github.com/Homebrew/brew/issues/9420
-              # https://github.com/Homebrew/brew/issues/12791
-              #{"macos-10.15"},
               # Windows tests all prematurely ends with the following error:
               # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
               # C:\hostedtoolcache\windows\Python\3.9.12\x64\lib\threading.py:316: KeyboardInterrupt

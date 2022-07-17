@@ -318,10 +318,20 @@ jobs:
         if: runner.os != 'Linux'
         run: |
           gem update --system
-      - name: Linux - Upgrade gem
-        if: runner.os == 'Linux'
+      - name: Linux - Ubuntu <= 21.04 - Upgrade gem with itself
+        if: matrix.os == 'ubuntu-18.04' || matrix.os == 'ubuntu-20.04'
         run: |
           sudo gem update --system
+      - name: Linux - Ubuntu >= 21.04 - Upgrade gem with APT
+        # As of Ubuntu 21.04, RubyGems is exclusively managed by APT. A call to "sudo gem update --system"
+        # ends up with the following error:
+        #   ERROR:  Your RubyGems was installed trough APT, and upgrading it through RubyGems
+        #   itself is unsupported. If you really need the latest version of RubyGems (tip:
+        #   you usually don't), then you need to install RubyGems (and Ruby) manually,
+        #   maybe using tools like ruby-install, rvm, etc.
+        if: runner.os == 'Linux' && matrix.os != 'ubuntu-18.04' && matrix.os != 'ubuntu-20.04'
+        run: |
+          sudo apt install --yes ruby-rubygems
 
       # SteamCMD
       - name: macOS - Install SteamCMD

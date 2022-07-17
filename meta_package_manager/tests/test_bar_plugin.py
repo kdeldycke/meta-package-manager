@@ -51,7 +51,7 @@ def _shell_invokation_matrix():
         # Options.
         (
             "-c",
-            ("--login", "-c"),
+            # ("--login", "-c"),
         ),
     )
 

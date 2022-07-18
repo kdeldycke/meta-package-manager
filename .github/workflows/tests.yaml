@@ -173,7 +173,7 @@ jobs:
           choco upgrade chocolatey
 
       # NPM
-      - name: "Linux - Ubuntu 18.04 - Install npm requirements"
+      - name: "Ubuntu 18.04 - Install npm requirements"
         if: matrix.os == 'ubuntu-18.04'
         run: |
           sudo apt install --yes node-gyp nodejs-dev libssl1.0-dev
@@ -279,7 +279,7 @@ jobs:
           sudo apt install --yes dnf
 
       # Zypper
-      - name: Linux - Install Zypper
+      - name: Ubuntu >= 20.04 - Install Zypper
         # Zypper has only been added in Ubuntu 20.04, not before.
         if: runner.os == 'Linux' && matrix.os != 'ubuntu-18.04'
         run: |
@@ -321,11 +321,11 @@ jobs:
         if: runner.os != 'Linux'
         run: |
           gem update --system
-      - name: Linux - Ubuntu <= 21.04 - Upgrade gem with itself
+      - name: Ubuntu < 21.04 - Upgrade gem with itself
         if: matrix.os == 'ubuntu-18.04' || matrix.os == 'ubuntu-20.04'
         run: |
           sudo gem update --system
-      - name: Linux - Ubuntu >= 21.04 - Upgrade gem with APT
+      - name: Ubuntu >= 21.04 - Upgrade gem with APT
         # As of Ubuntu 21.04, RubyGems is exclusively managed by APT. A call to "sudo gem update --system"
         # ends up with the following error:
         #   ERROR:  Your RubyGems was installed trough APT, and upgrading it through RubyGems

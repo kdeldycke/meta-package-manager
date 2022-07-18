@@ -64,7 +64,10 @@ def install_cask():
         assert process.returncode == 0
 
     def brew_cleanup():
-        process = subprocess.run(("brew", "cleanup", "-s", "--prune=all"))
+        process = subprocess.run(
+            ("brew", "cleanup", "-s", "--prune=all"),
+            env=env_copy({"HOMEBREW_NO_AUTO_UPDATE": "1"}),
+        )
         assert not process.stderr
         assert process.returncode == 0
 

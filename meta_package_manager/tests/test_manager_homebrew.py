@@ -63,10 +63,18 @@ def install_cask():
         assert not process.stderr
         assert process.returncode == 0
 
+    def brew_cleanup():
+        process = subprocess.run(("brew", "cleanup", "-s", "--prune=all"))
+        assert not process.stderr
+        assert process.returncode == 0
+
     def _install_cask(package_id, commit):
         packages.add(package_id)
+
         # Fetch locally the old version of the Cask's formula.
         git_checkout(package_id, commit)
+        brew_cleanup()
+
         # Install the cask but bypass its local cache auto-update: we want to
         # force brew to rely on our formula from the past.
         process = subprocess.run(
@@ -78,7 +86,11 @@ def install_cask():
 
         # Restore old formula to its most recent version.
         git_checkout(package_id, "HEAD")
+        brew_cleanup()
+
         # Check the cask has been properly installed.
+        print("XXX STDERR :: ", process.stderr)
+        print("XXX STDOUT :: ", process.stdout)
         if process.stderr:
             assert "is already installed" not in process.stderr
         assert f"{package_id} was successfully installed!" in process.stdout

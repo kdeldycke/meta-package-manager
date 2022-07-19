@@ -42,6 +42,28 @@ def _shell_invokation_matrix():
 
     See the list of shell supported by SwiftBar at:
     https://github.com/swiftbar/SwiftBar/commit/366695d594884fe141bc1752ab0f25d2c43334fa
+
+    Returns:
+
+    .. code-block:: python
+        (
+            ('bash', '-c'),
+            ('bash', '--login', '-c'),
+            ('/bin/bash', '-c'),
+            ('/bin/bash', '--login', '-c'),
+            ('zsh', '-c'),
+            ('zsh', '--login', '-c'),
+            ('/bin/zsh', '-c'),
+            ('/bin/zsh', '--login', '-c'),
+            ('/usr/bin/env', 'bash', '-c'),
+            ('/usr/bin/env', 'bash', '--login', '-c'),
+            ('/usr/bin/env', '/bin/bash', '-c'),
+            ('/usr/bin/env', '/bin/bash', '--login', '-c'),
+            ('/usr/bin/env', 'zsh', '-c'),
+            ('/usr/bin/env', 'zsh', '--login', '-c'),
+            ('/usr/bin/env', '/bin/zsh', '-c'),
+            ('/usr/bin/env', '/bin/zsh', '--login', '-c'),
+        )
     """
     return _invokation_matrix(
         # Env prefixes.
@@ -68,7 +90,18 @@ def _shell_invokation_matrix():
 
 
 def _python_invokation_matrix():
-    """Pre-compute a matrix of all possible options used for python invokation."""
+    """Pre-compute a matrix of all possible options used for python invokation.
+
+    Returns:
+
+    .. code-block:: python
+        (
+            ('python',),
+            ('python3',),
+            ('/usr/bin/env', 'python'),
+            ('/usr/bin/env', 'python3'),
+        )
+    """
     return _invokation_matrix(
         # Env prefixes.
         (None, "/usr/bin/env"),

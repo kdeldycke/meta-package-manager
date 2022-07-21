@@ -36,10 +36,16 @@ Catalina deprecates Python 2.x, and ships with Python 3.7.3. So this plugin is
 required to work with Python 3.7.3 or newer.
 """
 
+
+def v_to_str(version_tuple):
+    """Transforms into a string a tuple of integers representing a version."""
+    return ".".join(map(str, version_tuple))
+
+
 if sys.version_info < python_min_version:
     raise SystemError(
         f"Bar plugin ran with Python {sys.version}, "
-        f"but requires Python >= {'.'.join(map(str, python_min_version))}"
+        f"but requires Python >= {v_to_str(python_min_version)}"
     )
 
 import os
@@ -265,7 +271,7 @@ class MPMPlugin:
             self.print_error(error)
             print("---")
             action_msg = "Install" if not mpm_installed else "Upgrade"
-            min_version_str = ".".join(map(str, self.mpm_min_version))
+            min_version_str = v_to_str(self.mpm_min_version)
             self.pp(
                 f"{action_msg} mpm >= v{min_version_str}",
                 f"shell={self.python_path}",

@@ -110,6 +110,17 @@ def _python_invokation_matrix():
     )
 
 
+def _subcmd_args(invoke_args: None | tuple[str], *subcmd_args: tuple[str]):
+    """Cleanup args and eventually concatenate all ``subcmd_args`` items to a space separated string if ``invoke_args`` is defined and its last argument is equal to ``-c``."""
+    raw_args = []
+    if invoke_args:
+        raw_args.extend(invoke_args)
+        if invoke_args[-1] == "-c":
+            subcmd_args = (" ".join(subcmd_args),)
+    raw_args.extend(subcmd_args)
+    return PackageManager._args_cleanup(raw_args)
+
+
 @unless_macos
 class TestBarPlugin:
 
@@ -224,13 +235,11 @@ class TestBarPlugin:
     @pytest.mark.parametrize("python_args", _python_invokation_matrix())
     def test_python_shell_invokation(self, shell_args, python_args):
         """Test any Python shell invokation is properly configured and all are compatible with plugin requirements."""
-        if shell_args is not None:
-            raw_args = *shell_args, f"{' '.join(python_args)} --version"
-        else:
-            raw_args = *python_args, "--version"
-        clean_args = PackageManager._args_cleanup(raw_args)
-
-        process = subprocess.run(clean_args, capture_output=True, encoding="utf-8")
+        process = subprocess.run(
+            _subcmd_args(shell_args, *python_args, "--version"),
+            capture_output=True,
+            encoding="utf-8",
+        )
 
         assert process.returncode == 0
         assert process.stdout

@@ -102,7 +102,6 @@ class Pip(PackageManager):
         output = self.run_cli("list", "--format=json", "--verbose", "--quiet")
 
         if output:
-            print(f"XXXXX {output} ZZZZZ")
             for package in json.loads(output):
                 yield self.package(
                     id=package["name"], installed_version=package["version"]

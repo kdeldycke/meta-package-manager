@@ -224,12 +224,19 @@ class TestBarPlugin:
     @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
     @pytest.mark.parametrize("shell_args", (None, *_shell_invokation_matrix()))
     def test_plugin_shell_invokation(self, shell_args):
-        """Test execution of plugin on different shells."""
+        """Test execution of plugin on different shells.
+
+        Do not execute the complete search for outdated packages, just stop at searching for the mpm executable and extract its version.
+        """
         process = subprocess.run(
-            PackageManager._args_cleanup(shell_args, bar_plugin.__file__)
+            _subcmd_args(shell_args, bar_plugin.__file__, "--check-mpm"),
+            capture_output=True,
+            encoding="utf-8",
         )
+
         assert process.returncode == 0
         assert not process.stderr
+        assert re.match(r"^.+ v\d+\.\d+\.\d+$", process.stdout)
 
     @pytest.mark.parametrize("shell_args", (None, *_shell_invokation_matrix()))
     @pytest.mark.parametrize("python_args", _python_invokation_matrix())

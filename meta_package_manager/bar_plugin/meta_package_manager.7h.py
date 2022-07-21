@@ -50,6 +50,7 @@ if sys.version_info < python_min_version:
 
 import os
 import re
+from argparse import ArgumentParser, BooleanOptionalAction
 from configparser import RawConfigParser
 from shutil import which
 from subprocess import run
@@ -202,6 +203,34 @@ class MPMPlugin:
             return (mpm_exec,)
         return self.python_path, "-m", "meta_package_manager"
 
+    def check_mpm(self):
+        """Test-run mpm execution and extract its version."""
+        error = None
+        try:
+            process = run(
+                (*self.mpm_exec, "--version"), capture_output=True, encoding="utf-8"
+            )
+            error = process.stderr
+        except FileNotFoundError as ex:
+            error = ex
+
+        installed = False
+        up_to_date = False
+        # Is mpm CLI installed on the system?
+        if not process.returncode and not error:
+            installed = True
+            # Is mpm too old?
+            version_string = (
+                re.compile(r".*\s+(?P<version>[0-9\.]+)$", re.MULTILINE)
+                .search(process.stdout)
+                .groupdict()["version"]
+            )
+            mpm_version = tuple(map(int, version_string.split(".")))
+            if mpm_version >= self.mpm_min_version:
+                up_to_date = True
+
+        return installed, mpm_version, up_to_date, error
+
     @staticmethod
     def pp(*args):
         """Print one menu-line with the Xbar/SwiftBar dialect.
@@ -241,31 +270,7 @@ class MPMPlugin:
 
     def print_menu(self):
         """Print the main menu."""
-        # Test mpm execution.
-        error = None
-        try:
-            process = run(
-                (*self.mpm_exec, "--version"), capture_output=True, encoding="utf-8"
-            )
-            error = process.stderr
-        except FileNotFoundError as ex:
-            error = ex
-
-        mpm_installed = False
-        mpm_up_to_date = False
-        # Is mpm CLI installed on the system?
-        if not process.returncode and not error:
-            mpm_installed = True
-            # Is mpm too old?
-            version_string = (
-                re.compile(r".*\s+(?P<version>[0-9\.]+)$", re.MULTILINE)
-                .search(process.stdout)
-                .groupdict()["version"]
-            )
-            mpm_version = tuple(map(int, version_string.split(".")))
-            if mpm_version >= self.mpm_min_version:
-                mpm_up_to_date = True
-
+        mpm_installed, _, mpm_up_to_date, error = self.check_mpm()
         if not mpm_installed or not mpm_up_to_date:
             self.print_error_header()
             self.print_error(error)
@@ -317,7 +322,29 @@ class MPMPlugin:
 
 if __name__ == "__main__":
 
+    parser = ArgumentParser()
+    parser.add_argument(
+        "--check-mpm",
+        action=BooleanOptionalAction,
+        help="Locate mpm on the system and check its version.",
+    )
+    args = parser.parse_args()
+
     # Wrap plugin execution with our custom environment variables to avoid
     # environment leaks.
     with patch.dict("os.environ", MPMPlugin.extended_environment()):
-        MPMPlugin().print_menu()
+        plugin = MPMPlugin()
+
+        if args.check_mpm:
+            mpm_installed, mpm_version, mpm_up_to_date, error = plugin.check_mpm()
+            if not mpm_installed:
+                raise FileNotFoundError(error)
+            if not mpm_up_to_date:
+                raise ValueError(
+                    f"{plugin.mpm_exec} is too old: "
+                    f"{v_to_str(mpm_version)} < {v_to_str(plugin.mpm_min_version)}"
+                )
+            print(f"{' '.join(plugin.mpm_exec)} v{v_to_str(mpm_version)}")
+
+        else:
+            plugin.print_menu()

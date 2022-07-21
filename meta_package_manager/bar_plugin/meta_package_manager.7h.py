@@ -48,9 +48,9 @@ if sys.version_info < python_min_version:
         f"but requires Python >= {v_to_str(python_min_version)}"
     )
 
+import argparse
 import os
 import re
-from argparse import ArgumentParser, BooleanOptionalAction
 from configparser import RawConfigParser
 from shutil import which
 from subprocess import run
@@ -322,10 +322,10 @@ class MPMPlugin:
 
 if __name__ == "__main__":
 
-    parser = ArgumentParser()
+    parser = argparse.ArgumentParser()
     parser.add_argument(
         "--check-mpm",
-        action=BooleanOptionalAction,
+        action="store_true",
         help="Locate mpm on the system and check its version.",
     )
     args = parser.parse_args()

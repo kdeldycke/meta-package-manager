@@ -92,8 +92,6 @@ def install_cask():
         brew_cleanup()
 
         # Check the cask has been properly installed.
-        print("XXX STDERR :: ", process.stderr)
-        print("XXX STDOUT :: ", process.stdout)
         if process.stderr:
             assert "is already installed" not in process.stderr
         assert f"{package_id} was successfully installed!" in process.stdout

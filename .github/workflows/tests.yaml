@@ -126,7 +126,9 @@ jobs:
       # Pip
       - name: Upgrade pip and setuptools
         run: |
-          python -m pip install --upgrade setuptools pip
+          python -m pip install --upgrade setuptools
+          # XXX Target development pip version while we wait for a 22.2.1 release.
+          python -m pip install --upgrade "pip @ git+https://github.com/pypa/pip.git@0d4e9eb72253c008f2790482e664ce92198c5240"
 
       # Pipx
       - name: Install pipx

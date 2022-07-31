@@ -182,9 +182,9 @@ jobs:
       - name: macOS - Install npm
         if: runner.os == 'macOS'
         # Error: Refusing to uninstall /usr/local/Cellar/node@16/16.15.1
-        # because it is required by mongodb-community and mongosh, which are currently installed.
+        # because it is required by mongosh, which is currently installed.
         run: |
-          brew uninstall node@16 mongodb-community mongosh
+          brew uninstall node@16 mongosh
           brew install npm
       - name: Windows - Upgrade npm
         if: runner.os == 'Windows'

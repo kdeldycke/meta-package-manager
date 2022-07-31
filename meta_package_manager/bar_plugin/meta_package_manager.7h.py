@@ -215,6 +215,7 @@ class MPMPlugin:
             error = ex
 
         installed = False
+        mpm_version = None
         up_to_date = False
         # Is mpm CLI installed on the system?
         if not process.returncode and not error:

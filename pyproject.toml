@@ -116,11 +116,6 @@ typing-extensions = { version = "^4.3.0", python = "<= 3.7" }
 [tool.poetry.scripts]
 mpm = 'meta_package_manager.cli:mpm'
 
-[tool.black]
-# "You should include all Python versions that you want your code to run under."
-# Source: https://github.com/psf/black/issues/751
-target-version = ['py37', 'py38', 'py39', 'py310']
-
 [tool.pylint.MASTER]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html
 [tool.pylint."messages control"]
@@ -132,7 +127,6 @@ disable = "C0114, W0511, W1203"
 
 [tool.mypy]
 warn_unused_configs = true
-#python_version = "3.7"
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_return_any = true

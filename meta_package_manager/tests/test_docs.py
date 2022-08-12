@@ -52,7 +52,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 def test_project_metadata():
     # Fetch general information about the project from pyproject.toml.
-    toml_path = Path(__file__).parent.joinpath("../../pyproject.toml").resolve()
+    toml_path = PROJECT_ROOT.joinpath("pyproject.toml").resolve()
     toml_config = tomllib.loads(toml_path.read_text(encoding="utf-8"))
     # Check all managers are referenced in Python package keywords.
     assert set(pool.all_manager_ids).issubset(toml_config["tool"]["poetry"]["keywords"])

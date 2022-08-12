@@ -37,6 +37,8 @@ class SteamCMD(PackageManager):
         Evaluate `steam-cli <https://github.com/berenm/steam-cli>`_ as an alternative.
     """
 
+    name = "Valve Steam"
+
     homepage_url = "https://developer.valvesoftware.com/wiki/SteamCMD"
 
     platforms = frozenset({MACOS, LINUX, WINDOWS})

@@ -467,6 +467,16 @@ class Homebrew(PackageManager):
         """
         return self.build_cli("upgrade", package_id)
 
+    def remove(self, package_id: str) -> str:
+        """Removes a package.
+
+        .. code-block:: shell-session
+
+            ► brew uninstall bat
+            Uninstalling /usr/local/Cellar/bat/0.21.0... (14 files, 5MB)
+        """
+        return self.run_cli("uninstall", package_id)
+
     def sync(self) -> None:
         """Sync package metadata.
 

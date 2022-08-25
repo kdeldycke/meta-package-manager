@@ -6,6 +6,7 @@
 This version is not released yet and is under active development.
 ```
 
+- \[brew,cask\] Add support for `remove` operation in homebrew.
 - \[bar-plugin\] Check for minimal Python version.
 - \[mpm\] Deactivate cached property on base class. Reduces performances but fix tests.
 - \[mpm\] Run tests on `ubuntu-22.04` and `macos-12`.

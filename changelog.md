@@ -10,7 +10,7 @@ This version is not released yet and is under active development.
 - \[bar-plugin\] Check for minimal Python version.
 - \[mpm\] Deactivate cached property on base class. Reduces performances but fix tests.
 - \[mpm\] Run tests on `ubuntu-22.04` and `macos-12`.
-- \[mpm\] Remove tests on `macos-10.15`, its been deprecated by GitHub.
+- \[mpm\] Remove tests on `macos-10.15` and `ubuntu-18.04`, they're deprecated by GitHub.
 - \[mpm\] Fix plugin rendering tests.
 - \[mpm\] Always run plugin rendering tests in Poetry venv.
 - \[bar-plugin\] Add a `--check-mpm` option to tests the mpm binary search phase without running a full outdated package listing.

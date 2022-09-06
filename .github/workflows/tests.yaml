@@ -39,7 +39,6 @@ jobs:
           os_list = {
               "ubuntu-22.04",
               "ubuntu-20.04",
-              "ubuntu-18.04",
               "macos-12",
               "macos-11.0",
               "windows-2022",
@@ -171,10 +170,6 @@ jobs:
           choco upgrade chocolatey
 
       # NPM
-      - name: "Ubuntu 18.04 - Install npm requirements"
-        if: matrix.os == 'ubuntu-18.04'
-        run: |
-          sudo apt install --yes node-gyp nodejs-dev libssl1.0-dev
       - name: Linux - Install npm
         if: runner.os == 'Linux'
         run: |
@@ -261,7 +256,7 @@ jobs:
 
       # Flatpak
       - name: Ubuntu < 22.04 - Setup Flatpak repo
-        if: matrix.os == 'ubuntu-18.04' || matrix.os == 'ubuntu-20.04'
+        if: matrix.os == 'ubuntu-20.04'
         run: |
           sudo add-apt-repository --yes ppa:alexlarsson/flatpak
       - name: Linux - Install Flatpak
@@ -272,14 +267,13 @@ jobs:
       # DNF
       - name: Linux - Install DNF
         # DNF has only been added in Ubuntu 21.04, not before.
-        if: runner.os == 'Linux' && matrix.os != 'ubuntu-18.04' && matrix.os != 'ubuntu-20.04'
+        if: runner.os == 'Linux' && matrix.os != 'ubuntu-20.04'
         run: |
           sudo apt install --yes dnf
 
       # Zypper
       - name: Ubuntu >= 20.04 - Install Zypper
-        # Zypper has only been added in Ubuntu 20.04, not before.
-        if: runner.os == 'Linux' && matrix.os != 'ubuntu-18.04'
+        if: runner.os == 'Linux'
         run: |
           sudo apt install --yes zypper
 
@@ -320,7 +314,7 @@ jobs:
         run: |
           gem update --system
       - name: Ubuntu < 21.04 - Upgrade gem with itself
-        if: matrix.os == 'ubuntu-18.04' || matrix.os == 'ubuntu-20.04'
+        if: matrix.os == 'ubuntu-20.04'
         run: |
           sudo gem update --system
       - name: Ubuntu >= 21.04 - Upgrade gem with APT
@@ -330,7 +324,7 @@ jobs:
         #   itself is unsupported. If you really need the latest version of RubyGems (tip:
         #   you usually don't), then you need to install RubyGems (and Ruby) manually,
         #   maybe using tools like ruby-install, rvm, etc.
-        if: runner.os == 'Linux' && matrix.os != 'ubuntu-18.04' && matrix.os != 'ubuntu-20.04'
+        if: runner.os == 'Linux' && matrix.os != 'ubuntu-20.04'
         run: |
           sudo apt install --yes ruby-rubygems
 

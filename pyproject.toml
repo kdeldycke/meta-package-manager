@@ -94,7 +94,7 @@ xmltodict = "^0.13.0"
 [tool.poetry.dev-dependencies]
 bump2version = "^1.0.1"
 coverage = { extras = ["toml"], version = "^6.4" }
-furo = "^2022.6.21"
+furo = "^2022.9.15"
 myst-parser = "^0.18.0"
 pytest = "^7.1.1"
 # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html

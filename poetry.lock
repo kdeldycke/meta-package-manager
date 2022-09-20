@@ -55,6 +55,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "bracex"
+version = "2.3.post1"
+description = "Bash style brace expander."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
 name = "bump2version"
 version = "1.0.1"
 description = "Version-bump your software with a single command!"
@@ -110,7 +118,7 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "click-extra"
-version = "2.1.3"
+version = "3.1.0"
 description = "🌈 Extra colorization and configuration loading for Click."
 category = "main"
 optional = false
@@ -121,14 +129,17 @@ boltons = ">=21.0.0,<22.0.0"
 cli-helpers = ">=2.2.0,<3.0.0"
 click = ">=8.1.1,<9.0.0"
 click-log = ">=0.4.0,<0.5.0"
-cloup = ">=0.14,<0.16"
+cloup = ">=1.0.0,<2.0.0"
 commentjson = ">=0.9.0,<0.10.0"
 mergedeep = ">=1.3.4,<2.0.0"
+pygments = ">=2.10.0,<3.0.0"
+pygments-ansi-color = ">=0.0.6,<0.1.1"
 pyyaml = ">=6.0.0,<7.0.0"
 regex = ">=2022.3.15,<2023.0.0"
 requests = ">=2.27.1,<3.0.0"
 tabulate = {version = ">=0.8.9,<0.9.0", extras = ["widechars"]}
 tomli = {version = ">=2.0.1,<3.0.0", markers = "python_version < \"3.11\""}
+wcmatch = ">=8.4,<9.0"
 xmltodict = ">=0.12,<0.14"
 
 [[package]]
@@ -144,14 +155,14 @@ click = "*"
 
 [[package]]
 name = "cloup"
-version = "0.15.1"
+version = "1.0.0"
 description = "Adds features to Click: option groups, constraints, subcommand sections and help themes."
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
-click = ">=7.1,<9.0"
+click = ">=8.0,<9.0"
 typing-extensions = {version = "*", markers = "python_version <= \"3.8\""}
 
 [[package]]
@@ -428,9 +439,20 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "pygments"
 version = "2.12.0"
 description = "Pygments is a syntax highlighting package written in Python."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
+
+[[package]]
+name = "pygments-ansi-color"
+version = "0.1.0"
+description = ""
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+pygments = "!=2.7.3"
 
 [[package]]
 name = "pyparsing"
@@ -863,6 +885,17 @@ secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "ipaddress", "p
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
+name = "wcmatch"
+version = "8.4.1"
+description = "Wildcard/glob file name matcher."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+bracex = ">=2.1.1"
+
+[[package]]
 name = "wcwidth"
 version = "0.2.5"
 description = "Measures the displayed width of unicode strings in a terminal"
@@ -893,7 +926,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "24717a4a6318d67c964d570782ae28937f82745d4696b4d98c85463cb46dd2fe"
+content-hash = "3e374c40c6d47263620f4c880e39cb0417d2a8443b48c9718c408575ed22aa2e"
 
 [metadata.files]
 alabaster = [
@@ -916,6 +949,10 @@ boltons = [
     {file = "boltons-21.0.0-py2.py3-none-any.whl", hash = "sha256:b9bb7b58b2b420bbe11a6025fdef6d3e5edc9f76a42fb467afe7ca212ef9948b"},
     {file = "boltons-21.0.0.tar.gz", hash = "sha256:65e70a79a731a7fe6e98592ecfb5ccf2115873d01dbc576079874629e5c90f13"},
 ]
+bracex = [
+    {file = "bracex-2.3.post1-py3-none-any.whl", hash = "sha256:351b7f20d56fb9ea91f9b9e9e7664db466eb234188c175fd943f8f755c807e73"},
+    {file = "bracex-2.3.post1.tar.gz", hash = "sha256:e7b23fc8b2cd06d3dec0692baabecb249dda94e06a617901ff03a6c56fd71693"},
+]
 bump2version = [
     {file = "bump2version-1.0.1-py2.py3-none-any.whl", hash = "sha256:37f927ea17cde7ae2d7baf832f8e80ce3777624554a653006c9144f8017fe410"},
     {file = "bump2version-1.0.1.tar.gz", hash = "sha256:762cb2bfad61f4ec8e2bdf452c7c267416f8c70dd9ecb1653fd0bbb01fa936e6"},
@@ -937,16 +974,16 @@ click = [
     {file = "click-8.1.3.tar.gz", hash = "sha256:7682dc8afb30297001674575ea00d1814d808d6a36af415a82bd481d37ba7b8e"},
 ]
 click-extra = [
-    {file = "click-extra-2.1.3.tar.gz", hash = "sha256:4d0583cbea8069483e732c9f4e6a6cbd22e3744d5f248419d00e5c10f9887218"},
-    {file = "click_extra-2.1.3-py3-none-any.whl", hash = "sha256:ed4d033160d1f5cc5ca51244f3acb27ac67b2ff403c8fa1ae41cb4ecf1b3776c"},
+    {file = "click-extra-3.1.0.tar.gz", hash = "sha256:4c69ad4745de45734e4368bc14cbedb213302f341ab048371b277cb236261e25"},
+    {file = "click_extra-3.1.0-py3-none-any.whl", hash = "sha256:9d598ed09106bbde151bbcfc542e4ccb2db89e0af1592311dfd3d6b8d9d9d329"},
 ]
 click-log = [
     {file = "click-log-0.4.0.tar.gz", hash = "sha256:3970f8570ac54491237bcdb3d8ab5e3eef6c057df29f8c3d1151a51a9c23b975"},
     {file = "click_log-0.4.0-py2.py3-none-any.whl", hash = "sha256:a43e394b528d52112af599f2fc9e4b7cf3c15f94e53581f74fa6867e68c91756"},
 ]
 cloup = [
-    {file = "cloup-0.15.1-py2.py3-none-any.whl", hash = "sha256:9358fd1f4949ef88355d37e733d93d65045f4090b52b8de8d4c34cca9a1e7a08"},
-    {file = "cloup-0.15.1.tar.gz", hash = "sha256:8008b480a77d8a112c78702f64675adbdf59fadc39e391f3ba8bcac9c4d4cd86"},
+    {file = "cloup-1.0.0-py2.py3-none-any.whl", hash = "sha256:1f434beea1c0435a0c043970170c00be5455a13ee397b3c4a29077d8406d87f7"},
+    {file = "cloup-1.0.0.tar.gz", hash = "sha256:fc34777af44ad5decacfd742a784737800f9a29b183d9174a31d07a91f6eef5d"},
 ]
 colorama = [
     {file = "colorama-0.4.5-py2.py3-none-any.whl", hash = "sha256:854bf444933e37f5824ae7bfc1e98d5bce2ebe4160d46b5edf346a89358e99da"},
@@ -1156,6 +1193,10 @@ py = [
 pygments = [
     {file = "Pygments-2.12.0-py3-none-any.whl", hash = "sha256:dc9c10fb40944260f6ed4c688ece0cd2048414940f1cea51b8b226318411c519"},
     {file = "Pygments-2.12.0.tar.gz", hash = "sha256:5eb116118f9612ff1ee89ac96437bb6b49e8f04d8a13b514ba26f620208e26eb"},
+]
+pygments-ansi-color = [
+    {file = "pygments-ansi-color-0.1.0.tar.gz", hash = "sha256:d3076c798e5867966b7a4872a4c6174a9c1fccaf5b4895db3d5692bcd84ecd64"},
+    {file = "pygments_ansi_color-0.1.0-py3-none-any.whl", hash = "sha256:fb6017b43d39802f8b5fedd3c3d64b2f670f23a302d9c2e2faa90cd1a5f4ef3c"},
 ]
 pyparsing = [
     {file = "pyparsing-3.0.9-py3-none-any.whl", hash = "sha256:5026bae9a10eeaefb61dab2f09052b9f4307d44aee4eda64b309723d8d206bbc"},
@@ -1403,6 +1444,10 @@ typing-extensions = [
 urllib3 = [
     {file = "urllib3-1.26.11-py2.py3-none-any.whl", hash = "sha256:c33ccba33c819596124764c23a97d25f32b28433ba0dedeb77d873a38722c9bc"},
     {file = "urllib3-1.26.11.tar.gz", hash = "sha256:ea6e8fb210b19d950fab93b60c9009226c63a28808bc8386e05301e25883ac0a"},
+]
+wcmatch = [
+    {file = "wcmatch-8.4.1-py3-none-any.whl", hash = "sha256:3476cd107aba7b25ba1d59406938a47dc7eec6cfd0ad09ff77193f21a964dee7"},
+    {file = "wcmatch-8.4.1.tar.gz", hash = "sha256:b1f042a899ea4c458b7321da1b5e3331e3e0ec781583434de1301946ceadb943"},
 ]
 wcwidth = [
     {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},

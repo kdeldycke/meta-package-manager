@@ -760,8 +760,6 @@ class PackageManager(metaclass=MetaPackageManager):
             # Look by default into package ID and name.
             search_content = {match.id, match.name}
 
-            logger.debug(f"111 match for query {query}: {search_content}. {exact=} {extended=}")
-
             # Rejects fuzzy results: only keep packages strictly matching on ID or name.
             if exact and query not in search_content:
                 continue

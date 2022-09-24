@@ -1,8 +1,8 @@
 pacman:
   image: archlinux
   script:
-    - pacman -Sy --noconfirm python
+    - pacman -Sy --noconfirm python-pip
     - python -m pip install poetry
-    - poetry run pytest
+    - poetry install
     - python -m pip install .
     - mpm --pacman install vim

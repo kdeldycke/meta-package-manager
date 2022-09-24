@@ -5,4 +5,4 @@ pacman:
     - python -m pip install poetry
     - poetry install
     - python -m pip install .
-    - mpm --pacman install vim
+    - mpm --pacman -v DEBUG install vim

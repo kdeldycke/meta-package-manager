@@ -757,6 +757,7 @@ class PackageManager(metaclass=MetaPackageManager):
             capabilities of the package manager CLI.
         """
         for match in self.search(query, extended, exact):
+            logger.debug(f" match {match} for query {query}")
             # Look by default into package ID and name.
             search_content = {match.id, match.name}
 

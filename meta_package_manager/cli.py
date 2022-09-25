@@ -333,9 +333,11 @@ def managers(ctx):
         # Build up the CLI path column content.
         cli_infos = "{} {}".format(
             OK if manager.cli_path else KO,
+            # TODO: highlight cli_name found in manager.cli_path. I.e, the "choco" string in:
+            #    ✓ C:\ProgramData\chocolatey\bin\choco.EXE
             manager.cli_path
             if manager.cli_path
-            else f"{', '.join(manager.cli_names)} not found",
+            else f"{', '.join(map(theme.invoked_command, manager.cli_names))} not found",
         )
 
         # Build up the version column content.

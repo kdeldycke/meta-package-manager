@@ -131,11 +131,11 @@ class Pacman(PackageManager):
         output = self.run_cli("--sync", "--search", query)
 
         regexp = re.compile(
-            r"(?P<package_id>\S+)\s+(?P<version>\S+).*\n\s+(?P<description>.+)",
+            r"(?P<repo_id>\S+?)/(?P<package_id>\S+)\s+(?P<version>\S+).*\n\s+(?P<description>.+)",
             re.MULTILINE | re.VERBOSE,
         )
 
-        for package_id, version, description in regexp.findall(output):
+        for repo_id, package_id, version, description in regexp.findall(output):
             yield self.package(
                 id=package_id,
                 description=description,

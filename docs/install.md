@@ -3,7 +3,7 @@
 `````{tab-set}
 
 ````{tab-item} pipx
-Easiest way is to use [`pipx`](https://pypa.github.io/pipx/):
+Easiest way is to [install `pipx`](https://pypa.github.io/pipx/installation/), then use it to install `mpm`:
 
 ```{code-block} shell-session
 $ pipx install meta-package-manager
@@ -56,6 +56,17 @@ If for any reason `brew` gets broken by this external repository, you can easily
 $ brew untap hasnep/tap
 $ brew install hasnep/tap/meta-package-manager
 ```
+````
+
+````{tab-item} Windows
+1. [Install chocolatey](https://chocolatey.org/install#install-step2)
+1. Install Python via chocolatey:
+
+```{code-block} shell-session
+$ choco install python -y
+```
+
+1. Then follow the `mpm` installation instruction in `pipx` or `pip` tabs.
 ````
 
 ````{tab-item} Arch Linux

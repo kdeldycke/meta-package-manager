@@ -589,8 +589,8 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
-name = "sphinx"
-version = "5.1.1"
+name = "Sphinx"
+version = "5.2.0.post0"
 description = "Python documentation generator"
 category = "dev"
 optional = false
@@ -1319,9 +1319,9 @@ soupsieve = [
     {file = "soupsieve-2.3.2.post1-py3-none-any.whl", hash = "sha256:3b2503d3c7084a42b1ebd08116e5f81aadfaea95863628c80a3b774a11b7c759"},
     {file = "soupsieve-2.3.2.post1.tar.gz", hash = "sha256:fc53893b3da2c33de295667a0e19f078c14bf86544af307354de5fcf12a3f30d"},
 ]
-sphinx = [
-    {file = "Sphinx-5.1.1-py3-none-any.whl", hash = "sha256:309a8da80cb6da9f4713438e5b55861877d5d7976b69d87e336733637ea12693"},
-    {file = "Sphinx-5.1.1.tar.gz", hash = "sha256:ba3224a4e206e1fbdecf98a4fae4992ef9b24b85ebf7b584bb340156eaf08d89"},
+Sphinx = [
+    {file = "Sphinx-5.2.0.post0.tar.gz", hash = "sha256:68e7833263a961521f45302fa87285f9395ecf385f1eefd85cd61ddff0b15bc1"},
+    {file = "sphinx-5.2.0.post0-py3-none-any.whl", hash = "sha256:db93dc52cc90d12ef38c9f506eab9171813041204d8270e30ffad2be511e7ced"},
 ]
 sphinx-autodoc-typehints = [
     {file = "sphinx_autodoc_typehints-1.19.2-py3-none-any.whl", hash = "sha256:3d761de928d5a86901331133d6d4a2552afa2e798ebcfc0886791792aeb4dd9a"},

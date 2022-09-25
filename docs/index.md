@@ -28,6 +28,8 @@ hidden:
 contributing
 development
 API <meta_package_manager>
+genindex
+modindex
 todolist
 changelog
 history
@@ -36,9 +38,3 @@ license
 GitHub Repository <https://github.com/kdeldycke/meta-package-manager>
 Funding <https://github.com/sponsors/kdeldycke>
 ```
-
-## Indices and tables
-
-- {ref}`genindex`
-- {ref}`modindex`
-- {ref}`search`

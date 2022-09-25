@@ -1,6 +1,11 @@
 meta\_package\_manager package
 ==============================
 
+.. automodule:: meta_package_manager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Subpackages
 -----------
 
@@ -74,14 +79,6 @@ meta\_package\_manager.version module
 -------------------------------------
 
 .. automodule:: meta_package_manager.version
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: meta_package_manager
    :members:
    :undoc-members:
    :show-inheritance:

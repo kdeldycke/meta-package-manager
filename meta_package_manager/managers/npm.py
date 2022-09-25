@@ -177,7 +177,8 @@ class NPM(PackageManager):
                     continue
                 yield self.package(
                     id=f"{package_id}",
-                    installed_version=values["current"],
+                    # It seems "current" is not always populated.
+                    installed_version=values.get("current"),
                     latest_version=values["latest"],
                 )
 

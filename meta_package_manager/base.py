@@ -39,6 +39,7 @@ from boltons.strutils import strip_ansi
 from click_extra.colorize import theme
 from click_extra.platform import CURRENT_OS_ID, is_linux
 from click_extra.run import INDENT, format_cli, run_cmd
+from click_extra.tests.conftest import ExtraCliRunner
 
 from . import logger
 from .version import TokenizedString, parse_version
@@ -480,15 +481,6 @@ class PackageManager(metaclass=MetaPackageManager):
         )
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
-    @classmethod
-    def _args_cleanup(cls, *args: _Arg | _NestedArgs) -> tuple[str, ...]:
-        """Flatten recursive iterables, remove all ``None``, and cast each element to
-        strings.
-
-        Helps serialize :py:class:`pathlib.Path` and :py:class:`meta_package_manager.version.TokenizedString` objects.
-        """
-        return tuple(str(arg) for arg in flatten(args) if arg is not None)
-
     def run(self, *args: _Arg | _NestedArgs, extra_env: _EnvVars = None) -> str:
         """Run a shell command, return the output and accumulate error messages.
 
@@ -507,7 +499,7 @@ class PackageManager(metaclass=MetaPackageManager):
             Move :option:`mpm --dry-run` option and this method to `click-extra <https://github.com/kdeldycke/click-extra>`_.
         """
         # Casting to string helps serialize Path and Version objects.
-        clean_args = self._args_cleanup(*args)
+        clean_args = ExtraCliRunner._args_cleanup(*args)
         cli_msg = format_cli(clean_args, extra_env)
 
         code = 0
@@ -629,7 +621,7 @@ class PackageManager(metaclass=MetaPackageManager):
         elif auto_post_args:
             params.extend(self.post_args)
 
-        return self._args_cleanup(cast(_NestedArgs, params))
+        return ExtraCliRunner._args_cleanup(cast(_NestedArgs, params))
 
     def run_cli(
         self,

@@ -208,10 +208,6 @@ def test_available(manager):
     assert isinstance(manager.available, bool)
 
 
-# TODO:
-# def test_args_cleanup():
-
-
 @all_managers
 def test_installed_type(manager):
     """All installed operations are either not implemented or returns a dict of

@@ -31,13 +31,12 @@ from unittest.mock import patch
 
 import tomli_w
 from boltons.cacheutils import LRI, cached
-from click_extra import STRING, Choice, File
+from click_extra import STRING, Choice, File, Option
 from click_extra import Path as ClickPath
-from click_extra import argument, echo, group, option, option_group, pass_context
+from click_extra import argument, echo, extra_group, option, option_group, pass_context
 from click_extra.colorize import KO, OK, highlight, theme
 from click_extra.platform import os_label
 from click_extra.tabulate import table_format_option
-from cloup import Option
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -127,7 +126,10 @@ def bar_plugin_path(ctx, param, value):
         ctx.exit()
 
 
-@group(version=__version__)
+# XXX Why is Sphinx skipping Click methods in documentation?
+
+
+@extra_group(version=__version__)
 @option_group(
     "Package manager selection options",
     option(

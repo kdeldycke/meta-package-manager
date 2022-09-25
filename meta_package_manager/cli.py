@@ -160,8 +160,8 @@ def bar_plugin_path(ctx, param, value):
         "--xkcd",
         is_flag=True,
         default=False,
-        help="Preset manager selection as defined by XKCD #1654, i.e. "
-        "{}.".format(", ".join(map(theme.choice, XKCD_MANAGER_ORDER))),
+        help="Preset manager selection as defined by XKCD #1654. Equivalent to: "
+        "{}.".format(" ".join(f"--{mid}" for mid in XKCD_MANAGER_ORDER)),
     ),
     *single_manager_selectors(),
 )

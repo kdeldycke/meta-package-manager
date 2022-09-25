@@ -36,7 +36,7 @@ class Pip(PackageManager):
     Source: https://snarky.ca/why-you-should-use-python-m-pip/
     """
 
-    homepage_url = "https://pypi.org"
+    homepage_url = "https://pip.pypa.io"
 
     platforms = frozenset({MACOS, LINUX, WINDOWS})
 

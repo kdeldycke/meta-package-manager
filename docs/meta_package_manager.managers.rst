@@ -1,6 +1,11 @@
 meta\_package\_manager.managers package
 =======================================
 
+.. automodule:: meta_package_manager.managers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -168,14 +173,6 @@ meta\_package\_manager.managers.zypper module
 ---------------------------------------------
 
 .. automodule:: meta_package_manager.managers.zypper
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: meta_package_manager.managers
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,6 +1,11 @@
 meta\_package\_manager.tests package
 ====================================
 
+.. automodule:: meta_package_manager.tests
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -144,14 +149,6 @@ meta\_package\_manager.tests.test\_version module
 -------------------------------------------------
 
 .. automodule:: meta_package_manager.tests.test_version
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: meta_package_manager.tests
    :members:
    :undoc-members:
    :show-inheritance:

@@ -9,7 +9,6 @@ This version is not released yet and is under active development.
 - \[brew,cask\] Add support for `remove` operation in homebrew.
 - \[pacman\] Fix `pacman` install operation. Closes {pr}`766`.
 - \[bar-plugin\] Check for minimal Python version.
-- \[mpm\] Deactivate cached property on base class. Reduces performances but fix tests.
 - \[mpm\] Run tests on `ubuntu-22.04` and `macos-12`.
 - \[mpm\] Remove tests on `macos-10.15` and `ubuntu-18.04`, they're deprecated by GitHub.
 - \[mpm\] Fix plugin rendering tests.

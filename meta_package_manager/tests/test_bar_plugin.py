@@ -24,8 +24,8 @@ from itertools import product
 
 import pytest
 from boltons.iterutils import flatten
-from click_extra.run import env_copy
-from click_extra.tests.conftest import ExtraCliRunner, unless_macos
+from click_extra.run import args_cleanup, env_copy
+from click_extra.tests.conftest import unless_macos
 
 from .. import bar_plugin
 
@@ -33,7 +33,7 @@ from .. import bar_plugin
 def _invokation_matrix(*iterables):
     """Pre-compute a matrix of all possible options for invokation."""
     for args in product(*iterables):
-        yield ExtraCliRunner._args_cleanup(args)
+        yield args_cleanup(args)
 
 
 def _shell_invokation_matrix():
@@ -119,7 +119,7 @@ def _subcmd_args(invoke_args: None | tuple[str], *subcmd_args: str):
         if invoke_args[-1] == "-c":
             subcmd_args = (" ".join(subcmd_args),)
     raw_args.extend(subcmd_args)
-    return ExtraCliRunner._args_cleanup(raw_args)
+    return args_cleanup(raw_args)
 
 
 @unless_macos

@@ -26,7 +26,7 @@ from enum import Enum
 from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
-from typing import ContextManager, Dict, Iterable, Iterator, Optional, Union, cast
+from typing import ContextManager, Iterator, Tuple
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -38,8 +38,15 @@ from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from click_extra.colorize import theme
 from click_extra.platform import CURRENT_OS_ID, is_linux
-from click_extra.run import INDENT, format_cli, run_cmd
-from click_extra.tests.conftest import ExtraCliRunner
+from click_extra.run import (
+    INDENT,
+    _Arg,
+    _EnvVars,
+    _NestedArgs,
+    args_cleanup,
+    format_cli,
+    run_cmd,
+)
 
 from . import logger
 from .version import TokenizedString, parse_version
@@ -141,19 +148,6 @@ def packages_asdict(packages: Iterator[Package], keep_fields: tuple[str, ...]):
     """Returns a list of packages casted to a ``dict`` with only a subset of its
     fields."""
     return ({k: v for k, v in asdict(p).items() if k in keep_fields} for p in packages)
-
-
-_EnvVars = Optional[Dict[str, str]]
-
-# XXX Recursive types are not supported by mypy yet: https://github.com/python/mypy/issues/731
-# _NestedArgs = Iterable[Union[str, Path, None, Iterable["_NestedArgs"]]]
-_Arg = Union[str, Path, None]
-_Args = Iterable[_Arg]
-_NestedArgs = Iterable[
-    Union[
-        _Arg, Iterable[Union[_Arg, Iterable[Union[_Arg, Iterable[Union[_Arg, _Args]]]]]]
-    ]
-]
 
 
 class MetaPackageManager(type):
@@ -499,7 +493,7 @@ class PackageManager(metaclass=MetaPackageManager):
             Move :option:`mpm --dry-run` option and this method to `click-extra <https://github.com/kdeldycke/click-extra>`_.
         """
         # Casting to string helps serialize Path and Version objects.
-        clean_args = ExtraCliRunner._args_cleanup(*args)
+        clean_args = args_cleanup(*args)
         cli_msg = format_cli(clean_args, extra_env)
 
         code = 0
@@ -550,7 +544,7 @@ class PackageManager(metaclass=MetaPackageManager):
         override_pre_args: _NestedArgs | None = None,
         override_post_args: _NestedArgs | None = None,
         sudo: bool = False,
-    ) -> tuple[str, ...]:
+    ) -> Tuple[str, ...]:
         """Build the package manager CLI by combining the custom ``*args`` with the
         package manager's global parameters.
 
@@ -621,7 +615,7 @@ class PackageManager(metaclass=MetaPackageManager):
         elif auto_post_args:
             params.extend(self.post_args)
 
-        return ExtraCliRunner._args_cleanup(cast(_NestedArgs, params))
+        return args_cleanup(params)
 
     def run_cli(
         self,

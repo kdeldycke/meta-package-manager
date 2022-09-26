@@ -1,5 +1,11 @@
 # Changelog
 
+## {gh}`5.6.1 (unreleased) <compare/v5.6.0...main>`
+
+```{important}
+This version is not released yet and is under active development.
+```
+
 ## {gh}`5.6.0 (2022-09-26) <compare/v5.5.1...v5.6.0>`
 
 - \[brew,cask\] Add support for `remove` operation in homebrew.

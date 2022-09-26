@@ -110,7 +110,9 @@ def _python_invokation_matrix():
 
 
 def _subcmd_args(invoke_args: None | tuple[str], *subcmd_args: str):
-    """Cleanup args and eventually concatenate all ``subcmd_args`` items to a space separated string if ``invoke_args`` is defined and its last argument is equal to ``-c``."""
+    """Cleanup args and eventually concatenate all ``subcmd_args`` items to a space
+    separated string if ``invoke_args`` is defined and its last argument is equal to
+    ``-c``."""
     raw_args: list[str] = []
     if invoke_args:
         raw_args.extend(invoke_args)
@@ -146,7 +148,8 @@ class TestBarPlugin:
         """Run the plugin script and check its output against the checklist."""
 
         process = subprocess.run(
-            # Force the plugin to be called within Poetry venv to not have it seeking for macOS's default Python.
+            # Force the plugin to be called within Poetry venv to not have it seeking
+            # for macOS's default Python.
             ("poetry", "run", "python", bar_plugin.__file__),
             capture_output=True,
             encoding="utf-8",
@@ -225,7 +228,8 @@ class TestBarPlugin:
     def test_plugin_shell_invokation(self, shell_args):
         """Test execution of plugin on different shells.
 
-        Do not execute the complete search for outdated packages, just stop at searching for the mpm executable and extract its version.
+        Do not execute the complete search for outdated packages, just stop at searching
+        for the mpm executable and extract its version.
         """
         process = subprocess.run(
             _subcmd_args(shell_args, bar_plugin.__file__, "--check-mpm"),
@@ -240,7 +244,8 @@ class TestBarPlugin:
     @pytest.mark.parametrize("shell_args", (None, *_shell_invokation_matrix()))
     @pytest.mark.parametrize("python_args", _python_invokation_matrix())
     def test_python_shell_invokation(self, shell_args, python_args):
-        """Test any Python shell invokation is properly configured and all are compatible with plugin requirements."""
+        """Test any Python shell invokation is properly configured and all are
+        compatible with plugin requirements."""
         process = subprocess.run(
             _subcmd_args(shell_args, *python_args, "--version"),
             capture_output=True,

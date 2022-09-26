@@ -27,7 +27,6 @@ from click_extra.tests.conftest import destructive, unless_macos
 
 @pytest.fixture
 def install_cask():
-
     packages = set()
 
     def get_cask_path():

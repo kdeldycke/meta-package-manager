@@ -26,7 +26,7 @@ from enum import Enum
 from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
-from typing import ContextManager, Iterator, Optional, Tuple
+from typing import ContextManager, Iterable, Iterator, Optional, Tuple
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -351,11 +351,11 @@ class PackageManager(metaclass=MetaPackageManager):
         if not cli_path.exists():
             raise FileNotFoundError(cli_path)
         elif not cli_path.is_file():
-            logger.warning(f"{theme.invoked_command(cli_path)} is not a file.")
+            logger.warning(f"{theme.invoked_command(str(cli_path))} is not a file.")
             return None
 
         logger.debug(
-            f"{theme.invoked_command(cli_name)} CLI found at {theme.invoked_command(cli_path)}"
+            f"{theme.invoked_command(cli_name)} CLI found at {theme.invoked_command(str(cli_path))}"
         )
         return cli_path
 
@@ -406,10 +406,10 @@ class PackageManager(metaclass=MetaPackageManager):
                 # application" error.
                 if getattr(ex, "winerror", None) == 193:
                     logger.debug(
-                        f"{theme.invoked_command(self.cli_path)} is not a valid Windows application."
+                        f"{theme.invoked_command(str(self.cli_path))} is not a valid Windows application."
                     )
                     # Declare CLI as un-executable.
-                    self.executable = False  # type: ignore  # https://github.com/python/mypy/issues/1465
+                    self.executable = False
                     return None
                 # Unidentified error: re-raise.
                 raise
@@ -535,7 +535,7 @@ class PackageManager(metaclass=MetaPackageManager):
 
     def build_cli(
         self,
-        *args: _Arg | NestedArgs,
+        *args: Arg | NestedArgs,
         auto_pre_cmds: bool = True,
         auto_pre_args: bool = True,
         auto_post_args: bool = True,
@@ -615,7 +615,7 @@ class PackageManager(metaclass=MetaPackageManager):
         elif auto_post_args:
             params.extend(self.post_args)
 
-        return args_cleanup(params)
+        return args_cleanup(params)  # type: ignore
 
     def run_cli(
         self,

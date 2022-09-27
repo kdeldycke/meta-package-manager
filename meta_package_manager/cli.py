@@ -85,7 +85,7 @@ def add_manager_to_selection(ctx, param, selected):
         ctx.obj["single_manager_selector"].append(manager_id)
 
 
-def single_manager_selectors() -> Iterator[Option]:
+def single_manager_selectors():
     """Dynamiccaly creates a dedicated flag selector alias for each manager."""
     for manager_id in pool.all_manager_ids:
         yield option(

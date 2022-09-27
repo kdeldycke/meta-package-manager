@@ -23,7 +23,7 @@ from typing import Any, Iterator
 from boltons.iterutils import remap
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
-from ..base import Package, PackageManager, _Arg, _NestedArgs
+from ..base import Arg, NestedArgs, Package, PackageManager
 from ..capabilities import search_capabilities
 
 
@@ -60,7 +60,7 @@ class NPM(PackageManager):
         6.13.7
     """
 
-    def run_cli(self, *args: _Arg | _NestedArgs, **kwargs: Any) -> str:
+    def run_cli(self, *args: Arg | NestedArgs, **kwargs: Any) -> str:
         """Like the common run_cli helper, but silence NPM's JSON output on error.
 
         NPM is prone to breakage if local node version is not in sync:

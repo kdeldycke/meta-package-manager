@@ -17,4 +17,8 @@ To help debugging the issue:
   ```
   mpm --version
   ```
+- Provide the current configuration with:
+  ```
+  mpm --show-params
+  ```
 - Try the bleeding edge [development version of `mpm`](https://kdeldycke.github.io/meta-package-manager/development.html#setup-environment)

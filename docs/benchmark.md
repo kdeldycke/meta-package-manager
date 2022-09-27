@@ -131,7 +131,7 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `raco`         |       |       ✓        |               |              |              |
 | `rtcl`         |       |       ✓        |               |              |              |
 | `rustup`       |       |       ✓        |               |              |              |
-| `scoop`        |       |       ✓        |       ✓       |              |      ✓       |
+| `scoop`        |   ✓   |       ✓        |       ✓       |              |      ✓       |
 | `sdkman`       |       |       ✓        |               |              |              |
 | `sheldon`      |       |       ✓        |               |              |              |
 | `silnite`      |       |       ✓        |               |              |              |

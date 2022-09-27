@@ -80,6 +80,11 @@
     "description": "pip, pipx"
   },
   {
+    "name": "📦 manager: scoop",
+    "color": "#bfdadc",
+    "description": "scoop"
+  },
+  {
     "name": "📦 manager: snap",
     "color": "#bfdadc",
     "description": "snap"

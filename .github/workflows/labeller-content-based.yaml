@@ -142,6 +142,11 @@ jobs:
                "keywords": ["pip", "pipx"]},
 
               {"labels": [
+                "📦 manager: scoop",
+                "🖥 platform: Windows"],
+              "keywords": ["scoop"]},
+
+              {"labels": [
                 "📦 manager: snap",
                 "🖥 platform: Linux"],
                "keywords": ["snap"]},

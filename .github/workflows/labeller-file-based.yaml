@@ -93,6 +93,10 @@ jobs:
           - meta_package_manager/managers/pip*
           - meta_package_manager/tests/*pip*
 
+        "📦 manager: scoop":
+          - meta_package_manager/managers/scoop*
+          - meta_package_manager/tests/*scoop*
+
         "📦 manager: snap":
           - meta_package_manager/managers/snap*
           - meta_package_manager/tests/*snap*

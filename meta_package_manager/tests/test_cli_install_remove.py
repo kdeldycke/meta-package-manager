@@ -74,6 +74,7 @@ class TestInstallRemove(CLISubCommandTests):
         "pip": "meta-package-manager",
         # https://pypi.org/project/meta-package-manager
         "pipx": "meta-package-manager",
+        "scoop": "7zip",
         "snap": "standard-notes",
         "steamcmd": "740",
         "vscode": "tamasfe.even-better-toml",

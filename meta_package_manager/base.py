@@ -230,7 +230,7 @@ class PackageManager(metaclass=MetaPackageManager):
     works well on all platforms.
     """
 
-    extra_env: Optional[EnvVars] = None
+    extra_env: EnvVars | None = None
     """Additional environment variables to add to the current context.
 
     Automatically applied on each :py:func:`meta_package_manager.base.PackageManager.run_cli`
@@ -475,7 +475,7 @@ class PackageManager(metaclass=MetaPackageManager):
         )
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
-    def run(self, *args: Arg | NestedArgs, extra_env: Optional[EnvVars] = None) -> str:
+    def run(self, *args: Arg | NestedArgs, extra_env: EnvVars | None = None) -> str:
         """Run a shell command, return the output and accumulate error messages.
 
         ``args`` is allowed to be a nested structure of iterables, in which case it will
@@ -544,7 +544,7 @@ class PackageManager(metaclass=MetaPackageManager):
         override_pre_args: NestedArgs | None = None,
         override_post_args: NestedArgs | None = None,
         sudo: bool = False,
-    ) -> Tuple[str, ...]:
+    ) -> tuple[str, ...]:
         """Build the package manager CLI by combining the custom ``*args`` with the
         package manager's global parameters.
 
@@ -624,7 +624,7 @@ class PackageManager(metaclass=MetaPackageManager):
         auto_pre_cmds: bool = True,
         auto_pre_args: bool = True,
         auto_post_args: bool = True,
-        override_extra_env: Optional[EnvVars] = None,
+        override_extra_env: EnvVars | None = None,
         override_pre_cmds: NestedArgs | None = None,
         override_cli_path: Path | None = None,
         override_pre_args: NestedArgs | None = None,

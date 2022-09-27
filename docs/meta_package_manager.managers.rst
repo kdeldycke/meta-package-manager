@@ -137,6 +137,14 @@ meta\_package\_manager.managers.pipx module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.managers.scoop module
+--------------------------------------------
+
+.. automodule:: meta_package_manager.managers.scoop
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.managers.snap module
 -------------------------------------------
 

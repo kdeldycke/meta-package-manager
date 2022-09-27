@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`5.6.2 (unreleased) <compare/v5.6.1...main>`
-
-```{important}
-This version is not released yet and is under active development.
-```
+## {gh}`5.6.2 (2022-09-27) <compare/v5.6.1...v5.6.2>`
 
 - \[mpm\] Fix imports from `click.extra`.
 

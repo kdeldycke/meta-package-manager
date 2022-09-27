@@ -104,7 +104,8 @@ pytest-randomly = "^3.12.0"
 pytest-xdist = { extras = ["psutil"], version = "^2.5.0" }
 pyyaml = "^6.0"
 sphinx = "^5.2.0"
-sphinx-autodoc-typehints = "^1.19.2"
+# 1.19.3 is buggy: https://github.com/tox-dev/sphinx-autodoc-typehints/issues/259
+sphinx-autodoc-typehints = "^1.19.2, !=1.19.3"
 sphinx-click = "^4.3.0"
 sphinx-copybutton = "^0.5.0"
 sphinx-design = "^0.3.0"

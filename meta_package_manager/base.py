@@ -333,7 +333,7 @@ class PackageManager(metaclass=MetaPackageManager):
 
         Returns ``None`` if the CLI was not found or is not a file.
 
-        ..caution::
+        .. caution::
 
             Symlinks are not resolved, because some manager like Homebrew on Linux relies on some
             sort of symlink-based trickery to set environment variables.

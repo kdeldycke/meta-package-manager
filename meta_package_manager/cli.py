@@ -34,7 +34,9 @@ from boltons.cacheutils import LRI, cached
 from click_extra import STRING, Choice, File, Option
 from click_extra import Path as ClickPath
 from click_extra import argument, echo, extra_group, option, option_group, pass_context
-from click_extra.colorize import KO, OK, highlight, theme
+from click_extra.colorize import KO, OK
+from click_extra.colorize import default_theme as theme
+from click_extra.colorize import highlight
 from click_extra.platform import os_label
 from click_extra.tabulate import table_format_option
 

@@ -36,7 +36,7 @@ else:
 
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
-from click_extra.colorize import theme
+from click_extra.colorize import default_theme as theme
 from click_extra.platform import CURRENT_OS_ID, is_linux
 from click_extra.run import (
     INDENT,

@@ -50,10 +50,10 @@ class Scoop(PackageManager):
     """
 
     @staticmethod
-    def remove_headers(text: str) -> Optional[str]:
+    def remove_headers(text: str) -> str:
         results = text.split("---\n", 1)
         if len(results) != 2:
-            return None
+            return ""
         return results[1]
 
     @property

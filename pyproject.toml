@@ -85,7 +85,7 @@ classifiers = [
 python = "^3.7"
 boltons = "^21.0.0"
 click = "^8.1.2"
-click-extra = "^3.2.3"
+click-extra = "^3.2.4"
 tabulate = { extras = ["widechars"], version = "^0.8.9" }
 tomli = { version = "^2.0.1", python = "< 3.11" }
 tomli_w = "^1.0.0"
@@ -104,8 +104,7 @@ pytest-randomly = "^3.12.0"
 pytest-xdist = { extras = ["psutil"], version = "^2.5.0" }
 pyyaml = "^6.0"
 sphinx = "^5.2.0"
-# 1.19.3 is buggy: https://github.com/tox-dev/sphinx-autodoc-typehints/issues/259
-sphinx-autodoc-typehints = "^1.19.2, !=1.19.3"
+sphinx-autodoc-typehints = "^1.19.4,"
 sphinx-click = "^4.3.0"
 sphinx-copybutton = "^0.5.0"
 sphinx-design = "^0.3.0"

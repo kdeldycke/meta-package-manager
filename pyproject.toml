@@ -85,7 +85,7 @@ classifiers = [
 python = "^3.7"
 boltons = "^21.0.0"
 click = "^8.1.2"
-click-extra = "^3.2.2"
+click-extra = "^3.2.3"
 tabulate = { extras = ["widechars"], version = "^0.8.9" }
 tomli = { version = "^2.0.1", python = "< 3.11" }
 tomli_w = "^1.0.0"
@@ -111,7 +111,6 @@ sphinx-issues = "^3.0.1"
 sphinxext-opengraph = "^0.6.3"
 types-tabulate = "^0.8.11"
 types-xmltodict = "^0.13.0"
-typing-extensions = { version = "^4.3.0", python = "<= 3.7" }
 
 [tool.poetry.scripts]
 mpm = 'meta_package_manager.cli:mpm'
@@ -135,16 +134,7 @@ pretty = true
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
-module = [
-    "boltons.*",
-    "click_extra.*",
-    "cloup.*",
-    "pytest.*",
-    "tabulate.*",
-    "tomli_w.*",
-    "xmltodict.*",
-    "yaml.*",
-]
+module = ["boltons.*"]
 
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml

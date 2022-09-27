@@ -26,7 +26,7 @@ from enum import Enum
 from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
-from typing import ContextManager, Iterator, Tuple
+from typing import ContextManager, Iterator, Optional, Tuple
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -40,9 +40,9 @@ from click_extra.colorize import theme
 from click_extra.platform import CURRENT_OS_ID, is_linux
 from click_extra.run import (
     INDENT,
-    _Arg,
-    _EnvVars,
-    _NestedArgs,
+    Arg,
+    EnvVars,
+    NestedArgs,
     args_cleanup,
     format_cli,
     run_cmd,
@@ -230,7 +230,7 @@ class PackageManager(metaclass=MetaPackageManager):
     works well on all platforms.
     """
 
-    extra_env: _EnvVars = None
+    extra_env: Optional[EnvVars] = None
     """Additional environment variables to add to the current context.
 
     Automatically applied on each :py:func:`meta_package_manager.base.PackageManager.run_cli`
@@ -409,7 +409,7 @@ class PackageManager(metaclass=MetaPackageManager):
                         f"{theme.invoked_command(self.cli_path)} is not a valid Windows application."
                     )
                     # Declare CLI as un-executable.
-                    self.executable = False
+                    self.executable = False  # type: ignore  # https://github.com/python/mypy/issues/1465
                     return None
                 # Unidentified error: re-raise.
                 raise
@@ -475,7 +475,7 @@ class PackageManager(metaclass=MetaPackageManager):
         )
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
-    def run(self, *args: _Arg | _NestedArgs, extra_env: _EnvVars = None) -> str:
+    def run(self, *args: Arg | NestedArgs, extra_env: Optional[EnvVars] = None) -> str:
         """Run a shell command, return the output and accumulate error messages.
 
         ``args`` is allowed to be a nested structure of iterables, in which case it will
@@ -535,14 +535,14 @@ class PackageManager(metaclass=MetaPackageManager):
 
     def build_cli(
         self,
-        *args: _Arg | _NestedArgs,
+        *args: _Arg | NestedArgs,
         auto_pre_cmds: bool = True,
         auto_pre_args: bool = True,
         auto_post_args: bool = True,
-        override_pre_cmds: _NestedArgs | None = None,
+        override_pre_cmds: NestedArgs | None = None,
         override_cli_path: Path | None = None,
-        override_pre_args: _NestedArgs | None = None,
-        override_post_args: _NestedArgs | None = None,
+        override_pre_args: NestedArgs | None = None,
+        override_post_args: NestedArgs | None = None,
         sudo: bool = False,
     ) -> Tuple[str, ...]:
         """Build the package manager CLI by combining the custom ``*args`` with the
@@ -581,7 +581,7 @@ class PackageManager(metaclass=MetaPackageManager):
         On linux, the command can be run with `sudo <https://www.sudo.ws>`_ if the parameter of the same name is set to ``True``.
         In which case the ``override_pre_cmds`` parameter is not allowed to be set and the ``auto_pre_cmds`` parameter is forced to ``False``.
         """
-        params: list[_Arg | _NestedArgs] = []
+        params: list[Arg | NestedArgs] = []
 
         # Sudo replaces any pre-command, be it overridden or automatic.
         if sudo:
@@ -619,16 +619,16 @@ class PackageManager(metaclass=MetaPackageManager):
 
     def run_cli(
         self,
-        *args: _Arg | _NestedArgs,
+        *args: Arg | NestedArgs,
         auto_extra_env: bool = True,
         auto_pre_cmds: bool = True,
         auto_pre_args: bool = True,
         auto_post_args: bool = True,
-        override_extra_env: _EnvVars = None,
-        override_pre_cmds: _NestedArgs | None = None,
+        override_extra_env: Optional[EnvVars] = None,
+        override_pre_cmds: NestedArgs | None = None,
         override_cli_path: Path | None = None,
-        override_pre_args: _NestedArgs | None = None,
-        override_post_args: _NestedArgs | None = None,
+        override_pre_args: NestedArgs | None = None,
+        override_post_args: NestedArgs | None = None,
         force_exec: bool = False,
         sudo: bool = False,
     ) -> str:

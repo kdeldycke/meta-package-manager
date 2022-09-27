@@ -26,7 +26,6 @@ from functools import partial
 from io import TextIOWrapper
 from operator import attrgetter
 from pathlib import Path
-from typing import Iterator
 from unittest.mock import patch
 
 import tomli_w

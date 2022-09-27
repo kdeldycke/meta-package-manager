@@ -30,7 +30,7 @@ from unittest.mock import patch
 
 import tomli_w
 from boltons.cacheutils import LRI, cached
-from click_extra import STRING, Choice, File, Option
+from click_extra import STRING, Choice, File
 from click_extra import Path as ClickPath
 from click_extra import argument, echo, extra_group, option, option_group, pass_context
 from click_extra.colorize import KO, OK

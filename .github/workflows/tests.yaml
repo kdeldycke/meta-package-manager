@@ -273,7 +273,6 @@ jobs:
       - name: Windows - Install Scoop
         if: runner.os == 'Windows'
         run: |
-          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
           irm get.scoop.sh | iex
 
       # DNF

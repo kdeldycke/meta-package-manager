@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- Remove GitHub edit link workaround in documentation.
+
 ## {gh}`5.7.0 (2022-09-27) <compare/v5.6.2...v5.7.0>`
 
 - \[scoop\] Add support for Scoop on Windows. Closes {issue}`546`.

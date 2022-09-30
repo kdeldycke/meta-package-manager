@@ -91,18 +91,10 @@ html_title = project
 html_logo = "images/logo-square.svg"
 html_theme_options = {
     "sidebar_hide_name": True,
-}
-
-# Activates edit links.
-html_context = {
-    # XXX Temporary activate RTD while we wait for https://github.com/pradyunsg/furo/pull/426 to
-    # reach upstream.
-    "READTHEDOCS": True,
-    "conf_py_path": "/docs/",
-    "display_github": True,
-    "github_user": github_user,
-    "github_repo": project_id,
-    "github_version": "main",
+    # Activates edit links.
+    "source_repository": github_project,
+    "source_branch": "main",
+    "source_directory": "docs/",
 }
 
 # Footer content.

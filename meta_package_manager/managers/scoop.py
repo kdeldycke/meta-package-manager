@@ -175,7 +175,7 @@ class Scoop(PackageManager):
             7z2201-x64.msi (1.8 MB) [====================] 100%
             Checking hash of 7z2201-x64.msi ... ok.
             Extracting 7z2201-x64.msi ... done.
-            Linking ~\scoop\apps\7zip\current => ~\scoop\apps\7zip\22.01
+            Linking ~\\scoop\apps\7zip\\current => ~\\scoop\apps\7zip\22.01
             Creating shim for '7z'.
             Creating shortcut for 7-Zip (7zFM.exe)
             Persisting Codecs
@@ -184,7 +184,7 @@ class Scoop(PackageManager):
             '7zip' (22.01) was installed successfully!
             Notes
             -----
-            Add 7-Zip as a context menu by running: "C:\scoop\apps\7zip\current\install-context.reg"
+            Add 7-Zip as a context menu by running: "C:\\scoop\apps\7zip\\current\\install-context.reg"
         """
         return self.run_cli("install", package_id)
 
@@ -217,8 +217,8 @@ class Scoop(PackageManager):
             Uninstalling '7zip' (22.01).
             Removing shim '7z.shim'.
             Removing shim '7z.exe'.
-            Removing shortcut ~\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Scoop Apps\7-Zip.lnk
-            Unlinking ~\scoop\apps\7zip\current
+            Removing shortcut ~\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Scoop Apps\7-Zip.lnk
+            Unlinking ~\\scoop\apps\7zip\\current
             '7zip' was uninstalled.
         """
         return self.run_cli("uninstall", package_id, "--purge")

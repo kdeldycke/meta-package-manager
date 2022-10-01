@@ -24,7 +24,8 @@ from contextlib import contextmanager
 from datetime import datetime
 from functools import partial
 from io import TextIOWrapper
-from operator import attrgetter
+from itertools import groupby
+from operator import attrgetter, itemgetter
 from pathlib import Path
 from unittest.mock import patch
 
@@ -57,7 +58,7 @@ from .output import (
     print_stats,
     print_table,
 )
-from .pool import pool
+from .pool import pool, resolve_specs
 
 # Subcommand sections.
 EXPLORE = Section("Explore subcommands")
@@ -139,8 +140,8 @@ def bar_plugin_path(ctx, param, value):
         type=Choice(pool.all_manager_ids, case_sensitive=False),
         multiple=True,
         help="Restrict subcommand to a subset of managers. Repeat to "
-        "select multiple managers. The order in which options are provided defines the "
-        "order in which subcommands will process them.",
+        "select multiple managers. The order is preserved for priority-sensitive "
+        "subcommands.",
     ),
     option(
         "-e",
@@ -695,57 +696,90 @@ def search(ctx, extended, exact, refilter, query):
 
 
 @mpm.command(short_help="Install a package.", section=MAINTENANCE)
-@argument("package_id", type=STRING, required=True)
+@argument(
+    "packages_specs",
+    type=STRING,
+    nargs=-1,
+    required=True,
+    help="A mix of simple <package_id> IDs, <package_id@version> specifiers or <pkg:npm/left-pad> pURLs.",
+)
 # TODO: add a --force/--reinstall flag
 @pass_context
-def install(ctx, package_id):
-    """Install the provided package ID using one of the selected manager."""
+def install(ctx, packages_specs):
+    """Install the provided packages using one of the selected manager."""
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=Operations.install)
     )
+    manager_ids = tuple(manager.id for manager in selected_managers)
+    if manager_ids:
+        logger.info(f"Installation priority: {' > '.join(manager_ids)}")
 
-    logger.info(
-        f"Package manager order: {', '.join([m.id for m in selected_managers])}"
-    )
+    # Resolves specs, group packages by managers.
+    packages_per_managers = {}
+    for spec in resolve_specs(packages_specs, manager_ids):
+        packages_per_managers.setdefault(spec["manager_id"], []).append(spec)
 
-    for manager in selected_managers:
-        logger.debug(f"Try to install {package_id} with {manager.id}.")
-
-        # Is the package available on this manager?
-        matches = None
-        try:
-            matches = tuple(
-                manager.refiltered_search(extended=False, exact=True, query=package_id)
-            )
-        except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement search operation.")
-            logger.info(
-                f"{package_id} existence unconfirmed, try to directly install it..."
-            )
-        else:
-            if not matches:
-                logger.warning(f"No {package_id} package found on {manager.id}.")
-                continue
-            # Prevents any incomplete or bad implementation of exact search.
-            if len(matches) != 1:
-                raise ValueError("Exact search returned multiple packages.")
-
-        # Allow install subcommand to fail to have the opportunity to catch the CLIError exception and print
-        # a comprehensive message.
-        with patch.object(manager, "stop_on_error", True):
+    # Install all packages deterministiccaly tied to a specific manager.
+    for manager_id, package_specs in packages_per_managers.items():
+        if not manager_id:
+            continue
+        for package in package_specs:
+            package_id = package["package_id"]
             try:
-                logger.info(f"Install {package_id} package from {manager.id}...")
+                logger.info(f"Install {package_id} package from {manager_id}...")
+                manager = pool.get(manager_id)
                 output = manager.install(package_id)
             except NotImplementedError:
                 logger.warning(f"{manager.id} does not implement install operation.")
                 continue
-            except CLIError:
-                logger.warning(f"Could not install {package_id} with {manager.id}.")
-                continue
+            echo(output)
 
-        echo(output)
-        ctx.exit()
+    unmatched_packages = packages_per_managers.get(None, [])
+    for spec in unmatched_packages:
+        package_id = spec["package_id"]
+
+        for manager in selected_managers:
+            logger.debug(f"Try to install {package_id} with {manager.id}.")
+
+            # Is the package available on this manager?
+            matches = None
+            try:
+                matches = tuple(
+                    manager.refiltered_search(
+                        extended=False, exact=True, query=package_id
+                    )
+                )
+            except NotImplementedError:
+                logger.warning(f"{manager.id} does not implement search operation.")
+                logger.info(
+                    f"{package_id} existence unconfirmed, try to directly install it..."
+                )
+            else:
+                if not matches:
+                    logger.warning(f"No {package_id} package found on {manager.id}.")
+                    continue
+                # Prevents any incomplete or bad implementation of exact search.
+                if len(matches) != 1:
+                    raise ValueError("Exact search returned multiple packages.")
+
+            # Allow install subcommand to fail to have the opportunity to catch the CLIError exception and print
+            # a comprehensive message.
+            with patch.object(manager, "stop_on_error", True):
+                try:
+                    logger.info(f"Install {package_id} package from {manager.id}...")
+                    output = manager.install(package_id)
+                except NotImplementedError:
+                    logger.warning(
+                        f"{manager.id} does not implement install operation."
+                    )
+                    continue
+                except CLIError:
+                    logger.warning(f"Could not install {package_id} with {manager.id}.")
+                    continue
+
+            echo(output)
+            ctx.exit()
 
 
 @mpm.command(aliases=["update"], short_help="Upgrade packages.", section=MAINTENANCE)

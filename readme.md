@@ -44,7 +44,8 @@ ______________________________________________________________________
 - Restore/install list of packages from TOML files.
 - Pin-point commands to a subset of package managers (include/exclude
   selectors).
-- Export results in JSON or user-friendly tables.
+- Support plain, versionned and [purl](https://github.com/package-url/purl-spec) package specifiers.
+- Export output to JSON or print user-friendly tables.
 - Shell auto-completion for Bash, Zsh and Fish.
 - Provides a
   [Xbar/SwiftBar plugin](https://kdeldycke.github.io/meta-package-manager/bar-plugin.html) for

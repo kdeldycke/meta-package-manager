@@ -26,7 +26,7 @@ from enum import Enum
 from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
-from typing import ContextManager, Iterator, Optional, Tuple
+from typing import ContextManager, Iterator
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -65,7 +65,7 @@ Operations = Enum(
         "cleanup",
     ),
 )
-"""Recognize operation IDs that are implemented by package manager with their specific CLI invocation.
+"""Recognized operation IDs that are implemented by package manager with their specific CLI invocation.
 
 Each operation has its own CLI subcommand.
 """

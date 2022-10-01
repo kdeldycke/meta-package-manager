@@ -48,7 +48,10 @@ class TestInstallRemove(CLISubCommandTests):
         result = invoke(operation)
         assert result.exit_code == 2
         assert not result.stdout
-        assert "Error: Missing argument 'PACKAGE_ID'." in result.stderr
+        if operation == "remove":
+            assert "Error: Missing argument 'PACKAGE_ID'." in result.stderr
+        else:
+            assert "Error: Missing argument 'PACKAGES_SPECS...'." in result.stderr
 
     PACKAGE_IDS = {
         "apm": "markdown-pdf",

@@ -6,7 +6,9 @@
 This version is not released yet and is under active development.
 ```
 
-- Remove GitHub edit link workaround in documentation.
+- \[mpm\] Parse `purl` specifiers on `install` subcommand. Closes {issue}`669`.
+- \[mpm\] Allow multiple packages to be fed to `install` subcommand.
+- \[mpm\] Remove GitHub edit link workaround in documentation.
 
 ## {gh}`5.7.0 (2022-09-27) <compare/v5.6.2...v5.7.0>`
 

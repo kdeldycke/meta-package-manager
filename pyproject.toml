@@ -40,6 +40,7 @@ keywords = [
     'pipx',
     'plugin',
     'portage',
+    'purl',
     'ruby',
     'rust',
     'scoop',
@@ -86,7 +87,8 @@ classifiers = [
 python = "^3.7"
 boltons = "^21.0.0"
 click = "^8.1.2"
-click-extra = "^3.2.4"
+click-extra = "^3.2.5"
+packageurl-python = "^0.10.3"
 tabulate = { extras = ["widechars"], version = "^0.8.9" }
 tomli = { version = "^2.0.1", python = "< 3.11" }
 tomli_w = "^1.0.0"

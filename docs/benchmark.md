@@ -18,6 +18,7 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | Sortable output                       |   ✓   |                |               |              |              |
 | Colored output                        |   ✓   |       ✓        |               |              |              |
 | Version parsing and diff              |   ✓   |                |               |              |              |
+| [purl](https://github.com/package-url/purl-spec) support              |   ✓   |                |               |              |              |
 | JSON export                           |   ✓   |                |               |              |              |
 | CSV export                            |   ✓   |                |               |              |              |
 | Markup export                         |   ✓   |                |               |              |              |

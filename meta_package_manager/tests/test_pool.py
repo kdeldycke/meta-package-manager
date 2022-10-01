@@ -63,68 +63,92 @@ def test_extra_option_allowlist():
 
 selection_cases = {
     "single_selector": (
-        {"keep": ("apm",)},
-        ("apm",),
+        {"keep": ("pip",)},
+        ("pip",),
     ),
     "list_input": (
-        {"keep": ["apm"]},
-        ("apm",),
+        {"keep": ["pip"]},
+        ("pip",),
     ),
     "set_input": (
-        {"keep": {"apm"}},
-        ("apm",),
+        {"keep": {"pip"}},
+        ("pip",),
     ),
     "duplicate_selectors": (
-        {"keep": ("apm", "apm")},
-        ("apm",),
+        {"keep": ("pip", "pip")},
+        ("pip",),
     ),
     "multiple_selectors": (
-        {"keep": ("apm", "gem")},
-        ("apm", "gem"),
+        {"keep": ("pip", "gem")},
+        ("pip", "gem"),
     ),
     "ordered_selectors": (
-        {"keep": ("gem", "apm")},
-        ("gem", "apm"),
+        {"keep": ("gem", "pip")},
+        ("gem", "pip"),
     ),
     "single_exclusion": (
-        {"drop": ("apm")},
-        tuple(mid for mid in pool.default_manager_ids if mid != "apm"),
+        {"drop": {"pip"}},
+        tuple(
+            mid
+            for mid in pool.all_manager_ids
+            if pool[mid].supported and pool[mid].available and mid != "pip"
+        ),
     ),
     "duplicate_exclusions": (
-        {"drop": ("apm", "apm")},
-        tuple(mid for mid in pool.default_manager_ids if mid != "apm"),
+        {"drop": ("pip", "pip")},
+        tuple(
+            mid
+            for mid in pool.all_manager_ids
+            if pool[mid].supported and pool[mid].available and mid != "pip"
+        ),
     ),
     "multiple_exclusions": (
-        {"drop": ("apm", "gem")},
-        tuple(mid for mid in pool.default_manager_ids if mid not in ("apm", "gem")),
+        {"drop": ("pip", "gem")},
+        tuple(
+            mid
+            for mid in pool.all_manager_ids
+            if pool[mid].supported and pool[mid].available and mid not in ("pip", "gem")
+        ),
     ),
     "selector_priority": (
-        {"keep": ("apm"), "drop": ("gem")},
-        ("apm",),
+        {"keep": {"pip"}, "drop": {"gem"}},
+        ("pip",),
     ),
     "exclusion_override": (
-        {"keep": ("apm"), "drop": ("apm")},
+        {"keep": {"pip"}, "drop": {"pip"}},
         (),
     ),
     "default_selection": (
         {},
-        pool.default_manager_ids,
+        tuple(
+            mid
+            for mid in pool.all_manager_ids
+            if pool[mid].supported and pool[mid].available
+        ),
     ),
     "keep_unsupported": (
         {"keep_unsupported": True},
-        pool.all_manager_ids,
+        tuple(mid for mid in pool.all_manager_ids if pool[mid].available),
     ),
     "drop_unsupported": (
         {"keep_unsupported": False},
-        pool.default_manager_ids,
+        tuple(
+            mid
+            for mid in pool.all_manager_ids
+            if pool[mid].supported and pool[mid].available
+        ),
     ),
     "drop_inactive": (
         {"drop_inactive": True},
-        tuple(mid for mid in pool.default_manager_ids if pool[mid].available),
+        tuple(
+            mid
+            for mid in pool.all_manager_ids
+            if pool[mid].supported and pool[mid].available
+        ),
     ),
     "keep_inactive": (
         {"drop_inactive": False},
-        pool.default_manager_ids,
+        tuple(mid for mid in pool.all_manager_ids if pool[mid].supported),
     ),
 }
 
@@ -136,8 +160,8 @@ selection_cases = {
         for test_id, (kwargs, expected) in selection_cases.items()
     ),
 )
-def select_managers(kwargs, expected):
+def test_select_managers(kwargs, expected):
     """We use tuple everywhere so we can check that select_managers() conserve the
     original order."""
     selection = pool.select_managers(**kwargs)
-    assert tuple(selection) == expected
+    assert tuple(m.id for m in selection) == expected

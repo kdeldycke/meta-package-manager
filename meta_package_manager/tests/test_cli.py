@@ -267,72 +267,72 @@ class CLISubCommandTests:
 
     @pytest.mark.parametrize(
         "args,expected",
-        [
-            pytest.param(("--manager", "apm"), {"apm"}, id="single_selector"),
-            pytest.param(("--apm",), {"apm"}, id="single_flag_selector"),
-            pytest.param(("--manager", "apm") * 2, {"apm"}, id="duplicate_selectors"),
-            pytest.param(("--apm",) * 2, {"apm"}, id="duplicate_flag_selectors"),
+        (
+            pytest.param(("--manager", "pip"), {"pip"}, id="single_selector"),
+            pytest.param(("--pip",), {"pip"}, id="single_flag_selector"),
+            pytest.param(("--manager", "pip") * 2, {"pip"}, id="duplicate_selectors"),
+            pytest.param(("--pip",) * 2, {"pip"}, id="duplicate_flag_selectors"),
             pytest.param(
-                ("--manager", "apm", "--apm"),
-                {"apm"},
+                ("--manager", "pip", "--pip"),
+                {"pip"},
                 id="duplicate_mixed_selectors",
             ),
             pytest.param(
-                ("--manager", "apm", "--manager", "gem"),
-                {"apm", "gem"},
+                ("--manager", "pip", "--manager", "gem"),
+                {"pip", "gem"},
                 id="multiple_selectors",
             ),
             pytest.param(
-                ("--manager", "apm", "--gem"),
-                {"apm", "gem"},
+                ("--manager", "pip", "--gem"),
+                {"pip", "gem"},
                 id="multiple_mixed_selectors",
             ),
             pytest.param(
-                ("--manager", "gem", "--manager", "apm"),
-                {"apm", "gem"},
+                ("--manager", "gem", "--manager", "pip"),
+                {"pip", "gem"},
                 id="ordered_selectors",
             ),
             pytest.param(
-                ("--gem", "--manager", "apm"),
-                {"apm", "gem"},
+                ("--gem", "--manager", "pip"),
+                {"pip", "gem"},
                 id="ordered_mixed_selectors",
             ),
             pytest.param(
-                ("--exclude", "apm"),
-                set(pool.default_manager_ids) - {"apm"},
+                ("--exclude", "pip"),
+                set(pool.default_manager_ids) - {"pip"},
                 id="single_exclusion",
             ),
             pytest.param(
-                ("--exclude", "apm") * 2,
-                set(pool.default_manager_ids) - {"apm"},
+                ("--exclude", "pip") * 2,
+                set(pool.default_manager_ids) - {"pip"},
                 id="duplicate_exclusions",
             ),
             pytest.param(
-                ("--exclude", "apm", "--exclude", "gem"),
-                set(pool.default_manager_ids) - {"apm", "gem"},
+                ("--exclude", "pip", "--exclude", "gem"),
+                set(pool.default_manager_ids) - {"pip", "gem"},
                 id="multiple_exclusions",
             ),
             pytest.param(
-                ("--manager", "apm", "--exclude", "gem"),
-                {"apm"},
+                ("--manager", "pip", "--exclude", "gem"),
+                {"pip"},
                 id="selector_priority_ordered",
             ),
             pytest.param(
-                ("--exclude", "gem", "--manager", "apm"),
-                {"apm"},
+                ("--exclude", "gem", "--manager", "pip"),
+                {"pip"},
                 id="selector_priority_reversed",
             ),
             pytest.param(
-                ("--manager", "apm", "--exclude", "apm"),
+                ("--manager", "pip", "--exclude", "pip"),
                 set(),
                 id="exclusion_override_ordered",
             ),
             pytest.param(
-                ("--exclude", "apm", "--manager", "apm"),
+                ("--exclude", "pip", "--manager", "pip"),
                 set(),
                 id="exclusion_override_reversed",
             ),
-        ],
+        ),
     )
     def test_manager_selection(self, invoke, subcmd, args, expected):
         result = invoke(*args, subcmd)

@@ -27,6 +27,8 @@ quite resource intensive, and Homebrew might hit GitHub's API calls quota.
 - This is in progress for SwiftBar at:
   https://github.com/swiftbar/SwiftBar/issues/160
 """
+from __future__ import annotations
+
 import sys
 
 python_min_version = (3, 7, 3)

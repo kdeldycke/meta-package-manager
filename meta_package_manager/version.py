@@ -89,7 +89,7 @@ class Token:
     def __repr__(self) -> str:
         """Prints internal string and number values for debug."""
         return "<Token:{}>".format(
-            ",".join((f"{k}={v!r}" for k, v in self.__dict__.items()))
+            ",".join(f"{k}={v!r}" for k, v in self.__dict__.items())
         )
 
     def __str__(self) -> str:

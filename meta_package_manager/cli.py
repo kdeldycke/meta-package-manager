@@ -885,9 +885,10 @@ def remove(ctx, package_id):
         ctx.obj.selected_managers(implements_operation=Operations.remove)
     )
 
-    logger.info(
-        f"Package manager order: {', '.join([m.id for m in selected_managers])}"
-    )
+    if selected_managers:
+        logger.info(
+            f"Removal priority: {' > '.join([m.id for m in selected_managers])}"
+        )
 
     for manager in selected_managers:
         logger.debug(f"Try to remove {package_id} with {manager.id}.")

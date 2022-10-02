@@ -712,7 +712,7 @@ def install(ctx, packages_specs):
         ctx.obj.selected_managers(implements_operation=Operations.install)
     )
     manager_ids = tuple(manager.id for manager in selected_managers)
-    if manager_ids:
+    if len(manager_ids) > 1:
         logger.info(f"Installation priority: {' > '.join(manager_ids)}")
 
     # Resolves specs, group packages by managers.
@@ -885,10 +885,8 @@ def remove(ctx, package_id):
         ctx.obj.selected_managers(implements_operation=Operations.remove)
     )
 
-    if selected_managers:
-        logger.info(
-            f"Removal priority: {' > '.join([m.id for m in selected_managers])}"
-        )
+    if len(selected_managers) > 1:
+        logger.info(f"Removal priority: {' > '.join(m.id for m in selected_managers)}")
 
     for manager in selected_managers:
         logger.debug(f"Try to remove {package_id} with {manager.id}.")

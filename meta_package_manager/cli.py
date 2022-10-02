@@ -58,7 +58,7 @@ from .output import (
     print_stats,
     print_table,
 )
-from .pool import pool, resolve_specs
+from .pool import VERSION_SEP, pool, resolve_specs
 
 # Subcommand sections.
 EXPLORE = Section("Explore subcommands")
@@ -724,12 +724,15 @@ def install(ctx, packages_specs):
     for manager_id, package_specs in packages_per_managers.items():
         if not manager_id:
             continue
-        for package in package_specs:
-            package_id = package["package_id"]
+        for spec in package_specs:
+            package_id = spec["package_id"]
+            package_version = spec["version_str"]
             try:
-                logger.info(f"Install {package_id} package from {manager_id}...")
+                logger.info(
+                    f"Install {package_id}{VERSION_SEP}{package_version} package from {manager_id}..."
+                )
                 manager = pool.get(manager_id)
-                output = manager.install(package_id)
+                output = manager.install(package_id, package_version)
             except NotImplementedError:
                 logger.warning(f"{manager.id} does not implement install operation.")
                 continue
@@ -738,9 +741,12 @@ def install(ctx, packages_specs):
     unmatched_packages = packages_per_managers.get(None, [])
     for spec in unmatched_packages:
         package_id = spec["package_id"]
+        package_version = spec["version_str"]
 
         for manager in selected_managers:
-            logger.debug(f"Try to install {package_id} with {manager.id}.")
+            logger.debug(
+                f"Try to install {package_id}{VERSION_SEP}{package_version} with {manager.id}."
+            )
 
             # Is the package available on this manager?
             matches = None
@@ -768,7 +774,7 @@ def install(ctx, packages_specs):
             with patch.object(manager, "stop_on_error", True):
                 try:
                     logger.info(f"Install {package_id} package from {manager.id}...")
-                    output = manager.install(package_id)
+                    output = manager.install(package_id, package_version)
                 except NotImplementedError:
                     logger.warning(
                         f"{manager.id} does not implement install operation."

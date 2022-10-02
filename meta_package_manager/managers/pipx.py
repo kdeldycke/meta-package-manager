@@ -24,6 +24,7 @@ from typing import Iterator
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from ..base import Package, PackageManager
+from ..capabilities import version_not_implemented
 
 
 class Pipx(PackageManager):
@@ -158,7 +159,8 @@ class Pipx(PackageManager):
                             latest_version=sub_package["latest_version"],
                         )
 
-    def install(self, package_id: str) -> str:
+    @version_not_implemented
+    def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
         .. code-block:: shell-session

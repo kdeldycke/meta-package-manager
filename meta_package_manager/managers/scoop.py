@@ -18,12 +18,12 @@
 from __future__ import annotations
 
 import re
-from typing import Iterator, Optional
+from typing import Iterator
 
 from click_extra.platform import WINDOWS
 
 from ..base import Package, PackageManager
-from ..capabilities import search_capabilities
+from ..capabilities import search_capabilities, version_not_implemented
 
 
 class Scoop(PackageManager):
@@ -165,7 +165,8 @@ class Scoop(PackageManager):
         for package_id, version in regexp.findall(self.remove_headers(output)):
             yield self.package(id=package_id, latest_version=version)
 
-    def install(self, package_id: str) -> str:
+    @version_not_implemented
+    def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
         .. code-block:: shell-session

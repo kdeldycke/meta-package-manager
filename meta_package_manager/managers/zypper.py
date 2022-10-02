@@ -31,6 +31,7 @@ import xmltodict
 from click_extra.platform import LINUX
 
 from ..base import Package, PackageManager
+from ..capabilities import version_not_implemented
 from ..version import TokenizedString, parse_version
 
 
@@ -234,7 +235,8 @@ class Zypper(PackageManager):
         for package in self._search(*search_param, query):
             yield self.package(id=package["id"], installed_version=package["version"])
 
-    def install(self, package_id: str) -> str:
+    @version_not_implemented
+    def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
         .. code-block:: shell-session

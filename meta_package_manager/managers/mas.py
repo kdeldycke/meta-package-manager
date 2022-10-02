@@ -23,7 +23,7 @@ from typing import Iterator
 from click_extra.platform import MACOS
 
 from ..base import Package, PackageManager
-from ..capabilities import search_capabilities
+from ..capabilities import search_capabilities, version_not_implemented
 
 
 class MAS(PackageManager):
@@ -154,7 +154,8 @@ class MAS(PackageManager):
         for package_id, package_name, version in regexp.findall(output):
             yield self.package(id=package_id, name=package_name, latest_version=version)
 
-    def install(self, package_id: str) -> str:
+    @version_not_implemented
+    def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
         .. code-block:: shell-session

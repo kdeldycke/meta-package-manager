@@ -20,6 +20,7 @@ from __future__ import annotations
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from ..base import PackageManager
+from ..capabilities import version_not_implemented
 
 
 class SteamCMD(PackageManager):
@@ -62,7 +63,8 @@ class SteamCMD(PackageManager):
         Loading Steam API...OK
     """
 
-    def install(self, package_id: str) -> str:
+    @version_not_implemented
+    def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
         .. code-block:: shell-session

@@ -22,6 +22,7 @@ from typing import Iterator
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from ..base import Package, PackageManager
+from ..capabilities import version_not_implemented
 
 
 class VSCode(PackageManager):
@@ -66,7 +67,8 @@ class VSCode(PackageManager):
             package_id, installed_version = package.split("@")
             yield self.package(id=package_id, installed_version=installed_version)
 
-    def install(self, package_id: str) -> str:
+    @version_not_implemented
+    def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
         .. code-block:: shell-session

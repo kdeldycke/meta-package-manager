@@ -769,10 +769,10 @@ class PackageManager(metaclass=MetaPackageManager):
             # Report the package as matching.
             yield match
 
-    def install(self, package_id: str) -> str:
+    def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package and one only.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Allows a specific ``version`` to be provided.
         """
         raise NotImplementedError
 

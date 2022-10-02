@@ -24,7 +24,7 @@ from typing import Iterator
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from ..base import Package, PackageManager
-from ..capabilities import search_capabilities
+from ..capabilities import search_capabilities, version_not_implemented
 
 
 class Composer(PackageManager):
@@ -183,7 +183,8 @@ class Composer(PackageManager):
         for package_id, description in regexp.findall(output):
             yield self.package(id=package_id, description=description)
 
-    def install(self, package_id: str) -> str:
+    @version_not_implemented
+    def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
         .. code-block:: shell-session

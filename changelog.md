@@ -6,9 +6,11 @@
 This version is not released yet and is under active development.
 ```
 
-- \[mpm\] Parse `purl` specifiers on `install` subcommand. Closes {issue}`669`.
 - \[gem\] Implement `remove` operation.
 - \[mpm\] Allow multiple packages to be fed to `install` subcommand.
+- \[mpm\] Add supports for versionned package specifier with `@` separator on `install` subcommand.
+- \[mpm\] Parse `purl` specifiers on `install` subcommand. Closes {issue}`669`.
+- \[mpm\] Output warning for `install` operations not implementing version management.
 - \[mpm\] Remove GitHub edit link workaround in documentation.
 
 ## {gh}`5.7.0 (2022-09-27) <compare/v5.6.2...v5.7.0>`

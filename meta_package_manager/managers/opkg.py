@@ -23,7 +23,7 @@ from typing import Iterator
 from click_extra.platform import LINUX
 
 from ..base import Package, PackageManager
-from ..capabilities import search_capabilities
+from ..capabilities import search_capabilities, version_not_implemented
 
 
 class OPKG(PackageManager):
@@ -135,7 +135,8 @@ class OPKG(PackageManager):
                 id=package_id, description=description, latest_version=version
             )
 
-    def install(self, package_id: str) -> str:
+    @version_not_implemented
+    def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
         .. code-block:: shell-session

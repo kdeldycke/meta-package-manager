@@ -26,6 +26,7 @@ from click_extra.platform import LINUX, MACOS
 
 from .. import logger
 from ..base import Package, PackageManager
+from ..capabilities import version_not_implemented
 from ..version import parse_version
 
 
@@ -364,7 +365,8 @@ class Homebrew(PackageManager):
             if package_id not in matched_ids:
                 yield self.package(id=package_id)
 
-    def install(self, package_id: str) -> str:
+    @version_not_implemented
+    def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
         .. code-block:: shell-session

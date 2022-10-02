@@ -56,3 +56,18 @@ def search_capabilities(extended_support: bool = True, exact_support: bool = Tru
         return wrapper
 
     return decorator
+
+
+def version_not_implemented(func):
+    """Decorator to be used on ``install()`` or ``upgrade_one_cli()`` operations to signal that a
+    particular operation does not implement (yet) the version specifier parameter."""
+
+    def print_warning(manager, package_id: str, version: str | None = None) -> str:
+        if version:
+            logger.warning(
+                f"{func.__qualname__} does not implement version parameter. "
+                "Let the package manager set the default version."
+            )
+        return func(manager, package_id=package_id, version=version)
+
+    return print_warning

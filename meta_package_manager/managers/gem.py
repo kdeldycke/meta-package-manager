@@ -23,7 +23,7 @@ from typing import Iterator
 from click_extra.platform import LINUX, MACOS, WINDOWS
 
 from ..base import Package, PackageManager
-from ..capabilities import search_capabilities
+from ..capabilities import search_capabilities, version_not_implemented
 from ..version import parse_version
 
 
@@ -177,7 +177,8 @@ class Gem(PackageManager):
         for package_id, version in regexp.findall(output):
             yield self.package(id=package_id, latest_version=version)
 
-    def install(self, package_id: str) -> str:
+    @version_not_implemented
+    def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
         .. code-block:: shell-session

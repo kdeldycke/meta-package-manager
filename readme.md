@@ -104,35 +104,37 @@ in this case):
 
 ```shell-session
 $ mpm --all-managers managers
-╭────────────────────┬──────────┬────────────────┬───────────────────────────┬────────────┬──────────────╮
-│ Package manager    │ ID       │ Supported      │ CLI                       │ Executable │ Version      │
-├────────────────────┼──────────┼────────────────┼───────────────────────────┼────────────┼──────────────┤
-│ Atom's apm         │ apm      │ ✓              │ ✓ /usr/local/bin/apm      │ ✓          │ ✓ 2.6.2      │
-│ APT                │ apt      │ ✘ Linux only   │ ✓ /usr/bin/apt            │ ✓          │ ✘            │
-│ Linux Mint's apt   │ apt-mint │ ✘ Linux only   │ ✓ /usr/bin/apt            │ ✓          │ ✘            │
-│ Homebrew Formulae  │ brew     │ ✓              │ ✓ /usr/local/bin/brew     │ ✓          │ ✓ 3.2.16     │
-│ Rust's cargo       │ cargo    │ ✓              │ ✓ /opt/homebrew/bin/cargo │ ✓          │ ✓ 1.59.0     │
-│ Homebrew Cask      │ cask     │ ✓              │ ✓ /usr/local/bin/brew     │ ✓          │ ✓ 3.2.16     │
-│ Chocolatey         │ choco    │ ✘ Windows only │ ✘ choco not found         │            │              │
-│ PHP's Composer     │ composer │ ✓              │ ✓ /usr/local/bin/composer │ ✓          │ ✓ 2.1.8      │
-│ DNF                │ dnf      │ ✘ Linux only   │ ✘ dnf not found           │            │              │
-│ Emerge             │ emerge   │ ✘ Linux only   │ ✘ emerge not found        │            │              │
-│ Flatpak            │ flatpak  │ ✘ Linux only   │ ✘ flatpak not found       │            │              │
-│ Ruby Gems          │ gem      │ ✓              │ ✓ /usr/bin/gem            │ ✓          │ ✓ 3.0.3      │
-│ Mac AppStore       │ mas      │ ✓              │ ✓ /usr/local/bin/mas      │ ✓          │ ✓ 1.8.3      │
-│ Node's npm         │ npm      │ ✓              │ ✓ /usr/local/bin/npm      │ ✓          │ ✓ 7.24.0     │
-│ OPKG               │ opkg     │ ✘ Linux only   │ ✘ opkg not found          │            │              │
-│ Pacman             │ pacman   │ ✘ Linux only   │ ✘ pacman not found        │            │              │
-│ Pip                │ pip      │ ✓              │ ✓ /usr/local/bin/python3  │ ✓          │ ✓ 21.2.4     │
-│ Pipx               │ pipx     │ ✓              │ ✓ /opt/homebrew/bin/pipx  │ ✓          │ ✓ 1.0.0      │
-│ Snap               │ snap     │ ✘ Linux only   │ ✘ snap not found          │            │              │
-│ SteamCMD           │ steamcmd │ ✓              │ ✓ /opt/local/bin/steamcmd │ ✓          │ ✓ 1648077083 │
-│ Visual Studio Code │ vscode   │ ✓              │ ✓ /usr/local/bin/code     │ ✓          │ ✓ 1.61.0     │
-│ Node's yarn        │ yarn     │ ✓              │ ✘ yarn not found          │            │              │
-│ Yay                │ yay      │ ✘ Linux only   │ ✘ yay not found           │            │              │
-│ YUM                │ yum      │ ✘ Linux only   │ ✘ yum not found           │            │              │
-│ Zypper             │ zypper   │ ✘ Linux only   │ ✘ zypper not found        │            │              │
-╰────────────────────┴──────────┴────────────────┴───────────────────────────┴────────────┴──────────────╯
+╭────────────┬────────────────────┬────────────────┬──────────────────────────────┬────────────┬───────────╮
+│ Manager ID │ Name               │ Supported      │ CLI                          │ Executable │ Version   │
+├────────────┼────────────────────┼────────────────┼──────────────────────────────┼────────────┼───────────┤
+│ apm        │ Atom's apm         │ ✓              │ ✘ apm not found              │            │           │
+│ apt        │ APT                │ ✘ Linux only   │ ✓ /usr/bin/apt               │ ✓          │ ✘         │
+│ apt-mint   │ Linux Mint's apt   │ ✘ Linux only   │ ✓ /usr/bin/apt               │ ✓          │ ✘         │
+│ brew       │ Homebrew Formulae  │ ✓              │ ✓ /opt/homebrew/bin/brew     │ ✓          │ ✓ 3.6.3   │
+│ cargo      │ Rust's cargo       │ ✓              │ ✓ /opt/homebrew/bin/cargo    │ ✓          │ ✓ 1.64.0  │
+│ cask       │ Homebrew Cask      │ ✓              │ ✓ /opt/homebrew/bin/brew     │ ✓          │ ✓ 3.6.3   │
+│ choco      │ Chocolatey         │ ✘ Windows only │ ✘ choco not found            │            │           │
+│ composer   │ PHP's Composer     │ ✓              │ ✓ /opt/homebrew/bin/composer │ ✓          │ ✓ 2.4.2   │
+│ dnf        │ DNF                │ ✘ Linux only   │ ✘ dnf not found              │            │           │
+│ emerge     │ Emerge             │ ✘ Linux only   │ ✘ emerge not found           │            │           │
+│ flatpak    │ Flatpak            │ ✘ Linux only   │ ✘ flatpak not found          │            │           │
+│ gem        │ Ruby Gems          │ ✓              │ ✓ /usr/bin/gem               │ ✓          │ ✓ 3.0.3.1 │
+│ mas        │ Mac AppStore       │ ✓              │ ✓ /opt/homebrew/bin/mas      │ ✓          │ ✓ 1.8.6   │
+│ npm        │ Node's npm         │ ✓              │ ✓ /opt/homebrew/bin/npm      │ ✓          │ ✓ 8.19.2  │
+│ opkg       │ OPKG               │ ✘ Linux only   │ ✘ opkg not found             │            │           │
+│ pacman     │ Pacman             │ ✘ Linux only   │ ✘ pacman not found           │            │           │
+│ paru       │ Paru               │ ✘ Linux only   │ ✘ paru not found             │            │           │
+│ pip        │ Pip                │ ✓              │ ✓ ~/.pyenv/shims/python3     │ ✓          │ ✓ 22.2.2  │
+│ pipx       │ Pipx               │ ✓              │ ✓ /opt/homebrew/bin/pipx     │ ✓          │ ✓ 1.1.0   │
+│ scoop      │ Scoop              │ ✘ Windows only │ ✘ scoop not found            │            │           │
+│ snap       │ Snap               │ ✘ Linux only   │ ✘ snap not found             │            │           │
+│ steamcmd   │ Valve Steam        │ ✓              │ ✘ steamcmd not found         │            │           │
+│ vscode     │ Visual Studio Code │ ✓              │ ✓ /opt/homebrew/bin/code     │ ✓          │ ✓ 1.71.2  │
+│ yarn       │ Node's yarn        │ ✓              │ ✓ /opt/homebrew/bin/yarn     │ ✓          │ ✓ 1.22.19 │
+│ yay        │ Yay                │ ✘ Linux only   │ ✘ yay not found              │            │           │
+│ yum        │ YUM                │ ✘ Linux only   │ ✘ yum not found              │            │           │
+│ zypper     │ Zypper             │ ✘ Linux only   │ ✘ zypper not found           │            │           │
+╰────────────┴────────────────────┴────────────────┴──────────────────────────────┴────────────┴───────────╯
 ```
 
 If your favorite manager is not supported yet, you can help! See the [contibution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html).

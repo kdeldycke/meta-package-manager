@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[mpm\] Parse `purl` specifiers on `install` subcommand. Closes {issue}`669`.
+- \[gem\] Implement `remove` operation.
 - \[mpm\] Allow multiple packages to be fed to `install` subcommand.
 - \[mpm\] Remove GitHub edit link workaround in documentation.
 

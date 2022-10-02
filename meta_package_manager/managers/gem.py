@@ -238,6 +238,16 @@ class Gem(PackageManager):
             auto_post_args=False,
         )
 
+    def remove(self, package_id: str) -> str:
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            ► gem uninstall --user-install --quiet left-pad
+            Successfully uninstalled left-pad-1.1.0
+        """
+        return self.run_cli("uninstall", package_id)
+
     def cleanup(self) -> None:
         """Removes things we don't need anymore.
 

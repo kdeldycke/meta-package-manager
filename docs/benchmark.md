@@ -7,31 +7,31 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 
 ## Features
 
-| Feature                               | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
-| ------------------------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
-| Package manager autodetection         |   ✓   |       ✓        |               |              |              |
-| Unified CLI and options               |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Multi-PM execution                    |   ✓   |       ✓        |               |              |              |
-| Package manager priority              |   ✓   |                |               |              |              |
-| Consolidated output                   |   ✓   |                |               |              |              |
-| Configurable output                   |   ✓   |                |               |              |              |
-| Sortable output                       |   ✓   |                |               |              |              |
-| Colored output                        |   ✓   |       ✓        |               |              |              |
-| Version parsing and diff              |   ✓   |                |               |              |              |
-| [purl](https://github.com/package-url/purl-spec) support              |   ✓   |                |               |              |              |
-| JSON export                           |   ✓   |                |               |              |              |
-| CSV export                            |   ✓   |                |               |              |              |
-| Markup export                         |   ✓   |                |               |              |              |
-| Configuration file                    |   ✓   |       ✓        |       ✓       |              |      ✓       |
-| Non-interactive                       |   ✓   |       ✓        |       ✓       |              |              |
-| Dry-run                               |   ✓   |       ✓        |       ✓       |              |              |
-| Sudo elevation                        |   ✓   |       ✓        |       ✓       |              |              |
-| Desktop notifications                 |       |       ✓        |               |              |              |
-| Bash auto-completion                  |   ✓   |                |               |              |              |
-| Zsh auto-completion                   |   ✓   |                |               |              |              |
-| Fish auto-completion                  |   ✓   |                |               |              |              |
-| [XKCD #1654](https://xkcd.com/1654/)  |   ✓   |                |               |              |              |
-| [Xbar/SwiftBar plugin](bar-plugin.md) |   ✓   |                |               |              |              |
+| Feature                                                  | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| -------------------------------------------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
+| Package manager autodetection                            |   ✓   |       ✓        |               |              |              |
+| Unified CLI and options                                  |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| Multi-PM execution                                       |   ✓   |       ✓        |               |              |              |
+| Package manager priority                                 |   ✓   |                |               |              |              |
+| Consolidated output                                      |   ✓   |                |               |              |              |
+| Configurable output                                      |   ✓   |                |               |              |              |
+| Sortable output                                          |   ✓   |                |               |              |              |
+| Colored output                                           |   ✓   |       ✓        |               |              |              |
+| Version parsing and diff                                 |   ✓   |                |               |              |              |
+| [purl](https://github.com/package-url/purl-spec) support |   ✓   |                |               |              |              |
+| JSON export                                              |   ✓   |                |               |              |              |
+| CSV export                                               |   ✓   |                |               |              |              |
+| Markup export                                            |   ✓   |                |               |              |              |
+| Configuration file                                       |   ✓   |       ✓        |       ✓       |              |      ✓       |
+| Non-interactive                                          |   ✓   |       ✓        |       ✓       |              |              |
+| Dry-run                                                  |   ✓   |       ✓        |       ✓       |              |              |
+| Sudo elevation                                           |   ✓   |       ✓        |       ✓       |              |              |
+| Desktop notifications                                    |       |       ✓        |               |              |              |
+| Bash auto-completion                                     |   ✓   |                |               |              |              |
+| Zsh auto-completion                                      |   ✓   |                |               |              |              |
+| Fish auto-completion                                     |   ✓   |                |               |              |              |
+| [XKCD #1654](https://xkcd.com/1654/)                     |   ✓   |                |               |              |              |
+| [Xbar/SwiftBar plugin](bar-plugin.md)                    |   ✓   |                |               |              |              |
 
 ## Operations
 

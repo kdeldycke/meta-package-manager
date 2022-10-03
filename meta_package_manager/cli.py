@@ -170,7 +170,7 @@ def bar_plugin_path(ctx, param, value):
     *single_manager_selectors(),
 )
 @option_group(
-    "Manager's options",
+    "Manager options",
     option(
         "--ignore-auto-updates/--include-auto-updates",
         default=True,
@@ -243,7 +243,7 @@ def mpm(
     sort_by,
     stats,
 ):
-    """Common CLI options and behavior for managers."""
+    """Common CLI options for subcommands."""
 
     # Update the list of selected managers with single selectors.
     if ctx.obj:
@@ -701,12 +701,21 @@ def search(ctx, extended, exact, refilter, query):
     type=STRING,
     nargs=-1,
     required=True,
-    help="A mix of simple <package_id> IDs, <package_id@version> specifiers or <pkg:npm/left-pad> pURLs.",
+    help="A mix of plain <package_id>, simple <package_id@version> specifiers or full <pkg:npm/left-pad> purls.",
 )
 # TODO: add a --force/--reinstall flag
 @pass_context
 def install(ctx, packages_specs):
-    """Install the provided packages using one of the selected manager."""
+    """Install one or more packages.
+
+    Installation will proceed first with packages unambiguously tied to a manager. You can have an
+    influence on that with more precise package specifiers (like purl) and/or tighter selection of managers.
+
+    For other untied packages, mpm will try to find the best manager to install it with. Their installation
+    will be attempted with each manager, in the order they were selected. If we have the certainty, by the way
+    of a search operation, that this package is not available from this manager, we'll skip the installation
+    and try the next available manager.
+    """
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=Operations.install)

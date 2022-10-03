@@ -44,7 +44,7 @@ from .version import TokenizedString, parse_version
 VERSION_SEP: Final = "@"
 """Separator used by ``mpm`` to split package's ID from its version:
 
-This separator is popular convention among package managers and purl.
+This has been chosen as a separator because it is shared by popular package managers and purls.
 
 ..code-block::
 
@@ -52,7 +52,7 @@ This separator is popular convention among package managers and purl.
 """
 
 
-# 1:1 mapping between purl and mpm manager IDs.
+# 1:1 mapping between purl types and mpm manager IDs.
 PURL_MAP = {mid: {mid} for mid in pool.all_manager_ids}
 # Manager IDs collected by looking at packageurl-python source code.
 PURL_MAP.update(

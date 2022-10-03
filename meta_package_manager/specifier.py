@@ -15,18 +15,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-""" Utilities to manage and resolve constraints from a set of package specifiers.
-
-..todo:: Could be made into a class and specific objects for cleaner code.
-"""
+""" Utilities to manage and resolve constraints from a set of package specifiers."""
 
 from __future__ import annotations
 
 import sys
+from dataclasses import dataclass
 from itertools import groupby
-from operator import itemgetter
-from pathlib import Path
-from typing import Iterable, Iterator, Mapping, Sequence
+from operator import attrgetter
+from typing import Iterable, Iterator, Sequence
 
 if sys.version_info < (3, 8):
     from typing_extensions import Final
@@ -42,7 +39,7 @@ from packageurl import PackageURL
 
 from . import logger
 from .pool import pool
-from .version import parse_version
+from .version import TokenizedString, parse_version
 
 VERSION_SEP: Final = "@"
 """Separator used by ``mpm`` to split package's ID from its version:
@@ -79,180 +76,241 @@ PURL_MAP.update(
 )
 
 
-class SkipPackage(Exception):
+@dataclass(frozen=True)
+class Specifier:
+    """Lightweight representation of a package specification.
+
+    Contains all parsed metadata to be used as constraints.
+    """
+
+    raw_spec: str
+    """Original, un-parsed specifier string provided by the user."""
+
+    package_id: str
+    """ID is required and is the primary key used for specification."""
+
+    manager_id: str | None = None
+
+    version: str | None = None
+    """Version string, a 1:1 copy of the one provided by the user."""
+
+    @classmethod
+    def parse_purl(cls, spec_str: str) -> Iterator[Specifier] | None:
+        """Parse a purl string.
+
+        Yields ``Specifier`` objects or returns ``None``.
+        """
+        # Try to parse specifier as a purl.
+        try:
+            purl = PackageURL.from_string(spec_str)
+        except ValueError as ex:
+            logger.debug(f"{spec_str} is not a purl: {ex}")
+            return
+
+        # Specifier is a purl, extract its metadata.
+        manager_ids = PURL_MAP.get(purl.type)
+        if not manager_ids:
+            raise ValueError(f"Unrecognized {purl.type} purl type.")
+
+        # The purl can be handled by one manager or more.
+        for manager_id in manager_ids:
+            yield Specifier(
+                raw_spec=spec_str,
+                package_id=purl.name,
+                manager_id=manager_id,
+                version=purl.version,
+            )
+
+    @classmethod
+    def from_string(cls, spec_str: str) -> Iterator[Specifier]:
+        """Parse a string into a package specifier.
+
+        Supports various formats:
+        - plain ``package_id``
+        - simple package ID with version: ``package_id@version``
+        - purl: ``pkg:npm/left-pad@3.7``
+
+        If a specifier resolves to multiple constraints (as it might be the case for purl), we produce and returns all
+        variations. Resolution of these specs is left for ``reduce_contraints()``.
+
+        Returns a generator of ``Specifier``.
+        """
+        spec = tuple(cls.parse_purl(spec_str))
+        if spec:
+            yield from spec
+
+        # Specifier contains a version.
+        elif VERSION_SEP in spec_str:
+            package_id, version = spec_str.split(VERSION_SEP, 1)
+            yield cls(
+                raw_spec=spec_str,
+                package_id=package_id,
+                version=version,
+            )
+
+        # The spec is the plain package ID.
+        else:
+            yield cls(
+                raw_spec=spec_str,
+                package_id=spec_str,
+            )
+
+    @cached_property
+    def parsed_version(self) -> TokenizedString:
+        return parse_version(self.version)
+
+    @cached_property
+    def is_blank(self) -> bool:
+        """Is considered blank a ``Specifier`` without any constraint on ``manager_id`` or ``version``."""
+        return not bool(self.manager_id or self.version)
+
+    def __str__(self) -> str:
+        """Human readable string of the spec.
+
+        Dynamiccaly adds version, its separator and manage ID prefix (in purl syntax).
+        """
+        string = self.package_id
+        if self.version:
+            string = f"{string}{VERSION_SEP}{self.version}"
+        if self.manager_id:
+            string = f"pkg:{self.manager_id}/{string}"
+        return string
+
+
+class EmptyReduction(Exception):
+    """Raised by the solver if no constraint can't be met."""
+
     pass
 
 
-def reduce_contraints(
-    specs_metadata: Iterable[Mapping[str, str]],
-    manager_priority: Sequence[str] | None,
-) -> dict[str, str] | None:
-    """Reduce a complex set of constraints to their essential, minimal form.
+class Solver:
+    """Combine a set of ``Specifier`` and allow for the solving of the constraints they represent."""
 
-    The reduction process consist in several steps. At each step, the remaining set is return if
-    only one remains.
+    manager_priority: Sequence[str] = []
 
-    1. Empty constraints are returned right away as ``None`` for nomalization.
-    2. We remove all contraints tied to all by the top priority manager if provided.
-    3. If no manager priority is provided, we discard constraints not tied to a manager.
-    4. We discard constraints not tied to a version.
-    5. We only keep constraints tied to the highest version.
+    spec_pool: set[Specifier] = set()
 
-    If we ends up with more than one set of constraints after all this filtering, an error is raised
-    to invite the developer to troubleshoot the situation and refine this process.
-    """
-    # Build the set of metadata we will use as constraints.
-    subset = []
-    for metadata in specs_metadata:
-        c = {}
-        for k in {"manager_id", "version_str"}:
-            v = metadata.get(k)
-            if v:
-                c[k] = v
-        if c:
-            subset.append(c)
-
-    # Normalize un-constrained spec to None.
-    if not subset:
-        return None
-
-    if len(subset) == 1:
-        return subset.pop()
-
-    # If constraints allows for multiple managers, only keep those matching the highest priority.
-    target_manager_ids = {c.get("manager_id") for c in subset}
-    if len(target_manager_ids) > 1:
-
-        if manager_priority:
-            if target_manager_ids.isdisjoint(manager_priority):
-                logger.warning(
-                    f"Requested target managers {target_manager_ids} don't match available {manager_priority}."
-                )
-                raise SkipPackage
-            top_priority_manager = None
-            for manager_id in manager_priority:
-                if manager_id in target_manager_ids:
-                    top_priority_manager = manager_id
-                    break
-            subset = [c for c in subset if c.get("manager_id") == top_priority_manager]
-
-        # If no manager priority has been set, then only filters out specs not not tied to any manager.
-        else:
-            subset = [c for c in subset if c.get("manager_id")]
-
-    if len(subset) == 1:
-        return subset.pop()
-
-    # Only keep the set with the higher version.
-    for c in subset:
-        # Parse all versions and store them in the subset.
-        c.update({"version_obj": parse_version(c.get("version_str"))})
-    max_version = max(c["version_obj"] for c in subset)
-    subset2 = []
-    for c in subset:
-        if c["version_obj"] == max_version:
-            c.pop("version_obj")
-            subset2.append(c)
-    subset = subset2
-
-    if len(subset) == 1:
-        return subset.pop()
-
-    # Still too much constraints.
-    raise ValueError(
-        f"Cannot reduce {subset} any further. More heuristics must be implemented."
-    )
-
-
-def parse_specs(spec_strings: Iterable[str]) -> Iterator[dict[str, str]]:
-    """Parse a mix of package specifiers.
-
-    Supports various formats:
-    - simple ``package_id``
-    - simple package ID with version: ``package_id@version``
-    - purl: ``pkg:npm/left-pad@3.7``
-
-    If a specifier resolves to multiple constraints (as it might be the case for purl), we produce and returns all
-    variations. Resolution of these specs is left for ``reduce_contraints()``.
-
-    Returns a generator of dictionnaries containing parsed metadata to be used as constraints.
-    """
-    # Deduplicate entries.
-    for spec in set(spec_strings):
-
-        # Try to parse specifier as a purl.
-        purl = None
-        try:
-            purl = PackageURL.from_string(spec)
-        except ValueError as ex:
-            logger.debug(f"{spec} is not a purl: {ex}")
-
-        # Specifier is a purl, extract its metadata.
-        if purl:
-            manager_ids = PURL_MAP.get(purl.type)
-            if not manager_ids:
-                raise ValueError(f"Unrecognized {purl.type} purl type.")
-
-            # The purl can be handled by one manager or more.
-            for manager_id in manager_ids:
-                constraint = {
-                    "spec": spec,
-                    "package_id": purl.name,
-                    "manager_id": manager_id,
-                }
-                if purl.version:
-                    constraint["version_str"] = purl.version
-                yield constraint
-            continue
-
-        # Specifier contains a version.
-        if VERSION_SEP in spec:
-            package_id, version = spec.split(VERSION_SEP, 1)
-            yield {
-                "spec": spec,
-                "package_id": package_id,
-                "version_str": version,
-            }
-        # The spec is the package ID.
-        else:
-            yield {
-                "spec": spec,
-                "package_id": spec,
-            }
-
-
-def resolve_specs(
-    spec_strings: Iterable[str], manager_priority: Sequence[str] | None
-) -> Iterator[dict[str, str | None]]:
-    """Parse package specifiers, regroup them by package IDs, collect their constraints and reduce them to their simplest expression."""
-    spec_metadata = parse_specs(spec_strings)
-
-    # Regroup specs by package IDs. Has the nice side effect of deduplucating entries.
-    keyfunc = itemgetter("package_id")
-    for package_id, metadata in groupby(
-        sorted(spec_metadata, key=keyfunc), key=keyfunc
+    def __init__(
+        self, spec_strings: Iterable[str] | None = None, manager_priority=None
     ):
-        metadata = tuple(metadata)
+        if spec_strings:
+            self.populate_from_strings(spec_strings)
+        if manager_priority:
+            self.manager_priority = manager_priority
 
-        # Reduce and cleanup each set of constraints.
-        try:
-            reduced = reduce_contraints(metadata, manager_priority)
-        except SkipPackage:
-            logger.warning(f"Skip package {package_id}.")
-            continue
+    def populate_from_strings(self, spec_strings: Iterable[str]):
+        """Populate the solver with package specifiers parsed from provided strings."""
+        # Deduplicate entries.
+        for spec_str in set(spec_strings):
+            new_specs = Specifier.from_string(spec_str)
+            self.spec_pool = self.spec_pool.union(new_specs)
 
-        # Print a warning if the specifiers of a package went trough a reduction step.
-        package_specs = sorted(map(itemgetter("spec"), metadata))
-        if len(package_specs) > 1:
-            logger.warning(
-                f"Specifiers for {package_id} have been collapsed from {package_specs} to {reduced}"
-            )
+    def top_priority_manager(
+        self, matching_managers=Iterable[str] | None
+    ) -> str | None:
+        """Returns the top priority manager configured on the solver.
 
-        specs = {
-            "package_id": package_id,
-            "manager_id": None,
-            "version_str": None,
-        }
-        if reduced:
-            specs.update(reduced)
-        yield specs
+        ``matching_managers`` allows for filtering which managers to considers.
+        """
+        for manager_id in self.manager_priority:
+            if not matching_managers:
+                return manager_id
+            elif manager_id in matching_managers:
+                return manager_id
+
+    def reduce_specs(self, specs: Iterable[Specifier]) -> Specifier:
+        """Reduce a collection of ``Specifier`` to its essential, minimal and unique form.
+
+        This method assumes that all provided ``specs`` are of the same package (like ``resolve_package_specs()`` does).
+
+        The reduction process consist of several steps. At each step, as soon as we managed to
+        reduce the constraints to one ``Specifier``, we returns it.
+
+        Filtering steps:
+        1. We remove all contraints tied to all by the top priority manager if provided.
+        2. If no manager priority is provided, we discard constraints not tied to a manager.
+        3. We discard constraints not tied to a version.
+        4. We only keep constraints tied to the highest version.
+
+        If we ends up with more than one set of constraints after all this filtering, an error is raised
+        to invite the developer to troubleshoot the situation and refine this process.
+        """
+        # Deduplicate specifiers.
+        collection = set(specs)
+
+        if len(collection) == 1:
+            return collection.pop()
+
+        # If constraints allows for multiple managers, only keep specs matching the highest priority.
+        target_manager_ids = {s.manager_id for s in collection}
+        if len(target_manager_ids) > 1:
+
+            if self.manager_priority:
+                if target_manager_ids.isdisjoint(self.manager_priority):
+                    logger.warning(
+                        f"Requested target managers {target_manager_ids} don't match available {self.manager_priority}."
+                    )
+                    raise EmptyReduction
+                top_priority_manager = self.top_priority_manager(target_manager_ids)
+                collection = {
+                    s for s in collection if s.manager_id == top_priority_manager
+                }
+
+            # If no manager priority has been set, discards specs not tied to any manager.
+            else:
+                collection = {s for s in collection if s.manager_id}
+
+        if len(collection) == 1:
+            return collection.pop()
+
+        # Only keep the subset with the higher version.
+        max_version = max(s.parsed_version for s in collection if s.parsed_version)
+        collection = {s for s in collection if s.parsed_version == max_version}
+
+        if len(collection) == 1:
+            return collection.pop()
+
+        # Still too much constraints.
+        raise ValueError(
+            f"Cannot reduce {collection} any further. More heuristics must be implemented."
+        )
+
+    def resolve_package_specs(self) -> Iterator[tuple[str, Specifier]]:
+        """Regroup specs of the pool by package IDs, and solve their constraints.
+
+        Return each package ID with its single, reduced spec, or ``None`` if it ha no constraints.
+        """
+        # Regroup specs by package IDs. Has the nice side effect of deduplicating specs.
+        keyfunc = attrgetter("package_id")
+        for package_id, specs in groupby(
+            sorted(self.spec_pool, key=keyfunc), key=keyfunc
+        ):
+            # Serialize because of reuse in log message below.
+            specs = tuple(specs)
+
+            # Reduce and cleanup each set of constraints.
+            try:
+                reduced_spec = self.reduce_specs(specs)
+            except EmptyReduction:
+                logger.warning(f"Skip package {package_id}.")
+                continue
+
+            # Print warning if specifiers were subject to a reduction.
+            if len(specs) > 1:
+                logger.warning(
+                    f"{package_id} specifiers reduced from "
+                    f"{', '.join(sorted(s.raw_spec for s in specs))} to {reduced_spec}"
+                )
+
+            yield package_id, reduced_spec
+
+    def resolve_specs_group_by_managers(self) -> dict[str, list[Specifier]]:
+        """Resolves package specs, and returns them grouped by managers."""
+        packages_per_managers = {}
+        for package_id, spec in self.resolve_package_specs():
+            manager_id = None
+            if spec:
+                manager_id = spec.manager_id
+            packages_per_managers.setdefault(manager_id, set()).add(spec)
+
+        return packages_per_managers

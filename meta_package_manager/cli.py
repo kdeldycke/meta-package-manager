@@ -24,8 +24,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from functools import partial
 from io import TextIOWrapper
-from itertools import groupby
-from operator import attrgetter, itemgetter
+from operator import attrgetter
 from pathlib import Path
 from unittest.mock import patch
 
@@ -59,7 +58,7 @@ from .output import (
     print_table,
 )
 from .pool import pool
-from .specifier import VERSION_SEP, resolve_specs
+from .specifier import Solver, Specifier
 
 # Subcommand sections.
 EXPLORE = Section("Explore subcommands")
@@ -718,55 +717,46 @@ def install(ctx, packages_specs):
             f"Installation priority: {' > '.join(map(theme.invoked_command, manager_ids))}"
         )
 
-    # Resolves specs, group packages by managers.
-    packages_per_managers = {}
-    for spec in resolve_specs(packages_specs, manager_ids):
-        packages_per_managers.setdefault(spec["manager_id"], []).append(spec)
+    solver = Solver(packages_specs, manager_priority=manager_ids)
+    packages_per_managers = solver.resolve_specs_group_by_managers()
 
     # Install all packages deterministiccaly tied to a specific manager.
     for manager_id, package_specs in packages_per_managers.items():
         if not manager_id:
             continue
         for spec in package_specs:
-            package_id = spec["package_id"]
-            package_version = spec["version_str"]
             try:
-                logger.info(
-                    f"Install {package_id}{VERSION_SEP}{package_version} package from {manager_id}..."
-                )
+                logger.info(f"Install {spec} package with {manager_id}...")
                 manager = pool.get(manager_id)
-                output = manager.install(package_id, package_version)
+                output = manager.install(spec.package_id, spec.version)
             except NotImplementedError:
-                logger.warning(f"{manager.id} does not implement install operation.")
+                logger.warning(f"{manager_id} does not implement install operation.")
                 continue
             echo(output)
 
     unmatched_packages = packages_per_managers.get(None, [])
     for spec in unmatched_packages:
-        package_id = spec["package_id"]
-        package_version = spec["version_str"]
-
         for manager in selected_managers:
-            logger.debug(
-                f"Try to install {package_id}{VERSION_SEP}{package_version} with {manager.id}."
-            )
+            logger.debug(f"Try to install {spec} with {manager.id}.")
 
             # Is the package available on this manager?
             matches = None
             try:
                 matches = tuple(
                     manager.refiltered_search(
-                        extended=False, exact=True, query=package_id
+                        extended=False, exact=True, query=spec.package_id
                     )
                 )
             except NotImplementedError:
                 logger.warning(f"{manager.id} does not implement search operation.")
                 logger.info(
-                    f"{package_id} existence unconfirmed, try to directly install it..."
+                    f"{spec.package_id} existence unconfirmed, try to directly install it..."
                 )
             else:
                 if not matches:
-                    logger.warning(f"No {package_id} package found on {manager.id}.")
+                    logger.warning(
+                        f"No {spec.package_id} package found on {manager.id}."
+                    )
                     continue
                 # Prevents any incomplete or bad implementation of exact search.
                 if len(matches) != 1:
@@ -776,15 +766,15 @@ def install(ctx, packages_specs):
             # a comprehensive message.
             with patch.object(manager, "stop_on_error", True):
                 try:
-                    logger.info(f"Install {package_id} package from {manager.id}...")
-                    output = manager.install(package_id, package_version)
+                    logger.info(f"Install {spec} package with {manager.id}...")
+                    output = manager.install(spec.package_id, spec.version)
                 except NotImplementedError:
                     logger.warning(
                         f"{manager.id} does not implement install operation."
                     )
                     continue
                 except CLIError:
-                    logger.warning(f"Could not install {package_id} with {manager.id}.")
+                    logger.warning(f"Could not install {spec} with {manager.id}.")
                     continue
 
             echo(output)

@@ -183,7 +183,7 @@ class CLISubCommandTests:
                 # Install messages.
                 bool(
                     re.search(
-                        rf"Install \S+ package from {mid}\.\.\.",
+                        rf"Install \S+ package with {mid}\.\.\.",
                         stderr,
                     )
                 ),
@@ -205,7 +205,7 @@ class CLISubCommandTests:
                 # Remove messages.
                 bool(
                     re.search(
-                        rf"Remove \S+ package from {mid}\.\.\.",
+                        rf"Remove \S+ package with {mid}\.\.\.",
                         stderr,
                     )
                 ),

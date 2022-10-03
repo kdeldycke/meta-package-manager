@@ -66,7 +66,7 @@ def version_not_implemented(func):
         if version:
             logger.warning(
                 f"{func.__qualname__} does not implement version parameter. "
-                "Let the package manager set the default version."
+                "Let the package manager choose the version."
             )
         return func(manager, package_id=package_id, version=version)
 

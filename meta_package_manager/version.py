@@ -269,28 +269,46 @@ class TokenizedString:
         return iter(self.tokens)
 
     def __eq__(self, other):
+        if other is None:
+            return False
         if isinstance(other, (TokenizedString, tuple)):
             return tuple(self) == tuple(other)
+        return super().__eq__(other)
 
     def __ne__(self, other):
+        if other is None:
+            return True
         if isinstance(other, TokenizedString):
             return tuple(self) != tuple(other)
+        return super().__ne__(other)
 
     def __gt__(self, other):
+        if other is None:
+            return True
         if isinstance(other, TokenizedString):
             return tuple(self) > tuple(other)
+        return super().__gt__(other)
 
     def __lt__(self, other):
+        if other is None:
+            return False
         if isinstance(other, TokenizedString):
             return tuple(self) < tuple(other)
+        return super().__lt__(other)
 
     def __ge__(self, other):
+        if other is None:
+            return True
         if isinstance(other, TokenizedString):
             return tuple(self) >= tuple(other)
+        return super().__ge__(other)
 
     def __le__(self, other):
+        if other is None:
+            return False
         if isinstance(other, TokenizedString):
             return tuple(self) <= tuple(other)
+        return super().__le__(other)
 
 
 parse_version = partial(TokenizedString, separator=".")

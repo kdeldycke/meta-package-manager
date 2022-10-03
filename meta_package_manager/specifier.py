@@ -264,7 +264,7 @@ class Solver:
             return collection.pop()
 
         # Only keep the subset with the higher version.
-        max_version = max(s.parsed_version for s in collection if s.parsed_version)
+        max_version = max(s.parsed_version for s in collection)
         collection = {s for s in collection if s.parsed_version == max_version}
 
         if len(collection) == 1:

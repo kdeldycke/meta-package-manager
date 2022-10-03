@@ -231,6 +231,7 @@ def test_version_tokenizer(v_string, v_tuple):
 
 
 compared_gt = (
+    ("1", None),
     ("2.0", "1.0"),
     ("0.1", "0"),
     ("0.1", "0.0"),
@@ -267,6 +268,7 @@ def test_version_comparison_lt(ver1, ver2):
     "sequence",
     (
         [
+            None,
             "r0",
             "r1",
             "r9_0",

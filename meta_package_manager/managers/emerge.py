@@ -250,7 +250,7 @@ class Emerge(PackageManager):
             sudo=True,
         )
 
-    def upgrade_one_cli(self, package_id) -> tuple[str, ...]:
+    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 

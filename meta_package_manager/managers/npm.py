@@ -299,7 +299,7 @@ class NPM(PackageManager):
         """
         return self.build_cli("update")
 
-    def upgrade_one_cli(self, package_id) -> tuple[str, ...]:
+    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 
         .. code-block:: shell-session

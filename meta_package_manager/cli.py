@@ -58,7 +58,8 @@ from .output import (
     print_stats,
     print_table,
 )
-from .pool import VERSION_SEP, pool, resolve_specs
+from .pool import pool
+from .specifier import VERSION_SEP, resolve_specs
 
 # Subcommand sections.
 EXPLORE = Section("Explore subcommands")

@@ -75,6 +75,14 @@ meta\_package\_manager.pool module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.specifier module
+---------------------------------------
+
+.. automodule:: meta_package_manager.specifier
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.version module
 -------------------------------------
 

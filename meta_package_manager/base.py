@@ -114,9 +114,6 @@ class Package:
 
     name: str | None = None
 
-    label: str | None = None
-    """Label is used in *Bar plugin to display user-friendly entries."""
-
     description: str | None = None
 
     installed_version: TokenizedString | str | None = None
@@ -126,20 +123,25 @@ class Package:
     normalized into ``TokenizedString``.
     """
 
-    upgrade_cli: tuple[str, ...] | None = None
+    bar_plugin_label: str | None = None
+    """Label is used in *Bar plugin to display user-friendly entries."""
+
+    bar_plugin_upgrade_cli: tuple[str, ...] | None = None
+    """Upgrade CLI used in *Bar plugin to directly execute the package upgrade."""
 
     manager: InitVar[PackageManager] = None
     """Init-only variable user to populate package metadata requiring a lookup from the manager."""
 
     def __post_init__(self, manager) -> None:
-        self.label = self.name if self.name else self.id
+        self.bar_plugin_label = self.name if self.name else self.id
 
         # Make sure version strings are parsed into proper objects.
         self.installed_version = parse_version(self.installed_version)
         self.latest_version = parse_version(self.latest_version)
 
+        # Generate the un-versionned upgrade CLI to be used by the *bar plugin.
         try:
-            self.upgrade_cli = manager.upgrade_one_cli(self.id)
+            self.bar_plugin_upgrade_cli = manager.upgrade_one_cli(self.id)
         except NotImplementedError:
             pass
 

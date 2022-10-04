@@ -384,8 +384,13 @@ class BarPluginRenderer(MPMPlugin):
 
             table = [
                 (
-                    (p["label"], p["installed_version"], "→", p["latest_version"]),
-                    p["upgrade_cli"],
+                    (
+                        p["bar_plugin_label"],
+                        p["installed_version"],
+                        "→",
+                        p["latest_version"],
+                    ),
+                    p["bar_plugin_upgrade_cli"],
                 )
                 for p in manager["packages"]
             ]

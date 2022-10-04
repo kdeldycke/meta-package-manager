@@ -498,7 +498,7 @@ def outdated(ctx, plugin_output):
         "latest_version",
     ]
     if plugin_output:
-        fields.extend(["label", "upgrade_cli"])
+        fields.extend(["bar_plugin_label", "bar_plugin_upgrade_cli"])
 
     for manager in ctx.obj.selected_managers(implements_operation=Operations.outdated):
 
@@ -507,8 +507,8 @@ def outdated(ctx, plugin_output):
         # Re-render upgrade CLI for plugin consumption.
         if plugin_output:
             for info in packages:
-                info["upgrade_cli"] = BarPluginRenderer.render_cli(
-                    info["upgrade_cli"], plugin_format=plugin_output
+                info["bar_plugin_upgrade_cli"] = BarPluginRenderer.render_cli(
+                    info["bar_plugin_upgrade_cli"], plugin_format=plugin_output
                 )
 
         outdated_data[manager.id] = {

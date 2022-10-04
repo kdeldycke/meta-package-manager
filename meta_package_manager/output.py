@@ -43,10 +43,13 @@ else:
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from click_extra import echo, get_current_context, style
+from click_extra.colorize import default_theme as theme
 from click_extra.tabulate import TabularOutputFormatter
 from tabulate import DataRow, TableFormat, tabulate
 
+from . import logger
 from .bar_plugin import MPMPlugin  # type: ignore
+from .pool import pool
 from .version import TokenizedString
 
 SORTABLE_FIELDS = {
@@ -257,28 +260,18 @@ class BarPluginRenderer(MPMPlugin):
         return self.getenv_bool("XBARDarkMode")
 
     @staticmethod
-    def render_cli(cmd_args, plugin_format=False):
-        """Return a formatted CLI in the requested format.
+    def render_cli(cmd_args: tuple[str | Path]) -> str:
+        """Return a formatted CLI compatible with Xbar and SwiftBar plugin format.
 
-        Returns a space-separated strings build on ``cmd_args`` list.
-
-        If ``plugin_format`` is ``True`` returns a string compatible with Xbar and SwiftBar plugin format,
-        i.e. this schema:
+        I.e. a string with this schema:
 
         .. code-block::
 
             shell=cmd_args[0] param1=cmd_args[1] param2=cmd_args[2] param2=cmd_args[2] ...
         """
-        assert isinstance(cmd_args, tuple)
-        # Serialize Path instances.
-        cmd_args = map(str, flatten(cmd_args))
-
-        if not plugin_format:
-            return " ".join(cmd_args)
-
-        # Renders CLI into the *bar plugin dialect.
         plugin_params = []
-        for index, param_value in enumerate(cmd_args):
+        # Serialize Path into string.
+        for index, param_value in enumerate(map(str, flatten(cmd_args))):
             param_id = "shell" if index == 0 else f"param{index}"
             plugin_params.append(f"{param_id}={param_value}")
         return " ".join(plugin_params)
@@ -385,12 +378,12 @@ class BarPluginRenderer(MPMPlugin):
             table = [
                 (
                     (
-                        p["bar_plugin_label"],
+                        p.get("name") or p.get("id"),
                         p["installed_version"],
                         "→",
                         p["latest_version"],
                     ),
-                    p["bar_plugin_upgrade_cli"],
+                    p["upgrade_cli"],
                 )
                 for p in manager["packages"]
             ]
@@ -439,10 +432,52 @@ class BarPluginRenderer(MPMPlugin):
             self._render(outdated_data)
         return capture.getvalue()
 
+    def add_upgrade_cli(self, outdated_data):
+        """Augment the outdated data from ``mpm outdated`` subcommand with upgrade CLI fields for bar plugin consumption."""
+        for manager_id, manager_data in outdated_data.items():
+            if manager_data.get("packages"):
+                manager = pool.get(manager_id)
+
+                # Produce the full-upgrade CLI.
+                try:
+                    upgrade_all_cli = manager.upgrade_all_cli()
+                except NotImplementedError:
+                    # Fallback on mpm itself which is capable of simulating a full upgrade.
+                    logger.warning(
+                        f"{theme.invoked_command(manager_id)} does not implement upgrade_all_cli."
+                    )
+                    upgrade_all_cli = (
+                        *self.mpm_exec,
+                        f"--{manager_id}",
+                        "upgrade",
+                        "--all",
+                    )
+                    logger.debug(f"Fallback to direct mpm call: {upgrade_all_cli}")
+
+                # Update outdated data with the full-upgrade CLI.
+                outdated_data[manager_id]["upgrade_all_cli"] = self.render_cli(
+                    upgrade_all_cli
+                )
+
+                # Add for each package its upgrade CLI.
+                for package in manager_data["packages"]:
+                    # Generate the version-less upgrade CLI to be used by the *bar plugin.
+                    upgrade_cli = None
+                    try:
+                        upgrade_cli = self.render_cli(
+                            manager.upgrade_one_cli(package["id"])
+                        )
+                    except NotImplementedError:
+                        pass
+                    package["upgrade_cli"] = upgrade_cli
+
+        return outdated_data
+
     def print(self, outdated_data) -> None:
         """Print the final plugin rendering to ``<stdout>``.
 
         Capturing the output of the plugin and re-printing it will introduce an extra
         line return, hence the extra call to ``rstrip()``.
         """
+        outdated_data = self.add_upgrade_cli(outdated_data)
         echo(self.render(outdated_data).rstrip())

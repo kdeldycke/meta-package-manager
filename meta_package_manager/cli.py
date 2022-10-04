@@ -491,47 +491,21 @@ def outdated(ctx, plugin_output):
     """List available package upgrades and their versions for each manager."""
     # Build-up a global list of outdated packages per manager.
     outdated_data = {}
-    fields = [
+    fields = (
         "id",
         "name",
         "installed_version",
         "latest_version",
-    ]
-    if plugin_output:
-        fields.extend(["bar_plugin_label", "bar_plugin_upgrade_cli"])
+    )
 
     for manager in ctx.obj.selected_managers(implements_operation=Operations.outdated):
-
-        packages = tuple(packages_asdict(manager.outdated, tuple(fields)))
-
-        # Re-render upgrade CLI for plugin consumption.
-        if plugin_output:
-            for info in packages:
-                info["bar_plugin_upgrade_cli"] = BarPluginRenderer.render_cli(
-                    info["bar_plugin_upgrade_cli"], plugin_format=plugin_output
-                )
+        packages = tuple(packages_asdict(manager.outdated, fields))
 
         outdated_data[manager.id] = {
             "id": manager.id,
             "name": manager.name,
             "packages": packages,
         }
-
-        # Only include full-upgrade CLI for plugin.
-        if plugin_output and packages:
-            try:
-                upgrade_all_cli = manager.upgrade_all_cli()
-            except NotImplementedError:
-                # Fallback on mpm itself which is capable of simulating a full upgrade.
-                logger.warning(
-                    f"{theme.invoked_command(manager.id)} does not implement upgrade_all_cli."
-                )
-                mpm_exec = bar_plugin.MPMPlugin().mpm_exec
-                upgrade_all_cli = (*mpm_exec, f"--{manager.id}", "upgrade", "--all")
-                logger.debug(f"Fallback to direct mpm call: {upgrade_all_cli}")
-            outdated_data[manager.id]["upgrade_all_cli"] = BarPluginRenderer.render_cli(
-                upgrade_all_cli, plugin_format=plugin_output
-            )
 
         # Serialize errors at the last minute to gather all we encountered.
         outdated_data[manager.id]["errors"] = list(

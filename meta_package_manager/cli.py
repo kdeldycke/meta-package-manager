@@ -824,7 +824,7 @@ def upgrade(ctx, all, packages_specs):
     All outdated package will be upgraded by default if no specifiers are provided as arguments.
     I.e. assumes -A/--all option if no [PACKAGES_SPECS]....
 
-    Packages recognized by multiple managers will be upgraded with each of them. You can fine tune
+    Packages recognized by multiple managers will be upgraded with each of them. You can fine-tune
     this behavior with more precise package specifiers (like purl) and/or tighter selection of managers.
 
     Packages unrecognized by any selected manager will be skipped.
@@ -887,8 +887,7 @@ def upgrade(ctx, all, packages_specs):
 
         if not source_manager_ids:
             logger.error(
-                f"{package_id} is not recognized by any of the selected manager."
-                f" Skip its upgrade."
+                f"{package_id} is not recognized by any of the selected manager. Skip it."
             )
             continue
 
@@ -903,54 +902,71 @@ def upgrade(ctx, all, packages_specs):
 
 
 @mpm.command(aliases=["uninstall"], short_help="Remove a package.", section=MAINTENANCE)
-@argument("package_id", type=STRING, required=True)
+@argument(
+    "packages_specs",
+    type=STRING,
+    nargs=-1,
+    required=True,
+    help="A mix of plain <package_id>, simple <package_id@version> specifiers or full <pkg:npm/left-pad> purls.",
+)
 @pass_context
-def remove(ctx, package_id):
-    """Remove the provided package using one of the selected manager."""
+def remove(ctx, packages_specs):
+    """Remove one or more packages.
+
+    Packages recognized by multiple managers will be remove with each of them. You can fine-tune
+    this behavior with more precise package specifiers (like purl) and/or tighter selection of managers.
+
+    Packages unrecognized by any selected manager will be skipped.
+    """
+
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=Operations.remove)
     )
+    manager_ids = tuple(manager.id for manager in selected_managers)
 
-    if len(selected_managers) > 1:
-        logger.info(
-            f"Removal priority: {' > '.join(theme.invoked_command(m.id) for m in selected_managers)}"
+    # Get the subset of selected managers that are implementing the installed operation, so we
+    # can query it and know if a package has been installed with it.
+    sourcing_managers = tuple(
+        ctx.obj.selected_managers(
+            keep=manager_ids, implements_operation=Operations.installed
         )
+    )
 
-    for manager in selected_managers:
-        logger.debug(f"Try to remove {package_id} with {manager.id}.")
+    solver = Solver(packages_specs, manager_priority=manager_ids)
+    for package_id, spec in solver.resolve_package_specs():
 
-        # Is the package installed with this manager?
-        installed = set()
-        try:
-            installed = map(attrgetter("id"), manager.installed)
-        except NotImplementedError:
-            logger.warning(f"{manager.id} does not implement installed operation.")
-            logger.info(
-                f"{package_id} existence unconfirmed, try to directly remove it..."
-            )
+        source_manager_ids = set()
+        # Use the manager from the spec.
+        if spec.manager_id:
+            source_manager_ids.add(spec.manager_id)
+        # Package is not bound to a manager by the user's specifiers.
         else:
-            match = package_id in installed
-            if not match:
-                logger.warning(f"{package_id} was not installed by {manager.id}.")
-                continue
-            logger.info(f"{package_id} has been installed by {manager.id}.")
+            logger.debug(
+                f"{spec} not tied to a manager. Search all managers recognizing it."
+            )
+            # Find all the managers that have the package installed.
+            for manager in sourcing_managers:
+                if package_id in map(attrgetter("id"), manager.installed):
+                    logger.debug(
+                        f"{package_id} has been installed with {theme.invoked_command(manager.id)}."
+                    )
+                    source_manager_ids.add(manager.id)
 
-        # Allow remove subcommand to fail to have the opportunity to catch the CLIError exception and print
-        # a comprehensive message.
-        with patch.object(manager, "stop_on_error", True):
-            try:
-                logger.info(f"Remove {package_id} package with {manager.id}...")
-                output = manager.remove(package_id)
-            except NotImplementedError:
-                logger.warning(f"{manager.id} does not implement remove operation.")
-                continue
-            except CLIError:
-                logger.warning(f"Could not remove {package_id} with {manager.id}.")
-                continue
+        if not source_manager_ids:
+            logger.error(
+                f"{package_id} is not recognized by any of the selected manager. Skip it."
+            )
+            continue
 
-        echo(output)
-        ctx.exit()
+        logger.info(
+            f"Remove {package_id} with {', '.join(map(theme.invoked_command, sorted(source_manager_ids)))}"
+        )
+        for manager_id in source_manager_ids:
+            manager = pool.get(manager_id)
+            output = manager.remove(package_id)
+            if output:
+                logger.info(output)
 
 
 @mpm.command(short_help="Sync local package info.", section=MAINTENANCE)

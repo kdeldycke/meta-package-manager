@@ -735,18 +735,24 @@ def install(ctx, packages_specs):
             continue
         for spec in package_specs:
             try:
-                logger.info(f"Install {spec} package with {manager_id}...")
+                logger.info(
+                    f"Install {spec} package with {theme.invoked_command(manager_id)}..."
+                )
                 manager = pool.get(manager_id)
                 output = manager.install(spec.package_id, spec.version)
             except NotImplementedError:
-                logger.warning(f"{manager_id} does not implement install operation.")
+                logger.warning(
+                    f"{theme.invoked_command(manager_id)} does not implement install operation."
+                )
                 continue
             echo(output)
 
     unmatched_packages = packages_per_managers.get(None, [])
     for spec in unmatched_packages:
         for manager in selected_managers:
-            logger.debug(f"Try to install {spec} with {manager.id}.")
+            logger.debug(
+                f"Try to install {spec} with {theme.invoked_command(manager.id)}."
+            )
 
             # Is the package available on this manager?
             matches = None
@@ -757,14 +763,16 @@ def install(ctx, packages_specs):
                     )
                 )
             except NotImplementedError:
-                logger.warning(f"{manager.id} does not implement search operation.")
+                logger.warning(
+                    f"{theme.invoked_command(manager.id)} does not implement search operation."
+                )
                 logger.info(
                     f"{spec.package_id} existence unconfirmed, try to directly install it..."
                 )
             else:
                 if not matches:
                     logger.warning(
-                        f"No {spec.package_id} package found on {manager.id}."
+                        f"No {spec.package_id} package found on {theme.invoked_command(manager.id)}."
                     )
                     continue
                 # Prevents any incomplete or bad implementation of exact search.
@@ -775,15 +783,19 @@ def install(ctx, packages_specs):
             # a comprehensive message.
             with patch.object(manager, "stop_on_error", True):
                 try:
-                    logger.info(f"Install {spec} package with {manager.id}...")
+                    logger.info(
+                        f"Install {spec} package with {theme.invoked_command(manager.id)}..."
+                    )
                     output = manager.install(spec.package_id, spec.version)
                 except NotImplementedError:
                     logger.warning(
-                        f"{manager.id} does not implement install operation."
+                        f"{theme.invoked_command(manager.id)} does not implement install operation."
                     )
                     continue
                 except CLIError:
-                    logger.warning(f"Could not install {spec} with {manager.id}.")
+                    logger.warning(
+                        f"Could not install {spec} with {theme.invoked_command(manager.id)}."
+                    )
                     continue
 
             echo(output)

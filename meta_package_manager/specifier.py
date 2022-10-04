@@ -105,7 +105,7 @@ class Specifier:
             purl = PackageURL.from_string(spec_str)
         except ValueError as ex:
             logger.debug(f"{spec_str} is not a purl: {ex}")
-            return
+            return None
 
         # Specifier is a purl, extract its metadata.
         manager_ids = PURL_MAP.get(purl.type)
@@ -135,9 +135,9 @@ class Specifier:
 
         Returns a generator of ``Specifier``.
         """
-        spec = cls.parse_purl(spec_str)
-        if spec is not None:
-            yield from spec
+        specs = tuple(cls.parse_purl(spec_str))
+        if specs:
+            yield from specs
 
         # Specifier contains a version.
         elif VERSION_SEP in spec_str:

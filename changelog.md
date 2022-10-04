@@ -7,9 +7,9 @@ This version is not released yet and is under active development.
 ```
 
 - \[gem\] Implement `remove` operation.
-- \[mpm\] Allow multiple packages to be fed to `install` subcommand.
-- \[mpm\] Add supports for versionned package specifier with `@` separator on `install` subcommand.
-- \[mpm\] Parse `purl` specifiers on `install` subcommand. Closes {issue}`669`.
+- \[mpm\] Allow multiple packages to be fed to `install` and `upgrade` subcommands.
+- \[mpm\] Add supports for versionned package specifier with `@` separator on `install` and `upgrade` subcommands.
+- \[mpm\] Parse `purl` specifiers on `install` and `upgrade` subcommands. Closes {issue}`669`.
 - \[mpm\] Output warning for `install` operations not implementing version management.
 - \[mpm\] Remove GitHub edit link workaround in documentation.
 

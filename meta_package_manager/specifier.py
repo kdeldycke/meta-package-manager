@@ -248,7 +248,7 @@ class Solver:
             if self.manager_priority:
                 if target_manager_ids.isdisjoint(self.manager_priority):
                     logger.warning(
-                        f"Requested target managers {target_manager_ids} don't match available {self.manager_priority}."
+                        f"Requested target managers {target_manager_ids} don't match selected {self.manager_priority}."
                     )
                     raise EmptyReduction
                 top_priority_manager = self.top_priority_manager(target_manager_ids)

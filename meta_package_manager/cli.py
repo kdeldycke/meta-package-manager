@@ -799,82 +799,95 @@ def install(ctx, packages_specs):
     help="Upgrade all outdated packages. "
     "Will make the command ignore package IDs provided as parameters.",
 )
-@argument("package_ids", type=STRING, nargs=-1)
+@argument(
+    "packages_specs",
+    type=STRING,
+    nargs=-1,
+    help="A mix of plain <package_id>, simple <package_id@version> specifiers or full <pkg:npm/left-pad> purls.",
+)
 @pass_context
-def upgrade(ctx, all, package_ids):
+def upgrade(ctx, all, packages_specs):
     """Upgrade one or more outdated packages.
 
-    Defaults to upgrading all outdated package if none provided as arguments (i.e. assumes
-    -A/--all if no [PACKAGE_IDS]).
+    All outdated package will be upgraded by default if no specifiers are provided as arguments.
+    I.e. assumes -A/--all option if no [PACKAGES_SPECS]....
 
-    Upgrade will only proceed if no ambiguity is uncovered. Packages recognized by multiple
-    managers will be skipped. You can remove that ambiguity by carefully specifying the subset of
-    managers to consider for upgrade.
+    Packages recognized by multiple managers will be upgraded with each of them. You can fine tune
+    this behavior with more precise package specifiers (like purl) and/or tighter selection of managers.
 
-    Unknown packages will be skipped.
+    Packages unrecognized by any selected manager will be skipped.
     """
-    if not all and not package_ids:
+    if not all and not packages_specs:
         logger.warning("No package provided, assume -A/--all option.")
         all = True
 
-    # Deduplicate entries.
-    package_ids = set(package_ids)
-
     # Full upgrade.
     if all:
-        if package_ids:
-            logger.debug(
-                f"Ignore provided {', '.join(sorted(package_ids))} packages and proceed to a full upgrade..."
+        if packages_specs:
+            # Deduplicate and sort specifiers for terseness.
+            logger.warning(
+                f"Ignore {', '.join(sorted(set(packages_specs)))} specifiers and proceed to a full upgrade..."
             )
         for manager in ctx.obj.selected_managers(
             implements_operation=Operations.upgrade_all
         ):
-            logger.info(f"Upgrade all outdated packages from {manager.id}...")
+            logger.info(
+                f"Upgrade all outdated packages from {theme.invoked_command(manager.id)}..."
+            )
             output = manager.upgrade()
             if output:
                 logger.info(output)
         ctx.exit()
 
-    # Specific list of package to upgrade has been requested. We need to
-    # validate them before proceeding.
+    # Cast generator to tuple because of reuse.
+    selected_managers = tuple(
+        ctx.obj.selected_managers(implements_operation=Operations.upgrade)
+    )
+    manager_ids = tuple(manager.id for manager in selected_managers)
 
-    # For each package, we list the managers they were sourced from.
-    package_sources = {}
-    for manager in ctx.obj.selected_managers(implements_operation=Operations.upgrade):
-        for package in manager.installed:
-            if package.id in package_ids:
-                package_sources.setdefault(package.id, set()).add(manager.id)
-    logger.debug(f"Managers sourcing each package: {package_sources}")
+    # Get the subset of selected managers that are implementing the installed operation, so we
+    # can query it and know if a package has been installed with it.
+    sourcing_managers = tuple(
+        ctx.obj.selected_managers(
+            keep=manager_ids, implements_operation=Operations.installed
+        )
+    )
 
-    for package_id in package_ids:
+    solver = Solver(packages_specs, manager_priority=manager_ids)
+    for package_id, spec in solver.resolve_package_specs():
 
-        # Skip unrecognized packages.
-        if package_id not in package_sources:
+        source_manager_ids = set()
+        # Use the manager from the spec.
+        if spec.manager_id:
+            source_manager_ids.add(spec.manager_id)
+        # Package is not bound to a manager by the user's specifiers.
+        else:
+            logger.debug(
+                f"{spec} not tied to a manager. Search all managers recognizing it."
+            )
+            # Find all the managers that have the package installed.
+            for manager in sourcing_managers:
+                if package_id in map(attrgetter("id"), manager.installed):
+                    logger.debug(
+                        f"{package_id} has been installed with {theme.invoked_command(manager.id)}."
+                    )
+                    source_manager_ids.add(manager.id)
+
+        if not source_manager_ids:
             logger.error(
                 f"{package_id} is not recognized by any of the selected manager."
                 f" Skip its upgrade."
             )
             continue
 
-        # A package to upgrade that was sourced from multiple managers leads to undefined
-        # behavior. What should we do in this case? Upgrade the package with each manager? Only the first one? A random one?
-        # We choose to play it safe and simply report this ambiguous situation to
-        # the user and skip the package.
-        managers = package_sources[package_id]
-        if len(managers) > 1:
-            logger.error(
-                f"{package_id} was sourced from multiple managers: {', '.join(sorted(managers))}."
-                " Skip its upgrade."
-            )
-            continue
-
-        assert len(managers) == 1
-        manager_id = managers.pop()
-        manager = pool.get(manager_id)
-        logger.info(f"Proceed to upgrade {package_id} with {manager_id}...")
-        output = manager.upgrade(package_id)
-        if output:
-            logger.info(output)
+        logger.info(
+            f"Upgrade {package_id} with {', '.join(map(theme.invoked_command, sorted(source_manager_ids)))}"
+        )
+        for manager_id in source_manager_ids:
+            manager = pool.get(manager_id)
+            output = manager.upgrade(package_id)
+            if output:
+                logger.info(output)
 
 
 @mpm.command(aliases=["uninstall"], short_help="Remove a package.", section=MAINTENANCE)

@@ -236,7 +236,7 @@ class BarPluginRenderer(MPMPlugin):
     """
 
     @cached_property
-    def submenu_layout(self):
+    def submenu_layout(self) -> bool:
         """Group packages into manager sub-menus.
 
         If ``True``, will replace the default flat layout with an alternative structure
@@ -247,7 +247,7 @@ class BarPluginRenderer(MPMPlugin):
         return self.getenv_bool("VAR_SUBMENU_LAYOUT", False)
 
     @cached_property
-    def dark_mode(self):
+    def dark_mode(self) -> bool:
         """Detect dark mode by inspecting environment variables.
 
         Value is sourced from two environment variables depending on the plugin:
@@ -276,7 +276,7 @@ class BarPluginRenderer(MPMPlugin):
             plugin_params.append(f"{param_id}={param_value}")
         return " ".join(plugin_params)
 
-    def print_cli_item(self, *args):
+    def print_cli_item(self, *args) -> None:
         """Print two CLI entries:
 
         - one that is silent

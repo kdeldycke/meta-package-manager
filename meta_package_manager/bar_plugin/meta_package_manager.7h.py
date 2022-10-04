@@ -39,7 +39,7 @@ required to work with Python 3.7.3 or newer.
 """
 
 
-def v_to_str(version_tuple):
+def v_to_str(version_tuple: tuple[int, ...]) -> str:
     """Transforms into a string a tuple of integers representing a version."""
     return ".".join(map(str, version_tuple))
 
@@ -56,6 +56,7 @@ import re
 from configparser import RawConfigParser
 from shutil import which
 from subprocess import run
+from typing import Any
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -79,7 +80,7 @@ class MPMPlugin:
     """Mpm v5.0.0 was the first version taking care of the complete layout rendering."""
 
     @staticmethod
-    def extended_environment():
+    def extended_environment() -> dict[str, str]:
         """Returns a tweaked environment extending global path to find non-default
         system-wide binaries.
 
@@ -110,7 +111,7 @@ class MPMPlugin:
         return env_copy
 
     @staticmethod
-    def getenv_str(var, default=None):
+    def getenv_str(var, default: str | None = None) -> str | None:
         """Utility to get environment variables.
 
         Note that all environment variables are strings. Always returns a lowered-case
@@ -122,7 +123,7 @@ class MPMPlugin:
         return str(value).lower()
 
     @staticmethod
-    def getenv_bool(var, default=False):
+    def getenv_bool(var, default: bool = False) -> bool:
         """Utility to normalize boolean environment variables.
 
         Relies on ``configparser.RawConfigParser.BOOLEAN_STATES`` to translate strings into boolean. See:
@@ -134,7 +135,9 @@ class MPMPlugin:
         return RawConfigParser.BOOLEAN_STATES[value]
 
     @staticmethod
-    def normalize_params(font_string, valid_ids={"color", "font", "size"}):
+    def normalize_params(
+        font_string: str, valid_ids: set[str] = {"color", "font", "size"}
+    ) -> str:
         valid_params = {}
         for param in font_string.split():
             param_id, param_value = param.split("=", 1)
@@ -143,7 +146,7 @@ class MPMPlugin:
         return " ".join(f"{k}={v}" for k, v in valid_params.items())
 
     @cached_property
-    def table_rendering(self):
+    def table_rendering(self) -> bool:
         """Aligns package names and versions, like a table, for easier visual parsing.
 
         If ``True``, will aligns all items using a fixed-width font.
@@ -151,29 +154,29 @@ class MPMPlugin:
         return self.getenv_bool("VAR_TABLE_RENDERING", True)
 
     @cached_property
-    def default_font(self):
+    def default_font(self) -> str:
         """Make it easier to change font, sizes and colors of the output."""
-        return self.normalize_params(self.getenv_str("VAR_DEFAULT_FONT", ""))
+        return self.normalize_params(self.getenv_str("VAR_DEFAULT_FONT", ""))  # type: ignore
 
     @cached_property
-    def monospace_font(self):
+    def monospace_font(self) -> str:
         """Make it easier to change font, sizes and colors of the output."""
         return self.normalize_params(
-            self.getenv_str("VAR_MONOSPACE_FONT", "font=Menlo size=12")
+            self.getenv_str("VAR_MONOSPACE_FONT", "font=Menlo size=12")  # type: ignore
         )
 
     @cached_property
-    def error_font(self):
+    def error_font(self) -> str:
         """Error font is based on monospace font."""
         return self.normalize_params(f"{self.monospace_font} color=red")
 
     @cached_property
-    def is_swiftbar(self):
+    def is_swiftbar(self) -> bool:
         """SwiftBar is kind enough to tell us about its presence."""
         return self.getenv_bool("SWIFTBAR")
 
     @staticmethod
-    def locate_bin(*bin_names):
+    def locate_bin(*bin_names: str) -> str | None:
         """Find the location of an executable binary on the system.
 
         Provides as many binary names as you need, the first one found will be returned.
@@ -183,19 +186,20 @@ class MPMPlugin:
             path = which(name)
             if path:
                 return path
+        return None
 
     @cached_property
-    def python_path(self):
+    def python_path(self) -> str:
         """Returns the system's Python binary path.
 
         This plugin being run from Python, we have the one called by Xbar/SwiftBar to
         fallback to (i.e. ``sys.executable``). But before that, we attempt to locate it
         by respecting the environment variables.
         """
-        return self.locate_bin("python", "python3", sys.executable)
+        return self.locate_bin("python", "python3", sys.executable)  # type: ignore
 
     @cached_property
-    def mpm_exec(self):
+    def mpm_exec(self) -> tuple[str, ...]:
         """Search for mpm execution alternatives, either direct ``mpm`` call or as an
         executable Python module."""
         # XXX Local debugging and development.
@@ -205,9 +209,11 @@ class MPMPlugin:
             return (mpm_exec,)
         return self.python_path, "-m", "meta_package_manager"
 
-    def check_mpm(self):
+    def check_mpm(
+        self,
+    ) -> tuple[bool, tuple[int, ...] | None, bool, str | FileNotFoundError | None]:
         """Test-run mpm execution and extract its version."""
-        error = None
+        error: str | FileNotFoundError | None = None
         try:
             process = run(
                 (*self.mpm_exec, "--version"), capture_output=True, encoding="utf-8"
@@ -235,13 +241,13 @@ class MPMPlugin:
         return installed, mpm_version, up_to_date, error
 
     @staticmethod
-    def pp(*args):
+    def pp(*args: str) -> None:
         """Print one menu-line with the Xbar/SwiftBar dialect.
 
         First argument is the menu-line label, separated by a pipe to all other non-
         empty parameters, themselves separated by a space.
         """
-        line = []
+        line: list[str] = []
         for param in args:
             if param:
                 if len(line) == 1:
@@ -250,12 +256,12 @@ class MPMPlugin:
         print(*line, sep=" ")
 
     @staticmethod
-    def print_error_header():
+    def print_error_header() -> None:
         """Generic header for blocking error."""
         MPMPlugin.pp("❗️", "dropdown=false")
         print("---")
 
-    def print_error(self, message, submenu=""):
+    def print_error(self, message: str | FileNotFoundError, submenu: str = "") -> None:
         """Print a formatted error line by line.
 
         A red, fixed-width font is used to preserve traceback and exception layout.
@@ -271,7 +277,7 @@ class MPMPlugin:
                 "symbolize=false" if self.is_swiftbar else "",
             )
 
-    def print_menu(self):
+    def print_menu(self) -> None:
         """Print the main menu."""
         mpm_installed, _, mpm_up_to_date, error = self.check_mpm()
         if not mpm_installed or not mpm_up_to_date:

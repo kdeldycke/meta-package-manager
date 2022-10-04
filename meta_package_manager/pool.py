@@ -58,7 +58,7 @@ class ManagerPool:
     """Path of files containing package manager definitions."""
 
     @cached_property
-    def register(self):
+    def register(self) -> dict[str, PackageManager]:
         """Search for package manager definitions locally and store them into an
         internal register.
 

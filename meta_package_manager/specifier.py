@@ -53,7 +53,7 @@ This has been chosen as a separator because it is shared by popular package mana
 
 
 # 1:1 mapping between purl types and mpm manager IDs.
-PURL_MAP = {mid: {mid} for mid in pool.all_manager_ids}
+PURL_MAP: dict[str, set[str] | None] = {mid: {mid} for mid in pool.all_manager_ids}
 # Manager IDs collected by looking at packageurl-python source code.
 PURL_MAP.update(
     {
@@ -135,8 +135,8 @@ class Specifier:
 
         Returns a generator of ``Specifier``.
         """
-        spec = tuple(cls.parse_purl(spec_str))
-        if spec:
+        spec = cls.parse_purl(spec_str)
+        if spec is not None:
             yield from spec
 
         # Specifier contains a version.
@@ -206,7 +206,7 @@ class Solver:
             self.spec_pool = self.spec_pool.union(new_specs)
 
     def top_priority_manager(
-        self, matching_managers=Iterable[str] | None
+        self, matching_managers: Iterable[str] | None = None
     ) -> str | None:
         """Returns the top priority manager configured on the solver.
 
@@ -217,6 +217,7 @@ class Solver:
                 return manager_id
             elif manager_id in matching_managers:
                 return manager_id
+        return None
 
     def reduce_specs(self, specs: Iterable[Specifier]) -> Specifier:
         """Reduce a collection of ``Specifier`` to its essential, minimal and unique form.
@@ -282,11 +283,11 @@ class Solver:
         """
         # Regroup specs by package IDs. Has the nice side effect of deduplicating specs.
         keyfunc = attrgetter("package_id")
-        for package_id, specs in groupby(
+        for package_id, package_specs in groupby(
             sorted(self.spec_pool, key=keyfunc), key=keyfunc
         ):
             # Serialize because of reuse in log message below.
-            specs = tuple(specs)
+            specs = tuple(package_specs)
 
             # Reduce and cleanup each set of constraints.
             try:
@@ -296,7 +297,7 @@ class Solver:
                 continue
 
             # Print warning if specifiers were subject to a reduction.
-            if len(specs) > 1:  # type: ignore
+            if len(specs) > 1:
                 logger.warning(
                     f"{package_id} specifiers reduced from "
                     f"{', '.join(sorted(s.raw_spec for s in specs))} to {reduced_spec}"
@@ -304,9 +305,9 @@ class Solver:
 
             yield package_id, reduced_spec
 
-    def resolve_specs_group_by_managers(self) -> dict[str, list[Specifier]]:
+    def resolve_specs_group_by_managers(self) -> dict[str | None, set[Specifier]]:
         """Resolves package specs, and returns them grouped by managers."""
-        packages_per_managers = {}
+        packages_per_managers: dict[str | None, set[Specifier]] = {}
         for package_id, spec in self.resolve_package_specs():
             manager_id = None
             if spec:

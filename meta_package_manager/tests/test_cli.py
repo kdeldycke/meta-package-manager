@@ -198,7 +198,7 @@ class CLISubCommandTests:
                 f"Upgrade all outdated packages from {mid}..." in stderr,
                 bool(
                     re.search(
-                        rf"Proceed to upgrade \S+ with {mid}\.\.\.",
+                        rf"Upgrade \S+ with {mid}\.\.\.",
                         stderr,
                     )
                 ),
@@ -206,12 +206,6 @@ class CLISubCommandTests:
                 bool(
                     re.search(
                         rf"Remove \S+ package with {mid}\.\.\.",
-                        stderr,
-                    )
-                ),
-                bool(
-                    re.search(
-                        rf"warning: \S+ was not installed by {mid}\.",
                         stderr,
                     )
                 ),

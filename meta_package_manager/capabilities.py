@@ -18,12 +18,17 @@
 from __future__ import annotations
 
 from functools import wraps
-from typing import Iterator
+from typing import Callable, Iterator, TypeVar
+
+from typing_extensions import ParamSpec
 
 from . import logger
 from .base import Package, PackageManager
 
 """Utilities and helper to organize, inspect and audit the capabilities of mpm and package managers."""
+
+P = ParamSpec("P")
+T = TypeVar("T")
 
 
 def search_capabilities(extended_support: bool = True, exact_support: bool = True):
@@ -58,16 +63,16 @@ def search_capabilities(extended_support: bool = True, exact_support: bool = Tru
     return decorator
 
 
-def version_not_implemented(func):
+def version_not_implemented(func: Callable[P, T]) -> Callable[P, T]:
     """Decorator to be used on ``install()`` or ``upgrade_one_cli()`` operations to signal that a
     particular operation does not implement (yet) the version specifier parameter."""
 
-    def print_warning(manager, package_id: str, version: str | None = None) -> str:
-        if version:
+    def print_warning(*args: P.args, **kwargs: P.kwargs) -> T:
+        if kwargs.get("version"):
             logger.warning(
                 f"{func.__qualname__} does not implement version parameter. "
                 "Let the package manager choose the version."
             )
-        return func(manager, package_id=package_id, version=version)
+        return func(*args, **kwargs)
 
     return print_warning

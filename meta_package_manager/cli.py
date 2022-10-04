@@ -741,7 +741,7 @@ def install(ctx, packages_specs):
                     f"Install {spec} package with {theme.invoked_command(manager_id)}..."
                 )
                 manager = pool.get(manager_id)
-                output = manager.install(spec.package_id, spec.version)
+                output = manager.install(spec.package_id, version=spec.version)
             except NotImplementedError:
                 logger.warning(
                     f"{theme.invoked_command(manager_id)} does not implement install operation."
@@ -788,7 +788,7 @@ def install(ctx, packages_specs):
                     logger.info(
                         f"Install {spec} package with {theme.invoked_command(manager.id)}..."
                     )
-                    output = manager.install(spec.package_id, spec.version)
+                    output = manager.install(spec.package_id, version=spec.version)
                 except NotImplementedError:
                     logger.warning(
                         f"{theme.invoked_command(manager.id)} does not implement install operation."

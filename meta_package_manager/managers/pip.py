@@ -258,7 +258,10 @@ class Pip(PackageManager):
         """
         return self.run_cli("install", package_id)
 
-    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
+    @version_not_implemented
+    def upgrade_one_cli(
+        self, package_id: str, version: str | None = None
+    ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 
         .. code-block:: shell-session

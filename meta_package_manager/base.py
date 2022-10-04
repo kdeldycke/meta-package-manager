@@ -139,7 +139,7 @@ class Package:
         self.installed_version = parse_version(self.installed_version)
         self.latest_version = parse_version(self.latest_version)
 
-        # Generate the un-versionned upgrade CLI to be used by the *bar plugin.
+        # Generate the version-less upgrade CLI to be used by the *bar plugin.
         try:
             self.bar_plugin_upgrade_cli = manager.upgrade_one_cli(self.id)
         except NotImplementedError:
@@ -782,11 +782,16 @@ class PackageManager(metaclass=MetaPackageManager):
         """Returns the complete CLI to upgrade all outdated packages on the system."""
         raise NotImplementedError
 
-    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
-        """Returns the complete CLI to upgrade one package and one only."""
+    def upgrade_one_cli(
+        self, package_id: str, version: str | None = None
+    ) -> tuple[str, ...]:
+        """Returns the complete CLI to upgrade one package and one only.
+
+        Allows a specific ``version`` to be provided.
+        """
         raise NotImplementedError
 
-    def upgrade(self, package_id: str | None = None) -> str:
+    def upgrade(self, package_id: str | None = None, version: str | None = None) -> str:
         """Perform an upgrade of either all or one package.
 
         Executes the CLI provided by either
@@ -802,7 +807,7 @@ class PackageManager(metaclass=MetaPackageManager):
         See for example the case of :py:meth:`meta_package_manager.managers.pip.Pip.upgrade_one_cli`.
         """
         if package_id:
-            cli = self.upgrade_one_cli(package_id)
+            cli = self.upgrade_one_cli(package_id, version=version)
 
         else:
             try:

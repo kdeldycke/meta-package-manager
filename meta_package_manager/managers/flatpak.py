@@ -189,7 +189,10 @@ class Flatpak(PackageManager):
         """
         return self.build_cli("update", "--noninteractive")
 
-    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
+    @version_not_implemented
+    def upgrade_one_cli(
+        self, package_id: str, version: str | None = None
+    ) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 

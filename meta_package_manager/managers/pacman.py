@@ -161,7 +161,10 @@ class Pacman(PackageManager):
         """
         return self.build_cli("--sync", "--refresh", "--sysupgrade", sudo=True)
 
-    def upgrade_one_cli(self, package_id: str) -> tuple[str, ...]:
+    @version_not_implemented
+    def upgrade_one_cli(
+        self, package_id: str, version: str | None = None
+    ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 
         .. code-block:: shell-session

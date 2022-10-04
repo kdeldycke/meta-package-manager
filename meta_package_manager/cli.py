@@ -898,7 +898,7 @@ def upgrade(ctx, all, packages_specs):
         )
         for manager_id in source_manager_ids:
             manager = pool.get(manager_id)
-            output = manager.upgrade(package_id)
+            output = manager.upgrade(package_id, version=spec.version)
             if output:
                 logger.info(output)
 

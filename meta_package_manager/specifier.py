@@ -296,7 +296,7 @@ class Solver:
                 continue
 
             # Print warning if specifiers were subject to a reduction.
-            if len(specs) > 1:
+            if len(specs) > 1:  # type: ignore
                 logger.warning(
                     f"{package_id} specifiers reduced from "
                     f"{', '.join(sorted(s.raw_spec for s in specs))} to {reduced_spec}"

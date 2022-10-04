@@ -523,7 +523,9 @@ def outdated(ctx, plugin_output):
                 upgrade_all_cli = manager.upgrade_all_cli()
             except NotImplementedError:
                 # Fallback on mpm itself which is capable of simulating a full upgrade.
-                logger.warning(f"{manager.id} does not implement upgrade_all_cli.")
+                logger.warning(
+                    f"{theme.invoked_command(manager.id)} does not implement upgrade_all_cli."
+                )
                 mpm_exec = bar_plugin.MPMPlugin().mpm_exec
                 upgrade_all_cli = (*mpm_exec, f"--{manager.id}", "upgrade", "--all")
                 logger.debug(f"Fallback to direct mpm call: {upgrade_all_cli}")
@@ -918,7 +920,6 @@ def remove(ctx, packages_specs):
 
     Packages unrecognized by any selected manager will be skipped.
     """
-
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=Operations.remove)
@@ -974,7 +975,7 @@ def remove(ctx, packages_specs):
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
     for manager in ctx.obj.selected_managers(implements_operation=Operations.sync):
-        logger.info(f"Sync {manager.id} package info...")
+        logger.info(f"Sync {theme.invoked_command(manager.id)} package info...")
         manager.sync()
 
 
@@ -983,7 +984,7 @@ def sync(ctx):
 def cleanup(ctx):
     """Cleanup local data, temporary artifacts and removes orphaned dependencies."""
     for manager in ctx.obj.selected_managers(implements_operation=Operations.cleanup):
-        logger.info(f"Cleanup {manager.id}...")
+        logger.info(f"Cleanup {theme.invoked_command(manager.id)}...")
         manager.cleanup()
 
 
@@ -1116,7 +1117,7 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
         for manager in ctx.obj.selected_managers(
             implements_operation=Operations.installed
         ):
-            logger.info(f"Dumping packages from {manager.id}...")
+            logger.info(f"Dumping packages from {theme.invoked_command(manager.id)}...")
 
             packages = tuple(packages_asdict(manager.installed, fields))
 
@@ -1182,12 +1183,16 @@ def restore(ctx, toml_files):
             implements_operation=Operations.install
         ):
             if manager.id not in doc:
-                logger.warning(f"No [{manager.id}] section found.")
+                logger.warning(
+                    f"No [{theme.invoked_command(manager.id)}] section found."
+                )
                 continue
-            logger.info(f"Restore {manager.id} packages...")
+            logger.info(f"Restore {theme.invoked_command(manager.id)} packages...")
             for package_id, version in doc[manager.id].items():
                 # Let the command fail if the manager doesn't implement the
                 # install operation.
-                logger.info(f"Install {package_id} package from {manager.id}...")
+                logger.info(
+                    f"Install {package_id} package with {theme.invoked_command(manager.id)}..."
+                )
                 output = manager.install(package_id)
                 echo(output)

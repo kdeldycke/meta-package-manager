@@ -17,10 +17,14 @@
 
 from __future__ import annotations
 
+import sys
 from functools import wraps
 from typing import Callable, Iterator, TypeVar
 
-from typing_extensions import ParamSpec
+if sys.version_info < (3, 10):
+    from typing_extensions import ParamSpec
+else:
+    from typing import ParamSpec
 
 from . import logger
 from .base import Package, PackageManager

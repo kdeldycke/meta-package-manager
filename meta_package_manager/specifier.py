@@ -131,7 +131,7 @@ class Specifier:
         - purl: ``pkg:npm/left-pad@3.7``
 
         If a specifier resolves to multiple constraints (as it might be the case for purl), we produce and returns all
-        variations. Resolution of these specs is left for ``reduce_contraints()``.
+        variations. That way the ``Solver`` below has all necessary details to resolve the constraints.
 
         Returns a generator of ``Specifier``.
         """

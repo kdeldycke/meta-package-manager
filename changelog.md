@@ -1,5 +1,11 @@
 # Changelog
 
+## {gh}`5.8.1 (unreleased) <compare/v5.8.0...main>`
+
+```{important}
+This version is not released yet and is under active development.
+```
+
 ## {gh}`5.8.0 (2022-10-05) <compare/v5.7.0...v5.8.0>`
 
 - \[gem\] Implement `remove` operation.

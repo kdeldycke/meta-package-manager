@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-""" Utilities to manage and resolve constraints from a set of package specifiers."""
+"""Utilities to manage and resolve constraints from a set of package specifiers."""
 
 from __future__ import annotations
 
@@ -163,7 +163,8 @@ class Specifier:
 
     @cached_property
     def is_blank(self) -> bool:
-        """Is considered blank a ``Specifier`` without any constraint on ``manager_id`` or ``version``."""
+        """Is considered blank a ``Specifier`` without any constraint on ``manager_id``
+        or ``version``."""
         return not bool(self.manager_id or self.version)
 
     def __str__(self) -> str:
@@ -186,7 +187,8 @@ class EmptyReduction(Exception):
 
 
 class Solver:
-    """Combine a set of ``Specifier`` and allow for the solving of the constraints they represent."""
+    """Combine a set of ``Specifier`` and allow for the solving of the constraints they
+    represent."""
 
     manager_priority: Sequence[str] = []
 
@@ -215,7 +217,8 @@ class Solver:
         ``keep_managers`` allows for filtering by discarding managers not in that list.
         """
         for manager_id in self.manager_priority:
-            # Returns the first manager in the priority list if no filtering needs to be performed.
+            # Returns the first manager in the priority list if no filtering needs to
+            # be performed.
             if not keep_managers:
                 return manager_id
             # Returns the first matching manager in the priority list.
@@ -225,7 +228,8 @@ class Solver:
         return None
 
     def reduce_specs(self, specs: Iterable[Specifier]) -> Specifier:
-        """Reduce a collection of ``Specifier`` to its essential, minimal and unique form.
+        """Reduce a collection of ``Specifier`` to its essential, minimal and unique
+        form.
 
         This method assumes that all provided ``specs`` are of the same package (like ``resolve_package_specs()`` does).
 
@@ -247,7 +251,8 @@ class Solver:
         if len(collection) == 1:
             return collection.pop()
 
-        # If constraints allows for multiple managers, only keep specs matching the highest priority.
+        # If constraints allows for multiple managers, only keep specs matching
+        # the highest priority.
         target_manager_ids = {s.manager_id for s in collection}
         if len(target_manager_ids) > 1:
 
@@ -262,7 +267,8 @@ class Solver:
                     s for s in collection if s.manager_id == top_priority_manager
                 }
 
-            # If no manager priority has been set, discards specs not tied to any manager.
+            # If no manager priority has been set, discards specs not tied to any
+            # manager.
             else:
                 collection = {s for s in collection if s.manager_id}
 
@@ -284,7 +290,8 @@ class Solver:
     def resolve_package_specs(self) -> Iterator[tuple[str, Specifier]]:
         """Regroup specs of the pool by package IDs, and solve their constraints.
 
-        Return each package ID with its single, reduced spec, or ``None`` if it ha no constraints.
+        Return each package ID with its single, reduced spec, or ``None`` if it ha no
+        constraints.
         """
         # Regroup specs by package IDs. Has the nice side effect of deduplicating specs.
         keyfunc = attrgetter("package_id")

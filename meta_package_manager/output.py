@@ -433,7 +433,8 @@ class BarPluginRenderer(MPMPlugin):
         return capture.getvalue()
 
     def add_upgrade_cli(self, outdated_data):
-        """Augment the outdated data from ``mpm outdated`` subcommand with upgrade CLI fields for bar plugin consumption."""
+        """Augment the outdated data from ``mpm outdated`` subcommand with upgrade CLI
+        fields for bar plugin consumption."""
         for manager_id, manager_data in outdated_data.items():
             if manager_data.get("packages"):
                 manager = pool.get(manager_id)
@@ -442,7 +443,8 @@ class BarPluginRenderer(MPMPlugin):
                 try:
                     upgrade_all_cli = manager.upgrade_all_cli()
                 except NotImplementedError:
-                    # Fallback on mpm itself which is capable of simulating a full upgrade.
+                    # Fallback on mpm itself which is capable of simulating a full
+                    # upgrade.
                     logger.warning(
                         f"{theme.invoked_command(manager_id)} does not implement upgrade_all_cli."
                     )
@@ -461,7 +463,8 @@ class BarPluginRenderer(MPMPlugin):
 
                 # Add for each package its upgrade CLI.
                 for package in manager_data["packages"]:
-                    # Generate the version-less upgrade CLI to be used by the *bar plugin.
+                    # Generate the version-less upgrade CLI to be used by the *bar
+                    # plugin.
                     upgrade_cli = None
                     try:
                         upgrade_cli = self.render_cli(

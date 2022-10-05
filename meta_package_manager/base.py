@@ -21,7 +21,7 @@ import os
 import re
 import sys
 from contextlib import nullcontext
-from dataclasses import InitVar, asdict, dataclass
+from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
 from shutil import which
@@ -123,10 +123,7 @@ class Package:
     normalized into ``TokenizedString``.
     """
 
-    manager: InitVar[PackageManager] = None
-    """Init-only variable user to populate package metadata requiring a lookup from the manager."""
-
-    def __post_init__(self, manager) -> None:
+    def __post_init__(self) -> None:
         # Make sure version strings are parsed into proper objects.
         self.installed_version = parse_version(self.installed_version)
         self.latest_version = parse_version(self.latest_version)
@@ -269,7 +266,7 @@ class PackageManager(metaclass=MetaPackageManager):
     cli_errors: list[CLIError]
     """Accumulate all CLI errors encountered by the package manager."""
 
-    package_class: type[Package] = Package
+    package: type[Package] = Package
     """The dataclass to use to produce Package objects from the manager."""
 
     def __init__(self) -> None:
@@ -665,11 +662,6 @@ class PackageManager(metaclass=MetaPackageManager):
             output = self.run(*cli, extra_env=extra_env)
 
         return output
-
-    def package(self, *args, **kwargs) -> Package:
-        """Produce a ``Package`` object with provided attributes."""
-        kwargs["manager"] = self
-        return self.package_class(*args, **kwargs)
 
     @property
     def installed(self) -> Iterator[Package]:

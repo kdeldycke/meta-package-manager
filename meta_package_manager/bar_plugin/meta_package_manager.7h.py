@@ -157,7 +157,9 @@ class MPMPlugin:
     @cached_property
     def default_font(self) -> str:
         """Make it easier to change font, sizes and colors of the output."""
-        return self.normalize_params(self.getenv_str("VAR_DEFAULT_FONT", ""))  # type: ignore
+        return self.normalize_params(
+            self.getenv_str("VAR_DEFAULT_FONT", "")
+        )  # type: ignore
 
     @cached_property
     def monospace_font(self) -> str:

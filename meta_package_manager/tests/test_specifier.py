@@ -123,7 +123,8 @@ def test_parse_specs(spec_string, expected):
     spec_props = []
     for spec in specs:
         assert spec.raw_spec == spec_string
-        # Serialize each specifier into an hashable set without the 'raw_spec' field (which we checked above).
+        # Serialize each specifier into an hashable set without the 'raw_spec'
+        # field (which we checked above).
         spec_props.append(props(spec))
 
     assert sorted(spec_props) == sorted(sorted(s.items()) for s in expected)

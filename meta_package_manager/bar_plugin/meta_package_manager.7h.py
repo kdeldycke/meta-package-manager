@@ -39,8 +39,10 @@ required to work with Python 3.7.3 or newer.
 """
 
 
-def v_to_str(version_tuple: tuple[int, ...]) -> str:
+def v_to_str(version_tuple: tuple[int, ...] | None) -> str:
     """Transforms into a string a tuple of integers representing a version."""
+    if not version_tuple:
+        return "None"
     return ".".join(map(str, version_tuple))
 
 
@@ -56,7 +58,6 @@ import re
 from configparser import RawConfigParser
 from shutil import which
 from subprocess import run
-from typing import Any
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -211,9 +212,9 @@ class MPMPlugin:
 
     def check_mpm(
         self,
-    ) -> tuple[bool, tuple[int, ...] | None, bool, str | FileNotFoundError | None]:
+    ) -> tuple[bool, tuple[int, ...] | None, bool, str | Exception | None]:
         """Test-run mpm execution and extract its version."""
-        error: str | FileNotFoundError | None = None
+        error: str | Exception | None = None
         try:
             process = run(
                 (*self.mpm_exec, "--version"), capture_output=True, encoding="utf-8"
@@ -229,14 +230,14 @@ class MPMPlugin:
         if not process.returncode and not error:
             installed = True
             # Is mpm too old?
-            version_string = (
-                re.compile(r".*\s+(?P<version>[0-9\.]+)$", re.MULTILINE)
-                .search(process.stdout)
-                .groupdict()["version"]
+            match = re.compile(r".*\s+(?P<version>[0-9\.]+)$", re.MULTILINE).search(
+                process.stdout
             )
-            mpm_version = tuple(map(int, version_string.split(".")))
-            if mpm_version >= self.mpm_min_version:
-                up_to_date = True
+            if match:
+                version_string = match.groupdict()["version"]
+                mpm_version = tuple(map(int, version_string.split(".")))
+                if mpm_version >= self.mpm_min_version:
+                    up_to_date = True
 
         return installed, mpm_version, up_to_date, error
 
@@ -261,7 +262,7 @@ class MPMPlugin:
         MPMPlugin.pp("❗️", "dropdown=false")
         print("---")
 
-    def print_error(self, message: str | FileNotFoundError, submenu: str = "") -> None:
+    def print_error(self, message: str | Exception, submenu: str = "") -> None:
         """Print a formatted error line by line.
 
         A red, fixed-width font is used to preserve traceback and exception layout.
@@ -282,8 +283,9 @@ class MPMPlugin:
         mpm_installed, _, mpm_up_to_date, error = self.check_mpm()
         if not mpm_installed or not mpm_up_to_date:
             self.print_error_header()
-            self.print_error(error)
-            print("---")
+            if error:
+                self.print_error(error)
+                print("---")
             action_msg = "Install" if not mpm_installed else "Upgrade"
             min_version_str = v_to_str(self.mpm_min_version)
             self.pp(

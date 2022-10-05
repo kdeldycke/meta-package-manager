@@ -109,7 +109,7 @@ def _python_invokation_matrix():
     )
 
 
-def _subcmd_args(invoke_args: None | tuple[str], *subcmd_args: str):
+def _subcmd_args(invoke_args: tuple[str, ...] | None, *subcmd_args: str):
     """Cleanup args and eventually concatenate all ``subcmd_args`` items to a space
     separated string if ``invoke_args`` is defined and its last argument is equal to
     ``-c``."""

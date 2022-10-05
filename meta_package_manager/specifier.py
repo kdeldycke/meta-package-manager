@@ -95,7 +95,7 @@ class Specifier:
     """Version string, a 1:1 copy of the one provided by the user."""
 
     @classmethod
-    def parse_purl(cls, spec_str: str) -> Iterator[Specifier] | None:
+    def parse_purl(cls, spec_str: str) -> tuple[Specifier, ...] | None:
         """Parse a purl string.
 
         Yields ``Specifier`` objects or returns ``None``.
@@ -113,13 +113,15 @@ class Specifier:
             raise ValueError(f"Unrecognized {purl.type} purl type.")
 
         # The purl can be handled by one manager or more.
-        for manager_id in manager_ids:
-            yield Specifier(
+        return tuple(
+            Specifier(
                 raw_spec=spec_str,
                 package_id=purl.name,
                 manager_id=manager_id,
                 version=purl.version,
             )
+            for manager_id in manager_ids
+        )
 
     @classmethod
     def from_string(cls, spec_str: str) -> Iterator[Specifier]:
@@ -135,7 +137,7 @@ class Specifier:
 
         Returns a generator of ``Specifier``.
         """
-        specs = tuple(cls.parse_purl(spec_str))
+        specs = cls.parse_purl(spec_str)
         if specs:
             yield from specs
 
@@ -206,17 +208,20 @@ class Solver:
             self.spec_pool = self.spec_pool.union(new_specs)
 
     def top_priority_manager(
-        self, matching_managers: Iterable[str] | None = None
+        self, keep_managers: Iterable[str | None] | None = None
     ) -> str | None:
         """Returns the top priority manager configured on the solver.
 
-        ``matching_managers`` allows for filtering which managers to considers.
+        ``keep_managers`` allows for filtering by discarding managers not in that list.
         """
         for manager_id in self.manager_priority:
-            if not matching_managers:
+            # Returns the first manager in the priority list if no filtering needs to be performed.
+            if not keep_managers:
                 return manager_id
-            elif manager_id in matching_managers:
+            # Returns the first matching manager in the priority list.
+            elif manager_id in keep_managers:
                 return manager_id
+        # No single top-priority manager can selected.
         return None
 
     def reduce_specs(self, specs: Iterable[Specifier]) -> Specifier:

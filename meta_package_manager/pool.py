@@ -115,7 +115,7 @@ class ManagerPool:
     # Pre-compute all sorts of constants.
 
     @cached_property
-    def all_manager_ids(self) -> tuple[str]:
+    def all_manager_ids(self) -> tuple[str, ...]:
         """All recognized manager IDs.
 
         Returns a list of sorted items to provide consistency across all UI, and
@@ -124,7 +124,7 @@ class ManagerPool:
         return tuple(sorted(self.register))
 
     @cached_property
-    def default_manager_ids(self) -> tuple[str]:
+    def default_manager_ids(self) -> tuple[str, ...]:
         """All manager IDs supported on the current platform.
 
         Must keep the same order defined by :py:prop:`meta_package_manager.pool.ManagerPool.all_manager_ids`.
@@ -134,7 +134,7 @@ class ManagerPool:
         )
 
     @cached_property
-    def unsupported_manager_ids(self) -> tuple[str]:
+    def unsupported_manager_ids(self) -> tuple[str, ...]:
         """All manager IDs unsupported on the current platform.
 
         Order is not important here as this list will be used to discard managers from

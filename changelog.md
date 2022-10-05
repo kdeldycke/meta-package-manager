@@ -10,6 +10,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Allow multiple packages to be fed to `install`, `upgrade` and `remove` subcommands.
 - \[mpm\] Add supports for versionned package specifier with `@` separator on `install`, `upgrade` and `remove` subcommands.
 - \[mpm\] Parse `purl` specifiers on `install`, `upgrade` and `remove` subcommands. Closes {issue}`669`.
+- \[mpm\] Pass version specifier to `install` operation in `restore` subcommand.
 - \[mpm\] Output warning for `install` and `upgrade_one_cli` operations not implementing version parameter.
 - \[mpm\] Remove GitHub edit link workaround in documentation.
 

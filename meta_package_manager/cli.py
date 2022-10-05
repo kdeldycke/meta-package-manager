@@ -1132,10 +1132,7 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
 @argument("toml_files", type=File("r"), required=True, nargs=-1)
 @pass_context
 def restore(ctx, toml_files):
-    """Read TOML files then install or upgrade each package referenced in them.
-
-    Version specified in the TOML file is ignored in the current implementation.
-    """
+    """Read TOML files then install or upgrade each package referenced in them."""
     for toml_input in toml_files:
 
         is_stdin = isinstance(toml_input, TextIOWrapper)
@@ -1163,10 +1160,11 @@ def restore(ctx, toml_files):
                 continue
             logger.info(f"Restore {theme.invoked_command(manager.id)} packages...")
             for package_id, version in doc[manager.id].items():
+                spec = Specifier(package_id=package_id, version=version)
                 # Let the command fail if the manager doesn't implement the
                 # install operation.
                 logger.info(
-                    f"Install {package_id} package with {theme.invoked_command(manager.id)}..."
+                    f"Install {spec} package with {theme.invoked_command(manager.id)}..."
                 )
-                output = manager.install(package_id)
+                output = manager.install(spec.package_id, version=spec.version)
                 echo(output)

@@ -58,7 +58,7 @@ from .output import (
     print_table,
 )
 from .pool import pool
-from .specifier import Solver, Specifier
+from .specifier import VERSION_SEP, Solver, Specifier
 
 # Subcommand sections.
 EXPLORE = Section("Explore subcommands")
@@ -1160,11 +1160,9 @@ def restore(ctx, toml_files):
                 continue
             logger.info(f"Restore {theme.invoked_command(manager.id)} packages...")
             for package_id, version in doc[manager.id].items():
-                spec = Specifier(package_id=package_id, version=version)
-                # Let the command fail if the manager doesn't implement the
-                # install operation.
-                logger.info(
-                    f"Install {spec} package with {theme.invoked_command(manager.id)}..."
+                spec = Specifier.from_string(
+                    f"pkg:{manager.id}:/{package_id}{VERSION_SEP}{version}"
                 )
+                logger.info(f"Install {spec}...")
                 output = manager.install(spec.package_id, version=spec.version)
                 echo(output)

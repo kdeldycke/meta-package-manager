@@ -149,9 +149,10 @@ jobs:
           brew update
       - name: Linux - Install Homebrew
         if: runner.os == 'Linux'
+        # See: https://github.com/orgs/community/discussions/25163#discussioncomment-3246685
         run: |
           NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo "/home/linuxbrew/.linuxbrew/bin/" >> $GITHUB_PATH
+          echo "::add-path::/home/linuxbrew/.linuxbrew/bin"
       - name: Homebrew doctor and tap repair
         if: runner.os != 'Windows'
         run: |

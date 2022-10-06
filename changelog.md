@@ -6,6 +6,7 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Reactivate Atom install on macOS.
 - \[mpm\] Fix installation of Scoop on Windows in unittests.
 - \[mpm\] Fix installation of brew on Ubuntu in unittests.
 

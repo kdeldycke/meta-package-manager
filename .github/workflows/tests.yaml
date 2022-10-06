@@ -273,7 +273,8 @@ jobs:
       - name: Windows - Install Scoop
         if: runner.os == 'Windows'
         run: |
-          irm get.scoop.sh | iex
+          iwr get.scoop.sh -outfile 'install.ps1'
+          .\install.ps1 -RunAsAdmin
 
       # DNF
       - name: Linux - Install DNF

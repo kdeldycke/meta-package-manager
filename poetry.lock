@@ -430,7 +430,7 @@ testing = ["beautifulsoup4", "coverage[toml]", "pytest (>=6,<7)", "pytest-cov", 
 
 [[package]]
 name = "packageurl-python"
-version = "0.10.3"
+version = "0.10.4"
 description = "A purl aka. Package URL parser and builder"
 category = "main"
 optional = false
@@ -1249,8 +1249,8 @@ myst-parser = [
     {file = "myst_parser-0.18.1-py3-none-any.whl", hash = "sha256:61b275b85d9f58aa327f370913ae1bec26ebad372cc99f3ab85c8ec3ee8d9fb8"},
 ]
 packageurl-python = [
-    {file = "packageurl-python-0.10.3.tar.gz", hash = "sha256:a01371a9015fb5c1a3c62eb2f7250b87d1733fced57f075e30715eb8e15e075d"},
-    {file = "packageurl_python-0.10.3-py3-none-any.whl", hash = "sha256:aefef9565ff9800147725ba96a7ee68a2f75e49d0ac5a6ad6a7fb1ddb90eb748"},
+    {file = "packageurl-python-0.10.4.tar.gz", hash = "sha256:5c91334f942cd55d45eb0c67dd339a535ef90e25f05b9ec016ad188ed0ef9048"},
+    {file = "packageurl_python-0.10.4-py3-none-any.whl", hash = "sha256:bf8a1ffe755634776f6563904d792fb0aa13b377fc86115c36fe17f69b6e59db"},
 ]
 packaging = [
     {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},

@@ -927,7 +927,7 @@ python-versions = "*"
 
 [[package]]
 name = "types-xmltodict"
-version = "0.13.0"
+version = "0.13.0.1"
 description = "Typing stubs for xmltodict"
 category = "dev"
 optional = false
@@ -1585,8 +1585,8 @@ types-tabulate = [
     {file = "types_tabulate-0.9.0.0-py3-none-any.whl", hash = "sha256:a1cc2aa52d2a9abfe0acbb361ccd49e3400794086a41626ce8784ed2e1ec0b0d"},
 ]
 types-xmltodict = [
-    {file = "types-xmltodict-0.13.0.tar.gz", hash = "sha256:0154cb88de0248336ec2e05500f57767a1f4642a77b4573f233c7147454c8a86"},
-    {file = "types_xmltodict-0.13.0-py3-none-any.whl", hash = "sha256:770a6653995421d863d54f1ec00ab59df2835efa42e676f64e82783e66a3afaf"},
+    {file = "types-xmltodict-0.13.0.1.tar.gz", hash = "sha256:c7b5e90002cae8d1a65e33f8c93ed8d8f7ba200eead5c9b9b6ba9b75afa8c29b"},
+    {file = "types_xmltodict-0.13.0.1-py3-none-any.whl", hash = "sha256:c02c1b31eff9529429939dc806cff070c5058514f5437c3e70cd98f8af96079d"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.4.0-py3-none-any.whl", hash = "sha256:16fa4864408f655d35ec496218b85f79b3437c829e93320c7c9215ccfd92489e"},

@@ -57,16 +57,17 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | Manager        | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
 | -------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
 | `0install`     |       |                |               |              |              |
-| `antigen`      |       |       ✓        |               |              |              |
 | `antibody`     |       |       ✓        |               |              |              |
-| `apm`          |   ✓   |       ✓        |               |              |              |
+| `antigen`      |       |       ✓        |               |              |              |
 | `apk`          |       |                |       ✓       |      ✓       |              |
+| `apm`          |   ✓   |       ✓        |               |              |              |
 | `apt`          |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
 | `apt-cyg`      |       |                |               |      ✓       |              |
 | `apt-mint`     |   ✓   |                |               |              |              |
 | `asdf`         |       |       ✓        |               |              |              |
 | `bin`          |       |       ✓        |               |              |              |
 | `brew`         |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| `bun`          |       |       ✓        |               |              |              |
 | `cargo`        |   ✓   |       ✓        |               |              |              |
 | `cask`         |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
 | `cave`         |       |                |               |      ✓       |              |
@@ -75,37 +76,42 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `choosenim`    |       |       ✓        |               |              |              |
 | `chromebrew`   |       |                |               |              |      ✓       |
 | `composer`     |   ✓   |       ✓        |               |              |              |
-| `containers`   |       |       ✓        |               |              |              |
 | `conda`        |       |       ✓        |       ✓       |      ✓       |              |
+| `containers`   |       |       ✓        |               |              |              |
 | `dein`         |       |       ✓        |               |              |              |
 | `deno`         |       |       ✓        |               |              |              |
+| `distrobox`    |       |       ✓        |               |              |              |
 | `dnf`          |   ✓   |                |       ✓       |              |      ✓       |
 | `dotnet`       |       |       ✓        |               |              |              |
 | `emacs`        |       |       ✓        |               |              |              |
 | `emerge`       |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
 | `eopkg`        |       |                |               |              |      ✓       |
 | `etc-update`   |       |       ✓        |               |              |              |
-| `fwupdmgr`     |       |       ✓        |               |              |              |
 | `fisher`       |       |       ✓        |               |              |              |
 | `flatpak`      |   ✓   |       ✓        |               |              |      ✓       |
 | `flutter`      |       |       ✓        |               |              |              |
 | `fossil`       |       |       ✓        |               |              |              |
-| `gem`          |   ✓   |       ✓        |               |              |      ✓       |
+| `fwupdmgr`     |       |       ✓        |               |              |              |
 | `gcloud`       |       |       ✓        |               |              |              |
+| `gem`          |   ✓   |       ✓        |               |              |      ✓       |
+| `ghcup`        |       |       ✓        |               |              |              |
 | `git`          |       |       ✓        |               |              |              |
+| `github-cli-extensions` |       |       ✓        |               |              |              |
 | `gnome-shell`  |       |       ✓        |               |              |              |
 | `go`           |       |       ✓        |               |              |              |
-| `guix`         |       |                |               |              |      ✓       |
+| `guix`         |       |       ✓            |               |              |      ✓       |
 | `haxelib`      |       |       ✓        |               |              |              |
 | `home-manager` |       |       ✓        |               |              |              |
 | `jetpack`      |       |       ✓        |               |              |              |
+| `julia`        |       |       ✓        |               |              |              |
 | `kakoune`      |       |       ✓        |               |              |              |
 | `krew`         |       |       ✓        |               |              |              |
+| `macos`        |       |       ✓        |               |              |              |
 | `macports`     |       |       ✓        |       ✓       |      ✓       |      ✓       |
 | `mas`          |   ✓   |       ✓        |               |              |              |
-| `macos`        |       |       ✓        |               |              |              |
 | `micro`        |       |       ✓        |               |              |              |
 | `myrepos`      |       |       ✓        |               |              |              |
+| `nala`         |       |         ✓       |               |              |              |
 | `neobundle`    |       |       ✓        |               |              |              |
 | `nix`          |       |       ✓        |               |              |      ✓       |
 | `npm`          |   ✓   |       ✓        |               |              |      ✓       |
@@ -116,8 +122,8 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `pacstall`     |       |       ✓        |               |              |              |
 | `paru`         |   ✓   |       ✓        |               |              |              |
 | `pearl`        |       |       ✓        |               |              |              |
-| `pikaur`       |       |       ✓        |               |              |              |
 | `pihole`       |       |       ✓        |               |              |              |
+| `pikaur`       |       |       ✓        |               |              |              |
 | `pip`          |   ✓   |       ✓        |       ✓       |              |      ✓       |
 | `pipx`         |   ✓   |       ✓        |               |              |              |
 | `pkg`          |       |       ✓        |               |              |      ✓       |
@@ -129,19 +135,23 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `pnpm`         |       |       ✓        |               |              |              |
 | `podman`       |       |       ✓        |               |              |              |
 | `powershell`   |       |       ✓        |               |              |              |
+| `protonup`    |       |       ✓        |               |              |              |
 | `raco`         |       |       ✓        |               |              |              |
+| `rcm`  |       |       ✓        |               |              |              |
+| `remotes`  |       |       ✓        |               |              |              |
+| `restarts`  |       |       ✓        |               |              |              |
 | `rtcl`         |       |       ✓        |               |              |              |
 | `rustup`       |       |       ✓        |               |              |              |
 | `scoop`        |   ✓   |       ✓        |       ✓       |              |      ✓       |
 | `sdkman`       |       |       ✓        |               |              |              |
 | `sheldon`      |       |       ✓        |               |              |              |
-| `silnite`      |       |       ✓        |               |              |              |
 | `slapt-get`    |       |                |               |              |      ✓       |
 | `snap`         |   ✓   |       ✓        |               |              |      ✓       |
 | `spack`        |       |                |               |              |              |
+| `sparkle`       |       |       ✓        |               |              |              |
 | `spicetify`    |       |       ✓        |               |              |              |
-| `steamcmd`     |   ✓   |                |               |              |              |
 | `stack`        |       |       ✓        |               |              |              |
+| `steamcmd`     |   ✓   |                |               |              |              |
 | `sun-tools`    |       |                |               |      ✓       |              |
 | `swupd`        |       |                |               |      ✓       |              |
 | `system`       |       |       ✓        |               |              |              |
@@ -152,10 +162,9 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `trizen`       |       |       ✓        |               |              |              |
 | `vagrant`      |       |       ✓        |               |              |              |
 | `vcpkg`        |       |       ✓        |               |              |              |
-| `vundle`       |       |       ✓        |               |              |              |
-| `nala`         |       |                |               |              |              |
 | `voom`         |       |       ✓        |               |              |              |
 | `vscode`       |   ✓   |                |               |              |              |
+| `vundle`       |       |       ✓        |               |              |              |
 | `winget`       |       |       ✓        |               |              |              |
 | `wsl`          |       |       ✓        |               |              |              |
 | `xbps`         |       |                |       ✓       |      ✓       |      ✓       |
@@ -222,8 +231,8 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | License             | ![GitHub](https://img.shields.io/github/license/kdeldycke/meta-package-manager?label=%20&style=flat-square)                                       | ![GitHub](https://img.shields.io/github/license/topgrade-rs/topgrade?label=%20&style=flat-square)                                       | ![GitHub](https://img.shields.io/github/license/rami3l/pacaptr?label=%20&style=flat-square)                                       | ![GitHub](https://img.shields.io/github/license/icy/pacapt?label=%20&style=flat-square)                                       | ![GitHub](https://img.shields.io/github/license/emilengler/sysget?label=%20&style=flat-square)                                       |
 | Main language       | ![GitHub](https://img.shields.io/github/languages/top/kdeldycke/meta-package-manager?style=flat-square)                                           | ![GitHub](https://img.shields.io/github/languages/top/topgrade-rs/topgrade?style=flat-square)                                           | ![GitHub](https://img.shields.io/github/languages/top/rami3l/pacaptr?style=flat-square)                                           | ![GitHub](https://img.shields.io/github/languages/top/icy/pacapt?style=flat-square)                                           | ![GitHub](https://img.shields.io/github/languages/top/emilengler/sysget?style=flat-square)                                           |
 | Latest version      | ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/kdeldycke/meta-package-manager?label=%20&sort=semver&style=flat-square) | ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/topgrade-rs/topgrade?label=%20&sort=semver&style=flat-square) | ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/rami3l/pacaptr?label=%20&sort=semver&style=flat-square) | ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/icy/pacapt?label=%20&sort=semver&style=flat-square) | ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/emilengler/sysget?label=%20&sort=semver&style=flat-square) |
-| Version benchmarked | `5.4.0`                                                                                                                                           | `8.3.1`                                                                                                                               | `0.15.2`                                                                                                                          | `3.0.7`                                                                                                                       | `2.3`                                                                                                                                |
-| Benchmark date      | 2022-06                                                                                                                                           | 2022-04                                                                                                                               | 2022-04                                                                                                                           | 2022-04                                                                                                                       | 2022-04                                                                                                                              |
+| Version benchmarked | `5.4.0`                                                                                                                                           | `10.1.2`                                                                                                                               | `0.15.2`                                                                                                                          | `3.0.7`                                                                                                                       | `2.3`                                                                                                                                |
+| Benchmark date      | 2022-06                                                                                                                                           | 2022-11                                                                                                                               | 2022-04                                                                                                                           | 2022-04                                                                                                                       | 2022-04                                                                                                                              |
 
 ## Project's URL
 

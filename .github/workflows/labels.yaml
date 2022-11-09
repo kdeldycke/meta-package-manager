@@ -59,7 +59,7 @@ jobs:
           branch: update-labels
 
   labels:
-    uses: kdeldycke/workflows/.github/workflows/labels.yaml@v1.8.7
+    uses: kdeldycke/workflows/.github/workflows/labels.yaml@v1.8.9
     needs: generate-labels
     with:
       extra-label-files: |

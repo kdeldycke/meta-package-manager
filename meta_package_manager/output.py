@@ -201,7 +201,7 @@ def print_table(header_defs, rows, sort_key=None):
 
 
 def print_stats(manager_stats: Counter) -> None:
-    """Prints statistics to ``<stdout>``: total packages and a break down by package
+    """Prints statistics to ``<stderr>``: total packages and a break down by package
     manager.
 
     Prints something like:
@@ -220,7 +220,7 @@ def print_stats(manager_stats: Counter) -> None:
     else:
         total = sum(manager_stats.values())
     plural = "s" if total > 1 else ""
-    echo(f"{total} package{plural} total{per_manager_totals}.")
+    echo(f"{total} package{plural} total{per_manager_totals}.", err=True)
 
 
 class BarPluginRenderer(MPMPlugin):

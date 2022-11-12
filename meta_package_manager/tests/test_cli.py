@@ -172,7 +172,7 @@ class CLISubCommandTests:
                     )
                 ),
                 # Stats line at the end of output.
-                f"{mid}: " in stdout.splitlines()[-1] if stdout else "",
+                f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
                 # Match output of managers command.
                 bool(
                     re.search(

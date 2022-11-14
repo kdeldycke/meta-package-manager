@@ -46,6 +46,17 @@ new package manager definitions.
 all_managers = pytest.mark.parametrize("manager", pool.values(), ids=attrgetter("id"))
 
 
+@all_managers
+def test_deprecated(manager):
+    assert isinstance(manager.deprecated, bool)
+    if manager.deprecation_url is not None:
+        assert isinstance(manager.deprecation_url, str)
+        location = URL(manager.deprecation_url)
+        assert location
+        assert location.scheme.lower() in ("http", "https")
+        assert manager.deprecated is True
+
+
 @pytest.mark.parametrize("manager_id,manager", pool.items())
 def test_ascii_id(manager_id, manager):
     """All package manager IDs should be short ASCII strings."""

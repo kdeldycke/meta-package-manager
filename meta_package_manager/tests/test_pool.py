@@ -37,6 +37,11 @@ def test_cached_pool():
     assert pool is pool
 
 
+@pytest.mark.parametrize("manager_id", pool.maintained_manager_ids)
+def test_maintained_managers(manager_id):
+    assert pool[manager_id].deprecated is False
+
+
 @pytest.mark.parametrize("manager_id", pool.default_manager_ids)
 def test_supported_managers(manager_id):
     assert pool[manager_id].supported is True
@@ -48,12 +53,20 @@ def test_unsupported_managers(manager_id):
 
 
 def test_manager_groups():
+    """Test relationships between manager groups."""
+    assert set(pool.maintained_manager_ids).issubset(pool.all_manager_ids)
+    assert set(pool.default_manager_ids).issubset(pool.all_manager_ids)
+    assert set(pool.unsupported_manager_ids).issubset(pool.all_manager_ids)
+
+    assert set(pool.default_manager_ids).issubset(pool.maintained_manager_ids)
+    assert set(pool.unsupported_manager_ids).issubset(pool.maintained_manager_ids)
+
     assert len(pool.default_manager_ids) + len(pool.unsupported_manager_ids) == len(
-        pool.all_manager_ids
+        pool.maintained_manager_ids
     )
     assert (
         tuple(sorted(set(pool.default_manager_ids).union(pool.unsupported_manager_ids)))
-        == pool.all_manager_ids
+        == pool.maintained_manager_ids
     )
 
 
@@ -126,6 +139,18 @@ selection_cases = {
             if pool[mid].supported and pool[mid].available
         ),
     ),
+    "keep_deprecated": (
+        {"keep_deprecated": True},
+        tuple(mid for mid in pool.all_manager_ids if pool[mid].available),
+    ),
+    "drop_deprecated": (
+        {"keep_deprecated": False},
+        tuple(
+            mid
+            for mid in pool.all_manager_ids
+            if not pool[mid].deprecated and pool[mid].supported and pool[mid].available
+        ),
+    ),
     "keep_unsupported": (
         {"keep_unsupported": True},
         tuple(mid for mid in pool.all_manager_ids if pool[mid].available),
@@ -143,12 +168,16 @@ selection_cases = {
         tuple(
             mid
             for mid in pool.all_manager_ids
-            if pool[mid].supported and pool[mid].available
+            if not pool[mid].deprecated and pool[mid].supported and pool[mid].available
         ),
     ),
     "keep_inactive": (
         {"drop_inactive": False},
-        tuple(mid for mid in pool.all_manager_ids if pool[mid].supported),
+        tuple(
+            mid
+            for mid in pool.all_manager_ids
+            if not pool[mid].deprecated and pool[mid].supported
+        ),
     ),
 }
 

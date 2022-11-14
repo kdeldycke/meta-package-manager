@@ -124,30 +124,42 @@ class ManagerPool:
         return tuple(sorted(self.register))
 
     @cached_property
+    def maintained_manager_ids(self) -> tuple[str, ...]:
+        """All manager IDs which are not deprecated."""
+        return tuple(
+            mid for mid in self.all_manager_ids if not self.register.get(mid).deprecated
+        )
+
+    @cached_property
     def default_manager_ids(self) -> tuple[str, ...]:
-        """All manager IDs supported on the current platform.
+        """All manager IDs supported on the current platform and not deprecated.
 
         Must keep the same order defined by :py:prop:`meta_package_manager.pool.ManagerPool.all_manager_ids`.
         """
         return tuple(
-            mid for mid in self.all_manager_ids if self.register.get(mid).supported
+            mid
+            for mid in self.maintained_manager_ids
+            if self.register.get(mid).supported
         )
 
     @cached_property
     def unsupported_manager_ids(self) -> tuple[str, ...]:
-        """All manager IDs unsupported on the current platform.
+        """All manager IDs unsupported on the current platform but still maintained.
 
         Order is not important here as this list will be used to discard managers from
         selection sets.
         """
         return tuple(
-            mid for mid in self.all_manager_ids if mid not in self.default_manager_ids
+            mid
+            for mid in self.maintained_manager_ids
+            if mid not in self.default_manager_ids
         )
 
     def select_managers(
         self,
-        keep: Iterable | None = None,
-        drop: Iterable | None = None,
+        keep: Iterable[str] | None = None,
+        drop: Iterable[str] | None = None,
+        keep_deprecated: bool = False,
         keep_unsupported: bool = False,
         drop_inactive: bool = True,
         implements_operation: Operations | None = None,
@@ -160,6 +172,8 @@ class ManagerPool:
         ``keep_unsupported`` is set to ``True``, in which case all managers implemented by ``mpm``
         are selected, regardless of their supported platform.
 
+        Deprecated managers are also excluded by default, unless ``keep_deprecated`` is ``True``.
+
         ``drop_inactive`` filters out managers that where not found on the system.
 
         ``implements_operation`` filters out managers which do not implements the provided operation.
@@ -168,10 +182,14 @@ class ManagerPool:
 
         Returns a generator producing a manager instance one after the other.
         """
+        # Produce the default set of managers to consider if none have been provided by the ``keep`` parameter.
         if not keep:
-            keep = (
-                self.all_manager_ids if keep_unsupported else self.default_manager_ids
-            )
+            if keep_deprecated:
+                keep = self.all_manager_ids
+            elif keep_unsupported:
+                keep = self.maintained_manager_ids
+            else:
+                keep = self.default_manager_ids
         if not drop:
             drop = set()
         assert set(self.all_manager_ids).issuperset(keep)  # type: ignore

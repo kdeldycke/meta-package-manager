@@ -88,11 +88,15 @@ def add_manager_to_selection(ctx, param, selected):
 def single_manager_selectors():
     """Dynamiccaly creates a dedicated flag selector alias for each manager."""
     for manager_id in pool.all_manager_ids:
+        manager = pool.get(manager_id)
+        # Parameters do not have a deprecated flag.
+        # See: https://github.com/pallets/click/issues/2263
+        deprecated_msg = " (deprecated)" if manager.deprecated else ""
         yield option(
             f"--{manager_id}",
             is_flag=True,
             default=False,
-            help=f"Alias to --manager {manager_id}.",
+            help=f"Alias to --manager {manager_id}{deprecated_msg}.",
             expose_value=False,
             callback=add_manager_to_selection,
         )
@@ -155,9 +159,9 @@ def bar_plugin_path(ctx, param, value):
         "--all-managers",
         is_flag=True,
         default=False,
-        help="Force evaluation of all manager recognized by mpm, even those "
-        "not supported by the current platform. Still applies filtering by --manager "
-        "and --exclude options before calling the subcommand.",
+        help="Force evaluation of all managers recognized by mpm, including those "
+        "not supported by the current platform or deprecated. Still applies filtering "
+        "by --manager and --exclude options before calling the subcommand.",
     ),
     option(
         "-x",
@@ -258,7 +262,7 @@ def mpm(
         pool.select_managers,
         keep=manager if not xkcd else XKCD_MANAGER_ORDER,
         drop=exclude,
-        keep_unsupported=all_managers,
+        keep_deprecated=all_managers,
         # Should we include auto-update packages or not?
         ignore_auto_updates=ignore_auto_updates,
         # Does the manager should raise on error or not.
@@ -331,6 +335,8 @@ def managers(ctx):
             os_infos += " {} only".format(
                 ", ".join(sorted(os_label(os_id) for os_id in manager.platforms))
             )
+        if manager.deprecated:
+            os_infos += f" {theme.warning('(deprecated)')}"
 
         # Build up the CLI path column content.
         cli_infos = "{} {}".format(

@@ -28,6 +28,16 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 class APM(PackageManager):
 
+    deprecated = True
+    deprecation_url = "https://github.blog/2022-06-08-sunsetting-atom/"
+    """GitHub announced the end of the project for December 15, 2022.
+    Source: https://github.blog/2022-06-08-sunsetting-atom/
+
+    There is a tentative community fork being discussed. See: https://github.com/atom-community/apm
+
+    In the mean time, as long as no apm alternative is useable, it is safe to tag this manager as deprecated.
+    """
+
     name = "Atom's apm"
 
     homepage_url = "https://atom.io/packages"

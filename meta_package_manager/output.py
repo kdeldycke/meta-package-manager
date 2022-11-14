@@ -188,7 +188,7 @@ def print_stats(manager_stats: Counter) -> None:
 
     .. code-block:: text
 
-        16 packages total (brew: 2, pip: 2, apm: 2, gem: 2, cask: 2, mas: 2, vscode: 2, npm: 2, composer: 0).
+        16 packages total (brew: 2, pip: 2, gem: 2, cask: 2, mas: 2, vscode: 2, npm: 2, composer: 0).
     """
     per_manager_totals = ""
     if manager_stats:

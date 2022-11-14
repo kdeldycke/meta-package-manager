@@ -159,6 +159,23 @@ class PackageManager(metaclass=MetaPackageManager):
 
     """Base class from which all package manager definitions inherits."""
 
+    deprecated: bool = False
+    """A manager marked as deprecated will be hidden from all package selection by default.
+
+    You can still use it but need to explicitely call for it on the command line.
+
+    Implementation of a deprecated manager will be kept within mpm source code, but some of its
+    features or total implementation are allowed to be scraped in the face of
+    maintenance pain and adversity.
+
+    Integration tests and unittests for deprecated managers can be removed. We do not care if
+    a deprecated manager is not 100% reliable. A flakky deprecated manager should not block a
+    release due to flakky tests.
+    """
+
+    deprecation_url: str | None = None
+    """Announcement from the official project or evidence of abandonment of maintainance."""
+
     id: str
     """Package manager's ID.
 
@@ -453,7 +470,9 @@ class PackageManager(metaclass=MetaPackageManager):
         4. :py:attr:`match the version requirement <meta_package_manager.base.PackageManager.fresh>`.
         """
         logger.debug(
-            f"{self.id} is supported: {self.supported}; "
+            f"{self.id} "
+            f"is deprecated: {self.deprecated}; "
+            f"is supported: {self.supported}; "
             f"found at: {self.cli_path}; "
             f"is executable: {self.executable}; "
             f"is fresh: {self.fresh}."
@@ -818,7 +837,7 @@ class PackageManager(metaclass=MetaPackageManager):
         raise NotImplementedError
 
     def cleanup(self) -> None:
-        """Removes left-overs, orphaned dependencies,
+        """Prune left-overs, remove orphaned dependencies and clear caches.
 
         Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """

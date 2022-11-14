@@ -4,13 +4,15 @@ labels: ["🐛 bug"]
 body:
   - type: markdown
     attributes:
-      value: |
+      value: >
         Before filling this bug report, try the commands below and inspect their output to look for unexpected execution
         traces.
+
 
         You can also try the bleeding edge [development version of
         `mpm`](https://kdeldycke.github.io/meta-package-manager/development.html#setup-environment) to check if the
         issue hasn't already be addressed upstream.
+
 
         If you still cannot make sense of what happend or you think `mpm` behavior can be improved, please fill the
         form below and submit it.
@@ -26,20 +28,22 @@ body:
     id: package-manager-list
     attributes:
       label: List package managers
-      description: Provide details about identification of package managers by running the command below.
+      description: >
+        Provide details about identification of package managers by running the
+        `mpm --verbosity DEBUG --all-managers managers` command in your terminal.
       render: shell-session
       placeholder: mpm --verbosity DEBUG --all-managers managers
   - type: textarea
     id: mpm-version
     attributes:
-      label: Meta Package Manager version
-      description: Provide the version you are running and its environment with the command below.
+      label: `mpm` version
+      description: Provide the version you are running and its environment with `mpm --version`.
       render: shell-session
       placeholder: mpm --version
   - type: textarea
     id: mpm-config
     attributes:
-      label: Meta Package Manager configuration
-      description: Provide the current configuration.
+      label: `mpm` configuration
+      description: Provide the current configuration via `mpm --show-params`.
       render: shell-session
       placeholder: mpm --show-params

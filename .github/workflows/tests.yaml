@@ -32,7 +32,9 @@ jobs:
         shell: python
         run: |
           import json
+          import os
           from itertools import product
+          from pathlib import Path
 
           # See what each os came pre-installed with at:
           # https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners
@@ -71,7 +73,8 @@ jobs:
               jobs.append(job)
           matrix = json.dumps({"include": jobs})
 
-          print(f"::set-output name=matrix::{matrix}")
+          env_file = Path(os.getenv("GITHUB_OUTPUT"))
+          env_file.write_text(f"matrix={matrix}")
 
       - name: Print JSON matrix
         run: |

@@ -13,6 +13,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Fix installation of Scoop on Windows in unittests.
 - \[mpm\] Fix installation of brew on Ubuntu in unittests.
 - \[mpm\] Use form-based issue templates for bug reports and new package manager support requests.
+- \[mpm\] Remove use of deprecated `::set-output` directives and replace them by environment files.
 
 ## {gh}`5.8.0 (2022-10-05) <compare/v5.7.0...v5.8.0>`
 

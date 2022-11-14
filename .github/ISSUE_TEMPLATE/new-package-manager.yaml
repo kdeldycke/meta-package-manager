@@ -39,10 +39,10 @@ body:
     attributes:
       label: Platforms
       description: Platforms supported by the package manager.
-    options:
-      - label: Linux
-      - label: macOS
-      - label: Windows
+      options:
+        - label: Linux
+        - label: macOS
+        - label: Windows
 
   - type: textarea
     id: manager-version

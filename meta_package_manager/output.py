@@ -44,7 +44,7 @@ from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from click_extra import echo, get_current_context, style
 from click_extra.colorize import default_theme as theme
-from click_extra.tabulate import TabularOutputFormatter
+from click_extra.tabulate import output_formats
 from tabulate import DataRow, TableFormat, tabulate
 
 from . import logger
@@ -98,25 +98,7 @@ def colored_diff(a, b, style_common=None, style_a=None, style_b=None):
     return colored_a, colored_b
 
 
-def not_implemented_json_handler(data, headers, **kwargs):
-    """Dummy `TabularOutputFormatter <https://cli-helpers.readthedocs.io/en/latest/api.h
-    tml#cli_helpers.tabular_output.TabularOutputFormatter>`_ renderer.
-
-    Raises a :py:exc:`NotImplementedError` exception as this handler is not designed to
-    be used as-is by `tabulate module <https://github.com/astanin/python-tabulate>`_.
-    Its only purpose is to serve as a signal to detect leaks in our custom JSON
-    rendering code path.
-    """
-    raise NotImplementedError(
-        "JSON rendering is not generic and need specific subcommand implementation."
-    )
-
-
-TabularOutputFormatter.register_new_formatter("json", not_implemented_json_handler)
-"""Register our custom JSON rendering option to `TabularOutputFormatter <https://cli-helpers.readthedocs.io/en/latest/api.html#cli_helpers.tabular_output.TabularOutputFormatter>`_.
-
-Link it to the dummy :function:`not_implemented_json_handler` renderer as we plan to intercept the JSON option before the tabular renderer has a chance to call it.
-"""
+output_formats = sorted(output_formats + ["json"])
 
 
 def print_json(data):
@@ -144,7 +126,7 @@ def print_json(data):
 
 
 def print_table(header_defs, rows, sort_key=None):
-    """Print a table.
+    """Print a sorted table.
 
     ``header_defs`` parameter is an ordered list of tuple whose first item is the column's label and the second the column's ID. Example:
 
@@ -195,9 +177,7 @@ def print_table(header_defs, rows, sort_key=None):
         return tuple(sorting_key)
 
     ctx = get_current_context()
-    ctx.find_root().print_table(
-        sorted(rows, key=sort_method), header_labels, disable_numparse=True
-    )
+    ctx.find_root().print_table(sorted(rows, key=sort_method), header_labels)
 
 
 def print_stats(manager_stats: Counter) -> None:

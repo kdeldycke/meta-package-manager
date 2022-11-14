@@ -51,8 +51,8 @@ from .base import CLIError, Operations, PackageManager, packages_asdict
 from .output import (
     SORTABLE_FIELDS,
     BarPluginRenderer,
-    TabularOutputFormatter,
     colored_diff,
+    output_formats,
     print_json,
     print_stats,
     print_table,
@@ -195,9 +195,7 @@ def bar_plugin_path(ctx, param, value):
     table_format_option(
         "-o",
         "--output-format",
-        type=Choice(
-            sorted(TabularOutputFormatter._output_formats), case_sensitive=False
-        ),
+        type=Choice(output_formats, case_sensitive=False),
         help="Rendering mode of the output.",
     ),
     option(
@@ -252,7 +250,7 @@ def mpm(
     # Silence all log message for JSON rendering unless in debug mode.
     level = logger.level
     level_name = logging._levelToName.get(level, level)
-    if ctx.find_root().table_formatter.format_name == "json" and level_name != "DEBUG":
+    if ctx.find_root().table_format == "json" and level_name != "DEBUG":
         logger.setLevel(logging.CRITICAL * 2)
 
     # Select the subset of manager to target, and apply manager-level options.
@@ -300,7 +298,7 @@ def managers(ctx):
     }
 
     # Machine-friendly data rendering.
-    if ctx.find_root().table_formatter.format_name == "json":
+    if ctx.find_root().table_format == "json":
         manager_data = {}
         # Build up the data structure of manager metadata.
         fields = (
@@ -438,7 +436,7 @@ def installed(ctx, duplicates):
             installed_data[manager_id]["packages"] = duplicate_packages
 
     # Machine-friendly data rendering.
-    if ctx.find_root().table_formatter.format_name == "json":
+    if ctx.find_root().table_format == "json":
         print_json(installed_data)
         ctx.exit()
 
@@ -513,7 +511,7 @@ def outdated(ctx, plugin_output):
         )
 
     # Machine-friendly data rendering.
-    if ctx.find_root().table_formatter.format_name == "json":
+    if ctx.find_root().table_format == "json":
         print_json(outdated_data)
         ctx.exit()
 
@@ -623,7 +621,7 @@ def search(ctx, extended, exact, refilter, query):
         )
 
     # Machine-friendly data rendering.
-    if ctx.find_root().table_formatter.format_name == "json":
+    if ctx.find_root().table_format == "json":
         print_json(matches)
         ctx.exit()
 

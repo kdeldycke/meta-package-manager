@@ -23,7 +23,7 @@ import subprocess
 
 import pytest
 from boltons.strutils import strip_ansi
-from click_extra.tabulate import TabularOutputFormatter
+from click_extra.tabulate import output_formats
 
 from .. import __version__
 from ..bar_plugin import MPMPlugin  # type: ignore
@@ -341,7 +341,7 @@ class CLITableTests:
     A table output is also allowed to be rendered as JSON.
     """
 
-    @pytest.mark.parametrize("mode", TabularOutputFormatter._output_formats)
+    @pytest.mark.parametrize("mode", output_formats)
     def test_all_table_rendering(self, invoke, subcmd, mode):
         result = invoke("--output-format", mode, subcmd)
         assert result.exit_code == 0

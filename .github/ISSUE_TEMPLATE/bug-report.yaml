@@ -36,14 +36,14 @@ body:
   - type: textarea
     id: mpm-version
     attributes:
-      label: `mpm` version
+      label: Meta Package Manager version
       description: Provide the version you are running and its environment with `mpm --version`.
       render: shell-session
       placeholder: mpm --version
   - type: textarea
     id: mpm-config
     attributes:
-      label: `mpm` configuration
+      label: Meta Package Manager configuration
       description: Provide the current configuration via `mpm --show-params`.
       render: shell-session
       placeholder: mpm --show-params

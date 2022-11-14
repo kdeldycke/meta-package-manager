@@ -182,7 +182,8 @@ class ManagerPool:
 
         Returns a generator producing a manager instance one after the other.
         """
-        # Produce the default set of managers to consider if none have been provided by the ``keep`` parameter.
+        # Produce the default set of managers to consider if none have been
+        # provided by the ``keep`` parameter.
         if not keep:
             if keep_deprecated:
                 keep = self.all_manager_ids

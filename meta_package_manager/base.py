@@ -162,7 +162,7 @@ class PackageManager(metaclass=MetaPackageManager):
     deprecated: bool = False
     """A manager marked as deprecated will be hidden from all package selection by default.
 
-    You can still use it but need to explicitely call for it on the command line.
+    You can still use it but need to explicitly call for it on the command line.
 
     Implementation of a deprecated manager will be kept within mpm source code, but some of its
     features or total implementation are allowed to be scraped in the face of

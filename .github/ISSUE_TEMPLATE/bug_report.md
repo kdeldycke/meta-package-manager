@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Create a report to help solving `mpm` issue
 title: ''
 labels: 🐛 bug
 assignees: ''

@@ -1,0 +1,131 @@
+name: New package manager
+description: You would like to see a new package manager supported by `mpm`
+labels: ["🎁 feature request"]
+body:
+
+  - type: markdown
+    attributes:
+      value: >
+        Before filling this feature request, double check your manager is missing from the [support
+        matrix](https://github.com/kdeldycke/meta-package-manager#supported-package-managers-and-operations).
+
+
+        If you are a developper, you can try to implement support yourself. [Check the contribution
+        guide](https://kdeldycke.github.io/meta-package-manager/contributing.html) and propose a Pull Request.
+
+
+        If you are not a developper, you can still help the project by documenting some of the package manager
+        metadata below. And better: if you contibute some raw output of the package manager, the maintainers
+        can try a blind implementation of the new manager.
+
+  - type: input
+    id: manager-id
+    attributes:
+      label: ID and name
+      description: Either the manager's ID or full name, or better, provides both.
+    validations:
+      required: true
+
+  - type: input
+    id: manager-url
+    attributes:
+      label: Project URL
+      description: Official website or repository in which the package manager is maintained.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: manager-platforms
+    attributes:
+      label: Platforms
+      description: Platforms supported by the package manager.
+    options:
+      - label: Linux
+      - label: macOS
+      - label: Windows
+
+  - type: textarea
+    id: manager-version
+    attributes:
+      label: Version
+      description: >
+        Provides here the command and output that can be used to extract the manager's version.
+      render: shell-session
+      placeholder: |
+        $ my_package_manager --version
+        my_package_manager v3.12.1-alpha4 (Windows OS)
+
+  - type: textarea
+    id: manager-installed-cmd
+    attributes:
+      label: Installed command
+      description: >
+        Command and output to list all packages installed with the manager.
+      render: shell-session
+      placeholder: |
+
+  - type: textarea
+    id: manager-outdated-cmd
+    attributes:
+      label: Outdated command
+      description: >
+        Command and output to list all installed packages which are outdated.
+      render: shell-session
+      placeholder: |
+
+  - type: textarea
+    id: manager-search-cmd
+    attributes:
+      label: Search command
+      description: >
+        Command and output to search packages installable with the manager. Provides some variations which allows
+        for exact search on package ID, and fuzzy results on package's name and description.
+      render: shell-session
+      placeholder: |
+
+  - type: textarea
+    id: manager-install-cmd
+    attributes:
+      label: Install command
+      description: >
+        Command and output to install a package. Provides the variation which allows to install a particular version
+        of a package.
+      render: shell-session
+      placeholder: |
+
+  - type: textarea
+    id: manager-upgrade-cmd
+    attributes:
+      label: Upgrade command
+      description: >
+        Command and output to upgrade a package. Provides all variations which allows to upgrade only one package or
+        all, as well as the CLI targetting one version in particular.
+      render: shell-session
+      placeholder: |
+
+  - type: textarea
+    id: manager-remove-cmd
+    attributes:
+      label: Remove command
+      description: >
+        Command and output to remove a package.
+      render: shell-session
+      placeholder: |
+
+  - type: textarea
+    id: manager-sync-cmd
+    attributes:
+      label: Sync command
+      description: >
+        Command and output to synchronize local metadata from remote repositories.
+      render: shell-session
+      placeholder: |
+
+  - type: textarea
+    id: manager-cleanup-cmd
+    attributes:
+      label: Cleanup command
+      description: >
+        Command and output to remove all orphaned dependencies, prune left-overs and clear caches.
+      render: shell-session
+      placeholder: |

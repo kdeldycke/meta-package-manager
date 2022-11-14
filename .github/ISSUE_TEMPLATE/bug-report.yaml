@@ -2,6 +2,7 @@ name: Bug report
 description: Create a report to help solving `mpm` issue
 labels: ["🐛 bug"]
 body:
+
   - type: markdown
     attributes:
       value: >
@@ -16,6 +17,7 @@ body:
 
         If you still cannot make sense of what happend or you think `mpm` behavior can be improved, please fill the
         form below and submit it.
+
   - type: textarea
     id: bug-description
     attributes:
@@ -24,6 +26,7 @@ body:
       placeholder: Tell us what you see!
     validations:
       required: true
+
   - type: textarea
     id: package-manager-list
     attributes:
@@ -33,6 +36,7 @@ body:
         `mpm --verbosity DEBUG --all-managers managers` command in your terminal.
       render: shell-session
       placeholder: mpm --verbosity DEBUG --all-managers managers
+
   - type: textarea
     id: mpm-version
     attributes:
@@ -40,6 +44,7 @@ body:
       description: Provide the version you are running and its environment with `mpm --version`.
       render: shell-session
       placeholder: mpm --version
+
   - type: textarea
     id: mpm-config
     attributes:

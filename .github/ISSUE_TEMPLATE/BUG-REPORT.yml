@@ -1,6 +1,5 @@
 name: Bug report
 description: Create a report to help solving `mpm` issue
-title: ""
 labels: ["🐛 bug"]
 body:
   - type: markdown

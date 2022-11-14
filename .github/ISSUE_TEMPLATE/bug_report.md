@@ -8,7 +8,7 @@ assignees: ''
 
 To help debugging the issue:
 
-- Try running your command with `--verbosity DEBUG` option
+- Try running your command with `--verbosity DEBUG` option and inspect the output to look for unexpected execution traces.
 - Provide details about identification of package managers with:
   ```
   mpm --verbosity DEBUG --all-managers managers

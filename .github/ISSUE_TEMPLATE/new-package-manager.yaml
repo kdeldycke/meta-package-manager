@@ -76,10 +76,8 @@ body:
          {
             "version": "1.3",
             "name": "backports.functools-lru-cache",
-            "location": "/usr/local/lib/python3.7/site-packages",
             "installer": "pip"
-          },
-          (...)
+          }
         ]
 
   - type: textarea
@@ -91,21 +89,15 @@ body:
       render: shell-session
       placeholder: |
         $ brew outdated --json=v2 --formula | jq
-        {
-          "formulae": [
-            {
-              "name": "pygobject3",
-              "installed_versions": [
-                "3.36.1"
-              ],
-              "current_version": "3.38.0",
-              "pinned": false,
-              "pinned_version": null
-            },
-            (...)
-          ],
-          "casks": []
-        }
+        [
+          {
+            "name": "pygobject3",
+            "installed_versions": [
+              "3.36.1"
+            ],
+            "current_version": "3.38.0",
+          }
+        ]
 
   - type: textarea
     id: manager-search-cmd
@@ -153,9 +145,7 @@ body:
         $ brew upgrade dupeguru --cask
         ==> Upgrading 1 outdated package:
         dupeguru 4.2.0 -> 4.2.1
-        ==> Upgrading dupeguru
-        ==> Downloading https://github.com/arsenetar/dupeguru/releases/download/4.2.1/dupeguru_macOS_Qt_4.2.1.zi
-        ######################################################################## 100.0%
+        ==> Downloading https://github.com/arsenetar/dupeguru/releases/download/4.2.1/dupeguru_macOS_Qt_4.2.1.zip
         ==> Purging files for version 4.2.0 of Cask dupeguru
         🍺  dupeguru was successfully upgraded!
 
@@ -183,7 +173,6 @@ body:
         Get:2 http://archive.ubuntu.com xenial-updates InRelease [102 kB]
         Get:3 http://archive.ubuntu.com xenial-security InRelease [102 kB]
         Fetched 6,868 kB in 2s (2,680 kB/s)
-        Reading package lists...
         Building dependency tree...
         Reading state information...
 

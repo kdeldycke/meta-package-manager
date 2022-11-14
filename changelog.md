@@ -9,6 +9,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Allow managers to be flagged as deprecated.
 - \[apm\] Flag `apm` as deprecated.
 - \[mpm\] Remove Atom integration tests.
+- \[mpm\] Fix propagation of user selection of managers in `upgrade` and `remove` subcommands.
 - \[mpm\] Fix production of specifiers in `restore` subcommand.
 - \[mpm\] Fix installation of Scoop on Windows in unittests.
 - \[mpm\] Fix installation of brew on Ubuntu in unittests.

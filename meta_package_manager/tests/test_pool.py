@@ -87,6 +87,10 @@ selection_cases = {
         {"keep": {"pip"}},
         ("pip",),
     ),
+    "empty_selector": (
+        {"keep": ()},
+        (),
+    ),
     "duplicate_selectors": (
         {"keep": ("pip", "pip")},
         ("pip",),
@@ -133,6 +137,14 @@ selection_cases = {
     ),
     "default_selection": (
         {},
+        tuple(
+            mid
+            for mid in pool.all_manager_ids
+            if pool[mid].supported and pool[mid].available
+        ),
+    ),
+    "explicit_default_selection": (
+        {"keep": None, "drop": None},
         tuple(
             mid
             for mid in pool.all_manager_ids

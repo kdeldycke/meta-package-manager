@@ -247,20 +247,37 @@ def mpm(
 ):
     """Common CLI options for subcommands."""
 
-    # Update the list of selected managers with single selectors.
-    if ctx.obj:
-        manager = list(manager) + ctx.obj.get("single_manager_selector", [])
-
     # Silence all log message for JSON rendering unless in debug mode.
     level = logger.level
     level_name = logging._levelToName.get(level, level)
     if ctx.find_root().table_format == "json" and level_name != "DEBUG":
         logger.setLevel(logging.CRITICAL * 2)
 
+    # Merge all manager selectors to form the initial population enforced by the
+    # user.
+    initial_managers = list(manager)
+    # Update with single selectors.
+    if ctx.obj:
+        initial_managers.extend(ctx.obj.get("single_manager_selector", []))
+    # Update the list of managers with the XKCD preset.
+    if xkcd:
+        initial_managers.extend(XKCD_MANAGER_ORDER)
+    # Normalize to None if no manager selectors have been used. This prevent the
+    # pool.select_managers() method to iterate over an empty population of managers to
+    # choose from.
+    if not initial_managers:
+        initial_managers = None
+        logger.debug(f"No initial population of managers selected by user.")
+    else:
+        logger.debug(
+            "Initial population of user-selected managers: "
+            f"{' > '.join(map(theme.invoked_command, initial_managers))}"
+        )
+
     # Select the subset of manager to target, and apply manager-level options.
     selected_managers = partial(
         pool.select_managers,
-        keep=manager if not xkcd else XKCD_MANAGER_ORDER,
+        keep=initial_managers,
         drop=exclude,
         keep_deprecated=all_managers,
         # Should we include auto-update packages or not?

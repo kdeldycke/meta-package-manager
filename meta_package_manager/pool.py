@@ -184,26 +184,26 @@ class ManagerPool:
         """
         # Produce the default set of managers to consider if none have been
         # provided by the ``keep`` parameter.
-        if not keep:
+        if keep is None:
             if keep_deprecated:
                 keep = self.all_manager_ids
             elif keep_unsupported:
                 keep = self.maintained_manager_ids
             else:
                 keep = self.default_manager_ids
-        if not drop:
+        if drop is None:
             drop = set()
-        assert set(self.all_manager_ids).issuperset(keep)  # type: ignore
+        assert set(self.all_manager_ids).issuperset(keep)
         assert set(self.all_manager_ids).issuperset(drop)
 
         assert self.ALLOWED_EXTRA_OPTION.issuperset(extra_options)
 
-        # Only keeps the subset selected by the user.
-        selected_ids = keep
+        # Reduce the set to the user's constraints.
+        selected_ids = (mid for mid in unique(keep) if mid not in drop)
 
         # Deduplicate managers IDs while preserving order, then remove excluded
         # managers.
-        for manager_id in (mid for mid in unique(selected_ids) if mid not in drop):
+        for manager_id in selected_ids:
             manager = self.register.get(manager_id)
 
             # Check if operation is not implemented before calling `.available`. It saves one

@@ -597,7 +597,7 @@ class PackageManager(metaclass=MetaPackageManager):
                 auto_pre_cmds = False
             params.append("sudo")
         elif override_pre_cmds:
-            params.extend(override_pre_cmds)
+            params.extend(override_pre_cmds)  # type: ignore[arg-type]
         elif auto_pre_cmds:
             params.extend(self.pre_cmds)
 
@@ -607,7 +607,7 @@ class PackageManager(metaclass=MetaPackageManager):
             params.append(self.cli_path)
 
         if override_pre_args:
-            params.extend(override_pre_args)
+            params.extend(override_pre_args)  # type: ignore[arg-type]
         elif auto_pre_args:
             params.extend(self.pre_args)
 
@@ -615,11 +615,11 @@ class PackageManager(metaclass=MetaPackageManager):
             params.extend(args)
 
         if override_post_args:
-            params.extend(override_post_args)
+            params.extend(override_post_args)  # type: ignore[arg-type]
         elif auto_post_args:
             params.extend(self.post_args)
 
-        return args_cleanup(params)  # type: ignore
+        return args_cleanup(params)  # type: ignore[arg-type]
 
     def run_cli(
         self,

@@ -281,7 +281,8 @@ def test_search_type(manager):
 @destructive
 @all_managers
 def test_install_type(manager):
-    """All methods installing packages are either not implemented or returns a string."""
+    """All methods installing packages are either not implemented or returns a
+    string."""
     assert isinstance(manager.install, MethodType)
     try:
         result = manager.install("dummy_package_id")

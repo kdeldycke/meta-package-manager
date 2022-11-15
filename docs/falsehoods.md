@@ -1,10 +1,6 @@
 # Falsehoods programmers believe about package managers
 
-Pre-required reads:
-
-- [Falsehoods About Versions](https://github.com/xenoterracide/falsehoods/blob/master/versions.md).
-- And more generally, this
-  [Awesome List of Falshoods](https://github.com/kdeldycke/awesome-falsehood).
+Implementing `mpm` exposed me to many edge-cases and pitfalls of package management. Here is a list of falsehoods programmers believe about them.
 
 ## Packages
 
@@ -72,3 +68,9 @@ Pre-required reads:
 1. Implementing a meta package manager
    [is not a futile pursuit](https://xkcd.com/1654/).
 1. [Package managers don't need their own conference](https://packaging-con.org).
+
+# See also
+
+- [Falsehoods About Versions](https://github.com/xenoterracide/falsehoods/blob/master/versions.md).
+- And more generally, the
+  [Awesome List of Falshoods](https://github.com/kdeldycke/awesome-falsehood).

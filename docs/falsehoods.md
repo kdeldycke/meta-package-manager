@@ -69,7 +69,7 @@ Implementing `mpm` exposed me to many edge-cases and pitfalls of package managem
    [is not a futile pursuit](https://xkcd.com/1654/).
 1. [Package managers don't need their own conference](https://packaging-con.org).
 
-# See also
+## See also
 
 - [Falsehoods About Versions](https://github.com/xenoterracide/falsehoods/blob/master/versions.md).
 - And more generally, the

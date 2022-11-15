@@ -1,19 +1,22 @@
 # Configuration
 
-All `mpm` options defaults can be specified with a configuration file.
+All `mpm` options can be set with a configuration file.
 
 ## Location
 
 Location depends on OS (see
-[`click-extra` doc](https://github.com/kdeldycke/click-extra/blob/v1.3.0/click_extra/config.py#L49-L63)):
+[`click-extra` doc](https://kdeldycke.github.io/click-extra/config.html#pattern-matching)):
 
-```
-* macOS & Linux: `~/.mpm/config.toml`
-
-* Windows: `C:\Users\<user>\AppData\Roaming\mpm\config.toml`
-```
+* macOS:
+    `~/Library/Application Support/mpm/*.{toml,yaml,yml,json,ini,xml}`
+* Unix:
+    `~/.config/mpm/*.{toml,yaml,yml,json,ini,xml}`
+* Windows (roaming):
+    `C:\Users\<user>\AppData\Roaming\mpm\*.{toml,yaml,yml,json,ini,xml}`
 
 ## Sample
+
+Here is a TOML example:
 
 ```toml
 # My default configuration file.
@@ -28,11 +31,24 @@ exact = true
 
 ## Ignore a manager
 
-A user of `mpm` [was looking](https://github.com/matryer/xbar/issues/777) to
+A user [was looking](https://github.com/matryer/xbar/issues/777) to
 always have it ignore `pip` to speed-up execution. That can be solved with the
 following config file:
 
 ```toml
 [mpm]
-exclude = [ "pip",]
+exclude = ["pip",]
+```
+
+## Overlapping managers
+
+MPM has support for some overlapping package managers. Take for instance `pacman` and its collection of AUR helpers like `paru` and `yay`. All of the alternative helpers have the same source of packages as `pacman` (except if someone added other repositories to them). So updates to a single package may show up multiple times, because AUR helpers depends on `pacman` (which is always installed on the system).
+
+You can fine-tune this behaviour by simply excluding redundant managers depending on your preferrences.
+
+For instance, if `yay` is your preferred helper and `pacman` is polluting your entries, you can setup a configuration file in `~/.config/mpm/config.toml` to exclude the other AUR helpers by default:
+
+```toml
+[mpm]
+exclude = ["pacman", "paru"]
 ```

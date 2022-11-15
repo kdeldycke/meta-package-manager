@@ -30,6 +30,7 @@ import pytest
 from boltons.iterutils import unique
 from boltons.urlutils import URL
 from click_extra.platform import OS_DEFINITIONS
+from click_extra.tests.conftest import destructive
 
 from ..base import Operations, Package, PackageManager
 from ..cli import XKCD_MANAGER_ORDER
@@ -44,6 +45,11 @@ new package manager definitions.
 
 # Parametrization decorators.
 all_managers = pytest.mark.parametrize("manager", pool.values(), ids=attrgetter("id"))
+
+
+def test_xkcd_set():
+    assert len(unique(XKCD_MANAGER_ORDER)) == len(XKCD_MANAGER_ORDER)
+    assert set(pool.all_manager_ids).issuperset(XKCD_MANAGER_ORDER)
 
 
 @all_managers
@@ -65,11 +71,6 @@ def test_ascii_id(manager_id, manager):
     assert manager_id.isascii()
     assert set(manager_id).issubset(ascii_lowercase + digits + "-")
     assert manager_id == manager.id
-
-
-def test_xkcd_set():
-    assert len(unique(XKCD_MANAGER_ORDER)) == len(XKCD_MANAGER_ORDER)
-    assert set(pool.all_manager_ids).issuperset(XKCD_MANAGER_ORDER)
 
 
 @all_managers
@@ -120,6 +121,12 @@ def test_cli_names_type(manager):
         assert isinstance(name, str)
         assert name.isalnum()
         assert PurePath(name).name == name
+
+
+@all_managers
+def test_virtual(manager):
+    """Check the manager as a defined virtual property."""
+    assert isinstance(manager.virtual, bool)
 
 
 @all_managers
@@ -176,12 +183,6 @@ def test_version_regex(manager):
     assert isinstance(manager.version_regex, str)
     regex = re.compile(manager.version_regex)
     assert "version" in regex.groupindex
-
-
-@all_managers
-def test_virtual(manager):
-    """Check the manager as a defined virtual property."""
-    assert isinstance(manager.virtual, bool)
 
 
 @all_managers
@@ -277,17 +278,17 @@ def test_search_type(manager):
                 assert isinstance(pkg, Package)
 
 
+@destructive
 @all_managers
-def test_upgrade_one_cli_type(manager):
-    """All methods returning an upgrade CLI are either not implemented or returns a
-    tuple."""
-    assert isinstance(manager.upgrade_one_cli, MethodType)
+def test_install_type(manager):
+    """All methods installing packages are either not implemented or returns a string."""
+    assert isinstance(manager.install, MethodType)
     try:
-        result = manager.upgrade_one_cli("dummy_package_id")
+        result = manager.install("dummy_package_id")
     except Exception as ex:
         assert isinstance(ex, NotImplementedError)
     else:
-        assert isinstance(result, tuple)
+        assert isinstance(result, str)
 
 
 @all_managers
@@ -301,6 +302,45 @@ def test_upgrade_all_cli_type(manager):
         assert isinstance(ex, NotImplementedError)
     else:
         assert isinstance(result, tuple)
+
+
+@all_managers
+def test_upgrade_one_cli_type(manager):
+    """All methods returning an upgrade CLI are either not implemented or returns a
+    tuple."""
+    assert isinstance(manager.upgrade_one_cli, MethodType)
+    try:
+        result = manager.upgrade_one_cli("dummy_package_id")
+    except Exception as ex:
+        assert isinstance(ex, NotImplementedError)
+    else:
+        assert isinstance(result, tuple)
+
+
+@destructive
+@all_managers
+def test_upgrade_type(manager):
+    """All methods upgrading packages are either not implemented or returns a string."""
+    assert isinstance(manager.install, MethodType)
+    try:
+        result = manager.upgrade()
+    except Exception as ex:
+        assert isinstance(ex, NotImplementedError)
+    else:
+        assert isinstance(result, str)
+
+
+@destructive
+@all_managers
+def test_remove_type(manager):
+    """All methods removing packages are either not implemented or returns a string."""
+    assert isinstance(manager.remove, MethodType)
+    try:
+        result = manager.remove("dummy_package_id")
+    except Exception as ex:
+        assert isinstance(ex, NotImplementedError)
+    else:
+        assert isinstance(result, str)
 
 
 @all_managers

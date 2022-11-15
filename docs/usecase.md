@@ -6,7 +6,7 @@ A collection of user’s problems and how `mpm` solves them.
 
 A recent
 [study shows that 70% of vulnerabilities lies in outdated libraries](https://developers.slashdot.org/story/20/05/23/2330244/open-source-security-report-finds-library-induced-flaws-in-70-of-applications).
-One of the key habits of security professionnals to keep a system secure
+One of the key habits of security professionnals is to keep a system secure
 consist in having all software up to date.
 
 `mpm` helps you upgrade all packages from all managers of a system with
@@ -37,6 +37,22 @@ Successfully installed dephell-pythons-0.1.15
 ```
 
 This is the primary use case of `mpm` and the first reason I built it.
+
+## Solve XKCD
+
+I then wasted 6 years to implement [XKCD #1654 - *Universal Install Script*](https://xkcd.com/1654/):
+
+![XKCD #1654 - Universal Install Script](http://imgs.xkcd.com/comics/universal_install_script.png)
+
+So that you can:
+```shell-session
+$ mpm --xkcd install markdown
+Installation priority: pip > brew > npm > dnf > apt > steamcmd
+warning: pip does not implement search operation.
+markdown existence unconfirmed, try to directly install it...
+Install markdown package with pip...
+(...)
+```
 
 ## Extra features for your package managers
 

@@ -21,7 +21,7 @@
 - provides the `mpm` CLI, a wrapper around all package managers
 - `mpm` is like [`yt-dlp`](https://github.com/yt-dlp/yt-dlp), but for package
   managers instead of videos
-- `mpm` solves [XKCD #1654: Universal Install Script](https://xkcd.com/1654/)
+- `mpm` solves [XKCD #1654 - *Universal Install Script*](https://xkcd.com/1654/)
 
 ______________________________________________________________________
 

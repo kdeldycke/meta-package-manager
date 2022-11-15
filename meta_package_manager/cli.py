@@ -1181,7 +1181,7 @@ def restore(ctx, toml_files):
                 continue
             logger.info(f"Restore {theme.invoked_command(manager.id)} packages...")
             for package_id, version in doc[manager.id].items():
-                spec = Specifier.from_string(
+                spec = Specifier(
                     raw_spec=f"pkg:{manager.id}:/{package_id}{VERSION_SEP}{package_id}",
                     package_id=package_id,
                     manager_id=manager.id,

@@ -72,7 +72,7 @@
   {
     "name": "📦 manager: pacman-based",
     "color": "#bfdadc",
-    "description": "pacman, paru, yay"
+    "description": "pacman, pacaur, paru, yay"
   },
   {
     "name": "📦 manager: pip-based",

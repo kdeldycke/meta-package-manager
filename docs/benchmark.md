@@ -65,6 +65,7 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `apt-cyg`               |       |                |               |      ✓       |              |
 | `apt-mint`              |   ✓   |                |               |              |              |
 | `asdf`                  |       |       ✓        |               |              |              |
+| `aura`                  |       |       ✓        |               |              |              |
 | `bin`                   |       |       ✓        |               |              |              |
 | `brew`                  |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
 | `bun`                   |       |       ✓        |               |              |              |
@@ -118,8 +119,10 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `oh-my-zsh`             |       |       ✓        |               |              |              |
 | `opam`                  |       |       ✓        |               |              |              |
 | `opkg`                  |   ✓   |                |               |      ✓       |              |
+| `pacaur`                |   ✓   |                |               |              |              |
 | `pacman`                |   ✓   |       ✓        |               |      ✓       |      ✓       |
 | `pacstall`              |       |       ✓        |               |              |              |
+| `pamac`                 |       |       ✓        |               |              |              |
 | `paru`                  |   ✓   |       ✓        |               |              |              |
 | `pearl`                 |       |       ✓        |               |              |              |
 | `pihole`                |       |       ✓        |               |              |              |

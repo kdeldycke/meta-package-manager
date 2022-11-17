@@ -201,6 +201,23 @@ class Pacman(PackageManager):
         self.run_cli("--sync", "--clean", "--clean", sudo=True)
 
 
+class Pacaur(Pacman):
+    """``Pacaur`` wraps ``pacman`` and shadows its options."""
+
+    homepage_url = "https://github.com/E5ten/pacaur"
+
+    requirement = "4.0.0"
+
+    version_regex = r"pacaur\s+(?P<version>\S+)"
+    r"""Search version right after the ``pacaur`` string.
+
+    .. code-block:: shell-session
+
+        ► pacaur --version
+        pacaur 4.8.6
+    """
+
+
 class Paru(Pacman):
     """``paru`` wraps ``pacman`` and shadows its options."""
 

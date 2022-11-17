@@ -67,6 +67,7 @@ class TestInstallRemove(CLISubCommandTests):
         "mas": "747648890",  # Telegram
         "npm": "raven",
         "opkg": "enigma2-hotplug",
+        "pacaur": "manjaro-hello",
         "pacman": "manjaro-hello",
         # https://aur.archlinux.org/packages/meta-package-manager
         "paru": "meta-package-manager",

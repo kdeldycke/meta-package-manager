@@ -83,9 +83,11 @@ jobs:
 
         "📦 manager: pacman-based":
           - meta_package_manager/managers/pacman*
+          - meta_package_manager/managers/pacaur*
           - meta_package_manager/managers/paru*
           - meta_package_manager/managers/yay*
           - meta_package_manager/tests/*pacman*
+          - meta_package_manager/tests/*pacaur*
           - meta_package_manager/tests/*paru*
           - meta_package_manager/tests/*yay*
 

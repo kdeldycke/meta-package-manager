@@ -6,6 +6,7 @@
 This version is not released yet and is under active development.
 ```
 
+- \[pacaur\] Implement `pacaur` support. Closes {issue}`816`.
 - \[mpm\] Allow managers to be flagged as deprecated.
 - \[apm\] Flag `apm` as deprecated.
 - \[mpm\] Remove Atom integration tests.

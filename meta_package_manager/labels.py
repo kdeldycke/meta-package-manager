@@ -49,7 +49,7 @@ MANAGER_GROUPS = {
     "dnf-based": {"dnf", "yum"},
     "dpkg-based": {"dpkg", "apt", "apt-mint", "opkg"},
     "npm-based": {"npm", "yarn"},
-    "pacman-based": {"pacman", "paru", "yay"},
+    "pacman-based": {"pacman", "pacaur", "paru", "yay"},
     "pip-based": {"pip", "pipx"},
 }
 """Managers sharing some roots or implementation will be grouped together."""

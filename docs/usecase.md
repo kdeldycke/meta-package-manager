@@ -45,6 +45,7 @@ I then wasted 6 years to implement [XKCD #1654 - *Universal Install Script*](htt
 ![XKCD #1654 - Universal Install Script](http://imgs.xkcd.com/comics/universal_install_script.png)
 
 So that you can:
+
 ```shell-session
 $ mpm --xkcd install markdown
 Installation priority: pip > brew > npm > dnf > apt > steamcmd

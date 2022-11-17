@@ -7,12 +7,12 @@ All `mpm` options can be set with a configuration file.
 Location depends on OS (see
 [`click-extra` doc](https://kdeldycke.github.io/click-extra/config.html#pattern-matching)):
 
-* macOS:
-    `~/Library/Application Support/mpm/*.{toml,yaml,yml,json,ini,xml}`
-* Unix:
-    `~/.config/mpm/*.{toml,yaml,yml,json,ini,xml}`
-* Windows (roaming):
-    `C:\Users\<user>\AppData\Roaming\mpm\*.{toml,yaml,yml,json,ini,xml}`
+- macOS:
+  `~/Library/Application Support/mpm/*.{toml,yaml,yml,json,ini,xml}`
+- Unix:
+  `~/.config/mpm/*.{toml,yaml,yml,json,ini,xml}`
+- Windows (roaming):
+  `C:\Users\<user>\AppData\Roaming\mpm\*.{toml,yaml,yml,json,ini,xml}`
 
 ## TOML sample
 
@@ -35,7 +35,7 @@ following config file:
 
 ```toml
 [mpm]
-exclude = ["pip",]
+exclude = [ "pip",]
 ```
 
 ## Overlapping managers
@@ -48,7 +48,7 @@ For instance, if `yay` is your preferred helper and `pacman` is polluting your e
 
 ```toml
 [mpm]
-exclude = ["pacman", "paru"]
+exclude = [ "pacman", "paru",]
 ```
 
 ## Troubleshooting

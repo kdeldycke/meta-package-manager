@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`5.9.0 (unreleased) <compare/v5.8.0...main>`
-
-```{important}
-This version is not released yet and is under active development.
-```
+## {gh}`5.9.0 (2022-11-17) <compare/v5.8.0...v5.9.0>`
 
 - \[pacaur\] Implement `pacaur` support. Closes {issue}`816`.
 - \[mpm\] Allow managers to be flagged as deprecated.

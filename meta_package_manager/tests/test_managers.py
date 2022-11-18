@@ -24,7 +24,6 @@ import types
 from operator import attrgetter
 from pathlib import Path, PurePath
 from string import ascii_letters, ascii_lowercase, digits
-from types import MethodType
 
 import pytest
 from boltons.iterutils import unique
@@ -45,6 +44,9 @@ new package manager definitions.
 
 # Parametrization decorators.
 all_managers = pytest.mark.parametrize("manager", pool.values(), ids=attrgetter("id"))
+available_managers = pytest.mark.parametrize(
+    "manager", (m for m in pool.values() if m.available()), ids=attrgetter("id")
+)
 
 
 def test_xkcd_set():
@@ -220,33 +222,31 @@ def test_available(manager):
     assert isinstance(manager.available, bool)
 
 
-@all_managers
+@available_managers
 def test_installed_type(manager):
     """All installed operations are either not implemented or returns a dict of
     dicts."""
-    if manager.available:
-        try:
-            result = manager.installed
-        except Exception as ex:
-            assert isinstance(ex, NotImplementedError)
-        else:
-            assert isinstance(result, types.GeneratorType)
-            for pkg in result:
-                assert isinstance(pkg, Package)
+    try:
+        result = manager.installed
+    except Exception as ex:
+        assert isinstance(ex, NotImplementedError)
+    else:
+        assert isinstance(result, types.GeneratorType)
+        for pkg in result:
+            assert isinstance(pkg, Package)
 
 
-@all_managers
+@available_managers
 def test_outdated_type(manager):
     """All outdated operations are either not implemented or returns a dict of dicts."""
-    if manager.available:
-        try:
-            result = manager.outdated
-        except Exception as ex:
-            assert isinstance(ex, NotImplementedError)
-        else:
-            assert isinstance(result, types.GeneratorType)
-            for pkg in result:
-                assert isinstance(pkg, Package)
+    try:
+        result = manager.outdated
+    except Exception as ex:
+        assert isinstance(ex, NotImplementedError)
+    else:
+        assert isinstance(result, types.GeneratorType)
+        for pkg in result:
+            assert isinstance(pkg, Package)
 
 
 @pytest.mark.parametrize(
@@ -262,28 +262,25 @@ def test_query_parts(query, query_parts):
     assert PackageManager.query_parts(query) == query_parts
 
 
-@all_managers
+@available_managers
 def test_search_type(manager):
     """All search operations are either not implemented or returns a generator of
     dicts."""
-    assert isinstance(manager.search, MethodType)
-    if manager.available:
-        try:
-            matches = manager.search("python", extended=True, exact=False)
-        except Exception as ex:
-            assert isinstance(ex, NotImplementedError)
-        else:
-            assert isinstance(matches, types.GeneratorType)
-            for pkg in matches:
-                assert isinstance(pkg, Package)
+    try:
+        matches = manager.search("python", extended=True, exact=False)
+    except Exception as ex:
+        assert isinstance(ex, NotImplementedError)
+    else:
+        assert isinstance(matches, types.GeneratorType)
+        for pkg in matches:
+            assert isinstance(pkg, Package)
 
 
 @destructive
-@all_managers
+@available_managers
 def test_install_type(manager):
     """All methods installing packages are either not implemented or returns a
     string."""
-    assert isinstance(manager.install, MethodType)
     try:
         result = manager.install("dummy_package_id")
     except Exception as ex:
@@ -292,11 +289,11 @@ def test_install_type(manager):
         assert isinstance(result, str)
 
 
-@all_managers
+@destructive
+@available_managers
 def test_upgrade_all_cli_type(manager):
     """All methods returning an upgrade-all CLI are either not implemented or returns a
     tuple."""
-    assert isinstance(manager.upgrade_all_cli, MethodType)
     try:
         result = manager.upgrade_all_cli()
     except Exception as ex:
@@ -305,11 +302,11 @@ def test_upgrade_all_cli_type(manager):
         assert isinstance(result, tuple)
 
 
-@all_managers
+@destructive
+@available_managers
 def test_upgrade_one_cli_type(manager):
     """All methods returning an upgrade CLI are either not implemented or returns a
     tuple."""
-    assert isinstance(manager.upgrade_one_cli, MethodType)
     try:
         result = manager.upgrade_one_cli("dummy_package_id")
     except Exception as ex:
@@ -319,10 +316,9 @@ def test_upgrade_one_cli_type(manager):
 
 
 @destructive
-@all_managers
+@available_managers
 def test_upgrade_type(manager):
     """All methods upgrading packages are either not implemented or returns a string."""
-    assert isinstance(manager.install, MethodType)
     try:
         result = manager.upgrade()
     except Exception as ex:
@@ -332,10 +328,9 @@ def test_upgrade_type(manager):
 
 
 @destructive
-@all_managers
+@available_managers
 def test_remove_type(manager):
     """All methods removing packages are either not implemented or returns a string."""
-    assert isinstance(manager.remove, MethodType)
     try:
         result = manager.remove("dummy_package_id")
     except Exception as ex:
@@ -344,30 +339,26 @@ def test_remove_type(manager):
         assert isinstance(result, str)
 
 
-@all_managers
+@available_managers
 def test_sync_type(manager):
     """Sync operations are either not implemented or returns nothing."""
-    assert isinstance(manager.sync, MethodType)
-    if manager.available:
-        try:
-            result = manager.sync()
-        except Exception as ex:
-            assert isinstance(ex, NotImplementedError)
-        else:
-            assert result is None
+    try:
+        result = manager.sync()
+    except Exception as ex:
+        assert isinstance(ex, NotImplementedError)
+    else:
+        assert result is None
 
 
-@all_managers
+@available_managers
 def test_cleanup_type(manager):
     """Cleanup operations are either not implemented or returns nothing."""
-    assert isinstance(manager.cleanup, MethodType)
-    if manager.available:
-        try:
-            result = manager.cleanup()
-        except Exception as ex:
-            assert isinstance(ex, NotImplementedError)
-        else:
-            assert result is None
+    try:
+        result = manager.cleanup()
+    except Exception as ex:
+        assert isinstance(ex, NotImplementedError)
+    else:
+        assert result is None
 
 
 def collect_props_ref():

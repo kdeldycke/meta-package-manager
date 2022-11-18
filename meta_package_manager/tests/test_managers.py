@@ -45,7 +45,7 @@ new package manager definitions.
 # Parametrization decorators.
 all_managers = pytest.mark.parametrize("manager", pool.values(), ids=attrgetter("id"))
 available_managers = pytest.mark.parametrize(
-    "manager", (m for m in pool.values() if m.available()), ids=attrgetter("id")
+    "manager", (m for m in pool.values() if m.available), ids=attrgetter("id")
 )
 
 

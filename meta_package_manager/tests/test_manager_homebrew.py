@@ -70,6 +70,11 @@ def install_cask():
         assert not process.stderr
         assert process.returncode == 0
 
+    def brew_uninstall(package_id):
+        process = subprocess.run(("brew", "uninstall", "--cask", "--force", package_id))
+        assert not process.stderr
+        assert process.returncode == 0
+
     def _install_cask(package_id, commit):
         packages.add(package_id)
 
@@ -103,7 +108,7 @@ def install_cask():
 
     # Remove all installed packages.
     for package_id in packages:
-        subprocess.run(("brew", "uninstall", "--cask", "--force", package_id))
+        brew_uninstall(package_id)
 
 
 @destructive

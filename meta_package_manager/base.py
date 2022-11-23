@@ -155,6 +155,27 @@ class MetaPackageManager(type):
             cls.virtual = name == "PackageManager" or not cls.cli_names
 
 
+def highlight_cli_name(
+    path: Path | None, match_names: tuple[str, ...] | None = None
+) -> str | None:
+    """Highlight the binary name in the provided ``path``
+
+    If ``match_names`` is provided, only highlight if the binary name is in the list, regardless of the the case.
+
+    Takes care of extensions (e.g. ``.exe`` on Windows) and returns a string.
+    """
+    if path is None:
+        return None
+    suffixes = path.suffixes
+    # Strip all suffixes from the full name of the binary.
+    bin_name = path.name
+    for suffix in suffixes[::-1]:
+        bin_name.rstrip(suffix)
+    if not match_names or bin_name.lower() in (name.lower() for name in match_names):
+        bin_name = theme.invoked_command(bin_name)
+    return f"{path.parent}{os.path.sep}{bin_name}{''.join(suffixes)}"
+
+
 class PackageManager(metaclass=MetaPackageManager):
 
     """Base class from which all package manager definitions inherits."""
@@ -353,12 +374,10 @@ class PackageManager(metaclass=MetaPackageManager):
         if not cli_path.exists():
             raise FileNotFoundError(cli_path)
         elif not cli_path.is_file():
-            logger.warning(f"{theme.invoked_command(str(cli_path))} is not a file.")
+            logger.warning(f"{highlight_cli_name(cli_path)} is not a file.")
             return None
 
-        logger.debug(
-            f"{theme.invoked_command(cli_name)} CLI found at {theme.invoked_command(str(cli_path))}"
-        )
+        logger.debug(f"CLI found at {highlight_cli_name(cli_path)}")
         return cli_path
 
     @cached_property
@@ -439,7 +458,9 @@ class PackageManager(metaclass=MetaPackageManager):
         if not self.cli_path:
             return False
         if not os.access(self.cli_path, os.X_OK):
-            logger.debug(f"{self.cli_path} is not allowed to be executed.")
+            logger.debug(
+                f"{highlight_cli_name(self.cli_path)} is not allowed to be executed."
+            )
             return False
         return True
 
@@ -473,7 +494,7 @@ class PackageManager(metaclass=MetaPackageManager):
             f"{self.id} "
             f"is deprecated: {self.deprecated}; "
             f"is supported: {self.supported}; "
-            f"found at: {self.cli_path}; "
+            f"found at: {highlight_cli_name(self.cli_path)}; "
             f"is executable: {self.executable}; "
             f"is fresh: {self.fresh}."
         )

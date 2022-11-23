@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Only highlight binary name of package manager in logs.
+
 ## {gh}`5.9.0 (2022-11-17) <compare/v5.8.0...v5.9.0>`
 
 - \[pacaur\] Implement `pacaur` support. Closes {issue}`816`.

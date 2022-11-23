@@ -47,7 +47,13 @@ else:
 from cloup import Section
 
 from . import __version__, bar_plugin, logger
-from .base import CLIError, Operations, PackageManager, packages_asdict
+from .base import (
+    CLIError,
+    Operations,
+    PackageManager,
+    highlight_cli_name,
+    packages_asdict,
+)
 from .output import (
     SORTABLE_FIELDS,
     BarPluginRenderer,
@@ -358,9 +364,7 @@ def managers(ctx):
         # Build up the CLI path column content.
         cli_infos = "{} {}".format(
             OK if manager.cli_path else KO,
-            # TODO: highlight cli_name found in manager.cli_path. I.e, the "choco" string in:
-            #    ✓ C:\ProgramData\chocolatey\bin\choco.EXE
-            manager.cli_path
+            highlight_cli_name(manager.cli_path, manager.cli_names)
             if manager.cli_path
             else f"{', '.join(map(theme.invoked_command, manager.cli_names))} not found",
         )

@@ -7,10 +7,9 @@ A collection of user’s problems and how `mpm` solves them.
 A recent
 [study shows that 70% of vulnerabilities lies in outdated libraries](https://developers.slashdot.org/story/20/05/23/2330244/open-source-security-report-finds-library-induced-flaws-in-70-of-applications).
 One of the key habits of security professionnals is to keep a system secure
-consist in having all software up to date.
+by keeping all software up to date.
 
-`mpm` helps you upgrade all packages from all managers of a system with
-one-liner:
+`mpm` upgrade all packages from all managers with a one-liner CLI:
 
 ```shell-session
 $ mpm upgrade --all
@@ -36,7 +35,7 @@ Successfully installed dephell-argparse-0.1.3
 Successfully installed dephell-pythons-0.1.15
 ```
 
-This is the primary use case of `mpm` and the first reason I built it.
+This is the primary use case of `mpm` and the main reason I built it.
 
 ## Solve XKCD
 
@@ -57,7 +56,7 @@ Install markdown package with pip...
 
 ## Extra features for your package managers
 
-All package managers are not on-par between themselves. `mpm` is filling the
+Not all package managers are equivalent. `mpm` is filling the
 gap between managers and implement some missing features.
 
 For instance,
@@ -103,18 +102,18 @@ feature.
 
 ## Same package, multiple sources
 
-You just learned of a new CLI you did not known about (`broot`) from a friend.
-Back to your terminal, you can easily search for it across all package
+You just learned from a friend of a new CLI you did not known about (`broot`).
+Back to your terminal, you can search it across all package
 repositories, then choose your preferred package manager to install it:
 
 ```shell-session
 $ mpm search broot --exact
-╭────────────┬─────────┬────────────────╮
-│ Package ID │ Manager │ Latest version │
-├────────────┼─────────┼────────────────┤
-│ broot      │ brew    │ 0.1.0          │
-│ broot      │ cargo   │ 1.14.1         │
-╰────────────┴─────────┴────────────────╯
+╭────────────┬──────┬─────────┬────────────────╮
+│ Package ID │ Name │ Manager │ Latest version │
+├────────────┼──────┼─────────┼────────────────┤
+│ broot      │      │ brew    │ ?              │
+│ broot      │      │ cargo   │ 1.16.2         │
+╰────────────┴──────┴─────────┴────────────────╯
 2 packages total (brew: 1, pip: 1, cask: 0, gem: 0, mas: 0, npm: 0).
 ```
 
@@ -126,37 +125,45 @@ Install broot package from brew...
 🍺  /usr/local/Cellar/broot/0.13.6: 8 files, 3.5MB
 ```
 
-Thanks to `mpm` we were able to choose quickly the origin from which we sourced
-`broot` to get the latest version. No need to track down the CLI on Github and
-read the documentation (if it even exists).
+Thanks to `mpm` we were able to identify the best source for
+`broot` to get the latest version.
 
 ## Deduplicate packages
 
 ```shell-session
 $ mpm list --duplicates
-╭──────────────────────┬─────────┬───────────────────╮
-│ Package ID           │ Manager │ Installed version │
-├──────────────────────┼─────────┼───────────────────┤
-│ blah                 │ cargo   │ 0.0.0             │
-│ blah                 │ gem     │ 0.0.2             │
-│ blah                 │ npm     │ 5.2.1             │
-│ coverage             │ pip     │ 6.4.1             │
-│ coverage             │ pipx    │ 6.4.1             │
-│ six                  │ brew    │ 1.16.0_2          │
-│ six                  │ pip     │ 1.16.0            │
-╰──────────────────────┴─────────┴───────────────────╯
+╭────────────┬──────┬─────────┬───────────────────╮
+│ Package ID │ Name │ Manager │ Installed version │
+├────────────┼──────┼─────────┼───────────────────┤
+│ blah       │      │ cargo   │ 0.0.0             │
+│ blah       │      │ gem     │ 0.0.2             │
+│ blah       │      │ npm     │ 5.2.1             │
+│ coverage   │      │ pip     │ 6.4.1             │
+│ coverage   │      │ pipx    │ 6.4.1             │
+│ six        │      │ brew    │ 1.16.0_2          │
+│ six        │      │ pip     │ 1.16.0            │
+╰────────────┴──────┴─────────┴───────────────────╯
 6 packages total (pip: 2, brew: 1, cargo: 1, gem: 1, npm: 1, cask: 0).
 ```
 
-Now you can easily remove some of them, and no longer have to think hard about
-which is which.
+Now you can easily remove all of them:
 
 ```shell-session
-$ mpm --cargo uninstall blah
-$ mpm --gem   uninstall blah
-$ mpm --pip   uninstall blah
+$ mpm remove blah
+Remove blah with cargo, gem, npm
+(...)
+Successfully uninstalled blah-0.0.0
+(...)
+Successfully uninstalled blah-0.0.2
+(...)
+Successfully uninstalled blah-5.2.1
+```
 
+Or a target specific duplicates:
+
+```shell-session
 $ mpm --pip uninstall six
+(...)
 ```
 
 ```{todo}

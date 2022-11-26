@@ -12,7 +12,7 @@ hidden:
 ---
 install
 usecase
-cli-help
+cli-parameters
 configuration
 bar-plugin
 falsehoods

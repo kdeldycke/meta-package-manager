@@ -1,4 +1,4 @@
-# CLI help
+# CLI parameters
 
 ```{eval-rst}
 .. click:: meta_package_manager.cli:mpm

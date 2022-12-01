@@ -88,7 +88,7 @@ classifiers = [
 python = "^3.7"
 boltons = "^21.0.0"
 click = "^8.1.2"
-click-extra = "^3.3.1"
+click-extra = "^3.4.0"
 packageurl-python = "^0.10.3"
 tabulate = { extras = ["widechars"], version = "^0.9.0" }
 tomli = { version = "^2.0.1", python = "< 3.11" }

@@ -16,7 +16,6 @@ jobs:
 
   generate-exe:
     name: Generate Windows executable
-    needs: release
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v3.1.0

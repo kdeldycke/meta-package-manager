@@ -170,7 +170,7 @@ def highlight_cli_name(
     # Strip all suffixes from the full name of the binary.
     bin_name = path.name
     for suffix in suffixes[::-1]:
-        bin_name.rstrip(suffix)
+        bin_name = bin_name.rstrip(suffix)
     if not match_names or bin_name.lower() in (name.lower() for name in match_names):
         bin_name = theme.invoked_command(bin_name)
     return f"{path.parent}{os.path.sep}{bin_name}{''.join(suffixes)}"

@@ -6,6 +6,7 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Experimental build of single Windows executable. Closes {issue}`725`.
 - \[mpm\] Only highlight binary name of package manager in logs.
 
 ## {gh}`5.9.0 (2022-11-17) <compare/v5.8.0...v5.9.0>`

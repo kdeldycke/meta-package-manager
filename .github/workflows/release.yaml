@@ -13,3 +13,28 @@ jobs:
     uses: kdeldycke/workflows/.github/workflows/release.yaml@v1.9.2
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+
+  generate-exe:
+    name: Generate Windows executable
+    needs: release
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - uses: actions/setup-python@v4.3.0
+        with:
+          python-version: "3.11"
+      - name: Install pip
+        run: |
+          python -m pip install --upgrade pip
+      - name: Install poetry
+        run: |
+          python -m pip install poetry
+      - name: Install pyinstaller
+        run: |
+          python -m pip install pyinstaller
+      - name: Install package
+        run: |
+          poetry install --no-interaction --no-ansi
+      - name: Build .exe
+        run: |
+          pyinstaller meta_package_manager/__main__.py --onefile

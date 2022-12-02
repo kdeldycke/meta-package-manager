@@ -28,15 +28,15 @@ jobs:
       - name: Install poetry
         run: |
           python -m pip install poetry
-      - name: Install pyinstaller
-        run: |
-          python -m pip install pyinstaller
       - name: Install package
         run: |
           poetry install --no-interaction --no-ansi
-      - name: Build .exe
+      - name: Install pyinstaller in Poetry venv
         run: |
-          pyinstaller meta_package_manager/__main__.py --onefile --name mpm
+          poetry run python -m pip install pyinstaller
+      - name: Build .exe within Poetry venv
+        run: |
+          poetry run pyinstaller meta_package_manager/__main__.py --onefile --name mpm
       - name: Artifacts for release
         uses: actions/upload-artifact@v3.1.1
         with:

@@ -40,8 +40,9 @@ jobs:
       - name: Artifacts for release
         uses: actions/upload-artifact@v3.1.1
         with:
-          name: ${{ github.event.repository.name }}-build-${{ matrix.commit }}
-          path: ./dist/mpm.*
+          name: mpm-build-${{ matrix.commit }}.exe.zip
+          path: ./dist/mpm.exe
+          if-no-files-found: error
       - name: Test run
         run: |
           ./dist/mpm.exe --version

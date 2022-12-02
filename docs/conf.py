@@ -96,6 +96,13 @@ html_theme_options = {
     "source_repository": github_project,
     "source_branch": "main",
     "source_directory": "docs/",
+    "announcement": (
+        f"{project} works fine, but its sole maintainer is distracted by life "
+        "😶‍🌫️.<br/>You can influence it with purchase of "
+        "<strong><a class='reference external' "
+        f"href='https://github.com/sponsors/{github_user}'>"
+        "business support 🤝 and sponsorship 🫶</a></strong>."
+    ),
 }
 
 # Footer content.

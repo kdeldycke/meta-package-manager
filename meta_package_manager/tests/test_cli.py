@@ -26,7 +26,7 @@ from boltons.strutils import strip_ansi
 from click_extra.tabulate import output_formats
 
 from .. import __version__
-from ..bar_plugin import MPMPlugin  # type: ignore
+from ..bar_plugin import MPMPlugin
 from ..base import Operations
 from ..pool import pool
 

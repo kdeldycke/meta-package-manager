@@ -48,7 +48,7 @@ from click_extra.tabulate import output_formats
 from tabulate import DataRow, TableFormat, tabulate
 
 from . import logger
-from .bar_plugin import MPMPlugin  # type: ignore
+from .bar_plugin import MPMPlugin
 from .pool import pool
 from .version import TokenizedString
 

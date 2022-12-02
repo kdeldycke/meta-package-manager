@@ -6,7 +6,7 @@
 # <xbar.desc>List outdated packages and manage upgrades.</xbar.desc>
 # <xbar.dependencies>python,mpm</xbar.dependencies>
 # <xbar.image>https://i.imgur.com/B5wdxIc.png</xbar.image>
-# <xbar.abouturl>https://github.com/kdeldycke/meta-package-manager</xbar.abouturl>
+# <xbar.abouturl>https://kdeldycke.github.io/meta-package-manager/bar-plugin.html</xbar.abouturl>
 # <xbar.var>boolean(VAR_SUBMENU_LAYOUT=false): Group packages into a sub-menu for each manager.</xbar.var>
 # <xbar.var>boolean(VAR_TABLE_RENDERING=true): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
 # XXX Deactivate font-related options for Xbar. Default variable value does not allow `=` character in Xbar. See: https://github.com/matryer/xbar/issues/832
@@ -16,17 +16,19 @@
 
 """Xbar and SwiftBar plugin for Meta Package Manager (i.e. the :command:`mpm` CLI).
 
-Default update cycle is set to 7 hours so we have a chance to get user's
-attention once a day. Higher frequency might ruin the system as all checks are
-quite resource intensive, and Homebrew might hit GitHub's API calls quota.
+Default update cycle should be set to several hours so we have a chance to get
+user's attention once a day. Higher frequency might ruin the system as all
+checks are quite resource intensive, and Homebrew might hit GitHub's API calls
+quota.
 
-- Xbar automatically bridge plugin options between its UI and environment
-  variable on script execution. See:
-  https://xbarapp.com/docs/2021/03/14/variables-in-xbar.html
+- `Xbar automatically bridge plugin options
+  <https://xbarapp.com/docs/2021/03/14/variables-in-xbar.html>`_ between its UI
+  and environment variable on script execution.
 
-- This is in progress for SwiftBar at:
-  https://github.com/swiftbar/SwiftBar/issues/160
+- This is `in progress for SwiftBar
+  <https://github.com/swiftbar/SwiftBar/issues/160>`_.
 """
+
 from __future__ import annotations
 
 import sys
@@ -72,9 +74,9 @@ class MPMPlugin:
 
     Once ``mpm`` is located, we can rely on it to produce the main output of the plugin.
 
-    The output must supports both Xbar and SwiftBar:
-        - https://github.com/matryer/xbar-plugins/blob/main/CONTRIBUTING.md#plugin-api
-        - https://github.com/swiftbar/SwiftBar#plugin-api
+    The output must supports both `Xbar dialect
+    <https://github.com/matryer/xbar-plugins/blob/main/CONTRIBUTING.md#plugin-api>`_
+    and `SwiftBar dialect <https://github.com/swiftbar/SwiftBar#plugin-api>`_.
     """
 
     mpm_min_version = (5, 0, 0)

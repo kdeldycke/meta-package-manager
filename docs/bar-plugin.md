@@ -6,7 +6,7 @@ The Meta Package Manager project is actively maintaining a plugin that is both c
 The plugin is written in Python and is a small wrapper around the `mpm` CLI.
 
 ```{hint}
-I recommend SwiftBar over Xbar, as the later has 2 outstanding issues:
+I recommend SwiftBar, because Xbar has 2 outstanding issues:
 - [`=` not allowed in variables defaults](https://github.com/matryer/xbar/issues/832)
 - [Shell parameters over-escaping](https://github.com/matryer/xbar/issues/831)
 ```
@@ -82,16 +82,20 @@ and
 Once `mpm` is installed on your system, it can dynamiccaly be located with the dedicated `--xbar-plugin-path` option:
 
 ```shell-session
-$ mpm --xbar-plugin-path
-~/meta-package-manager/meta_package_manager/xbar/meta_package_manager.7h.py
+$ mpm --bar-plugin-path
+~/Library/Python/3.9/lib/python/site-packages/meta_package_manager/bar_plugin.py
 ```
 
-This is handy to pre-populate Xbar/SwiftBar with some plugins, [as I do in my dotfiles via symlinks](https://github.com/kdeldycke/dotfiles/blob/c04296d29e5f5ce48687f79554b265b3e89d5dbb/install.sh#L230).
+This option is handy for deployment and initial configuration of Xbar/SwiftBar. I personnaly
+[use this in my dotfiles](https://github.com/kdeldycke/dotfiles/blob/c04296d29e5f5ce48687f79554b265b3e89d5dbb/install.sh#L230) to symlink the plugin to its latest version:
+
+```shell-session
+$ ln -sf "$(mpm --bar-plugin-path)" "${HOME}/Library/Application Support/xbar/plugins/mpm.7h.py"
+```
 
 ## Python `>=3.7.3` required
 
-Xbar plugins are self-contained scripts. As such,
-`meta_package_manager.7h.py` needs to be able to run without any extra
+Xbar plugins are self-contained scripts. As such, it needs to be able to run without any extra
 dependency, on the pre-installed Python distribution that ships with macOS.
 
 Xbar itself
@@ -129,14 +133,14 @@ Active development of the plugin is happening here, as a side-project of
 
 Releases of the plugin is synchronized with the package. Both share the exact
 same version to simplify management. This explain why the plugin could appears
-jumpimg ahead of a couple of major/minor version while providing tiny or no
+jumping ahead a couple of major/minor versions while providing tiny or no
 changes at all.
 
 A release is ready when both the package and the plugin reach a stable state.
 
 If the plugin has been changed between releases, a
 [copy of the plugin is pushed](https://github.com/matryer/xbar-plugins/pulls?q=is%3Apr%20%22Meta%20Package%20Manager%22)
-to the
+under the name `meta_package_manager.7h.py`, to the
 [official Xbar plugin repository](https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py).
 
 ## Release process
@@ -161,8 +165,8 @@ to the
 1. Replace existing copy of the plugin with the latest tagged version:
 
    ```shell-session
-   $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v4.13.1/meta_package_manager/bar_plugin/meta_package_manager.7h.py
-   $ mv ./meta_package_manager.7h.py ./Dev/
+   $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v4.13.1/meta_package_manager/bar_plugin.py
+   $ mv ./bar_plugin.py ./Dev/meta_package_manager.7h.py
    $ chmod 755 ./Dev/meta_package_manager.7h.py
    ```
 

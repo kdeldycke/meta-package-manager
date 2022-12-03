@@ -44,7 +44,7 @@ def manager_operations() -> str:
     for mid, m in sorted(pool.items()):
         line = [
             f"[`{mid}`]({m.homepage_url})"
-            + ("" if not m.deprecated else f" ([deprecated]({m.deprecation_url}))"),
+            + ("" if not m.deprecated else f" [⚠️]({m.deprecation_url})"),
             f"{m.requirement}",
             "🐧" if LINUX in m.platforms else "",
             "🍎" if MACOS in m.platforms else "",

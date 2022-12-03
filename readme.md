@@ -88,7 +88,9 @@ ______________________________________________________________________
 
 ## Quickstart
 
-Easiest way is to install `mpm` with [`pipx`](https://pypa.github.io/pipx/):
+### Install from sources
+
+Easiest way is to install `mpm` from sources with [`pipx`](https://pypa.github.io/pipx/):
 
 ```shell-session
 $ pipx install meta-package-manager
@@ -98,7 +100,11 @@ Other
 [alternatives installation methods](https://kdeldycke.github.io/meta-package-manager/install.html)
 are available in the documentation.
 
-## List managers
+### Binaries
+
+On Windows, you can skip the installation process above and [download the standalone `mpm.exe` executable](https://github.com/kdeldycke/meta-package-manager/releases/latest) directly. You just need to unzip it to run it.
+
+### List managers
 
 List all supported package managers and their status on current system (macOS
 in this case):
@@ -140,7 +146,7 @@ $ mpm --all-managers managers
 
 If your favorite manager is not supported yet, you can help! See the [contibution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html).
 
-## List installed packages
+### List installed packages
 
 List all packages installed on current system:
 
@@ -169,7 +175,7 @@ $ mpm installed
 16 packages total (brew: 2, pip: 2, apm: 2, gem: 2, cask: 2, mas: 2, vscode: 2, npm: 2, composer: 0).
 ```
 
-## List outdated packages
+### List outdated packages
 
 List all packages installed for which an upgrade is available:
 
@@ -192,10 +198,10 @@ $ mpm outdated
 
 ## Usage
 
-More documentation is available in:
+Other subcommands and options are documented in:
 
 - the
-  [detailed help screens](https://kdeldycke.github.io/meta-package-manager/cli-help.html)
+  [detailed help screens](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html)
 - the
   [list of use-cases](https://kdeldycke.github.io/meta-package-manager/usecase.html)
   where you’ll find inspiration on how to leverage `mpm` power

@@ -1,5 +1,21 @@
 # Installation
 
+````{admonition} Danger: **Misleading package name**
+---
+class: danger
+---
+```{eval-rst}
+.. figure:: images/angry-paper-box.png
+    :align: right
+    :figwidth: 50px
+```
+
+There is a *`mpm`* Python module on PyPi that has nothing to do with this project. Avoid it!
+
+The **real package is named `meta-package-manager`**. Only the latter provides the {command}`mpm` CLI
+you're looking for.
+````
+
 `````{tab-set}
 
 ````{tab-item} pipx
@@ -9,7 +25,9 @@ Easiest way is to [install `pipx`](https://pypa.github.io/pipx/installation/), t
 $ pipx install meta-package-manager
 ```
 
+```{note}
 `pipx` is to `pip` what `npx` is to `npm`: a clean way to install and run Python applications in isolated environments.
+```
 ````
 
 ````{tab-item} pip
@@ -48,7 +66,7 @@ $ brew install hasnep/tap/meta-package-manager
 ```
 
 ```{admonition} Broken Homebrew
-:class: note
+:class: tip
 
 If for any reason `brew` gets broken by this external repository, you can easily fix it running:
 
@@ -82,7 +100,7 @@ $ yay -S meta-package-manager
 ````
 
 ````{tab-item} mpm
-In a funny twist, `mpm` can be installed by itself:
+In a funny twist, `mpm` can be installed with itself:
 
 ```{code-block} shell-session
 $ mpm --brew install meta-package-manager
@@ -93,22 +111,6 @@ $ mpm --yay  install meta-package-manager
 ```
 ````
 `````
-
-````{admonition} Danger: **Misleading package name**
----
-class: danger
----
-```{eval-rst}
-.. figure:: images/angry-paper-box.png
-    :align: right
-    :figwidth: 50px
-```
-
-There is a *`mpm`* Python module on PyPi that has nothing to do with this project. Avoid it!
-
-The **real package is named `meta-package-manager`**. Only the latter provides the {command}`mpm` CLI
-you're looking for.
-````
 
 ## Run `mpm`
 

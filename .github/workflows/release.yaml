@@ -37,7 +37,8 @@ jobs:
       - name: Install package
         run: |
           poetry install --no-interaction --no-ansi
-      - uses: Nuitka/Nuitka-Action@v0.4
+      # XXX Nuitka/Nuitka-Action has not been tagged for a while... :(
+      - uses: Nuitka/Nuitka-Action@b7a17285a3819669acff9270a930f4c52beabbe2
         with:
           script-name: meta_package_manager/__main__.py
       - name: Upload binary

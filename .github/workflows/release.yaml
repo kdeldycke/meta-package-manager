@@ -14,53 +14,6 @@ jobs:
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
 
-  generate-exe:
-    name: Generate Windows executable
-    strategy:
-      matrix:
-        distro:
-          - ubuntu-22.04
-          - ubuntu-20.04
-          - macos-12
-          - macos-11
-          - windows-2022
-          - windows-2019
-    runs-on: ${{ matrix.distro }}
-    steps:
-      - uses: actions/checkout@v3.1.0
-      - uses: actions/setup-python@v4.3.0
-        with:
-          python-version: "3.11"
-      - name: Install pip
-        run: |
-          python -m pip install --upgrade pip
-      - name: Install poetry
-        run: |
-          python -m pip install poetry
-      - name: Install package
-        run: |
-          poetry install --no-interaction --no-ansi
-      - name: Install pyinstaller in Poetry venv
-        run: |
-          poetry run python -m pip install pyinstaller
-      - name: Build .exe within Poetry venv
-        run: >
-          poetry run pyinstaller meta_package_manager/__main__.py
-          --onefile
-          --name mpm
-          --collect-all "meta_package_manager.managers"
-      - name: Artifacts for release
-        uses: actions/upload-artifact@v3.1.1
-        with:
-          name: mpm-build-${{ matrix.distro }}-${{ matrix.commit }}.exe
-          path: ./dist/mpm.exe
-          if-no-files-found: error
-      - name: Test run
-        run: |
-          ./dist/mpm.exe --version
-          ./dist/mpm.exe --help
-          ./dist/mpm.exe --all-managers managers
-
   nuitka-generate-bins:
     name: Generate binaries
     strategy:

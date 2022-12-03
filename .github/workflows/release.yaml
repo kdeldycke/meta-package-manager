@@ -50,6 +50,9 @@ jobs:
           poetry run python -m nuitka
           --standalone --onefile --assume-yes-for-downloads
           --output-dir=build
+          --include-package=lark.grammars
+          --include-package=meta_package_manager
+          --nofollow-import-to=*.tests
           meta_package_manager/__main__.py
       - name: Upload binary
         uses: actions/upload-artifact@v3.1.1

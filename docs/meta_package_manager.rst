@@ -12,12 +12,19 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   meta_package_manager.bar_plugin
    meta_package_manager.managers
    meta_package_manager.tests
 
 Submodules
 ----------
+
+meta\_package\_manager.bar\_plugin module
+-----------------------------------------
+
+.. automodule:: meta_package_manager.bar_plugin
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 meta\_package\_manager.base module
 ----------------------------------

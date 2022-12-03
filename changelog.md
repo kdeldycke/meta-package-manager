@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[mpm\] Experimental build of single Windows executable. Closes {issue}`725`.
+- \[mpm\] `--bar-plugin-path` option is only available for CLI installed from sources.
 - \[bar-plugin\] Rename and move `meta_package_manager.7h.py` bar plugin script to eliminate dynamic module loading.
 - \[mpm\] Only highlight binary name of package manager in logs.
 

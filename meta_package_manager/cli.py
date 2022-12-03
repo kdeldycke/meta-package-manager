@@ -123,16 +123,27 @@ def bar_plugin_path(ctx, param, value):
       simplified to ``~/.python/site-packages/mpm/bar_plugin.py``,
     - but ``/usr/bin/python3.9/mpm/bar_plugin.py`` is returned as-is.
     """
-    if value:
-        bar_path = Path(bar_plugin.__file__).expanduser().resolve()
-        home_dir = Path.home()
-        if bar_path.is_relative_to(home_dir):
-            home_shorthand = Path("~")
-            shorten_bar_path = home_shorthand / bar_path.relative_to(home_dir)
-            assert shorten_bar_path.expanduser().resolve() == bar_path
-            bar_path = shorten_bar_path
-        echo(bar_path)
-        ctx.exit()
+    # Option has not been called.
+    if not value:
+        return
+
+    # Options is only available when CLI is installed from sources, not CLI is a bundled executable.
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        logger.debug("CLI running as a PyInstaller bundle.")
+        logger.fatal(
+            "Option --bar-plugin-path is only available when CLI is installed from sources."
+        )
+        ctx.exit(2)
+
+    bar_path = Path(bar_plugin.__file__).expanduser().resolve()
+    home_dir = Path.home()
+    if bar_path.is_relative_to(home_dir):
+        home_shorthand = Path("~")
+        shorten_bar_path = home_shorthand / bar_path.relative_to(home_dir)
+        assert shorten_bar_path.expanduser().resolve() == bar_path
+        bar_path = shorten_bar_path
+    echo(bar_path)
+    ctx.exit()
 
 
 # XXX Why is Sphinx skipping Click methods in documentation?

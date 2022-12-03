@@ -49,7 +49,7 @@ jobs:
         run: >
           poetry run python -m nuitka
           --standalone --onefile --assume-yes-for-downloads
-          --output-dir=build
+          --output-dir=dist
           --include-package=lark.grammars
           --include-package=meta_package_manager
           --nofollow-import-to=*.tests
@@ -59,9 +59,9 @@ jobs:
         with:
           name: ${{ runner.os }} Build
           path: |
-            build/*.exe
-            build/*.bin
-            build/*.app/**/*
+            dist/*.exe
+            dist/*.bin
+            dist/*.app/**/*
       - name: Windows binary tests
         if: runner.os == 'Windows'
         run: |

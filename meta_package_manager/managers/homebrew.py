@@ -555,7 +555,7 @@ class Cask(Homebrew):
 
     name = "Homebrew Cask"
 
-    homepage_url = "https://caskroom.github.io"
+    homepage_url = "https://github.com/Homebrew/homebrew-cask"
 
     # Casks are only available on macOS, not Linux.
     platforms = frozenset({MACOS})

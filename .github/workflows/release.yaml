@@ -62,3 +62,15 @@ jobs:
             build/*.exe
             build/*.bin
             build/*.app/**/*
+      - name: Windows binary tests
+        if: runner.os == 'Windows'
+        run: |
+          ./dist/__main__.exe --version
+          ./dist/__main__.exe --help
+          ./dist/__main__.exe --all-managers managers
+      - name: Linux and macOS binary tests
+        if: runner.os != 'Windows'
+        run: |
+          ./dist/__main__.bin --version
+          ./dist/__main__.bin --help
+          ./dist/__main__.bin --all-managers managers

@@ -39,7 +39,7 @@ jobs:
           poetry install --no-interaction --no-ansi
       - uses: Nuitka/Nuitka-Action@v0.4
         with:
-          script-name: mpm
+          script-name: meta_package_manager/__main__.py
           onefile: true
       - name: Upload binary
         uses: actions/upload-artifact@v3.1.1

@@ -77,18 +77,28 @@ $ brew install hasnep/tap/meta-package-manager
 ````
 
 ````{tab-item} Windows
+A [standalone `mpm.exe` executable](https://github.com/kdeldycke/meta-package-manager/releases/latest) is available on Windows, so you can run it without a fuss.
+````
+
+````{tab-item} Chocolatey
 1. [Install chocolatey](https://chocolatey.org/install#install-step2)
 1. Install Python via chocolatey:
-
-```{code-block} shell-session
-$ choco install python -y
-```
-
+    ```{code-block} shell-session
+    $ choco install python -y
+    ```
 1. Then follow the `mpm` installation instruction in `pipx` or `pip` tabs.
 ````
 
 ````{tab-item} Arch Linux
-An `mpm` package has been contributed by [@autinerd](https://github.com/autinerd) and is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager):
+An `mpm` package has been contributed by [@autinerd](https://github.com/autinerd) and is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager) and can be installed with any AUR helper:
+
+```{code-block} shell-session
+$ pacaur -S meta-package-manager
+```
+
+```{code-block} shell-session
+$ pacman -S meta-package-manager
+```
 
 ```{code-block} shell-session
 $ paru -S meta-package-manager
@@ -104,9 +114,29 @@ In a funny twist, `mpm` can be installed with itself:
 
 ```{code-block} shell-session
 $ mpm --brew install meta-package-manager
+```
+
+```{code-block} shell-session
+$ mpm --pacaur install meta-package-manager
+```
+
+```{code-block} shell-session
+$ mpm --pacman install meta-package-manager
+```
+
+```{code-block} shell-session
 $ mpm --paru install meta-package-manager
+```
+
+```{code-block} shell-session
 $ mpm --pip  install meta-package-manager
+```
+
+```{code-block} shell-session
 $ mpm --pipx install meta-package-manager
+```
+
+```{code-block} shell-session
 $ mpm --yay  install meta-package-manager
 ```
 ````

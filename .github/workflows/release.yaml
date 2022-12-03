@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-22.04
+          #- ubuntu-22.04
           - macos-12
           - windows-2022
     runs-on: ${{ matrix.os }}
@@ -40,7 +40,6 @@ jobs:
       - uses: Nuitka/Nuitka-Action@v0.4
         with:
           script-name: meta_package_manager/__main__.py
-          onefile: true
       - name: Upload binary
         uses: actions/upload-artifact@v3.1.1
         with:

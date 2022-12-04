@@ -33,7 +33,7 @@ from click_extra.tests.conftest import destructive
 
 from ..base import Operations, Package, PackageManager
 from ..cli import XKCD_MANAGER_ORDER
-from ..pool import pool
+from ..pool import manager_classes, pool
 from ..version import TokenizedString
 
 """ Test the structure, data and types returned by all package managers.
@@ -405,25 +405,21 @@ def test_operation_order():
 
 
 # Check the code of each file registered in the pool.
-@pytest.mark.parametrize("manager_file", pool.manager_files, ids=attrgetter("name"))
-def test_content_order(manager_file):
+@pytest.mark.parametrize("manager_class", manager_classes, ids=attrgetter("name"))
+def test_content_order(manager_class):
     """Lint each package manager definition file to check its code structure is the same
     as the canonical PackageManager base class."""
+    # Collect in order the IDs of all properties (ast.Assign) and functions in
+    # the class.
+    collected_props = []
 
-    tree = ast.parse(manager_file.read_bytes())
+    klass_tree = ast.parse(inspect.getsource(manager_class))
+    for node in klass_tree.body:
+        if isinstance(node, ast.Assign):
+            collected_props.extend([t.id for t in node.targets])
+        if isinstance(node, ast.FunctionDef):
+            collected_props.append(node.name)
 
-    # Analyse each class.
-    for klass in (n for n in tree.body if isinstance(n, ast.ClassDef)):
-
-        # Collect in order the IDs of all properties (ast.Assign) and functions in
-        # the class.
-        collected_props = []
-        for node in klass.body:
-            if isinstance(node, ast.Assign):
-                collected_props.extend([t.id for t in node.targets])
-            if isinstance(node, ast.FunctionDef):
-                collected_props.append(node.name)
-
-        enforced_props = tuple(p for p in collected_props if p in props_ref)
-        expected_order = tuple(p for p in props_ref if p in collected_props)
-        assert enforced_props == expected_order
+    enforced_props = tuple(p for p in collected_props if p in props_ref)
+    expected_order = tuple(p for p in props_ref if p in collected_props)
+    assert enforced_props == expected_order

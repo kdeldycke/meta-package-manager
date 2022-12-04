@@ -17,16 +17,43 @@
 
 from __future__ import annotations
 
+import inspect
+from importlib import import_module
+from pathlib import Path
+
 import pytest
 
+from ..base import PackageManager
 from ..cli import mpm
-from ..pool import pool
+from ..pool import manager_classes, pool
 
 """ Test the pool and its content. """
 
 
+def test_manager_definition_inventory():
+    """Check all classes implementing a package manager are accounted for in the pool."""
+    found_classes = set()
+
+    # Search for manager definitions in the managers subfolder.
+    for py_file in Path(__file__).parent.joinpath("../managers").glob("*.py"):
+        module = import_module(f"..managers.{py_file.stem}", package=__package__)
+        for _, klass in inspect.getmembers(module, inspect.isclass):
+            if issubclass(klass, PackageManager) and not klass.virtual:
+                found_classes.add(klass)
+
+    assert sorted(map(str, found_classes)) == sorted(map(str, manager_classes))
+
+
+def test_manager_classes_order():
+    """Check manager classes are ordered by their IDs."""
+    assert [c.__name__ for c in manager_classes] == sorted(
+        c.__name__ for c in manager_classes
+    )
+
+
 def test_manager_count():
     """Check all implemented package managers are accounted for, and unique."""
+    assert len(manager_classes) == 28
     assert len(pool) == 28
     assert len(pool) == len(pool.all_manager_ids)
     assert pool.all_manager_ids == tuple(sorted(set(pool)))

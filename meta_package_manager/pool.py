@@ -19,10 +19,7 @@
 
 from __future__ import annotations
 
-import inspect
 import sys
-from importlib import import_module
-from pathlib import Path
 from typing import Iterable, Iterator
 
 if sys.version_info < (3, 8):
@@ -40,11 +37,73 @@ from click_extra.colorize import default_theme as theme
 
 from . import logger
 from .base import Operations, PackageManager
-from .managers import *
+from .managers.apm import APM
+from .managers.apt import APT, APT_Mint
+from .managers.cargo import Cargo
+from .managers.chocolatey import Choco
+from .managers.composer import Composer
+from .managers.dnf import DNF, YUM
+from .managers.emerge import Emerge
+from .managers.flatpak import Flatpak
+from .managers.gem import Gem
+from .managers.homebrew import Brew, Cask
+from .managers.mas import MAS
+from .managers.npm import NPM
+from .managers.opkg import OPKG
+from .managers.pacman import Pacaur, Pacman, Paru, Yay
+from .managers.pip import Pip
+from .managers.pipx import Pipx
+from .managers.scoop import Scoop
+from .managers.snap import Snap
+from .managers.steamcmd import SteamCMD
+from .managers.vscode import VSCode
+from .managers.yarn import Yarn
+from .managers.zypper import Zypper
+
+manager_classes = (
+    APM,
+    APT,
+    APT_Mint,
+    Brew,
+    Cargo,
+    Cask,
+    Choco,
+    Composer,
+    DNF,
+    Emerge,
+    Flatpak,
+    Gem,
+    MAS,
+    NPM,
+    OPKG,
+    Pacaur,
+    Pacman,
+    Paru,
+    Pip,
+    Pipx,
+    Scoop,
+    Snap,
+    SteamCMD,
+    VSCode,
+    YUM,
+    Yarn,
+    Yay,
+    Zypper,
+)
+"""The list of all classes implementing the specific package managers.
+
+Is considered valid package manager, definitions classes which:
+
+#. are located in the :py:prop:`meta_package_manager.pool.ManagerPool.manager_subfolder` subfolder, and
+#. are sub-classes of :py:class:`meta_package_manager.base.PackageManager`, and
+#. are not :py:prop:`meta_package_manager.base.PackageManager.virtual` (i.e. have a non-null :py:prop:`meta_package_manager.base.PackageManager.cli_names` property).
+
+These properties are checked and enforced in unittests.
+"""
 
 
 class ManagerPool:
-    """A dict-like register, indexing all supported package managers."""
+    """A dict-like register, instanciating all supported package managers."""
 
     ALLOWED_EXTRA_OPTION: Final = frozenset(
         {"ignore_auto_updates", "stop_on_error", "dry_run"}
@@ -52,43 +111,13 @@ class ManagerPool:
     """List of extra options that are allowed to be set on managers during the use of the
     :py:func:`meta_package_manager.pool.ManagerPool.select_managers` helper below."""
 
-    manager_subfolder: Final = "managers"
-    """Relative subfolder where manager definition files are stored."""
-
-    manager_files: set = set()
-    """Path of files containing package manager definitions."""
-
     @cached_property
     def register(self) -> dict[str, PackageManager]:
-        """Search for package manager definitions locally and store them into an
-        internal register.
-
-        Is considered valid package manager, definitions classes which:
-
-        #. are located in the :py:prop:`meta_package_manager.pool.ManagerPool.manager_subfolder` subfolder, and
-        #. are sub-classes of :py:class:`meta_package_manager.base.PackageManager`, and
-        #. are not :py:prop:`meta_package_manager.base.PackageManager.virtual` (i.e. have a non-null :py:prop:`meta_package_manager.base.PackageManager.cli_names` property).
-        """
+        """Instantiate all supported package managers."""
         register = {}
-
-        # Populate empty register.
-        for py_file in (
-            Path(__file__).parent.joinpath(self.manager_subfolder).glob("*.py")
-        ):
-            logger.debug(f"Search manager definitions in {py_file}")
-            module = import_module(
-                f".{self.manager_subfolder}.{py_file.stem}", package=__package__
-            )
-
-            for _, klass in inspect.getmembers(module, inspect.isclass):
-                if issubclass(klass, PackageManager) and not klass.virtual:
-                    logger.debug(f"Found {klass!r}")
-                    manager = klass()
-                    register[manager.id] = manager
-                    self.manager_files.add(py_file)
-                else:
-                    logger.debug(f"{klass!r} is not a valid manager definition")
-
+        for klass in manager_classes:
+            manager = klass()
+            register[manager.id] = manager
         return register
 
     # Emulates some dict methods.

@@ -50,8 +50,7 @@ jobs:
           poetry run python -m nuitka
           --standalone --onefile --assume-yes-for-downloads
           --output-dir=dist
-          --include-package=lark.grammars
-          --include-package-data=*.lark
+          --include-package-data=lark
           --include-package=meta_package_manager
           --nofollow-import-to=*.tests
           meta_package_manager/__main__.py

@@ -40,6 +40,7 @@ from click_extra.colorize import default_theme as theme
 
 from . import logger
 from .base import Operations, PackageManager
+from .managers import *
 
 
 class ManagerPool:

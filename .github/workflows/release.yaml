@@ -51,7 +51,7 @@ jobs:
           --standalone --onefile --assume-yes-for-downloads
           --output-dir=dist
           --include-package-data=lark
-          --include-package=meta_package_manager
+          --include-package=meta_package_manager.managers
           --nofollow-import-to=*.tests
           meta_package_manager/__main__.py
       - name: Upload binary

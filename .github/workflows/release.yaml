@@ -52,6 +52,8 @@ jobs:
           --output-dir=./dist/
           --include-package-data=lark
           --include-package=meta_package_manager.managers
+          --include-package-data=meta_package_manager
+          --include-module=meta_package_manager.managers
           --nofollow-import-to=*.tests
           meta_package_manager/__main__.py
       - name: Upload binary

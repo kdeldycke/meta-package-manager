@@ -129,9 +129,9 @@ def bar_plugin_path(ctx, param, value):
 
     # Options is only available when CLI is installed from sources, not CLI is a bundled executable.
     if "__compiled__" in globals():
-        logger.debug("CLI running as a PyInstaller bundle.")
+        logger.debug("CLI running as a binary.")
         logger.fatal(
-            "Option --bar-plugin-path is only available when CLI is installed from sources."
+            "Option --bar-plugin-path is only available for CLI installed from sources."
         )
         ctx.exit(2)
 

@@ -63,6 +63,7 @@ jobs:
         # https://github.com/databrickslabs/dbx/issues/455#issuecomment-1312770919
         # https://github.com/pallets/click/issues/2121#issuecomment-1312773882
         # https://gist.github.com/NodeJSmith/e7e37f2d3f162456869f015f842bcf15
+        # https://github.com/Nuitka/Nuitka/blob/ca1ec9e8e10b51d187b589f1d33935c4ed558687/nuitka/utils/ReExecute.py#L73-L74
         run: >
           poetry run python -X utf8 -m nuitka
           --standalone --onefile --assume-yes-for-downloads

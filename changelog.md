@@ -6,10 +6,13 @@
 This version is not released yet and is under active development.
 ```
 
-- \[mpm\] Experimental build of single Windows executable. Closes {issue}`725`.
-- \[mpm\] `--bar-plugin-path` option is only available for CLI installed from sources.
+- \[mpm\] Build standalone executable for macOS, Linux and Windows. Closes {issue}`725`.
+- \[mpm\] Force default output encoding of Windows executable to fix issue of Windows CI agents.
+- \[bar-plugin\] Disable `--bar-plugin-path` option if CLI not installed from sources.
 - \[bar-plugin\] Rename and move `meta_package_manager.7h.py` bar plugin script to eliminate dynamic module loading.
-- \[mpm\] Only highlight binary name of package manager in logs.
+- \[mpm\] Replace dynamic loading of package manager definition by static code.
+- \[mpm\] Highlight package manager's executable name when printing their path in logs.
+- \[mpm\] Hint at deprecation of manager in the support matrix.
 
 ## {gh}`5.9.0 (2022-11-17) <compare/v5.8.0...v5.9.0>`
 

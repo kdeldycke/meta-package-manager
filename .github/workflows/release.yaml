@@ -23,6 +23,10 @@ jobs:
           - macos-12
           - windows-2022
     runs-on: ${{ matrix.os }}
+    # XXX Workaround for Windows runners redirecting the output of commands to files.
+    # See: https://github.com/databrickslabs/dbx/issues/455#issuecomment-1312770919
+    env:
+      PYTHONIOENCODING: "utf8"
     steps:
       - uses: actions/checkout@v3.1.0
       - uses: actions/setup-python@v4.3.0

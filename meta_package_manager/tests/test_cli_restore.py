@@ -99,10 +99,10 @@ class TestRestore(CLISubCommandTests):
             "pip-npm-dummy.toml",
             """
             [pip]
-            fancy_package = "0.0.1"
+            leftpad = "0.1.2"
 
             [npm]
-            dummy_package = "2.2.2"
+            chance = "1.1.9"
             """,
         )
 
@@ -118,10 +118,10 @@ class TestRestore(CLISubCommandTests):
             "pip-npm-dummy.toml",
             """
             [pip]
-            fancy_package = "0.0.1"
+            leftpad = "0.1.2"
 
             [npm]
-            dummy_package = "2.2.2"
+            chance = "1.1.9"
             """,
         )
 

@@ -9,7 +9,7 @@ name: Tests
     # Run tests every Monday at 9:17 to catch regressions.
     - cron: "17 9 * * 1"
 
-# XXX Concurrency detection sucks and jobs gets killed randonmly.
+# XXX Concurrency detection sucks and jobs gets killed randomly.
 # concurrency:
 #   # Group workflow jobs so new commits cancels in-progress execution triggered by previous commits.
 #   # Source: https://mail.python.org/archives/list/pypa-committers@python.org/thread/PCBCQMJF64JGRBOX7E2EE4YLKHT4DI55/
@@ -121,63 +121,6 @@ jobs:
         run: |
           python -m pip install --user pipx
           python -m pipx ensurepath
-
-      # Mpm
-      - name: Install last mpm release
-        run: |
-          python -m pipx install meta-package-manager
-      - name: mpm inventory for runner debugging
-        run: |
-          mpm --version
-      - name: mpm manager list for runner debugging
-        # XXX strange error on Windows:
-        # Traceback (most recent call last):
-        #   File "(...)Python\3.9.13\x64\lib\runpy.py", line 197, in _run_module_as_main
-        #     return _run_code(code, main_globals, None,
-        #   File "(...)Python\3.9.13\x64\lib\runpy.py", line 87, in _run_code
-        #     exec(code, run_globals)
-        #   File "C:\Program Files (x86)\pipx_bin\mpm.exe\__main__.py", line 7, in <module>
-        #   File "(...)click\core.py", line 1130, in __call__
-        #     return self.main(*args, **kwargs)
-        #   File "(...)click_extra\commands.py", line 161, in main
-        #     return super().main(*args, **kwargs)
-        #   File "(...)click\core.py", line 1055, in main
-        #     rv = self.invoke(ctx)
-        #   File "(...)click_extra\commands.py", line 212, in invoke
-        #     return super().invoke(ctx)
-        #   File "(...)click\core.py", line 1657, in invoke
-        #     return _process_result(sub_ctx.command.invoke(sub_ctx))
-        #   File "(...)click\core.py", line 1404, in invoke
-        #     return ctx.invoke(self.callback, **ctx.params)
-        #   File "(...)click\core.py", line 760, in invoke
-        #     return __callback(*args, **kwargs)
-        #   File "(...)click\decorators.py", line 26, in new_func
-        #     return f(get_current_context(), *args, **kwargs)
-        #   File "(...)meta_package_manager\cli.py", line 388, in managers
-        #     print_table(
-        #   File "(...)meta_package_manager\output.py", line 180, in print_table
-        #     ctx.find_root().print_table(sorted(rows, key=sort_method), header_labels)
-        #   File "(...)click_extra\tabulate.py", line 93, in render_table
-        #     echo(tabulate.tabulate(tabular_data, headers, **defaults))
-        #   File "(...)click\utils.py", line 299, in echo
-        #     file.write(out)  # type: ignore
-        #   File "(...)click\_compat.py", line 550, in _safe_write
-        #     return _write(s)
-        #   File "(...)colorama\ansitowin32.py", line 47, in write
-        #     self.__convertor.write(text)
-        #   File "(...)colorama\ansitowin32.py", line 177, in write
-        #     self.write_and_convert(text)
-        #   File "(...)colorama\ansitowin32.py", line 202, in write_and_convert
-        #     self.write_plain_text(text, cursor, start)
-        #   File "(...)colorama\ansitowin32.py", line 210, in write_plain_text
-        #     self.wrapped.write(text[start:end])
-        #   File "(...)Python\3.9.13\x64\lib\encodings\cp1252.py", line 19, in encode
-        #     return codecs.charmap_encode(input,self.errors,encoding_table)[0]
-        # UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-145:
-        # character maps to <undefined>
-        if: runner.os != 'Windows'
-        run: |
-          mpm managers
 
       # Homebrew
       - name: macOS - Upgrade Homebrew
@@ -383,61 +326,26 @@ jobs:
       - name: Install mpm with Poetry
         run: |
           poetry install --no-interaction --no-ansi
-      - name: mpm output for debugging
+      - name: mpm output for debugging - macOS & Linux
+        if: runner.os != 'Windows'
         run: |
           poetry run mpm
           poetry run mpm --version
-      - name: mpm manager list for debugging
-        # XXX strange error on Windows:
-        # Traceback (most recent call last):
-        #   File "(...)Python\3.9.13\x64\lib\runpy.py", line 197, in _run_module_as_main
-        #     return _run_code(code, main_globals, None,
-        #   File "(...)Python\3.9.13\x64\lib\runpy.py", line 87, in _run_code
-        #     exec(code, run_globals)
-        #   File "C:\Program Files (x86)\pipx_bin\mpm.exe\__main__.py", line 7, in <module>
-        #   File "(...)click\core.py", line 1130, in __call__
-        #     return self.main(*args, **kwargs)
-        #   File "(...)click_extra\commands.py", line 161, in main
-        #     return super().main(*args, **kwargs)
-        #   File "(...)click\core.py", line 1055, in main
-        #     rv = self.invoke(ctx)
-        #   File "(...)click_extra\commands.py", line 212, in invoke
-        #     return super().invoke(ctx)
-        #   File "(...)click\core.py", line 1657, in invoke
-        #     return _process_result(sub_ctx.command.invoke(sub_ctx))
-        #   File "(...)click\core.py", line 1404, in invoke
-        #     return ctx.invoke(self.callback, **ctx.params)
-        #   File "(...)click\core.py", line 760, in invoke
-        #     return __callback(*args, **kwargs)
-        #   File "(...)click\decorators.py", line 26, in new_func
-        #     return f(get_current_context(), *args, **kwargs)
-        #   File "(...)meta_package_manager\cli.py", line 388, in managers
-        #     print_table(
-        #   File "(...)meta_package_manager\output.py", line 180, in print_table
-        #     ctx.find_root().print_table(sorted(rows, key=sort_method), header_labels)
-        #   File "(...)click_extra\tabulate.py", line 93, in render_table
-        #     echo(tabulate.tabulate(tabular_data, headers, **defaults))
-        #   File "(...)click\utils.py", line 299, in echo
-        #     file.write(out)  # type: ignore
-        #   File "(...)click\_compat.py", line 550, in _safe_write
-        #     return _write(s)
-        #   File "(...)colorama\ansitowin32.py", line 47, in write
-        #     self.__convertor.write(text)
-        #   File "(...)colorama\ansitowin32.py", line 177, in write
-        #     self.write_and_convert(text)
-        #   File "(...)colorama\ansitowin32.py", line 202, in write_and_convert
-        #     self.write_plain_text(text, cursor, start)
-        #   File "(...)colorama\ansitowin32.py", line 210, in write_plain_text
-        #     self.wrapped.write(text[start:end])
-        #   File "(...)Python\3.9.13\x64\lib\encodings\cp1252.py", line 19, in encode
-        #     return codecs.charmap_encode(input,self.errors,encoding_table)[0]
-        # UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-145:
-        # character maps to <undefined>
-        if: runner.os != 'Windows'
+          poetry run mpm managers
+      - name: mpm output for debugging - Windows
+        if: runner.os == 'Windows'
+        # XXX Workaround for Windows runners redirecting the output of commands to files. See:
+        # https://github.com/databrickslabs/dbx/issues/455#issuecomment-1312770919
+        # https://github.com/pallets/click/issues/2121#issuecomment-1312773882
+        # https://gist.github.com/NodeJSmith/e7e37f2d3f162456869f015f842bcf15
+        env:
+          PYTHONIOENCODING: "utf8"
         run: |
+          poetry run mpm
+          poetry run mpm --version
           poetry run mpm managers
 
-      # Prepare env for tests
+      # Prepare env for tests.
       - name: Hack to fix coverage
         # "Can't combine line data with arc data" error.
         if: runner.os != 'Windows'
@@ -465,10 +373,3 @@ jobs:
           poetry run pytest --exitfirst --cov-config=pyproject.toml --cov=./ --cov-report=xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3.1.1
-
-      # Mpm final state
-      - name: mpm output for debugging
-        run: |
-          poetry run mpm
-          poetry run mpm --version
-          poetry run mpm managers

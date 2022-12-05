@@ -47,15 +47,8 @@ jobs:
       - name: Nuitka and compilers versions
         run: |
           poetry run python -m nuitka --version
-      - name: Build binary within Poetry venv
-        # XXX Workaround for Windows runners redirecting the output of commands to files. See:
-        # https://github.com/databrickslabs/dbx/issues/455#issuecomment-1312770919
-        # https://github.com/pallets/click/issues/2121#issuecomment-1312773882
-        # https://gist.github.com/NodeJSmith/e7e37f2d3f162456869f015f842bcf15
-        # Nuitka will gather any extra environment variable and pass them to the Python interpreter that will
-        # end up embedded in the final binary (as describe by the --python-flag=FLAG option).
-        env:
-          PYTHONIOENCODING: "utf8"
+      - name: macOS and Linux - Build binary within Poetry venv
+        if: runner.os != 'Windows'
         run: >
           poetry run python -m nuitka
           --standalone --onefile --assume-yes-for-downloads
@@ -63,7 +56,21 @@ jobs:
           --include-package-data=lark
           --nofollow-import-to=*.tests
           meta_package_manager/__main__.py
-      - name: Upload binary
+      - name: Windows - Build binary within Poetry venv
+        if: runner.os == 'Windows'
+        # XXX "-X utf8" parameter is a workaround for Windows runners redirecting the output of commands
+        # to files. See:
+        # https://github.com/databrickslabs/dbx/issues/455#issuecomment-1312770919
+        # https://github.com/pallets/click/issues/2121#issuecomment-1312773882
+        # https://gist.github.com/NodeJSmith/e7e37f2d3f162456869f015f842bcf15
+        run: >
+          poetry run python -X utf8 -m nuitka
+          --standalone --onefile --assume-yes-for-downloads
+          --output-dir=./dist/
+          --include-package-data=lark
+          --nofollow-import-to=*.tests
+          meta_package_manager/__main__.py
+      - name: Upload binaries
         uses: actions/upload-artifact@v3.1.1
         with:
           name: ${{ runner.os }} binary build
@@ -71,13 +78,13 @@ jobs:
             ./dist/*.exe
             ./dist/*.bin
             ./dist/*.app/**/*
-      - name: Linux and macOS binary tests
+      - name: Linux and macOS - Binary tests
         if: runner.os != 'Windows'
         run: |
           ./dist/__main__.bin --version
           ./dist/__main__.bin --help
           ./dist/__main__.bin --all-managers managers
-      - name: Windows binary tests
+      - name: Windows - Binary tests
         if: runner.os == 'Windows'
         run: |
           ./dist/__main__.exe --version

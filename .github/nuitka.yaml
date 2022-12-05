@@ -1,0 +1,4 @@
+- module-name: "lark"
+  data-files:
+    dirs:
+      - "grammars"

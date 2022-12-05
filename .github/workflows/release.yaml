@@ -68,8 +68,8 @@ jobs:
           poetry run python -X utf8 -m nuitka
           --standalone --onefile --assume-yes-for-downloads
           --output-dir=./dist/
-          --include-package-data=lark
           --nofollow-import-to=*.tests
+          --user-package-configuration-file=./.github/nuitka.yaml
           meta_package_manager/__main__.py
       - name: Upload binaries
         uses: actions/upload-artifact@v3.1.1

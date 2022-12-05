@@ -25,6 +25,7 @@ import pytest
 from boltons.iterutils import same
 
 from ..pool import pool
+from .conftest import all_manager_ids, default_manager_ids, unsupported_manager_ids
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
@@ -34,21 +35,23 @@ def subcmd():
 
 
 class TestManagers(CLISubCommandTests, CLITableTests):
-    @pytest.mark.parametrize("mid", pool.default_manager_ids)
-    def test_default_managers(self, invoke, subcmd, mid):
-        result = invoke(f"--{mid}", subcmd)
+    @default_manager_ids
+    def test_default_managers(self, invoke, subcmd, manager_id):
+        result = invoke(f"--{manager_id}", subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result, {mid})
+        self.check_manager_selection(result, {manager_id})
 
-    @pytest.mark.parametrize("mid", pool.all_manager_ids)
-    def test_all_managers(self, invoke, subcmd, mid):
-        result = invoke(f"--{mid}", "--all-managers", subcmd)
+    @all_manager_ids
+    def test_all_managers(self, invoke, subcmd, manager_id):
+        result = invoke(f"--{manager_id}", "--all-managers", subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result, {mid}, reference_set=pool.all_manager_ids)
+        self.check_manager_selection(
+            result, {manager_id}, reference_set=pool.all_manager_ids
+        )
 
-    @pytest.mark.parametrize("mid", pool.unsupported_manager_ids)
-    def test_unsupported_managers(self, invoke, subcmd, mid):
-        result = invoke(f"--{mid}", subcmd)
+    @unsupported_manager_ids
+    def test_unsupported_managers(self, invoke, subcmd, manager_id):
+        result = invoke(f"--{manager_id}", subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(result, set())
 

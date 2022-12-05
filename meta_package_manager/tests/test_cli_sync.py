@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import pytest
 
-from ..pool import pool
+from .conftest import default_manager_ids
 from .test_cli import CLISubCommandTests
 
 
@@ -31,8 +31,8 @@ def subcmd():
 
 
 class TestSync(CLISubCommandTests):
-    @pytest.mark.parametrize("mid", pool.default_manager_ids)
-    def test_single_manager(self, invoke, subcmd, mid):
-        result = invoke(f"--{mid}", subcmd)
+    @default_manager_ids
+    def test_single_manager(self, invoke, subcmd, manager_id):
+        result = invoke(f"--{manager_id}", subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result, {mid})
+        self.check_manager_selection(result, {manager_id})

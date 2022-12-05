@@ -21,6 +21,7 @@ import pytest
 from click_extra.tests.conftest import destructive
 
 from ..pool import pool
+from .conftest import default_manager_ids
 from .test_cli import CLISubCommandTests
 
 
@@ -51,24 +52,24 @@ class TestUpgrade(CLISubCommandTests):
             assert "assume -A/--all option" in result.stderr
         self.check_manager_selection(result)
 
-    @pytest.mark.parametrize("mid", pool.default_manager_ids)
+    @default_manager_ids
     @pytest.mark.parametrize("all_option", ("--all", None))
-    def test_single_manager_dry_run_upgrade_all(self, invoke, mid, all_option):
-        result = invoke(f"--{mid}", "--dry-run", "upgrade", all_option)
+    def test_single_manager_dry_run_upgrade_all(self, invoke, manager_id, all_option):
+        result = invoke(f"--{manager_id}", "--dry-run", "upgrade", all_option)
         assert result.exit_code == 0
         if not all_option:
             assert "assume -A/--all option" in result.stderr
-        self.check_manager_selection(result, {mid})
+        self.check_manager_selection(result, {manager_id})
 
     @destructive
-    @pytest.mark.parametrize("mid", pool.default_manager_ids)
+    @default_manager_ids
     @pytest.mark.parametrize("all_option", ("--all", None))
-    def test_single_manager_upgrade_all(self, invoke, mid, all_option):
-        result = invoke(f"--{mid}", "upgrade", all_option)
+    def test_single_manager_upgrade_all(self, invoke, manager_id, all_option):
+        result = invoke(f"--{manager_id}", "upgrade", all_option)
         assert result.exit_code == 0
         if not all_option:
             assert "assume -A/--all option" in result.stderr
-        self.check_manager_selection(result, {mid})
+        self.check_manager_selection(result, {manager_id})
 
 
 destructive()(TestUpgrade.test_stats)

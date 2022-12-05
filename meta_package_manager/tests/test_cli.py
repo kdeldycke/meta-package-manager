@@ -29,6 +29,7 @@ from .. import __version__
 from ..bar_plugin import MPMPlugin
 from ..base import Operations
 from ..pool import pool
+from .conftest import default_manager_ids
 
 """ Common tests for all CLI basic features and templates for subcommands. """
 
@@ -252,12 +253,12 @@ class CLISubCommandTests:
         assert result.exit_code == 0
         self.check_manager_selection(result)
 
-    @pytest.mark.parametrize("mid", pool.default_manager_ids)
-    def test_manager_shortcuts(self, invoke, subcmd, mid):
+    @default_manager_ids
+    def test_manager_shortcuts(self, invoke, subcmd, manager_id):
         """Test each manager selection shortcut."""
-        result = invoke(f"--{mid}", subcmd)
+        result = invoke(f"--{manager_id}", subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result, {mid})
+        self.check_manager_selection(result, {manager_id})
 
     @pytest.mark.parametrize(
         "args,expected",

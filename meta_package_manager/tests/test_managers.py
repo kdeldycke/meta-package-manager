@@ -21,7 +21,6 @@ import ast
 import inspect
 import re
 import types
-from operator import attrgetter
 from pathlib import Path, PurePath
 from string import ascii_letters, ascii_lowercase, digits
 
@@ -33,20 +32,20 @@ from click_extra.tests.conftest import destructive
 
 from ..base import Operations, Package, PackageManager
 from ..cli import XKCD_MANAGER_ORDER
-from ..pool import manager_classes, pool
+from ..pool import pool
 from ..version import TokenizedString
+from .conftest import (
+    all_managers,
+    available_managers,
+    available_managers_and_dummy_package,
+    manager_classes,
+)
 
 """ Test the structure, data and types returned by all package managers.
 
 This test suite try to automate most of the basic reviewing work for the addition of
 new package manager definitions.
 """
-
-# Parametrization decorators.
-all_managers = pytest.mark.parametrize("manager", pool.values(), ids=attrgetter("id"))
-available_managers = pytest.mark.parametrize(
-    "manager", tuple(m for m in pool.values() if m.available), ids=attrgetter("id")
-)
 
 
 def test_xkcd_set():
@@ -65,14 +64,13 @@ def test_deprecated(manager):
         assert manager.deprecated is True
 
 
-@pytest.mark.parametrize("manager_id,manager", pool.items())
-def test_ascii_id(manager_id, manager):
+@all_managers
+def test_ascii_id(manager):
     """All package manager IDs should be short ASCII strings."""
-    assert manager_id
-    assert isinstance(manager_id, str)
-    assert manager_id.isascii()
-    assert set(manager_id).issubset(ascii_lowercase + digits + "-")
-    assert manager_id == manager.id
+    assert manager.id
+    assert isinstance(manager.id, str)
+    assert manager.id.isascii()
+    assert set(manager.id).issubset(ascii_lowercase + digits + "-")
 
 
 @all_managers
@@ -277,12 +275,12 @@ def test_search_type(manager):
 
 
 @destructive
-@available_managers
-def test_install_type(manager):
+@available_managers_and_dummy_package
+def test_install_type(manager, package_id):
     """All methods installing packages are either not implemented or returns a
     string."""
     try:
-        result = manager.install("dummy_package_id")
+        result = manager.install(package_id)
     except Exception as ex:
         assert isinstance(ex, NotImplementedError)
     else:
@@ -303,12 +301,12 @@ def test_upgrade_all_cli_type(manager):
 
 
 @destructive
-@available_managers
-def test_upgrade_one_cli_type(manager):
+@available_managers_and_dummy_package
+def test_upgrade_one_cli_type(manager, package_id):
     """All methods returning an upgrade CLI are either not implemented or returns a
     tuple."""
     try:
-        result = manager.upgrade_one_cli("dummy_package_id")
+        result = manager.upgrade_one_cli(package_id)
     except Exception as ex:
         assert isinstance(ex, NotImplementedError)
     else:
@@ -328,11 +326,11 @@ def test_upgrade_type(manager):
 
 
 @destructive
-@available_managers
-def test_remove_type(manager):
+@available_managers_and_dummy_package
+def test_remove_type(manager, package_id):
     """All methods removing packages are either not implemented or returns a string."""
     try:
-        result = manager.remove("dummy_package_id")
+        result = manager.remove(package_id)
     except Exception as ex:
         assert isinstance(ex, NotImplementedError)
     else:
@@ -405,7 +403,7 @@ def test_operation_order():
 
 
 # Check the code of each file registered in the pool.
-@pytest.mark.parametrize("manager_class", manager_classes, ids=attrgetter("name"))
+@manager_classes
 def test_content_order(manager_class):
     """Lint each package manager definition file to check its code structure is the same
     as the canonical PackageManager base class."""

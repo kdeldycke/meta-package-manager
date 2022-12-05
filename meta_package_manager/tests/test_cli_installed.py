@@ -27,6 +27,7 @@ from boltons.iterutils import same
 
 from ..base import Package
 from ..pool import pool
+from .conftest import default_manager_ids
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
@@ -36,11 +37,11 @@ def subcmd():
 
 
 class TestInstalled(CLISubCommandTests, CLITableTests):
-    @pytest.mark.parametrize("mid", pool.default_manager_ids)
-    def test_single_manager(self, invoke, subcmd, mid):
-        result = invoke(f"--{mid}", subcmd)
+    @default_manager_ids
+    def test_single_manager(self, invoke, subcmd, manager_id):
+        result = invoke(f"--{manager_id}", subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result, {mid})
+        self.check_manager_selection(result, {manager_id})
 
     def test_json_parsing(self, invoke, subcmd):
         result = invoke("--output-format", "json", subcmd)

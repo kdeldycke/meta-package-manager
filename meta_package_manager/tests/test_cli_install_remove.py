@@ -21,6 +21,7 @@ import pytest
 from click_extra.tests.conftest import destructive
 
 from ..pool import pool
+from .conftest import all_manager_ids_and_dummy_package
 from .test_cli import CLISubCommandTests
 
 
@@ -50,55 +51,20 @@ class TestInstallRemove(CLISubCommandTests):
         assert not result.stdout
         assert "Error: Missing argument 'PACKAGES_SPECS...'." in result.stderr
 
-    PACKAGE_IDS = {
-        "apm": "markdown-pdf",
-        "apt": "wget",
-        "apt-mint": "exiftool",
-        # https://github.com/Hasnep/homebrew-tap/blob/main/Formula/meta-package-manager.rb
-        "brew": "hasnep/tap/meta-package-manager",
-        "cargo": "colorous",
-        "cask": "pngyu",
-        "choco": "ccleaner",
-        "composer": "illuminate/contracts",
-        "dnf": "usd",
-        "emerge": "dev-vcs/git",
-        "flatpak": "org.gnome.Dictionary",
-        "gem": "markdown",
-        "mas": "747648890",  # Telegram
-        "npm": "raven",
-        "opkg": "enigma2-hotplug",
-        "pacaur": "manjaro-hello",
-        "pacman": "manjaro-hello",
-        # https://aur.archlinux.org/packages/meta-package-manager
-        "paru": "meta-package-manager",
-        # https://pypi.org/project/meta-package-manager
-        "pip": "meta-package-manager",
-        # https://pypi.org/project/meta-package-manager
-        "pipx": "meta-package-manager",
-        "scoop": "7zip",
-        "snap": "standard-notes",
-        "steamcmd": "740",
-        "vscode": "tamasfe.even-better-toml",
-        "yarn": "awesome-lint",
-        # https://aur.archlinux.org/packages/meta-package-manager
-        "yay": "meta-package-manager",
-        "yum": "usd",
-        "zypper": "git",
-    }
-    assert set(PACKAGE_IDS) == set(pool.all_manager_ids)
-
     @destructive
-    @pytest.mark.parametrize(
-        "mid,package_id", (pytest.param(*v, id=v[0]) for v in PACKAGE_IDS.items())
-    )
-    def test_single_manager_install_and_remove(self, invoke, mid, package_id):
-        result = invoke(f"--{mid}", "install", package_id)
+    @all_manager_ids_and_dummy_package
+    def test_single_manager_install_and_remove(self, invoke, manager_id, package_id):
+        result = invoke(f"--{manager_id}", "install", package_id)
         assert result.exit_code == 0
-        self.check_manager_selection(result, {mid}, reference_set=pool.all_manager_ids)
+        self.check_manager_selection(
+            result, {manager_id}, reference_set=pool.all_manager_ids
+        )
 
-        result = invoke(f"--{mid}", "remove", package_id)
+        result = invoke(f"--{manager_id}", "remove", package_id)
         assert result.exit_code == 0
-        self.check_manager_selection(result, {mid}, reference_set=pool.all_manager_ids)
+        self.check_manager_selection(
+            result, {manager_id}, reference_set=pool.all_manager_ids
+        )
 
 
 destructive()(TestInstallRemove.test_stats)

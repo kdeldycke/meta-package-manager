@@ -26,6 +26,11 @@ import pytest
 from ..base import PackageManager
 from ..cli import mpm
 from ..pool import manager_classes, pool
+from .conftest import (
+    default_manager_ids,
+    maintained_manager_ids,
+    unsupported_manager_ids,
+)
 
 """ Test the pool and its content. """
 
@@ -64,17 +69,17 @@ def test_cached_pool():
     assert pool is pool
 
 
-@pytest.mark.parametrize("manager_id", pool.maintained_manager_ids)
+@maintained_manager_ids
 def test_maintained_managers(manager_id):
     assert pool[manager_id].deprecated is False
 
 
-@pytest.mark.parametrize("manager_id", pool.default_manager_ids)
+@default_manager_ids
 def test_supported_managers(manager_id):
     assert pool[manager_id].supported is True
 
 
-@pytest.mark.parametrize("manager_id", pool.unsupported_manager_ids)
+@unsupported_manager_ids
 def test_unsupported_managers(manager_id):
     assert pool[manager_id].supported is False
 

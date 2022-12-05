@@ -21,6 +21,7 @@ import pytest
 from click_extra.tests.conftest import destructive
 
 from ..pool import pool
+from .conftest import default_manager_ids
 from .test_cli import CLISubCommandTests
 
 
@@ -60,8 +61,8 @@ class TestRestore(CLISubCommandTests):
         self.check_manager_selection(result)
 
     @destructive
-    @pytest.mark.parametrize("mid", pool.default_manager_ids)
-    def test_single_manager(self, invoke, create_config, mid):
+    @default_manager_ids
+    def test_single_manager(self, invoke, create_config, manager_id):
         toml_path = create_config(
             "all-managers.toml",
             "".join(
@@ -75,9 +76,9 @@ class TestRestore(CLISubCommandTests):
             ),
         )
 
-        result = invoke(f"--{mid}", "restore", str(toml_path))
+        result = invoke(f"--{manager_id}", "restore", str(toml_path))
         assert result.exit_code == 0
-        self.check_manager_selection(result, {mid})
+        self.check_manager_selection(result, {manager_id})
 
     def test_ignore_unrecognized_manager(self, invoke, create_config):
         toml_path = create_config(

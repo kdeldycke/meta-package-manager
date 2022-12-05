@@ -52,6 +52,8 @@ jobs:
         # https://github.com/databrickslabs/dbx/issues/455#issuecomment-1312770919
         # https://github.com/pallets/click/issues/2121#issuecomment-1312773882
         # https://gist.github.com/NodeJSmith/e7e37f2d3f162456869f015f842bcf15
+        # Nuitka will gather any extra environment variable and pass them to the Python interpreter that will
+        # end up embedded in the final binary (as describe by the --python-flag=FLAG option).
         env:
           PYTHONIOENCODING: "utf8"
         run: >

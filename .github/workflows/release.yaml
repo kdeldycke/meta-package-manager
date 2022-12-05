@@ -23,15 +23,11 @@ jobs:
           - macos-12
           - windows-2022
     runs-on: ${{ matrix.os }}
-    # XXX Workaround for Windows runners redirecting the output of commands to files.
-    # See: https://github.com/databrickslabs/dbx/issues/455#issuecomment-1312770919
-    env:
-      PYTHONIOENCODING: "utf8"
     steps:
       - uses: actions/checkout@v3.1.0
       - uses: actions/setup-python@v4.3.0
         with:
-          # XXX Nuitka is not ready yet for Python 3.11.
+          # XXX Nuitka is not ready for Python 3.11 yet.
           python-version: "3.10"
       - name: Install pip
         run: |
@@ -55,29 +51,31 @@ jobs:
           --standalone --onefile --assume-yes-for-downloads
           --output-dir=./dist/
           --include-package-data=lark
-          --include-package=meta_package_manager
-          --include-module=meta_package_manager
-          --include-module=meta_package_manager.managers
-          --include-plugin-directory=meta_package_manager.managers
           --nofollow-import-to=*.tests
           meta_package_manager/__main__.py
       - name: Upload binary
         uses: actions/upload-artifact@v3.1.1
         with:
-          name: ${{ runner.os }} Build
+          name: ${{ runner.os }} binary build
           path: |
             ./dist/*.exe
             ./dist/*.bin
             ./dist/*.app/**/*
-      - name: Windows binary tests
-        if: runner.os == 'Windows'
-        run: |
-          ./dist/__main__.exe --version
-          ./dist/__main__.exe --help
-          ./dist/__main__.exe --all-managers managers
       - name: Linux and macOS binary tests
         if: runner.os != 'Windows'
         run: |
           ./dist/__main__.bin --version
           ./dist/__main__.bin --help
           ./dist/__main__.bin --all-managers managers
+      - name: Windows binary tests
+        if: runner.os == 'Windows'
+        # XXX Workaround for Windows runners redirecting the output of commands to files. See:
+        # https://github.com/databrickslabs/dbx/issues/455#issuecomment-1312770919
+        # https://github.com/pallets/click/issues/2121#issuecomment-1312773882
+        # https://gist.github.com/NodeJSmith/e7e37f2d3f162456869f015f842bcf15
+        env:
+          PYTHONIOENCODING: "utf8"
+        run: |
+          ./dist/__main__.exe --version
+          ./dist/__main__.exe --help
+          ./dist/__main__.exe --all-managers managers

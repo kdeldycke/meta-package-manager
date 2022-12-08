@@ -26,12 +26,21 @@ jobs:
           - os: ubuntu-22.04
             platform: linux
             extension: bin
+            extra_python_params:
           - os: macos-12
             platform: macos
             extension: bin
+            extra_python_params:
           - os: windows-2022
             platform: windows
             extension: exe
+            # XXX "-X utf8" parameter is a workaround for Windows runners redirecting the output of commands to files.
+            # See:
+            # https://github.com/databrickslabs/dbx/issues/455#issuecomment-1312770919
+            # https://github.com/pallets/click/issues/2121#issuecomment-1312773882
+            # https://gist.github.com/NodeJSmith/e7e37f2d3f162456869f015f842bcf15
+            # https://github.com/Nuitka/Nuitka/blob/ca1ec9e8e10b51d187b589f1d33935c4ed558687/nuitka/utils/ReExecute.py#L73-L74
+            extra_python_params: "-X utf8"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3.1.0
@@ -52,38 +61,24 @@ jobs:
         # Additional dependencies:
         #   - ordered-set: used by Nuitka for compilation performance
         #   - zstandard: for nuitka's onefile compression
-        run: |
-          poetry run python -m pip install nuitka ordered-set zstandard
-      - name: Nuitka and compilers versions
+        run: >
+          poetry run python -m pip install
+          "nuitka==1.2.6"
+          "ordered-set==4.1.0"
+          "zstandard==0.19.0"
+      - name: Nuitka + compilers versions
         run: |
           poetry run python -m nuitka --version
-      - name: macOS and Linux - Build binary within Poetry venv
-        if: runner.os != 'Windows'
+      - name: Build binary within Poetry venv
         run: >
-          poetry run python -m nuitka
-          --standalone --onefile --assume-yes-for-downloads
-          --output-dir=./dist/
-          --include-package-data=lark
-          --nofollow-import-to=*.tests
-          meta_package_manager/__main__.py
-      - name: Windows - Build binary within Poetry venv
-        if: runner.os == 'Windows'
-        # XXX "-X utf8" parameter is a workaround for Windows runners redirecting the output of commands
-        # to files. See:
-        # https://github.com/databrickslabs/dbx/issues/455#issuecomment-1312770919
-        # https://github.com/pallets/click/issues/2121#issuecomment-1312773882
-        # https://gist.github.com/NodeJSmith/e7e37f2d3f162456869f015f842bcf15
-        # https://github.com/Nuitka/Nuitka/blob/ca1ec9e8e10b51d187b589f1d33935c4ed558687/nuitka/utils/ReExecute.py#L73-L74
-        run: >
-          poetry run python -X utf8 -m nuitka
-          --standalone --onefile --assume-yes-for-downloads
+          poetry run python ${{ extra_python_params }} -m nuitka
+          --standalone
+          --onefile
+          --assume-yes-for-downloads
           --nofollow-import-to=*.tests
           --output-filename=mpm.${{ matrix.extension }}
           --output-dir=./dist/
           meta_package_manager/__main__.py
-      - name: Rename binary
-        run: |
-          mv ./dist/__main__.${{ matrix.extension }} ./dist/mpm.${{ matrix.extension }}
       - name: Upload binaries
         uses: actions/upload-artifact@v3.1.1
         with:

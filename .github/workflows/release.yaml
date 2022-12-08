@@ -83,10 +83,8 @@ jobs:
         uses: actions/upload-artifact@v3.1.1
         with:
           name: mpm-${{ matrix.platform }}.${{ matrix.extension }}
-          path: |
-            ./dist/*.exe
-            ./dist/*.bin
-            ./dist/*.app/**/*
+          if-no-files-found: error
+          path: ./dist/mpm.${{ matrix.extension }}
       - name: Binary tests
         run: |
           ./dist/mpm.${{ matrix.extension }} --version

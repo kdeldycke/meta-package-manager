@@ -83,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@v3.1.1
         with:
           name: mpm-${{ matrix.platform }}.${{ matrix.extension }}
-          path: ./dist/*
+          path: ./*
           #path: |
           #  ./dist/*.exe
           #  ./dist/*.bin

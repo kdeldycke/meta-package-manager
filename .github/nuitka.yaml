@@ -1,5 +1,0 @@
-# Waiting upstream integration at: https://github.com/Nuitka/Nuitka/pull/1918
-- module-name: "lark"
-  data-files:
-    dirs:
-      - "grammars"

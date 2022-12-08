@@ -72,7 +72,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "certifi"
-version = "2022.9.24"
+version = "2022.12.7"
 description = "Python package for providing Mozilla's CA Bundle."
 category = "main"
 optional = false
@@ -103,7 +103,7 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "click-extra"
-version = "3.4.0"
+version = "3.4.1"
 description = "🌈 Extra colorization and configuration loading for Click."
 category = "main"
 optional = false
@@ -418,14 +418,11 @@ test = ["black", "isort", "pytest"]
 
 [[package]]
 name = "packaging"
-version = "21.3"
+version = "22.0"
 description = "Core utilities for Python packages"
 category = "main"
 optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
+python-versions = ">=3.7"
 
 [[package]]
 name = "pallets-sphinx-themes"
@@ -487,17 +484,6 @@ python-versions = ">=3.7"
 
 [package.dependencies]
 pygments = "!=2.7.3"
-
-[[package]]
-name = "pyparsing"
-version = "3.0.9"
-description = "pyparsing module - Classes and methods to define and execute parsing grammars"
-category = "main"
-optional = false
-python-versions = ">=3.6.8"
-
-[package.extras]
-diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pytest"
@@ -988,8 +974,8 @@ bump2version = [
     {file = "bump2version-1.0.1.tar.gz", hash = "sha256:762cb2bfad61f4ec8e2bdf452c7c267416f8c70dd9ecb1653fd0bbb01fa936e6"},
 ]
 certifi = [
-    {file = "certifi-2022.9.24-py3-none-any.whl", hash = "sha256:90c1a32f1d68f940488354e36370f6cca89f0f106db09518524c88d6ed83f382"},
-    {file = "certifi-2022.9.24.tar.gz", hash = "sha256:0d9c601124e5a6ba9712dbc60d9c53c21e34f5f641fe83002317394311bdce14"},
+    {file = "certifi-2022.12.7-py3-none-any.whl", hash = "sha256:4ad3232f5e926d6718ec31cfc1fcadfde020920e278684144551c91769c7bc18"},
+    {file = "certifi-2022.12.7.tar.gz", hash = "sha256:35824b4c3a97115964b408844d64aa14db1cc518f6562e8d7261699d1350a9e3"},
 ]
 charset-normalizer = [
     {file = "charset-normalizer-2.1.1.tar.gz", hash = "sha256:5a3d016c7c547f69d6f81fb0db9449ce888b418b5b9952cc5e6e66843e9dd845"},
@@ -1000,8 +986,8 @@ click = [
     {file = "click-8.1.3.tar.gz", hash = "sha256:7682dc8afb30297001674575ea00d1814d808d6a36af415a82bd481d37ba7b8e"},
 ]
 click-extra = [
-    {file = "click_extra-3.4.0-py3-none-any.whl", hash = "sha256:19ee0636f419c68a1dbe225a7c3a51d7c609c195f807e24151ed45783994452e"},
-    {file = "click_extra-3.4.0.tar.gz", hash = "sha256:92caa76e593d10c17e01f91bfa7751640db17f9ffbeaf5a511301f40ab48950d"},
+    {file = "click_extra-3.4.1-py3-none-any.whl", hash = "sha256:88262a609824081e757839fed37b27541189d3d26fca29a73328a328c7964622"},
+    {file = "click_extra-3.4.1.tar.gz", hash = "sha256:fe79e55b9689eb09ed6890f7b3a79e44afc7749519f6faf061c75034b3a1f37a"},
 ]
 click-log = [
     {file = "click-log-0.4.0.tar.gz", hash = "sha256:3970f8570ac54491237bcdb3d8ab5e3eef6c057df29f8c3d1151a51a9c23b975"},
@@ -1212,8 +1198,8 @@ packageurl-python = [
     {file = "packageurl_python-0.10.4-py3-none-any.whl", hash = "sha256:bf8a1ffe755634776f6563904d792fb0aa13b377fc86115c36fe17f69b6e59db"},
 ]
 packaging = [
-    {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
-    {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
+    {file = "packaging-22.0-py3-none-any.whl", hash = "sha256:957e2148ba0e1a3b282772e791ef1d8083648bc131c8ab0c1feba110ce1146c3"},
+    {file = "packaging-22.0.tar.gz", hash = "sha256:2198ec20bd4c017b8f9717e00f0c8714076fc2fd93816750ab48e2c41de2cfd3"},
 ]
 pallets-sphinx-themes = [
     {file = "Pallets-Sphinx-Themes-2.0.2.tar.gz", hash = "sha256:6d62f8ea421b035698748850ccaa6c2ee126b3bd9ed575ae558b4a99b0eed1e1"},
@@ -1246,10 +1232,6 @@ pygments = [
 pygments-ansi-color = [
     {file = "pygments-ansi-color-0.1.0.tar.gz", hash = "sha256:d3076c798e5867966b7a4872a4c6174a9c1fccaf5b4895db3d5692bcd84ecd64"},
     {file = "pygments_ansi_color-0.1.0-py3-none-any.whl", hash = "sha256:fb6017b43d39802f8b5fedd3c3d64b2f670f23a302d9c2e2faa90cd1a5f4ef3c"},
-]
-pyparsing = [
-    {file = "pyparsing-3.0.9-py3-none-any.whl", hash = "sha256:5026bae9a10eeaefb61dab2f09052b9f4307d44aee4eda64b309723d8d206bbc"},
-    {file = "pyparsing-3.0.9.tar.gz", hash = "sha256:2b020ecf7d21b687f219b71ecad3631f644a47f01403fa1d1036b0c6416d70fb"},
 ]
 pytest = [
     {file = "pytest-7.2.0-py3-none-any.whl", hash = "sha256:892f933d339f068883b6fd5a459f03d85bfcb355e4981e146d2c7616c21fef71"},

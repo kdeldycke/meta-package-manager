@@ -71,7 +71,7 @@ jobs:
           poetry run python -m nuitka --version
       - name: Build binary within Poetry venv
         run: >
-          poetry run python ${{ extra_python_params }} -m nuitka
+          poetry run python ${{ matrix.extra_python_params }} -m nuitka
           --standalone
           --onefile
           --assume-yes-for-downloads

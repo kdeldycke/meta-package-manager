@@ -22,6 +22,16 @@ jobs:
           - ubuntu-22.04
           - macos-12
           - windows-2022
+        include:
+          - os: ubuntu-22.04
+            platform: linux
+            extension: bin
+          - os: macos-12
+            platform: macos
+            extension: bin
+          - os: windows-2022
+            platform: windows
+            extension: exe
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3.1.0
@@ -68,26 +78,23 @@ jobs:
           poetry run python -X utf8 -m nuitka
           --standalone --onefile --assume-yes-for-downloads
           --nofollow-import-to=*.tests
-          --output-filename=mpm
+          --output-filename=mpm.${{ matrix.extension }}
           --output-dir=./dist/
           meta_package_manager/__main__.py
+      - name: Rename binary
+        run: |
+          mv ./dist/__main__.${{ matrix.extension }} ./dist/mpm.${{ matrix.extension }}
       - name: Upload binaries
         uses: actions/upload-artifact@v3.1.1
         with:
-          name: ${{ runner.os }} binary build
+          name: mpm-${{ matrix.platform }}.${{ matrix.extension }}
+          if-no-files-found: error
           path: |
             ./dist/*.exe
             ./dist/*.bin
             ./dist/*.app/**/*
-      - name: Linux and macOS - Binary tests
-        if: runner.os != 'Windows'
+      - name: Binary tests
         run: |
-          ./dist/__main__.bin --version
-          ./dist/__main__.bin --help
-          ./dist/__main__.bin --all-managers managers
-      - name: Windows - Binary tests
-        if: runner.os == 'Windows'
-        run: |
-          ./dist/__main__.exe --version
-          ./dist/__main__.exe --help
-          ./dist/__main__.exe --all-managers managers
+          ./dist/mpm.${{ matrix.extension }} --version
+          ./dist/mpm.${{ matrix.extension }} --help
+          ./dist/mpm.${{ matrix.extension }} --all-managers managers

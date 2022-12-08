@@ -83,12 +83,13 @@ jobs:
         uses: actions/upload-artifact@v3.1.1
         with:
           name: mpm-${{ matrix.platform }}.${{ matrix.extension }}
-          path: |
-            ./dist/*.exe
-            ./dist/*.bin
-            ./dist/*.app/**/*
-      - name: Binary tests
-        run: |
-          ./dist/mpm.${{ matrix.extension }} --version
-          ./dist/mpm.${{ matrix.extension }} --help
-          ./dist/mpm.${{ matrix.extension }} --all-managers managers
+          path: ./dist/*
+          #path: |
+          #  ./dist/*.exe
+          #  ./dist/*.bin
+          #  ./dist/*.app/**/*
+      #- name: Binary tests
+      #  run: |
+      #    ./dist/mpm.${{ matrix.extension }} --version
+      #    ./dist/mpm.${{ matrix.extension }} --help
+      #    ./dist/mpm.${{ matrix.extension }} --all-managers managers

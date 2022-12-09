@@ -86,6 +86,12 @@ ______________________________________________________________________
 | [`yum`](http://yum.baseurl.org)                                                        | 4.0.0        |  🐧   |       |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
 | [`zypper`](https://en.opensuse.org/Portal:Zypper)                                      | 1.14.0       |  🐧   |       |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
 
+> **Note**: Missing manager
+>
+> If you your favorite manager is missing or does not support an operation, you can influence its implementation: [open a ticket to document its ouput](https://github.com/kdeldycke/meta-package-manager/issues/new?assignees=&labels=🎁+feature+request&template=new-package-manager.yaml) or [read the contribution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html) and submit a pull request.
+>
+> I can do that work for you if you [purchase business support 🤝 or sponsor the project 🫶](https://github.com/sponsors/kdeldycke).
+
 ## Quickstart
 
 ### Install from sources

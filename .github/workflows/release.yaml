@@ -77,19 +77,15 @@ jobs:
           --assume-yes-for-downloads
           --nofollow-import-to=*.tests
           --output-filename=mpm.${{ matrix.extension }}
-          --output-dir=dist
           meta_package_manager/__main__.py
       - name: Upload binaries
         uses: actions/upload-artifact@v3.1.1
         with:
           name: mpm-${{ matrix.platform }}.${{ matrix.extension }}
-          path: ./*
-          #path: |
-          #  ./dist/*.exe
-          #  ./dist/*.bin
-          #  ./dist/*.app/**/*
-      #- name: Binary tests
-      #  run: |
-      #    ./dist/mpm.${{ matrix.extension }} --version
-      #    ./dist/mpm.${{ matrix.extension }} --help
-      #    ./dist/mpm.${{ matrix.extension }} --all-managers managers
+          if-no-files-found: error
+          path: mpm.${{ matrix.extension }}
+      - name: Binary tests
+        run: |
+          ./mpm.${{ matrix.extension }} --version
+          ./mpm.${{ matrix.extension }} --help
+          ./mpm.${{ matrix.extension }} --all-managers managers

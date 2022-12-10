@@ -22,8 +22,8 @@
     $ python -m meta_package_manager
 
 Removes empty string and current working directory from the first entry of
-`sys.path`, if present to avoid using current directory
-in subcommands when invoked as `python -m meta_package_manager <command>`.
+``sys.path``, if present to avoid using current directory
+in subcommands when invoked as ``python -m meta_package_manager <command>``.
 """
 
 from __future__ import annotations
@@ -37,10 +37,23 @@ if sys.path[0] in ("", os.getcwd()):
     sys.path.pop(0)
 
 
-if __name__ == "__main__":
-    """ Execute the CLI but force its name to not let Click defaults to:
+def main():
+    """Execute the CLI but force its name to not let Click defaults to:
 
     .. code-block:: shell-session
-        $ python -m meta_package_manager
+        $ python -m meta_package_manager --version
+        python -m meta_package_manager, version 5.10.0
+
+    Indirection via this ``main()`` method was `required to reconcile
+    <https://github.com/python-poetry/poetry/issues/5981>`_:
+
+        - plain inline package call: ``python -m meta_package_manager``,
+        - Poetry's script entry point: ``mpm = 'meta_package_manager.__main__:main``,
+        - Nuitka's main module invokation requirement: ``python -m nuitka (...) meta_package_manager/__main__.py``
+
+    That way we can deduce all three cases from the Poetry entry point.
     """
     mpm(prog_name=mpm.name)
+
+if __name__ == "__main__":
+    main()

@@ -92,6 +92,6 @@ jobs:
           path: mpm_${{ matrix.arch }}.${{ matrix.extension }}
       - name: Binary tests
         run: |
-          ./mpm.${{ matrix.extension }} --version
-          ./mpm.${{ matrix.extension }} --help
-          ./mpm.${{ matrix.extension }} --all-managers managers
+          ./mpm_${{ matrix.arch }}.${{ matrix.extension }} --version
+          ./mpm_${{ matrix.arch }}.${{ matrix.extension }} --help
+          ./mpm_${{ matrix.arch }}.${{ matrix.extension }} --all-managers managers

@@ -224,7 +224,7 @@ class BarPluginRenderer(MPMPlugin):
 
         Value is sourced from the ``VAR_SUBMENU_LAYOUT`` environment variable.
         """
-        return self.getenv_bool("VAR_SUBMENU_LAYOUT", False)  # type: ignore
+        return self.getenv_bool("VAR_SUBMENU_LAYOUT", False)
 
     @cached_property
     def dark_mode(self) -> bool:
@@ -236,8 +236,8 @@ class BarPluginRenderer(MPMPlugin):
         - ``XBARDarkMode`` for XBar
         """
         if self.is_swiftbar:
-            return self.getenv_str("OS_APPEARANCE", "light") == "dark"  # type: ignore
-        return self.getenv_bool("XBARDarkMode")  # type: ignore
+            return self.getenv_str("OS_APPEARANCE", "light") == "dark"
+        return self.getenv_bool("XBARDarkMode")
 
     @staticmethod
     def render_cli(cmd_args: tuple[str | Path, ...]) -> str:

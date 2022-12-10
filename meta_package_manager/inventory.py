@@ -20,6 +20,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 from tabulate import tabulate
@@ -28,7 +29,7 @@ from .base import Operations
 from .pool import pool
 
 
-def manager_operations() -> str:
+def operation_matrix() -> str:
     """Inspect manager and print a matrix of their current implementation."""
     # Build up the column titles.
     headers = [
@@ -97,13 +98,18 @@ def update_readme() -> None:
 
     # Extract pre- and post-content surrounding the section we're trying to update.
     section_title = "## Supported package managers and operations"
-    pre_content, section_start = content.split(section_title, 1)
-    post_content = section_start.split("##", 1)[1]
+    pre_section, section_start = content.split(section_title, 1)
+    section_content, post_section = section_start.split("##", 1)
+
+    # Extract the prolog and epilog surrounding the table in the section.
+    prolog, epilog = re.split(r"(?:\|.*\|\n)+", section_content, maxsplit=1, flags=re.MULTILINE)
 
     # Reconstruct the readme with our updated section.
     readme.write_text(
-        f"{pre_content}"
-        f"{section_title}\n\n"
-        f"{manager_operations()}\n\n"
-        f"##{post_content}"
+        f"{pre_section}"
+        f"{section_title}"
+        f"{prolog}"
+        f"{operation_matrix()}\n"
+        f"{epilog}"
+        f"##{post_section}"
     )

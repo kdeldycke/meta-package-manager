@@ -22,6 +22,13 @@ jobs:
           - ubuntu-22.04
           - macos-12
           - windows-2022
+        arch:
+          - x64
+          # XXX There is no GitHub-hosted macOS runners with Apple silicon yet. See:
+          # https://github.com/github/roadmap/issues/528
+          # https://github.com/actions/runner-images/issues/2187
+          # https://github.com/actions/runner/issues/805
+          # - arm64
         include:
           - os: ubuntu-22.04
             platform: linux
@@ -75,14 +82,14 @@ jobs:
           --onefile
           --assume-yes-for-downloads
           --nofollow-import-to=*.tests
-          --output-filename=mpm.${{ matrix.extension }}
+          --output-filename=mpm_${{ matrix.arch }}.${{ matrix.extension }}
           meta_package_manager/__main__.py
       - name: Upload binaries
         uses: actions/upload-artifact@v3.1.1
         with:
-          name: mpm-${{ matrix.platform }}.${{ matrix.extension }}
+          name: mpm.${{ matrix.extension }}-${{ matrix.platform }}-${{ matrix.arch }}
           if-no-files-found: error
-          path: mpm.${{ matrix.extension }}
+          path: mpm_${{ matrix.arch }}.${{ matrix.extension }}
       - name: Binary tests
         run: |
           ./mpm.${{ matrix.extension }} --version

@@ -240,14 +240,17 @@ def bar_plugin_path(ctx, param, value):
         help="Print per-manager package statistics.",
     ),
 )
-@option(
-    "--bar-plugin-path",
-    is_flag=True,
-    default=False,
-    expose_value=False,
-    is_eager=True,
-    callback=bar_plugin_path,
-    help="Print location of the Xbar/SwiftBar plugin.",
+@option_group(
+    "Xbar/SwiftBar options",
+    option(
+        "--bar-plugin-path",
+        is_flag=True,
+        default=False,
+        expose_value=False,
+        is_eager=True,
+        callback=bar_plugin_path,
+        help="Print location of the Xbar/SwiftBar plugin.",
+    )
 )
 @pass_context
 def mpm(

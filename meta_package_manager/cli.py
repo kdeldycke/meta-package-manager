@@ -80,13 +80,17 @@ See the corresponding :issue:`implementation rationale in issue #10 <10>`.
 
 
 def add_manager_to_selection(ctx, param, selected):
-    """Store singular manager flag selection in the context."""
+    """Store singular manager flag selection in the context.
+
+    .. important::
+        Because the parameter's name is transformed into a Python identifier on
+        instantiation, we have to reverse the process to get our value.
+
+        Example: ``--apt-mint`` => ``apt_mint`` => ``apt-mint``
+    """
     if selected:
         if ctx.obj is None:
             ctx.obj = {"single_manager_selector": []}
-        # Parameter's name is transformed into a Python identifier on instantiation.
-        # Reverse the process to get our value.
-        # Example: "--apt-mint" => "apt_mint" => "apt-mint"
         manager_id = param.name.replace("_", "-")
         ctx.obj["single_manager_selector"].append(manager_id)
 

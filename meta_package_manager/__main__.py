@@ -31,14 +31,16 @@ from __future__ import annotations
 import os
 import sys
 
+from .cli import mpm
+
 if sys.path[0] in ("", os.getcwd()):
     sys.path.pop(0)
 
 
 if __name__ == "__main__":
+    """ Execute the CLI but force its name to not let Click defaults to:
 
-    from meta_package_manager.cli import mpm
-
-    # Execute the CLI but force its name to not let Click defaults to:
-    # "python -m meta_package_manager".
+    .. code-block:: shell-session
+        $ python -m meta_package_manager
+    """
     mpm(prog_name=mpm.name)

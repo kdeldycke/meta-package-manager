@@ -31,8 +31,6 @@ from __future__ import annotations
 import os
 import sys
 
-from .cli import mpm
-
 if sys.path[0] in ("", os.getcwd()):
     sys.path.pop(0)
 
@@ -53,6 +51,8 @@ def main():
 
     That way we can deduce all three cases from the Poetry entry point.
     """
+    from meta_package_manager.cli import mpm
+
     mpm(prog_name=mpm.name)
 
 if __name__ == "__main__":

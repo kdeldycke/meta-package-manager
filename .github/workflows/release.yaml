@@ -60,7 +60,7 @@ jobs:
           python -m pip install --upgrade pip
       - name: Install poetry
         run: |
-          python -m pip install "Poetry==1.2"
+          python -m pip install Poetry
       - name: Install package
         run: |
           poetry install --no-interaction --no-ansi
@@ -76,10 +76,18 @@ jobs:
       - name: Nuitka + compilers versions
         run: |
           poetry run python -m nuitka --version
-      - name: mpm bin name
+      - name: Generate bin name
         id: bin_name
+        shell: python
         run: |
-          echo "bin_name=mpm_${{ matrix.platform }}_${{ matrix.arch }}.${{ matrix.extension }}" >> $GITHUB_OUTPUT
+          import os
+          from pathlib import Path
+
+          name = "mpm_${{ matrix.platform }}_${{ matrix.arch }}.${{ matrix.extension }}"
+          print(f"Generated binary name: {name}")
+
+          env_file = Path(os.getenv("GITHUB_OUTPUT"))
+          env_file.write_text(f"bin_name={name}")
       - name: Build binary within Poetry venv
         run: >
           poetry run python ${{ matrix.extra_python_params }} -m nuitka

@@ -60,7 +60,7 @@ jobs:
           python -m pip install --upgrade pip
       - name: Install poetry
         run: |
-          python -m pip install Poetry
+          python -m pip install "Poetry==1.2"
       - name: Install package
         run: |
           poetry install --no-interaction --no-ansi

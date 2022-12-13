@@ -76,22 +76,26 @@ jobs:
       - name: Nuitka + compilers versions
         run: |
           poetry run python -m nuitka --version
+      - name: mpm bin name
+        id: bin_name
+        run: |
+          echo "bin_name=mpm_${{ matrix.platform }}_${{ matrix.arch }}.${{ matrix.extension }}" >> $GITHUB_OUTPUT
       - name: Build binary within Poetry venv
         run: >
           poetry run python ${{ matrix.extra_python_params }} -m nuitka
           --onefile
           --assume-yes-for-downloads
           --nofollow-import-to=*.tests
-          --output-filename=mpm_${{ matrix.arch }}.${{ matrix.extension }}
+          --output-filename=${{ steps.bin_name.outputs.bin_name }}
           meta_package_manager/__main__.py
       - name: Upload binaries
         uses: actions/upload-artifact@v3.1.1
         with:
-          name: mpm.${{ matrix.extension }}-${{ matrix.platform }}-${{ matrix.arch }}
+          name: ${{ steps.bin_name.outputs.bin_name }}
           if-no-files-found: error
-          path: mpm_${{ matrix.arch }}.${{ matrix.extension }}
+          path: ${{ steps.bin_name.outputs.bin_name }}
       - name: Binary tests
         run: |
-          ./mpm_${{ matrix.arch }}.${{ matrix.extension }} --version
-          ./mpm_${{ matrix.arch }}.${{ matrix.extension }} --help
-          ./mpm_${{ matrix.arch }}.${{ matrix.extension }} --all-managers managers
+          ./${{ steps.bin_name.outputs.bin_name }} --version
+          ./${{ steps.bin_name.outputs.bin_name }} --help
+          ./${{ steps.bin_name.outputs.bin_name }} --all-managers managers

@@ -6,7 +6,7 @@ A collection of user’s problems and how `mpm` solves them.
 
 A recent
 [study shows that 70% of vulnerabilities lies in outdated libraries](https://developers.slashdot.org/story/20/05/23/2330244/open-source-security-report-finds-library-induced-flaws-in-70-of-applications).
-One of the key habits of security professionnals is to keep a system secure
+One of the key habits of security professionals is to keep a system secure
 by keeping all software up to date.
 
 `mpm` upgrade all packages from all managers with a one-liner CLI:

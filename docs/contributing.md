@@ -2,8 +2,9 @@
 
 Good candidates for new package manager:
 
+- [Awesome Package Manager](https://github.com/damon-kwok/awesome-package-manager)
+- [Package managers from list of terminal CLIs](https://github.com/k4m4/terminals-are-sexy#package-managers)
 - [Wikipedia list of package managers](https://en.wikipedia.org/wiki/List_of_software_package_management_systems)
-- [Awesome list of package managers](https://github.com/k4m4/terminals-are-sexy#package-managers)
 - [GitHub list of package managers](https://github.com/showcases/package-managers)
 - {doc}`/benchmark` of other similar tools
 

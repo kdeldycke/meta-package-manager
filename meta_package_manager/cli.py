@@ -42,7 +42,7 @@ from click_extra.tabulate import table_format_option
 if sys.version_info >= (3, 11):
     import tomllib
 else:
-    import tomli as tomllib
+    import tomli as tomllib  # type: ignore[import]
 
 from cloup import Section
 

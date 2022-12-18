@@ -109,7 +109,7 @@ unsupported_manager_ids = pytest.mark.parametrize(
     "manager_id", pool.unsupported_manager_ids
 )
 
-manager_classes = pytest.mark.parametrize(
+manager_classes = pytest.mark.parametrize(  # type: ignore[assignment]
     "manager_class", manager_classes, ids=attrgetter("name")
 )
 

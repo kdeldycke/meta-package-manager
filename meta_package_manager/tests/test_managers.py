@@ -403,7 +403,7 @@ def test_operation_order():
 
 
 # Check the code of each file registered in the pool.
-@manager_classes
+@manager_classes  # type: ignore[operator]
 def test_content_order(manager_class):
     """Lint each package manager definition file to check its code structure is the same
     as the canonical PackageManager base class."""

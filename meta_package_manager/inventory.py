@@ -19,8 +19,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import re
+from pathlib import Path
 
 from click_extra.platform import LINUX, MACOS, WINDOWS
 from tabulate import tabulate
@@ -102,7 +102,9 @@ def update_readme() -> None:
     section_content, post_section = section_start.split("##", 1)
 
     # Extract the prolog and epilog surrounding the table in the section.
-    prolog, epilog = re.split(r"(?:\|.*\|\n)+", section_content, maxsplit=1, flags=re.MULTILINE)
+    prolog, epilog = re.split(
+        r"(?:\|.*\|\n)+", section_content, maxsplit=1, flags=re.MULTILINE
+    )
 
     # Reconstruct the readme with our updated section.
     readme.write_text(

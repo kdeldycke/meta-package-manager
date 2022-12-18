@@ -36,7 +36,8 @@ from .conftest import (
 
 
 def test_manager_definition_inventory():
-    """Check all classes implementing a package manager are accounted for in the pool."""
+    """Check all classes implementing a package manager are accounted for in the
+    pool."""
     found_classes = set()
 
     # Search for manager definitions in the managers subfolder.

@@ -131,7 +131,8 @@ def bar_plugin_path(ctx, param, value):
     if not value:
         return
 
-    # Options is only available when CLI is installed from sources, not CLI is a bundled executable.
+    # Options is only available when CLI is installed from sources, not CLI is
+    # a bundled executable.
     if "__compiled__" in globals():
         logger.debug("CLI running as a binary.")
         logger.fatal(
@@ -250,7 +251,7 @@ def bar_plugin_path(ctx, param, value):
         is_eager=True,
         callback=bar_plugin_path,
         help="Print location of the Xbar/SwiftBar plugin.",
-    )
+    ),
 )
 @pass_context
 def mpm(

@@ -2,7 +2,7 @@
 
 A collection of user’s problems and how `mpm` solves them.
 
-## Keep system secure
+## Keep system up-to-date
 
 A recent
 [study shows that 70% of vulnerabilities lies in outdated libraries](https://developers.slashdot.org/story/20/05/23/2330244/open-source-security-report-finds-library-induced-flaws-in-70-of-applications).

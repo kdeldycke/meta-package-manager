@@ -34,6 +34,7 @@ ______________________________________________________________________
 - Inventory and list all package managers available on the system.
 - Supports macOS, Linux and Windows.
 - List installed packages.
+- List duplicate installed packages.
 - Search for packages.
 - Install a package.
 - Remove a package.

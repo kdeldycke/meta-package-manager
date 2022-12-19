@@ -33,6 +33,7 @@ ______________________________________________________________________
 
 - Inventory and list all package managers available on the system.
 - Supports macOS, Linux and Windows.
+- Standalone `x86_64` executables: [`mpm.exe` for Windows](https://github.com/kdeldycke/meta-package-manager/releases/latest), `mpm.bin` [for Linux](https://github.com/kdeldycke/meta-package-manager/releases/latest) and [for macOS](https://github.com/kdeldycke/meta-package-manager/releases/latest).
 - List installed packages.
 - List duplicate installed packages.
 - Search for packages.
@@ -93,9 +94,9 @@ ______________________________________________________________________
 >
 > I can do that work for you if you [purchase business support 🤝 or sponsor the project 🫶](https://github.com/sponsors/kdeldycke).
 
-## Quickstart
+## Installation
 
-### Install from sources
+### From sources
 
 Easiest way is to install `mpm` from sources with [`pipx`](https://pypa.github.io/pipx/):
 
@@ -109,7 +110,13 @@ are available in the documentation.
 
 ### Binaries
 
-On Windows, you can skip the installation process above and [download the standalone `mpm.exe` executable](https://github.com/kdeldycke/meta-package-manager/releases/latest) directly. You just need to unzip it to run it.
+`x86_64` binaries are available so you can skip the installation process above and download the standalone executables directly:
+
+- [download `mpm.bin` for Linux](https://github.com/kdeldycke/meta-package-manager/releases/latest)
+- [download `mpm.bin` for macOS](https://github.com/kdeldycke/meta-package-manager/releases/latest)
+- [download `mpm.exe` for Windows](https://github.com/kdeldycke/meta-package-manager/releases/latest)
+
+## Quickstart
 
 ### List managers
 

@@ -76,17 +76,8 @@ $ brew install hasnep/tap/meta-package-manager
 ```
 ````
 
-````{tab-item} Windows
-A [standalone `mpm.exe` executable](https://github.com/kdeldycke/meta-package-manager/releases/latest) is available on Windows, so you can run it without a fuss.
-````
-
-````{tab-item} Chocolatey
-1. [Install chocolatey](https://chocolatey.org/install#install-step2)
-1. Install Python via chocolatey:
-    ```{code-block} shell-session
-    $ choco install python -y
-    ```
-1. Then follow the `mpm` installation instruction in `pipx` or `pip` tabs.
+````{tab-item} macOS
+A [standalone `mpm.bin` executable](https://github.com/kdeldycke/meta-package-manager/releases/latest) for `x86_64` is available on macOS, so you can run it without a fuss.
 ````
 
 ````{tab-item} Arch Linux
@@ -107,6 +98,27 @@ $ paru -S meta-package-manager
 ```{code-block} shell-session
 $ yay -S meta-package-manager
 ```
+````
+
+````{tab-item} Linux
+A [standalone `mpm.bin` executable](https://github.com/kdeldycke/meta-package-manager/releases/latest) for `x86_64` is available on Linux, so you can run it without a fuss.
+````
+
+````{tab-item} Windows
+## Executable
+
+A [standalone `mpm.exe` executable](https://github.com/kdeldycke/meta-package-manager/releases/latest) for `x86_64` is available on Windows, so you can run it without a fuss.
+
+## From sources
+
+You need is a working Python on your machine. Here is for example how to install it with Chocolatey:
+
+1. [Install chocolatey](https://chocolatey.org/install#install-step2)
+1. Install Python via chocolatey:
+    ```{code-block} shell-session
+    $ choco install python -y
+    ```
+1. Then follow the `mpm` installation instruction in `pipx` or `pip` tabs.
 ````
 
 ````{tab-item} mpm

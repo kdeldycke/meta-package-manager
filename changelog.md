@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`5.10.2 (unreleased) <compare/v5.10.1...main>`
-
-```{important}
-This version is not released yet and is under active development.
-```
+## {gh}`5.10.2 (2022-12-19) <compare/v5.10.1...v5.10.2>`
 
 - \[mpm\] Fix uploading of artefacts to GitHub release.
 

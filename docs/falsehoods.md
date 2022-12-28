@@ -73,4 +73,4 @@ Implementing `mpm` exposed me to many edge-cases and pitfalls of package managem
 
 - [Falsehoods About Versions](https://github.com/xenoterracide/falsehoods/blob/master/versions.md).
 - And more generally, the
-  [Awesome List of Falshoods](https://github.com/kdeldycke/awesome-falsehood).
+  [Awesome List of Falsehoods](https://github.com/kdeldycke/awesome-falsehood).

@@ -40,11 +40,11 @@ exclude = [ "pip",]
 
 ## Overlapping managers
 
-MPM has support for some overlapping package managers. Take for instance `pacman` and its collection of AUR helpers like `paru` and `yay`. All of the alternative helpers have the same source of packages as `pacman` (except if someone added other repositories to them). So updates to a single package may show up multiple times, because AUR helpers depends on `pacman` (which is always installed on the system).
+MPM has support for some overlapping package managers. Take for instance `pacman` and its collection of AUR helpers like `paru` and `yay`. All of these alternative helpers have the same source of packages as `pacman`. So updates to a single package may show up multiple times, because AUR helpers depends on `pacman` (which is always installed on the system).
 
 You can fine-tune this behaviour by simply excluding redundant managers depending on your preferrences.
 
-For instance, if `yay` is your preferred helper and `pacman` is polluting your entries, you can setup a configuration file in `~/.config/mpm/config.toml` to exclude the other AUR helpers by default:
+For instance, if `yay` is your preferred helper and `pacman` and `paru` are polluting your entries, you can setup a configuration file in `~/.config/mpm/config.toml` to exclude the other AUR helpers by default:
 
 ```toml
 [mpm]

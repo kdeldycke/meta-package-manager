@@ -52,6 +52,7 @@ jobs:
               "3.9",
               "3.10",
               "3.11",
+              "3.12-dev",
           }
           # Safety check to ensure there is no overlap between the 2 sets.
           assert not os_list.intersection(python_list)

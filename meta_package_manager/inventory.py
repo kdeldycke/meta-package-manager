@@ -36,10 +36,10 @@ def operation_matrix() -> str:
         "Package manager",
         "Min. version",
         "Linux",
-        "macOS",
-        "Any Unix",
-        "Windows",
         "WSL2",
+        "Any Unix",
+        "macOS",
+        "Windows",
     ]
     headers.extend(f"`{op.name}`" for op in Operations)
 
@@ -50,10 +50,10 @@ def operation_matrix() -> str:
             + ("" if not m.deprecated else f" [⚠️]({m.deprecation_url})"),
             f"{m.requirement}",
             "🐧" if LINUX in m.platforms else "",
-            "🍎" if MACOS in m.platforms else "",
-            "`>_`" if ANY_UNIX_BUT_MACOS.issubset(m.platforms) else "",
-            "🪟" if WINDOWS in m.platforms else "",
             "🐧" if WSL2 in m.platforms else "",
+            "`>_`" if ANY_UNIX_BUT_MACOS.issubset(m.platforms) else "",
+            "🍎" if MACOS in m.platforms else "",
+            "🪟" if WINDOWS in m.platforms else "",
         ]
         for op in Operations:
             line.append("✓" if m.implements(op) else "")

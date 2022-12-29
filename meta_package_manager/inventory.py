@@ -22,7 +22,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from click_extra.platform import LINUX, MACOS, WINDOWS, WSL2, ANY_UNIX_BUT_MACOS
+from click_extra.platform import ANY_UNIX_BUT_MACOS, LINUX, MACOS, WINDOWS, WSL2
 from tabulate import tabulate
 
 from .base import Operations

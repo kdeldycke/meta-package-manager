@@ -21,7 +21,7 @@ import json
 from typing import Any, Iterator
 
 from boltons.iterutils import remap
-from click_extra.platform import ANY_UNIX_BUT_MACOS, MACOS, WINDOWS, ANY_PLATFORM
+from click_extra.platform import ANY_PLATFORM, ANY_UNIX_BUT_MACOS, MACOS, WINDOWS
 
 from ..base import Arg, NestedArgs, Package, PackageManager
 from ..capabilities import search_capabilities, version_not_implemented

@@ -10,6 +10,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Activate `brew` on Windows Subsystem for Linux v2.
 - \[mpm\] Run tests on Python `3.12-dev`.
 - \[mpm\] Test `mpm` binaries.
+- \[mpm\] Add new GitHub labels for newly supported platforms.
 
 ## {gh}`5.10.2 (2022-12-19) <compare/v5.10.1...v5.10.2>`
 

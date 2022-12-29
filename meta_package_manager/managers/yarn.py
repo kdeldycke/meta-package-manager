@@ -27,7 +27,7 @@ if sys.version_info >= (3, 8):
 else:
     from boltons.cacheutils import cachedproperty as cached_property
 
-from click_extra.platform import LINUX, MACOS, WINDOWS
+from click_extra.platform import ANY_UNIX_BUT_MACOS, MACOS, WINDOWS, ANY_PLATFORM
 
 from ..base import Package, PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
@@ -39,7 +39,7 @@ class Yarn(PackageManager):
 
     homepage_url = "https://yarnpkg.com"
 
-    platforms = frozenset({LINUX, MACOS, WINDOWS})
+    platforms = ANY_PLATFORM
 
     requirement = "1.20.0"
 

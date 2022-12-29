@@ -20,7 +20,7 @@ from __future__ import annotations
 import re
 from typing import Iterator
 
-from click_extra.platform import LINUX, MACOS, WINDOWS
+from click_extra.platform import ANY_UNIX_BUT_MACOS, MACOS, WINDOWS, ANY_PLATFORM
 
 from ..base import Package, PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
@@ -47,7 +47,7 @@ class Gem(PackageManager):
 
     homepage_url = "https://rubygems.org"
 
-    platforms = frozenset({LINUX, MACOS, WINDOWS})
+    platforms = ANY_PLATFORM
 
     # Default to the version shipped with the latest maintained macOS version,
     # i.e. macOS 10.13 High Sierra, which is bundled with gem 2.5.2.

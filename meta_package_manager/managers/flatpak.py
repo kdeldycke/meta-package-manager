@@ -20,7 +20,7 @@ from __future__ import annotations
 import re
 from typing import Iterator
 
-from click_extra.platform import LINUX
+from click_extra.platform import ANY_UNIX_BUT_MACOS
 
 from ..base import Package, PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
@@ -30,7 +30,7 @@ class Flatpak(PackageManager):
 
     homepage_url = "https://flatpak.org"
 
-    platforms = frozenset({LINUX})
+    platforms = ANY_UNIX_BUT_MACOS
 
     requirement = "1.2.0"
 

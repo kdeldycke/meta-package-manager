@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from typing import Iterator
 
-from click_extra.platform import LINUX, MACOS, WINDOWS
+from click_extra.platform import ANY_UNIX_BUT_MACOS, MACOS, WINDOWS, ANY_PLATFORM
 
 from ..base import Package, PackageManager
 from ..capabilities import version_not_implemented
@@ -31,7 +31,7 @@ class VSCode(PackageManager):
 
     homepage_url = "https://code.visualstudio.com"
 
-    platforms = frozenset({LINUX, MACOS, WINDOWS})
+    platforms = ANY_PLATFORM
 
     requirement = "1.60.0"
 

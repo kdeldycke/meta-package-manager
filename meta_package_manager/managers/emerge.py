@@ -20,7 +20,7 @@ from __future__ import annotations
 import re
 from typing import Iterator
 
-from click_extra.platform import LINUX
+from click_extra.platform import ANY_UNIX_BUT_MACOS
 
 from ..base import Package, PackageManager
 from ..capabilities import version_not_implemented
@@ -38,7 +38,7 @@ class Emerge(PackageManager):
 
     homepage_url = "https://wiki.gentoo.org/wiki/Portage#emerge"
 
-    platforms = frozenset({LINUX})
+    platforms = ANY_UNIX_BUT_MACOS
 
     requirement = "3.0.0"
 

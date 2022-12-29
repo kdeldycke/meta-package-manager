@@ -21,7 +21,7 @@ import json
 import re
 from typing import Iterator
 
-from click_extra.platform import LINUX, MACOS, WINDOWS
+from click_extra.platform import ANY_UNIX_BUT_MACOS, MACOS, WINDOWS, ANY_PLATFORM
 
 from ..base import Package, PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
@@ -33,7 +33,7 @@ class Composer(PackageManager):
 
     homepage_url = "https://getcomposer.org"
 
-    platforms = frozenset({LINUX, MACOS, WINDOWS})
+    platforms = ANY_PLATFORM
 
     requirement = "1.4.0"
 

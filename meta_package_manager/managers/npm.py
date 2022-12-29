@@ -21,7 +21,7 @@ import json
 from typing import Any, Iterator
 
 from boltons.iterutils import remap
-from click_extra.platform import LINUX, MACOS, WINDOWS
+from click_extra.platform import ANY_UNIX_BUT_MACOS, MACOS, WINDOWS, ANY_PLATFORM
 
 from ..base import Arg, NestedArgs, Package, PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
@@ -33,7 +33,7 @@ class NPM(PackageManager):
 
     homepage_url = "https://www.npmjs.com"
 
-    platforms = frozenset({LINUX, MACOS, WINDOWS})
+    platforms = ANY_PLATFORM
 
     requirement = "4.0.0"
 

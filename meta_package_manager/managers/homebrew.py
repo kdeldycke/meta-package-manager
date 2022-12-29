@@ -22,7 +22,7 @@ import re
 from operator import methodcaller
 from typing import Iterator
 
-from click_extra.platform import LINUX, MACOS
+from click_extra.platform import LINUX, MACOS, WSL2
 
 from .. import logger
 from ..base import Package, PackageManager
@@ -37,11 +37,16 @@ class Homebrew(PackageManager):
     Homebrew is the umbrella project providing both brew and brew cask commands.
     """
 
-    platforms = frozenset({LINUX, MACOS})
+    platforms = frozenset({LINUX, MACOS, WSL2})
+    """Homebrew core is now compatible with `Linux and Windows Subsystem for Linux
+    (WSL) 2 <https://docs.brew.sh/Homebrew-on-Linux>`_.
+    """
 
-    # Vanilla brew and cask CLIs now shares the same version.
-    # 2.7.0 is the first release to enforce the use of --cask option.
     requirement = "2.7.0"
+    """Vanilla ``brew`` and ``cask`` CLIs now shares the same version.
+
+    ``2.7.0`` is the first release to enforce the use of ``--cask`` option.
+    """
 
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     virtual = True
@@ -557,8 +562,8 @@ class Cask(Homebrew):
 
     homepage_url = "https://github.com/Homebrew/homebrew-cask"
 
-    # Casks are only available on macOS, not Linux.
     platforms = frozenset({MACOS})
+    """Casks are only available on macOS, not Linux or WSL."""
 
     cli_names = ("brew",)
 

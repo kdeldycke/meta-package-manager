@@ -22,7 +22,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from click_extra.platform import LINUX, MACOS, WINDOWS
+from click_extra.platform import LINUX, MACOS, WINDOWS, WSL2, ANY_UNIX_BUT_MACOS
 from tabulate import tabulate
 
 from .base import Operations
@@ -37,9 +37,13 @@ def operation_matrix() -> str:
         "Min. version",
         "Linux",
         "macOS",
+        "Any Unix",
         "Windows",
+        "WSL2",
     ]
     headers.extend(f"`{op.name}`" for op in Operations)
+
+
 
     table = []
     for mid, m in sorted(pool.items()):
@@ -49,7 +53,9 @@ def operation_matrix() -> str:
             f"{m.requirement}",
             "🐧" if LINUX in m.platforms else "",
             "🍎" if MACOS in m.platforms else "",
+            "`>_`" if ANY_UNIX_BUT_MACOS.issubset(m.platforms) else "",
             "🪟" if WINDOWS in m.platforms else "",
+            "🐧" if WSL2 in m.platforms else "",
         ]
         for op in Operations:
             line.append("✓" if m.implements(op) else "")

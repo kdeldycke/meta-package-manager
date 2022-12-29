@@ -21,7 +21,7 @@ import json
 import re
 from typing import Iterator
 
-from click_extra.platform import LINUX, MACOS, WINDOWS
+from click_extra.platform import ANY_UNIX_BUT_MACOS, MACOS, WINDOWS, ANY_PLATFORM
 
 from ..base import Package, PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
@@ -38,7 +38,7 @@ class Pip(PackageManager):
 
     homepage_url = "https://pip.pypa.io"
 
-    platforms = frozenset({MACOS, LINUX, WINDOWS})
+    platforms = ANY_PLATFORM
 
     requirement = "10.0.0"
 

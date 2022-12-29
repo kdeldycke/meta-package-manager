@@ -43,8 +43,6 @@ def operation_matrix() -> str:
     ]
     headers.extend(f"`{op.name}`" for op in Operations)
 
-
-
     table = []
     for mid, m in sorted(pool.items()):
         line = [
@@ -62,7 +60,7 @@ def operation_matrix() -> str:
         table.append(line)
 
     # Set each colomn alignment.
-    alignments = ["left", "left", "center", "center", "center"]
+    alignments = ["left", "left", "center", "center", "center", "center", "center"]
     alignments.extend(["center"] * len(Operations))
 
     output = tabulate(

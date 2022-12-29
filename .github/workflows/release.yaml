@@ -25,10 +25,10 @@ jobs:
           name: ${{ needs.release.outputs.bin_name }}
       - name: Run mpm --version
         run: |
-          ${{ needs.release.outputs.bin_name }} --version
+          ${{ steps.artefacts.outputs.download-path }}/${{ needs.release.outputs.bin_name }} --version
       - name: Run mpm --help
         run: |
-          ${{ needs.release.outputs.bin_name }} --help
+          ${{ steps.artefacts.outputs.download-path }}/${{ needs.release.outputs.bin_name }} --help
       - name: Run mpm --all-managers managers
         run: |
-          ${{ needs.release.outputs.bin_name }} --all-managers managers
+          ${{ steps.artefacts.outputs.download-path }}/${{ needs.release.outputs.bin_name }} --all-managers managers

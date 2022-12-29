@@ -19,13 +19,15 @@
 
 from __future__ import annotations
 
+from typing import Union, Set, FrozenSet, Dict
+
 from boltons.iterutils import flatten
 from click_extra.platform import ANY_PLATFORM, MACOS, ANY_BSD, ANY_LINUX, ANY_UNIX_BUT_MACOS, WINDOWS
 
 from .pool import pool
 
 
-LABELS = [
+LABELS: list[tuple[str, str, str]] = [
     (
         "🔌 bar-plugin",
         "#fef2c0",
@@ -42,7 +44,11 @@ Structure:
 """
 
 
-def generate_labels(all_labels: set[str], groups: dict[str, set[str]], prefix: str, color: str) -> dict[str, str]:
+LabelSet = Union[Set[str], FrozenSet[str]]
+LabelGroup = Dict[str, LabelSet]
+
+
+def generate_labels(all_labels: LabelSet, groups: LabelGroup, prefix: str, color: str) -> dict[str, str]:
     """Generate labels."""
     # Check group definitions.
     group_entries = tuple(flatten(groups.values()))
@@ -82,7 +88,7 @@ def generate_labels(all_labels: set[str], groups: dict[str, set[str]], prefix: s
 # Add mpm as its own manager.
 all_manager_ids = set(pool.all_manager_ids) | {"mpm"}
 
-MANAGER_GROUPS: dict[str, set[str]] = {
+MANAGER_GROUPS: LabelGroup = {
     "dnf-based": {"dnf", "yum"},
     "dpkg-based": {"apt", "apt-mint", "opkg"},
     "npm-based": {"npm", "yarn"},
@@ -91,11 +97,13 @@ MANAGER_GROUPS: dict[str, set[str]] = {
 }
 """Managers sharing some origin or implementation are grouped together."""
 
-MANAGER_LABELS = generate_labels(all_manager_ids, MANAGER_GROUPS, "📦 manager: ", "#bfdadc")
+MANAGER_PREFIX = "📦 manager: "
+
+MANAGER_LABELS = generate_labels(all_manager_ids, MANAGER_GROUPS, MANAGER_PREFIX, "#bfdadc")
 """ Maps all manager IDs to their labels. """
 
 
-PLATFORM_GROUPS: dict[str, set[str]] = {
+PLATFORM_GROUPS: LabelGroup = {
     # Group all BSD platforms but macOS.
     "BSD": ANY_BSD - {MACOS},
     "Linux": ANY_LINUX,
@@ -105,5 +113,7 @@ PLATFORM_GROUPS: dict[str, set[str]] = {
 }
 """Similar platforms are grouped together."""
 
-PLATFORM_LABELS = generate_labels(ANY_PLATFORM, PLATFORM_GROUPS, "🖥 platform: ", "#bfd4f2")
+PLATFORM_PREFIX = "🖥 platform: "
+
+PLATFORM_LABELS = generate_labels(ANY_PLATFORM, PLATFORM_GROUPS, PLATFORM_PREFIX, "#bfd4f2")
 """ Maps all platform names to their labels. """

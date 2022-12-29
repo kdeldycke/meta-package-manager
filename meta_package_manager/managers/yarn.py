@@ -27,7 +27,7 @@ if sys.version_info >= (3, 8):
 else:
     from boltons.cacheutils import cachedproperty as cached_property
 
-from click_extra.platform import ANY_UNIX_BUT_MACOS, MACOS, WINDOWS, ANY_PLATFORM
+from click_extra.platform import ANY_PLATFORM, ANY_UNIX_BUT_MACOS, MACOS, WINDOWS
 
 from ..base import Package, PackageManager
 from ..capabilities import search_capabilities, version_not_implemented

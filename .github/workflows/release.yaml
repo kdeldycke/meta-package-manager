@@ -10,6 +10,25 @@ name: Build & release
 jobs:
 
   release:
-    uses: kdeldycke/workflows/.github/workflows/release.yaml@v2.0.2
+    uses: kdeldycke/workflows/.github/workflows/release.yaml@v2.0.5
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+
+  test-binaries:
+    needs: release
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download artefacts
+        id: artefacts
+        uses: actions/download-artifact@v3.0.1
+        with:
+          name: ${{ needs.release.outputs.bin_name }}
+      - name: Run mpm --version
+        run: |
+          ${{ needs.release.outputs.bin_name }} --version
+      - name: Run mpm --help
+        run: |
+          ${{ needs.release.outputs.bin_name }} --help
+      - name: Run mpm --all-managers managers
+        run: |
+          ${{ needs.release.outputs.bin_name }} --all-managers managers

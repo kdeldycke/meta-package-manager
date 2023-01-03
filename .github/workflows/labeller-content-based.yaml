@@ -9,7 +9,7 @@ name: Labeller (content-based)
 jobs:
   labeller:
     name: Issue & PR labeller based on content
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: Naturalclar/issue-action@v2.0.2
         # Skip this step if this workflow was created/triggered by a bot. That way we can prevent content-rich PRs

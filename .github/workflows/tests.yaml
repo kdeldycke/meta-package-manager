@@ -23,7 +23,7 @@ jobs:
     # This will became unmaintainable and tedious so we use this job to pre-compute which jobs is going to get our
     # "stable" flag.
     name: "OS/Python/stable matrix pre-compute"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       test_matrix: ${{ steps.create_matrix.outputs.matrix }}
     steps:

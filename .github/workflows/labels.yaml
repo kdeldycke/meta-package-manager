@@ -50,7 +50,7 @@ jobs:
 
 
             > [Auto-generated on run `#${{ github.run_id }}`](${{ github.event.repository.html_url }}/actions/runs/${{
-            github.run_id }}) by `${{ github.job }}` job from [`docs.yaml`](${{ github.event.repository.html_url
+            github.run_id }}) by `${{ github.job }}` job from [`labels.yaml`](${{ github.event.repository.html_url
             }}/blob/${{ github.sha }}/.github/workflows/labels.yaml) workflow.
 
 

@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Download artefacts
         id: artefacts
-        uses: actions/download-artifact@v3.0.1
+        uses: actions/download-artifact@v3.0.2
         with:
           name: ${{ needs.release.outputs.bin_name }}
       - name: Run mpm --version

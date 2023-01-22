@@ -103,7 +103,7 @@ coverage = { extras = ["toml"], version = "^7.0" }
 furo = "^2022.9.29"
 mypy = "^0.991"
 myst-parser = "^0.18.0"
-pytest = "^7.2.0"
+pytest = "^7.2.1"
 # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html
 pytest-cov = "^4.0.0"
 pytest-randomly = "^3.12.0"

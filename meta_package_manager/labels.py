@@ -19,13 +19,19 @@
 
 from __future__ import annotations
 
-from typing import Union, Set, FrozenSet, Dict
+from typing import Dict, FrozenSet, Set, Union
 
 from boltons.iterutils import flatten
-from click_extra.platform import ANY_PLATFORM, MACOS, ANY_BSD, ANY_LINUX, ANY_UNIX_BUT_MACOS, WINDOWS
+from click_extra.platform import (
+    ANY_BSD,
+    ANY_LINUX,
+    ANY_PLATFORM,
+    ANY_UNIX_BUT_MACOS,
+    MACOS,
+    WINDOWS,
+)
 
 from .pool import pool
-
 
 LABELS: list[tuple[str, str, str]] = [
     (
@@ -48,7 +54,9 @@ LabelSet = Union[Set[str], FrozenSet[str]]
 LabelGroup = Dict[str, LabelSet]
 
 
-def generate_labels(all_labels: LabelSet, groups: LabelGroup, prefix: str, color: str) -> dict[str, str]:
+def generate_labels(
+    all_labels: LabelSet, groups: LabelGroup, prefix: str, color: str
+) -> dict[str, str]:
     """Generate labels."""
     # Check group definitions.
     group_entries = tuple(flatten(groups.values()))
@@ -99,7 +107,9 @@ MANAGER_GROUPS: LabelGroup = {
 
 MANAGER_PREFIX = "📦 manager: "
 
-MANAGER_LABELS = generate_labels(all_manager_ids, MANAGER_GROUPS, MANAGER_PREFIX, "#bfdadc")
+MANAGER_LABELS = generate_labels(
+    all_manager_ids, MANAGER_GROUPS, MANAGER_PREFIX, "#bfdadc"
+)
 """ Maps all manager IDs to their labels. """
 
 
@@ -115,5 +125,7 @@ PLATFORM_GROUPS: LabelGroup = {
 
 PLATFORM_PREFIX = "🖥 platform: "
 
-PLATFORM_LABELS = generate_labels(ANY_PLATFORM, PLATFORM_GROUPS, PLATFORM_PREFIX, "#bfd4f2")
+PLATFORM_LABELS = generate_labels(
+    ANY_PLATFORM, PLATFORM_GROUPS, PLATFORM_PREFIX, "#bfd4f2"
+)
 """ Maps all platform names to their labels. """

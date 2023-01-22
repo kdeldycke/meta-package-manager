@@ -132,7 +132,12 @@ def print_table(header_defs, rows, sort_key=None):
 
     .. code-block:: python
 
-        [("Column 1", "column1"), ("User's name", "name"), ("Package manager", "manager_id"), ...]
+        [
+            ("Column 1", "column1"),
+            ("User's name", "name"),
+            ("Package manager", "manager_id"),
+            ...,
+        ]
 
     Rows can be sorted by providing the column's ID to ``sort_key`` parameter. By default, ``None`` means the table will be sorted
     in the order of columns provided by ``header_defs``.
@@ -302,9 +307,9 @@ class BarPluginRenderer(MPMPlugin):
         .. code-block:: pycon
 
             >>> table_data = [
-            ...     ('xmlrpc', '0.3.1', '→', '0.4'),
-            ...     ('blockblock', '5.33,VHSDGataYCcV8xqv5TSZA', '→', '5.39'),
-            ...     ('sed', '2', '→', '2021.0328'),
+            ...     ("xmlrpc", "0.3.1", "→", "0.4"),
+            ...     ("blockblock", "5.33,VHSDGataYCcV8xqv5TSZA", "→", "5.39"),
+            ...     ("sed", "2", "→", "2021.0328"),
             ... ]
             >>> print(render_table(table_data))
             xmlrpc                          0.3.1 → 0.4

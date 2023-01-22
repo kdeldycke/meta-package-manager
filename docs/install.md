@@ -295,9 +295,7 @@ _MPM_COMPLETE=fish_source mpm > ~/.config/fish/completions/mpm.fish
 
 FYI, here is a graph of Python package dependencies:
 
-```{image} images/dependencies.png
----
-alt: Meta Package Manager dependency graph
-align: center
----
+```{eval-rst}
+.. graphviz:: images/dependencies.dot
+   :align: center
 ```

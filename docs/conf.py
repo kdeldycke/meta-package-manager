@@ -44,6 +44,7 @@ extensions = [
     "sphinx_click",
     "sphinx_autodoc_typehints",
     "click_extra.sphinx",
+    "sphinx.ext.graphviz",
 ]
 
 # https://myst-parser.readthedocs.io/en/latest/syntax/optional.html
@@ -63,6 +64,8 @@ autoclass_content = "both"
 # Keep the same ordering as in original source code.
 autodoc_member_order = "bysource"
 autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
+
+graphviz_output_format = "svg"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 # https://www.sphinx-doc.org/en/master/usage/extensions/todo.html

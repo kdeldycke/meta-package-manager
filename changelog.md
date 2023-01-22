@@ -1,5 +1,11 @@
 # Changelog
 
+## {gh}`5.11.1 (unreleased) <compare/v5.11.0...main>`
+
+```{important}
+This version is not released yet and is under active development.
+```
+
 ## {gh}`5.11.0 (2023-01-22) <compare/v5.10.2...v5.11.0>`
 
 - \[mpm\] Unlock run on any Unix-like platform. Closes {issue}`872`.

@@ -20,7 +20,7 @@ from __future__ import annotations
 import re
 from typing import Iterator
 
-from click_extra.platform import WINDOWS
+from click_extra.platforms import WINDOWS
 
 from ..base import Package, PackageManager
 from ..capabilities import version_not_implemented
@@ -32,7 +32,7 @@ class Choco(PackageManager):
 
     homepage_url = "https://chocolatey.org"
 
-    platforms = frozenset({WINDOWS})
+    platforms = WINDOWS
 
     requirement = "0.10.4"
 

@@ -20,7 +20,7 @@ from __future__ import annotations
 import re
 from typing import Iterator
 
-from click_extra.platform import WINDOWS
+from click_extra.platforms import WINDOWS
 
 from ..base import Package, PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
@@ -32,7 +32,7 @@ class Scoop(PackageManager):
 
     homepage_url = "https://scoop.sh"
 
-    platforms = frozenset({WINDOWS})
+    platforms = WINDOWS
 
     requirement = "0.2.4"
 

@@ -20,7 +20,7 @@ from __future__ import annotations
 import re
 from typing import Iterator
 
-from click_extra.platform import ANY_UNIX_BUT_MACOS
+from click_extra.platforms import UNIX_WITHOUT_MACOS
 
 from ..base import Package, PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
@@ -35,7 +35,7 @@ class DNF(PackageManager):
 
     homepage_url = "https://github.com/rpm-software-management/dnf"
 
-    platforms = ANY_UNIX_BUT_MACOS
+    platforms = UNIX_WITHOUT_MACOS
 
     requirement = "4.0.0"
 

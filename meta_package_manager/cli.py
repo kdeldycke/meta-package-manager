@@ -36,7 +36,6 @@ from click_extra import argument, echo, extra_group, option, option_group, pass_
 from click_extra.colorize import KO, OK
 from click_extra.colorize import default_theme as theme
 from click_extra.colorize import highlight
-from click_extra.platform import os_label
 from click_extra.tabulate import table_format_option
 
 if sys.version_info >= (3, 11):
@@ -372,7 +371,7 @@ def managers(ctx):
         os_infos = OK if manager.supported else KO
         if not manager.supported:
             os_infos += " {} only".format(
-                ", ".join(sorted(os_label(os_id) for os_id in manager.platforms))
+                ", ".join(sorted(p.name for p in manager.platforms))
             )
         if manager.deprecated:
             os_infos += f" {theme.warning('(deprecated)')}"

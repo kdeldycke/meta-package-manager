@@ -37,7 +37,7 @@ else:
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from click_extra.colorize import default_theme as theme
-from click_extra.platform import CURRENT_OS_ID, is_linux
+from click_extra.platforms import Group, Platform, current_os, is_linux
 from click_extra.run import (
     INDENT,
     Arg,
@@ -154,6 +154,18 @@ class MetaPackageManager(type):
         if "virtual" not in dct:
             cls.virtual = name == "PackageManager" or not cls.cli_names
 
+        # Normalize list of platform and groups into a frozen set of platforms.
+        if "platforms" in dct:
+            platforms = set()
+            for spec in flatten([dct["platforms"]]):
+                if isinstance(spec, Platform):
+                    platforms.add(spec)
+                elif isinstance(spec, Group):
+                    platforms |= spec.platforms
+                else:
+                    raise ValueError(f"Unrecognized platform specifier: {spec!r}")
+            cls.platforms = frozenset(platforms)
+
 
 def highlight_cli_name(
     path: Path | None, match_names: tuple[str, ...] | None = None
@@ -216,7 +228,7 @@ class PackageManager(metaclass=MetaPackageManager):
     homepage_url: str | None = None
     """Home page of the project, only used in documentation for reference."""
 
-    platforms: frozenset = frozenset()
+    platforms: frozenset[Platform] = frozenset()
     """List of platforms supported by the manager."""
 
     requirement: str | None = None
@@ -450,7 +462,7 @@ class PackageManager(metaclass=MetaPackageManager):
     @cached_property
     def supported(self) -> bool:
         """Is the package manager supported on that platform?"""
-        return CURRENT_OS_ID in self.platforms
+        return current_os() in self.platforms
 
     @cached_property
     def executable(self) -> bool:

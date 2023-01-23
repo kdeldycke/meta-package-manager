@@ -24,7 +24,7 @@ from collections import Counter
 from pathlib import Path
 
 from boltons.iterutils import flatten
-from click_extra.platform import OS_DEFINITIONS, os_label
+from click_extra.platforms import os_label
 from click_extra.tests.conftest import unless_linux
 from yaml import Loader, load
 
@@ -33,6 +33,7 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib  # type: ignore[import]
 
+from ..platforms import PLATFORM_GROUPS
 from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_LABELS, PLATFORM_PREFIX
 from ..pool import pool
 
@@ -74,7 +75,7 @@ def test_changelog():
                 flatten(
                     (
                         pool.all_manager_ids,
-                        OS_DEFINITIONS.keys(),
+                        PLATFORM_GROUPS.platform_ids,
                         "mpm",
                         "bar-plugin",
                     )

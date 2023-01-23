@@ -17,7 +17,7 @@
 
 from __future__ import annotations
 
-from click_extra.platform import ANY_PLATFORM, ANY_UNIX_BUT_MACOS, MACOS, WINDOWS
+from click_extra.platforms import ALL_PLATFORMS
 
 from ..base import PackageManager
 from ..capabilities import version_not_implemented
@@ -42,7 +42,7 @@ class SteamCMD(PackageManager):
 
     homepage_url = "https://developer.valvesoftware.com/wiki/SteamCMD"
 
-    platforms = ANY_PLATFORM
+    platforms = ALL_PLATFORMS
 
     requirement = None
     """Accept any SteamCMD version as it seems it is hardly versioned at all."""

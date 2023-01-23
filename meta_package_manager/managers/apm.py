@@ -20,7 +20,7 @@ from __future__ import annotations
 import json
 from typing import Iterator
 
-from click_extra.platform import ANY_PLATFORM, ANY_UNIX_BUT_MACOS, MACOS, WINDOWS
+from click_extra.platforms import BSD, LINUX, MACOS, WINDOWS, WSL2
 
 from ..base import Package, PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
@@ -42,7 +42,7 @@ class APM(PackageManager):
 
     homepage_url = "https://atom.io/packages"
 
-    platforms = ANY_PLATFORM
+    platforms = BSD, LINUX, MACOS, WINDOWS, WSL2
 
     requirement = "1.0.0"
 

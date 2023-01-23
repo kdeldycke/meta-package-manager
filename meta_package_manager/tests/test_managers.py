@@ -27,7 +27,7 @@ from string import ascii_letters, ascii_lowercase, digits
 import pytest
 from boltons.iterutils import unique
 from boltons.urlutils import URL
-from click_extra.platform import OS_DEFINITIONS
+from click_extra.platforms import ALL_PLATFORMS
 from click_extra.tests.conftest import destructive
 
 from ..base import Operations, Package, PackageManager
@@ -99,7 +99,7 @@ def test_platforms(manager):
     """Check that definitions returns supported platforms as a frozenset."""
     assert manager.platforms
     assert isinstance(manager.platforms, frozenset)
-    assert manager.platforms.issubset(OS_DEFINITIONS)
+    assert manager.platforms.issubset(ALL_PLATFORMS)
 
 
 @all_managers

@@ -20,7 +20,7 @@ from __future__ import annotations
 import re
 from typing import Iterator
 
-from click_extra.platform import MACOS
+from click_extra.platforms import MACOS
 
 from ..base import Package, PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
@@ -32,7 +32,7 @@ class MAS(PackageManager):
 
     homepage_url = "https://github.com/argon/mas"
 
-    platforms = frozenset({MACOS})
+    platforms = MACOS
 
     # 'mas search' output has been fixed in 1.6.1:
     # https://github.com/mas-cli/mas/pull/205

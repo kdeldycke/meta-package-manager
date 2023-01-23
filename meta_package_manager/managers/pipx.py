@@ -21,7 +21,7 @@ import json
 from operator import attrgetter
 from typing import Iterator
 
-from click_extra.platform import ANY_PLATFORM, ANY_UNIX_BUT_MACOS, MACOS, WINDOWS
+from click_extra.platforms import ALL_PLATFORMS
 
 from ..base import Package, PackageManager
 from ..capabilities import version_not_implemented
@@ -31,7 +31,7 @@ class Pipx(PackageManager):
 
     homepage_url = "https://pypa.github.io/pipx/"
 
-    platforms = ANY_PLATFORM
+    platforms = ALL_PLATFORMS
 
     requirement = "1.0.0"
     """

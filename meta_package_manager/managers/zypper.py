@@ -28,7 +28,7 @@ else:
     from typing import TypedDict
 
 import xmltodict
-from click_extra.platform import ANY_UNIX_BUT_MACOS
+from click_extra.platforms import UNIX_WITHOUT_MACOS
 
 from ..base import Package, PackageManager
 from ..capabilities import version_not_implemented
@@ -47,7 +47,7 @@ class Zypper(PackageManager):
 
     homepage_url = "https://en.opensuse.org/Portal:Zypper"
 
-    platforms = ANY_UNIX_BUT_MACOS
+    platforms = UNIX_WITHOUT_MACOS
 
     requirement = "1.14.0"
 

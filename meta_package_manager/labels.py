@@ -22,15 +22,9 @@ from __future__ import annotations
 from typing import Dict, FrozenSet, Set, Union
 
 from boltons.iterutils import flatten
-from click_extra.platform import (
-    ANY_BSD,
-    ANY_LINUX,
-    ANY_PLATFORM,
-    ANY_UNIX_BUT_MACOS,
-    MACOS,
-    WINDOWS,
-)
+from click_extra.platforms import ALL_PLATFORMS
 
+from .platforms import PLATFORM_GROUPS
 from .pool import pool
 
 LABELS: list[tuple[str, str, str]] = [
@@ -50,7 +44,7 @@ Structure:
 """
 
 
-LabelSet = Union[Set[str], FrozenSet[str]]
+LabelSet = FrozenSet[str]
 LabelGroup = Dict[str, LabelSet]
 
 
@@ -65,8 +59,6 @@ def generate_labels(
     assert len(group_entries) == len(grouped_labels)
     # Check all labels to groups are referenced in the full label set.
     assert grouped_labels.issubset(all_labels)
-    # Check group IDs do not collide with original labels.
-    assert all_labels.isdisjoint(groups.keys())
 
     new_labels = {}
 
@@ -93,39 +85,46 @@ def generate_labels(
     return new_labels
 
 
-# Add mpm as its own manager.
-all_manager_ids = set(pool.all_manager_ids) | {"mpm"}
-
-MANAGER_GROUPS: LabelGroup = {
-    "dnf-based": {"dnf", "yum"},
-    "dpkg-based": {"apt", "apt-mint", "opkg"},
-    "npm-based": {"npm", "yarn"},
-    "pacman-based": {"pacman", "pacaur", "paru", "yay"},
-    "pip-based": {"pip", "pipx"},
-}
-"""Managers sharing some origin or implementation are grouped together."""
-
 MANAGER_PREFIX = "📦 manager: "
 
+MANAGER_LABEL_GROUPS: LabelGroup = {
+    "dnf-based": frozenset({"dnf", "yum"}),
+    "dpkg-based": frozenset({"apt", "apt-mint", "opkg"}),
+    "npm-based": frozenset({"npm", "yarn"}),
+    "pacman-based": frozenset({"pacman", "pacaur", "paru", "yay"}),
+    "pip-based": frozenset({"pip", "pipx"}),
+}
+"""Managers sharing some origin or implementation are grouped together under the same label."""
+
+all_manager_label_ids = frozenset(set(pool.all_manager_ids) | {"mpm"})
+"""Adds ``mpm`` as its own manager alongside all those implemented."""
+
+# Check group IDs do not collide with original labels.
+assert all_manager_label_ids.isdisjoint(MANAGER_LABEL_GROUPS.keys())
+
 MANAGER_LABELS = generate_labels(
-    all_manager_ids, MANAGER_GROUPS, MANAGER_PREFIX, "#bfdadc"
+    all_manager_label_ids,
+    MANAGER_LABEL_GROUPS,
+    MANAGER_PREFIX,
+    "#bfdadc"
 )
 """ Maps all manager IDs to their labels. """
 
 
-PLATFORM_GROUPS: LabelGroup = {
-    # Group all BSD platforms but macOS.
-    "BSD": ANY_BSD - {MACOS},
-    "Linux": ANY_LINUX,
-    "macOS": {MACOS},
-    "Unix": ANY_UNIX_BUT_MACOS - ANY_LINUX - ANY_BSD,
-    "Windows": {WINDOWS},
-}
-"""Similar platforms are grouped together."""
-
 PLATFORM_PREFIX = "🖥 platform: "
 
+PLATFORM_LABEL_GROUPS: LabelGroup = {
+    g.name: {p.name for p in g.platforms}
+    for g in PLATFORM_GROUPS
+}
+"""Similar platforms are grouped together under the same label."""
+
+all_platform_label_ids = frozenset(flatten(PLATFORM_LABEL_GROUPS.values()))
+
 PLATFORM_LABELS = generate_labels(
-    ANY_PLATFORM, PLATFORM_GROUPS, PLATFORM_PREFIX, "#bfd4f2"
+    all_platform_label_ids,
+    PLATFORM_LABEL_GROUPS,
+    PLATFORM_PREFIX,
+    "#bfd4f2"
 )
 """ Maps all platform names to their labels. """

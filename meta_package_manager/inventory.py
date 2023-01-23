@@ -19,12 +19,12 @@
 
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
-from click_extra.platform import ANY_UNIX_BUT_MACOS, LINUX, MACOS, WINDOWS, WSL2
+from click_extra.docs_update import replace_content
 from tabulate import tabulate
 
+from .platforms import PLATFORM_GROUPS
 from .base import Operations
 from .pool import pool
 
@@ -35,12 +35,22 @@ def operation_matrix() -> str:
     headers = [
         "Package manager",
         "Min. version",
-        "Linux",
-        "WSL2",
-        "Any Unix",
-        "macOS",
-        "Windows",
     ]
+
+    # Footnotes are used to details the OSes covered by each platform group.
+    footnotes = []
+
+    for group in PLATFORM_GROUPS:
+        header_title = group.name
+        # Add footnote for groups with more than one platform.
+        if len(group.platforms) > 1:
+            footnote_tag = f"[^{group.id}]"
+            header_title += footnote_tag
+            footnotes.append(
+                f"{footnote_tag}: {', '.join(sorted(p.name for p in group.platforms))}."
+            )
+        headers.append(header_title)
+
     headers.extend(f"`{op.name}`" for op in Operations)
 
     table = []
@@ -49,21 +59,19 @@ def operation_matrix() -> str:
             f"[`{mid}`]({m.homepage_url})"
             + ("" if not m.deprecated else f" [⚠️]({m.deprecation_url})"),
             f"{m.requirement}",
-            "🐧" if LINUX in m.platforms else "",
-            "🐧" if WSL2 in m.platforms else "",
-            "`>_`" if ANY_UNIX_BUT_MACOS.issubset(m.platforms) else "",
-            "🍎" if MACOS in m.platforms else "",
-            "🪟" if WINDOWS in m.platforms else "",
         ]
+        for group in PLATFORM_GROUPS:
+            line.append(group.icon if group.issubset(m.platforms) else "")
         for op in Operations:
             line.append("✓" if m.implements(op) else "")
         table.append(line)
 
     # Set each colomn alignment.
-    alignments = ["left", "left", "center", "center", "center", "center", "center"]
+    alignments = ["left", "left"]
+    alignments.extend(["center"] * len(PLATFORM_GROUPS))
     alignments.extend(["center"] * len(Operations))
 
-    output = tabulate(
+    rendered_table = tabulate(
         table,
         headers=headers,
         tablefmt="github",
@@ -87,35 +95,23 @@ def operation_matrix() -> str:
         separators.append(sep)
     header_separator = f"| {' | '.join(separators)} |"
 
-    lines = output.splitlines()
+    lines = rendered_table.splitlines()
     lines[1] = header_separator
 
-    return "\n".join(lines)
+    output = "\n".join(lines)
+    if footnotes:
+        output += "\n\n"
+        output += "\n".join(footnotes)
+
+    return output
 
 
 def update_readme() -> None:
     """Update `readme.md` at the root of the project with the implementation table for
     each manager we support."""
-    # Load-up `readme.md`.
-    readme = Path(__file__).parent.parent.joinpath("readme.md").resolve()
-    content = readme.read_text()
-
-    # Extract pre- and post-content surrounding the section we're trying to update.
-    section_title = "## Supported package managers and operations"
-    pre_section, section_start = content.split(section_title, 1)
-    section_content, post_section = section_start.split("##", 1)
-
-    # Extract the prolog and epilog surrounding the table in the section.
-    prolog, epilog = re.split(
-        r"(?:\|.*\|\n)+", section_content, maxsplit=1, flags=re.MULTILINE
-    )
-
-    # Reconstruct the readme with our updated section.
-    readme.write_text(
-        f"{pre_section}"
-        f"{section_title}"
-        f"{prolog}"
-        f"{operation_matrix()}\n"
-        f"{epilog}"
-        f"##{post_section}"
+    replace_content(
+        Path(__file__).parent.parent.joinpath("readme.md"),
+        "<!-- operation-matrix-start -->\n\n",
+        "\n\n<!-- operation-matrix-end -->",
+        operation_matrix(),
     )

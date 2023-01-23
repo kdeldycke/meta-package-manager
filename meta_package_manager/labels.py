@@ -19,10 +19,9 @@
 
 from __future__ import annotations
 
-from typing import Dict, FrozenSet, Set, Union
+from typing import Dict, FrozenSet
 
 from boltons.iterutils import flatten
-from click_extra.platforms import ALL_PLATFORMS
 
 from .platforms import PLATFORM_GROUPS
 from .pool import pool

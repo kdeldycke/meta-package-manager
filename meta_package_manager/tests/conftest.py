@@ -24,9 +24,9 @@ from operator import attrgetter
 import pytest
 
 # Pre-load invokation helpers to be used as pytest's fixture.
-from click_extra.tests.conftest import create_config
+from click_extra.tests.conftest import create_config  # nopycln: import
+from click_extra.tests.conftest import runner  # nopycln: import
 from click_extra.tests.conftest import invoke as invoke_extra
-from click_extra.tests.conftest import runner
 from pytest import fixture, param
 
 from ..cli import mpm

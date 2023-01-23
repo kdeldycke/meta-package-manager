@@ -103,10 +103,7 @@ all_manager_label_ids = frozenset(set(pool.all_manager_ids) | {"mpm"})
 assert all_manager_label_ids.isdisjoint(MANAGER_LABEL_GROUPS.keys())
 
 MANAGER_LABELS = generate_labels(
-    all_manager_label_ids,
-    MANAGER_LABEL_GROUPS,
-    MANAGER_PREFIX,
-    "#bfdadc"
+    all_manager_label_ids, MANAGER_LABEL_GROUPS, MANAGER_PREFIX, "#bfdadc"
 )
 """ Maps all manager IDs to their labels. """
 
@@ -114,17 +111,13 @@ MANAGER_LABELS = generate_labels(
 PLATFORM_PREFIX = "🖥 platform: "
 
 PLATFORM_LABEL_GROUPS: LabelGroup = {
-    g.name: {p.name for p in g.platforms}
-    for g in PLATFORM_GROUPS
+    g.name: {p.name for p in g.platforms} for g in PLATFORM_GROUPS
 }
 """Similar platforms are grouped together under the same label."""
 
 all_platform_label_ids = frozenset(flatten(PLATFORM_LABEL_GROUPS.values()))
 
 PLATFORM_LABELS = generate_labels(
-    all_platform_label_ids,
-    PLATFORM_LABEL_GROUPS,
-    PLATFORM_PREFIX,
-    "#bfd4f2"
+    all_platform_label_ids, PLATFORM_LABEL_GROUPS, PLATFORM_PREFIX, "#bfd4f2"
 )
 """ Maps all platform names to their labels. """

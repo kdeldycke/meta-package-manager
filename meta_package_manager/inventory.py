@@ -24,8 +24,8 @@ from pathlib import Path
 from click_extra.docs_update import replace_content
 from tabulate import tabulate
 
-from .platforms import PLATFORM_GROUPS
 from .base import Operations
+from .platforms import PLATFORM_GROUPS
 from .pool import pool
 
 

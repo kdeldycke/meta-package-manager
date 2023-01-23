@@ -24,7 +24,6 @@ from click_extra.platforms import MACOS as MACOS_PLATFORM
 from click_extra.platforms import UNIX as ALL_UNIX
 from click_extra.platforms import WSL2, Group
 
-
 BSD: Group = dataclasses.replace(BSD_WITHOUT_MACOS, name="BSD", icon="🅱️")
 LINUX: Group = Group("linux", "Linux", [*ALL_LINUX.platforms, WSL2], icon="🐧")
 MACOS: Group = Group("macos", "macOS", [MACOS_PLATFORM], icon="🍎")

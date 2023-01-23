@@ -33,8 +33,8 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib  # type: ignore[import]
 
-from ..platforms import PLATFORM_GROUPS
 from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_LABELS, PLATFORM_PREFIX
+from ..platforms import PLATFORM_GROUPS
 from ..pool import pool
 
 """ Test all non-code artifacts depending on manager definitions.

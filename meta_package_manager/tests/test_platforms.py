@@ -32,10 +32,11 @@ def test_unique_ids():
 
 def test_groups_content():
     for group in PLATFORM_GROUPS:
-            assert isinstance(group, Group)
-            assert len(group) > 0
-            assert len(group.platforms) == len(group.platform_ids)
-            assert group.issubset(ALL_PLATFORMS)
+        assert isinstance(group, Group)
+        assert len(group) > 0
+        assert len(group.platforms) == len(group.platform_ids)
+        assert group.issubset(ALL_PLATFORMS)
+
 
 def test_platform_groups_no_overlap():
     """Check our platform groups are mutually exclusive."""

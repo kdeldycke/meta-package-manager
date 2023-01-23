@@ -20,7 +20,6 @@ from __future__ import annotations
 import pytest
 from click_extra.tests.conftest import destructive
 
-from ..pool import pool
 from .conftest import default_manager_ids
 from .test_cli import CLISubCommandTests
 

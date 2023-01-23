@@ -259,7 +259,7 @@ class PackageManager(metaclass=MetaPackageManager):
     cli_search_path: tuple[str, ...] = ()
     """ List of additional path to help :program:`mpm` hunt down the package manager CLI.
 
-    Should be a list of strings whose order dictatate the search sequence.
+    Must be a list of strings whose order dictates the search sequence.
 
     Most of the time unnecessary: :py:func:`meta_package_manager.base.PackageManager.cli_path`
     works well on all platforms.

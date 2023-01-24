@@ -47,7 +47,7 @@ def operation_matrix() -> str:
             footnote_tag = f"[^{group.id}]"
             header_title += footnote_tag
             footnotes.append(
-                f"{footnote_tag}: {', '.join(sorted(p.name for p in group.platforms))}."
+                f"{footnote_tag}: {', '.join(sorted((p.name for p in group.platforms), key=str.casefold))}."
             )
         headers.append(header_title)
 

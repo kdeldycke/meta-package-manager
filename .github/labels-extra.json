@@ -110,18 +110,28 @@
     "description": "Xbar/SwiftBar plugin code, documentation and features"
   },
   {
+    "name": "🖥 platform: BSD",
+    "color": "#bfd4f2",
+    "description": "BSD"
+  },
+  {
     "name": "🖥 platform: Linux",
     "color": "#bfd4f2",
     "description": "Linux"
   },
   {
-    "name": "🖥 platform: Windows",
-    "color": "#bfd4f2",
-    "description": "Windows"
-  },
-  {
     "name": "🖥 platform: macOS",
     "color": "#bfd4f2",
     "description": "macOS"
+  },
+  {
+    "name": "🖥 platform: Unix",
+    "color": "#bfd4f2",
+    "description": "Unix"
+  },
+  {
+    "name": "🖥 platform: Windows",
+    "color": "#bfd4f2",
+    "description": "Windows"
   }
 ]

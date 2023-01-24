@@ -24,8 +24,6 @@ from collections import Counter
 from pathlib import Path
 
 from boltons.iterutils import flatten
-from click_extra.platforms import os_label
-from click_extra.tests.conftest import unless_linux
 from yaml import Loader, load
 
 if sys.version_info >= (3, 11):
@@ -33,7 +31,7 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib  # type: ignore[import]
 
-from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_LABELS, PLATFORM_PREFIX
+from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_PREFIX
 from ..platforms import PLATFORM_GROUPS
 from ..pool import pool
 
@@ -83,14 +81,7 @@ def test_changelog():
             )
 
 
-@unless_linux
 def test_labeller_rules():
-    """This covers the dynamic production of labels by GitHub action. As such it only
-    targets Linux. See: https://github.com/kdeldycke/meta-package-manager/blob.
-
-    /bd666e291c783fe480015c9aae3beab19b12774c/.github/workflows/labels.yaml#L14
-    """
-
     # Extract list of extra labels.
     content = PROJECT_ROOT.joinpath(".github/labels-extra.json").read_text()
     extra_labels = [lbl["name"] for lbl in json.loads(content)]
@@ -161,7 +152,7 @@ def test_labeller_rules():
     # Each canonical platform labels is defined.
     assert len(canonical_platforms.symmetric_difference(rules_platforms)) == 0
     # Each registered OS has a rule.
-    assert len(rules_platforms) == len(OS_DEFINITIONS)
+    assert len(rules_platforms) == len(PLATFORM_GROUPS)
     # Each platforms has at least a rule.
     assert min(rules_platforms.values()) >= 1
 
@@ -183,10 +174,10 @@ def test_labeller_rules():
             manager_label = manager_label.pop()
 
             # Only platforms are expected alongside manager labels.
-            platforms = set(rule["labels"]) - canonical_managers
-            assert platforms.issubset(canonical_platforms)
+            platforms_labels = set(rule["labels"]) - canonical_managers
+            assert platforms_labels.issubset(canonical_platforms)
 
-            # Check managers sharing the same label shares the same platforms.
+            # Check managers sharing the same label shares the same platforms specs.
             supported_platforms = [
                 pool.get(mid).platforms
                 for mid, lbl in MANAGER_LABELS.items()
@@ -196,8 +187,16 @@ def test_labeller_rules():
             ]
             assert len(set(supported_platforms)) == 1
 
-            # Check the right platforms is associated with the manager.
-            supported_platform_labels = {
-                PLATFORM_LABELS[os_label(p)] for p in supported_platforms[0]
-            }
-            assert platforms == supported_platform_labels
+            # Regenerate the platforms specs from the label and check it matches.
+            common_platforms = supported_platforms.pop()
+            target_platforms = set()
+            for platform_label in platforms_labels:
+                group_name = platform_label.split(PLATFORM_PREFIX, 1)[1]
+                assert group_name
+                matching_groups = []
+                for group in PLATFORM_GROUPS:
+                    if group.name == group_name:
+                        matching_groups.append(group)
+                assert len(matching_groups) == 1
+                target_platforms.update(matching_groups[0].platforms)
+            assert target_platforms == common_platforms

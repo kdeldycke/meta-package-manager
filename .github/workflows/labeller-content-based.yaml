@@ -55,6 +55,7 @@ jobs:
 
                {"labels": [
                   "📦 manager: apm",
+                  "🖥 platform: BSD",
                   "🖥 platform: Linux",
                   "🖥 platform: macOS",
                   "🖥 platform: Windows"],
@@ -62,14 +63,16 @@ jobs:
 
               {"labels": [
                 "📦 manager: brew",
-                "🖥 platform: macOS",
-                "🖥 platform: Linux"],
+                "🖥 platform: Linux",
+                "🖥 platform: macOS"],
                "keywords": ["brew", "homebrew", "tap", "formula"]},
 
               {"labels": [
                 "📦 manager: cargo",
+                "🖥 platform: BSD",
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",
+                "🖥 platform: Unix",
                 "🖥 platform: Windows"],
               "keywords": ["cargo", "rust", "crate"]},
 
@@ -84,36 +87,48 @@ jobs:
               "keywords": ["choco", "chocolatey"]},
 
               {"labels": [
-                "📦 manager: dnf-based",
-                "🖥 platform: Linux"],
-              "keywords": ["dnf", "yum", "rpm", "fedora", "redhat", "rhel"]},
-
-              {"labels": [
                 "📦 manager: composer",
+                "🖥 platform: BSD",
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",
+                "🖥 platform: Unix",
                 "🖥 platform: Windows"],
               "keywords": ["composer", "php"]},
 
               {"labels": [
+                "📦 manager: dnf-based",
+                "🖥 platform: BSD",
+                "🖥 platform: Linux",
+                "🖥 platform: Unix"],
+              "keywords": ["dnf", "yum", "rpm", "fedora", "redhat", "rhel"]},
+
+              {"labels": [
                 "📦 manager: dpkg-based",
-                "🖥 platform: Linux"],
+                "🖥 platform: BSD",
+                "🖥 platform: Linux",
+                "🖥 platform: Unix"],
                "keywords": ["apt", "apt-mint", "aptitude", "dpkg", "opkg", "ubuntu", "debian", "mint"]},
 
               {"labels": [
                 "📦 manager: emerge",
-                "🖥 platform: Linux"],
+                "🖥 platform: BSD",
+                "🖥 platform: Linux",
+                "🖥 platform: Unix"],
                "keywords": ["emerge", "portage", "gentoo"]},
 
               {"labels": [
                 "📦 manager: flatpak",
-                "🖥 platform: Linux"],
+                "🖥 platform: BSD",
+                "🖥 platform: Linux",
+                "🖥 platform: Unix"],
                "keywords": ["flatpak", "flat"]},
 
               {"labels": [
                 "📦 manager: gem",
+                "🖥 platform: BSD",
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",
+                "🖥 platform: Unix",
                 "🖥 platform: Windows"],
                "keywords": ["gem", "ruby"]},
 
@@ -124,20 +139,26 @@ jobs:
 
               {"labels": [
                 "📦 manager: npm-based",
+                "🖥 platform: BSD",
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",
+                "🖥 platform: Unix",
                 "🖥 platform: Windows"],
                "keywords": ["npm", "node", "yarn"]},
 
               {"labels": [
                 "📦 manager: pacman-based",
-                "🖥 platform: Linux"],
+                "🖥 platform: BSD",
+                "🖥 platform: Linux",
+                "🖥 platform: Unix"],
               "keywords": ["pacman", "arch", "pacaur", "paru", "yay"]},
 
               {"labels": [
                 "📦 manager: pip-based",
+                "🖥 platform: BSD",
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",
+                "🖥 platform: Unix",
                 "🖥 platform: Windows"],
                "keywords": ["pip", "pipx"]},
 
@@ -148,27 +169,39 @@ jobs:
 
               {"labels": [
                 "📦 manager: snap",
-                "🖥 platform: Linux"],
+                "🖥 platform: BSD",
+                "🖥 platform: Linux",
+                "🖥 platform: Unix"],
                "keywords": ["snap"]},
 
               {"labels": [
                 "📦 manager: steamcmd",
+                "🖥 platform: BSD",
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",
+                "🖥 platform: Unix",
                 "🖥 platform: Windows"],
                "keywords": ["steamcmd", "steam", "valve"]},
 
               {"labels": [
                 "📦 manager: vscode",
+                "🖥 platform: BSD",
                 "🖥 platform: Linux",
                 "🖥 platform: macOS",
+                "🖥 platform: Unix",
                 "🖥 platform: Windows"],
                "keywords": ["vscode", "visual studio code", "visual studio"]},
 
               {"labels": [
                 "📦 manager: zypper",
-                "🖥 platform: Linux"],
+                "🖥 platform: BSD",
+                "🖥 platform: Linux",
+                "🖥 platform: Unix"],
                "keywords": ["zypper", "opensuse", "suse"]},
+
+              {"labels": [
+                "🖥 platform: BSD"],
+               "keywords": ["bsd"]},
 
               {"labels": [
                 "🖥 platform: Linux"],
@@ -177,6 +210,10 @@ jobs:
               {"labels": [
                 "🖥 platform: macOS"],
                "keywords": ["macos", "mac os", "osx", "os x", "apple"]},
+
+              {"labels": [
+                "🖥 platform: Unix"],
+               "keywords": ["unix"]},
 
               {"labels": [
                 "🖥 platform: Windows"],

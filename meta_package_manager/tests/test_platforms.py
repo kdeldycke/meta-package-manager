@@ -22,6 +22,7 @@ from itertools import combinations
 from click_extra.platforms import ALL_PLATFORMS, Group
 
 from ..platforms import PLATFORM_GROUPS
+from .conftest import all_managers
 
 
 def test_unique_ids():
@@ -42,3 +43,12 @@ def test_platform_groups_no_overlap():
     """Check our platform groups are mutually exclusive."""
     for combination in combinations(PLATFORM_GROUPS, 2):
         assert combination[0].platform_ids.isdisjoint(combination[1].platform_ids)
+
+
+@all_managers
+def test_all_platforms_covered_by_groups(manager):
+    """Check all platforms supported by managers are covered by a local group."""
+    uncovered_platforms = manager.platforms.copy()
+    for group in PLATFORM_GROUPS:
+        uncovered_platforms -= set(group.platforms)
+    assert len(uncovered_platforms) == 0

@@ -15,7 +15,7 @@ This version is not released yet and is under active development.
 
 ## {gh}`5.10.2 (2022-12-19) <compare/v5.10.1...v5.10.2>`
 
-- \[mpm\] Fix uploading of artefacts to GitHub release.
+- \[mpm\] Fix uploading of artifacts to GitHub release.
 
 ## {gh}`5.10.1 (2022-12-19) <compare/v5.10.0...v5.10.1>`
 
@@ -268,18 +268,18 @@ This version is not released yet and is under active development.
 
 ## {gh}`4.9.9 (2022-01-15) <compare/v4.9.8...v4.9.9>`
 
-- \[mpm\] Fix upload of build artefacts in GitHub release.
+- \[mpm\] Fix upload of build artifacts in GitHub release.
 
 ## {gh}`4.9.8 (2022-01-15) <compare/v4.9.7...v4.9.8>`
 
-- \[mpm\] Fix propagation of build artefacts to GitHub release and PyPi.
+- \[mpm\] Fix propagation of build artifacts to GitHub release and PyPi.
 - \[mpm\] Fix test of labelling rules.
 - \[mpm\] Remove local dependency on `graphviz` now that fixes were pushed
   upstream.
 
 ## {gh}`4.9.7 (2022-01-11) <compare/v4.9.6...v4.9.7>`
 
-- \[mpm\] Add release version in artefacts produced by Poetry builds.
+- \[mpm\] Add release version in artifacts produced by Poetry builds.
 - \[mpm\] Pass local PyPi token to reused workflow to fix publishing.
 
 ## {gh}`4.9.6 (2022-01-11) <compare/v4.9.5...v4.9.6>`
@@ -297,7 +297,7 @@ This version is not released yet and is under active development.
 
 ## {gh}`4.9.4 (2022-01-04) <compare/v4.9.3...v4.9.4>`
 
-- \[mpm\] Re-integrate artefacts in GitHub release on tagging.
+- \[mpm\] Re-integrate artifacts in GitHub release on tagging.
 
 ## {gh}`4.9.3 (2022-01-04) <compare/v4.9.2...v4.9.3>`
 

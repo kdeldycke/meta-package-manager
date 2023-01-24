@@ -99,7 +99,7 @@ def test_platforms(manager):
     """Check that definitions returns supported platforms as a frozenset."""
     assert manager.platforms
     assert isinstance(manager.platforms, frozenset)
-    assert manager.platforms.issubset(ALL_PLATFORMS)
+    assert ALL_PLATFORMS.issuperset(manager.platforms)
 
 
 @all_managers

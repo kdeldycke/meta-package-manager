@@ -42,13 +42,23 @@ def test_groups_content():
 def test_platform_groups_no_overlap():
     """Check our platform groups are mutually exclusive."""
     for combination in combinations(PLATFORM_GROUPS, 2):
-        assert combination[0].platform_ids.isdisjoint(combination[1].platform_ids)
+        assert combination[0].isdisjoint(combination[1])
 
 
 @all_managers
 def test_all_platforms_covered_by_groups(manager):
     """Check all platforms supported by managers are covered by a local group."""
-    uncovered_platforms = manager.platforms.copy()
+    leftover_platforms = manager.platforms.copy()
+
     for group in PLATFORM_GROUPS:
-        uncovered_platforms -= set(group.platforms)
-    assert len(uncovered_platforms) == 0
+
+        # Check the group fully overlap the manager platforms.
+        if not group.isdisjoint(manager.platforms):
+            assert group.issubset(manager.platforms)
+
+            # Remove the group platforms from the uncovered list.
+            leftover_platforms -= set(group.platforms)
+
+    assert len(leftover_platforms) == 0
+    # At this stage we know all platforms of the manager can be partitioned by a
+    # combination of PLATFORM_GROUPS elements, without any overlap or leftover.

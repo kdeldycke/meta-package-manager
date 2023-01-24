@@ -64,22 +64,22 @@ def generate_labels(
     # Create a dedicated label for each non-grouped entry.
     standalone_labels = all_labels - grouped_labels
     for label_id in standalone_labels:
-        full_name = f"{prefix}{label_id}"
+        label_name = f"{prefix}{label_id}"
         # Check the addition of the prefix does not collide with an existing label.
-        assert full_name not in all_labels
-        new_labels[label_id] = full_name
+        assert label_name not in all_labels
+        new_labels[label_id] = label_name
         # Register label to the global registry.
-        LABELS.append((full_name, color, label_id))
+        LABELS.append((label_name, color, label_id))
 
     # Create a dedicated label for each group.
     for group_id, label_ids in groups.items():
-        full_name = f"{prefix}{group_id}"
+        label_name = f"{prefix}{group_id}"
         # Check the addition of the prefix does not collide with an existing label.
-        assert full_name not in all_labels
+        assert label_name not in all_labels
         for label_id in label_ids:
-            new_labels[label_id] = full_name
+            new_labels[label_id] = label_name
         # Register label to the global registry.
-        LABELS.append((full_name, color, ", ".join(sorted(label_ids))))
+        LABELS.append((label_name, color, ", ".join(sorted(label_ids, key=str.casefold))))
 
     return new_labels
 

@@ -74,6 +74,14 @@ meta\_package\_manager.output module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.platforms module
+---------------------------------------
+
+.. automodule:: meta_package_manager.platforms
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.pool module
 ----------------------------------
 

@@ -89,7 +89,7 @@ classifiers = [
 python = "^3.7"
 boltons = "^21.0.0"
 click = "^8.1.2"
-click-extra = { git = "https://github.com/kdeldycke/click-extra.git", branch = "main" }
+click-extra = "^3.8.0"
 packageurl-python = "^0.10.3"
 tabulate = { extras = ["widechars"], version = "^0.9.0" }
 tomli = { version = "^2.0.1", python = "< 3.11" }

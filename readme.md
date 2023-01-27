@@ -90,9 +90,9 @@ ______________________________________________________________________
 | [`yum`](http://yum.baseurl.org)                                                        | 4.0.0        |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
 | [`zypper`](https://en.opensuse.org/Portal:Zypper)                                      | 1.14.0       |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
 
-[^bsd_without_macos]: FreeBSD, NetBSD, OpenBSD, SunOS.
-[^linux]: Linux, Windows Subsystem for Linux v2.
-[^unix]: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.
+[^bsd_without_macos]: BSD: FreeBSD, NetBSD, OpenBSD, SunOS.
+[^linux]: Linux: Linux, Windows Subsystem for Linux v2.
+[^unix]: Unix: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.
 
 <!-- operation-matrix-end -->
 

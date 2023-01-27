@@ -37,7 +37,7 @@
   {
     "name": "📦 manager: dpkg-based",
     "color": "#bfdadc",
-    "description": "apt, apt-mint, dpkg, opkg"
+    "description": "apt, apt-mint, opkg"
   },
   {
     "name": "📦 manager: emerge",
@@ -112,12 +112,12 @@
   {
     "name": "🖥 platform: BSD",
     "color": "#bfd4f2",
-    "description": "BSD"
+    "description": "FreeBSD, NetBSD, OpenBSD, SunOS"
   },
   {
     "name": "🖥 platform: Linux",
     "color": "#bfd4f2",
-    "description": "Linux"
+    "description": "Linux, Windows Subsystem for Linux v2"
   },
   {
     "name": "🖥 platform: macOS",
@@ -127,7 +127,7 @@
   {
     "name": "🖥 platform: Unix",
     "color": "#bfd4f2",
-    "description": "Unix"
+    "description": "AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1"
   },
   {
     "name": "🖥 platform: Windows",

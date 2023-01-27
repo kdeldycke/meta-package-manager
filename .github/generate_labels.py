@@ -31,14 +31,14 @@ def write_labels():
     json_file = Path(__file__).parent.joinpath("../.github/labels-extra.json").resolve()
 
     # Debug messages.
-    for label_name, _, _ in sorted(LABELS):
+    for label_name, _, _ in LABELS:
         print(f"Generated label: {label_name}")
     print(f"{len(LABELS)} labels generated.")
     print(f"Saving to: {json_file}")
 
     # Save to json definition file.
     label_defs = [
-        dict(zip(["name", "color", "description"], label)) for label in sorted(LABELS)
+        dict(zip(["name", "color", "description"], label)) for label in LABELS
     ]
     json_file.write_text(
         json.dumps(

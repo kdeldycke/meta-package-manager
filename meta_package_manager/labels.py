@@ -59,7 +59,7 @@ def generate_labels(
     # Check all labels to groups are referenced in the full label set.
     assert grouped_labels.issubset(all_labels)
 
-    new_labels = {}
+    label_map = {}
 
     # Create a dedicated label for each non-grouped entry.
     standalone_labels = all_labels - grouped_labels
@@ -67,7 +67,7 @@ def generate_labels(
         label_name = f"{prefix}{label_id}"
         # Check the addition of the prefix does not collide with an existing label.
         assert label_name not in all_labels
-        new_labels[label_id] = label_name
+        label_map[label_id] = label_name
         # Register label to the global registry.
         LABELS.append((label_name, color, label_id))
 
@@ -77,11 +77,12 @@ def generate_labels(
         # Check the addition of the prefix does not collide with an existing label.
         assert label_name not in all_labels
         for label_id in label_ids:
-            new_labels[label_id] = label_name
+            label_map[label_id] = label_name
         # Register label to the global registry.
         LABELS.append((label_name, color, ", ".join(sorted(label_ids, key=str.casefold))))
 
-    return new_labels
+    # Sort label_map by their name.
+    return {k: v for k, v in sorted(label_map.items(), key=lambda i: str.casefold(i[1]))}
 
 
 MANAGER_PREFIX = "📦 manager: "
@@ -120,3 +121,6 @@ PLATFORM_LABELS = generate_labels(
     all_platform_label_ids, PLATFORM_LABEL_GROUPS, PLATFORM_PREFIX, "#bfd4f2"
 )
 """ Maps all platform names to their labels. """
+
+# Force sorting of labels.
+LABELS = sorted(LABELS, key=lambda i: str.casefold(i[0]))

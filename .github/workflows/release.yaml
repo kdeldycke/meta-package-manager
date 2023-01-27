@@ -10,14 +10,14 @@ name: Build & release
 jobs:
 
   release:
-    uses: kdeldycke/workflows/.github/workflows/release.yaml@v2.4.1
+    uses: kdeldycke/workflows/.github/workflows/release.yaml@v2.4.2
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
 
   test-binaries:
     needs: release
     strategy:
-      matrix: ${{ fromJSON(needs.project-metadata.outputs.nuitka_matrix) }}
+      matrix: ${{ fromJSON(needs.release.outputs.nuitka_matrix) }}
     runs-on: ${{ matrix.os }}
     steps:
       - name: Download artifacts

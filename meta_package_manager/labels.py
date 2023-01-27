@@ -79,10 +79,14 @@ def generate_labels(
         for label_id in label_ids:
             label_map[label_id] = label_name
         # Register label to the global registry.
-        LABELS.append((label_name, color, ", ".join(sorted(label_ids, key=str.casefold))))
+        LABELS.append(
+            (label_name, color, ", ".join(sorted(label_ids, key=str.casefold)))
+        )
 
     # Sort label_map by their name.
-    return {k: v for k, v in sorted(label_map.items(), key=lambda i: str.casefold(i[1]))}
+    return {
+        k: v for k, v in sorted(label_map.items(), key=lambda i: str.casefold(i[1]))
+    }
 
 
 MANAGER_PREFIX = "📦 manager: "

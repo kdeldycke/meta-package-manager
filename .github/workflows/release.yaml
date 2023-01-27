@@ -10,25 +10,31 @@ name: Build & release
 jobs:
 
   release:
-    uses: kdeldycke/workflows/.github/workflows/release.yaml@v2.3.6
+    uses: kdeldycke/workflows/.github/workflows/release.yaml@v2.4.0
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
 
   test-binaries:
     needs: release
-    runs-on: ubuntu-22.04
+    strategy:
+      matrix: ${{ fromJSON(needs.project-metadata.outputs.nuitka_matrix) }}
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Download artefacts
-        id: artefacts
+      - name: Download artifacts
+        id: artifacts
         uses: actions/download-artifact@v3.0.2
         with:
-          name: ${{ needs.release.outputs.bin_name }}
+          name: ${{ matrix.bin_name }}
+      - name: Set binary permissions
+        if: runner.os != 'Windows'
+        run: |
+          chmod +x ${{ steps.artifacts.outputs.path }}/${{ matrix.bin_name }}
       - name: Run mpm --version
         run: |
-          ${{ steps.artefacts.outputs.download-path }}/${{ needs.release.outputs.bin_name }} --version
+          ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }} --version
       - name: Run mpm --help
         run: |
-          ${{ steps.artefacts.outputs.download-path }}/${{ needs.release.outputs.bin_name }} --help
+          ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }} --help
       - name: Run mpm --all-managers managers
         run: |
-          ${{ steps.artefacts.outputs.download-path }}/${{ needs.release.outputs.bin_name }} --all-managers managers
+          ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }} --all-managers managers

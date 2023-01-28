@@ -35,7 +35,7 @@ jobs:
           from click._compat import _default_text_stderr
           from click._compat import _default_text_stdout
 
-          from click_extra import extra_echo
+          from click_extra import echo as extra_echo
 
           out_file = _default_text_stdout()
           err_file = _default_text_stderr()

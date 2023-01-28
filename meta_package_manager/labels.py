@@ -43,12 +43,12 @@ Structure:
 """
 
 
-LabelSet = FrozenSet[str]
-LabelGroup = Dict[str, LabelSet]
+TLabelSet = FrozenSet[str]
+TLabelGroup = Dict[str, TLabelSet]
 
 
 def generate_labels(
-    all_labels: LabelSet, groups: LabelGroup, prefix: str, color: str
+    all_labels: TLabelSet, groups: TLabelGroup, prefix: str, color: str
 ) -> dict[str, str]:
     """Generate labels."""
     # Check group definitions.
@@ -91,7 +91,7 @@ def generate_labels(
 
 MANAGER_PREFIX = "📦 manager: "
 
-MANAGER_LABEL_GROUPS: LabelGroup = {
+MANAGER_LABEL_GROUPS: TLabelGroup = {
     "dnf-based": frozenset({"dnf", "yum"}),
     "dpkg-based": frozenset({"apt", "apt-mint", "opkg"}),
     "npm-based": frozenset({"npm", "yarn"}),
@@ -114,7 +114,7 @@ MANAGER_LABELS = generate_labels(
 
 PLATFORM_PREFIX = "🖥 platform: "
 
-PLATFORM_LABEL_GROUPS: LabelGroup = {
+PLATFORM_LABEL_GROUPS: TLabelGroup = {
     g.name: {p.name for p in g.platforms} for g in PLATFORM_GROUPS
 }
 """Similar platforms are grouped together under the same label."""

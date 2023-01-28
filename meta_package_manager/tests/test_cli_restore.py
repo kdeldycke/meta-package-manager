@@ -106,11 +106,11 @@ class TestRestore(CLISubCommandTests):
             """,
         )
 
-        result = invoke("--npm", "restore", str(toml_path))
+        result = invoke("--npm", "restore", str(toml_path), color=False)
         assert result.exit_code == 0
         assert "pip-npm-dummy.toml" in result.stderr
-        assert "Restore \x1b[97mpip\x1b[0m packages..." not in result.stderr
-        assert "Restore \x1b[97mnpm\x1b[0m packages..." in result.stderr
+        assert "Restore pip packages..." not in result.stderr
+        assert "Restore npm packages..." in result.stderr
 
     @destructive
     def test_restore_excluded_manager(self, invoke, create_config):
@@ -125,11 +125,11 @@ class TestRestore(CLISubCommandTests):
             """,
         )
 
-        result = invoke("--exclude", "npm", "restore", str(toml_path))
+        result = invoke("--exclude", "npm", "restore", str(toml_path), color=False)
         assert result.exit_code == 0
         assert "pip-npm-dummy.toml" in result.stderr
-        assert "Restore \x1b[97mpip\x1b[0m packages..." in result.stderr
-        assert "Restore \x1b[97mnpm\x1b[0m packages..." not in result.stderr
+        assert "Restore pip packages..." in result.stderr
+        assert "Restore npm packages..." not in result.stderr
 
     def test_empty_manager(self, invoke, create_config):
         toml_path = create_config(
@@ -139,7 +139,7 @@ class TestRestore(CLISubCommandTests):
             """,
         )
 
-        result = invoke("restore", str(toml_path))
+        result = invoke("restore", str(toml_path), color=False)
         assert result.exit_code == 0
         assert "pip-empty.toml" in result.stderr
-        assert "Restore \x1b[97mpip\x1b[0m packages..." in result.stderr
+        assert "Restore pip packages..." in result.stderr

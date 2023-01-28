@@ -53,12 +53,23 @@ jobs:
 
           msg = "\x1b[32m\x1b[1mcoco\x1b[0mmo-\x1b[32m\x1b[1mco\x1b[0mre"
 
+          print("----")
+
           echo(msg)
           echo(msg, color=None)
           echo(msg, color=True)
           echo(msg, color=False)
 
+          print("----")
+
           extra_echo(msg)
           extra_echo(msg, color=None)
           extra_echo(msg, color=True)
           extra_echo(msg, color=False)
+
+          print("----")
+
+          for color in [None, True, False]:
+              file = auto_wrap_for_ansi(out_file, color=color)
+              file.write(msg)
+              file.flush()

@@ -88,6 +88,14 @@ classifiers = [
 # https://en.wikipedia.org/wiki/History_of_Python#Support
 python = "^3.7"
 boltons = "^21.0.0"
+# click-extra needs requests, requests needs charset_normalizer, charset_normalizer
+# breaks Nuitka. Work around this by using a lower version number. Once upstream
+# issue is fixed, or requests drops charset_normalizer, this can go away. See:
+# https://github.com/Nuitka/Nuitka/issues/2020
+# https://github.com/Ousret/charset_normalizer/issues/253
+# https://github.com/psf/requests/issues/6331
+# https://github.com/pyinstaller/pyinstaller-hooks-contrib/issues/534
+charset-normalizer = "< 3"
 click = "^8.1.2"
 click-extra = "^3.8.0"
 packageurl-python = "^0.10.3"

@@ -8,6 +8,7 @@ This version is not released yet and is under active development.
 
 - \[mpm\] Unlock run on any Unix-like platform. Closes {issue}`872`.
 - \[mpm\] Activate `brew` on Windows Subsystem for Linux v2.
+- \[mpm\] Depends on `charset-normalizer < 3` to fix Nuitka compilation.
 - \[mpm\] Run tests on Python `3.12-dev`.
 - \[mpm\] Test `mpm` binaries.
 - \[mpm\] Add new GitHub labels for newly supported platforms.

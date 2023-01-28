@@ -83,7 +83,10 @@ def test_changelog():
 def test_labeller_rules():
     # Extract list of extra labels.
     content = PROJECT_ROOT.joinpath(".github/labels-extra.json").read_text()
+    assert content
+
     extra_labels = [lbl["name"] for lbl in json.loads(content)]
+    assert extra_labels
 
     # Canonical labels are uniques.
     assert len(extra_labels) == len(set(extra_labels))

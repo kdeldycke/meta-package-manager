@@ -62,7 +62,9 @@ def operation_matrix() -> str:
             f"{m.requirement}",
         ]
         for group in PLATFORM_GROUPS:
-            line.append(group.icon if group.issubset(m.platforms) else "")
+            line.append(
+                group.icon if group.issubset(m.platforms) and group.icon else ""
+            )
         for op in Operations:
             line.append("✓" if m.implements(op) else "")
         table.append(line)

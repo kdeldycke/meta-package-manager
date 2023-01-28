@@ -26,7 +26,7 @@ from enum import Enum
 from pathlib import Path
 from shutil import which
 from textwrap import dedent, indent, shorten
-from typing import ContextManager, Iterator
+from typing import ContextManager, Iterable, Iterator, cast
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -228,8 +228,14 @@ class PackageManager(metaclass=MetaPackageManager):
     homepage_url: str | None = None
     """Home page of the project, only used in documentation for reference."""
 
-    platforms: frozenset[Platform] = frozenset()
-    """List of platforms supported by the manager."""
+    platforms: Group | Platform | Iterable[Group | Platform] | frozenset[
+        Platform
+    ] = frozenset()
+    """List of platforms supported by the manager.
+
+    Allows for a mishmash of platforms and groups. Will be normalized into a frozen set of
+    ``Platform`` instances at instanciation.
+    """
 
     requirement: str | None = None
     """Minimal required version.
@@ -462,7 +468,9 @@ class PackageManager(metaclass=MetaPackageManager):
     @cached_property
     def supported(self) -> bool:
         """Is the package manager supported on that platform?"""
-        return current_os() in self.platforms
+        # At this point self.platforms is normalized as a frozenset of Platform
+        # instances, but mypy doens't know it.
+        return current_os() in self.platforms  # type: ignore[operator]
 
     @cached_property
     def executable(self) -> bool:

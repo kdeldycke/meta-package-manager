@@ -18,6 +18,7 @@
 """``mpm``'s platform introspection utilities."""
 
 import dataclasses
+from typing import Tuple
 
 from click_extra.platforms import ALL_LINUX, ALL_WINDOWS, BSD_WITHOUT_MACOS
 from click_extra.platforms import MACOS as MACOS_PLATFORM
@@ -25,25 +26,27 @@ from click_extra.platforms import UNIX as ALL_UNIX
 from click_extra.platforms import WSL2, Group
 
 BSD: Group = dataclasses.replace(BSD_WITHOUT_MACOS, name="BSD", icon="🅱️")
-LINUX: Group = Group("linux", "Linux", [*ALL_LINUX.platforms, WSL2], icon="🐧")
-MACOS: Group = Group("macos", "macOS", [MACOS_PLATFORM], icon="🍎")
+LINUX: Group = Group("linux", "Linux", tuple((*ALL_LINUX.platforms, WSL2)), icon="🐧")
+MACOS: Group = Group("macos", "macOS", (MACOS_PLATFORM,), icon="🍎")
 # Catch all for all Unix-like platforms not already covered by BSD, LINUX
 # and MACOS groups above.
 UNIX: Group = Group(
     "unix",
     "Unix",
-    [
-        p
-        for p in ALL_UNIX.platforms
-        if p not in BSD.platforms + LINUX.platforms + MACOS.platforms
-    ],
+    tuple(
+        (
+            p
+            for p in ALL_UNIX.platforms
+            if p not in BSD.platforms + LINUX.platforms + MACOS.platforms
+        )
+    ),
     icon="`>_`",
 )
 WINDOWS: Group = dataclasses.replace(ALL_WINDOWS, name="Windows", icon="🪟")
 """Define comprehensive platform groups to minimize the operation matrix verbosity."""
 
 
-PLATFORM_GROUPS: tuple[Group, ...] = tuple(
-    sorted((LINUX, MACOS, WINDOWS, UNIX, BSD), key=lambda g: g.name.lower())
+PLATFORM_GROUPS: Tuple[Group, ...] = tuple(
+    sorted((BSD, LINUX, MACOS, UNIX, WINDOWS), key=lambda g: g.name.lower())
 )
 """Sorted list of platform groups that will have their own dedicated column in the matrix."""

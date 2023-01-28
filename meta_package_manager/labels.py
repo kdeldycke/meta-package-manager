@@ -115,7 +115,7 @@ MANAGER_LABELS = generate_labels(
 PLATFORM_PREFIX = "🖥 platform: "
 
 PLATFORM_LABEL_GROUPS: TLabelGroup = {
-    g.name: {p.name for p in g.platforms} for g in PLATFORM_GROUPS
+    g.name: frozenset(p.name for p in g.platforms) for g in PLATFORM_GROUPS
 }
 """Similar platforms are grouped together under the same label."""
 

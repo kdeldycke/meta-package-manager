@@ -37,7 +37,7 @@ class Homebrew(PackageManager):
     Homebrew is the umbrella project providing both brew and brew cask commands.
     """
 
-    platforms = LINUX, MACOS, WSL2
+    platforms = {LINUX, MACOS, WSL2}
     """Homebrew core is now compatible with `Linux and Windows Subsystem for Linux
     (WSL) 2 <https://docs.brew.sh/Homebrew-on-Linux>`_.
     """
@@ -562,7 +562,7 @@ class Cask(Homebrew):
 
     homepage_url = "https://github.com/Homebrew/homebrew-cask"
 
-    platforms = frozenset({MACOS})
+    platforms = {MACOS}
     """Casks are only available on macOS, not Linux or WSL."""
 
     cli_names = ("brew",)

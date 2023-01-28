@@ -7,3 +7,54 @@ jobs:
 
   debug:
     uses: kdeldycke/workflows/.github/workflows/debug.yaml@v2.3.6
+
+  click-color-context:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-22.04
+          # - ubuntu-20.04
+          - macos-12
+          # - macos-11
+          - windows-2022
+          # - windows-2019
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3.3.0
+      - uses: actions/setup-python@v4.5.0
+        with:
+          python-version: "3.11"
+      - run: |
+          python -m pip install --upgrade setuptools pip poetry
+      - run: |
+          poetry install --no-interaction --no-ansi
+      - shell: python
+        run: |
+          from click import echo
+          from click._compat import auto_wrap_for_ansi
+          from click._compat import should_strip_ansi
+          from click._compat import strip_ansi
+          from click.globals import resolve_color_default
+          from click._compat import _default_text_stderr
+          from click._compat import _default_text_stdout
+
+          out_file = _default_text_stdout()
+          err_file = _default_text_stderr()
+
+          print(f"_default_text_stdout() = {out_file}")
+          print(f"_default_text_stderr() = {err_file}")
+
+          print(f"should_strip_ansi() = {should_strip_ansi()}")
+          print(f"should_strip_ansi(stderr) = {should_strip_ansi(out_file)}")
+          print(f"should_strip_ansi(stdout) = {should_strip_ansi(err_file)}")
+
+          print(f"auto_wrap_for_ansi = {auto_wrap_for_ansi}")
+
+          print(f"resolve_color_default() = {resolve_color_default()}")
+
+          msg = "\x1b[32m\x1b[1mcoco\x1b[0mmo-\x1b[32m\x1b[1mco\x1b[0mre"
+
+          echo(msg)
+          echo(msg, color=None)
+          echo(msg, color=True)
+          echo(msg, color=False)

@@ -89,7 +89,14 @@ def install_cask():
             capture_output=True,
             encoding="utf-8",
             env=env_copy(
-                {"HOMEBREW_NO_ENV_HINTS": "1", "HOMEBREW_NO_AUTO_UPDATE": "1"}
+                {
+                    # Do not let brew use its live API to fetch the latest version.
+                    # This variable forces brew to use the local repository instead:
+                    # https://github.com/Homebrew/brew/blob/10845a1/Library/Homebrew/env_config.rb#L314-L317
+                    "HOMEBREW_NO_INSTALL_FROM_API": "1",
+                    "HOMEBREW_NO_AUTO_UPDATE": "1",
+                    "HOMEBREW_NO_ENV_HINTS": "1",
+                }
             ),
         )
 

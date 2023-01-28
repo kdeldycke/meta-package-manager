@@ -72,5 +72,5 @@ jobs:
           if auto_wrap_for_ansi:
               for color in [None, True, False]:
                   file = auto_wrap_for_ansi(out_file, color=color)
-                  file.write(msg)
+                  file.write(msg + "\n")
                   file.flush()

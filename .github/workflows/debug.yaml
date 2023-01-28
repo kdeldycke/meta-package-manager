@@ -25,18 +25,17 @@ jobs:
         with:
           python-version: "3.11"
       - run: |
-          python -m pip install --upgrade setuptools pip poetry
-      - run: |
-          poetry install --no-interaction --no-ansi
+          python -m pip install --upgrade click click-extra
       - shell: python
         run: |
           from click import echo
+          from click.globals import resolve_color_default
           from click._compat import auto_wrap_for_ansi
           from click._compat import should_strip_ansi
-          from click._compat import strip_ansi
-          from click.globals import resolve_color_default
           from click._compat import _default_text_stderr
           from click._compat import _default_text_stdout
+
+          from click_extra import extra_echo
 
           out_file = _default_text_stdout()
           err_file = _default_text_stderr()
@@ -58,3 +57,8 @@ jobs:
           echo(msg, color=None)
           echo(msg, color=True)
           echo(msg, color=False)
+
+          extra_echo(msg)
+          extra_echo(msg, color=None)
+          extra_echo(msg, color=True)
+          extra_echo(msg, color=False)

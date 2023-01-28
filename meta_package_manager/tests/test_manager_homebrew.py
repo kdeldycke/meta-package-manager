@@ -63,6 +63,16 @@ def install_cask():
         assert process.returncode == 0
 
     def brew_cleanup():
+        """
+        .. note::
+            ``brew`` does not cleanup ``~/Library/Caches/Homebrew``, see:
+            https://github.com/Homebrew/brew/issues/3784#issuecomment-364675767
+
+            We might need to force it with:
+
+            .. code-block:: shell-session
+                $ rm -rf $(brew --cache)
+        """
         process = subprocess.run(
             ("brew", "cleanup", "-s", "--prune=all"),
             env=env_copy({"HOMEBREW_NO_AUTO_UPDATE": "1"}),

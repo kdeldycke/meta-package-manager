@@ -353,7 +353,7 @@ jobs:
           choco install steamcmd --no-progress
 
       # Mpm
-      - name: Poetry upgrade
+      - name: Poetry - Upgrade
         run: |
           python -m pip install --upgrade poetry
       - name: mpm - Install

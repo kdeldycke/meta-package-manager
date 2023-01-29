@@ -14,6 +14,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Test `mpm` binaries.
 - \[mpm\] Force upgrade of Ruby on Windows test runners.
 - \[mpm\] Fix installation of old formulae in brew unittests.
+- \[mpm\] Force re-detection of `npm` CLI location on macOS subcommand unittests.
 - \[mpm\] Add new GitHub labels for newly supported platforms.
 - \[mpm\] Generates dependency graph in Graphviz format.
 

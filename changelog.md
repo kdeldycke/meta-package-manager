@@ -11,6 +11,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Bump minimal `choco` requirement to `0.10.4`.
 - \[mpm\] Depends on `charset-normalizer < 3` to fix Nuitka compilation.
 - \[mpm\] Run tests on Python `3.12-dev`.
+- \[mpm\] Reduce verbosity of pre-install steps in GitHub actions.
 - \[mpm\] Test `mpm` binaries.
 - \[mpm\] Force upgrade of Ruby on Windows test runners.
 - \[mpm\] Fix installation of old formulae in brew unittests.

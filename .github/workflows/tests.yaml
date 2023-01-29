@@ -143,7 +143,7 @@ jobs:
       - name: Linux - Upgrade apt
         if: runner.os == 'Linux'
         run: |
-          sudo apt update
+          sudo apt --quiet --yes update
 
       # Chocolatey
       - name: Windows - Upgrade Chocolatey
@@ -155,7 +155,7 @@ jobs:
       - name: Linux - Install npm
         if: runner.os == 'Linux'
         run: |
-          sudo apt install --yes npm
+          sudo apt --quiet --yes install npm
       - name: macOS - Install npm
         if: runner.os == 'macOS'
         # Error: Refusing to uninstall /usr/local/Cellar/node@16/16.15.1
@@ -176,7 +176,7 @@ jobs:
       - name: Linux - Install Cargo
         if: runner.os == 'Linux'
         run: |
-          sudo apt install --yes cargo
+          sudo apt --quiet --yes install cargo
       - name: Windows - Install Yarn
         if: runner.os == 'Windows'
         run: |
@@ -192,8 +192,8 @@ jobs:
         run: |
           curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
           echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-          sudo apt update
-          sudo apt install --yes yarn
+          sudo apt --quiet --yes update
+          sudo apt --quiet --yes install yarn
       - name: Windows - Install Yarn
         if: runner.os == 'Windows'
         run: |
@@ -223,7 +223,7 @@ jobs:
       - name: Linux - Install Flatpak
         if: runner.os == 'Linux'
         run: |
-          sudo apt install --yes flatpak
+          sudo apt --quiet --yes install flatpak
 
       # Scoop
       - name: Windows - Install Scoop
@@ -237,19 +237,19 @@ jobs:
         # DNF has only been added in Ubuntu 21.04, not before.
         if: runner.os == 'Linux' && matrix.os != 'ubuntu-20.04'
         run: |
-          sudo apt install --yes dnf
+          sudo apt --quiet --yes install dnf
 
       # Zypper
       - name: Ubuntu >= 20.04 - Install Zypper
         if: runner.os == 'Linux'
         run: |
-          sudo apt install --yes zypper
+          sudo apt --quiet --yes install zypper
 
       # Snap
       - name: Linux - Upgrade Snapd
         if: runner.os == 'Linux'
         run: |
-          sudo apt install --yes snapd
+          sudo apt --quiet --yes install snapd
 
       # VSCode
       - name: macOS - Install VSCode
@@ -299,7 +299,7 @@ jobs:
         #   maybe using tools like ruby-install, rvm, etc.
         if: runner.os == 'Linux' && matrix.os != 'ubuntu-20.04'
         run: |
-          sudo apt install --yes ruby-rubygems
+          sudo apt --quiet --yes install ruby-rubygems
 
       # SteamCMD
       - name: macOS - Install SteamCMD
@@ -311,15 +311,15 @@ jobs:
         run: |
           sudo add-apt-repository --yes multiverse
           sudo dpkg --add-architecture i386
-          sudo apt update
-          sudo apt install --yes lib32gcc-s1
+          sudo apt --quiet --yes update
+          sudo apt --quiet --yes install lib32gcc-s1
           # Accept Steam license.
           # Source: https://askubuntu.com/a/1017487
           echo steam steam/question select "I AGREE" | sudo debconf-set-selections
           echo steam steam/license note '' | sudo debconf-set-selections
           sudo debconf-show steam
-          sudo apt install --yes steam
-          sudo apt install --yes steamcmd
+          sudo apt --quiet --yes install steam
+          sudo apt --quiet --yes install steamcmd
       - name: Windows - Install SteamCMD
         if: runner.os == 'Windows'
         run: |

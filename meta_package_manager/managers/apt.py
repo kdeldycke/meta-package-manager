@@ -42,7 +42,12 @@ class APT(PackageManager):
 
     requirement = "1.0.0"
 
-    post_args = ("--quiet",)
+    pre_args = ("--quiet",)
+    """
+    ``--quiet``: produces output suitable for logging, omitting progress indicators.
+
+    Souce: https://manpages.org/apt-get/8#options
+    """
 
     version_regex = r"apt\s+(?P<version>\S+)"
     """
@@ -58,7 +63,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt list --installed --quiet
+            ► apt --quiet list --installed
             Listing...
             adduser/xenial,now 3.113+nmu3ubuntu4 all [installed]
             base-files/xenial-updates,now 9.4ubuntu4.3 amd64 [installed]
@@ -100,7 +105,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt list --upgradable --quiet
+            ► apt --quiet list --upgradable
             Listing...
             apt/xenial-updates 1.2.19 amd64 [upgradable from: 1.2.15ubuntu0.2]
             nano/xenial-updates 2.5.3-2ubuntu2 amd64 [upgradable from: 2.5.3-2]
@@ -123,7 +128,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt search abc --names-only --quiet
+            ► apt --quiet search abc --names-only
             Sorting...
             Full Text Search...
             abcde/xenial 2.7.1-1 all
@@ -143,7 +148,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt search ^sed$ --names-only --quiet
+            ► apt --quiet search ^sed$ --names-only
             Sorting...
             Full Text Search...
             sed/xenial 2.1.9-3 all
@@ -151,7 +156,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt search abc --full --quiet
+            ► apt --quiet search abc --full
             Sorting...
             Full Text Search...
             abcde/xenial 2.7.1-1 all
@@ -206,9 +211,9 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo apt install git --yes --quiet
+            ► sudo apt --quiet --yes install git
         """
-        return self.run_cli("install", package_id, "--yes", sudo=True)
+        return self.run_cli("--yes", "install", package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
@@ -216,9 +221,9 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo apt upgrade --yes --quiet
+            ► sudo apt --quiet --yes upgrade
         """
-        return self.build_cli("upgrade", "--yes", sudo=True)
+        return self.build_cli("--yes", "upgrade", sudo=True)
 
     @version_not_implemented
     def upgrade_one_cli(
@@ -229,10 +234,10 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo apt install --only-upgrade git --yes --quiet
+            ► sudo apt --quiet --yes install --only-upgrade git
         """
         return self.build_cli(
-            "install", "--only-upgrade", package_id, "--yes", sudo=True
+            "--yes", "install", "--only-upgrade", package_id, sudo=True
         )
 
     def sync(self) -> None:
@@ -240,7 +245,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo apt update --yes --quiet
+            ► sudo apt --quiet --yes update
             Hit:1 http://archive.ubuntu.com xenial InRelease
             Get:2 http://archive.ubuntu.com xenial-updates InRelease [102 kB]
             Get:3 http://archive.ubuntu.com xenial-security InRelease [102 kB]
@@ -250,18 +255,18 @@ class APT(PackageManager):
             Building dependency tree...
             Reading state information...
         """
-        self.run_cli("update", "--yes", sudo=True)
+        self.run_cli("--yes", "update", sudo=True)
 
     def cleanup(self) -> None:
         """Removes things we don't need anymore.
 
         .. code-block:: shell-session
 
-            ► sudo apt autoremove --yes --quiet
-            ► sudo apt clean --yes --quiet
+            ► sudo apt --quiet --yes autoremove
+            ► sudo apt --quiet --yes clean
         """
         for command in ("autoremove", "clean"):
-            self.run_cli(command, "--yes", sudo=True)
+            self.run_cli("--yes", command, sudo=True)
 
 
 class APT_Mint(APT):
@@ -294,7 +299,7 @@ class APT_Mint(APT):
 
         .. code-block:: shell-session
 
-            ► /usr/local/bin/apt search sed --quiet
+            ► /usr/local/bin/apt --quiet search sed
             v   librust-slog-2.5+erased-serde-dev  -
             p   python3-blessed                    - Practical wrapper
             i   sed                                - GNU stream editor
@@ -302,7 +307,7 @@ class APT_Mint(APT):
 
         .. code-block:: shell-session
 
-            ► /usr/local/bin/apt search ^sed$ --quiet
+            ► /usr/local/bin/apt --quiet search ^sed$
             i   sed              - GNU stream editor
             p   sed:i386         - GNU stream editor
         """

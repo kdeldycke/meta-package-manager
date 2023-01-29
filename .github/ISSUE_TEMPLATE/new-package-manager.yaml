@@ -168,7 +168,7 @@ body:
         Command and output to synchronize local metadata from remote repositories.
       render: shell-session
       placeholder: |
-        $ sudo apt update --yes --quiet
+        $ sudo apt --quiet --yes update
         Hit:1 http://archive.ubuntu.com xenial InRelease
         Get:2 http://archive.ubuntu.com xenial-updates InRelease [102 kB]
         Get:3 http://archive.ubuntu.com xenial-security InRelease [102 kB]

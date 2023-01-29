@@ -149,7 +149,7 @@ jobs:
       - name: Windows - Upgrade Chocolatey
         if: runner.os == 'Windows'
         run: |
-          choco upgrade chocolatey
+          choco upgrade chocolatey --no-progress
 
       # NPM
       - name: Linux - Install npm
@@ -180,7 +180,7 @@ jobs:
       - name: Windows - Install Yarn
         if: runner.os == 'Windows'
         run: |
-          choco install rust
+          choco install rust --no-progress
 
       # Yarn
       - name: macOS - Install Yarn
@@ -197,7 +197,7 @@ jobs:
       - name: Windows - Install Yarn
         if: runner.os == 'Windows'
         run: |
-          choco install yarn
+          choco install yarn --no-progress
 
       # Composer
       - name: macOS - Upgrade Composer
@@ -207,7 +207,7 @@ jobs:
       - name: Windows - Install Composer
         if: runner.os == 'Windows'
         run: |
-          choco install composer
+          choco install composer --no-progress
 
       # MAS
       - name: macOS - Install mas
@@ -274,13 +274,13 @@ jobs:
       - name: Windows - Install VSCode
         if: runner.os == 'Windows'
         run: |
-          choco install vscode
+          choco install vscode --no-progress
 
       # Gem
       - name: Windows - Upgrade Ruby
         if: runner.os == 'Windows'
         run: |
-          choco upgrade ruby
+          choco upgrade ruby --no-progress
       - name: macOS & Windows - Upgrade gem
         if: runner.os != 'Linux'
         run: |
@@ -322,7 +322,7 @@ jobs:
       - name: Windows - Install SteamCMD
         if: runner.os == 'Windows'
         run: |
-          choco install steamcmd
+          choco install steamcmd --no-progress
 
       # Mpm
       - name: Upgrade Poetry

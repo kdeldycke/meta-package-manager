@@ -285,11 +285,15 @@ jobs:
       - name: macOS & Windows - Upgrade gem
         if: runner.os != 'Linux'
         run: |
-          gem update --system
+          ruby -v
+          gem --version
+          gem install --quiet rubygems-update -v '<3'
+          update_rubygems
+          gem update --quiet --system
       - name: Ubuntu < 21.04 - Upgrade gem with itself
         if: matrix.os == 'ubuntu-20.04'
         run: |
-          sudo gem update --system
+          sudo gem update --quiet --system
       - name: Ubuntu >= 21.04 - Upgrade gem with APT
         # As of Ubuntu 21.04, RubyGems is exclusively managed by APT. A call to "sudo gem update --system"
         # ends up with the following error:

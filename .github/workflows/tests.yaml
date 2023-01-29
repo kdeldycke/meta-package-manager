@@ -98,7 +98,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3.3.0
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Python ${{ matrix.python-version }} - Install
         uses: actions/setup-python@v4.5.0
         with:
           python-version: ${{ matrix.python-version }}
@@ -113,146 +113,148 @@ jobs:
       ### ready to use for mpm.
 
       # Pip
-      - name: Upgrade pip and setuptools
+      - name: Pip & Setuptools - Upgrade
         run: |
           python -m pip install --upgrade setuptools pip
 
       # Pipx
-      - name: Install pipx
+      - name: Pipx - Install
         run: |
           python -m pip install --user pipx
           python -m pipx ensurepath
 
       # Homebrew
-      - name: macOS - Upgrade Homebrew
+      - name: Homebrew - macOS upgrade
         if: runner.os == 'macOS'
         run: |
           brew update
-      - name: Linux - Install Homebrew
+      - name: Homebrew - Linux install
         if: runner.os == 'Linux'
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           echo "/home/linuxbrew/.linuxbrew/bin/" >> $GITHUB_PATH
-      - name: Homebrew doctor and tap repair
+      - name: Homebrew - Doctor and tap repair
         if: runner.os != 'Windows'
         run: |
           brew doctor || true
           brew tap --repair
 
       # Apt
-      - name: Linux - Upgrade apt
+      - name: APT - Linux upgrade
         if: runner.os == 'Linux'
         run: |
           sudo apt --quiet --yes update
 
       # Chocolatey
-      - name: Windows - Upgrade Chocolatey
+      - name: Chocolatey - Windows upgrade
         if: runner.os == 'Windows'
         run: |
           choco upgrade chocolatey --no-progress
 
       # NPM
-      - name: Linux - Install npm
+      - name: NPM - Linux install
         if: runner.os == 'Linux'
         run: |
           sudo apt --quiet --yes install npm
-      - name: macOS - Install npm
+      - name: NPM - macOS install
         if: runner.os == 'macOS'
         # Error: Refusing to uninstall /usr/local/Cellar/node@16/16.15.1
         # because it is required by mongodb-community@5.0 and mongosh, which are currently installed.
         run: |
           brew uninstall node@16 mongodb-community@5.0 mongosh
           brew install npm
-      - name: Windows - Upgrade npm
+          sudo mkdir -p /usr/local/bin
+          sudo ln -s /usr/bin/npm /usr/local/bin/npm
+      - name: NPM - Windows upgrade
         if: runner.os == 'Windows'
         run: |
           npm install --global npm
 
       # Cargo
-      - name: macOS - Install Cargo
+      - name: Cargo - macOS install
         if: runner.os == 'macOS'
         run: |
           brew install rust
-      - name: Linux - Install Cargo
+      - name: Cargo - Linux install
         if: runner.os == 'Linux'
         run: |
           sudo apt --quiet --yes install cargo
-      - name: Windows - Install Yarn
+      - name: Cargo - Windows install
         if: runner.os == 'Windows'
         run: |
           choco install rust --no-progress
 
       # Yarn
-      - name: macOS - Install Yarn
+      - name: Yarn - macOS install
         if: runner.os == 'macOS'
         run: |
           brew install yarn
-      - name: Linux - Install Yarn
+      - name: Yarn - Linux install
         if: runner.os == 'Linux'
         run: |
           curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
           echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
           sudo apt --quiet --yes update
           sudo apt --quiet --yes install yarn
-      - name: Windows - Install Yarn
+      - name: Yarn - Windows install
         if: runner.os == 'Windows'
         run: |
           choco install yarn --no-progress
 
       # Composer
-      - name: macOS - Upgrade Composer
+      - name: Composer - macOS upgrade
         if: runner.os == 'macOS'
         run: |
           brew upgrade composer
-      - name: Windows - Install Composer
+      - name: Composer - Windows install
         if: runner.os == 'Windows'
         run: |
           choco install composer --no-progress
 
       # MAS
-      - name: macOS - Install mas
+      - name: MAS - macOS install
         if: runner.os == 'macOS'
         run: |
           brew install mas
 
       # Flatpak
-      - name: Ubuntu < 22.04 - Setup Flatpak repo
+      - name: Flatpak - Ubuntu < 22.04 repo setup
         if: matrix.os == 'ubuntu-20.04'
         run: |
           sudo add-apt-repository --yes ppa:alexlarsson/flatpak
-      - name: Linux - Install Flatpak
+      - name: Flatpak - Linux install
         if: runner.os == 'Linux'
         run: |
           sudo apt --quiet --yes install flatpak
 
       # Scoop
-      - name: Windows - Install Scoop
+      - name: Scoop - Windows install
         if: runner.os == 'Windows'
         run: |
           iwr get.scoop.sh -outfile 'install.ps1'
           .\install.ps1 -RunAsAdmin
 
       # DNF
-      - name: Linux - Install DNF
+      - name: DNF - Linux install
         # DNF has only been added in Ubuntu 21.04, not before.
         if: runner.os == 'Linux' && matrix.os != 'ubuntu-20.04'
         run: |
           sudo apt --quiet --yes install dnf
 
       # Zypper
-      - name: Ubuntu >= 20.04 - Install Zypper
+      - name: Zypper - Ubuntu >= 20.04 install
         if: runner.os == 'Linux'
         run: |
           sudo apt --quiet --yes install zypper
 
       # Snap
-      - name: Linux - Upgrade Snapd
+      - name: Snap - Linux upgrade
         if: runner.os == 'Linux'
         run: |
           sudo apt --quiet --yes install snapd
 
       # VSCode
-      - name: macOS - Install VSCode
+      - name: VSCode - macOS install
         if: runner.os == 'macOS'
         # XXX Tweak permission to fix this issue:
         # Hint: https://github.com/Homebrew/discussions/discussions/633#discussioncomment-1400084
@@ -267,17 +269,17 @@ jobs:
         run: |
           sudo chown -R "$USER" /private/tmp/
           brew install --cask visual-studio-code
-      - name: Linux - Install VSCode
+      - name: VSCode - Linux install
         if: runner.os == 'Linux'
         run: |
           sudo snap install --classic code
-      - name: Windows - Install VSCode
+      - name: VSCode - Windows install
         if: runner.os == 'Windows'
         run: |
           choco install vscode --no-progress
 
       # Gem
-      - name: Windows - Upgrade Ruby and gem
+      - name: Ruby & Gem - Windows upgrade
         if: runner.os == 'Windows'
         # XXX "gem install rubygems-update; update_rubygems" is needed on some old versions of rubygems to unstuck
         # subsequent "gem update --quiet --system" calls.
@@ -287,14 +289,14 @@ jobs:
           choco upgrade ruby --no-progress
           refreshenv
           gem install --quiet rubygems-update -v '<3'
-          Import-Module "$env:ChocolateyInstall/helpers/chocolateyInstaller.psm1"
+          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
           update_rubygems
           gem update --quiet --system
-      - name: macOS & Ubuntu < 21.04 - Upgrade gem with itself
+      - name: Ruby & Gem - macOS & Ubuntu < 21.04 upgrade
         if: runner.os == 'macOS' || matrix.os == 'ubuntu-20.04'
         run: |
           sudo gem update --quiet --system
-      - name: Ubuntu >= 21.04 - Upgrade gem with APT
+      - name: Ruby & Gem - Ubuntu >= 21.04 upgrade
         # As of Ubuntu 21.04, RubyGems is exclusively managed by APT. A call to "sudo gem update --system"
         # ends up with the following error:
         #   ERROR:  Your RubyGems was installed trough APT, and upgrading it through RubyGems
@@ -306,11 +308,11 @@ jobs:
           sudo apt --quiet --yes install ruby-rubygems
 
       # SteamCMD
-      - name: macOS - Install SteamCMD
+      - name: SteamCMD - macOS install
         if: runner.os == 'macOS'
         run: |
           brew install --cask steamcmd
-      - name: Linux - Install SteamCMD
+      - name: SteamCMD - Linux install
         if: runner.os == 'Linux'
         run: |
           sudo add-apt-repository --yes multiverse
@@ -324,25 +326,25 @@ jobs:
           sudo debconf-show steam
           sudo apt --quiet --yes install steam
           sudo apt --quiet --yes install steamcmd
-      - name: Windows - Install SteamCMD
+      - name: SteamCMD - Windows install
         if: runner.os == 'Windows'
         run: |
           choco install steamcmd --no-progress
 
       # Mpm
-      - name: Upgrade Poetry
+      - name: Poetry upgrade
         run: |
           python -m pip install --upgrade poetry
-      - name: Install mpm with Poetry
+      - name: mpm - Install
         run: |
           poetry install --no-interaction --no-ansi
-      - name: mpm output for debugging - macOS & Linux
+      - name: mpm - macOS & Linux output
         if: runner.os != 'Windows'
         run: |
           poetry run mpm
           poetry run mpm --version
           poetry run mpm managers
-      - name: mpm output for debugging - Windows
+      - name: mpm - Windows output
         if: runner.os == 'Windows'
         # XXX Workaround for Windows runners redirecting the output of commands to files. See:
         # https://github.com/databrickslabs/dbx/issues/455#issuecomment-1312770919
@@ -356,12 +358,12 @@ jobs:
           poetry run mpm managers
 
       # Prepare env for tests.
-      - name: Hack to fix coverage
+      - name: Tests - Coverage hack
         # "Can't combine line data with arc data" error.
         if: runner.os != 'Windows'
         run: |
           rm -rf .coverage*
-      - name: Clean-up .pyc leftovers
+      - name: Tests - Clean-up .pyc leftovers
         # To eliminate these warnings:
         #   CoverageWarning: Couldn't parse '/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn
         #   /T/pip-install-v4yiyxo1/argparse_2a0cc810c7b545beacef972740eaaabc/argparse.py':
@@ -371,7 +373,7 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           sudo find / -name "*.pyc" -delete || true
-      - name: Tests and coverage report in destructive mode
+      - name: Tests - Destructive mode
         env:
           DESTRUCTIVE_TESTS: true
         # pyproject.toml config file is specified at CLI level instead of
@@ -381,5 +383,5 @@ jobs:
         # https://github.com/pytest-dev/pytest-cov/issues/243
         run: |
           poetry run pytest --exitfirst --cov-config=pyproject.toml --cov=./ --cov-report=xml
-      - name: Upload coverage to Codecov
+      - name: Coverage - Upload Codecov
         uses: codecov/codecov-action@v3.1.1

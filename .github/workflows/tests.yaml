@@ -292,26 +292,9 @@ jobs:
           Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
           Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1"
           "-------------XXX003"
-          & RefreshEnv.cmd
-          "-------------XXX004"
-          ls env:
-          Get-ChildItem Env: | Sort Name
-          "-------------XXX005"
           refreshenv
           ruby -v
           gem --version
-          "-------------XXX006"
-          gem install --quiet rubygems-update -v '<3'
-          "-------------XXX007"
-          ruby -v
-          gem --version
-          "-------------XXX008"
-          refreshenv
-          "-------------XXX009"
-          ruby -v
-          gem --version
-          "-------------XXX010"
-          update_rubygems
           "-------------XXX011"
           gem update --quiet --system
       - name: Ruby & Gem - macOS & Ubuntu < 21.04 upgrade

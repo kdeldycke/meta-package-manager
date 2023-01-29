@@ -277,21 +277,18 @@ jobs:
           choco install vscode --no-progress
 
       # Gem
-      - name: Windows - Upgrade Ruby
+      - name: Windows - Upgrade Ruby and gem
         if: runner.os == 'Windows'
+        # XXX "gem install rubygems-update; update_rubygems" is needed on some old versions of rubygems to unstuck
+        # subsequent "gem update --quiet --system" calls.
         run: |
           choco upgrade ruby --no-progress
           refreshenv
-      - name: macOS & Windows - Upgrade gem
-        if: runner.os != 'Linux'
-        run: |
-          ruby -v
-          gem --version
           gem install --quiet rubygems-update -v '<3'
           update_rubygems
           gem update --quiet --system
-      - name: Ubuntu < 21.04 - Upgrade gem with itself
-        if: matrix.os == 'ubuntu-20.04'
+      - name: macOS & Ubuntu < 21.04 - Upgrade gem with itself
+        if: runner.os == 'macOS' || matrix.os == 'ubuntu-20.04'
         run: |
           sudo gem update --quiet --system
       - name: Ubuntu >= 21.04 - Upgrade gem with APT

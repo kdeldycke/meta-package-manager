@@ -277,6 +277,10 @@ jobs:
           choco install vscode
 
       # Gem
+      - name: Windows - Upgrade Ruby
+        if: runner.os == 'Windows'
+        run: |
+          choco upgrade ruby
       - name: macOS & Windows - Upgrade gem
         if: runner.os != 'Linux'
         run: |

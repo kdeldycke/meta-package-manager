@@ -11,6 +11,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Depends on `charset-normalizer < 3` to fix Nuitka compilation.
 - \[mpm\] Run tests on Python `3.12-dev`.
 - \[mpm\] Test `mpm` binaries.
+- \[mpm\] Force upgrade of Ruby on Windows test runners.
 - \[mpm\] Fix installation of old formulae in brew unittests.
 - \[mpm\] Add new GitHub labels for newly supported platforms.
 - \[mpm\] Generates dependency graph in Graphviz format.

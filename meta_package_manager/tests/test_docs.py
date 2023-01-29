@@ -83,7 +83,6 @@ def test_changelog():
 def test_labeller_rules():
     # Extract list of extra labels.
     content = PROJECT_ROOT.joinpath(".github/labels-extra.json").read_text()
-    print(content)
     assert content
 
     extra_labels = [lbl["name"] for lbl in json.loads(content)]
@@ -93,6 +92,8 @@ def test_labeller_rules():
     # Canonical labels are uniques.
     assert len(extra_labels) == len(set(extra_labels))
     canonical_labels = set(extra_labels)
+    print(canonical_labels)
+    assert canonical_labels
 
     # Extract and categorize labels.
     canonical_managers = {
@@ -100,7 +101,6 @@ def test_labeller_rules():
         for lbl in canonical_labels
         if lbl.startswith(MANAGER_PREFIX) and "mpm" not in lbl
     }
-    print(canonical_managers)
     assert canonical_managers
     canonical_platforms = {
         lbl for lbl in canonical_labels if lbl.startswith(PLATFORM_PREFIX)

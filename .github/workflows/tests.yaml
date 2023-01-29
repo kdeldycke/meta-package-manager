@@ -291,10 +291,11 @@ jobs:
           "-------------XXX002"
           Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
           Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1"
-          "XXX003"
-          call RefreshEnv.cmd
-          "-------------XXX004"
+          "-------------XXX003"
           & RefreshEnv.cmd
+          "-------------XXX004"
+          ls env:
+          Get-ChildItem Env: | Sort Name
           "-------------XXX005"
           refreshenv
           ruby -v

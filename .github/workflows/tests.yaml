@@ -285,12 +285,6 @@ jobs:
         # The RefreshEnv is needed to make sure the new Ruby version is used.
         run: |
           choco upgrade ruby --no-progress --yes
-          "-------------XXX001"
-          ruby -v
-          gem --version
-          "-------------XXX002"
-          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-          Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1"
           "-------------XXX003"
           refreshenv
           ruby -v

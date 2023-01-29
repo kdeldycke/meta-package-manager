@@ -279,19 +279,14 @@ jobs:
       # Gem
       - name: Ruby & Gem - Windows upgrade
         if: runner.os == 'Windows'
-        # XXX "gem install rubygems-update; update_rubygems" is needed on some old versions of rubygems to unstuck
-        # subsequent "gem update --quiet --system" calls.
-        # The Import-Module workaround is comming from: https://github.com/actions/runner-images/discussions/6065
-        # The RefreshEnv is needed to make sure the new Ruby version is used.
+        # The 'refreshenv' call forces the new Ruby version installed by 'choco' to be registered in the 'PATH'.
+        # The Import-Module workaround is inspired by:
+        # https://github.com/actions/runner-images/discussions/6065
+        # https://docs.chocolatey.org/en-us/troubleshooting#why-does-choco-tab-not-work-for-me
         run: |
           choco upgrade ruby --no-progress --yes
-          "-------------XXX002"
           Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-          "-------------XXX003"
           refreshenv
-          ruby -v
-          gem --version
-          "-------------XXX011"
           gem update --quiet --system
       - name: Ruby & Gem - macOS & Ubuntu < 21.04 upgrade
         if: runner.os == 'macOS' || matrix.os == 'ubuntu-20.04'
@@ -353,7 +348,10 @@ jobs:
         # https://gist.github.com/NodeJSmith/e7e37f2d3f162456869f015f842bcf15
         env:
           PYTHONIOENCODING: "utf8"
+        # The 'refreshenv' is required for new and updated components to be registered in the 'PATH'.
         run: |
+          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+          refreshenv
           poetry run mpm
           poetry run mpm --version
           poetry run mpm managers

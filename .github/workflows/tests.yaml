@@ -281,10 +281,13 @@ jobs:
         if: runner.os == 'Windows'
         # XXX "gem install rubygems-update; update_rubygems" is needed on some old versions of rubygems to unstuck
         # subsequent "gem update --quiet --system" calls.
+        # The Import-Module workaround is comming from: https://github.com/actions/runner-images/discussions/6065
+        # The RefreshEnv is needed to make sure the new Ruby version is used.
         run: |
           choco upgrade ruby --no-progress
           refreshenv
           gem install --quiet rubygems-update -v '<3'
+          Import-Module "$env:ChocolateyInstall/helpers/chocolateyInstaller.psm1"
           update_rubygems
           gem update --quiet --system
       - name: macOS & Ubuntu < 21.04 - Upgrade gem with itself

@@ -287,9 +287,10 @@ jobs:
         # The RefreshEnv is needed to make sure the new Ruby version is used.
         run: |
           choco upgrade ruby --no-progress
+          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+          Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1"
           refreshenv
           gem install --quiet rubygems-update -v '<3'
-          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
           update_rubygems
           gem update --quiet --system
       - name: Ruby & Gem - macOS & Ubuntu < 21.04 upgrade

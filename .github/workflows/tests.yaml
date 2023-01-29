@@ -163,8 +163,6 @@ jobs:
         run: |
           brew uninstall node@16 mongodb-community@5.0 mongosh
           brew install npm
-          sudo mkdir -p /usr/local/bin
-          sudo ln -s /usr/bin/npm /usr/local/bin/npm
       - name: NPM - Windows upgrade
         if: runner.os == 'Windows'
         run: |

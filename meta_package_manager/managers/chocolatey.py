@@ -33,7 +33,12 @@ class Choco(PackageManager):
 
     platforms = WINDOWS
 
-    requirement = "0.10.4"
+    requirement = "0.10.9"
+    """ ``0.10.9`` is the first version to support the ``--no-color`` option.
+
+    Source: `choco options and switches
+    <https://docs.chocolatey.org/en-us/choco/commands/feature#options-and-switches>`_.
+    """
 
     post_args = ("--no-progress", "--no-color")
 

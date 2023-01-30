@@ -350,6 +350,8 @@ jobs:
           PYTHONIOENCODING: "utf8"
         # The 'refreshenv' is required for new and updated components to be registered in the 'PATH'.
         run: |
+          Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1"
+          refreshenv
           poetry run mpm
           poetry run mpm --version
           poetry run mpm managers

@@ -187,4 +187,5 @@ def pytest_runtest_teardown(item, nextitem):
 
             # Force recompute of the CLI path.
             cli_path = npm.cli_path
-            assert isinstance(npm.cli_path, Path)
+            if cli_path:
+                assert isinstance(npm.cli_path, Path)

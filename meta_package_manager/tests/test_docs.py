@@ -86,13 +86,11 @@ def test_labeller_rules():
     assert content
 
     extra_labels = [lbl["name"] for lbl in json.loads(content)]
-    print(extra_labels)
     assert extra_labels
 
     # Canonical labels are uniques.
     assert len(extra_labels) == len(set(extra_labels))
     canonical_labels = set(extra_labels)
-    print(canonical_labels)
     assert canonical_labels
 
     # Extract and categorize labels.
@@ -101,6 +99,14 @@ def test_labeller_rules():
         for lbl in canonical_labels
         if lbl.startswith(MANAGER_PREFIX) and "mpm" not in lbl
     }
+    print(repr(canonical_labels))
+    print(repr(MANAGER_PREFIX))
+    print(
+        [
+            (lbl, MANAGER_PREFIX, lbl.startswith(MANAGER_PREFIX))
+            for lbl in canonical_labels
+        ]
+    )
     assert canonical_managers
     canonical_platforms = {
         lbl for lbl in canonical_labels if lbl.startswith(PLATFORM_PREFIX)

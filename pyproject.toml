@@ -96,7 +96,7 @@ boltons = "^21.0.0"
 # https://github.com/Ousret/charset_normalizer/issues/253
 # https://github.com/psf/requests/issues/6331
 # https://github.com/pyinstaller/pyinstaller-hooks-contrib/issues/534
-charset-normalizer = "< 3"
+charset-normalizer = "<4"
 click = "^8.1.2"
 click-extra = "^3.8.0"
 packageurl-python = "^0.10.3"

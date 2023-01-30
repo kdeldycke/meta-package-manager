@@ -204,10 +204,10 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew upgrade composer
-      - name: Composer - Windows install
+      - name: Composer - Windows upgrade
         if: runner.os == 'Windows'
         run: |
-          choco install composer --no-progress
+          choco upgrade composer --no-progress --yes
 
       # MAS
       - name: MAS - macOS install

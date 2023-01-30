@@ -348,10 +348,7 @@ jobs:
         # https://gist.github.com/NodeJSmith/e7e37f2d3f162456869f015f842bcf15
         env:
           PYTHONIOENCODING: "utf8"
-        # The 'refreshenv' is required for new and updated components to be registered in the 'PATH'.
         run: |
-          Import-Module "$env:ChocolateyInstall\helpers\chocolateyInstaller.psm1"
-          refreshenv
           poetry run mpm
           poetry run mpm --version
           poetry run mpm managers

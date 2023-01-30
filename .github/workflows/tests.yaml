@@ -92,6 +92,11 @@ jobs:
     # We keep going when a job flagged as not stable fails.
     continue-on-error: ${{ matrix.state == 'unstable' }}
     env:
+      # XXX Workaround for Windows runners redirecting the output of commands to files. See:
+      # https://github.com/databrickslabs/dbx/issues/455#issuecomment-1312770919
+      # https://github.com/pallets/click/issues/2121#issuecomment-1312773882
+      # https://gist.github.com/NodeJSmith/e7e37f2d3f162456869f015f842bcf15
+      PYTHONIOENCODING: "utf8"
       # Deactivate Homebrew auto-update and verbose output.
       HOMEBREW_NO_ENV_HINTS: "1"
       HOMEBREW_NO_AUTO_UPDATE: "1"
@@ -334,24 +339,18 @@ jobs:
       - name: mpm - Install
         run: |
           poetry install --no-interaction --no-ansi
-      - name: mpm - macOS & Linux output
-        if: runner.os != 'Windows'
+      - name: mpm --help
         run: |
           poetry run mpm
-          poetry run mpm --version
-          poetry run mpm managers
-      - name: mpm - Windows output
-        if: runner.os == 'Windows'
-        # XXX Workaround for Windows runners redirecting the output of commands to files. See:
-        # https://github.com/databrickslabs/dbx/issues/455#issuecomment-1312770919
-        # https://github.com/pallets/click/issues/2121#issuecomment-1312773882
-        # https://gist.github.com/NodeJSmith/e7e37f2d3f162456869f015f842bcf15
-        env:
-          PYTHONIOENCODING: "utf8"
+      - name: mpm --version
         run: |
-          poetry run mpm
           poetry run mpm --version
+      - name: mpm managers
+        run: |
           poetry run mpm managers
+      - name: mpm --all-managers managers
+        run: |
+          poetry run mpm --all-managers managers
 
       # Prepare env for tests.
       - name: Tests - Coverage hack

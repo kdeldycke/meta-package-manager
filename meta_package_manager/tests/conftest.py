@@ -19,6 +19,7 @@ from __future__ import annotations
 
 from functools import partial
 from operator import attrgetter
+from pathlib import Path
 
 import pytest
 from click_extra.platforms import is_macos
@@ -183,3 +184,7 @@ def pytest_runtest_teardown(item, nextitem):
             if "cli_path" in npm.__dict__:
                 # Reset cached cli_path to force re-detection of the CLI.
                 del npm.cli_path
+
+            # Force recompute of the CLI path.
+            cli_path = npm.cli_path
+            assert isinstance(npm.cli_path, Path)

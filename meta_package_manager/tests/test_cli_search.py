@@ -25,7 +25,7 @@ from time import sleep
 
 import pytest
 from boltons.iterutils import same
-from click_extra.tests.conftest import unless_macos
+from click_extra.tests.conftest import skip_windows, unless_macos
 
 from ..base import Package
 from ..pool import pool
@@ -163,6 +163,11 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         # We should find lots of results for this package search.
         assert int(msg_match.groups()[0]) >= 20
 
+    # XXX Colorama, a dependency of Click, is supposed to transform ANSI codes into
+    # Windows-specific directives but doen't. Maybe because the running environment is
+    # not considered as a terminal. We need to investigate this further and report
+    # issues to either Click or Colorama.
+    @skip_windows
     def test_search_highlight(self, invoke):
         """We search on cargo as it is available on all platforms.
 

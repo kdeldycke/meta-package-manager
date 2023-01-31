@@ -101,14 +101,6 @@ def test_labeller_rules():
         for lbl in canonical_labels
         if lbl.startswith(MANAGER_PREFIX) and "mpm" not in lbl
     }
-    print(repr(canonical_labels))
-    print(repr(MANAGER_PREFIX))
-    print(
-        [
-            (lbl, MANAGER_PREFIX, lbl.startswith(MANAGER_PREFIX))
-            for lbl in canonical_labels
-        ]
-    )
     assert canonical_managers
     canonical_platforms = {
         lbl for lbl in canonical_labels if lbl.startswith(PLATFORM_PREFIX)

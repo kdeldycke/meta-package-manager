@@ -23,6 +23,7 @@ from collections import Counter
 from pathlib import Path
 
 from boltons.iterutils import flatten
+from click_extra.platforms import is_windows
 from yaml import Loader, load
 
 if sys.version_info >= (3, 11):
@@ -81,8 +82,10 @@ def test_changelog():
 
 
 def test_labeller_rules():
+    # Forcing encoding is required on Windows.
+    extra_args = {"encoding": "utf-8"} if is_windows() else {}
     # Extract list of extra labels.
-    content = PROJECT_ROOT.joinpath(".github/labels-extra.json").read_text()
+    content = PROJECT_ROOT.joinpath(".github/labels-extra.json").read_text(**extra_args)
     assert content
 
     extra_labels = [lbl["name"] for lbl in json.loads(content)]

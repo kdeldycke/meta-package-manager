@@ -33,9 +33,9 @@ UNIX: Group = Group(
     "unix",
     "Unix",
     tuple(
-            p
-            for p in ALL_UNIX.platforms
-            if p not in BSD.platforms + LINUX.platforms + MACOS.platforms
+        p
+        for p in ALL_UNIX.platforms
+        if p not in BSD.platforms + LINUX.platforms + MACOS.platforms
     ),
     icon="`>_`",
 )

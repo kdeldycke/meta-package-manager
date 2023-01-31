@@ -61,6 +61,7 @@ from .output import (
     print_stats,
     print_table,
 )
+from .platforms import encoding_args
 from .pool import pool
 from .specifier import VERSION_SEP, Solver, Specifier
 
@@ -1107,7 +1108,7 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
         "installed_version",
     )
     if merge or update_version:
-        installed_data = tomllib.loads(toml_path.read_text())
+        installed_data = tomllib.loads(toml_path.read_text(**encoding_args))
 
     @contextmanager
     def file_writer(filepath):
@@ -1178,7 +1179,7 @@ def restore(ctx, toml_files):
         toml_filepath = toml_input.name if is_stdin else Path(toml_input.name).resolve()
         logger.info(f"Load package list from {toml_filepath}")
 
-        doc = tomllib.loads(toml_input.read())
+        doc = tomllib.loads(toml_input.read_text(**encoding_args))
 
         # List unrecognized sections.
         ignored_sections = [

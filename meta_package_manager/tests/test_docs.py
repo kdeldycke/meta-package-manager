@@ -23,7 +23,6 @@ from collections import Counter
 from pathlib import Path
 
 from boltons.iterutils import flatten
-from click_extra.platforms import is_windows
 from yaml import Loader, load
 
 if sys.version_info >= (3, 11):
@@ -32,7 +31,7 @@ else:
     import tomli as tomllib  # type: ignore[import]
 
 from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_PREFIX
-from ..platforms import PLATFORM_GROUPS
+from ..platforms import PLATFORM_GROUPS, encoding_args
 from ..pool import pool
 
 """ Test all non-code artifacts depending on manager definitions.
@@ -52,13 +51,13 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 def test_project_metadata():
     # Fetch general information about the project from pyproject.toml.
     toml_path = PROJECT_ROOT.joinpath("pyproject.toml").resolve()
-    toml_config = tomllib.loads(toml_path.read_text(encoding="utf-8"))
+    toml_config = tomllib.loads(toml_path.read_text(**encoding_args))
     # Check all managers are referenced in Python package keywords.
     assert set(pool.all_manager_ids).issubset(toml_config["tool"]["poetry"]["keywords"])
 
 
 def test_changelog():
-    content = PROJECT_ROOT.joinpath("changelog.md").read_text()
+    content = PROJECT_ROOT.joinpath("changelog.md").read_text(**encoding_args)
 
     assert content.startswith("# Changelog\n")
 
@@ -82,10 +81,10 @@ def test_changelog():
 
 
 def test_labeller_rules():
-    # Forcing encoding is required on Windows.
-    extra_args = {"encoding": "utf-8"} if is_windows() else {}
     # Extract list of extra labels.
-    content = PROJECT_ROOT.joinpath(".github/labels-extra.json").read_text(**extra_args)
+    content = PROJECT_ROOT.joinpath(".github/labels-extra.json").read_text(
+        **encoding_args
+    )
     assert content
 
     extra_labels = [lbl["name"] for lbl in json.loads(content)]
@@ -119,7 +118,7 @@ def test_labeller_rules():
     # Extract rules from json blurb serialized into YAML.
     content = PROJECT_ROOT.joinpath(
         ".github/workflows/labeller-content-based.yaml"
-    ).read_text()
+    ).read_text(**encoding_args)
     assert "Naturalclar/issue-action" in content
     json_rules = load(content, Loader=Loader)["jobs"]["labeller"]["steps"][0]["with"][
         "parameters"

@@ -27,6 +27,7 @@ from click_extra.run import args_cleanup, env_copy
 from click_extra.tests.conftest import unless_macos
 
 from .. import bar_plugin
+from ..version import parse_version
 
 
 def _invokation_matrix(*iterables):
@@ -255,5 +256,7 @@ class TestBarPlugin:
         assert process.stdout
         assert not process.stderr
 
-        version = tuple(map(int, process.stdout.split()[1].split(".")))
-        assert version >= bar_plugin.python_min_version
+        # We need to parse the version to account for alpha release, like Python `3.12.0a4`.
+        assert parse_version(process.stdout.split()[1]) >= parse_version(
+            ".".join(bar_plugin.python_min_version)
+        )

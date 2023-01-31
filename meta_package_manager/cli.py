@@ -1176,10 +1176,16 @@ def restore(ctx, toml_files):
     for toml_input in toml_files:
 
         is_stdin = isinstance(toml_input, TextIOWrapper)
-        toml_filepath = toml_input.name if is_stdin else Path(toml_input.name).resolve()
-        logger.info(f"Load package list from {toml_filepath}")
+        if is_stdin:
+            toml_input.reconfigure(**encoding_args)
+            toml_filepath = toml_input.name
+            toml_content = toml_input.read()
+        else:
+            toml_filepath = Path(toml_input.name).resolve()
+            toml_content = toml_filepath.read_text(**encoding_args)
 
-        doc = tomllib.loads(toml_input.read(**encoding_args))
+        logger.info(f"Load package list from {toml_filepath}")
+        doc = tomllib.loads(toml_content)
 
         # List unrecognized sections.
         ignored_sections = [

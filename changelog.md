@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Remove temporary direct dependency on `charset-normalizer`, fix has been pushed upstream to Nuitka.
+
 ## {gh}`5.11.0 (2023-01-29) <compare/v5.10.2...v5.11.0>`
 
 - \[mpm\] Unlock run on any Unix-like platform. Closes {issue}`872`.

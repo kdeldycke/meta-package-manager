@@ -258,5 +258,5 @@ class TestBarPlugin:
 
         # We need to parse the version to account for alpha release, like Python `3.12.0a4`.
         assert parse_version(process.stdout.split()[1]) >= parse_version(
-            ".".join(bar_plugin.python_min_version)
+            ".".join(str(i) for i in bar_plugin.python_min_version)
         )

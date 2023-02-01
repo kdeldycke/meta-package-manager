@@ -368,9 +368,10 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           sudo find / -name "*.pyc" -delete || true
-      - name: Tests - Destructive mode
+      - name: Destructive tests - macOS & Linux
         env:
           DESTRUCTIVE_TESTS: true
+        if: runner.os != 'Windows'
         # pyproject.toml config file is specified at CLI level instead of
         # letting coverage find it because of this bug:
         # https://github.com/nedbat/coveragepy/issues/512#issuecomment-399707938
@@ -378,5 +379,48 @@ jobs:
         # https://github.com/pytest-dev/pytest-cov/issues/243
         run: |
           poetry run pytest --exitfirst --cov-config=pyproject.toml --cov=./ --cov-report=xml
+      - name: Destructive tests - Windows
+        env:
+          DESTRUCTIVE_TESTS: true
+        if: runner.os == 'Windows'
+        # Force ordering of tests in Windows to work around an issue with NPM/YARN when upgrade_all is invoked:
+        #   ► mpm --exclude pip upgrade --all
+        #     (...)
+        #     Upgrade all outdated packages from yarn...
+        #     (...)
+        #   Traceback (most recent call last):
+        #     File "...\click\testing.py", line 408, in invoke
+        #       return_value = cli.main(args=args or (), prog_name=prog_name, **extra)
+        #     File "...\click_extra\commands.py", line 161, in main
+        #       return super().main(*args, **kwargs)
+        #     File "...\click\core.py", line 1055, in main
+        #       rv = self.invoke(ctx)
+        #     File "...\click_extra\commands.py", line 214, in invoke
+        #       return super().invoke(ctx)
+        #     File "...\click\core.py", line 1657, in invoke
+        #       return _process_result(sub_ctx.command.invoke(sub_ctx))
+        #     File "...\click\core.py", line 1404, in invoke
+        #       return ctx.invoke(self.callback, **ctx.params)
+        #     File "...\click\core.py", line 760, in invoke
+        #       return __callback(*args, **kwargs)
+        #     File "...\click\decorators.py", line 26, in new_func
+        #       return f(get_current_context(), *args, **kwargs)
+        #     File "...\meta_package_manager\cli.py", line 865, in upgrade
+        #       output = manager.upgrade()
+        #     File "...\meta_package_manager\base.py", line 863, in upgrade
+        #       return self.run(cli, extra_env=self.extra_env)
+        #     File "...\meta_package_manager\base.py", line 551, in run
+        #       code, output, error = run_cmd(
+        #     File "...\click_extra\run.py", line 111, in run_cmd
+        #       process = subprocess.run(
+        #     File "...\lib\subprocess.py", line 493, in run
+        #       with Popen(*popenargs, **kwargs) as process:
+        #     File "...\lib\subprocess.py", line 858, in __init__
+        #       self._execute_child(args, executable, preexec_fn, close_fds,
+        #     File "...\lib\subprocess.py", line 1311, in _execute_child
+        #       hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+        #   FileNotFoundError: [WinError 2] The system cannot find the file specified
+        run: |
+          poetry run pytest --randomly-seed=2091446270 --exitfirst --cov-config=pyproject.toml --cov=./ --cov-report=xml
       - name: Coverage - Upload Codecov
         uses: codecov/codecov-action@v3.1.1

@@ -2,7 +2,7 @@
 # Docs: https://python-poetry.org/docs/pyproject/
 name = "meta-package-manager"
 version = "5.11.1"
-description = "🎁 wraps all package managers with an unifying CLI"
+description = "🎁 wraps all package managers with a unifying CLI"
 license = 'GPL-2.0-or-later'
 authors = ["Kevin Deldycke <kevin@deldycke.com>"]
 readme = "readme.md"

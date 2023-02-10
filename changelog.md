@@ -7,6 +7,8 @@ This version is not released yet and is under active development.
 ```
 
 - \[mpm\] Remove temporary direct dependency on `charset-normalizer`, fix has been pushed upstream to Nuitka.
+- \[mpm\] Rename artifacts attached to releases to benefits from stable URLs pointing to latest downloads.
+- \[mpm\] Fix some Windows unittests.
 
 ## {gh}`5.11.0 (2023-01-29) <compare/v5.10.2...v5.11.0>`
 

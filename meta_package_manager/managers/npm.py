@@ -59,7 +59,7 @@ class NPM(PackageManager):
         6.13.7
     """
 
-    def __run_cli(self, *args: Arg | NestedArgs, **kwargs: Any) -> str:
+    def run_cli(self, *args: Arg | NestedArgs, **kwargs: Any) -> str:
         """Like the common run_cli helper, but silence NPM's JSON output on error.
 
         NPM is prone to breakage if local node version is not in sync:

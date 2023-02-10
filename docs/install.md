@@ -16,6 +16,10 @@ The **real package is named `meta-package-manager`**. Only the latter provides t
 you're looking for.
 ````
 
+## From packages
+
+`mpm` is available on several popular package managers:
+
 `````{tab-set}
 
 ````{tab-item} pipx
@@ -76,10 +80,6 @@ $ brew install hasnep/tap/meta-package-manager
 ```
 ````
 
-````{tab-item} macOS
-A [standalone `mpm.bin` executable](https://github.com/kdeldycke/meta-package-manager/releases/latest) for `x86_64` is available on macOS, so you can run it without a fuss.
-````
-
 ````{tab-item} Arch Linux
 An `mpm` package has been contributed by [@autinerd](https://github.com/autinerd) and is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager) and can be installed with any AUR helper:
 
@@ -98,27 +98,6 @@ $ paru -S meta-package-manager
 ```{code-block} shell-session
 $ yay -S meta-package-manager
 ```
-````
-
-````{tab-item} Linux
-A [standalone `mpm.bin` executable](https://github.com/kdeldycke/meta-package-manager/releases/latest) for `x86_64` is available on Linux, so you can run it without a fuss.
-````
-
-````{tab-item} Windows
-## Executable
-
-A [standalone `mpm.exe` executable](https://github.com/kdeldycke/meta-package-manager/releases/latest) for `x86_64` is available on Windows, so you can run it without a fuss.
-
-## From sources
-
-You need is a working Python on your machine. Here is for example how to install it with Chocolatey:
-
-1. [Install chocolatey](https://chocolatey.org/install#install-step2)
-1. Install Python via chocolatey:
-    ```{code-block} shell-session
-    $ choco install python -y
-    ```
-1. Then follow the `mpm` installation instruction in `pipx` or `pip` tabs.
 ````
 
 ````{tab-item} mpm
@@ -153,6 +132,24 @@ $ mpm --yay  install meta-package-manager
 ```
 ````
 `````
+
+## Binaries
+
+Binaries are compiled at each release, so you can skip the installation process above and download the standalone executables directly:
+
+| Platform  | `x86_64` |
+| ---- | ------------ |
+| **Linux** |  [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     |
+| **macOS** |  [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     |
+| **Windows** |  [Download `mpm.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe)     |
+
+```{admonition} Other versions
+:class: seealso
+
+All links above points to the latest released version of `mpm`.
+
+If you need to test previous versions for regression, compatibility or general troubleshooting, you'll find the old binaries attached to [past releases on GitHub](https://github.com/kdeldycke/meta-package-manager/releases).
+```
 
 ## Run `mpm`
 

@@ -33,7 +33,7 @@ ______________________________________________________________________
 
 - Inventory and list all package managers available on the system.
 - Supports macOS, Linux and Windows.
-- Standalone `x86_64` executables: [`mpm.exe` for Windows](https://github.com/kdeldycke/meta-package-manager/releases/latest), `mpm.bin` [for Linux](https://github.com/kdeldycke/meta-package-manager/releases/latest) and [for macOS](https://github.com/kdeldycke/meta-package-manager/releases/latest).
+- [Standalone executables](#binaries) for macOS, Linux and Windows.
 - List installed packages.
 - List duplicate installed packages.
 - Search for packages.
@@ -118,11 +118,15 @@ are available in the documentation.
 
 ### Binaries
 
-`x86_64` binaries are available so you can skip the installation process above and download the standalone executables directly:
+Binaries are available so you can skip the installation process above and download the standalone executables directly:
 
-- [download `mpm.bin` for Linux](https://github.com/kdeldycke/meta-package-manager/releases/latest)
-- [download `mpm.bin` for macOS](https://github.com/kdeldycke/meta-package-manager/releases/latest)
-- [download `mpm.exe` for Windows](https://github.com/kdeldycke/meta-package-manager/releases/latest)
+| Platform  | `x86_64` |
+| ---- | ------------ |
+| **Linux**[^linux] |  [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     |
+| **macOS** |  [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     |
+| **Windows** |  [Download `mpm.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe)     |
+
+All links above points to the latest released version.
 
 ## Quickstart
 

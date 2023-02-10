@@ -1,5 +1,11 @@
 # Changelog
 
+## {gh}`5.11.2 (unreleased) <compare/v5.11.1...main>`
+
+```{important}
+This version is not released yet and is under active development.
+```
+
 ## {gh}`5.11.1 (2023-02-10) <compare/v5.11.0...v5.11.1>`
 
 - \[mpm\] Remove temporary direct dependency on `charset-normalizer`, fix has been pushed upstream to Nuitka.

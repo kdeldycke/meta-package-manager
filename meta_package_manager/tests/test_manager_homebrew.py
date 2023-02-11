@@ -62,7 +62,8 @@ def install_cask():
         assert process.returncode == 0
 
     def brew_cleanup():
-        """
+        """Remove all downloads cached by Homebrew.
+
         .. note::
             ``brew`` does not cleanup ``~/Library/Caches/Homebrew``, see:
             https://github.com/Homebrew/brew/issues/3784#issuecomment-364675767

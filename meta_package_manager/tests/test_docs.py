@@ -80,6 +80,18 @@ def test_changelog():
             )
 
 
+def test_new_package_manager_issue_template():
+    content = PROJECT_ROOT.joinpath(
+        ".github/ISSUE_TEMPLATE/new-package-manager.yaml"
+    ).read_text(**encoding_args)
+    assert content
+
+    template_platforms = load(content, Loader=Loader)["body"][3]["attributes"][
+        "options"
+    ]
+    assert template_platforms == [{"label": p.name} for p in PLATFORM_GROUPS]
+
+
 def test_labeller_rules():
     # Extract list of extra labels.
     content = PROJECT_ROOT.joinpath(".github/labels-extra.json").read_text(

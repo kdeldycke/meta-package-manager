@@ -40,8 +40,10 @@ body:
       label: Platforms
       description: Platforms supported by the package manager.
       options:
+        - label: BSD
         - label: Linux
         - label: macOS
+        - label: Unix
         - label: Windows
 
   - type: textarea

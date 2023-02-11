@@ -99,9 +99,109 @@ $ paru -S meta-package-manager
 $ yay -S meta-package-manager
 ```
 ````
+`````
 
-````{tab-item} mpm
-In a funny twist, `mpm` can be installed with itself:
+## Binaries
+
+Binaries are compiled at each release, so you can skip the installation process above and download the standalone executables directly:
+
+| Platform    | `x86_64`                                                                                                             |
+| ----------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Linux**   | [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)   |
+| **macOS**   | [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)   |
+| **Windows** | [Download `mpm.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) |
+
+All links above points to the latest released version of `mpm`.
+
+```{admonition} Older releases
+---
+class: seealso
+---
+
+If you need to test previous versions for regression, compatibility or general troubleshooting, you'll find the old binaries attached as assets to [past releases on GitHub](https://github.com/kdeldycke/meta-package-manager/releases).
+```
+
+```{admonition} Development builds
+---
+class: caution
+---
+
+Each commit to the development branch triggers the compilation of binaries. This way you can easily test the bleeding edge version of `mpm` and report any issue.
+
+Look at the [list of latest binary builds](https://github.com/kdeldycke/meta-package-manager/actions/workflows/release.yaml?query=branch%3Amain+is%3Asuccess). Then select the latest `Build & release`/`release.yaml` workflow run and download the binary artifact corresponding to your platform and architecture.
+```
+
+## Self-bootstraping
+
+In a funny twist, `mpm` can be installed with itself.
+
+Which means there is a way to boostrap its deployment on an unknown system. Just [download the binary](#binaries) corresponding to your platform and architecture:
+
+```{code-block} shell-session
+$ curl --fail --remote-name https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin
+################################################### 100.0%
+```
+
+```{code-block} shell-session
+$ file ./mpm-macos-x64.bin
+./mpm-macos-x64.bin: Mach-O 64-bit executable x86_64
+```
+
+```{code-block} shell-session
+$ chmod +x ./mpm-macos-x64.bin
+```
+
+```{code-block} shell-session
+$ ./mpm-macos-x64.bin --version
+mpm, version 5.7.0
+```
+
+Then let `mpm` discovers which package managers are available on your machine and choose the one providing a path to `mpm` installation:
+
+```{code-block} shell-session
+$ ./mpm-macos-x64.bin install meta-package-manager
+warning: Skip unavailable cargo manager.
+warning: Skip unavailable steamcmd manager.
+Installation priority: brew > cask > composer > gem > mas > npm > pip > pipx > vscode > yarn
+warning: No meta-package-manager package found on brew.
+warning: No meta-package-manager package found on cask.
+warning: No meta-package-manager package found on composer.
+warning: No meta-package-manager package found on gem.
+warning: No meta-package-manager package found on mas.
+warning: No meta-package-manager package found on npm.
+warning: pip does not implement search operation.
+meta-package-manager existence unconfirmed, try to directly install it...
+Install meta-package-manager package with pip...
+Collecting meta-package-manager
+  Downloading meta_package_manager-5.11.1-py3-none-any.whl (161 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 161.5/161.5 kB 494.7 kB/s eta 0:00:00
+(...)
+Installing collected packages: (...) meta-package-manager
+Successfully installed (...) meta-package-manager-5.11.1
+```
+
+And now you can remove the local binary and enjoy the system-wide `mpm` that was installed by itself:
+
+```{code-block} shell-session
+$ rm -f ./mpm-macos-x64.bin
+```
+
+```{code-block} shell-session
+$ which mpm
+/opt/homebrew/bin/mpm
+```
+
+```{code-block} shell-session
+$ mpm --version
+mpm, version 5.11.1
+```
+
+````{admonition} Older releases
+---
+class: tip
+---
+
+At this moment, `mpm` can be installed with itself via these managers:
 
 ```{code-block} shell-session
 $ mpm --brew install meta-package-manager
@@ -131,26 +231,6 @@ $ mpm --pipx install meta-package-manager
 $ mpm --yay  install meta-package-manager
 ```
 ````
-`````
-
-## Binaries
-
-Binaries are compiled at each release, so you can skip the installation process above and download the standalone executables directly:
-
-| Platform    | `x86_64`                                                                                                             |
-| ----------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Linux**   | [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)   |
-| **macOS**   | [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)   |
-| **Windows** | [Download `mpm.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) |
-
-```{admonition} Other versions
----
-class: seealso
----
-All links above points to the latest released version of `mpm`.
-
-If you need to test previous versions for regression, compatibility or general troubleshooting, you'll find the old binaries attached to [past releases on GitHub](https://github.com/kdeldycke/meta-package-manager/releases).
-```
 
 ## Run `mpm`
 

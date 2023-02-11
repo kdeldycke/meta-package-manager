@@ -54,10 +54,10 @@ body:
       placeholder: |
         $ pacman --version
 
-          .--.                  Pacman v6.0.1 - libalpm v13.0.1
+           .--.                  Pacman v6.0.1 - libalpm v13.0.1
           / _.-' .-.  .-.  .-.   Copyright (C) 2006-2021 Pacman Development Team
           \  '-. '-'  '-'  '-'   Copyright (C) 2002-2006 Judd Vinet
-          '--'
+           '--'
                               This program may be freely redistributed under
                               the terms of the GNU General Public License.
     validations:

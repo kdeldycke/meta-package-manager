@@ -6,26 +6,29 @@ body:
   - type: markdown
     attributes:
       value: >
-        Before filling this bug report, try the commands proposed below and inspect their output to look for unexpected
-        behavior or execution traces:
-
-        - `mpm --version`
-
-        - `mpm --show-params`
-
-        - `mpm --verbosity DEBUG --all-managers managers`
+        Before filling this bug report, try to isolate the issue by targetting only one manager, by running `mpm` with
+        a single `--<manager_id>`/`--manager <manager_id>` option.
 
 
-        Most issues are self-explanatory and can be solved by looking at the verbosiest logs (i.e. use the
-        `--verbosity DEBUG` option).
+        Once isolated to a specific manager, run `mpm --show-params` to make sure the CLI is run under a sane
+        configuration and environment.
 
 
-        Then try to isolate the issue by targetting only one manager, by running `mpm` commands with a single
-        `--<manager_id>`/`--manager <manager_id>` option.
+        Also run `mpm --verbosity DEBUG --all-managers managers` to check if, and how, `mpm` properly detects all
+        package managers.
 
 
-        The issue you are trying to report might already have been resolved upstream. You should try the development
-        version of `mpm` by:
+        Try to run your problematic command with the `--verbosity DEBUG` option. Most issues are self-explanatory and
+        can be solved by looking at the verbosiest logs. One thing to look for is the all the CLI `mpm` is executing
+        under the hood. Try to run them manually in your terminal to see if they behave the same.
+
+
+        The issue you are trying to report night already be fixed upstream. Check your current version with `mpm
+        --version` and compare it with [the
+        changelog](https://kdeldycke.github.io/meta-package-manager/changelog.html).
+
+
+        You might then try to run the latest development version of `mpm` by:
 
         - [installing it from its source
         code](https://kdeldycke.github.io/meta-package-manager/development.html#setup-environment)
@@ -49,6 +52,14 @@ body:
       required: true
 
   - type: textarea
+    id: mpm-config
+    attributes:
+      label: Meta Package Manager configuration
+      description: Provide the current configuration via `mpm --show-params`.
+      render: shell-session
+      placeholder: mpm --show-params
+
+  - type: textarea
     id: package-manager-list
     attributes:
       label: List package managers
@@ -65,11 +76,3 @@ body:
       description: Provide the version you are running and its environment with `mpm --version`.
       render: shell-session
       placeholder: mpm --version
-
-  - type: textarea
-    id: mpm-config
-    attributes:
-      label: Meta Package Manager configuration
-      description: Provide the current configuration via `mpm --show-params`.
-      render: shell-session
-      placeholder: mpm --show-params

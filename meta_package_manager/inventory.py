@@ -103,7 +103,7 @@ def operation_matrix() -> str:
     output = "\n".join(lines)
     if footnotes:
         output += "\n\n"
-        output += "\n".join(footnotes)
+        output += "\n\n".join(footnotes)
 
     return output
 

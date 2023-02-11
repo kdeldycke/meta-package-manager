@@ -6,24 +6,34 @@ body:
   - type: markdown
     attributes:
       value: >
-        Before filling this bug report, try the commands below and inspect their output to look for unexpected execution
-        traces.
+        Before filling this bug report, try the commands proposed below and inspect their output to look for unexpected
+        behavior or execution traces. Most issues are self-explanatory and can be solved by looking at the verbosiest
+        logs (i.e. use the `--verbosity DEBUG` option).
 
 
-        You can also try the bleeding edge [development version of
-        `mpm`](https://kdeldycke.github.io/meta-package-manager/development.html#setup-environment) to check if the
-        issue hasn't already be addressed upstream.
+        Then try to isolate the issue by targetting only one manager, by running `mpm` commands with a single
+        `--<manager_id>`/`--manager <manager_id>` option.
 
 
-        If you still cannot make sense of what happend or you think `mpm` behavior can be improved, please fill the
+        The issue you are trying to report might already have been resolved upstream. You should try the development
+        version of `mpm` by:
+
+        - [installing its source code](https://kdeldycke.github.io/meta-package-manager/development.html#setup-environment)
+        - [downloading the latest binary
+        build](https://github.com/kdeldycke/meta-package-manager/actions/workflows/release.yaml?query=branch%3Amain+is%3Asuccess)
+        (select the latest `release.yaml` workflow run and download the binary artifact corresponding to your platform
+        and architecture).
+
+
+        If you still cannot make sense of what happened or you think `mpm` behavior can be improved, please fill the
         form below and submit it.
 
   - type: textarea
     id: bug-description
     attributes:
       label: What happened?
-      description: Tell us what did you expect to happen?
-      placeholder: Tell us what you see!
+      description: "Tell us: 1) what you did, 2) what you expected to happen, and 3) what did happened instead."
+      placeholder: Show us what you see!
     validations:
       required: true
 

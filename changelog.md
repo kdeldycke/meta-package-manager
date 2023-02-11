@@ -6,6 +6,9 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Refine bug report template.
+- \[mpm\] Fix attachment of binaries to GitHub release.
+
 ## {gh}`5.11.1 (2023-02-10) <compare/v5.11.0...v5.11.1>`
 
 - \[mpm\] Remove temporary direct dependency on `charset-normalizer`, fix has been pushed upstream to Nuitka.

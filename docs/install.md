@@ -117,7 +117,6 @@ All links above points to the latest released version of `mpm`.
 ---
 class: seealso
 ---
-
 If you need to test previous versions for regression, compatibility or general troubleshooting, you'll find the old binaries attached as assets to [past releases on GitHub](https://github.com/kdeldycke/meta-package-manager/releases).
 ```
 
@@ -125,7 +124,6 @@ If you need to test previous versions for regression, compatibility or general t
 ---
 class: caution
 ---
-
 Each commit to the development branch triggers the compilation of binaries. This way you can easily test the bleeding edge version of `mpm` and report any issue.
 
 Look at the [list of latest binary builds](https://github.com/kdeldycke/meta-package-manager/actions/workflows/release.yaml?query=branch%3Amain+is%3Asuccess). Then select the latest `Build & release`/`release.yaml` workflow run and download the binary artifact corresponding to your platform and architecture.
@@ -200,7 +198,6 @@ mpm, version 5.11.1
 ---
 class: tip
 ---
-
 At this moment, `mpm` can be installed with itself via these managers:
 
 ```{code-block} shell-session

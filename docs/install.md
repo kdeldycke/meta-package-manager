@@ -137,15 +137,16 @@ $ mpm --yay  install meta-package-manager
 
 Binaries are compiled at each release, so you can skip the installation process above and download the standalone executables directly:
 
-| Platform  | `x86_64` |
-| ---- | ------------ |
-| **Linux** |  [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     |
-| **macOS** |  [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     |
-| **Windows** |  [Download `mpm.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe)     |
+| Platform    | `x86_64`                                                                                                             |
+| ----------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Linux**   | [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)   |
+| **macOS**   | [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)   |
+| **Windows** | [Download `mpm.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) |
 
 ```{admonition} Other versions
-:class: seealso
-
+---
+class: seealso
+---
 All links above points to the latest released version of `mpm`.
 
 If you need to test previous versions for regression, compatibility or general troubleshooting, you'll find the old binaries attached to [past releases on GitHub](https://github.com/kdeldycke/meta-package-manager/releases).

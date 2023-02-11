@@ -40,11 +40,11 @@ body:
       label: Platforms
       description: Platforms supported by the package manager.
       options:
-        - label: BSD
-        - label: Linux
-        - label: macOS
-        - label: Unix
-        - label: Windows
+        - label: "🅱️ BSD (FreeBSD, NetBSD, OpenBSD, SunOS)"
+        - label: "🐧 Linux (Linux, Windows Subsystem for Linux v2)"
+        - label: "🍎 macOS"
+        - label: "`>_` Unix (AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1)"
+        - label: "🪟 Windows"
 
   - type: textarea
     id: manager-version

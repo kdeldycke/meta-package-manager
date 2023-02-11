@@ -81,6 +81,7 @@ def test_changelog():
 
 
 def test_new_package_manager_issue_template():
+    """Check all platforms groups are referenced in the issue template."""
     content = PROJECT_ROOT.joinpath(
         ".github/ISSUE_TEMPLATE/new-package-manager.yaml"
     ).read_text(**encoding_args)
@@ -89,7 +90,15 @@ def test_new_package_manager_issue_template():
     template_platforms = load(content, Loader=Loader)["body"][3]["attributes"][
         "options"
     ]
-    assert template_platforms == [{"label": p.name} for p in PLATFORM_GROUPS]
+
+    reference_labels = []
+    for group in PLATFORM_GROUPS:
+        label = f"{group.icon} {group.name}"
+        if len(group) > 1:
+            label += f" ({', '.join(p.name for p in group.platforms)})"
+        reference_labels.append({"label": label})
+
+    assert template_platforms == reference_labels
 
 
 def test_labeller_rules():

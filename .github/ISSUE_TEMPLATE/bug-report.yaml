@@ -10,7 +10,9 @@ body:
         behavior or execution traces:
 
         - `mpm --version`
+
         - `mpm --show-params`
+
         - `mpm --verbosity DEBUG --all-managers managers`
 
 

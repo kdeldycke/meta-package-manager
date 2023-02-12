@@ -33,7 +33,7 @@ ______________________________________________________________________
 
 - Inventory and list all package managers available on the system.
 - Supports macOS, Linux and Windows.
-- [Standalone executables](#binaries) for macOS, Linux and Windows.
+- [Standalone executables](#executables) for Linux, macOS and Windows.
 - List installed packages.
 - List duplicate installed packages.
 - Search for packages.
@@ -118,17 +118,15 @@ Other
 [alternatives installation methods](https://kdeldycke.github.io/meta-package-manager/install.html)
 are available in the documentation.
 
-### Binaries
+### Executables
 
-Binaries are available so you can skip the installation process above and download the standalone executables directly:
+Standalone executables of `mpm`'s latest version are available for several platforms and architectures:
 
 | Platform  | `x86_64` |
 | ---- | ------------ |
 | **Linux**[^linux] |  [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     |
 | **macOS** |  [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     |
 | **Windows** |  [Download `mpm.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe)     |
-
-All links above points to the latest released version.
 
 ## Quickstart
 

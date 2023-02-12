@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- \[pip\] Print Python's own version in debug logs before checking for Pip's version.
+
 ## {gh}`5.11.6 (2023-02-12) <compare/v5.11.5...v5.11.6>`
 
 - \[mpm\] Fix collection of artifact files from their folder.

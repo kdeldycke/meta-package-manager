@@ -18,12 +18,19 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from typing import Iterator
+
+if sys.version_info >= (3, 8):
+    from functools import cached_property
+else:
+    from boltons.cacheutils import cachedproperty as cached_property
 
 from click_extra.platforms import ALL_PLATFORMS
 
 from ..base import Package, PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
+from ..version import TokenizedString
 
 
 class Pip(PackageManager):
@@ -59,6 +66,30 @@ class Pip(PackageManager):
         ► python -m pip --no-color --version
         pip 2.0.2 from /usr/local/lib/python/site-packages/pip (python 3.7)
     """
+
+    @cached_property
+    def version(self) -> TokenizedString | None:
+        """Print Python's own version before Pip's.
+
+        This gives much more context to the user about the environment when a Python
+        executable is found but Pip is not.
+
+        Runs:
+
+            .. code-block:: shell-session
+                ► python --version --version
+                Python 3.10.10 (main, Feb  8 2023, 05:34:50) [Clang 14.0.0 (clang-1400.0.29.202)]
+        """
+        if self.executable:
+            self.run_cli(
+                ("--version", "--version"),
+                auto_pre_cmds=False,
+                auto_pre_args=False,
+                auto_post_args=False,
+                force_exec=True,
+            )
+
+        return super(Pip, self).version
 
     @property
     def installed(self) -> Iterator[Package]:

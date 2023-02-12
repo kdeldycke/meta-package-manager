@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Fix collection of artifact files from their folder.
+
 ## {gh}`5.11.5 (2023-02-12) <compare/v5.11.4...v5.11.5>`
 
 - \[mpm\] Fix collection of artifact files from their folder.

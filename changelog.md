@@ -6,6 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Fix attachment of binaries to GitHub release.
+
 ## {gh}`5.11.3 (2023-02-12) <compare/v5.11.2...v5.11.3>`
 
 - \[mpm\] Fix attachment of binaries to GitHub release.

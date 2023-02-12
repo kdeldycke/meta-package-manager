@@ -1,5 +1,11 @@
 # Changelog
 
+## {gh}`5.11.5 (unreleased) <compare/v5.11.4...main>`
+
+```{important}
+This version is not released yet and is under active development.
+```
+
 ## {gh}`5.11.4 (2023-02-12) <compare/v5.11.3...v5.11.4>`
 
 - \[mpm\] Fix attachment of binaries to GitHub release.

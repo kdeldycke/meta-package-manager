@@ -16,4 +16,4 @@ name: Lint
 jobs:
 
   lint:
-    uses: kdeldycke/workflows/.github/workflows/lint.yaml@v2.7.3
+    uses: kdeldycke/workflows/.github/workflows/lint.yaml@v2.7.4

@@ -117,9 +117,14 @@ class Package:
 
     installed_version: TokenizedString | str | None = None
     latest_version: TokenizedString | str | None = None
-    """ ``installed_version`` and ``latest_version`` are allowed to temporarily be a string
-    between ``__init__`` and ``__post_init__``. Once they reach the later, they're parsed and
-    normalized into ``TokenizedString``.
+    """Installed and latest versions are optional: they're not always provided by the package manager.
+
+    ``installed_version`` and ``latest_version`` are allowed to temporarily be strings
+    between ``__init__`` and ``__post_init__``. Once they reach the later, they're
+    parsed and normalized into either ``TokenizedString`` or `None`. They can't be
+    strings beyong that point, i.e. after the Package instance has been fully
+    instantiated. We don't know how to declare this transient state with type hints,
+    so we're just going to allow string type.
     """
 
     def __post_init__(self) -> None:

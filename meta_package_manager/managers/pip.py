@@ -89,7 +89,7 @@ class Pip(PackageManager):
                 force_exec=True,
             )
 
-        return super(Pip, self).version
+        return super().version
 
     @property
     def installed(self) -> Iterator[Package]:

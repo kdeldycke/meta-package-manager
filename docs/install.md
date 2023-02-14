@@ -103,7 +103,9 @@ $ yay -S meta-package-manager
 
 ## Binaries
 
-Binaries are compiled at each release, so you can skip the installation process above and download the standalone executables directly:
+Binaries are compiled at each release, so you can skip the installation process above and download the standalone executables directly.
+
+This is the prefered way of testing `mpm` without polluting your machine. They also offer the possibility of running the CLI on older systems not supporting the minimal Python version required by `mpm`.
 
 | Platform    | `x86_64`                                                                                                             |
 | ----------- | -------------------------------------------------------------------------------------------------------------------- |

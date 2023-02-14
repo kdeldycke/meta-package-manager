@@ -123,15 +123,6 @@ types-xmltodict = "^0.13.0"
 [tool.poetry.scripts]
 mpm = 'meta_package_manager.__main__:main'
 
-[tool.pylint.MASTER]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html
-[tool.pylint."messages control"]
-# List messages with: $ pylint --list-msgs
-# C0114: missing-module-docstring
-# W0511: fixme
-# W1203: logging-fstring-interpolation
-disable = "C0114, W0511, W1203"
-
 [tool.mypy]
 warn_unused_configs = true
 warn_redundant_casts = true

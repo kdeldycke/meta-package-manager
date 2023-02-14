@@ -108,9 +108,11 @@ class Token:
         """Does the ``Token`` got an equivalent pure integer representation?"""
         return self.integer is not None
 
-    """ Compare the current ``Token`` instance to the other as integers if both can be losslessly interpreted as pure integers.
+    """ Compare the current ``Token`` instance to the other as integers if both can be
+    losslessly interpreted as pure integers.
 
-    If one at least is not an integer, we convert all of them to string to allow comparison.
+    If one at least is not an integer, we convert all of them to string to allow
+    comparison.
     """
 
     def _match_type(self, other):
@@ -163,12 +165,13 @@ class TokenizedString:
 
         .. hint::
 
-            If :py:meth:`object.__new__` returns an instance of ``cls``, then the new instance's
-            :py:meth:`object.__init__` method will be invoked.
+            If :py:meth:`object.__new__` returns an instance of ``cls``, then the new
+            instance's :py:meth:`object.__init__` method will be invoked.
 
         .. seealso::
 
-            An alternative would be to `merge __init__ with __new__ <https://stackoverflow.com/a/53482003>`_.
+            An alternative would be to `merge __init__ with __new__
+            <https://stackoverflow.com/a/53482003>`_.
         """
         if value is None:
             return None
@@ -182,8 +185,8 @@ class TokenizedString:
     def __init__(self, value: str | int, separator: str = "-") -> None:
         """Parse and tokenize the provided raw ``value``."""
         if isinstance(value, TokenizedString):
-            # Skip initialization for instance of the class, as this __init__() gets called
-            # auto-magiccaly eveytime the __new__() method above returns a
+            # Skip initialization for instance of the class, as this __init__() gets
+            # called auto-magiccaly eveytime the __new__() method above returns a
             # TokenizedString instance.
             return
         # Our canonical __init__() starts here.
@@ -200,8 +203,8 @@ class TokenizedString:
         """Generic recursive deep copy of the current instance.
 
         This is required to make the :py:meth:`copy.deepcopy` called within
-        :py:meth:`dataclasses.asdict` working, because the defaults implementation doesn't know how to
-        handle the ``value`` parameter provided in the
+        :py:meth:`dataclasses.asdict` working, because the defaults implementation
+        doesn't know how to handle the ``value`` parameter provided in the
         :py:meth:`meta_package_manager.version.TokenizedString.__init__` method above.
 
         .. seealso::

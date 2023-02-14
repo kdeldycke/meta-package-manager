@@ -45,7 +45,7 @@ class Scoop(PackageManager):
         v0.2.4 - Released at 2022-08-08
 
         'main' bucket:
-        5a5b13b6c (HEAD -> master, origin/master, origin/HEAD) oh-my-posh: Update to version 11.1.1
+        5a5b13b6c (HEAD -> master, origin/HEAD) oh-my-posh: Update to version 11.1.1
     """
 
     @staticmethod
@@ -98,7 +98,7 @@ class Scoop(PackageManager):
             ----           ----------------- -------------- -------------------- ----
             demulshooter   16.7.2            18.7.3
             eduke32        20220611-10112    20220709-10115
-            Teracopy-np                                                          Installed failed
+            Teracopy-np
             yuzu-pineapple EA-2804           EA-2830
         """
         output = self.run_cli("scoop", "status")
@@ -128,8 +128,10 @@ class Scoop(PackageManager):
         """Fetch matching packages.
 
         .. caution::
-            Search does not support extended or exact matching. So we returns the best subset of results and let
-            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them.
+            Search does not support extended or exact matching. So we returns the best
+            subset of results and let
+            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine
+            them.
 
         .. code-block:: shell-session
 
@@ -140,9 +142,9 @@ class Scoop(PackageManager):
             ----             -------         ------ --------
             7zip             22.01           main
             7zip19.00-helper 19.00           main
-            busybox          4716-g31467ddfc main   bunzip2 | bzip2 | gunzip | gzip | unzip
+            busybox          4716-g31467ddfc main   bunzip2 | gunzip | gzip | unzip
             bzip2            1.0.8.0         main
-            gow              0.8.0           main   bunzip2.exe | bzip2.exe | gzip.exe | zip.exe
+            gow              0.8.0           main   bunzip2.exe | bzip2.exe | zip.exe
             gzip             1.3.12          main
             lzip             1.20            main
             unzip            6.00            main
@@ -184,7 +186,7 @@ class Scoop(PackageManager):
             '7zip' (22.01) was installed successfully!
             Notes
             -----
-            Add 7-Zip as a context menu by running: "C:\\scoop\apps\7zip\\current\\install-context.reg"
+            Add 7-Zip as a context menu by running: "C:\\scoop\\...install-context.reg"
         """
         return self.run_cli("install", package_id)
 
@@ -220,7 +222,7 @@ class Scoop(PackageManager):
             Uninstalling '7zip' (22.01).
             Removing shim '7z.shim'.
             Removing shim '7z.exe'.
-            Removing shortcut ~\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Scoop Apps\7-Zip.lnk
+            Removing shortcut ~\\AppData\\Roaming\\Scoop Apps\7-Zip.lnk
             Unlinking ~\\scoop\apps\7zip\\current
             '7zip' was uninstalled.
         """

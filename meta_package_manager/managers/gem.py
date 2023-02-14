@@ -31,7 +31,8 @@ class Gem(PackageManager):
     """
     ..tip::
 
-        Installs require ``sudo`` on system ruby. I (@tresni) recommend doing something like:
+        Installs require ``sudo`` on system ruby. I (@tresni) recommend doing something
+        like:
 
         .. code-block:: shell-session
 

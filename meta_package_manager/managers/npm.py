@@ -66,7 +66,8 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit --json outdated
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+                --json outdated
             {
               "error": {
                 "code": "ERR_OUT_OF_RANGE",
@@ -93,7 +94,8 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit --json list | jq
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+                --json list | jq
             {
               "dependencies": {
                 "npm": {
@@ -152,7 +154,8 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit --json outdated | jq
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+                --json outdated | jq
             {
               "my-linked-package": {
                 "current": "0.0.0-development",
@@ -192,7 +195,8 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit search --json python | jq
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+                search --json python | jq
             [
               {
                 "name": "python",
@@ -260,7 +264,8 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit search --json --no-description python | jq
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+                search --json --no-description python | jq
         """
         search_args = []
         if not extended:
@@ -282,7 +287,8 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit install markdown
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+                install markdown
 
             added 3 packages in 3s
         """
@@ -294,7 +300,8 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit upgrade
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+                upgrade
         """
         return self.build_cli("update")
 
@@ -306,7 +313,8 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit upgrade raven
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+                upgrade raven
         """
         return self.build_cli("upgrade", f"{package_id}")
 
@@ -315,6 +323,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit uninstall raven
+            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+                uninstall raven
         """
         return self.run_cli("uninstall", package_id)

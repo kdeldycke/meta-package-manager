@@ -322,7 +322,7 @@ class APT_Mint(APT):
             \S                       # One non-space character.
             \s+                      # One space or more.
             (?P<package_id>[^\s:]+)  # Any non-space until whitespace or semi-colon.
-            (?:\:\S+)?               # Optional arch suffix after package and semi-colon.
+            (?:\:\S+)?               # Optional arch suffix after package and semi-colon
             \s+                      # One space or more.
             -                        # A dash.
             \ ?                      # An optional space.

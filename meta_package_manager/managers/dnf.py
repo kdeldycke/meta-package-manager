@@ -99,8 +99,10 @@ class DNF(PackageManager):
         """Fetch matching packages.
 
         .. caution::
-            Search does not support extended or exact matching. So we returns the best subset of results and let
-            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them.
+            Search does not support extended or exact matching. So we returns the best
+            subset of results and let
+            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine
+            them.
 
         .. code-block:: shell-session
 

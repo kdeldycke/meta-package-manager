@@ -26,11 +26,13 @@ class SteamCMD(PackageManager):
 
     """Basic SteamCMD usage.
 
-    SteamCMD doesn't seem to be properly documented and maintained to offer a powerful automated integration.
+    SteamCMD doesn't seem to be properly documented and maintained to offer a powerful
+    automated integration.
 
     Documentation:
 
-    - `list of steamcmd commands <https://github.com/dgibbs64/SteamCMD-Commands-List/blob/master/steamcmd_commands.txt>`_
+    - `list of steamcmd commands
+    <https://github.com/dgibbs64/SteamCMD-Commands-List/blob/master/steamcmd_commands.txt>`_
 
     .. todo::
 

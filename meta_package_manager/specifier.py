@@ -43,7 +43,8 @@ from .version import TokenizedString, parse_version
 VERSION_SEP: Final = "@"
 """Separator used by ``mpm`` to split package's ID from its version:
 
-This has been chosen as a separator because it is shared by popular package managers and purls.
+This has been chosen as a separator because it is shared by popular package managers and
+purls.
 
 ..code-block::
 
@@ -131,8 +132,9 @@ class Specifier:
         - simple package ID with version: ``package_id@version``
         - purl: ``pkg:npm/left-pad@3.7``
 
-        If a specifier resolves to multiple constraints (as it might be the case for purl), we produce and returns all
-        variations. That way the ``Solver`` below has all necessary details to resolve the constraints.
+        If a specifier resolves to multiple constraints (as it might be the case for
+        purl), we produce and returns all variations. That way the ``Solver`` below has
+        all necessary details to resolve the constraints.
 
         Returns a generator of ``Specifier``.
         """
@@ -230,19 +232,23 @@ class Solver:
         """Reduce a collection of ``Specifier`` to its essential, minimal and unique
         form.
 
-        This method assumes that all provided ``specs`` are of the same package (like ``resolve_package_specs()`` does).
+        This method assumes that all provided ``specs`` are of the same package (like
+        ``resolve_package_specs()`` does).
 
-        The reduction process consist of several steps. At each step, as soon as we managed to
-        reduce the constraints to one ``Specifier``, we returns it.
+        The reduction process consist of several steps. At each step, as soon as we
+        managed to reduce the constraints to one ``Specifier``, we returns it.
 
         Filtering steps:
-        1. We remove all constraints tied to all by the top priority manager if provided.
-        2. If no manager priority is provided, we discard constraints not tied to a manager.
+        1. We remove all constraints tied to all by the top priority manager if
+            provided.
+        2. If no manager priority is provided, we discard constraints not tied to a
+            manager.
         3. We discard constraints not tied to a version.
         4. We only keep constraints tied to the highest version.
 
-        If we ends up with more than one set of constraints after all this filtering, an error is raised
-        to invite the developer to troubleshoot the situation and refine this process.
+        If we ends up with more than one set of constraints after all this filtering, an
+        error is raised to invite the developer to troubleshoot the situation and refine
+        this process.
         """
         # Deduplicate specifiers.
         collection = set(specs)
@@ -258,7 +264,8 @@ class Solver:
             if self.manager_priority:
                 if target_manager_ids.isdisjoint(self.manager_priority):
                     logger.warning(
-                        f"Requested target managers {target_manager_ids} don't match selected {self.manager_priority}."
+                        f"Requested target managers {target_manager_ids} "
+                        f"don't match selected {self.manager_priority}."
                     )
                     raise EmptyReduction
                 top_priority_manager = self.top_priority_manager(target_manager_ids)
@@ -283,7 +290,8 @@ class Solver:
 
         # Still too much constraints.
         raise ValueError(
-            f"Cannot reduce {collection} any further. More heuristics must be implemented."
+            f"Cannot reduce {collection} any further. "
+            "More heuristics must be implemented."
         )
 
     def resolve_package_specs(self) -> Iterator[tuple[str, Specifier]]:

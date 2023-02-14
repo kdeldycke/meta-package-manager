@@ -56,8 +56,9 @@ class Emerge(PackageManager):
         .. warning::
             This suppose the ``qlist`` binary is available and present on the system. We
             do not search for it or try to resolves its canonical path with
-            :py:attr:`PackageManager.cli_path <meta_package_manager.base.PackageManager.cli_path>`,
-            as we do for the reference ``emerge`` binary.
+            :py:attr:`PackageManager.cli_path
+            <meta_package_manager.base.PackageManager.cli_path>`, as we do for the
+            reference ``emerge`` binary.
 
         .. code-block:: shell-session
 
@@ -87,7 +88,7 @@ class Emerge(PackageManager):
             -                       # A dash.
             (
                 ?P<version>[^\s-]+  # Any non-whitespace/non-dash string.
-                (?:-r\d+)?          # Optional revision suffix led by a dash (non-grouped).
+                (?:-r\d+)?          # Optional revision suffix led by a -, non-grouped.
             )
             """,
             re.VERBOSE,
@@ -110,7 +111,7 @@ class Emerge(PackageManager):
             [ebuild   N    ] app-games/qstat   [25c]
             [ebuild    R   ] sys-apps/sed      [2.4.7-r6]
             [ebuild       U] net-fs/samba      [2.2.8_pre1]      [2.2.7a]
-            [ebuild       U] sys-devel/distcc  [2.16]            [2.13-r1] USE=ipv6* -gtk
+            [ebuild       U] sys-devel/distcc  [2.16]            [2.13-r1] USE=ip6* -gtk
             [ebuild r     U] dev-libs/icu      [50.1.1:0/50.1.1] [50.1-r2:0/50.1]
             [ebuild r  R   ] dev-libs/libxml2  [2.9.0-r1:2]       USE=icu
         """
@@ -127,19 +128,25 @@ class Emerge(PackageManager):
 
         regexp = re.compile(
             r"""
-            \[.+\]                                  # Update state.
-            \                                       # A space.
-            (?P<package_id>\S+)                     # Non-whitespace string.
-            \s+                                     # Any spacing.
-            (?:\[                                   # Non-matching group starting with a '['.
-                (?P<latest_version>[^\s\/:]+)       # Any non-spaced string until a ':' or '/' is met.
-                \S*                                 # Left-over parts of the version, after a ':' or '/'.
-            \])?                                    # Optional group ending with a ']'.
-            \s+                                     # Any spacing.
-            (?:\[                                   # Non-matching group starting with a '['.
-                (?P<installed_version>[^\s\/:]+)    # Any non-spaced string until a ':' or '/' is met.
-                \S*                                 # Left-over parts of the version, after a ':' or '/'.
-            \])?                                    # Optional group ending with a ']'.
+            \[.+\]                               # Update state.
+            \                                    # A space.
+            (?P<package_id>\S+)                  # Non-whitespace string.
+            \s+                                  # Any spacing.
+            (?:\[                                # Non-matching group
+                                                 #   starting with a '['.
+                (?P<latest_version>[^\s\/:]+)    # Any non-spaced string
+                                                 #   until a ':' or '/' is met.
+                \S*                              # Left-over parts of the version,
+                                                 #   after a ':' or '/'.
+            \])?                                 # Optional group ending with a ']'.
+            \s+                                  # Any spacing.
+            (?:\[                                # Non-matching group
+                                                 #   starting with a '['.
+                (?P<installed_version>[^\s\/:]+) # Any non-spaced string
+                                                 #   until a ':' or '/' is met.
+                \S*                              # Left-over parts of the version,
+                                                 #   after a ':' or '/'.
+            \])?                                 # Optional group ending with a ']'.
             """,
             re.VERBOSE,
         )
@@ -281,17 +288,20 @@ class Emerge(PackageManager):
     def cleanup(self) -> None:
         """Removes things we don't need anymore.
 
-        An update is forced before calling the clean commands, as `pointed to by the emerge documentation <https://wiki.gentoo.org/wiki/Gentoo_Cheat_Sheet#Recommended_method>`_:
+        An update is forced before calling the clean commands, as `pointed to by the
+        emerge documentation
+        <https://wiki.gentoo.org/wiki/Gentoo_Cheat_Sheet#Recommended_method>`_:
 
         > As a safety measure, depclean will not remove any packages unless *all*
         > required dependencies have been resolved. As a consequence, it is often
         > necessary to run `emerge --update --newuse --deep @world` prior to depclean.
 
         .. warning::
-            This suppose the ``eclean`` binary is available and present on the system. We
-            do not search for it or try to resolves its canonical path with
-            :py:attr:`PackageManager.cli_path <meta_package_manager.base.PackageManager.cli_path>`,
-            as we do for the reference ``emerge`` binary.
+            This suppose the ``eclean`` binary is available and present on the system.
+            We do not search for it or try to resolves its canonical path with
+            :py:attr:`PackageManager.cli_path
+            <meta_package_manager.base.PackageManager.cli_path>`, as we do for the
+            reference ``emerge`` binary.
 
         .. code-block:: shell-session
 

@@ -78,7 +78,8 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh --xmlout search --details --type package [*args]
+            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+                --xmlout search --details --type package [*args]
             <?xml version='1.0'?>
             <stream>
                 <message type="info">Loading repository data...</message>
@@ -89,21 +90,26 @@ class Zypper(PackageManager):
                         <solvable status="installed" name="aaa_base" kind="package"
                             edition="12.12-bp12.3.1" arch="x86_64"/>
 
-                        <solvable status="installed" name="adwaita-icon-theme" kind="package"
-                            edition="1.0.3-bp153.1.1" arch="x86_64"/>
-                        <solvable status="other-version" name="adwaita-icon-theme" kind="package"
-                            edition="1.0.1-bp153.1.1" arch="x86_64"/>
+                        <solvable status="installed" name="adwaita-icon-theme"
+                            kind="package" edition="1.0.3-bp153.1.1" arch="x86_64"/>
+                        <solvable status="other-version" name="adwaita-icon-theme"
+                            kind="package" edition="1.0.1-bp153.1.1" arch="x86_64"/>
 
-                        <solvable status="not-installed" name="kopete-devel" kind="package"
-                            edition="20.04.2-bp153.2.5.1" arch="x86_64" repository="Update"/>
-                        <solvable status="not-installed" name="kopete-devel" kind="package"
-                            edition="20.04.2-bp153.2.2.1" arch="x86_64" repository="Update"/>
-                        <solvable status="not-installed" name="kopete-devel" kind="package"
-                            edition="20.04.2-bp153.2.2.1" arch="x86_64" repository="Debug"/>
-                        <solvable status="not-installed" name="kopete-devel" kind="package"
-                            edition="20.04.2-bp153.2.5.1" arch="i586" repository="Update"/>
-                        <solvable status="not-installed" name="kopete-devel" kind="package"
-                            edition="20.04.2-bp153.2.2.1" arch="i586" repository="Update"/>
+                        <solvable status="not-installed" name="kopete-devel"
+                            kind="package" edition="20.04.2-bp153.2.5.1" arch="x86_64"
+                            repository="Update"/>
+                        <solvable status="not-installed" name="kopete-devel"
+                            kind="package" edition="20.04.2-bp153.2.2.1" arch="x86_64"
+                            repository="Update"/>
+                        <solvable status="not-installed" name="kopete-devel"
+                            kind="package" edition="20.04.2-bp153.2.2.1" arch="x86_64"
+                            repository="Debug"/>
+                        <solvable status="not-installed" name="kopete-devel"
+                            kind="package" edition="20.04.2-bp153.2.5.1" arch="i586"
+                            repository="Update"/>
+                        <solvable status="not-installed" name="kopete-devel"
+                            kind="package" edition="20.04.2-bp153.2.2.1" arch="i586"
+                            repository="Update"/>
 
                         (...)
                     </solvable-list>
@@ -115,8 +121,8 @@ class Zypper(PackageManager):
             "search",
             # --details is the only option that is providing the package's version...
             "--details",
-            # ...but comes with duplicate results due to source packages, different arch and old releases.
-            # So we filters them out to only keep proper packages.
+            # ...but comes with duplicate results due to source packages, different arch
+            # and old releases. So we filters them out to only keep proper packages.
             "--type",
             "package",
             # Additional search arguments.
@@ -154,7 +160,8 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh --xmlout search --details --type package --installed-only
+            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+                --xmlout search --details --type package --installed-only
         """
         for package in self._search("--installed-only"):
             yield self.package(id=package["id"], installed_version=package["version"])
@@ -165,21 +172,24 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh --xmlout list-updates
+            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+                --xmlout list-updates
             <?xml version='1.0'?>
             <stream>
                 <message type="info">Loading repository data...</message>
                 <message type="info">Reading installed packages...</message>
                 <update-status version="0.6">
                     <update-list>
-                        <update name="git" kind="package"
-                            edition="2.34.1-10.9.1" edition-old="2.26.2-3.34.1" arch="x86_64">
+                        <update name="git" kind="package" edition="2.34.1-10.9.1"
+                                edition-old="2.26.2-3.34.1" arch="x86_64">
                             <summary>Fast, scalable revision control system</summary>
                             <description>
                                 Blah blah blah...
                             </description>
                             <license/>
-                            <source url="http://download.opensuse.org/updata/leap/15.3/sle" alias="repo-sle-update"/>
+                            <source
+                                url="http://download.opensuse.org/updata/leap/15.3/sle"
+                                alias="repo-sle-update"/>
                         </update>
                         (...)
                     </update-list>
@@ -211,19 +221,24 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh --xmlout search --details --type package kopete
+            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+                --xmlout search --details --type package kopete
 
         .. code-block:: shell-session
 
-            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh --xmlout search --details --type package --search-description kopete
+            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+                --xmlout search --details --type package --search-description kopete
 
         .. code-block:: shell-session
 
-            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh --xmlout search --details --type package --match-exact kopete
+            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+                --xmlout search --details --type package --match-exact kopete
 
         .. code-block:: shell-session
 
-            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh --xmlout search --details --type package --search-description --match-exact kopete
+            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+                --xmlout search --details --type package --search-description \
+                --match-exact kopete
         """
         search_param = []
         if extended:
@@ -240,7 +255,8 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh install kopete
+            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+                --no-refresh install kopete
         """
         return self.run_cli("install", package_id, sudo=True)
 
@@ -250,7 +266,8 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh update
+            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+                --no-refresh update
         """
         return self.build_cli("update", sudo=True)
 
@@ -263,7 +280,8 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh update kopete
+            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+                --no-refresh update kopete
         """
         return self.build_cli("update", package_id, sudo=True)
 
@@ -272,7 +290,8 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh refresh
+            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+                --no-refresh refresh
         """
         self.run_cli("refresh", sudo=True)
 
@@ -281,6 +300,7 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh clean
+            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+                --no-refresh clean
         """
         self.run_cli("clean", sudo=True)

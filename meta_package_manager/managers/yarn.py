@@ -85,7 +85,8 @@ class Yarn(PackageManager):
         output = self.run_cli("global", "--json", "list", "--depth", "0")
 
         regexp = re.compile(
-            r"^.+\"data\":\"\\\"(?P<package_id>\S+)@(?P<version>\S+)\\\" has binaries:\"\}$",
+            r"^.+\"data\":\"\\\"(?P<package_id>\S+)"
+            r"@(?P<version>\S+)\\\" has binaries:\"\}$",
             re.MULTILINE,
         )
 
@@ -153,7 +154,7 @@ class Yarn(PackageManager):
             "<yellow>" : Minor Update backward-compatible features
             "<green>"  : Patch Update backward-compatible bug fixes
             Package  Current Wanted Latest Package Type URL
-            markdown 0.4.0   0.4.0  0.5.0  dependencies git://github.com/evilstreak/markdown-js.git
+            markdown 0.4.0   0.4.0  0.5.0  dependencies git://github.com/.../md-js.git
             ✨  Done in 0.95s.
         """
         output = self.run_cli("--json", "outdated", "--cwd", self.global_dir)
@@ -177,10 +178,11 @@ class Yarn(PackageManager):
         """Fetch matching packages.
 
         .. warning::
-            Yarn maintainers have `decided to not implement a dedicated search
-            command <https://github.com/yarnpkg/yarn/issues/778#issuecomment-253146299>`_.
+            Yarn maintainers have `decided to not implement a dedicated search command
+            <https://github.com/yarnpkg/yarn/issues/778#issuecomment-253146299>`_.
 
-            Search is simulated by a direct call to ``yarn info``, and as a result only works for exact match.
+            Search is simulated by a direct call to ``yarn info``, and as a result only
+            works for exact match.
 
         .. code-block:: shell-session
 

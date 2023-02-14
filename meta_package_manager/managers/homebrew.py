@@ -55,9 +55,10 @@ class Homebrew(PackageManager):
         "HOMEBREW_NO_ANALYTICS": "1",
         # Disable configuration hints to reduce verbosity.
         "HOMEBREW_NO_ENV_HINTS": "1",
-        # Do not let brew mix the update operation with others. Mpm has a separate "sync" command for that.
-        # This silo-ed behavior has been requested by user since the beginning of
-        # mpm: https://github.com/kdeldycke/meta-package-manager/issues/36
+        # Do not let brew mix the update operation with others. Mpm has a separate
+        # "sync" command for that. This silo-ed behavior has been requested by user
+        # since the beginning of mpm:
+        # https://github.com/kdeldycke/meta-package-manager/issues/36
         "HOMEBREW_NO_AUTO_UPDATE": "1",
         # See: https://docs.brew.sh/FAQ#why-cant-i-open-a-mac-app-from-an-unidentified-developer
         # "HOMEBREW_CASK_OPTS": "--no-quarantine",
@@ -241,7 +242,8 @@ class Homebrew(PackageManager):
                 package_id = pkg_info["name"]
                 if installed_version == latest_version:
                     logger.debug(
-                        f"Ignore {package_id} upgrade from {installed_version} to {latest_version}."
+                        f"Ignore {package_id} upgrade "
+                        f"from {installed_version} to {latest_version}."
                     )
                     continue
 
@@ -331,7 +333,7 @@ class Homebrew(PackageManager):
                 (?:==>\s\S+\s)?           # Ignore section starting with '==>'.
                 (?P<package_id>\S+)       # Any non-empty characters.
                 :                         # Semi-colon.
-                (                         # Optional group start (ignored below with "_" variable).
+                (                         # Optional group start (ignored below with _).
                     \s+                   # Blank characters.
                     \(                    # Opening parenthesis.
                     (?P<package_name>.+)  # Any string.
@@ -465,10 +467,10 @@ class Homebrew(PackageManager):
             ==> Upgrading 1 outdated package:
             dupeguru 4.2.0 -> 4.2.1
             ==> Upgrading dupeguru
-            ==> Downloading https://github.com/arsenetar/dupeguru/releases/download/4.2.1/dupeguru_macOS_Qt_4.2.1.zi
-            ==> Downloading from https://objects.githubusercontent.com/github-production-release-asset-2e65be/108563
-            ######################################################################## 100.0%
-            ==> Backing App 'dupeguru.app' up to '/opt/homebrew/Caskroom/dupeguru/4.2.0/dupeguru.app'
+            ==> Downloading https://github.com/(...)/4.2.1/dupeguru_macOS_Qt_4.2.1.zip
+            ==> Downloading from https://githubusercontent.com/production-release-asset
+            ##################################################################### 100.0%
+            ==> Backing App 'dupeguru.app' up to '/opt/homebrew/.../4.2.0/dupeguru.app'
             ==> Removing App '/Applications/dupeguru.app'
             ==> Moving App 'dupeguru.app' to '/Applications/dupeguru.app'
             ==> Purging files for version 4.2.0 of Cask dupeguru

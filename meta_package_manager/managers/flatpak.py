@@ -83,7 +83,8 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            ► flatpak remote-ls --app --updates --columns=name,application,version --ostree-verbose
+            ► flatpak remote-ls --app --updates --columns=name,application,version \
+                --ostree-verbose
             GNOME Dictionary    org.gnome.Dictionary    3.26.0  stable  x86_64
         """
         output = self.run_cli(
@@ -131,8 +132,10 @@ class Flatpak(PackageManager):
         """Fetch matching packages.
 
         .. caution::
-            Search does not support extended or exact matching. So we returns the best subset of results and let
-            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them.
+            Search does not support extended or exact matching. So we returns the best
+            subset of results and let
+            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine
+            them.
 
         .. code-block:: shell-session
 

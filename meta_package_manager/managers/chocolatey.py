@@ -117,7 +117,8 @@ class Choco(PackageManager):
 
         .. code-block:: shell-session
 
-            ► choco search VirtualBox --by-id-only --limit-output --no-progress --no-color
+            ► choco search VirtualBox --by-id-only --limit-output --no-progress \
+                --no-color
             virtualbox|6.1.0
             VirtualBox.ExtensionPack|5.1.10.20161223
             enigmavirtualbox|9.20
@@ -125,7 +126,8 @@ class Choco(PackageManager):
 
         .. code-block:: shell-session
 
-            ► choco search VirtualBox --by-id-only --exact --limit-output --no-progress --no-color
+            ► choco search VirtualBox --by-id-only --exact --limit-output \
+                --no-progress --no-color
             virtualbox|6.1.0
 
         .. code-block:: shell-session

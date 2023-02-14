@@ -93,9 +93,11 @@ manager_classes = (
 
 Is considered valid package manager, definitions classes which:
 
-#. are located in the :py:prop:`meta_package_manager.pool.ManagerPool.manager_subfolder` subfolder, and
+#. are located in the :py:prop:`meta_package_manager.pool.ManagerPool.manager_subfolder`
+    subfolder, and
 #. are sub-classes of :py:class:`meta_package_manager.base.PackageManager`, and
-#. are not :py:prop:`meta_package_manager.base.PackageManager.virtual` (i.e. have a non-null :py:prop:`meta_package_manager.base.PackageManager.cli_names` property).
+#. are not :py:prop:`meta_package_manager.base.PackageManager.virtual` (i.e. have a
+    non-null :py:prop:`meta_package_manager.base.PackageManager.cli_names` property).
 
 These properties are checked and enforced in unittests.
 """
@@ -107,8 +109,9 @@ class ManagerPool:
     ALLOWED_EXTRA_OPTION: Final = frozenset(
         {"ignore_auto_updates", "stop_on_error", "dry_run"}
     )
-    """List of extra options that are allowed to be set on managers during the use of the
-    :py:func:`meta_package_manager.pool.ManagerPool.select_managers` helper below."""
+    """List of extra options that are allowed to be set on managers during the use of
+    the :py:func:`meta_package_manager.pool.ManagerPool.select_managers` helper below.
+    """
 
     @cached_property
     def register(self) -> dict[str, PackageManager]:
@@ -163,7 +166,8 @@ class ManagerPool:
     def default_manager_ids(self) -> tuple[str, ...]:
         """All manager IDs supported on the current platform and not deprecated.
 
-        Must keep the same order defined by :py:prop:`meta_package_manager.pool.ManagerPool.all_manager_ids`.
+        Must keep the same order defined by
+        :py:prop:`meta_package_manager.pool.ManagerPool.all_manager_ids`.
         """
         return tuple(
             mid
@@ -197,17 +201,20 @@ class ManagerPool:
         """Utility method to extract a subset of the manager pool based on selection
         list (``keep`` parameter) and exclusion list (``drop`` parameter) criterion.
 
-        By default, only the managers supported by the current platform are selected. Unless
-        ``keep_unsupported`` is set to ``True``, in which case all managers implemented by ``mpm``
-        are selected, regardless of their supported platform.
+        By default, only the managers supported by the current platform are selected.
+        Unless ``keep_unsupported`` is set to ``True``, in which case all managers
+        implemented by ``mpm`` are selected, regardless of their supported platform.
 
-        Deprecated managers are also excluded by default, unless ``keep_deprecated`` is ``True``.
+        Deprecated managers are also excluded by default, unless ``keep_deprecated`` is
+        ``True``.
 
         ``drop_inactive`` filters out managers that where not found on the system.
 
-        ``implements_operation`` filters out managers which do not implements the provided operation.
+        ``implements_operation`` filters out managers which do not implements the
+        provided operation.
 
-        Finally, ``extra_options`` parameters are fed to manager objects to set some additional options.
+        Finally, ``extra_options`` parameters are fed to manager objects to set some
+        additional options.
 
         Returns a generator producing a manager instance one after the other.
         """
@@ -235,11 +242,12 @@ class ManagerPool:
         for manager_id in selected_ids:
             manager = self.register.get(manager_id)
 
-            # Check if operation is not implemented before calling `.available`. It saves one
-            # call to the package manager CLI.
+            # Check if operation is not implemented before calling `.available`. It
+            # saves one call to the package manager CLI.
             if implements_operation and not manager.implements(implements_operation):
                 logger.warning(
-                    f"{theme.invoked_command(manager_id)} does not implement {implements_operation}."
+                    f"{theme.invoked_command(manager_id)} "
+                    f"does not implement {implements_operation}."
                 )
                 continue
 

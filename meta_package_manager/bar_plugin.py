@@ -6,13 +6,37 @@
 # <xbar.desc>List outdated packages and manage upgrades.</xbar.desc>
 # <xbar.dependencies>python,mpm</xbar.dependencies>
 # <xbar.image>https://i.imgur.com/B5wdxIc.png</xbar.image>
-# <xbar.abouturl>https://kdeldycke.github.io/meta-package-manager/bar-plugin.html</xbar.abouturl>
-# <xbar.var>boolean(VAR_SUBMENU_LAYOUT=false): Group packages into a sub-menu for each manager.</xbar.var>
-# <xbar.var>boolean(VAR_TABLE_RENDERING=true): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
-# XXX Deactivate font-related options for Xbar. Default variable value does not allow `=` character in Xbar. See: https://github.com/matryer/xbar/issues/832
-# <!--xbar.var>string(VAR_DEFAULT_FONT=""): Default font to use for non-monospaced text.</xbar.var-->
-# <!--xbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Default configuration for monospace fonts, including errors. Is used for table rendering.</xbar.var-->
-# <swiftbar.environment>[VAR_SUBMENU_LAYOUT: false, VAR_TABLE_RENDERING: true, VAR_DEFAULT_FONT: , VAR_MONOSPACE_FONT: font=Menlo size=12]</swiftbar.environment>
+# <xbar.abouturl>
+#    https://kdeldycke.github.io/meta-package-manager/bar-plugin.html
+# </xbar.abouturl>
+# <xbar.var>
+#   boolean(VAR_SUBMENU_LAYOUT=false):
+#   Group packages into a sub-menu for each manager.
+# </xbar.var>
+# <xbar.var>
+#   boolean(VAR_TABLE_RENDERING=true):
+#   Aligns package names and versions in a table for easier visual parsing.
+# </xbar.var>
+#
+# XXX Deactivate font-related options for Xbar. Default variable value does not allow
+# XXX `=` character in Xbar. See: https://github.com/matryer/xbar/issues/832
+# <!--xbar.var>
+#   string(VAR_DEFAULT_FONT=""):
+#   Default font to use for non-monospaced text.
+# </xbar.var-->
+# <!--xbar.var>
+#   string(VAR_MONOSPACE_FONT="font=Menlo size=12"):
+#   Default configuration for monospace fonts, including errors.
+#   Is used for table rendering.
+# </xbar.var-->
+# <swiftbar.environment>
+#   [
+#       VAR_SUBMENU_LAYOUT: false,
+#       VAR_TABLE_RENDERING: true,
+#       VAR_DEFAULT_FONT: ,
+#       VAR_MONOSPACE_FONT: font=Menlo size=12
+#   ]
+# </swiftbar.environment>
 
 """Xbar and SwiftBar plugin for Meta Package Manager (i.e. the :command:`mpm` CLI).
 
@@ -54,13 +78,13 @@ if sys.version_info < python_min_version:
         f"but requires Python >= {v_to_str(python_min_version)}"
     )
 
-import argparse
-import os
-import re
-from configparser import RawConfigParser
-from shutil import which
-from subprocess import run
-from unittest.mock import patch
+import argparse  # noqa: E402
+import os  # noqa: E402
+import re  # noqa: E402
+from configparser import RawConfigParser  # noqa: E402
+from shutil import which  # noqa: E402
+from subprocess import run  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 
 if sys.version_info >= (3, 8):
     from functools import cached_property
@@ -129,7 +153,8 @@ class MPMPlugin:
     def getenv_bool(var, default: bool = False) -> bool:
         """Utility to normalize boolean environment variables.
 
-        Relies on ``configparser.RawConfigParser.BOOLEAN_STATES`` to translate strings into boolean. See:
+        Relies on ``configparser.RawConfigParser.BOOLEAN_STATES`` to translate strings
+        into boolean. See:
         https://github.com/python/cpython/blob/89192c46da7b984811ff3bd648f8e827e4ef053c/Lib/configparser.py#L597-L599
         """
         value = MPMPlugin.getenv_str(var)
@@ -299,7 +324,8 @@ class MPMPlugin:
                 "param2=pip",
                 "param3=install",
                 "param4=--upgrade",
-                # XXX This seems broken beyond repair. No amount of workaround works. See:
+                # XXX This seems broken beyond repair. No amount of workaround works.
+                # See:
                 # https://github.com/matryer/xbar/issues/831
                 # https://github.com/swiftbar/SwiftBar/issues/308
                 # Fallback to the only version that is working on SwiftBar.

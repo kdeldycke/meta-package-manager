@@ -97,7 +97,8 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     "pacman-based": frozenset({"pacman", "pacaur", "paru", "yay"}),
     "pip-based": frozenset({"pip", "pipx"}),
 }
-"""Managers sharing some origin or implementation are grouped together under the same label."""
+"""Managers sharing some origin or implementation are grouped together under the same
+label."""
 
 all_manager_label_ids = frozenset(set(pool.all_manager_ids) | {"mpm"})
 """Adds ``mpm`` as its own manager alongside all those implemented."""

@@ -76,25 +76,29 @@ class Cargo(PackageManager):
         """Fetch matching packages.
 
         .. caution::
-            Search does not support extended or exact matching. So we returns the best subset of results and let
-            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them.
+            Search does not support extended or exact matching. So we returns the best
+            subset of results and let
+            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine
+            them.
 
         .. danger:
-            `Cargo limits search to 100 results <https://doc.rust-lang.org/cargo/commands/cargo-search.html#search-options>`_,
-            and because CLI output is refiltered as mentioned above, the final results can't be guaranteed.
+            `Cargo limits search to 100 results
+            <https://doc.rust-lang.org/cargo/commands/cargo-search.html#search-options>`_,
+            and because CLI output is refiltered as mentioned above, the final results
+            can't be guaranteed.
 
         .. code-block:: shell-session
 
             ► cargo --color never --quiet search --limit 100 python
             python = "0.0.0"                  # Python.
-            pyo3-asyncio = "0.16.0"           # PyO3 utilities for Python's Asyncio library
+            pyo3-asyncio = "0.16.0"           # PyO3 utilities for Python's Asyncio
             pyo3-asyncio-macros = "0.16.0"    # Proc Macro Attributes for PyO3 Asyncio
             pyo3 = "0.16.4"                   # Bindings to Python interpreter
-            pyenv-python = "0.4.0"            # A pyenv shim for python that's much faster than pyenv.
+            pyenv-python = "0.4.0"            # A pyenv shim for python
             python-launcher = "1.0.0"         # The Python launcher for Unix
             py-spy = "0.3.11"                 # Sampling profiler for Python programs
-            python_mixin = "0.0.0"            # Use Python to generate your Rust, right in your Rus…
-            pyflow = "0.3.1"                  # A modern Python installation and dependency manager
+            python_mixin = "0.0.0"            # Use Python to generate your Rust, right…
+            pyflow = "0.3.1"                  # A modern Python dependency manager
             pypackage = "0.0.3"               # A modern Python dependency manager
             ... and 1664 crates more (use --limit N to see more)
         """
@@ -130,7 +134,7 @@ class Cargo(PackageManager):
             Compiling bore-cli v0.4.0
               Finished release [optimized] target(s) in 1m 06s
              Replacing /home/mawoka/.cargo/bin/bore
-              Replaced package `bore-cli v0.2.3` with `bore-cli v0.4.0` (executable `bore`)
+              Replaced `bore-cli v0.2.3` with `bore-cli v0.4.0` (executable `bore`)
         """
         res = self.run_cli("install", package_id)
         return res

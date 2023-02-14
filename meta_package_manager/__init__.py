@@ -29,4 +29,4 @@ __version__ = "5.11.7"
     __version__ = "1.2.3.post1"  # Post Release 1
 """
 
-from click_extra.logging import logger
+from click_extra.logging import logger  # noqa: F401, E402

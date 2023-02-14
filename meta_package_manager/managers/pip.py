@@ -78,7 +78,7 @@ class Pip(PackageManager):
 
             .. code-block:: shell-session
                 ► python --version --version
-                Python 3.10.10 (main, Feb  8 2023, 05:34:50) [Clang 14.0.0 (clang-1400.0.29.202)]
+                Python 3.10.10 (Feb  8 2023, 05:34) [Clang 14.0.0 (clang-1400.0.29.202)]
         """
         if self.executable:
             self.run_cli(
@@ -89,7 +89,10 @@ class Pip(PackageManager):
                 force_exec=True,
             )
 
-        return super(Pip, self).version
+        # XXX The sentence below gets modernized with `super().version` by ruff.
+        # See: https://beta.ruff.rs/docs/rules/#pyupgrade-up
+        # But we're explicitly using the old syntax to bypass `cached_property`.
+        return super(Pip, self).version  # noqa: UP008
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -231,8 +234,9 @@ class Pip(PackageManager):
             https://github.com/pypa/pip/issues/5216#issuecomment-744605466
 
         .. caution::
-            Search is extended by default. So we returns the best subset of results and let
-            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them
+            Search is extended by default. So we returns the best subset of results and
+            let :py:meth:`meta_package_manager.base.PackageManager.refiltered_search`
+            refine them
 
         .. code-block:: shell-session
 

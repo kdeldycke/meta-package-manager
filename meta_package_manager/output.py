@@ -103,7 +103,8 @@ output_formats = sorted(output_formats + ["json"])
 def print_json(data):
     """Pretty-print Python data to JSON and output results to ``<stdout>``.
 
-    Serialize :py:class:`pathlib.Path` and :py:class:`meta_package_manager.version.TokenizedString` objects.
+    Serialize :py:class:`pathlib.Path` and
+    :py:class:`meta_package_manager.version.TokenizedString` objects.
     """
 
     def serialize_objects(obj):
@@ -127,7 +128,8 @@ def print_json(data):
 def print_table(header_defs, rows, sort_key=None):
     """Print a sorted table.
 
-    ``header_defs`` parameter is an ordered list of tuple whose first item is the column's label and the second the column's ID. Example:
+    ``header_defs`` parameter is an ordered list of tuple whose first item is the
+    column's label and the second the column's ID. Example:
 
     .. code-block:: python
 
@@ -138,8 +140,9 @@ def print_table(header_defs, rows, sort_key=None):
             ...,
         ]
 
-    Rows can be sorted by providing the column's ID to ``sort_key`` parameter. By default, ``None`` means the table will be sorted
-    in the order of columns provided by ``header_defs``.
+    Rows can be sorted by providing the column's ID to ``sort_key`` parameter. By
+    default, ``None`` means the table will be sorted in the order of columns provided by
+    ``header_defs``.
     """
     # Do not print anything, not even table headers if no rows.
     if not rows:
@@ -192,7 +195,7 @@ def print_stats(manager_stats: Counter) -> None:
 
     .. code-block:: text
 
-        16 packages total (brew: 2, pip: 2, gem: 2, cask: 2, mas: 2, vscode: 2, npm: 2, composer: 0).
+        10 packages total (brew: 2, pip: 2, gem: 2, vscode: 2, npm: 2, composer: 0).
     """
     per_manager_totals = ""
     if manager_stats:
@@ -211,12 +214,12 @@ class BarPluginRenderer(MPMPlugin):
     """All utilities used to render output compatible with both Xbar and SwiftBar plugin
     dialect.
 
-    The minimal code to locate ``mpm``, then call it and print its output resides in the plugin itself at
-    :py:meth:`meta_package_manager.bar_plugin.MPMPlugin.mpm_exec`.
+    The minimal code to locate ``mpm``, then call it and print its output resides in the
+    plugin itself at :py:meth:`meta_package_manager.bar_plugin.MPMPlugin.mpm_exec`.
 
-    All other stuff, especially the rendering code, is managed here, to allow for more complex
-    layouts relying on external Python dependencies. This also limits the number of required updates on the
-    plugin itself.
+    All other stuff, especially the rendering code, is managed here, to allow for more
+    complex layouts relying on external Python dependencies. This also limits the number
+    of required updates on the plugin itself.
     """
 
     @cached_property
@@ -251,7 +254,7 @@ class BarPluginRenderer(MPMPlugin):
 
         .. code-block::
 
-            shell=cmd_args[0] param1=cmd_args[1] param2=cmd_args[2] param2=cmd_args[2] ...
+            shell=cmd_args[0] param1=cmd_args[1] param2=cmd_args[2] ...
         """
         plugin_params = []
         # Serialize Path into string.
@@ -292,7 +295,8 @@ class BarPluginRenderer(MPMPlugin):
         padding=0,
         with_header_hide=None,
     )
-    """Simple rendering format with single-space separated columns used in the function below."""
+    """Simple rendering format with single-space separated columns used in the function
+    below."""
 
     @staticmethod
     def render_table(
@@ -317,8 +321,8 @@ class BarPluginRenderer(MPMPlugin):
 
         ..todo::
 
-            Use upcoming ``tabulate.SEPARATING_LINE`` to produce the whole bar plugin table in one go
-            and have all version numbers from all managers aligned. See:
+            Use upcoming ``tabulate.SEPARATING_LINE`` to produce the whole bar plugin
+            table in one go and have all version numbers from all managers aligned. See:
             https://github.com/astanin/python-tabulate/commit/dab256d1f64da97720c1459478a3cc0a4ea7a91e
         """
         if not table_data:
@@ -336,8 +340,9 @@ class BarPluginRenderer(MPMPlugin):
 
         ..todo::
 
-            Wait for ANSI-aware layout in table to be merged upstream so we can highly version
-            differences in bar plugin. See: https://github.com/astanin/python-tabulate/pull/184
+            Wait for ANSI-aware layout in table to be merged upstream so we can highly
+            version differences in bar plugin. See:
+            https://github.com/astanin/python-tabulate/pull/184
         """
         managers = outdated_data.values()
         font = self.monospace_font if self.table_rendering else self.default_font
@@ -430,7 +435,8 @@ class BarPluginRenderer(MPMPlugin):
                     # Fallback on mpm itself which is capable of simulating a full
                     # upgrade.
                     logger.warning(
-                        f"{theme.invoked_command(manager_id)} does not implement upgrade_all_cli."
+                        f"{theme.invoked_command(manager_id)} "
+                        "does not implement upgrade_all_cli."
                     )
                     upgrade_all_cli = (
                         *self.mpm_exec,

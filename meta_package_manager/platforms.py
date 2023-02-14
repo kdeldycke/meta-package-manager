@@ -19,10 +19,16 @@
 import dataclasses
 from typing import Tuple
 
-from click_extra.platforms import ALL_LINUX, ALL_WINDOWS, BSD_WITHOUT_MACOS
+from click_extra.platforms import (
+    ALL_LINUX,
+    ALL_WINDOWS,
+    BSD_WITHOUT_MACOS,
+    WSL2,
+    Group,
+    is_windows,
+)
 from click_extra.platforms import MACOS as MACOS_PLATFORM
 from click_extra.platforms import UNIX as ALL_UNIX
-from click_extra.platforms import WSL2, Group, is_windows
 
 BSD: Group = dataclasses.replace(BSD_WITHOUT_MACOS, name="BSD", icon="🅱️")
 LINUX: Group = Group("linux", "Linux", tuple((*ALL_LINUX.platforms, WSL2)), icon="🐧")
@@ -46,7 +52,8 @@ WINDOWS: Group = dataclasses.replace(ALL_WINDOWS, name="Windows", icon="🪟")
 PLATFORM_GROUPS: Tuple[Group, ...] = tuple(
     sorted((BSD, LINUX, MACOS, UNIX, WINDOWS), key=lambda g: g.name.lower())
 )
-"""Sorted list of platform groups that will have their own dedicated column in the matrix."""
+"""Sorted list of platform groups that will have their own dedicated column in the
+matrix."""
 
 encoding_args = {"encoding": "utf-8"} if is_windows() else {}
 """Forcing encoding is required on Windows."""

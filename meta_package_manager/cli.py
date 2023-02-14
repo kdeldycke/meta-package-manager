@@ -29,12 +29,20 @@ from unittest.mock import patch
 
 import tomli_w
 from boltons.cacheutils import LRI, cached
-from click_extra import STRING, Choice, File
+from click_extra import (
+    STRING,
+    Choice,
+    File,
+    argument,
+    echo,
+    extra_group,
+    option,
+    option_group,
+    pass_context,
+)
 from click_extra import Path as ClickPath
-from click_extra import argument, echo, extra_group, option, option_group, pass_context
-from click_extra.colorize import KO, OK
+from click_extra.colorize import KO, OK, highlight
 from click_extra.colorize import default_theme as theme
-from click_extra.colorize import highlight
 from click_extra.tabulate import table_format_option
 
 if sys.version_info >= (3, 11):
@@ -72,7 +80,8 @@ SNAPSHOTS = Section("Package snapshots subcommands")
 
 
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
-"""Sequence of package managers as defined by `XKCD #1654: Universal Install Script <https://xkcd.com/1654/>`_.
+"""Sequence of package managers as defined by `XKCD #1654: Universal Install Script
+<https://xkcd.com/1654/>`_.
 
 See the corresponding :issue:`implementation rationale in issue #10 <10>`.
 """
@@ -288,7 +297,7 @@ def mpm(
     # choose from.
     if not initial_managers:
         initial_managers = None
-        logger.debug(f"No initial population of managers selected by user.")
+        logger.debug("No initial population of managers selected by user.")
     else:
         logger.debug(
             "Initial population of user-selected managers: "
@@ -381,7 +390,10 @@ def managers(ctx):
             OK if manager.cli_path else KO,
             highlight_cli_name(manager.cli_path, manager.cli_names)
             if manager.cli_path
-            else f"{', '.join(map(theme.invoked_command, manager.cli_names))} not found",
+            else (
+                f"{', '.join(map(theme.invoked_command, manager.cli_names))} "
+                "not found"
+            ),
         )
 
         # Build up the version column content.
@@ -612,7 +624,8 @@ def outdated(ctx, plugin_output):
 @option(
     "--extended/--id-name-only",
     default=False,
-    help="Extend search to description, instead of restricting it to package ID and name. Implies --description.",
+    help="Extend search to description, instead of restricting it to package ID and "
+    "name. Implies --description.",
 )
 @option(
     "--exact/--fuzzy",
@@ -717,20 +730,23 @@ def search(ctx, extended, exact, refilter, query):
     type=STRING,
     nargs=-1,
     required=True,
-    help="A mix of plain <package_id>, simple <package_id@version> specifiers or full <pkg:npm/left-pad> purls.",
+    help="A mix of plain <package_id>, simple <package_id@version> specifiers or full "
+    "<pkg:npm/left-pad> purls.",
 )
 # TODO: add a --force/--reinstall flag
 @pass_context
 def install(ctx, packages_specs):
     """Install one or more packages.
 
-    Installation will proceed first with packages unambiguously tied to a manager. You can have an
-    influence on that with more precise package specifiers (like purl) and/or tighter selection of managers.
+    Installation will proceed first with packages unambiguously tied to a manager. You
+    can have an influence on that with more precise package specifiers (like purl)
+    and/or tighter selection of managers.
 
-    For other untied packages, mpm will try to find the best manager to install it with. Their installation
-    will be attempted with each manager, in the order they were selected. If we have the certainty, by the way
-    of a search operation, that this package is not available from this manager, we'll skip the installation
-    and try the next available manager.
+    For other untied packages, mpm will try to find the best manager to install it with.
+    Their installation will be attempted with each manager, in the order they were
+    selected. If we have the certainty, by the way of a search operation, that this
+    package is not available from this manager, we'll skip the installation and try the
+    next available manager.
     """
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(
@@ -739,7 +755,8 @@ def install(ctx, packages_specs):
     manager_ids = tuple(manager.id for manager in selected_managers)
     if len(manager_ids) > 1:
         logger.info(
-            f"Installation priority: {' > '.join(map(theme.invoked_command, manager_ids))}"
+            "Installation priority: "
+            f"{' > '.join(map(theme.invoked_command, manager_ids))}"
         )
 
     solver = Solver(packages_specs, manager_priority=manager_ids)
@@ -752,13 +769,15 @@ def install(ctx, packages_specs):
         for spec in package_specs:
             try:
                 logger.info(
-                    f"Install {spec} package with {theme.invoked_command(manager_id)}..."
+                    f"Install {spec} package with "
+                    f"{theme.invoked_command(manager_id)}..."
                 )
                 manager = pool.get(manager_id)
                 output = manager.install(spec.package_id, version=spec.version)
             except NotImplementedError:
                 logger.warning(
-                    f"{theme.invoked_command(manager_id)} does not implement install operation."
+                    f"{theme.invoked_command(manager_id)} "
+                    "does not implement install operation."
                 )
                 continue
             echo(output)
@@ -780,37 +799,43 @@ def install(ctx, packages_specs):
                 )
             except NotImplementedError:
                 logger.warning(
-                    f"{theme.invoked_command(manager.id)} does not implement search operation."
+                    f"{theme.invoked_command(manager.id)} "
+                    "does not implement search operation."
                 )
                 logger.info(
-                    f"{spec.package_id} existence unconfirmed, try to directly install it..."
+                    f"{spec.package_id} existence unconfirmed, "
+                    "try to directly install it..."
                 )
             else:
                 if not matches:
                     logger.warning(
-                        f"No {spec.package_id} package found on {theme.invoked_command(manager.id)}."
+                        f"No {spec.package_id} package found "
+                        f"on {theme.invoked_command(manager.id)}."
                     )
                     continue
                 # Prevents any incomplete or bad implementation of exact search.
                 if len(matches) != 1:
                     raise ValueError("Exact search returned multiple packages.")
 
-            # Allow install subcommand to fail to have the opportunity to catch the CLIError exception and print
-            # a comprehensive message.
+            # Allow install subcommand to fail to have the opportunity to catch the
+            # CLIError exception and print a comprehensive message.
             with patch.object(manager, "stop_on_error", True):
                 try:
                     logger.info(
-                        f"Install {spec} package with {theme.invoked_command(manager.id)}..."
+                        f"Install {spec} package "
+                        f"with {theme.invoked_command(manager.id)}..."
                     )
                     output = manager.install(spec.package_id, version=spec.version)
                 except NotImplementedError:
                     logger.warning(
-                        f"{theme.invoked_command(manager.id)} does not implement install operation."
+                        f"{theme.invoked_command(manager.id)} "
+                        "does not implement install operation."
                     )
                     continue
                 except CLIError:
                     logger.warning(
-                        f"Could not install {spec} with {theme.invoked_command(manager.id)}."
+                        f"Could not install {spec} "
+                        f"with {theme.invoked_command(manager.id)}."
                     )
                     continue
 
@@ -831,17 +856,19 @@ def install(ctx, packages_specs):
     "packages_specs",
     type=STRING,
     nargs=-1,
-    help="A mix of plain <package_id>, simple <package_id@version> specifiers or full <pkg:npm/left-pad> purls.",
+    help="A mix of plain <package_id>, simple <package_id@version> specifiers or full "
+    "<pkg:npm/left-pad> purls.",
 )
 @pass_context
 def upgrade(ctx, all, packages_specs):
     """Upgrade one or more outdated packages.
 
-    All outdated package will be upgraded by default if no specifiers are provided as arguments.
-    I.e. assumes -A/--all option if no [PACKAGES_SPECS]....
+    All outdated package will be upgraded by default if no specifiers are provided as
+    arguments. I.e. assumes -A/--all option if no [PACKAGES_SPECS]....
 
-    Packages recognized by multiple managers will be upgraded with each of them. You can fine-tune
-    this behavior with more precise package specifiers (like purl) and/or tighter selection of managers.
+    Packages recognized by multiple managers will be upgraded with each of them. You can
+    fine-tune this behavior with more precise package specifiers (like purl) and/or
+    tighter selection of managers.
 
     Packages unrecognized by any selected manager will be skipped.
     """
@@ -854,13 +881,15 @@ def upgrade(ctx, all, packages_specs):
         if packages_specs:
             # Deduplicate and sort specifiers for terseness.
             logger.warning(
-                f"Ignore {', '.join(sorted(set(packages_specs)))} specifiers and proceed to a full upgrade..."
+                f"Ignore {', '.join(sorted(set(packages_specs)))} specifiers "
+                "and proceed to a full upgrade..."
             )
         for manager in ctx.obj.selected_managers(
             implements_operation=Operations.upgrade_all
         ):
             logger.info(
-                f"Upgrade all outdated packages from {theme.invoked_command(manager.id)}..."
+                "Upgrade all outdated packages "
+                f"from {theme.invoked_command(manager.id)}..."
             )
             output = manager.upgrade()
             if output:
@@ -873,8 +902,8 @@ def upgrade(ctx, all, packages_specs):
     )
     manager_ids = tuple(manager.id for manager in selected_managers)
 
-    # Get the subset of selected managers that are implementing the installed operation, so we
-    # can query it and know if a package has been installed with it.
+    # Get the subset of selected managers that are implementing the installed operation,
+    # so we can query it and know if a package has been installed with it.
     sourcing_managers = tuple(
         ctx.obj.selected_managers(
             keep=manager_ids, implements_operation=Operations.installed
@@ -897,18 +926,21 @@ def upgrade(ctx, all, packages_specs):
             for manager in sourcing_managers:
                 if package_id in map(attrgetter("id"), manager.installed):
                     logger.debug(
-                        f"{package_id} has been installed with {theme.invoked_command(manager.id)}."
+                        f"{package_id} has been installed "
+                        "with {theme.invoked_command(manager.id)}."
                     )
                     source_manager_ids.add(manager.id)
 
         if not source_manager_ids:
             logger.error(
-                f"{package_id} is not recognized by any of the selected manager. Skip it."
+                f"{package_id} is not recognized by any of the selected manager. "
+                "Skip it."
             )
             continue
 
         logger.info(
-            f"Upgrade {package_id} with {', '.join(map(theme.invoked_command, sorted(source_manager_ids)))}"
+            f"Upgrade {package_id} "
+            f"with {', '.join(map(theme.invoked_command, sorted(source_manager_ids)))}"
         )
         for manager_id in source_manager_ids:
             manager = pool.get(manager_id)
@@ -923,14 +955,16 @@ def upgrade(ctx, all, packages_specs):
     type=STRING,
     nargs=-1,
     required=True,
-    help="A mix of plain <package_id>, simple <package_id@version> specifiers or full <pkg:npm/left-pad> purls.",
+    help="A mix of plain <package_id>, simple <package_id@version> specifiers or full "
+    "<pkg:npm/left-pad> purls.",
 )
 @pass_context
 def remove(ctx, packages_specs):
     """Remove one or more packages.
 
-    Packages recognized by multiple managers will be remove with each of them. You can fine-tune
-    this behavior with more precise package specifiers (like purl) and/or tighter selection of managers.
+    Packages recognized by multiple managers will be remove with each of them. You can
+    fine-tune this behavior with more precise package specifiers (like purl) and/or
+    tighter selection of managers.
 
     Packages unrecognized by any selected manager will be skipped.
     """
@@ -940,8 +974,8 @@ def remove(ctx, packages_specs):
     )
     manager_ids = tuple(manager.id for manager in selected_managers)
 
-    # Get the subset of selected managers that are implementing the installed operation, so we
-    # can query it and know if a package has been installed with it.
+    # Get the subset of selected managers that are implementing the installed operation,
+    # so we can query it and know if a package has been installed with it.
     sourcing_managers = tuple(
         ctx.obj.selected_managers(
             keep=manager_ids, implements_operation=Operations.installed
@@ -964,18 +998,21 @@ def remove(ctx, packages_specs):
             for manager in sourcing_managers:
                 if package_id in map(attrgetter("id"), manager.installed):
                     logger.debug(
-                        f"{package_id} has been installed with {theme.invoked_command(manager.id)}."
+                        f"{package_id} has been installed "
+                        f"with {theme.invoked_command(manager.id)}."
                     )
                     source_manager_ids.add(manager.id)
 
         if not source_manager_ids:
             logger.error(
-                f"{package_id} is not recognized by any of the selected manager. Skip it."
+                f"{package_id} is not recognized by any of the selected manager. "
+                "Skip it."
             )
             continue
 
         logger.info(
-            f"Remove {package_id} with {', '.join(map(theme.invoked_command, sorted(source_manager_ids)))}"
+            f"Remove {package_id} "
+            f"with {', '.join(map(theme.invoked_command, sorted(source_manager_ids)))}"
         )
         for manager_id in source_manager_ids:
             manager = pool.get(manager_id)
@@ -1019,13 +1056,15 @@ def cleanup(ctx):
     "--merge",
     is_flag=True,
     default=False,
-    help="Read the provided TOML file and update each entry with the version currently installed on the system. Requires the [TOML_PATH] argument.",
+    help="Read the provided TOML file and update each entry with the version currently "
+    "installed on the system. Requires the [TOML_PATH] argument.",
 )
 @option(
     "--update-version",
     is_flag=True,
     default=False,
-    help="Read the provided TOML file and update each existing entry with the version currently installed on the system. Requires the [TOML_PATH] argument.",
+    help="Read the provided TOML file and update each existing entry with the version "
+    "currently installed on the system. Requires the [TOML_PATH] argument.",
 )
 @argument(
     "toml_path",
@@ -1077,7 +1116,8 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
             logger.info(f"Merge all installed packages into {toml_path}")
         elif update_version:
             logger.info(
-                f"Update in-place all versions of installed packages found in {toml_path}"
+                f"Update in-place all versions of installed packages "
+                f"found in {toml_path}"
             )
         else:
             logger.info(f"Dump all installed packages into {toml_path}")

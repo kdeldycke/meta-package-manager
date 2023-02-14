@@ -25,8 +25,8 @@ import pytest
 from click_extra.platforms import is_macos
 
 # Pre-load invokation helpers to be used as pytest's fixture.
-from click_extra.tests.conftest import create_config  # nopycln: import
-from click_extra.tests.conftest import runner  # nopycln: import
+from click_extra.tests.conftest import create_config  # noqa: F401
+from click_extra.tests.conftest import runner  # noqa: F401
 from click_extra.tests.conftest import invoke as invoke_extra
 from pytest import fixture, param
 

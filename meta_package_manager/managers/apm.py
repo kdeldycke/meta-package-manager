@@ -32,9 +32,11 @@ class APM(PackageManager):
     """GitHub announced the end of the project for December 15, 2022.
     Source: https://github.blog/2022-06-08-sunsetting-atom/
 
-    There is a tentative community fork being discussed. See: https://github.com/atom-community/apm
+    There is a tentative community fork being discussed. See:
+    https://github.com/atom-community/apm
 
-    In the mean time, as long as no apm alternative is useable, it is safe to tag this manager as deprecated.
+    In the mean time, as long as no apm alternative is useable, it is safe to tag this
+    manager as deprecated.
     """
 
     name = "Atom's apm"
@@ -436,9 +438,9 @@ class APM(PackageManager):
         .. code-block:: shell-session
 
             ► apm install image-view
-            The image-view package is bundled with Atom and should not be explicitly installed.
-            You can run `apm uninstall image-view` to uninstall it and then the version bundled
-            with Atom will be used.
+            The image-view package is bundled with Atom and should not be explicitly
+            installed. You can run `apm uninstall image-view` to uninstall it and then
+            the version bundled with Atom will be used.
             Installing image-view to /Users/kde/.atom/packages ✓
         """
         return self.run_cli("install", package_id)

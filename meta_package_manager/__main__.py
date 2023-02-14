@@ -46,7 +46,8 @@ def main():
 
         - plain inline package call: ``python -m meta_package_manager``,
         - Poetry's script entry point: ``mpm = 'meta_package_manager.__main__:main``,
-        - Nuitka's main module invokation requirement: ``python -m nuitka (...) meta_package_manager/__main__.py``
+        - Nuitka's main module invokation requirement: ``python -m nuitka (...)
+          meta_package_manager/__main__.py``
 
     That way we can deduce all three cases from the Poetry entry point.
     """

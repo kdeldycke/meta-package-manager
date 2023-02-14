@@ -95,8 +95,9 @@ class Snap(PackageManager):
         """Fetch matching packages.
 
         .. caution::
-            Search is extended by default. So we returns the best subset of results and let
-            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine them.
+            Search is extended by default. So we returns the best subset of results and
+            let :py:meth:`meta_package_manager.base.PackageManager.refiltered_search`
+            refine them.
 
         .. code-block:: shell-session
 

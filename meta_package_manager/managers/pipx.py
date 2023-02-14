@@ -56,7 +56,7 @@ class Pipx(PackageManager):
                       "main_package": {
                         "app_paths": [
                           {
-                            "__Path__": "/Users/kde/.local/pipx/venvs/pycowsay/bin/pycowsay",
+                            "__Path__": "~/.local/pipx/venvs/pycowsay/bin/pycowsay",
                             "__type__": "Path"
                           }
                         ],
@@ -98,7 +98,8 @@ class Pipx(PackageManager):
 
         .. todo::
 
-            Mimics ``Pip.outdated()`` operation. There probably is a way to factorize it.
+            Mimics ``Pip.outdated()`` operation. There probably is a way to factorize
+            it.
 
         .. code-block:: shell-session
 

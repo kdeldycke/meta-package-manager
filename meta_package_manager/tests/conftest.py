@@ -25,9 +25,11 @@ import pytest
 from click_extra.platforms import is_macos
 
 # Pre-load invokation helpers to be used as pytest's fixture.
-from click_extra.tests.conftest import create_config  # noqa: F401
-from click_extra.tests.conftest import runner  # noqa: F401
-from click_extra.tests.conftest import invoke as invoke_extra
+from click_extra.tests.conftest import (
+    create_config,  # noqa: F401
+    runner,  # noqa: F401
+)
+from click_extra.tests.conftest import invoke as invoke_extra  # noqa: F401
 from pytest import fixture, param
 
 from ..cli import mpm
@@ -37,7 +39,7 @@ from ..pool import manager_classes, pool
 
 
 @fixture
-def invoke(invoke_extra):
+def invoke(invoke_extra):  # noqa: F811
     return partial(invoke_extra, mpm)
 
 
@@ -169,7 +171,7 @@ def pytest_runtest_teardown(item, nextitem):
     binary on the system.
     """
     # Let pytest finish the test as-is.
-    outcome = yield
+    outcome = yield  # noqa: F841
 
     # Only inspect tests that are part of a suit wrapped in a class, and only on macOS.
     if item.parent.cls and is_macos():

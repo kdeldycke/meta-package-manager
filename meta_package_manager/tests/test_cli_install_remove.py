@@ -33,8 +33,8 @@ class TestInstallRemove(CLISubCommandTests):
     """Install and remove operations are siblings and sensible, so we regroup them under
     the same test suite.
 
-    Install mpm with itself when we can, so we can test externally contributed packaging.
-    See: https://github.com/kdeldycke/meta-package-manager/issues/527
+    Install mpm with itself when we can, so we can test externally contributed
+    packaging. See: https://github.com/kdeldycke/meta-package-manager/issues/527
     """
 
     strict_selection_match = False

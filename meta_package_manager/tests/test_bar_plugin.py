@@ -72,12 +72,13 @@ def _shell_invokation_matrix():
         # Options.
         (
             "-c",
-            # XXX Login shell defaults to Python 2.7 on GitHub macOS runners and is picked up by surprise for bar plugin tests:
+            # XXX Login shell defaults to Python 2.7 on GitHub macOS runners and is
+            # picked up by surprise for bar plugin tests:
             # Traceback (most recent call last):
-            #   File "/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/runpy.py",
+            #   File "/Library/Frameworks/.../2.7/lib/python2.7/runpy.py",
             #   line 163, in _run_module_as_main
             #     mod_name, _Error)
-            #   File "/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/runpy.py",
+            #   File "/Library/Frameworks/.../2.7/lib/python2.7/runpy.py",
             #   line 111, in _get_module_details
             #     __import__(mod_name)  # Do not catch exceptions initializing package
             #   File "meta_package_manager/__init__.py", line 33, in <module>
@@ -209,7 +210,8 @@ class TestBarPlugin:
                     # Package upgrade line.
                     (
                         r"(--)?\S+\s+\S+ → \S+\s+\| shell=\S+( param\d+=\S+)+ "
-                        r"font=Menlo size=12 refresh=true terminal=(false|true alternate=true)?$",
+                        r"font=Menlo size=12 refresh=true "
+                        r"terminal=(false|true alternate=true)?$",
                         True,
                     ),
                 )
@@ -256,7 +258,8 @@ class TestBarPlugin:
         assert process.stdout
         assert not process.stderr
 
-        # We need to parse the version to account for alpha release, like Python `3.12.0a4`.
+        # We need to parse the version to account for alpha release,
+        # like Python `3.12.0a4`.
         assert parse_version(process.stdout.split()[1]) >= parse_version(
             ".".join(str(i) for i in bar_plugin.python_min_version)
         )

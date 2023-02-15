@@ -56,8 +56,8 @@ Install markdown package with pip...
 
 ## Extra features for your package managers
 
-Not all package managers are equivalent. `mpm` is filling the
-gap between managers and implement some missing features.
+Package managers are not comparable. Some have advanced features other lacks. `mpm` is filling the
+gap between managers and implement some of these missing features.
 
 For instance,
 [`pip` can’t upgrade all outdated package](https://github.com/pypa/pip/issues/4551)
@@ -102,33 +102,37 @@ feature.
 
 ## Same package, multiple sources
 
-You just learned from a friend of a new CLI you did not known about (`broot`).
-Back to your terminal, you can search it across all package
-repositories, then choose your preferred package manager to install it:
+You just learned about a new cool app you did not known about (`broot` in this example).
+You want to try it but don't known where to get it. Back to your terminal, you can search for it
+across all package repositories:
 
 ```shell-session
 $ mpm search broot --exact
 ╭────────────┬──────┬─────────┬────────────────╮
 │ Package ID │ Name │ Manager │ Latest version │
 ├────────────┼──────┼─────────┼────────────────┤
-│ broot      │      │ brew    │ ?              │
-│ broot      │      │ cargo   │ 1.16.2         │
+│ broot      │      │ brew    │ 1.16.2         │
+│ broot      │      │ cargo   │ 0.13.6         │
 ╰────────────┴──────┴─────────┴────────────────╯
 2 packages total (brew: 1, pip: 1, cask: 0, gem: 0, mas: 0, npm: 0).
 ```
+
+Then choose your preferred package manager to install it:
 
 ```shell-session
 $ mpm --brew install broot
 Package manager order: brew
 Install broot package from brew...
 (...)
-🍺  /usr/local/Cellar/broot/0.13.6: 8 files, 3.5MB
+🍺  /usr/local/Cellar/broot/1.16.2: 8 files, 3.5MB
 ```
 
 Thanks to `mpm` we were able to identify the best source for
 `broot` to get the latest version.
 
 ## Deduplicate packages
+
+`mpm` can list all the installed packages on your machine sharing the same ID:
 
 ```shell-session
 $ mpm list --duplicates
@@ -143,7 +147,7 @@ $ mpm list --duplicates
 │ six        │      │ brew    │ 1.16.0_2          │
 │ six        │      │ pip     │ 1.16.0            │
 ╰────────────┴──────┴─────────┴───────────────────╯
-6 packages total (pip: 2, brew: 1, cargo: 1, gem: 1, npm: 1, cask: 0).
+7 packages total (pip: 2, brew: 1, cargo: 1, gem: 1, npm: 1, pipx: 1, cask: 0).
 ```
 
 Now you can easily remove all of them:
@@ -225,15 +229,6 @@ $ mpm snapshot --merge packages.toml
 
 Of course you can still call the backup
 
-## Get rid of Docker for lambda?
-
-Some developers have a hard-time reproducing environment for lambda execution
-onto their local machine. Most of devs use Docker to abstract their runtime
-requirements. But Docker might be too big for some people.
-
-`mpm` can be a lightweight alternative to Docker here to abstract the runtime
-from their execution environment.
-
 ## Switch systems
 
 You used to work on macOS. Now you’d like to move to Linux. To reduce friction
@@ -256,7 +251,112 @@ then reinstall them on your new distribution.
 Implement a best matchig strategy, across package managers of different kinds.
 ```
 
-## Support and fund open-source?
+## Speculative use-cases
+
+A list of ideas and concepts `mpm` could support in the future
+
+### SBOM: Software Bill of Materials
+
+```{admonition} Context
+The [Log4Shell vulnerability](https://en.wikipedia.org/wiki/Log4Shell) debacle was a wake-up call for the industry. This dependency was deeply embedded in the legacy stack of companies and administrations. They all had huge difficulty to identify its presence, writing custom detection scripts and scanning their software artifacts.
+
+As a response to this crisis, [SBOM tools have now became a category of their own](https://en.wikipedia.org/wiki/Software_supply_chain). To the point that [a US executive order has also been released](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/) to modernize cybersecurity practices and enforce the production of SBOM to track the software supply chain.
+```
+
+```{todo}
+`mpm` doesn't implement SBOM features yet. This work is tracked by {issue}`936`.
+```
+
+````{tip}
+In the mean time, you can export the list of installed packages in JSON:
+
+```shell-session
+$ mpm --output-format json installed > installed_package.json
+```
+```json
+{
+    "pip": {
+        "errors": [],
+        "id": "pip",
+        "name": "Pip",
+        "packages": [
+            {
+                "id": "arrow",
+                "installed_version": "1.2.3",
+                "name": null
+            },
+            {
+                "id": "boltons",
+                "installed_version": "21.0.0",
+                "name": null
+            }
+        ]
+    },
+    "vscode": {
+        "errors": [],
+        "id": "vscode",
+        "name": "Visual Studio Code",
+        "packages": [
+            {
+                "id": "charliermarsh.ruff",
+                "installed_version": "2023.6.0",
+                "name": null
+            },
+            {
+                "id": "ExecutableBookProject.myst-highlight",
+                "installed_version": "0.11.0",
+                "name": null
+            },
+            {
+                "id": "GitHub.copilot",
+                "installed_version": "1.73.8685",
+                "name": null
+            }
+        ]
+    },
+}
+```
+
+Or in CSV:
+```shell-session
+$ mpm --output-format csv installed > installed_package.csv
+```
+```csv
+Package ID,Name,Manager,Installed version
+arrow,,pip,1.2.3
+boltons,,pip,21.0.0
+charliermarsh.ruff,,vscode,2023.6.0
+ExecutableBookProject.myst-highlight,,vscode,0.11.0
+GitHub.copilot,,vscode,1.73.8685
+```
+
+There's probably a tool somewhere that will allow you to transform these machine-readable exports to a proper SBOM file format.
+````
+
+### List vulnerabilities
+
+```{todo}
+`mpm` doesn't identify CVEs yet.
+
+This feature might be solved with SBOM implementation, as I think there is some tools available around that can check an SBOM export and cross reference it with a CVE database.
+```
+
+### List dependencies
+
+```{todo}
+`mpm` doesn't collect dependencies yet. Once it does these dependencies can augment the SBOM export.
+```
+
+### Get rid of Docker for lambda?
+
+Some developers have a hard-time reproducing environment for lambda execution
+onto their local machine. Most of devs use Docker to abstract their runtime
+requirements. But Docker might be too big for some people.
+
+`mpm` can be a lightweight alternative to Docker, to abstract the runtime
+from their execution environment.
+
+### Support and fund open-source?
 
 One future development direction might be to add a way to inventory all
 components your using on your system and track down their preferred funding

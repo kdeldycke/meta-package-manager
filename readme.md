@@ -122,11 +122,11 @@ are available in the documentation.
 
 Standalone executables of `mpm`'s latest version are available for several platforms and architectures:
 
-| Platform  | `x86_64` |
-| ---- | ------------ |
-| **Linux**[^linux] |  [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     |
-| **macOS** |  [Download `mpm.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     |
-| **Windows** |  [Download `mpm.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe)     |
+| Platform    | `x86_64`                                                                                                             |
+| ----------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Linux**[^linux]   | [Download `mpm-linux-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)   |
+| **macOS**   | [Download `mpm-macos-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)   |
+| **Windows** | [Download `mpm-windows-x64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) |
 
 ## Quickstart
 

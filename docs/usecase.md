@@ -267,7 +267,11 @@ As a response to this crisis, [SBOM tools have now became a category of their ow
 `mpm` doesn't implement SBOM features yet. This work is tracked by {issue}`936`.
 ```
 
-````{tip}
+````{admonition} JSON & CSV exports
+---
+class: tip
+---
+
 In the mean time, you can export the list of installed packages in JSON:
 
 ```shell-session

@@ -384,7 +384,12 @@ jobs:
           DESTRUCTIVE_TESTS: true
         if: runner.os == 'Windows'
         # Force ordering of tests in Windows to work around an issue with NPM/YARN when upgrade_all is invoked:
+        #
+        # ____________ TestUpgrade.test_manager_selection[single_exclusion] _____________
+        # platform win32 -- Python 3.8.10, pytest-7.2.1, pluggy-1.0.0
         #   ► mpm --exclude pip upgrade --all
+        #     (...)
+        #     Upgrade all outdated packages from npm...
         #     (...)
         #     Upgrade all outdated packages from yarn...
         #     (...)
@@ -420,6 +425,66 @@ jobs:
         #     File "...\lib\subprocess.py", line 1311, in _execute_child
         #       hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
         #   FileNotFoundError: [WinError 2] The system cannot find the file specified
+        #
+        # _____________________ TestUpgrade.test_stats[--no-stats] ______________________
+        # platform win32 -- Python 3.12.0a4, pytest-7.2.1, pluggy-1.0.0
+        #   ► mpm --no-stats upgrade --all
+        #     (...)
+        #     Upgrade all outdated packages from yarn...
+        #     (...)
+        #     Upgrade all outdated packages from npm...
+        #     (...)
+        #   Traceback (most recent call last):
+        #     File "...\click\testing.py", line 408, in invoke
+        #       return_value = cli.main(args=args or (), prog_name=prog_name, **extra)
+        #     File "...\click_extra\commands.py", line 161, in main
+        #       return super().main(*args, **kwargs)
+        #     File "...\click\core.py", line 1055, in main
+        #       rv = self.invoke(ctx)
+        #     File "...\click_extra\commands.py", line 214, in invoke
+        #       return super().invoke(ctx)
+        #     File "...\click\core.py", line 1657, in invoke
+        #       return _process_result(sub_ctx.command.invoke(sub_ctx))
+        #     File "...\click\core.py", line 1404, in invoke
+        #       return ctx.invoke(self.callback, **ctx.params)
+        #     File "...\click\core.py", line 760, in invoke
+        #       return __callback(*args, **kwargs)
+        #     File "...\click\decorators.py", line 26, in new_func
+        #       return f(get_current_context(), *args, **kwargs)
+        #     File "...\meta_package_manager\cli.py", line 865, in upgrade
+        #       output = manager.upgrade()
+        #     File "...\meta_package_manager\base.py", line 863, in upgrade
+        #       return self.run(cli, extra_env=self.extra_env)
+        #     File "...\meta_package_manager\base.py", line 551, in run
+        #       code, output, error = run_cmd(
+        #     File "...\click_extra\run.py", line 111, in run_cmd
+        #       process = subprocess.run(
+        #     File "...\Lib\subprocess.py", line 548, in run
+        #       with Popen(*popenargs, **kwargs) as process:
+        #     File "...\Lib\subprocess.py", line 1024, in __init__
+        #       self._execute_child(args, executable, preexec_fn, close_fds,
+        #     File "...\Lib\subprocess.py", line 1493, in _execute_child
+        #       hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+        #   FileNotFoundError: [WinError 2] The system cannot find the file specified
+        #
+        # _____________________________ test_cli_path[npm] ______________________________
+        # platform win32 -- Python 3.7.9, pytest-7.2.1, pluggy-1.0.0
+        #
+        # manager = <meta_package_manager.managers.npm.NPM object at 0x00000220A5CAF688>
+        #
+        #     @all_managers
+        #     def test_cli_path(manager):
+        #         if manager.cli_path is not None:
+        #             assert isinstance(manager.cli_path, Path)
+        #             assert manager.cli_path.is_absolute()
+        #             assert not manager.cli_path.is_reserved()
+        # >           assert manager.cli_path.is_file()
+        # E           AssertionError: assert False
+        # E            +  where False = <bound method Path.is_file of WindowsPath('C:/npm/prefix/npm.CMD')>()
+        # E            +    where <bound method Path.is_file of WindowsPath('C:/npm/prefix/npm.CMD')> = WindowsPath('C:/npm/prefix/npm.CMD').is_file
+        # E            +      where WindowsPath('C:/npm/prefix/npm.CMD') = <meta_package_manager.managers.npm.NPM object at 0x00000220A5CAF688>.cli_path
+        #
+        # meta_package_manager\tests\test_managers.py:194: AssertionError
         run: |
           poetry run pytest --randomly-seed=2091446270 --exitfirst --cov-config=pyproject.toml --cov=./ --cov-report=xml
       - name: Coverage - Upload Codecov

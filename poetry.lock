@@ -229,14 +229,14 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "click-extra"
-version = "3.8.0"
+version = "3.8.1"
 description = "🌈 Extra colorization and configuration loading for Click."
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "click_extra-3.8.0-py3-none-any.whl", hash = "sha256:d809ef3724fbca682286c1f8e729158c1f1945d347a5b0b1dac1f4f96d67eb53"},
-    {file = "click_extra-3.8.0.tar.gz", hash = "sha256:7f67201685034708ed241039db32f2849900ac581c8022f796b0685d0984219c"},
+    {file = "click_extra-3.8.1-py3-none-any.whl", hash = "sha256:49c0bff6b7df851dce88bd78b62a460bd7edfe7ea2fb2187b7ce0c5e0954f4e7"},
+    {file = "click_extra-3.8.1.tar.gz", hash = "sha256:d7def7ae2b4c5a319d59486c439e6a44d99f7ad55b02bfa33fcd8ff7b07ecbc3"},
 ]
 
 [package.dependencies]

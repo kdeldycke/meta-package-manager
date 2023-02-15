@@ -271,7 +271,6 @@ As a response to this crisis, [SBOM tools have now became a category of their ow
 ---
 class: tip
 ---
-
 In the mean time, you can export the list of installed packages in JSON:
 
 ```shell-session

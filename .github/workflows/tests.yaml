@@ -481,8 +481,10 @@ jobs:
         # >           assert manager.cli_path.is_file()
         # E           AssertionError: assert False
         # E            +  where False = <bound method Path.is_file of WindowsPath('C:/npm/prefix/npm.CMD')>()
-        # E            +    where <bound method Path.is_file of WindowsPath('C:/npm/prefix/npm.CMD')> = WindowsPath('C:/npm/prefix/npm.CMD').is_file
-        # E            +      where WindowsPath('C:/npm/prefix/npm.CMD') = <meta_package_manager.managers.npm.NPM object at 0x00000220A5CAF688>.cli_path
+        # E            +    where <bound method Path.is_file of WindowsPath('C:/npm/prefix/npm.CMD')>
+        #                   = WindowsPath('C:/npm/prefix/npm.CMD').is_file
+        # E            +      where WindowsPath('C:/npm/prefix/npm.CMD')
+        #                     = <meta_package_manager.managers.npm.NPM object at 0x00000220A5CAF688>.cli_path
         #
         # meta_package_manager\tests\test_managers.py:194: AssertionError
         run: |

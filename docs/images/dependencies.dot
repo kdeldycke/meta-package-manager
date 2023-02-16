@@ -33,7 +33,7 @@ digraph {
     "click-extra" -> tabulate [label=">=0.9.0,<0.10.0"]
     "click-extra" -> wcmatch [label=">=8.4,<9.0"]
     "click-extra" -> xmltodict [label=">=0.12,<0.14"]
-    "click-extra" [label="click-extra\n3.8.0"]
+    "click-extra" [label="click-extra\n3.8.1"]
     "click-log" -> click [label=any]
     "click-log" [label="click-log\n0.4.0"]
     "lark-parser" [label="lark-parser\n0.7.8"]

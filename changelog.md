@@ -1,5 +1,11 @@
 # Changelog
 
+## {gh}`5.11.8 (unreleased) <compare/v5.11.7...main>`
+
+```{important}
+This version is not released yet and is under active development.
+```
+
 ## {gh}`5.11.7 (2023-02-20) <compare/v5.11.6...v5.11.7>`
 
 - \[mpm\] Fix overlapping detection of `linux` and `wsl2` platforms. Closes {issue}`944`.

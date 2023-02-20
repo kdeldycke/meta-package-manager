@@ -6,8 +6,10 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Fix overlapping detection of `linux` and `wsl2` platforms. Closes {issue}`944`.
 - \[pip\] Print Python's own version in debug logs before checking for Pip's version.
 - \[mpm\] Code, comments and documentation style change to conform to new QA workflows based on `ruff`.
+- \[mpm\] Produce dependency graph in Mermaid instead of Graphviz. Add new dev dependency on `sphinxcontrib-mermaid`.
 
 ## {gh}`5.11.6 (2023-02-12) <compare/v5.11.5...v5.11.6>`
 

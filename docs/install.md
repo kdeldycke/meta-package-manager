@@ -385,6 +385,6 @@ _MPM_COMPLETE=fish_source mpm > ~/.config/fish/completions/mpm.fish
 FYI, here is a graph of Python package dependencies:
 
 ```{eval-rst}
-.. graphviz:: images/dependencies.dot
+.. mermaid:: images/dependencies.mmd
    :align: center
 ```

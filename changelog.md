@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`5.11.7 (unreleased) <compare/v5.11.6...main>`
-
-```{important}
-This version is not released yet and is under active development.
-```
+## {gh}`5.11.7 (2023-02-20) <compare/v5.11.6...v5.11.7>`
 
 - \[mpm\] Fix overlapping detection of `linux` and `wsl2` platforms. Closes {issue}`944`.
 - \[pip\] Print Python's own version in debug logs before checking for Pip's version.

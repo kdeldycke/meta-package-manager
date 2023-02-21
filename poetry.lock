@@ -1533,14 +1533,14 @@ files = [
 
 [[package]]
 name = "types-xmltodict"
-version = "0.13.0.1"
+version = "0.13.0.2"
 description = "Typing stubs for xmltodict"
 category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "types-xmltodict-0.13.0.1.tar.gz", hash = "sha256:c7b5e90002cae8d1a65e33f8c93ed8d8f7ba200eead5c9b9b6ba9b75afa8c29b"},
-    {file = "types_xmltodict-0.13.0.1-py3-none-any.whl", hash = "sha256:c02c1b31eff9529429939dc806cff070c5058514f5437c3e70cd98f8af96079d"},
+    {file = "types-xmltodict-0.13.0.2.tar.gz", hash = "sha256:7a233e65aa828aac611250aa479f9e346a41a8029566ed90dac246c5888304df"},
+    {file = "types_xmltodict-0.13.0.2-py3-none-any.whl", hash = "sha256:274eb87050e957be0328eace3371714468578f6fbe66341702741366c65f256a"},
 ]
 
 [[package]]
@@ -1595,6 +1595,7 @@ category = "main"
 optional = false
 python-versions = "*"
 files = [
+    {file = "wcwidth-0.2.6-py2.py3-none-any.whl", hash = "sha256:795b138f6875577cd91bba52baf9e445cd5118fd32723b460e30a0af30ea230e"},
     {file = "wcwidth-0.2.6.tar.gz", hash = "sha256:a5220780a404dbe3353789870978e472cfe477761f06ee55077256e509b156d0"},
 ]
 

@@ -52,7 +52,6 @@ TEST_CONF_FILE = """
 
 
 class TestBaseCLI:
-
     """This collection is testing basic CLI behavior without involving any subcommands.
 
     Also includes a bunch of tests performed once on an arbitrary sub-command, for
@@ -108,7 +107,6 @@ class TestBaseCLI:
 
 
 class CLISubCommandTests:
-
     """All these tests runs on each subcommand.
 
     This class doesn't starts with `Test` as it is meant to be used as a template,
@@ -157,7 +155,6 @@ class CLISubCommandTests:
         stderr = strip_ansi(result.stderr)
 
         for mid in reference_set:
-
             # List of signals indicating a package manager has been retained by
             # the CLI. Roughly sorted from most specific to more forgiving.
             signals = (
@@ -335,7 +332,6 @@ class CLISubCommandTests:
 
 
 class CLITableTests:
-
     """Test subcommands whose output is a configurable table.
 
     A table output is also allowed to be rendered as JSON.
@@ -349,8 +345,8 @@ class CLITableTests:
     def test_json_output(self, invoke, subcmd):
         """JSON output is expected to be parseable if read from <stdout>.
 
-        Debug level messages are redirected to <stderr> and are not supposed to
-        interfer with this behavior.
+        Debug level messages are redirected to <stderr> and are not supposed to interfer
+        with this behavior.
 
         Also checks that JSON output format is not supported by all commands.
         """

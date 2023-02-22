@@ -144,7 +144,6 @@ class Token:
 
 
 class TokenizedString:
-
     """Tokenize a string for user-friendly sorting.
 
     Essentially a wrapper around a list of ``Token`` instances.

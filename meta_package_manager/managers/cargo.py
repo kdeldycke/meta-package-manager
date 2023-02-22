@@ -26,7 +26,6 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 
 class Cargo(PackageManager):
-
     name = "Rust's cargo"
 
     homepage_url = "https://doc.rust-lang.org/cargo/"

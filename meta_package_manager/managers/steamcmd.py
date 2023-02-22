@@ -23,7 +23,6 @@ from ..capabilities import version_not_implemented
 
 
 class SteamCMD(PackageManager):
-
     """Basic SteamCMD usage.
 
     SteamCMD doesn't seem to be properly documented and maintained to offer a powerful

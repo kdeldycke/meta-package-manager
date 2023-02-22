@@ -26,7 +26,6 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 
 class Scoop(PackageManager):
-
     name = "Scoop"
 
     homepage_url = "https://scoop.sh"

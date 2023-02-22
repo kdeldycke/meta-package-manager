@@ -95,8 +95,8 @@ def test_homepage_url(manager):
 
 @all_managers
 def test_platforms(manager):
-    """Check that definitions returns supported platforms as a frozenset of platforms.
-    """
+    """Check that definitions returns supported platforms as a frozenset of
+    platforms."""
     assert manager.platforms
     assert isinstance(manager.platforms, frozenset)
     assert all(isinstance(p, Platform) for p in manager.platforms)

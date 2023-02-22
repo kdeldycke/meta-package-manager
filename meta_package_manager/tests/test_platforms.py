@@ -50,7 +50,6 @@ def test_all_platforms_covered_by_groups(manager):
     leftover_platforms = manager.platforms.copy()
 
     for group in PLATFORM_GROUPS:
-
         # Check the group fully overlap the manager platforms.
         if not group.isdisjoint(manager.platforms):
             assert group.issubset(manager.platforms)

@@ -34,13 +34,16 @@ class TestInstallRemove(CLISubCommandTests):
     the same test suite.
 
     Install mpm with itself when we can, so we can test externally contributed
-    packaging. See: https://github.com/kdeldycke/meta-package-manager/issues/527
+    packaging. See:
+    https://github.com/kdeldycke/meta-package-manager/issues/527
     """
 
     strict_selection_match = False
-    """ Install sub-command try each user-selected manager until it find one providing
-    the package we seek to install, after which the process stop. This mean not all
-    managers will be called, so we allow the CLI output checks to partially match.
+    """Install sub-command try each user-selected manager until it find one providing
+    the package we seek to install, after which the process stop.
+
+    This mean not all managers will be called, so we allow the CLI output checks to
+    partially match.
     """
 
     @pytest.mark.parametrize("operation", ("install", "remove"))

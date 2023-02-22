@@ -125,7 +125,6 @@ def _subcmd_args(invoke_args: tuple[str, ...] | None, *subcmd_args: str):
 
 @unless_macos
 class TestBarPlugin:
-
     common_checklist = [
         # Menubar line. Required.
         (r"(🎁↑\d+|📦✓)( ⚠️\d+)? \| dropdown=false$", True),
@@ -147,7 +146,6 @@ class TestBarPlugin:
 
     def plugin_output_checks(self, checklist, extra_env=None):
         """Run the plugin script and check its output against the checklist."""
-
         process = subprocess.run(
             # Force the plugin to be called within Poetry venv to not have it seeking
             # for macOS's default Python.

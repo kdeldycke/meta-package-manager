@@ -26,7 +26,6 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 
 class MAS(PackageManager):
-
     name = "Mac AppStore"
 
     homepage_url = "https://github.com/argon/mas"

@@ -27,7 +27,6 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 
 class Composer(PackageManager):
-
     name = "PHP's Composer"
 
     homepage_url = "https://getcomposer.org"

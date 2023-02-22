@@ -26,7 +26,6 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 
 class APT(PackageManager):
-
     """Base package manager shared by variation of the apt command.
 
     Documentation:
@@ -270,7 +269,6 @@ class APT(PackageManager):
 
 
 class APT_Mint(APT):
-
     """Special version of apt for Linux Mint.
 
     Exactly the same as its parent but implement specific version extraction.

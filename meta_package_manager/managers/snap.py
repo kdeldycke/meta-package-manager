@@ -26,7 +26,6 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 
 class Snap(PackageManager):
-
     homepage_url = "https://snapcraft.io"
 
     platforms = UNIX_WITHOUT_MACOS

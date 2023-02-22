@@ -106,7 +106,6 @@ def print_json(data):
     Serialize :py:class:`pathlib.Path` and
     :py:class:`meta_package_manager.version.TokenizedString` objects.
     """
-
     def serialize_objects(obj):
         if isinstance(obj, (TokenizedString, Path)):
             return str(obj)

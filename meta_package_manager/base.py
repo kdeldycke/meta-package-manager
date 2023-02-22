@@ -374,7 +374,7 @@ class PackageManager(metaclass=MetaPackageManager):
             # Presence of the operation function is not enough to rules out proper
             # implementation, as it can be a method that raises NotImplemented error
             # anyway. See for instance the upgrade_all_cli in pip.py:
-            # https://github.com/kdeldycke/meta-package-manager/blob/4acc003bd268a59f5a79cf317be6d25a90878f6d/meta_package_manager/managers/pip.py#L271-L279
+            # https://github.com/kdeldycke/meta-package-manager/blob/4acc003/meta_package_manager/managers/pip.py#L271-L279
             for method_ids in method_deps:
                 all_deps_found = method_ids.issubset(klass.__dict__)
                 if all_deps_found:

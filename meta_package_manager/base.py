@@ -23,15 +23,17 @@ from contextlib import nullcontext
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from shutil import _WIN_DEFAULT_PATHEXT
 from textwrap import dedent, indent, shorten
 from typing import ContextManager, Iterable, Iterator, Generator
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
     from functools import cached_property
+    from shutil import _WIN_DEFAULT_PATHEXT
 else:
     from boltons.cacheutils import cachedproperty as cached_property
+    # XXX Copy of https://github.com/python/cpython/blob/edbde8f/Lib/shutil.py#L49
+    _WIN_DEFAULT_PATHEXT = ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC"
 
 from boltons.iterutils import flatten, unique
 from boltons.strutils import strip_ansi

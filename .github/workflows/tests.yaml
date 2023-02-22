@@ -163,10 +163,7 @@ jobs:
           sudo apt --quiet --yes install npm
       - name: NPM - macOS install
         if: runner.os == 'macOS'
-        # Error: Refusing to uninstall /usr/local/Cellar/node@16/16.15.1
-        # because it is required by mongodb-community@5.0 and mongosh, which are currently installed.
         run: |
-          brew uninstall node@16 mongodb-community@5.0 mongosh
           brew install npm
       - name: NPM - Windows upgrade
         if: runner.os == 'Windows'

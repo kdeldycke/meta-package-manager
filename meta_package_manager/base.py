@@ -175,7 +175,7 @@ class MetaPackageManager(type):
             cls.platforms = frozenset(platforms)
 
 
-def highlight_cli_name(path: Path | None, match_names: tuple[str, ...]) -> str | None:
+def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | None:
     """Highlight the binary name in the provided ``path``
 
     If ``match_names`` is provided, only highlight the start of the binary name that is

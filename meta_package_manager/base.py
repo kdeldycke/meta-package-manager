@@ -23,9 +23,9 @@ from contextlib import nullcontext
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from shutil import which
+from shutil import _WIN_DEFAULT_PATHEXT
 from textwrap import dedent, indent, shorten
-from typing import ContextManager, Iterable, Iterator
+from typing import ContextManager, Iterable, Iterator, Generator
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -33,7 +33,7 @@ if sys.version_info >= (3, 8):
 else:
     from boltons.cacheutils import cachedproperty as cached_property
 
-from boltons.iterutils import flatten
+from boltons.iterutils import flatten, unique
 from boltons.strutils import strip_ansi
 from click_extra.colorize import default_theme as theme
 from click_extra.platforms import Group, Platform, current_os, is_linux
@@ -173,26 +173,28 @@ class MetaPackageManager(type):
             cls.platforms = frozenset(platforms)
 
 
-def highlight_cli_name(
-    path: Path | None, match_names: tuple[str, ...] | None = None
-) -> str | None:
+def highlight_cli_name(path: Path | None, match_names: tuple[str, ...]) -> str | None:
     """Highlight the binary name in the provided ``path``
 
-    If ``match_names`` is provided, only highlight if the binary name is in the list,
-    regardless of the the case.
+    If ``match_names`` is provided, only highlight the start of the binary name that is
+    in the list.
 
-    Takes care of extensions (e.g. ``.exe`` on Windows) and returns a string.
+    Matchin is insensitive to case on Windows and case-sensitive on other platforms,
+    thanks to ``os.path.normcase``.
     """
     if path is None:
         return None
-    suffixes = path.suffixes
-    # Strip all suffixes from the full name of the binary.
-    bin_name = path.name
-    for suffix in suffixes[::-1]:
-        bin_name = bin_name.rstrip(suffix)
-    if not match_names or bin_name.lower() in (name.lower() for name in match_names):
-        bin_name = theme.invoked_command(bin_name)
-    return f"{path.parent}{os.path.sep}{bin_name}{''.join(suffixes)}"
+
+    highlighted_name = path.name
+    for ref_name in match_names:
+        if os.path.normcase(ref_name).startswith(os.path.normcase(path.name)):
+            highlighted_name = (
+                theme.invoked_command(path.name[:len(ref_name)]) +
+                path.name[len(ref_name):]
+            )
+            break
+
+    return f"{path.parent}{os.path.sep}{highlighted_name}"
 
 
 class PackageManager(metaclass=MetaPackageManager):
@@ -378,64 +380,124 @@ class PackageManager(metaclass=MetaPackageManager):
 
         raise NotImplementedError(f"Can't guess {cls} implementation of {op}.")
 
-    def search_cli(self, cli_name: str) -> Path | None:
-        """Search for a CLI on the system.
+    def search_all_cli(self, cli_names: Iterable[str], env=None) -> Generator[Path, None, None]:
+        """Search for all binary files matching the CLI names, in all environment path.
 
-        Look for the provided ``cli_name`` in this order:
-          * first in paths provided by
-            :py:attr:`cli_search_path
+        This is like our own implementation of ``shutil.which()``, with the difference
+        that it is capable of returning all the possible paths of the provided file
+        names, in all environment path, not just the first one that match. And on
+        Windows, prevents matching of CLI in the current directory, which takes
+        precedence on other paths.
+
+        Returns all files matching any ``cli_names``, by iterating over all folders in
+        this order:
+          * folders provided by :py:attr:`cli_search_path
             <meta_package_manager.base.PackageManager.cli_search_path>`,
           * then in all the default places specified by the environment variable (i.e.
             ``os.getenv("PATH")``).
 
-        Only checks if the file exists. Not its executability.
-
-        Returns ``None`` if the CLI was not found or is not a file.
+        Only returns files that exists and are not empty.
 
         .. caution::
 
-            Symlinks are not resolved, because some manager like Homebrew on Linux
-            relies on some sort of symlink-based trickery to set environment variables.
+            Symlinks are not resolved, because some manager like `Homebrew on Linux
+            relies on some sort of symlink-based trickery
+            <https://github.com/kdeldycke/meta-package-manager/pull/188>`_ to set
+            environment variables.
         """
-        # Locally extend the environment to add manager-specific search path.
-        env_path = ":".join(flatten((self.cli_search_path, os.getenv("PATH"))))
+        # Check CLI names are not path, but plain filenames.
+        for cli_name in cli_names:
+            assert not os.path.dirname(cli_name), (
+                f"CLI name {cli_name} contains path separator {os.path.sep}."
+            )
 
-        cli_path_found = which(cli_name, mode=os.F_OK, path=env_path)
-        if not cli_path_found:
-            logger.debug(f"{theme.invoked_command(cli_name)} CLI not found.")
-            return None
+        # Validates each search path.
+        for cli_search_path in self.cli_search_path:
+            assert os.pathsep not in cli_search_path, (
+                f"Search path {cli_search_path} contains "
+                f"environment path separator {os.pathsep}."
+            )
 
-        # Check if path exist and is a file.
-        cli_path = Path(cli_path_found)
-        if not cli_path.exists():
-            raise FileNotFoundError(cli_path)
-        elif not cli_path.is_file():
-            logger.warning(f"{highlight_cli_name(cli_path)} is not a file.")
-            return None
+        # By default, the filename to search for is the case-sensitive CLI name.
+        search_filenames = list(cli_names)
+        # But on Windows, there is this special ``PATHEXT`` environment variable to
+        # tell you what file suffixes are executable. We have to search for any
+        # variation of the CLI name with any of these suffixes.
+        # Code below is inpired by the original implementation of ``shutil.which()``:
+        # https://github.com/python/cpython/blob/8d46c7e/Lib/shutil.py#L1478-L1491
+        if sys.platform == "win32":
+            pathext_source = os.getenv("PATHEXT") or _WIN_DEFAULT_PATHEXT
+            pathext = unique((ext for ext in pathext_source.split(os.pathsep) if ext))
+            search_filenames = []
+            for cli_name in cli_names:
+                # See if the given file matches any of the expected path extensions.
+                # This will allow us to short circuit when given "python.exe".
+                # If it does match, only test that one, otherwise we have to try
+                # others.
+                if any(cli_name.lower().endswith(ext.lower()) for ext in pathext):
+                    search_filenames.append(cli_name)
+                else:
+                    search_filenames.extend(f"{cli_name}{ext}" for ext in pathext)
+        search_filenames = unique(search_filenames)
 
-        logger.debug(f"CLI found at {highlight_cli_name(cli_path)}")
-        return cli_path
+        def normalize_path(path: Path) -> str:
+            """ Resolves symlinks and produces a normalized absolute path string.
+
+            Additonnaly use ``os.path.normcase`` on Windows to exclude duplicates produced
+            by case-insensitive filesystems.
+            """
+            return os.path.normcase(path.resolve())
+
+        # Deduplicate search paths while keeping their order and original value, as the
+        # normalization process happens with the ``key`` lookup.
+        search_path_list: list[Path] = unique(
+            # Manager-specific search path takes precedence over default environment.
+            (Path(p) for p in list(self.cli_search_path) + os.get_exec_path(env=env)),
+            key=normalize_path,
+        )
+
+        logger.debug(
+            f"Search for "
+            + ', '.join((theme.invoked_command(cli) for cli in search_filenames)) +
+            f" in " + ', '.join(str(p) for p in search_path_list)
+        )
+
+        for search_path in search_path_list:
+            if not search_path.is_dir():
+                continue
+
+            for filename in search_filenames:
+                file = search_path / filename
+                if not file.is_file() or not os.path.getsize(file):
+                    continue
+                logger.debug(f"CLI found at {highlight_cli_name(file, cli_names)}")
+                yield file
+
+    def which(self, cli_name: str) -> Path | None:
+        """Emulates the ``which`` command.
+
+        Based on the ``search_all_cli()`` method.
+        """
+        for cli_path_found in self.search_all_cli([cli_name]):
+            return cli_path_found
+        return None
 
     @cached_property
     def cli_path(self) -> Path | None:
         """Fully qualified path to the canonical package manager binary.
 
-        Automatically search the location of the CLI in the system. Try multiple CLI
-        names provided by :py:attr:`cli_names
-        <meta_package_manager.base.PackageManager.cli_names>`, in all system path
+        Try each CLI names provided by :py:attr:`cli_names
+        <meta_package_manager.base.PackageManager.cli_names>`, in each system path
         provided by :py:attr:`cli_search_path
-        <meta_package_manager.base.PackageManager.cli_search_path>`.
+        <meta_package_manager.base.PackageManager.cli_search_path>`. In that order.
+        Then returns the first match.
 
-        Executability of the CLI will be separatel assessed later by
-        the :py:func:`meta_package_manager.base.PackageManager.executable` method below.
+        Executability of the CLI will be separately assessed later by the
+        :py:func:`meta_package_manager.base.PackageManager.executable` method below.
         """
-        # Search for multiple CLI names.
         if self.cli_names is not None:
-            for name in self.cli_names:
-                cli_path_found = self.search_cli(name)
-                if cli_path_found:
-                    return cli_path_found
-
+            for cli_path in self.search_all_cli(self.cli_names):
+                return cli_path
         return None
 
     @cached_property
@@ -499,7 +561,8 @@ class PackageManager(metaclass=MetaPackageManager):
             return False
         if not os.access(self.cli_path, os.X_OK):
             logger.debug(
-                f"{highlight_cli_name(self.cli_path)} is not allowed to be executed."
+                f"{highlight_cli_name(self.cli_path, self.cli_names)} "
+                "is not allowed to be executed."
             )
             return False
         return True
@@ -538,7 +601,7 @@ class PackageManager(metaclass=MetaPackageManager):
             f"{self.id} "
             f"is deprecated: {self.deprecated}; "
             f"is supported: {self.supported}; "
-            f"found at: {highlight_cli_name(self.cli_path)}; "
+            f"found at: {highlight_cli_name(self.cli_path, self.cli_names)}; "
             f"is executable: {self.executable}; "
             f"is fresh: {self.fresh}."
         )

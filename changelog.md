@@ -6,6 +6,13 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Refactor CLI search to allow all matching to be reported. This will open the way to future support of multiple versions of the same package manager. Refs {issue}`629`.
+- \[mpm\] Exclude empty files for our CLI search results to skip Microsoft's dummy placeholders on Windows. Closes {issue}`927`.
+- \[mpm\] Fix composition of CLI search path on Windows.
+- \[mpm\] Deduplicate entries in the list of composed CLI search path.
+- \[mpm\] Do not search for CLI in current directory on Windows.
+- \[mpm\] Fix case-insensitive highlighting of CLI names in path on Windows.
+
 ## {gh}`5.11.7 (2023-02-20) <compare/v5.11.6...v5.11.7>`
 
 - \[mpm\] Fix overlapping detection of `linux` and `wsl2` platforms. Closes {issue}`944`.

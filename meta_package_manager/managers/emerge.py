@@ -71,7 +71,7 @@ class Emerge(PackageManager):
             app-arch/p7zip-16.02-r8
         """
         # Locate qlist.
-        qlist_path = self.search_cli("qlist")
+        qlist_path = self.which("qlist")
         if not qlist_path:
             raise FileNotFoundError(qlist_path)
 
@@ -314,6 +314,6 @@ class Emerge(PackageManager):
 
         self.run_cli("--depclean", sudo=True)
 
-        eclean_path = self.search_cli("eclean")
+        eclean_path = self.which("eclean")
         if eclean_path:
             self.run_cli("distfiles", override_cli_path=eclean_path, sudo=True)

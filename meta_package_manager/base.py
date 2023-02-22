@@ -442,8 +442,8 @@ class PackageManager(metaclass=MetaPackageManager):
         def normalize_path(path: Path) -> str:
             """Resolves symlinks and produces a normalized absolute path string.
 
-            Additonnaly use ``os.path.normcase`` on Windows to exclude duplicates produced
-            by case-insensitive filesystems.
+            Additonnaly use ``os.path.normcase`` on Windows to exclude duplicates
+            produced by case-insensitive filesystems.
             """
             return os.path.normcase(path.resolve())
 

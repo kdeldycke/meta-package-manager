@@ -1,6 +1,6 @@
 # Changelog
 
-## {gh}`5.11.8 (unreleased) <compare/v5.11.7...main>`
+## {gh}`5.12.0 (unreleased) <compare/v5.11.7...main>`
 
 ```{important}
 This version is not released yet and is under active development.

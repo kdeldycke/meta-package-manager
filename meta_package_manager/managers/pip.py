@@ -34,7 +34,6 @@ from ..version import TokenizedString
 
 
 class Pip(PackageManager):
-
     """We will use the Python binary to call out ``pip`` as a module instead of a CLI.
 
     This is a more robust way of managing packages: "if you're on Windows there
@@ -221,7 +220,6 @@ class Pip(PackageManager):
     def search_xxx_disabled(
         self, query: str, extended: bool, exact: bool
     ) -> Iterator[Package]:
-
         """Fetch matching packages.
 
         .. warning::

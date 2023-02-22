@@ -124,6 +124,7 @@ available_managers_and_dummy_package = pytest.mark.parametrize(
     (param(m, PACKAGE_IDS[mid], id=mid) for mid, m in pool.items() if m.available),
 )
 
+
 # XXX Deactive hack while we investigate.
 # @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_teardown(item, nextitem):

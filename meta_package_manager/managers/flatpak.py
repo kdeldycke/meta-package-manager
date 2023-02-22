@@ -26,7 +26,6 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 
 class Flatpak(PackageManager):
-
     homepage_url = "https://flatpak.org"
 
     platforms = UNIX_WITHOUT_MACOS

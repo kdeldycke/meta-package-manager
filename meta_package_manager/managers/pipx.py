@@ -27,7 +27,6 @@ from ..capabilities import version_not_implemented
 
 
 class Pipx(PackageManager):
-
     homepage_url = "https://pypa.github.io/pipx/"
 
     platforms = ALL_PLATFORMS
@@ -133,7 +132,6 @@ class Pipx(PackageManager):
             ]
         """
         for main_package_id in map(attrgetter("id"), self.installed):
-
             # --quiet is required here to silence warning and error messages
             # mangling the JSON content.
             output = self.run_cli(

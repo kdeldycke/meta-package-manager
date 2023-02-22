@@ -27,7 +27,6 @@ from ..version import parse_version
 
 
 class Gem(PackageManager):
-
     """
     ..tip::
 

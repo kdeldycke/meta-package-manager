@@ -110,8 +110,8 @@ class ManagerPool:
         {"ignore_auto_updates", "stop_on_error", "dry_run"}
     )
     """List of extra options that are allowed to be set on managers during the use of
-    the :py:func:`meta_package_manager.pool.ManagerPool.select_managers` helper below.
-    """
+    the :py:func:`meta_package_manager.pool.ManagerPool.select_managers` helper
+    below."""
 
     @cached_property
     def register(self) -> dict[str, PackageManager]:

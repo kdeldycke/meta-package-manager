@@ -30,16 +30,14 @@ from ..version import parse_version
 
 
 class Homebrew(PackageManager):
-
     """Virtual package manager shared by brew and cask CLI defined below.
 
     Homebrew is the umbrella project providing both brew and brew cask commands.
     """
 
     platforms = {LINUX, MACOS, WSL2}
-    """Homebrew core is now compatible with `Linux and Windows Subsystem for Linux
-    (WSL) 2 <https://docs.brew.sh/Homebrew-on-Linux>`_.
-    """
+    """Homebrew core is now compatible with `Linux and Windows Subsystem for Linux (WSL)
+    2 <https://docs.brew.sh/Homebrew-on-Linux>`_."""
 
     requirement = "2.7.0"
     """Vanilla ``brew`` and ``cask`` CLIs now shares the same version.
@@ -229,7 +227,6 @@ class Homebrew(PackageManager):
         if output:
             package_list = json.loads(output)
             for pkg_info in package_list["formulae"] + package_list["casks"]:
-
                 # Interpret installed versions.
                 versions = pkg_info["installed_versions"]
                 if isinstance(versions, str):
@@ -547,7 +544,6 @@ class Homebrew(PackageManager):
 
 
 class Brew(Homebrew):
-
     name = "Homebrew Formulae"
 
     homepage_url = "https://brew.sh"
@@ -558,7 +554,6 @@ class Brew(Homebrew):
 
 
 class Cask(Homebrew):
-
     name = "Homebrew Cask"
 
     homepage_url = "https://github.com/Homebrew/homebrew-cask"

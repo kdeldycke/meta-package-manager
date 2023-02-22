@@ -74,7 +74,6 @@ Each operation has its own CLI subcommand.
 
 
 class CLIError(Exception):
-
     """An error occurred when running package manager CLI."""
 
     def __init__(self, code: int, output: str, error: str):
@@ -112,7 +111,7 @@ class Package:
     """Lightweight representation of a package and its metadata."""
 
     id: str
-    """ID is required and is the primary key used by the manager. """
+    """ID is required and is the primary key used by the manager."""
 
     name: str | None = None
 
@@ -191,8 +190,8 @@ def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | N
     for ref_name in match_names:
         if os.path.normcase(ref_name).startswith(os.path.normcase(path.name)):
             highlighted_name = (
-                theme.invoked_command(path.name[:len(ref_name)]) +
-                path.name[len(ref_name):]
+                theme.invoked_command(path.name[: len(ref_name)])
+                + path.name[len(ref_name) :]
             )
             break
 
@@ -200,7 +199,6 @@ def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | N
 
 
 class PackageManager(metaclass=MetaPackageManager):
-
     """Base class from which all package manager definitions inherits."""
 
     deprecated: bool = False
@@ -262,9 +260,8 @@ class PackageManager(metaclass=MetaPackageManager):
     cli_names: tuple[str, ...]
     """List of CLI names the package manager is known as.
 
-    The supported CLI names are ordered by priority. This is used for example to
-    help out the search of the right binary in the case of the python3/python2
-    transition.
+    The supported CLI names are ordered by priority. This is used for example to help
+    out the search of the right binary in the case of the python3/python2 transition.
 
     Is derived by default from the manager's ID.
     """
@@ -277,8 +274,7 @@ class PackageManager(metaclass=MetaPackageManager):
     """
 
     cli_search_path: tuple[str, ...] = ()
-    """ List of additional path to help :program:`mpm` hunt down the package manager
-    CLI.
+    """List of additional path to help :program:`mpm` hunt down the package manager CLI.
 
     Must be a list of strings whose order dictates the search sequence.
 
@@ -317,9 +313,9 @@ class PackageManager(metaclass=MetaPackageManager):
     """List of options to get the version from the package manager CLI."""
 
     version_regex: str = r"(?P<version>\S+)"
-    """ Regular expression used to extract the version number from the result of the CLI
-    run with the options above. It doesn't matter if the regex returns unsanitized
-    and crappy string. The :py:func:`meta_package_manager.base.PackageManager.version`
+    """Regular expression used to extract the version number from the result of the CLI
+    run with the options above. It doesn't matter if the regex returns unsanitized and
+    crappy string. The :py:func:`meta_package_manager.base.PackageManager.version`
     method will clean and normalized it.
 
     By default match the first part that is space-separated.
@@ -330,8 +326,7 @@ class PackageManager(metaclass=MetaPackageManager):
 
     ignore_auto_updates: bool = True
     """Some managers can report or ignore packages which have their own auto-update
-    mechanism.
-    """
+    mechanism."""
 
     dry_run: bool = False
     """Do not actually perform any action, just simulate CLI calls."""
@@ -382,7 +377,9 @@ class PackageManager(metaclass=MetaPackageManager):
 
         raise NotImplementedError(f"Can't guess {cls} implementation of {op}.")
 
-    def search_all_cli(self, cli_names: Iterable[str], env=None) -> Generator[Path, None, None]:
+    def search_all_cli(
+        self, cli_names: Iterable[str], env=None
+    ) -> Generator[Path, None, None]:
         """Search for all binary files matching the CLI names, in all environment path.
 
         This is like our own implementation of ``shutil.which()``, with the difference
@@ -409,9 +406,9 @@ class PackageManager(metaclass=MetaPackageManager):
         """
         # Check CLI names are not path, but plain filenames.
         for cli_name in cli_names:
-            assert not os.path.dirname(cli_name), (
-                f"CLI name {cli_name} contains path separator {os.path.sep}."
-            )
+            assert not os.path.dirname(
+                cli_name
+            ), f"CLI name {cli_name} contains path separator {os.path.sep}."
 
         # Validates each search path.
         for cli_search_path in self.cli_search_path:
@@ -443,7 +440,7 @@ class PackageManager(metaclass=MetaPackageManager):
         search_filenames = unique(search_filenames)
 
         def normalize_path(path: Path) -> str:
-            """ Resolves symlinks and produces a normalized absolute path string.
+            """Resolves symlinks and produces a normalized absolute path string.
 
             Additonnaly use ``os.path.normcase`` on Windows to exclude duplicates produced
             by case-insensitive filesystems.
@@ -459,9 +456,10 @@ class PackageManager(metaclass=MetaPackageManager):
         )
 
         logger.debug(
-            f"Search for "
-            + ', '.join((theme.invoked_command(cli) for cli in search_filenames)) +
-            f" in " + ', '.join(str(p) for p in search_path_list)
+            "Search for "
+            + ", ".join((theme.invoked_command(cli) for cli in search_filenames))
+            + " in "
+            + ", ".join(str(p) for p in search_path_list)
         )
 
         for search_path in search_path_list:

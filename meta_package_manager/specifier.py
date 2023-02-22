@@ -260,7 +260,6 @@ class Solver:
         # the highest priority.
         target_manager_ids = {s.manager_id for s in collection}
         if len(target_manager_ids) > 1:
-
             if self.manager_priority:
                 if target_manager_ids.isdisjoint(self.manager_priority):
                     logger.warning(

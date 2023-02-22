@@ -25,7 +25,6 @@ from ..capabilities import version_not_implemented
 
 
 class VSCode(PackageManager):
-
     name = "Visual Studio Code"
 
     homepage_url = "https://code.visualstudio.com"

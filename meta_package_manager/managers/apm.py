@@ -26,7 +26,6 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 
 class APM(PackageManager):
-
     deprecated = True
     deprecation_url = "https://github.blog/2022-06-08-sunsetting-atom/"
     """GitHub announced the end of the project for December 15, 2022.

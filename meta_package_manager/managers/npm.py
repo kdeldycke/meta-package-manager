@@ -27,7 +27,6 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 
 class NPM(PackageManager):
-
     name = "Node's npm"
 
     homepage_url = "https://www.npmjs.com"

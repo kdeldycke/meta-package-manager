@@ -26,7 +26,6 @@ from ..capabilities import version_not_implemented
 
 
 class Choco(PackageManager):
-
     name = "Chocolatey"
 
     homepage_url = "https://chocolatey.org"

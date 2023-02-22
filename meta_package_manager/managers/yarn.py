@@ -33,7 +33,6 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 
 class Yarn(PackageManager):
-
     name = "Node's yarn"
 
     homepage_url = "https://yarnpkg.com"

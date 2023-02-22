@@ -109,7 +109,7 @@ assert all_manager_label_ids.isdisjoint(MANAGER_LABEL_GROUPS.keys())
 MANAGER_LABELS = generate_labels(
     all_manager_label_ids, MANAGER_LABEL_GROUPS, MANAGER_PREFIX, "#bfdadc"
 )
-""" Maps all manager IDs to their labels. """
+"""Maps all manager IDs to their labels."""
 
 
 PLATFORM_PREFIX = "🖥 platform: "
@@ -124,7 +124,7 @@ all_platform_label_ids = frozenset(flatten(PLATFORM_LABEL_GROUPS.values()))
 PLATFORM_LABELS = generate_labels(
     all_platform_label_ids, PLATFORM_LABEL_GROUPS, PLATFORM_PREFIX, "#bfd4f2"
 )
-""" Maps all platform names to their labels. """
+"""Maps all platform names to their labels."""
 
 # Force sorting of labels.
 LABELS = sorted(LABELS, key=lambda i: str.casefold(i[0]))

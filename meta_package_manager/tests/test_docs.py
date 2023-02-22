@@ -187,14 +187,12 @@ def test_labeller_rules():
 
     # Check each rule definition.
     for rule in rules:
-
         # No duplicate labels.
         assert len(set(rule["labels"])) == len(rule["labels"])
 
         # Special checks for rules targeting manager labels.
         manager_label = canonical_managers.intersection(rule["labels"])
         if manager_label:
-
             # Extract manager label
             assert len(manager_label) == 1
             manager_label = manager_label.pop()

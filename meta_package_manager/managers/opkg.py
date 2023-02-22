@@ -26,7 +26,6 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 
 class OPKG(PackageManager):
-
     homepage_url = "https://git.yoctoproject.org/cgit/cgit.cgi/opkg/"
 
     platforms = UNIX_WITHOUT_MACOS

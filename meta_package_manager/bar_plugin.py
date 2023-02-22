@@ -60,8 +60,8 @@ import sys
 python_min_version = (3, 7, 3)
 """Minimal requirement is macOS Catalina (10.15) for both Xbar and SwiftBar.
 
-Catalina deprecates Python 2.x, and ships with Python 3.7.3. So this plugin is
-required to work with Python 3.7.3 or newer.
+Catalina deprecates Python 2.x, and ships with Python 3.7.3. So this plugin is required
+to work with Python 3.7.3 or newer.
 """
 
 
@@ -362,7 +362,6 @@ class MPMPlugin:
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--check-mpm",

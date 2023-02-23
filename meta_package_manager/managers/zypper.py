@@ -128,6 +128,8 @@ class Zypper(PackageManager):
             # Additional search arguments.
             *args,
         )
+        if not output:
+            return
 
         package_list = (
             xmltodict.parse(output)

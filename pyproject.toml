@@ -138,8 +138,7 @@ module = ["boltons.*", "packageurl.*"]
 
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml
-# --full-trace: have a full traceback printed on KeyboardInterrupt
-addopts = "--numprocesses auto --dist loadgroup --durations=10 --cov-report term --cov=meta_package_manager"
+addopts = "--numprocesses 0 --dist loadgroup --durations=10 --cov-report term --cov=meta_package_manager"
 xfail_strict = true
 
 [tool.coverage.paths]

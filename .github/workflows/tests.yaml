@@ -329,10 +329,6 @@ jobs:
           brew install mas
 
       # Flatpak
-      - name: Flatpak - Ubuntu < 22.04 repo setup
-        if: matrix.os == 'ubuntu-20.04'
-        run: |
-          sudo add-apt-repository --yes ppa:alexlarsson/flatpak
       - name: Flatpak - Linux install
         if: runner.os == 'Linux'
         run: |

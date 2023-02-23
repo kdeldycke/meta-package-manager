@@ -12,6 +12,8 @@ This version is not released yet and is under active development.
 - \[mpm\] Deduplicate entries in the list of composed CLI search path.
 - \[mpm\] Do not search for CLI in current directory on Windows.
 - \[mpm\] Fix case-insensitive highlighting of CLI names in path on Windows.
+- \[yarn\] Do not test `yarn` on Linux and Windows.
+- \[mpm\] TO not force test order on Windows.
 
 ## {gh}`5.11.7 (2023-02-20) <compare/v5.11.6...v5.11.7>`
 

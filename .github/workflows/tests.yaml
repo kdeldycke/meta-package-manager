@@ -337,6 +337,7 @@ jobs:
       # Scoop
       - name: Scoop - Windows install
         if: runner.os == 'Windows'
+        shell: pwsh
         run: |
           iwr get.scoop.sh -outfile 'install.ps1'
           .\install.ps1 -RunAsAdmin

@@ -199,6 +199,8 @@ class Zypper(PackageManager):
             </stream>
         """
         output = self.run_cli("--xmlout", "list-updates")
+        if not output:
+            return
 
         package_list = []
         update_list = (

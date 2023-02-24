@@ -463,16 +463,6 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           rm -rf .coverage*
-      - name: Tests - Clean-up .pyc leftovers
-        # To eliminate these warnings:
-        #   CoverageWarning: Couldn't parse '/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn
-        #   /T/pip-install-v4yiyxo1/argparse_2a0cc810c7b545beacef972740eaaabc/argparse.py':
-        #   No source for code: '/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn
-        #   /T/pip-install-v4yiyxo1/argparse_2a0cc810c7b545beacef972740eaaabc/argparse.py'. (couldnt-parse)
-        # See: https://stackoverflow.com/q/2386975
-        if: runner.os != 'Windows'
-        run: |
-          sudo find / -name "*.pyc" -delete || true
       - name: Destructive tests
         env:
           DESTRUCTIVE_TESTS: true

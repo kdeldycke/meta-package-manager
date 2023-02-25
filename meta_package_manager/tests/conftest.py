@@ -38,6 +38,44 @@ from ..pool import manager_classes, pool
 """ Fixtures, configuration and helpers for tests. """
 
 
+def pytest_addoption(parser):
+    """Add custom command line options.
+
+    Documentation: https://docs.pytest.org/en/7.1.x/example/simple.html#control-skipping-of-tests-according-to-command-line-option
+    """
+    parser.addoption(
+        "--only-destructive", action="store_true", default=False, help="Only run destructive tests."
+    )
+    parser.addoption(
+        "--only-non-destructive", action="store_true", default=False, help="Only run non-destructive tests."
+    )
+
+
+def pytest_configure(config):
+    """Register custom markers."""
+    config.addinivalue_line("markers", "destructive: mark test as being destructive, i.e. modifying the system they run on.")
+
+
+def pytest_collection_modifyitems(config, items):
+    """Either skip or run destructive tests based on command line options."""
+    if config.getoption("--only-destructive") and config.getoption("--only-non-destructive"):
+        raise ValueError("Cannot use both --only-destructive and --only-non-destructive options.")
+
+    # Only run tests marked as destructive, skip all others.
+    if config.getoption("--only-destructive"):
+        skip_non_destructive = pytest.mark.skip(reason="skip non-destructive tests")
+        for item in items:
+            if "destructive" not in item.keywords:
+                item.add_marker(skip_non_destructive)
+
+    # Skip all tests marked as destructive, run all others.
+    if config.getoption("--only-non-destructive"):
+        skip_destructive = pytest.mark.skip(reason="skip destructive tests")
+        for item in items:
+            if "destructive" in item.keywords:
+                item.add_marker(skip_destructive)
+
+
 @fixture
 def invoke(invoke_extra):  # noqa: F811
     return partial(invoke_extra, mpm)

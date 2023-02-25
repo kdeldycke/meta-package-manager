@@ -21,7 +21,7 @@ from pathlib import Path
 
 import pytest
 from click_extra.run import env_copy
-from click_extra.tests.conftest import destructive, unless_macos
+from click_extra.tests.conftest import unless_macos
 
 
 @pytest.fixture
@@ -128,7 +128,7 @@ def install_cask():
         brew_uninstall(package_id)
 
 
-@destructive
+@pytest.mark.destructive
 @unless_macos
 class TestCask:
     @pytest.mark.xdist_group(name="avoid_concurrent_git_tweaks")

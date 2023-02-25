@@ -27,7 +27,6 @@ import pytest
 from boltons.iterutils import unique
 from boltons.urlutils import URL
 from click_extra.platforms import ALL_PLATFORMS, Platform
-from click_extra.tests.conftest import destructive
 
 from ..base import Operations, Package, PackageManager
 from ..cli import XKCD_MANAGER_ORDER
@@ -275,7 +274,7 @@ def test_search_type(manager):
             assert isinstance(pkg, Package)
 
 
-@destructive
+@pytest.mark.destructive
 @available_managers_and_dummy_package
 def test_install_type(manager, package_id):
     """All methods installing packages are either not implemented or returns a
@@ -288,7 +287,7 @@ def test_install_type(manager, package_id):
         assert isinstance(result, str)
 
 
-@destructive
+@pytest.mark.destructive
 @available_managers
 def test_upgrade_all_cli_type(manager):
     """All methods returning an upgrade-all CLI are either not implemented or returns a
@@ -301,7 +300,7 @@ def test_upgrade_all_cli_type(manager):
         assert isinstance(result, tuple)
 
 
-@destructive
+@pytest.mark.destructive
 @available_managers_and_dummy_package
 def test_upgrade_one_cli_type(manager, package_id):
     """All methods returning an upgrade CLI are either not implemented or returns a
@@ -314,7 +313,7 @@ def test_upgrade_one_cli_type(manager, package_id):
         assert isinstance(result, tuple)
 
 
-@destructive
+@pytest.mark.destructive
 @available_managers
 def test_upgrade_type(manager):
     """All methods upgrading packages are either not implemented or returns a string."""
@@ -326,7 +325,7 @@ def test_upgrade_type(manager):
         assert isinstance(result, str)
 
 
-@destructive
+@pytest.mark.destructive
 @available_managers_and_dummy_package
 def test_remove_type(manager, package_id):
     """All methods removing packages are either not implemented or returns a string."""

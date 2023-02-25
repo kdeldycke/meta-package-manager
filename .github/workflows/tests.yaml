@@ -463,15 +463,32 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           rm -rf .coverage*
-      - name: Destructive tests
-        env:
-          DESTRUCTIVE_TESTS: true
-        # pyproject.toml config file is specified at CLI level instead of
-        # letting coverage find it because of this bug:
-        # https://github.com/nedbat/coveragepy/issues/512#issuecomment-399707938
-        # https://github.com/pytest-dev/pytest-cov/issues/168#issuecomment-327533847
-        # https://github.com/pytest-dev/pytest-cov/issues/243
-        run: |
+
+      - name: Parallel non-destructive tests
+        # XXX pyproject.toml config file is specified at CLI level instead of letting coverage find it because of this
+        #   bug:
+        #   https://github.com/nedbat/coveragepy/issues/512#issuecomment-399707938
+        #   https://github.com/pytest-dev/pytest-cov/issues/168#issuecomment-327533847
+        #   https://github.com/pytest-dev/pytest-cov/issues/243
+        # XXX ./meta_package_manager/tests/ is specified at CLI level instead of using the ``testpaths`` parameter
+        #   from pyproject.toml because of this bug: https://github.com/pytest-dev/pytest/issues/10665
+        run: >
           poetry run pytest --exitfirst --cov-config=pyproject.toml --cov=./ --cov-report=xml
+          --numprocesses=auto --only-non-destructive
+          ./meta_package_manager/tests/
+
+      - name: Non-parallel destructive tests
+        # XXX pyproject.toml config file is specified at CLI level instead of letting coverage find it because of this
+        #   bug:
+        #   https://github.com/nedbat/coveragepy/issues/512#issuecomment-399707938
+        #   https://github.com/pytest-dev/pytest-cov/issues/168#issuecomment-327533847
+        #   https://github.com/pytest-dev/pytest-cov/issues/243
+        # XXX ./meta_package_manager/tests/ is specified at CLI level instead of using the ``testpaths`` parameter
+        #   from pyproject.toml because of this bug: https://github.com/pytest-dev/pytest/issues/10665
+        run: >
+          poetry run pytest --exitfirst --cov-config=pyproject.toml --cov=./ --cov-report=xml
+          --numprocesses=0 --only-destructive
+          ./meta_package_manager/tests/
+
       - name: Coverage - Upload Codecov
         uses: codecov/codecov-action@v3.1.1

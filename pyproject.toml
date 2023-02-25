@@ -137,8 +137,15 @@ ignore_missing_imports = true
 module = ["boltons.*", "packageurl.*"]
 
 [tool.pytest.ini_options]
+# XXX This option has no effect since pytest is only looking for a ``conftest.py`` right next to this pyproject.toml file.
+# See: https://github.com/pytest-dev/pytest/issues/10665
+testpaths = ["meta_package_manager/tests/"]
+#addopts = "--pdbcls=pdbr:RichPdb --numprocesses auto --dist loadgroup --durations=10 --cov-report term --cov=meta_package_manager"
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml
-addopts = "--numprocesses 0 --dist loadgroup --durations=10 --cov-report term --cov=meta_package_manager"
+# --maxschedchunk=1 : Limit size of the chunks of consecutive tests that xdist submits to workers.
+#   Setting it to 1 will effectively mean "round-robin distribution".
+#   Source: https://github.com/pytest-dev/pytest-xdist/issues/855#issuecomment-1344986156
+addopts = "--dist=loadgroup --maxschedchunk=1 --durations=10 --cov-report=term --cov=meta_package_manager"
 xfail_strict = true
 
 [tool.coverage.paths]

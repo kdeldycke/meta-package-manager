@@ -17,7 +17,6 @@
 from __future__ import annotations
 
 import pytest
-from click_extra.tests.conftest import destructive
 
 from ..pool import pool
 from .conftest import all_manager_ids_and_dummy_package
@@ -53,7 +52,7 @@ class TestInstallRemove(CLISubCommandTests):
         assert not result.stdout
         assert "Error: Missing argument 'PACKAGES_SPECS...'." in result.stderr
 
-    @destructive
+    @pytest.mark.destructive
     @all_manager_ids_and_dummy_package
     def test_single_manager_install_and_remove(self, invoke, manager_id, package_id):
         result = invoke(f"--{manager_id}", "install", package_id)
@@ -69,7 +68,7 @@ class TestInstallRemove(CLISubCommandTests):
         )
 
 
-destructive()(TestInstallRemove.test_stats)
-destructive()(TestInstallRemove.test_default_all_managers)
-destructive()(TestInstallRemove.test_manager_shortcuts)
-destructive()(TestInstallRemove.test_manager_selection)
+pytest.mark.destructive()(TestInstallRemove.test_stats)
+pytest.mark.destructive()(TestInstallRemove.test_default_all_managers)
+pytest.mark.destructive()(TestInstallRemove.test_manager_shortcuts)
+pytest.mark.destructive()(TestInstallRemove.test_manager_selection)

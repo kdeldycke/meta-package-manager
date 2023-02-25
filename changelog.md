@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`5.12.0 (unreleased) <compare/v5.11.7...main>`
-
-```{important}
-This version is not released yet and is under active development.
-```
+## {gh}`5.12.0 (2023-02-25) <compare/v5.11.7...v5.12.0>`
 
 - \[mpm\] Refactor CLI search to allow all matching to be reported. This will open the way to future support of multiple versions of the same package manager. Refs {issue}`629`.
 - \[mpm\] Exclude empty files for our CLI search results to skip Microsoft's dummy placeholders on Windows. Closes {issue}`927`.

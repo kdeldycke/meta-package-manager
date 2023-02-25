@@ -13,7 +13,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Do not search for CLI in current directory on Windows.
 - \[mpm\] Fix case-insensitive highlighting of CLI names in path on Windows.
 - \[yarn\] Do not test `yarn` on Linux and Windows.
-- \[mpm\] TO not force test order on Windows.
+- \[mpm\] Do not force test order on Windows.
 
 ## {gh}`5.11.7 (2023-02-20) <compare/v5.11.6...v5.11.7>`
 

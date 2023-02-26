@@ -29,7 +29,7 @@ from click_extra.tests.conftest import skip_windows, unless_macos
 from ..base import Package
 from ..pool import pool
 from .conftest import default_manager_ids
-from .test_cli import CLISubCommandTests, CLITableTests
+from .test_cli import CLISubCommandTests, CLITableTests, check_manager_selection
 
 
 @pytest.fixture
@@ -42,7 +42,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
     def test_single_manager(self, invoke, subcmd, manager_id):
         result = invoke(f"--{manager_id}", subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result, {manager_id})
+        check_manager_selection(result, {manager_id})
 
     def test_json_parsing(self, invoke, subcmd):
         result = invoke("--output-format", "json", subcmd)

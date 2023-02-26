@@ -19,7 +19,7 @@ from __future__ import annotations
 import pytest
 
 from .conftest import default_manager_ids
-from .test_cli import CLISubCommandTests
+from .test_cli import CLISubCommandTests, check_manager_selection
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ class TestUpgrade(CLISubCommandTests):
         assert result.exit_code == 0
         if not all_option:
             assert "assume -A/--all option" in result.stderr
-        self.check_manager_selection(result)
+        check_manager_selection(result)
 
     @pytest.mark.destructive
     @pytest.mark.parametrize("all_option", ("--all", None))
@@ -46,7 +46,7 @@ class TestUpgrade(CLISubCommandTests):
         assert result.exit_code == 0
         if not all_option:
             assert "assume -A/--all option" in result.stderr
-        self.check_manager_selection(result)
+        check_manager_selection(result)
 
     @default_manager_ids
     @pytest.mark.parametrize("all_option", ("--all", None))
@@ -55,7 +55,7 @@ class TestUpgrade(CLISubCommandTests):
         assert result.exit_code == 0
         if not all_option:
             assert "assume -A/--all option" in result.stderr
-        self.check_manager_selection(result, {manager_id})
+        check_manager_selection(result, {manager_id})
 
     @pytest.mark.destructive
     @default_manager_ids
@@ -65,10 +65,9 @@ class TestUpgrade(CLISubCommandTests):
         assert result.exit_code == 0
         if not all_option:
             assert "assume -A/--all option" in result.stderr
-        self.check_manager_selection(result, {manager_id})
+        check_manager_selection(result, {manager_id})
 
 
 pytest.mark.destructive()(TestUpgrade.test_stats)
-pytest.mark.destructive()(TestUpgrade.test_default_all_managers)
 pytest.mark.destructive()(TestUpgrade.test_manager_shortcuts)
 pytest.mark.destructive()(TestUpgrade.test_manager_selection)

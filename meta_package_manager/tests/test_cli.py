@@ -51,93 +51,25 @@ TEST_CONF_FILE = """
     """
 
 
-class TestBaseCLI:
-    """This collection is testing basic CLI behavior without involving any subcommands.
-
-    Also includes a bunch of tests performed once on an arbitrary sub-command, for
-    situation when the tested behavior is shared by all subcommands. The arbitrary sub-
-    command is `managers`, as it is a safe read-only operation supposed to work on all
-    platforms, whatever the environment.
-    """
-
-    def test_executable_module(self):
-        # Locate Python executable.
-        py_path = MPMPlugin.locate_bin("python", "python3")
-        assert py_path
-
-        process = subprocess.run(
-            (py_path, "-m", "meta_package_manager", "--version"),
-            capture_output=True,
-            encoding="utf-8",
-        )
-
-        assert process.returncode == 0
-        assert process.stdout.startswith(f"mpm, version {__version__}\n")
-        assert not process.stderr
-
-    def test_conf_file_overrides_defaults(self, invoke, create_config):
-        conf_path = create_config("conf.toml", TEST_CONF_FILE)
-        result = invoke("--config", str(conf_path), "managers", color=False)
-        assert result.exit_code == 0
-        for mid in ("pip", "npm", "gem"):
-            assert re.search(rf"│ {mid}\s+│ ", result.stdout)
-        assert " brew " not in result.stdout
-        assert " brew cask " not in result.stdout
-        assert "debug: " in result.stderr
-
-    def test_conf_file_cli_override(self, invoke, create_config):
-        conf_path = create_config("conf.toml", TEST_CONF_FILE)
-        result = invoke(
-            "--config",
-            str(conf_path),
-            "--verbosity",
-            "CRITICAL",
-            "managers",
-            color=False,
-        )
-        assert result.exit_code == 0
-        for mid in ("pip", "npm", "gem"):
-            assert re.search(rf"│ {mid}\s+│ ", result.stdout)
-        assert " brew " not in result.stdout
-        assert " cask " not in result.stdout
-        assert "error: " not in result.stderr
-        assert "warning: " not in result.stderr
-        assert "info: " not in result.stderr
-        assert "debug: " not in result.stderr
-
-
-class CLISubCommandTests:
-    """All these tests runs on each subcommand.
-
-    This class doesn't starts with `Test` as it is meant to be used as a template,
-    inherited by sub-command specific test cases.
-    """
-
-    @pytest.mark.parametrize("opt_stats", ("--stats", "--no-stats", None))
-    def test_stats(self, invoke, subcmd, opt_stats):
-        """Test the result on all combinations of optional options."""
-        result = invoke(opt_stats, subcmd)
-        assert result.exit_code == 0
-
-    strict_selection_match = True
-    """All user-selected managers are expected to be reported in CLI output."""
-
-    @classmethod
-    def check_manager_selection(
-        cls,
+def check_manager_selection(
         result,
         selected=pool.default_manager_ids,
         reference_set=pool.default_manager_ids,
+        strict_selection_match=True,
     ):
         """Check that user-selected managers are found in CLI's output.
 
         At this stage of the CLI, the order in which the managers are reported doesn't
         matter because:
-        * ``<stdout>`` and ``<stderr>`` gets mangled
-        * paging is async
-        * we may introduce parallel execution of manager in the future
+
+          - ``<stdout>`` and ``<stderr>`` gets mangled
+          - paging is async
+          - we may introduce parallel execution of manager in the future
 
         This explain the use of ``set()`` everywhere.
+
+        ``strict_selection_match`` check that all selected managers are properly
+        reported in CLI output.
 
         .. todo::
 
@@ -228,33 +160,115 @@ class CLISubCommandTests:
         assert found_managers.union(skipped_managers) == set(reference_set)
 
         # Compare managers reported by the CLI and those expected.
-        if cls.strict_selection_match:
+        if strict_selection_match:
             assert found_managers == set(selected)
         # Partial reporting of found manager is allowed in certain cases like install
         # command, which is only picking one manager among the user's selection.
         else:
             assert set(found_managers).issubset(selected)
 
+
+class TestBaseCLI:
+    """Tests of basic CLI invokations that does not involve subcommands.
+
+    Still includes tests performed only once on an arbitrary, non-destructive
+    subcommand, to cover code path shared by all other subcommands. That way we prevent
+    duplicating similar tests for each subcommand and improve overall execution of the
+    test suite.
+
+    The arbitrary subcommand of our choice is ``mpm managers``, as it is a safe
+    read-only operation supposed to work on all platforms, whatever the environment.
+    """
+
+    def test_executable_module(self):
+        # Locate Python executable.
+        py_path = MPMPlugin.locate_bin("python", "python3")
+        assert py_path
+
+        process = subprocess.run(
+            (py_path, "-m", "meta_package_manager", "--version"),
+            capture_output=True,
+            encoding="utf-8",
+        )
+
+        assert process.returncode == 0
+        assert process.stdout.startswith(f"mpm, version {__version__}\n")
+        assert not process.stderr
+
     @pytest.mark.parametrize("selector", ("--manager", "--exclude"))
-    def test_invalid_manager_selector(self, invoke, subcmd, selector):
-        result = invoke(selector, "unknown", subcmd)
+    def test_invalid_manager_selector(self, invoke, selector):
+        result = invoke(selector, "unknown", "managers")
         assert result.exit_code == 2
         assert not result.stdout
         assert "Error: Invalid value for " in result.stderr
         assert selector in result.stderr
 
-    def test_default_all_managers(self, invoke, subcmd):
+    def test_default_all_managers(self, invoke):
         """Test all available managers are selected by default."""
-        result = invoke(subcmd)
+        result = invoke("managers")
         assert result.exit_code == 0
-        self.check_manager_selection(result)
+        check_manager_selection(result)
+
+    def test_conf_file_overrides_defaults(self, invoke, create_config):
+        conf_path = create_config("conf.toml", TEST_CONF_FILE)
+        result = invoke("--config", str(conf_path), "managers", color=False)
+        assert result.exit_code == 0
+        for mid in ("pip", "npm", "gem"):
+            assert re.search(rf"│ {mid}\s+│ ", result.stdout)
+        assert " brew " not in result.stdout
+        assert " brew cask " not in result.stdout
+        assert "debug: " in result.stderr
+
+    def test_conf_file_cli_override(self, invoke, create_config):
+        conf_path = create_config("conf.toml", TEST_CONF_FILE)
+        result = invoke(
+            "--config",
+            str(conf_path),
+            "--verbosity",
+            "CRITICAL",
+            "managers",
+            color=False,
+        )
+        assert result.exit_code == 0
+        for mid in ("pip", "npm", "gem"):
+            assert re.search(rf"│ {mid}\s+│ ", result.stdout)
+        assert " brew " not in result.stdout
+        assert " cask " not in result.stdout
+        assert "error: " not in result.stderr
+        assert "warning: " not in result.stderr
+        assert "info: " not in result.stderr
+        assert "debug: " not in result.stderr
+
+
+# @pytest.fixture(scope="class")
+# def subcmd():
+#     """ Fixture used in `test_cli_*.py` files to set the subcommand in all
+#     CLI calls.
+#     Must returns a string or an iterable of strings. Defaults to `None`,
+#     which allows tests relying on this fixture to selectively skip running.
+#     """
+#     return None
+
+
+class CLISubCommandTests:
+    """All these tests runs on each subcommand.
+
+    This class doesn't starts with `Test` as it is meant to be used as a template,
+    inherited by subcommand specific test cases.
+    """
+
+    @pytest.mark.parametrize("opt_stats", ("--stats", "--no-stats", None))
+    def test_stats(self, invoke, subcmd, opt_stats):
+        """Test the result on all combinations of optional options."""
+        result = invoke(opt_stats, subcmd)
+        assert result.exit_code == 0
 
     @default_manager_ids
     def test_manager_shortcuts(self, invoke, subcmd, manager_id):
         """Test each manager selection shortcut."""
         result = invoke(f"--{manager_id}", subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result, {manager_id})
+        check_manager_selection(result, {manager_id})
 
     @pytest.mark.parametrize(
         "args,expected",
@@ -328,7 +342,7 @@ class CLISubCommandTests:
     def test_manager_selection(self, invoke, subcmd, args, expected):
         result = invoke(*args, subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result, expected)
+        check_manager_selection(result, expected)
 
 
 class CLITableTests:

@@ -20,7 +20,7 @@ import pytest
 
 from ..pool import pool
 from .conftest import all_manager_ids_and_dummy_package
-from .test_cli import CLISubCommandTests
+from .test_cli import CLISubCommandTests, check_manager_selection
 
 
 @pytest.fixture
@@ -32,17 +32,11 @@ class TestInstallRemove(CLISubCommandTests):
     """Install and remove operations are siblings and sensible, so we regroup them under
     the same test suite.
 
-    Install mpm with itself when we can, so we can test externally contributed
-    packaging. See:
-    https://github.com/kdeldycke/meta-package-manager/issues/527
-    """
+    .. tip::
 
-    strict_selection_match = False
-    """Install sub-command try each user-selected manager until it find one providing
-    the package we seek to install, after which the process stop.
-
-    This mean not all managers will be called, so we allow the CLI output checks to
-    partially match.
+        Where we can, we invoke the ``install`` subcommand to install ``mpm`` with
+        itself, so we can `test externally contributed packaging
+        <https://github.com/kdeldycke/meta-package-manager/issues/527>`_.
     """
 
     @pytest.mark.parametrize("operation", ("install", "remove"))
@@ -55,20 +49,36 @@ class TestInstallRemove(CLISubCommandTests):
     @pytest.mark.destructive
     @all_manager_ids_and_dummy_package
     def test_single_manager_install_and_remove(self, invoke, manager_id, package_id):
+        """
+        .. caution
+
+            ``strict_selection_match`` is set to ``False`` because the ``install``
+            subcommand will not try all managers selected by default. So a strict
+            match is not possible.
+
+            That's because ``install`` subcommand try each user-selected manager until
+            it find one providing the package we seek to install, after which the
+            process stop.
+        """
         result = invoke(f"--{manager_id}", "install", package_id)
         assert result.exit_code == 0
-        self.check_manager_selection(
-            result, {manager_id}, reference_set=pool.all_manager_ids
+        check_manager_selection(
+            result,
+            {manager_id},
+            reference_set=pool.all_manager_ids,
+            strict_selection_match=False,
         )
 
         result = invoke(f"--{manager_id}", "remove", package_id)
         assert result.exit_code == 0
-        self.check_manager_selection(
-            result, {manager_id}, reference_set=pool.all_manager_ids
+        check_manager_selection(
+            result,
+            {manager_id},
+            reference_set=pool.all_manager_ids,
+            strict_selection_match=False,
         )
 
 
 pytest.mark.destructive()(TestInstallRemove.test_stats)
-pytest.mark.destructive()(TestInstallRemove.test_default_all_managers)
 pytest.mark.destructive()(TestInstallRemove.test_manager_shortcuts)
 pytest.mark.destructive()(TestInstallRemove.test_manager_selection)

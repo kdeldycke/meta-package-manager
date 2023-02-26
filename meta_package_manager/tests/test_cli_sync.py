@@ -20,7 +20,7 @@ from __future__ import annotations
 import pytest
 
 from .conftest import default_manager_ids
-from .test_cli import CLISubCommandTests
+from .test_cli import CLISubCommandTests, check_manager_selection
 
 
 @pytest.fixture
@@ -33,4 +33,4 @@ class TestSync(CLISubCommandTests):
     def test_single_manager(self, invoke, subcmd, manager_id):
         result = invoke(f"--{manager_id}", subcmd)
         assert result.exit_code == 0
-        self.check_manager_selection(result, {manager_id})
+        check_manager_selection(result, {manager_id})

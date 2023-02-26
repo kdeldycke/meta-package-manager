@@ -20,7 +20,7 @@ from __future__ import annotations
 import pytest
 
 from .conftest import default_manager_ids
-from .test_cli import CLISubCommandTests
+from .test_cli import CLISubCommandTests, check_manager_selection
 
 
 @pytest.fixture
@@ -33,23 +33,23 @@ class TestBackup(CLISubCommandTests):
         result = invoke(subcmd)
         assert result.exit_code == 0
         assert "Print installed package list to <stdout>" in result.stderr
-        self.check_manager_selection(result)
+        check_manager_selection(result)
 
     def test_output_to_console(self, invoke, subcmd):
         result = invoke(subcmd, "-")
         assert result.exit_code == 0
         assert "Print installed package list to <stdout>" in result.stderr
-        self.check_manager_selection(result)
+        check_manager_selection(result)
 
     def test_output_to_file(self, invoke, subcmd):
         result = invoke(subcmd, "mpm-packages.toml")
         assert result.exit_code == 0
         assert "mpm-packages.toml" in result.stderr
-        self.check_manager_selection(result)
+        check_manager_selection(result)
 
     @default_manager_ids
     def test_single_manager_file_output(self, manager_id, invoke, subcmd):
         result = invoke(f"--{manager_id}", subcmd, "mpm-packages.toml")
         assert result.exit_code == 0
         assert "mpm-packages.toml" in result.stderr
-        self.check_manager_selection(result, {manager_id})
+        check_manager_selection(result, {manager_id})

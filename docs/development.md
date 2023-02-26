@@ -11,7 +11,7 @@
 
 This project more or less follows [Semantic Versioning](https://semver.org/).
 
-Which boils down to the following rules of thumb regarding stability:
+Which boils down to the following these rules of thumb regarding stability:
 
 - **Patch releases**: `0.x.n` → `0.x.(n+1)` upgrades
 
@@ -54,7 +54,7 @@ $ python3 -m pip install poetry
 $ poetry install
 ```
 
-Now you’re ready to hack and abuse git!
+Now you’re ready to hack and abuse `git`.
 
 ## Test `mpm` development version
 

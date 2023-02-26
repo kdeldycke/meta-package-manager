@@ -125,7 +125,7 @@ def invoke(invoke_extra):  # noqa: F811
 
 @fixture(scope="class")
 def subcmd():
-    """Fixture used in ``test_cli_*.py`` files to set the sub-command arguments in all
+    """Fixture used in ``test_cli_*.py`` files to set the subcommand arguments in all
     CLI calls.
 
     Must returns a string or an iterable of strings. Defaults to ``None``, which allows

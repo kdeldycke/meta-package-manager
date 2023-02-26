@@ -68,10 +68,17 @@ mpm, version 4.13.0-dev
 
 ## Unit-tests
 
-Run unit-tests with:
+Run non-destructive unit-tests in parallel with:
 
 ```shell-session
-$ poetry run pytest
+$ poetry run pytest --numprocesses=auto --skip-destructive ./meta_package_manager/tests
+```
+
+If you're not afraid of `mpm` tests messing around with the package managers on your system, you
+can run the destructive tests in sequential order:
+
+```shell-session
+$ poetry run pytest --numprocesses=0 --skip-non-destructive --run-destructive ./meta_package_manager/tests
 ```
 
 ## Coding style

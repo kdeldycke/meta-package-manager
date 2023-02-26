@@ -474,7 +474,7 @@ jobs:
         #   from pyproject.toml because of this bug: https://github.com/pytest-dev/pytest/issues/10665
         run: >
           poetry run pytest --exitfirst --cov-config=pyproject.toml --cov=./ --cov-report=xml
-          --numprocesses=auto --only-non-destructive
+          --numprocesses=auto --run-non-destructive --skip-destructive
           ./meta_package_manager/tests/
 
       - name: Non-parallel destructive tests
@@ -487,7 +487,7 @@ jobs:
         #   from pyproject.toml because of this bug: https://github.com/pytest-dev/pytest/issues/10665
         run: >
           poetry run pytest --exitfirst --cov-config=pyproject.toml --cov=./ --cov-report=xml
-          --numprocesses=0 --only-destructive
+          --numprocesses=0 --skip-non-destructive --run-destructive
           ./meta_package_manager/tests/
 
       - name: Coverage - Upload Codecov

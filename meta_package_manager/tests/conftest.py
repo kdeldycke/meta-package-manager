@@ -41,52 +41,81 @@ from ..pool import manager_classes, pool
 def pytest_addoption(parser):
     """Add custom command line options.
 
-    Documentation: https://docs.pytest.org/en/7.1.x/example/simple.html#control-skipping-of-tests-according-to-command-line-option
+    Based on `Pytest's documentation examples
+    <https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option>`_.
+
+    By default, runs non-destructive tests and skips destructive ones.
     """
     parser.addoption(
-        "--only-destructive",
-        action="store_true",
+        "--run-destructive",
+        action='store_true',
         default=False,
-        help="Only run destructive tests.",
-    )
+        help="Run the subset of tests that are marked as destructive.")
     parser.addoption(
-        "--only-non-destructive",
-        action="store_true",
+        '--skip-destructive',
+        action='store_true',
         default=False,
-        help="Only run non-destructive tests.",
-    )
+        help="Skip the subset of tests that are marked as destructive. "
+        "Takes precedence over --run-destructive.")
+
+    parser.addoption(
+        "--run-non-destructive",
+        action='store_true',
+        default=True,
+        help="Run the subset of tests that are marked as non-destructive.")
+    parser.addoption(
+        '--skip-non-destructive',
+        action='store_true',
+        default=False,
+        help="Skip the subset of tests that are marked as non-destructive. "
+        "Takes precedence over --run-non-destructive.")
 
 
 def pytest_configure(config):
     """Register custom markers."""
     config.addinivalue_line(
         "markers",
-        "destructive: mark test as being destructive, i.e. modifying the system they run on.",
+        "destructive: mark test as being destructive, "
+        "i.e. modifying the system they run on.",
     )
 
 
 def pytest_collection_modifyitems(config, items):
     """Either skip or run destructive tests based on command line options."""
-    if config.getoption("--only-destructive") and config.getoption(
-        "--only-non-destructive"
-    ):
+    run_destructive = config.getoption("--run-destructive")
+    run_non_destructive = config.getoption("--run-non-destructive")
+    # Skip options take precedence over run options.
+    if config.getoption("--skip-destructive"):
+        run_destructive = False
+    if config.getoption("--skip-non-destructive"):
+        run_non_destructive = False
+
+    print()
+    print("--run-destructive =", config.getoption("--run-destructive"))
+    print("--skip-destructive =", config.getoption("--skip-destructive"))
+    print("--run-non-destructive =", config.getoption("--run-non-destructive"))
+    print("--skip-non-destructive =", config.getoption("--skip-non-destructive"))
+    print("run_destructive =", run_destructive)
+    print("run_non_destructive =", run_non_destructive)
+
+    if not run_destructive and not run_non_destructive:
         raise ValueError(
-            "Cannot use both --only-destructive and --only-non-destructive options."
+            "Both destructive and non-destructive tests were skipped. No tests to run."
         )
 
-    # Only run tests marked as destructive, skip all others.
-    if config.getoption("--only-destructive"):
-        skip_non_destructive = pytest.mark.skip(reason="skip non-destructive tests")
-        for item in items:
-            if "destructive" not in item.keywords:
-                item.add_marker(skip_non_destructive)
-
-    # Skip all tests marked as destructive, run all others.
-    if config.getoption("--only-non-destructive"):
+    # Skip destructive tests.
+    if not run_destructive:
         skip_destructive = pytest.mark.skip(reason="skip destructive tests")
         for item in items:
             if "destructive" in item.keywords:
                 item.add_marker(skip_destructive)
+
+    # Skip non-destructive tests.
+    if not run_non_destructive:
+        skip_non_destructive = pytest.mark.skip(reason="skip non-destructive tests")
+        for item in items:
+            if "destructive" not in item.keywords:
+                item.add_marker(skip_non_destructive)
 
 
 @fixture

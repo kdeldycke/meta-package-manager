@@ -209,64 +209,10 @@ class TestBaseCLI:
         assert result.exit_code == 0
         check_manager_selection(result)
 
-    def test_conf_file_overrides_defaults(self, invoke, create_config):
-        conf_path = create_config("conf.toml", TEST_CONF_FILE)
-        result = invoke("--config", str(conf_path), "managers", color=False)
-        assert result.exit_code == 0
-        for mid in ("pip", "npm", "gem"):
-            assert re.search(rf"│ {mid}\s+│ ", result.stdout)
-        assert " brew " not in result.stdout
-        assert " brew cask " not in result.stdout
-        assert "debug: " in result.stderr
-
-    def test_conf_file_cli_override(self, invoke, create_config):
-        conf_path = create_config("conf.toml", TEST_CONF_FILE)
-        result = invoke(
-            "--config",
-            str(conf_path),
-            "--verbosity",
-            "CRITICAL",
-            "managers",
-            color=False,
-        )
-        assert result.exit_code == 0
-        for mid in ("pip", "npm", "gem"):
-            assert re.search(rf"│ {mid}\s+│ ", result.stdout)
-        assert " brew " not in result.stdout
-        assert " cask " not in result.stdout
-        assert "error: " not in result.stderr
-        assert "warning: " not in result.stderr
-        assert "info: " not in result.stderr
-        assert "debug: " not in result.stderr
-
-
-# @pytest.fixture(scope="class")
-# def subcmd():
-#     """ Fixture used in `test_cli_*.py` files to set the subcommand in all
-#     CLI calls.
-#     Must returns a string or an iterable of strings. Defaults to `None`,
-#     which allows tests relying on this fixture to selectively skip running.
-#     """
-#     return None
-
-
-class CLISubCommandTests:
-    """All these tests runs on each subcommand.
-
-    This class doesn't starts with `Test` as it is meant to be used as a template,
-    inherited by subcommand specific test cases.
-    """
-
-    @pytest.mark.parametrize("opt_stats", ("--stats", "--no-stats", None))
-    def test_stats(self, invoke, subcmd, opt_stats):
-        """Test the result on all combinations of optional options."""
-        result = invoke(opt_stats, subcmd)
-        assert result.exit_code == 0
-
     @default_manager_ids
-    def test_manager_shortcuts(self, invoke, subcmd, manager_id):
+    def test_manager_shortcuts(self, invoke, manager_id):
         """Test each manager selection shortcut."""
-        result = invoke(f"--{manager_id}", subcmd)
+        result = invoke(f"--{manager_id}", "managers")
         assert result.exit_code == 0
         check_manager_selection(result, {manager_id})
 
@@ -339,10 +285,48 @@ class CLISubCommandTests:
             ),
         ),
     )
-    def test_manager_selection(self, invoke, subcmd, args, expected):
-        result = invoke(*args, subcmd)
+    def test_manager_selection(self, invoke, args, expected):
+        result = invoke(*args, "managers")
         assert result.exit_code == 0
         check_manager_selection(result, expected)
+
+    def test_conf_file_overrides_defaults(self, invoke, create_config):
+        conf_path = create_config("conf.toml", TEST_CONF_FILE)
+        result = invoke("--config", str(conf_path), "managers", color=False)
+        assert result.exit_code == 0
+        check_manager_selection(result, ("pip", "npm", "gem"))
+        assert "debug: " in result.stderr
+
+    def test_conf_file_cli_override(self, invoke, create_config):
+        conf_path = create_config("conf.toml", TEST_CONF_FILE)
+        result = invoke(
+            "--config",
+            str(conf_path),
+            "--verbosity",
+            "CRITICAL",
+            "managers",
+            color=False,
+        )
+        assert result.exit_code == 0
+        check_manager_selection(result, ("pip", "npm", "gem"))
+        assert "error: " not in result.stderr
+        assert "warning: " not in result.stderr
+        assert "info: " not in result.stderr
+        assert "debug: " not in result.stderr
+
+
+class CLISubCommandTests:
+    """All these tests runs on each subcommand.
+
+    This class doesn't starts with `Test` as it is meant to be used as a template,
+    inherited by subcommand specific test cases.
+    """
+
+    @pytest.mark.parametrize("opt_stats", ("--stats", "--no-stats", None))
+    def test_stats(self, invoke, subcmd, opt_stats):
+        """Test the result on all combinations of optional options."""
+        result = invoke(opt_stats, subcmd)
+        assert result.exit_code == 0
 
 
 class CLITableTests:

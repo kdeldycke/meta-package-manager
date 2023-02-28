@@ -16,10 +16,13 @@
 
 from __future__ import annotations
 
+import re
+
 import pytest
 
+from ..base import Operations
 from .conftest import default_manager_ids
-from .test_cli import CLISubCommandTests, check_manager_selection
+from .test_cli import CLISubCommandTests
 
 
 @pytest.fixture
@@ -28,8 +31,22 @@ def subcmd():
 
 
 class TestUpgrade(CLISubCommandTests):
-    """All tests here should me marked as destructive unless --dry-run parameter is
-    passed."""
+    """
+    .. danger::
+        All tests here should me marked as destructive unless --dry-run parameter is
+        passed.
+    """
+
+    @staticmethod
+    def evaluate_signals(mid, stdout, stderr):
+        yield from (
+            f"warning: {mid} does not implement upgrade_all_cli." in stderr,
+            f"warning: {mid} does not implement {Operations.upgrade_all}." in stderr,
+            f"Upgrade all outdated packages from {mid}..." in stderr,
+            bool(re.search(rf"Upgrade \S+ with {mid}\.\.\.", stderr)),
+            # Common "not found" warning message.
+            f"warning: Skip unavailable {mid} manager." in stderr,
+        )
 
     @pytest.mark.parametrize("all_option", ("--all", None))
     def test_all_managers_dry_run_upgrade_all(self, invoke, all_option):
@@ -37,7 +54,7 @@ class TestUpgrade(CLISubCommandTests):
         assert result.exit_code == 0
         if not all_option:
             assert "assume -A/--all option" in result.stderr
-        check_manager_selection(result)
+        self.check_manager_selection(result)
 
     @pytest.mark.destructive
     @pytest.mark.parametrize("all_option", ("--all", None))
@@ -46,7 +63,7 @@ class TestUpgrade(CLISubCommandTests):
         assert result.exit_code == 0
         if not all_option:
             assert "assume -A/--all option" in result.stderr
-        check_manager_selection(result)
+        self.check_manager_selection(result)
 
     @default_manager_ids
     @pytest.mark.parametrize("all_option", ("--all", None))
@@ -55,7 +72,7 @@ class TestUpgrade(CLISubCommandTests):
         assert result.exit_code == 0
         if not all_option:
             assert "assume -A/--all option" in result.stderr
-        check_manager_selection(result, {manager_id})
+        self.check_manager_selection(result, {manager_id})
 
     @pytest.mark.destructive
     @default_manager_ids
@@ -65,9 +82,4 @@ class TestUpgrade(CLISubCommandTests):
         assert result.exit_code == 0
         if not all_option:
             assert "assume -A/--all option" in result.stderr
-        check_manager_selection(result, {manager_id})
-
-
-pytest.mark.destructive()(TestUpgrade.test_stats)
-pytest.mark.destructive()(TestUpgrade.test_manager_shortcuts)
-pytest.mark.destructive()(TestUpgrade.test_manager_selection)
+        self.check_manager_selection(result, {manager_id})

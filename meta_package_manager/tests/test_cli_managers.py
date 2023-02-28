@@ -18,13 +18,14 @@
 from __future__ import annotations
 
 import json
+import re
 
 import pytest
 from boltons.iterutils import same
 
 from ..pool import pool
-from .conftest import all_manager_ids, default_manager_ids, unsupported_manager_ids
-from .test_cli import CLISubCommandTests, CLITableTests, check_manager_selection
+from .conftest import all_manager_ids, unsupported_manager_ids
+from .test_cli import CLISubCommandTests, CLITableTests
 
 
 @pytest.fixture
@@ -33,17 +34,24 @@ def subcmd():
 
 
 class TestManagers(CLISubCommandTests, CLITableTests):
-    @default_manager_ids
-    def test_default_managers(self, invoke, subcmd, manager_id):
-        result = invoke(f"--{manager_id}", subcmd)
-        assert result.exit_code == 0
-        check_manager_selection(result, {manager_id})
+    @staticmethod
+    def evaluate_signals(mid, stdout, stderr):
+        yield from (
+            # Search in manager table.
+            bool(
+                re.search(
+                    rf"│\s+{mid}\s+│.+│\s+(✓|✘).+│\s+(✓|✘)",
+                    stdout,
+                )
+            ),
+        )
 
     @all_manager_ids
     def test_all_managers(self, invoke, subcmd, manager_id):
+        """Check only the selected manager is listed."""
         result = invoke(f"--{manager_id}", "--all-managers", subcmd)
         assert result.exit_code == 0
-        check_manager_selection(
+        self.check_manager_selection(
             result, {manager_id}, reference_set=pool.all_manager_ids
         )
 
@@ -51,7 +59,7 @@ class TestManagers(CLISubCommandTests, CLITableTests):
     def test_unsupported_managers(self, invoke, subcmd, manager_id):
         result = invoke(f"--{manager_id}", subcmd)
         assert result.exit_code == 0
-        check_manager_selection(result, set())
+        self.check_manager_selection(result, set())
 
     def test_json_parsing(self, invoke, subcmd):
         result = invoke("--output-format", "json", subcmd)

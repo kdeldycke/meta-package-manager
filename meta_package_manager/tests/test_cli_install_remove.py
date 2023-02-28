@@ -16,11 +16,13 @@
 
 from __future__ import annotations
 
+import re
+
 import pytest
 
 from ..pool import pool
 from .conftest import all_manager_ids_and_dummy_package
-from .test_cli import CLISubCommandTests, check_manager_selection
+from .test_cli import CLISubCommandTests
 
 
 @pytest.fixture
@@ -38,6 +40,31 @@ class TestInstallRemove(CLISubCommandTests):
         itself, so we can `test externally contributed packaging
         <https://github.com/kdeldycke/meta-package-manager/issues/527>`_.
     """
+
+    @staticmethod
+    def evaluate_signals(mid, stdout, stderr):
+        yield from (
+            # Install messages.
+            bool(
+                re.search(
+                    rf"Install \S+ package with {mid}\.\.\.",
+                    stderr,
+                )
+            ),
+            bool(
+                re.search(
+                    rf"warning: No \S+ package found on {mid}\.",
+                    stderr,
+                )
+            ),
+            # Remove messages.
+            bool(
+                re.search(
+                    rf"Remove \S+ package with {mid}\.\.\.",
+                    stderr,
+                )
+            ),
+        )
 
     @pytest.mark.parametrize("operation", ("install", "remove"))
     def test_no_package_id(self, invoke, operation):
@@ -62,7 +89,7 @@ class TestInstallRemove(CLISubCommandTests):
         """
         result = invoke(f"--{manager_id}", "install", package_id)
         assert result.exit_code == 0
-        check_manager_selection(
+        self.check_manager_selection(
             result,
             {manager_id},
             reference_set=pool.all_manager_ids,
@@ -71,14 +98,9 @@ class TestInstallRemove(CLISubCommandTests):
 
         result = invoke(f"--{manager_id}", "remove", package_id)
         assert result.exit_code == 0
-        check_manager_selection(
+        self.check_manager_selection(
             result,
             {manager_id},
             reference_set=pool.all_manager_ids,
             strict_selection_match=False,
         )
-
-
-pytest.mark.destructive()(TestInstallRemove.test_stats)
-pytest.mark.destructive()(TestInstallRemove.test_manager_shortcuts)
-pytest.mark.destructive()(TestInstallRemove.test_manager_selection)

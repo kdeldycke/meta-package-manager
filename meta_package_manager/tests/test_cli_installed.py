@@ -25,8 +25,7 @@ from boltons.iterutils import same
 
 from ..base import Package
 from ..pool import pool
-from .conftest import default_manager_ids
-from .test_cli import CLISubCommandTests, CLITableTests, check_manager_selection
+from .test_cli import CLISubCommandTests, CLITableTests
 
 
 @pytest.fixture
@@ -35,11 +34,14 @@ def subcmd():
 
 
 class TestInstalled(CLISubCommandTests, CLITableTests):
-    @default_manager_ids
-    def test_single_manager(self, invoke, subcmd, manager_id):
-        result = invoke(f"--{manager_id}", subcmd)
-        assert result.exit_code == 0
-        check_manager_selection(result, {manager_id})
+    @staticmethod
+    def evaluate_signals(mid, stdout, stderr):
+        yield from (
+            # Common "not found" warning message.
+            f"warning: Skip unavailable {mid} manager." in stderr,
+            # Stats line at the end of output.
+            f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
+        )
 
     def test_json_parsing(self, invoke, subcmd):
         result = invoke("--output-format", "json", subcmd)

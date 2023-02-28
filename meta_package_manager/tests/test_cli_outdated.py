@@ -23,10 +23,9 @@ import json
 import pytest
 from boltons.iterutils import same
 
-from ..base import Package
+from ..base import Operations, Package
 from ..pool import pool
-from .conftest import default_manager_ids
-from .test_cli import CLISubCommandTests, CLITableTests, check_manager_selection
+from .test_cli import CLISubCommandTests, CLITableTests
 
 
 @pytest.fixture
@@ -38,11 +37,15 @@ BAR_PLUGIN_KEYWORDS = frozenset({"shell"}.union({f"param{i}" for i in range(1, 1
 
 
 class TestOutdated(CLISubCommandTests, CLITableTests):
-    @default_manager_ids
-    def test_single_manager(self, invoke, manager_id, subcmd):
-        result = invoke(f"--{manager_id}", subcmd)
-        assert result.exit_code == 0
-        check_manager_selection(result, {manager_id})
+    @staticmethod
+    def evaluate_signals(mid, stdout, stderr):
+        yield from (
+            f"warning: {mid} does not implement {Operations.outdated}" in stderr,
+            # Common "not found" warning message.
+            f"warning: Skip unavailable {mid} manager." in stderr,
+            # Stats line at the end of output.
+            f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
+        )
 
     def test_json_parsing(self, invoke, subcmd):
         result = invoke("--output-format", "json", subcmd)

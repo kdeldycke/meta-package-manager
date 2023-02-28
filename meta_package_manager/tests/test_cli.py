@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+from typing import Iterator
 
 import pytest
 from boltons.strutils import strip_ansi
@@ -26,7 +27,6 @@ from click_extra.tabulate import output_formats
 
 from .. import __version__
 from ..bar_plugin import MPMPlugin
-from ..base import Operations
 from ..pool import pool
 from .conftest import default_manager_ids
 
@@ -51,34 +51,57 @@ TEST_CONF_FILE = """
     """
 
 
-def check_manager_selection(
+class InspectCLIOuput:
+    @staticmethod
+    def evaluate_signals(mid: str, stdout: str, stderr: str) -> Iterator[bool]:
+        """Search in the CLI output for evidence that a manager has been retained.
+
+        ..tip::
+
+            In the implementation, signals should be roughly sorted from most specific
+            to more forgiving.
+        """
+        raise NotImplementedError
+        yield from (
+            # Common "not found" warning message.
+            f"warning: Skip unavailable {mid} manager." in stderr,
+            # Stats line at the end of output.
+            f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
+        )
+
+    def check_manager_selection(
+        self,
         result,
-        selected=pool.default_manager_ids,
-        reference_set=pool.default_manager_ids,
-        strict_selection_match=True,
+        selected: Iterator[str] = pool.default_manager_ids,
+        reference_set: Iterator[str] = pool.default_manager_ids,
+        strict_selection_match: bool = True,
     ):
         """Check that user-selected managers are found in CLI's output.
 
-        At this stage of the CLI, the order in which the managers are reported doesn't
-        matter because:
+        To establish that ``mpm`` CLI is properly selecting managers, we search for
+        signals in CLI logs, by matching regular expressions against ``<stdout>`` and
+        ``<stderr>``. This strategy close the gap of testing internal code testing and
+        end user experience.
 
-          - ``<stdout>`` and ``<stderr>`` gets mangled
-          - paging is async
-          - we may introduce parallel execution of manager in the future
-
-        This explain the use of ``set()`` everywhere.
+        Signals are expected to be implemented for each subcommand by the
+        ``evaluate_signals()`` method.
 
         ``strict_selection_match`` check that all selected managers are properly
-        reported in CLI output.
+        reported in CLI output and none are missing.
 
-        .. todo::
+        .. caution::
 
-            Parametrize/fixturize signals to pin point output depending on
-            subcommand.
+            At this stage of the CLI execution, the order in which the managers are
+            reported doesn't matter because:
+
+            - ``<stdout>`` and ``<stderr>`` gets mangled
+            - `paging is async
+                <https://github.com/kdeldycke/meta-package-manager/issues/528>`_
+            - we may introduce `parallel execution of managers in the future
+                <https://github.com/kdeldycke/meta-package-manager/issues/529>`_
+
+            This explain the use of ``set()`` everywhere in this method.
         """
-        assert isinstance(selected, (list, tuple, frozenset, set))
-        assert isinstance(reference_set, (list, tuple, frozenset, set))
-
         found_managers = set()
         skipped_managers = set()
 
@@ -87,70 +110,8 @@ def check_manager_selection(
         stderr = strip_ansi(result.stderr)
 
         for mid in reference_set:
-            # List of signals indicating a package manager has been retained by
-            # the CLI. Roughly sorted from most specific to more forgiving.
-            signals = (
-                # Common "not found" warning message.
-                f"warning: Skip unavailable {mid} manager." in stderr,
-                # Common "not implemented" optional command warning message.
-                bool(
-                    re.search(
-                        rf"warning: {mid} does not implement "
-                        rf"Operations\.({'|'.join(Operations.__members__.keys())}).",
-                        stderr,
-                    )
-                ),
-                # Stats line at the end of output.
-                f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
-                # Match output of managers command.
-                bool(
-                    re.search(
-                        rf"│\s+{mid}\s+│.+│\s+(✓|✘).+│\s+(✓|✘)",
-                        stdout,
-                    )
-                ),
-                # Install messages.
-                bool(
-                    re.search(
-                        rf"Install \S+ package with {mid}\.\.\.",
-                        stderr,
-                    )
-                ),
-                bool(
-                    re.search(
-                        rf"warning: No \S+ package found on {mid}\.",
-                        stderr,
-                    )
-                ),
-                # Upgrade command.
-                f"warning: {mid} does not implement upgrade_all_cli." in stderr,
-                f"Upgrade all outdated packages from {mid}..." in stderr,
-                bool(
-                    re.search(
-                        rf"Upgrade \S+ with {mid}\.\.\.",
-                        stderr,
-                    )
-                ),
-                # Remove messages.
-                bool(
-                    re.search(
-                        rf"Remove \S+ package with {mid}\.\.\.",
-                        stderr,
-                    )
-                ),
-                # Sync command.
-                f"Sync {mid} package info..." in stderr,
-                # Cleanup command.
-                f"Cleanup {mid}..." in stderr,
-                # Log message for backup command.
-                f"Dumping packages from {mid}..." in stderr,
-                # Warning message for restore command.
-                f"warning: No [{mid}] section found." in stderr,
-                # Restoring message.
-                f"Restore {mid} packages..." in stderr,
-            )
-
-            if True in signals:
+            signals_eval = self.evaluate_signals(mid, stdout, stderr)
+            if True in signals_eval:
                 found_managers.add(mid)
             else:
                 skipped_managers.add(mid)
@@ -168,16 +129,14 @@ def check_manager_selection(
             assert set(found_managers).issubset(selected)
 
 
-class TestBaseCLI:
-    """Tests of basic CLI invokations that does not involve subcommands.
+class TestCommonCLI:
+    """Tests CLI behavior shared by all subcommands.
 
-    Still includes tests performed only once on an arbitrary, non-destructive
-    subcommand, to cover code path shared by all other subcommands. That way we prevent
-    duplicating similar tests for each subcommand and improve overall execution of the
-    test suite.
+    If we have to, we only run the test on a single, non-destructive subcommand
+    (like ``mpm installed`` or ``mpm managers``). Not all subcommands are tested.
 
-    The arbitrary subcommand of our choice is ``mpm managers``, as it is a safe
-    read-only operation supposed to work on all platforms, whatever the environment.
+    That way we prevent running similar tests which are operating on the same, shared
+    code path. Thus improving overall execution of the test suite.
     """
 
     def test_executable_module(self):
@@ -195,6 +154,44 @@ class TestBaseCLI:
         assert process.stdout.startswith(f"mpm, version {__version__}\n")
         assert not process.stderr
 
+    @pytest.mark.parametrize(
+        "stats_arg,active_stats",
+        (("--stats", True), ("--no-stats", False), (None, True)),
+    )
+    def test_stats(self, invoke, stats_arg, active_stats):
+        """Test the result on all combinations of optional statistics options."""
+        result = invoke(stats_arg, "installed")
+        assert result.exit_code == 0
+        stats_match = re.match(
+            r"\d+ packages total \((\w+: \d+(, )?)+\)\.",
+            # Last line of stderr.
+            result.stderr.splitlines()[-1],
+        )
+        assert active_stats is bool(stats_match)
+
+
+class TestManagerSelection(InspectCLIOuput):
+    """Test selection of package managers to use.
+
+    Tests are performed here on the ``mpm managers`` subcommand, as it is a safe
+    read-only operation that is supposed to work on all platforms, whatever the
+    environment.
+
+    There is not need to test all subcommands, as the selection logic and code path is
+    shared by all of them. See the implementation in
+    ``meta_package_manager.pool.ManagerPool.select_managers()``.
+    """
+
+    @staticmethod
+    def evaluate_signals(mid: str, stdout: str, stderr: str) -> Iterator[bool]:
+        """Borrow the signals from the ``--managers`` test suite.
+
+        Module is imported inplace to avoid circular import.
+        """
+        from .test_cli_managers import TestManagers
+
+        return TestManagers.evaluate_signals(mid, stdout, stderr)
+
     @pytest.mark.parametrize("selector", ("--manager", "--exclude"))
     def test_invalid_manager_selector(self, invoke, selector):
         result = invoke(selector, "unknown", "managers")
@@ -207,14 +204,14 @@ class TestBaseCLI:
         """Test all available managers are selected by default."""
         result = invoke("managers")
         assert result.exit_code == 0
-        check_manager_selection(result)
+        self.check_manager_selection(result)
 
     @default_manager_ids
     def test_manager_shortcuts(self, invoke, manager_id):
         """Test each manager selection shortcut."""
         result = invoke(f"--{manager_id}", "managers")
         assert result.exit_code == 0
-        check_manager_selection(result, {manager_id})
+        self.check_manager_selection(result, {manager_id})
 
     @pytest.mark.parametrize(
         "args,expected",
@@ -288,13 +285,13 @@ class TestBaseCLI:
     def test_manager_selection(self, invoke, args, expected):
         result = invoke(*args, "managers")
         assert result.exit_code == 0
-        check_manager_selection(result, expected)
+        self.check_manager_selection(result, expected)
 
     def test_conf_file_overrides_defaults(self, invoke, create_config):
         conf_path = create_config("conf.toml", TEST_CONF_FILE)
         result = invoke("--config", str(conf_path), "managers", color=False)
         assert result.exit_code == 0
-        check_manager_selection(result, ("pip", "npm", "gem"))
+        self.check_manager_selection(result, ("pip", "npm", "gem"))
         assert "debug: " in result.stderr
 
     def test_conf_file_cli_override(self, invoke, create_config):
@@ -308,25 +305,19 @@ class TestBaseCLI:
             color=False,
         )
         assert result.exit_code == 0
-        check_manager_selection(result, ("pip", "npm", "gem"))
+        self.check_manager_selection(result, ("pip", "npm", "gem"))
         assert "error: " not in result.stderr
         assert "warning: " not in result.stderr
         assert "info: " not in result.stderr
         assert "debug: " not in result.stderr
 
 
-class CLISubCommandTests:
+class CLISubCommandTests(InspectCLIOuput):
     """All these tests runs on each subcommand.
 
     This class doesn't starts with `Test` as it is meant to be used as a template,
-    inherited by subcommand specific test cases.
+    inherited by sub-command specific test cases.
     """
-
-    @pytest.mark.parametrize("opt_stats", ("--stats", "--no-stats", None))
-    def test_stats(self, invoke, subcmd, opt_stats):
-        """Test the result on all combinations of optional options."""
-        result = invoke(opt_stats, subcmd)
-        assert result.exit_code == 0
 
 
 class CLITableTests:

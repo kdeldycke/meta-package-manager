@@ -20,7 +20,7 @@ import pytest
 
 from ..pool import pool
 from .conftest import default_manager_ids
-from .test_cli import CLISubCommandTests, check_manager_selection
+from .test_cli import CLISubCommandTests
 
 
 @pytest.fixture
@@ -38,6 +38,15 @@ def subcmd(create_config):
 
 
 class TestRestore(CLISubCommandTests):
+    @staticmethod
+    def evaluate_signals(mid, stdout, stderr):
+        yield from (
+            # Warning message for restore command.
+            f"warning: No [{mid}] section found." in stderr,
+            # Restoring message.
+            f"Restore {mid} packages..." in stderr,
+        )
+
     @pytest.mark.destructive
     def test_default_all_managers(self, invoke, create_config):
         toml_path = create_config(
@@ -56,7 +65,7 @@ class TestRestore(CLISubCommandTests):
         result = invoke("restore", str(toml_path))
         assert result.exit_code == 0
         assert "all-managers.toml" in result.stderr
-        check_manager_selection(result)
+        self.check_manager_selection(result)
 
     @pytest.mark.destructive
     @default_manager_ids
@@ -76,7 +85,7 @@ class TestRestore(CLISubCommandTests):
 
         result = invoke(f"--{manager_id}", "restore", str(toml_path))
         assert result.exit_code == 0
-        check_manager_selection(result, {manager_id})
+        self.check_manager_selection(result, {manager_id})
 
     def test_ignore_unrecognized_manager(self, invoke, create_config):
         toml_path = create_config(

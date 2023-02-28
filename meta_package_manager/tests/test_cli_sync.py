@@ -19,8 +19,7 @@ from __future__ import annotations
 
 import pytest
 
-from .conftest import default_manager_ids
-from .test_cli import CLISubCommandTests, check_manager_selection
+from .test_cli import CLISubCommandTests
 
 
 @pytest.fixture
@@ -29,8 +28,6 @@ def subcmd():
 
 
 class TestSync(CLISubCommandTests):
-    @default_manager_ids
-    def test_single_manager(self, invoke, subcmd, manager_id):
-        result = invoke(f"--{manager_id}", subcmd)
-        assert result.exit_code == 0
-        check_manager_selection(result, {manager_id})
+    @staticmethod
+    def evaluate_signals(mid, stdout, stderr):
+        yield from (f"Sync {mid} package info..." in stderr,)

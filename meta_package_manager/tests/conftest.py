@@ -48,27 +48,31 @@ def pytest_addoption(parser):
     """
     parser.addoption(
         "--run-destructive",
-        action='store_true',
+        action="store_true",
         default=False,
-        help="Run the subset of tests that are marked as destructive.")
+        help="Run the subset of tests that are marked as destructive.",
+    )
     parser.addoption(
-        '--skip-destructive',
-        action='store_true',
+        "--skip-destructive",
+        action="store_true",
         default=False,
         help="Skip the subset of tests that are marked as destructive. "
-        "Takes precedence over --run-destructive.")
+        "Takes precedence over --run-destructive.",
+    )
 
     parser.addoption(
         "--run-non-destructive",
-        action='store_true',
+        action="store_true",
         default=True,
-        help="Run the subset of tests that are marked as non-destructive.")
+        help="Run the subset of tests that are marked as non-destructive.",
+    )
     parser.addoption(
-        '--skip-non-destructive',
-        action='store_true',
+        "--skip-non-destructive",
+        action="store_true",
         default=False,
         help="Skip the subset of tests that are marked as non-destructive. "
-        "Takes precedence over --run-non-destructive.")
+        "Takes precedence over --run-non-destructive.",
+    )
 
 
 def pytest_configure(config):

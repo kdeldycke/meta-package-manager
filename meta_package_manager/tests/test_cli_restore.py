@@ -45,6 +45,8 @@ class TestRestore(CLISubCommandTests):
             f"warning: No [{mid}] section found." in stderr,
             # Restoring message.
             f"Restore {mid} packages..." in stderr,
+            # Common "not found" warning message.
+            f"warning: Skip unavailable {mid} manager." in stderr,
         )
 
     @pytest.mark.destructive

@@ -51,7 +51,7 @@ TEST_CONF_FILE = """
     """
 
 
-class InspectCLIOuput:
+class InspectCLIOutput:
     @staticmethod
     def evaluate_signals(mid: str, stdout: str, stderr: str) -> Iterator[bool]:
         """Search in the CLI output for evidence that a manager has been retained.
@@ -170,7 +170,7 @@ class TestCommonCLI:
         assert active_stats is bool(stats_match)
 
 
-class TestManagerSelection(InspectCLIOuput):
+class TestManagerSelection(InspectCLIOutput):
     """Test selection of package managers to use.
 
     Tests are performed here on the ``mpm managers`` subcommand, as it is a safe
@@ -312,7 +312,7 @@ class TestManagerSelection(InspectCLIOuput):
         assert "debug: " not in result.stderr
 
 
-class CLISubCommandTests(InspectCLIOuput):
+class CLISubCommandTests(InspectCLIOutput):
     """All these tests runs on each subcommand.
 
     This class doesn't starts with `Test` as it is meant to be used as a template,

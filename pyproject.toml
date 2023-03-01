@@ -102,7 +102,7 @@ bump2version = "^1.0.1"
 coverage = { extras = ["toml"], version = "^7.2" }
 furo = "^2022.9.29"
 mypy = "^1.0"
-myst-parser = "^0.18.0"
+myst-parser = "^0.19.0"
 pytest = "^7.2.1"
 # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html
 pytest-cov = "^4.0.0"

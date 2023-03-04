@@ -1,112 +1,95 @@
-digraph {
-    fontname="Helvetica,Arial,sans-serif"
-                node [
-                    style=filled
-                    shape=box
-                    fontname="Helvetica,Arial,sans-serif"
-                    fontsize=10
-                    color="#b2afa7"
-                    fillcolor="#edeceb"
-                ]
-                edge [
-                    headport=nw
-                    fontname="Helvetica,Arial,sans-serif"
-                    fontsize=8
-                    color="#b2b1ae"
-                    fontcolor="#00000080"
-                ]
-    "charset-normalizer" [label="charset-normalizer\n3.0.1"]
-    "click-extra" -> "click-log" [label=">=0.4.0,<0.5.0"]
-    "click-extra" -> "pallets-sphinx-themes" [label=">=2.0.2,<3.0.0"]
-    "click-extra" -> "pygments-ansi-color" [label=">=0.0.6,<0.1.1"]
-    "click-extra" -> boltons [label=">=21.0.0,<22.0.0"]
-    "click-extra" -> click [label=">=8.1.1,<9.0.0"]
-    "click-extra" -> cloup [label=">=2.0.0.post1,<3.0.0"]
-    "click-extra" -> commentjson [label=">=0.9.0,<0.10.0"]
-    "click-extra" -> graphviz [label=">=0.20.1,<0.21.0"]
-    "click-extra" -> mergedeep [label=">=1.3.4,<2.0.0"]
-    "click-extra" -> pygments [label=">=2.14.0,<3.0.0"]
-    "click-extra" -> pyyaml [label=">=6.0.0,<7.0.0"]
-    "click-extra" -> regex [label=">=2022.3.15,<2023.0.0"]
-    "click-extra" -> requests [label=">=2.27.1,<3.0.0"]
-    "click-extra" -> sphinx [label=">=5.3.0,<6.0.0"]
-    "click-extra" -> tabulate [label=">=0.9.0,<0.10.0"]
-    "click-extra" -> wcmatch [label=">=8.4,<9.0"]
-    "click-extra" -> xmltodict [label=">=0.12,<0.14"]
-    "click-extra" [label="click-extra\n3.8.1"]
-    "click-log" -> click [label=any]
-    "click-log" [label="click-log\n0.4.0"]
-    "lark-parser" [label="lark-parser\n0.7.8"]
-    "meta-package-manager" -> "click-extra" [label=">=3.8.0,<4.0.0"]
-    "meta-package-manager" -> "packageurl-python" [label=">=0.10.3,<0.11.0"]
-    "meta-package-manager" -> "tomli-w" [label=">=1.0.0,<2.0.0"]
-    "meta-package-manager" -> boltons [label=">=21.0.0,<22.0.0"]
-    "meta-package-manager" -> click [label=">=8.1.2,<9.0.0"]
-    "meta-package-manager" -> tabulate [label=">=0.9.0,<0.10.0"]
-    "meta-package-manager" -> xmltodict [label=">=0.13.0,<0.14.0"]
-    "meta-package-manager" [label="meta-package-manager\n5.11.7"]
-    "packageurl-python" [label="packageurl-python\n0.10.4"]
-    "pallets-sphinx-themes" -> packaging [label=any]
-    "pallets-sphinx-themes" -> sphinx [label=any]
-    "pallets-sphinx-themes" [label="Pallets-Sphinx-Themes\n2.0.3"]
-    "pygments-ansi-color" -> pygments [label="!=2.7.3"]
-    "pygments-ansi-color" [label="pygments-ansi-color\n0.1.0"]
-    "sphinxcontrib-applehelp" [label="sphinxcontrib-applehelp\n1.0.2"]
-    "sphinxcontrib-devhelp" [label="sphinxcontrib-devhelp\n1.0.2"]
-    "sphinxcontrib-htmlhelp" [label="sphinxcontrib-htmlhelp\n2.0.0"]
-    "sphinxcontrib-jsmath" [label="sphinxcontrib-jsmath\n1.0.1"]
-    "sphinxcontrib-qthelp" [label="sphinxcontrib-qthelp\n1.0.3"]
-    "sphinxcontrib-serializinghtml" [label="sphinxcontrib-serializinghtml\n1.1.5"]
-    "tomli-w" [label="tomli-w\n1.0.0"]
-    alabaster [label="alabaster\n0.7.13"]
-    babel -> pytz [label=">=2015.7"]
-    babel [label="Babel\n2.11.0"]
-    boltons [label="boltons\n21.0.0"]
-    bracex [label="bracex\n2.3.post1"]
-    certifi [label="certifi\n2022.12.7"]
-    click [label="click\n8.1.3"]
-    cloup -> click [label=">=8.0,<9.0"]
-    cloup [label="cloup\n2.0.0.post1"]
-    commentjson -> "lark-parser" [label=">=0.7.1,<0.8.0"]
-    commentjson [label="commentjson\n0.9.0"]
-    docutils [label="docutils\n0.19"]
-    graphviz [label="graphviz\n0.20.1"]
-    idna [label="idna\n3.4"]
-    imagesize [label="imagesize\n1.4.1"]
-    jinja2 -> markupsafe [label=">=2.0"]
-    jinja2 [label="Jinja2\n3.1.2"]
-    markupsafe [label="MarkupSafe\n2.1.2"]
-    mergedeep [label="mergedeep\n1.3.4"]
-    packaging [label="packaging\n23.0"]
-    pygments [label="Pygments\n2.14.0"]
-    pytz [label="pytz\n2022.7.1"]
-    pyyaml [label="PyYAML\n6.0"]
-    regex [label="regex\n2022.10.31"]
-    requests -> "charset-normalizer" [label=">=2,<4"]
-    requests -> certifi [label=">=2017.4.17"]
-    requests -> idna [label=">=2.5,<4"]
-    requests -> urllib3 [label=">=1.21.1,<1.27"]
-    requests [label="requests\n2.28.2"]
-    snowballstemmer [label="snowballstemmer\n2.2.0"]
-    sphinx -> "sphinxcontrib-applehelp" [label=any]
-    sphinx -> "sphinxcontrib-devhelp" [label=any]
-    sphinx -> "sphinxcontrib-htmlhelp" [label=">=2.0.0"]
-    sphinx -> "sphinxcontrib-jsmath" [label=any]
-    sphinx -> "sphinxcontrib-qthelp" [label=any]
-    sphinx -> "sphinxcontrib-serializinghtml" [label=">=1.1.5"]
-    sphinx -> alabaster [label=">=0.7,<0.8"]
-    sphinx -> babel [label=">=2.9"]
-    sphinx -> docutils [label=">=0.14,<0.20"]
-    sphinx -> imagesize [label=">=1.3"]
-    sphinx -> jinja2 [label=">=3.0"]
-    sphinx -> packaging [label=">=21.0"]
-    sphinx -> pygments [label=">=2.12"]
-    sphinx -> requests [label=">=2.5.0"]
-    sphinx -> snowballstemmer [label=">=2.0"]
-    sphinx [label="sphinx\n5.3.0"]
-    tabulate [label="tabulate\n0.9.0"]
-    urllib3 [label="urllib3\n1.26.14"]
-    wcmatch -> bracex [label=">=2.1.1"]
-    wcmatch [label="wcmatch\n8.4.1"]
-    xmltodict [label="xmltodict\n0.13.0"]
-}
+flowchart TD
+    classDef missing stroke-dasharray: 5
+    alabaster[alabaster\n0.7.13]
+    babel[Babel\n2.11.0]
+    boltons[boltons\n21.0.0]
+    bracex[bracex\n2.3.post1]
+    certifi[certifi\n2022.12.7]
+    charset-normalizer[charset-normalizer\n3.0.1]
+    click-extra[click-extra\n3.8.2]
+    click-log[click-log\n0.4.0]
+    click[click\n8.1.3]
+    cloup[cloup\n2.0.0.post1]
+    commentjson[commentjson\n0.9.0]
+    docutils[docutils\n0.19]
+    idna[idna\n3.4]
+    imagesize[imagesize\n1.4.1]
+    jinja2[Jinja2\n3.1.2]
+    lark-parser[lark-parser\n0.7.8]
+    markupsafe[MarkupSafe\n2.1.2]
+    mergedeep[mergedeep\n1.3.4]
+    meta-package-manager[meta-package-manager\n5.12.1]
+    packageurl-python[packageurl-python\n0.10.4]
+    packaging[packaging\n23.0]
+    pallets-sphinx-themes[Pallets-Sphinx-Themes\n2.0.3]
+    pygments-ansi-color[pygments-ansi-color\n0.1.0]
+    pygments[Pygments\n2.14.0]
+    pytz[pytz\n2022.7.1]
+    pyyaml[PyYAML\n6.0]
+    regex[regex\n2022.10.31]
+    requests[requests\n2.28.2]
+    snowballstemmer[snowballstemmer\n2.2.0]
+    sphinx[sphinx\n5.3.0]
+    sphinxcontrib-applehelp[sphinxcontrib-applehelp\n1.0.2]
+    sphinxcontrib-devhelp[sphinxcontrib-devhelp\n1.0.2]
+    sphinxcontrib-htmlhelp[sphinxcontrib-htmlhelp\n2.0.0]
+    sphinxcontrib-jsmath[sphinxcontrib-jsmath\n1.0.1]
+    sphinxcontrib-qthelp[sphinxcontrib-qthelp\n1.0.3]
+    sphinxcontrib-serializinghtml[sphinxcontrib-serializinghtml\n1.1.5]
+    tabulate[tabulate\n0.9.0]
+    tomli-w[tomli-w\n1.0.0]
+    urllib3[urllib3\n1.26.14]
+    wcmatch[wcmatch\n8.4.1]
+    xmltodict[xmltodict\n0.13.0]
+    babel -- >=2015.7 --> pytz
+    click-extra -- >=0.0.6,<0.1.1 --> pygments-ansi-color
+    click-extra -- >=0.12,<0.14 --> xmltodict
+    click-extra -- >=0.4.0,<0.5.0 --> click-log
+    click-extra -- >=0.9.0,<0.10.0 --> commentjson
+    click-extra -- >=0.9.0,<0.10.0 --> tabulate
+    click-extra -- >=1.3.4,<2.0.0 --> mergedeep
+    click-extra -- >=2.0.0.post1,<3.0.0 --> cloup
+    click-extra -- >=2.0.2,<3.0.0 --> pallets-sphinx-themes
+    click-extra -- >=2.14.0,<3.0.0 --> pygments
+    click-extra -- >=2.27.1,<3.0.0 --> requests
+    click-extra -- >=2022.3.15,<2023.0.0 --> regex
+    click-extra -- >=21.0.0,<22.0.0 --> boltons
+    click-extra -- >=5.3.0,<6.0.0 --> sphinx
+    click-extra -- >=6.0.0,<7.0.0 --> pyyaml
+    click-extra -- >=8.1.1,<9.0.0 --> click
+    click-extra -- >=8.4,<9.0 --> wcmatch
+    click-log -- any --> click
+    cloup -- >=8.0,<9.0 --> click
+    commentjson -- >=0.7.1,<0.8.0 --> lark-parser
+    jinja2 -- >=2.0 --> markupsafe
+    meta-package-manager -- >=0.10.3,<0.11.0 --> packageurl-python
+    meta-package-manager -- >=0.13.0,<0.14.0 --> xmltodict
+    meta-package-manager -- >=0.9.0,<0.10.0 --> tabulate
+    meta-package-manager -- >=1.0.0,<2.0.0 --> tomli-w
+    meta-package-manager -- >=21.0.0,<22.0.0 --> boltons
+    meta-package-manager -- >=3.8.2,<4.0.0 --> click-extra
+    meta-package-manager -- >=8.1.2,<9.0.0 --> click
+    pallets-sphinx-themes -- any --> packaging
+    pallets-sphinx-themes -- any --> sphinx
+    pygments-ansi-color -- !=2.7.3 --> pygments
+    requests -- >=1.21.1,<1.27 --> urllib3
+    requests -- >=2,<4 --> charset-normalizer
+    requests -- >=2.5,<4 --> idna
+    requests -- >=2017.4.17 --> certifi
+    sphinx -- >=0.14,<0.20 --> docutils
+    sphinx -- >=0.7,<0.8 --> alabaster
+    sphinx -- >=1.1.5 --> sphinxcontrib-serializinghtml
+    sphinx -- >=1.3 --> imagesize
+    sphinx -- >=2.0 --> snowballstemmer
+    sphinx -- >=2.0.0 --> sphinxcontrib-htmlhelp
+    sphinx -- >=2.12 --> pygments
+    sphinx -- >=2.5.0 --> requests
+    sphinx -- >=2.9 --> babel
+    sphinx -- >=21.0 --> packaging
+    sphinx -- >=3.0 --> jinja2
+    sphinx -- any --> sphinxcontrib-applehelp
+    sphinx -- any --> sphinxcontrib-devhelp
+    sphinx -- any --> sphinxcontrib-jsmath
+    sphinx -- any --> sphinxcontrib-qthelp
+    wcmatch -- >=2.1.1 --> bracex
+

@@ -101,7 +101,7 @@ xmltodict = "^0.13.0"
 bump2version = "^1.0.1"
 coverage = { extras = ["toml"], version = "^7.2" }
 furo = "^2022.9.29"
-mypy = "^1.0"
+mypy = "^1.1"
 myst-parser = "^0.19.1"
 pytest = "^7.2.2"
 # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html

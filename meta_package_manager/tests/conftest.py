@@ -43,7 +43,6 @@ def pytest_addoption(parser):
 
     Based on `Pytest's documentation examples
     <https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option>`_.
-
     By default, runs non-destructive tests and skips destructive ones.
     """
     parser.addoption(

@@ -296,6 +296,9 @@ poetry.toml
 # ruff
 .ruff_cache/
 
+# LSP config files
+pyrightconfig.json
+
 ### SSH ###
 **/.ssh/id_*
 **/.ssh/*_id_*

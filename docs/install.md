@@ -1,6 +1,6 @@
 # Installation
 
-````{admonition} Danger: **Misleading package name**
+```{admonition} Danger: **Misleading package name**
 ---
 class: danger
 ---
@@ -10,7 +10,7 @@ There is a *`mpm`* Python module on PyPi that has nothing to do with this projec
 
 The **real package is named `meta-package-manager`**. Only the latter provides the {command}`mpm` CLI
 you're looking for.
-````
+```
 
 ## From packages
 

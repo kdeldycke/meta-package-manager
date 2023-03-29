@@ -4,11 +4,7 @@
 ---
 class: danger
 ---
-```{eval-rst}
-.. figure:: images/angry-paper-box.png
-    :align: right
-    :figwidth: 50px
-```
+![Angry package](images/angry-paper-box.png){w=50px align=right}
 
 There is a *`mpm`* Python module on PyPi that has nothing to do with this project. Avoid it!
 
@@ -384,7 +380,6 @@ _MPM_COMPLETE=fish_source mpm > ~/.config/fish/completions/mpm.fish
 
 FYI, here is a graph of Python package dependencies:
 
-```{eval-rst}
-.. mermaid:: images/dependencies.mmd
-   :align: center
+```mermaid images/dependencies.mmd
+:align: center
 ```

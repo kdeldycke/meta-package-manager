@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/kdeldycke/meta-package-manager/">
-    <img src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/images/logo-banner.svg" alt="Meta Package Manager">
+    <img src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/logo-banner.svg" alt="Meta Package Manager">
   </a>
 </p>
 
@@ -27,9 +27,9 @@ ______________________________________________________________________
 
 ## Features
 
-<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/images/mpm-outdated-cli.png"/>
+<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-outdated-cli.png"/>
 
-<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/images/mpm-managers-cli.png"/>
+<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.png"/>
 
 - Inventory and list all package managers available on the system.
 - Supports macOS, Linux and Windows.

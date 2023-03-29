@@ -28,23 +28,23 @@ The plugin is configurable with these environment variables:
 
 ````{grid} 1 2 3 4
 ```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_SUBMENU_LAYOUT = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
-:img-top: images/swiftbar-flatmenu-standard-rendering.png
-:link: images/swiftbar-flatmenu-standard-rendering.png
+:img-top: assets/swiftbar-flatmenu-standard-rendering.png
+:link: assets/swiftbar-flatmenu-standard-rendering.png
 ```
 
 ```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_SUBMENU_LAYOUT = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span></br>(default)
-:img-top: images/swiftbar-flatmenu-table-rendering.png
-:link: images/swiftbar-flatmenu-table-rendering.png
+:img-top: assets/swiftbar-flatmenu-table-rendering.png
+:link: assets/swiftbar-flatmenu-table-rendering.png
 ```
 
 ```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_SUBMENU_LAYOUT = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span>
-:img-top: images/swiftbar-submenu-table-rendering.png
-:link: images/swiftbar-submenu-table-rendering.png
+:img-top: assets/swiftbar-submenu-table-rendering.png
+:link: assets/swiftbar-submenu-table-rendering.png
 ```
 
 ```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_SUBMENU_LAYOUT = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
-:img-top: images/swiftbar-submenu-strandard-rendering.png
-:link: images/swiftbar-submenu-strandard-rendering.png
+:img-top: assets/swiftbar-submenu-strandard-rendering.png
+:link: assets/swiftbar-submenu-strandard-rendering.png
 ```
 ````
 
@@ -52,23 +52,23 @@ The plugin is configurable with these environment variables:
 
 ````{grid} 1 2 3 4
 ```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_SUBMENU_LAYOUT = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
-:img-top: images/xbar-flatmenu-standard-rendering.png
-:link: images/xbar-flatmenu-standard-rendering.png
+:img-top: assets/xbar-flatmenu-standard-rendering.png
+:link: assets/xbar-flatmenu-standard-rendering.png
 ```
 
 ```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_SUBMENU_LAYOUT = False</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span></br>(default)
-:img-top: images/xbar-flatmenu-table-rendering.png
-:link: images/xbar-flatmenu-table-rendering.png
+:img-top: assets/xbar-flatmenu-table-rendering.png
+:link: assets/xbar-flatmenu-table-rendering.png
 ```
 
 ```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_SUBMENU_LAYOUT = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_TABLE_RENDERING = True</code></span>
-:img-top: images/xbar-submenu-table-rendering.png
-:link: images/xbar-submenu-table-rendering.png
+:img-top: assets/xbar-submenu-table-rendering.png
+:link: assets/xbar-submenu-table-rendering.png
 ```
 
 ```{grid-item-card} <span class="sd-sphinx-override sd-badge sd-bg-success sd-bg-text-success"><code>VAR_SUBMENU_LAYOUT = True</code></span><br/><span class="sd-sphinx-override sd-badge sd-outline-success sd-text-success"><code>VAR_TABLE_RENDERING = False</code></span>
-:img-top: images/xbar-submenu-strandard-rendering.png
-:link: images/xbar-submenu-strandard-rendering.png
+:img-top: assets/xbar-submenu-strandard-rendering.png
+:link: assets/xbar-submenu-strandard-rendering.png
 ```
 ````
 

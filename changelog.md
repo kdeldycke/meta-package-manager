@@ -8,6 +8,7 @@ This version is not released yet and is under active development.
 
 - \[mpm\] Adds `--run-destructive`, `--skip-destructive`, `--run-non-destructive` and `--skip-non-destructive` custom options to Pytest.
 - \[mpm\] Run non-destructive tests in parallel and destructive ones in sequential order.
+- \[mpm\] Move all documentation assets to `assets` subfolder.
 
 ## {gh}`5.12.0 (2023-02-25) <compare/v5.11.7...v5.12.0>`
 

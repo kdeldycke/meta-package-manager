@@ -4,7 +4,7 @@
 ---
 class: danger
 ---
-![Angry package](images/angry-paper-box.png){w=50px align=right}
+![Angry package](assets/angry-paper-box.png){w=50px align=right}
 
 There is a *`mpm`* Python module on PyPi that has nothing to do with this project. Avoid it!
 
@@ -380,6 +380,6 @@ _MPM_COMPLETE=fish_source mpm > ~/.config/fish/completions/mpm.fish
 
 FYI, here is a graph of Python package dependencies:
 
-```mermaid images/dependencies.mmd
+```mermaid assets/dependencies.mmd
 :align: center
 ```

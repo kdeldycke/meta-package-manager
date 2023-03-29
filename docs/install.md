@@ -204,7 +204,7 @@ $ mpm --version
 mpm, version 5.11.1
 ```
 
-````{admonition} Older releases
+````{admonition}
 ---
 class: tip
 ---

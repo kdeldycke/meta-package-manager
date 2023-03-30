@@ -771,12 +771,15 @@ def which(ctx, cli_names):
                     symlink,
                 )
             )
-    print_table((
-        ("Manager ID", None),
-        ("Priority", None),
-        ("CLI path", None),
-        ("Symlink destination", None),
-    ), table)
+    print_table(
+        (
+            ("Manager ID", None),
+            ("Priority", None),
+            ("CLI path", None),
+            ("Symlink destination", None),
+        ),
+        table,
+    )
 
 
 @mpm.command(short_help="Install a package.", section=MAINTENANCE)

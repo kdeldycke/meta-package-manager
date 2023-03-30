@@ -124,7 +124,11 @@ def print_json(data):
     )
 
 
-def print_table(header_defs: list[tuple[str, str]], rows: Iterable[Sequence[str | TokenizedString]], sort_key: str | None=None) -> None:
+def print_table(
+    header_defs: list[tuple[str, str]],
+    rows: Iterable[Sequence[str | TokenizedString]],
+    sort_key: str | None = None,
+) -> None:
     """Print a table.
 
     ``header_defs`` parameter is an ordered list of tuple whose first item is the

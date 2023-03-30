@@ -19,7 +19,7 @@ from __future__ import annotations
 import json
 import re
 import subprocess
-from typing import Iterator
+from typing import Collection, Iterator
 
 import pytest
 from boltons.strutils import strip_ansi
@@ -62,18 +62,12 @@ class InspectCLIOutput:
             to more forgiving.
         """
         raise NotImplementedError
-        yield from (
-            # Common "not found" warning message.
-            f"warning: Skip unavailable {mid} manager." in stderr,
-            # Stats line at the end of output.
-            f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
-        )
 
     def check_manager_selection(
         self,
         result,
         selected: Iterator[str] = pool.default_manager_ids,
-        reference_set: Iterator[str] = pool.default_manager_ids,
+        reference_set: Collection[str] = pool.default_manager_ids,
         strict_selection_match: bool = True,
     ):
         """Check that user-selected managers are found in CLI's output.
@@ -190,7 +184,9 @@ class TestManagerSelection(InspectCLIOutput):
         """
         from .test_cli_managers import TestManagers
 
-        return TestManagers.evaluate_signals(mid, stdout, stderr)
+        return TestManagers.evaluate_signals(  # type: ignore[no-any-return]
+            mid, stdout, stderr
+        )
 
     @pytest.mark.parametrize("selector", ("--manager", "--exclude"))
     def test_invalid_manager_selector(self, invoke, selector):

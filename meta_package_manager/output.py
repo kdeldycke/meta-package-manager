@@ -31,7 +31,7 @@ from functools import partial
 from io import StringIO
 from operator import itemgetter
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Iterable, Sequence
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):
@@ -124,8 +124,8 @@ def print_json(data):
     )
 
 
-def print_table(header_defs, rows, sort_key=None):
-    """Print a sorted table.
+def print_table(header_defs: list[tuple[str, str]], rows: Iterable[Sequence[str | TokenizedString]], sort_key: str | None=None) -> None:
+    """Print a table.
 
     ``header_defs`` parameter is an ordered list of tuple whose first item is the
     column's label and the second the column's ID. Example:
@@ -183,7 +183,9 @@ def print_table(header_defs, rows, sort_key=None):
         return tuple(sorting_key)
 
     ctx = get_current_context()
-    ctx.find_root().print_table(sorted(rows, key=sort_method), header_labels)
+    ctx.find_root().print_table(  # type: ignore[attr-defined]
+        sorted(rows, key=sort_method), header_labels
+    )
 
 
 def print_stats(manager_stats: Counter) -> None:

@@ -722,6 +722,63 @@ def search(ctx, extended, exact, refilter, query):
         print_stats(Counter({k: len(v["packages"]) for k, v in matches.items()}))
 
 
+@mpm.command(aliases=["locate"], short_help="Locate CLIs on system.", section=EXPLORE)
+@argument("cli_names", type=STRING, nargs=-1, required=True)
+@pass_context
+def which(ctx, cli_names):
+    """Search from the user's environment all CLIs matching the query.
+
+    This is mpm's own version of the `which -a` UNIX command, used internally to locate
+    binaries for each manager. It is exposed as a subcommand for convenience and to help
+    troubleshoot CLI resolution logic.
+
+    Compared to the venerable `which` command, this will respect the additional path
+    configured for each package manager. It will ignore files that are empty (0 size).
+    On Windows, it additionally suppress the default lookup in the current directory,
+    which takes precedence on other paths.
+    """
+    if ctx.obj.sort_by:
+        logger.debug("Ignore --sort-by option for which command.")
+
+    # Machine-friendly data rendering.
+    if ctx.find_root().table_format == "json":
+        cli_data = []
+        for manager in ctx.obj.selected_managers():
+            cli_data.append(
+                {
+                    "manager_id": manager.id,
+                    "cli_paths": [
+                        found_cli for found_cli in manager.search_all_cli(cli_names)
+                    ],
+                }
+            )
+        print_json(cli_data)
+        ctx.exit()
+
+    # Print table.
+    table = []
+    for manager in ctx.obj.selected_managers():
+        for priority, found_cli in enumerate(manager.search_all_cli(cli_names)):
+            # Resolve symlinks and highlight the CLI name.
+            symlink = ""
+            if found_cli.is_symlink():
+                symlink = "→ " + highlight_cli_name(found_cli.resolve(), cli_names)
+            table.append(
+                (
+                    manager.id,
+                    str(priority),
+                    highlight_cli_name(found_cli, cli_names),
+                    symlink,
+                )
+            )
+    print_table((
+        ("Manager ID", None),
+        ("Priority", None),
+        ("CLI path", None),
+        ("Symlink destination", None),
+    ), table)
+
+
 @mpm.command(short_help="Install a package.", section=MAINTENANCE)
 @argument(
     "packages_specs",

@@ -70,6 +70,16 @@ body:
       placeholder: mpm --verbosity DEBUG --all-managers managers
 
   - type: textarea
+    id: binary-resolution
+    attributes:
+      label: Binary path resolution
+      description: >
+        If `mpm` has issues to locate a binary, you can use the `which`/`locate` subcommand to troubleshoot `mpm`'s CLI
+        resolution logic.
+      render: shell-session
+      placeholder: mpm which python
+
+  - type: textarea
     id: mpm-version
     attributes:
       label: Meta Package Manager version

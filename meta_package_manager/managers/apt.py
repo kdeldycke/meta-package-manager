@@ -139,6 +139,9 @@ class APT(PackageManager):
             berkeley-abc/xenial 1.01+20150706hgc3698e0+dfsg-2 amd64
               ABC - A System for Sequential Synthesis and Verification
 
+            fuse-overlayfs/jammy,now 1.7.1-1 amd64 [installed]
+              implementation of overlay+shiftfs in FUSE for rootless containers
+
             grabcd-rip/xenial 0009-1 all
               rip and encode audio CDs - ripper
 
@@ -188,12 +191,12 @@ class APT(PackageManager):
         regexp = re.compile(
             r"""
             ^(?P<package_id>\S+)  # A string with a char at least.
-            /.+\                  # A slash, any string, then a space.
-            (?P<version>.+)       # Any string.
+            /\S+\                 # A slash, any non-spaced string, then a space.
+            (?P<version>\S+)      # Any non-spaced string.
             \                     # A space.
-            (?:.+)\n              # Any string ending the line.
+            (?:.+)\n              # Any content ending the line.
             (?P<description>      # Start of the multi-line desc group.
-                (?:\ \ .+\n)+     # Lines of strings prefixed by 2 spaces.
+                (?:\ \ .+\n)+     # Lines of content prefixed by 2 spaces.
             )
             """,
             re.MULTILINE | re.VERBOSE,
@@ -324,7 +327,7 @@ class APT_Mint(APT):
             \s+                      # One space or more.
             -                        # A dash.
             \ ?                      # An optional space.
-            (?P<description>\S+)?    # Optional non-space string.
+            (?P<description>.+)?     # Optional content string.
             """,
             re.VERBOSE,
         )

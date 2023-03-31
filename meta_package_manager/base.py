@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
 from textwrap import dedent, indent, shorten
-from typing import ContextManager, Iterable, Iterator, Generator
+from typing import ContextManager, Generator, Iterable, Iterator
 from unittest.mock import patch
 
 if sys.version_info >= (3, 8):

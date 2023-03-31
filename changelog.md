@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[mpm\] Add new `which`/`locate` subcommand to search for CLIs in user's environment.
+- \[mpm\] Allow usage of `sudo` for CLI invokation on all UNIXes, not Linux only. Closes {issue}`976`.
 - \[mpm\] Adds `--run-destructive`, `--skip-destructive`, `--run-non-destructive` and `--skip-non-destructive` custom options to Pytest.
 - \[mpm\] Run non-destructive tests in parallel and destructive ones in sequential order.
 - \[mpm\] Move all documentation assets to `assets` subfolder.

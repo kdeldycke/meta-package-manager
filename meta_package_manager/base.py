@@ -39,7 +39,7 @@ else:
 from boltons.iterutils import flatten, unique
 from boltons.strutils import strip_ansi
 from click_extra.colorize import default_theme as theme
-from click_extra.platforms import Group, Platform, current_os, is_linux
+from click_extra.platforms import UNIX, Group, Platform, current_os
 from click_extra.run import (
     INDENT,
     Arg,
@@ -731,8 +731,8 @@ class PackageManager(metaclass=MetaPackageManager):
 
         # Sudo replaces any pre-command, be it overridden or automatic.
         if sudo:
-            if not is_linux():
-                raise NotImplementedError("sudo only supported on Linux.")
+            if current_os() not in UNIX:
+                raise NotImplementedError("sudo only supported on UNIX.")
             if override_pre_cmds:
                 raise ValueError("Pre-commands not allowed if sudo is requested.")
             if auto_pre_cmds:

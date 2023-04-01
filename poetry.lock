@@ -50,7 +50,7 @@ pytz = ">=2015.7"
 name = "beautifulsoup4"
 version = "4.11.2"
 description = "Screen-scraping library"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6.0"
 files = [
@@ -67,14 +67,14 @@ lxml = ["lxml"]
 
 [[package]]
 name = "boltons"
-version = "21.0.0"
+version = "23.0.0"
 description = "When they're not builtins, they're boltons."
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "boltons-21.0.0-py2.py3-none-any.whl", hash = "sha256:b9bb7b58b2b420bbe11a6025fdef6d3e5edc9f76a42fb467afe7ca212ef9948b"},
-    {file = "boltons-21.0.0.tar.gz", hash = "sha256:65e70a79a731a7fe6e98592ecfb5ccf2115873d01dbc576079874629e5c90f13"},
+    {file = "boltons-23.0.0-py2.py3-none-any.whl", hash = "sha256:f716a1b57698a5b19062f3146cb5ce3549904028a2f267c2c0cf584eea3ad75b"},
+    {file = "boltons-23.0.0.tar.gz", hash = "sha256:8c50a71829525835ca3c849c7ed2511610c972b4dddfcd41a4a5447222beb4b0"},
 ]
 
 [[package]]
@@ -229,27 +229,28 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "click-extra"
-version = "3.8.2"
+version = "3.9.0"
 description = "🌈 Extra colorization and configuration loading for Click."
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "click_extra-3.8.2-py3-none-any.whl", hash = "sha256:e70c9880bc0ed44bbf49a813f4adc7f2994e421d7c78c0114cb09c075fef444f"},
-    {file = "click_extra-3.8.2.tar.gz", hash = "sha256:1146fffc400957e56c4ff6e69a3870cbcd8f7d56f7cc9a94cf90698676291d74"},
+    {file = "click_extra-3.9.0-py3-none-any.whl", hash = "sha256:a4f0bbf067b14d920a102e9969e74484127b3aafeb2817b892c4a4f63eee6abf"},
+    {file = "click_extra-3.9.0.tar.gz", hash = "sha256:a8d28bb81cbb5e6a18dae928b3594cead0a9475d3395649ea833cc7829d6a603"},
 ]
 
 [package.dependencies]
-boltons = ">=21.0.0,<22.0.0"
+boltons = ">=23.0.0,<24.0.0"
 click = ">=8.1.1,<9.0.0"
 click-log = ">=0.4.0,<0.5.0"
 cloup = ">=2.0.0.post1,<3.0.0"
 commentjson = ">=0.9.0,<0.10.0"
+furo = ">=2023.03.27,<2024.0.0"
 importlib-metadata = {version = ">=1.4", markers = "python_version < \"3.8\""}
 mergedeep = ">=1.3.4,<2.0.0"
 Pallets-Sphinx-Themes = ">=2.0.2,<3.0.0"
 pygments = ">=2.14.0,<3.0.0"
-pygments-ansi-color = ">=0.0.6,<0.1.1"
+pygments-ansi-color = ">=0.2.0,<0.3.0"
 pyyaml = ">=6.0.0,<7.0.0"
 regex = ">=2022.3.15,<2023.0.0"
 requests = ">=2.27.1,<3.0.0"
@@ -257,7 +258,7 @@ sphinx = ">=5.3.0,<6.0.0"
 tabulate = {version = ">=0.9.0,<0.10.0", extras = ["widechars"]}
 tomli = {version = ">=2.0.1,<3.0.0", markers = "python_version < \"3.11\""}
 wcmatch = ">=8.4,<9.0"
-xmltodict = ">=0.12,<0.14"
+xmltodict = ">=0.13.0,<0.14.0"
 
 [[package]]
 name = "click-log"
@@ -429,7 +430,7 @@ testing = ["pre-commit"]
 name = "furo"
 version = "2023.3.27"
 description = "A clean customisable Sphinx documentation theme."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -856,14 +857,14 @@ plugins = ["importlib-metadata"]
 
 [[package]]
 name = "pygments-ansi-color"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pygments-ansi-color-0.1.0.tar.gz", hash = "sha256:d3076c798e5867966b7a4872a4c6174a9c1fccaf5b4895db3d5692bcd84ecd64"},
-    {file = "pygments_ansi_color-0.1.0-py3-none-any.whl", hash = "sha256:fb6017b43d39802f8b5fedd3c3d64b2f670f23a302d9c2e2faa90cd1a5f4ef3c"},
+    {file = "pygments-ansi-color-0.2.0.tar.gz", hash = "sha256:8e2f9a57873b4b28d6b95a8f1c9f346be5fc0f9e4f4a316594584a0684aa7959"},
+    {file = "pygments_ansi_color-0.2.0-py3-none-any.whl", hash = "sha256:29d7c56e1bf143df4b0ccc03cd313488bb580c5aa207992ed5548e88fccc0a68"},
 ]
 
 [package.dependencies]
@@ -1149,7 +1150,7 @@ files = [
 name = "soupsieve"
 version = "2.4"
 description = "A modern CSS selector implementation for Beautiful Soup."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -1217,7 +1218,7 @@ type-comment = ["typed-ast (>=1.5.4)"]
 name = "sphinx-basic-ng"
 version = "1.0.0b1"
 description = "A modern skeleton for Sphinx themes."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -1632,4 +1633,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "12b3029b32f6365fe6b12d5369e0d66e2119e669ded7372f5a9c09c372b4e01d"
+content-hash = "d546d06f498cdf7a734ad4cf3023a015c7db341149439628fd6d1523c15108f1"

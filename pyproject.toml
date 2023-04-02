@@ -154,7 +154,7 @@ testpaths = ["meta_package_manager/tests/"]
 #   pytest is properly recognizing it and loads our customization from ``./meta_package_manager/tests/conftest.py``
 #   (see issue https://github.com/pytest-dev/pytest/issues/10665 and explanation above for the details). Else we
 #   run the risk of having all tests run by default, including the destructive ones.
-addopts = "--numprocesses=auto --dist=loadgroup --maxschedchunk=1 --durations=10 --cov-report=term --cov-report=xml --cov-config=pyproject.toml --cov=meta_package_manager --run-non-destructive"
+addopts = "--numprocesses=auto --dist=loadgroup --maxschedchunk=1 --durations=10 --cov-report=term --cov-report=xml --cov-config=pyproject.toml --cov=. --run-non-destructive"
 # Make sure tests that are expected to fail do not resurect and start working all of a sudden.
 xfail_strict = true
 

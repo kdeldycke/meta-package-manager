@@ -39,11 +39,11 @@ from click_extra import (
     option,
     option_group,
     pass_context,
+    table_format_option,
 )
 from click_extra import Path as ClickPath
 from click_extra.colorize import KO, OK, highlight
 from click_extra.colorize import default_theme as theme
-from click_extra.tabulate import table_format_option
 
 if sys.version_info >= (3, 11):
     import tomllib

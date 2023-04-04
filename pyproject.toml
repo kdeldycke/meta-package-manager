@@ -158,15 +158,10 @@ addopts = "--numprocesses=auto --dist=loadgroup --maxschedchunk=1 --durations=10
 # Make sure tests that are expected to fail do not resurect and start working all of a sudden.
 xfail_strict = true
 
-[tool.coverage.paths]
 # https://coverage.readthedocs.io/en/latest/config.html
-source = ["meta_package_manager"]
 [tool.coverage.run]
-source = ["meta_package_manager"]
 branch = true
-omit = ["*/tests/*"]
 [tool.coverage.report]
-omit = ["*/tests/*"]
 precision = 2
 
 [tool.check-wheel-contents]

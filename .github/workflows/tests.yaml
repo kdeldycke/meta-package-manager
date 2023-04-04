@@ -457,13 +457,6 @@ jobs:
         run: |
           poetry run mpm --all-managers managers
 
-      # Prepare env for tests.
-      - name: Tests - Coverage hack
-        # "Can't combine line data with arc data" error.
-        if: runner.os != 'Windows'
-        run: |
-          rm -rf .coverage*
-
       - name: Parallel non-destructive tests
         # XXX ./meta_package_manager/tests/ is specified at CLI level instead of using the ``testpaths`` parameter
         #   from pyproject.toml because of this bug: https://github.com/pytest-dev/pytest/issues/10665

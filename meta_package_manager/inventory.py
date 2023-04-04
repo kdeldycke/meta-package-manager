@@ -81,8 +81,9 @@ def operation_matrix() -> str:
         disable_numparse=True,
     )
 
-    # Manually produce Markdown alignment hints.
-    # See: https://github.com/astanin/python-tabulate/issues/53
+    # Manually produce Markdown alignment hints. This has been proposed upstream at:
+    # https://github.com/astanin/python-tabulate/pull/261
+    # https://github.com/astanin/python-tabulate/issues/53
     separators = []
     for col_index, header in enumerate(headers):
         cells = [line[col_index] for line in table] + [header]

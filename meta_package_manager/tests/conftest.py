@@ -142,8 +142,8 @@ PACKAGE_IDS = {
     "apm": "markdown-pdf",
     "apt": "wget",
     "apt-mint": "exiftool",
-    # https://github.com/Hasnep/homebrew-tap/blob/main/Formula/meta-package-manager.rb
-    "brew": "hasnep/tap/meta-package-manager",
+    # https://github.com/Homebrew/homebrew-core/blob/master/Formula/meta-package-manager.rb
+    "brew": "meta-package-manager",
     "cargo": "colorous",
     "cask": "pngyu",
     "choco": "ccleaner",

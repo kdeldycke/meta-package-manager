@@ -29,12 +29,19 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           chmod +x ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }}
+
+      # Runs the same binary tests as in the brew official Formula:
+      # https://github.com/Homebrew/homebrew-core/blob/f0a4d69/Formula/meta-package-manager.rb#L401-L413
       - name: Run mpm --version
         run: |
           ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }} --version
       - name: Run mpm --help
         run: |
           ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }} --help
-      - name: Run mpm --all-managers managers
+      - name: Run mpm --output-format csv --all-managers managers
+        run: >
+          ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }}
+          --output-format csv --all-managers managers
+      - name: Run mpm --output-format csv installed
         run: |
-          ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }} --all-managers managers
+          ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }} --output-format csv installed

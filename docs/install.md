@@ -59,20 +59,10 @@ If you have difficulties to use `pip`, see
 ````
 
 ````{tab-item} brew
-An `mpm` formula has been contributed by [@Hasnep](https://github.com/Hasnep) and is [available at `hasnep/tap/meta-package-manager`](https://github.com/Hasnep/homebrew-tap/blob/main/Formula/meta-package-manager.rb):
+Meta Package Manager is available as an official [Homebrew](https://brew.sh/) formula, so you just need to:
 
 ```{code-block} shell-session
-$ brew install hasnep/tap/meta-package-manager
-```
-
-```{admonition} Broken Homebrew
-:class: tip
-
-If for any reason `brew` gets broken by this external repository, you can easily fix it running:
-
-```{code-block} shell-session
-$ brew untap hasnep/tap
-$ brew install hasnep/tap/meta-package-manager
+$ brew install meta-package-manager
 ```
 ````
 

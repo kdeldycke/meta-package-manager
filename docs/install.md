@@ -16,6 +16,8 @@ you're looking for.
 
 `mpm` is available on several popular package managers:
 
+![Yo dawg, I herd you like package managers...](assets/yo-dawg-meta-package-manager.jpg){align=center}
+
 `````{tab-set}
 
 ````{tab-item} pipx

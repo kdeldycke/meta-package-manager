@@ -33,6 +33,7 @@ from click_extra import (
     STRING,
     Choice,
     File,
+    Section,
     argument,
     echo,
     extra_group,
@@ -49,8 +50,6 @@ if sys.version_info >= (3, 11):
     import tomllib
 else:
     import tomli as tomllib  # type: ignore[import]
-
-from cloup import Section
 
 from . import __version__, bar_plugin, logger
 from .base import (

@@ -342,6 +342,8 @@ There's probably a tool somewhere that will allow you to transform these machine
 `mpm` doesn't identify CVEs yet.
 
 This feature might be solved with SBOM implementation, as I think there is some tools available around that can check an SBOM export and cross reference it with a CVE database.
+
+Take a look at: https://security.googleblog.com/2023/04/announcing-depsdev-api-critical.html
 ```
 
 ### List dependencies
@@ -361,6 +363,7 @@ from their execution environment.
 
 ### Support and fund open-source?
 
+```{todo}
 One future development direction might be to add a way to inventory all
 components your using on your system and track down their preferred funding
 platform like [GitHub Sponsors](https://github.com/sponsors),
@@ -369,3 +372,6 @@ a way to fund all those.
 
 Homebrew is already featuring
 [some commands in that direction](https://github.com/Homebrew/brew/pull/7900).
+
+This is being discussed at {issue}`501`.
+```

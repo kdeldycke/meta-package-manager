@@ -37,12 +37,12 @@ from click_extra import (
     argument,
     echo,
     extra_group,
+    file_path,
     option,
     option_group,
     pass_context,
     table_format_option,
 )
-from click_extra import Path as ClickPath
 from click_extra.colorize import KO, OK, highlight
 from click_extra.colorize import default_theme as theme
 
@@ -1123,12 +1123,10 @@ def cleanup(ctx):
 )
 @argument(
     "toml_path",
-    type=ClickPath(
-        dir_okay=False,
+    type=file_path(
         writable=True,
         resolve_path=True,
         allow_dash=True,
-        path_type=Path,
     ),
     default="-",
 )

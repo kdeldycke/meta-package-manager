@@ -50,7 +50,6 @@ class NPM(PackageManager):
         # Disable sending of audit reports to the configured registries.
         "--no-audit",
     )
-
     """
     .. code-block:: shell-session
 

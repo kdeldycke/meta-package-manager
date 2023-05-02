@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
 """APT-specific tests."""
 
 from __future__ import annotations
@@ -22,18 +21,20 @@ import pytest
 import subprocess
 from click_extra.tests.conftest import unless_linux
 
+
 @pytest.fixture
 def exact_search():
     def _exact_search(package_id):
         process = subprocess.run(
-                ("apt", "search", f"^{package_id}$"),
-                capture_output=True,
-                encoding="utf-8",
+            ("apt", "search", f"^{package_id}$"),
+            capture_output=True,
+            encoding="utf-8",
         )
         assert process.returncode == 0
         return process.stdout
 
     yield _exact_search
+
 
 @unless_linux
 class TestAPT:

@@ -129,6 +129,14 @@ meta\_package\_manager.tests.test\_docs module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.tests.test\_manager\_apt module
+------------------------------------------------------
+
+.. automodule:: meta_package_manager.tests.test_manager_apt
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.tests.test\_manager\_homebrew module
 -----------------------------------------------------------
 

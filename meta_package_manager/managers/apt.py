@@ -196,7 +196,7 @@ class APT(PackageManager):
             \                     # A space.
             (?:.+)\n              # Any content ending the line.
             (?P<description>      # Start of the multi-line desc group.
-                (?:\ \ .+\n)+     # Lines of content prefixed by 2 spaces.
+                (?:\ \ .+\n?)+    # Line(s) of content prefixed by 2 spaces.
             )
             """,
             re.MULTILINE | re.VERBOSE,

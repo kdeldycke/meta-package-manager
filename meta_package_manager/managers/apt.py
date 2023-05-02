@@ -172,9 +172,10 @@ class APT(PackageManager):
               sha1sum seq shred sleep sort split stat stty sum sync tac tail
               tr true tsort tty uname unexpand uniq unlink users vdir wc who
 
+            (...)
+
             midi/xenial 20160103-1 amd64
               converter from ABC to MIDI format and back
-            (...)
         """
         search_arg = "--names-only"
         if exact:

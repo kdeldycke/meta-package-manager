@@ -14,10 +14,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+"""APT-specific tests."""
+
 from __future__ import annotations
 
 import pytest
 import subprocess
+from click_extra.tests.conftest import unless_linux
 
 @pytest.fixture
 def exact_search():
@@ -32,8 +35,9 @@ def exact_search():
 
     yield _exact_search
 
-class TestAptSearch:
-    def test_nonempty_exact_result(self, invoke, exact_search):
+@unless_linux
+class TestAPT:
+    def test_nonempty_exact_search_results(self, invoke, exact_search):
         # Search for a package by the exact name, and check that apt finds it.
         output = exact_search("snapd")
         assert "snapd/" in output

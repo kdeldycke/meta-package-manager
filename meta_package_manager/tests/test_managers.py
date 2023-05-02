@@ -38,7 +38,6 @@ from .conftest import (
     available_managers_and_dummy_package,
     manager_classes,
 )
-
 """ Test the structure, data and types returned by all package managers.
 
 This test suite try to automate most of the basic reviewing work for the addition of

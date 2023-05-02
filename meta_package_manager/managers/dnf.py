@@ -39,7 +39,6 @@ class DNF(PackageManager):
     requirement = "4.0.0"
 
     cli_names = ("dnf",)
-
     """
     .. code-block:: shell-session
 
@@ -187,7 +186,7 @@ class DNF(PackageManager):
 
 
 class YUM(DNF):
-    """yum is dnf is yum."""
+    """Yum is dnf is yum."""
 
     homepage_url = "http://yum.baseurl.org"
 

@@ -37,7 +37,6 @@
 #       VAR_MONOSPACE_FONT: font=Menlo size=12
 #   ]
 # </swiftbar.environment>
-
 """Xbar and SwiftBar plugin for Meta Package Manager (i.e. the :command:`mpm` CLI).
 
 Default update cycle should be set to several hours so we have a chance to get

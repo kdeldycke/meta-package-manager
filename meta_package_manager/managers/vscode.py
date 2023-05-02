@@ -34,7 +34,6 @@ class VSCode(PackageManager):
     requirement = "1.60.0"
 
     cli_names = ("code",)
-
     """
     .. code-block:: shell-session
 

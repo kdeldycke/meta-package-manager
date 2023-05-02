@@ -1140,6 +1140,7 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
 
     Files produced by this subcommand can be safely consumed by `mpm restore`.
     """
+
     def is_stdout(filepath):
         return str(filepath) == "-"
 

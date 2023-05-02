@@ -40,7 +40,6 @@ class Choco(PackageManager):
     """
 
     post_args = ("--no-progress", "--no-color")
-
     """
     .. code-block:: shell-session
 

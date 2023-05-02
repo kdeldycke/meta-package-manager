@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
 """Helpers and utilities to render and print content.
 
 .. todo::
@@ -106,6 +105,7 @@ def print_json(data):
     Serialize :py:class:`pathlib.Path` and
     :py:class:`meta_package_manager.version.TokenizedString` objects.
     """
+
     def serialize_objects(obj):
         if isinstance(obj, (TokenizedString, Path)):
             return str(obj)

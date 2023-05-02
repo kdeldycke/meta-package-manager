@@ -6,6 +6,7 @@
 This version is not released yet and is under active development.
 ```
 
+- \[apt\] Fix omission of the final result in an `apt` (non-mint) search.
 - \[mpm\] Update `brew` installation instructions now that `mpm` is available in official Homebrew repository.
 
 ## {gh}`5.13.0 (2023-03-31) <compare/v5.12.0...v5.13.0>`

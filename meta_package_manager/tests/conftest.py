@@ -23,6 +23,7 @@ from pathlib import Path
 
 import pytest
 from click_extra.platforms import is_macos
+from _pytest.config import Config
 
 # Pre-load invokation helpers to be used as pytest's fixture.
 from click_extra.tests.conftest import (
@@ -83,28 +84,28 @@ def pytest_configure(config):
     )
 
 
-def pytest_collection_modifyitems(config, items):
-    """Either skip or run destructive tests based on command line options."""
+def solve_destructive_options(config: Config) -> tuple[bool, bool]:
+    """Solve the destructive options to determine which tests to run."""
     run_destructive = config.getoption("--run-destructive")
     run_non_destructive = config.getoption("--run-non-destructive")
+
     # Skip options take precedence over run options.
     if config.getoption("--skip-destructive"):
         run_destructive = False
     if config.getoption("--skip-non-destructive"):
         run_non_destructive = False
 
-    print()
-    print("--run-destructive =", config.getoption("--run-destructive"))
-    print("--skip-destructive =", config.getoption("--skip-destructive"))
-    print("--run-non-destructive =", config.getoption("--run-non-destructive"))
-    print("--skip-non-destructive =", config.getoption("--skip-non-destructive"))
-    print("run_destructive =", run_destructive)
-    print("run_non_destructive =", run_non_destructive)
-
     if not run_destructive and not run_non_destructive:
         raise ValueError(
             "Both destructive and non-destructive tests were skipped. No tests to run."
         )
+
+    return run_destructive, run_non_destructive
+
+
+def pytest_collection_modifyitems(config, items):
+    """Either skip or run destructive tests based on command line options."""
+    run_destructive, run_non_destructive = solve_destructive_options(config)
 
     # Skip destructive tests.
     if not run_destructive:
@@ -119,6 +120,23 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "destructive" not in item.keywords:
                 item.add_marker(skip_non_destructive)
+
+
+def pytest_report_header(config: Config, start_path, startdir) -> tuple[str]:
+    """Display destructive options status in test report header."""
+    run_destructive = config.getoption("--run-destructive")
+    skip_destructive = config.getoption("--skip-destructive")
+    run_non_destructive = config.getoption("--run-non-destructive")
+    skip_non_destructive = config.getoption("--skip-non-destructive")
+    run_destructive_tests, run_non_destructive_tests = solve_destructive_options(config)
+    return (
+        f"--run-destructive={run_destructive}",
+        f"--skip-destructive={skip_destructive}",
+        f"--run-non-destructive={run_non_destructive}",
+        f"--skip-non-destructive={skip_non_destructive}",
+        f"Run destructive tests: {run_destructive_tests}",
+        f"Run non-destructive tests: {run_non_destructive_tests}",
+    )
 
 
 @fixture

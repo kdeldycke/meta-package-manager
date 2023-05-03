@@ -122,7 +122,7 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_non_destructive)
 
 
-def pytest_report_header(config: Config, start_path, startdir) -> tuple[str]:
+def pytest_report_header(config: Config, start_path, startdir) -> tuple[str, ...]:
     """Display destructive options status in test report header."""
     run_destructive = config.getoption("--run-destructive")
     skip_destructive = config.getoption("--skip-destructive")

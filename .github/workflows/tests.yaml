@@ -465,12 +465,20 @@ jobs:
           --numprocesses=auto --run-non-destructive --skip-destructive
           ./meta_package_manager/tests/
 
-      - name: Non-parallel destructive tests
-        # XXX ./meta_package_manager/tests/ is specified at CLI level instead of using the ``testpaths`` parameter
-        #   from pyproject.toml because of this bug: https://github.com/pytest-dev/pytest/issues/10665
+      - name: Non-parallel random destructive tests - macOS & Linux
+        if: runner.os != 'Windows'
+        run: >
+            poetry run pytest --exitfirst
+            --numprocesses=0 --skip-non-destructive --run-destructive
+            ./meta_package_manager/tests/
+
+      - name: Non-parallel, non-random destructive tests - Windows
+        if: runner.os == 'Windows'
+        # XXX There an issue with the order in which different managers update each others on Windows.
         run: >
           poetry run pytest --exitfirst
           --numprocesses=0 --skip-non-destructive --run-destructive
+          --randomly-seed=2976763296
           ./meta_package_manager/tests/
 
       - name: Coverage - Upload Codecov

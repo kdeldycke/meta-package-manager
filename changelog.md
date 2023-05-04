@@ -1,5 +1,11 @@
 # Changelog
 
+## {gh}`5.13.2 (unreleased) <compare/v5.13.1...main>`
+
+```{important}
+This version is not released yet and is under active development.
+```
+
 ## {gh}`5.13.1 (2023-05-04) <compare/v5.13.0...v5.13.1>`
 
 - \[apt\] Fix omission of the final result in an `apt` (non-mint) search.

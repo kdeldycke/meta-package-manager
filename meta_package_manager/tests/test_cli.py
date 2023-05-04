@@ -29,6 +29,7 @@ from .. import __version__
 from ..bar_plugin import MPMPlugin
 from ..pool import pool
 from .conftest import default_manager_ids
+
 """ Common tests for all CLI basic features and templates for subcommands. """
 
 

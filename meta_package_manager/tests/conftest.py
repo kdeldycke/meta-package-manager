@@ -35,6 +35,7 @@ from pytest import fixture, param
 
 from ..cli import mpm
 from ..pool import manager_classes, pool
+
 """ Fixtures, configuration and helpers for tests. """
 
 

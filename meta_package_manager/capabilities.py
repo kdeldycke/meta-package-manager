@@ -27,6 +27,7 @@ else:
 
 from . import logger
 from .base import Package, PackageManager
+
 """Utilities and helper to organize, inspect and audit the capabilities of mpm and
 package managers."""
 

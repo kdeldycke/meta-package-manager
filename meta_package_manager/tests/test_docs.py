@@ -33,6 +33,7 @@ else:
 from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_PREFIX
 from ..platforms import PLATFORM_GROUPS, encoding_args
 from ..pool import pool
+
 """ Test all non-code artifacts depending on manager definitions.
 
 Covers:

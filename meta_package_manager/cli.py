@@ -1247,7 +1247,7 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
                     sorted(
                         installed_data[manager.id].items(),
                         # Case-insensitive lexicographical sort on keys.
-                        key=lambda i: (i[0].lower(), i[0])
+                        key=lambda i: (i[0].lower(), i[0]),
                     )
                 )
 

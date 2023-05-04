@@ -1244,7 +1244,11 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
             # Re-sort package list.
             if installed_data.get(manager.id):
                 installed_data[manager.id] = dict(
-                    sorted(installed_data[manager.id].items())
+                    sorted(
+                        installed_data[manager.id].items(),
+                        # Case-insensitive lexicographical sort on keys.
+                        key=lambda i: (i[0].lower(), i[0])
+                    )
                 )
 
         # Write each section separated by an empty line for readability.

@@ -20,7 +20,7 @@ flowchart TD
     lark-parser["lark-parser\n0.7.8"]
     markupsafe["MarkupSafe\n2.1.2"]
     mergedeep["mergedeep\n1.3.4"]
-    meta-package-manager["meta-package-manager\n5.13.1"]
+    meta-package-manager["meta-package-manager\n5.13.2"]
     packageurl-python["packageurl-python\n0.11.1"]
     packaging["packaging\n23.1"]
     pallets-sphinx-themes["Pallets-Sphinx-Themes\n2.0.3"]
@@ -28,7 +28,7 @@ flowchart TD
     pygments["Pygments\n2.15.1"]
     pyyaml["PyYAML\n6.0"]
     regex["regex\n2022.10.31"]
-    requests["requests\n2.29.0"]
+    requests["requests\n2.30.0"]
     snowballstemmer["snowballstemmer\n2.2.0"]
     soupsieve["soupsieve\n2.4.1"]
     sphinx-basic-ng["sphinx-basic-ng\n1.0.0b1"]
@@ -41,7 +41,7 @@ flowchart TD
     sphinxcontrib-serializinghtml["sphinxcontrib-serializinghtml\n1.1.5"]
     tabulate["tabulate\n0.9.0"]
     tomli-w["tomli-w\n1.0.0"]
-    urllib3["urllib3\n1.26.15"]
+    urllib3["urllib3\n2.0.2"]
     wcmatch["wcmatch\n8.4.1"]
     xmltodict["xmltodict\n0.13.0"]
     beautifulsoup4 -- ">1.2" --> soupsieve
@@ -80,7 +80,7 @@ flowchart TD
     pallets-sphinx-themes -- "any" --> packaging
     pallets-sphinx-themes -- "any" --> sphinx
     pygments-ansi-color -- "!=2.7.3" --> pygments
-    requests -- ">=1.21.1,<1.27" --> urllib3
+    requests -- ">=1.21.1,<3" --> urllib3
     requests -- ">=2,<4" --> charset-normalizer
     requests -- ">=2.5,<4" --> idna
     requests -- ">=2017.4.17" --> certifi

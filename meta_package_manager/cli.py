@@ -142,7 +142,7 @@ def bar_plugin_path(ctx, param, value):
     # a bundled executable.
     if "__compiled__" in globals():
         logger.debug("CLI running as a binary.")
-        logger.fatal(
+        logger.critical(
             "Option --bar-plugin-path is only available for CLI installed from sources."
         )
         ctx.exit(2)
@@ -1146,12 +1146,12 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
 
     if is_stdout(toml_path):
         if merge:
-            logger.fatal(
+            logger.critical(
                 "--merge requires the [TOML_PATH] argument to point to a file."
             )
             ctx.exit(2)
         if update_version:
-            logger.fatal(
+            logger.critical(
                 "--update-version requires the [TOML_PATH] argument to point to a file."
             )
             ctx.exit(2)
@@ -1161,7 +1161,7 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
 
     else:
         if merge and update_version:
-            logger.fatal("--merge and --update-version are mutually exclusive.")
+            logger.critical("--merge and --update-version are mutually exclusive.")
             ctx.exit(2)
 
         if merge:
@@ -1181,17 +1181,17 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
                 if merge or update_version:
                     logger.warning("Ignore the --overwrite/--force/--replace option.")
                 else:
-                    logger.fatal("Target file exist and will be overwritten.")
+                    logger.critical("Target file exist and will be overwritten.")
                     ctx.exit(2)
         elif merge:
-            logger.fatal("--merge requires an existing file.")
+            logger.critical("--merge requires an existing file.")
             ctx.exit(2)
         elif update_version:
-            logger.fatal("--update-version requires an existing file.")
+            logger.critical("--update-version requires an existing file.")
             ctx.exit(2)
 
         if toml_path.suffix.lower() != ".toml":
-            logger.fatal("Target file is not a TOML file.")
+            logger.critical("Target file is not a TOML file.")
             ctx.exit(2)
 
     installed_data = {}

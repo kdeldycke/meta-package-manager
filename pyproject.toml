@@ -139,7 +139,7 @@ module = ["boltons.*", "packageurl.*"]
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml
 # XXX The ``testpaths`` parameter has no effect since pytest is only looking for a ``conftest.py`` right next to this
-# ``pyproject.toml`` file. This issue is tracked upstream at: https://github.com/pytest-dev/pytest/issues/10665
+# ``pyproject.toml`` file. This issue is tracked upstream at: https://github.com/pytest-dev/pytest/issues/9311
 # In the meantime, we have to rely on the ``addopts`` parameter to hard-code the test path and have our custom options
 # recognized.
 testpaths = ["meta_package_manager/tests/"]
@@ -153,7 +153,7 @@ testpaths = ["meta_package_manager/tests/"]
 # XXX --run-non-destructive : is not required as this is the default behavior.
 #   We would love to add it to the command line to make sure pytest is properly recognizing it and loads our
 #   customization from ``./meta_package_manager/tests/conftest.py``. But because of issue
-#   https://github.com/pytest-dev/pytest/issues/10665 (see above), it is not currently present in ``addopts``.
+#   https://github.com/pytest-dev/pytest/issues/9311 (see above), it is not currently present in ``addopts``.
 addopts = "--numprocesses=auto --dist=loadgroup --maxschedchunk=1 --durations=10 --cov-report=term --cov-report=xml --cov-config=pyproject.toml --cov=."
 # Make sure tests that are expected to fail do not resurect and start working all of a sudden.
 xfail_strict = true

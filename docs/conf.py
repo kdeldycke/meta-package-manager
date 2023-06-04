@@ -61,8 +61,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 nitpicky = True
 
-# Both the class’ and the __init__ method’s docstring are concatenated and
-# inserted.
+# Concatenates the docstrings of the class and the __init__ method.
 autoclass_content = "both"
 # Keep the same ordering as in original source code.
 autodoc_member_order = "bysource"

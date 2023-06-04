@@ -30,18 +30,20 @@ from meta_package_manager.version import parse_version
 
 
 class Gem(PackageManager):
-    """..tip::
+    """The RubyGems package manager.
 
-    Installs require ``sudo`` on system ruby. I (@tresni) recommend doing something
-    like:
+    ..tip::
 
-    .. code-block:: shell-session
+        Installs require ``sudo`` on system ruby. I (@tresni) recommend doing something
+        like:
 
-    ► sudo dseditgroup -o edit -a -t user wheel
+        .. code-block:: shell-session
 
-    And then do ``visudo`` to make it so the ``wheel`` group does not require
-    a password. There is a line already there for it, you just need to
-    uncomment it and save.
+        ► sudo dseditgroup -o edit -a -t user wheel
+
+        And then do ``visudo`` to make it so the ``wheel`` group does not require
+        a password. There is a line already there for it, you just need to
+        uncomment it and save.
     """
 
     name = "Ruby Gems"

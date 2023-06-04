@@ -60,7 +60,7 @@ class Pip(PackageManager):
         "--no-color",  # Suppress colored output.
     )
 
-    version_cli_options = (*list(pre_args), "--version")
+    version_cli_options = (*pre_args, "--version")
     version_regex = r"pip\s+(?P<version>\S+)"
     """
     .. code-block:: shell-session

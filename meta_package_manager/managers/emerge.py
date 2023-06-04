@@ -26,9 +26,11 @@ from meta_package_manager.capabilities import version_not_implemented
 
 
 class Emerge(PackageManager):
-    """Documentation:
+    """The Gentoo package manager.
+
+    Documentation:
     - https://wiki.gentoo.org/wiki/Portage#emerge
-    - https://dev.gentoo.org/~zmedico/portage/doc/man/emerge.1.html.
+    - https://dev.gentoo.org/~zmedico/portage/doc/man/emerge.1.html
 
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
     """

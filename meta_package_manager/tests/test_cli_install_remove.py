@@ -77,15 +77,17 @@ class TestInstallRemove(CLISubCommandTests):
     @pytest.mark.destructive()
     @all_manager_ids_and_dummy_package
     def test_single_manager_install_and_remove(self, invoke, manager_id, package_id):
-        """.. caution.
+        """Test the installation and removal of a package with each manager.
 
-        ``strict_selection_match`` is set to ``False`` because the ``install``
-        subcommand will not try all managers selected by default. So a strict
-        match is not possible.
+        .. caution.
 
-        That's because ``install`` subcommand try each user-selected manager until
-        it find one providing the package we seek to install, after which the
-        process stop.
+            ``strict_selection_match`` is set to ``False`` because the ``install``
+            subcommand will not try all managers selected by default. So a strict
+            match is not possible.
+
+            That's because ``install`` subcommand try each user-selected manager until
+            it find one providing the package we seek to install, after which the
+            process stop.
         """
         result = invoke(f"--{manager_id}", "install", package_id)
         assert result.exit_code == 0

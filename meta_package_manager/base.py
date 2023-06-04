@@ -841,8 +841,7 @@ class PackageManager(metaclass=MetaPackageManager):
     def installed(self) -> Iterator[Package]:
         """List packages currently installed on the system.
 
-        Optional. Will be simply skipped by
-        :program: `mpm` if not implemented.
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
         raise NotImplementedError
 
@@ -850,8 +849,7 @@ class PackageManager(metaclass=MetaPackageManager):
     def outdated(self) -> Iterator[Package]:
         """List installed packages with available upgrades.
 
-        Optional. Will be simply skipped by
-        :program: `mpm` if not implemented.
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
         raise NotImplementedError
 
@@ -993,23 +991,20 @@ class PackageManager(metaclass=MetaPackageManager):
     def remove(self, package_id: str) -> str:
         """Remove one package and one only.
 
-        Optional. Will be simply skipped by
-        :program: `mpm` if not implemented.
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
         raise NotImplementedError
 
     def sync(self) -> None:
         """Refresh package metadata from remote repositories.
 
-        Optional. Will be simply skipped by
-        :program: `mpm` if not implemented.
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
         raise NotImplementedError
 
     def cleanup(self) -> None:
         """Prune left-overs, remove orphaned dependencies and clear caches.
 
-        Optional. Will be simply skipped by
-        :program: `mpm` if not implemented.
+        Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
         raise NotImplementedError

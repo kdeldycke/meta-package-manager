@@ -35,10 +35,13 @@ from meta_package_manager.version import TokenizedString, parse_version
 
 
 class Zypper(PackageManager):
-    """Documentation:
+    """Zypper package manager.
+
+    Documentation:
+
     - https://en.opensuse.org/Portal:Zypper
     - https://documentation.suse.com/smart/linux/html/concept-zypper/index.html
-    - https://opensuse.github.io/openSUSE-docs-revamped-temp/zypper/.
+    - https://opensuse.github.io/openSUSE-docs-revamped-temp/zypper/
 
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
     """

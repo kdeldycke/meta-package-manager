@@ -22,8 +22,8 @@ from typing import Iterator
 
 from click_extra.platforms import ALL_PLATFORMS
 
-from ..base import Package, PackageManager
-from ..capabilities import version_not_implemented
+from meta_package_manager.base import Package, PackageManager
+from meta_package_manager.capabilities import version_not_implemented
 
 
 class Pipx(PackageManager):
@@ -177,7 +177,9 @@ class Pipx(PackageManager):
 
     @version_not_implemented
     def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
+        self,
+        package_id: str,
+        version: str | None = None,
     ) -> tuple[str, ...]:
         """Upgrade the package provided as parameter."""
         return self.build_cli("upgrade", package_id)

@@ -29,17 +29,16 @@ else:
 import xmltodict
 from click_extra.platforms import UNIX_WITHOUT_MACOS
 
-from ..base import Package, PackageManager
-from ..capabilities import version_not_implemented
-from ..version import TokenizedString, parse_version
+from meta_package_manager.base import Package, PackageManager
+from meta_package_manager.capabilities import version_not_implemented
+from meta_package_manager.version import TokenizedString, parse_version
 
 
 class Zypper(PackageManager):
-    """
-    Documentation:
+    """Documentation:
     - https://en.opensuse.org/Portal:Zypper
     - https://documentation.suse.com/smart/linux/html/concept-zypper/index.html
-    - https://opensuse.github.io/openSUSE-docs-revamped-temp/zypper/
+    - https://opensuse.github.io/openSUSE-docs-revamped-temp/zypper/.
 
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
     """
@@ -277,7 +276,9 @@ class Zypper(PackageManager):
 
     @version_not_implemented
     def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
+        self,
+        package_id: str,
+        version: str | None = None,
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.

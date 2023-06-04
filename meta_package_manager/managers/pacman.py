@@ -21,8 +21,11 @@ from typing import Iterator
 
 from click_extra.platforms import UNIX_WITHOUT_MACOS
 
-from ..base import Package, PackageManager
-from ..capabilities import search_capabilities, version_not_implemented
+from meta_package_manager.base import Package, PackageManager
+from meta_package_manager.capabilities import (
+    search_capabilities,
+    version_not_implemented,
+)
 
 
 class Pacman(PackageManager):
@@ -134,7 +137,7 @@ class Pacman(PackageManager):
             re.MULTILINE | re.VERBOSE,
         )
 
-        for repo_id, package_id, version, description in regexp.findall(output):
+        for _repo_id, package_id, version, description in regexp.findall(output):
             yield self.package(
                 id=package_id,
                 description=description,
@@ -162,7 +165,9 @@ class Pacman(PackageManager):
 
     @version_not_implemented
     def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
+        self,
+        package_id: str,
+        version: str | None = None,
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 

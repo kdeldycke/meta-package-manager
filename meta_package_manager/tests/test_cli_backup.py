@@ -19,12 +19,13 @@ from __future__ import annotations
 
 import pytest
 
-from ..base import Operations
+from meta_package_manager.base import Operations
+
 from .conftest import default_manager_ids
 from .test_cli import CLISubCommandTests
 
 
-@pytest.fixture
+@pytest.fixture()
 def subcmd():
     return "backup"
 

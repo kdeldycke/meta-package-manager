@@ -26,12 +26,13 @@ import pytest
 from boltons.iterutils import same
 from click_extra.tests.conftest import skip_windows, unless_macos
 
-from ..base import Operations, Package
-from ..pool import pool
+from meta_package_manager.base import Operations, Package
+from meta_package_manager.pool import pool
+
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
-@pytest.fixture
+@pytest.fixture()
 def subcmd():
     return "search", "abc"
 
@@ -112,7 +113,8 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
     @skip_pip_search
     @pytest.mark.parametrize(
-        "query", ("SED", "SeD", "sEd*", "*sED*", "_seD-@", "", "_")
+        "query",
+        ("SED", "SeD", "sEd*", "*sED*", "_seD-@", "", "_"),
     )
     def test_exact_search_no_result(self, invoke, query):
         sleep(2)
@@ -158,7 +160,8 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         last_line = result.stdout.splitlines()[-1]
         assert last_line
         msg_match = re.match(
-            r"^([0-9]+) packages? total \(pip: ([0-9]+)\).$", last_line
+            r"^([0-9]+) packages? total \(pip: ([0-9]+)\).$",
+            last_line,
         )
         assert msg_match
         assert same(msg_match.groups())

@@ -28,10 +28,11 @@ from boltons.iterutils import unique
 from boltons.urlutils import URL
 from click_extra.platforms import ALL_PLATFORMS, Platform
 
-from ..base import Operations, Package, PackageManager
-from ..cli import XKCD_MANAGER_ORDER
-from ..pool import pool
-from ..version import TokenizedString
+from meta_package_manager.base import Operations, Package, PackageManager
+from meta_package_manager.cli import XKCD_MANAGER_ORDER
+from meta_package_manager.pool import pool
+from meta_package_manager.version import TokenizedString
+
 from .conftest import (
     all_managers,
     available_managers,
@@ -247,7 +248,7 @@ def test_outdated_type(manager):
 
 
 @pytest.mark.parametrize(
-    "query,query_parts",
+    ("query", "query_parts"),
     (
         ("cli-l-cli", {"cli", "l"}),
         ("ab12--cd34", {"ab12", "cd34"}),
@@ -273,7 +274,7 @@ def test_search_type(manager):
             assert isinstance(pkg, Package)
 
 
-@pytest.mark.destructive
+@pytest.mark.destructive()
 @available_managers_and_dummy_package
 def test_install_type(manager, package_id):
     """All methods installing packages are either not implemented or returns a
@@ -286,7 +287,7 @@ def test_install_type(manager, package_id):
         assert isinstance(result, str)
 
 
-@pytest.mark.destructive
+@pytest.mark.destructive()
 @available_managers
 def test_upgrade_all_cli_type(manager):
     """All methods returning an upgrade-all CLI are either not implemented or returns a
@@ -299,7 +300,7 @@ def test_upgrade_all_cli_type(manager):
         assert isinstance(result, tuple)
 
 
-@pytest.mark.destructive
+@pytest.mark.destructive()
 @available_managers_and_dummy_package
 def test_upgrade_one_cli_type(manager, package_id):
     """All methods returning an upgrade CLI are either not implemented or returns a
@@ -312,7 +313,7 @@ def test_upgrade_one_cli_type(manager, package_id):
         assert isinstance(result, tuple)
 
 
-@pytest.mark.destructive
+@pytest.mark.destructive()
 @available_managers
 def test_upgrade_type(manager):
     """All methods upgrading packages are either not implemented or returns a string."""
@@ -324,7 +325,7 @@ def test_upgrade_type(manager):
         assert isinstance(result, str)
 
 
-@pytest.mark.destructive
+@pytest.mark.destructive()
 @available_managers_and_dummy_package
 def test_remove_type(manager, package_id):
     """All methods removing packages are either not implemented or returns a string."""

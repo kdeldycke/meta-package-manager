@@ -25,7 +25,7 @@ from click_extra.run import env_copy
 from click_extra.tests.conftest import unless_macos
 
 
-@pytest.fixture
+@pytest.fixture()
 def install_cask():
     packages = set()
 
@@ -57,7 +57,7 @@ def install_cask():
 
     def git_checkout(package_id, commit):
         process = subprocess.run(
-            ("git", "-C", get_cask_path(), "checkout", commit, f"{package_id}.rb")
+            ("git", "-C", get_cask_path(), "checkout", commit, f"{package_id}.rb"),
         )
         assert not process.stderr
         assert process.returncode == 0
@@ -107,7 +107,7 @@ def install_cask():
                     "HOMEBREW_NO_INSTALL_FROM_API": "1",
                     "HOMEBREW_NO_AUTO_UPDATE": "1",
                     "HOMEBREW_NO_ENV_HINTS": "1",
-                }
+                },
             ),
         )
 
@@ -129,7 +129,7 @@ def install_cask():
         brew_uninstall(package_id)
 
 
-@pytest.mark.destructive
+@pytest.mark.destructive()
 @unless_macos
 class TestCask:
     @pytest.mark.xdist_group(name="avoid_concurrent_git_tweaks")

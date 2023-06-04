@@ -25,9 +25,10 @@ import pytest
 from boltons.strutils import strip_ansi
 from click_extra.tabulate import output_formats
 
-from .. import __version__
-from ..bar_plugin import MPMPlugin
-from ..pool import pool
+from meta_package_manager import __version__
+from meta_package_manager.bar_plugin import MPMPlugin
+from meta_package_manager.pool import pool
+
 from .conftest import default_manager_ids
 
 """ Common tests for all CLI basic features and templates for subcommands. """
@@ -149,7 +150,7 @@ class TestCommonCLI:
         assert not process.stderr
 
     @pytest.mark.parametrize(
-        "stats_arg,active_stats",
+        ("stats_arg", "active_stats"),
         (("--stats", True), ("--no-stats", False), (None, True)),
     )
     def test_stats(self, invoke, stats_arg, active_stats):
@@ -185,7 +186,9 @@ class TestManagerSelection(InspectCLIOutput):
         from .test_cli_managers import TestManagers
 
         return TestManagers.evaluate_signals(  # type: ignore[no-any-return]
-            mid, stdout, stderr
+            mid,
+            stdout,
+            stderr,
         )
 
     @pytest.mark.parametrize("selector", ("--manager", "--exclude"))
@@ -210,7 +213,7 @@ class TestManagerSelection(InspectCLIOutput):
         self.check_manager_selection(result, {manager_id})
 
     @pytest.mark.parametrize(
-        "args,expected",
+        ("args", "expected"),
         (
             pytest.param(("--manager", "pip"), {"pip"}, id="single_selector"),
             pytest.param(("--pip",), {"pip"}, id="single_flag_selector"),

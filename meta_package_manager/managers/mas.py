@@ -21,8 +21,11 @@ from typing import Iterator
 
 from click_extra.platforms import MACOS
 
-from ..base import Package, PackageManager
-from ..capabilities import search_capabilities, version_not_implemented
+from meta_package_manager.base import Package, PackageManager
+from meta_package_manager.capabilities import (
+    search_capabilities,
+    version_not_implemented,
+)
 
 
 class MAS(PackageManager):
@@ -74,7 +77,9 @@ class MAS(PackageManager):
 
         for package_id, package_name, version in regexp.findall(output):
             yield self.package(
-                id=package_id, name=package_name, installed_version=version
+                id=package_id,
+                name=package_name,
+                installed_version=version,
             )
 
     @property
@@ -176,7 +181,9 @@ class MAS(PackageManager):
 
     @version_not_implemented
     def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
+        self,
+        package_id: str,
+        version: str | None = None,
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.

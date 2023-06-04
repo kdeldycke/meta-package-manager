@@ -20,12 +20,13 @@ import re
 
 import pytest
 
-from ..pool import pool
+from meta_package_manager.pool import pool
+
 from .conftest import all_manager_ids_and_dummy_package
 from .test_cli import CLISubCommandTests
 
 
-@pytest.fixture
+@pytest.fixture()
 def subcmd():
     return "install", "arrow"
 
@@ -49,20 +50,20 @@ class TestInstallRemove(CLISubCommandTests):
                 re.search(
                     rf"Install \S+ package with {mid}\.\.\.",
                     stderr,
-                )
+                ),
             ),
             bool(
                 re.search(
                     rf"warning: No \S+ package found on {mid}\.",
                     stderr,
-                )
+                ),
             ),
             # Remove messages.
             bool(
                 re.search(
                     rf"Remove \S+ package with {mid}\.\.\.",
                     stderr,
-                )
+                ),
             ),
         )
 
@@ -73,19 +74,18 @@ class TestInstallRemove(CLISubCommandTests):
         assert not result.stdout
         assert "Error: Missing argument 'PACKAGES_SPECS...'." in result.stderr
 
-    @pytest.mark.destructive
+    @pytest.mark.destructive()
     @all_manager_ids_and_dummy_package
     def test_single_manager_install_and_remove(self, invoke, manager_id, package_id):
-        """
-        .. caution
+        """.. caution.
 
-            ``strict_selection_match`` is set to ``False`` because the ``install``
-            subcommand will not try all managers selected by default. So a strict
-            match is not possible.
+        ``strict_selection_match`` is set to ``False`` because the ``install``
+        subcommand will not try all managers selected by default. So a strict
+        match is not possible.
 
-            That's because ``install`` subcommand try each user-selected manager until
-            it find one providing the package we seek to install, after which the
-            process stop.
+        That's because ``install`` subcommand try each user-selected manager until
+        it find one providing the package we seek to install, after which the
+        process stop.
         """
         result = invoke(f"--{manager_id}", "install", package_id)
         assert result.exit_code == 0

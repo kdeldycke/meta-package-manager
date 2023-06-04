@@ -24,7 +24,7 @@ import pytest
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
-@pytest.fixture
+@pytest.fixture()
 def subcmd():
     return "which", "python"
 
@@ -38,6 +38,6 @@ class TestWhich(CLISubCommandTests, CLITableTests):
                 re.search(
                     rf"│\s+{mid}\s+│\s+\d+\s+│.+│.+│",
                     stdout,
-                )
+                ),
             ),
         )

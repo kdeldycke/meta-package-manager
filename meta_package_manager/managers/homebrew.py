@@ -23,10 +23,10 @@ from typing import Iterator
 
 from click_extra.platforms import LINUX, MACOS, WSL2
 
-from .. import logger
-from ..base import Package, PackageManager
-from ..capabilities import version_not_implemented
-from ..version import parse_version
+from meta_package_manager import logger
+from meta_package_manager.base import Package, PackageManager
+from meta_package_manager.capabilities import version_not_implemented
+from meta_package_manager.version import parse_version
 
 
 class Homebrew(PackageManager):
@@ -124,8 +124,9 @@ class Homebrew(PackageManager):
             re.VERBOSE,
         )
 
-        for package_id, removed, versions in map(
-            methodcaller("groups"), regexp.finditer(output)
+        for package_id, _removed, versions in map(
+            methodcaller("groups"),
+            regexp.finditer(output),
         ):
             # Keep highest version found.
             version = max(map(parse_version, versions.split()))
@@ -240,7 +241,7 @@ class Homebrew(PackageManager):
                 if installed_version == latest_version:
                     logger.debug(
                         f"Ignore {package_id} upgrade "
-                        f"from {installed_version} to {latest_version}."
+                        f"from {installed_version} to {latest_version}.",
                     )
                     continue
 
@@ -451,7 +452,9 @@ class Homebrew(PackageManager):
 
     @version_not_implemented
     def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
+        self,
+        package_id: str,
+        version: str | None = None,
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.

@@ -71,7 +71,7 @@ PURL_MAP.update(
         "rpm": {"dnf", "yum", "zypper"},
         "rubygems": {"gem"},
         "sourceforge": None,
-    }
+    },
 )
 
 
@@ -109,7 +109,8 @@ class Specifier:
         # Specifier is a purl, extract its metadata.
         manager_ids = PURL_MAP.get(purl.type)
         if not manager_ids:
-            raise ValueError(f"Unrecognized {purl.type} purl type.")
+            msg = f"Unrecognized {purl.type} purl type."
+            raise ValueError(msg)
 
         # The purl can be handled by one manager or more.
         return tuple(
@@ -164,7 +165,8 @@ class Specifier:
     @cached_property
     def is_blank(self) -> bool:
         """Is considered blank a ``Specifier`` without any constraint on ``manager_id``
-        or ``version``."""
+        or ``version``.
+        """
         return not bool(self.manager_id or self.version)
 
     def __str__(self) -> str:
@@ -183,20 +185,21 @@ class Specifier:
 class EmptyReduction(Exception):
     """Raised by the solver if no constraint can't be met."""
 
-    pass
-
 
 class Solver:
     """Combine a set of ``Specifier`` and allow for the solving of the constraints they
-    represent."""
+    represent.
+    """
 
     manager_priority: Sequence[str] = []
 
     spec_pool: set[Specifier] = set()
 
     def __init__(
-        self, spec_strings: Iterable[str] | None = None, manager_priority=None
-    ):
+        self,
+        spec_strings: Iterable[str] | None = None,
+        manager_priority=None,
+    ) -> None:
         if spec_strings:
             self.populate_from_strings(spec_strings)
         if manager_priority:
@@ -210,7 +213,8 @@ class Solver:
             self.spec_pool = self.spec_pool.union(new_specs)
 
     def top_priority_manager(
-        self, keep_managers: Iterable[str | None] | None = None
+        self,
+        keep_managers: Iterable[str | None] | None = None,
     ) -> str | None:
         """Returns the top priority manager configured on the solver.
 
@@ -263,7 +267,7 @@ class Solver:
                 if target_manager_ids.isdisjoint(self.manager_priority):
                     logger.warning(
                         f"Requested target managers {target_manager_ids} "
-                        f"don't match selected {self.manager_priority}."
+                        f"don't match selected {self.manager_priority}.",
                     )
                     raise EmptyReduction
                 top_priority_manager = self.top_priority_manager(target_manager_ids)
@@ -287,9 +291,9 @@ class Solver:
             return collection.pop()
 
         # Still too much constraints.
+        msg = f"Cannot reduce {collection} any further. More heuristics must be implemented."
         raise ValueError(
-            f"Cannot reduce {collection} any further. "
-            "More heuristics must be implemented."
+            msg,
         )
 
     def resolve_package_specs(self) -> Iterator[tuple[str, Specifier]]:
@@ -301,7 +305,8 @@ class Solver:
         # Regroup specs by package IDs. Has the nice side effect of deduplicating specs.
         keyfunc = attrgetter("package_id")
         for package_id, package_specs in groupby(
-            sorted(self.spec_pool, key=keyfunc), key=keyfunc
+            sorted(self.spec_pool, key=keyfunc),
+            key=keyfunc,
         ):
             # Serialize because of reuse in log message below.
             specs = tuple(package_specs)
@@ -317,7 +322,7 @@ class Solver:
             if len(specs) > 1:
                 logger.warning(
                     f"{package_id} specifiers reduced from "
-                    f"{', '.join(sorted(s.raw_spec for s in specs))} to {reduced_spec}"
+                    f"{', '.join(sorted(s.raw_spec for s in specs))} to {reduced_spec}",
                 )
 
             yield package_id, reduced_spec
@@ -325,7 +330,7 @@ class Solver:
     def resolve_specs_group_by_managers(self) -> dict[str | None, set[Specifier]]:
         """Resolves package specs, and returns them grouped by managers."""
         packages_per_managers: dict[str | None, set[Specifier]] = {}
-        for package_id, spec in self.resolve_package_specs():
+        for _package_id, spec in self.resolve_package_specs():
             manager_id = None
             if spec:
                 manager_id = spec.manager_id

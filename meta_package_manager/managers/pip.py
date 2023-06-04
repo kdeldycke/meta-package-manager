@@ -28,9 +28,12 @@ else:
 
 from click_extra.platforms import ALL_PLATFORMS
 
-from ..base import Package, PackageManager
-from ..capabilities import search_capabilities, version_not_implemented
-from ..version import TokenizedString
+from meta_package_manager.base import Package, PackageManager
+from meta_package_manager.capabilities import (
+    search_capabilities,
+    version_not_implemented,
+)
+from meta_package_manager.version import TokenizedString
 
 
 class Pip(PackageManager):
@@ -57,7 +60,7 @@ class Pip(PackageManager):
         "--no-color",  # Suppress colored output.
     )
 
-    version_cli_options = tuple(list(pre_args) + ["--version"])
+    version_cli_options = (*list(pre_args), "--version")
     version_regex = r"pip\s+(?P<version>\S+)"
     """
     .. code-block:: shell-session
@@ -136,7 +139,8 @@ class Pip(PackageManager):
         if output:
             for package in json.loads(output):
                 yield self.package(
-                    id=package["name"], installed_version=package["version"]
+                    id=package["name"],
+                    installed_version=package["version"],
                 )
 
     @property
@@ -218,7 +222,10 @@ class Pip(PackageManager):
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search_xxx_disabled(
-        self, query: str, extended: bool, exact: bool
+        self,
+        query: str,
+        extended: bool,
+        exact: bool,
     ) -> Iterator[Package]:
         """Fetch matching packages.
 
@@ -292,7 +299,9 @@ class Pip(PackageManager):
 
     @version_not_implemented
     def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
+        self,
+        package_id: str,
+        version: str | None = None,
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 

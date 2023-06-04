@@ -38,6 +38,8 @@ if sys.version_info >= (3, 8):
 else:
     from boltons.cacheutils import cachedproperty as cached_property
 
+import contextlib
+
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from click_extra import echo, get_current_context, style
@@ -96,7 +98,7 @@ def colored_diff(a, b, style_common=None, style_a=None, style_b=None):
     return colored_a, colored_b
 
 
-output_formats = sorted(output_formats + ["json"])
+output_formats = sorted([*output_formats, "json"])
 
 
 def print_json(data):
@@ -188,7 +190,8 @@ def print_table(
 
     ctx = get_current_context()
     ctx.find_root().print_table(  # type: ignore[attr-defined]
-        sorted(rows, key=sort_method), header_labels
+        sorted(rows, key=sort_method),
+        header_labels,
     )
 
 
@@ -408,7 +411,10 @@ class BarPluginRenderer(MPMPlugin):
             # Print a menu entry for each outdated packages.
             for line, upgrade_cli in zip(formatted_lines, upgrade_cli_list):
                 self.print_cli_item(
-                    f"{submenu}{line}", upgrade_cli, font, "refresh=true"
+                    f"{submenu}{line}",
+                    upgrade_cli,
+                    font,
+                    "refresh=true",
                 )
 
             self.print_upgrade_all_item(manager, submenu)
@@ -419,7 +425,8 @@ class BarPluginRenderer(MPMPlugin):
 
     def render(self, outdated_data) -> str:
         """Wraps the :py:meth:`meta_package_manager.output.BarPluginRenderer._render`
-        function above to capture all ``print`` statements."""
+        function above to capture all ``print`` statements.
+        """
         capture = StringIO()
         print_capture = partial(print, file=capture)
         with patch.object(builtins, "print", new=print_capture):
@@ -428,7 +435,8 @@ class BarPluginRenderer(MPMPlugin):
 
     def add_upgrade_cli(self, outdated_data):
         """Augment the outdated data from ``mpm outdated`` subcommand with upgrade CLI
-        fields for bar plugin consumption."""
+        fields for bar plugin consumption.
+        """
         for manager_id, manager_data in outdated_data.items():
             if manager_data.get("packages"):
                 manager = pool.get(manager_id)
@@ -441,7 +449,7 @@ class BarPluginRenderer(MPMPlugin):
                     # upgrade.
                     logger.warning(
                         f"{theme.invoked_command(manager_id)} "
-                        "does not implement upgrade_all_cli."
+                        "does not implement upgrade_all_cli.",
                     )
                     upgrade_all_cli = (
                         *self.mpm_exec,
@@ -453,7 +461,7 @@ class BarPluginRenderer(MPMPlugin):
 
                 # Update outdated data with the full-upgrade CLI.
                 outdated_data[manager_id]["upgrade_all_cli"] = self.render_cli(
-                    upgrade_all_cli
+                    upgrade_all_cli,
                 )
 
                 # Add for each package its upgrade CLI.
@@ -461,12 +469,11 @@ class BarPluginRenderer(MPMPlugin):
                     # Generate the version-less upgrade CLI to be used by the *bar
                     # plugin.
                     upgrade_cli = None
-                    try:
+                    with contextlib.suppress(NotImplementedError):
                         upgrade_cli = self.render_cli(
-                            manager.upgrade_one_cli(package["id"])
+                            manager.upgrade_one_cli(package["id"]),
                         )
-                    except NotImplementedError:
-                        pass
+
                     package["upgrade_cli"] = upgrade_cli
 
         return outdated_data

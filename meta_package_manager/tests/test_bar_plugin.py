@@ -26,8 +26,8 @@ from boltons.iterutils import flatten
 from click_extra.run import args_cleanup, env_copy
 from click_extra.tests.conftest import unless_macos
 
-from .. import bar_plugin
-from ..version import parse_version
+from meta_package_manager import bar_plugin
+from meta_package_manager.version import parse_version
 
 
 def _invokation_matrix(*iterables):
@@ -42,8 +42,8 @@ def _shell_invokation_matrix():
     See the list of shell supported by SwiftBar at:
     https://github.com/swiftbar/SwiftBar/commit/366695d594884fe141bc1752ab0f25d2c43334fa
 
-    Returns:
-
+    Returns
+    -------
     .. code-block:: python
         (
             ("bash", "-c"),
@@ -92,8 +92,8 @@ def _shell_invokation_matrix():
 def _python_invokation_matrix():
     """Pre-compute a matrix of all possible options used for python invokation.
 
-    Returns:
-
+    Returns
+    -------
     .. code-block:: python
         (
             ("python",),
@@ -113,7 +113,8 @@ def _python_invokation_matrix():
 def _subcmd_args(invoke_args: tuple[str, ...] | None, *subcmd_args: str):
     """Cleanup args and eventually concatenate all ``subcmd_args`` items to a space
     separated string if ``invoke_args`` is defined and its last argument is equal to
-    ``-c``."""
+    ``-c``.
+    """
     raw_args: list[str] = []
     if invoke_args:
         raw_args.extend(invoke_args)
@@ -172,13 +173,15 @@ class TestBarPlugin:
                     break
             if not matches:
                 print(process.stdout)
-                raise Exception(f"plugin output line {line!r} did not match any regex.")
+                msg = f"plugin output line {line!r} did not match any regex."
+                raise Exception(msg)
 
         # Check all required regex did match at least once.
         for index, (regex, required) in enumerate(checks):
             if required and not match_counter[index]:
+                msg = f"{regex!r} regex did not match any plugin output line."
                 raise Exception(
-                    f"{regex!r} regex did not match any plugin output line."
+                    msg,
                 )
 
     @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
@@ -197,7 +200,7 @@ class TestBarPlugin:
                         r"refresh=true terminal=(false|true alternate=true)$",
                         True,
                     ),
-                )
+                ),
             )
         # Default case is VAR_TABLE_RENDERING=true.
         else:
@@ -212,7 +215,7 @@ class TestBarPlugin:
                         r"terminal=(false|true alternate=true)?$",
                         True,
                     ),
-                )
+                ),
             )
 
         extra_env = {}
@@ -259,5 +262,5 @@ class TestBarPlugin:
         # We need to parse the version to account for alpha release,
         # like Python `3.12.0a4`.
         assert parse_version(process.stdout.split()[1]) >= parse_version(
-            ".".join(str(i) for i in bar_plugin.python_min_version)
+            ".".join(str(i) for i in bar_plugin.python_min_version),
         )

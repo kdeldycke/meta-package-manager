@@ -45,7 +45,7 @@ def operation_matrix() -> str:
             footnote_tag = f"[^{group.id}]"
             header_title += footnote_tag
             platforms_string = ", ".join(
-                sorted((p.name for p in group.platforms), key=str.casefold)
+                sorted((p.name for p in group.platforms), key=str.casefold),
             )
             footnotes.append(f"{footnote_tag}: {group.name}: {platforms_string}.")
         headers.append(header_title)
@@ -61,7 +61,7 @@ def operation_matrix() -> str:
         ]
         for group in PLATFORM_GROUPS:
             line.append(
-                group.icon if group.issubset(m.platforms) and group.icon else ""
+                group.icon if group.issubset(m.platforms) and group.icon else "",
             )
         for op in Operations:
             line.append("✓" if m.implements(op) else "")

@@ -22,7 +22,7 @@ import pytest
 from .test_cli import CLISubCommandTests
 
 
-@pytest.fixture
+@pytest.fixture()
 def subcmd():
     return "cleanup"
 

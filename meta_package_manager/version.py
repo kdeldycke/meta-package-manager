@@ -62,24 +62,29 @@ class Token:
         if not str_int:
             str_int = "0"
         if str(integer) != str_int:
+            msg = f"{value!r} string is not equivalent to {integer!r} integer."
             raise TypeError(
-                f"{value!r} string is not equivalent to {integer!r} integer."
+                msg,
             )
 
         return value, integer
 
     def __init__(self, value: str | int) -> None:
         """Instantiates a ``Token`` from an alphanumeric string or a non-negative
-        integer."""
+        integer.
+        """
         # Check provided value.
         if isinstance(value, str):
             if not value.isalnum():
-                raise TypeError("Only alphanumeric characters are allowed.")
+                msg = "Only alphanumeric characters are allowed."
+                raise TypeError(msg)
         elif isinstance(value, int):
             if value < 0:
-                raise TypeError("Negative integers not allowed.")
+                msg = "Negative integers not allowed."
+                raise TypeError(msg)
         else:
-            raise TypeError("Only string and integer allowed.")
+            msg = "Only string and integer allowed."
+            raise TypeError(msg)
 
         # Parse user-value and stores its string and integer representations.
         self.string, self.integer = self.str_to_int(value)
@@ -87,7 +92,7 @@ class Token:
     def __repr__(self) -> str:
         """Prints internal string and number values for debug."""
         return "<Token:{}>".format(
-            ",".join(f"{k}={v!r}" for k, v in self.__dict__.items())
+            ",".join(f"{k}={v!r}" for k, v in self.__dict__.items()),
         )
 
     def __str__(self) -> str:
@@ -154,7 +159,8 @@ class TokenizedString:
 
     def __hash__(self):
         """A ``TokenizedString`` is made unique by its original string and tuple of
-        parsed tokens."""
+        parsed tokens.
+        """
         return hash((self.string, self.separator, self.tokens))
 
     def __new__(cls, value, *args, **kwargs):
@@ -193,7 +199,8 @@ class TokenizedString:
         elif isinstance(value, str):
             self.string = value.strip()
         else:
-            raise TypeError(f"{type(value)} not supported")
+            msg = f"{type(value)} not supported"
+            raise TypeError(msg)
         self.tokens = tuple(self.tokenize(self.string))
         self.separator = separator
 
@@ -265,7 +272,8 @@ class TokenizedString:
 
     def __iter__(self):
         """``TokenizedString`` are essentially a wrapper around a tuple of ``Token``
-        objects."""
+        objects.
+        """
         return iter(self.tokens)
 
     def __eq__(self, other):

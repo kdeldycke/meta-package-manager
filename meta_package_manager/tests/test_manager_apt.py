@@ -17,12 +17,13 @@
 
 from __future__ import annotations
 
-import pytest
 import subprocess
+
+import pytest
 from click_extra.tests.conftest import unless_linux
 
 
-@pytest.fixture
+@pytest.fixture()
 def exact_search():
     def _exact_search(package_id):
         process = subprocess.run(
@@ -33,7 +34,7 @@ def exact_search():
         assert process.returncode == 0
         return process.stdout
 
-    yield _exact_search
+    return _exact_search
 
 
 @unless_linux

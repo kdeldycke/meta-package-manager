@@ -30,9 +30,9 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib  # type: ignore[import]
 
-from ..labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_PREFIX
-from ..platforms import PLATFORM_GROUPS, encoding_args
-from ..pool import pool
+from meta_package_manager.labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_PREFIX
+from meta_package_manager.platforms import PLATFORM_GROUPS, encoding_args
+from meta_package_manager.pool import pool
 
 """ Test all non-code artifacts depending on manager definitions.
 
@@ -75,15 +75,15 @@ def test_changelog():
                         PLATFORM_GROUPS.platform_ids,
                         "mpm",
                         "bar-plugin",
-                    )
-                )
+                    ),
+                ),
             )
 
 
 def test_new_package_manager_issue_template():
     """Check all platforms groups are referenced in the issue template."""
     content = PROJECT_ROOT.joinpath(
-        ".github/ISSUE_TEMPLATE/new-package-manager.yaml"
+        ".github/ISSUE_TEMPLATE/new-package-manager.yaml",
     ).read_text(**encoding_args)
     assert content
 
@@ -104,7 +104,7 @@ def test_new_package_manager_issue_template():
 def test_labeller_rules():
     # Extract list of extra labels.
     content = PROJECT_ROOT.joinpath(".github/labels-extra.json").read_text(
-        **encoding_args
+        **encoding_args,
     )
     assert content
 
@@ -130,7 +130,7 @@ def test_labeller_rules():
 
     # Extract rules from json blurb serialized into YAML.
     content = PROJECT_ROOT.joinpath(
-        ".github/workflows/labeller-content-based.yaml"
+        ".github/workflows/labeller-content-based.yaml",
     ).read_text(**encoding_args)
     assert "Naturalclar/issue-action" in content
     json_rules = load(content, Loader=Loader)["jobs"]["labeller"]["steps"][0]["with"][
@@ -150,7 +150,7 @@ def test_labeller_rules():
     assert rules_labels
     # Check that all canonical labels are referenced in rules.
     assert (canonical_labels - {"🔌 bar-plugin", "📦 manager: mpm"}).issubset(
-        rules_labels
+        rules_labels,
     )
 
     rules_managers = Counter(
@@ -158,14 +158,14 @@ def test_labeller_rules():
             label: count
             for label, count in rules_labels.items()
             if label.startswith(MANAGER_PREFIX)
-        }
+        },
     )
     rules_platforms = Counter(
         {
             label: count
             for label, count in rules_labels.items()
             if label.startswith(PLATFORM_PREFIX)
-        }
+        },
     )
 
     assert rules_managers

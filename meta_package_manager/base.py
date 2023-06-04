@@ -171,7 +171,7 @@ class MetaPackageManager(type):
                 if isinstance(spec, Platform):
                     platforms.add(spec)
                 elif isinstance(spec, Group):
-                    platforms |= spec.platforms
+                    platforms |= set(spec.platforms)
                 else:
                     msg = f"Unrecognized platform specifier: {spec!r}"
                     raise ValueError(msg)

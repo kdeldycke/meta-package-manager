@@ -22,9 +22,10 @@ from pathlib import Path
 
 import pytest
 
-from ..base import PackageManager
-from ..cli import mpm
-from ..pool import manager_classes, pool
+from meta_package_manager.base import PackageManager
+from meta_package_manager.cli import mpm
+from meta_package_manager.pool import manager_classes, pool
+
 from .conftest import (
     default_manager_ids,
     maintained_manager_ids,
@@ -93,7 +94,7 @@ def test_manager_groups():
     assert set(pool.unsupported_manager_ids).issubset(pool.maintained_manager_ids)
 
     assert len(pool.default_manager_ids) + len(pool.unsupported_manager_ids) == len(
-        pool.maintained_manager_ids
+        pool.maintained_manager_ids,
     )
     assert (
         tuple(sorted(set(pool.default_manager_ids).union(pool.unsupported_manager_ids)))
@@ -226,7 +227,7 @@ selection_cases = {
 
 
 @pytest.mark.parametrize(
-    "kwargs,expected",
+    ("kwargs", "expected"),
     (
         pytest.param(kwargs, expected, id=test_id)
         for test_id, (kwargs, expected) in selection_cases.items()

@@ -21,25 +21,27 @@ from typing import Iterator
 
 from click_extra.platforms import ALL_PLATFORMS
 
-from ..base import Package, PackageManager
-from ..capabilities import search_capabilities, version_not_implemented
-from ..version import parse_version
+from meta_package_manager.base import Package, PackageManager
+from meta_package_manager.capabilities import (
+    search_capabilities,
+    version_not_implemented,
+)
+from meta_package_manager.version import parse_version
 
 
 class Gem(PackageManager):
-    """
-    ..tip::
+    """..tip::
 
-        Installs require ``sudo`` on system ruby. I (@tresni) recommend doing something
-        like:
+    Installs require ``sudo`` on system ruby. I (@tresni) recommend doing something
+    like:
 
-        .. code-block:: shell-session
+    .. code-block:: shell-session
 
-            ► sudo dseditgroup -o edit -a -t user wheel
+    ► sudo dseditgroup -o edit -a -t user wheel
 
-        And then do ``visudo`` to make it so the ``wheel`` group does not require
-        a password. There is a line already there for it, you just need to
-        uncomment it and save.
+    And then do ``visudo`` to make it so the ``wheel`` group does not require
+    a password. There is a line already there for it, you just need to
+    uncomment it and save.
     """
 
     name = "Ruby Gems"
@@ -223,7 +225,9 @@ class Gem(PackageManager):
 
     @version_not_implemented
     def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
+        self,
+        package_id: str,
+        version: str | None = None,
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.

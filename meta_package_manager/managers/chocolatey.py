@@ -21,8 +21,8 @@ from typing import Iterator
 
 from click_extra.platforms import WINDOWS
 
-from ..base import Package, PackageManager
-from ..capabilities import version_not_implemented
+from meta_package_manager.base import Package, PackageManager
+from meta_package_manager.capabilities import version_not_implemented
 
 
 class Choco(PackageManager):
@@ -169,7 +169,9 @@ class Choco(PackageManager):
 
     @version_not_implemented
     def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
+        self,
+        package_id: str,
+        version: str | None = None,
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.

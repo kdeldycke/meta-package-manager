@@ -22,8 +22,8 @@ from operator import attrgetter
 from pathlib import Path
 
 import pytest
-from click_extra.platforms import is_macos
 from _pytest.config import Config
+from click_extra.platforms import is_macos
 
 # Pre-load invokation helpers to be used as pytest's fixture.
 from click_extra.tests.conftest import (
@@ -33,8 +33,8 @@ from click_extra.tests.conftest import (
 from click_extra.tests.conftest import invoke as invoke_extra  # noqa: F401
 from pytest import fixture, param
 
-from ..cli import mpm
-from ..pool import manager_classes, pool
+from meta_package_manager.cli import mpm
+from meta_package_manager.pool import manager_classes, pool
 
 """ Fixtures, configuration and helpers for tests. """
 
@@ -97,8 +97,11 @@ def solve_destructive_options(config: Config) -> tuple[bool, bool]:
         run_non_destructive = False
 
     if not run_destructive and not run_non_destructive:
-        raise ValueError(
+        msg = (
             "Both destructive and non-destructive tests were skipped. No tests to run."
+        )
+        raise ValueError(
+            msg,
         )
 
     return run_destructive, run_non_destructive
@@ -140,7 +143,7 @@ def pytest_report_header(config: Config, start_path, startdir) -> tuple[str, ...
     )
 
 
-@fixture
+@fixture()
 def invoke(invoke_extra):  # noqa: F811
     return partial(invoke_extra, mpm)
 
@@ -153,7 +156,7 @@ def subcmd():
     Must returns a string or an iterable of strings. Defaults to ``None``, which allows
     tests relying on this fixture to selectively skip running.
     """
-    return None
+    return
 
 
 PACKAGE_IDS = {
@@ -202,24 +205,31 @@ assert set(PACKAGE_IDS) == set(pool.all_manager_ids)
 
 all_managers = pytest.mark.parametrize("manager", pool.values(), ids=attrgetter("id"))
 available_managers = pytest.mark.parametrize(
-    "manager", tuple(m for m in pool.values() if m.available), ids=attrgetter("id")
+    "manager",
+    tuple(m for m in pool.values() if m.available),
+    ids=attrgetter("id"),
 )
 
 all_manager_ids = pytest.mark.parametrize("manager_id", pool.all_manager_ids)
 maintained_manager_ids = pytest.mark.parametrize(
-    "manager_id", pool.maintained_manager_ids
+    "manager_id",
+    pool.maintained_manager_ids,
 )
 default_manager_ids = pytest.mark.parametrize("manager_id", pool.default_manager_ids)
 unsupported_manager_ids = pytest.mark.parametrize(
-    "manager_id", pool.unsupported_manager_ids
+    "manager_id",
+    pool.unsupported_manager_ids,
 )
 
 manager_classes = pytest.mark.parametrize(  # type: ignore[assignment]
-    "manager_class", manager_classes, ids=attrgetter("name")
+    "manager_class",
+    manager_classes,
+    ids=attrgetter("name"),
 )
 
 all_manager_ids_and_dummy_package = pytest.mark.parametrize(
-    "manager_id,package_id", (param(*v, id=v[0]) for v in PACKAGE_IDS.items())
+    "manager_id,package_id",
+    (param(*v, id=v[0]) for v in PACKAGE_IDS.items()),
 )
 available_managers_and_dummy_package = pytest.mark.parametrize(
     "manager,package_id",

@@ -14,8 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-""" Utilities to manage GitHub labels to use in issues and PR management.
-"""
+"""Utilities to manage GitHub labels to use in issues and PR management."""
 
 from __future__ import annotations
 
@@ -45,7 +44,7 @@ def write_labels():
             indent=2,
             separators=(",", ": "),
             ensure_ascii=False,
-        )
+        ),
     )
 
 

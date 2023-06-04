@@ -21,8 +21,11 @@ from typing import Iterator
 
 from click_extra.platforms import UNIX_WITHOUT_MACOS
 
-from ..base import Package, PackageManager
-from ..capabilities import search_capabilities, version_not_implemented
+from meta_package_manager.base import Package, PackageManager
+from meta_package_manager.capabilities import (
+    search_capabilities,
+    version_not_implemented,
+)
 
 
 class APT(PackageManager):
@@ -205,7 +208,9 @@ class APT(PackageManager):
 
         for package_id, version, description in regexp.findall(output):
             yield self.package(
-                id=package_id, description=description, latest_version=version
+                id=package_id,
+                description=description,
+                latest_version=version,
             )
 
     @version_not_implemented
@@ -230,7 +235,9 @@ class APT(PackageManager):
 
     @version_not_implemented
     def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
+        self,
+        package_id: str,
+        version: str | None = None,
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
@@ -240,7 +247,11 @@ class APT(PackageManager):
             ► sudo apt --quiet --yes install --only-upgrade git
         """
         return self.build_cli(
-            "--yes", "install", "--only-upgrade", package_id, sudo=True
+            "--yes",
+            "install",
+            "--only-upgrade",
+            package_id,
+            sudo=True,
         )
 
     def sync(self) -> None:

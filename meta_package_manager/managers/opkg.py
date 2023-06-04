@@ -21,8 +21,11 @@ from typing import Iterator
 
 from click_extra.platforms import UNIX_WITHOUT_MACOS
 
-from ..base import Package, PackageManager
-from ..capabilities import search_capabilities, version_not_implemented
+from meta_package_manager.base import Package, PackageManager
+from meta_package_manager.capabilities import (
+    search_capabilities,
+    version_not_implemented,
+)
 
 
 class OPKG(PackageManager):
@@ -132,7 +135,9 @@ class OPKG(PackageManager):
 
         for package_id, version, description in regexp.findall(output):
             yield self.package(
-                id=package_id, description=description, latest_version=version
+                id=package_id,
+                description=description,
+                latest_version=version,
             )
 
     @version_not_implemented
@@ -157,7 +162,9 @@ class OPKG(PackageManager):
 
     @version_not_implemented
     def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
+        self,
+        package_id: str,
+        version: str | None = None,
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.

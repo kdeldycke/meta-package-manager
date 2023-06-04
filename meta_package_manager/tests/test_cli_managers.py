@@ -23,12 +23,13 @@ import re
 import pytest
 from boltons.iterutils import same
 
-from ..pool import pool
+from meta_package_manager.pool import pool
+
 from .conftest import all_manager_ids, unsupported_manager_ids
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
-@pytest.fixture
+@pytest.fixture()
 def subcmd():
     return "managers"
 
@@ -42,7 +43,7 @@ class TestManagers(CLISubCommandTests, CLITableTests):
                 re.search(
                     rf"│\s+{mid}\s+│.+│\s+(✓|✘).+│\s+(✓|✘)",
                     stdout,
-                )
+                ),
             ),
         )
 
@@ -52,7 +53,9 @@ class TestManagers(CLISubCommandTests, CLITableTests):
         result = invoke(f"--{manager_id}", "--all-managers", subcmd)
         assert result.exit_code == 0
         self.check_manager_selection(
-            result, {manager_id}, reference_set=pool.all_manager_ids
+            result,
+            {manager_id},
+            reference_set=pool.all_manager_ids,
         )
 
     @unsupported_manager_ids

@@ -20,21 +20,21 @@ import re
 
 import pytest
 
-from ..base import Operations
+from meta_package_manager.base import Operations
+
 from .conftest import default_manager_ids
 from .test_cli import CLISubCommandTests
 
 
-@pytest.fixture
+@pytest.fixture()
 def subcmd():
     return "upgrade", "--all"
 
 
 class TestUpgrade(CLISubCommandTests):
-    """
-    .. danger::
-        All tests here should me marked as destructive unless --dry-run parameter is
-        passed.
+    """.. danger::
+    All tests here should me marked as destructive unless --dry-run parameter is
+    passed.
     """
 
     @staticmethod
@@ -56,7 +56,7 @@ class TestUpgrade(CLISubCommandTests):
             assert "assume -A/--all option" in result.stderr
         self.check_manager_selection(result)
 
-    @pytest.mark.destructive
+    @pytest.mark.destructive()
     @pytest.mark.parametrize("all_option", ("--all", None))
     def test_all_managers_upgrade_all(self, invoke, all_option):
         result = invoke("upgrade", all_option)
@@ -74,7 +74,7 @@ class TestUpgrade(CLISubCommandTests):
             assert "assume -A/--all option" in result.stderr
         self.check_manager_selection(result, {manager_id})
 
-    @pytest.mark.destructive
+    @pytest.mark.destructive()
     @default_manager_ids
     @pytest.mark.parametrize("all_option", ("--all", None))
     def test_single_manager_upgrade_all(self, invoke, manager_id, all_option):

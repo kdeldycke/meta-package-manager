@@ -21,16 +21,14 @@ from typing import Iterator
 
 from click_extra.platforms import UNIX_WITHOUT_MACOS
 
-from ..base import Package, PackageManager
-from ..capabilities import version_not_implemented
+from meta_package_manager.base import Package, PackageManager
+from meta_package_manager.capabilities import version_not_implemented
 
 
 class Emerge(PackageManager):
-    """
-
-    Documentation:
+    """Documentation:
     - https://wiki.gentoo.org/wiki/Portage#emerge
-    - https://dev.gentoo.org/~zmedico/portage/doc/man/emerge.1.html
+    - https://dev.gentoo.org/~zmedico/portage/doc/man/emerge.1.html.
 
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
     """
@@ -76,7 +74,10 @@ class Emerge(PackageManager):
             raise FileNotFoundError(qlist_path)
 
         output = self.run_cli(
-            "--installed", "--verbose", "--nocolor", override_cli_path=qlist_path
+            "--installed",
+            "--verbose",
+            "--nocolor",
+            override_cli_path=qlist_path,
         )
 
         regexp = re.compile(
@@ -258,7 +259,9 @@ class Emerge(PackageManager):
 
     @version_not_implemented
     def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
+        self,
+        package_id: str,
+        version: str | None = None,
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.

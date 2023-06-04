@@ -23,12 +23,13 @@ import json
 import pytest
 from boltons.iterutils import same
 
-from ..base import Operations, Package
-from ..pool import pool
+from meta_package_manager.base import Operations, Package
+from meta_package_manager.pool import pool
+
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
-@pytest.fixture
+@pytest.fixture()
 def subcmd():
     return "outdated"
 

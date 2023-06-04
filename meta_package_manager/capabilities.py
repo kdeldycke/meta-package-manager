@@ -37,26 +37,28 @@ T = TypeVar("T")
 
 def search_capabilities(extended_support: bool = True, exact_support: bool = True):
     """Decorator factory to be used on ``search()`` operations to signal ``mpm``
-    framework manager's capabilities."""
+    framework manager's capabilities.
+    """
 
     def decorator(function):
         @wraps(function)
         def wrapper(
-            self: PackageManager, query: str, extended: bool, exact: bool
+            self: PackageManager,
+            query: str,
+            extended: bool,
+            exact: bool,
         ) -> Iterator[Package]:
             refilter = False
-            if exact:
-                if not exact_support:
-                    refilter = True
-                    logger.warning(
-                        f"{self.id} does not implement exact search operation."
-                    )
-            if extended:
-                if not extended_support:
-                    refilter = True
-                    logger.warning(
-                        f"{self.id} does not implement extended search operation."
-                    )
+            if exact and not exact_support:
+                refilter = True
+                logger.warning(
+                    f"{self.id} does not implement exact search operation.",
+                )
+            if extended and not extended_support:
+                refilter = True
+                logger.warning(
+                    f"{self.id} does not implement extended search operation.",
+                )
             if refilter:
                 logger.warning("Refiltering of raw results has been activated.")
 
@@ -70,13 +72,14 @@ def search_capabilities(extended_support: bool = True, exact_support: bool = Tru
 def version_not_implemented(func: Callable[P, T]) -> Callable[P, T]:
     """Decorator to be used on ``install()`` or ``upgrade_one_cli()`` operations to
     signal that a particular operation does not implement (yet) the version specifier
-    parameter."""
+    parameter.
+    """
 
     def print_warning(*args: P.args, **kwargs: P.kwargs) -> T:
         if kwargs.get("version"):
             logger.warning(
                 f"{func.__qualname__} does not implement version parameter. "
-                "Let the package manager choose the version."
+                "Let the package manager choose the version.",
             )
         return func(*args, **kwargs)
 

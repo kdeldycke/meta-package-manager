@@ -30,7 +30,7 @@ from click_extra.platforms import MACOS as MACOS_PLATFORM
 from click_extra.platforms import UNIX as ALL_UNIX
 
 BSD: Group = dataclasses.replace(BSD_WITHOUT_MACOS, name="BSD", icon="🅱️")
-LINUX: Group = Group("linux", "Linux", tuple((*ALL_LINUX.platforms, WSL2)), icon="🐧")
+LINUX: Group = Group("linux", "Linux", (*ALL_LINUX.platforms, WSL2), icon="🐧")
 MACOS: Group = Group("macos", "macOS", (MACOS_PLATFORM,), icon="🍎")
 # Catch all for all Unix-like platforms not already covered by BSD, LINUX
 # and MACOS groups above.
@@ -49,7 +49,7 @@ WINDOWS: Group = dataclasses.replace(ALL_WINDOWS, name="Windows", icon="🪟")
 
 
 PLATFORM_GROUPS: Tuple[Group, ...] = tuple(
-    sorted((BSD, LINUX, MACOS, UNIX, WINDOWS), key=lambda g: g.name.lower())
+    sorted((BSD, LINUX, MACOS, UNIX, WINDOWS), key=lambda g: g.name.lower()),
 )
 """Sorted list of platform groups that will have their own dedicated column in the
 matrix."""

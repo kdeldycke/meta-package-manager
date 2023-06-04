@@ -21,7 +21,7 @@ from random import shuffle
 
 import pytest
 
-from ..version import Token, TokenizedString, parse_version
+from meta_package_manager.version import Token, TokenizedString, parse_version
 
 
 def reverse_fixtures(table):
@@ -97,32 +97,32 @@ lt_values = [
 ]
 
 
-@pytest.mark.parametrize("token,value", eq_values)
+@pytest.mark.parametrize(("token", "value"), eq_values)
 def test_token_eq(token, value):
     assert token == value
 
 
-@pytest.mark.parametrize("token,value", ne_values)
+@pytest.mark.parametrize(("token", "value"), ne_values)
 def test_token_ne(token, value):
     assert token != value
 
 
-@pytest.mark.parametrize("token,value", gt_values)
+@pytest.mark.parametrize(("token", "value"), gt_values)
 def test_token_gt(token, value):
     assert token > value
 
 
-@pytest.mark.parametrize("token,value", lt_values)
+@pytest.mark.parametrize(("token", "value"), lt_values)
 def test_token_lt(token, value):
     assert token < value
 
 
-@pytest.mark.parametrize("token,value", gt_values + eq_values)
+@pytest.mark.parametrize(("token", "value"), gt_values + eq_values)
 def test_token_ge(token, value):
     assert token >= value
 
 
-@pytest.mark.parametrize("token,value", lt_values + eq_values)
+@pytest.mark.parametrize(("token", "value"), lt_values + eq_values)
 def test_token_le(token, value):
     assert token <= value
 
@@ -136,14 +136,16 @@ def test_token_hash():
 
 
 @pytest.mark.parametrize(
-    "value", (None, 0, 123, -1, "0", "1.2.3", "abc", "A-B-C", "123   a bc \n")
+    "value",
+    (None, 0, 123, -1, "0", "1.2.3", "abc", "A-B-C", "123   a bc \n"),
 )
 def test_tokenized_string_allowed_instanciation(value):
     TokenizedString(value)
 
 
 @pytest.mark.parametrize(
-    "value", (1.0, [1, 2, 3], (1, 2, 3), {1, 2, 3}, {"a": 1, "b": 2})
+    "value",
+    (1.0, [1, 2, 3], (1, 2, 3), {1, 2, 3}, {"a": 1, "b": 2}),
 )
 def test_tokenized_string_unauthorized_instanciation(value):
     with pytest.raises(TypeError):
@@ -157,7 +159,7 @@ def test_tokenized_string_hash():
     assert hash(TokenizedString("09999")) != hash(TokenizedString("9999"))
     assert hash(TokenizedString("09999")) != hash(TokenizedString(9999))
     assert hash(TokenizedString("1.2.3", separator=".")) != hash(
-        TokenizedString("1.2.3", separator="_")
+        TokenizedString("1.2.3", separator="_"),
     )
 
 
@@ -224,7 +226,7 @@ version_list = (
 )
 
 
-@pytest.mark.parametrize("v_string,v_tuple", version_list)
+@pytest.mark.parametrize(("v_string", "v_tuple"), version_list)
 def test_version_tokenizer(v_string, v_tuple):
     assert TokenizedString(v_string) == v_tuple
 
@@ -253,13 +255,13 @@ compared_gt = (
 )
 
 
-@pytest.mark.parametrize("ver1,ver2", compared_gt)
+@pytest.mark.parametrize(("ver1", "ver2"), compared_gt)
 def test_version_comparison_gt(ver1, ver2):
     assert TokenizedString(ver1) > TokenizedString(ver2)
     assert parse_version(ver1) > parse_version(ver2)
 
 
-@pytest.mark.parametrize("ver1,ver2", reverse_fixtures(compared_gt))
+@pytest.mark.parametrize(("ver1", "ver2"), reverse_fixtures(compared_gt))
 def test_version_comparison_lt(ver1, ver2):
     assert TokenizedString(ver1) < TokenizedString(ver2)
     assert parse_version(ver1) < parse_version(ver2)

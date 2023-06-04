@@ -72,9 +72,9 @@ def v_to_str(version_tuple: tuple[int, ...] | None) -> str:
 
 
 if sys.version_info < python_min_version:
+    msg = f"Bar plugin ran with Python {sys.version}, but requires Python >= {v_to_str(python_min_version)}"
     raise SystemError(
-        f"Bar plugin ran with Python {sys.version}, "
-        f"but requires Python >= {v_to_str(python_min_version)}"
+        msg,
     )
 
 import argparse  # noqa: E402
@@ -132,7 +132,7 @@ class MPMPlugin:
                 "/opt/local/sbin",
                 # System.
                 os.environ.get("PATH", ""),
-            )
+            ),
         )
         return env_copy
 
@@ -163,7 +163,8 @@ class MPMPlugin:
 
     @staticmethod
     def normalize_params(
-        font_string: str, valid_ids: set[str] = {"color", "font", "size"}
+        font_string: str,
+        valid_ids: set[str] = {"color", "font", "size"},
     ) -> str:
         valid_params = {}
         for param in font_string.split():
@@ -184,14 +185,14 @@ class MPMPlugin:
     def default_font(self) -> str:
         """Make it easier to change font, sizes and colors of the output."""
         return self.normalize_params(
-            self.getenv_str("VAR_DEFAULT_FONT", "")  # type: ignore
+            self.getenv_str("VAR_DEFAULT_FONT", ""),  # type: ignore
         )
 
     @cached_property
     def monospace_font(self) -> str:
         """Make it easier to change font, sizes and colors of the output."""
         return self.normalize_params(
-            self.getenv_str("VAR_MONOSPACE_FONT", "font=Menlo size=12")  # type: ignore
+            self.getenv_str("VAR_MONOSPACE_FONT", "font=Menlo size=12"),  # type: ignore
         )
 
     @cached_property
@@ -230,7 +231,8 @@ class MPMPlugin:
     @cached_property
     def mpm_exec(self) -> tuple[str, ...]:
         """Search for mpm execution alternatives, either direct ``mpm`` call or as an
-        executable Python module."""
+        executable Python module.
+        """
         # XXX Local debugging and development.
         # return "poetry", "run", "mpm"
         mpm_exec = self.locate_bin("mpm")
@@ -245,7 +247,9 @@ class MPMPlugin:
         error: str | Exception | None = None
         try:
             process = run(
-                (*self.mpm_exec, "--version"), capture_output=True, encoding="utf-8"
+                (*self.mpm_exec, "--version"),
+                capture_output=True,
+                encoding="utf-8",
             )
             error = process.stderr
         except FileNotFoundError as ex:
@@ -259,7 +263,7 @@ class MPMPlugin:
             installed = True
             # Is mpm too old?
             match = re.compile(r".*\s+(?P<version>[0-9\.]+)$", re.MULTILINE).search(
-                process.stdout
+                process.stdout,
             )
             if match:
                 version_string = match.groupdict()["version"]
@@ -379,9 +383,9 @@ if __name__ == "__main__":
             if not mpm_installed:
                 raise FileNotFoundError(error)
             if not mpm_up_to_date:
+                msg = f"{plugin.mpm_exec} is too old: {v_to_str(mpm_version)} < {v_to_str(plugin.mpm_min_version)}"
                 raise ValueError(
-                    f"{plugin.mpm_exec} is too old: "
-                    f"{v_to_str(mpm_version)} < {v_to_str(plugin.mpm_min_version)}"
+                    msg,
                 )
             print(f"{' '.join(plugin.mpm_exec)} v{v_to_str(mpm_version)}")
 

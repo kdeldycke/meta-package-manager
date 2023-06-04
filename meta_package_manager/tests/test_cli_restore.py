@@ -18,12 +18,13 @@ from __future__ import annotations
 
 import pytest
 
-from ..pool import pool
+from meta_package_manager.pool import pool
+
 from .conftest import default_manager_ids
 from .test_cli import CLISubCommandTests
 
 
-@pytest.fixture
+@pytest.fixture()
 def subcmd(create_config):
     """Seed common subcommand tests with a dummy file and content to allow the CLI to
     not fail on required file input."""
@@ -49,7 +50,7 @@ class TestRestore(CLISubCommandTests):
             f"warning: Skip unavailable {mid} manager." in stderr,
         )
 
-    @pytest.mark.destructive
+    @pytest.mark.destructive()
     def test_default_all_managers(self, invoke, create_config):
         toml_path = create_config(
             "all-managers.toml",
@@ -58,7 +59,7 @@ class TestRestore(CLISubCommandTests):
             [{}]
             blah = 123
             """.format(
-                    m
+                    m,
                 )
                 for m in pool.all_manager_ids
             ),
@@ -69,7 +70,7 @@ class TestRestore(CLISubCommandTests):
         assert "all-managers.toml" in result.stderr
         self.check_manager_selection(result)
 
-    @pytest.mark.destructive
+    @pytest.mark.destructive()
     @default_manager_ids
     def test_single_manager(self, invoke, create_config, manager_id):
         toml_path = create_config(
@@ -79,7 +80,7 @@ class TestRestore(CLISubCommandTests):
             [{}]
             blah = 123
             """.format(
-                    m
+                    m,
                 )
                 for m in pool.all_manager_ids
             ),
@@ -103,7 +104,7 @@ class TestRestore(CLISubCommandTests):
         assert "unrecognized.toml" in result.stderr
         assert "Ignore [random_section] section" in result.stderr
 
-    @pytest.mark.destructive
+    @pytest.mark.destructive()
     def test_restore_single_manager(self, invoke, create_config):
         toml_path = create_config(
             "pip-npm-dummy.toml",
@@ -122,7 +123,7 @@ class TestRestore(CLISubCommandTests):
         assert "Restore pip packages..." not in result.stderr
         assert "Restore npm packages..." in result.stderr
 
-    @pytest.mark.destructive
+    @pytest.mark.destructive()
     def test_restore_excluded_manager(self, invoke, create_config):
         toml_path = create_config(
             "pip-npm-dummy.toml",

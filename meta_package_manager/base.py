@@ -77,7 +77,7 @@ Each operation has its own CLI subcommand.
 class CLIError(Exception):
     """An error occurred when running package manager CLI."""
 
-    def __init__(self, code: int, output: str, error: str):
+    def __init__(self, code: int, output: str, error: str) -> None:
         """The exception internally keeps the result of CLI execution."""
         super().__init__()
         self.code = code
@@ -95,14 +95,16 @@ class CLIError(Exception):
                 Output:
                 {indented_output}
                 Error:
-                {indented_error}"""
+                {indented_error}""",
             ),
             INDENT,
         )
 
     def __repr__(self) -> str:
         error_excerpt = shorten(
-            " ".join(self.error.split()), width=60, placeholder="(...)"
+            " ".join(self.error.split()),
+            width=60,
+            placeholder="(...)",
         )
         return f"<{self.__class__.__name__}({self.code}, {error_excerpt!r})>"
 
@@ -139,17 +141,17 @@ class Package:
 
 def packages_asdict(packages: Iterator[Package], keep_fields: tuple[str, ...]):
     """Returns a list of packages casted to a ``dict`` with only a subset of its
-    fields."""
+    fields.
+    """
     return ({k: v for k, v in asdict(p).items() if k in keep_fields} for p in packages)
 
 
 class MetaPackageManager(type):
     """Custom metaclass used as a class factory for package managers."""
 
-    def __init__(cls, name, bases, dct):
+    def __init__(cls, name, bases, dct) -> None:
         """Sets some class defaults, but only if they're not redefined in the final
         manager class."""
-
         if "id" not in dct:
             cls.id = name.lower().replace("_", "-")
 
@@ -171,12 +173,13 @@ class MetaPackageManager(type):
                 elif isinstance(spec, Group):
                     platforms |= spec.platforms
                 else:
-                    raise ValueError(f"Unrecognized platform specifier: {spec!r}")
+                    msg = f"Unrecognized platform specifier: {spec!r}"
+                    raise ValueError(msg)
             cls.platforms = frozenset(platforms)
 
 
 def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | None:
-    """Highlight the binary name in the provided ``path``
+    """Highlight the binary name in the provided ``path``.
 
     If ``match_names`` is provided, only highlight the start of the binary name that is
     in the list.
@@ -376,10 +379,13 @@ class PackageManager(metaclass=MetaPackageManager):
                 if all_deps_found:
                     return True
 
-        raise NotImplementedError(f"Can't guess {cls} implementation of {op}.")
+        msg = f"Can't guess {cls} implementation of {op}."
+        raise NotImplementedError(msg)
 
     def search_all_cli(
-        self, cli_names: Iterable[str], env=None
+        self,
+        cli_names: Iterable[str],
+        env=None,
     ) -> Generator[Path, None, None]:
         """Search for all binary files matching the CLI names, in all environment path.
 
@@ -408,7 +414,7 @@ class PackageManager(metaclass=MetaPackageManager):
         # Check CLI names are not path, but plain filenames.
         for cli_name in cli_names:
             assert not os.path.dirname(
-                cli_name
+                cli_name,
             ), f"CLI name {cli_name} contains path separator {os.path.sep}."
 
         # Validates each search path.
@@ -427,7 +433,7 @@ class PackageManager(metaclass=MetaPackageManager):
         # https://github.com/python/cpython/blob/8d46c7e/Lib/shutil.py#L1478-L1491
         if sys.platform == "win32":
             pathext_source = os.getenv("PATHEXT") or _WIN_DEFAULT_PATHEXT
-            pathext = unique((ext for ext in pathext_source.split(os.pathsep) if ext))
+            pathext = unique(ext for ext in pathext_source.split(os.pathsep) if ext)
             search_filenames = []
             for cli_name in cli_names:
                 # See if the given file matches any of the expected path extensions.
@@ -458,9 +464,9 @@ class PackageManager(metaclass=MetaPackageManager):
 
         logger.debug(
             "Search for "
-            + ", ".join((theme.invoked_command(cli) for cli in search_filenames))
+            + ", ".join(theme.invoked_command(cli) for cli in search_filenames)
             + " in "
-            + ", ".join(str(p) for p in search_path_list)
+            + ", ".join(str(p) for p in search_path_list),
         )
 
         for search_path in search_path_list:
@@ -528,7 +534,7 @@ class PackageManager(metaclass=MetaPackageManager):
                 if getattr(ex, "winerror", None) == 193:
                     logger.debug(
                         f"{theme.invoked_command(str(self.cli_path))} "
-                        "is not a valid Windows application."
+                        "is not a valid Windows application.",
                     )
                     # Declare CLI as un-executable.
                     self.executable = False
@@ -538,7 +544,7 @@ class PackageManager(metaclass=MetaPackageManager):
 
             # Extract the version with the regex.
             parts = re.compile(self.version_regex, re.MULTILINE | re.VERBOSE).search(
-                output
+                output,
             )
             if parts:
                 version_string = parts.groupdict().get("version")
@@ -563,7 +569,7 @@ class PackageManager(metaclass=MetaPackageManager):
         if not os.access(self.cli_path, os.X_OK):
             logger.debug(
                 f"{highlight_cli_name(self.cli_path, self.cli_names)} "
-                "is not allowed to be executed."
+                "is not allowed to be executed.",
             )
             return False
         return True
@@ -574,13 +580,12 @@ class PackageManager(metaclass=MetaPackageManager):
         # Version is mandatory.
         if not self.version:
             return False
-        if self.requirement:
-            if self.version < parse_version(self.requirement):
-                logger.debug(
-                    f"{self.id} {self.version} is older than "
-                    f"{self.requirement} version requirement."
-                )
-                return False
+        if self.requirement and self.version < parse_version(self.requirement):
+            logger.debug(
+                f"{self.id} {self.version} is older than "
+                f"{self.requirement} version requirement.",
+            )
+            return False
         return True
 
     @cached_property
@@ -604,7 +609,7 @@ class PackageManager(metaclass=MetaPackageManager):
             f"is supported: {self.supported}; "
             f"found at: {highlight_cli_name(self.cli_path, self.cli_names)}; "
             f"is executable: {self.executable}; "
-            f"is fresh: {self.fresh}."
+            f"is fresh: {self.fresh}.",
         )
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
@@ -642,7 +647,9 @@ class PackageManager(metaclass=MetaPackageManager):
         else:
             logger.debug(cli_msg)
             code, output, error = run_cmd(
-                *clean_args, extra_env=extra_env, print_output=False
+                *clean_args,
+                extra_env=extra_env,
+                print_output=False,
             )
 
         # Normalize messages.
@@ -732,9 +739,11 @@ class PackageManager(metaclass=MetaPackageManager):
         # Sudo replaces any pre-command, be it overridden or automatic.
         if sudo:
             if current_os() not in UNIX:
-                raise NotImplementedError("sudo only supported on UNIX.")
+                msg = "sudo only supported on UNIX."
+                raise NotImplementedError(msg)
             if override_pre_cmds:
-                raise ValueError("Pre-commands not allowed if sudo is requested.")
+                msg = "Pre-commands not allowed if sudo is requested."
+                raise ValueError(msg)
             if auto_pre_cmds:
                 auto_pre_cmds = False
             params.append("sudo")
@@ -832,7 +841,8 @@ class PackageManager(metaclass=MetaPackageManager):
     def installed(self) -> Iterator[Package]:
         """List packages currently installed on the system.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Optional. Will be simply skipped by
+        :program: `mpm` if not implemented.
         """
         raise NotImplementedError
 
@@ -840,7 +850,8 @@ class PackageManager(metaclass=MetaPackageManager):
     def outdated(self) -> Iterator[Package]:
         """List installed packages with available upgrades.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Optional. Will be simply skipped by
+        :program: `mpm` if not implemented.
         """
         raise NotImplementedError
 
@@ -868,7 +879,10 @@ class PackageManager(metaclass=MetaPackageManager):
         raise NotImplementedError
 
     def refiltered_search(
-        self, query: str, extended: bool, exact: bool
+        self,
+        query: str,
+        extended: bool,
+        exact: bool,
     ) -> Iterator[Package]:
         """Returns search results with extra manual refiltering to refine gross
         matchings.
@@ -930,7 +944,9 @@ class PackageManager(metaclass=MetaPackageManager):
         raise NotImplementedError
 
     def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
+        self,
+        package_id: str,
+        version: str | None = None,
     ) -> tuple[str, ...]:
         """Returns the complete CLI to upgrade one package and one only.
 
@@ -963,7 +979,7 @@ class PackageManager(metaclass=MetaPackageManager):
                 cli = self.upgrade_all_cli()
             except NotImplementedError:
                 logger.info(
-                    "Fallback to calling upgrade operation on each outdated package."
+                    "Fallback to calling upgrade operation on each outdated package.",
                 )
                 log = ""
                 for package in self.outdated:
@@ -977,20 +993,23 @@ class PackageManager(metaclass=MetaPackageManager):
     def remove(self, package_id: str) -> str:
         """Remove one package and one only.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Optional. Will be simply skipped by
+        :program: `mpm` if not implemented.
         """
         raise NotImplementedError
 
     def sync(self) -> None:
         """Refresh package metadata from remote repositories.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Optional. Will be simply skipped by
+        :program: `mpm` if not implemented.
         """
         raise NotImplementedError
 
     def cleanup(self) -> None:
         """Prune left-overs, remove orphaned dependencies and clear caches.
 
-        Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        Optional. Will be simply skipped by
+        :program: `mpm` if not implemented.
         """
         raise NotImplementedError

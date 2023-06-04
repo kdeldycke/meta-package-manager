@@ -46,7 +46,10 @@ TLabelGroup = Dict[str, TLabelSet]
 
 
 def generate_labels(
-    all_labels: TLabelSet, groups: TLabelGroup, prefix: str, color: str
+    all_labels: TLabelSet,
+    groups: TLabelGroup,
+    prefix: str,
+    color: str,
 ) -> dict[str, str]:
     """Generate labels."""
     # Check group definitions.
@@ -78,13 +81,11 @@ def generate_labels(
             label_map[label_id] = label_name
         # Register label to the global registry.
         LABELS.append(
-            (label_name, color, ", ".join(sorted(label_ids, key=str.casefold)))
+            (label_name, color, ", ".join(sorted(label_ids, key=str.casefold))),
         )
 
     # Sort label_map by their name.
-    return {
-        k: v for k, v in sorted(label_map.items(), key=lambda i: str.casefold(i[1]))
-    }
+    return dict(sorted(label_map.items(), key=lambda i: str.casefold(i[1])))
 
 
 MANAGER_PREFIX = "📦 manager: "
@@ -106,7 +107,10 @@ all_manager_label_ids = frozenset(set(pool.all_manager_ids) | {"mpm"})
 assert all_manager_label_ids.isdisjoint(MANAGER_LABEL_GROUPS.keys())
 
 MANAGER_LABELS = generate_labels(
-    all_manager_label_ids, MANAGER_LABEL_GROUPS, MANAGER_PREFIX, "#bfdadc"
+    all_manager_label_ids,
+    MANAGER_LABEL_GROUPS,
+    MANAGER_PREFIX,
+    "#bfdadc",
 )
 """Maps all manager IDs to their labels."""
 
@@ -121,7 +125,10 @@ PLATFORM_LABEL_GROUPS: TLabelGroup = {
 all_platform_label_ids = frozenset(flatten(PLATFORM_LABEL_GROUPS.values()))
 
 PLATFORM_LABELS = generate_labels(
-    all_platform_label_ids, PLATFORM_LABEL_GROUPS, PLATFORM_PREFIX, "#bfd4f2"
+    all_platform_label_ids,
+    PLATFORM_LABEL_GROUPS,
+    PLATFORM_PREFIX,
+    "#bfd4f2",
 )
 """Maps all platform names to their labels."""
 

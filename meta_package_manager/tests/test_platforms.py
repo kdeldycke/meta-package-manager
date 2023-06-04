@@ -20,7 +20,8 @@ from itertools import combinations
 
 from click_extra.platforms import ALL_PLATFORMS, Group
 
-from ..platforms import PLATFORM_GROUPS
+from meta_package_manager.platforms import PLATFORM_GROUPS
+
 from .conftest import all_managers
 
 

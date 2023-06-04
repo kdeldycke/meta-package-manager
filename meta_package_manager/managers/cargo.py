@@ -21,8 +21,11 @@ from typing import Iterator
 
 from click_extra.platforms import ALL_PLATFORMS
 
-from ..base import Package, PackageManager
-from ..capabilities import search_capabilities, version_not_implemented
+from meta_package_manager.base import Package, PackageManager
+from meta_package_manager.capabilities import (
+    search_capabilities,
+    version_not_implemented,
+)
 
 
 class Cargo(PackageManager):

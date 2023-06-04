@@ -21,8 +21,8 @@ from dataclasses import asdict
 import pytest
 from boltons.iterutils import flatten
 
-from ..pool import pool
-from ..specifier import PURL_MAP, EmptyReduction, Solver, Specifier
+from meta_package_manager.pool import pool
+from meta_package_manager.specifier import PURL_MAP, EmptyReduction, Solver, Specifier
 
 
 def test_purl_map():
@@ -45,7 +45,7 @@ def props(spec: Specifier):
 
 
 @pytest.mark.parametrize(
-    "spec_string, expected",
+    ("spec_string", "expected"),
     (
         pytest.param(
             "leftpad",
@@ -130,7 +130,7 @@ def test_parse_specs(spec_string, expected):
 
 
 @pytest.mark.parametrize(
-    "spec_strings,target_managers,expected",
+    ("spec_strings", "target_managers", "expected"),
     (
         pytest.param(
             ("leftpad",),

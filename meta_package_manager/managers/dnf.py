@@ -21,13 +21,15 @@ from typing import Iterator
 
 from click_extra.platforms import UNIX_WITHOUT_MACOS
 
-from ..base import Package, PackageManager
-from ..capabilities import search_capabilities, version_not_implemented
+from meta_package_manager.base import Package, PackageManager
+from meta_package_manager.capabilities import (
+    search_capabilities,
+    version_not_implemented,
+)
 
 
 class DNF(PackageManager):
-    """
-    Documentation: https://dnf.readthedocs.io/en/latest/command_ref.html
+    """Documentation: https://dnf.readthedocs.io/en/latest/command_ref.html.
 
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
     """
@@ -153,7 +155,9 @@ class DNF(PackageManager):
 
     @version_not_implemented
     def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
+        self,
+        package_id: str,
+        version: str | None = None,
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.

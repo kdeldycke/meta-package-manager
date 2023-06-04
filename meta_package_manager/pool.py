@@ -106,7 +106,7 @@ class ManagerPool:
     """A dict-like register, instanciating all supported package managers."""
 
     ALLOWED_EXTRA_OPTION: Final = frozenset(
-        {"ignore_auto_updates", "stop_on_error", "dry_run"}
+        {"ignore_auto_updates", "stop_on_error", "dry_run"},
     )
     """List of extra options that are allowed to be set on managers during the use of
     the :py:func:`meta_package_manager.pool.ManagerPool.select_managers` helper
@@ -123,7 +123,7 @@ class ManagerPool:
 
     # Emulates some dict methods.
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.register)
 
     def __getitem__(self, key):
@@ -134,7 +134,7 @@ class ManagerPool:
     def __iter__(self):
         yield from self.register
 
-    def __contains__(self, key):
+    def __contains__(self, key) -> bool:
         return key in self.register
 
     def values(self):
@@ -246,14 +246,14 @@ class ManagerPool:
             if implements_operation and not manager.implements(implements_operation):
                 logger.warning(
                     f"{theme.invoked_command(manager_id)} "
-                    f"does not implement {implements_operation}."
+                    f"does not implement {implements_operation}.",
                 )
                 continue
 
             # Filters out inactive managers.
             if drop_inactive and not manager.available:
                 logger.warning(
-                    f"Skip unavailable {theme.invoked_command(manager_id)} manager."
+                    f"Skip unavailable {theme.invoked_command(manager_id)} manager.",
                 )
                 continue
 

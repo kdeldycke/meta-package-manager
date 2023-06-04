@@ -22,8 +22,11 @@ from typing import Any, Iterator
 from boltons.iterutils import remap
 from click_extra.platforms import ALL_PLATFORMS
 
-from ..base import Arg, NestedArgs, Package, PackageManager
-from ..capabilities import search_capabilities, version_not_implemented
+from meta_package_manager.base import Arg, NestedArgs, Package, PackageManager
+from meta_package_manager.capabilities import (
+    search_capabilities,
+    version_not_implemented,
+)
 
 
 class NPM(PackageManager):
@@ -80,9 +83,8 @@ class NPM(PackageManager):
         # silence the errors in JSON so they get reported in CLI output (as
         # they're already featured in self.cli_errors) without raising error
         # (unless the --stop-on-error option is provided).
-        if "--json" in args:
-            if output and self.cli_errors:
-                output = ""
+        if "--json" in args and output and self.cli_errors:
+            output = ""
 
         return output
 
@@ -138,7 +140,7 @@ class NPM(PackageManager):
                 if key == "version":
                     package_id = path[-1]
                     installed.append(
-                        self.package(id=package_id, installed_version=value)
+                        self.package(id=package_id, installed_version=value),
                     )
                 return True
 
@@ -305,7 +307,9 @@ class NPM(PackageManager):
 
     @version_not_implemented
     def upgrade_one_cli(
-        self, package_id: str, version: str | None = None
+        self,
+        package_id: str,
+        version: str | None = None,
     ) -> tuple[str, ...]:
         """Generates the CLI to upgrade the package provided as parameter.
 

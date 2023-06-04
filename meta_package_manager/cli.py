@@ -143,7 +143,8 @@ def bar_plugin_path(ctx, param, value):
     if "__compiled__" in globals():
         logger.debug("CLI running as a binary.")
         logger.critical(
-            "Option --bar-plugin-path is only available for CLI installed from sources.",
+            "Option --bar-plugin-path is only available for CLI installed from "
+            "sources.",
         )
         ctx.exit(2)
 
@@ -1156,7 +1157,8 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
             ctx.exit(2)
         if update_version:
             logger.critical(
-                "--update-version requires the [TOML_PATH] argument to point to a file.",
+                "--update-version requires the [TOML_PATH] argument to point to a "
+                "file.",
             )
             ctx.exit(2)
         if overwrite:

@@ -72,10 +72,11 @@ def v_to_str(version_tuple: tuple[int, ...] | None) -> str:
 
 
 if sys.version_info < python_min_version:
-    msg = f"Bar plugin ran with Python {sys.version}, but requires Python >= {v_to_str(python_min_version)}"
-    raise SystemError(
-        msg,
+    msg = (
+        f"Bar plugin ran with Python {sys.version}, but requires "
+        f"Python >= {v_to_str(python_min_version)}"
     )
+    raise SystemError(msg)
 
 import argparse  # noqa: E402
 import os  # noqa: E402
@@ -154,7 +155,7 @@ class MPMPlugin:
 
         Relies on ``configparser.RawConfigParser.BOOLEAN_STATES`` to translate strings
         into boolean. See:
-        https://github.com/python/cpython/blob/89192c46da7b984811ff3bd648f8e827e4ef053c/Lib/configparser.py#L597-L599
+        https://github.com/python/cpython/blob/89192c4/Lib/configparser.py#L597-L599
         """
         value = MPMPlugin.getenv_str(var)
         if value is None:
@@ -383,10 +384,11 @@ if __name__ == "__main__":
             if not mpm_installed:
                 raise FileNotFoundError(error)
             if not mpm_up_to_date:
-                msg = f"{plugin.mpm_exec} is too old: {v_to_str(mpm_version)} < {v_to_str(plugin.mpm_min_version)}"
-                raise ValueError(
-                    msg,
+                msg = (
+                    f"{plugin.mpm_exec} is too old: "
+                    f"{v_to_str(mpm_version)} < {v_to_str(plugin.mpm_min_version)}"
                 )
+                raise ValueError(msg)
             print(f"{' '.join(plugin.mpm_exec)} v{v_to_str(mpm_version)}")
 
         else:

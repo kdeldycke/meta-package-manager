@@ -42,8 +42,8 @@ from .version import TokenizedString, parse_version
 VERSION_SEP: Final = "@"
 """Separator used by ``mpm`` to split package's ID from its version:
 
-This has been chosen as a separator because it is shared by popular package managers and
-purls.
+This has been chosen as a separator because it is shared by popular package managers
+and purls.
 
 ..code-block::
 
@@ -291,10 +291,11 @@ class Solver:
             return collection.pop()
 
         # Still too much constraints.
-        msg = f"Cannot reduce {collection} any further. More heuristics must be implemented."
-        raise ValueError(
-            msg,
+        msg = (
+            f"Cannot reduce {collection} any further. More heuristics must be "
+            "implemented."
         )
+        raise ValueError(msg)
 
     def resolve_package_specs(self) -> Iterator[tuple[str, Specifier]]:
         """Regroup specs of the pool by package IDs, and solve their constraints.

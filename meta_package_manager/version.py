@@ -82,6 +82,9 @@ class Token:
             if value < 0:
                 msg = "Negative integers not allowed."
                 raise TypeError(msg)
+        else:
+            msg = "Only string and integer allowed."  # type: ignore[unreachable]
+            raise TypeError(msg)
 
         # Parse user-value and stores its string and integer representations.
         self.string, self.integer = self.str_to_int(value)
@@ -195,6 +198,9 @@ class TokenizedString:
             self.string = str(value)
         elif isinstance(value, str):
             self.string = value.strip()
+        else:
+            msg = f"{type(value)} not supported"  # type: ignore[unreachable]
+            raise TypeError(msg)
         self.tokens = tuple(self.tokenize(self.string))
         self.separator = separator
 

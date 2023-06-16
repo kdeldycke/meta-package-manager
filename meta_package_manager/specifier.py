@@ -18,11 +18,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import cached_property
 from itertools import groupby
 from operator import attrgetter
-from typing import Iterable, Iterator, Sequence
-from typing import Final
-from functools import cached_property
+from typing import Final, Iterable, Iterator, Sequence
 
 from packageurl import PackageURL
 

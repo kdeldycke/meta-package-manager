@@ -22,12 +22,12 @@ import sys
 from contextlib import nullcontext
 from dataclasses import asdict, dataclass
 from enum import Enum
+from functools import cached_property
 from pathlib import Path
+from shutil import _WIN_DEFAULT_PATHEXT
 from textwrap import dedent, indent, shorten
 from typing import ContextManager, Generator, Iterable, Iterator
 from unittest.mock import patch
-from functools import cached_property
-from shutil import _WIN_DEFAULT_PATHEXT
 
 from boltons.iterutils import flatten, unique
 from boltons.strutils import strip_ansi

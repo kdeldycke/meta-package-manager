@@ -23,17 +23,15 @@
 from __future__ import annotations
 
 import builtins
+import contextlib
 import json
 import sys
-from collections import Counter
-from functools import partial
+from functools import cached_property, partial
 from io import StringIO
 from operator import itemgetter
 from pathlib import Path
-from typing import Any, Iterable, Sequence
+from typing import TYPE_CHECKING, Any, Iterable, Sequence
 from unittest.mock import patch
-from functools import cached_property
-import contextlib
 
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
@@ -46,6 +44,9 @@ from . import logger
 from .bar_plugin import MPMPlugin
 from .pool import pool
 from .version import TokenizedString
+
+if TYPE_CHECKING:
+    from collections import Counter
 
 SORTABLE_FIELDS = {
     "manager_id",

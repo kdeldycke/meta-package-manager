@@ -110,7 +110,8 @@ def operation_matrix() -> str:
 
 def update_readme() -> None:
     """Update `readme.md` at the root of the project with the implementation table for
-    each manager we support."""
+    each manager we support.
+    """
     replace_content(
         Path(__file__).parent.parent.joinpath("readme.md"),
         "<!-- operation-matrix-start -->\n\n",

@@ -17,15 +17,13 @@
 
 from __future__ import annotations
 
-from typing import Iterable, Iterator
-from typing import Final
 from functools import cached_property
+from typing import TYPE_CHECKING, Final, Iterable, Iterator
 
 from boltons.iterutils import unique
 from click_extra.colorize import default_theme as theme
 
 from . import logger
-from .base import Operations, PackageManager
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
 from .managers.cargo import Cargo
@@ -48,6 +46,9 @@ from .managers.steamcmd import SteamCMD
 from .managers.vscode import VSCode
 from .managers.yarn import Yarn
 from .managers.zypper import Zypper
+
+if TYPE_CHECKING:
+    from .base import Operations, PackageManager
 
 manager_classes = (
     APM,

@@ -171,6 +171,31 @@ ignore = [
     "W002",
 ]
 
+[tool.bumpversion]
+current_version = "5.13.2"
+allow_dirty = true
+
+[[tool.bumpversion.files]]
+filename = "./meta_package_manager/__init__.py"
+
+[[tool.bumpversion.files]]
+filename = "./meta_package_manager/bar_plugin.py"
+
+[[tool.bumpversion.files]]
+filename = "./pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "./changelog.md"
+search = "{{gh}}`{current_version} (unreleased)"
+replace = "{{gh}}`{new_version} (unreleased)"
+
+[[tool.bumpversion.files]]
+filename = "./citation.cff"
+search = "version: {current_version}"
+replace = "version: {new_version}"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

@@ -6,7 +6,7 @@ name: Changelog & versions
       - main
     paths:
       - changelog.md
-      - .bumpversion.cfg
+      - pyproject.toml
       - .github/workflows/changelog.yaml
       - .github/workflows/release.yaml
 

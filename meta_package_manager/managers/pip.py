@@ -18,9 +18,8 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Iterator
-
 from functools import cached_property
+from typing import TYPE_CHECKING, Iterator
 
 from click_extra.platforms import ALL_PLATFORMS
 
@@ -29,7 +28,9 @@ from meta_package_manager.capabilities import (
     search_capabilities,
     version_not_implemented,
 )
-from meta_package_manager.version import TokenizedString
+
+if TYPE_CHECKING:
+    from meta_package_manager.version import TokenizedString
 
 
 class Pip(PackageManager):

@@ -20,9 +20,9 @@ from __future__ import annotations
 from functools import partial
 from operator import attrgetter
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
-from _pytest.config import Config
 from click_extra.platforms import is_macos
 
 # Pre-load invokation helpers to be used as pytest's fixture.
@@ -35,6 +35,9 @@ from pytest import fixture, param
 
 from meta_package_manager.cli import mpm
 from meta_package_manager.pool import manager_classes, pool
+
+if TYPE_CHECKING:
+    from _pytest.config import Config
 
 """ Fixtures, configuration and helpers for tests. """
 

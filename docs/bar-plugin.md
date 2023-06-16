@@ -93,38 +93,22 @@ This option is handy for deployment and initial configuration of Xbar/SwiftBar. 
 $ ln -sf "$(mpm --bar-plugin-path)" "${HOME}/Library/Application Support/xbar/plugins/mpm.7h.py"
 ```
 
-## Python `>=3.7.3` required
+## Python `>=3.8` required
 
 Xbar plugins are self-contained scripts. As such, it needs to be able to run without any extra
 dependency, on the pre-installed Python distribution that ships with macOS.
 
-Xbar itself
-[requires macOS Catalina or newer (>= 10.15)](https://github.com/matryer/xbar/blame/2d063e0e46a0e427aedef62dc047b0065602cd40/README.md#L9).
-The embedded
-[Python 2.x on this platform is deprecated](https://developer.apple.com/documentation/macos-release-notes/macos-catalina-10_15-release-notes):
+With Python 3.7 being EOL and not receiving any security updates as of 2023-06-27, the plugin **requires Python 3.8 or newer**.
 
-```shell-session
-$ python
-
-WARNING: Python 2.7 is not recommended.
-This version is included in macOS for compatibility with legacy software.
-Future versions of macOS will not include Python 2.7.
-Instead, it is recommended that you transition to using 'python3' from within Terminal.
-
-Python 2.7.16 (default, Aug 24 2019, 18:37:03)
-[GCC 4.2.1 Compatible Apple LLVM 11.0.0 (clang-1100.0.32.4) (-macos10.15-objc-s on darwin
-Type "help", "copyright", "credits" or "license" for more information.
->>>
-```
-
-So this plugin targets Python 3.7.3 or newer, which is the default version
-available on Catalina as the `python3` CLI:
-
-```shell-session
-$ xcrun python3
-Python 3.7.3 (default, Sep  5 2019, 17:14:41)
-[Clang 11.0.0 (clang-1100.0.33.8)] on darwin
-```
+For reference:
+- Xbar itself
+[requires macOS Catalina or newer (>= 10.15)](https://github.com/matryer/xbar/blame/2d063e0e46a0e427aedef62dc047b0065602cd40/README.md#L9)
+- Python 2.x is [deprecated since macOS Catalina (10.15)](https://developer.apple.com/documentation/macos-release-notes/macos-catalina-10_15-release-notes) and has been [removed in macOS Monterey 12.3](https://developer.apple.com/documentation/macos-release-notes/macos-12_3-release-notes#Python)
+- It looks like since Monterey (macOS), there is no default Python version installed anymore, and the `python` CLI is a stub that points to the App Store to install Xcode:
+   ```shell-session
+   $ python3 --version
+   xcode-select: note: no developer tools were found at '/Applications/Xcode.app', requesting install. Choose an option in the dialog to download the command line developer tools.
+   ```
 
 ## Development workflow
 

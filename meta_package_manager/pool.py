@@ -17,18 +17,9 @@
 
 from __future__ import annotations
 
-import sys
 from typing import Iterable, Iterator
-
-if sys.version_info < (3, 8):
-    from typing_extensions import Final
-else:
-    from typing import Final
-
-if sys.version_info >= (3, 8):
-    from functools import cached_property
-else:
-    from boltons.cacheutils import cachedproperty as cached_property
+from typing import Final
+from functools import cached_property
 
 from boltons.iterutils import unique
 from click_extra.colorize import default_theme as theme

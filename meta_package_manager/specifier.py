@@ -17,21 +17,12 @@
 
 from __future__ import annotations
 
-import sys
 from dataclasses import dataclass
 from itertools import groupby
 from operator import attrgetter
 from typing import Iterable, Iterator, Sequence
-
-if sys.version_info < (3, 8):
-    from typing_extensions import Final
-else:
-    from typing import Final
-
-if sys.version_info >= (3, 8):
-    from functools import cached_property
-else:
-    from boltons.cacheutils import cachedproperty as cached_property
+from typing import Final
+from functools import cached_property
 
 from packageurl import PackageURL
 

@@ -32,12 +32,7 @@ from operator import itemgetter
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 from unittest.mock import patch
-
-if sys.version_info >= (3, 8):
-    from functools import cached_property
-else:
-    from boltons.cacheutils import cachedproperty as cached_property
-
+from functools import cached_property
 import contextlib
 
 from boltons.iterutils import flatten

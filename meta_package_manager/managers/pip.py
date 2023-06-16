@@ -18,13 +18,9 @@ from __future__ import annotations
 
 import json
 import re
-import sys
 from typing import Iterator
 
-if sys.version_info >= (3, 8):
-    from functools import cached_property
-else:
-    from boltons.cacheutils import cachedproperty as cached_property
+from functools import cached_property
 
 from click_extra.platforms import ALL_PLATFORMS
 

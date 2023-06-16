@@ -86,7 +86,7 @@ classifiers = [
 [tool.poetry.dependencies]
 # List of python versions and their support status:
 # https://en.wikipedia.org/wiki/History_of_Python#Support
-python = "^3.7"
+python = "^3.8"
 boltons = "^23.0.0"
 click = "^8.1.2"
 click-extra = "^3.10.0"

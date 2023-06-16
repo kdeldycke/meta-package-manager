@@ -56,12 +56,8 @@ from __future__ import annotations
 
 import sys
 
-python_min_version = (3, 7, 3)
-"""Minimal requirement is macOS Catalina (10.15) for both Xbar and SwiftBar.
-
-Catalina deprecates Python 2.x, and ships with Python 3.7.3. So this plugin is required
-to work with Python 3.7.3 or newer.
-"""
+python_min_version = (3, 8, 0)
+"""Minimal requirement is aligns to mpm's one."""
 
 
 def v_to_str(version_tuple: tuple[int, ...] | None) -> str:
@@ -86,10 +82,7 @@ from shutil import which  # noqa: E402
 from subprocess import run  # noqa: E402
 from unittest.mock import patch  # noqa: E402
 
-if sys.version_info >= (3, 8):
-    from functools import cached_property
-else:
-    cached_property = property
+from functools import cached_property
 
 
 class MPMPlugin:

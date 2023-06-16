@@ -153,7 +153,7 @@ testpaths = ["meta_package_manager/tests/"]
 #   We would love to add it to the command line to make sure pytest is properly recognizing it and loads our
 #   customization from ``./meta_package_manager/tests/conftest.py``. But because of issue
 #   https://github.com/pytest-dev/pytest/issues/9311 (see above), it is not currently present in ``addopts``.
-addopts = "--numprocesses=auto --dist=loadgroup --maxschedchunk=1 --durations=10 --cov-report=term --cov-report=xml --cov-config=pyproject.toml --cov=."
+addopts = "--numprocesses=auto --dist=loadgroup --maxschedchunk=1 --durations=10 --cov-report=term --cov-report=xml --cov-config=pyproject.toml --cov=meta_package_manager"
 # Make sure tests that are expected to fail do not resurect and start working all of a sudden.
 xfail_strict = true
 

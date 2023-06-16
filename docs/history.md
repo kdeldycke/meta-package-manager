@@ -3,7 +3,7 @@
 The `package_manager.py` script
 [started its life in my `dotfile` repository](https://github.com/kdeldycke/dotfiles/commit/bfcc51e318b40c4283974548cfa1712d082be121#diff-c8127ac6af9d4a21e366ff740db2eeb5)
 in 2016. It was a rewrite of the
-[`brew-updates.sh` script](https://github.com/matryer/xbar-plugins/blob/master/Dev/Homebrew/brew-updates.1h.sh)
+[`brew-updates.sh` script](https://github.com/matryer/xbar-plugins/blob/26831264939f1a2b5c086bba647e31ac77cf59bb/Dev/Homebrew/brew-updates.1h.sh)
 from Bash to Python.
 
 I then

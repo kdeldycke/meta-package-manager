@@ -101,14 +101,15 @@ dependency, on the pre-installed Python distribution that ships with macOS.
 With Python 3.7 being EOL and not receiving any security updates as of 2023-06-27, the plugin **requires Python 3.8 or newer**.
 
 For reference:
+
 - Xbar itself
-[requires macOS Catalina or newer (>= 10.15)](https://github.com/matryer/xbar/blame/2d063e0e46a0e427aedef62dc047b0065602cd40/README.md#L9)
+  [requires macOS Catalina or newer (>= 10.15)](https://github.com/matryer/xbar/blame/2d063e0e46a0e427aedef62dc047b0065602cd40/README.md#L9)
 - Python 2.x is [deprecated since macOS Catalina (10.15)](https://developer.apple.com/documentation/macos-release-notes/macos-catalina-10_15-release-notes) and has been [removed in macOS Monterey 12.3](https://developer.apple.com/documentation/macos-release-notes/macos-12_3-release-notes#Python)
 - It looks like since Monterey (macOS), there is no default Python version installed anymore, and the `python` CLI is a stub that points to the App Store to install Xcode:
-   ```shell-session
-   $ python3 --version
-   xcode-select: note: no developer tools were found at '/Applications/Xcode.app', requesting install. Choose an option in the dialog to download the command line developer tools.
-   ```
+  ```shell-session
+  $ python3 --version
+  xcode-select: note: no developer tools were found at '/Applications/Xcode.app', requesting install. Choose an option in the dialog to download the command line developer tools.
+  ```
 
 ## Development workflow
 

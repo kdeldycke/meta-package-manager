@@ -423,7 +423,6 @@ jobs:
           sudo add-apt-repository --yes multiverse
           sudo dpkg --add-architecture i386
           sudo apt --quiet --yes update
-          sudo apt --quiet --yes install lib32gcc-s1
           # Accept Steam license.
           # Source: https://askubuntu.com/a/1017487
           echo steam steam/question select "I AGREE" | sudo debconf-set-selections

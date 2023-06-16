@@ -161,9 +161,7 @@ class ManagerPool:
         :py:prop:`meta_package_manager.pool.ManagerPool.all_manager_ids`.
         """
         return tuple(
-            mid
-            for mid in self.maintained_manager_ids
-            if self.register[mid].supported
+            mid for mid in self.maintained_manager_ids if self.register[mid].supported
         )
 
     @cached_property

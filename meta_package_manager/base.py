@@ -18,13 +18,13 @@ from __future__ import annotations
 
 import os
 import re
+import shutil
 import sys
 from contextlib import nullcontext
 from dataclasses import asdict, dataclass
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
-from shutil import _WIN_DEFAULT_PATHEXT
 from textwrap import dedent, indent, shorten
 from typing import ContextManager, Generator, Iterable, Iterator
 from unittest.mock import patch
@@ -425,7 +425,7 @@ class PackageManager(metaclass=MetaPackageManager):
         # Code below is inpired by the original implementation of ``shutil.which()``:
         # https://github.com/python/cpython/blob/8d46c7e/Lib/shutil.py#L1478-L1491
         if sys.platform == "win32":
-            pathext_source = os.getenv("PATHEXT") or _WIN_DEFAULT_PATHEXT
+            pathext_source = os.getenv("PATHEXT") or shutil._WIN_DEFAULT_PATHEXT
             pathext = unique(ext for ext in pathext_source.split(os.pathsep) if ext)
             search_filenames = []
             for cli_name in cli_names:

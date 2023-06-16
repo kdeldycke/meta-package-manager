@@ -91,7 +91,7 @@ class Pip(PackageManager):
         # XXX The sentence below gets modernized with `super().version` by ruff.
         # See: https://beta.ruff.rs/docs/rules/#pyupgrade-up
         # But we're explicitly using the old syntax to bypass `cached_property`.
-        return super(Pip, self).version  # type: ignore[no-any-return] # noqa: UP008
+        return super(Pip, self).version  # noqa: UP008
 
     @property
     def installed(self) -> Iterator[Package]:

@@ -150,7 +150,7 @@ class ManagerPool:
     def maintained_manager_ids(self) -> tuple[str, ...]:
         """All manager IDs which are not deprecated."""
         return tuple(
-            mid for mid in self.all_manager_ids if not self.register.get(mid).deprecated
+            mid for mid in self.all_manager_ids if not self.register[mid].deprecated
         )
 
     @cached_property
@@ -163,7 +163,7 @@ class ManagerPool:
         return tuple(
             mid
             for mid in self.maintained_manager_ids
-            if self.register.get(mid).supported
+            if self.register[mid].supported
         )
 
     @cached_property
@@ -231,7 +231,7 @@ class ManagerPool:
         # Deduplicate managers IDs while preserving order, then remove excluded
         # managers.
         for manager_id in selected_ids:
-            manager = self.register.get(manager_id)
+            manager = self.register[manager_id]
 
             # Check if operation is not implemented before calling `.available`. It
             # saves one call to the package manager CLI.

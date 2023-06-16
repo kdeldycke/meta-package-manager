@@ -78,7 +78,7 @@ import argparse  # noqa: E402
 import os  # noqa: E402
 import re  # noqa: E402
 from configparser import RawConfigParser  # noqa: E402
-from functools import cached_property
+from functools import cached_property  # noqa: E402
 from shutil import which  # noqa: E402
 from subprocess import run  # noqa: E402
 from unittest.mock import patch  # noqa: E402

@@ -67,7 +67,7 @@ class InspectCLIOutput:
     def check_manager_selection(
         self,
         result,
-        selected: Iterator[str] = pool.default_manager_ids,
+        selected: Iterator[str] | tuple[str, ...] = pool.default_manager_ids,
         reference_set: Collection[str] = pool.default_manager_ids,
         strict_selection_match: bool = True,
     ):

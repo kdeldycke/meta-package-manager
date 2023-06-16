@@ -98,7 +98,6 @@ typing-extensions = { version = "^4.3.0", python = "< 3.10" }
 xmltodict = "^0.13.0"
 
 [tool.poetry.group.dev.dependencies]
-bump2version = "^1.0.1"
 coverage = { extras = ["toml"], version = "^7.2" }
 furo = "^2023.03.27"
 mypy = "^1.1"

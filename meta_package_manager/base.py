@@ -826,9 +826,7 @@ class PackageManager(metaclass=MetaPackageManager):
             local_option2 = patch.object(self, "stop_on_error", False)
         # Execute the command with eventual local options.
         with local_option1, local_option2:
-            output = self.run(*cli, extra_env=extra_env)
-
-        return output
+            return self.run(*cli, extra_env=extra_env)
 
     @property
     def installed(self) -> Iterator[Package]:

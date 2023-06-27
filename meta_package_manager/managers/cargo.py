@@ -138,8 +138,7 @@ class Cargo(PackageManager):
              Replacing /home/mawoka/.cargo/bin/bore
               Replaced `bore-cli v0.2.3` with `bore-cli v0.4.0` (executable `bore`)
         """
-        res = self.run_cli("install", package_id)
-        return res
+        return self.run_cli("install", package_id)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.

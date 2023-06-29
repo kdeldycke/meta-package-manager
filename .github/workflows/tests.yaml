@@ -131,6 +131,7 @@ jobs:
       - name: Homebrew - macOS upgrade
         if: runner.os == 'macOS'
         run: |
+          brew update-reset
           brew upgrade
           brew update
       - name: Homebrew - Linux install

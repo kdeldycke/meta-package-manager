@@ -131,9 +131,8 @@ jobs:
       - name: Homebrew - macOS upgrade
         if: runner.os == 'macOS'
         run: |
-          # Remove some tap as hinted in Homebrew 4.0.0 release notes: https://brew.sh/2023/02/16/homebrew-4.0.0/
-          brew untap homebrew/core
-          brew untap homebrew/cask
+          brew --version
+          brew upgrade mongodb-database-tools
           brew update
       - name: Homebrew - Linux install
         if: runner.os == 'Linux'

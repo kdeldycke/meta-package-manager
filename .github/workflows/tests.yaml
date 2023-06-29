@@ -423,6 +423,8 @@ jobs:
           sudo add-apt-repository --yes multiverse
           sudo dpkg --add-architecture i386
           sudo apt --quiet --yes update
+          # Source: https://steamcommunity.com/app/221410/discussions/0/1796278072823330159/#c1813170373224689290
+          sudo apt-get -o Dpkg::Options::="--force-overwrite" -f install
           # Accept Steam license.
           # Source: https://askubuntu.com/a/1017487
           echo steam steam/question select "I AGREE" | sudo debconf-set-selections

@@ -131,8 +131,7 @@ jobs:
       - name: Homebrew - macOS upgrade
         if: runner.os == 'macOS'
         run: |
-          brew --version
-          brew upgrade mongodb-database-tools
+          brew upgrade
           brew update
       - name: Homebrew - Linux install
         if: runner.os == 'Linux'

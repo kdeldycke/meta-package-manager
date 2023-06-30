@@ -133,6 +133,7 @@ jobs:
         run: |
           brew update-reset
           # Forces Python upgrade and linking to not have it raise an error on "brew upgrade" later.
+          brew link --overwrite python@3.11
           brew upgrade --force python@3.11
           brew upgrade
           brew update

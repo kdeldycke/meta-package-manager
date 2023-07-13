@@ -132,6 +132,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew update-reset
+          brew unlink go
           # Forces Python upgrade and linking to not have it raise an error on "brew upgrade" later.
           brew unlink python@3.11
           brew link --overwrite python@3.11

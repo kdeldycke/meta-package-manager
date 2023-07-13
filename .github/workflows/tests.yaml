@@ -128,14 +128,18 @@ jobs:
           python -m pipx ensurepath
 
       # Homebrew
-      - name: Homebrew - macOS upgrade
+      - name: Homebrew - macOS fix
         if: runner.os == 'macOS'
         run: |
           brew update-reset
           # Forces Python upgrade and linking to not have it raise an error on "brew upgrade" later.
+          brew unlink python@3.11
           brew link --overwrite python@3.11
           brew upgrade --force python@3.11
           brew upgrade
+      - name: Homebrew - macOS upgrade
+        if: runner.os == 'macOS'
+        run: |
           brew update
       - name: Homebrew - Linux install
         if: runner.os == 'Linux'

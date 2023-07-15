@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[mpm\] Drop support of Python 3.7.
+- \[mpm\] Run bar plugin unittests in their independent, non-parrallel step.
 - \[mpm\] Replace unmaintained `bump2version` by `bump-my-version`.
 
 ## {gh}`5.13.1 (2023-05-04) <compare/v5.13.0...v5.13.1>`

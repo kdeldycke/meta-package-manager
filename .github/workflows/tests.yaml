@@ -478,16 +478,18 @@ jobs:
         run: >
           poetry run pytest --exitfirst
           --numprocesses=auto --run-non-destructive --skip-destructive
+          --ignore=./meta_package_manager/tests/test_bar_plugin.py
           ./meta_package_manager/tests/
 
-      - name: Non-parallel random destructive tests - macOS & Linux
+      - name: Sequential random destructive tests - macOS & Linux
         if: runner.os != 'Windows'
         run: >
-            poetry run pytest --exitfirst
-            --numprocesses=0 --skip-non-destructive --run-destructive
-            ./meta_package_manager/tests/
+          poetry run pytest --exitfirst
+          --numprocesses=0 --skip-non-destructive --run-destructive
+          --ignore=./meta_package_manager/tests/test_bar_plugin.py
+          ./meta_package_manager/tests/
 
-      - name: Non-parallel, non-random destructive tests - Windows
+      - name: Sequential, non-random destructive tests - Windows
         if: runner.os == 'Windows'
         # XXX There an issue with the order in which different managers update each others on Windows.
         run: >
@@ -495,6 +497,14 @@ jobs:
           --numprocesses=0 --skip-non-destructive --run-destructive
           --randomly-seed=2976763296
           ./meta_package_manager/tests/
+
+      - name: Sequential, bar plugin tests - macOS
+        if: runner.os == 'macOS'
+        # XXX bar plugin calls way too many external commands to be run in parallel.
+        run: >
+          poetry run pytest --exitfirst
+          --numprocesses=0 --run-non-destructive --run-destructive
+          ./meta_package_manager/tests/test_bar_plugin.py
 
       - name: Coverage - Upload Codecov
         uses: codecov/codecov-action@v3.1.4

@@ -54,10 +54,20 @@ quota.
 
 from __future__ import annotations
 
+import argparse
+import os
+import re
 import sys
+from configparser import RawConfigParser
+from functools import cached_property
+from operator import methodcaller
+from shutil import which
+from subprocess import run
+from textwrap import dedent
+from unittest.mock import patch
 
 python_min_version = (3, 8, 0)
-"""Minimal requirement is aligns to mpm's one."""
+"""Minimal requirement is aligned to mpm."""
 
 
 def v_to_str(version_tuple: tuple[int, ...] | None) -> str:
@@ -73,15 +83,6 @@ if sys.version_info < python_min_version:
         f"Python >= {v_to_str(python_min_version)}"
     )
     raise SystemError(msg)
-
-import argparse  # noqa: E402
-import os  # noqa: E402
-import re  # noqa: E402
-from configparser import RawConfigParser  # noqa: E402
-from functools import cached_property  # noqa: E402
-from shutil import which  # noqa: E402
-from subprocess import run  # noqa: E402
-from unittest.mock import patch  # noqa: E402
 
 
 class MPMPlugin:
@@ -267,19 +268,18 @@ class MPMPlugin:
         return installed, mpm_version, up_to_date, error
 
     @staticmethod
-    def pp(*args: str) -> None:
+    def pp(label: str, *args: str) -> None:
         """Print one menu-line with the Xbar/SwiftBar dialect.
 
         First argument is the menu-line label, separated by a pipe to all other non-
         empty parameters, themselves separated by a space.
         """
-        line: list[str] = []
-        for param in args:
-            if param:
-                if len(line) == 1:
-                    line.append("|")
-                line.append(param)
-        print(*line, sep=" ")
+        print(
+            label.strip(),
+            "|",
+            *(l for l in map(methodcaller("strip"), args) if l),
+            sep=" ",
+        )
 
     @staticmethod
     def print_error_header() -> None:
@@ -288,20 +288,24 @@ class MPMPlugin:
         print("---")
 
     def print_error(self, message: str | Exception, submenu: str = "") -> None:
-        """Print a formatted error line by line.
+        """Print a formatted error message line by line.
 
         A red, fixed-width font is used to preserve traceback and exception layout.
+        For compactness, the message is dedented and empty lines are skipped.
+
+        Message is always casted to a string as we allow passing of exception objects
+        and have them rendered.
         """
-        # Cast to string as we might directly pass exceptions for rendering.
-        for line in str(message).strip().splitlines():
-            self.pp(
-                f"{submenu}{line}",
-                self.error_font,
-                "trim=false",
-                "ansi=false",
-                "emojize=false",
-                "symbolize=false" if self.is_swiftbar else "",
-            )
+        for line in map(methodcaller("strip"), dedent(str(message)).splitlines()):
+            if line:
+                self.pp(
+                    f"{submenu}{line}",
+                    self.error_font,
+                    "trim=false",
+                    "ansi=false",
+                    "emojize=false",
+                    "symbolize=false" if self.is_swiftbar else "",
+                )
 
     def print_menu(self) -> None:
         """Print the main menu."""

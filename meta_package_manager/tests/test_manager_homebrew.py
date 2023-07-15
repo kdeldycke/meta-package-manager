@@ -93,6 +93,17 @@ def install_cask():
         git_checkout(package_id, commit)
         brew_cleanup()
 
+        # XXX Work around the bad old ubersicht cask formula.
+        # Replace ":yosemite" by ":el_capitan" like the last commit did at:
+        # https://github.com/Homebrew/homebrew-cask/commit/5cddbd6
+        # The day we have a new version of ubersicht after this commit, we will be able
+        # to remove that hack, and have the install_cask() invokation from the
+        # test_autoupdate_unicode_name() test below checkout ubersicht from that commit.
+        if package_id == "ubersicht":
+            cask_path = get_cask_path().joinpath(f"{package_id}.rb")
+            content = cask_path.read_text()
+            cask_path.write_text(content.replace(":yosemite", ":el_capitan"))
+
         # Install the cask but bypass its local cache auto-update: we want to
         # force brew to rely on our formula from the past.
         process = subprocess.run(
@@ -137,6 +148,8 @@ class TestCask:
         """See #16."""
         # Install an old version of a package with a unicode name.
         # Old Cask formula for ubersicht 1.6.69.
+        # XXX Update this commit when a new version of ubersicht is released so we can
+        # get rid of the hack above.
         output = install_cask("ubersicht", "9870e8ffaa8dc83403973580415b2c56dc760f15")
         assert "Uebersicht-1.6.69.app.zip" in output
         assert "Übersicht.app" in output

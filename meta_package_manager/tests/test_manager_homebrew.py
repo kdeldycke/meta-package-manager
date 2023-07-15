@@ -99,6 +99,7 @@ def install_cask():
             ("brew", "reinstall", "--cask", package_id),
             capture_output=True,
             encoding="utf-8",
+            check=True,
             env=env_copy(
                 {
                     # Do not let brew use its live API to fetch the latest version.
@@ -119,7 +120,6 @@ def install_cask():
         if process.stderr:
             assert "is already installed" not in process.stderr
         assert f"{package_id} was successfully installed!" in process.stdout
-        assert process.returncode == 0
         return process.stdout
 
     yield _install_cask

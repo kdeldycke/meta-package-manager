@@ -110,9 +110,17 @@ ______________________________________________________________________
 
 Below are the most popular ones:
 
+### On macOS
+
+`mpm` is part of the official [Homebrew](https://brew.sh) default tap, so you can install it with:
+
+```shell-session
+$ brew install meta-package-manager
+```
+
 ### From sources
 
-Easiest way is to install `mpm` from sources with [`pipx`](https://pypa.github.io/pipx/):
+[`pipx`](https://pypa.github.io/pipx/) is the cleanest way to install `mpm` from sources on any platform:
 
 ```shell-session
 $ pipx install meta-package-manager

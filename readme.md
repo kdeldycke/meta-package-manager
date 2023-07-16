@@ -138,48 +138,6 @@ Standalone executables of `mpm`'s latest version are available as direct downloa
 
 ## Quickstart
 
-### List managers
-
-List all supported package managers and their status on current system (macOS
-in this case):
-
-```shell-session
-$ mpm --all-managers managers
-╭────────────┬────────────────────┬────────────────┬──────────────────────────────┬────────────┬───────────╮
-│ Manager ID │ Name               │ Supported      │ CLI                          │ Executable │ Version   │
-├────────────┼────────────────────┼────────────────┼──────────────────────────────┼────────────┼───────────┤
-│ apm        │ Atom's apm         │ ✓              │ ✘ apm not found              │            │           │
-│ apt        │ APT                │ ✘ Linux only   │ ✓ /usr/bin/apt               │ ✓          │ ✘         │
-│ apt-mint   │ Linux Mint's apt   │ ✘ Linux only   │ ✓ /usr/bin/apt               │ ✓          │ ✘         │
-│ brew       │ Homebrew Formulae  │ ✓              │ ✓ /opt/homebrew/bin/brew     │ ✓          │ ✓ 3.6.3   │
-│ cargo      │ Rust's cargo       │ ✓              │ ✓ /opt/homebrew/bin/cargo    │ ✓          │ ✓ 1.64.0  │
-│ cask       │ Homebrew Cask      │ ✓              │ ✓ /opt/homebrew/bin/brew     │ ✓          │ ✓ 3.6.3   │
-│ choco      │ Chocolatey         │ ✘ Windows only │ ✘ choco not found            │            │           │
-│ composer   │ PHP's Composer     │ ✓              │ ✓ /opt/homebrew/bin/composer │ ✓          │ ✓ 2.4.2   │
-│ dnf        │ DNF                │ ✘ Linux only   │ ✘ dnf not found              │            │           │
-│ emerge     │ Emerge             │ ✘ Linux only   │ ✘ emerge not found           │            │           │
-│ flatpak    │ Flatpak            │ ✘ Linux only   │ ✘ flatpak not found          │            │           │
-│ gem        │ Ruby Gems          │ ✓              │ ✓ /usr/bin/gem               │ ✓          │ ✓ 3.0.3.1 │
-│ mas        │ Mac AppStore       │ ✓              │ ✓ /opt/homebrew/bin/mas      │ ✓          │ ✓ 1.8.6   │
-│ npm        │ Node's npm         │ ✓              │ ✓ /opt/homebrew/bin/npm      │ ✓          │ ✓ 8.19.2  │
-│ opkg       │ OPKG               │ ✘ Linux only   │ ✘ opkg not found             │            │           │
-│ pacman     │ Pacman             │ ✘ Linux only   │ ✘ pacman not found           │            │           │
-│ paru       │ Paru               │ ✘ Linux only   │ ✘ paru not found             │            │           │
-│ pip        │ Pip                │ ✓              │ ✓ ~/.pyenv/shims/python3     │ ✓          │ ✓ 22.2.2  │
-│ pipx       │ Pipx               │ ✓              │ ✓ /opt/homebrew/bin/pipx     │ ✓          │ ✓ 1.1.0   │
-│ scoop      │ Scoop              │ ✘ Windows only │ ✘ scoop not found            │            │           │
-│ snap       │ Snap               │ ✘ Linux only   │ ✘ snap not found             │            │           │
-│ steamcmd   │ Valve Steam        │ ✓              │ ✘ steamcmd not found         │            │           │
-│ vscode     │ Visual Studio Code │ ✓              │ ✓ /opt/homebrew/bin/code     │ ✓          │ ✓ 1.71.2  │
-│ yarn       │ Node's yarn        │ ✓              │ ✓ /opt/homebrew/bin/yarn     │ ✓          │ ✓ 1.22.19 │
-│ yay        │ Yay                │ ✘ Linux only   │ ✘ yay not found              │            │           │
-│ yum        │ YUM                │ ✘ Linux only   │ ✘ yum not found              │            │           │
-│ zypper     │ Zypper             │ ✘ Linux only   │ ✘ zypper not found           │            │           │
-╰────────────┴────────────────────┴────────────────┴──────────────────────────────┴────────────┴───────────╯
-```
-
-If your favorite manager is not supported yet, you can help! See the [contibution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html).
-
 ### List installed packages
 
 List all packages installed on current system:
@@ -229,6 +187,47 @@ $ mpm outdated
 ╰──────────────┴─────────────┴─────────┴───────────────────┴────────────────╯
 8 packages total (brew: 3, pip: 2, gem: 1, mas: 1, npm: 1, apm: 0, cask: 0, composer: 0).
 ```
+
+### List managers
+
+If you wonder why your package manager doesn't seems to be identified, you can list all those recognized by `mpm` with:
+
+```shell-session
+$ mpm --all-managers managers
+╭────────────┬────────────────────┬────────────────┬──────────────────────────────┬────────────┬───────────╮
+│ Manager ID │ Name               │ Supported      │ CLI                          │ Executable │ Version   │
+├────────────┼────────────────────┼────────────────┼──────────────────────────────┼────────────┼───────────┤
+│ apm        │ Atom's apm         │ ✓              │ ✘ apm not found              │            │           │
+│ apt        │ APT                │ ✘ Linux only   │ ✓ /usr/bin/apt               │ ✓          │ ✘         │
+│ apt-mint   │ Linux Mint's apt   │ ✘ Linux only   │ ✓ /usr/bin/apt               │ ✓          │ ✘         │
+│ brew       │ Homebrew Formulae  │ ✓              │ ✓ /opt/homebrew/bin/brew     │ ✓          │ ✓ 3.6.3   │
+│ cargo      │ Rust's cargo       │ ✓              │ ✓ /opt/homebrew/bin/cargo    │ ✓          │ ✓ 1.64.0  │
+│ cask       │ Homebrew Cask      │ ✓              │ ✓ /opt/homebrew/bin/brew     │ ✓          │ ✓ 3.6.3   │
+│ choco      │ Chocolatey         │ ✘ Windows only │ ✘ choco not found            │            │           │
+│ composer   │ PHP's Composer     │ ✓              │ ✓ /opt/homebrew/bin/composer │ ✓          │ ✓ 2.4.2   │
+│ dnf        │ DNF                │ ✘ Linux only   │ ✘ dnf not found              │            │           │
+│ emerge     │ Emerge             │ ✘ Linux only   │ ✘ emerge not found           │            │           │
+│ flatpak    │ Flatpak            │ ✘ Linux only   │ ✘ flatpak not found          │            │           │
+│ gem        │ Ruby Gems          │ ✓              │ ✓ /usr/bin/gem               │ ✓          │ ✓ 3.0.3.1 │
+│ mas        │ Mac AppStore       │ ✓              │ ✓ /opt/homebrew/bin/mas      │ ✓          │ ✓ 1.8.6   │
+│ npm        │ Node's npm         │ ✓              │ ✓ /opt/homebrew/bin/npm      │ ✓          │ ✓ 8.19.2  │
+│ opkg       │ OPKG               │ ✘ Linux only   │ ✘ opkg not found             │            │           │
+│ pacman     │ Pacman             │ ✘ Linux only   │ ✘ pacman not found           │            │           │
+│ paru       │ Paru               │ ✘ Linux only   │ ✘ paru not found             │            │           │
+│ pip        │ Pip                │ ✓              │ ✓ ~/.pyenv/shims/python3     │ ✓          │ ✓ 22.2.2  │
+│ pipx       │ Pipx               │ ✓              │ ✓ /opt/homebrew/bin/pipx     │ ✓          │ ✓ 1.1.0   │
+│ scoop      │ Scoop              │ ✘ Windows only │ ✘ scoop not found            │            │           │
+│ snap       │ Snap               │ ✘ Linux only   │ ✘ snap not found             │            │           │
+│ steamcmd   │ Valve Steam        │ ✓              │ ✘ steamcmd not found         │            │           │
+│ vscode     │ Visual Studio Code │ ✓              │ ✓ /opt/homebrew/bin/code     │ ✓          │ ✓ 1.71.2  │
+│ yarn       │ Node's yarn        │ ✓              │ ✓ /opt/homebrew/bin/yarn     │ ✓          │ ✓ 1.22.19 │
+│ yay        │ Yay                │ ✘ Linux only   │ ✘ yay not found              │            │           │
+│ yum        │ YUM                │ ✘ Linux only   │ ✘ yum not found              │            │           │
+│ zypper     │ Zypper             │ ✘ Linux only   │ ✘ zypper not found           │            │           │
+╰────────────┴────────────────────┴────────────────┴──────────────────────────────┴────────────┴───────────╯
+```
+
+If your favorite manager is not supported yet, you can help! See the [contibution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html).
 
 ## Usage
 

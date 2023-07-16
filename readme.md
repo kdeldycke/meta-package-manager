@@ -106,6 +106,10 @@ ______________________________________________________________________
 
 ## Installation
 
+[All installation methods](https://kdeldycke.github.io/meta-package-manager/install.html) are available in the documentation.
+
+Below are the most popular ones:
+
 ### From sources
 
 Easiest way is to install `mpm` from sources with [`pipx`](https://pypa.github.io/pipx/):
@@ -114,13 +118,9 @@ Easiest way is to install `mpm` from sources with [`pipx`](https://pypa.github.i
 $ pipx install meta-package-manager
 ```
 
-Other
-[alternatives installation methods](https://kdeldycke.github.io/meta-package-manager/install.html)
-are available in the documentation.
-
 ### Executables
 
-Standalone executables of `mpm`'s latest version are available for several platforms and architectures:
+Standalone executables of `mpm`'s latest version are available as direct downloads for several platforms and architectures:
 
 | Platform    | `x86_64`                                                                                                             |
 | ----------- | -------------------------------------------------------------------------------------------------------------------- |

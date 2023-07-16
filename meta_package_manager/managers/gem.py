@@ -38,8 +38,7 @@ class Gem(PackageManager):
         like:
 
         .. code-block:: shell-session
-
-        ► sudo dseditgroup -o edit -a -t user wheel
+            ► sudo dseditgroup -o edit -a -t user wheel
 
         And then do ``visudo`` to make it so the ``wheel`` group does not require
         a password. There is a line already there for it, you just need to

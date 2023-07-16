@@ -63,9 +63,7 @@ class Token:
             str_int = "0"
         if str(integer) != str_int:
             msg = f"{value!r} string is not equivalent to {integer!r} integer."
-            raise TypeError(
-                msg,
-            )
+            raise TypeError(msg)
 
         return value, integer
 

@@ -118,6 +118,7 @@ To produce clean and fancy terminals screenshots, use either:
 - [Graphite Shot](https://graphite-shot.now.sh)
 - [Carbon](https://github.com/carbon-app/carbon)
 - [CodeKeep](https://codekeep.io/screenshot)
+- [chalk.ist](https://chalk.ist)
 
 ## Changelog
 

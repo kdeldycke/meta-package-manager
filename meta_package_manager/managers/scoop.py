@@ -37,8 +37,8 @@ class Scoop(PackageManager):
 
     requirement = "0.2.4"
 
-    version_regex = r".*Scoop version:\s+v(?P<version>\S+)"
-    """Search version right after the ``Scoop version:\n`` string.
+    version_regex = r"^v(?P<version>\S+)\s.+"
+    """Search version at the start of a line.
 
     .. code-block:: shell-session
 

@@ -435,6 +435,8 @@ jobs:
           brew install --cask steamcmd
       - name: SteamCMD - Linux install
         if: runner.os == 'Linux'
+        # Some notes on the Steam situation on Linux:
+        # https://popey.com/blog/2023/08/i386-in-ubuntu-wont-die/
         run: |
           sudo add-apt-repository --yes multiverse
           sudo dpkg --add-architecture i386

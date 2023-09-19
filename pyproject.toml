@@ -174,27 +174,42 @@ ignore = [
 [tool.bumpversion]
 current_version = "5.14.0"
 allow_dirty = true
+no_regex = true
 
 [[tool.bumpversion.files]]
+# Update Python package version.
 filename = "./meta_package_manager/__init__.py"
+no_regex = true
 
 [[tool.bumpversion.files]]
+# Update version in bar plugin.
 filename = "./meta_package_manager/bar_plugin.py"
+no_regex = true
 
 [[tool.bumpversion.files]]
+# Update version in Poetry section.
 filename = "./pyproject.toml"
+no_regex = true
 search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
 
 [[tool.bumpversion.files]]
 filename = "./changelog.md"
+no_regex = true
 search = "{{gh}}`{current_version} (unreleased)"
 replace = "{{gh}}`{new_version} (unreleased)"
 
 [[tool.bumpversion.files]]
 filename = "./citation.cff"
+no_regex = true
 search = "version: {current_version}"
 replace = "version: {new_version}"
+
+[[tool.bumpversion.files]]
+filename = "./citation.cff"
+no_regex = false
+search = "date-released: \\d{{4}}-\\d{{2}}-\\d{{2}}"
+replace = "date-released: {now:%Y-%m-%d}"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

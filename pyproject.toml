@@ -84,8 +84,7 @@ classifiers = [
 "Changelog" = "https://kdeldycke.github.io/meta-package-manager/changelog.html"
 
 [tool.poetry.dependencies]
-# List of python versions and their support status:
-# https://en.wikipedia.org/wiki/History_of_Python#Support
+# Python versions and their status: https://devguide.python.org/versions/
 python = "^3.8"
 boltons = "^23.0.0"
 click = "^8.1.2"

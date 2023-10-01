@@ -23,7 +23,7 @@
   managers instead of videos
 - `mpm` solves [XKCD #1654 - *Universal Install Script*](https://xkcd.com/1654/)
 
-______________________________________________________________________
+---
 
 ## Features
 
@@ -59,42 +59,36 @@ ______________________________________________________________________
 
 <!-- operation-matrix-start -->
 
-| Package manager                                                                        | Min. version | BSD[^bsd_without_macos] | Linux[^linux] | macOS | Unix[^unix] | Windows | `installed` | `outdated` | `search` | `install` | `upgrade` | `upgrade_all` | `remove` | `sync` | `cleanup` |
+| Package manager                                                                         | Min. version | BSD[^bsd_without_macos] | Linux[^linux] | macOS | Unix[^unix] | Windows | `installed` | `outdated` | `search` | `install` | `upgrade` | `upgrade_all` | `remove` | `sync` | `cleanup` |
 | --------------------------------------------------------------------------------------- | ------------ | :---------------------: | :-----------: | :---: | :---------: | :-----: | :---------: | :--------: | :------: | :-------: | :-------: | :-----------: | :------: | :----: | :-------: |
-| [`apm`](https://atom.io/packages) [⚠️](https://github.blog/2022-06-08-sunsetting-atom/) | 1.0.0        |            🅱️            |      🐧       |  🍎   |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
-| [`apt`](https://wiki.debian.org/AptCLI)                                                | 1.0.0        |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
-| [`apt-mint`](https://github.com/kdeldycke/meta-package-manager/issues/52)              | 1.0.0        |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
-| [`brew`](https://brew.sh)                                                              | 2.7.0        |                         |      🐧       |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
-| [`cargo`](https://doc.rust-lang.org/cargo/)                                            | 1.0.0        |            🅱️            |      🐧       |  🍎   |    `>_`     |   🪟    |      ✓      |            |    ✓     |     ✓     |           |               |    ✓     |        |           |
-| [`cask`](https://github.com/Homebrew/homebrew-cask)                                    | 2.7.0        |                         |               |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
-| [`choco`](https://chocolatey.org)                                                      | 0.10.9       |                         |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
-| [`composer`](https://getcomposer.org)                                                  | 1.4.0        |            🅱️            |      🐧       |  🍎   |    `>_`     |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |     ✓     |
-| [`dnf`](https://github.com/rpm-software-management/dnf)                                | 4.0.0        |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
-| [`emerge`](https://wiki.gentoo.org/wiki/Portage#emerge)                                | 3.0.0        |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
-| [`flatpak`](https://flatpak.org)                                                       | 1.2.0        |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |     ✓     |
-| [`gem`](https://rubygems.org)                                                          | 2.5.0        |            🅱️            |      🐧       |  🍎   |    `>_`     |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
-| [`mas`](https://github.com/argon/mas)                                                  | 1.6.1        |                         |               |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
-| [`npm`](https://www.npmjs.com)                                                         | 4.0.0        |            🅱️            |      🐧       |  🍎   |    `>_`     |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
-| [`opkg`](https://git.yoctoproject.org/cgit/cgit.cgi/opkg/)                             | 0.2.0        |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |           |
-| [`pacaur`](https://github.com/E5ten/pacaur)                                            | 4.0.0        |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
-| [`pacman`](https://wiki.archlinux.org/title/pacman)                                    | 5.0.0        |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
-| [`paru`](https://github.com/Morganamilo/paru)                                          | 1.9.3        |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
-| [`pip`](https://pip.pypa.io)                                                           | 10.0.0       |            🅱️            |      🐧       |  🍎   |    `>_`     |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
-| [`pipx`](https://pypa.github.io/pipx/)                                                 | 1.0.0        |            🅱️            |      🐧       |  🍎   |    `>_`     |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
-| [`scoop`](https://scoop.sh)                                                            | 0.2.4        |                         |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
-| [`snap`](https://snapcraft.io)                                                         | 2.0.0        |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
-| [`steamcmd`](https://developer.valvesoftware.com/wiki/SteamCMD)                        | None         |            🅱️            |      🐧       |  🍎   |    `>_`     |   🪟    |             |            |          |     ✓     |           |               |          |        |           |
-| [`vscode`](https://code.visualstudio.com)                                              | 1.60.0       |            🅱️            |      🐧       |  🍎   |    `>_`     |   🪟    |      ✓      |            |          |     ✓     |           |               |          |        |           |
-| [`yarn`](https://yarnpkg.com)                                                          | 1.20.0       |            🅱️            |      🐧       |  🍎   |    `>_`     |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
-| [`yay`](https://github.com/Jguer/yay)                                                  | 11.0.0       |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
-| [`yum`](http://yum.baseurl.org)                                                        | 4.0.0        |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
-| [`zypper`](https://en.opensuse.org/Portal:Zypper)                                      | 1.14.0       |            🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
-
-[^bsd_without_macos]: BSD: FreeBSD, NetBSD, OpenBSD, SunOS.
-
-[^linux]: Linux: Linux, Windows Subsystem for Linux v2.
-
-[^unix]: Unix: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.
+| [`apm`](https://atom.io/packages) [⚠️](https://github.blog/2022-06-08-sunsetting-atom/) | 1.0.0        |           🅱️            |       🐧       |   🍎   |             |    🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
+| [`apt`](https://wiki.debian.org/AptCLI)                                                 | 1.0.0        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
+| [`apt-mint`](https://github.com/kdeldycke/meta-package-manager/issues/52)               | 1.0.0        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
+| [`brew`](https://brew.sh)                                                               | 2.7.0        |                         |       🐧       |   🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`cargo`](https://doc.rust-lang.org/cargo/)                                             | 1.0.0        |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |      ✓      |            |    ✓     |     ✓     |           |               |    ✓     |        |           |
+| [`cask`](https://github.com/Homebrew/homebrew-cask)                                     | 2.7.0        |                         |               |   🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`choco`](https://chocolatey.org)                                                       | 0.10.9       |                         |               |       |             |    🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
+| [`composer`](https://getcomposer.org)                                                   | 1.4.0        |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |     ✓     |
+| [`dnf`](https://github.com/rpm-software-management/dnf)                                 | 4.0.0        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
+| [`emerge`](https://wiki.gentoo.org/wiki/Portage#emerge)                                 | 3.0.0        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
+| [`flatpak`](https://flatpak.org)                                                        | 1.2.0        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |     ✓     |
+| [`gem`](https://rubygems.org)                                                           | 2.5.0        |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
+| [`mas`](https://github.com/argon/mas)                                                   | 1.6.1        |                         |               |   🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
+| [`npm`](https://www.npmjs.com)                                                          | 4.0.0        |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
+| [`opkg`](https://git.yoctoproject.org/cgit/cgit.cgi/opkg/)                              | 0.2.0        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |           |
+| [`pacaur`](https://github.com/E5ten/pacaur)                                             | 4.0.0        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`pacman`](https://wiki.archlinux.org/title/pacman)                                     | 5.0.0        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`paru`](https://github.com/Morganamilo/paru)                                           | 1.9.3        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`pip`](https://pip.pypa.io)                                                            | 10.0.0       |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
+| [`pipx`](https://pypa.github.io/pipx/)                                                  | 1.0.0        |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
+| [`scoop`](https://scoop.sh)                                                             | 0.2.4        |                         |               |       |             |    🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`snap`](https://snapcraft.io)                                                          | 2.0.0        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
+| [`steamcmd`](https://developer.valvesoftware.com/wiki/SteamCMD)                         | None         |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |             |            |          |     ✓     |           |               |          |        |           |
+| [`vscode`](https://code.visualstudio.com)                                               | 1.60.0       |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |      ✓      |            |          |     ✓     |           |               |          |        |           |
+| [`yarn`](https://yarnpkg.com)                                                           | 1.20.0       |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
+| [`yay`](https://github.com/Jguer/yay)                                                   | 11.0.0       |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`yum`](http://yum.baseurl.org)                                                         | 4.0.0        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
+| [`zypper`](https://en.opensuse.org/Portal:Zypper)                                       | 1.14.0       |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
 
 <!-- operation-matrix-end -->
 
@@ -130,11 +124,11 @@ $ pipx install meta-package-manager
 
 Standalone executables of `mpm`'s latest version are available as direct downloads for several platforms and architectures:
 
-| Platform    | `x86_64`                                                                                                             |
-| ----------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Linux**[^linux]   | [Download `mpm-linux-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)   |
-| **macOS**   | [Download `mpm-macos-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)   |
-| **Windows** | [Download `mpm-windows-x64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) |
+| Platform          | `x86_64`                                                                                                                         |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Linux**[^linux] | [Download `mpm-linux-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     |
+| **macOS**         | [Download `mpm-macos-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     |
+| **Windows**       | [Download `mpm-windows-x64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) |
 
 ## Quickstart
 
@@ -238,3 +232,9 @@ Other subcommands and options are documented in:
 - the
   [list of use-cases](https://kdeldycke.github.io/meta-package-manager/usecase.html)
   where you’ll find inspiration on how to leverage `mpm` power
+
+[^bsd_without_macos]: BSD: FreeBSD, NetBSD, OpenBSD, SunOS.
+
+[^linux]: Linux: Linux, Windows Subsystem for Linux v2.
+
+[^unix]: Unix: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.

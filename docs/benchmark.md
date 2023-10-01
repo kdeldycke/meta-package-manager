@@ -35,23 +35,23 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 
 ## Operations
 
-| Operation                    | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
-| ---------------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
-| List available managers      |   ✓   |                |               |              |              |
-| List installed packages      |   ✓   |                |       ✓       |              |      ✓       |
-| List duplicate packages      |   ✓   |                |               |              |              |
-| List outdated packages       |   ✓   |                |       ✓       |              |      ✓       |
-| Search packages              |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Locate binaries (`which` command)    |   ✓   |                |               |              |              |
-| Install a package            |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Remove / Uninstall a package |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Upgrade single package       |   ✓   |                |       ✓       |              |      ✓       |
-| Upgrade all packages         |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Sync                         |   ✓   |                |       ✓       |      ✓       |      ✓       |
-| Cleanup: caches              |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Cleanup: orphans             |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| Backup / Lock / Freeze       |   ✓   |                |               |              |              |
-| Restore                      |   ✓   |                |               |              |              |
+| Operation                         | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| --------------------------------- | :---: | :------------: | :-----------: | :----------: | :----------: |
+| List available managers           |   ✓   |                |               |              |              |
+| List installed packages           |   ✓   |                |       ✓       |              |      ✓       |
+| List duplicate packages           |   ✓   |                |               |              |              |
+| List outdated packages            |   ✓   |                |       ✓       |              |      ✓       |
+| Search packages                   |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Locate binaries (`which` command) |   ✓   |                |               |              |              |
+| Install a package                 |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Remove / Uninstall a package      |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Upgrade single package            |   ✓   |                |       ✓       |              |      ✓       |
+| Upgrade all packages              |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| Sync                              |   ✓   |                |       ✓       |      ✓       |      ✓       |
+| Cleanup: caches                   |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| Cleanup: orphans                  |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
+| Backup / Lock / Freeze            |   ✓   |                |               |              |              |
+| Restore                           |   ✓   |                |               |              |              |
 
 ## Package manager support
 
@@ -184,19 +184,13 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 
 ## Operating system support
 
-| OS      | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
-| ------- | :---: | :------------: | :-----------: | :----------: | :----------: |
-| BSD |   🅱️[^bsd_without_macos]   |             |           |              |              |
-| Linux   |   🐧[^linux]   |       🐧        |       🐧       |      🐧       |      🐧       |
-| macOS   |   🍎   |       🍎        |       🍎       |      🍎       |      🍎       |
-| Unix |   `>_`[^unix]    |             |             |              |              |
-| Windows |   🪟   |       🪟        |       🪟       |              |              |
-
-[^bsd_without_macos]: BSD: FreeBSD, NetBSD, OpenBSD, SunOS.
-
-[^linux]: Linux: Linux, Windows Subsystem for Linux v2.
-
-[^unix]: Unix: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.
+| OS      |         `mpm`          | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| ------- | :--------------------: | :------------: | :-----------: | :----------: | :----------: |
+| BSD     | 🅱️[^bsd_without_macos] |                |               |              |              |
+| Linux   |       🐧[^linux]        |       🐧        |       🐧       |      🐧       |      🐧       |
+| macOS   |           🍎            |       🍎        |       🍎       |      🍎       |      🍎       |
+| Unix    |      `>_`[^unix]       |                |               |              |              |
+| Windows |           🪟            |       🪟        |       🪟       |              |              |
 
 ## Distribution
 
@@ -207,7 +201,7 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | macOS binary    |                                                                                                     ✓ (`x86_64`)                                                                                                      |                                                                                           ✓ (`x86_64`)                                                                                            |                                                                          ✓(`x86_64`, `aarch64`, `universal`)                                                                          |                                                                                                                                                                               |                                                                                                                                                                                             |
 | Linux binary    |                                                                                                     ✓ (`x86_64`)                                                                                                      |                                                                                 ✓ (`x86_64`, `aarch64`, `armv7`)                                                                                  |                                                                                     ✓ (`x86_64`)                                                                                      |                                                                                                                                                                               |                                                                                        ✓ (`x86_64`)                                                                                         |
 | Windows binary  |                                                                                                     ✓ (`x86_64`)                                                                                                      |                                                                                           ✓ (`x86_64`)                                                                                            |                                                                                     ✓ (`x86_64`)                                                                                      |                                                                                                                                                                               |                                                                                                                                                                                             |
-| Homebrew        | [![homebrew downloads](https://img.shields.io/homebrew/installs/dm/meta-package-manager?style=flat-square)](https://github.com/Homebrew/homebrew-core/blob/master/Formula/meta-package-manager.rb) |            [![homebrew downloads](https://img.shields.io/homebrew/installs/dm/topgrade?style=flat-square)](https://github.com/Homebrew/homebrew-core/blob/master/Formula/topgrade.rb)             |                                                                      [✓](https://github.com/rami3l/pacaptr#brew)                                                                      |    [![homebrew downloads](https://img.shields.io/homebrew/installs/dm/pacapt?style=flat-square)](https://github.com/Homebrew/homebrew-core/blob/master/Formula/pacapt.rb)     |                                                                                                                                                                                             |
+| Homebrew        |          [![homebrew downloads](https://img.shields.io/homebrew/installs/dm/meta-package-manager?style=flat-square)](https://github.com/Homebrew/homebrew-core/blob/master/Formula/meta-package-manager.rb)           |            [![homebrew downloads](https://img.shields.io/homebrew/installs/dm/topgrade?style=flat-square)](https://github.com/Homebrew/homebrew-core/blob/master/Formula/topgrade.rb)             |                                                                      [✓](https://github.com/rami3l/pacaptr#brew)                                                                      |    [![homebrew downloads](https://img.shields.io/homebrew/installs/dm/pacapt?style=flat-square)](https://github.com/Homebrew/homebrew-core/blob/master/Formula/pacapt.rb)     |                                                                                                                                                                                             |
 | Macports        |                                                                                                                                                                                                                       |                                                                          [✓](https://ports.macports.org/port/topgrade/)                                                                           |                                                                                                                                                                                       |                                                                                                                                                                               |                                                                                                                                                                                             |
 | Chocolatey      |                                                                                                                                                                                                                       |                                                                                                                                                                                                   |                          [![Chocolatey](https://img.shields.io/chocolatey/dt/pacaptr?style=flat-square)](https://community.chocolatey.org/packages/pacaptr)                           |                                                                                                                                                                               |                                                                                                                                                                                             |
 | Crates.io       |                                                                                                                                                                                                                       |                                           [![Crates.io](https://img.shields.io/crates/d/topgrade?style=flat-square)](https://crates.io/crates/topgrade)                                           |                                      [![Crates.io](https://img.shields.io/crates/d/pacaptr?style=flat-square)](https://crates.io/crates/pacaptr)                                      |                                                                                                                                                                               |                                                                                                                                                                                             |
@@ -258,3 +252,9 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 [^3]: <https://github.com/icy/pacapt>
 
 [^4]: <https://github.com/emilengler/sysget>
+
+[^bsd_without_macos]: BSD: FreeBSD, NetBSD, OpenBSD, SunOS.
+
+[^linux]: Linux: Linux, Windows Subsystem for Linux v2.
+
+[^unix]: Unix: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.

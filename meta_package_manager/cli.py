@@ -101,7 +101,7 @@ def add_manager_to_selection(ctx: Context, param: Parameter, selected: bool) -> 
     if selected:
         if ctx.obj is None:
             ctx.obj = {"single_manager_selector": []}
-        manager_id = param.name.replace("_", "-")
+        manager_id = param.name.replace("_", "-")  # type: ignore[union-attr]
         ctx.obj["single_manager_selector"].append(manager_id)
 
 

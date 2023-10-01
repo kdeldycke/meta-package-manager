@@ -27,7 +27,8 @@ from .test_cli import CLISubCommandTests
 
 @pytest.fixture()
 def subcmd():
-    return "backup"
+    # The details of backup operations are only logged at INFO level.
+    return "--verbosity", "INFO", "backup"
 
 
 class TestBackup(CLISubCommandTests):
@@ -60,7 +61,7 @@ class TestBackup(CLISubCommandTests):
 
     @default_manager_ids
     def test_single_manager_file_output(self, manager_id, invoke, subcmd):
-        result = invoke(f"--{manager_id}", subcmd, "mpm-packages.toml")
+        result = invoke("--verbosity", "INFO", f"--{manager_id}", subcmd, "mpm-packages.toml")
         assert result.exit_code == 0
         assert "mpm-packages.toml" in result.stderr
         self.check_manager_selection(result, {manager_id})

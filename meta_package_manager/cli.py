@@ -42,6 +42,8 @@ from click_extra import (
     option_group,
     pass_context,
     table_format_option,
+    Context, Parameter,
+        get_current_context,
 )
 from click_extra.colorize import KO, OK, highlight
 from click_extra.colorize import default_theme as theme
@@ -51,7 +53,7 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib  # type: ignore[import]
 
-from . import __version__, bar_plugin, logger
+from . import __version__, bar_plugin
 from .base import (
     CLIError,
     Operations,
@@ -86,7 +88,7 @@ See the corresponding :issue:`implementation rationale in issue #10 <10>`.
 """
 
 
-def add_manager_to_selection(ctx, param, selected):
+def add_manager_to_selection(ctx: Context, param: Parameter, selected: bool) -> None:
     """Store singular manager flag selection in the context.
 
     .. important::
@@ -141,8 +143,8 @@ def bar_plugin_path(ctx, param, value):
     # Options is only available when CLI is installed from sources, not CLI is
     # a bundled executable.
     if "__compiled__" in globals():
-        logger.debug("CLI running as a binary.")
-        logger.critical(
+        logging.debug("CLI running as a binary.")
+        logging.critical(
             "Option --bar-plugin-path is only available for CLI installed from "
             "sources.",
         )
@@ -162,7 +164,8 @@ def bar_plugin_path(ctx, param, value):
 # XXX Why is Sphinx skipping Click methods in documentation?
 
 
-@extra_group(version=__version__)
+# XXX Default verbosity has been changed in Click Extra v4.0.0 from INFO to WARNING.
+@extra_group(context_settings={"default_map": {"verbosity": "INFO"}})
 @option_group(
     "Package manager selection options",
     option(
@@ -276,11 +279,22 @@ def mpm(
     stats,
 ):
     """Common CLI options for subcommands."""
-    # Silence all log message for JSON rendering unless in debug mode.
-    level = logger.level
-    level_name = logging._levelToName.get(level, level)
-    if ctx.find_root().table_format == "json" and level_name != "DEBUG":
-        logger.setLevel(logging.CRITICAL * 2)
+    # Silence all log messages for JSON rendering unless in debug mode.
+    if ctx.meta["click_extra.table_format"] == "json" and ctx.meta["click_extra.verbosity"] != "DEBUG":
+        logging.disable()
+
+        def remove_logging_override():
+            """Reset the logging override to its default state.
+
+            ``logging.disable()`` mess with the logging module internals at the root
+            level. We need to restore the default behavior when the context is closed,
+            otherwise the logging module will be stuck in a disabled state.
+
+            See: https://docs.python.org/3/library/logging.html?highlight=logging#logging.disable
+            """
+            logging.disable(logging.NOTSET)
+
+        ctx.call_on_close(remove_logging_override)
 
     # Merge all manager selectors to form the initial population enforced by the
     # user.
@@ -296,9 +310,9 @@ def mpm(
     # choose from.
     if not initial_managers:
         initial_managers = None
-        logger.debug("No initial population of managers selected by user.")
+        logging.debug("No initial population of managers selected by user.")
     else:
-        logger.debug(
+        logging.debug(
             "Initial population of user-selected managers: "
             f"{' > '.join(map(theme.invoked_command, initial_managers))}",
         )
@@ -349,7 +363,7 @@ def managers(ctx):
     }
 
     # Machine-friendly data rendering.
-    if ctx.find_root().table_format == "json":
+    if ctx.meta["click_extra.table_format"] == "json":
         manager_data = {}
         # Build up the data structure of manager metadata.
         fields = (
@@ -470,13 +484,13 @@ def installed(ctx, duplicates):
         for manager_id, installed_pkg in installed_data.items():
             for package in installed_pkg["packages"]:
                 package_sources.setdefault(package["id"], set()).add(manager_id)
-        logger.debug(f"Managers sourcing each package: {package_sources}")
+        logging.debug(f"Managers sourcing each package: {package_sources}")
 
         # Identify package IDs shared by multiple managers.
         duplicates_ids = {
             pid for pid, managers in package_sources.items() if len(managers) > 1
         }
-        logger.debug(f"Duplicates: {duplicates_ids}")
+        logging.debug(f"Duplicates: {duplicates_ids}")
 
         # Remove non-duplicates from results.
         for manager_id in installed_data:
@@ -488,7 +502,7 @@ def installed(ctx, duplicates):
             installed_data[manager_id]["packages"] = duplicate_packages
 
     # Machine-friendly data rendering.
-    if ctx.find_root().table_format == "json":
+    if ctx.meta["click_extra.table_format"] == "json":
         print_json(installed_data)
         ctx.exit()
 
@@ -508,7 +522,7 @@ def installed(ctx, duplicates):
     # Force sorting by package ID in duplicate mode.
     sort_by = ctx.obj.sort_by
     if duplicates:
-        logger.info("Force table sorting on package ID because of --duplicates option.")
+        logging.info("Force table sorting on package ID because of --duplicates option.")
         sort_by = "package_id"
 
     # Print table.
@@ -563,7 +577,7 @@ def outdated(ctx, plugin_output):
         )
 
     # Machine-friendly data rendering.
-    if ctx.find_root().table_format == "json":
+    if ctx.meta["click_extra.table_format"] == "json":
         print_json(outdated_data)
         ctx.exit()
 
@@ -642,7 +656,7 @@ def search(ctx, extended, exact, refilter, query):
     # --extended implies --description.
     show_description = ctx.obj.description
     if extended and not ctx.obj.description:
-        logger.warning("--extended option forces --description option.")
+        logging.warning("--extended option forces --description option.")
         show_description = True
 
     # Build-up a global list of package matches per manager.
@@ -675,7 +689,7 @@ def search(ctx, extended, exact, refilter, query):
         )
 
     # Machine-friendly data rendering.
-    if ctx.find_root().table_format == "json":
+    if ctx.meta["click_extra.table_format"] == "json":
         print_json(matches)
         ctx.exit()
 
@@ -739,10 +753,10 @@ def which(ctx, cli_names):
     which takes precedence on other paths.
     """
     if ctx.obj.sort_by:
-        logger.debug("Ignore --sort-by option for which command.")
+        logging.debug("Ignore --sort-by option for which command.")
 
     # Machine-friendly data rendering.
-    if ctx.find_root().table_format == "json":
+    if ctx.meta["click_extra.table_format"] == "json":
         cli_data = []
         for manager in ctx.obj.selected_managers():
             cli_data.append(
@@ -811,7 +825,7 @@ def install(ctx, packages_specs):
     )
     manager_ids = tuple(manager.id for manager in selected_managers)
     if len(manager_ids) > 1:
-        logger.info(
+        logging.info(
             "Installation priority: "
             f"{' > '.join(map(theme.invoked_command, manager_ids))}",
         )
@@ -825,14 +839,14 @@ def install(ctx, packages_specs):
             continue
         for spec in package_specs:
             try:
-                logger.info(
+                logging.info(
                     f"Install {spec} package with "
                     f"{theme.invoked_command(manager_id)}...",
                 )
                 manager = pool.get(manager_id)
                 output = manager.install(spec.package_id, version=spec.version)
             except NotImplementedError:
-                logger.warning(
+                logging.warning(
                     f"{theme.invoked_command(manager_id)} "
                     "does not implement install operation.",
                 )
@@ -842,7 +856,7 @@ def install(ctx, packages_specs):
     unmatched_packages = packages_per_managers.get(None, [])
     for spec in unmatched_packages:
         for manager in selected_managers:
-            logger.debug(
+            logging.debug(
                 f"Try to install {spec} with {theme.invoked_command(manager.id)}.",
             )
 
@@ -857,17 +871,17 @@ def install(ctx, packages_specs):
                     ),
                 )
             except NotImplementedError:
-                logger.warning(
+                logging.warning(
                     f"{theme.invoked_command(manager.id)} "
                     "does not implement search operation.",
                 )
-                logger.info(
+                logging.info(
                     f"{spec.package_id} existence unconfirmed, "
                     "try to directly install it...",
                 )
             else:
                 if not matches:
-                    logger.warning(
+                    logging.warning(
                         f"No {spec.package_id} package found "
                         f"on {theme.invoked_command(manager.id)}.",
                     )
@@ -881,19 +895,19 @@ def install(ctx, packages_specs):
             # CLIError exception and print a comprehensive message.
             with patch.object(manager, "stop_on_error", True):
                 try:
-                    logger.info(
+                    logging.info(
                         f"Install {spec} package "
                         f"with {theme.invoked_command(manager.id)}...",
                     )
                     output = manager.install(spec.package_id, version=spec.version)
                 except NotImplementedError:
-                    logger.warning(
+                    logging.warning(
                         f"{theme.invoked_command(manager.id)} "
                         "does not implement install operation.",
                     )
                     continue
                 except CLIError:
-                    logger.warning(
+                    logging.warning(
                         f"Could not install {spec} "
                         f"with {theme.invoked_command(manager.id)}.",
                     )
@@ -933,27 +947,27 @@ def upgrade(ctx, all, packages_specs):
     Packages unrecognized by any selected manager will be skipped.
     """
     if not all and not packages_specs:
-        logger.warning("No package provided, assume -A/--all option.")
+        logging.warning("No package provided, assume -A/--all option.")
         all = True
 
     # Full upgrade.
     if all:
         if packages_specs:
             # Deduplicate and sort specifiers for terseness.
-            logger.warning(
+            logging.warning(
                 f"Ignore {', '.join(sorted(set(packages_specs)))} specifiers "
                 "and proceed to a full upgrade...",
             )
         for manager in ctx.obj.selected_managers(
             implements_operation=Operations.upgrade_all,
         ):
-            logger.info(
+            logging.info(
                 "Upgrade all outdated packages "
                 f"from {theme.invoked_command(manager.id)}...",
             )
             output = manager.upgrade()
             if output:
-                logger.info(output)
+                logging.info(output)
         ctx.exit()
 
     # Cast generator to tuple because of reuse.
@@ -979,26 +993,26 @@ def upgrade(ctx, all, packages_specs):
             source_manager_ids.add(spec.manager_id)
         # Package is not bound to a manager by the user's specifiers.
         else:
-            logger.debug(
+            logging.debug(
                 f"{spec} not tied to a manager. Search all managers recognizing it.",
             )
             # Find all the managers that have the package installed.
             for manager in sourcing_managers:
                 if package_id in map(attrgetter("id"), manager.installed):
-                    logger.debug(
+                    logging.debug(
                         f"{package_id} has been installed "
                         "with {theme.invoked_command(manager.id)}.",
                     )
                     source_manager_ids.add(manager.id)
 
         if not source_manager_ids:
-            logger.error(
+            logging.error(
                 f"{package_id} is not recognized by any of the selected manager. "
                 "Skip it.",
             )
             continue
 
-        logger.info(
+        logging.info(
             f"Upgrade {package_id} "
             f"with {', '.join(map(theme.invoked_command, sorted(source_manager_ids)))}",
         )
@@ -1006,7 +1020,7 @@ def upgrade(ctx, all, packages_specs):
             manager = pool.get(manager_id)
             output = manager.upgrade(package_id, version=spec.version)
             if output:
-                logger.info(output)
+                logging.info(output)
 
 
 @mpm.command(aliases=["uninstall"], short_help="Remove a package.", section=MAINTENANCE)
@@ -1051,26 +1065,26 @@ def remove(ctx, packages_specs):
             source_manager_ids.add(spec.manager_id)
         # Package is not bound to a manager by the user's specifiers.
         else:
-            logger.debug(
+            logging.debug(
                 f"{spec} not tied to a manager. Search all managers recognizing it.",
             )
             # Find all the managers that have the package installed.
             for manager in sourcing_managers:
                 if package_id in map(attrgetter("id"), manager.installed):
-                    logger.debug(
+                    logging.debug(
                         f"{package_id} has been installed "
                         f"with {theme.invoked_command(manager.id)}.",
                     )
                     source_manager_ids.add(manager.id)
 
         if not source_manager_ids:
-            logger.error(
+            logging.error(
                 f"{package_id} is not recognized by any of the selected manager. "
                 "Skip it.",
             )
             continue
 
-        logger.info(
+        logging.info(
             f"Remove {package_id} "
             f"with {', '.join(map(theme.invoked_command, sorted(source_manager_ids)))}",
         )
@@ -1078,7 +1092,7 @@ def remove(ctx, packages_specs):
             manager = pool.get(manager_id)
             output = manager.remove(package_id)
             if output:
-                logger.info(output)
+                logging.info(output)
 
 
 @mpm.command(short_help="Sync local package info.", section=MAINTENANCE)
@@ -1086,7 +1100,7 @@ def remove(ctx, packages_specs):
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
     for manager in ctx.obj.selected_managers(implements_operation=Operations.sync):
-        logger.info(f"Sync {theme.invoked_command(manager.id)} package info...")
+        logging.info(f"Sync {theme.invoked_command(manager.id)} package info...")
         manager.sync()
 
 
@@ -1095,7 +1109,7 @@ def sync(ctx):
 def cleanup(ctx):
     """Cleanup local data, temporary artifacts and removes orphaned dependencies."""
     for manager in ctx.obj.selected_managers(implements_operation=Operations.cleanup):
-        logger.info(f"Cleanup {theme.invoked_command(manager.id)}...")
+        logging.info(f"Cleanup {theme.invoked_command(manager.id)}...")
         manager.cleanup()
 
 
@@ -1151,53 +1165,53 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
 
     if is_stdout(toml_path):
         if merge:
-            logger.critical(
+            logging.critical(
                 "--merge requires the [TOML_PATH] argument to point to a file.",
             )
             ctx.exit(2)
         if update_version:
-            logger.critical(
+            logging.critical(
                 "--update-version requires the [TOML_PATH] argument to point to a "
                 "file.",
             )
             ctx.exit(2)
         if overwrite:
-            logger.warning("Ignore the --overwrite/--force/--replace option.")
-        logger.info(f"Print installed package list to {sys.stdout.name}")
+            logging.warning("Ignore the --overwrite/--force/--replace option.")
+        logging.info(f"Print installed package list to {sys.stdout.name}")
 
     else:
         if merge and update_version:
-            logger.critical("--merge and --update-version are mutually exclusive.")
+            logging.critical("--merge and --update-version are mutually exclusive.")
             ctx.exit(2)
 
         if merge:
-            logger.info(f"Merge all installed packages into {toml_path}")
+            logging.info(f"Merge all installed packages into {toml_path}")
         elif update_version:
-            logger.info(
+            logging.info(
                 f"Update in-place all versions of installed packages "
                 f"found in {toml_path}",
             )
         else:
-            logger.info(f"Dump all installed packages into {toml_path}")
+            logging.info(f"Dump all installed packages into {toml_path}")
 
         if toml_path.exists():
             if overwrite:
-                logger.warning("Target file exist and will be overwritten.")
+                logging.warning("Target file exist and will be overwritten.")
             else:
                 if merge or update_version:
-                    logger.warning("Ignore the --overwrite/--force/--replace option.")
+                    logging.warning("Ignore the --overwrite/--force/--replace option.")
                 else:
-                    logger.critical("Target file exist and will be overwritten.")
+                    logging.critical("Target file exist and will be overwritten.")
                     ctx.exit(2)
         elif merge:
-            logger.critical("--merge requires an existing file.")
+            logging.critical("--merge requires an existing file.")
             ctx.exit(2)
         elif update_version:
-            logger.critical("--update-version requires an existing file.")
+            logging.critical("--update-version requires an existing file.")
             ctx.exit(2)
 
         if toml_path.suffix.lower() != ".toml":
-            logger.critical("Target file is not a TOML file.")
+            logging.critical("Target file is not a TOML file.")
             ctx.exit(2)
 
     installed_data = {}
@@ -1228,7 +1242,7 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
         for manager in ctx.obj.selected_managers(
             implements_operation=Operations.installed,
         ):
-            logger.info(f"Dumping packages from {theme.invoked_command(manager.id)}...")
+            logging.info(f"Dumping packages from {theme.invoked_command(manager.id)}...")
 
             packages = tuple(packages_asdict(manager.installed, fields))
 
@@ -1284,7 +1298,7 @@ def restore(ctx, toml_files):
             toml_filepath = Path(toml_input.name).resolve()
             toml_content = toml_filepath.read_text(**encoding_args)
 
-        logger.info(f"Load package list from {toml_filepath}")
+        logging.info(f"Load package list from {toml_filepath}")
         doc = tomllib.loads(toml_content)
 
         # List unrecognized sections.
@@ -1294,17 +1308,17 @@ def restore(ctx, toml_files):
         if ignored_sections:
             plural = "s" if len(ignored_sections) > 1 else ""
             sections = ", ".join(ignored_sections)
-            logger.info(f"Ignore {sections} section{plural}.")
+            logging.info(f"Ignore {sections} section{plural}.")
 
         for manager in ctx.obj.selected_managers(
             implements_operation=Operations.install,
         ):
             if manager.id not in doc:
-                logger.warning(
+                logging.warning(
                     f"No [{theme.invoked_command(manager.id)}] section found.",
                 )
                 continue
-            logger.info(f"Restore {theme.invoked_command(manager.id)} packages...")
+            logging.info(f"Restore {theme.invoked_command(manager.id)} packages...")
             for package_id, version in doc[manager.id].items():
                 spec = Specifier(
                     raw_spec=f"pkg:{manager.id}:/{package_id}{VERSION_SEP}{package_id}",
@@ -1312,6 +1326,6 @@ def restore(ctx, toml_files):
                     manager_id=manager.id,
                     version=version,
                 )
-                logger.info(f"Install {spec}...")
+                logging.info(f"Install {spec}...")
                 output = manager.install(spec.package_id, version=spec.version)
                 echo(output)

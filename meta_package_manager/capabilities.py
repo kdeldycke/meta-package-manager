@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import sys
+import logging
 from functools import wraps
 from typing import TYPE_CHECKING, Callable, Iterator, TypeVar
 
@@ -24,8 +25,6 @@ if sys.version_info < (3, 10):
     from typing_extensions import ParamSpec
 else:
     from typing import ParamSpec
-
-from . import logger
 
 if TYPE_CHECKING:
     from .base import Package, PackageManager
@@ -53,16 +52,16 @@ def search_capabilities(extended_support: bool = True, exact_support: bool = Tru
             refilter = False
             if exact and not exact_support:
                 refilter = True
-                logger.warning(
+                logging.warning(
                     f"{self.id} does not implement exact search operation.",
                 )
             if extended and not extended_support:
                 refilter = True
-                logger.warning(
+                logging.warning(
                     f"{self.id} does not implement extended search operation.",
                 )
             if refilter:
-                logger.warning("Refiltering of raw results has been activated.")
+                logging.warning("Refiltering of raw results has been activated.")
 
             return function(self, query, extended, exact)  # type: ignore
 
@@ -79,7 +78,7 @@ def version_not_implemented(func: Callable[P, T]) -> Callable[P, T]:
 
     def print_warning(*args: P.args, **kwargs: P.kwargs) -> T:
         if kwargs.get("version"):
-            logger.warning(
+            logging.warning(
                 f"{func.__qualname__} does not implement version parameter. "
                 "Let the package manager choose the version.",
             )

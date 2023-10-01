@@ -51,7 +51,11 @@ extensions = [
 myst_enable_extensions = [
     "attrs_block",
     "attrs_inline",
-    "colon_fence",
+    "deflist",
+    "replacements",
+    "smartquotes",
+    "strikethrough",
+    "tasklist",
 ]
 myst_fence_as_directive = ["mermaid"]
 

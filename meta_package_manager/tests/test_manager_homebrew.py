@@ -21,7 +21,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
-from click_extra.run import env_copy
+from click_extra.testing import env_copy
 from click_extra.tests.conftest import unless_macos
 
 

@@ -65,7 +65,7 @@ class TestRestore(CLISubCommandTests):
             ),
         )
 
-        result = invoke("restore", str(toml_path))
+        result = invoke("--verbosity", "INFO", "restore", str(toml_path))
         assert result.exit_code == 0
         assert "all-managers.toml" in result.stderr
         self.check_manager_selection(result)
@@ -86,7 +86,7 @@ class TestRestore(CLISubCommandTests):
             ),
         )
 
-        result = invoke(f"--{manager_id}", "restore", str(toml_path))
+        result = invoke("--verbosity", "INFO", f"--{manager_id}", "restore", str(toml_path))
         assert result.exit_code == 0
         self.check_manager_selection(result, {manager_id})
 
@@ -117,7 +117,7 @@ class TestRestore(CLISubCommandTests):
             """,
         )
 
-        result = invoke("--npm", "restore", str(toml_path), color=False)
+        result = invoke("--verbosity", "INFO", "--npm", "restore", str(toml_path), color=False)
         assert result.exit_code == 0
         assert "pip-npm-dummy.toml" in result.stderr
         assert "Restore pip packages..." not in result.stderr
@@ -136,7 +136,7 @@ class TestRestore(CLISubCommandTests):
             """,
         )
 
-        result = invoke("--exclude", "npm", "restore", str(toml_path), color=False)
+        result = invoke("--verbosity", "INFO", "--exclude", "npm", "restore", str(toml_path), color=False)
         assert result.exit_code == 0
         assert "pip-npm-dummy.toml" in result.stderr
         assert "Restore pip packages..." in result.stderr
@@ -150,7 +150,7 @@ class TestRestore(CLISubCommandTests):
             """,
         )
 
-        result = invoke("restore", str(toml_path), color=False)
+        result = invoke("--verbosity", "INFO", "restore", str(toml_path), color=False)
         assert result.exit_code == 0
         assert "pip-empty.toml" in result.stderr
         assert "Restore pip packages..." in result.stderr

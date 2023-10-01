@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import builtins
 import contextlib
+import logging
 import json
 import sys
 from functools import cached_property, partial
@@ -40,7 +41,6 @@ from click_extra.colorize import default_theme as theme
 from click_extra.tabulate import output_formats
 from tabulate import DataRow, TableFormat, tabulate
 
-from . import logger
 from .bar_plugin import MPMPlugin
 from .pool import pool
 from .version import TokenizedString
@@ -443,7 +443,7 @@ class BarPluginRenderer(MPMPlugin):
                 except NotImplementedError:
                     # Fallback on mpm itself which is capable of simulating a full
                     # upgrade.
-                    logger.warning(
+                    logging.warning(
                         f"{theme.invoked_command(manager_id)} "
                         "does not implement upgrade_all_cli.",
                     )
@@ -453,7 +453,7 @@ class BarPluginRenderer(MPMPlugin):
                         "upgrade",
                         "--all",
                     )
-                    logger.debug(f"Fallback to direct mpm call: {upgrade_all_cli}")
+                    logging.debug(f"Fallback to direct mpm call: {upgrade_all_cli}")
 
                 # Update outdated data with the full-upgrade CLI.
                 outdated_data[manager_id]["upgrade_all_cli"] = self.render_cli(

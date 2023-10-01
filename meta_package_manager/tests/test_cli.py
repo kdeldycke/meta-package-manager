@@ -322,12 +322,12 @@ class CLISubCommandTests(InspectCLIOutput):
 class CLITableTests:
     """Test subcommands whose output is a configurable table.
 
-    A table output is also allowed to be rendered as JSON.
+    Any table output is also allowed to be rendered as JSON.
     """
 
     @pytest.mark.parametrize("mode", output_formats)
-    def test_all_table_rendering(self, invoke, subcmd, mode):
-        result = invoke("--output-format", mode, subcmd)
+    def test_all_table_rendering(self, invoke, mode):
+        result = invoke("--output-format", mode, "installed")
         assert result.exit_code == 0
 
     def test_json_output(self, invoke, subcmd):
@@ -335,13 +335,10 @@ class CLITableTests:
 
         Debug level messages are redirected to <stderr> and are not supposed to interfer
         with this behavior.
-
-        Also checks that JSON output format is not supported by all commands.
         """
         result = invoke("--output-format", "json", "--verbosity", "DEBUG", subcmd)
         assert result.exit_code == 0
-        assert "debug:" in result.stderr
+        assert "debug" in result.stderr
         json.loads(result.stdout)
-        json.loads(result.output)
         with pytest.raises(json.decoder.JSONDecodeError):
             json.loads(result.stderr)

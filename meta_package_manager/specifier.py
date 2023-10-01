@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from functools import cached_property
 from itertools import groupby
@@ -25,7 +26,6 @@ from typing import Final, Iterable, Iterator, Sequence
 
 from packageurl import PackageURL
 
-from . import logger
 from .pool import pool
 from .version import TokenizedString, parse_version
 
@@ -93,7 +93,7 @@ class Specifier:
         try:
             purl = PackageURL.from_string(spec_str)
         except ValueError as ex:
-            logger.debug(f"{spec_str} is not a purl: {ex}")
+            logging.debug(f"{spec_str} is not a purl: {ex}")
             return None
 
         # Specifier is a purl, extract its metadata.
@@ -255,7 +255,7 @@ class Solver:
         if len(target_manager_ids) > 1:
             if self.manager_priority:
                 if target_manager_ids.isdisjoint(self.manager_priority):
-                    logger.warning(
+                    logging.warning(
                         f"Requested target managers {target_manager_ids} "
                         f"don't match selected {self.manager_priority}.",
                     )
@@ -306,12 +306,12 @@ class Solver:
             try:
                 reduced_spec = self.reduce_specs(specs)
             except EmptyReduction:
-                logger.warning(f"Skip package {package_id}.")
+                logging.warning(f"Skip package {package_id}.")
                 continue
 
             # Print warning if specifiers were subject to a reduction.
             if len(specs) > 1:
-                logger.warning(
+                logging.warning(
                     f"{package_id} specifiers reduced from "
                     f"{', '.join(sorted(s.raw_spec for s in specs))} to {reduced_spec}",
                 )

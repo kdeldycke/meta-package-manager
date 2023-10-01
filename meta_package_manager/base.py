@@ -20,6 +20,7 @@ import os
 import re
 import shutil
 import sys
+import logging
 from contextlib import nullcontext
 from dataclasses import asdict, dataclass
 from enum import Enum
@@ -33,17 +34,16 @@ from boltons.iterutils import flatten, unique
 from boltons.strutils import strip_ansi
 from click_extra.colorize import default_theme as theme
 from click_extra.platforms import UNIX, Group, Platform, current_os
-from click_extra.run import (
+from click_extra.testing import (
     INDENT,
     Arg,
     EnvVars,
     NestedArgs,
     args_cleanup,
-    format_cli,
+    format_cli_prompt,
     run_cmd,
 )
 
-from . import logger
 from .version import TokenizedString, parse_version
 
 Operations = Enum(
@@ -144,7 +144,11 @@ class MetaPackageManager(type):
 
     def __init__(cls, name, bases, dct) -> None:
         """Sets some class defaults, but only if they're not redefined in the final
-        manager class."""
+        manager class.
+
+        Also normalize list of platform, by ungrouping groups, deduplicate entries and
+        freeze them into a set of unique platforms.
+        """
         if "id" not in dct:
             cls.id = name.lower().replace("_", "-")
 
@@ -157,7 +161,6 @@ class MetaPackageManager(type):
         if "virtual" not in dct:
             cls.virtual = name == "PackageManager" or not cls.cli_names
 
-        # Normalize list of platform and groups into a frozen set of platforms.
         if "platforms" in dct:
             platforms = set()
             for spec in flatten([dct["platforms"]]):
@@ -342,7 +345,7 @@ class PackageManager(metaclass=MetaPackageManager):
     def implements(cls, op: Operations) -> bool:
         """Inspect manager's implementation to check for proper support of an
         operation."""
-        logger.debug(f"Does {cls} implements {op}?")
+        logging.debug(f"Does {cls} implements {op}?")
 
         # General case: the operation and the method implementing it shares the same ID.
         method_deps: tuple[set[str], ...] = ({op.name},)
@@ -455,7 +458,7 @@ class PackageManager(metaclass=MetaPackageManager):
             key=normalize_path,
         )
 
-        logger.debug(
+        logging.debug(
             "Search for "
             + ", ".join(theme.invoked_command(cli) for cli in search_filenames)
             + " in "
@@ -470,7 +473,7 @@ class PackageManager(metaclass=MetaPackageManager):
                 file = search_path / filename
                 if not file.is_file() or not os.path.getsize(file):
                     continue
-                logger.debug(f"CLI found at {highlight_cli_name(file, cli_names)}")
+                logging.debug(f"CLI found at {highlight_cli_name(file, cli_names)}")
                 yield file
 
     def which(self, cli_name: str) -> Path | None:
@@ -525,7 +528,7 @@ class PackageManager(metaclass=MetaPackageManager):
                 # Check for "OSError: [WinError 193] %1 is not a valid Win32
                 # application" error.
                 if getattr(ex, "winerror", None) == 193:
-                    logger.debug(
+                    logging.debug(
                         f"{theme.invoked_command(str(self.cli_path))} "
                         "is not a valid Windows application.",
                     )
@@ -541,9 +544,9 @@ class PackageManager(metaclass=MetaPackageManager):
             )
             if parts:
                 version_string = parts.groupdict().get("version")
-                logger.debug(f"Extracted version: {version_string!r}")
+                logging.debug(f"Extracted version: {version_string!r}")
                 parsed_version = parse_version(version_string)
-                logger.debug(f"Parsed version: {parsed_version!r}")
+                logging.debug(f"Parsed version: {parsed_version!r}")
                 return parsed_version
         return None
 
@@ -560,7 +563,7 @@ class PackageManager(metaclass=MetaPackageManager):
         if not self.cli_path:
             return False
         if not os.access(self.cli_path, os.X_OK):
-            logger.debug(
+            logging.debug(
                 f"{highlight_cli_name(self.cli_path, self.cli_names)} "
                 "is not allowed to be executed.",
             )
@@ -574,7 +577,7 @@ class PackageManager(metaclass=MetaPackageManager):
         if not self.version:
             return False
         if self.requirement and self.version < parse_version(self.requirement):
-            logger.debug(
+            logging.debug(
                 f"{self.id} {self.version} is older than "
                 f"{self.requirement} version requirement.",
             )
@@ -596,7 +599,7 @@ class PackageManager(metaclass=MetaPackageManager):
         4. :py:attr:`match the version requirement
            <meta_package_manager.base.PackageManager.fresh>`.
         """
-        logger.debug(
+        logging.debug(
             f"{self.id} "
             f"is deprecated: {self.deprecated}; "
             f"is supported: {self.supported}; "
@@ -629,16 +632,16 @@ class PackageManager(metaclass=MetaPackageManager):
         """
         # Casting to string helps serialize Path and Version objects.
         clean_args = args_cleanup(*args)
-        cli_msg = format_cli(clean_args, extra_env)
+        cli_msg = format_cli_prompt(clean_args, extra_env)
 
         code = 0
         output = ""
         error = ""
 
         if self.dry_run:
-            logger.warning(f"Dry-run: {cli_msg}")
+            logging.warning(f"Dry-run: {cli_msg}")
         else:
-            logger.debug(cli_msg)
+            logging.debug(cli_msg)
             code, output, error = run_cmd(
                 *clean_args,
                 extra_env=extra_env,
@@ -653,10 +656,10 @@ class PackageManager(metaclass=MetaPackageManager):
 
         # Log <stdout> and <stderr> output.
         if output:
-            logger.debug(indent(output, INDENT))
+            logging.debug(indent(output, INDENT))
         if error:
             # Non-fatal error messages are logged as warnings.
-            log_func = logger.error if code else logger.warning
+            log_func = logging.error if code else logging.warning
             log_func(indent(error, INDENT))
 
         # Non-successful run.
@@ -967,7 +970,7 @@ class PackageManager(metaclass=MetaPackageManager):
             try:
                 cli = self.upgrade_all_cli()
             except NotImplementedError:
-                logger.info(
+                logging.info(
                     "Fallback to calling upgrade operation on each outdated package.",
                 )
                 log = ""

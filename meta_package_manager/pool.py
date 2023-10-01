@@ -19,11 +19,11 @@ from __future__ import annotations
 
 from functools import cached_property
 from typing import TYPE_CHECKING, Final, Iterable, Iterator
+import logging
 
 from boltons.iterutils import unique
 from click_extra.colorize import default_theme as theme
 
-from . import logger
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
 from .managers.cargo import Cargo
@@ -234,7 +234,7 @@ class ManagerPool:
             # Check if operation is not implemented before calling `.available`. It
             # saves one call to the package manager CLI.
             if implements_operation and not manager.implements(implements_operation):
-                logger.warning(
+                logging.warning(
                     f"{theme.invoked_command(manager_id)} "
                     f"does not implement {implements_operation}.",
                 )
@@ -242,7 +242,7 @@ class ManagerPool:
 
             # Filters out inactive managers.
             if drop_inactive and not manager.available:
-                logger.warning(
+                logging.warning(
                     f"Skip unavailable {theme.invoked_command(manager_id)} manager.",
                 )
                 continue

@@ -18,12 +18,12 @@ from __future__ import annotations
 
 import json
 import re
+import logging
 from operator import methodcaller
 from typing import Iterator
 
 from click_extra.platforms import LINUX, MACOS, WSL2
 
-from meta_package_manager import logger
 from meta_package_manager.base import Package, PackageManager
 from meta_package_manager.capabilities import version_not_implemented
 from meta_package_manager.version import parse_version
@@ -239,7 +239,7 @@ class Homebrew(PackageManager):
                 # Skip packages not offering upgradeable version.
                 package_id = pkg_info["name"]
                 if installed_version == latest_version:
-                    logger.debug(
+                    logging.debug(
                         f"Ignore {package_id} upgrade "
                         f"from {installed_version} to {latest_version}.",
                     )

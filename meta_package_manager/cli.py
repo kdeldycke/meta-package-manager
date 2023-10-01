@@ -32,7 +32,9 @@ from boltons.cacheutils import LRI, cached
 from click_extra import (
     STRING,
     Choice,
+    Context,
     File,
+    Parameter,
     Section,
     argument,
     echo,
@@ -42,8 +44,6 @@ from click_extra import (
     option_group,
     pass_context,
     table_format_option,
-    Context, Parameter,
-        get_current_context,
 )
 from click_extra.colorize import KO, OK, highlight
 from click_extra.colorize import default_theme as theme
@@ -281,7 +281,10 @@ def mpm(
 ):
     """Common CLI options for subcommands."""
     # Silence all log messages for JSON rendering unless in debug mode.
-    if ctx.meta["click_extra.table_format"] == "json" and ctx.meta["click_extra.verbosity"] != "DEBUG":
+    if (
+        ctx.meta["click_extra.table_format"] == "json"
+        and ctx.meta["click_extra.verbosity"] != "DEBUG"
+    ):
         logging.disable()
 
         def remove_logging_override():
@@ -523,7 +526,9 @@ def installed(ctx, duplicates):
     # Force sorting by package ID in duplicate mode.
     sort_by = ctx.obj.sort_by
     if duplicates:
-        logging.info("Force table sorting on package ID because of --duplicates option.")
+        logging.info(
+            "Force table sorting on package ID because of --duplicates option."
+        )
         sort_by = "package_id"
 
     # Print table.
@@ -1243,7 +1248,9 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
         for manager in ctx.obj.selected_managers(
             implements_operation=Operations.installed,
         ):
-            logging.info(f"Dumping packages from {theme.invoked_command(manager.id)}...")
+            logging.info(
+                f"Dumping packages from {theme.invoked_command(manager.id)}..."
+            )
 
             packages = tuple(packages_asdict(manager.installed, fields))
 

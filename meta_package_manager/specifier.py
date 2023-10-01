@@ -155,8 +155,7 @@ class Specifier:
     @cached_property
     def is_blank(self) -> bool:
         """Is considered blank a ``Specifier`` without any constraint on ``manager_id``
-        or ``version``.
-        """
+        or ``version``."""
         return not bool(self.manager_id or self.version)
 
     def __str__(self) -> str:
@@ -178,8 +177,7 @@ class EmptyReduction(Exception):
 
 class Solver:
     """Combine a set of ``Specifier`` and allow for the solving of the constraints they
-    represent.
-    """
+    represent."""
 
     manager_priority: Sequence[str] = []
 

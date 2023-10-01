@@ -84,7 +84,9 @@ class Snap(PackageManager):
             package_id = package.split()[0]
             latest_version = package.split()[1]
             installed_version = (
-                self.run_cli("list", package_id).splitlines()[-1].split()[1]
+                self.run_cli("list", package_id)
+                .splitlines()[-1]
+                .split()[1]
             )
             yield self.package(
                 id=package_id,

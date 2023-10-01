@@ -158,8 +158,10 @@ class MPMPlugin:
     @staticmethod
     def normalize_params(
         font_string: str,
-        valid_ids: set[str] = {"color", "font", "size"},
+        valid_ids: set[str] | None = None,
     ) -> str:
+        if valid_ids is None:
+            valid_ids = {"color", "font", "size"}
         valid_params = {}
         for param in font_string.split():
             param_id, param_value = param.split("=", 1)
@@ -225,8 +227,7 @@ class MPMPlugin:
     @cached_property
     def mpm_exec(self) -> tuple[str, ...]:
         """Search for mpm execution alternatives, either direct ``mpm`` call or as an
-        executable Python module.
-        """
+        executable Python module."""
         # XXX Local debugging and development.
         # return "poetry", "run", "mpm"
         mpm_exec = self.locate_bin("mpm")
@@ -290,8 +291,8 @@ class MPMPlugin:
     def print_error(self, message: str | Exception, submenu: str = "") -> None:
         """Print a formatted error message line by line.
 
-        A red, fixed-width font is used to preserve traceback and exception layout.
-        For compactness, the message is dedented and empty lines are skipped.
+        A red, fixed-width font is used to preserve traceback and exception layout. For
+        compactness, the message is dedented and empty lines are skipped.
 
         Message is always casted to a string as we allow passing of exception objects
         and have them rendered.

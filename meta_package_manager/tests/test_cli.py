@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 import subprocess
 from typing import Collection, Iterator
 
@@ -135,19 +136,27 @@ class TestCommonCLI:
     """
 
     def test_executable_module(self):
-        # Locate Python executable.
-        py_path = MPMPlugin.locate_bin("python", "python3")
-        assert py_path
+        # Take the current Python executable as a reference.
+        py_path_list = {sys.executable}
 
-        process = subprocess.run(
-            (py_path, "-m", "meta_package_manager", "--version"),
-            capture_output=True,
-            encoding="utf-8",
-        )
+        # Search Python executables on the system by name.
+        for bin_name in ("python", "python3"):
+            bin_path = MPMPlugin.locate_bin(bin_name)
+            if bin_path:
+                py_path_list.add(bin_path)
 
-        assert process.returncode == 0
-        assert process.stdout.startswith(f"mpm, version {__version__}\n")
-        assert not process.stderr
+        for py_path in py_path_list:
+            process = subprocess.run(
+                (py_path, "-m", "meta_package_manager", "--version"),
+                capture_output=True,
+                encoding="utf-8",
+            )
+
+            assert process.returncode == 0
+            assert process.stdout == (
+                f"\x1b[97mmpm\x1b[0m, version \x1b[32m{__version__}\x1b[0m\n"
+            )
+            assert not process.stderr
 
     @pytest.mark.parametrize(
         ("stats_arg", "active_stats"),

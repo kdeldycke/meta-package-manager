@@ -8,6 +8,7 @@ This version is not released yet and is under active development.
 
 - \[mpm\] Drop support of Python 3.7.
 - \[scoop\] Fix parsing of Scoop version.
+- \[mpm\] Group platforms by family in the `managers` subcommand.
 - \[mpm\] Run bar plugin unittests in their independent, non-parrallel step.
 - \[mpm\] Replace unmaintained `bump2version` by `bump-my-version`.
 

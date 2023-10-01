@@ -47,6 +47,7 @@ from click_extra import (
 )
 from click_extra.colorize import KO, OK, highlight
 from click_extra.colorize import default_theme as theme
+from click_extra.platforms import reduce
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -392,8 +393,8 @@ def managers(ctx):
         # Build up the OS column content.
         os_infos = OK if manager.supported else KO
         if not manager.supported:
-            os_infos += " {} only".format(
-                ", ".join(sorted(p.name for p in manager.platforms)),
+            os_infos += " {}".format(
+                ", ".join(sorted(p.name for p in reduce(manager.platforms))),
             )
         if manager.deprecated:
             os_infos += f" {theme.warning('(deprecated)')}"

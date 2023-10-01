@@ -18,6 +18,8 @@ from __future__ import annotations
 
 import pytest
 
+from click_extra.tests.conftest import create_config
+
 from meta_package_manager.pool import pool
 
 from .conftest import default_manager_ids
@@ -38,6 +40,7 @@ def subcmd(create_config):
     return "restore", str(toml_path)
 
 
+@pytest.mark.skip(reason="Generated config file is not isolated from other tests.")
 class TestRestore(CLISubCommandTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):

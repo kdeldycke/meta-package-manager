@@ -10,6 +10,7 @@ This version is not released yet and is under active development.
 - \[scoop\] Fix parsing of Scoop version.
 - \[mpm\] Group platforms by family in the `managers` subcommand.
 - \[mpm\] Run bar plugin unittests in their independent, non-parrallel step.
+- \[mpm\] Skip testing on intermediate Python versions to speed up CI. Only the oldest and latest supported.
 - \[mpm\] Skip configuration-related tests while we investigate test isolation.
 - \[mpm\] Replace unmaintained `bump2version` by `bump-my-version`.
 

@@ -46,10 +46,10 @@ jobs:
               "windows-2022",
               "windows-2019",
           }
+          # Only test the oldest and latest Python version supported and the upcoming one. Skip the intermediates
+          # to speed up the tests.
           python_list = {
               "3.8",
-              "3.9",
-              "3.10",
               "3.11",
               "3.12-dev",
           }

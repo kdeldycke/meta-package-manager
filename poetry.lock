@@ -1140,6 +1140,22 @@ sphinx = ">=4.0"
 docs = ["furo", "ipython", "myst-parser", "sphinx-copybutton", "sphinx-inline-tabs"]
 
 [[package]]
+name = "sphinx-click"
+version = "5.0.1"
+description = "Sphinx extension that automatically documents click applications"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "sphinx-click-5.0.1.tar.gz", hash = "sha256:fcc7df15e56e3ff17ebf446cdd316c2eb79580b37c49579fba11e5468802ef25"},
+    {file = "sphinx_click-5.0.1-py3-none-any.whl", hash = "sha256:31836ca22f746d3c26cbfdfe0c58edf0bca5783731a0b2e25bb6d59800bb75a1"},
+]
+
+[package.dependencies]
+click = ">=7.0"
+docutils = "*"
+sphinx = ">=2.0"
+
+[[package]]
 name = "sphinx-copybutton"
 version = "0.5.2"
 description = "Add a copy button to each of your code cells."
@@ -1467,4 +1483,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "bf2e1860a6ec321c5de5bdeefeedabcfc3ffd4b607c668ea0720c8d59d98f0dd"
+content-hash = "2503f4abd75e6de95bf94dfdf989a793e6cbb3038002c738a9f1abcc2f416f19"

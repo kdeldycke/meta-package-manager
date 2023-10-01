@@ -26,7 +26,6 @@ import pytest
 from click_extra.platforms import is_macos
 
 # Pre-load invokation helpers to be used as pytest's fixture.
-from click_extra.tests.conftest import extra_runner
 from pytest import fixture, param
 
 from meta_package_manager.cli import mpm
@@ -143,7 +142,7 @@ def pytest_report_header(config: Config, start_path, startdir) -> tuple[str, ...
 
 
 @fixture()
-def invoke(extra_runner):  # noqa: F811
+def invoke(extra_runner):
     return partial(extra_runner.invoke, mpm)
 
 

@@ -24,8 +24,8 @@ from __future__ import annotations
 
 import builtins
 import contextlib
-import logging
 import json
+import logging
 import sys
 from functools import cached_property, partial
 from io import StringIO
@@ -421,8 +421,7 @@ class BarPluginRenderer(MPMPlugin):
 
     def render(self, outdated_data) -> str:
         """Wraps the :py:meth:`meta_package_manager.output.BarPluginRenderer._render`
-        function above to capture all ``print`` statements.
-        """
+        function above to capture all ``print`` statements."""
         capture = StringIO()
         print_capture = partial(print, file=capture)
         with patch.object(builtins, "print", new=print_capture):
@@ -431,8 +430,7 @@ class BarPluginRenderer(MPMPlugin):
 
     def add_upgrade_cli(self, outdated_data):
         """Augment the outdated data from ``mpm outdated`` subcommand with upgrade CLI
-        fields for bar plugin consumption.
-        """
+        fields for bar plugin consumption."""
         for manager_id, manager_data in outdated_data.items():
             if manager_data.get("packages"):
                 manager = pool.get(manager_id)

@@ -17,8 +17,8 @@
 from __future__ import annotations
 
 import json
-import re
 import logging
+import re
 from operator import methodcaller
 from typing import Iterator
 

@@ -16,8 +16,8 @@
 
 from __future__ import annotations
 
-import sys
 import logging
+import sys
 from functools import wraps
 from typing import TYPE_CHECKING, Callable, Iterator, TypeVar
 
@@ -38,8 +38,7 @@ T = TypeVar("T")
 
 def search_capabilities(extended_support: bool = True, exact_support: bool = True):
     """Decorator factory to be used on ``search()`` operations to signal ``mpm``
-    framework manager's capabilities.
-    """
+    framework manager's capabilities."""
 
     def decorator(function):
         @wraps(function)
@@ -73,8 +72,7 @@ def search_capabilities(extended_support: bool = True, exact_support: bool = Tru
 def version_not_implemented(func: Callable[P, T]) -> Callable[P, T]:
     """Decorator to be used on ``install()`` or ``upgrade_one_cli()`` operations to
     signal that a particular operation does not implement (yet) the version specifier
-    parameter.
-    """
+    parameter."""
 
     def print_warning(*args: P.args, **kwargs: P.kwargs) -> T:
         if kwargs.get("version"):

@@ -16,11 +16,11 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 import shutil
 import sys
-import logging
 from contextlib import nullcontext
 from dataclasses import asdict, dataclass
 from enum import Enum
@@ -134,8 +134,7 @@ class Package:
 
 def packages_asdict(packages: Iterator[Package], keep_fields: tuple[str, ...]):
     """Returns a list of packages casted to a ``dict`` with only a subset of its
-    fields.
-    """
+    fields."""
     return ({k: v for k, v in asdict(p).items() if k in keep_fields} for p in packages)
 
 
@@ -239,9 +238,9 @@ class PackageManager(metaclass=MetaPackageManager):
     homepage_url: str | None = None
     """Home page of the project, only used in documentation for reference."""
 
-    platforms: Group | Platform | Iterable[Group | Platform] | frozenset[
-        Platform
-    ] = frozenset()
+    platforms: (
+        Group | Platform | Iterable[Group | Platform] | frozenset[Platform]
+    ) = frozenset()
     """List of platforms supported by the manager.
 
     Allows for a mishmash of platforms and groups. Will be normalized into a frozen set

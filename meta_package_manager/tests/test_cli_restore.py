@@ -18,8 +18,6 @@ from __future__ import annotations
 
 import pytest
 
-from click_extra.tests.conftest import create_config
-
 from meta_package_manager.pool import pool
 
 from .conftest import default_manager_ids
@@ -58,12 +56,10 @@ class TestRestore(CLISubCommandTests):
         toml_path = create_config(
             "all-managers.toml",
             "".join(
-                """
-            [{}]
+                f"""
+            [{m}]
             blah = 123
-            """.format(
-                    m,
-                )
+            """
                 for m in pool.all_manager_ids
             ),
         )
@@ -79,17 +75,17 @@ class TestRestore(CLISubCommandTests):
         toml_path = create_config(
             "all-managers.toml",
             "".join(
-                """
-            [{}]
+                f"""
+            [{m}]
             blah = 123
-            """.format(
-                    m,
-                )
+            """
                 for m in pool.all_manager_ids
             ),
         )
 
-        result = invoke("--verbosity", "INFO", f"--{manager_id}", "restore", str(toml_path))
+        result = invoke(
+            "--verbosity", "INFO", f"--{manager_id}", "restore", str(toml_path)
+        )
         assert result.exit_code == 0
         self.check_manager_selection(result, {manager_id})
 
@@ -120,7 +116,9 @@ class TestRestore(CLISubCommandTests):
             """,
         )
 
-        result = invoke("--verbosity", "INFO", "--npm", "restore", str(toml_path), color=False)
+        result = invoke(
+            "--verbosity", "INFO", "--npm", "restore", str(toml_path), color=False
+        )
         assert result.exit_code == 0
         assert "pip-npm-dummy.toml" in result.stderr
         assert "Restore pip packages..." not in result.stderr
@@ -139,7 +137,15 @@ class TestRestore(CLISubCommandTests):
             """,
         )
 
-        result = invoke("--verbosity", "INFO", "--exclude", "npm", "restore", str(toml_path), color=False)
+        result = invoke(
+            "--verbosity",
+            "INFO",
+            "--exclude",
+            "npm",
+            "restore",
+            str(toml_path),
+            color=False,
+        )
         assert result.exit_code == 0
         assert "pip-npm-dummy.toml" in result.stderr
         assert "Restore pip packages..." in result.stderr

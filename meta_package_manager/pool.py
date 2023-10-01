@@ -17,9 +17,9 @@
 
 from __future__ import annotations
 
+import logging
 from functools import cached_property
 from typing import TYPE_CHECKING, Final, Iterable, Iterator
-import logging
 
 from boltons.iterutils import unique
 from click_extra.colorize import default_theme as theme

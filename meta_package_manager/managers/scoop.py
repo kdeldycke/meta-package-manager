@@ -187,8 +187,8 @@ class Scoop(PackageManager):
             Running post_install script...
             '7zip' (22.01) was installed successfully!
 
-        Notes
-        -----
+            Notes
+            -----
             Add 7-Zip as a context menu by running: "C:\\scoop\\...install-context.reg"
         """
         return self.run_cli("install", package_id)

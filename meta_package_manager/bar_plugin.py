@@ -278,7 +278,7 @@ class MPMPlugin:
         print(
             label.strip(),
             "|",
-            *(l for l in map(methodcaller("strip"), args) if l),
+            *(line for line in map(methodcaller("strip"), args) if line),
             sep=" ",
         )
 

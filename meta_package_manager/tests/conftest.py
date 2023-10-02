@@ -98,9 +98,7 @@ def solve_destructive_options(config: Config) -> tuple[bool, bool]:
         msg = (
             "Both destructive and non-destructive tests were skipped. No tests to run."
         )
-        raise ValueError(
-            msg,
-        )
+        raise ValueError(msg)
 
     return run_destructive, run_non_destructive
 

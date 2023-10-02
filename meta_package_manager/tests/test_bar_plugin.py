@@ -179,9 +179,7 @@ class TestBarPlugin:
         for index, (regex, required) in enumerate(checks):
             if required and not match_counter[index]:
                 msg = f"{regex!r} regex did not match any plugin output line."
-                raise Exception(
-                    msg,
-                )
+                raise Exception(msg)
 
     @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
     @pytest.mark.parametrize("submenu_layout", (True, False, None))

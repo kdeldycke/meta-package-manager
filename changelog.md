@@ -9,6 +9,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Drop support of Python 3.7.
 - \[scoop\] Fix parsing of Scoop version.
 - \[mpm\] Group platforms by family in the `managers` subcommand.
+- \[mpm\] Run tests and actions on released Python 3.12 version.
 - \[mpm\] Run tests on macos-13. Remove tests on macos-11.
 - \[mpm\] Run bar plugin unittests in their independent, non-parrallel step.
 - \[mpm\] Skip testing on intermediate Python versions to speed up CI. Only the oldest and latest supported.

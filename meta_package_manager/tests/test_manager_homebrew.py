@@ -164,6 +164,11 @@ def install_cask():
 
 @pytest.mark.destructive()
 @unless_macos
+# XXX The layout of the cask repository has changed, so we cannot go back in time too
+# much and checkout old versions of casks. We need to wait for a couple of new releases
+# of the casks we use in our tests, so we can have enough commit depth to test the
+# upgrade process.
+@pytest.mark.skip(reason="Cask repository structure changed too much to go back in time.")
 class TestCask:
     @pytest.mark.xdist_group(name="avoid_concurrent_git_tweaks")
     def test_autoupdate_unicode_name(self, invoke, install_cask):

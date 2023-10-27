@@ -27,13 +27,22 @@ from click_extra.tests.conftest import unless_macos
 
 @pytest.fixture()
 def install_cask():
-    packages = set()
+    """A fixture to install a Cask from a specific commit."""
 
-    def get_cask_path():
+    packages = set()
+    """List of installed packages."""
+
+    def get_cask_tap_path():
         """Default location of Homebrew Cask formulas on macOS.
 
-        This is supposed to be a shallow copy of the following Git repository:
-        https://github.com/Homebrew/homebrew-cask
+        This is supposed to be a `shallow copy of the official cask repository
+        <https://github.com/Homebrew/homebrew-cask>`_.
+
+        The later can be obtained with:
+
+        .. code-block:: shell-session
+            $ export HOMEBREW_NO_INSTALL_FROM_API="1"
+            $ brew tap homebrew/cask
         """
         process = subprocess.run(
             ("brew", "--repository"),
@@ -55,9 +64,22 @@ def install_cask():
         assert cask_repo.is_dir()
         return cask_repo
 
-    def git_checkout(package_id, commit):
+    def get_cask_folder(package_id: str):
+        """Get the folder where a Cask is located.
+
+        ..warning::
+            As of `aa46114 <https://github.com/Homebrew/homebrew-cask/commit/aa46114>`_,
+            casks have been moved to a subfolder named after their first letter.
+        """
+        cask_folder = get_cask_tap_path().joinpath(package_id[0])
+        assert cask_folder.is_absolute()
+        assert cask_folder.exists()
+        assert cask_folder.is_dir()
+        return cask_folder
+
+    def git_checkout(package_id: str, commit: str):
         process = subprocess.run(
-            ("git", "-C", get_cask_path(), "checkout", commit, f"{package_id}.rb"),
+            ("git", "-C", get_cask_folder(package_id), "checkout", commit, f"{package_id}.rb"),
         )
         assert not process.stderr
         assert process.returncode == 0

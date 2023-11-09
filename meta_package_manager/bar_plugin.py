@@ -201,19 +201,6 @@ class MPMPlugin:
         """SwiftBar is kind enough to tell us about its presence."""
         return self.getenv_bool("SWIFTBAR")
 
-    @staticmethod
-    def locate_bin(*bin_names: str) -> str | None:
-        """Find the location of an executable binary on the system.
-
-        Provides as many binary names as you need, the first one found will be returned.
-        Both plain name and full path are supported.
-        """
-        for name in bin_names:
-            path = which(name)
-            if path:
-                return path
-        return None
-
     @cached_property
     def python_path(self) -> str:
         """Returns the system's Python binary path.
@@ -222,7 +209,11 @@ class MPMPlugin:
         fallback to (i.e. ``sys.executable``). But before that, we attempt to locate it
         by respecting the environment variables.
         """
-        return self.locate_bin("python", "python3", sys.executable)  # type: ignore
+        for bin_name in ("python", "python3", sys.executable):
+            py_path = which(bin_name)
+            if py_path:
+                return py_path
+        raise FileNotFoundError("No Python binary found on the system.")
 
     @cached_property
     def mpm_exec(self) -> tuple[str, ...]:
@@ -230,7 +221,7 @@ class MPMPlugin:
         executable Python module."""
         # XXX Local debugging and development.
         # return "poetry", "run", "mpm"
-        mpm_exec = self.locate_bin("mpm")
+        mpm_exec = which("mpm")
         if mpm_exec:
             return (mpm_exec,)
         return self.python_path, "-m", "meta_package_manager"

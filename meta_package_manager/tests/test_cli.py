@@ -137,31 +137,24 @@ class TestCommonCLI:
     """
 
     def test_executable_module(self):
-        # Take the current Python executable as a reference.
-        py_path_list = {sys.executable}
+        """Try running the CLI as a Python module.
 
-        # Search Python executables on the system by name.
-        for bin_name in ("python", "python3"):
-            bin_path = MPMPlugin.locate_bin(bin_name)
-            if bin_path:
-                py_path_list.add(bin_path)
+        Use the current Python executable so we don't have to worry about missing
+        dependencies.
+        """
+        process = subprocess.run(
+            (sys.executable, "-m", "meta_package_manager", "--version"),
+            capture_output=True,
+            encoding="utf-8",
+        )
 
-        for py_path in py_path_list:
-            process = subprocess.run(
-                (py_path, "-m", "meta_package_manager", "--version"),
-                capture_output=True,
-                encoding="utf-8",
-            )
+        assert process.returncode == 0
+        assert not process.stderr
 
-            assert process.returncode == 0
-            assert not process.stderr
-
-            expected_output = (
-                f"\x1b[97mmpm\x1b[0m, version \x1b[32m{__version__}\x1b[0m\n"
-            )
-            if is_windows():
-                expected_output = strip_ansi(expected_output)
-            assert process.stdout == expected_output
+        expected_output = f"\x1b[97mmpm\x1b[0m, version \x1b[32m{__version__}\x1b[0m\n"
+        if is_windows():
+            expected_output = strip_ansi(expected_output)
+        assert process.stdout == expected_output
 
     @pytest.mark.parametrize(
         ("stats_arg", "active_stats"),

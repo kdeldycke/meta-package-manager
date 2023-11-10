@@ -485,6 +485,7 @@ jobs:
         if: runner.os != 'Windows'
         run: >
           poetry run pytest --exitfirst
+          -vvvvvvvvvvvvvvvv
           --numprocesses=0 --skip-non-destructive --run-destructive
           --ignore=./meta_package_manager/tests/test_bar_plugin.py
           ./meta_package_manager/tests/

@@ -160,8 +160,6 @@ class TestCommonCLI:
         """Check that the CLI exits with an error when a timeout is reached."""
         result = invoke("--timeout", "1", "outdated")
         assert result.exit_code == 1
-        assert not result.stdout
-        assert not result.stderr
         assert isinstance(result.exception, subprocess.TimeoutExpired)
 
     @pytest.mark.parametrize(

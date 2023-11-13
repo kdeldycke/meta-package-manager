@@ -6,6 +6,7 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Add a `-t`/`--timeout` option to set the maximum duration of each CLI call. Defaults to 10 minutes.
 - \[mpm\] Drop support of Python 3.7.
 - \[scoop\] Fix parsing of Scoop version.
 - \[mpm\] Group platforms by family in the `managers` subcommand.

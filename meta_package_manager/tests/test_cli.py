@@ -127,7 +127,7 @@ class InspectCLIOutput:
 
 
 class TestCommonCLI:
-    """Tests CLI behavior shared by all subcommands.
+    """Single tests for CLI behavior shared by all subcommands.
 
     If we have to, we only run the test on a single, non-destructive subcommand
     (like ``mpm installed`` or ``mpm managers``). Not all subcommands are tested.
@@ -155,6 +155,14 @@ class TestCommonCLI:
         if is_windows():
             expected_output = strip_ansi(expected_output)
         assert process.stdout == expected_output
+
+    def test_timeout(self, invoke):
+        """Check that the CLI exits with an error when a timeout is reached."""
+        result = invoke("--timeout", "1", "outdated")
+        assert result.exit_code == 1
+        assert not result.stdout
+        assert not result.stderr
+        assert isinstance(result.exception, subprocess.TimeoutExpired)
 
     @pytest.mark.parametrize(
         ("stats_arg", "active_stats"),

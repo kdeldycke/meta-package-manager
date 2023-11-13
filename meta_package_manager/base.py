@@ -27,8 +27,9 @@ from enum import Enum
 from functools import cached_property
 from pathlib import Path
 from textwrap import dedent, indent, shorten
-from typing import ContextManager, Generator, Iterable, Iterator
+from typing import ContextManager, Generator, Iterable, Iterator, cast
 from unittest.mock import patch
+import subprocess
 
 from boltons.iterutils import flatten, unique
 from boltons.strutils import strip_ansi
@@ -41,7 +42,7 @@ from click_extra.testing import (
     NestedArgs,
     args_cleanup,
     format_cli_prompt,
-    run_cmd,
+    env_copy,
 )
 
 from .version import TokenizedString, parse_version
@@ -329,6 +330,9 @@ class PackageManager(metaclass=MetaPackageManager):
 
     dry_run: bool = False
     """Do not actually perform any action, just simulate CLI calls."""
+
+    timeout: int | None = None
+    """Maximum number of seconds to wait for a CLI call to complete."""
 
     cli_errors: list[CLIError]
     """Accumulate all CLI errors encountered by the package manager."""
@@ -623,11 +627,6 @@ class PackageManager(metaclass=MetaPackageManager):
           * returning ready-to-use normalized strings (dedented and stripped)
           * letting :option:`mpm --dry-run` and :option:`mpm --stop-on-error` have
             expected effect on execution
-
-        .. todo::
-
-            Move :option:`mpm --dry-run` option and this method to `click-extra
-            <https://github.com/kdeldycke/click-extra>`_.
         """
         # Casting to string helps serialize Path and Version objects.
         clean_args = args_cleanup(*args)
@@ -641,11 +640,16 @@ class PackageManager(metaclass=MetaPackageManager):
             logging.warning(f"Dry-run: {cli_msg}")
         else:
             logging.debug(cli_msg)
-            code, output, error = run_cmd(
-                *clean_args,
-                extra_env=extra_env,
-                print_output=False,
+            result = subprocess.run(
+                clean_args,
+                capture_output=True,
+                timeout=self.timeout,
+                encoding="utf-8",
+                env=cast("subprocess._ENV", env_copy(extra_env)),
             )
+            code = result.returncode
+            output = result.stdout
+            error = result.stderr
 
         # Normalize messages.
         if error:

@@ -34,6 +34,7 @@ from click_extra import (
     Choice,
     Context,
     File,
+    IntRange,
     Parameter,
     Section,
     argument,
@@ -224,6 +225,13 @@ def bar_plugin_path(ctx, param, value):
         default=False,
         help="Do not actually perform any action, just simulate CLI calls.",
     ),
+    option(
+        "-t",
+        "--timeout",
+        type=IntRange(min=0),
+        default=300,
+        help="Set maximum duration in seconds for each CLI call.",
+    ),
 )
 @option_group(
     "Output options",
@@ -275,6 +283,7 @@ def mpm(
     ignore_auto_updates,
     stop_on_error,
     dry_run,
+    timeout,
     description,
     sort_by,
     stats,
@@ -332,6 +341,7 @@ def mpm(
         # Does the manager should raise on error or not.
         stop_on_error=stop_on_error,
         dry_run=dry_run,
+        timeout=timeout,
     )
 
     # Load up current and new global options to the context for subcommand consumption.

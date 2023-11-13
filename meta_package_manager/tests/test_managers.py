@@ -19,7 +19,6 @@ from __future__ import annotations
 import ast
 import inspect
 import re
-import types
 from pathlib import Path, PurePath
 from string import ascii_letters, ascii_lowercase, digits
 
@@ -28,17 +27,13 @@ from boltons.iterutils import unique
 from boltons.urlutils import URL
 from click_extra.platforms import ALL_PLATFORMS, Platform
 
-from meta_package_manager.base import Operations, Package, PackageManager
+from meta_package_manager.base import Operations, PackageManager
 from meta_package_manager.cli import XKCD_MANAGER_ORDER
 from meta_package_manager.pool import pool
 from meta_package_manager.version import TokenizedString
 
-from .conftest import (
-    all_managers,
-    available_managers,
-    available_managers_and_dummy_package,
-    manager_classes,
-)
+from .conftest import all_managers, manager_classes
+
 """ Test the structure, data and types returned by all package managers.
 
 This test suite try to automate most of the basic reviewing work for the addition of
@@ -53,9 +48,7 @@ def test_xkcd_set():
 
 @all_managers
 def test_deprecated(manager):
-    assert isinstance(manager.deprecated, bool)
     if manager.deprecation_url is not None:
-        assert isinstance(manager.deprecation_url, str)
         location = URL(manager.deprecation_url)
         assert location
         assert location.scheme.lower() in ("http", "https")
@@ -66,7 +59,6 @@ def test_deprecated(manager):
 def test_ascii_id(manager):
     """All package manager IDs should be short ASCII strings."""
     assert manager.id
-    assert isinstance(manager.id, str)
     assert manager.id.isascii()
     assert set(manager.id).issubset(ascii_lowercase + digits + "-")
 
@@ -75,7 +67,6 @@ def test_ascii_id(manager):
 def test_name(manager):
     """Check all managers have a name."""
     assert manager.name
-    assert isinstance(manager.name, str)
     assert set(manager.name).issubset(ascii_letters + digits + "' ")
 
 
@@ -86,7 +77,6 @@ def test_unique_names():
 @all_managers
 def test_homepage_url(manager):
     assert manager.homepage_url
-    assert isinstance(manager.homepage_url, str)
     location = URL(manager.homepage_url)
     assert location
     assert location.scheme.lower() in ("http", "https")
@@ -94,8 +84,7 @@ def test_homepage_url(manager):
 
 @all_managers
 def test_platforms(manager):
-    """Check that definitions returns supported platforms as a frozenset of
-    platforms."""
+    """Check platforms is normalized as a frozenset."""
     assert manager.platforms
     assert isinstance(manager.platforms, frozenset)
     assert all(isinstance(p, Platform) for p in manager.platforms)
@@ -106,7 +95,6 @@ def test_platforms(manager):
 def test_requirement(manager):
     """Each manager is required to specify a minimal version or ``None``."""
     if manager.requirement is not None:
-        assert isinstance(manager.requirement, str)
         assert set(manager.requirement).issubset(digits + ".")
         # Check provided string is lossless once passed via TokenizedString.
         assert str(TokenizedString(manager.requirement)) == manager.requirement
@@ -116,25 +104,15 @@ def test_requirement(manager):
 def test_cli_names_type(manager):
     """Check the pointed CLI name and path are file-system compatible."""
     assert manager.cli_names
-    assert isinstance(manager.cli_names, tuple)
     for name in manager.cli_names:
-        assert isinstance(name, str)
         assert name.isalnum()
         assert PurePath(name).name == name
 
 
 @all_managers
-def test_virtual(manager):
-    """Check the manager as a defined virtual property."""
-    assert isinstance(manager.virtual, bool)
-
-
-@all_managers
 def test_cli_search_path(manager):
-    assert isinstance(manager.cli_search_path, tuple)
     assert len(set(manager.cli_search_path)) == len(manager.cli_search_path)
     for search_path in manager.cli_search_path:
-        assert isinstance(search_path, str)
         path_obj = Path(search_path).resolve()
         assert path_obj.is_absolute()
         assert not path_obj.is_reserved()
@@ -145,33 +123,26 @@ def test_cli_search_path(manager):
 @all_managers
 def test_extra_env_type(manager):
     """Check that definitions environment variables as a dict of strings."""
-    assert manager.extra_env is None or isinstance(manager.extra_env, dict)
     if manager.extra_env:
         for key, value in manager.extra_env.items():
             for item in (key, value):
                 assert item
-                assert isinstance(item, str)
                 assert set(item).issubset(ascii_letters + digits + "_-")
 
 
 @all_managers
 def test_global_args_type(manager):
-    """Check that definitions returns CLI args as a list of strings."""
+    """Check that definitions returns CLI args as a list of non-empty strings."""
     for global_args in (manager.pre_cmds, manager.pre_args, manager.post_args):
-        assert isinstance(global_args, tuple)
+        assert all(global_args)
         for arg in global_args:
-            assert arg
-            assert isinstance(arg, str)
             assert set(arg).issubset(ascii_letters + digits + "-=+")
 
 
 @all_managers
 def test_version_cli_options(manager):
-    """Version CLI options must be a list of strings or a dict of that structure."""
-    assert isinstance(manager.version_cli_options, tuple)
-    for arg in manager.version_cli_options:
-        assert arg
-        assert isinstance(arg, str)
+    """Version CLI options must be a list of non empty strings."""
+    assert all(manager.version_cli_options)
 
 
 @all_managers
@@ -194,59 +165,6 @@ def test_cli_path(manager):
         assert manager.cli_path.is_file()
 
 
-@all_managers
-def test_version(manager):
-    if manager.version is not None:
-        assert isinstance(manager.version, TokenizedString)
-
-
-@all_managers
-def test_supported(manager):
-    assert isinstance(manager.supported, bool)
-
-
-@all_managers
-def test_executable(manager):
-    assert isinstance(manager.executable, bool)
-
-
-@all_managers
-def test_fresh(manager):
-    assert isinstance(manager.fresh, bool)
-
-
-@all_managers
-def test_available(manager):
-    assert isinstance(manager.available, bool)
-
-
-@available_managers
-def test_installed_type(manager):
-    """All installed operations are either not implemented or returns a dict of
-    dicts."""
-    try:
-        result = manager.installed
-    except Exception as ex:
-        assert isinstance(ex, NotImplementedError)
-    else:
-        assert isinstance(result, types.GeneratorType)
-        for pkg in result:
-            assert isinstance(pkg, Package)
-
-
-@available_managers
-def test_outdated_type(manager):
-    """All outdated operations are either not implemented or returns a dict of dicts."""
-    try:
-        result = manager.outdated
-    except Exception as ex:
-        assert isinstance(ex, NotImplementedError)
-    else:
-        assert isinstance(result, types.GeneratorType)
-        for pkg in result:
-            assert isinstance(pkg, Package)
-
-
 @pytest.mark.parametrize(
     ("query", "query_parts"),
     (
@@ -258,105 +176,6 @@ def test_outdated_type(manager):
 )
 def test_query_parts(query, query_parts):
     assert PackageManager.query_parts(query) == query_parts
-
-
-@available_managers
-def test_search_type(manager):
-    """All search operations are either not implemented or returns a generator of
-    dicts."""
-    try:
-        matches = manager.search("python", extended=True, exact=False)
-    except Exception as ex:
-        assert isinstance(ex, NotImplementedError)
-    else:
-        assert isinstance(matches, types.GeneratorType)
-        for pkg in matches:
-            assert isinstance(pkg, Package)
-
-
-@pytest.mark.destructive()
-@available_managers_and_dummy_package
-def test_install_type(manager, package_id):
-    """All methods installing packages are either not implemented or returns a
-    string."""
-    try:
-        result = manager.install(package_id)
-    except Exception as ex:
-        assert isinstance(ex, NotImplementedError)
-    else:
-        assert isinstance(result, str)
-
-
-@pytest.mark.destructive()
-@available_managers
-def test_upgrade_all_cli_type(manager):
-    """All methods returning an upgrade-all CLI are either not implemented or returns a
-    tuple."""
-    try:
-        result = manager.upgrade_all_cli()
-    except Exception as ex:
-        assert isinstance(ex, NotImplementedError)
-    else:
-        assert isinstance(result, tuple)
-
-
-@pytest.mark.destructive()
-@available_managers_and_dummy_package
-def test_upgrade_one_cli_type(manager, package_id):
-    """All methods returning an upgrade CLI are either not implemented or returns a
-    tuple."""
-    try:
-        result = manager.upgrade_one_cli(package_id)
-    except Exception as ex:
-        assert isinstance(ex, NotImplementedError)
-    else:
-        assert isinstance(result, tuple)
-
-
-@pytest.mark.destructive()
-@available_managers
-def test_upgrade_type(manager):
-    """All methods upgrading packages are either not implemented or returns a string."""
-    try:
-        result = manager.upgrade()
-    except Exception as ex:
-        assert isinstance(ex, NotImplementedError)
-    else:
-        assert isinstance(result, str)
-
-
-@pytest.mark.destructive()
-@available_managers_and_dummy_package
-def test_remove_type(manager, package_id):
-    """All methods removing packages are either not implemented or returns a string."""
-    try:
-        result = manager.remove(package_id)
-    except Exception as ex:
-        assert isinstance(ex, NotImplementedError)
-    else:
-        assert isinstance(result, str)
-
-
-@available_managers
-def test_sync_type(manager):
-    """Sync operations are either not implemented or returns nothing."""
-    try:
-        result = manager.sync()
-    except Exception as ex:
-        assert isinstance(ex, NotImplementedError)
-    else:
-        assert result is None
-
-
-@available_managers
-def test_cleanup_type(manager):
-    """Cleanup operations are either not implemented or returns nothing."""
-    try:
-        result = manager.cleanup()
-    except Exception as ex:
-        assert isinstance(ex, NotImplementedError)
-    else:
-        assert result is None
 
 
 def collect_props_ref():

@@ -28,7 +28,6 @@ from click_extra.platforms import is_windows
 from click_extra.tabulate import output_formats
 
 from meta_package_manager import __version__
-from meta_package_manager.bar_plugin import MPMPlugin
 from meta_package_manager.pool import pool
 
 from .conftest import default_manager_ids

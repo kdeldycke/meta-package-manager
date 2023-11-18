@@ -229,7 +229,7 @@ def bar_plugin_path(ctx, param, value):
         "-t",
         "--timeout",
         type=IntRange(min=0),
-        default=300,
+        default=500,
         help="Set maximum duration in seconds for each CLI call.",
     ),
 )

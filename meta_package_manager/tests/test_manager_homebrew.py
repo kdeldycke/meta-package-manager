@@ -129,7 +129,7 @@ def install_cask():
         # to remove that hack, and have the install_cask() invokation from the
         # test_autoupdate_unicode_name() test below checkout ubersicht from that commit.
         if package_id == "ubersicht":
-            cask_path = get_cask_path().joinpath(f"{package_id}.rb")
+            cask_path = get_cask_tap_path().joinpath(f"{package_id}.rb")
             content = cask_path.read_text()
             cask_path.write_text(content.replace(":yosemite", ":el_capitan"))
 

@@ -28,7 +28,7 @@ from yaml import Loader, load
 if sys.version_info >= (3, 11):
     import tomllib
 else:
-    import tomli as tomllib  # type: ignore[import]
+    import tomli as tomllib  # type: ignore[import-not-found]
 
 from meta_package_manager.labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_PREFIX
 from meta_package_manager.platforms import PLATFORM_GROUPS, encoding_args

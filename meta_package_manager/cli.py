@@ -53,7 +53,7 @@ from click_extra.platforms import reduce
 if sys.version_info >= (3, 11):
     import tomllib
 else:
-    import tomli as tomllib  # type: ignore[import]
+    import tomli as tomllib  # type: ignore[import-not-found]
 
 from . import __version__, bar_plugin
 from .base import (

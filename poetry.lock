@@ -683,17 +683,17 @@ testing-docutils = ["pygments", "pytest (>=7,<8)", "pytest-param-files (>=0.3.4,
 
 [[package]]
 name = "packageurl-python"
-version = "0.11.2"
+version = "0.13.1"
 description = "A purl aka. Package URL parser and builder"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "packageurl-python-0.11.2.tar.gz", hash = "sha256:01fbf74a41ef85cf413f1ede529a1411f658bda66ed22d45d27280ad9ceba471"},
-    {file = "packageurl_python-0.11.2-py3-none-any.whl", hash = "sha256:799acfe8d9e6e3534bbc19660be97d5b66754bc033e62c39f1e2f16323fcfa84"},
+    {file = "packageurl-python-0.13.1.tar.gz", hash = "sha256:84f8053f4b85294b98b3b78715475847fb48f4525ec302d06dc35b26a9b3078a"},
+    {file = "packageurl_python-0.13.1-py3-none-any.whl", hash = "sha256:d35090c7ec1d7afc611679912151b2157f28f68e729b6fa56f8ea5422819eaed"},
 ]
 
 [package.extras]
-build = ["wheel"]
+build = ["setuptools", "wheel"]
 lint = ["black", "isort", "mypy"]
 sqlalchemy = ["sqlalchemy (>=2.0.0)"]
 test = ["pytest"]
@@ -1526,4 +1526,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "9fa6f81f16c57a4a84e5fdc2f24d06a9d7c728833d0a4a94c0673479946a8d4f"
+content-hash = "6e146a7bce2d510ccb4ab10ca07e62061bb697a3755eac07090a91aaa771314c"

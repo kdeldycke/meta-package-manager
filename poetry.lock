@@ -683,13 +683,13 @@ testing-docutils = ["pygments", "pytest (>=7,<8)", "pytest-param-files (>=0.3.4,
 
 [[package]]
 name = "packageurl-python"
-version = "0.13.1"
+version = "0.13.2"
 description = "A purl aka. Package URL parser and builder"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "packageurl-python-0.13.1.tar.gz", hash = "sha256:84f8053f4b85294b98b3b78715475847fb48f4525ec302d06dc35b26a9b3078a"},
-    {file = "packageurl_python-0.13.1-py3-none-any.whl", hash = "sha256:d35090c7ec1d7afc611679912151b2157f28f68e729b6fa56f8ea5422819eaed"},
+    {file = "packageurl-python-0.13.2.tar.gz", hash = "sha256:af4af4732e3265b6acafad97b03db1bf9740b196011dd23d41e565fbdd58244c"},
+    {file = "packageurl_python-0.13.2-py3-none-any.whl", hash = "sha256:c2d8f5d584486e82d1b9677cb0efc4e01e25c30a6edef1d71f74828c01b13e9a"},
 ]
 
 [package.extras]

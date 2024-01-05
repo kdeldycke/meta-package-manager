@@ -239,9 +239,9 @@ class PackageManager(metaclass=MetaPackageManager):
     homepage_url: str | None = None
     """Home page of the project, only used in documentation for reference."""
 
-    platforms: (
-        Group | Platform | Iterable[Group | Platform] | frozenset[Platform]
-    ) = frozenset()
+    platforms: Group | Platform | Iterable[Group | Platform] | frozenset[Platform] = (
+        frozenset()
+    )
     """List of platforms supported by the manager.
 
     Allows for a mishmash of platforms and groups. Will be normalized into a frozen set

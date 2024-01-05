@@ -31,6 +31,7 @@ from .conftest import (
     maintained_manager_ids,
     unsupported_manager_ids,
 )
+
 """ Test the pool and its content. """
 
 

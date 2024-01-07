@@ -36,15 +36,11 @@ jobs:
           from itertools import product
           from pathlib import Path
 
-          # See what each os came pre-installed with at:
-          # https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners
+          # Available OSes: https://github.com/actions/runner-images#available-images
           os_list = {
               "ubuntu-22.04",
-              "ubuntu-20.04",
               "macos-13",
-              "macos-12",
               "windows-2022",
-              "windows-2019",
           }
           # Only test the oldest and latest Python version supported and the upcoming one. Skip the intermediates
           # to speed up the tests.
@@ -357,8 +353,7 @@ jobs:
 
       # DNF
       - name: DNF - Linux install
-        # DNF has only been added in Ubuntu 21.04, not before.
-        if: runner.os == 'Linux' && matrix.os != 'ubuntu-20.04'
+        if: runner.os == 'Linux'
         run: |
           sudo apt --quiet --yes install dnf
 
@@ -411,18 +406,18 @@ jobs:
           Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
           refreshenv
           gem update --quiet --system
-      - name: Ruby & Gem - macOS & Ubuntu < 21.04 upgrade
-        if: runner.os == 'macOS' || matrix.os == 'ubuntu-20.04'
+      - name: Ruby & Gem - macOS
+        if: runner.os == 'macOS'
         run: |
           sudo gem update --quiet --system
-      - name: Ruby & Gem - Ubuntu >= 21.04 upgrade
+      - name: Ruby & Gem - Ubuntu
         # As of Ubuntu 21.04, RubyGems is exclusively managed by APT. A call to "sudo gem update --system"
         # ends up with the following error:
         #   ERROR:  Your RubyGems was installed trough APT, and upgrading it through RubyGems
         #   itself is unsupported. If you really need the latest version of RubyGems (tip:
         #   you usually don't), then you need to install RubyGems (and Ruby) manually,
         #   maybe using tools like ruby-install, rvm, etc.
-        if: runner.os == 'Linux' && matrix.os != 'ubuntu-20.04'
+        if: runner.os == 'Linux'
         run: |
           sudo apt --quiet --yes install ruby-rubygems
 

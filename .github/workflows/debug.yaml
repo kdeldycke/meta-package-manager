@@ -13,11 +13,8 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          # - ubuntu-20.04
-          - macos-12
-          # - macos-11
+          - macos-13
           - windows-2022
-          # - windows-2019
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4.1.1

@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`5.14.0 (unreleased) <compare/v5.13.1...main>`
-
-```{important}
-This version is not released yet and is under active development.
-```
+## {gh}`5.14.0 (2024-01-12) <compare/v5.13.1...v5.14.0>`
 
 - \[mpm\] Add a `-t`/`--timeout` option to set the maximum duration of each CLI call. Defaults to 10 minutes.
 - \[mpm\] Drop support of Python 3.7.

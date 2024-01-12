@@ -1,7 +1,7 @@
 [tool.poetry]
 # Docs: https://python-poetry.org/docs/pyproject/
 name = "meta-package-manager"
-version = "5.14.0"
+version = "5.14.1"
 description = "🎁 wraps all package managers with a unifying CLI"
 license = 'GPL-2.0-or-later'
 authors = ["Kevin Deldycke <kevin@deldycke.com>"]
@@ -173,7 +173,7 @@ ignore = [
 ]
 
 [tool.bumpversion]
-current_version = "5.14.0"
+current_version = "5.14.1"
 allow_dirty = true
 
 [[tool.bumpversion.files]]
@@ -211,6 +211,7 @@ filename = "./citation.cff"
 regex = true
 search = "date-released: \\d{{4}}-\\d{{2}}-\\d{{2}}"
 replace = "date-released: {utcnow:%Y-%m-%d}"
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

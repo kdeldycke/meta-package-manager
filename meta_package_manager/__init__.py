@@ -15,7 +15,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Expose package-wide elements."""
 
-__version__ = "5.14.0"
+__version__ = "5.14.1"
 """Examples of valid version strings according :pep:`440#version-scheme`:
 
 .. code-block:: python

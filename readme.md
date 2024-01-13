@@ -80,7 +80,7 @@
 | [`pacman`](https://wiki.archlinux.org/title/pacman)                                     | 5.0.0        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`paru`](https://github.com/Morganamilo/paru)                                           | 1.9.3        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`pip`](https://pip.pypa.io)                                                            | 10.0.0       |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
-| [`pipx`](https://pypa.github.io/pipx/)                                                  | 1.0.0        |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
+| [`pipx`](https://pipx.pypa.io)                                                  | 1.0.0        |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`scoop`](https://scoop.sh)                                                             | 0.2.4        |                         |               |       |             |    🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`snap`](https://snapcraft.io)                                                          | 2.0.0        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
 | [`steamcmd`](https://developer.valvesoftware.com/wiki/SteamCMD)                         | None         |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |             |            |          |     ✓     |           |               |          |        |           |
@@ -114,7 +114,7 @@ $ brew install meta-package-manager
 
 ### From sources
 
-[`pipx`](https://pypa.github.io/pipx/) is the cleanest way to install `mpm` from sources on any platform:
+[`pipx`](https://pipx.pypa.io) is the cleanest way to install `mpm` from sources on any platform:
 
 ```shell-session
 $ pipx install meta-package-manager

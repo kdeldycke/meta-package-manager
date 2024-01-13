@@ -27,7 +27,7 @@ from meta_package_manager.capabilities import version_not_implemented
 
 
 class Pipx(PackageManager):
-    homepage_url = "https://pypa.github.io/pipx/"
+    homepage_url = "https://pipx.pypa.io"
 
     platforms = ALL_PLATFORMS
 

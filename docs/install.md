@@ -21,7 +21,7 @@ you're looking for.
 `````{tab-set}
 
 ````{tab-item} pipx
-Easiest way is to [install `pipx`](https://pypa.github.io/pipx/installation/), then use it to install `mpm`:
+Easiest way is to [install `pipx`](https://pipx.pypa.io/stable/installation/), then use it to install `mpm`:
 
 ```{code-block} shell-session
 $ pipx install meta-package-manager

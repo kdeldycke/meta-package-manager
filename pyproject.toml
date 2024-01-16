@@ -1,7 +1,7 @@
 [tool.poetry]
 # Docs: https://python-poetry.org/docs/pyproject/
 name = "meta-package-manager"
-version = "5.14.1"
+version = "5.14.2"
 description = "🎁 wraps all package managers with a unifying CLI"
 license = 'GPL-2.0-or-later'
 authors = ["Kevin Deldycke <kevin@deldycke.com>"]
@@ -173,7 +173,7 @@ ignore = [
 ]
 
 [tool.bumpversion]
-current_version = "5.14.1"
+current_version = "5.14.2"
 allow_dirty = true
 
 [[tool.bumpversion.files]]

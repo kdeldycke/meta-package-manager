@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`5.14.1 (unreleased) <compare/v5.14.0...main>`
-
-```{important}
-This version is not released yet and is under active development.
-```
+## {gh}`5.14.1 (2024-01-16) <compare/v5.14.0...v5.14.1>`
 
 - \[bar-plugin\] Always call `mpm --version` without color.
 - \[bar-plugin\] Increase robustness of `mpm` version parsing, wether its colored or not.

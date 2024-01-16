@@ -177,8 +177,7 @@ def bar_plugin_path(ctx, param, value):
     # XXX Same as what click_extra.commands.default_extra_params returns, but with
     # colors of the version option forced to be neutralized. This temporarily address
     # the validation of mpm version by old (X|Swift)Bar plugins. This could be removed
-    # in a couple of months, after a series of mpm/bar plugin releases.
-    # See: https://github.com/kdeldycke/meta-package-manager/pull/1152
+    # once https://github.com/matryer/xbar-plugins/pull/2018 is merged upstream.
     params=[
         TimerOption(),
         ColorOption(),

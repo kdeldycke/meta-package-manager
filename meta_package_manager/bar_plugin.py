@@ -233,7 +233,9 @@ class MPMPlugin:
         error: str | Exception | None = None
         try:
             process = run(
-                (*self.mpm_exec, "--version"),
+                # Output a color-less versionjust in case the script is not run in a
+                # non-interactive shell, or Click/Click-Extra autodetection fails.
+                (*self.mpm_exec, "--no-color", "--version"),
                 capture_output=True,
                 encoding="utf-8",
             )
@@ -247,13 +249,25 @@ class MPMPlugin:
         # Is mpm CLI installed on the system?
         if not process.returncode and not error:
             installed = True
-            # Is mpm too old?
-            match = re.compile(r".*\s+(?P<version>[0-9\.]+)$", re.MULTILINE).search(
-                process.stdout,
-            )
+            # This regular expression is designed to extract the version number, wether
+            # it is surrounded by ANSI color escape sequence or not.
+            match = re.compile(
+                r"""
+                .+                      # Any string
+                \                       # A space
+                version                 # The "version" string
+                \                       # A space
+                [^\.]*?                 # Any minimal (non-greedy) string without a dot
+                (?P<version>[0-9\.]+)   # Version composed of numbers and dots
+                [^\.]*?                 # Any minimal (non-greedy) string without a dot
+                $                       # End of the string
+                """,
+                re.VERBOSE | re.MULTILINE,
+            ).search(process.stdout)
             if match:
                 version_string = match.groupdict()["version"]
                 mpm_version = tuple(map(int, version_string.split(".")))
+                # Is mpm too old?
                 if mpm_version >= self.mpm_min_version:
                     up_to_date = True
 

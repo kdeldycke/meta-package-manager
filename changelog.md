@@ -8,6 +8,7 @@ This version is not released yet and is under active development.
 
 - \[bar-plugin\] Always call `mpm --version` without color.
 - \[bar-plugin\] Increase robustness of `mpm` version parsing, wether its colored or not.
+- \[mpm\] Temporary disable version output in color to fix already installed plugin/binary pairs. Closes {pr}`1152`.
 
 ## {gh}`5.14.0 (2024-01-12) <compare/v5.13.1...v5.14.0>`
 

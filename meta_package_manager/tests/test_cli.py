@@ -150,7 +150,7 @@ class TestCommonCLI:
         assert process.returncode == 0
         assert not process.stderr
 
-        expected_output = f"\x1b[97mmpm\x1b[0m, version \x1b[32m{__version__}\x1b[0m\n"
+        expected_output = f"\x1b[97mmpm\x1b[0m, version {__version__}\n"
         if is_windows():
             expected_output = strip_ansi(expected_output)
         assert process.stdout == expected_output

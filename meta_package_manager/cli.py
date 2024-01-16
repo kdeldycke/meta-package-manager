@@ -40,6 +40,7 @@ from click_extra import (
     argument,
     echo,
     extra_group,
+    extra_version_option,
     file_path,
     option,
     option_group,
@@ -272,6 +273,11 @@ def bar_plugin_path(ctx, param, value):
         callback=bar_plugin_path,
         help="Print location of the Xbar/SwiftBar plugin.",
     ),
+)
+@extra_version_option(
+    message_style=None,
+    version_style=None,
+    prog_name_style=None,
 )
 @pass_context
 def mpm(

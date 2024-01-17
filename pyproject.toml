@@ -212,7 +212,7 @@ regex = true
 search = "date-released: \\d{{4}}-\\d{{2}}-\\d{{2}}"
 replace = "date-released: {utcnow:%Y-%m-%d}"
 
-[tool.typos.default.extend-identifiers]
+[tool.typos]
 # error: `ist` should be `is`, `it`, `its`, `sit`, `list`
 #   --> ./docs/development.md:121:10
 #     |
@@ -225,7 +225,7 @@ replace = "date-released: {utcnow:%Y-%m-%d}"
 # 121 | - [chalk.ist](https://chalk.ist)
 #     |                             ^^^
 #     |
-chalk.ist = "chalk.ist"
+default.extend-identifiers = { "chalk.ist" = "chalk.ist" }
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

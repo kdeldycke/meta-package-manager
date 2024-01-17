@@ -20,6 +20,7 @@ import logging
 import os
 import re
 import shutil
+import subprocess
 import sys
 from contextlib import nullcontext
 from dataclasses import asdict, dataclass
@@ -29,7 +30,6 @@ from pathlib import Path
 from textwrap import dedent, indent, shorten
 from typing import ContextManager, Generator, Iterable, Iterator, cast
 from unittest.mock import patch
-import subprocess
 
 from boltons.iterutils import flatten, unique
 from boltons.strutils import strip_ansi
@@ -41,8 +41,8 @@ from click_extra.testing import (
     EnvVars,
     NestedArgs,
     args_cleanup,
-    format_cli_prompt,
     env_copy,
+    format_cli_prompt,
 )
 
 from .version import TokenizedString, parse_version

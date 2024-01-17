@@ -213,19 +213,21 @@ search = "date-released: \\d{{4}}-\\d{{2}}-\\d{{2}}"
 replace = "date-released: {utcnow:%Y-%m-%d}"
 
 [tool.typos]
-# error: `ist` should be `is`, `it`, `its`, `sit`, `list`
-#   --> ./docs/development.md:121:10
-#     |
-# 121 | - [chalk.ist](https://chalk.ist)
-#     |          ^^^
-#     |
-# error: `ist` should be `is`, `it`, `its`, `sit`, `list`
-#   --> ./docs/development.md:121:29
-#     |
-# 121 | - [chalk.ist](https://chalk.ist)
-#     |                             ^^^
-#     |
-default.extend-identifiers = { "chalk.ist" = "chalk.ist" }
+default.extend-ignore-identifiers-re = [
+    # error: `ist` should be `is`, `it`, `its`, `sit`, `list`
+    #   --> ./docs/development.md:121:10
+    #     |
+    # 121 | - [chalk.ist](https://chalk.ist)
+    #     |          ^^^
+    #     |
+    # error: `ist` should be `is`, `it`, `its`, `sit`, `list`
+    #   --> ./docs/development.md:121:29
+    #     |
+    # 121 | - [chalk.ist](https://chalk.ist)
+    #     |                             ^^^
+    #     |
+    "ist",
+]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

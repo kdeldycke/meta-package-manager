@@ -557,7 +557,7 @@ class PackageManager(metaclass=MetaPackageManager):
     def supported(self) -> bool:
         """Is the package manager supported on that platform?"""
         # At this point self.platforms is normalized as a frozenset of Platform
-        # instances, but mypy doens't know it.
+        # instances, but mypy doesn't know it.
         return current_os() in self.platforms  # type: ignore[operator]
 
     @cached_property

@@ -169,7 +169,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         assert int(msg_match.groups()[0]) >= 20
 
     # XXX Colorama, a dependency of Click, is supposed to transform ANSI codes into
-    # Windows-specific directives but doen't. Maybe because the running environment is
+    # Windows-specific directives but doesn't. Maybe because the running environment is
     # not considered as a terminal. We need to investigate this further and report
     # issues to either Click or Colorama.
     @skip_windows

@@ -48,7 +48,7 @@ class APT(PackageManager):
     """
     ``--quiet``: produces output suitable for logging, omitting progress indicators.
 
-    Souce: https://manpages.org/apt-get/8#options
+    Source: https://manpages.org/apt-get/8#options
     """
 
     version_regex = r"apt\s+(?P<version>\S+)"

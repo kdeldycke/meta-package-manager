@@ -32,7 +32,7 @@ If you're a Python developer, for now the easiest way to have new package manage
    - Add at least one capture of the CLI output in the docstring to help future maintainers.
    - Reduce verbosity of CLI output to its essential data.
    - Use no-colors and/or non-emoji options if possible to not pollute output.
-   - Force the manager to output machine-readeable format like JSON, XML or CSV.
+   - Force the manager to output machine-readable format like JSON, XML or CSV.
    - If you cannot, you'll have to rely on less robust parsing with regular expressions. In which case try to make the output as predictable as possible.
    - Read the {doc}`/falsehoods` to anticipate edge-cases.
    - Read the implementation of the {py:class}`meta_package_manager.base.PackageManager` base class from which all definitions derives.

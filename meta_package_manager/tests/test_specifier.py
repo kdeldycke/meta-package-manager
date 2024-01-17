@@ -166,7 +166,7 @@ def test_parse_specs(spec_string, expected):
             {"left-pad", "left-pad@8.23.a7"},
             None,
             Specifier.from_string("left-pad@8.23.a7"),
-            id="version_and_unversionned_mix",
+            id="version_and_unversioned_mix",
         ),
         pytest.param(
             {"pkg:npm/leftpad"},

@@ -13,10 +13,10 @@ Implementing `mpm` exposed me to many edge-cases and pitfalls of package managem
 1. There is only one way to install a package.
 1. Only one version of a package is available on a system.
 1. Shared [dependencies are always compatible](https://en.wikipedia.org/wiki/Dependency_hell).
-1. [Version selection is garanteed to run fast](https://research.swtch.com/version-sat).
+1. [Version selection is guaranteed to run fast](https://research.swtch.com/version-sat).
 1. All
    {gh}`packages have a version <blob/v2.2.0/meta_package_manager/managers/mas.py#L71-L75>`.
-1. {gh}`Versionned packages are immutable <blob/v2.2.0/meta_package_manager/managers/homebrew.py#L230-L231>`.
+1. {gh}`Versioned packages are immutable <blob/v2.2.0/meta_package_manager/managers/homebrew.py#L230-L231>`.
 1. Packages can’t upgrade themselves.
 1. A package can be reinstalled.
 

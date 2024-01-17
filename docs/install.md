@@ -93,7 +93,7 @@ $ yay -S meta-package-manager
 
 Binaries are compiled at each release, so you can skip the installation process above and download the standalone executables directly.
 
-This is the prefered way of testing `mpm` without polluting your machine. They also offer the possibility of running the CLI on older systems not supporting the minimal Python version required by `mpm`.
+This is the preferred way of testing `mpm` without polluting your machine. They also offer the possibility of running the CLI on older systems not supporting the minimal Python version required by `mpm`.
 
 | Platform    | `x86_64`                                                                                                                         |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -131,11 +131,11 @@ $ file ./mpm*
 ```
 ````
 
-## Self-bootstraping
+## Self-bootstrapping
 
 In a funny twist, `mpm` can be installed with itself.
 
-Which means there is a way to boostrap its deployment on an unknown system. Just [download the binary](#binaries) corresponding to your platform and architecture:
+Which means there is a way to bootstrap its deployment on an unknown system. Just [download the binary](#binaries) corresponding to your platform and architecture:
 
 ```{code-block} shell-session
 $ curl --fail --remote-name https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin

@@ -26,7 +26,7 @@ Which boils down to the following these rules of thumb regarding stability:
 
 - **Major releases**: `n.*.*` → `(n+1).0.0` upgrades
 
-  Make no promises about backwards-compability. Any API change requires a new
+  Make no promises about backwards-compatibility. Any API change requires a new
   major release.
 
 ## Build status
@@ -88,7 +88,7 @@ can run the subset of destructive tests with:
 $ poetry run pytest --numprocesses=0 --skip-non-destructive --run-destructive ./meta_package_manager/tests
 ```
 
-As you can see above we recommand running these tests in (non-deterministic) sequential order as most
+As you can see above we recommend running these tests in (non-deterministic) sequential order as most
 package managers don't support concurrency.
 ````
 

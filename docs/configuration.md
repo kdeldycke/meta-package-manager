@@ -42,7 +42,7 @@ exclude = [ "pip",]
 
 MPM has support for some overlapping package managers. Take for instance `pacman` and its collection of AUR helpers like `paru` and `yay`. All of these alternative helpers have the same source of packages as `pacman`. So updates to a single package may show up multiple times, because AUR helpers depends on `pacman` (which is always installed on the system).
 
-You can fine-tune this behaviour by simply excluding redundant managers depending on your preferrences.
+You can fine-tune this behaviour by simply excluding redundant managers depending on your preferences.
 
 For instance, if `yay` is your preferred helper and `pacman` and `paru` are polluting your entries, you can setup a configuration file in `~/.config/mpm/config.toml` to exclude the other AUR helpers by default:
 
@@ -53,7 +53,7 @@ exclude = [ "pacman", "paru",]
 
 ## Troubleshooting
 
-You can easely debug the way `mpm` source its configuration with the `--show-params`:
+You can easily debug the way `mpm` source its configuration with the `--show-params`:
 
 ```{eval-rst}
 .. click:run::

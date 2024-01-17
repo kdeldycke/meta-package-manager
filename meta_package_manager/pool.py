@@ -95,7 +95,7 @@ These properties are checked and enforced in unittests.
 
 
 class ManagerPool:
-    """A dict-like register, instanciating all supported package managers."""
+    """A dict-like register, instantiating all supported package managers."""
 
     ALLOWED_EXTRA_OPTION: Final = frozenset(
         {"ignore_auto_updates", "stop_on_error", "dry_run", "timeout"},

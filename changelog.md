@@ -1,10 +1,6 @@
 # Changelog
 
-## {gh}`5.14.2 (unreleased) <compare/v5.14.1...main>`
-
-```{important}
-This version is not released yet and is under active development.
-```
+## {gh}`5.14.2 (2024-01-17) <compare/v5.14.1...v5.14.2>`
 
 - \[mpm\] Fix installation from `pipx`. Closes {issue}`1154`.
 

@@ -26,7 +26,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Group platforms by family in the `managers` subcommand.
 - \[mpm\] Run tests and actions on released Python 3.12 version.
 - \[mpm\] Run tests on `macos-13`. Remove tests on `macos-12`, `macos-11`, `ubuntu-20.04` and `windows-2019`.
-- \[mpm\] Run bar plugin unittests in their independent, non-parrallel step.
+- \[mpm\] Run bar plugin unittests in their independent, non-parallel step.
 - \[mpm\] Skip testing on intermediate Python versions to speed up CI. Only the oldest and latest supported.
 - \[mpm\] Skip configuration-related tests while we investigate test isolation.
 - \[mpm\] Fix fetching of full local copy of cask tap in tests to allow for checkout of past formula.
@@ -41,7 +41,7 @@ This version is not released yet and is under active development.
 ## {gh}`5.13.0 (2023-03-31) <compare/v5.12.0...v5.13.0>`
 
 - \[mpm\] Add new `which`/`locate` subcommand to search for CLIs in user's environment.
-- \[mpm\] Allow usage of `sudo` for CLI invokation on all UNIXes, not Linux only. Closes {issue}`976`.
+- \[mpm\] Allow usage of `sudo` for CLI invocation on all UNIXes, not Linux only. Closes {issue}`976`.
 - \[apt\] Fix parsing of search results for `apt` and `apt-mint`. Closes {issue}`881` and {issue}`966`.
 - \[mpm\] Adds `--run-destructive`, `--skip-destructive`, `--run-non-destructive` and `--skip-non-destructive` custom options to Pytest.
 - \[mpm\] Run non-destructive tests in parallel and destructive ones in sequential order.
@@ -171,7 +171,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Fix plugin rendering tests.
 - \[mpm\] Always run plugin rendering tests in Poetry venv.
 - \[bar-plugin\] Add a `--check-mpm` option to tests the mpm binary search phase without running a full outdated package listing.
-- \[mpm\] Tests Python and plugin invokation in lots of shell configuration.
+- \[mpm\] Tests Python and plugin invocation in lots of shell configuration.
 - \[mpm\] Deactivate login shell tests.
 - \[mpm\] Force Homebrew tap repair in tests.
 - \[mpm\] Dynamiccaly get location of Homebrew Cask formulas in tests.

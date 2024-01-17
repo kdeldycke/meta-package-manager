@@ -30,14 +30,14 @@ from meta_package_manager import bar_plugin
 from meta_package_manager.version import parse_version
 
 
-def _invokation_matrix(*iterables):
-    """Pre-compute a matrix of all possible options for invokation."""
+def _invocation_matrix(*iterables):
+    """Pre-compute a matrix of all possible options for invocation."""
     for args in product(*iterables):
         yield args_cleanup(args)
 
 
-def _shell_invokation_matrix():
-    """Pre-compute a matrix of all possible options used for shell invokation.
+def _shell_invocation_matrix():
+    """Pre-compute a matrix of all possible options used for shell invocation.
 
     See the list of shell supported by SwiftBar at:
     https://github.com/swiftbar/SwiftBar/commit/366695d594884fe141bc1752ab0f25d2c43334fa
@@ -64,7 +64,7 @@ def _shell_invokation_matrix():
             ("/usr/bin/env", "/bin/zsh", "--login", "-c"),
         )
     """
-    return _invokation_matrix(
+    return _invocation_matrix(
         # Env prefixes.
         (None, "/usr/bin/env"),
         # Naked and full binary paths.
@@ -89,8 +89,8 @@ def _shell_invokation_matrix():
     )
 
 
-def _python_invokation_matrix():
-    """Pre-compute a matrix of all possible options used for python invokation.
+def _python_invocation_matrix():
+    """Pre-compute a matrix of all possible options used for python invocation.
 
     Returns
     -------
@@ -102,7 +102,7 @@ def _python_invokation_matrix():
             ("/usr/bin/env", "python3"),
         )
     """
-    return _invokation_matrix(
+    return _invocation_matrix(
         # Env prefixes.
         (None, "/usr/bin/env"),
         # Binary paths
@@ -224,8 +224,8 @@ class TestBarPlugin:
         self.plugin_output_checks(extra_checks, extra_env=extra_env)
 
     @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
-    @pytest.mark.parametrize("shell_args", (None, *_shell_invokation_matrix()))
-    def test_plugin_shell_invokation(self, shell_args):
+    @pytest.mark.parametrize("shell_args", (None, *_shell_invocation_matrix()))
+    def test_plugin_shell_invocation(self, shell_args):
         """Test execution of plugin on different shells.
 
         Do not execute the complete search for outdated packages, just stop at searching
@@ -241,10 +241,10 @@ class TestBarPlugin:
         assert not process.stderr
         assert re.match(r"^.+ v\d+\.\d+\.\d+$", process.stdout)
 
-    @pytest.mark.parametrize("shell_args", (None, *_shell_invokation_matrix()))
-    @pytest.mark.parametrize("python_args", _python_invokation_matrix())
-    def test_python_shell_invokation(self, shell_args, python_args):
-        """Test any Python shell invokation is properly configured and all are
+    @pytest.mark.parametrize("shell_args", (None, *_shell_invocation_matrix()))
+    @pytest.mark.parametrize("python_args", _python_invocation_matrix())
+    def test_python_shell_invocation(self, shell_args, python_args):
+        """Test any Python shell invocation is properly configured and all are
         compatible with plugin requirements."""
         process = subprocess.run(
             _subcmd_args(shell_args, *python_args, "--version"),

@@ -46,7 +46,7 @@
 - Restore/install list of packages from TOML files.
 - Pin-point commands to a subset of package managers (include/exclude
   selectors).
-- Support plain, versionned and [purl](https://github.com/package-url/purl-spec) package specifiers.
+- Support plain, versioned and [purl](https://github.com/package-url/purl-spec) package specifiers.
 - Export output to JSON or print user-friendly tables.
 - Shell auto-completion for Bash, Zsh and Fish.
 - Provides a
@@ -221,7 +221,7 @@ $ mpm --all-managers managers
 ╰────────────┴────────────────────┴────────────────┴──────────────────────────────┴────────────┴───────────╯
 ```
 
-If your favorite manager is not supported yet, you can help! See the [contibution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html).
+If your favorite manager is not supported yet, you can help! See the [contribution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html).
 
 ## Usage
 

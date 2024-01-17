@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING
 import pytest
 from click_extra.platforms import is_macos
 
-# Pre-load invokation helpers to be used as pytest's fixture.
+# Pre-load invocation helpers to be used as pytest's fixture.
 from click_extra.tests.conftest import extra_runner  # noqa: F401
 from pytest import fixture, param
 
@@ -234,7 +234,7 @@ available_managers_and_dummy_package = pytest.mark.parametrize(
 )
 
 
-# XXX Deactive hack while we investigate.
+# XXX Deactivate hack while we investigate.
 # @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_teardown(item, nextitem):
     """Force the reset, after each subcommand test, of NPM's cached CLI path.
@@ -292,7 +292,7 @@ def pytest_runtest_teardown(item, nextitem):
         if CLISubCommandTests in item.parent.cls.mro():
             npm = pool.get("npm")
             # Inspect the internal dict to avoid calling the property or ``getattr``,
-            # as both will trigger the caching mecanism.
+            # as both will trigger the caching mechanism.
             if "cli_path" in npm.__dict__:
                 # Reset cached cli_path to force re-detection of the CLI.
                 del npm.cli_path

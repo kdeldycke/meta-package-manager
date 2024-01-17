@@ -67,7 +67,7 @@ def operation_matrix() -> str:
             line.append("✓" if m.implements(op) else "")
         table.append(line)
 
-    # Set each colomn alignment.
+    # Set each column alignment.
     alignments = ["left", "left"]
     alignments.extend(["center"] * len(PLATFORM_GROUPS))
     alignments.extend(["center"] * len(Operations))

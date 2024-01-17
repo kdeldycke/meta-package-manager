@@ -381,7 +381,7 @@ class Homebrew(PackageManager):
             ==> Downloading https://ghcr.io/core/jpeginfo/blobs/sha256:27bb35884368b83
             ==> Downloading from https://pkg.githubcontent.com/ghcr1/blobs/sha256:27bb3
             ############################################################## 100.0%
-            ==> Pouring jpeginfo--1.6.1_1.big_sur.bottle.1.tar.gz
+            ==> Pouring jpeginfo--1.6.1_1.big_sure.bottle.1.tar.gz
             🍺  /usr/local/Cellar/jpeginfo/1.6.1_1: 7 files, 77.6KB
 
         .. code-block:: shell-session

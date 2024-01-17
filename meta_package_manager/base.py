@@ -122,7 +122,7 @@ class Package:
     ``installed_version`` and ``latest_version`` are allowed to temporarily be strings
     between ``__init__`` and ``__post_init__``. Once they reach the later, they're
     parsed and normalized into either ``TokenizedString`` or `None`. They can't be
-    strings beyong that point, i.e. after the Package instance has been fully
+    strings beyond that point, i.e. after the Package instance has been fully
     instantiated. We don't know how to declare this transient state with type hints,
     so we're just going to allow string type.
     """
@@ -180,7 +180,7 @@ def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | N
     If ``match_names`` is provided, only highlight the start of the binary name that is
     in the list.
 
-    Matchin is insensitive to case on Windows and case-sensitive on other platforms,
+    Matching is insensitive to case on Windows and case-sensitive on other platforms,
     thanks to ``os.path.normcase``.
     """
     if path is None:
@@ -218,7 +218,7 @@ class PackageManager(metaclass=MetaPackageManager):
 
     deprecation_url: str | None = None
     """Announcement from the official project or evidence of abandonment of
-    maintainance."""
+    maintenance."""
 
     id: str
     """Package manager's ID.
@@ -245,7 +245,7 @@ class PackageManager(metaclass=MetaPackageManager):
     """List of platforms supported by the manager.
 
     Allows for a mishmash of platforms and groups. Will be normalized into a frozen set
-    of ``Platform`` instances at instanciation.
+    of ``Platform`` instances at instantiation.
     """
 
     requirement: str | None = None
@@ -428,7 +428,7 @@ class PackageManager(metaclass=MetaPackageManager):
         # But on Windows, there is this special ``PATHEXT`` environment variable to
         # tell you what file suffixes are executable. We have to search for any
         # variation of the CLI name with any of these suffixes.
-        # Code below is inpired by the original implementation of ``shutil.which()``:
+        # Code below is inspired by the original implementation of ``shutil.which()``:
         # https://github.com/python/cpython/blob/8d46c7e/Lib/shutil.py#L1478-L1491
         if sys.platform == "win32":
             pathext_source = os.getenv("PATHEXT") or shutil._WIN_DEFAULT_PATHEXT

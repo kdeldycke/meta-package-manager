@@ -86,7 +86,7 @@ $ mpm --bar-plugin-path
 ~/Library/Python/3.9/lib/python/site-packages/meta_package_manager/bar_plugin.py
 ```
 
-This option is handy for deployment and initial configuration of Xbar/SwiftBar. I personnaly
+This option is handy for deployment and initial configuration of Xbar/SwiftBar. I personally
 [use this in my dotfiles](https://github.com/kdeldycke/dotfiles/blob/c04296d29e5f5ce48687f79554b265b3e89d5dbb/install.sh#L230) to symlink the plugin to its latest version:
 
 ```shell-session

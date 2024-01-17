@@ -347,7 +347,7 @@ class CLITableTests:
     def test_json_output(self, invoke, subcmd):
         """JSON output is expected to be parseable if read from ``<stdout>``.
 
-        Debug level messages are redirected to <stderr> and are not supposed to interfer
+        Debug level messages are redirected to <stderr> and are not supposed to interfere
         with this behavior.
         """
         result = invoke("--output-format", "json", "--verbosity", "DEBUG", subcmd)

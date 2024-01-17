@@ -126,7 +126,7 @@ def install_cask():
         # Replace ":yosemite" by ":el_capitan" like the last commit did at:
         # https://github.com/Homebrew/homebrew-cask/commit/5cddbd6
         # The day we have a new version of ubersicht after this commit, we will be able
-        # to remove that hack, and have the install_cask() invokation from the
+        # to remove that hack, and have the install_cask() invocation from the
         # test_autoupdate_unicode_name() test below checkout ubersicht from that commit.
         if package_id == "ubersicht":
             cask_path = get_cask_tap_path().joinpath(f"{package_id}.rb")

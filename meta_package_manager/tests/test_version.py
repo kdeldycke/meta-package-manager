@@ -30,12 +30,12 @@ def reverse_fixtures(table):
 
 
 @pytest.mark.parametrize("value", [0, 123, "0", "123", "abc", "ABC", "123abc"])
-def test_token_allowed_instanciation(value):
+def test_token_allowed_instantiation(value):
     Token(value)
 
 
 @pytest.mark.parametrize("value", [None, -1, "a-b-c", 1.0])
-def test_token_unauthorized_instanciation(value):
+def test_token_unauthorized_instantiation(value):
     with pytest.raises(TypeError):
         Token(value)
 
@@ -139,7 +139,7 @@ def test_token_hash():
     "value",
     (None, 0, 123, -1, "0", "1.2.3", "abc", "A-B-C", "123   a bc \n"),
 )
-def test_tokenized_string_allowed_instanciation(value):
+def test_tokenized_string_allowed_instantiation(value):
     TokenizedString(value)
 
 
@@ -147,7 +147,7 @@ def test_tokenized_string_allowed_instanciation(value):
     "value",
     (1.0, [1, 2, 3], (1, 2, 3), {1, 2, 3}, {"a": 1, "b": 2}),
 )
-def test_tokenized_string_unauthorized_instanciation(value):
+def test_tokenized_string_unauthorized_instantiation(value):
     with pytest.raises(TypeError):
         TokenizedString(value)
 
@@ -163,11 +163,11 @@ def test_tokenized_string_hash():
     )
 
 
-def test_tokenized_string_noop_instanciation():
+def test_tokenized_string_noop_instantiation():
     assert TokenizedString(None) is None
 
 
-def test_tokenized_string_idempotent_instanciation():
+def test_tokenized_string_idempotent_instantiation():
     tok1 = TokenizedString("1.2.3")
     tok2 = TokenizedString(tok1)
     assert tok1 is tok2

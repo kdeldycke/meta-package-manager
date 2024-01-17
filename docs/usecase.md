@@ -178,7 +178,7 @@ Add arguments to `installed` command, or an `--installed` boolean flag to `searc
 
 You maintain a repository of `dotfiles`. This helps you spawn up a highly
 customized working environment in a couple of hours. New job? New machine?
-Easy: run your dotfiles, get a coffe, come back with everything perfectly in
+Easy: run your dotfiles, get a coffee, come back with everything perfectly in
 place to start an extremely productive hacking session. But maintaining
 `dotfiles` is a pain.
 

@@ -249,8 +249,8 @@ class MPMPlugin:
         # Is mpm CLI installed on the system?
         if not process.returncode and not error:
             installed = True
-            # This regular expression is designed to extract the version number, wether
-            # it is surrounded by ANSI color escape sequence or not.
+            # This regular expression is designed to extract the version number,
+            # whether it is surrounded by ANSI color escape sequence or not.
             match = re.compile(
                 r"""
                 .+                      # Any string

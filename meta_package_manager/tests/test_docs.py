@@ -30,7 +30,7 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib  # type: ignore[import-not-found]
 
-from meta_package_manager.labels import MANAGER_LABELS, MANAGER_PREFIX, PLATFORM_PREFIX
+from meta_package_manager.labels import MANAGER_PREFIX, PLATFORM_PREFIX
 from meta_package_manager.platforms import PLATFORM_GROUPS, encoding_args
 from meta_package_manager.pool import pool
 
@@ -132,95 +132,17 @@ def test_labeller_rules():
     content = PROJECT_ROOT.joinpath(
         ".github/workflows/labeller-content-based.yaml",
     ).read_text(**encoding_args)
-    assert "Naturalclar/issue-action" in content
-    json_rules = load(content, Loader=Loader)["jobs"]["labeller"]["steps"][0]["with"][
-        "parameters"
+    assert "kdeldycke/workflows/.github/workflows/labeller-file-based.yaml" in content
+    extra_rules = load(content, Loader=Loader)["jobs"]["labeller"]["with"][
+        "extra-rules"
     ]
-    rules = json.loads(json_rules)
+    rules = load(extra_rules, Loader=Loader)
     assert rules
 
     # Each keyword match one rule only.
-    rules_keywords = Counter(flatten([r["keywords"] for r in rules]))
+    rules_keywords = Counter(flatten(rules.values()))
     assert rules_keywords
     assert max(rules_keywords.values()) == 1
 
-    # Extract and categorize labels.
-    rules_labels = Counter(flatten([r["labels"] for r in rules]))
-
-    assert rules_labels
     # Check that all canonical labels are referenced in rules.
-    assert (canonical_labels - {"🔌 bar-plugin", "📦 manager: mpm"}).issubset(
-        rules_labels,
-    )
-
-    rules_managers = Counter(
-        {
-            label: count
-            for label, count in rules_labels.items()
-            if label.startswith(MANAGER_PREFIX)
-        },
-    )
-    rules_platforms = Counter(
-        {
-            label: count
-            for label, count in rules_labels.items()
-            if label.startswith(PLATFORM_PREFIX)
-        },
-    )
-
-    assert rules_managers
-    # Each canonical manager labels is defined.
-    assert len(canonical_managers.symmetric_difference(rules_managers)) == 0
-    # Each manager has a rule and one only.
-    assert max(rules_managers.values()) == 1
-
-    assert rules_platforms
-    # Each canonical platform labels is defined.
-    assert len(canonical_platforms.symmetric_difference(rules_platforms)) == 0
-    # Each registered OS has a rule.
-    assert len(rules_platforms) == len(PLATFORM_GROUPS)
-    # Each platforms has at least a rule.
-    assert min(rules_platforms.values()) >= 1
-
-    # Check that all canonical labels are referenced in rules.
-    assert canonical_labels.issuperset(rules_platforms)
-
-    # Check each rule definition.
-    for rule in rules:
-        # No duplicate labels.
-        assert len(set(rule["labels"])) == len(rule["labels"])
-
-        # Special checks for rules targeting manager labels.
-        manager_label = canonical_managers.intersection(rule["labels"])
-        if manager_label:
-            # Extract manager label
-            assert len(manager_label) == 1
-            manager_label = manager_label.pop()
-
-            # Only platforms are expected alongside manager labels.
-            platforms_labels = set(rule["labels"]) - canonical_managers
-            assert platforms_labels.issubset(canonical_platforms)
-
-            # Check managers sharing the same label shares the same platforms specs.
-            supported_platforms = [
-                pool.get(mid).platforms
-                for mid, lbl in MANAGER_LABELS.items()
-                # Relying on pool restrict our checks, as the pool exclude
-                # non-locally supported managers.
-                if lbl == manager_label and mid in pool
-            ]
-            assert len(set(supported_platforms)) == 1
-
-            # Regenerate the platforms specs from the label and check it matches.
-            common_platforms = supported_platforms.pop()
-            target_platforms = set()
-            for platform_label in platforms_labels:
-                group_name = platform_label.split(PLATFORM_PREFIX, 1)[1]
-                assert group_name
-                matching_groups = []
-                for group in PLATFORM_GROUPS:
-                    if group.name == group_name:
-                        matching_groups.append(group)
-                assert len(matching_groups) == 1
-                target_platforms.update(matching_groups[0].platforms)
-            assert target_platforms == common_platforms
+    assert (canonical_labels - {"📦 manager: mpm"}).issubset(rules.keys())

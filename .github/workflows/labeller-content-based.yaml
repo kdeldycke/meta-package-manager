@@ -6,217 +6,140 @@ name: Labeller (content-based)
   pull_request:
     types: [opened]
 
+# XXX Concurrency detection sucks and jobs gets killed randonmly.
+# concurrency:
+#   # Group workflow jobs so new commits cancels in-progress execution triggered by previous commits.
+#   # Source: https://mail.python.org/archives/list/pypa-committers@python.org/thread/PCBCQMJF64JGRBOX7E2EE4YLKHT4DI55/
+#   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+#   cancel-in-progress: true
+
 jobs:
+
   labeller:
-    name: Issue & PR labeller based on content
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: Naturalclar/issue-action@v2.0.2
-        # Skip this step if this workflow was created/triggered by a bot. That way we can prevent content-rich PRs
-        # (like those produced by dependabot) to be overly tagged with extra labels.
-        if: >
-          github.event.sender.type != 'Bot'
-          && github.actor != 'dependabot[bot]'
-          && github.actor != 'dependabot-preview[bot]'
-        with:
-          parameters: >
-            [
-              {"labels": [
-                "🔌 bar-plugin",
-                "🖥 platform: macOS"],
-               "keywords": ["xbar", "swiftbar", "plugin"]},
+    uses: kdeldycke/workflows/.github/workflows/labeller-file-based.yaml@v2.25.0
+    with:
+      extra-rules: |
+        "🔌 bar-plugin":
+          - "xbar"
+          - "swiftbar"
+          - "plugin"
 
-              {"labels": [
-                "🐛 bug"],
-               "keywords": ["bug", "error", "traceback", "fix", "exception"]},
+        "📦 manager: apm":
+          - "apm"
+          - "atom"
 
-              {"labels": [
-                "🆙 changelog"],
-               "keywords": [
-                  "change-log", "changelog"]},
+        "📦 manager: brew":
+          - "brew"
+          - "homebrew"
+          - "tap"
+          - "formula"
 
-              {"labels": [
-                "🤖 ci"],
-               "keywords": ["ci-cd", "cicd", ".github", "coverage", "workflow", "actions", "gitignore"]},
+        "📦 manager: cargo":
+          - "cargo"
+          - "rust"
+          - "crate"
 
-              {"labels": [
-                "📦 dependencies"],
-               "keywords": [
-                  "dependabot", "poetry.lock", "poetry", "pyproject.toml"]},
+        "📦 manager: cask":
+          - "cask"
 
-              {"labels": [
-                "📚 documentation"],
-               "keywords": [
-                  "sphinx", "readme", "markdown", "typo", "docstring", "mailmap", "license"]},
+        "📦 manager: choco":
+          - "choco"
+          - "chocolatey"
 
-              {"labels": [
-                "💖 sponsor"],
-               "keywords": ["sponsor", "funding"]},
+        "📦 manager: composer":
+          - "composer"
+          - "php"
 
-               {"labels": [
-                  "📦 manager: apm",
-                  "🖥 platform: BSD",
-                  "🖥 platform: Linux",
-                  "🖥 platform: macOS",
-                  "🖥 platform: Windows"],
-               "keywords": ["apm", "atom"]},
+        "📦 manager: dnf-based":
+          - "dnf"
+          - "yum"
+          - "rpm"
+          - "fedora"
+          - "redhat"
+          - "rhel"
 
-              {"labels": [
-                "📦 manager: brew",
-                "🖥 platform: Linux",
-                "🖥 platform: macOS"],
-               "keywords": ["brew", "homebrew", "tap", "formula"]},
+        "📦 manager: dpkg-based":
+          - "apt"
+          - "apt-mint"
+          - "aptitude"
+          - "dpkg"
+          - "opkg"
+          - "ubuntu"
+          - "debian"
+          - "mint"
 
-              {"labels": [
-                "📦 manager: cargo",
-                "🖥 platform: BSD",
-                "🖥 platform: Linux",
-                "🖥 platform: macOS",
-                "🖥 platform: Unix",
-                "🖥 platform: Windows"],
-              "keywords": ["cargo", "rust", "crate"]},
+        "📦 manager: emerge":
+          - "emerge"
+          - "portage"
+          - "gentoo"
 
-              {"labels": [
-                "📦 manager: cask",
-                "🖥 platform: macOS"],
-               "keywords": ["cask"]},
+        "📦 manager: flatpak":
+          - "flatpak"
+          - "flat"
 
-              {"labels": [
-                "📦 manager: choco",
-                "🖥 platform: Windows"],
-              "keywords": ["choco", "chocolatey"]},
+        "📦 manager: gem":
+          - "gem"
+          - "ruby"
 
-              {"labels": [
-                "📦 manager: composer",
-                "🖥 platform: BSD",
-                "🖥 platform: Linux",
-                "🖥 platform: macOS",
-                "🖥 platform: Unix",
-                "🖥 platform: Windows"],
-              "keywords": ["composer", "php"]},
+        "📦 manager: mas":
+          - "mas"
+          - "app store"
+          - "app-store"
 
-              {"labels": [
-                "📦 manager: dnf-based",
-                "🖥 platform: BSD",
-                "🖥 platform: Linux",
-                "🖥 platform: Unix"],
-              "keywords": ["dnf", "yum", "rpm", "fedora", "redhat", "rhel"]},
+        "📦 manager: npm-based":
+          - "npm"
+          - "node"
+          - "yarn"
 
-              {"labels": [
-                "📦 manager: dpkg-based",
-                "🖥 platform: BSD",
-                "🖥 platform: Linux",
-                "🖥 platform: Unix"],
-               "keywords": ["apt", "apt-mint", "aptitude", "dpkg", "opkg", "ubuntu", "debian", "mint"]},
+        "📦 manager: pacman-based":
+          - "pacman"
+          - "arch"
+          - "pacaur"
+          - "paru"
+          - "yay"
 
-              {"labels": [
-                "📦 manager: emerge",
-                "🖥 platform: BSD",
-                "🖥 platform: Linux",
-                "🖥 platform: Unix"],
-               "keywords": ["emerge", "portage", "gentoo"]},
+        "📦 manager: pip-based":
+          - "pip"
+          - "pipx"
 
-              {"labels": [
-                "📦 manager: flatpak",
-                "🖥 platform: BSD",
-                "🖥 platform: Linux",
-                "🖥 platform: Unix"],
-               "keywords": ["flatpak", "flat"]},
+        "📦 manager: scoop":
+          - "scoop"
 
-              {"labels": [
-                "📦 manager: gem",
-                "🖥 platform: BSD",
-                "🖥 platform: Linux",
-                "🖥 platform: macOS",
-                "🖥 platform: Unix",
-                "🖥 platform: Windows"],
-               "keywords": ["gem", "ruby"]},
+        "📦 manager: snap":
+          - "snap"
 
-              {"labels": [
-                "📦 manager: mas",
-                "🖥 platform: macOS"],
-               "keywords": ["mas", "app store", "app-store"]},
+        "📦 manager: steamcmd":
+          - "steamcmd"
+          - "steam"
+          - "valve"
 
-              {"labels": [
-                "📦 manager: npm-based",
-                "🖥 platform: BSD",
-                "🖥 platform: Linux",
-                "🖥 platform: macOS",
-                "🖥 platform: Unix",
-                "🖥 platform: Windows"],
-               "keywords": ["npm", "node", "yarn"]},
+        "📦 manager: vscode":
+          - "vscode"
+          - "visual studio code"
+          - "visual studio"
 
-              {"labels": [
-                "📦 manager: pacman-based",
-                "🖥 platform: BSD",
-                "🖥 platform: Linux",
-                "🖥 platform: Unix"],
-              "keywords": ["pacman", "arch", "pacaur", "paru", "yay"]},
+        "📦 manager: zypper":
+          - "zypper"
+          - "opensuse"
+          - "suse"
 
-              {"labels": [
-                "📦 manager: pip-based",
-                "🖥 platform: BSD",
-                "🖥 platform: Linux",
-                "🖥 platform: macOS",
-                "🖥 platform: Unix",
-                "🖥 platform: Windows"],
-               "keywords": ["pip", "pipx"]},
+        "🖥 platform: BSD":
+          - "bsd"
 
-              {"labels": [
-                "📦 manager: scoop",
-                "🖥 platform: Windows"],
-              "keywords": ["scoop"]},
+        "🖥 platform: Linux":
+          - "linux"
 
-              {"labels": [
-                "📦 manager: snap",
-                "🖥 platform: BSD",
-                "🖥 platform: Linux",
-                "🖥 platform: Unix"],
-               "keywords": ["snap"]},
+        "🖥 platform: macOS":
+          - "macos"
+          - "mac os"
+          - "osx"
+          - "os x"
+          - "apple"
 
-              {"labels": [
-                "📦 manager: steamcmd",
-                "🖥 platform: BSD",
-                "🖥 platform: Linux",
-                "🖥 platform: macOS",
-                "🖥 platform: Unix",
-                "🖥 platform: Windows"],
-               "keywords": ["steamcmd", "steam", "valve"]},
+        "🖥 platform: Unix":
+          - "unix"
 
-              {"labels": [
-                "📦 manager: vscode",
-                "🖥 platform: BSD",
-                "🖥 platform: Linux",
-                "🖥 platform: macOS",
-                "🖥 platform: Unix",
-                "🖥 platform: Windows"],
-               "keywords": ["vscode", "visual studio code", "visual studio"]},
-
-              {"labels": [
-                "📦 manager: zypper",
-                "🖥 platform: BSD",
-                "🖥 platform: Linux",
-                "🖥 platform: Unix"],
-               "keywords": ["zypper", "opensuse", "suse"]},
-
-              {"labels": [
-                "🖥 platform: BSD"],
-               "keywords": ["bsd"]},
-
-              {"labels": [
-                "🖥 platform: Linux"],
-               "keywords": ["linux"]},
-
-              {"labels": [
-                "🖥 platform: macOS"],
-               "keywords": ["macos", "mac os", "osx", "os x", "apple"]},
-
-              {"labels": [
-                "🖥 platform: Unix"],
-               "keywords": ["unix"]},
-
-              {"labels": [
-                "🖥 platform: Windows"],
-               "keywords": ["windows", "c:", "microsoft"]}
-            ]
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        "🖥 platform: Windows":
+          - "windows"
+          - "c:"
+          - "microsoft"

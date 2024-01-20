@@ -89,7 +89,7 @@ python = "^3.8"
 boltons = "^23.0.0"
 click = "^8.1.2"
 click-extra = "^4.7.0"
-packageurl-python = ">=0.11.1,<0.14.0"
+packageurl-python = "^0.13.4"
 tabulate = { extras = ["widechars"], version = "^0.9.0" }
 tomli = { version = "^2.0.1", python = "< 3.11" }
 tomli_w = "^1.0.0"

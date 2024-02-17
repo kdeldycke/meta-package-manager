@@ -26,7 +26,7 @@ If you're a Python developer, for now the easiest way to have new package manage
 1. Identify an already implemented package manager that is similar to the new
    one you’d like to add.
 1. Duplicate its definition file from the
-   {gh}`/managers subfolder <tree/main/meta_package_manager/managers>`.
+   [`/managers` subfolder](https://github.com/kdeldycke/meta-package-manager/tree/main/meta_package_manager/managers).
 1. Adapt the new file to the particularities of the new package manager:
    - Always use `--long-form-option` wherever you can to have self-documenting CLIs.
    - Add at least one capture of the CLI output in the docstring to help future maintainers.

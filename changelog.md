@@ -1,6 +1,6 @@
 # Changelog
 
-## {gh}`5.14.3 (unreleased) <compare/v5.14.2...main>`
+## [5.14.3 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v5.14.2...main)
 
 ```{important}
 This version is not released yet and is under active development.
@@ -8,17 +8,17 @@ This version is not released yet and is under active development.
 
 - \[mpm\] Use external workflow to manage issues and PRs content-based labelling.
 
-## {gh}`5.14.2 (2024-01-17) <compare/v5.14.1...v5.14.2>`
+## [5.14.2 (2024-01-17)](https://github.com/kdeldycke/meta-package-manager/compare/v5.14.1...v5.14.2)
 
 - \[mpm\] Fix installation from `pipx`. Closes {issue}`1154`.
 
-## {gh}`5.14.1 (2024-01-16) <compare/v5.14.0...v5.14.1>`
+## [5.14.1 (2024-01-16)](https://github.com/kdeldycke/meta-package-manager/compare/v5.14.0...v5.14.1)
 
 - \[bar-plugin\] Always call `mpm --version` without color.
 - \[bar-plugin\] Increase robustness of `mpm` version parsing, whether its colored or not.
 - \[mpm\] Temporary disable version output in color to fix already installed plugin/binary pairs. Closes {pr}`1152`.
 
-## {gh}`5.14.0 (2024-01-12) <compare/v5.13.1...v5.14.0>`
+## [5.14.0 (2024-01-12)](https://github.com/kdeldycke/meta-package-manager/compare/v5.13.1...v5.14.0)
 
 - \[mpm\] Add a `-t`/`--timeout` option to set the maximum duration of each CLI call. Defaults to 10 minutes.
 - \[mpm\] Drop support of Python 3.7.
@@ -32,13 +32,13 @@ This version is not released yet and is under active development.
 - \[mpm\] Fix fetching of full local copy of cask tap in tests to allow for checkout of past formula.
 - \[mpm\] Replace unmaintained `bump2version` by `bump-my-version`.
 
-## {gh}`5.13.1 (2023-05-04) <compare/v5.13.0...v5.13.1>`
+## [5.13.1 (2023-05-04)](https://github.com/kdeldycke/meta-package-manager/compare/v5.13.0...v5.13.1)
 
 - \[apt\] Fix omission of the final result in an `apt` (non-mint) search.
 - \[mpm\] Defaults to case-insensitive, lexicographical sort of package IDs in `backup` subcommand.
 - \[mpm\] Update `brew` installation instructions now that `mpm` is available in official Homebrew repository.
 
-## {gh}`5.13.0 (2023-03-31) <compare/v5.12.0...v5.13.0>`
+## [5.13.0 (2023-03-31)](https://github.com/kdeldycke/meta-package-manager/compare/v5.12.0...v5.13.0)
 
 - \[mpm\] Add new `which`/`locate` subcommand to search for CLIs in user's environment.
 - \[mpm\] Allow usage of `sudo` for CLI invocation on all UNIXes, not Linux only. Closes {issue}`976`.
@@ -47,7 +47,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Run non-destructive tests in parallel and destructive ones in sequential order.
 - \[mpm\] Move all documentation assets to `assets` subfolder.
 
-## {gh}`5.12.0 (2023-02-25) <compare/v5.11.7...v5.12.0>`
+## [5.12.0 (2023-02-25)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.7...v5.12.0)
 
 - \[mpm\] Refactor CLI search to allow all matching to be reported. This will open the way to future support of multiple versions of the same package manager. Refs {issue}`629`.
 - \[mpm\] Exclude empty files for our CLI search results to skip Microsoft's dummy placeholders on Windows. Closes {issue}`927`.
@@ -58,41 +58,41 @@ This version is not released yet and is under active development.
 - \[yarn\] Do not test `yarn` on Linux and Windows.
 - \[mpm\] Do not force test order on Windows.
 
-## {gh}`5.11.7 (2023-02-20) <compare/v5.11.6...v5.11.7>`
+## [5.11.7 (2023-02-20)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.6...v5.11.7)
 
 - \[mpm\] Fix overlapping detection of `linux` and `wsl2` platforms. Closes {issue}`944`.
 - \[pip\] Print Python's own version in debug logs before checking for Pip's version.
 - \[mpm\] Code, comments and documentation style change to conform to new QA workflows based on `ruff`.
 - \[mpm\] Produce dependency graph in Mermaid instead of Graphviz. Add new dev dependency on `sphinxcontrib-mermaid`.
 
-## {gh}`5.11.6 (2023-02-12) <compare/v5.11.5...v5.11.6>`
+## [5.11.6 (2023-02-12)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.5...v5.11.6)
 
 - \[mpm\] Fix collection of artifact files from their folder.
 
-## {gh}`5.11.5 (2023-02-12) <compare/v5.11.4...v5.11.5>`
+## [5.11.5 (2023-02-12)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.4...v5.11.5)
 
 - \[mpm\] Fix collection of artifact files from their folder.
 
-## {gh}`5.11.4 (2023-02-12) <compare/v5.11.3...v5.11.4>`
+## [5.11.4 (2023-02-12)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.3...v5.11.4)
 
 - \[mpm\] Fix attachment of binaries to GitHub release.
 
-## {gh}`5.11.3 (2023-02-12) <compare/v5.11.2...v5.11.3>`
+## [5.11.3 (2023-02-12)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.2...v5.11.3)
 
 - \[mpm\] Fix attachment of binaries to GitHub release.
 
-## {gh}`5.11.2 (2023-02-11) <compare/v5.11.1...v5.11.2>`
+## [5.11.2 (2023-02-11)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.1...v5.11.2)
 
 - \[mpm\] Refine bug report template.
 - \[mpm\] Fix attachment of binaries to GitHub release.
 
-## {gh}`5.11.1 (2023-02-10) <compare/v5.11.0...v5.11.1>`
+## [5.11.1 (2023-02-10)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.0...v5.11.1)
 
 - \[mpm\] Remove temporary direct dependency on `charset-normalizer`, fix has been pushed upstream to Nuitka.
 - \[mpm\] Rename artifacts attached to releases to benefits from stable URLs pointing to latest downloads.
 - \[mpm\] Fix some Windows unittests.
 
-## {gh}`5.11.0 (2023-01-29) <compare/v5.10.2...v5.11.0>`
+## [5.11.0 (2023-01-29)](https://github.com/kdeldycke/meta-package-manager/compare/v5.10.2...v5.11.0)
 
 - \[mpm\] Unlock run on any Unix-like platform. Closes {issue}`872`.
 - \[mpm\] Activate `brew` on Windows Subsystem for Linux v2.
@@ -107,15 +107,15 @@ This version is not released yet and is under active development.
 - \[mpm\] Add new GitHub labels for newly supported platforms.
 - \[mpm\] Generates dependency graph in Graphviz format.
 
-## {gh}`5.10.2 (2022-12-19) <compare/v5.10.1...v5.10.2>`
+## [5.10.2 (2022-12-19)](https://github.com/kdeldycke/meta-package-manager/compare/v5.10.1...v5.10.2)
 
 - \[mpm\] Fix uploading of artifacts to GitHub release.
 
-## {gh}`5.10.1 (2022-12-19) <compare/v5.10.0...v5.10.1>`
+## [5.10.1 (2022-12-19)](https://github.com/kdeldycke/meta-package-manager/compare/v5.10.0...v5.10.1)
 
 - \[mpm\] Fix uploading of Nuitka binaries to GitHub release.
 
-## {gh}`5.10.0 (2022-12-19) <compare/v5.9.0...v5.10.0>`
+## [5.10.0 (2022-12-19)](https://github.com/kdeldycke/meta-package-manager/compare/v5.9.0...v5.10.0)
 
 - \[mpm\] Build standalone executable for macOS, Linux and Windows. Closes {issue}`725`.
 - \[mpm\] Force default output encoding of Windows executable to fix issue on Windows CI agents.
@@ -126,7 +126,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Hint at deprecation of manager in the support matrix.
 - \[mpm\] Execute all workflows with Python 3.11.
 
-## {gh}`5.9.0 (2022-11-17) <compare/v5.8.0...v5.9.0>`
+## [5.9.0 (2022-11-17)](https://github.com/kdeldycke/meta-package-manager/compare/v5.8.0...v5.9.0)
 
 - \[pacaur\] Implement `pacaur` support. Closes {issue}`816`.
 - \[mpm\] Allow managers to be flagged as deprecated.
@@ -139,7 +139,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Use form-based issue templates for bug reports and new package manager support requests.
 - \[mpm\] Remove use of deprecated `::set-output` directives and replace them by environment files.
 
-## {gh}`5.8.0 (2022-10-05) <compare/v5.7.0...v5.8.0>`
+## [5.8.0 (2022-10-05)](https://github.com/kdeldycke/meta-package-manager/compare/v5.7.0...v5.8.0)
 
 - \[gem\] Implement `remove` operation.
 - \[mpm\] Allow multiple packages to be fed to `install`, `upgrade` and `remove` subcommands.
@@ -148,20 +148,20 @@ This version is not released yet and is under active development.
 - \[mpm\] Output warning for `install` and `upgrade_one_cli` operations not implementing version parameter.
 - \[mpm\] Remove GitHub edit link workaround in documentation.
 
-## {gh}`5.7.0 (2022-09-27) <compare/v5.6.2...v5.7.0>`
+## [5.7.0 (2022-09-27)](https://github.com/kdeldycke/meta-package-manager/compare/v5.6.2...v5.7.0)
 
 - \[scoop\] Add support for Scoop on Windows. Closes {issue}`546`.
 - \[mpm\] Fix imports from `click.extra`. Closes {issue}`783`.
 
-## {gh}`5.6.2 (2022-09-27) <compare/v5.6.1...v5.6.2>`
+## [5.6.2 (2022-09-27)](https://github.com/kdeldycke/meta-package-manager/compare/v5.6.1...v5.6.2)
 
 - \[mpm\] Fix imports from `click.extra`.
 
-## {gh}`5.6.1 (2022-09-26) <compare/v5.6.0...v5.6.1>`
+## [5.6.1 (2022-09-26)](https://github.com/kdeldycke/meta-package-manager/compare/v5.6.0...v5.6.1)
 
 - \[mpm\] Fix import from private `click.extra` submodule.
 
-## {gh}`5.6.0 (2022-09-26) <compare/v5.5.1...v5.6.0>`
+## [5.6.0 (2022-09-26)](https://github.com/kdeldycke/meta-package-manager/compare/v5.5.1...v5.6.0)
 
 - \[brew,cask\] Add support for `remove` operation in homebrew.
 - \[pacman\] Fix `pacman` install operation. Closes {pr}`766`.
@@ -179,7 +179,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Add `upgrade_all` operation in support matrix.
 - \[mpm\] Rely on external workflow to set Python version parameters for `mypy`, `black` and `pyupgrade` jobs.
 
-## {gh}`5.5.1 (2022-07-08) <compare/v5.5.0...v5.5.1>`
+## [5.5.1 (2022-07-08)](https://github.com/kdeldycke/meta-package-manager/compare/v5.5.0...v5.5.1)
 
 - \[mpm\] Eliminate rendering of `None` cells to `<null>` in tables.
 - \[mpm\] Add a `--refilter`/`--no-refilter` option to `search` to allow bypassing of `mpm` default refiltering.
@@ -191,7 +191,7 @@ This version is not released yet and is under active development.
 - \[yarn\] Set minimal `yarn` version to `1.20.0`, as it should have been.
 - \[bar-plugin\] Silence all errors but critical ones on `outdated` invocation to prevent a failing manager to block rendering of the plugin output.
 
-## {gh}`5.5.0 (2022-07-08) <compare/v5.4.0...v5.5.0>`
+## [5.5.0 (2022-07-08)](https://github.com/kdeldycke/meta-package-manager/compare/v5.4.0...v5.5.0)
 
 - \[mpm\] Restore behavior of having `upgrade` assuming `--all` option on a bare call. Closes {issue}`715`.
 - \[cask\] Fix parsing of multiple reported installed versions.
@@ -205,7 +205,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Add metadata for easy citation in academic content.
 - \[mpm\] Deactivate Atom install in macOS tests as it seems broken.
 
-## {gh}`5.4.0 (2022-06-28) <compare/v5.3.0...v5.4.0>`
+## [5.4.0 (2022-06-28)](https://github.com/kdeldycke/meta-package-manager/compare/v5.3.0...v5.4.0)
 
 - \[mpm\] Allow global `upgrade` of a subset of packages from the command line if no ambiguity is identified.
 - \[mpm\] Add a `-A`/`--all` option to `upgrade` operation.
@@ -226,7 +226,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Switch package ID and name columns in table rendering.
 - \[mpm\] Rename all `*-like` labels to `*-based` to help finer identification of families.
 
-## {gh}`5.3.0 (2022-06-25) <compare/v5.2.0...v5.3.0>`
+## [5.3.0 (2022-06-25)](https://github.com/kdeldycke/meta-package-manager/compare/v5.2.0...v5.3.0)
 
 - \[paru\] Add `paru` support.
 - \[pacman,paru,yay\] Run `install`, `upgrade`, `remove` and `cleanup` operations with `sudo`.
@@ -241,7 +241,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Simplify `installed`, `outdated` and `search` operation by relying on generators and a `package` dataclass.
 - \[mpm\] Disable workflow grouping and concurrency management.
 
-## {gh}`5.2.0 (2022-06-16) <compare/v5.1.0...v5.2.0>`
+## [5.2.0 (2022-06-16)](https://github.com/kdeldycke/meta-package-manager/compare/v5.1.0...v5.2.0)
 
 - \[yay\] Add `yay` support. Refs {issue}`527`.
 - \[mpm,pip,pipx,pacman\] Add `remove` operation.
@@ -252,21 +252,21 @@ This version is not released yet and is under active development.
 - \[mpm\] Group workflow jobs so new commits cancels in-progress execution triggered by previous commits.
 - \[mpm\] Run tests on early Python 3.11 releases.
 
-## {gh}`5.1.0 (2022-05-15) <compare/v5.0.1...v5.1.0>`
+## [5.1.0 (2022-05-15)](https://github.com/kdeldycke/meta-package-manager/compare/v5.0.1...v5.1.0)
 
 - \[pipx\] Add `pipx` support. Closes {issue}`468`.
 - \[cargo\] Add `cargo` support. Closes {issue}`633`.
 - \[mpm\] Factorize search result refiltering code.
 - \[mpm\] Regroup `dnf` and `yum` labels.
 
-## {gh}`5.0.1 (2022-04-28) <compare/v5.0.0...v5.0.1>`
+## [5.0.1 (2022-04-28)](https://github.com/kdeldycke/meta-package-manager/compare/v5.0.0...v5.0.1)
 
 - \[apt\] Fix commands incompatible with `--yes` option. Closes {issue}`625`.
 - \[mpm\] Add `topgrade` and `pacaptr` in the list of benchmarked alternatives.
 - \[mpm\] Rename `alternative` page to `benchmark`.
 - \[mpm\] Fix label unittests.
 
-## {gh}`5.0.0 (2022-04-25) <compare/v4.13.1...v5.0.0>`
+## [5.0.0 (2022-04-25)](https://github.com/kdeldycke/meta-package-manager/compare/v4.13.1...v5.0.0)
 
 - \[zypper\] Add `zypper` support for Suse and OpenSuse. Closes {issue}`566`.
 - \[emerge\] Add `emerge` support.
@@ -293,7 +293,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Use string highlighting code from `click-extra >= 2.1.0`.
 - \[mpm\] Add edit links to documentation.
 
-## {gh}`4.13.1 (2022-04-17) <compare/v4.13.0...v4.13.1>`
+## [4.13.1 (2022-04-17)](https://github.com/kdeldycke/meta-package-manager/compare/v4.13.0...v4.13.1)
 
 - \[apt\] Add missing `sudo` pre-commands for `apt` calls that requires it.
   Closes {issue}`496` and {issue}`579`.
@@ -304,7 +304,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Remove date-based shallowing of Homebrew git repository in unittests
   and considers the local runner copy to already be unshallowed.
 
-## {gh}`4.13.0 (2022-04-16) <compare/v4.12.1...v4.13.0>`
+## [4.13.0 (2022-04-16)](https://github.com/kdeldycke/meta-package-manager/compare/v4.12.1...v4.13.0)
 
 - \[pacman\] Add support for `pacman`. Closes {issue}`416`.
 - \[apt-mint\] Fix search. Closes {issue}`572` and {pr}`573`.
@@ -318,18 +318,18 @@ This version is not released yet and is under active development.
 - \[mpm\] Fix normalization of CLI arguments.
 - \[mpm\] Fix file not found error on non-Windows platform during version checking.
 
-## {gh}`4.12.1 (2022-04-05) <compare/v4.12.0...v4.12.1>`
+## [4.12.1 (2022-04-05)](https://github.com/kdeldycke/meta-package-manager/compare/v4.12.0...v4.12.1)
 
 - \[mpm\] Make CLI path evaluation more robust on Windows. Closes {issue}`542`.
 
-## {gh}`4.12.0 (2022-04-04) <compare/v4.11.0...v4.12.0>`
+## [4.12.0 (2022-04-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.11.0...v4.12.0)
 
 - \[dnf\] Add support for `dnf`. Closes {issue}`516`, refs {issue}`415`.
 - \[yum\] Allow `yum` to act as `dnf`. Closes {issue}`415`.
 - \[brew,cask\] Fix execution of `sync` command.
 - \[mpm\] Fix extraction of version. Closes {issue}`536`.
 
-## {gh}`4.11.0 (2022-04-03) <compare/v4.10.0...v4.11.0>`
+## [4.11.0 (2022-04-03)](https://github.com/kdeldycke/meta-package-manager/compare/v4.10.0...v4.11.0)
 
 - \[brew,cask\] Do not let homebrew auto-update on other commands. Refs {issue}`36`.
 - \[brew,cask\] Disable analytics and env hints in logs.
@@ -338,7 +338,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Enforce code structure in package manager definition files.
 - \[mpm\] Fix documentation generation.
 
-## {gh}`4.10.0 (2022-03-31) <compare/v4.9.10...v4.10.0>`
+## [4.10.0 (2022-03-31)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.10...v4.10.0)
 
 - \[mpm\] Allow for package managers to simultaneously set a list of
   pre-commands and environment variables, as well as global arguments before
@@ -350,7 +350,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Cap `click-extra` requirement to `<1.7.0` to fix regression. Closes
   {issue}`518`.
 
-## {gh}`4.9.10 (2022-03-09) <compare/v4.9.9...v4.9.10>`
+## [4.9.10 (2022-03-09)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.9...v4.9.10)
 
 - \[mpm\] Fix execution error on Python 3.10 by updating `click-extra`. Closes
   {issue}`467`.
@@ -360,27 +360,27 @@ This version is not released yet and is under active development.
   modernization.
 - \[mpm\] Remove direct dependency on `cloup`, `simplejson` and `pipdeptree`.
 
-## {gh}`4.9.9 (2022-01-15) <compare/v4.9.8...v4.9.9>`
+## [4.9.9 (2022-01-15)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.8...v4.9.9)
 
 - \[mpm\] Fix upload of build artifacts in GitHub release.
 
-## {gh}`4.9.8 (2022-01-15) <compare/v4.9.7...v4.9.8>`
+## [4.9.8 (2022-01-15)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.7...v4.9.8)
 
 - \[mpm\] Fix propagation of build artifacts to GitHub release and PyPi.
 - \[mpm\] Fix test of labelling rules.
 - \[mpm\] Remove local dependency on `graphviz` now that fixes were pushed
   upstream.
 
-## {gh}`4.9.7 (2022-01-11) <compare/v4.9.6...v4.9.7>`
+## [4.9.7 (2022-01-11)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.6...v4.9.7)
 
 - \[mpm\] Add release version in artifacts produced by Poetry builds.
 - \[mpm\] Pass local PyPi token to reused workflow to fix publishing.
 
-## {gh}`4.9.6 (2022-01-11) <compare/v4.9.5...v4.9.6>`
+## [4.9.6 (2022-01-11)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.5...v4.9.6)
 
 - \[mpm\] Fix detection of Poetry in build workflow.
 
-## {gh}`4.9.5 (2022-01-11) <compare/v4.9.4...v4.9.5>`
+## [4.9.5 (2022-01-11)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.4...v4.9.5)
 
 - \[mpm\] Use external workflow for package building and publishing via Poetry.
 - \[mpm\] Reused external label maintenance workflows and definitions.
@@ -389,26 +389,26 @@ This version is not released yet and is under active development.
 - \[mpm\] Remove changelog code left-overs.
 - \[mpm\] Aligns content of all PRs locally produced by workflows.
 
-## {gh}`4.9.4 (2022-01-04) <compare/v4.9.3...v4.9.4>`
+## [4.9.4 (2022-01-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.3...v4.9.4)
 
 - \[mpm\] Re-integrate artifacts in GitHub release on tagging.
 
-## {gh}`4.9.3 (2022-01-04) <compare/v4.9.2...v4.9.3>`
+## [4.9.3 (2022-01-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.2...v4.9.3)
 
 - \[mpm\] Fix GitHub release's content update.
 
-## {gh}`4.9.2 (2022-01-04) <compare/v4.9.1...v4.9.2>`
+## [4.9.2 (2022-01-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.1...v4.9.2)
 
 - \[mpm\] Regenerate GitHub release content body dynamiccaly on tagging.
 
-## {gh}`4.9.1 (2022-01-04) <compare/v4.9.0...v4.9.1>`
+## [4.9.1 (2022-01-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.0...v4.9.1)
 
 - \[mpm\] Automate minor and major version bump.
 - \[mpm\] Automate release preparation workflow.
 - \[mpm\] Trigger tagging, build and version bump on release event.
 - \[mpm\] Add a debug workflow for troubleshooting.
 
-## {gh}`4.9.0 (2022-01-03) <compare/v4.8.0...v4.9.0>`
+## [4.9.0 (2022-01-03)](https://github.com/kdeldycke/meta-package-manager/compare/v4.8.0...v4.9.0)
 
 - \[mpm\] Add single manager selector aliases: `--apm`, `--apt`, `--apt-mint`,
   `--brew`, `--cask`. `--choco`, `--composer`, `--flatpak`, `--gem`, `--mas`,
@@ -422,7 +422,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Outsource some workflow definition to external repository.
 - \[mpm\] Fix generation of dependency graph.
 
-## {gh}`4.8.0 (2021-11-01) <compare/v4.7.0...v4.8.0>`
+## [4.8.0 (2021-11-01)](https://github.com/kdeldycke/meta-package-manager/compare/v4.7.0...v4.8.0)
 
 - \[mpm\] Add `--color`/`--no-color` (aliased to `--ansi`/`--no-ansi`) flags.
 - \[mpm\] Forces no color on JSON output.
@@ -436,7 +436,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Simplify project management by abandoning the dual use of
   `main`/`develop` branches.
 
-## {gh}`4.7.0 (2021-10-13) <compare/v4.6.0...v4.7.0>`
+## [4.7.0 (2021-10-13)](https://github.com/kdeldycke/meta-package-manager/compare/v4.6.0...v4.7.0)
 
 - \[mpm\] Add help screen coloring.
 - \[mpm\] Change documentation theme from classic RTD to furo.
@@ -447,13 +447,13 @@ This version is not released yet and is under active development.
 - \[mpm\] Run tests on Python 3.10.
 - \[mpm\] Add a contribution guide stub in documentation. Closes {issue}`276`.
 
-## {gh}`4.6.0 (2021-10-04) <compare/v4.5.0...v4.6.0>`
+## [4.6.0 (2021-10-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.5.0...v4.6.0)
 
 - \[mpm\] Implements XKCD 1654. Closes {issue}`10`.
 - \[mpm\] Add `-x`/`--xkcd` option to forces manager selection.
 - \[mpm\] Let `-m`/`--manager` multi-option keep order.
 
-## {gh}`4.5.0 (2021-09-30) <compare/v4.4.0...v4.5.0>`
+## [4.5.0 (2021-09-30)](https://github.com/kdeldycke/meta-package-manager/compare/v4.4.0...v4.5.0)
 
 - \[choco\] Add Chocolatey package manager.
 - \[mpm\] Skip by default the evaluation of package managers not supported on
@@ -462,7 +462,7 @@ This version is not released yet and is under active development.
   managers.
 - \[mpm\] Fix highlighting of substrings in search results.
 
-## {gh}`4.4.0 (2021-09-27) <compare/v4.3.0...v4.4.0>`
+## [4.4.0 (2021-09-27)](https://github.com/kdeldycke/meta-package-manager/compare/v4.3.0...v4.4.0)
 
 - \[mpm\] Add a global `-d`/`--dry-run` option.
 - \[apt\] Add dedicated `apt-mint` manager to handle the special case of `apt`
@@ -473,7 +473,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Remove all the unused utilities to discard some table rendering on
   Windows.
 
-## {gh}`4.3.0 (2021-09-25) <compare/v4.2.0...v4.3.0>`
+## [4.3.0 (2021-09-25)](https://github.com/kdeldycke/meta-package-manager/compare/v4.2.0...v4.3.0)
 
 - \[mpm\] Add new `install` command. Closes {issue}`21`.
 - \[vscode\] Add support for Visual Studio Code plugins.
@@ -482,7 +482,7 @@ This version is not released yet and is under active development.
   TOML backup files.
 - \[mpm\] Forces logger state reset before each CLI call in unittests.
 
-## {gh}`4.2.0 (2021-09-21) <compare/v4.1.0...v4.2.0>`
+## [4.2.0 (2021-09-21)](https://github.com/kdeldycke/meta-package-manager/compare/v4.1.0...v4.2.0)
 
 - \[mpm\] Add support for TOML configuration file. Closes {issue}`66`.
 - \[mpm\] Add `-C`/`--config` option to point to specific configuration file.
@@ -500,7 +500,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Remove support for `--cli-format bitbar` option. Use `xbar` value
   instead.
 
-## {gh}`4.1.0 (2021-05-01) <compare/v4.0.0...v4.1.0>`
+## [4.1.0 (2021-05-01)](https://github.com/kdeldycke/meta-package-manager/compare/v4.0.0...v4.1.0)
 
 - \[bar-plugin\] Add new `Submenu layout` boolean option in xbar plugin UI.
 - \[bar-plugin\] Rename `XBAR_MPM_SUBMENU` environment variable to
@@ -508,7 +508,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Allow search of multiple CLI names for a package manager.
 - \[pip\] Fix search of `python3` binary on macOS. Closes {issue}`247`.
 
-## {gh}`4.0.0 (2021-04-27) <compare/v3.6.0...v4.0.0>`
+## [4.0.0 (2021-04-27)](https://github.com/kdeldycke/meta-package-manager/compare/v3.6.0...v4.0.0)
 
 - \[bar-plugin\] Upgrade BitBar plugin to new xbar format.
 - \[bar-plugin\] Drop xbar plugin requirement on Python 2.x and bump it up to Python
@@ -521,7 +521,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Only trigger dependency graph update on tagging to reduce noise.
 - \[mpm\] Re-introduce `isort`.
 
-## {gh}`3.6.0 (2021-01-03) <compare/v3.5.2...v3.6.0>`
+## [3.6.0 (2021-01-03)](https://github.com/kdeldycke/meta-package-manager/compare/v3.5.2...v3.6.0)
 
 - \[brew\] Add support for `brew` on Linux.
 - \[brew,cask\] Bump minimal requirement of `brew` to `2.7.0`.
@@ -533,7 +533,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Remove `pycodestyle` now that we rely on `black`.
 - \[mpm\] Add emoji to issue labels.
 
-## {gh}`3.5.2 (2020-10-29) <compare/v3.5.1...v3.5.2>`
+## [3.5.2 (2020-10-29)](https://github.com/kdeldycke/meta-package-manager/compare/v3.5.1...v3.5.2)
 
 - \[mpm\] Run tests on Python 3.9.
 - \[mpm\] Upgrade to `Poetry 1.1.0`.
@@ -549,30 +549,30 @@ This version is not released yet and is under active development.
 - \[mpm\] Fix `npm` setup in Ubuntu 18.04 and 20.04 CI runners.
 - \[mpm\] Use latest `Atom` version in Ubuntu CI runners.
 
-## {gh}`3.5.1 (2020-10-03) <compare/v3.5.0...v3.5.1>`
+## [3.5.1 (2020-10-03)](https://github.com/kdeldycke/meta-package-manager/compare/v3.5.0...v3.5.1)
 
 - \[mpm\] Defaults to `--continue-on-error` instead of stopping.
 - \[mpm\] Force checking of CLI being a file.
 - \[mpm\] Auto-optimize images.
 - \[mpm\] Auto-lock closed issues and PRs after a moment of inactivity.
 
-## {gh}`3.5.0 (2020-09-20) <compare/v3.4.2...v3.5.0>`
+## [3.5.0 (2020-09-20)](https://github.com/kdeldycke/meta-package-manager/compare/v3.4.2...v3.5.0)
 
 - \[mpm\] Fix `--stop-on-error` parameter: it was never taken into account.
 - \[brew,cask\] Bump minimal requirement of `brew` to `2.5.0`.
 - \[brew,cask\] Fix warning to deprecated options.
 - \[npm\] Always fix JSON parsing on error for any npm subcommand.
 
-## {gh}`3.4.2 (2020-09-13) <compare/v3.4.1...v3.4.2>`
+## [3.4.2 (2020-09-13)](https://github.com/kdeldycke/meta-package-manager/compare/v3.4.1...v3.4.2)
 
 - \[brew,cask\] Do not mix-up brew and cask upgrades.
 - \[npm\] Skip parsing of JSON results on error.
 
-## {gh}`3.4.1 (2020-09-02) <compare/v3.4.0...v3.4.1>`
+## [3.4.1 (2020-09-02)](https://github.com/kdeldycke/meta-package-manager/compare/v3.4.0...v3.4.1)
 
 - \[mpm\] Rename `master` branch to `main`.
 
-## {gh}`3.4.0 (2020-08-18) <compare/v3.3.0...v3.4.0>`
+## [3.4.0 (2020-08-18)](https://github.com/kdeldycke/meta-package-manager/compare/v3.3.0...v3.4.0)
 
 - \[yarn\] Set minimal requirement to `1.20.0`.
 - \[yarn\] Fix deprecated global arguments.
@@ -590,7 +590,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Removes `requires.io` and Scrutinizer badges.
 - \[mpm\] Revert to `pipdeptree` to produce package dependency graph.
 
-## {gh}`3.3.0 (2020-06-23) <compare/v3.2.0...v3.3.0>`
+## [3.3.0 (2020-06-23)](https://github.com/kdeldycke/meta-package-manager/compare/v3.2.0...v3.3.0)
 
 - \[bar-plugin\] Each entry in the drop-down menu can now be called into a terminal
   to track the execution by holding the `Option` key.
@@ -615,7 +615,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Check label rules against manager definitions. Adds development
   dependency on `PyYAML`.
 
-## {gh}`3.2.0 (2020-05-31) <compare/v3.1.0...v3.2.0>`
+## [3.2.0 (2020-05-31)](https://github.com/kdeldycke/meta-package-manager/compare/v3.1.0...v3.2.0)
 
 - \[snap\] Add support for `snap` on Linux.
 - \[cask\] Rely on JSON output to fetch outdated packages.
@@ -640,7 +640,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Drop support of Python 3.6.
 - \[mpm\] Use group-tabs in Sphinx docs.
 
-## {gh}`3.1.0 (2020-04-02) <compare/v3.0.0...v3.1.0>`
+## [3.1.0 (2020-04-02)](https://github.com/kdeldycke/meta-package-manager/compare/v3.0.0...v3.1.0)
 
 - \[mpm\] Add new `cleanup` command. Closes {issue}`5`.
 - \[mpm\] Improve table sorting with new version-aware tokenizer.
@@ -655,7 +655,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Allow stats to be printed for `backup` command.
 - \[gem\] Bump minimal requirement to `2.5.0`.
 
-## {gh}`3.0.0 (2020-03-25) <compare/v2.9.0...v3.0.0>`
+## [3.0.0 (2020-03-25)](https://github.com/kdeldycke/meta-package-manager/compare/v2.9.0...v3.0.0)
 
 - \[mpm\] Add new `backup` and dummy `restore` commands to respectively dump
   and load up list of installed packages to/from a TOML file. Refs {issue}`38`.
@@ -681,7 +681,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Raise requirement to `click 7.1`.
 - \[mpm\] Raise requirement to `boltons >= 20.0`.
 
-## {gh}`2.9.0 (2020-03-18) <compare/v2.8.0...v2.9.0>`
+## [2.9.0 (2020-03-18)](https://github.com/kdeldycke/meta-package-manager/compare/v2.8.0...v2.9.0)
 
 - \[mpm\] Drop support of Python 2.7, 3.4 and 3.5. Add support for Python 3.8.
 - \[windows\] Add support for `apm`, `composer`, `gem`, `npm` and `pip2` on
@@ -706,7 +706,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Drop all Python 3.0 `__future__` imports.
 - \[mpm\] Add detailed usage CLI page in documentation.
 
-## {gh}`2.8.0 (2019-01-03) <compare/v2.7.0...v2.8.0>`
+## [2.8.0 (2019-01-03)](https://github.com/kdeldycke/meta-package-manager/compare/v2.7.0...v2.8.0)
 
 - \[composer\] Add support for PHP `composer`.
 - \[cask\] Remove `cask`-specific `version`, `sync` and `search` command.
@@ -718,7 +718,7 @@ This version is not released yet and is under active development.
   vintage Mac OS X 10.10 and 10.11.
 - \[mpm\] Use latest macOS 10.12 and 10.13 Travis images.
 
-## {gh}`2.7.0 (2018-04-02) <compare/v2.6.1...v2.7.0>`
+## [2.7.0 (2018-04-02)](https://github.com/kdeldycke/meta-package-manager/compare/v2.6.1...v2.7.0)
 
 - \[mpm\] Add new `--ignore-auto-updates` and `--include-auto-updates` boolean
   flags.
@@ -730,11 +730,11 @@ This version is not released yet and is under active development.
   {pr}`44`.
 - \[bar-plugin\] Do not run BitBar plugin unittests but on macOS.
 
-## {gh}`2.6.1 (2017-11-05) <compare/v2.6.0...v2.6.1>`
+## [2.6.1 (2017-11-05)](https://github.com/kdeldycke/meta-package-manager/compare/v2.6.0...v2.6.1)
 
 - \[mpm\] Fix Travis unittests.
 
-## {gh}`2.6.0 (2017-09-11) <compare/v2.5.0...v2.6.0>`
+## [2.6.0 (2017-09-11)](https://github.com/kdeldycke/meta-package-manager/compare/v2.5.0...v2.6.0)
 
 - \[apt\] Add support for `apt` on Linux systems.
 - \[pip\] Use pip 9.0 JSON output. Closes {issue}`18`.
@@ -747,7 +747,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Replace `nose` by `pytest`.
 - \[mpm\] Only notify by mail of test failures.
 
-## {gh}`2.5.0 (2017-03-01) <compare/v2.4.0...v2.5.0>`
+## [2.5.0 (2017-03-01)](https://github.com/kdeldycke/meta-package-manager/compare/v2.4.0...v2.5.0)
 
 - \[mpm\] Auto-detect location of manager CLI on the system.
 - \[mpm\] Add new `search` operation. Closes {issue}`22`.
@@ -767,7 +767,7 @@ This version is not released yet and is under active development.
   {issue}`26`.
 - \[mpm\] Drop support of Python 3.3.
 
-## {gh}`2.4.0 (2017-01-28) <compare/v2.3.0...v2.4.0>`
+## [2.4.0 (2017-01-28)](https://github.com/kdeldycke/meta-package-manager/compare/v2.3.0...v2.4.0)
 
 - \[mpm\] Add new `list` operation. Closes {issue}`20`.
 - \[mas\] Fix upgrade of `mas` packages. Closes {issue}`32`.
@@ -778,7 +778,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Add global todo list in documentation.
 - \[mpm\] Bump requirement to `boltons >= 17.0.0` for Python 3.3 compatibility.
 
-## {gh}`2.3.0 (2017-01-15) <compare/v2.2.0...v2.3.0>`
+## [2.3.0 (2017-01-15)](https://github.com/kdeldycke/meta-package-manager/compare/v2.2.0...v2.3.0)
 
 - \[mpm\] Add Sphinx documentation. Closes {issue}`24`.
 - \[mpm\] Add installation instructions. Closes {issue}`19`.
@@ -798,7 +798,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Replace double by single-width characters in `mpm` output to fix
   table misalignment. Closes {issue}`30`.
 
-## {gh}`2.2.0 (2016-12-25) <compare/v2.1.1...v2.2.0>`
+## [2.2.0 (2016-12-25)](https://github.com/kdeldycke/meta-package-manager/compare/v2.1.1...v2.2.0)
 
 - \[mpm\] Rename `supported` property of managers to `fresh`.
 - \[mpm\] Allow restriction of package managers to a platform. Closes
@@ -812,7 +812,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Print current platform in debug messages.
 - \[mpm\] Unittest detection of managers on each platform.
 
-## {gh}`2.1.1 (2016-12-17) <compare/v2.1.0...v2.1.1>`
+## [2.1.1 (2016-12-17)](https://github.com/kdeldycke/meta-package-manager/compare/v2.1.0...v2.1.1)
 
 - \[brew,cask\] Fix parsing of non-point releases of `brew` and `cask`
   versions. Closes {issue}`15`.
@@ -821,7 +821,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Do not strip CLI output. Keep original format.
 - \[mpm\] Fix full changelog link.
 
-## {gh}`2.1.0 (2016-12-14) <compare/v2.0.0...v2.1.0>`
+## [2.1.0 (2016-12-14)](https://github.com/kdeldycke/meta-package-manager/compare/v2.0.0...v2.1.0)
 
 - \[bar-plugin\] Adjust rendering of BitBar plugin errors.
 - \[mpm\] Fix fetching of log level names in Python 3.4+.
@@ -850,7 +850,7 @@ This version is not released yet and is under active development.
 - \[mpm,macos\] Fix upgrade of `setuptools` in `macOS` and Python 3.3 Travis
   jobs.
 
-## {gh}`2.0.0 (2016-12-04) <compare/v1.12.0...v2.0.0>`
+## [2.0.0 (2016-12-04)](https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...v2.0.0)
 
 - \[bar-plugin\] Rewrite BitBar plugin based on `mpm`. Closes {issue}`13`.
 - \[bar-plugin\] Render errors with a monospaced font in BitBar plugin.
@@ -867,7 +867,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Add `upgrade_all_cli` field for each package manager in JSON output
   of `mpm outdated` command.
 
-## {gh}`1.12.0 (2016-12-03) <compare/v1.11.0...v1.12.0>`
+## [1.12.0 (2016-12-03)](https://github.com/kdeldycke/meta-package-manager/compare/v1.11.0...v1.12.0)
 
 - \[mpm\] Rename `mpm update` command to `mpm upgrade`.
 - \[mpm\] Allow restriction to only one package manager for each sub-command.
@@ -885,7 +885,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Fix fall-back to iterative full upgrade command.
 - \[mpm\] Fix computation of outdated packages statistics.
 
-## {gh}`1.11.0 (2016-11-30) <compare/v1.10.0...v1.11.0>`
+## [1.11.0 (2016-11-30)](https://github.com/kdeldycke/meta-package-manager/compare/v1.10.0...v1.11.0)
 
 - \[mpm\] Allow rendering of output data into `json`.
 - \[mpm\] Sort list of outdated packages by lower-cased package IDs.
@@ -894,7 +894,7 @@ This version is not released yet and is under active development.
 - \[cask\] Fix fetching of outdated `cask` packages.
 - \[cask\] Fix upgrade of `cask` packages.
 
-## {gh}`1.10.0 (2016-10-04) <compare/v1.9.0...v1.10.0>`
+## [1.10.0 (2016-10-04)](https://github.com/kdeldycke/meta-package-manager/compare/v1.9.0...v1.10.0)
 
 - \[mpm\] Add optional `version` property on package manager definitions.
 - \[mpm\] Allow each package manager to set requirement on its own version.
@@ -905,7 +905,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Cache lazy properties to speed metadata computation.
 - \[mpm\] Shows detailed state of package managers in CLI.
 
-## {gh}`1.9.0 (2016-09-23) <compare/v1.8.0...v1.9.0>`
+## [1.9.0 (2016-09-23)](https://github.com/kdeldycke/meta-package-manager/compare/v1.8.0...v1.9.0)
 
 - \[mpm\] Fix `bumpversion` configuration to target `CHANGES.rst` instead of
   `README.rst`.
@@ -933,7 +933,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Allow selection of table rendering.
 - \[cask\] Fix parsing of unversioned cask packages. Closes {pr}`6`.
 
-## {gh}`1.8.0 (2016-08-22) <compare/v1.7.0...v1.8.0>`
+## [1.8.0 (2016-08-22)](https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...v1.8.0)
 
 - \[mpm\] Move the plugin to its own repository.
 - \[mpm\] Rename `package-manager` project to `meta-package-manager`.
@@ -950,48 +950,48 @@ This version is not released yet and is under active development.
 - \[mpm\] Add default `bumpversion`, `isort`, `nosetests`, `coverage`, `pep8`
   and `pylint` default configuration.
 
-## {gh}`1.7.0 (2016-08-16) <compare/v1.6.0...v1.7.0>`
+## [1.7.0 (2016-08-16)](https://github.com/kdeldycke/meta-package-manager/compare/v1.6.0...v1.7.0)
 
 - \[brew\] Fix issues with `$PATH` not having Homebrew/Macports.
 - \[pip\] New workaround for full `pip` upgrade command.
 - \[cask\] Workaround for Homebrew Cask full upgrade command.
 - \[mpm\] Grammar fix when 0 packages need to be upgraded.
 
-## {gh}`1.6.0 (2016-08-10) <compare/v1.5.0...v1.6.0>`
+## [1.6.0 (2016-08-10)](https://github.com/kdeldycke/meta-package-manager/compare/v1.5.0...v1.6.0)
 
 - \[pip\] Work around the lacks of full `pip` upgrade command.
 - \[mpm\] Fix `UnicodeDecodeError` on parsing CLI output.
 
-## {gh}`1.5.0 (2016-07-25) <compare/v1.4.0...v1.5.0>`
+## [1.5.0 (2016-07-25)](https://github.com/kdeldycke/meta-package-manager/compare/v1.4.0...v1.5.0)
 
 - \[mas\] Add support for `mas`.
 - \[mpm\] Don't show all `stderr` as `err` (check return code for error state).
 
-## {gh}`1.4.0 (2016-07-10) <compare/v1.3.0...v1.4.0>`
+## [1.4.0 (2016-07-10)](https://github.com/kdeldycke/meta-package-manager/compare/v1.3.0...v1.4.0)
 
 - \[mpm\] Don't attempt to parse empty lines.
 - \[npm\] Check for linked `npm` packages.
 - \[gem\] Support system or Homebrew Ruby Gems (with proper `sudo` setup).
 
-## {gh}`1.3.0 (2016-07-09) <compare/v1.2.0...v1.3.0>`
+## [1.3.0 (2016-07-09)](https://github.com/kdeldycke/meta-package-manager/compare/v1.2.0...v1.3.0)
 
 - \[mpm\] Add changelog.
 - \[mpm\] Add reference to package manager's issues.
 - \[cask\] Force Cask update before evaluating available packages.
 - \[mpm\] Add sample of command output as version parsing can be tricky.
 
-## {gh}`1.2.0 (2016-07-08) <compare/v1.1.0...v1.2.0>`
+## [1.2.0 (2016-07-08)](https://github.com/kdeldycke/meta-package-manager/compare/v1.1.0...v1.2.0)
 
 - \[pip,npm,apm,gem\] Add support for both `pip2` and `pip3`, Node's `npm`,
   Atom's `apm`, Ruby's `gem`.
 - \[cask\] Fixup `brew cask` checking.
 - \[mpm\] Don't die on errors.
 
-## {gh}`1.1.0 (2016-07-07) <compare/v1.0.0...v1.1.0>`
+## [1.1.0 (2016-07-07)](https://github.com/kdeldycke/meta-package-manager/compare/v1.0.0...v1.1.0)
 
 - \[pip\] Add support for Python's `pip`.
 
-## {gh}`1.0.0 (2016-07-05) <commit/170ce9>`
+## [1.0.0 (2016-07-05)](https://github.com/kdeldycke/meta-package-manager/commit/170ce9)
 
 - \[mpm\] Initial public release.
 - \[brew,cask\] Add support for Homebrew and Cask.

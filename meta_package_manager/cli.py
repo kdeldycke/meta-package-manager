@@ -46,14 +46,9 @@ from click_extra import (
     pass_context,
     table_format_option,
 )
-from click_extra.colorize import KO, OK, ColorOption, HelpOption, highlight
+from click_extra.colorize import KO, OK, highlight
 from click_extra.colorize import default_theme as theme
-from click_extra.config import ConfigOption
-from click_extra.logging import VerbosityOption
-from click_extra.parameters import ShowParamsOption
 from click_extra.platforms import reduce
-from click_extra.timer import TimerOption
-from click_extra.version import ExtraVersionOption
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -174,19 +169,6 @@ def bar_plugin_path(ctx, param, value):
 @extra_group(
     # XXX Default verbosity has been changed in Click Extra 4.0.0 from INFO to WARNING.
     context_settings={"default_map": {"verbosity": "INFO"}},
-    # XXX Same as what click_extra.commands.default_extra_params returns, but with
-    # colors of the version option forced to be neutralized. This temporarily address
-    # the validation of mpm version by old (X|Swift)Bar plugins. This could be removed
-    # once https://github.com/matryer/xbar-plugins/pull/2018 is merged upstream.
-    params=[
-        TimerOption(),
-        ColorOption(),
-        ConfigOption(),
-        ShowParamsOption(),
-        VerbosityOption(),
-        ExtraVersionOption(version_style=None),
-        HelpOption(),
-    ],
 )
 @option_group(
     "Package manager selection options",

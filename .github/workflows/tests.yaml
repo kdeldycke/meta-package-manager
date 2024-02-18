@@ -56,7 +56,7 @@ jobs:
           unstable = [
               # msgpack does not work on Python 3.13-dev yet:
               # https://github.com/msgpack/msgpack-python/issues/573
-              {"python-version": "3.13-dev"},
+              {"3.13-dev"},
           ]
 
           jobs = []

@@ -200,8 +200,6 @@ replace = "## [{new_version} (unreleased)]("
 [[tool.bumpversion.files]]
 # Update the version in the citation file.
 filename = "./citation.cff"
-# XXX There a regression in bump-my-version 0.12.0 which prevent version to be updated here.
-# See: https://github.com/callowayproject/bump-my-version/issues/90
 search = "version: {current_version}"
 replace = "version: {new_version}"
 

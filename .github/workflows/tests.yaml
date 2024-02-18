@@ -36,41 +36,60 @@ jobs:
           from itertools import product
           from pathlib import Path
 
-          # Available OSes: https://github.com/actions/runner-images#available-images
-          os_list = {
-              "ubuntu-22.04",
-              "macos-14",
-              "windows-2022",
+          variants: dict[str, set[str]] = {
+              # Available OSes: https://github.com/actions/runner-images#available-images
+              "os": {
+                  "ubuntu-22.04",
+                  "macos-14",
+                  "windows-2022",
+              },
+              # Only test the oldest and latest Python version supported and the upcoming one. Skip the intermediates
+              # to speed up the tests.
+              "python-version": {
+                  "3.8",
+                  "3.12",
+                  "3.13-dev",
+              }
           }
-          # Only test the oldest and latest Python version supported and the upcoming one. Skip the intermediates
-          # to speed up the tests.
-          python_list = {
-              "3.8",
-              "3.12",
-              "3.13-dev",
-          }
-          # Safety check to ensure there is no overlap between the 2 sets.
-          assert not os_list.intersection(python_list)
+          # TODO: List of additional variants to include in the matrix.
+          include: list[dict[str, str]] = []
 
-          # List of unstable creiterions.
-          unstable = [
+          # List of variants to exclude from the matrix.
+          exclude: list[dict[str, str]] = []
+
+          # List of unstable criterions.
+          unstable: list[dict[str, str]] = [
+              # XXX Python <3.10 is not available on new macOS M1 runners.
+              # See: https://github.com/actions/setup-python/issues/808
+              {"os": "macos-14", "python-version": "3.8"},
               # msgpack does not work on Python 3.13-dev yet:
               # https://github.com/msgpack/msgpack-python/issues/573
-              {"3.13-dev"},
+              {"python-version": "3.13-dev"},
           ]
 
-          jobs = []
-          for os_id, python_version in product(os_list, python_list):
-              job = {
-                  "os": os_id,
-                  "python-version": python_version,
-                  "state": "stable",
-              }
+          # Build the job matrix.
+          jobs: list[dict[str, str]] = []
+          for variants in product(*[{(key, value) for value in values} for key, values in variants.items()]):
+              job = dict(variants)
+
+              # Match the job against the exclude criterions.
+              exclude_job = False
+              for criterion in exclude:
+                  if set(criterion.items()).issubset(job.items()):
+                      exclude_job = True
+                      break
+              if exclude_job:
+                  continue
+
+              # Match the job against the unstable criterions.
+              job["state"] = "stable"
               for criterion in unstable:
-                  if criterion.issubset(job.values()):
+                  if set(criterion.items()).issubset(job.items()):
                       job["state"] = "unstable"
                       break
+
               jobs.append(job)
+
           matrix = json.dumps({"include": jobs})
 
           env_file = Path(os.getenv("GITHUB_OUTPUT"))

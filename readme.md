@@ -80,7 +80,7 @@
 | [`pacman`](https://wiki.archlinux.org/title/pacman)                                     | 5.0.0        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`paru`](https://github.com/Morganamilo/paru)                                           | 1.9.3        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`pip`](https://pip.pypa.io)                                                            | 10.0.0       |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
-| [`pipx`](https://pipx.pypa.io)                                                  | 1.0.0        |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
+| [`pipx`](https://pipx.pypa.io)                                                          | 1.0.0        |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`scoop`](https://scoop.sh)                                                             | 0.2.4        |                         |               |       |             |    🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`snap`](https://snapcraft.io)                                                          | 2.0.0        |           🅱️            |       🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
 | [`steamcmd`](https://developer.valvesoftware.com/wiki/SteamCMD)                         | None         |           🅱️            |       🐧       |   🍎   |    `>_`     |    🪟    |             |            |          |     ✓     |           |               |          |        |           |
@@ -124,11 +124,11 @@ $ pipx install meta-package-manager
 
 Standalone executables of `mpm`'s latest version are available as direct downloads for several platforms and architectures:
 
-| Platform          | `x86_64`                                                                                                                         | `arm64` |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------- | --- |
-| **Linux**[^linux] | [Download `mpm-linux-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     | |
-| **macOS**         | [Download `mpm-macos-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     | [Download `mpm-macos-arm64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-arm64.bin)  |
-| **Windows**       | [Download `mpm-windows-x64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) | |
+| Platform          | `x86_64`                                                                                                                         | `arm64`                                                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Linux**[^linux] | [Download `mpm-linux-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     |                                                                                                                                  |
+| **macOS**         | [Download `mpm-macos-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     | [Download `mpm-macos-arm64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-arm64.bin) |
+| **Windows**       | [Download `mpm-windows-x64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) |                                                                                                                                  |
 
 ## Quickstart
 

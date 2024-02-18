@@ -8,6 +8,7 @@ This version is not released yet and is under active development.
 
 - \[mpm\] Build `arm64` binaries on `macos-14`.
 - \[mpm\] Run tests on `macos-14` instead of `macos-13`.
+- \[mpm\] Run tests on Python 3.13-dev branch.
 - \[mpm\] Use external workflow to manage issues and PRs content-based labelling.
 
 ## [5.14.2 (2024-01-17)](https://github.com/kdeldycke/meta-package-manager/compare/v5.14.1...v5.14.2)

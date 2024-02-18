@@ -47,9 +47,7 @@ jobs:
           python_list = {
               "3.8",
               "3.12",
-              # Work on Python 3.13 has not started yet:
-              # https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json
-              # "3.13-dev",
+              "3.13-dev",
           }
           # Safety check to ensure there is no overlap between the 2 sets.
           assert not os_list.intersection(python_list)

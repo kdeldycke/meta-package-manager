@@ -55,13 +55,14 @@ jobs:
           include: list[dict[str, str]] = []
 
           # List of variants to exclude from the matrix.
-          exclude: list[dict[str, str]] = []
-
-          # List of unstable criterions.
-          unstable: list[dict[str, str]] = [
+          exclude: list[dict[str, str]] = [
               # XXX Python <3.10 is not available on new macOS M1 runners.
               # See: https://github.com/actions/setup-python/issues/808
               {"os": "macos-14", "python-version": "3.8"},
+          ]
+
+          # List of unstable criterions.
+          unstable: list[dict[str, str]] = [
               # msgpack does not work on Python 3.13-dev yet:
               # https://github.com/msgpack/msgpack-python/issues/573
               {"python-version": "3.13-dev"},

@@ -124,11 +124,11 @@ $ pipx install meta-package-manager
 
 Standalone executables of `mpm`'s latest version are available as direct downloads for several platforms and architectures:
 
-| Platform          | `x86_64`                                                                                                                         |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Linux**[^linux] | [Download `mpm-linux-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     |
-| **macOS**         | [Download `mpm-macos-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     |
-| **Windows**       | [Download `mpm-windows-x64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) |
+| Platform          | `x86_64`                                                                                                                         | `arm64` |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------- | --- |
+| **Linux**[^linux] | [Download `mpm-linux-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     | |
+| **macOS**         | [Download `mpm-macos-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     | [Download `mpm-macos-arm64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-arm64.bin)  |
+| **Windows**       | [Download `mpm-windows-x64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) | |
 
 ## Quickstart
 

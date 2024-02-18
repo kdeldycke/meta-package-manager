@@ -95,11 +95,11 @@ Binaries are compiled at each release, so you can skip the installation process 
 
 This is the preferred way of testing `mpm` without polluting your machine. They also offer the possibility of running the CLI on older systems not supporting the minimal Python version required by `mpm`.
 
-| Platform    | `x86_64`                                                                                                                         |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Linux**   | [Download `mpm-linux-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     |
-| **macOS**   | [Download `mpm-macos-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     |
-| **Windows** | [Download `mpm-windows-x64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) |
+| Platform          | `x86_64`                                                                                                                         | `arm64` |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------- | --- |
+| **Linux** | [Download `mpm-linux-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     | |
+| **macOS**         | [Download `mpm-macos-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     | [Download `mpm-macos-arm64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-arm64.bin)  |
+| **Windows**       | [Download `mpm-windows-x64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) | |
 
 All links above points to the latest released version of `mpm`.
 
@@ -126,6 +126,7 @@ class: seelalso
 ```{code-block} shell-session
 $ file ./mpm*
 ./mpm-linux-x64.bin:   ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=d0a8ae1ffa469465a836c1505504d1b1c75725b0, for GNU/Linux 3.2.0, stripped
+./mpm-macos-arm64.bin: Mach-O 64-bit executable arm64
 ./mpm-macos-x64.bin:   Mach-O 64-bit executable x86_64
 ./mpm-windows-x64.exe: PE32+ executable (console) x86-64, for MS Windows
 ```

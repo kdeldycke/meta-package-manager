@@ -39,7 +39,7 @@ jobs:
           # Available OSes: https://github.com/actions/runner-images#available-images
           os_list = {
               "ubuntu-22.04",
-              "macos-13",
+              "macos-14",
               "windows-2022",
           }
           # Only test the oldest and latest Python version supported and the upcoming one. Skip the intermediates

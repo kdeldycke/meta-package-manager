@@ -324,10 +324,10 @@ jobs:
       #     choco install yarn --no-progress --yes
 
       # Composer
-      - name: Composer - macOS upgrade
+      - name: Composer - macOS install
         if: runner.os == 'macOS'
         run: |
-          brew upgrade composer
+          brew install composer
       - name: Composer - Windows upgrade
         if: runner.os == 'Windows'
         run: |

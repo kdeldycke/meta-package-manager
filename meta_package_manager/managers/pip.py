@@ -314,7 +314,7 @@ class Pip(PackageManager):
                   Successfully uninstalled six-1.14.0
             Successfully installed six-1.15.0
 
-        ,, note::
+        .. note::
 
             Pip lacks support of a proper full upgrade command. Raising an error let the
             parent class upgrade packages one by one.

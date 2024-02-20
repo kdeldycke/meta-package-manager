@@ -20,7 +20,7 @@ import json
 import re
 from typing import Iterator
 
-from click_extra.platforms import FREEBSD, LINUX, MACOS, NETBSD
+from click_extra.platforms import UNIX
 
 from meta_package_manager.base import Package, PackageManager
 from meta_package_manager.capabilities import (
@@ -33,7 +33,7 @@ class PKG(PackageManager):
 
     homepage_url = "https://github.com/freebsd/pkg"
 
-    platforms = FREEBSD, LINUX, NETBSD, MACOS
+    platforms = UNIX
 
     requirement = "1.20.0"
 

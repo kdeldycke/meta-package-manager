@@ -181,6 +181,7 @@ PACKAGE_IDS = {
     "pip": "meta-package-manager",
     # https://pypi.org/project/meta-package-manager
     "pipx": "meta-package-manager",
+    "pkg": "dmg2img",
     "scoop": "7zip",
     "snap": "standard-notes",
     "steamcmd": "740",

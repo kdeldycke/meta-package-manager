@@ -129,6 +129,11 @@ jobs:
               - meta_package_manager/managers/pip*
               - meta_package_manager/tests/*pip*
 
+        "📦 manager: pkg":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/pkg*
+
         "📦 manager: scoop":
           - changed-files:
             - any-glob-to-any-file:

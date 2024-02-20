@@ -40,6 +40,7 @@ keywords = [
     'php composer',
     'pip',
     'pipx',
+    'pkg',
     'plugin',
     'portage',
     'purl',

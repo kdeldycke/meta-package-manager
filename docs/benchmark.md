@@ -130,7 +130,7 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `pikaur`                |       |       ✓        |               |              |              |
 | `pip`                   |   ✓   |       ✓        |       ✓       |              |      ✓       |
 | `pipx`                  |   ✓   |       ✓        |               |              |              |
-| `pkg`                   |       |       ✓        |               |              |      ✓       |
+| `pkg`                   |   ✓   |       ✓        |               |              |      ✓       |
 | `pkg-mgr`               |       |                |               |              |      ✓       |
 | `pkg-tools`             |       |                |               |      ✓       |              |
 | `pkgin`                 |       |       ✓        |               |              |              |

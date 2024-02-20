@@ -102,6 +102,9 @@ jobs:
           - "pip"
           - "pipx"
 
+        "📦 manager: pkg":
+          - "pkg"
+
         "📦 manager: scoop":
           - "scoop"
 

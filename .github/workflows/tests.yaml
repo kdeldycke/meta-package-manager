@@ -354,10 +354,14 @@ jobs:
           choco upgrade composer --no-progress --yes
 
       # MAS
-      - name: MAS - macOS install
-        if: runner.os == 'macOS'
-        run: |
-          brew install mas
+      # XXX Deactivate MAS on macOS as it always timeout:
+      #    subprocess.TimeoutExpired: Command '('/opt/homebrew/bin/mas', 'install', '747648890')'
+      #    timed out after 500 seconds
+      # Probably because the MAS CLI is not registered against an Apple account.
+      # - name: MAS - macOS install
+      #   if: runner.os == 'macOS'
+      #   run: |
+      #     brew install mas
 
       # Flatpak
       - name: Flatpak - Linux install

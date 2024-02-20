@@ -10,6 +10,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Build `arm64` binaries on `macos-14`.
 - \[mpm\] Run tests on `macos-14` instead of `macos-13`.
 - \[mpm\] Run tests on Python 3.13-dev branch.
+- \[mas\] Deactivate integration tests for `mas` on macOS, which always timeout.
 - \[mpm\] Reintroduce coloring of version. Refs {pr}`1152`.
 - \[mpm\] Use external workflow to manage issues and PRs content-based labelling.
 

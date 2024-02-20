@@ -54,9 +54,9 @@ class PKG(PackageManager):
             7-zip 21.07_2 Console version of the 7-Zip file archiver
             ap24-mod_mpm_itk 2.4.7_2 Run each vhost under a separate uid and gid
             apache24 2.4.57 Version 2.4.x of Apache web server
-            aquantia-atlantic-kmod 0.0.5_1 Aquantia AQtion (Atlantic) Network Driver (Development Preview)
+            aquantia-atlantic-kmod 0.0.5_1 Aquantia AQtion (Atlantic) Network Driver
             arcconf 3.07.23971,1 Adaptec SCSI/SAS RAID administration tool
-            areca-cli-amd64 1.14.7.150519,1 Command Line Interface for the Areca ARC-xxxx RAID controllers
+            areca-cli-amd64 1.14.7.150519,1 Command Line Interface for ARC-xxxx RAID
             base64 1.5_1 Utility to encode and decode base64 files
             bash 5.1.12 GNU Project's Bourne Again SHell
             beadm 1.4_1 Solaris-like utility to manage Boot Environments on ZFS
@@ -317,7 +317,8 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pkg search --raw --raw-format json-compact --search name --search comment --search description nginx
+            ► pkg search --raw --raw-format json-compact \
+              --search name --search comment --search description nginx
         """
         search_args = ["--raw", "--raw-format", "json-compact", "--search", "name"]
         if exact:
@@ -389,7 +390,7 @@ class PKG(PackageManager):
 
             ► pkg delete --yes dmg2img
             Checking integrity... done (0 conflicting)
-            Deinstallation has been requested for the following 1 packages (of 0 packages in the universe):
+            Deinstallation has been requested for the following 1 packages:
 
             Installed packages to be REMOVED:
                 dmg2img: 1.6.7

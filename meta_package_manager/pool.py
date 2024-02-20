@@ -77,9 +77,9 @@ manager_classes = (
     Snap,
     SteamCMD,
     VSCode,
-    YUM,
     Yarn,
     Yay,
+    YUM,
     Zypper,
 )
 """The list of all classes implementing the specific package managers.

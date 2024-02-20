@@ -53,7 +53,7 @@ def test_manager_definition_inventory():
 def test_manager_classes_order():
     """Check manager classes are ordered by their IDs."""
     assert [c.__name__ for c in manager_classes] == sorted(
-        c.__name__ for c in manager_classes
+        (c.__name__ for c in manager_classes), key=str.casefold
     )
 
 

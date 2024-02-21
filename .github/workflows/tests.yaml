@@ -182,10 +182,16 @@ jobs:
           sudo apt --quiet --yes update
 
       # Chocolatey
-      - name: Chocolatey - Windows upgrade
+      - name: Chocolatey - Windows self-upgrade
         if: runner.os == 'Windows'
         run: |
           choco upgrade chocolatey --no-progress --yes
+      - name: Chocolatey - Windows full upgrade
+        if: runner.os == 'Windows'
+        # We upgrade all packages preemptively as the test suite will attempt it but fail,
+        # because of mpm's enforced timeout.
+        run: |
+          choco upgrade all --no-progress --yes
 
       # NPM
       - name: NPM - Linux install

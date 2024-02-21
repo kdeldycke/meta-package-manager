@@ -82,9 +82,28 @@ class TestSearch(CLISubCommandTests, CLITableTests):
                 for f in pkg:
                     assert isinstance(pkg[f], str) or pkg[f] is None
 
+    # XXX mas CLI has been deactivated in GitHub action runner because it timed out.
+    # See: https://github.com/kdeldycke/meta-package-manager/commit/2f0cf1c
+    @pytest.mark.skip(reason="mas is not available in macOS GitHub runner")
     @unless_macos
     def test_unicode_search(self, invoke):
-        """See #16."""
+        """Check ``mpm`` is accepting unicode as search query.
+
+        ``mas`` is the only manager we have that is accepting unicode characters for
+        its package names. We perform a search with it so we can prove ``mpm`` is
+        supporting it too:
+
+        .. code-block:: shell-session
+
+            ► mpm --mas search 钉钉
+            ╭────────────┬──────┬─────────┬────────────────╮
+            │ Package ID │ Name │ Manager │ Latest version │
+            ├────────────┼──────┼─────────┼────────────────┤
+            │ 1435447041 │ 钉钉 │ mas     │ 7.5.0          │
+            ╰────────────┴──────┴─────────┴────────────────╯
+
+        Test originates from #16.
+        """
         result = invoke("--mas", "search", "钉钉")
         assert result.exit_code == 0
         assert "钉钉" in result.stdout

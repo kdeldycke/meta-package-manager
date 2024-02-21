@@ -102,8 +102,8 @@ This version is not released yet and is under active development.
 ## [5.11.0 (2023-01-29)](https://github.com/kdeldycke/meta-package-manager/compare/v5.10.2...v5.11.0)
 
 - \[mpm\] Unlock run on any Unix-like platform. Closes {issue}`872`.
-- \[mpm\] Activate `brew` on Windows Subsystem for Linux v2.
-- \[mpm\] Bump minimal `choco` requirement to `0.10.4`.
+- \[brew\] Activate `brew` on Windows Subsystem for Linux v2.
+- \[choco\] Bump minimal `choco` requirement to `0.10.4`.
 - \[mpm\] Depends on `charset-normalizer < 3` to fix Nuitka compilation.
 - \[mpm\] Run tests on Python `3.12-dev`.
 - \[mpm\] Reduce verbosity of pre-install steps in GitHub actions.

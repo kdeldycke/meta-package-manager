@@ -32,11 +32,11 @@ class Choco(PackageManager):
 
     platforms = WINDOWS
 
-    requirement = "0.10.9"
-    """``0.10.9`` is the first version to support the ``--no-color`` option.
+    requirement = "2.0.0"
+    """``2.0.0`` is the first version which is not requiring the ``--local-only`` option, which has been entirely removed.
 
     Source: `choco options and switches
-    <https://docs.chocolatey.org/en-us/choco/commands/feature#options-and-switches>`_.
+    <https://docs.chocolatey.org/en-us/guides/upgrading-to-chocolatey-v2-v6#the-list-command-now-lists-local-packages-only-and-the-local-only-and-lo-options-have-been-removed>`_.
     """
 
     post_args = ("--no-progress", "--no-color")
@@ -53,7 +53,7 @@ class Choco(PackageManager):
 
         .. code-block:: shell-session
 
-            ► choco list --local-only --limit-output --no-progress --no-color
+            ► choco list --limit-output --no-progress --no-color
             adobereader|11.0.10
             ccleaner|5.03.5128
             chocolatey|0.9.9.2
@@ -61,7 +61,7 @@ class Choco(PackageManager):
             gimp|2.8.14.1
             git|1.9.5.20150114
         """
-        output = self.run_cli("list", "--local-only", "--limit-output")
+        output = self.run_cli("list", "--limit-output")
 
         regexp = re.compile(r"(.+)\|(.+)")
         for package in output.splitlines():

@@ -190,6 +190,18 @@ jobs:
         if: runner.os == 'Windows'
         # XXX The upgrade all step below fails for strawberryperl package on windows-2022 runners v2.313.0:
         #
+        #   You have nginx v1.25.3 installed. Version 1.25.4 is available based on your source(s).
+        #
+        #   nginx v1.25.4 [Approved]
+        #   nginx package files upgrade completed. Performing other installation steps.
+        #   Port '80' is in use by 'System'...
+        #   ERROR: Please specify a different port number...
+        #   Environment Vars (like PATH) have changed. Close/reopen your shell to
+        #    see the changes (or in powershell/cmd.exe just type `refreshenv`).
+        #   The upgrade of nginx was NOT successful.
+        #   Error while running 'C:\ProgramData\chocolatey\lib\nginx\tools\chocolateyInstall.ps1'.
+        #    See log for details.
+        #
         #   You have strawberryperl v5.32.1.1 installed. Version 5.38.2.2 is available based on your source(s).
         #
         #   strawberryperl v5.38.2.2 [Approved]
@@ -214,6 +226,7 @@ jobs:
         #   the MSI Log for "Return Value 3" and look above that for the error..
         #   The upgrade of strawberryperl was NOT successful.
         run: |
+          choco pin add --name="nginx"
           choco pin add --name="strawberryperl"
       - name: Chocolatey - Windows full upgrade
         if: runner.os == 'Windows'

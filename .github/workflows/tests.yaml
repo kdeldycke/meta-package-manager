@@ -186,6 +186,35 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           choco upgrade chocolatey --no-progress --yes
+      - name: Chocolatey - Pin un-upgradeable packages
+        if: runner.os == 'Windows'
+        # XXX The upgrade all step below fails for strawberryperl package on windows-2022 runners v2.313.0:
+        #
+        #   You have strawberryperl v5.32.1.1 installed. Version 5.38.2.2 is available based on your source(s).
+        #
+        #   strawberryperl v5.38.2.2 [Approved]
+        #   strawberryperl package files upgrade completed. Performing other installation steps.
+        #   Downloading strawberryperl 64 bit
+        #     from 'https://github.com/StrawberryPerl/Perl-Dist-Strawberry/strawberry-perl-5.38.2.2-64bit.msi'
+        #
+        #   Download of strawberry-perl-5.38.2.2-64bit.msi (171.74 MB) completed.
+        #   Hashes match.
+        #   Installing strawberryperl...
+        #   WARNING: Generic MSI Error. This is a local environment error, not an issue with a package or the MSI
+        #   itself - it could mean a pending reboot is necessary prior to install or something else (like the same
+        #   version is already installed). Please see MSI log if available. If not, try again adding
+        #   '--install-arguments="'/l*v c:\StrawberryPerl_msi_install.log'"'. Then search the MSI Log for
+        #   "Return Value 3" and look above that for the error.
+        #   ERROR: Running ["C:\Windows\System32\msiexec.exe" /i "C:\Users\runneradmin\AppData\Local\Temp\chocolatey
+        #   \StrawberryPerl\5.38.2.2\strawberry-perl-5.38.2.2-64bit.msi" /qn /norestart ] was not successful. Exit
+        #   code was '1603'. Exit code indicates the following: Generic MSI Error. This is a local environment error,
+        #   not an issue with a package or the MSI itself - it could mean a pending reboot is necessary prior to
+        #   install or something else (like the same version is already installed). Please see MSI log if available.
+        #   If not, try again adding '--install-arguments="'/l*v c:\StrawberryPerl_msi_install.log'"'. Then search
+        #   the MSI Log for "Return Value 3" and look above that for the error..
+        #   The upgrade of strawberryperl was NOT successful.
+        run: |
+          choco pin add --name="'strawberryperl'" --reason="'Upgrade fail on GitHub Windows 2022 runners'"
       - name: Chocolatey - Windows full upgrade
         if: runner.os == 'Windows'
         # We upgrade all packages preemptively as the test suite will attempt it but fail,

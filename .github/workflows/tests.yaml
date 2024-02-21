@@ -214,7 +214,7 @@ jobs:
         #   the MSI Log for "Return Value 3" and look above that for the error..
         #   The upgrade of strawberryperl was NOT successful.
         run: |
-          choco pin add --name="'strawberryperl'" --reason="'Upgrade fail on GitHub Windows 2022 runners'"
+          choco pin add --name="strawberryperl"
       - name: Chocolatey - Windows full upgrade
         if: runner.os == 'Windows'
         # We upgrade all packages preemptively as the test suite will attempt it but fail,

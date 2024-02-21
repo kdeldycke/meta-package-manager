@@ -35,8 +35,8 @@ class PKG(PackageManager):
 
     platforms = UNIX
 
-    # 1.11 is the first version to support IGNORE_OSVERSION environment variable.
     requirement = "1.11"
+    """1.11 is the first version to support ``IGNORE_OSVERSION`` environment variable."""
 
     """
     .. code-block:: shell-session

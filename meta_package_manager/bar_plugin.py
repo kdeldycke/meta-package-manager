@@ -279,13 +279,18 @@ class MPMPlugin:
 
         First argument is the menu-line label, separated by a pipe to all other non-
         empty parameters, themselves separated by a space.
+
+        Skip printing of the line if label is empty.
         """
-        print(
-            label.strip(),
-            "|",
-            *(line for line in map(methodcaller("strip"), args) if line),
-            sep=" ",
-        )
+        if label.strip():
+            print(
+                # Do not strip the label to keep character alignements, especially in
+                # table rendering and Python tracebacks.
+                label,
+                "|",
+                *(line for line in map(methodcaller("strip"), args) if line),
+                sep=" ",
+            )
 
     @staticmethod
     def print_error_header() -> None:
@@ -297,12 +302,12 @@ class MPMPlugin:
         """Print a formatted error message line by line.
 
         A red, fixed-width font is used to preserve traceback and exception layout. For
-        compactness, the message is dedented and empty lines are skipped.
+        compactness, the block message is dedented and empty lines are skipped.
 
         Message is always casted to a string as we allow passing of exception objects
         and have them rendered.
         """
-        for line in map(methodcaller("strip"), dedent(str(message)).splitlines()):
+        for line in map(methodcaller("rstrip"), dedent(str(message)).splitlines()):
             if line:
                 self.pp(
                     f"{submenu}{line}",

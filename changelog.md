@@ -8,6 +8,7 @@ This version is not released yet and is under active development.
 
 - \[pkg\] Add support for `pkg` on FreeBSD.
 - \[choco\] Bump minimal `choco` requirement to `2.0.0`.
+- \[bar-plugin\] Keep original indention of Python traceback.
 - \[mpm\] Build `arm64` binaries on `macos-14`.
 - \[mpm\] Run tests on `macos-14` instead of `macos-13`.
 - \[mpm\] Run tests on Python 3.13-dev branch.

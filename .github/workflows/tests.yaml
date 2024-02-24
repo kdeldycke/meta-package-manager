@@ -571,7 +571,7 @@ jobs:
         if: runner.os == 'macOS'
         # XXX bar plugin calls way too many external commands to be run in parallel.
         run: >
-          poetry run pytest --exitfirst
+          poetry run pytest
           -vvvvvvvvvvvvvvv
           --numprocesses=0 --run-non-destructive --run-destructive
           ./meta_package_manager/tests/test_bar_plugin.py

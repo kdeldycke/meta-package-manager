@@ -554,7 +554,6 @@ jobs:
         if: runner.os != 'Windows'
         run: >
           poetry run pytest --exitfirst
-          -vvvvvvvvvvvvvvvv
           --numprocesses=0 --skip-non-destructive --run-destructive
           --ignore=./meta_package_manager/tests/test_bar_plugin.py
           ./meta_package_manager/tests/
@@ -573,6 +572,7 @@ jobs:
         # XXX bar plugin calls way too many external commands to be run in parallel.
         run: >
           poetry run pytest --exitfirst
+          -vvvvvvvvvvvvvvv
           --numprocesses=0 --run-non-destructive --run-destructive
           ./meta_package_manager/tests/test_bar_plugin.py
 

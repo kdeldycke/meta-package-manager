@@ -100,37 +100,6 @@ class MPMPlugin:
     """Mpm v5.0.0 was the first version taking care of the complete layout rendering."""
 
     @staticmethod
-    def extended_environment() -> dict[str, str]:
-        """Returns a tweaked environment extending global path to find non-default
-        system-wide binaries.
-
-        macOS does not put ``/usr/local/bin`` or ``/opt/local/bin`` in the ``PATH`` for
-        GUI apps. For some package managers this is a problem. Additionally Homebrew and
-        Macports are using different paths. So, to make sure we can always get to the
-        necessary binaries, we overload the path. Current preference order would equate
-        to Homebrew, Macports, then system.
-        """
-        # Cast to dict to make a copy and prevent modification of the global
-        # environment.
-        env_copy = dict(os.environ)
-        env_copy["PATH"] = ":".join(
-            (
-                # Homebrew Apple silicon.
-                "/opt/homebrew/bin",
-                "/opt/homebrew/sbin",
-                # Homebrew Intel.
-                "/usr/local/bin",
-                "/usr/local/sbin",
-                # Macports.
-                "/opt/local/bin",
-                "/opt/local/sbin",
-                # System.
-                os.environ.get("PATH", ""),
-            ),
-        )
-        return env_copy
-
-    @staticmethod
     def getenv_str(var, default: str | None = None) -> str | None:
         """Utility to get environment variables.
 
@@ -383,10 +352,9 @@ if __name__ == "__main__":
 
     # Wrap plugin execution with our custom environment variables to avoid
     # environment leaks.
-    with patch.dict("os.environ", MPMPlugin.extended_environment()):
-        plugin = MPMPlugin()
+    plugin = MPMPlugin()
 
-        if args.check_mpm:
+    if args.check_mpm:
             mpm_installed, mpm_version, mpm_up_to_date, error = plugin.check_mpm()
             if not mpm_installed:
                 raise FileNotFoundError(error)
@@ -398,5 +366,5 @@ if __name__ == "__main__":
                 raise ValueError(msg)
             print(f"{' '.join(plugin.mpm_exec)} v{v_to_str(mpm_version)}")
 
-        else:
+    else:
             plugin.print_menu()

@@ -1,10 +1,6 @@
 # Changelog
 
-## [5.15.0 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v5.14.2...main)
-
-```{important}
-This version is not released yet and is under active development.
-```
+## [5.15.0 (2024-02-25)](https://github.com/kdeldycke/meta-package-manager/compare/v5.14.2...v5.15.0)
 
 - \[pkg\] Add support for `pkg` on FreeBSD.
 - \[choco\] Bump minimal `choco` requirement to `2.0.0`.

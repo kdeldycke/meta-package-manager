@@ -62,9 +62,10 @@ def _shell_invocation_matrix():
             ("/usr/bin/env", "zsh", "--login", "-c"),
             ("/usr/bin/env", "/bin/zsh", "-c"),
             ("/usr/bin/env", "/bin/zsh", "--login", "-c"),
+            None,
         )
     """
-    return _invocation_matrix(
+    return list(_invocation_matrix(
         # Env prefixes.
         (None, "/usr/bin/env"),
         # Naked and full binary paths.
@@ -86,7 +87,7 @@ def _shell_invocation_matrix():
             # ImportError: No module named click_extra.logging
             # ("--login", "-c"),
         ),
-    )
+    )) + [None]
 
 
 def _python_invocation_matrix():
@@ -108,6 +109,19 @@ def _python_invocation_matrix():
         # Binary paths
         ("python", "python3"),
     )
+
+
+shell_args = pytest.mark.parametrize(
+    "shell_args",
+    tuple(pytest.param(p, id=' '.join(args_cleanup(p))) for p in _shell_invocation_matrix()),
+)
+
+
+shell_python_args = pytest.mark.parametrize(
+    "shell_args,python_args",
+    (pytest.param(s_args, p_args, id=' '.join(args_cleanup(s_args, p_args)))
+    for s_args, p_args in product(_shell_invocation_matrix(), _python_invocation_matrix()))
+)
 
 
 def _subcmd_args(invoke_args: tuple[str, ...] | None, *subcmd_args: str):
@@ -224,7 +238,7 @@ class TestBarPlugin:
         self.plugin_output_checks(extra_checks, extra_env=extra_env)
 
     @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
-    @pytest.mark.parametrize("shell_args", (None, *_shell_invocation_matrix()))
+    @shell_args
     def test_plugin_shell_invocation(self, shell_args):
         """Test execution of plugin on different shells.
 
@@ -241,8 +255,7 @@ class TestBarPlugin:
         assert not process.stderr
         assert re.match(r"^.+ v\d+\.\d+\.\d+$", process.stdout)
 
-    @pytest.mark.parametrize("shell_args", (None, *_shell_invocation_matrix()))
-    @pytest.mark.parametrize("python_args", _python_invocation_matrix())
+    @shell_python_args
     def test_python_shell_invocation(self, shell_args, python_args):
         """Test any Python shell invocation is properly configured and all are
         compatible with plugin requirements."""

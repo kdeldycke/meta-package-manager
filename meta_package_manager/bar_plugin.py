@@ -178,7 +178,7 @@ class MPMPlugin:
         fallback to (i.e. ``sys.executable``). But before that, we attempt to locate it
         by respecting the environment variables.
         """
-        for bin_name in ("python", "python3", sys.executable):
+        for bin_name in (sys.executable, "python", "python3"):
             py_path = which(bin_name)
             if py_path:
                 return py_path

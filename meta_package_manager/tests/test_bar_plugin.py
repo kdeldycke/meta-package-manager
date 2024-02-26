@@ -65,29 +65,31 @@ def _shell_invocation_matrix():
             None,
         )
     """
-    return list(_invocation_matrix(
-        # Env prefixes.
-        (None, "/usr/bin/env"),
-        # Naked and full binary paths.
-        flatten((bin_id, f"/bin/{bin_id}") for bin_id in ("bash", "zsh")),
-        # Options.
-        (
-            "-c",
-            # XXX Login shell defaults to Python 2.7 on GitHub macOS runners and is
-            # picked up by surprise for bar plugin tests:
-            # Traceback (most recent call last):
-            #   File "/Library/Frameworks/.../2.7/lib/python2.7/runpy.py",
-            #   line 163, in _run_module_as_main
-            #     mod_name, _Error)
-            #   File "/Library/Frameworks/.../2.7/lib/python2.7/runpy.py",
-            #   line 111, in _get_module_details
-            #     __import__(mod_name)  # Do not catch exceptions initializing package
-            #   File "meta_package_manager/__init__.py", line 33, in <module>
-            #     from click_extra.logging import logger
-            # ImportError: No module named click_extra.logging
-            # ("--login", "-c"),
-        ),
-    )) + [None]
+    return list(
+        _invocation_matrix(
+            # Env prefixes.
+            (None, "/usr/bin/env"),
+            # Naked and full binary paths.
+            flatten((bin_id, f"/bin/{bin_id}") for bin_id in ("bash", "zsh")),
+            # Options.
+            (
+                "-c",
+                # XXX Login shell defaults to Python 2.7 on GitHub macOS runners and is
+                # picked up by surprise for bar plugin tests:
+                # Traceback (most recent call last):
+                #   File "/Library/Frameworks/.../2.7/lib/python2.7/runpy.py",
+                #   line 163, in _run_module_as_main
+                #     mod_name, _Error)
+                #   File "/Library/Frameworks/.../2.7/lib/python2.7/runpy.py",
+                #   line 111, in _get_module_details
+                #     __import__(mod_name)  # Do not catch exceptions initializing package
+                #   File "meta_package_manager/__init__.py", line 33, in <module>
+                #     from click_extra.logging import logger
+                # ImportError: No module named click_extra.logging
+                # ("--login", "-c"),
+            ),
+        )
+    ) + [None]
 
 
 def _python_invocation_matrix():
@@ -113,14 +115,21 @@ def _python_invocation_matrix():
 
 shell_args = pytest.mark.parametrize(
     "shell_args",
-    tuple(pytest.param(p, id=' '.join(args_cleanup(p))) for p in _shell_invocation_matrix()),
+    tuple(
+        pytest.param(p, id=" ".join(args_cleanup(p)))
+        for p in _shell_invocation_matrix()
+    ),
 )
 
 
 shell_python_args = pytest.mark.parametrize(
     "shell_args,python_args",
-    (pytest.param(s_args, p_args, id=' '.join(args_cleanup(s_args, p_args)))
-    for s_args, p_args in product(_shell_invocation_matrix(), _python_invocation_matrix()))
+    (
+        pytest.param(s_args, p_args, id=" ".join(args_cleanup(s_args, p_args)))
+        for s_args, p_args in product(
+            _shell_invocation_matrix(), _python_invocation_matrix()
+        )
+    ),
 )
 
 

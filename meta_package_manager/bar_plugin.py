@@ -64,7 +64,6 @@ from operator import methodcaller
 from shutil import which
 from subprocess import run
 from textwrap import dedent
-from unittest.mock import patch
 
 python_min_version = (3, 8, 0)
 """Minimal requirement is aligned to mpm."""
@@ -79,7 +78,7 @@ def v_to_str(version_tuple: tuple[int, ...] | None) -> str:
 
 if sys.version_info < python_min_version:
     msg = (
-        f"Bar plugin ran with Python {sys.version}, but requires "
+        f"Bar plugin invoked with Python {sys.version}, but requires "
         f"Python >= {v_to_str(python_min_version)}"
     )
     raise SystemError(msg)
@@ -202,7 +201,7 @@ class MPMPlugin:
         error: str | Exception | None = None
         try:
             process = run(
-                # Output a color-less versionjust in case the script is not run in a
+                # Output a color-less version just in case the script is not run in a
                 # non-interactive shell, or Click/Click-Extra autodetection fails.
                 (*self.mpm_exec, "--no-color", "--version"),
                 capture_output=True,
@@ -335,10 +334,11 @@ class MPMPlugin:
         if process.stderr or not process.stdout:
             self.print_error_header()
             self.print_error(process.stderr)
-        else:
-            # Capturing the output of mpm and re-printing it will introduce an extra
-            # line returns, hence the extra rstrip() call.
-            print(process.stdout.rstrip())
+            return
+
+        # Capturing the output of mpm and re-printing it will introduce an extra
+        # line returns, hence the extra rstrip() call.
+        print(process.stdout.rstrip())
 
 
 if __name__ == "__main__":
@@ -350,21 +350,19 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    # Wrap plugin execution with our custom environment variables to avoid
-    # environment leaks.
     plugin = MPMPlugin()
 
     if args.check_mpm:
-            mpm_installed, mpm_version, mpm_up_to_date, error = plugin.check_mpm()
-            if not mpm_installed:
-                raise FileNotFoundError(error)
-            if not mpm_up_to_date:
-                msg = (
-                    f"{plugin.mpm_exec} is too old: "
-                    f"{v_to_str(mpm_version)} < {v_to_str(plugin.mpm_min_version)}"
-                )
-                raise ValueError(msg)
-            print(f"{' '.join(plugin.mpm_exec)} v{v_to_str(mpm_version)}")
+        mpm_installed, mpm_version, mpm_up_to_date, error = plugin.check_mpm()
+        if not mpm_installed:
+            raise FileNotFoundError(error)
+        if not mpm_up_to_date:
+            msg = (
+                f"{plugin.mpm_exec} is too old: "
+                f"{v_to_str(mpm_version)} < {v_to_str(plugin.mpm_min_version)}"
+            )
+            raise ValueError(msg)
+        print(f"{' '.join(plugin.mpm_exec)} v{v_to_str(mpm_version)}")
 
     else:
-            plugin.print_menu()
+        plugin.print_menu()

@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import logging
 import re
 import subprocess
 from collections import Counter
@@ -178,6 +179,8 @@ class TestBarPlugin:
             env=env_copy(extra_env),
         )
 
+        logging.info(process.stderr)
+
         assert not process.stderr
         assert process.returncode == 0
 
@@ -259,6 +262,8 @@ class TestBarPlugin:
             capture_output=True,
             encoding="utf-8",
         )
+
+        logging.info(process.stderr)
 
         assert not process.stderr
         assert re.match(r"^.+ v\d+\.\d+\.\d+$", process.stdout)

@@ -531,9 +531,9 @@ jobs:
       - name: mpm --help
         run: |
           poetry run mpm
-      - name: mpm --version
+      - name: mpm --verbosity DEBUG --version
         run: |
-          poetry run mpm --version
+          poetry run mpm --verbosity DEBUG --version
       - name: mpm managers
         run: |
           poetry run mpm managers

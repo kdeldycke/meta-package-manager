@@ -32,17 +32,17 @@ jobs:
 
       # Runs the same binary tests as in the brew official Formula:
       # https://github.com/Homebrew/homebrew-core/blob/f0a4d69/Formula/meta-package-manager.rb#L401-L413
-      - name: Run mpm --version
+      - name: mpm --verbosity DEBUG --version
         run: |
-          ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }} --version
-      - name: Run mpm --help
+          ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }} --verbosity DEBUG --version
+      - name: mpm --help
         run: |
           ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }} --help
-      - name: Run mpm --output-format csv --all-managers managers
+      - name: mpm --output-format csv --all-managers managers
         run: >
           ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }}
           --output-format csv --all-managers managers
-      - name: Run mpm --no-color --output-format csv installed
+      - name: mpm --no-color --output-format csv installed
         # XXX Ideally we would like to use --no-color to simplify Homebrew's formula checks.
         # See: https://github.com/kdeldycke/meta-package-manager/issues/1004
         run: |

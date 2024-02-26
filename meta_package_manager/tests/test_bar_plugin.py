@@ -169,8 +169,8 @@ class TestBarPlugin:
             env=env_copy(extra_env),
         )
 
-        assert process.returncode == 0
         assert not process.stderr
+        assert process.returncode == 0
 
         checks = checklist + self.common_checklist
 
@@ -251,9 +251,9 @@ class TestBarPlugin:
             encoding="utf-8",
         )
 
-        assert process.returncode == 0
         assert not process.stderr
         assert re.match(r"^.+ v\d+\.\d+\.\d+$", process.stdout)
+        assert process.returncode == 0
 
     @shell_python_args
     def test_python_shell_invocation(self, shell_args, python_args):
@@ -265,9 +265,9 @@ class TestBarPlugin:
             encoding="utf-8",
         )
 
-        assert process.returncode == 0
-        assert process.stdout
         assert not process.stderr
+        assert process.stdout
+        assert process.returncode == 0
 
         # We need to parse the version to account for alpha release,
         # like Python `3.12.0a4`.

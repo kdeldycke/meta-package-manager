@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-import logging
 import re
 import subprocess
 from collections import Counter
@@ -171,15 +170,11 @@ class TestBarPlugin:
     def plugin_output_checks(self, checklist, extra_env=None):
         """Run the plugin script and check its output against the checklist."""
         process = subprocess.run(
-            # Force the plugin to be called within Poetry venv to not have it seeking
-            # for macOS's default Python.
-            ("poetry", "run", "python", bar_plugin.__file__),
+            bar_plugin.__file__,
             capture_output=True,
             encoding="utf-8",
             env=env_copy(extra_env),
         )
-
-        logging.info(process.stderr)
 
         assert not process.stderr
         assert process.returncode == 0
@@ -258,15 +253,13 @@ class TestBarPlugin:
         for the mpm executable and extract its version.
         """
         process = subprocess.run(
-            _subcmd_args(shell_args, bar_plugin.__file__, "--check-mpm"),
+            _subcmd_args(shell_args, bar_plugin.__file__, "--search-mpm"),
             capture_output=True,
             encoding="utf-8",
         )
 
-        logging.info(process.stderr)
-
         assert not process.stderr
-        assert re.match(r"^.+ v\d+\.\d+\.\d+$", process.stdout)
+        assert process.stdout
         assert process.returncode == 0
 
     @shell_python_args
@@ -286,5 +279,5 @@ class TestBarPlugin:
         # We need to parse the version to account for alpha release,
         # like Python `3.12.0a4`.
         assert parse_version(process.stdout.split()[1]) >= parse_version(
-            ".".join(str(i) for i in bar_plugin.python_min_version),
+            ".".join(str(i) for i in bar_plugin.PYTHON_MIN_VERSION),
         )

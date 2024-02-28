@@ -59,14 +59,20 @@ import os
 import re
 import sys
 from configparser import RawConfigParser
+from enum import Enum
 from functools import cached_property
-from operator import methodcaller
+from operator import itemgetter, methodcaller
+from pathlib import Path
 from shutil import which
 from subprocess import run
 from textwrap import dedent
+from typing import Generator
 
-python_min_version = (3, 8, 0)
+PYTHON_MIN_VERSION = (3, 8, 0)
 """Minimal requirement is aligned to mpm."""
+
+MPM_MIN_VERSION = (5, 0, 0)
+"""Mpm v5.0.0 was the first version taking care of the complete layout rendering."""
 
 
 def v_to_str(version_tuple: tuple[int, ...] | None) -> str:
@@ -76,12 +82,8 @@ def v_to_str(version_tuple: tuple[int, ...] | None) -> str:
     return ".".join(map(str, version_tuple))
 
 
-if sys.version_info < python_min_version:
-    msg = (
-        f"Bar plugin invoked with Python {sys.version}, but requires "
-        f"Python >= {v_to_str(python_min_version)}"
-    )
-    raise SystemError(msg)
+Venv = Enum("Venv", ["PIPENV", "POETRY", "VIRTUALENV"])
+"""Type of virtualenv we are capable of detecting."""
 
 
 class MPMPlugin:
@@ -94,9 +96,6 @@ class MPMPlugin:
     <https://github.com/matryer/xbar-plugins/blob/main/CONTRIBUTING.md#plugin-api>`_
     and `SwiftBar dialect <https://github.com/swiftbar/SwiftBar#plugin-api>`_.
     """
-
-    mpm_min_version = (5, 0, 0)
-    """Mpm v5.0.0 was the first version taking care of the complete layout rendering."""
 
     @staticmethod
     def getenv_str(var, default: str | None = None) -> str | None:
@@ -170,40 +169,111 @@ class MPMPlugin:
         return self.getenv_bool("SWIFTBAR")
 
     @cached_property
-    def python_path(self) -> str:
-        """Returns the system's Python binary path.
+    def all_pythons(self) -> list[Path]:
+        """Search for any Python on the system.
 
-        This plugin being run from Python, we have the one called by Xbar/SwiftBar to
-        fallback to (i.e. ``sys.executable``). But before that, we attempt to locate it
-        by respecting the environment variables.
+        Returns a generator of normalized and deduplicated ``Path`` to Python binaries.
+
+        Filters out old Python interpreters.
+
+        We first try to locate Python by respecting the environment variables as-is,
+        i.e. as defined by the user. Then we return the Python interpreter used to
+        execute this script.
+
+        TODO: try to tweak the env vars to look for homebrew location etc?
         """
-        for bin_name in (sys.executable, "python", "python3"):
+        collected = []
+        seen = set()
+        for bin_name in ("python3", "python", sys.executable):
             py_path = which(bin_name)
-            if py_path:
-                return py_path
-        raise FileNotFoundError("No Python binary found on the system.")
+            if not py_path:
+                continue
 
-    @cached_property
-    def mpm_exec(self) -> tuple[str, ...]:
-        """Search for mpm execution alternatives, either direct ``mpm`` call or as an
-        executable Python module."""
-        # XXX Local debugging and development.
-        # return "poetry", "run", "mpm"
-        mpm_exec = which("mpm")
-        if mpm_exec:
-            return (mpm_exec,)
-        return self.python_path, "-m", "meta_package_manager"
+            normalized_path = os.path.normcase(Path(py_path).resolve())
+            if normalized_path in seen:
+                continue
+            seen.add(normalized_path)
+
+            process = run(
+                (str(normalized_path), "--version"),
+                capture_output=True,
+                encoding="utf-8",
+            )
+            version_string = process.stdout.split()[1]
+            python_version = tuple(map(int, version_string.split(".")))
+            # Is Python too old?
+            if python_version < PYTHON_MIN_VERSION:
+                continue
+
+            collected.append(normalized_path)
+
+        return collected
+
+    @staticmethod
+    def search_venv(folder: Path) -> tuple[Venv | None, tuple[str, ...] | None]:
+        """Search for signs of a virtual env in the provided folder.
+
+        Returns the type of the detected venv and CLI arguments that can be used to run
+        a command from the virtualenv context.
+
+        Returns ``(None, None)`` if the folder is not a venv.
+        """
+        if (folder / "Pipfile").is_file():
+            return Venv.PIPENV, (f"PIPENV_PIPFILE='{folder}'", "pipenv", "run", "mpm")
+
+        if (folder / "poetry.lock").is_file():
+            return Venv.POETRY, ("poetry", "run", "--directory", str(folder), "mpm")
+
+        if (folder / "requirements.txt").is_file() or (folder / "setup.py").is_file():
+            return Venv.VIRTUALENV, (
+                f"VIRTUAL_ENV='{folder}'",
+                "python",
+                "-m",
+                "meta_package_manager",
+            )
+
+        return None, None
+
+    def search_mpm(self) -> Generator[tuple[str, ...], None, None]:
+        """Iterare over possible CLI commands to execute ``mpm``.
+
+        Should be able to produce the full spectrum of alternative commands we can use
+        to invoke ``mpm`` over different context.
+        """
+        # Search for an mpm executable in the environment, be it a script or a binary.
+        mpm_bin = which("mpm")
+        if mpm_bin:
+            yield (mpm_bin,)
+
+        # Search for a meta_package_manager package installed in any Python found on
+        # the system.
+        for python_path in self.all_pythons:
+            yield python_path, "-m", "meta_package_manager"
+
+        # This script might be itself part of an mpm installation that was deployed in
+        # a virtualenv. So walk back the whole folder tree from here in search of a
+        # virtualenv.
+        for folder in Path(__file__).parents:
+            # Stop looking beyond Home.
+            if folder == Path.home():
+                continue
+
+            venv_type, run_args = self.search_venv(folder)
+            if not venv_type:
+                continue
+
+            yield run_args
 
     def check_mpm(
-        self,
-    ) -> tuple[bool, tuple[int, ...] | None, bool, str | Exception | None]:
+        self, mpm_cli_args: tuple[str, ...]
+    ) -> tuple[bool, bool, tuple[int, ...] | None, str | Exception | None]:
         """Test-run mpm execution and extract its version."""
         error: str | Exception | None = None
         try:
             process = run(
                 # Output a color-less version just in case the script is not run in a
                 # non-interactive shell, or Click/Click-Extra autodetection fails.
-                (*self.mpm_exec, "--no-color", "--version"),
+                (*mpm_cli_args, "--no-color", "--version"),
                 capture_output=True,
                 encoding="utf-8",
             )
@@ -211,12 +281,12 @@ class MPMPlugin:
         except FileNotFoundError as ex:
             error = ex
 
-        installed = False
+        runnable = False
         mpm_version = None
         up_to_date = False
-        # Is mpm CLI installed on the system?
+        # Is mpm runnable as-is with provided CLI arguments?
         if not process.returncode and not error:
-            installed = True
+            runnable = True
             # This regular expression is designed to extract the version number,
             # whether it is surrounded by ANSI color escape sequence or not.
             match = re.compile(
@@ -236,10 +306,10 @@ class MPMPlugin:
                 version_string = match.groupdict()["version"]
                 mpm_version = tuple(map(int, version_string.split(".")))
                 # Is mpm too old?
-                if mpm_version >= self.mpm_min_version:
+                if mpm_version >= MPM_MIN_VERSION:
                     up_to_date = True
 
-        return installed, mpm_version, up_to_date, error
+        return runnable, up_to_date, mpm_version, error
 
     @staticmethod
     def pp(label: str, *args: str) -> None:
@@ -286,19 +356,34 @@ class MPMPlugin:
                     "symbolize=false" if self.is_swiftbar else "",
                 )
 
+    @cached_property
+    def ranked_mpm(self) -> list[tuple[str, ...]]:
+        """Rank the best mpm candidates we can find on the system."""
+        # Collect all mpm.
+        all_mpm = (
+            (mpm_candidate, self.check_mpm(mpm_candidate))
+            for mpm_candidate in self.search_mpm()
+        )
+        # Sort them by runnability, then up-to-date status, then version number, and error.
+        return sorted(all_mpm, key=itemgetter(1), reverse=True)
+
+    @cached_property
+    def best_mpm(self) -> tuple[str, ...]:
+        return self.ranked_mpm[0]
+
     def print_menu(self) -> None:
         """Print the main menu."""
-        mpm_installed, _, mpm_up_to_date, error = self.check_mpm()
-        if not mpm_installed or not mpm_up_to_date:
+        mpm_args, (runnable, up_to_date, _mpm_version, error) = self.best_mpm
+        if not runnable or not up_to_date:
             self.print_error_header()
             if error:
                 self.print_error(error)
                 print("---")
-            action_msg = "Install" if not mpm_installed else "Upgrade"
-            min_version_str = v_to_str(self.mpm_min_version)
+            action_msg = "Install" if not runnable else "Upgrade"
+            min_version_str = v_to_str(MPM_MIN_VERSION)
             self.pp(
                 f"{action_msg} mpm >= v{min_version_str}",
-                f"shell={self.python_path}",
+                f"shell={self.all_pythons[0]}",
                 "param1=-m",
                 "param2=pip",
                 "param3=install",
@@ -316,7 +401,7 @@ class MPMPlugin:
             return
 
         # Force a sync of all local package databases.
-        run((*self.mpm_exec, "--verbosity", "ERROR", "sync"))
+        run((*mpm_args, "--verbosity", "ERROR", "sync"))
 
         # Fetch outdated packages from all package managers available on the system.
         # We defer all rendering to mpm itself so it can compute more intricate layouts.
@@ -324,7 +409,7 @@ class MPMPlugin:
             # We silence all errors but the CRITICAL ones. All others will be captured
             # by mpm in --plugin-output mode and rendered back into each manager
             # section.
-            (*self.mpm_exec, "--verbosity", "CRITICAL", "outdated", "--plugin-output"),
+            (*mpm_args, "--verbosity", "CRITICAL", "outdated", "--plugin-output"),
             capture_output=True,
             encoding="utf-8",
         )
@@ -344,25 +429,20 @@ class MPMPlugin:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--check-mpm",
+        "--search-mpm",
         action="store_true",
-        help="Locate mpm on the system and check its version.",
+        help="Locate all mpm on the system and sort them by best candidates.",
     )
     args = parser.parse_args()
 
     plugin = MPMPlugin()
 
-    if args.check_mpm:
-        mpm_installed, mpm_version, mpm_up_to_date, error = plugin.check_mpm()
-        if not mpm_installed:
-            raise FileNotFoundError(error)
-        if not mpm_up_to_date:
-            msg = (
-                f"{plugin.mpm_exec} is too old: "
-                f"{v_to_str(mpm_version)} < {v_to_str(plugin.mpm_min_version)}"
+    if args.search_mpm:
+        for mpm_args, (runnable, up_to_date, version, error) in plugin.ranked_mpm:
+            print(
+                f"{' '.join(mpm_args)} | runnable: {runnable} | up to date: {up_to_date}"
+                f" | version: {version} | error: {error}"
             )
-            raise ValueError(msg)
-        print(f"{' '.join(plugin.mpm_exec)} v{v_to_str(mpm_version)}")
 
     else:
         plugin.print_menu()

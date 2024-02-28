@@ -219,7 +219,7 @@ class BarPluginRenderer(MPMPlugin):
     dialect.
 
     The minimal code to locate ``mpm``, then call it and print its output resides in the
-    plugin itself at :py:meth:`meta_package_manager.bar_plugin.MPMPlugin.mpm_exec`.
+    plugin itself at :py:meth:`meta_package_manager.bar_plugin.MPMPlugin.best_mpm`.
 
     All other stuff, especially the rendering code, is managed here, to allow for more
     complex layouts relying on external Python dependencies. This also limits the number
@@ -445,8 +445,11 @@ class BarPluginRenderer(MPMPlugin):
                         f"{theme.invoked_command(manager_id)} "
                         "does not implement upgrade_all_cli.",
                     )
+                    mpm_args, (_runnable, _up_to_date, _mpm_version, _error) = (
+                        self.best_mpm
+                    )
                     upgrade_all_cli = (
-                        *self.mpm_exec,
+                        *mpm_args,
                         f"--{manager_id}",
                         "upgrade",
                         "--all",

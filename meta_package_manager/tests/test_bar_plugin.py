@@ -170,9 +170,7 @@ class TestBarPlugin:
     def plugin_output_checks(self, checklist, extra_env=None):
         """Run the plugin script and check its output against the checklist."""
         process = subprocess.run(
-            # Force the plugin to be called within Poetry venv to not have it seeking
-            # for macOS's default Python.
-            ("poetry", "run", "python", bar_plugin.__file__),
+            bar_plugin.__file__,
             capture_output=True,
             encoding="utf-8",
             env=env_copy(extra_env),

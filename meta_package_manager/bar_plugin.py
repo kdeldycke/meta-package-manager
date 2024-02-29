@@ -238,17 +238,16 @@ class MPMPlugin:
 
         Should be able to produce the full spectrum of alternative commands we can use
         to invoke ``mpm`` over different context.
+
+        The order in which the candidates are returned by this method is conserved by
+        the ``ranked_mpm()`` method below.
+
+        We prioritize venv-based findings first, as they're more likely to have all
+        dependencies installed and sorted out. They're also our prime candidates in
+        unittests.
+
+        Then we search for system-wide installation. And finally Python modules.
         """
-        # Search for an mpm executable in the environment, be it a script or a binary.
-        mpm_bin = which("mpm")
-        if mpm_bin:
-            yield (mpm_bin,)
-
-        # Search for a meta_package_manager package installed in any Python found on
-        # the system.
-        for python_path in self.all_pythons:
-            yield python_path, "-m", "meta_package_manager"
-
         # This script might be itself part of an mpm installation that was deployed in
         # a virtualenv. So walk back the whole folder tree from here in search of a
         # virtualenv.
@@ -262,6 +261,16 @@ class MPMPlugin:
                 continue
 
             yield run_args
+
+        # Search for an mpm executable in the environment, be it a script or a binary.
+        mpm_bin = which("mpm")
+        if mpm_bin:
+            yield (mpm_bin,)
+
+        # Search for a meta_package_manager package installed in any Python found on
+        # the system.
+        for python_path in self.all_pythons:
+            yield python_path, "-m", "meta_package_manager"
 
     def check_mpm(
         self, mpm_cli_args: tuple[str, ...]

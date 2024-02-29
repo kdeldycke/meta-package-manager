@@ -319,6 +319,21 @@ class MPMPlugin:
 
         return runnable, up_to_date, mpm_version, error
 
+    @cached_property
+    def ranked_mpm(self) -> list[tuple[str, ...]]:
+        """Rank the best mpm candidates we can find on the system."""
+        # Collect all mpm.
+        all_mpm = (
+            (mpm_candidate, self.check_mpm(mpm_candidate))
+            for mpm_candidate in self.search_mpm()
+        )
+        # Sort them by runnability, then up-to-date status, then version number, and error.
+        return sorted(all_mpm, key=itemgetter(1), reverse=True)
+
+    @cached_property
+    def best_mpm(self) -> tuple[str, ...]:
+        return self.ranked_mpm[0]
+
     @staticmethod
     def pp(label: str, *args: str) -> None:
         """Print one menu-line with the Xbar/SwiftBar dialect.
@@ -363,21 +378,6 @@ class MPMPlugin:
                     "emojize=false",
                     "symbolize=false" if self.is_swiftbar else "",
                 )
-
-    @cached_property
-    def ranked_mpm(self) -> list[tuple[str, ...]]:
-        """Rank the best mpm candidates we can find on the system."""
-        # Collect all mpm.
-        all_mpm = (
-            (mpm_candidate, self.check_mpm(mpm_candidate))
-            for mpm_candidate in self.search_mpm()
-        )
-        # Sort them by runnability, then up-to-date status, then version number, and error.
-        return sorted(all_mpm, key=itemgetter(1), reverse=True)
-
-    @cached_property
-    def best_mpm(self) -> tuple[str, ...]:
-        return self.ranked_mpm[0]
 
     def print_menu(self) -> None:
         """Print the main menu."""

@@ -261,8 +261,14 @@ class TestBarPlugin:
         )
 
         assert not process.stderr
-        assert process.stdout
         assert process.returncode == 0
+        assert process.stdout
+        for line in process.stdout.splitlines():
+            assert re.match(
+                r"^.+ \| runnable: \S+ \| up to date: \S+"
+                r" \| version: .+ \| error: .*$",
+                line,
+            )
 
     @shell_python_args
     def test_python_shell_invocation(self, shell_args, python_args):

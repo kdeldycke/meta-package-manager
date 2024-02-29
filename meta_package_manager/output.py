@@ -445,9 +445,7 @@ class BarPluginRenderer(MPMPlugin):
                         f"{theme.invoked_command(manager_id)} "
                         "does not implement upgrade_all_cli.",
                     )
-                    mpm_args, (_runnable, _up_to_date, _mpm_version, _error) = (
-                        self.best_mpm
-                    )
+                    mpm_args, _runnable, _up_to_date, _version, _error = self.best_mpm
                     upgrade_all_cli = (
                         *mpm_args,
                         f"--{manager_id}",

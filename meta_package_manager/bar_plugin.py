@@ -168,7 +168,7 @@ class MPMPlugin:
         return self.getenv_bool("SWIFTBAR")
 
     @cached_property
-    def all_pythons(self) -> list[Path]:
+    def all_pythons(self) -> list[str]:
         """Search for any Python on the system.
 
         Returns a generator of normalized and deduplicated ``Path`` to Python binaries.
@@ -194,7 +194,7 @@ class MPMPlugin:
             seen.add(normalized_path)
 
             process = run(
-                (str(normalized_path), "--version"),
+                (normalized_path, "--version"),
                 capture_output=True,
                 encoding="utf-8",
             )
@@ -209,7 +209,7 @@ class MPMPlugin:
         return collected
 
     @staticmethod
-    def search_venv(folder: Path) -> tuple[Venv | None, tuple[str, ...] | None]:
+    def search_venv(folder: Path) -> tuple[Venv, tuple[str, ...]] | None:
         """Search for signs of a virtual env in the provided folder.
 
         Returns the type of the detected venv and CLI arguments that can be used to run
@@ -231,7 +231,7 @@ class MPMPlugin:
                 "meta_package_manager",
             )
 
-        return None, None
+        return None
 
     def search_mpm(self) -> Generator[tuple[str, ...], None, None]:
         """Iterare over possible CLI commands to execute ``mpm``.
@@ -256,11 +256,11 @@ class MPMPlugin:
             if folder == Path.home():
                 continue
 
-            venv_type, run_args = self.search_venv(folder)
-            if not venv_type:
+            venv_found = self.search_venv(folder)
+            if not venv_found:
                 continue
 
-            yield run_args
+            yield venv_found[1]
 
         # Search for an mpm executable in the environment, be it a script or a binary.
         mpm_bin = which("mpm")
@@ -290,7 +290,7 @@ class MPMPlugin:
             error = ex
 
         runnable = False
-        mpm_version = None
+        version = None
         up_to_date = False
         # Is mpm runnable as-is with provided CLI arguments?
         if not process.returncode and not error:
@@ -312,26 +312,46 @@ class MPMPlugin:
             ).search(process.stdout)
             if match:
                 version_string = match.groupdict()["version"]
-                mpm_version = tuple(map(int, version_string.split(".")))
+                version = tuple(map(int, version_string.split(".")))
                 # Is mpm too old?
-                if mpm_version >= MPM_MIN_VERSION:
+                if version >= MPM_MIN_VERSION:
                     up_to_date = True
 
-        return runnable, up_to_date, mpm_version, error
+        return runnable, up_to_date, version, error
 
     @cached_property
-    def ranked_mpm(self) -> list[tuple[str, ...]]:
-        """Rank the best mpm candidates we can find on the system."""
-        # Collect all mpm.
+    def ranked_mpm(
+        self,
+    ) -> list[
+        tuple[
+            tuple[str, ...], bool, bool, tuple[int, ...] | None, str | Exception | None
+        ]
+    ]:
+        """Rank the mpm candidates we found on the system.
+
+        Sort them by:
+        - runnability
+        - up-to-date status
+        - version number
+        - error
+
+        On tie, the order from ``search_mpm`` is respected.
+        """
         all_mpm = (
             (mpm_candidate, self.check_mpm(mpm_candidate))
             for mpm_candidate in self.search_mpm()
         )
-        # Sort them by runnability, then up-to-date status, then version number, and error.
-        return sorted(all_mpm, key=itemgetter(1), reverse=True)
+        return [
+            (mpm_args, *mpm_status)
+            for mpm_args, mpm_status in sorted(all_mpm, key=itemgetter(1), reverse=True)
+        ]
 
     @cached_property
-    def best_mpm(self) -> tuple[str, ...]:
+    def best_mpm(
+        self,
+    ) -> tuple[
+        tuple[str, ...], bool, bool, tuple[int, ...] | None, str | Exception | None
+    ]:
         return self.ranked_mpm[0]
 
     @staticmethod
@@ -381,7 +401,7 @@ class MPMPlugin:
 
     def print_menu(self) -> None:
         """Print the main menu."""
-        mpm_args, (runnable, up_to_date, _mpm_version, error) = self.best_mpm
+        mpm_args, runnable, up_to_date, _version, error = self.best_mpm
         if not runnable or not up_to_date:
             self.print_error_header()
             if error:
@@ -446,7 +466,7 @@ if __name__ == "__main__":
     plugin = MPMPlugin()
 
     if args.search_mpm:
-        for mpm_args, (runnable, up_to_date, version, error) in plugin.ranked_mpm:
+        for mpm_args, runnable, up_to_date, version, error in plugin.ranked_mpm:
             print(
                 f"{' '.join(mpm_args)} | runnable: {runnable} | up to date: {up_to_date}"
                 f" | version: {version} | error: {error!r}"

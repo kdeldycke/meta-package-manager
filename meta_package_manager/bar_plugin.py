@@ -74,14 +74,6 @@ PYTHON_MIN_VERSION = (3, 8, 0)
 MPM_MIN_VERSION = (5, 0, 0)
 """Mpm v5.0.0 was the first version taking care of the complete layout rendering."""
 
-
-def v_to_str(version_tuple: tuple[int, ...] | None) -> str:
-    """Transforms into a string a tuple of integers representing a version."""
-    if not version_tuple:
-        return "None"
-    return ".".join(map(str, version_tuple))
-
-
 Venv = Enum("Venv", ["PIPENV", "POETRY", "VIRTUALENV"])
 """Type of virtualenv we are capable of detecting."""
 
@@ -135,6 +127,13 @@ class MPMPlugin:
             if param_id in valid_ids:
                 valid_params[param_id] = param_value
         return " ".join(f"{k}={v}" for k, v in valid_params.items())
+
+    @staticmethod
+    def v_to_str(version_tuple: tuple[int, ...] | None) -> str:
+        """Transforms into a string a tuple of integers representing a version."""
+        if not version_tuple:
+            return "None"
+        return ".".join(map(str, version_tuple))
 
     @cached_property
     def table_rendering(self) -> bool:
@@ -380,7 +379,7 @@ class MPMPlugin:
                 self.print_error(error)
                 print("---")
             action_msg = "Install" if not runnable else "Upgrade"
-            min_version_str = v_to_str(MPM_MIN_VERSION)
+            min_version_str = self.v_to_str(MPM_MIN_VERSION)
             self.pp(
                 f"{action_msg} mpm >= v{min_version_str}",
                 f"shell={self.all_pythons[0]}",

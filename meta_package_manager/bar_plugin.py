@@ -468,8 +468,8 @@ if __name__ == "__main__":
     if args.search_mpm:
         for mpm_args, runnable, up_to_date, version, error in plugin.ranked_mpm:
             print(
-                f"{' '.join(mpm_args)} | runnable: {runnable} | up to date: {up_to_date}"
-                f" | version: {version} | error: {error!r}"
+                f"{' '.join(mpm_args)} | runnable: {runnable} | "
+                f"up to date: {up_to_date} | version: {version} | error: {error!r}"
             )
 
     else:

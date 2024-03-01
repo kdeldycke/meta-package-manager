@@ -21,7 +21,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4.1.3
+        uses: actions/download-artifact@v4.1.4
         id: artifacts
         with:
           name: ${{ matrix.bin_name }}

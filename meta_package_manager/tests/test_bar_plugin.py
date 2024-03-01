@@ -23,7 +23,7 @@ from itertools import product
 
 import pytest
 from boltons.iterutils import flatten
-from click_extra.testing import args_cleanup
+from click_extra.testing import args_cleanup, env_copy
 from click_extra.tests.conftest import unless_macos
 
 from meta_package_manager import bar_plugin
@@ -172,8 +172,9 @@ class TestBarPlugin:
         process = subprocess.run(
             bar_plugin.__file__,
             capture_output=True,
+            shell=True,
             encoding="utf-8",
-            env=extra_env,
+            env=env_copy(extra_env),
         )
 
         assert not process.stderr

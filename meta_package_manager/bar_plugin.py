@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # <xbar.title>Meta Package Manager</xbar.title>
 # <xbar.version>v5.15.1</xbar.version>
 # <xbar.author>Kevin Deldycke</xbar.author>

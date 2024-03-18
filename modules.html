@@ -1,0 +1,572 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="meta-package-manager" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="modules.html" />
+<meta property="og:site_name" content="Meta Package Manager" />
+<meta property="og:description" content="meta_package_manager package- Subpackages- meta_package_manager.managers package- Submodules, meta_package_manager.managers.apm module, meta_package_manager.managers.apt module, meta_package_manage..." />
+<meta name="description" content="meta_package_manager package- Subpackages- meta_package_manager.managers package- Submodules, meta_package_manager.managers.apm module, meta_package_manager.managers.apt module, meta_package_manage..." />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
+
+    <!-- Generated with Sphinx 7.1.2 and Furo 2024.01.29 -->
+        <title>meta-package-manager - Meta Package Manager</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d3572542" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     Meta Package Manager works fine, but its sole maintainer is distracted by life 😶‍🌫️.<br/>You can influence it with purchase of <strong><a class='reference external' href='https://github.com/sponsors/kdeldycke'>business support 🤝 and sponsorship 🫶</a></strong>. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">Meta Package Manager</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/logo-square.svg" alt="Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usecase.html">Use-cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-parameters.html">CLI parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bar-plugin.html">Xbar and SwiftBar plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="falsehoods.html">Falsehoods programmers believe about package managers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark.html">Benchmark</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contribution guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="meta_package_manager.html">API</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.managers.html">meta_package_manager.managers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.tests.html">meta_package_manager.tests package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="todolist.html">Todo-list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code-of-conduct.html">Code of conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/sponsors/kdeldycke">Funding</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/kdeldycke/meta-package-manager/edit/main/docs/modules.rst" title="Edit this page">
+    <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
+      <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
+    </svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="meta-package-manager">
+<h1>meta-package-manager<a class="headerlink" href="#meta-package-manager" title="Permalink to this heading">#</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="meta_package_manager.html">meta_package_manager package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.managers.html">meta_package_manager.managers package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.apm">meta_package_manager.managers.apm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.apt">meta_package_manager.managers.apt module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.cargo">meta_package_manager.managers.cargo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.chocolatey">meta_package_manager.managers.chocolatey module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.composer">meta_package_manager.managers.composer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.dnf">meta_package_manager.managers.dnf module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.emerge">meta_package_manager.managers.emerge module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.flatpak">meta_package_manager.managers.flatpak module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.gem">meta_package_manager.managers.gem module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.homebrew">meta_package_manager.managers.homebrew module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.mas">meta_package_manager.managers.mas module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.npm">meta_package_manager.managers.npm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.opkg">meta_package_manager.managers.opkg module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.pacman">meta_package_manager.managers.pacman module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.pip">meta_package_manager.managers.pip module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.pipx">meta_package_manager.managers.pipx module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.pkg">meta_package_manager.managers.pkg module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.scoop">meta_package_manager.managers.scoop module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.snap">meta_package_manager.managers.snap module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.steamcmd">meta_package_manager.managers.steamcmd module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.vscode">meta_package_manager.managers.vscode module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.yarn">meta_package_manager.managers.yarn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.managers.html#module-meta_package_manager.managers.zypper">meta_package_manager.managers.zypper module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.tests.html">meta_package_manager.tests package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.conftest">meta_package_manager.tests.conftest module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_bar_plugin">meta_package_manager.tests.test_bar_plugin module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_cli">meta_package_manager.tests.test_cli module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_cli_backup">meta_package_manager.tests.test_cli_backup module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_cli_cleanup">meta_package_manager.tests.test_cli_cleanup module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_cli_install_remove">meta_package_manager.tests.test_cli_install_remove module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_cli_installed">meta_package_manager.tests.test_cli_installed module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_cli_managers">meta_package_manager.tests.test_cli_managers module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_cli_outdated">meta_package_manager.tests.test_cli_outdated module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_cli_restore">meta_package_manager.tests.test_cli_restore module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_cli_search">meta_package_manager.tests.test_cli_search module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_cli_sync">meta_package_manager.tests.test_cli_sync module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_cli_upgrade">meta_package_manager.tests.test_cli_upgrade module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_cli_which">meta_package_manager.tests.test_cli_which module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_docs">meta_package_manager.tests.test_docs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_manager_apt">meta_package_manager.tests.test_manager_apt module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_manager_homebrew">meta_package_manager.tests.test_manager_homebrew module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_managers">meta_package_manager.tests.test_managers module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_platforms">meta_package_manager.tests.test_platforms module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_pool">meta_package_manager.tests.test_pool module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_specifier">meta_package_manager.tests.test_specifier module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.tests.html#module-meta_package_manager.tests.test_version">meta_package_manager.tests.test_version module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.html#module-meta_package_manager.bar_plugin">meta_package_manager.bar_plugin module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.PYTHON_MIN_VERSION"><code class="docutils literal notranslate"><span class="pre">PYTHON_MIN_VERSION</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPM_MIN_VERSION"><code class="docutils literal notranslate"><span class="pre">MPM_MIN_VERSION</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.Venv"><code class="docutils literal notranslate"><span class="pre">Venv</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.Venv.PIPENV"><code class="docutils literal notranslate"><span class="pre">Venv.PIPENV</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.Venv.POETRY"><code class="docutils literal notranslate"><span class="pre">Venv.POETRY</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.Venv.VIRTUALENV"><code class="docutils literal notranslate"><span class="pre">Venv.VIRTUALENV</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin"><code class="docutils literal notranslate"><span class="pre">MPMPlugin</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.getenv_str"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.getenv_str()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.getenv_bool"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.getenv_bool()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.normalize_params"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.normalize_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.v_to_str"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.v_to_str()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.table_rendering"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.table_rendering</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.default_font"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.default_font</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.monospace_font"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.monospace_font</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.error_font"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.error_font</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.is_swiftbar"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.is_swiftbar</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.all_pythons"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.all_pythons</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.search_venv"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.search_venv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.search_mpm"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.search_mpm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.check_mpm"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.check_mpm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.ranked_mpm"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.ranked_mpm</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.best_mpm"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.best_mpm</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.pp"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.pp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.print_error_header"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.print_error_header()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.print_error"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.print_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.bar_plugin.MPMPlugin.print_menu"><code class="docutils literal notranslate"><span class="pre">MPMPlugin.print_menu()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.html#module-meta_package_manager.base">meta_package_manager.base module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Operations"><code class="docutils literal notranslate"><span class="pre">Operations</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Operations.installed"><code class="docutils literal notranslate"><span class="pre">Operations.installed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Operations.outdated"><code class="docutils literal notranslate"><span class="pre">Operations.outdated</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Operations.search"><code class="docutils literal notranslate"><span class="pre">Operations.search</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Operations.install"><code class="docutils literal notranslate"><span class="pre">Operations.install</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Operations.upgrade"><code class="docutils literal notranslate"><span class="pre">Operations.upgrade</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Operations.upgrade_all"><code class="docutils literal notranslate"><span class="pre">Operations.upgrade_all</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Operations.remove"><code class="docutils literal notranslate"><span class="pre">Operations.remove</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Operations.sync"><code class="docutils literal notranslate"><span class="pre">Operations.sync</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Operations.cleanup"><code class="docutils literal notranslate"><span class="pre">Operations.cleanup</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.CLIError"><code class="docutils literal notranslate"><span class="pre">CLIError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Package"><code class="docutils literal notranslate"><span class="pre">Package</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Package.id"><code class="docutils literal notranslate"><span class="pre">Package.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Package.name"><code class="docutils literal notranslate"><span class="pre">Package.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Package.description"><code class="docutils literal notranslate"><span class="pre">Package.description</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Package.installed_version"><code class="docutils literal notranslate"><span class="pre">Package.installed_version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.Package.latest_version"><code class="docutils literal notranslate"><span class="pre">Package.latest_version</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.packages_asdict"><code class="docutils literal notranslate"><span class="pre">packages_asdict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.MetaPackageManager"><code class="docutils literal notranslate"><span class="pre">MetaPackageManager</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.highlight_cli_name"><code class="docutils literal notranslate"><span class="pre">highlight_cli_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager"><code class="docutils literal notranslate"><span class="pre">PackageManager</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.deprecated"><code class="docutils literal notranslate"><span class="pre">PackageManager.deprecated</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.deprecation_url"><code class="docutils literal notranslate"><span class="pre">PackageManager.deprecation_url</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.id"><code class="docutils literal notranslate"><span class="pre">PackageManager.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.name"><code class="docutils literal notranslate"><span class="pre">PackageManager.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.homepage_url"><code class="docutils literal notranslate"><span class="pre">PackageManager.homepage_url</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.platforms"><code class="docutils literal notranslate"><span class="pre">PackageManager.platforms</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.requirement"><code class="docutils literal notranslate"><span class="pre">PackageManager.requirement</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.cli_names"><code class="docutils literal notranslate"><span class="pre">PackageManager.cli_names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.virtual"><code class="docutils literal notranslate"><span class="pre">PackageManager.virtual</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.cli_search_path"><code class="docutils literal notranslate"><span class="pre">PackageManager.cli_search_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.extra_env"><code class="docutils literal notranslate"><span class="pre">PackageManager.extra_env</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.pre_cmds"><code class="docutils literal notranslate"><span class="pre">PackageManager.pre_cmds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.pre_args"><code class="docutils literal notranslate"><span class="pre">PackageManager.pre_args</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.post_args"><code class="docutils literal notranslate"><span class="pre">PackageManager.post_args</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.version_cli_options"><code class="docutils literal notranslate"><span class="pre">PackageManager.version_cli_options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.version_regex"><code class="docutils literal notranslate"><span class="pre">PackageManager.version_regex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.stop_on_error"><code class="docutils literal notranslate"><span class="pre">PackageManager.stop_on_error</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.ignore_auto_updates"><code class="docutils literal notranslate"><span class="pre">PackageManager.ignore_auto_updates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.dry_run"><code class="docutils literal notranslate"><span class="pre">PackageManager.dry_run</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.timeout"><code class="docutils literal notranslate"><span class="pre">PackageManager.timeout</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.package"><code class="docutils literal notranslate"><span class="pre">PackageManager.package</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.cli_errors"><code class="docutils literal notranslate"><span class="pre">PackageManager.cli_errors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.implements"><code class="docutils literal notranslate"><span class="pre">PackageManager.implements()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.search_all_cli"><code class="docutils literal notranslate"><span class="pre">PackageManager.search_all_cli()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.which"><code class="docutils literal notranslate"><span class="pre">PackageManager.which()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.cli_path"><code class="docutils literal notranslate"><span class="pre">PackageManager.cli_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.version"><code class="docutils literal notranslate"><span class="pre">PackageManager.version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.supported"><code class="docutils literal notranslate"><span class="pre">PackageManager.supported</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.executable"><code class="docutils literal notranslate"><span class="pre">PackageManager.executable</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.fresh"><code class="docutils literal notranslate"><span class="pre">PackageManager.fresh</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.available"><code class="docutils literal notranslate"><span class="pre">PackageManager.available</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.run"><code class="docutils literal notranslate"><span class="pre">PackageManager.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.build_cli"><code class="docutils literal notranslate"><span class="pre">PackageManager.build_cli()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.run_cli"><code class="docutils literal notranslate"><span class="pre">PackageManager.run_cli()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.installed"><code class="docutils literal notranslate"><span class="pre">PackageManager.installed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.outdated"><code class="docutils literal notranslate"><span class="pre">PackageManager.outdated</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.query_parts"><code class="docutils literal notranslate"><span class="pre">PackageManager.query_parts()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.search"><code class="docutils literal notranslate"><span class="pre">PackageManager.search()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.refiltered_search"><code class="docutils literal notranslate"><span class="pre">PackageManager.refiltered_search()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.install"><code class="docutils literal notranslate"><span class="pre">PackageManager.install()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.upgrade_all_cli"><code class="docutils literal notranslate"><span class="pre">PackageManager.upgrade_all_cli()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.upgrade_one_cli"><code class="docutils literal notranslate"><span class="pre">PackageManager.upgrade_one_cli()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.upgrade"><code class="docutils literal notranslate"><span class="pre">PackageManager.upgrade()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.remove"><code class="docutils literal notranslate"><span class="pre">PackageManager.remove()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.sync"><code class="docutils literal notranslate"><span class="pre">PackageManager.sync()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.base.PackageManager.cleanup"><code class="docutils literal notranslate"><span class="pre">PackageManager.cleanup()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.html#module-meta_package_manager.capabilities">meta_package_manager.capabilities module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.capabilities.search_capabilities"><code class="docutils literal notranslate"><span class="pre">search_capabilities()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.capabilities.version_not_implemented"><code class="docutils literal notranslate"><span class="pre">version_not_implemented()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.html#module-meta_package_manager.cli">meta_package_manager.cli module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.cli.XKCD_MANAGER_ORDER"><code class="docutils literal notranslate"><span class="pre">XKCD_MANAGER_ORDER</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.cli.add_manager_to_selection"><code class="docutils literal notranslate"><span class="pre">add_manager_to_selection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.cli.single_manager_selectors"><code class="docutils literal notranslate"><span class="pre">single_manager_selectors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.cli.bar_plugin_path"><code class="docutils literal notranslate"><span class="pre">bar_plugin_path()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.html#module-meta_package_manager.inventory">meta_package_manager.inventory module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.inventory.operation_matrix"><code class="docutils literal notranslate"><span class="pre">operation_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.inventory.update_readme"><code class="docutils literal notranslate"><span class="pre">update_readme()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.html#module-meta_package_manager.labels">meta_package_manager.labels module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.labels.generate_labels"><code class="docutils literal notranslate"><span class="pre">generate_labels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.labels.MANAGER_LABEL_GROUPS"><code class="docutils literal notranslate"><span class="pre">MANAGER_LABEL_GROUPS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.labels.all_manager_label_ids"><code class="docutils literal notranslate"><span class="pre">all_manager_label_ids</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.labels.MANAGER_LABELS"><code class="docutils literal notranslate"><span class="pre">MANAGER_LABELS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.labels.PLATFORM_LABEL_GROUPS"><code class="docutils literal notranslate"><span class="pre">PLATFORM_LABEL_GROUPS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.labels.PLATFORM_LABELS"><code class="docutils literal notranslate"><span class="pre">PLATFORM_LABELS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.labels.LABELS"><code class="docutils literal notranslate"><span class="pre">LABELS</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.html#module-meta_package_manager.output">meta_package_manager.output module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.SORTABLE_FIELDS"><code class="docutils literal notranslate"><span class="pre">SORTABLE_FIELDS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.colored_diff"><code class="docutils literal notranslate"><span class="pre">colored_diff()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.print_json"><code class="docutils literal notranslate"><span class="pre">print_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.print_table"><code class="docutils literal notranslate"><span class="pre">print_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.print_stats"><code class="docutils literal notranslate"><span class="pre">print_stats()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.BarPluginRenderer"><code class="docutils literal notranslate"><span class="pre">BarPluginRenderer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.BarPluginRenderer.submenu_layout"><code class="docutils literal notranslate"><span class="pre">BarPluginRenderer.submenu_layout</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.BarPluginRenderer.dark_mode"><code class="docutils literal notranslate"><span class="pre">BarPluginRenderer.dark_mode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.BarPluginRenderer.render_cli"><code class="docutils literal notranslate"><span class="pre">BarPluginRenderer.render_cli()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.BarPluginRenderer.print_cli_item"><code class="docutils literal notranslate"><span class="pre">BarPluginRenderer.print_cli_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.BarPluginRenderer.print_upgrade_all_item"><code class="docutils literal notranslate"><span class="pre">BarPluginRenderer.print_upgrade_all_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.BarPluginRenderer.plain_table_format"><code class="docutils literal notranslate"><span class="pre">BarPluginRenderer.plain_table_format</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.BarPluginRenderer.render_table"><code class="docutils literal notranslate"><span class="pre">BarPluginRenderer.render_table()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.BarPluginRenderer.render"><code class="docutils literal notranslate"><span class="pre">BarPluginRenderer.render()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.BarPluginRenderer.add_upgrade_cli"><code class="docutils literal notranslate"><span class="pre">BarPluginRenderer.add_upgrade_cli()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.output.BarPluginRenderer.print"><code class="docutils literal notranslate"><span class="pre">BarPluginRenderer.print()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.html#module-meta_package_manager.platforms">meta_package_manager.platforms module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.platforms.WINDOWS"><code class="docutils literal notranslate"><span class="pre">WINDOWS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.platforms.PLATFORM_GROUPS"><code class="docutils literal notranslate"><span class="pre">PLATFORM_GROUPS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.platforms.encoding_args"><code class="docutils literal notranslate"><span class="pre">encoding_args</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.html#module-meta_package_manager.pool">meta_package_manager.pool module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.pool.manager_classes"><code class="docutils literal notranslate"><span class="pre">manager_classes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.pool.ManagerPool"><code class="docutils literal notranslate"><span class="pre">ManagerPool</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.pool.ManagerPool.ALLOWED_EXTRA_OPTION"><code class="docutils literal notranslate"><span class="pre">ManagerPool.ALLOWED_EXTRA_OPTION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.pool.ManagerPool.register"><code class="docutils literal notranslate"><span class="pre">ManagerPool.register</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.pool.ManagerPool.get"><code class="docutils literal notranslate"><span class="pre">ManagerPool.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.pool.ManagerPool.values"><code class="docutils literal notranslate"><span class="pre">ManagerPool.values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.pool.ManagerPool.items"><code class="docutils literal notranslate"><span class="pre">ManagerPool.items()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.pool.ManagerPool.all_manager_ids"><code class="docutils literal notranslate"><span class="pre">ManagerPool.all_manager_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.pool.ManagerPool.maintained_manager_ids"><code class="docutils literal notranslate"><span class="pre">ManagerPool.maintained_manager_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.pool.ManagerPool.default_manager_ids"><code class="docutils literal notranslate"><span class="pre">ManagerPool.default_manager_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.pool.ManagerPool.unsupported_manager_ids"><code class="docutils literal notranslate"><span class="pre">ManagerPool.unsupported_manager_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.pool.ManagerPool.select_managers"><code class="docutils literal notranslate"><span class="pre">ManagerPool.select_managers()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.html#module-meta_package_manager.specifier">meta_package_manager.specifier module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.VERSION_SEP"><code class="docutils literal notranslate"><span class="pre">VERSION_SEP</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Specifier"><code class="docutils literal notranslate"><span class="pre">Specifier</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Specifier.raw_spec"><code class="docutils literal notranslate"><span class="pre">Specifier.raw_spec</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Specifier.package_id"><code class="docutils literal notranslate"><span class="pre">Specifier.package_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Specifier.manager_id"><code class="docutils literal notranslate"><span class="pre">Specifier.manager_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Specifier.version"><code class="docutils literal notranslate"><span class="pre">Specifier.version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Specifier.parse_purl"><code class="docutils literal notranslate"><span class="pre">Specifier.parse_purl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Specifier.from_string"><code class="docutils literal notranslate"><span class="pre">Specifier.from_string()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Specifier.parsed_version"><code class="docutils literal notranslate"><span class="pre">Specifier.parsed_version</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Specifier.is_blank"><code class="docutils literal notranslate"><span class="pre">Specifier.is_blank</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.EmptyReduction"><code class="docutils literal notranslate"><span class="pre">EmptyReduction</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Solver"><code class="docutils literal notranslate"><span class="pre">Solver</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Solver.spec_pool"><code class="docutils literal notranslate"><span class="pre">Solver.spec_pool</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Solver.manager_priority"><code class="docutils literal notranslate"><span class="pre">Solver.manager_priority</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Solver.populate_from_strings"><code class="docutils literal notranslate"><span class="pre">Solver.populate_from_strings()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Solver.top_priority_manager"><code class="docutils literal notranslate"><span class="pre">Solver.top_priority_manager()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Solver.reduce_specs"><code class="docutils literal notranslate"><span class="pre">Solver.reduce_specs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Solver.resolve_package_specs"><code class="docutils literal notranslate"><span class="pre">Solver.resolve_package_specs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.specifier.Solver.resolve_specs_group_by_managers"><code class="docutils literal notranslate"><span class="pre">Solver.resolve_specs_group_by_managers()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.html#module-meta_package_manager.version">meta_package_manager.version module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.version.Token"><code class="docutils literal notranslate"><span class="pre">Token</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.version.Token.str_to_int"><code class="docutils literal notranslate"><span class="pre">Token.str_to_int()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.version.Token.string"><code class="docutils literal notranslate"><span class="pre">Token.string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.version.Token.integer"><code class="docutils literal notranslate"><span class="pre">Token.integer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.version.Token.isint"><code class="docutils literal notranslate"><span class="pre">Token.isint</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.version.TokenizedString"><code class="docutils literal notranslate"><span class="pre">TokenizedString</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.version.TokenizedString.string"><code class="docutils literal notranslate"><span class="pre">TokenizedString.string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.version.TokenizedString.tokens"><code class="docutils literal notranslate"><span class="pre">TokenizedString.tokens</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.version.TokenizedString.separator"><code class="docutils literal notranslate"><span class="pre">TokenizedString.separator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.version.TokenizedString.pretty_print"><code class="docutils literal notranslate"><span class="pre">TokenizedString.pretty_print()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.version.TokenizedString.tokenize"><code class="docutils literal notranslate"><span class="pre">TokenizedString.tokenize()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="meta_package_manager.html#meta_package_manager.version.parse_version"><code class="docutils literal notranslate"><span class="pre">parse_version</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Kevin Deldycke and contributors
+            </div>
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on 2024-03-18</div>
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=bc11bb63"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=36754332"></script>
+    </body>
+</html>

@@ -1,0 +1,495 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+
+    <!-- Generated with Sphinx 7.1.2 and Furo 2024.01.29 -->
+        <title>meta_package_manager.tests.test_manager_homebrew - Meta Package Manager</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d3572542" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     Meta Package Manager works fine, but its sole maintainer is distracted by life 😶‍🌫️.<br/>You can influence it with purchase of <strong><a class='reference external' href='https://github.com/sponsors/kdeldycke'>business support 🤝 and sponsorship 🫶</a></strong>. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">Meta Package Manager</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="../../../_static/logo-square.svg" alt="Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usecase.html">Use-cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli-parameters.html">CLI parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../bar-plugin.html">Xbar and SwiftBar plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../falsehoods.html">Falsehoods programmers believe about package managers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark.html">Benchmark</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contribution guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../meta_package_manager.html">API</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../meta_package_manager.managers.html">meta_package_manager.managers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../meta_package_manager.tests.html">meta_package_manager.tests package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../py-modindex.html">Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../todolist.html">Todo-list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../code-of-conduct.html">Code of conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/sponsors/kdeldycke">Funding</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for meta_package_manager.tests.test_manager_homebrew</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright Kevin Deldycke &lt;kevin@deldycke.com&gt; and contributors.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is Free Software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU General Public License</span>
+<span class="c1"># as published by the Free Software Foundation; either version 2</span>
+<span class="c1"># of the License, or (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.</span>
+<span class="sd">&quot;&quot;&quot;Homebrew-specific tests.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">pytest</span>
+<span class="kn">from</span> <span class="nn">click_extra.testing</span> <span class="kn">import</span> <span class="n">env_copy</span>
+<span class="kn">from</span> <span class="nn">click_extra.tests.conftest</span> <span class="kn">import</span> <span class="n">unless_macos</span>
+
+
+<div class="viewcode-block" id="install_cask"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_manager_homebrew.install_cask">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">install_cask</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A fixture to install a Cask from a specific commit.&quot;&quot;&quot;</span>
+
+    <span class="n">packages</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List of installed packages.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get_cask_tap_path</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Default location of Homebrew Cask formulas on macOS.</span>
+
+<span class="sd">        This is supposed to be a `shallow copy of the official cask repository</span>
+<span class="sd">        &lt;https://github.com/Homebrew/homebrew-cask&gt;`_.</span>
+
+<span class="sd">        The later can be obtained with:</span>
+
+<span class="sd">        .. code-block:: shell-session</span>
+<span class="sd">            $ export HOMEBREW_NO_INSTALL_FROM_API=&quot;1&quot;</span>
+<span class="sd">            $ brew tap homebrew/cask</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;brew&quot;</span><span class="p">,</span> <span class="s2">&quot;--repository&quot;</span><span class="p">),</span>
+            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="n">process</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">process</span><span class="o">.</span><span class="n">stderr</span>
+        <span class="k">assert</span> <span class="n">process</span><span class="o">.</span><span class="n">stdout</span>
+
+        <span class="n">brew_root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="k">assert</span> <span class="n">brew_root</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">brew_root</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">brew_root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+
+        <span class="n">cask_repo</span> <span class="o">=</span> <span class="n">brew_root</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;Library/Taps/homebrew/homebrew-cask/Casks/&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">cask_repo</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">cask_repo</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">cask_repo</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">cask_repo</span>
+
+    <span class="k">def</span> <span class="nf">get_cask_folder</span><span class="p">(</span><span class="n">package_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the folder where a Cask is located.</span>
+
+<span class="sd">        ..warning::</span>
+<span class="sd">            As of `aa46114 &lt;https://github.com/Homebrew/homebrew-cask/commit/aa46114&gt;`_,</span>
+<span class="sd">            casks have been moved to a subfolder named after their first letter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cask_folder</span> <span class="o">=</span> <span class="n">get_cask_tap_path</span><span class="p">()</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">package_id</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">assert</span> <span class="n">cask_folder</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">cask_folder</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">cask_folder</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">cask_folder</span>
+
+    <span class="k">def</span> <span class="nf">git_checkout</span><span class="p">(</span><span class="n">package_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">commit</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="s2">&quot;git&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;-C&quot;</span><span class="p">,</span>
+                <span class="n">get_cask_folder</span><span class="p">(</span><span class="n">package_id</span><span class="p">),</span>
+                <span class="s2">&quot;checkout&quot;</span><span class="p">,</span>
+                <span class="n">commit</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">package_id</span><span class="si">}</span><span class="s2">.rb&quot;</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">process</span><span class="o">.</span><span class="n">stderr</span>
+        <span class="k">assert</span> <span class="n">process</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">brew_cleanup</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all downloads cached by Homebrew.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            ``brew`` does not cleanup ``~/Library/Caches/Homebrew``, see:</span>
+<span class="sd">            https://github.com/Homebrew/brew/issues/3784#issuecomment-364675767</span>
+
+<span class="sd">            We might need to force it with:</span>
+
+<span class="sd">            .. code-block:: shell-session</span>
+<span class="sd">                $ rm -rf $(brew --cache)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;brew&quot;</span><span class="p">,</span> <span class="s2">&quot;cleanup&quot;</span><span class="p">,</span> <span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="s2">&quot;--prune=all&quot;</span><span class="p">),</span>
+            <span class="n">env</span><span class="o">=</span><span class="n">env_copy</span><span class="p">({</span><span class="s2">&quot;HOMEBREW_NO_AUTO_UPDATE&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}),</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">process</span><span class="o">.</span><span class="n">stderr</span>
+        <span class="k">assert</span> <span class="n">process</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">brew_uninstall</span><span class="p">(</span><span class="n">package_id</span><span class="p">):</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">((</span><span class="s2">&quot;brew&quot;</span><span class="p">,</span> <span class="s2">&quot;uninstall&quot;</span><span class="p">,</span> <span class="s2">&quot;--cask&quot;</span><span class="p">,</span> <span class="s2">&quot;--force&quot;</span><span class="p">,</span> <span class="n">package_id</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">process</span><span class="o">.</span><span class="n">stderr</span>
+        <span class="k">assert</span> <span class="n">process</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">_install_cask</span><span class="p">(</span><span class="n">package_id</span><span class="p">,</span> <span class="n">commit</span><span class="p">):</span>
+        <span class="n">packages</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">package_id</span><span class="p">)</span>
+
+        <span class="c1"># Fetch locally the old version of the Cask&#39;s formula.</span>
+        <span class="n">git_checkout</span><span class="p">(</span><span class="n">package_id</span><span class="p">,</span> <span class="n">commit</span><span class="p">)</span>
+        <span class="n">brew_cleanup</span><span class="p">()</span>
+
+        <span class="c1"># XXX Work around the bad old ubersicht cask formula.</span>
+        <span class="c1"># Replace &quot;:yosemite&quot; by &quot;:el_capitan&quot; like the last commit did at:</span>
+        <span class="c1"># https://github.com/Homebrew/homebrew-cask/commit/5cddbd6</span>
+        <span class="c1"># The day we have a new version of ubersicht after this commit, we will be able</span>
+        <span class="c1"># to remove that hack, and have the install_cask() invocation from the</span>
+        <span class="c1"># test_autoupdate_unicode_name() test below checkout ubersicht from that commit.</span>
+        <span class="k">if</span> <span class="n">package_id</span> <span class="o">==</span> <span class="s2">&quot;ubersicht&quot;</span><span class="p">:</span>
+            <span class="n">cask_path</span> <span class="o">=</span> <span class="n">get_cask_tap_path</span><span class="p">()</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">package_id</span><span class="si">}</span><span class="s2">.rb&quot;</span><span class="p">)</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">cask_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+            <span class="n">cask_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;:yosemite&quot;</span><span class="p">,</span> <span class="s2">&quot;:el_capitan&quot;</span><span class="p">))</span>
+
+        <span class="c1"># Install the cask but bypass its local cache auto-update: we want to</span>
+        <span class="c1"># force brew to rely on our formula from the past.</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;brew&quot;</span><span class="p">,</span> <span class="s2">&quot;reinstall&quot;</span><span class="p">,</span> <span class="s2">&quot;--cask&quot;</span><span class="p">,</span> <span class="n">package_id</span><span class="p">),</span>
+            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span>
+            <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">env</span><span class="o">=</span><span class="n">env_copy</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="c1"># Do not let brew use its live API to fetch the latest version.</span>
+                    <span class="c1"># This variable forces brew to use the local repository instead:</span>
+                    <span class="c1"># https://github.com/Homebrew/brew/blob/10845a1/Library/Homebrew/env_config.rb#L314-L317</span>
+                    <span class="s2">&quot;HOMEBREW_NO_INSTALL_FROM_API&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;HOMEBREW_NO_AUTO_UPDATE&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;HOMEBREW_NO_ENV_HINTS&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Restore old formula to its most recent version.</span>
+        <span class="n">git_checkout</span><span class="p">(</span><span class="n">package_id</span><span class="p">,</span> <span class="s2">&quot;HEAD&quot;</span><span class="p">)</span>
+        <span class="n">brew_cleanup</span><span class="p">()</span>
+
+        <span class="c1"># Check the cask has been properly installed.</span>
+        <span class="k">if</span> <span class="n">process</span><span class="o">.</span><span class="n">stderr</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="s2">&quot;is already installed&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">process</span><span class="o">.</span><span class="n">stderr</span>
+        <span class="k">assert</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">package_id</span><span class="si">}</span><span class="s2"> was successfully installed!&quot;</span> <span class="ow">in</span> <span class="n">process</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="k">return</span> <span class="n">process</span><span class="o">.</span><span class="n">stdout</span>
+
+    <span class="k">yield</span> <span class="n">_install_cask</span>
+
+    <span class="c1"># Remove all installed packages.</span>
+    <span class="k">for</span> <span class="n">package_id</span> <span class="ow">in</span> <span class="n">packages</span><span class="p">:</span>
+        <span class="n">brew_uninstall</span><span class="p">(</span><span class="n">package_id</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestCask"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_manager_homebrew.TestCask">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">destructive</span><span class="p">()</span>
+<span class="nd">@unless_macos</span>
+<span class="c1"># XXX The layout of the cask repository has changed, so we cannot go back in time too</span>
+<span class="c1"># much and checkout old versions of casks. We need to wait for a couple of new releases</span>
+<span class="c1"># of the casks we use in our tests, so we can have enough commit depth to test the</span>
+<span class="c1"># upgrade process.</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">skip</span><span class="p">(</span>
+    <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Cask repository structure changed too much to go back in time.&quot;</span>
+<span class="p">)</span>
+<span class="k">class</span> <span class="nc">TestCask</span><span class="p">:</span>
+<div class="viewcode-block" id="TestCask.test_autoupdate_unicode_name"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_manager_homebrew.TestCask.test_autoupdate_unicode_name">[docs]</a>    <span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">xdist_group</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;avoid_concurrent_git_tweaks&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_autoupdate_unicode_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">invoke</span><span class="p">,</span> <span class="n">install_cask</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;See #16.&quot;&quot;&quot;</span>
+        <span class="c1"># Install an old version of a package with a unicode name.</span>
+        <span class="c1"># Old Cask formula for ubersicht 1.6.69.</span>
+        <span class="c1"># XXX Update this commit when a new version of ubersicht is released so we can</span>
+        <span class="c1"># get rid of the hack above.</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">install_cask</span><span class="p">(</span><span class="s2">&quot;ubersicht&quot;</span><span class="p">,</span> <span class="s2">&quot;9870e8ffaa8dc83403973580415b2c56dc760f15&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="s2">&quot;Uebersicht-1.6.69.app.zip&quot;</span> <span class="ow">in</span> <span class="n">output</span>
+        <span class="k">assert</span> <span class="s2">&quot;Übersicht.app&quot;</span> <span class="ow">in</span> <span class="n">output</span>
+        <span class="k">assert</span> <span class="s2">&quot;Übersicht.app&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">output</span>
+
+        <span class="c1"># Ubersicht is not reported as outdated because is tagged as</span>
+        <span class="c1"># auto-update.</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">invoke</span><span class="p">(</span><span class="s2">&quot;--cask&quot;</span><span class="p">,</span> <span class="s2">&quot;outdated&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="s2">&quot;ubersicht&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="k">assert</span> <span class="s2">&quot;Übersicht&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span>
+
+        <span class="c1"># Try with explicit option.</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">invoke</span><span class="p">(</span><span class="s2">&quot;--ignore-auto-updates&quot;</span><span class="p">,</span> <span class="s2">&quot;--cask&quot;</span><span class="p">,</span> <span class="s2">&quot;outdated&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="s2">&quot;ubersicht&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="k">assert</span> <span class="s2">&quot;Übersicht&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span>
+
+        <span class="c1"># Look for reported available upgrade.</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">invoke</span><span class="p">(</span><span class="s2">&quot;--include-auto-updates&quot;</span><span class="p">,</span> <span class="s2">&quot;--cask&quot;</span><span class="p">,</span> <span class="s2">&quot;outdated&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="s2">&quot;ubersicht&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="c1"># Outdated subcommand does not fetch the unicode name by default.</span>
+        <span class="k">assert</span> <span class="s2">&quot;Übersicht&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span></div>
+
+<div class="viewcode-block" id="TestCask.test_multiple_names"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_manager_homebrew.TestCask.test_multiple_names">[docs]</a>    <span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">xdist_group</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;avoid_concurrent_git_tweaks&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_multiple_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">invoke</span><span class="p">,</span> <span class="n">install_cask</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;See #26.&quot;&quot;&quot;</span>
+        <span class="c1"># Install an old version of a package with multiple names.</span>
+        <span class="c1"># Old Cask formula for xld 20210101,153.1.</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">install_cask</span><span class="p">(</span><span class="s2">&quot;xld&quot;</span><span class="p">,</span> <span class="s2">&quot;6be43816ea729c18219322f656c62a702e1c2440&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="s2">&quot;xld-20210101.dmg&quot;</span> <span class="ow">in</span> <span class="n">output</span>
+        <span class="k">assert</span> <span class="s2">&quot;XLD.app&quot;</span> <span class="ow">in</span> <span class="n">output</span>
+
+        <span class="c1"># Look for reported available upgrade.</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">invoke</span><span class="p">(</span><span class="s2">&quot;--include-auto-updates&quot;</span><span class="p">,</span> <span class="s2">&quot;--cask&quot;</span><span class="p">,</span> <span class="s2">&quot;outdated&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="s2">&quot;xld&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="c1"># Outdated subcommand does not fetch the unicode name by default.</span>
+        <span class="k">assert</span> <span class="s2">&quot;X Lossless Decoder&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span></div></div>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Kevin Deldycke and contributors
+            </div>
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on 2024-03-18</div>
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=bc11bb63"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+    </body>
+</html>

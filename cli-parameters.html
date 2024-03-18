@@ -1,0 +1,1473 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="CLI parameters" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="cli-parameters.html" />
+<meta property="og:site_name" content="Meta Package Manager" />
+<meta property="og:description" content="Help screen: Options: mpm: Common CLI options for subcommands. Options Environment variables backup: Dump the list of installed packages to a TOML file. By default the generated TOML content is dis..." />
+<meta name="description" content="Help screen: Options: mpm: Common CLI options for subcommands. Options Environment variables backup: Dump the list of installed packages to a TOML file. By default the generated TOML content is dis..." />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Configuration" href="configuration.html" /><link rel="prev" title="Use-cases" href="usecase.html" />
+
+    <!-- Generated with Sphinx 7.1.2 and Furo 2024.01.29 -->
+        <title>CLI parameters - Meta Package Manager</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d3572542" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     Meta Package Manager works fine, but its sole maintainer is distracted by life 😶‍🌫️.<br/>You can influence it with purchase of <strong><a class='reference external' href='https://github.com/sponsors/kdeldycke'>business support 🤝 and sponsorship 🫶</a></strong>. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">Meta Package Manager</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/logo-square.svg" alt="Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usecase.html">Use-cases</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">CLI parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bar-plugin.html">Xbar and SwiftBar plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="falsehoods.html">Falsehoods programmers believe about package managers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark.html">Benchmark</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contribution guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="meta_package_manager.html">API</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.managers.html">meta_package_manager.managers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.tests.html">meta_package_manager.tests package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="todolist.html">Todo-list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code-of-conduct.html">Code of conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/sponsors/kdeldycke">Funding</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/kdeldycke/meta-package-manager/edit/main/docs/cli-parameters.md" title="Edit this page">
+    <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
+      <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
+    </svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="cli-parameters">
+<h1>CLI parameters<a class="headerlink" href="#cli-parameters" title="Permalink to this heading">#</a></h1>
+<section id="help-screen">
+<h2>Help screen<a class="headerlink" href="#help-screen" title="Permalink to this heading">#</a></h2>
+<div class="highlight-ansi-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>--help
+<span class=" -Color -Color-Bold -Color-Bold-BrightBlue -C-Bold -C-BrightBlue">Usage:</span> <span class=" -Color -Color-BrightWhite -C-BrightWhite">mpm</span> <span class=" -Color -Color-Faint -Color-Faint-Cyan -C-Faint -C-Cyan">[OPTIONS]</span> <span class=" -Color -Color-Faint -Color-Faint-Cyan -C-Faint -C-Cyan">COMMAND [ARGS]...</span>
+
+  Common CLI options for subcommands.
+
+<span class=" -Color -Color-Bold -Color-Bold-BrightBlue -C-Bold -C-BrightBlue">Package manager selection options:</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">-m</span>, <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> [<span class=" -Color -Color-Magenta -C-Magenta">apm</span>|<span class=" -Color -Color-Magenta -C-Magenta">apt</span>|<span class=" -Color -Color-Magenta -C-Magenta">apt-mint</span>|<span class=" -Color -Color-Magenta -C-Magenta">brew</span>|<span class=" -Color -Color-Magenta -C-Magenta">cargo</span>|<span class=" -Color -Color-Magenta -C-Magenta">cask</span>|<span class=" -Color -Color-Magenta -C-Magenta">choco</span>|<span class=" -Color -Color-Magenta -C-Magenta">composer</span>|<span class=" -Color -Color-Magenta -C-Magenta">dnf</span>|<span class=" -Color -Color-Magenta -C-Magenta">emerge</span>|<span class=" -Color -Color-Magenta -C-Magenta">flatpak</span>|<span class=" -Color -Color-Magenta -C-Magenta">gem</span>|<span class=" -Color -Color-Magenta -C-Magenta">mas</span>|<span class=" -Color -Color-Magenta -C-Magenta">npm</span>|<span class=" -Color -Color-Magenta -C-Magenta">opkg</span>|<span class=" -Color -Color-Magenta -C-Magenta">pacaur</span>|<span class=" -Color -Color-Magenta -C-Magenta">pacman</span>|<span class=" -Color -Color-Magenta -C-Magenta">paru</span>|<span class=" -Color -Color-Magenta -C-Magenta">pip</span>|<span class=" -Color -Color-Magenta -C-Magenta">pipx</span>|<span class=" -Color -Color-Magenta -C-Magenta">pkg</span>|<span class=" -Color -Color-Magenta -C-Magenta">scoop</span>|<span class=" -Color -Color-Magenta -C-Magenta">snap</span>|<span class=" -Color -Color-Magenta -C-Magenta">steamcmd</span>|<span class=" -Color -Color-Magenta -C-Magenta">vscode</span>|<span class=" -Color -Color-Magenta -C-Magenta">yarn</span>|<span class=" -Color -Color-Magenta -C-Magenta">yay</span>|<span class=" -Color -Color-Magenta -C-Magenta">yum</span>|<span class=" -Color -Color-Magenta -C-Magenta">zypper</span>]
+                      Restrict subcommand to a subset of managers. Repeat to
+                      select multiple managers. The order is preserved for
+                      priority-sensitive subcommands.
+  <span class=" -Color -Color-Cyan -C-Cyan">-e</span>, <span class=" -Color -Color-Cyan -C-Cyan">--exclude</span> [<span class=" -Color -Color-Magenta -C-Magenta">apm</span>|<span class=" -Color -Color-Magenta -C-Magenta">apt</span>|<span class=" -Color -Color-Magenta -C-Magenta">apt-mint</span>|<span class=" -Color -Color-Magenta -C-Magenta">brew</span>|<span class=" -Color -Color-Magenta -C-Magenta">cargo</span>|<span class=" -Color -Color-Magenta -C-Magenta">cask</span>|<span class=" -Color -Color-Magenta -C-Magenta">choco</span>|<span class=" -Color -Color-Magenta -C-Magenta">composer</span>|<span class=" -Color -Color-Magenta -C-Magenta">dnf</span>|<span class=" -Color -Color-Magenta -C-Magenta">emerge</span>|<span class=" -Color -Color-Magenta -C-Magenta">flatpak</span>|<span class=" -Color -Color-Magenta -C-Magenta">gem</span>|<span class=" -Color -Color-Magenta -C-Magenta">mas</span>|<span class=" -Color -Color-Magenta -C-Magenta">npm</span>|<span class=" -Color -Color-Magenta -C-Magenta">opkg</span>|<span class=" -Color -Color-Magenta -C-Magenta">pacaur</span>|<span class=" -Color -Color-Magenta -C-Magenta">pacman</span>|<span class=" -Color -Color-Magenta -C-Magenta">paru</span>|<span class=" -Color -Color-Magenta -C-Magenta">pip</span>|<span class=" -Color -Color-Magenta -C-Magenta">pipx</span>|<span class=" -Color -Color-Magenta -C-Magenta">pkg</span>|<span class=" -Color -Color-Magenta -C-Magenta">scoop</span>|<span class=" -Color -Color-Magenta -C-Magenta">snap</span>|<span class=" -Color -Color-Magenta -C-Magenta">steamcmd</span>|<span class=" -Color -Color-Magenta -C-Magenta">vscode</span>|<span class=" -Color -Color-Magenta -C-Magenta">yarn</span>|<span class=" -Color -Color-Magenta -C-Magenta">yay</span>|<span class=" -Color -Color-Magenta -C-Magenta">yum</span>|<span class=" -Color -Color-Magenta -C-Magenta">zypper</span>]
+                      Exclude a manager. Repeat to exclude multiple managers.
+  <span class=" -Color -Color-Cyan -C-Cyan">-a</span>, <span class=" -Color -Color-Cyan -C-Cyan">--all-managers</span>  Force evaluation of all managers recognized by mpm,
+                      including those not supported by the current platform or
+                      deprecated. Still applies filtering by <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> and
+                      <span class=" -Color -Color-Cyan -C-Cyan">--exclude</span> options before calling the subcommand.
+  <span class=" -Color -Color-Cyan -C-Cyan">-x</span>, <span class=" -Color -Color-Cyan -C-Cyan">--xkcd</span>          Preset manager selection as defined by XKCD #1654.
+                      Equivalent to: <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">pip</span> <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">brew</span> <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">npm</span> <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">dnf</span> <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">apt</span> <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">steamcmd</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">apm</span>               Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">apm</span> (deprecated).
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">apt</span>               Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">apt</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">apt-mint</span>          Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">apt-mint</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">brew</span>              Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">brew</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">cargo</span>             Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">cargo</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">cask</span>              Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">cask</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">choco</span>             Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">choco</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">composer</span>          Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">composer</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">dnf</span>               Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">dnf</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">emerge</span>            Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">emerge</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">flatpak</span>           Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">flatpak</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">gem</span>               Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">gem</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">mas</span>               Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">mas</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">npm</span>               Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">npm</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">opkg</span>              Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">opkg</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">pacaur</span>            Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">pacaur</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">pacman</span>            Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">pacman</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">paru</span>              Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">paru</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">pip</span>               Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">pip</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">pipx</span>              Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">pipx</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">pkg</span>               Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">pkg</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">scoop</span>             Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">scoop</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">snap</span>              Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">snap</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">steamcmd</span>          Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">steamcmd</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">vscode</span>            Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">vscode</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">yarn</span>              Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">yarn</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">yay</span>               Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">yay</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">yum</span>               Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">yum</span>.
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">zypper</span>            Alias to <span class=" -Color -Color-Cyan -C-Cyan">--manager</span> <span class=" -Color -Color-Magenta -C-Magenta">zypper</span>.
+
+<span class=" -Color -Color-Bold -Color-Bold-BrightBlue -C-Bold -C-BrightBlue">Manager options:</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">--ignore-auto-updates</span> / <span class=" -Color -Color-Cyan -C-Cyan">--include-auto-updates</span>
+                               Report all outdated packages, including those
+                               tagged as auto-updating. Only applies to outdated
+                               and upgrade subcommands.  <span class=" -Color -Color-Faint -C-Faint">[default: </span><span class=" -Color -Color-Faint -Color-Faint-Green -C-Faint -C-Green">ignore-auto-</span>
+<span class=" -Color -Color-Faint -Color-Faint-Green -C-Faint -C-Green">                               updates</span><span class=" -Color -Color-Faint -C-Faint">]</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">--stop-on-error</span> / <span class=" -Color -Color-Cyan -C-Cyan">--continue-on-error</span>
+                               Stop right away or continue operations on manager
+                               CLI error.  <span class=" -Color -Color-Faint -C-Faint">[default: </span><span class=" -Color -Color-Faint -Color-Faint-Green -C-Faint -C-Green">continue-on-error</span><span class=" -Color -Color-Faint -C-Faint">]</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">-d</span>, <span class=" -Color -Color-Cyan -C-Cyan">--dry-run</span>                Do not actually perform any action, just simulate
+                               CLI calls.
+  <span class=" -Color -Color-Cyan -C-Cyan">-t</span>, <span class=" -Color -Color-Cyan -C-Cyan">--timeout</span> <span class=" -Color -Color-Faint -Color-Faint-Cyan -C-Faint -C-Cyan">INTEGER RANGE</span>  Set maximum duration in seconds for each CLI
+                               call.  <span class=" -Color -Color-Faint -C-Faint">[default: </span><span class=" -Color -Color-Faint -Color-Faint-Green -C-Faint -C-Green">500</span><span class=" -Color -Color-Faint -C-Faint">; x&gt;=0]</span>
+
+<span class=" -Color -Color-Bold -Color-Bold-BrightBlue -C-Bold -C-BrightBlue">Output options:</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">--description</span>         Show package description in results.
+  <span class=" -Color -Color-Cyan -C-Cyan">-s</span>, <span class=" -Color -Color-Cyan -C-Cyan">--sort-by</span> [<span class=" -Color -Color-Magenta -C-Magenta">manager_id</span>|<span class=" -Color -Color-Magenta -C-Magenta">manager_name</span>|<span class=" -Color -Color-Magenta -C-Magenta">package_id</span>|<span class=" -Color -Color-Magenta -C-Magenta">package_name</span>|<span class=" -Color -Color-Magenta -C-Magenta">version</span>]
+                        Sort results.  <span class=" -Color -Color-Faint -C-Faint">[default: </span><span class=" -Color -Color-Faint -Color-Faint-Green -C-Faint -C-Green">manager_id</span><span class=" -Color -Color-Faint -C-Faint">]</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">--stats</span> / <span class=" -Color -Color-Cyan -C-Cyan">--no-stats</span>  Print per-manager package statistics.  <span class=" -Color -Color-Faint -C-Faint">[default: </span><span class=" -Color -Color-Faint -Color-Faint-Green -C-Faint -C-Green">stats</span><span class=" -Color -Color-Faint -C-Faint">]</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">-o</span>, <span class=" -Color -Color-Cyan -C-Cyan">--output-format</span> [<span class=" -Color -Color-Magenta -C-Magenta">asciidoc</span>|<span class=" -Color -Color-Magenta -C-Magenta">csv</span>|<span class=" -Color -Color-Magenta -C-Magenta">csv-excel</span>|<span class=" -Color -Color-Magenta -C-Magenta">csv-excel-tab</span>|<span class=" -Color -Color-Magenta -C-Magenta">csv-unix</span>|<span class=" -Color -Color-Magenta -C-Magenta">double_grid</span>|<span class=" -Color -Color-Magenta -C-Magenta">double_outline</span>|<span class=" -Color -Color-Magenta -C-Magenta">fancy_grid</span>|<span class=" -Color -Color-Magenta -C-Magenta">fancy_outline</span>|<span class=" -Color -Color-Magenta -C-Magenta">github</span>|<span class=" -Color -Color-Magenta -C-Magenta">grid</span>|<span class=" -Color -Color-Magenta -C-Magenta">heavy_grid</span>|<span class=" -Color -Color-Magenta -C-Magenta">heavy_outline</span>|<span class=" -Color -Color-Magenta -C-Magenta">html</span>|<span class=" -Color -Color-Magenta -C-Magenta">jira</span>|<span class=" -Color -Color-Magenta -C-Magenta">json</span>|<span class=" -Color -Color-Magenta -C-Magenta">latex</span>|<span class=" -Color -Color-Magenta -C-Magenta">latex_booktabs</span>|<span class=" -Color -Color-Magenta -C-Magenta">latex_longtable</span>|<span class=" -Color -Color-Magenta -C-Magenta">latex_raw</span>|<span class=" -Color -Color-Magenta -C-Magenta">mediawiki</span>|<span class=" -Color -Color-Magenta -C-Magenta">mixed_grid</span>|<span class=" -Color -Color-Magenta -C-Magenta">mixed_outline</span>|<span class=" -Color -Color-Magenta -C-Magenta">moinmoin</span>|<span class=" -Color -Color-Magenta -C-Magenta">orgtbl</span>|<span class=" -Color -Color-Magenta -C-Magenta">outline</span>|<span class=" -Color -Color-Magenta -C-Magenta">pipe</span>|<span class=" -Color -Color-Magenta -C-Magenta">plain</span>|<span class=" -Color -Color-Magenta -C-Magenta">presto</span>|<span class=" -Color -Color-Magenta -C-Magenta">pretty</span>|<span class=" -Color -Color-Magenta -C-Magenta">psql</span>|<span class=" -Color -Color-Magenta -C-Magenta">rounded_grid</span>|<span class=" -Color -Color-Magenta -C-Magenta">rounded_outline</span>|<span class=" -Color -Color-Magenta -C-Magenta">rst</span>|<span class=" -Color -Color-Magenta -C-Magenta">simple</span>|<span class=" -Color -Color-Magenta -C-Magenta">simple_grid</span>|<span class=" -Color -Color-Magenta -C-Magenta">simple_outline</span>|<span class=" -Color -Color-Magenta -C-Magenta">textile</span>|<span class=" -Color -Color-Magenta -C-Magenta">tsv</span>|<span class=" -Color -Color-Magenta -C-Magenta">unsafehtml</span>|<span class=" -Color -Color-Magenta -C-Magenta">vertical</span>|<span class=" -Color -Color-Magenta -C-Magenta">youtrack</span>]
+                        Rendering mode of the output.  <span class=" -Color -Color-Faint -C-Faint">[default:</span>
+<span class=" -Color -Color-Faint -C-Faint">                        </span><span class=" -Color -Color-Faint -Color-Faint-Green -C-Faint -C-Green">rounded_outline</span><span class=" -Color -Color-Faint -C-Faint">]</span>
+
+<span class=" -Color -Color-Bold -Color-Bold-BrightBlue -C-Bold -C-BrightBlue">Xbar/SwiftBar options:</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">--bar-plugin-path</span>  Print location of the Xbar/SwiftBar plugin.
+
+<span class=" -Color -Color-Bold -Color-Bold-BrightBlue -C-Bold -C-BrightBlue">Other options:</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">--time</span> / <span class=" -Color -Color-Cyan -C-Cyan">--no-time</span>        Measure and print elapsed execution time.  <span class=" -Color -Color-Faint -C-Faint">[default:</span>
+<span class=" -Color -Color-Faint -C-Faint">                            </span><span class=" -Color -Color-Faint -Color-Faint-Green -C-Faint -C-Green">no-time</span><span class=" -Color -Color-Faint -C-Faint">]</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">--color</span>, <span class=" -Color -Color-Cyan -C-Cyan">--ansi</span> / <span class=" -Color -Color-Cyan -C-Cyan">--no-color</span>, <span class=" -Color -Color-Cyan -C-Cyan">--no-ansi</span>
+                            Strip out all colors and all ANSI codes from output.
+                            <span class=" -Color -Color-Faint -C-Faint">[default: </span><span class=" -Color -Color-Faint -Color-Faint-Green -C-Faint -C-Green">color</span><span class=" -Color -Color-Faint -C-Faint">]</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">-C</span>, <span class=" -Color -Color-Cyan -C-Cyan">--config</span> <span class=" -Color -Color-Faint -Color-Faint-Cyan -C-Faint -C-Cyan">CONFIG_PATH</span>  Location of the configuration file. Supports glob
+                            pattern of local path and remote URL.  <span class=" -Color -Color-Faint -C-Faint">[default:</span>
+<span class=" -Color -Color-Faint -C-Faint">                            </span><span class=" -Color -Color-Faint -Color-Faint-Green -C-Faint -C-Green">~/.config/mpm/*.{toml,yaml,yml,</span><span class=" -Color -Color-Faint -Color-Faint-Magenta -C-Faint -C-Magenta">json</span>,ini,xml}<span class=" -Color -Color-Faint -C-Faint">]</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">--show-params</span>             Show all CLI parameters, their provenance, defaults
+                            and value, then exit.
+  <span class=" -Color -Color-Cyan -C-Cyan">-v</span>, <span class=" -Color -Color-Cyan -C-Cyan">--verbosity</span> <span class=" -Color -Color-Faint -Color-Faint-Cyan -C-Faint -C-Cyan">LEVEL</span>     Either <span class=" -Color -Color-Magenta -C-Magenta">CRITICAL</span>, <span class=" -Color -Color-Magenta -C-Magenta">ERROR</span>, <span class=" -Color -Color-Magenta -C-Magenta">WARNING</span>, <span class=" -Color -Color-Magenta -C-Magenta">INFO</span>, <span class=" -Color -Color-Magenta -C-Magenta">DEBUG</span>.
+                            <span class=" -Color -Color-Faint -C-Faint">[default: </span><span class=" -Color -Color-Faint -Color-Faint-Green -C-Faint -C-Green">INFO</span><span class=" -Color -Color-Faint -C-Faint">]</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">--</span><span class=" -Color -Color-Magenta -C-Magenta">version</span>                 Show the <span class=" -Color -Color-Magenta -C-Magenta">version</span> and exit.
+  <span class=" -Color -Color-Cyan -C-Cyan">-h</span>, <span class=" -Color -Color-Cyan -C-Cyan">--help</span>                Show this message and exit.
+
+<span class=" -Color -Color-Bold -Color-Bold-BrightBlue -C-Bold -C-BrightBlue">Explore subcommands:</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">managers</span>            List supported package managers and their location.
+  <span class=" -Color -Color-Cyan -C-Cyan">installed</span> (list)    List installed packages.
+  <span class=" -Color -Color-Cyan -C-Cyan">outdated</span>            List outdated packages.
+  <span class=" -Color -Color-Cyan -C-Cyan">search</span>              Search packages.
+  <span class=" -Color -Color-Cyan -C-Cyan">which</span> (locate)      Locate CLIs on system.
+
+<span class=" -Color -Color-Bold -Color-Bold-BrightBlue -C-Bold -C-BrightBlue">Maintenance subcommands:</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">install</span>             Install a package.
+  <span class=" -Color -Color-Cyan -C-Cyan">upgrade</span> (update)    Upgrade packages.
+  <span class=" -Color -Color-Cyan -C-Cyan">remove</span> (uninstall)  Remove a package.
+  <span class=" -Color -Color-Cyan -C-Cyan">sync</span>                Sync local package info.
+  <span class=" -Color -Color-Cyan -C-Cyan">cleanup</span>             Cleanup local data.
+
+<span class=" -Color -Color-Bold -Color-Bold-BrightBlue -C-Bold -C-BrightBlue">Package snapshots subcommands:</span>
+  <span class=" -Color -Color-Cyan -C-Cyan">backup</span> (lock, freeze, snapshot)
+                      Save installed packages to a TOML file.
+  <span class=" -Color -Color-Cyan -C-Cyan">restore</span>             Install packages in batch as specified by TOML files.
+</pre></div>
+</div>
+</section>
+<section id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this heading">#</a></h2>
+<section id="mpm">
+<h3>mpm<a class="headerlink" href="#mpm" title="Permalink to this heading">#</a></h3>
+<p>Common CLI options for subcommands.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mpm<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>COMMAND<span class="w"> </span><span class="o">[</span>ARGS<span class="o">]</span>...
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-m">
+<span id="cmdoption-mpm-manager"></span><span class="sig-name descname"><span class="pre">-m</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--manager</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;manager&gt;</span></span><a class="headerlink" href="#cmdoption-mpm-m" title="Permalink to this definition">#</a></dt>
+<dd><p>Restrict subcommand to a subset of managers. Repeat to select multiple managers. The order is preserved for priority-sensitive subcommands.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>apm | apt | apt-mint | brew | cargo | cask | choco | composer | dnf | emerge | flatpak | gem | mas | npm | opkg | pacaur | pacman | paru | pip | pipx | pkg | scoop | snap | steamcmd | vscode | yarn | yay | yum | zypper</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-e">
+<span id="cmdoption-mpm-exclude"></span><span class="sig-name descname"><span class="pre">-e</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--exclude</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;exclude&gt;</span></span><a class="headerlink" href="#cmdoption-mpm-e" title="Permalink to this definition">#</a></dt>
+<dd><p>Exclude a manager. Repeat to exclude multiple managers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>apm | apt | apt-mint | brew | cargo | cask | choco | composer | dnf | emerge | flatpak | gem | mas | npm | opkg | pacaur | pacman | paru | pip | pipx | pkg | scoop | snap | steamcmd | vscode | yarn | yay | yum | zypper</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-a">
+<span id="cmdoption-mpm-all-managers"></span><span class="sig-name descname"><span class="pre">-a</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--all-managers</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-a" title="Permalink to this definition">#</a></dt>
+<dd><p>Force evaluation of all managers recognized by mpm, including those not supported by the current platform or deprecated. Still applies filtering by –manager and –exclude options before calling the subcommand.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-x">
+<span id="cmdoption-mpm-xkcd"></span><span class="sig-name descname"><span class="pre">-x</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--xkcd</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-x" title="Permalink to this definition">#</a></dt>
+<dd><p>Preset manager selection as defined by XKCD #1654. Equivalent to: –pip –brew –npm –dnf –apt –steamcmd.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-apm">
+<span class="sig-name descname"><span class="pre">--apm</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-apm" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager apm (deprecated).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-apt">
+<span class="sig-name descname"><span class="pre">--apt</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-apt" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager apt.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-apt-mint">
+<span class="sig-name descname"><span class="pre">--apt-mint</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-apt-mint" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager apt-mint.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-brew">
+<span class="sig-name descname"><span class="pre">--brew</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-brew" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager brew.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-cargo">
+<span class="sig-name descname"><span class="pre">--cargo</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-cargo" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager cargo.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-cask">
+<span class="sig-name descname"><span class="pre">--cask</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-cask" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager cask.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-choco">
+<span class="sig-name descname"><span class="pre">--choco</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-choco" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager choco.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-composer">
+<span class="sig-name descname"><span class="pre">--composer</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-composer" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager composer.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-dnf">
+<span class="sig-name descname"><span class="pre">--dnf</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-dnf" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager dnf.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-emerge">
+<span class="sig-name descname"><span class="pre">--emerge</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-emerge" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager emerge.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-flatpak">
+<span class="sig-name descname"><span class="pre">--flatpak</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-flatpak" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager flatpak.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-gem">
+<span class="sig-name descname"><span class="pre">--gem</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-gem" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager gem.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-mas">
+<span class="sig-name descname"><span class="pre">--mas</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-mas" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager mas.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-npm">
+<span class="sig-name descname"><span class="pre">--npm</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-npm" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager npm.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-opkg">
+<span class="sig-name descname"><span class="pre">--opkg</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-opkg" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager opkg.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-pacaur">
+<span class="sig-name descname"><span class="pre">--pacaur</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-pacaur" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager pacaur.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-pacman">
+<span class="sig-name descname"><span class="pre">--pacman</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-pacman" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager pacman.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-paru">
+<span class="sig-name descname"><span class="pre">--paru</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-paru" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager paru.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-pip">
+<span class="sig-name descname"><span class="pre">--pip</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-pip" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager pip.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-pipx">
+<span class="sig-name descname"><span class="pre">--pipx</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-pipx" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager pipx.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-pkg">
+<span class="sig-name descname"><span class="pre">--pkg</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-pkg" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager pkg.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-scoop">
+<span class="sig-name descname"><span class="pre">--scoop</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-scoop" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager scoop.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-snap">
+<span class="sig-name descname"><span class="pre">--snap</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-snap" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager snap.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-steamcmd">
+<span class="sig-name descname"><span class="pre">--steamcmd</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-steamcmd" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager steamcmd.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-vscode">
+<span class="sig-name descname"><span class="pre">--vscode</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-vscode" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager vscode.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-yarn">
+<span class="sig-name descname"><span class="pre">--yarn</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-yarn" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager yarn.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-yay">
+<span class="sig-name descname"><span class="pre">--yay</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-yay" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager yay.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-yum">
+<span class="sig-name descname"><span class="pre">--yum</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-yum" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager yum.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-zypper">
+<span class="sig-name descname"><span class="pre">--zypper</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-zypper" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias to –manager zypper.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-ignore-auto-updates">
+<span id="cmdoption-mpm-include-auto-updates"></span><span class="sig-name descname"><span class="pre">--ignore-auto-updates</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--include-auto-updates</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-ignore-auto-updates" title="Permalink to this definition">#</a></dt>
+<dd><p>Report all outdated packages, including those tagged as auto-updating. Only applies to outdated and upgrade subcommands.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-stop-on-error">
+<span id="cmdoption-mpm-continue-on-error"></span><span class="sig-name descname"><span class="pre">--stop-on-error</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--continue-on-error</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-stop-on-error" title="Permalink to this definition">#</a></dt>
+<dd><p>Stop right away or continue operations on manager CLI error.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-d">
+<span id="cmdoption-mpm-dry-run"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--dry-run</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-d" title="Permalink to this definition">#</a></dt>
+<dd><p>Do not actually perform any action, just simulate CLI calls.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-t">
+<span id="cmdoption-mpm-timeout"></span><span class="sig-name descname"><span class="pre">-t</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--timeout</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;timeout&gt;</span></span><a class="headerlink" href="#cmdoption-mpm-t" title="Permalink to this definition">#</a></dt>
+<dd><p>Set maximum duration in seconds for each CLI call.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-description">
+<span class="sig-name descname"><span class="pre">--description</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-description" title="Permalink to this definition">#</a></dt>
+<dd><p>Show package description in results.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-s">
+<span id="cmdoption-mpm-sort-by"></span><span class="sig-name descname"><span class="pre">-s</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--sort-by</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;sort_by&gt;</span></span><a class="headerlink" href="#cmdoption-mpm-s" title="Permalink to this definition">#</a></dt>
+<dd><p>Sort results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>manager_id | manager_name | package_id | package_name | version</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-stats">
+<span id="cmdoption-mpm-no-stats"></span><span class="sig-name descname"><span class="pre">--stats</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-stats</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-stats" title="Permalink to this definition">#</a></dt>
+<dd><p>Print per-manager package statistics.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-bar-plugin-path">
+<span class="sig-name descname"><span class="pre">--bar-plugin-path</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-bar-plugin-path" title="Permalink to this definition">#</a></dt>
+<dd><p>Print location of the Xbar/SwiftBar plugin.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-time">
+<span id="cmdoption-mpm-no-time"></span><span class="sig-name descname"><span class="pre">--time</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-time</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-time" title="Permalink to this definition">#</a></dt>
+<dd><p>Measure and print elapsed execution time.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-color">
+<span id="cmdoption-mpm-ansi"></span><span id="cmdoption-mpm-no-color"></span><span id="cmdoption-mpm-no-ansi"></span><span class="sig-name descname"><span class="pre">--color</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--ansi</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-color</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-ansi</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-color" title="Permalink to this definition">#</a></dt>
+<dd><p>Strip out all colors and all ANSI codes from output.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-C">
+<span id="cmdoption-mpm-config"></span><span class="sig-name descname"><span class="pre">-C</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--config</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;CONFIG_PATH&gt;</span></span><a class="headerlink" href="#cmdoption-mpm-C" title="Permalink to this definition">#</a></dt>
+<dd><p>Location of the configuration file. Supports glob pattern of local path and remote URL.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-show-params">
+<span class="sig-name descname"><span class="pre">--show-params</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-show-params" title="Permalink to this definition">#</a></dt>
+<dd><p>Show all CLI parameters, their provenance, defaults and value, then exit.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-v">
+<span id="cmdoption-mpm-verbosity"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbosity</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;LEVEL&gt;</span></span><a class="headerlink" href="#cmdoption-mpm-v" title="Permalink to this definition">#</a></dt>
+<dd><p>Either CRITICAL, ERROR, WARNING, INFO, DEBUG.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>CRITICAL | ERROR | WARNING | INFO | DEBUG</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-version">
+<span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-version" title="Permalink to this definition">#</a></dt>
+<dd><p>Show the version and exit.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-h">
+<span id="cmdoption-mpm-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-h" title="Permalink to this definition">#</a></dt>
+<dd><p>Show this message and exit.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-o">
+<span id="cmdoption-mpm-output-format"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output-format</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_format&gt;</span></span><a class="headerlink" href="#cmdoption-mpm-o" title="Permalink to this definition">#</a></dt>
+<dd><p>Rendering mode of the output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>asciidoc | csv | csv-excel | csv-excel-tab | csv-unix | double_grid | double_outline | fancy_grid | fancy_outline | github | grid | heavy_grid | heavy_outline | html | jira | json | latex | latex_booktabs | latex_longtable | latex_raw | mediawiki | mixed_grid | mixed_outline | moinmoin | orgtbl | outline | pipe | plain | presto | pretty | psql | rounded_grid | rounded_outline | rst | simple | simple_grid | simple_outline | textile | tsv | unsafehtml | vertical | youtrack</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Environment variables</p>
+<span class="target" id="mpm-manager-mpm-manager"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_MANAGER',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-exclude-mpm-exclude"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_EXCLUDE',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-e"><code class="xref std std-option docutils literal notranslate"><span class="pre">-e</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-all-managers-mpm-all-managers"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_ALL_MANAGERS',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-a"><code class="xref std std-option docutils literal notranslate"><span class="pre">-a</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-xkcd-mpm-xkcd"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_XKCD',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-x"><code class="xref std std-option docutils literal notranslate"><span class="pre">-x</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-apm-mpm-apm"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_APM',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-apm"><code class="xref std std-option docutils literal notranslate"><span class="pre">--apm</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-apt-mpm-apt"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_APT',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-apt"><code class="xref std std-option docutils literal notranslate"><span class="pre">--apt</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-apt-mint-mpm-apt-mint"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_APT_MINT',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-apt-mint"><code class="xref std std-option docutils literal notranslate"><span class="pre">--apt-mint</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-brew-mpm-brew"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_BREW',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-brew"><code class="xref std std-option docutils literal notranslate"><span class="pre">--brew</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-cargo-mpm-cargo"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_CARGO',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-cargo"><code class="xref std std-option docutils literal notranslate"><span class="pre">--cargo</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-cask-mpm-cask"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_CASK',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-cask"><code class="xref std std-option docutils literal notranslate"><span class="pre">--cask</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-choco-mpm-choco"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_CHOCO',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-choco"><code class="xref std std-option docutils literal notranslate"><span class="pre">--choco</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-composer-mpm-composer"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_COMPOSER',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-composer"><code class="xref std std-option docutils literal notranslate"><span class="pre">--composer</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-dnf-mpm-dnf"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_DNF',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-dnf"><code class="xref std std-option docutils literal notranslate"><span class="pre">--dnf</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-emerge-mpm-emerge"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_EMERGE',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-emerge"><code class="xref std std-option docutils literal notranslate"><span class="pre">--emerge</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-flatpak-mpm-flatpak"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_FLATPAK',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-flatpak"><code class="xref std std-option docutils literal notranslate"><span class="pre">--flatpak</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-gem-mpm-gem"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_GEM',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-gem"><code class="xref std std-option docutils literal notranslate"><span class="pre">--gem</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-mas-mpm-mas"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_MAS',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-mas"><code class="xref std std-option docutils literal notranslate"><span class="pre">--mas</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-npm-mpm-npm"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_NPM',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-npm"><code class="xref std std-option docutils literal notranslate"><span class="pre">--npm</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-opkg-mpm-opkg"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_OPKG',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-opkg"><code class="xref std std-option docutils literal notranslate"><span class="pre">--opkg</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-pacaur-mpm-pacaur"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_PACAUR',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-pacaur"><code class="xref std std-option docutils literal notranslate"><span class="pre">--pacaur</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-pacman-mpm-pacman"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_PACMAN',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-pacman"><code class="xref std std-option docutils literal notranslate"><span class="pre">--pacman</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-paru-mpm-paru"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_PARU',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-paru"><code class="xref std std-option docutils literal notranslate"><span class="pre">--paru</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-pip-mpm-pip"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_PIP',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-pip"><code class="xref std std-option docutils literal notranslate"><span class="pre">--pip</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-pipx-mpm-pipx"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_PIPX',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-pipx"><code class="xref std std-option docutils literal notranslate"><span class="pre">--pipx</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-pkg-mpm-pkg"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_PKG',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-pkg"><code class="xref std std-option docutils literal notranslate"><span class="pre">--pkg</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-scoop-mpm-scoop"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_SCOOP',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-scoop"><code class="xref std std-option docutils literal notranslate"><span class="pre">--scoop</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-snap-mpm-snap"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_SNAP',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-snap"><code class="xref std std-option docutils literal notranslate"><span class="pre">--snap</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-steamcmd-mpm-steamcmd"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_STEAMCMD',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-steamcmd"><code class="xref std std-option docutils literal notranslate"><span class="pre">--steamcmd</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-vscode-mpm-vscode"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_VSCODE',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-vscode"><code class="xref std std-option docutils literal notranslate"><span class="pre">--vscode</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-yarn-mpm-yarn"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_YARN',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-yarn"><code class="xref std std-option docutils literal notranslate"><span class="pre">--yarn</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-yay-mpm-yay"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_YAY',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-yay"><code class="xref std std-option docutils literal notranslate"><span class="pre">--yay</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-yum-mpm-yum"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_YUM',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-yum"><code class="xref std std-option docutils literal notranslate"><span class="pre">--yum</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-zypper-mpm-zypper"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_ZYPPER',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-zypper"><code class="xref std std-option docutils literal notranslate"><span class="pre">--zypper</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-ignore-auto-updates-mpm-ignore-auto-updates"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_IGNORE_AUTO_UPDATES',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-ignore-auto-updates"><code class="xref std std-option docutils literal notranslate"><span class="pre">--ignore-auto-updates</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-stop-on-error-mpm-stop-on-error"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_STOP_ON_ERROR',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-stop-on-error"><code class="xref std std-option docutils literal notranslate"><span class="pre">--stop-on-error</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-dry-run-mpm-dry-run"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_DRY_RUN',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-d"><code class="xref std std-option docutils literal notranslate"><span class="pre">-d</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-timeout-mpm-timeout"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_TIMEOUT',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-t"><code class="xref std std-option docutils literal notranslate"><span class="pre">-t</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-description-mpm-description"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_DESCRIPTION',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-description"><code class="xref std std-option docutils literal notranslate"><span class="pre">--description</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-sort-by-mpm-sort-by"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_SORT_BY',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-s"><code class="xref std std-option docutils literal notranslate"><span class="pre">-s</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-stats-mpm-stats"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_STATS',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-stats"><code class="xref std std-option docutils literal notranslate"><span class="pre">--stats</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-bar-plugin-path-mpm-bar-plugin-path"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_BAR_PLUGIN_PATH',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-bar-plugin-path"><code class="xref std std-option docutils literal notranslate"><span class="pre">--bar-plugin-path</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-time-mpm-time"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_TIME',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-time"><code class="xref std std-option docutils literal notranslate"><span class="pre">--time</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-color-mpm-color"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_COLOR',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-color"><code class="xref std std-option docutils literal notranslate"><span class="pre">--color</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-config-mpm-config"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_CONFIG',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-C"><code class="xref std std-option docutils literal notranslate"><span class="pre">--config</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-show-params-mpm-show-params"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_SHOW_PARAMS',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-show-params"><code class="xref std std-option docutils literal notranslate"><span class="pre">--show-params</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-verbosity-mpm-verbosity"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_VERBOSITY',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-v"><code class="xref std std-option docutils literal notranslate"><span class="pre">--verbosity</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-version-mpm-version"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_VERSION',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-version"><code class="xref std std-option docutils literal notranslate"><span class="pre">--version</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-help-mpm-help"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_HELP',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-h"><code class="xref std std-option docutils literal notranslate"><span class="pre">--help</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-output-format-mpm-output-format"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('MPM_OUTPUT_FORMAT',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<section id="mpm-backup">
+<h4>backup<a class="headerlink" href="#mpm-backup" title="Permalink to this heading">#</a></h4>
+<p>Dump the list of installed packages to a TOML file.</p>
+<p>By default the generated TOML content is displayed directly in the console output.
+So <cite>mpm backup</cite> is the same as a call to <cite>mpm backup -</cite>. To have the result written
+in a file on disk, specify the output file like so: <cite>mpm backup packages.toml</cite>.</p>
+<p>Files produced by this subcommand can be safely consumed by <cite>mpm restore</cite>.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mpm<span class="w"> </span>backup<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span><span class="o">[</span>TOML_PATH<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-backup-overwrite">
+<span id="cmdoption-mpm-backup-force"></span><span id="cmdoption-mpm-backup-replace"></span><span class="sig-name descname"><span class="pre">--overwrite</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--force</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--replace</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-backup-overwrite" title="Permalink to this definition">#</a></dt>
+<dd><p>Allow the provided TOML file to be silently wiped out if it already exists.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-backup-merge">
+<span class="sig-name descname"><span class="pre">--merge</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-backup-merge" title="Permalink to this definition">#</a></dt>
+<dd><p>Read the provided TOML file and update each entry with the version currently installed on the system. Requires the [TOML_PATH] argument.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-backup-update-version">
+<span class="sig-name descname"><span class="pre">--update-version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-backup-update-version" title="Permalink to this definition">#</a></dt>
+<dd><p>Read the provided TOML file and update each existing entry with the version currently installed on the system. Requires the [TOML_PATH] argument.</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-backup-arg-TOML_PATH">
+<span class="sig-name descname"><span class="pre">TOML_PATH</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-backup-arg-TOML_PATH" title="Permalink to this definition">#</a></dt>
+<dd><p>Optional argument</p>
+</dd></dl>
+
+<p class="rubric">Environment variables</p>
+<span class="target" id="mpm-backup-overwrite-backup-overwrite"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('BACKUP_OVERWRITE',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-backup-overwrite"><code class="xref std std-option docutils literal notranslate"><span class="pre">--overwrite</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-backup-merge-backup-merge"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('BACKUP_MERGE',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-backup-merge"><code class="xref std std-option docutils literal notranslate"><span class="pre">--merge</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-backup-update-version-backup-update-version"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('BACKUP_UPDATE_VERSION',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-backup-update-version"><code class="xref std std-option docutils literal notranslate"><span class="pre">--update-version</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+</section>
+<section id="mpm-cleanup">
+<h4>cleanup<a class="headerlink" href="#mpm-cleanup" title="Permalink to this heading">#</a></h4>
+<p>Cleanup local data, temporary artifacts and removes orphaned dependencies.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mpm<span class="w"> </span>cleanup<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+<section id="mpm-install">
+<h4>install<a class="headerlink" href="#mpm-install" title="Permalink to this heading">#</a></h4>
+<p>Install one or more packages.</p>
+<p>Installation will proceed first with packages unambiguously tied to a manager. You
+can have an influence on that with more precise package specifiers (like purl)
+and/or tighter selection of managers.</p>
+<p>For other untied packages, mpm will try to find the best manager to install it with.
+Their installation will be attempted with each manager, in the order they were
+selected. If we have the certainty, by the way of a search operation, that this
+package is not available from this manager, we’ll skip the installation and try the
+next available manager.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mpm<span class="w"> </span>install<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>PACKAGES_SPECS...
+</pre></div>
+</div>
+<p class="rubric">Arguments</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-install-arg-PACKAGES_SPECS">
+<span class="sig-name descname"><span class="pre">PACKAGES_SPECS</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-install-arg-PACKAGES_SPECS" title="Permalink to this definition">#</a></dt>
+<dd><p>Required argument(s)</p>
+</dd></dl>
+
+</section>
+<section id="mpm-installed">
+<h4>installed<a class="headerlink" href="#mpm-installed" title="Permalink to this heading">#</a></h4>
+<p>List all packages installed on the system by each manager.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mpm<span class="w"> </span>installed<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-installed-d">
+<span id="cmdoption-mpm-installed-duplicates"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--duplicates</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-installed-d" title="Permalink to this definition">#</a></dt>
+<dd><p>Only list installed packages sharing the same ID. Implies <cite>–sort_by package_id</cite> to make duplicates easier to compare between themselves.</p>
+</dd></dl>
+
+<p class="rubric">Environment variables</p>
+<span class="target" id="mpm-installed-duplicates-installed-duplicates"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('INSTALLED_DUPLICATES',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-installed-d"><code class="xref std std-option docutils literal notranslate"><span class="pre">-d</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+</section>
+<section id="mpm-managers">
+<h4>managers<a class="headerlink" href="#mpm-managers" title="Permalink to this heading">#</a></h4>
+<p>List all supported package managers and autodetect their presence on the
+system.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mpm<span class="w"> </span>managers<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+<section id="mpm-outdated">
+<h4>outdated<a class="headerlink" href="#mpm-outdated" title="Permalink to this heading">#</a></h4>
+<p>List available package upgrades and their versions for each manager.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mpm<span class="w"> </span>outdated<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-outdated-plugin-output">
+<span class="sig-name descname"><span class="pre">--plugin-output</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-outdated-plugin-output" title="Permalink to this definition">#</a></dt>
+<dd><p>Output results for direct consumption by an Xbar/SwiftBar-compatible plugin. The layout is dynamic and depends on environment variables set by either Xbar or SwiftBar.</p>
+</dd></dl>
+
+<p class="rubric">Environment variables</p>
+<span class="target" id="mpm-outdated-plugin-output-outdated-plugin-output"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('OUTDATED_PLUGIN_OUTPUT',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-outdated-plugin-output"><code class="xref std std-option docutils literal notranslate"><span class="pre">--plugin-output</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+</section>
+<section id="mpm-remove">
+<h4>remove<a class="headerlink" href="#mpm-remove" title="Permalink to this heading">#</a></h4>
+<p>Remove one or more packages.</p>
+<p>Packages recognized by multiple managers will be remove with each of them. You can
+fine-tune this behavior with more precise package specifiers (like purl) and/or
+tighter selection of managers.</p>
+<p>Packages unrecognized by any selected manager will be skipped.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mpm<span class="w"> </span>remove<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>PACKAGES_SPECS...
+</pre></div>
+</div>
+<p class="rubric">Arguments</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-remove-arg-PACKAGES_SPECS">
+<span class="sig-name descname"><span class="pre">PACKAGES_SPECS</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-remove-arg-PACKAGES_SPECS" title="Permalink to this definition">#</a></dt>
+<dd><p>Required argument(s)</p>
+</dd></dl>
+
+</section>
+<section id="mpm-restore">
+<h4>restore<a class="headerlink" href="#mpm-restore" title="Permalink to this heading">#</a></h4>
+<p>Read TOML files then install or upgrade each package referenced in them.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mpm<span class="w"> </span>restore<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>TOML_FILES...
+</pre></div>
+</div>
+<p class="rubric">Arguments</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-restore-arg-TOML_FILES">
+<span class="sig-name descname"><span class="pre">TOML_FILES</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-restore-arg-TOML_FILES" title="Permalink to this definition">#</a></dt>
+<dd><p>Required argument(s)</p>
+</dd></dl>
+
+</section>
+<section id="mpm-search">
+<h4>search<a class="headerlink" href="#mpm-search" title="Permalink to this heading">#</a></h4>
+<p>Search each manager for a package ID, name or description matching the query.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mpm<span class="w"> </span>search<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>QUERY
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-search-extended">
+<span id="cmdoption-mpm-search-id-name-only"></span><span class="sig-name descname"><span class="pre">--extended</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--id-name-only</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-search-extended" title="Permalink to this definition">#</a></dt>
+<dd><p>Extend search to description, instead of restricting it to package ID and name. Implies –description.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-search-exact">
+<span id="cmdoption-mpm-search-fuzzy"></span><span class="sig-name descname"><span class="pre">--exact</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--fuzzy</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-search-exact" title="Permalink to this definition">#</a></dt>
+<dd><p>Only returns exact matches on package ID or name.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-search-refilter">
+<span id="cmdoption-mpm-search-no-refilter"></span><span class="sig-name descname"><span class="pre">--refilter</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-refilter</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-search-refilter" title="Permalink to this definition">#</a></dt>
+<dd><p>Let mpm refilters managers’ search results.</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-search-arg-QUERY">
+<span class="sig-name descname"><span class="pre">QUERY</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-search-arg-QUERY" title="Permalink to this definition">#</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+<p class="rubric">Environment variables</p>
+<span class="target" id="mpm-search-extended-search-extended"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('SEARCH_EXTENDED',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-search-extended"><code class="xref std std-option docutils literal notranslate"><span class="pre">--extended</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-search-exact-search-exact"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('SEARCH_EXACT',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-search-exact"><code class="xref std std-option docutils literal notranslate"><span class="pre">--exact</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="mpm-search-refilter-search-refilter"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('SEARCH_REFILTER',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-search-refilter"><code class="xref std std-option docutils literal notranslate"><span class="pre">--refilter</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+</section>
+<section id="mpm-sync">
+<h4>sync<a class="headerlink" href="#mpm-sync" title="Permalink to this heading">#</a></h4>
+<p>Sync local package metadata and info from external sources.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mpm<span class="w"> </span>sync<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+<section id="mpm-upgrade">
+<h4>upgrade<a class="headerlink" href="#mpm-upgrade" title="Permalink to this heading">#</a></h4>
+<p>Upgrade one or more outdated packages.</p>
+<p>All outdated package will be upgraded by default if no specifiers are provided as
+arguments. I.e. assumes -A/–all option if no [PACKAGES_SPECS]….</p>
+<p>Packages recognized by multiple managers will be upgraded with each of them. You can
+fine-tune this behavior with more precise package specifiers (like purl) and/or
+tighter selection of managers.</p>
+<p>Packages unrecognized by any selected manager will be skipped.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mpm<span class="w"> </span>upgrade<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span><span class="o">[</span>PACKAGES_SPECS<span class="o">]</span>...
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-upgrade-A">
+<span id="cmdoption-mpm-upgrade-all"></span><span class="sig-name descname"><span class="pre">-A</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--all</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-upgrade-A" title="Permalink to this definition">#</a></dt>
+<dd><p>Upgrade all outdated packages. Will make the command ignore package IDs provided as parameters.</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-upgrade-arg-PACKAGES_SPECS">
+<span class="sig-name descname"><span class="pre">PACKAGES_SPECS</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-upgrade-arg-PACKAGES_SPECS" title="Permalink to this definition">#</a></dt>
+<dd><p>Optional argument(s)</p>
+</dd></dl>
+
+<p class="rubric">Environment variables</p>
+<span class="target" id="mpm-upgrade-all-upgrade-all"></span><dl class="std envvar">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">('UPGRADE_ALL',)</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-mpm-upgrade-A"><code class="xref std std-option docutils literal notranslate"><span class="pre">-A</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+</section>
+<section id="mpm-which">
+<h4>which<a class="headerlink" href="#mpm-which" title="Permalink to this heading">#</a></h4>
+<p>Search from the user’s environment all CLIs matching the query.</p>
+<p>This is mpm’s own version of the <cite>which -a</cite> UNIX command, used internally to locate
+binaries for each manager. It is exposed as a subcommand for convenience and to help
+troubleshoot CLI resolution logic.</p>
+<p>Compared to the venerable <cite>which</cite> command, this will respect the additional path
+configured for each package manager. It will ignore files that are empty (0 size).
+On Windows, it additionally suppress the default lookup in the current directory,
+which takes precedence on other paths.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mpm<span class="w"> </span>which<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>CLI_NAMES...
+</pre></div>
+</div>
+<p class="rubric">Arguments</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mpm-which-arg-CLI_NAMES">
+<span class="sig-name descname"><span class="pre">CLI_NAMES</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-mpm-which-arg-CLI_NAMES" title="Permalink to this definition">#</a></dt>
+<dd><p>Required argument(s)</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="configuration.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Configuration</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="usecase.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Use-cases</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Kevin Deldycke and contributors
+            </div>
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on 2024-03-18</div>
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">CLI parameters</a><ul>
+<li><a class="reference internal" href="#help-screen">Help screen</a></li>
+<li><a class="reference internal" href="#options">Options</a><ul>
+<li><a class="reference internal" href="#mpm">mpm</a><ul>
+<li><a class="reference internal" href="#mpm-backup">backup</a></li>
+<li><a class="reference internal" href="#mpm-cleanup">cleanup</a></li>
+<li><a class="reference internal" href="#mpm-install">install</a></li>
+<li><a class="reference internal" href="#mpm-installed">installed</a></li>
+<li><a class="reference internal" href="#mpm-managers">managers</a></li>
+<li><a class="reference internal" href="#mpm-outdated">outdated</a></li>
+<li><a class="reference internal" href="#mpm-remove">remove</a></li>
+<li><a class="reference internal" href="#mpm-restore">restore</a></li>
+<li><a class="reference internal" href="#mpm-search">search</a></li>
+<li><a class="reference internal" href="#mpm-sync">sync</a></li>
+<li><a class="reference internal" href="#mpm-upgrade">upgrade</a></li>
+<li><a class="reference internal" href="#mpm-which">which</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=bc11bb63"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=36754332"></script>
+    </body>
+</html>

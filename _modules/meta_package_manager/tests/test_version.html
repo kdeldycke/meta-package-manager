@@ -1,0 +1,561 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+
+    <!-- Generated with Sphinx 7.1.2 and Furo 2024.01.29 -->
+        <title>meta_package_manager.tests.test_version - Meta Package Manager</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d3572542" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     Meta Package Manager works fine, but its sole maintainer is distracted by life 😶‍🌫️.<br/>You can influence it with purchase of <strong><a class='reference external' href='https://github.com/sponsors/kdeldycke'>business support 🤝 and sponsorship 🫶</a></strong>. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">Meta Package Manager</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="../../../_static/logo-square.svg" alt="Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usecase.html">Use-cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli-parameters.html">CLI parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../bar-plugin.html">Xbar and SwiftBar plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../falsehoods.html">Falsehoods programmers believe about package managers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark.html">Benchmark</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contribution guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../meta_package_manager.html">API</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../meta_package_manager.managers.html">meta_package_manager.managers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../meta_package_manager.tests.html">meta_package_manager.tests package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../py-modindex.html">Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../todolist.html">Todo-list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../code-of-conduct.html">Code of conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/sponsors/kdeldycke">Funding</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for meta_package_manager.tests.test_version</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright Kevin Deldycke &lt;kevin@deldycke.com&gt; and contributors.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is Free Software; you can redistribute it and/or</span>
+<span class="c1"># modify it under the terms of the GNU General Public License</span>
+<span class="c1"># as published by the Free Software Foundation; either version 2</span>
+<span class="c1"># of the License, or (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">shuffle</span>
+
+<span class="kn">import</span> <span class="nn">pytest</span>
+
+<span class="kn">from</span> <span class="nn">meta_package_manager.version</span> <span class="kn">import</span> <span class="n">Token</span><span class="p">,</span> <span class="n">TokenizedString</span><span class="p">,</span> <span class="n">parse_version</span>
+
+
+<div class="viewcode-block" id="reverse_fixtures"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.reverse_fixtures">[docs]</a><span class="k">def</span> <span class="nf">reverse_fixtures</span><span class="p">(</span><span class="n">table</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Utility method to reverse a tuple of tuples.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="nb">reversed</span><span class="p">,</span> <span class="n">table</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="test_token_allowed_instantiation"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_token_allowed_instantiation">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">123</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;123&quot;</span><span class="p">,</span> <span class="s2">&quot;abc&quot;</span><span class="p">,</span> <span class="s2">&quot;ABC&quot;</span><span class="p">,</span> <span class="s2">&quot;123abc&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">test_token_allowed_instantiation</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="n">Token</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_token_unauthorized_instantiation"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_token_unauthorized_instantiation">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;a-b-c&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">test_token_unauthorized_instantiation</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+        <span class="n">Token</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<span class="n">eq_values</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;2345&quot;</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="s2">&quot;2345&quot;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;2345&quot;</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="mi">2345</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;02345&quot;</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="mi">2345</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;02345&quot;</span><span class="p">),</span> <span class="s2">&quot;02345&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;2345&quot;</span><span class="p">),</span> <span class="mi">2345</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;2345&quot;</span><span class="p">),</span> <span class="s2">&quot;2345&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">),</span> <span class="s2">&quot;0&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;000&quot;</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;abc&quot;</span><span class="p">),</span> <span class="s2">&quot;abc&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;abc&quot;</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="s2">&quot;abc&quot;</span><span class="p">)),</span>
+<span class="p">]</span>
+
+
+<span class="n">ne_values</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;2345&quot;</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="s2">&quot;45&quot;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;2345&quot;</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="mi">45</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;2345&quot;</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="mi">0</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;2345&quot;</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">),</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;abc&quot;</span><span class="p">),</span> <span class="s2">&quot;def&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;Z&quot;</span><span class="p">),</span> <span class="s2">&quot;z&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;acb&quot;</span><span class="p">),</span> <span class="mi">123</span><span class="p">),</span>
+<span class="p">]</span>
+
+
+<span class="n">gt_values</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;9999&quot;</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="s2">&quot;12&quot;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;9999&quot;</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="s2">&quot;000000099&quot;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="mi">9999</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="s2">&quot;12&quot;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="mi">9999</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="mi">12</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="mi">9999</span><span class="p">),</span> <span class="s2">&quot;0&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="mi">9999</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">),</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;abc&quot;</span><span class="p">),</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;abc&quot;</span><span class="p">),</span> <span class="s2">&quot;ab&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">),</span> <span class="s2">&quot;Z&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">),</span> <span class="s2">&quot;Z&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="s2">&quot;Z&quot;</span><span class="p">)),</span>
+<span class="p">]</span>
+
+
+<span class="n">lt_values</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;12&quot;</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="s2">&quot;9999&quot;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;0000012&quot;</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="s2">&quot;9999&quot;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;12&quot;</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="mi">9999</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="mi">12</span><span class="p">),</span> <span class="n">Token</span><span class="p">(</span><span class="mi">9999</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;12&quot;</span><span class="p">),</span> <span class="mi">9999</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">),</span> <span class="mi">9999</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;ab&quot;</span><span class="p">),</span> <span class="s2">&quot;abc&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;Z&quot;</span><span class="p">),</span> <span class="s2">&quot;z&quot;</span><span class="p">),</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="test_token_eq"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_token_eq">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">((</span><span class="s2">&quot;token&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">),</span> <span class="n">eq_values</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_token_eq</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">token</span> <span class="o">==</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="test_token_ne"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_token_ne">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">((</span><span class="s2">&quot;token&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">),</span> <span class="n">ne_values</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_token_ne</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">token</span> <span class="o">!=</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="test_token_gt"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_token_gt">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">((</span><span class="s2">&quot;token&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">),</span> <span class="n">gt_values</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_token_gt</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">token</span> <span class="o">&gt;</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="test_token_lt"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_token_lt">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">((</span><span class="s2">&quot;token&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">),</span> <span class="n">lt_values</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_token_lt</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">token</span> <span class="o">&lt;</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="test_token_ge"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_token_ge">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">((</span><span class="s2">&quot;token&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">),</span> <span class="n">gt_values</span> <span class="o">+</span> <span class="n">eq_values</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_token_ge</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">token</span> <span class="o">&gt;=</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="test_token_le"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_token_le">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">((</span><span class="s2">&quot;token&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">),</span> <span class="n">lt_values</span> <span class="o">+</span> <span class="n">eq_values</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_token_le</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">token</span> <span class="o">&lt;=</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="test_token_hash"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_token_hash">[docs]</a><span class="k">def</span> <span class="nf">test_token_hash</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="nb">hash</span><span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;9999&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="nb">hash</span><span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;9999&quot;</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">hash</span><span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;9999&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="nb">hash</span><span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="mi">9999</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">hash</span><span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="mi">9999</span><span class="p">))</span> <span class="o">==</span> <span class="nb">hash</span><span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="mi">9999</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">hash</span><span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;09999&quot;</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">hash</span><span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;9999&quot;</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">hash</span><span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="s2">&quot;09999&quot;</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">hash</span><span class="p">(</span><span class="n">Token</span><span class="p">(</span><span class="mi">9999</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="test_tokenized_string_allowed_instantiation"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_tokenized_string_allowed_instantiation">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span>
+    <span class="s2">&quot;value&quot;</span><span class="p">,</span>
+    <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">123</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1.2.3&quot;</span><span class="p">,</span> <span class="s2">&quot;abc&quot;</span><span class="p">,</span> <span class="s2">&quot;A-B-C&quot;</span><span class="p">,</span> <span class="s2">&quot;123   a bc </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_tokenized_string_allowed_instantiation</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="n">TokenizedString</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_tokenized_string_unauthorized_instantiation"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_tokenized_string_unauthorized_instantiation">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span>
+    <span class="s2">&quot;value&quot;</span><span class="p">,</span>
+    <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}),</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_tokenized_string_unauthorized_instantiation</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+        <span class="n">TokenizedString</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_tokenized_string_hash"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_tokenized_string_hash">[docs]</a><span class="k">def</span> <span class="nf">test_tokenized_string_hash</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="nb">hash</span><span class="p">(</span><span class="n">TokenizedString</span><span class="p">(</span><span class="s2">&quot;1.2.3&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="nb">hash</span><span class="p">(</span><span class="n">TokenizedString</span><span class="p">(</span><span class="s2">&quot;1.2.3&quot;</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">hash</span><span class="p">(</span><span class="n">TokenizedString</span><span class="p">(</span><span class="mi">9999</span><span class="p">))</span> <span class="o">==</span> <span class="nb">hash</span><span class="p">(</span><span class="n">TokenizedString</span><span class="p">(</span><span class="mi">9999</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">hash</span><span class="p">(</span><span class="n">TokenizedString</span><span class="p">(</span><span class="s2">&quot;9999&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="nb">hash</span><span class="p">(</span><span class="n">TokenizedString</span><span class="p">(</span><span class="mi">9999</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">hash</span><span class="p">(</span><span class="n">TokenizedString</span><span class="p">(</span><span class="s2">&quot;09999&quot;</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">hash</span><span class="p">(</span><span class="n">TokenizedString</span><span class="p">(</span><span class="s2">&quot;9999&quot;</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">hash</span><span class="p">(</span><span class="n">TokenizedString</span><span class="p">(</span><span class="s2">&quot;09999&quot;</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">hash</span><span class="p">(</span><span class="n">TokenizedString</span><span class="p">(</span><span class="mi">9999</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">hash</span><span class="p">(</span><span class="n">TokenizedString</span><span class="p">(</span><span class="s2">&quot;1.2.3&quot;</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">hash</span><span class="p">(</span>
+        <span class="n">TokenizedString</span><span class="p">(</span><span class="s2">&quot;1.2.3&quot;</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;_&quot;</span><span class="p">),</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_tokenized_string_noop_instantiation"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_tokenized_string_noop_instantiation">[docs]</a><span class="k">def</span> <span class="nf">test_tokenized_string_noop_instantiation</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">TokenizedString</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="test_tokenized_string_idempotent_instantiation"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_tokenized_string_idempotent_instantiation">[docs]</a><span class="k">def</span> <span class="nf">test_tokenized_string_idempotent_instantiation</span><span class="p">():</span>
+    <span class="n">tok1</span> <span class="o">=</span> <span class="n">TokenizedString</span><span class="p">(</span><span class="s2">&quot;1.2.3&quot;</span><span class="p">)</span>
+    <span class="n">tok2</span> <span class="o">=</span> <span class="n">TokenizedString</span><span class="p">(</span><span class="n">tok1</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">tok1</span> <span class="ow">is</span> <span class="n">tok2</span>
+    <span class="k">assert</span> <span class="nb">hash</span><span class="p">(</span><span class="n">tok1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">hash</span><span class="p">(</span><span class="n">tok2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">tok1</span> <span class="o">==</span> <span class="n">tok2</span></div>
+
+
+<div class="viewcode-block" id="test_tokenized_string_deepcopy"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_tokenized_string_deepcopy">[docs]</a><span class="k">def</span> <span class="nf">test_tokenized_string_deepcopy</span><span class="p">():</span>
+    <span class="n">tok1</span> <span class="o">=</span> <span class="n">TokenizedString</span><span class="p">(</span><span class="s2">&quot;1.2.3&quot;</span><span class="p">)</span>
+    <span class="n">tok2</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">tok1</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">tok1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">tok2</span>
+    <span class="k">assert</span> <span class="nb">hash</span><span class="p">(</span><span class="n">tok1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">hash</span><span class="p">(</span><span class="n">tok2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">tok1</span> <span class="o">==</span> <span class="n">tok2</span></div>
+
+
+<span class="n">version_list</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="p">(</span><span class="s2">&quot;r2917_1&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="mi">2917</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot; r     29   </span><span class="se">\n</span><span class="s2">  17   1 x  &quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;2020.03.24&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">24</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;4.2.1-5666.3&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5666</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;4.2.1-5666..3&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5666</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;4.2.1-5666.3.&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5666</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;.4.2.1-5666.3&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5666</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;4.2.1--5666.3&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5666</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;4.2.1-#-5666.3&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5666</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;4.2.1-ABC-5666.3&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;abc&quot;</span><span class="p">,</span> <span class="mi">5666</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+    <span class="p">(</span>
+        <span class="s2">&quot;4.2.1-éèàçÇÉÈ²³¼ÀÁÂÃÄ—ÅËÍÑÒÖÜÝåïš™-5666.3&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;eeaccee&quot;</span><span class="p">,</span> <span class="mi">231</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;aaaaae&quot;</span><span class="p">,</span> <span class="s2">&quot;ainooeueyastm&quot;</span><span class="p">,</span> <span class="mi">5666</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;1.3_1&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;2.40.20161221.0239&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">20161221</span><span class="p">,</span> <span class="mi">239</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;latest&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;latest&quot;</span><span class="p">,)),</span>
+    <span class="p">(</span><span class="s2">&quot;1.2beta5&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;beta&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;2.8.18-x86_64&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">86</span><span class="p">,</span> <span class="mi">64</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;1.8.0_112-b16&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">112</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="mi">16</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;3.6.9_build_4685&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="s2">&quot;build&quot;</span><span class="p">,</span> <span class="mi">4685</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;1.8.6-124-g6cd4c31&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">124</span><span class="p">,</span> <span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s2">&quot;cd&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="mi">31</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;0.9999999&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9999999</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;0.0.0&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;1.0+git71+c79e264-r0&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="mi">71</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="mi">264</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;20190718-r0&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">20190718</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;0.0.0-development&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;development&quot;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;v0.9.4.3&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;6.0.1-0ubuntu1&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;ubuntu&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;4.6.0+git+20160126-2&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="mi">20160126</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;1:5.25-2ubuntu1&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;ubuntu&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;1.18.4ubuntu1.1&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;ubuntu&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;20160104ubuntu1&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">20160104</span><span class="p">,</span> <span class="s2">&quot;ubuntu&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">&quot;3.113+nmu3ubuntu4&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">113</span><span class="p">,</span> <span class="s2">&quot;nmu&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;ubuntu&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span>
+    <span class="p">(</span>
+        <span class="s2">&quot;13.0.2,8:d4173c853231432f001e99d882&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="mi">4173</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="mi">853231432</span><span class="p">,</span> <span class="s2">&quot;f&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="mi">99</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="mi">882</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;1.01+20150706hgc3698e0+dfsg-2&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">20150706</span><span class="p">,</span> <span class="s2">&quot;hgc&quot;</span><span class="p">,</span> <span class="mi">3698</span><span class="p">,</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;dfsg&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="test_version_tokenizer"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_version_tokenizer">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">((</span><span class="s2">&quot;v_string&quot;</span><span class="p">,</span> <span class="s2">&quot;v_tuple&quot;</span><span class="p">),</span> <span class="n">version_list</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_version_tokenizer</span><span class="p">(</span><span class="n">v_string</span><span class="p">,</span> <span class="n">v_tuple</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">TokenizedString</span><span class="p">(</span><span class="n">v_string</span><span class="p">)</span> <span class="o">==</span> <span class="n">v_tuple</span></div>
+
+
+<span class="n">compared_gt</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span> <span class="s2">&quot;1.0&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;0.1&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;0.1&quot;</span><span class="p">,</span> <span class="s2">&quot;0.0&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;0.1&quot;</span><span class="p">,</span> <span class="s2">&quot;0.0.0.0.0&quot;</span><span class="p">),</span>
+    <span class="c1"># (&quot;0.1&quot;, &quot;0.beta2&quot;),</span>
+    <span class="p">(</span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span> <span class="s2">&quot;1.0&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;3.1.10&quot;</span><span class="p">,</span> <span class="s2">&quot;3.1.9&quot;</span><span class="p">),</span>
+    <span class="c1"># (&quot;6.2&quot;, &quot;6.2.0&quot;),</span>
+    <span class="c1"># (&quot;9.52&quot;, &quot;9d&quot;),</span>
+    <span class="p">(</span><span class="s2">&quot;8.2p1_1&quot;</span><span class="p">,</span> <span class="s2">&quot;8.2p1&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;3.12.0a4&quot;</span><span class="p">,</span> <span class="s2">&quot;3.7.0&quot;</span><span class="p">),</span>
+    <span class="c1"># (&quot;3.12.0&quot;, &quot;3.12.0a4&quot;),</span>
+    <span class="c1"># (&quot;3.7.7&quot;, &quot;3.7-beta2_1&quot;),</span>
+    <span class="c1"># (&quot;2.1.1&quot;, &quot;2.1.1-git-23hfb2-foobar&quot;),</span>
+    <span class="p">(</span><span class="mi">20200313</span><span class="p">,</span> <span class="mi">20190801</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;2020.03.24&quot;</span><span class="p">,</span> <span class="s2">&quot;2019.11.28&quot;</span><span class="p">),</span>
+    <span class="c1"># (&quot;14.0.1,7:664493ef4a6946b186ff29eb326336a2&quot;,</span>
+    <span class="c1">#  &quot;14,36:076bab302c7b4508975440c56f6cc26a&quot;),</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="test_version_comparison_gt"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_version_comparison_gt">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">((</span><span class="s2">&quot;ver1&quot;</span><span class="p">,</span> <span class="s2">&quot;ver2&quot;</span><span class="p">),</span> <span class="n">compared_gt</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_version_comparison_gt</span><span class="p">(</span><span class="n">ver1</span><span class="p">,</span> <span class="n">ver2</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">TokenizedString</span><span class="p">(</span><span class="n">ver1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">TokenizedString</span><span class="p">(</span><span class="n">ver2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">parse_version</span><span class="p">(</span><span class="n">ver1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="n">ver2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_version_comparison_lt"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_version_comparison_lt">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">((</span><span class="s2">&quot;ver1&quot;</span><span class="p">,</span> <span class="s2">&quot;ver2&quot;</span><span class="p">),</span> <span class="n">reverse_fixtures</span><span class="p">(</span><span class="n">compared_gt</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">test_version_comparison_lt</span><span class="p">(</span><span class="n">ver1</span><span class="p">,</span> <span class="n">ver2</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">TokenizedString</span><span class="p">(</span><span class="n">ver1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">TokenizedString</span><span class="p">(</span><span class="n">ver2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">parse_version</span><span class="p">(</span><span class="n">ver1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="n">ver2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_version_sorting"><a class="viewcode-back" href="../../../meta_package_manager.tests.html#meta_package_manager.tests.test_version.test_version_sorting">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span>
+    <span class="s2">&quot;sequence&quot;</span><span class="p">,</span>
+    <span class="p">(</span>
+        <span class="p">[</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;r0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;r1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;r9_0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;r9_3&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;r9_30&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;r2917_1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;r02918_1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;r02920_0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;r02920_1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;r02920_20&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;r02920_021&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_version_sorting</span><span class="p">(</span><span class="n">sequence</span><span class="p">):</span>
+    <span class="n">sorted_version</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">TokenizedString</span><span class="p">,</span> <span class="n">sequence</span><span class="p">))</span>
+    <span class="n">ramdom_order</span> <span class="o">=</span> <span class="n">sorted_version</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">shuffle</span><span class="p">(</span><span class="n">ramdom_order</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">ramdom_order</span> <span class="o">!=</span> <span class="n">sorted_version</span>
+    <span class="k">assert</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ramdom_order</span><span class="p">)</span> <span class="o">==</span> <span class="n">sorted_version</span></div>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Kevin Deldycke and contributors
+            </div>
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on 2024-03-18</div>
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=bc11bb63"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=36754332"></script>
+    <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+    </body>
+</html>

@@ -1,0 +1,471 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Development" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="development.html" />
+<meta property="og:site_name" content="Meta Package Manager" />
+<meta property="og:description" content="Philosophy: First create something that works (to provide business value)., Then something that’s beautiful (to lower maintenance costs)., Finally works on performance (to avoid wasting time on pre..." />
+<meta name="description" content="Philosophy: First create something that works (to provide business value)., Then something that’s beautiful (to lower maintenance costs)., Finally works on performance (to avoid wasting time on pre..." />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="meta_package_manager package" href="meta_package_manager.html" /><link rel="prev" title="Contribution guide" href="contributing.html" />
+
+    <!-- Generated with Sphinx 7.1.2 and Furo 2024.01.29 -->
+        <title>Development - Meta Package Manager</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d3572542" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     Meta Package Manager works fine, but its sole maintainer is distracted by life 😶‍🌫️.<br/>You can influence it with purchase of <strong><a class='reference external' href='https://github.com/sponsors/kdeldycke'>business support 🤝 and sponsorship 🫶</a></strong>. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">Meta Package Manager</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/logo-square.svg" alt="Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usecase.html">Use-cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-parameters.html">CLI parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bar-plugin.html">Xbar and SwiftBar plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="falsehoods.html">Falsehoods programmers believe about package managers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark.html">Benchmark</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contribution guide</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Development</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="meta_package_manager.html">API</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.managers.html">meta_package_manager.managers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.tests.html">meta_package_manager.tests package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="todolist.html">Todo-list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code-of-conduct.html">Code of conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/sponsors/kdeldycke">Funding</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/kdeldycke/meta-package-manager/edit/main/docs/development.md" title="Edit this page">
+    <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
+      <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
+    </svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="development">
+<h1>Development<a class="headerlink" href="#development" title="Permalink to this heading">#</a></h1>
+<section id="philosophy">
+<h2>Philosophy<a class="headerlink" href="#philosophy" title="Permalink to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>First create something that works (to provide business value).</p></li>
+<li><p>Then something that’s beautiful (to lower maintenance costs).</p></li>
+<li><p>Finally works on performance (to avoid wasting time on premature
+optimizations).</p></li>
+</ol>
+</section>
+<section id="stability-policy">
+<h2>Stability policy<a class="headerlink" href="#stability-policy" title="Permalink to this heading">#</a></h2>
+<p>This project more or less follows <a class="reference external" href="https://semver.org/">Semantic Versioning</a>.</p>
+<p>Which boils down to the following these rules of thumb regarding stability:</p>
+<ul>
+<li><p><strong>Patch releases</strong>: <code class="docutils literal notranslate"><span class="pre">0.x.n</span></code> → <code class="docutils literal notranslate"><span class="pre">0.x.(n+1)</span></code> upgrades</p>
+<p>Are bug-fix only. These releases must not break anything and keep
+backward-compatibility with <code class="docutils literal notranslate"><span class="pre">0.x.*</span></code> and <code class="docutils literal notranslate"><span class="pre">0.(x-1).*</span></code> series.</p>
+</li>
+<li><p><strong>Minor releases</strong>: <code class="docutils literal notranslate"><span class="pre">0.n.*</span></code> → <code class="docutils literal notranslate"><span class="pre">0.(n+1).0</span></code> upgrades</p>
+<p>Includes any non-bugfix changes. These releases must be backward-compatible
+with any <code class="docutils literal notranslate"><span class="pre">0.n.*</span></code> version but are allowed to drop compatibility with the
+<code class="docutils literal notranslate"><span class="pre">0.(n-1).*</span></code> series and below.</p>
+</li>
+<li><p><strong>Major releases</strong>: <code class="docutils literal notranslate"><span class="pre">n.*.*</span></code> → <code class="docutils literal notranslate"><span class="pre">(n+1).0.0</span></code> upgrades</p>
+<p>Make no promises about backwards-compatibility. Any API change requires a new
+major release.</p>
+</li>
+</ul>
+</section>
+<section id="build-status">
+<h2>Build status<a class="headerlink" href="#build-status" title="Permalink to this heading">#</a></h2>
+<p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/tree/main"><code class="docutils literal notranslate"><span class="pre">main</span></code> branch</a>:
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Amain"><img alt="Unittests status" src="https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=main" /></a>
+<a class="reference external" href="https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main"><img alt="Coverage status" src="https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/badge.svg" /></a></p>
+</section>
+<section id="setup-environment">
+<h2>Setup environment<a class="headerlink" href="#setup-environment" title="Permalink to this heading">#</a></h2>
+<p>This <strong>step is required</strong> for all the other sections from this page.</p>
+<p>Check out latest development branch:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:kdeldycke/meta-package-manager.git
+<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>./meta-package-manager
+<span class="gp">$ </span>git<span class="w"> </span>checkout<span class="w"> </span>main
+</pre></div>
+</div>
+<p>Install package in editable mode with all development dependencies:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>poetry
+<span class="gp">$ </span>poetry<span class="w"> </span>install
+</pre></div>
+</div>
+<p>Now you’re ready to hack and abuse <code class="docutils literal notranslate"><span class="pre">git</span></code>.</p>
+</section>
+<section id="test-mpm-development-version">
+<h2>Test <code class="docutils literal notranslate"><span class="pre">mpm</span></code> development version<a class="headerlink" href="#test-mpm-development-version" title="Permalink to this heading">#</a></h2>
+<p>After the steps above, you are free to play with the bleeding edge version of <code class="docutils literal notranslate"><span class="pre">mpm</span></code>:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>poetry<span class="w"> </span>run<span class="w"> </span>mpm<span class="w"> </span>--version
+<span class="go">mpm, version 4.13.0-dev</span>
+<span class="gp gp-VirtualEnv">(...)</span>
+</pre></div>
+</div>
+</section>
+<section id="unit-tests">
+<h2>Unit-tests<a class="headerlink" href="#unit-tests" title="Permalink to this heading">#</a></h2>
+<p>Simply run:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>poetry<span class="w"> </span>run<span class="w"> </span>pytest
+</pre></div>
+</div>
+<p>Which should be the same as running non-destructive unit-tests in parallel with:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>--numprocesses<span class="o">=</span>auto<span class="w"> </span>--skip-destructive<span class="w"> </span>./meta_package_manager/tests
+</pre></div>
+</div>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>If you’re not afraid of <code class="docutils literal notranslate"><span class="pre">mpm</span></code> tests messing around with the package managers on your system, you
+can run the subset of destructive tests with:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>--numprocesses<span class="o">=</span><span class="m">0</span><span class="w"> </span>--skip-non-destructive<span class="w"> </span>--run-destructive<span class="w"> </span>./meta_package_manager/tests
+</pre></div>
+</div>
+<p>As you can see above we recommend running these tests in (non-deterministic) sequential order as most
+package managers don’t support concurrency.</p>
+</div>
+</section>
+<section id="coding-style">
+<h2>Coding style<a class="headerlink" href="#coding-style" title="Permalink to this heading">#</a></h2>
+<p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/lint.yaml">Code linting is handled by a workflow</a>.</p>
+</section>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading">#</a></h2>
+<p>The documentation you’re currently reading can be built locally with
+<a class="reference external" href="https://www.sphinx-doc.org">Sphinx</a>:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>poetry<span class="w"> </span>run<span class="w"> </span>sphinx-build<span class="w"> </span>-b<span class="w"> </span>html<span class="w"> </span>./docs<span class="w"> </span>./docs/html
+</pre></div>
+</div>
+<p>The generation of API documentation is
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/docs.yaml">covered by a dedicated workflow</a>.</p>
+</section>
+<section id="screenshots">
+<h2>Screenshots<a class="headerlink" href="#screenshots" title="Permalink to this heading">#</a></h2>
+<p>Project screenshots found in the documentation and the <code class="docutils literal notranslate"><span class="pre">readme.md</span></code> file needs
+to be refreshed by hand once in a while.</p>
+<p>To produce clean and fancy terminals screenshots, use either:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://graphite-shot.now.sh">Graphite Shot</a></p></li>
+<li><p><a class="reference external" href="https://github.com/carbon-app/carbon">Carbon</a></p></li>
+<li><p><a class="reference external" href="https://codekeep.io/screenshot">CodeKeep</a></p></li>
+<li><p><a class="reference external" href="https://chalk.ist">chalk.ist</a></p></li>
+</ul>
+</section>
+<section id="changelog">
+<h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this heading">#</a></h2>
+<p>Before a release, the maintainers will review and rewrite the changelog to make
+it clean and readable. Inspiration can be drawn from the
+<a class="reference external" href="https://keepachangelog.com">keep a changelog manifesto</a>.</p>
+<p>Changes can be inspected by using the comparison URL between the last tagged
+version and the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch. This link is available at the top of the
+<a class="reference internal" href="changelog.html"><span class="doc">Changelog</span></a>.</p>
+</section>
+<section id="release-process">
+<h2>Release process<a class="headerlink" href="#release-process" title="Permalink to this heading">#</a></h2>
+<p>All steps of the release process and version management are automated in the
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/changelog.yaml"><code class="docutils literal notranslate"><span class="pre">changelog.yaml</span></code></a> and
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/release.yaml"><code class="docutils literal notranslate"><span class="pre">release.yaml</span></code></a> and workflows.</p>
+<p>All there’s left to do is to:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/workflows/pulls?q=is%3Apr+is%3Aopen+head%3Aprepare-release">check the open draft prepare-release PR</a>
+and its changes,</p></li>
+<li><p>click the <code class="docutils literal notranslate"><span class="pre">Ready</span> <span class="pre">for</span> <span class="pre">review</span></code> button,</p></li>
+<li><p>click the <code class="docutils literal notranslate"><span class="pre">Rebase</span> <span class="pre">and</span> <span class="pre">merge</span></code> button,</p></li>
+<li><p>let the workflows tag the release and set back the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch into a
+development state.</p></li>
+</ul>
+</section>
+<section id="version-bump">
+<h2>Version bump<a class="headerlink" href="#version-bump" title="Permalink to this heading">#</a></h2>
+<p>Versions are bumped to their next <code class="docutils literal notranslate"><span class="pre">patch</span></code> revision during the release process
+above by the
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/release.yaml"><code class="docutils literal notranslate"><span class="pre">release.yaml</span></code> workflow</a>.</p>
+<p>At any point during development, you can bump the version by merging either the
+<code class="docutils literal notranslate"><span class="pre">minor-version-increment</span></code> or <code class="docutils literal notranslate"><span class="pre">major-version-increment</span></code> branch, each available
+in their own PR.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="meta_package_manager.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">meta_package_manager package</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="contributing.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Contribution guide</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Kevin Deldycke and contributors
+            </div>
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on 2024-03-18</div>
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Development</a><ul>
+<li><a class="reference internal" href="#philosophy">Philosophy</a></li>
+<li><a class="reference internal" href="#stability-policy">Stability policy</a></li>
+<li><a class="reference internal" href="#build-status">Build status</a></li>
+<li><a class="reference internal" href="#setup-environment">Setup environment</a></li>
+<li><a class="reference internal" href="#test-mpm-development-version">Test <code class="docutils literal notranslate"><span class="pre">mpm</span></code> development version</a></li>
+<li><a class="reference internal" href="#unit-tests">Unit-tests</a></li>
+<li><a class="reference internal" href="#coding-style">Coding style</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+<li><a class="reference internal" href="#screenshots">Screenshots</a></li>
+<li><a class="reference internal" href="#changelog">Changelog</a></li>
+<li><a class="reference internal" href="#release-process">Release process</a></li>
+<li><a class="reference internal" href="#version-bump">Version bump</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=bc11bb63"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=36754332"></script>
+    </body>
+</html>

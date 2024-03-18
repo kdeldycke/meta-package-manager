@@ -1,6 +1,6 @@
 # Changelog
 
-## [5.15.1 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v5.15.0...main)
+## [5.16.0 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v5.15.0...main)
 
 ```{important}
 This version is not released yet and is under active development.

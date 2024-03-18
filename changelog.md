@@ -1,10 +1,12 @@
 # Changelog
 
-## [5.15.1 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v5.15.0...main)
+## [5.15.2 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v5.15.1...main)
 
 ```{important}
 This version is not released yet and is under active development.
 ```
+
+## [5.15.1 (2024-03-18)](https://github.com/kdeldycke/meta-package-manager/compare/v5.15.0...v5.15.1)
 
 ## [5.15.0 (2024-02-25)](https://github.com/kdeldycke/meta-package-manager/compare/v5.14.2...v5.15.0)
 

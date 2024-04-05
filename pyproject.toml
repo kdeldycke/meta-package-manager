@@ -87,9 +87,9 @@ classifiers = [
 [tool.poetry.dependencies]
 # Python versions and their status: https://devguide.python.org/versions/
 python = "^3.8"
-boltons = "^23.0.0"
+boltons = "^24.0.0"
 click = "^8.1.2"
-click-extra = "^4.7.4"
+click-extra = "^4.7.5"
 packageurl-python = "^0.15.0"
 tabulate = { extras = ["widechars"], version = "^0.9.0" }
 tomli = { version = "^2.0.1", python = "< 3.11" }

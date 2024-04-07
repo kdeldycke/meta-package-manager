@@ -149,8 +149,7 @@ jobs:
       # Pipx
       - name: Pipx - Install
         run: |
-          python -m pip install --user pipx
-          python -m pipx ensurepath
+          python -m pip install --upgrade pipx
 
       # Homebrew
       - name: Homebrew - macOS upgrade

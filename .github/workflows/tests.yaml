@@ -576,4 +576,4 @@ jobs:
           ./meta_package_manager/tests/test_bar_plugin.py
 
       - name: Coverage - Upload Codecov
-        uses: codecov/codecov-action@v4.2.0
+        uses: codecov/codecov-action@v4.3.0

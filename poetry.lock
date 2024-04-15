@@ -1234,13 +1234,13 @@ theme-sbt = ["sphinx-book-theme (>=1.0,<2.0)"]
 
 [[package]]
 name = "sphinx-issues"
-version = "4.0.0"
+version = "4.1.0"
 description = "A Sphinx extension for linking to your project's issue tracker"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "sphinx_issues-4.0.0-py3-none-any.whl", hash = "sha256:ce1ee87682eb8e661d2d500672756916f113ac0a37da3678aa474b7d8ce3d039"},
-    {file = "sphinx_issues-4.0.0.tar.gz", hash = "sha256:5b8fcc229ffaeaef53fef0dca88dc89bc14b4aa81f221d9682a64ecced02e25d"},
+    {file = "sphinx_issues-4.1.0-py3-none-any.whl", hash = "sha256:d779dddff441175c9fddb7a4018eca38f9f6cdb1e0a2fe31d93b4f89587c7ba1"},
+    {file = "sphinx_issues-4.1.0.tar.gz", hash = "sha256:a67f7ef31d164b420b2f21b6c9b020baeb4a014afd4045f5be314c984e8ee520"},
 ]
 
 [package.dependencies]

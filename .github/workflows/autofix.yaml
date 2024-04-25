@@ -42,7 +42,7 @@ jobs:
           git checkout --force
           # Restore modified file. Do not fail if no file has been stashed.
           git stash pop || true
-      - uses: peter-evans/create-pull-request@v6.0.4
+      - uses: peter-evans/create-pull-request@v6.0.5
         with:
           assignees: ${{ github.actor }}
           commit-message: "[autofix] Update readme"

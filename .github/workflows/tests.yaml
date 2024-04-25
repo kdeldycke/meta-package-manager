@@ -56,9 +56,6 @@ jobs:
 
           # List of variants to exclude from the matrix.
           exclude: list[dict[str, str]] = [
-              # XXX Python <3.10 is not available on new macOS M1 runners.
-              # See: https://github.com/actions/setup-python/issues/808
-              {"os": "macos-14", "python-version": "3.8"},
           ]
 
           # List of unstable criterions.

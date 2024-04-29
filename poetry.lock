@@ -869,13 +869,13 @@ pytest = "*"
 
 [[package]]
 name = "pytest-xdist"
-version = "3.6.0"
+version = "3.6.1"
 description = "pytest xdist plugin for distributed testing, most importantly across multiple CPUs"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pytest_xdist-3.6.0-py3-none-any.whl", hash = "sha256:958e08f38472e1b3a83450d8d3e682e90fdbffee39a97dd0f27185a3bd9074d1"},
-    {file = "pytest_xdist-3.6.0.tar.gz", hash = "sha256:2bf346fb1f1481c8d255750f80bc1dfb9fb18b9ad5286ead0b741b6fd56d15b7"},
+    {file = "pytest_xdist-3.6.1-py3-none-any.whl", hash = "sha256:9ed4adfb68a016610848639bb7e02c9352d5d9f03d04809919e2dafc3be4cca7"},
+    {file = "pytest_xdist-3.6.1.tar.gz", hash = "sha256:ead156a4db231eec769737f57668ef58a2084a34b2e55c4a8fa20d861107300d"},
 ]
 
 [package.dependencies]

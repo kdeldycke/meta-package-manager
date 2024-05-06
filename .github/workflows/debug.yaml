@@ -17,7 +17,7 @@ jobs:
           - windows-2022
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4.1.4
+      - uses: actions/checkout@v4.1.5
       - uses: actions/setup-python@v5.1.0
         with:
           python-version: "3.12"

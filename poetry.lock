@@ -197,13 +197,13 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "click-extra"
-version = "4.8.0"
+version = "4.8.1"
 description = "🌈 Extra colorization and configuration loading for Click."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "click_extra-4.8.0-py3-none-any.whl", hash = "sha256:76e661d64caa87e872d4512fadfb86a0b128ff59be0eba89de17c2db4c4b3329"},
-    {file = "click_extra-4.8.0.tar.gz", hash = "sha256:feeb8bf548e5dd73e88a93a23bfe732279b2944f6e5b8faae66c779d259a0dbf"},
+    {file = "click_extra-4.8.1-py3-none-any.whl", hash = "sha256:6bf3aef78ae7a245c46e6b50697881406c0474655abfb8b8dcf6feed8830a432"},
+    {file = "click_extra-4.8.1.tar.gz", hash = "sha256:ed7c8b078dd413fb7ff17c7ee14249051f1456e4f63166f06ef7c25c3a7c25fc"},
 ]
 
 [package.dependencies]

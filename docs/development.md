@@ -51,7 +51,7 @@ Install package in editable mode with all development dependencies:
 
 ```shell-session
 $ python3 -m pip install poetry
-$ poetry install
+$ poetry install --all-extras
 ```
 
 Now you’re ready to hack and abuse `git`.
@@ -71,6 +71,7 @@ mpm, version 4.13.0-dev
 Simply run:
 
 ```shell-session
+$ poetry install --with tests
 $ poetry run pytest
 ```
 
@@ -102,6 +103,7 @@ The documentation you’re currently reading can be built locally with
 [Sphinx](https://www.sphinx-doc.org):
 
 ```shell-session
+$ poetry install --with docs
 $ poetry run sphinx-build -b html ./docs ./docs/html
 ```
 

@@ -6,7 +6,7 @@ name: Debug
 jobs:
 
   debug:
-    uses: kdeldycke/workflows/.github/workflows/debug.yaml@v3.4.7
+    uses: kdeldycke/workflows/.github/workflows/debug.yaml@v3.5.2
 
   click-color-context:
     strategy:

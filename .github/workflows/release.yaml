@@ -10,7 +10,7 @@ name: Build & release
 jobs:
 
   release:
-    uses: kdeldycke/workflows/.github/workflows/release.yaml@v3.4.7
+    uses: kdeldycke/workflows/.github/workflows/release.yaml@v3.5.2
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
 

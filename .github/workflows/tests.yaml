@@ -523,7 +523,7 @@ jobs:
           python -m pip install --upgrade poetry
       - name: mpm - Install
         run: |
-          poetry install --no-interaction
+          poetry install --with test --no-interaction
       - name: mpm --help
         run: |
           poetry run mpm

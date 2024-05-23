@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+"""Fixtures, configuration and helpers for tests."""
 
 from __future__ import annotations
 
@@ -23,7 +23,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
-from click_extra.platforms import is_macos
 
 # Pre-load invocation helpers to be used as pytest's fixture.
 from click_extra.pytest import extra_runner  # noqa: F401
@@ -34,8 +33,6 @@ from meta_package_manager.pool import manager_classes, pool
 
 if TYPE_CHECKING:
     from _pytest.config import Config
-
-""" Fixtures, configuration and helpers for tests. """
 
 
 def pytest_addoption(parser):
@@ -233,72 +230,3 @@ available_managers_and_dummy_package = pytest.mark.parametrize(
     "manager,package_id",
     (param(m, PACKAGE_IDS[mid], id=mid) for mid, m in pool.items() if m.available),
 )
-
-
-# XXX Deactivate hack while we investigate.
-# @pytest.hookimpl(hookwrapper=True)
-def pytest_runtest_teardown(item, nextitem):
-    """Force the reset, after each subcommand test, of NPM's cached CLI path.
-
-    This hack is applied on macOS only, in which parallel tests are messing up with the
-    location of the system's NPM binary. This ends up in cryptic test suite failures,
-    as the ``npm`` CLI is moved around during execution:
-
-    .. code-block:: pytb
-        Traceback (most recent call last):
-          File ".../site-packages/click/testing.py", line 408, in invoke
-            return_value = cli.main(args=args or (), prog_name=prog_name, **extra)
-          File ".../site-packages/click_extra/commands.py", line 161, in main
-            return super().main(*args, **kwargs)
-          File ".../site-packages/click/core.py", line 1055, in main
-            rv = self.invoke(ctx)
-          File ".../site-packages/click_extra/commands.py", line 214, in invoke
-            return super().invoke(ctx)
-          File ".../site-packages/click/core.py", line 1657, in invoke
-            return _process_result(sub_ctx.command.invoke(sub_ctx))
-          File ".../site-packages/click/core.py", line 1404, in invoke
-            return ctx.invoke(self.callback, **ctx.params)
-          File ".../site-packages/click/core.py", line 760, in invoke
-            return __callback(*args, **kwargs)
-          File ".../site-packages/click/decorators.py", line 26, in new_func
-            return f(get_current_context(), *args, **kwargs)
-          File ".../meta_package_manager/cli.py", line 864, in upgrade
-            output = manager.upgrade()
-          File ".../meta_package_manager/base.py", line 863, in upgrade
-            return self.run(cli, extra_env=self.extra_env)
-          File ".../meta_package_manager/base.py", line 551, in run
-            code, output, error = run_cmd(
-          File ".../site-packages/click_extra/run.py", line 111, in run_cmd
-            process = subprocess.run(
-          File ".../python3.8/subprocess.py", line 493, in run
-            with Popen(*popenargs, **kwargs) as process:
-          File ".../python3.8/subprocess.py", line 858, in __init__
-            self._execute_child(args, executable, preexec_fn, close_fds,
-          File ".../python3.8/subprocess.py", line 1704, in _execute_child
-            raise child_exception_type(errno_num, err_msg, err_filename)
-        FileNotFoundError: [Errno 2] No such file or directory: '/usr/local/bin/npm'
-
-    Clearing the ``cli_path`` cached property forces ``mpm`` to re-search the ``npm``
-    binary on the system.
-    """
-    # Let pytest finish the test as-is.
-    outcome = yield  # noqa: F841
-
-    # Only inspect tests that are part of a suit wrapped in a class, and only on macOS.
-    if item.parent.cls and is_macos():
-        # Work around circular imports.
-        from .test_cli import CLISubCommandTests
-
-        # Only apply this hack to subcommand tests.
-        if CLISubCommandTests in item.parent.cls.mro():
-            npm = pool.get("npm")
-            # Inspect the internal dict to avoid calling the property or ``getattr``,
-            # as both will trigger the caching mechanism.
-            if "cli_path" in npm.__dict__:
-                # Reset cached cli_path to force re-detection of the CLI.
-                del npm.cli_path
-
-            # Force recompute of the CLI path.
-            cli_path = npm.cli_path
-            if cli_path:
-                assert isinstance(npm.cli_path, Path)

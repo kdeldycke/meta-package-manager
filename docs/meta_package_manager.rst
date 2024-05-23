@@ -13,7 +13,6 @@ Subpackages
    :maxdepth: 4
 
    meta_package_manager.managers
-   meta_package_manager.tests
 
 Submodules
 ----------

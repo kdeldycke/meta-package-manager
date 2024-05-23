@@ -88,9 +88,9 @@ classifiers = [
 # Python versions and their status: https://devguide.python.org/versions/
 python = "^3.8"
 boltons = "^24.0.0"
-click-extra = "^4.7.5"
+click-extra = "^4.8.0"
 packageurl-python = "^0.15.0"
-tabulate = { extras = ["widechars"], version = "^0.9.0" }
+tabulate = { version = "^0.9.0", extras = ["widechars"] }
 tomli = { version = "^2.0.1", python = "< 3.11" }
 tomli_w = "^1.0.0"
 xmltodict = "^0.13.0"
@@ -99,13 +99,14 @@ xmltodict = "^0.13.0"
 optional = true
 
 [tool.poetry.group.test.dependencies]
-coverage = { extras = ["toml"], version = "^7.2.3" }
+click-extra = { version = "^4.8.0", extras = ["pytest"] }
+coverage = { version = "^7.2.3", extras = ["toml"] }
 pytest = "^8.0.2"
 # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html
 pytest-cov = "^5.0.0"
 pytest-github-actions-annotate-failures = "^0.2.0"
 pytest-randomly = "^3.12.0"
-pytest-xdist = { extras = ["psutil"], version = "^3.2.1" }
+pytest-xdist = { version = "^3.2.1", extras = ["psutil"] }
 
 [tool.poetry.group.typing]
 optional = true
@@ -120,6 +121,7 @@ typing-extensions = { version = "^4.3.0", python = "< 3.10" }
 optional = true
 
 [tool.poetry.group.docs.dependencies]
+click-extra = { version = "^4.8.0", extras = ["sphinx"] }
 furo = "^2024.1.29"
 myst-parser = "^3.0.0"
 # Sphinx 6 is the first version to drop Python 3.7.

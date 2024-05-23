@@ -20,7 +20,7 @@ from __future__ import annotations
 import subprocess
 
 import pytest
-from click_extra.tests.conftest import unless_linux
+from click_extra.pytest import unless_linux
 
 
 @pytest.fixture

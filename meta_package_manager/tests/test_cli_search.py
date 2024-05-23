@@ -24,7 +24,7 @@ from time import sleep
 
 import pytest
 from boltons.iterutils import same
-from click_extra.tests.conftest import skip_windows, unless_macos
+from click_extra.pytest import skip_windows, unless_macos
 
 from meta_package_manager.base import Operations, Package
 from meta_package_manager.pool import pool

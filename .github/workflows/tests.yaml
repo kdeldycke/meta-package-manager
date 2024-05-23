@@ -573,4 +573,4 @@ jobs:
           ./tests/test_bar_plugin.py
 
       - name: Coverage - Upload Codecov
-        uses: codecov/codecov-action@v4.4.0
+        uses: codecov/codecov-action@v4.4.1

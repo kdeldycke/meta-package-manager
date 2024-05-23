@@ -155,18 +155,28 @@ module = ["boltons.*", "packageurl.*"]
 # In the meantime, we have to rely on the ``addopts`` parameter to hard-code the test path and have our custom options
 # recognized.
 testpaths = ["meta_package_manager/tests/"]
-# --maxschedchunk=1 : Limit size of the chunks of consecutive tests that xdist submits to workers.
-#   Setting it to 1 will effectively mean "round-robin distribution".
-#   Source: https://github.com/pytest-dev/pytest-xdist/issues/855#issuecomment-1344986156
-# --cov-config=pyproject.toml : is specified at CLI level instead of letting coverage find it because of this bug:
-#   https://github.com/nedbat/coveragepy/issues/512#issuecomment-399707938
-#   https://github.com/pytest-dev/pytest-cov/issues/168#issuecomment-327533847
-#   https://github.com/pytest-dev/pytest-cov/issues/243
-# XXX --run-non-destructive : is not required as this is the default behavior.
-#   We would love to add it to the command line to make sure pytest is properly recognizing it and loads our
-#   customization from ``./meta_package_manager/tests/conftest.py``. But because of issue
-#   https://github.com/pytest-dev/pytest/issues/9311 (see above), it is not currently present in ``addopts``.
-addopts = "--numprocesses=auto --dist=loadgroup --maxschedchunk=1 --durations=10 --cov-report=term --cov-report=xml --cov-config=pyproject.toml --cov=meta_package_manager"
+addopts = [
+    "--numprocesses=auto",
+    "--dist=loadgroup",
+    # Limit size of the chunks of consecutive tests that xdist submits to workers.
+    # Setting it to 1 will effectively mean "round-robin distribution".
+    # Source: https://github.com/pytest-dev/pytest-xdist/issues/855#issuecomment-1344986156
+    "--maxschedchunk=1",
+    "--durations=10",
+    "--cov-report=term",
+    "--cov-report=xml",
+    # cov-config=pyproject.toml : is specified at CLI level instead of letting coverage find it because of this bug:
+    # https://github.com/nedbat/coveragepy/issues/512#issuecomment-399707938
+    # https://github.com/pytest-dev/pytest-cov/issues/168#issuecomment-327533847
+    # https://github.com/pytest-dev/pytest-cov/issues/243
+    "--cov-config=pyproject.toml",
+    "--cov=meta_package_manager",
+    # XXX --run-non-destructiveis not required as this is the default behavior.
+    # We would love to add it to the command line to make sure pytest is properly recognizing it and loads our
+    # customization from ``./meta_package_manager/tests/conftest.py``. But because of issue
+    # https://github.com/pytest-dev/pytest/issues/9311 (see above), it is not currently present in ``addopts``.
+    # "--run-non-destructive",
+]
 # Make sure tests that are expected to fail do not resurect and start working all of a sudden.
 xfail_strict = true
 

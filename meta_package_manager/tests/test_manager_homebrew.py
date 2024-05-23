@@ -25,7 +25,7 @@ from click_extra.testing import env_copy
 from click_extra.tests.conftest import unless_macos
 
 
-@pytest.fixture()
+@pytest.fixture
 def install_cask():
     """A fixture to install a Cask from a specific commit."""
 

@@ -140,7 +140,7 @@ def pytest_report_header(config: Config, start_path: Path) -> tuple[str, ...]:
     )
 
 
-@fixture()
+@fixture
 def invoke(extra_runner):  # noqa: F811
     return partial(extra_runner.invoke, mpm)
 

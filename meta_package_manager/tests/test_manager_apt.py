@@ -23,7 +23,7 @@ import pytest
 from click_extra.tests.conftest import unless_linux
 
 
-@pytest.fixture()
+@pytest.fixture
 def exact_search():
     def _exact_search(package_id):
         process = subprocess.run(

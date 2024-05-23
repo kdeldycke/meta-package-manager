@@ -26,7 +26,7 @@ from .conftest import all_manager_ids_and_dummy_package
 from .test_cli import CLISubCommandTests
 
 
-@pytest.fixture()
+@pytest.fixture
 def subcmd():
     return "install", "arrow"
 

@@ -24,7 +24,7 @@ import pytest
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
-@pytest.fixture()
+@pytest.fixture
 def subcmd():
     return "which", "python"
 

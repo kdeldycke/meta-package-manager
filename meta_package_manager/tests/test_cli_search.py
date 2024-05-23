@@ -32,7 +32,7 @@ from meta_package_manager.pool import pool
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
-@pytest.fixture()
+@pytest.fixture
 def subcmd():
     return "search", "abc"
 

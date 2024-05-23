@@ -26,7 +26,7 @@ from .conftest import default_manager_ids
 from .test_cli import CLISubCommandTests
 
 
-@pytest.fixture()
+@pytest.fixture
 def subcmd():
     return "upgrade", "--all"
 

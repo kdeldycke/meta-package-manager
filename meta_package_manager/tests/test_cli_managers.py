@@ -29,7 +29,7 @@ from .conftest import all_manager_ids, unsupported_manager_ids
 from .test_cli import CLISubCommandTests, CLITableTests
 
 
-@pytest.fixture()
+@pytest.fixture
 def subcmd():
     return "managers"
 

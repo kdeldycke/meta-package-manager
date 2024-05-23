@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+"""Utilities and helper to organize, inspect and audit the capabilities of mpm and
+package managers."""
 
 from __future__ import annotations
 
@@ -21,19 +23,16 @@ import sys
 from functools import wraps
 from typing import TYPE_CHECKING, Callable, Iterator, TypeVar
 
-if sys.version_info < (3, 10):
-    from typing_extensions import ParamSpec
-else:
-    from typing import ParamSpec
-
 if TYPE_CHECKING:
     from .base import Package, PackageManager
 
-"""Utilities and helper to organize, inspect and audit the capabilities of mpm and
-package managers."""
+    if sys.version_info < (3, 10):
+        from typing_extensions import ParamSpec
+    else:
+        from typing import ParamSpec
 
-P = ParamSpec("P")
-T = TypeVar("T")
+    P = ParamSpec("P")
+    T = TypeVar("T")
 
 
 def search_capabilities(extended_support: bool = True, exact_support: bool = True):

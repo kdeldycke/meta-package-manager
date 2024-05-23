@@ -22,6 +22,7 @@ from pathlib import Path
 
 import pytest
 
+import meta_package_manager
 from meta_package_manager.base import PackageManager
 from meta_package_manager.cli import mpm
 from meta_package_manager.pool import manager_classes, pool
@@ -41,8 +42,12 @@ def test_manager_definition_inventory():
     found_classes = set()
 
     # Search for manager definitions in the managers subfolder.
-    for py_file in Path(__file__).parent.joinpath("../managers").glob("*.py"):
-        module = import_module(f"..managers.{py_file.stem}", package=__package__)
+    for py_file in Path(inspect.getfile(meta_package_manager)).parent.glob(
+        "managers/*.py"
+    ):
+        module = import_module(
+            f"meta_package_manager.managers.{py_file.stem}", package=__package__
+        )
         for _, klass in inspect.getmembers(module, inspect.isclass):
             if issubclass(klass, PackageManager) and not klass.virtual:
                 found_classes.add(klass)

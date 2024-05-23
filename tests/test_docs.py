@@ -45,7 +45,7 @@ These tests are mainly there to remind us keep extra stuff in sync on new
 platform or manager addition.
 """
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent
 
 
 def test_project_metadata():

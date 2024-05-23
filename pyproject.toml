@@ -156,7 +156,7 @@ module = ["boltons.*", "packageurl.*"]
 # ``pyproject.toml`` file. This issue is tracked upstream at: https://github.com/pytest-dev/pytest/issues/9311
 # In the meantime, we have to rely on the ``addopts`` parameter to hard-code the test path and have our custom options
 # recognized.
-testpaths = ["meta_package_manager/tests/"]
+testpaths = ["tests/"]
 addopts = [
     "--numprocesses=auto",
     "--dist=loadgroup",
@@ -175,7 +175,7 @@ addopts = [
     "--cov=meta_package_manager",
     # XXX --run-non-destructiveis not required as this is the default behavior.
     # We would love to add it to the command line to make sure pytest is properly recognizing it and loads our
-    # customization from ``./meta_package_manager/tests/conftest.py``. But because of issue
+    # customization from ``./tests/conftest.py``. But because of issue
     # https://github.com/pytest-dev/pytest/issues/9311 (see above), it is not currently present in ``addopts``.
     # "--run-non-destructive",
 ]
@@ -192,7 +192,7 @@ precision = 2
 ignore = [
     # W002: Wheel contains duplicate files:
     #   meta_package_manager/managers/__init__.py
-    #   meta_package_manager/tests/__init__.py
+    #   tests/__init__.py
     "W002",
 ]
 

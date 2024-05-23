@@ -78,7 +78,7 @@ $ poetry run pytest
 Which should be the same as running non-destructive unit-tests in parallel with:
 
 ```shell-session
-$ poetry run pytest --numprocesses=auto --skip-destructive ./meta_package_manager/tests
+$ poetry run pytest --numprocesses=auto --skip-destructive ./tests
 ```
 
 ````{danger}
@@ -86,7 +86,7 @@ If you're not afraid of `mpm` tests messing around with the package managers on 
 can run the subset of destructive tests with:
 
 ```shell-session
-$ poetry run pytest --numprocesses=0 --skip-non-destructive --run-destructive ./meta_package_manager/tests
+$ poetry run pytest --numprocesses=0 --skip-non-destructive --run-destructive ./tests
 ```
 
 As you can see above we recommend running these tests in (non-deterministic) sequential order as most

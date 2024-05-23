@@ -119,7 +119,7 @@ jobs:
       # Do not let brew use its live API to fetch the latest version.
       # This variable forces brew to use the local repository instead (which we need in destructive tests to checkout
       # formulas from the past): https://github.com/Homebrew/brew/blob/10845a1/Library/Homebrew/env_config.rb#L314-L317
-      # See: meta_package_manager/tests/test_manager_homebrew.py::TestCask test.
+      # See: meta_package_manager/test_manager_homebrew.py::TestCask test.
       HOMEBREW_NO_INSTALL_FROM_API: "1"
     steps:
       - uses: actions/checkout@v4.1.5
@@ -157,7 +157,7 @@ jobs:
       - name: Homebrew - macOS cask repository copy
         if: runner.os == 'macOS'
         # Clone the full copy of the cask repository, so tests on macOS can locally checkout past versions of casks.
-        # This is performed by the destructive meta_package_manager/tests/test_manager_homebrew.py::TestCask test.
+        # This is performed by the destructive meta_package_manager/test_manager_homebrew.py::TestCask test.
         run: |
           brew tap homebrew/cask
       - name: Homebrew - Linux install
@@ -538,21 +538,21 @@ jobs:
           poetry run mpm --all-managers managers
 
       - name: Parallel non-destructive tests
-        # XXX ./meta_package_manager/tests/ is specified at CLI level instead of using the ``testpaths`` parameter
+        # XXX ./tests/ is specified at CLI level instead of using the ``testpaths`` parameter
         #   from pyproject.toml because of this bug: https://github.com/pytest-dev/pytest/issues/9311
         run: >
           poetry run pytest --exitfirst
           --numprocesses=auto --run-non-destructive --skip-destructive
-          --ignore=./meta_package_manager/tests/test_bar_plugin.py
-          ./meta_package_manager/tests/
+          --ignore=./tests/test_bar_plugin.py
+          ./tests/
 
       - name: Sequential random destructive tests - macOS & Linux
         if: runner.os != 'Windows'
         run: >
           poetry run pytest --exitfirst
           --numprocesses=0 --skip-non-destructive --run-destructive
-          --ignore=./meta_package_manager/tests/test_bar_plugin.py
-          ./meta_package_manager/tests/
+          --ignore=./tests/test_bar_plugin.py
+          ./tests/
 
       - name: Sequential, non-random destructive tests - Windows
         if: runner.os == 'Windows'
@@ -561,7 +561,7 @@ jobs:
           poetry run pytest --exitfirst
           --numprocesses=0 --skip-non-destructive --run-destructive
           --randomly-seed=2976763296
-          ./meta_package_manager/tests/
+          ./tests/
 
       - name: Sequential, bar plugin tests - macOS
         if: runner.os == 'macOS'
@@ -570,7 +570,7 @@ jobs:
           poetry run pytest
           -vvvvvvvvvvvvvvv
           --numprocesses=0 --run-non-destructive --run-destructive
-          ./meta_package_manager/tests/test_bar_plugin.py
+          ./tests/test_bar_plugin.py
 
       - name: Coverage - Upload Codecov
         uses: codecov/codecov-action@v4.4.0

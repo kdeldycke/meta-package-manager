@@ -6,6 +6,7 @@
 This version is not released yet and is under active development.
 ```
 
+- Slim down package by moving unit tests out of the main package.
 - Split `dev` dependency groups into optional `test`, `typing` and `docs` groups.
 - Remove direct dependency on `click` and `mypy`.
 - Make `typing-extensions` dependency optional.

@@ -27,6 +27,7 @@ from boltons.iterutils import unique
 from boltons.urlutils import URL
 from click_extra.platforms import ALL_PLATFORMS, Platform
 
+from meta_package_manager import cli
 from meta_package_manager.base import Operations, PackageManager
 from meta_package_manager.cli import XKCD_MANAGER_ORDER
 from meta_package_manager.pool import pool
@@ -212,7 +213,7 @@ def test_operation_order():
     base_operations = [p for p in props_ref if p in direct_operation_ids]
     assert list(direct_operation_ids) == list(base_operations)
 
-    cli_tree = ast.parse(Path(__file__).parent.joinpath("../cli.py").read_bytes())
+    cli_tree = ast.parse(Path(inspect.getfile(cli)).read_bytes())
     implemented_operations = [
         n.name
         for n in cli_tree.body

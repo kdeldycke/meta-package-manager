@@ -19,50 +19,50 @@ jobs:
         "🔌 bar-plugin":
           - changed-files:
             - any-glob-to-any-file:
-              - meta_package_manager/tests/*bar_plugin*
               - meta_package_manager/bar_plugin/*
+              - tests/*bar_plugin*
 
         "📦 manager: apm":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/apm*
-              - meta_package_manager/tests/*apm*
+              - tests/*apm*
 
         "📦 manager: brew":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/homebrew*
-              - meta_package_manager/tests/*homebrew*
+              - tests/*homebrew*
 
         "📦 manager: cargo":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/cargo*
-              - meta_package_manager/tests/*cargo*
+              - tests/*cargo*
 
         "📦 manager: cask":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/homebrew*
-              - meta_package_manager/tests/*homebrew*
+              - tests/*homebrew*
 
         "📦 manager: choco":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/chocolatey*
-              - meta_package_manager/tests/*chocolatey*
+              - tests/*chocolatey*
 
         "📦 manager: composer":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/composer*
-              - meta_package_manager/tests/*composer*
+              - tests/*composer*
 
         "📦 manager: dnf-based":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/dnf*
-              - meta_package_manager/tests/*dnf*
+              - tests/*dnf*
 
         "📦 manager: dpkg-based":
           - changed-files:
@@ -70,33 +70,33 @@ jobs:
               - meta_package_manager/managers/apt*
               - meta_package_manager/managers/dpkg*
               - meta_package_manager/managers/opkg*
-              - meta_package_manager/tests/*apt*
-              - meta_package_manager/tests/*dpkg*
-              - meta_package_manager/tests/*opkg*
+              - tests/*apt*
+              - tests/*dpkg*
+              - tests/*opkg*
 
         "📦 manager: emerge":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/emerge*
-              - meta_package_manager/tests/*emerge*
+              - tests/*emerge*
 
         "📦 manager: flatpak":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/flatpak*
-              - meta_package_manager/tests/*flatpak*
+              - tests/*flatpak*
 
         "📦 manager: gem":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/gem*
-              - meta_package_manager/tests/*gem*
+              - tests/*gem*
 
         "📦 manager: mas":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/mas*
-              - meta_package_manager/tests/*mas*
+              - tests/*mas*
 
         "📦 manager: mpm":
           - changed-files:
@@ -108,8 +108,8 @@ jobs:
             - any-glob-to-any-file:
               - meta_package_manager/managers/npm*
               - meta_package_manager/managers/yarn*
-              - meta_package_manager/tests/*npm*
-              - meta_package_manager/tests/*yarn*
+              - tests/*npm*
+              - tests/*yarn*
 
         "📦 manager: pacman-based":
           - changed-files:
@@ -118,16 +118,16 @@ jobs:
               - meta_package_manager/managers/pacaur*
               - meta_package_manager/managers/paru*
               - meta_package_manager/managers/yay*
-              - meta_package_manager/tests/*pacman*
-              - meta_package_manager/tests/*pacaur*
-              - meta_package_manager/tests/*paru*
-              - meta_package_manager/tests/*yay*
+              - tests/*pacman*
+              - tests/*pacaur*
+              - tests/*paru*
+              - tests/*yay*
 
         "📦 manager: pip-based":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/pip*
-              - meta_package_manager/tests/*pip*
+              - tests/*pip*
 
         "📦 manager: pkg":
           - changed-files:
@@ -138,28 +138,28 @@ jobs:
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/scoop*
-              - meta_package_manager/tests/*scoop*
+              - tests/*scoop*
 
         "📦 manager: snap":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/snap*
-              - meta_package_manager/tests/*snap*
+              - tests/*snap*
 
         "📦 manager: steamcmd":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/steamcmd*
-              - meta_package_manager/tests/*steamcmd*
+              - tests/*steamcmd*
 
         "📦 manager: vscode":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/vscode*
-              - meta_package_manager/tests/*vscode*
+              - tests/*vscode*
 
         "📦 manager: zypper":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/zypper*
-              - meta_package_manager/tests/*zypper*
+              - tests/*zypper*

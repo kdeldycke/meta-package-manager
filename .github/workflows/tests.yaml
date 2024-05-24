@@ -553,6 +553,12 @@ jobs:
       - name: poetry run bar_plugin.py --search-mpm
         run: |
           poetry run ./meta_package_manager/bar_plugin.py --search-mpm
+      - name: bar_plugin.py
+        run: |
+          ./meta_package_manager/bar_plugin.py
+      - name: poetry run bar_plugin.py
+        run: |
+          poetry run ./meta_package_manager/bar_plugin.py
 
       - name: Parallel non-destructive tests
         # XXX ./tests/ is specified at CLI level instead of using the ``testpaths`` parameter

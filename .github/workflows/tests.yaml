@@ -546,6 +546,14 @@ jobs:
         run: |
           poetry run mpm --all-managers managers
 
+      # Bar plugin
+      - name: bar_plugin.py --search-mpm
+        run: |
+          ./meta_package_manager/bar_plugin.py --search-mpm
+      - name: poetry run bar_plugin.py --search-mpm
+        run: |
+          poetry run ./meta_package_manager/bar_plugin.py --search-mpm
+
       - name: Parallel non-destructive tests
         # XXX ./tests/ is specified at CLI level instead of using the ``testpaths`` parameter
         #   from pyproject.toml because of this bug: https://github.com/pytest-dev/pytest/issues/9311

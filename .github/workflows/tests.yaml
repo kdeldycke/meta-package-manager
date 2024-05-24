@@ -422,11 +422,13 @@ jobs:
           .\install.ps1 -RunAsAdmin
 
       # WinGet
-      # XXX WinGet is not installable on GitHub action runners: https://github.com/microsoft/winget-cli/issues/3872
-      # - name: WinGet - Windows self-upgrade
-      #   if: runner.os == 'Windows'
-      #   run: |
-      #     winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
+      # XXX Rely on a hacked action as WinGet is not installable on GitHub action runners as-is:
+      # https://github.com/microsoft/winget-cli/issues/3872
+      - name: WinGet - Windows install
+        if: runner.os == 'Windows'
+        uses: Cyberboss/install-winget@v1.0.6
+        # run: |
+        #   winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
 
       # DNF
       - name: DNF - Linux install

@@ -229,7 +229,7 @@ jobs:
         # We upgrade all packages preemptively as the test suite will attempt it but fail,
         # because of mpm's enforced timeout.
         run: |
-          choco upgrade all --no-progress --yes
+          choco upgrade all --no-progress --yes --ignore-package-exit-codes
 
       # NPM
       - name: NPM - Linux install

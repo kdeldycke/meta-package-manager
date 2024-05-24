@@ -422,10 +422,11 @@ jobs:
           .\install.ps1 -RunAsAdmin
 
       # WinGet
-      - name: WinGet - Windows self-upgrade
-        if: runner.os == 'Windows'
-        run: |
-          winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
+      # XXX WinGet is not installable on GitHub action runners: https://github.com/microsoft/winget-cli/issues/3872
+      # - name: WinGet - Windows self-upgrade
+      #   if: runner.os == 'Windows'
+      #   run: |
+      #     winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
 
       # DNF
       - name: DNF - Linux install

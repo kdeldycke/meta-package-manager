@@ -1,90 +1,50 @@
 flowchart TD
     classDef missing stroke-dasharray: 5
-    alabaster["alabaster\n0.7.13"]
-    babel["Babel\n2.14.0"]
-    boltons["boltons\n23.1.1"]
+    boltons["boltons\n24.0.0"]
     bracex["bracex\n2.4"]
     certifi["certifi\n2024.2.2"]
     charset-normalizer["charset-normalizer\n3.3.2"]
-    click-extra["click-extra\n4.7.4"]
+    click-extra["click-extra\n4.8.1"]
     click_0["click\n8.1.7"]
-    cloup["cloup\n3.0.4"]
+    cloup["cloup\n3.0.5"]
     commentjson["commentjson\n0.9.0"]
     docutils["docutils\n0.20.1"]
-    idna["idna\n3.6"]
-    imagesize["imagesize\n1.4.1"]
-    jinja2["Jinja2\n3.1.3"]
+    idna["idna\n3.7"]
     lark-parser["lark-parser\n0.7.8"]
-    markupsafe["MarkupSafe\n2.1.5"]
     mergedeep["mergedeep\n1.3.4"]
-    meta-package-manager["meta-package-manager\n5.15.0"]
-    packageurl-python["packageurl-python\n0.13.4"]
-    packaging["packaging\n23.2"]
-    pallets-sphinx-themes["Pallets-Sphinx-Themes\n2.1.1"]
-    pygments-ansi-color["pygments-ansi-color\n0.3.0"]
-    pygments["pygments\n2.17.2"]
+    meta-package-manager["meta-package-manager\n5.16.0"]
+    packageurl-python["packageurl-python\n0.15.0"]
     pyyaml["PyYAML\n6.0.1"]
-    regex["regex\n2023.12.25"]
-    requests["requests\n2.31.0"]
-    snowballstemmer["snowballstemmer\n2.2.0"]
-    sphinx["sphinx\n7.1.2"]
-    sphinxcontrib-applehelp["sphinxcontrib-applehelp\n1.0.4"]
-    sphinxcontrib-devhelp["sphinxcontrib-devhelp\n1.0.2"]
-    sphinxcontrib-htmlhelp["sphinxcontrib-htmlhelp\n2.0.1"]
-    sphinxcontrib-jsmath["sphinxcontrib-jsmath\n1.0.1"]
-    sphinxcontrib-qthelp["sphinxcontrib-qthelp\n1.0.3"]
-    sphinxcontrib-serializinghtml["sphinxcontrib-serializinghtml\n1.1.5"]
+    regex["regex\n2024.5.15"]
+    requests["requests\n2.32.2"]
     tabulate["tabulate\n0.9.0"]
-    tomli-w["tomli-w\n1.0.0"]
+    tomli-w["tomli_w\n1.0.0"]
     urllib3["urllib3\n2.2.1"]
-    wcmatch["wcmatch\n8.5.1"]
+    wcmatch["wcmatch\n8.5.2"]
     xmltodict["xmltodict\n0.13.0"]
     click-extra -- ">=0.13.0,<0.14.0" --> xmltodict
-    click-extra -- ">=0.3.0,<0.4.0" --> pygments-ansi-color
     click-extra -- ">=0.9,<0.10" --> tabulate
     click-extra -- ">=0.9.0,<0.10.0" --> commentjson
     click-extra -- ">=1.3.4,<2.0.0" --> mergedeep
-    click-extra -- ">=2.1.1,<3.0.0" --> pallets-sphinx-themes
-    click-extra -- ">=2.14,<3.0" --> pygments
     click-extra -- ">=2.28.2,<3.0.0" --> requests
-    click-extra -- ">=2023.3.22,<2024.0.0" --> regex
-    click-extra -- ">=23.0.0,<24.0.0" --> boltons
-    click-extra -- ">=3.0.1,<4.0.0" --> cloup
-    click-extra -- ">=6" --> sphinx
+    click-extra -- ">=2024.4.16,<2025.0.0" --> regex
+    click-extra -- ">=24.0.0,<25.0.0" --> boltons
+    click-extra -- ">=3.0.5,<4.0.0" --> cloup
     click-extra -- ">=6.0.0,<7.0.0" --> pyyaml
     click-extra -- ">=8.1.4,<9.0.0" --> click_0
     click-extra -- ">=8.5,<9.0" --> wcmatch
     cloup -- ">=8.0,<9.0" --> click_0
     commentjson -- ">=0.7.1,<0.8.0" --> lark-parser
-    jinja2 -- ">=2.0" --> markupsafe
+    meta-package-manager -- "!=0.21" --> docutils
     meta-package-manager -- ">=0.13.0,<0.14.0" --> xmltodict
-    meta-package-manager -- ">=0.13.4,<0.14.0" --> packageurl-python
+    meta-package-manager -- ">=0.15.0,<0.16.0" --> packageurl-python
     meta-package-manager -- ">=0.9.0,<0.10.0" --> tabulate
     meta-package-manager -- ">=1.0.0,<2.0.0" --> tomli-w
-    meta-package-manager -- ">=23.0.0,<24.0.0" --> boltons
-    meta-package-manager -- ">=4.7.4,<5.0.0" --> click-extra
-    meta-package-manager -- ">=8.1.2,<9.0.0" --> click_0
-    pallets-sphinx-themes -- ">=3" --> sphinx
-    pallets-sphinx-themes -- "any" --> packaging
-    pygments-ansi-color -- "!=2.7.3" --> pygments
+    meta-package-manager -- ">=24.0.0,<25.0.0" --> boltons
+    meta-package-manager -- ">=4.8.1,<5.0.0" --> click-extra
     requests -- ">=1.21.1,<3" --> urllib3
     requests -- ">=2,<4" --> charset-normalizer
     requests -- ">=2.5,<4" --> idna
     requests -- ">=2017.4.17" --> certifi
-    sphinx -- ">=0.18.1,<0.21" --> docutils
-    sphinx -- ">=0.7,<0.8" --> alabaster
-    sphinx -- ">=1.1.5" --> sphinxcontrib-serializinghtml
-    sphinx -- ">=1.3" --> imagesize
-    sphinx -- ">=2.0" --> snowballstemmer
-    sphinx -- ">=2.0.0" --> sphinxcontrib-htmlhelp
-    sphinx -- ">=2.13" --> pygments
-    sphinx -- ">=2.25.0" --> requests
-    sphinx -- ">=2.9" --> babel
-    sphinx -- ">=21.0" --> packaging
-    sphinx -- ">=3.0" --> jinja2
-    sphinx -- "any" --> sphinxcontrib-applehelp
-    sphinx -- "any" --> sphinxcontrib-devhelp
-    sphinx -- "any" --> sphinxcontrib-jsmath
-    sphinx -- "any" --> sphinxcontrib-qthelp
     wcmatch -- ">=2.1.1" --> bracex
 

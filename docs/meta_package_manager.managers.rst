@@ -177,6 +177,14 @@ meta\_package\_manager.managers.vscode module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.managers.winget module
+---------------------------------------------
+
+.. automodule:: meta_package_manager.managers.winget
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.managers.yarn module
 -------------------------------------------
 

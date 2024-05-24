@@ -7,6 +7,7 @@ This version is not released yet and is under active development.
 ```
 
 - \[winget\] Add support for WinGet on Windows. Closes {issue}`500` and {issue}`1241`.
+- \[scoop\] Add `mpm` installation instructions with `scoop`.
 - \[mpm\] Slim down package by moving unit tests out of the main package.
 - \[mpm\] Split `dev` dependency groups into optional `test`, `typing` and `docs` groups.
 - \[mpm\] Remove direct dependency on `click` and `mypy`.

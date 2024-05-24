@@ -68,6 +68,14 @@ $ brew install meta-package-manager
 ```
 ````
 
+````{tab-item} Scoop
+Meta Package Manager is available in the `main` repository of [Scoop](https://scoop.sh), so you just need to:
+
+```{code-block} pwsh-session
+> scoop install main/meta-package-manager
+```
+````
+
 ````{tab-item} Arch Linux
 An `mpm` package has been contributed by [@autinerd](https://github.com/autinerd) and is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager) and can be installed with any AUR helper:
 

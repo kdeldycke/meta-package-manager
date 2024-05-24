@@ -16,7 +16,7 @@
 
 from __future__ import annotations
 
-from typing import Iterator
+from typing import Generator, Iterator
 
 from click_extra.platforms import WINDOWS
 
@@ -56,7 +56,7 @@ class WinGet(PackageManager):
         v1.7.11261
     """
 
-    def _parse_table(self, output: str) -> Iterator[tuple[str, ...]]:
+    def _parse_table(self, output: str) -> Iterator[Generator[str, None, None]]:
         """Parse a table from the output of a winget command and returns a generator of cells."""
         # Extract table.
         table_start = "Name "

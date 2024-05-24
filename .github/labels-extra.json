@@ -105,6 +105,11 @@
     "description": "vscode"
   },
   {
+    "name": "📦 manager: winget",
+    "color": "#bfdadc",
+    "description": "winget"
+  },
+  {
     "name": "📦 manager: zypper",
     "color": "#bfdadc",
     "description": "zypper"

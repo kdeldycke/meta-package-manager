@@ -158,6 +158,12 @@ jobs:
               - meta_package_manager/managers/vscode*
               - tests/*vscode*
 
+        "📦 manager: winget":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/winget*
+              - tests/*winget*
+
         "📦 manager: zypper":
           - changed-files:
             - any-glob-to-any-file:

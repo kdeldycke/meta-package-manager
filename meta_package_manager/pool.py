@@ -45,6 +45,7 @@ from .managers.scoop import Scoop
 from .managers.snap import Snap
 from .managers.steamcmd import SteamCMD
 from .managers.vscode import VSCode
+from .managers.winget import WinGet
 from .managers.yarn import Yarn
 from .managers.zypper import Zypper
 
@@ -77,6 +78,7 @@ manager_classes = (
     Snap,
     SteamCMD,
     VSCode,
+    WinGet,
     Yarn,
     Yay,
     YUM,

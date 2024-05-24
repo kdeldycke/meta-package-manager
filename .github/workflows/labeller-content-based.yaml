@@ -121,6 +121,9 @@ jobs:
           - "visual studio code"
           - "visual studio"
 
+        "📦 manager: winget":
+          - "winget"
+
         "📦 manager: zypper":
           - "zypper"
           - "opensuse"

@@ -169,7 +169,7 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `voom`                  |       |       ✓        |               |              |              |
 | `vscode`                |   ✓   |                |               |              |              |
 | `vundle`                |       |       ✓        |               |              |              |
-| `winget`                |       |       ✓        |               |              |              |
+| `winget`                |   ✓   |       ✓        |               |              |              |
 | `wsl`                   |       |       ✓        |               |              |              |
 | `xbps`                  |       |                |       ✓       |      ✓       |      ✓       |
 | `yadm`                  |       |       ✓        |               |              |              |

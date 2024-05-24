@@ -421,6 +421,12 @@ jobs:
           iwr get.scoop.sh -outfile 'install.ps1'
           .\install.ps1 -RunAsAdmin
 
+      # WinGet
+      - name: WinGet - Windows self-upgrade
+        if: runner.os == 'Windows'
+        run: |
+          winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
+
       # DNF
       - name: DNF - Linux install
         if: runner.os == 'Linux'

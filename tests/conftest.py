@@ -183,6 +183,7 @@ PACKAGE_IDS = {
     "snap": "standard-notes",
     "steamcmd": "740",
     "vscode": "tamasfe.even-better-toml",
+    "winget": "Microsoft.PowerToys",
     "yarn": "awesome-lint",
     # https://aur.archlinux.org/packages/meta-package-manager
     "yay": "meta-package-manager",

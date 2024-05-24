@@ -1,10 +1,6 @@
 # Changelog
 
-## [5.16.0 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v5.15.0...main)
-
-```{important}
-This version is not released yet and is under active development.
-```
+## [5.16.0 (2024-05-24)](https://github.com/kdeldycke/meta-package-manager/compare/v5.15.0...v5.16.0)
 
 - \[winget\] Add support for WinGet on Windows. Closes {issue}`500` and {issue}`1241`.
 - \[scoop\] Add `mpm` installation instructions with `scoop`.

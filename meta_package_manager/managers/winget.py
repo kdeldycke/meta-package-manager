@@ -241,7 +241,8 @@ class WinGet(PackageManager):
             for name, package_id, version, _, _ in self._parse_table(output):
                 yield self.package(id=package_id, name=name, latest_version=version)
 
-        # For non-extended search, we need to perform 2 queries, one for id and one for name.
+        # For non-extended search, we need to perform 2 queries, one for id and
+        # one for name.
         else:
             for field in "--id", "--name":
                 output = self.run_cli(

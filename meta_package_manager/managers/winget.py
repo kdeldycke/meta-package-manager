@@ -56,7 +56,7 @@ class WinGet(PackageManager):
         v1.7.11261
     """
 
-    def _parse_table(output: str) -> Iterator[tuple[str, ...]]:
+    def _parse_table(self, output: str) -> Iterator[tuple[str, ...]]:
         """Parse a table from the output of a winget command and returns a generator of cells."""
         # Extract table.
         table_start = "Name "

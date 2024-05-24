@@ -88,18 +88,22 @@ classifiers = [
 # Python versions and their status: https://devguide.python.org/versions/
 python = "^3.8"
 boltons = "^24.0.0"
-click-extra = "^4.8.0"
+click-extra = "^4.8.1"
 packageurl-python = "^0.15.0"
 tabulate = { version = "^0.9.0", extras = ["widechars"] }
 tomli = { version = "^2.0.1", python = "< 3.11" }
 tomli_w = "^1.0.0"
 xmltodict = "^0.13.0"
 
+# docutils 0.21 cannot be installed with poetry
+# See https://github.com/python-poetry/poetry/issues/9293
+docutils = "!=0.21"
+
 [tool.poetry.group.test]
 optional = true
 
 [tool.poetry.group.test.dependencies]
-click-extra = { version = "^4.8.0", extras = ["pytest"] }
+click-extra = { version = "^4.8.1", extras = ["pytest"] }
 coverage = { version = "^7.2.3", extras = ["toml"] }
 pytest = "^8.0.2"
 # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html
@@ -121,7 +125,7 @@ typing-extensions = { version = "^4.3.0", python = "< 3.10" }
 optional = true
 
 [tool.poetry.group.docs.dependencies]
-click-extra = { version = "^4.8.0", extras = ["sphinx"] }
+click-extra = { version = "^4.8.1", extras = ["sphinx"] }
 furo = "^2024.1.29"
 myst-parser = "^3.0.0"
 # Sphinx 6 is the first version to drop Python 3.7.

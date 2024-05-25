@@ -175,7 +175,7 @@ class TestBarPlugin:
             bar_plugin.__file__,
             capture_output=True,
             encoding="utf-8",
-            env=env_copy(extra_env),
+            # env=env_copy(extra_env),
         )
 
         assert not process.stderr

@@ -548,15 +548,19 @@ jobs:
 
       # Bar plugin
       - name: bar_plugin.py --search-mpm
+        if: runner.os == 'macOS'
         run: |
           ./meta_package_manager/bar_plugin.py --search-mpm
       - name: poetry run bar_plugin.py --search-mpm
+        if: runner.os == 'macOS'
         run: |
           poetry run ./meta_package_manager/bar_plugin.py --search-mpm
       - name: bar_plugin.py
+        if: runner.os == 'macOS'
         run: |
           ./meta_package_manager/bar_plugin.py
       - name: poetry run bar_plugin.py
+        if: runner.os == 'macOS'
         run: |
           poetry run ./meta_package_manager/bar_plugin.py
 

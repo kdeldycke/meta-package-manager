@@ -197,13 +197,13 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "click-extra"
-version = "4.8.1"
+version = "4.8.2"
 description = "🌈 Extra colorization and configuration loading for Click."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "click_extra-4.8.1-py3-none-any.whl", hash = "sha256:6bf3aef78ae7a245c46e6b50697881406c0474655abfb8b8dcf6feed8830a432"},
-    {file = "click_extra-4.8.1.tar.gz", hash = "sha256:ed7c8b078dd413fb7ff17c7ee14249051f1456e4f63166f06ef7c25c3a7c25fc"},
+    {file = "click_extra-4.8.2-py3-none-any.whl", hash = "sha256:9aa9ca64d97696dc16edc5e7ddacc6fece178cfc2568fd420ca02a02bb09adb3"},
+    {file = "click_extra-4.8.2.tar.gz", hash = "sha256:c3de71205fc62aadc898ca9412d80bfddeb1329c3aeb340f19239184b3188f35"},
 ]
 
 [package.dependencies]
@@ -1440,4 +1440,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "98ebab919168cbf1ce4d54c5aef2aa142777de7f2b87638b5de9e0872d48f4fa"
+content-hash = "00783068186a3f11d4eda4cfae88793de2dc421d6cb10c407f985cf7943e8a64"

@@ -20,6 +20,7 @@ import os
 import re
 import subprocess
 from collections import Counter
+from configparser import RawConfigParser
 from itertools import product
 
 import pytest
@@ -214,7 +215,7 @@ class TestBarPlugin:
         #   installed as a script. You may get improper `sys.argv[0]`.
         #   The support to run uninstalled scripts will be removed in a future release.
         #   Run `poetry install` to resolve and get rid of this message.
-        condition=os.getenv("GITHUB_ACTIONS"),
+        condition=RawConfigParser.BOOLEAN_STATES[os.getenv("GITHUB_ACTIONS")],
         strict=True,
         reason="Poetry cannot resolved script context",
     )

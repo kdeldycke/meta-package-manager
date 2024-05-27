@@ -157,10 +157,6 @@ module = ["boltons.*", "packageurl.*"]
 
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml
-# XXX The ``testpaths`` parameter has no effect since pytest is only looking for a ``conftest.py`` right next to this
-# ``pyproject.toml`` file. This issue is tracked upstream at: https://github.com/pytest-dev/pytest/issues/9311
-# In the meantime, we have to rely on the ``addopts`` parameter to hard-code the test path and have our custom options
-# recognized.
 testpaths = ["tests/"]
 addopts = [
     "--numprocesses=auto",

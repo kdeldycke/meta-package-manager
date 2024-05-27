@@ -526,7 +526,7 @@ jobs:
         run: |
           choco install steamcmd --no-progress --yes
 
-      # Mpm
+      # Mpm.
       - name: Poetry - Upgrade
         run: |
           python -m pip install --upgrade poetry
@@ -545,24 +545,6 @@ jobs:
       - name: mpm --all-managers managers
         run: |
           poetry run mpm --all-managers managers
-
-      # Bar plugin
-      - name: bar_plugin.py --search-mpm
-        if: runner.os == 'macOS'
-        run: |
-          ./meta_package_manager/bar_plugin.py --search-mpm
-      - name: poetry run bar_plugin.py --search-mpm
-        if: runner.os == 'macOS'
-        run: |
-          poetry run ./meta_package_manager/bar_plugin.py --search-mpm
-      - name: bar_plugin.py
-        if: runner.os == 'macOS'
-        run: |
-          ./meta_package_manager/bar_plugin.py
-      - name: poetry run bar_plugin.py
-        if: runner.os == 'macOS'
-        run: |
-          poetry run ./meta_package_manager/bar_plugin.py
 
       - name: Parallel non-destructive tests
         # XXX ./tests/ is specified at CLI level instead of using the ``testpaths`` parameter
@@ -589,6 +571,24 @@ jobs:
           --numprocesses=0 --skip-non-destructive --run-destructive
           --randomly-seed=2976763296
           ./tests/
+
+      # Bar plugin test runs.
+      - name: bar_plugin.py --search-mpm
+        if: runner.os == 'macOS'
+        run: |
+          ./meta_package_manager/bar_plugin.py --search-mpm
+      - name: poetry run bar_plugin.py --search-mpm
+        if: runner.os == 'macOS'
+        run: |
+          poetry run ./meta_package_manager/bar_plugin.py --search-mpm
+      - name: bar_plugin.py
+        if: runner.os == 'macOS'
+        run: |
+          ./meta_package_manager/bar_plugin.py
+      - name: poetry run bar_plugin.py
+        if: runner.os == 'macOS'
+        run: |
+          poetry run ./meta_package_manager/bar_plugin.py
 
       - name: Sequential, bar plugin tests - macOS
         if: runner.os == 'macOS'

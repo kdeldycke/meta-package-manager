@@ -76,19 +76,7 @@ def _shell_invocation_matrix():
             # Options.
             (
                 "-c",
-                # XXX Login shell defaults to Python 2.7 on GitHub macOS runners and is
-                # picked up by surprise for bar plugin tests:
-                # Traceback (most recent call last):
-                #   File "/Library/Frameworks/.../2.7/lib/python2.7/runpy.py",
-                #   line 163, in _run_module_as_main
-                #     mod_name, _Error)
-                #   File "/Library/Frameworks/.../2.7/lib/python2.7/runpy.py",
-                #   line 111, in _get_module_details
-                #     __import__(mod_name)  # Do not catch exceptions initializing package
-                #   File "meta_package_manager/__init__.py", line 33, in <module>
-                #     from click_extra.logging import logger
-                # ImportError: No module named click_extra.logging
-                # ("--login", "-c"),
+                ("--login", "-c"),
             ),
         )
     ) + [None]

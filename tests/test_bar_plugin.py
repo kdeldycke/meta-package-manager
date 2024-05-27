@@ -74,10 +74,7 @@ def _shell_invocation_matrix():
             # Naked and full binary paths.
             flatten((bin_id, f"/bin/{bin_id}") for bin_id in ("bash", "zsh")),
             # Options.
-            (
-                "-c",
-                ("--login", "-c"),
-            ),
+            ("-c", ("--login", "-c")),
         )
     ) + [None]
 

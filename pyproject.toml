@@ -189,14 +189,6 @@ branch = true
 [tool.coverage.report]
 precision = 2
 
-[tool.check-wheel-contents]
-ignore = [
-    # W002: Wheel contains duplicate files:
-    #   meta_package_manager/managers/__init__.py
-    #   tests/__init__.py
-    "W002",
-]
-
 [tool.bumpversion]
 current_version = "5.16.1"
 allow_dirty = true

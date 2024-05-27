@@ -221,7 +221,17 @@ class MPMPlugin:
             return Venv.PIPENV, (f"PIPENV_PIPFILE='{folder}'", "pipenv", "run", "mpm")
 
         if (folder / "poetry.lock").is_file():
-            return Venv.POETRY, ("poetry", "run", "--directory", str(folder), "mpm")
+            # Run mpm from its module, by the way of Poetry's own Python. See:
+            # https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/__main__.py
+            return Venv.POETRY, (
+                "poetry",
+                "run",
+                "--directory",
+                str(folder),
+                "python",
+                "-m",
+                "meta_package_manager",
+            )
 
         if (folder / "requirements.txt").is_file() or (folder / "setup.py").is_file():
             return Venv.VIRTUALENV, (

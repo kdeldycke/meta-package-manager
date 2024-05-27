@@ -112,7 +112,7 @@
 
 Below are the most popular ones:
 
-### On macOS
+### macOS
 
 `mpm` is part of the official [Homebrew](https://brew.sh) default tap, so you can install it with:
 
@@ -120,7 +120,7 @@ Below are the most popular ones:
 $ brew install meta-package-manager
 ```
 
-### On Windows
+### Windows
 
 `mpm` is available in the `main` repository of [Scoop](https://scoop.sh), so you just need to:
 

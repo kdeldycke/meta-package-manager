@@ -555,19 +555,11 @@ jobs:
           --numprocesses=auto --run-non-destructive --skip-destructive
           --ignore=./tests/test_bar_plugin.py
 
-      - name: Sequential random destructive tests - macOS & Linux
-        if: runner.os != 'Windows'
+      - name: Sequential random destructive tests
         run: >
           poetry run pytest --exitfirst
           --numprocesses=0 --skip-non-destructive --run-destructive
           --ignore=./tests/test_bar_plugin.py
-
-      - name: Sequential, non-random destructive tests - Windows
-        if: runner.os == 'Windows'
-        # XXX There is an issue with the order in which different managers update each others on Windows.
-        run: >
-          poetry run pytest --exitfirst
-          --numprocesses=0 --skip-non-destructive --run-destructive
 
       # Bar plugin test runs.
       - name: bar_plugin.py --search-mpm

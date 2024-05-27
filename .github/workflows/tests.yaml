@@ -60,9 +60,12 @@ jobs:
 
           # List of unstable criterions.
           unstable: list[dict[str, str]] = [
-              # msgpack does not work on Python 3.13-dev yet:
+              # cffi does not work on Python 3.13-dev yet on macOS:
               # https://github.com/msgpack/msgpack-python/issues/573
-              {"python-version": "3.13-dev"},
+              #   Building wheel for cffi (pyproject.toml) did not run successfully.
+              #   Failed to build cffi
+              #   ERROR: Could not build wheels for cffi, which is required to install pyproject.toml-based projects
+              {"os": "macos-14", "python-version": "3.13-dev"},
           ]
 
           # Build the job matrix.

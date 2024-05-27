@@ -172,14 +172,22 @@ class TestBarPlugin:
     def plugin_output_checks(self, checklist, extra_env=None):
         """Run the plugin script and check its output against the checklist."""
         process = subprocess.run(
-            # XXX Force running the script via Poetry. This bypass the following error
-            # I only get on GitHub action runners:
+            # XXX Force running the script via Poetry after explicitly installing it.
+            # This bypass the following error I only get on GitHub action runners:
             #   Warning: 'mpm' is an entry point defined in pyproject.toml, but it's
             #   not installed as a script. You may get improper `sys.argv[0]`.
             #   The support to run uninstalled scripts will be removed in a future
             #   release.
             #   Run `poetry install` to resolve and get rid of this message.
-            ("poetry", "run", bar_plugin.__file__),
+            (
+                "poetry",
+                "install",
+                "--no-interaction",
+                "&&",
+                "poetry",
+                "run",
+                bar_plugin.__file__,
+            ),
             capture_output=True,
             encoding="utf-8",
             env=env_copy(extra_env),

@@ -179,7 +179,8 @@ PACKAGE_IDS = {
     # https://pypi.org/project/meta-package-manager
     "pipx": "meta-package-manager",
     "pkg": "dmg2img",
-    "scoop": "7zip",
+    # https://github.com/ScoopInstaller/Main/blob/master/bucket/meta-package-manager.json
+    "scoop": "main/meta-package-manager",
     "snap": "standard-notes",
     "steamcmd": "740",
     "vscode": "tamasfe.even-better-toml",

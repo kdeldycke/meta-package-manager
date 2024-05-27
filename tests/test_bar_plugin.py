@@ -215,7 +215,9 @@ class TestBarPlugin:
         #   installed as a script. You may get improper `sys.argv[0]`.
         #   The support to run uninstalled scripts will be removed in a future release.
         #   Run `poetry install` to resolve and get rid of this message.
-        condition=RawConfigParser.BOOLEAN_STATES[os.getenv("GITHUB_ACTIONS")],  # type: ignore[index]
+        condition=RawConfigParser.BOOLEAN_STATES.get(
+            os.getenv("GITHUB_ACTIONS"), False
+        ),
         strict=True,
         reason="Poetry cannot resolved script context",
     )

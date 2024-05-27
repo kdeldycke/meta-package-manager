@@ -120,6 +120,14 @@ Below are the most popular ones:
 $ brew install meta-package-manager
 ```
 
+### On Windows
+
+`mpm` is available in the `main` repository of [Scoop](https://scoop.sh), so you just need to:
+
+```pwsh-session
+> scoop install main/meta-package-manager
+```
+
 ### From sources
 
 [`pipx`](https://pipx.pypa.io) is the cleanest way to install `mpm` from sources on any platform:

@@ -104,7 +104,8 @@ def update_manager_selection(
 
     # Is a list to keep the natural order of selection.
     to_add: list[str] = []
-    # Is a set because we removal takes precedence over addition, so we don't care about user's order.
+    # Is a set because we removal takes precedence over addition, so we don't
+    # care about user's order.
     to_remove: set[str] = set()
 
     # Add the value of --manager list.

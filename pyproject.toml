@@ -178,12 +178,6 @@ addopts = [
     "--durations=10",
     "--cov-report=term",
     "--cov-report=xml",
-    # cov-config=pyproject.toml : is specified at CLI level instead of letting coverage find it because of this bug:
-    # https://github.com/nedbat/coveragepy/issues/512#issuecomment-399707938
-    # https://github.com/pytest-dev/pytest-cov/issues/168#issuecomment-327533847
-    # https://github.com/pytest-dev/pytest-cov/issues/243
-    "--cov-config=pyproject.toml",
-    "--cov=meta_package_manager",
     # XXX --run-non-destructiveis not required as this is the default behavior.
     # We would love to add it to the command line to make sure pytest is properly recognizing it and loads our
     # customization from ``./tests/conftest.py``. But because of issue

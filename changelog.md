@@ -6,6 +6,13 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Add metadata and icon to binaries produced by Nuitka.
+- \[mpm\] Mark all Python 3.13-dev tests as stable but on macOS.
+- \[bar-plugin\] Reactivate login shells invokation tests.
+- \[bar-plugin\] Skip rendering tests on GitHub.
+- \[mpm\] Remove `sys.path` cleaning hack in `__main__` invokation.
+- \[mpm\] Reactivate config file test for `restore` subcommand.
+
 ## [5.16.0 (2024-05-24)](https://github.com/kdeldycke/meta-package-manager/compare/v5.15.0...v5.16.0)
 
 - \[winget\] Add support for WinGet on Windows. Closes {issue}`500` and {issue}`1241`.

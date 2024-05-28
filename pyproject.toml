@@ -143,6 +143,16 @@ sphinxext-opengraph = "^0.9.0"
 [tool.poetry.scripts]
 mpm = 'meta_package_manager.__main__:main'
 
+[tool.nuitka]
+product-name = "Meta Package Manager"
+file-description = "🎁 wraps all package managers with a unifying CLI"
+copyright = "Kevin Deldycke <kevin@deldycke.com> and contributors. Distributed under GPL-2.0-or-later license."
+file-version = "5.16.1"
+product-version = "5.16.1"
+macos-app-icon = "docs/assets/icon.png"
+linux-icon = "docs/assets/icon.png"
+windows-icon-from-ico = "docs/assets/icon.png"
+
 [tool.mypy]
 warn_unused_configs = true
 warn_redundant_casts = true
@@ -207,6 +217,18 @@ filename = "./meta_package_manager/bar_plugin.py"
 filename = "./pyproject.toml"
 search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+# Update version in Nuitka metadata.
+filename = "./pyproject.toml"
+search = 'file-version = "{current_version}"'
+replace = 'file-version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+# Update version in Nuitka metadata.
+filename = "./pyproject.toml"
+search = 'product-version = "{current_version}"'
+replace = 'product-version = "{new_version}"'
 
 [[tool.bumpversion.files]]
 # Update the version in standard Markdown changelog.

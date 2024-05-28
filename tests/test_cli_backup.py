@@ -64,6 +64,12 @@ class TestBackup(CLISubCommandTests):
         result = invoke(
             "--verbosity", "INFO", f"--{manager_id}", subcmd, "mpm-packages.toml"
         )
-        assert result.exit_code == 0
         assert "mpm-packages.toml" in result.stderr
-        self.check_manager_selection(result, {manager_id})
+        if result.exit_code == 2:
+            assert not result.stdout
+            assert result.stderr.endswith(
+                "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
+            )
+        else:
+            assert result.exit_code == 0
+            self.check_manager_selection(result, {manager_id})

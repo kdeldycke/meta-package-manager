@@ -22,7 +22,9 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Final, Iterable, Iterator
 
 from boltons.iterutils import unique
+from click_extra import get_current_context
 from click_extra.colorize import default_theme as theme
+from more_itertools import peekable
 
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
@@ -181,7 +183,7 @@ class ManagerPool:
             if mid not in self.default_manager_ids
         )
 
-    def select_managers(
+    def _select_managers(
         self,
         keep: Iterable[str] | None = None,
         drop: Iterable[str] | None = None,
@@ -257,6 +259,16 @@ class ManagerPool:
                 setattr(manager, param, value)
 
             yield manager
+
+    def select_managers(self, *args, **kwargs) -> Iterator[PackageManager]:
+        """Wraps ``_select_managers()`` to stop CLI execution if no manager are selected."""
+        managers = peekable(self._select_managers(*args, **kwargs))
+        try:
+            managers.peek()
+        except StopIteration:
+            logging.critical("No manager selected.")
+            get_current_context().exit(2)
+        yield from managers
 
 
 pool = ManagerPool()

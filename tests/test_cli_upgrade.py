@@ -73,10 +73,16 @@ class TestUpgrade(CLISubCommandTests):
         result = invoke(
             f"--{manager_id}", "--dry-run", "--verbosity", "INFO", "upgrade", all_option
         )
-        assert result.exit_code == 0
         if not all_option:
             assert "assume -A/--all option" in result.stderr
-        self.check_manager_selection(result, {manager_id})
+        if result.exit_code == 2:
+            assert not result.stdout
+            assert result.stderr.endswith(
+                "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
+            )
+        else:
+            assert result.exit_code == 0
+            self.check_manager_selection(result, {manager_id})
 
     @pytest.mark.destructive()
     @default_manager_ids

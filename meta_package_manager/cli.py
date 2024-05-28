@@ -25,6 +25,7 @@ from functools import partial
 from io import TextIOWrapper
 from operator import attrgetter
 from pathlib import Path
+from typing import Iterable, Iterator
 from unittest.mock import patch
 
 import tomli_w
@@ -90,37 +91,87 @@ See the corresponding :issue:`implementation rationale in issue #10 <10>`.
 """
 
 
-def add_manager_to_selection(ctx: Context, param: Parameter, selected: bool) -> None:
-    """Store singular manager flag selection in the context.
+def update_manager_selection(
+    ctx: Context, param: Parameter, value: str | Iterable[str] | None
+) -> None:
+    """Update global selection list of managers in the context.
 
-    .. important::
-        Because the parameter's name is transformed into a Python identifier on
-        instantiation, we have to reverse the process to get our value.
-
-        Example: ``--apt-mint`` => ``apt_mint`` => ``apt-mint``
+    Accumulate and merge all manager selectors to form the initial population enforced by the user.
     """
-    if selected:
-        if ctx.obj is None:
-            ctx.obj = {"single_manager_selector": []}
-        manager_id = param.name.replace("_", "-")  # type: ignore[union-attr]
-        ctx.obj["single_manager_selector"].append(manager_id)
+    # Option has not been called.
+    if not value:
+        return
+
+    # Is a list to keep the natural order of selection.
+    to_add: list[str] = []
+    # Is a set because we removal takes precedence over addition, so we don't care about user's order.
+    to_remove: set[str] = set()
+
+    # Add the value of --manager list.
+    if param.name == "manager":
+        to_add.extend(value)
+
+    # Add the value of --exclure list.
+    elif param.name == "exclude":
+        to_remove.update(value)
+
+    # Update the list of managers with the XKCD preset.
+    elif param.name == "xkcd":
+        to_add.extend(XKCD_MANAGER_ORDER)
+
+    # Update selection with single selectors.
+    else:
+        assert value in pool.all_manager_ids, f"{value!r} is not a recognized manage ID"
+        # Because the parameter's name is transformed into a Python identifier on
+        # instantiation, we have to reverse the process to get our value.
+        # Example: --apt-mint => apt_mint => apt-mint
+        assert (
+            param.name.removeprefix("no_").replace("_", "-") == value
+        ), f"single manager selector {param.name!r} is not recognized"
+        if param.name.startswith("no_"):
+            to_remove.add(value)
+        else:
+            to_add.append(value)
+
+    # Initialize the shared context object to accumulate there the selection results.
+    if ctx.obj is None:
+        ctx.obj = {}
+    if to_add:
+        ctx.obj.setdefault("managers_to_add", []).extend(to_add)
+    if to_remove:
+        ctx.obj.setdefault("managers_to_remove", set()).update(to_remove)
 
 
-def single_manager_selectors():
+def single_manager_selectors() -> Iterator[Parameter]:
     """Dynamiccaly creates a dedicated flag selector alias for each manager."""
+    single_flags = []
+    single_no_flags = []
     for manager_id in pool.all_manager_ids:
         manager = pool.get(manager_id)
         # Parameters do not have a deprecated flag.
         # See: https://github.com/pallets/click/issues/2263
         deprecated_msg = " (deprecated)" if manager.deprecated else ""
-        yield option(
-            f"--{manager_id}",
-            is_flag=True,
-            default=False,
-            help=f"Alias to --manager {manager_id}{deprecated_msg}.",
-            expose_value=False,
-            callback=add_manager_to_selection,
+        single_flags.append(
+            option(
+                f"--{manager_id}",
+                flag_value=manager_id,
+                default=False,
+                help=f"Alias to --manager {manager_id}{deprecated_msg}.",
+                expose_value=False,
+                callback=update_manager_selection,
+            )
         )
+        single_no_flags.append(
+            option(
+                f"--no-{manager_id}",
+                flag_value=manager_id,
+                default=False,
+                help=f"Alias to --exclude {manager_id}{deprecated_msg}.",
+                expose_value=False,
+                callback=update_manager_selection,
+            )
+        )
+    return *single_flags, *single_no_flags
 
 
 def bar_plugin_path(ctx, param, value):
@@ -177,6 +228,8 @@ def bar_plugin_path(ctx, param, value):
         "--manager",
         type=Choice(pool.all_manager_ids, case_sensitive=False),
         multiple=True,
+        expose_value=False,
+        callback=update_manager_selection,
         help="Restrict subcommand to a subset of managers. Repeat to "
         "select multiple managers. The order is preserved for priority-sensitive "
         "subcommands.",
@@ -186,7 +239,11 @@ def bar_plugin_path(ctx, param, value):
         "--exclude",
         type=Choice(pool.all_manager_ids, case_sensitive=False),
         multiple=True,
-        help="Exclude a manager. Repeat to exclude multiple managers.",
+        expose_value=False,
+        callback=update_manager_selection,
+        help="Exclude a manager. Repeat to exclude multiple managers. Exclusion of a "
+        "manager always takes precedence over inclusion, whatever the parameter "
+        "position.",
     ),
     option(
         "-a",
@@ -202,6 +259,8 @@ def bar_plugin_path(ctx, param, value):
         "--xkcd",
         is_flag=True,
         default=False,
+        expose_value=False,
+        callback=update_manager_selection,
         help="Preset manager selection as defined by XKCD #1654. Equivalent to: "
         "{}.".format(" ".join(f"--{mid}" for mid in XKCD_MANAGER_ORDER)),
     ),
@@ -278,10 +337,7 @@ def bar_plugin_path(ctx, param, value):
 @pass_context
 def mpm(
     ctx,
-    manager,
-    exclude,
     all_managers,
-    xkcd,
     ignore_auto_updates,
     stop_on_error,
     dry_run,
@@ -311,32 +367,28 @@ def mpm(
 
         ctx.call_on_close(remove_logging_override)
 
-    # Merge all manager selectors to form the initial population enforced by the
-    # user.
-    initial_managers = list(manager)
-    # Update with single selectors.
+    user_selection = None
+    managers_to_remove = None
     if ctx.obj:
-        initial_managers.extend(ctx.obj.get("single_manager_selector", []))
-    # Update the list of managers with the XKCD preset.
-    if xkcd:
-        initial_managers.extend(XKCD_MANAGER_ORDER)
+        user_selection = ctx.obj.get("managers_to_add", None)
+        managers_to_remove = ctx.obj.get("managers_to_remove", None)
+
     # Normalize to None if no manager selectors have been used. This prevent the
     # pool.select_managers() method to iterate over an empty population of managers to
     # choose from.
-    if not initial_managers:
-        initial_managers = None
+    if not user_selection:
         logging.debug("No initial population of managers selected by user.")
     else:
         logging.debug(
-            "Initial population of user-selected managers: "
-            f"{' > '.join(map(theme.invoked_command, initial_managers))}",
+            "User-selected managers by priority: "
+            f"{' > '.join(map(theme.invoked_command, user_selection))}",
         )
 
     # Select the subset of manager to target, and apply manager-level options.
     selected_managers = partial(
         pool.select_managers,
-        keep=initial_managers,
-        drop=exclude,
+        keep=user_selection,
+        drop=managers_to_remove,
         keep_deprecated=all_managers,
         # Should we include auto-update packages or not?
         ignore_auto_updates=ignore_auto_updates,

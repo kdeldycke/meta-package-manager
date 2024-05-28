@@ -6,6 +6,9 @@
 This version is not released yet and is under active development.
 ```
 
+- \[mpm\] Add `--no-*` negative selection flags for each single manager. Closes {issue}`882`.
+- \[mpm\] Stop CLI execution if manager selection parameters ends up with no managers being retained.
+- \[mpm\] Add dependency on `more-itertools`.
 - \[mpm\] Add metadata and icon to binaries produced by Nuitka.
 - \[mpm\] Mark all Python 3.13-dev tests as stable but on macOS.
 - \[bar-plugin\] Reactivate login shells invokation tests.

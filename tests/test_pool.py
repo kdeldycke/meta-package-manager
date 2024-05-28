@@ -242,5 +242,5 @@ selection_cases = {
 def test_select_managers(kwargs, expected):
     """We use tuple everywhere so we can check that select_managers() conserve the
     original order."""
-    selection = pool.select_managers(**kwargs)
+    selection = pool._select_managers(**kwargs)
     assert tuple(m.id for m in selection) == expected

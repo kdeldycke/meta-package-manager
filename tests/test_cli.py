@@ -283,20 +283,28 @@ class TestManagerSelection(InspectCLIOutput):
             ),
             pytest.param(
                 ("--manager", "pip", "--exclude", "pip"),
-                set(),
-                id="exclusion_override_ordered",
+                None,
+                id="exclusion_precedence_ordered",
             ),
             pytest.param(
                 ("--exclude", "pip", "--manager", "pip"),
-                set(),
-                id="exclusion_override_reversed",
+                None,
+                id="exclusion_precedence_reversed",
             ),
         ),
     )
     def test_manager_selection(self, invoke, args, expected):
         result = invoke(*args, "managers")
-        assert result.exit_code == 0
-        self.check_manager_selection(result, expected)
+        if expected is None:
+            assert result.exit_code == 2
+            assert not result.stdout
+            assert (
+                result.stderr
+                == "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
+            )
+        else:
+            assert result.exit_code == 0
+            self.check_manager_selection(result, expected)
 
     @pytest.mark.skip(reason="Generated config file is not isolated from other tests.")
     def test_conf_file_overrides_defaults(self, invoke, create_config):

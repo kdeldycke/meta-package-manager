@@ -61,7 +61,11 @@ def test_ascii_id(manager):
     """All package manager IDs should be short ASCII strings."""
     assert manager.id
     assert manager.id.isascii()
+    assert manager.id[0] in ascii_lowercase
+    assert manager.id[-1] in ascii_lowercase + digits
     assert set(manager.id).issubset(ascii_lowercase + digits + "-")
+    # Make sure there is no potential conflix by prefixing a manager ID by "no", which is the convention for single manager flags in the CLI.
+    assert not manager.id.startswith("no")
 
 
 @all_managers

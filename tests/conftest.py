@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 # Pre-load invocation helpers to be used as pytest's fixture.
-from click_extra.pytest import extra_runner  # noqa: F401
+from click_extra.pytest import create_config, extra_runner  # noqa: F401
 from pytest import fixture, param
 
 from meta_package_manager.cli import mpm

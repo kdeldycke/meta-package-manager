@@ -217,7 +217,14 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 
     bar_path = Path(bar_plugin.__file__).expanduser().resolve()
     home_dir = Path.home()
-    if bar_path.is_relative_to(home_dir):
+
+    starts_with_home = False
+    if sys.version_info >= (3, 9):
+        starts_with_home = bar_path.is_relative_to(home_dir)
+    else:
+        starts_with_home = home_dir == bar_path or home_dir in bar_path.parents
+
+    if starts_with_home:
         home_shorthand = Path("~")
         shorten_bar_path = home_shorthand / bar_path.relative_to(home_dir)
         assert shorten_bar_path.expanduser().resolve() == bar_path

@@ -260,10 +260,13 @@ class PackageManager(metaclass=MetaPackageManager):
     cli_names: tuple[str, ...]
     """List of CLI names the package manager is known as.
 
-    The supported CLI names are ordered by priority. This is used for example to help
-    out the search of the right binary in the case of the python3/python2 transition.
+    This list of recognized CLI names is ordered by priority. That way we can influence
+    the search of the right binary. This was helpful in the case of the Python
+    transition from 2.x to 3.x, where multiple versions of the same executable were
+    named ``python`` or ``python3``.
 
-    Is derived by default from the manager's ID.
+    By default, this property's value is derived from the manager's ID (see the
+    ``MetaPackageManager.__init__`` method above).
     """
 
     virtual: bool

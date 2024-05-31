@@ -1,7 +1,7 @@
 [tool.poetry]
 # Docs: https://python-poetry.org/docs/pyproject/
 name = "meta-package-manager"
-version = "5.16.1"
+version = "5.17.0"
 description = "🎁 wraps all package managers with a unifying CLI"
 license = 'GPL-2.0-or-later'
 authors = ["Kevin Deldycke <kevin@deldycke.com>"]
@@ -148,8 +148,8 @@ mpm = 'meta_package_manager.__main__:main'
 product-name = "Meta Package Manager"
 file-description = "🎁 wraps all package managers with a unifying CLI"
 copyright = "Kevin Deldycke <kevin@deldycke.com> and contributors. Distributed under GPL-2.0-or-later license."
-file-version = "5.16.1"
-product-version = "5.16.1"
+file-version = "5.17.0"
+product-version = "5.17.0"
 macos-app-icon = "docs/assets/icon.png"
 linux-icon = "docs/assets/icon.png"
 windows-icon-from-ico = "docs/assets/icon.png"
@@ -195,7 +195,7 @@ branch = true
 precision = 2
 
 [tool.bumpversion]
-current_version = "5.16.1"
+current_version = "5.17.0"
 allow_dirty = true
 
 [[tool.bumpversion.files]]

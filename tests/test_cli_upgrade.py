@@ -19,6 +19,8 @@ from __future__ import annotations
 import re
 
 import pytest
+from boltons.strutils import strip_ansi
+from click_extra.platforms import is_windows
 
 from meta_package_manager.base import Operations
 
@@ -77,9 +79,10 @@ class TestUpgrade(CLISubCommandTests):
             assert "assume -A/--all option" in result.stderr
         if result.exit_code == 2:
             assert not result.stdout
-            assert result.stderr.endswith(
-                "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
-            )
+            expected_error = "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
+            if is_windows():
+                expected_error = strip_ansi(expected_error)
+            assert result.stderr.endswith(expected_error)
         else:
             assert result.exit_code == 0
             self.check_manager_selection(result, {manager_id})
@@ -93,9 +96,10 @@ class TestUpgrade(CLISubCommandTests):
             assert "assume -A/--all option" in result.stderr
         if result.exit_code == 2:
             assert not result.stdout
-            assert result.stderr.endswith(
-                "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
-            )
+            expected_error = "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
+            if is_windows():
+                expected_error = strip_ansi(expected_error)
+            assert result.stderr.endswith(expected_error)
         else:
             assert result.exit_code == 0
             self.check_manager_selection(result, {manager_id})

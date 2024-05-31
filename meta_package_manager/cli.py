@@ -128,9 +128,16 @@ def update_manager_selection(
         # Because the parameter's name is transformed into a Python identifier on
         # instantiation, we have to reverse the process to get our value.
         # Example: --apt-mint => apt_mint => apt-mint
+        manager_id = param.name
+        if sys.version_info >= (3, 9):
+            manager_id = manager_id.removeprefix("no_")
+        else:
+            if manager_id.startswith("no_"):
+                manager_id = manager_id[3:]
+        manager_id = manager_id.replace("_", "-")
         assert (
-            param.name.removeprefix("no_").replace("_", "-") == value
-        ), f"single manager selector {param.name!r} is not recognized"
+            manager_id == value
+        ), f"unrecognized single manager selector {param.name!r}"
         if param.name.startswith("no_"):
             assert isinstance(value, str)
             to_remove.add(value)

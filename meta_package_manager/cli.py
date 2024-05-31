@@ -400,22 +400,26 @@ def mpm(
 
         ctx.call_on_close(remove_logging_override)
 
+    # Normalize to None if no manager selectors have been used. This prevent the
+    # pool.select_managers() method to iterate over an empty population of managers to
+    # choose from.
     user_selection = None
     managers_to_remove = None
     if ctx.obj:
         user_selection = ctx.obj.get("managers_to_add", None)
         managers_to_remove = ctx.obj.get("managers_to_remove", None)
-
-    # Normalize to None if no manager selectors have been used. This prevent the
-    # pool.select_managers() method to iterate over an empty population of managers to
-    # choose from.
-    if not user_selection:
-        logging.debug("No initial population of managers selected by user.")
-    else:
-        logging.debug(
-            "User-selected managers by priority: "
-            f"{' > '.join(map(theme.invoked_command, user_selection))}",
-        )
+    selection_string = (
+        repr(user_selection)
+        if not user_selection
+        else "> " + " > ".join(map(theme.invoked_command, user_selection))
+    )
+    deselection_string = (
+        repr(managers_to_remove)
+        if not managers_to_remove
+        else ", ".join(map(theme.invoked_command, managers_to_remove))
+    )
+    logging.info(f"User selection of managers by priority: {selection_string}")
+    logging.info(f"Managers to drop by user: {deselection_string}")
 
     # Select the subset of manager to target, and apply manager-level options.
     selected_managers = partial(
@@ -933,11 +937,10 @@ def install(ctx, packages_specs):
         ctx.obj.selected_managers(implements_operation=Operations.install),
     )
     manager_ids = tuple(manager.id for manager in selected_managers)
-    if len(manager_ids) > 1:
-        logging.info(
-            "Installation priority: "
-            f"{' > '.join(map(theme.invoked_command, manager_ids))}",
-        )
+    logging.info(
+        "Installation priority: > "
+        f"{' > '.join(map(theme.invoked_command, manager_ids))}",
+    )
 
     solver = Solver(packages_specs, manager_priority=manager_ids)
     packages_per_managers = solver.resolve_specs_group_by_managers()

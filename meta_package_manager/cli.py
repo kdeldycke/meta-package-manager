@@ -154,7 +154,7 @@ def update_manager_selection(
         ctx.obj.setdefault("managers_to_remove", set()).update(to_remove)
 
 
-def single_manager_selectors() -> tuple[Parameter, ...]:
+def single_manager_selectors():
     """Dynamiccaly creates a dedicated flag selector alias for each manager."""
     single_flags = []
     single_no_flags = []
@@ -186,7 +186,7 @@ def single_manager_selectors() -> tuple[Parameter, ...]:
     return *single_flags, *single_no_flags
 
 
-def bar_plugin_path(ctx, param, value):
+def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     """Print the location of the :doc:`Xbar/SwiftBar plugin <bar-plugin>`.
 
     Returns the normalized path of the standalone `bar_plugin.py

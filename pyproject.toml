@@ -208,22 +208,10 @@ ignore_missing_version = true
 filename = "./meta_package_manager/bar_plugin.py"
 
 [[tool.bumpversion.files]]
-# Update version in Poetry section.
+# Update version in Poetry and Nuitka sections.
 filename = "./pyproject.toml"
 search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
-
-[[tool.bumpversion.files]]
-# Update version in Nuitka metadata.
-filename = "./pyproject.toml"
-search = 'file-version = "{current_version}"'
-replace = 'file-version = "{new_version}"'
-
-[[tool.bumpversion.files]]
-# Update version in Nuitka metadata.
-filename = "./pyproject.toml"
-search = 'product-version = "{current_version}"'
-replace = 'product-version = "{new_version}"'
 
 [[tool.bumpversion.files]]
 # Update the version in standard Markdown changelog.

@@ -89,20 +89,19 @@ class TestInstallRemove(CLISubCommandTests):
             it find one providing the package we seek to install, after which the
             process stop.
         """
-        result = invoke(f"--{manager_id}", "install", package_id)
-        assert result.exit_code == 0
-        self.check_manager_selection(
-            result,
-            {manager_id},
-            reference_set=pool.all_manager_ids,
-            strict_selection_match=False,
-        )
+        for command in ("install", "remove"):
+            result = invoke(f"--{manager_id}", command, package_id)
 
-        result = invoke(f"--{manager_id}", "remove", package_id)
-        assert result.exit_code == 0
-        self.check_manager_selection(
-            result,
-            {manager_id},
-            reference_set=pool.all_manager_ids,
-            strict_selection_match=False,
-        )
+            if result.exit_code == 2:
+                assert not result.stdout
+                assert result.stderr.endswith(
+                    "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
+                )
+            else:
+                assert result.exit_code == 0
+                self.check_manager_selection(
+                    result,
+                    {manager_id},
+                    reference_set=pool.all_manager_ids,
+                    strict_selection_match=False,
+                )

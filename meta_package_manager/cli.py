@@ -112,10 +112,20 @@ def update_manager_selection(
 
     # Add the value of --manager list.
     if param.name == "manager":
+        for manager_id in value:
+            logging.warning(
+                f"The `--manager {manager_id}` option is deprecated. "
+                f"Use `--{manager_id}` single selector instead.",
+            )
         to_add.extend(value)
 
-    # Add the value of --exclure list.
+    # Add the value of --exclude list.
     elif param.name == "exclude":
+        for manager_id in value:
+            logging.warning(
+                f"The `--exclude {manager_id}` option is deprecated. "
+                f"Use `--no-{manager_id}` single selector instead.",
+            )
         to_remove.update(value)
 
     # Update the list of managers with the XKCD preset.
@@ -158,17 +168,16 @@ def single_manager_selectors():
     """Dynamiccaly creates a dedicated flag selector alias for each manager."""
     single_flags = []
     single_no_flags = []
-    for manager_id in pool.all_manager_ids:
-        manager = pool.get(manager_id)
+    for manager_id, manager in pool.items():
         # Parameters do not have a deprecated flag.
         # See: https://github.com/pallets/click/issues/2263
-        deprecated_msg = " (deprecated)" if manager.deprecated else ""
+        deprecated_msg = "(Deprecated) " if manager.deprecated else ""
         single_flags.append(
             option(
                 f"--{manager_id}",
                 flag_value=manager_id,
                 default=False,
-                help=f"Alias to --manager {manager_id}{deprecated_msg}.",
+                help=f"{deprecated_msg}Select {manager.name}.",
                 expose_value=False,
                 callback=update_manager_selection,
             )
@@ -178,7 +187,7 @@ def single_manager_selectors():
                 f"--no-{manager_id}",
                 flag_value=manager_id,
                 default=False,
-                help=f"Alias to --exclude {manager_id}{deprecated_msg}.",
+                help=f"{deprecated_msg}Deselect {manager.name}.",
                 expose_value=False,
                 callback=update_manager_selection,
             )
@@ -242,36 +251,22 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 )
 @option_group(
     "Package manager selection options",
-    option(
-        "-m",
-        "--manager",
-        type=Choice(pool.all_manager_ids, case_sensitive=False),
-        multiple=True,
-        expose_value=False,
-        callback=update_manager_selection,
-        help="Restrict subcommand to a subset of managers. Repeat to "
-        "select multiple managers. The order is preserved for priority-sensitive "
-        "subcommands.",
-    ),
-    option(
-        "-e",
-        "--exclude",
-        type=Choice(pool.all_manager_ids, case_sensitive=False),
-        multiple=True,
-        expose_value=False,
-        callback=update_manager_selection,
-        help="Exclude a manager. Repeat to exclude multiple managers. Exclusion of a "
-        "manager always takes precedence over inclusion, whatever the parameter "
-        "position.",
-    ),
+    "These options allow you to restrict the subcommand to a subset of managers. "
+    "By default, mpm will evaluate all managers supported on the current platform. "
+    "To only target a subset of managers, use the --<manager-id> selectors below. "
+    "To remove a manager from the selection, use the --no-<manager-id> selectors.  "
+    "The order of the selectors is preserved for priority-sensitive subcommands. "
+    "Exclusion of a manager always takes precedence over inclusion, whatever the "
+    "parameter position.",
+    *single_manager_selectors(),
     option(
         "-a",
         "--all-managers",
         is_flag=True,
         default=False,
-        help="Force evaluation of all managers recognized by mpm, including those "
+        help="Force evaluation of all managers implemented by mpm, including those "
         "not supported by the current platform or deprecated. Still applies filtering "
-        "by --manager and --exclude options before calling the subcommand.",
+        "by --<manager-id> / --no-<manager-id> options before calling the subcommand.",
     ),
     option(
         "-x",
@@ -283,7 +278,24 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         help="Preset manager selection as defined by XKCD #1654. Equivalent to: "
         "{}.".format(" ".join(f"--{mid}" for mid in XKCD_MANAGER_ORDER)),
     ),
-    *single_manager_selectors(),
+    option(
+        "-m",
+        "--manager",
+        type=Choice(pool.all_manager_ids, case_sensitive=False),
+        multiple=True,
+        expose_value=False,
+        callback=update_manager_selection,
+        help="(Deprecated) Use --<manager-id> single selector instead.",
+    ),
+    option(
+        "-e",
+        "--exclude",
+        type=Choice(pool.all_manager_ids, case_sensitive=False),
+        multiple=True,
+        expose_value=False,
+        callback=update_manager_selection,
+        help="(Deprecated) Use --no-<manager-id> single selector instead.",
+    ),
 )
 @option_group(
     "Manager options",
@@ -365,7 +377,7 @@ def mpm(
     sort_by,
     stats,
 ):
-    """Common CLI options for subcommands."""
+    """CLI options shared by all subcommands."""
     # Silence all log messages for JSON rendering unless in debug mode.
     if (
         ctx.meta["click_extra.table_format"] == "json"

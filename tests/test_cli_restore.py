@@ -146,8 +146,7 @@ class TestRestore(CLISubCommandTests):
         result = invoke(
             "--verbosity",
             "INFO",
-            "--exclude",
-            "npm",
+            "--no-npm",
             "restore",
             str(toml_path),
             color=False,

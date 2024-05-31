@@ -6,7 +6,8 @@
 This version is not released yet and is under active development.
 ```
 
-- \[mpm\] Add `--no-*` negative selection flags for each single manager. Closes {issue}`882`.
+- \[mpm\] Add `--no-<manager-id>` negative selection flags for each single manager. Closes {issue}`882`.
+- \[mpm\] Deprecate `-m`/`--manager` and `-e`/`--exclude` options in favor of single `--<manager-id>`/`--no-<manager-id>` selectors.
 - \[mpm\] Stop CLI execution if manager selection parameters ends up with no managers being retained.
 - \[mpm\] Add dependency on `more-itertools`.
 - \[mpm\] Add metadata and icon to binaries produced by Nuitka.

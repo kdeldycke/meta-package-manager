@@ -191,7 +191,7 @@ class TestManagerSelection(InspectCLIOutput):
 
     @staticmethod
     def evaluate_signals(mid: str, stdout: str, stderr: str) -> Iterator[bool]:
-        """Borrow the signals from the ``--managers`` test suite.
+        """Borrow the signals from the ``--manager`` test suite.
 
         Module is imported inplace to avoid circular import.
         """
@@ -247,7 +247,7 @@ class TestManagerSelection(InspectCLIOutput):
                 id="multiple_mixed_selectors",
             ),
             pytest.param(
-                ("--manager", "gem", "--manager", "pip"),
+                ("--gem", "--pip"),
                 {"pip", "gem"},
                 id="ordered_selectors",
             ),
@@ -257,37 +257,37 @@ class TestManagerSelection(InspectCLIOutput):
                 id="ordered_mixed_selectors",
             ),
             pytest.param(
-                ("--exclude", "pip"),
+                ("--no-pip"),
                 set(pool.default_manager_ids) - {"pip"},
                 id="single_exclusion",
             ),
             pytest.param(
-                ("--exclude", "pip") * 2,
+                ("--no-pip") * 2,
                 set(pool.default_manager_ids) - {"pip"},
                 id="duplicate_exclusions",
             ),
             pytest.param(
-                ("--exclude", "pip", "--exclude", "gem"),
+                ("--no-pip", "--no-gem"),
                 set(pool.default_manager_ids) - {"pip", "gem"},
                 id="multiple_exclusions",
             ),
             pytest.param(
-                ("--manager", "pip", "--exclude", "gem"),
+                ("--pip", "--no-gem"),
                 {"pip"},
                 id="selector_priority_ordered",
             ),
             pytest.param(
-                ("--exclude", "gem", "--manager", "pip"),
+                ("--no-gem", "--pip"),
                 {"pip"},
                 id="selector_priority_reversed",
             ),
             pytest.param(
-                ("--manager", "pip", "--exclude", "pip"),
+                ("--pip", "--no-pip"),
                 None,
                 id="exclusion_precedence_ordered",
             ),
             pytest.param(
-                ("--exclude", "pip", "--manager", "pip"),
+                ("--no-pip", "--pip"),
                 None,
                 id="exclusion_precedence_reversed",
             ),

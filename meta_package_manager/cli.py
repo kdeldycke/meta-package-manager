@@ -25,7 +25,7 @@ from functools import partial
 from io import TextIOWrapper
 from operator import attrgetter
 from pathlib import Path
-from typing import Iterable, Iterator
+from typing import Iterable
 from unittest.mock import patch
 
 import tomli_w
@@ -108,6 +108,8 @@ def update_manager_selection(
     # care about user's order.
     to_remove: set[str] = set()
 
+    assert param.name
+
     # Add the value of --manager list.
     if param.name == "manager":
         to_add.extend(value)
@@ -130,8 +132,10 @@ def update_manager_selection(
             param.name.removeprefix("no_").replace("_", "-") == value
         ), f"single manager selector {param.name!r} is not recognized"
         if param.name.startswith("no_"):
+            assert isinstance(value, str)
             to_remove.add(value)
         else:
+            assert isinstance(value, str)
             to_add.append(value)
 
     # Initialize the shared context object to accumulate there the selection results.
@@ -143,7 +147,7 @@ def update_manager_selection(
         ctx.obj.setdefault("managers_to_remove", set()).update(to_remove)
 
 
-def single_manager_selectors() -> Iterator[Parameter]:
+def single_manager_selectors() -> tuple[Parameter, ...]:
     """Dynamiccaly creates a dedicated flag selector alias for each manager."""
     single_flags = []
     single_no_flags = []

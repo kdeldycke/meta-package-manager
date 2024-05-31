@@ -11,7 +11,7 @@ This version is not released yet and is under active development.
 - \[mpm\] Stop CLI execution if manager selection parameters ends up with no managers being retained.
 - \[mpm\] Add dependency on `more-itertools`.
 - \[mpm\] Add metadata and icon to binaries produced by Nuitka.
-- \[mpm\] Mark all Python 3.13-dev tests as stable but on macOS.
+- \[mpm\] Mark all Python 3.13-dev tests as stable on all platforms but macOS.
 - \[bar-plugin\] Reactivate login shells invocation tests.
 - \[bar-plugin\] Skip rendering tests on GitHub.
 - \[mpm\] Remove `sys.path` cleaning hack in `__main__` invocation.

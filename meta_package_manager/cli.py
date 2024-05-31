@@ -114,8 +114,9 @@ def update_manager_selection(
     if param.name == "manager":
         for manager_id in value:
             logging.warning(
-                f"The `--manager {manager_id}` option is deprecated. "
-                f"Use `--{manager_id}` single selector instead.",
+                f"The `--include {theme.invoked_command(manager_id)}` option is "
+                f"deprecated. Use `--{theme.invoked_command(manager_id)}` single "
+                "selector instead.",
             )
         to_add.extend(value)
 
@@ -123,8 +124,9 @@ def update_manager_selection(
     elif param.name == "exclude":
         for manager_id in value:
             logging.warning(
-                f"The `--exclude {manager_id}` option is deprecated. "
-                f"Use `--no-{manager_id}` single selector instead.",
+                f"The `--exclude {theme.invoked_command(manager_id)}` option is "
+                f"deprecated. Use `--no-{theme.invoked_command(manager_id)}` single "
+                "selector instead.",
             )
         to_remove.update(value)
 
@@ -910,15 +912,21 @@ def which(ctx, cli_names):
 def install(ctx, packages_specs):
     """Install one or more packages.
 
-    Installation will proceed first with packages unambiguously tied to a manager. You
-    can have an influence on that with more precise package specifiers (like purl)
-    and/or tighter selection of managers.
+    This subcommand is sensible to the order of the package managers selected by the
+    user.
 
-    For other untied packages, mpm will try to find the best manager to install it with.
-    Their installation will be attempted with each manager, in the order they were
-    selected. If we have the certainty, by the way of a search operation, that this
-    package is not available from this manager, we'll skip the installation and try the
-    next available manager.
+    Installation will first proceed for all the packages found to be tied to a specific
+    manager. Which is the case for packages provided with precise package specifiers
+    (like purl). This will also happens in situations in which a tighter selection of
+    managers is provided by the user.
+
+    For packages whose manager is not known, or if multiple managers are candidates for
+    the installation, mpm will try to find the best manager to install it with.
+
+    Installation will be attempted with each manager, in the order they were selected.
+    If a search for the package ID returns no result from the highest-priority manager,
+    we will skip the installation and try the next available managers in the order of
+    their priority.
     """
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(
@@ -1102,7 +1110,7 @@ def upgrade(ctx, all, packages_specs):
                 if package_id in map(attrgetter("id"), manager.installed):
                     logging.debug(
                         f"{package_id} has been installed "
-                        "with {theme.invoked_command(manager.id)}.",
+                        f"with {theme.invoked_command(manager.id)}.",
                     )
                     source_manager_ids.add(manager.id)
 
@@ -1259,6 +1267,10 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
     in a file on disk, specify the output file like so: `mpm backup packages.toml`.
 
     Files produced by this subcommand can be safely consumed by `mpm restore`.
+
+    Sections of the TOML file will be named after the manager ID. Sections are ordered in
+    the same order as the manager selection priority. Each section will contain a list of
+    package IDs and their installed version.
     """
 
     def is_stdout(filepath):

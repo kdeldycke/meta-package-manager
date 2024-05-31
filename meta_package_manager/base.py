@@ -974,7 +974,8 @@ class PackageManager(metaclass=MetaPackageManager):
                 cli = self.upgrade_all_cli()
             except NotImplementedError:
                 logging.info(
-                    "Fallback to calling upgrade operation on each outdated package.",
+                    "upgrade_all_cli operation not implemented. "
+                    "Call single upgrade operation on each package, one-by-one.",
                 )
                 log = ""
                 for package in self.outdated:

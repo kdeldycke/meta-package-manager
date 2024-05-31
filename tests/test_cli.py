@@ -257,12 +257,12 @@ class TestManagerSelection(InspectCLIOutput):
                 id="ordered_mixed_selectors",
             ),
             pytest.param(
-                ("--no-pip"),
+                ("--no-pip",),
                 set(pool.default_manager_ids) - {"pip"},
                 id="single_exclusion",
             ),
             pytest.param(
-                ("--no-pip") * 2,
+                ("--no-pip",) * 2,
                 set(pool.default_manager_ids) - {"pip"},
                 id="duplicate_exclusions",
             ),

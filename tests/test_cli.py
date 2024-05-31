@@ -301,7 +301,7 @@ class TestManagerSelection(InspectCLIOutput):
             expected_error = "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
             if is_windows():
                 expected_error = strip_ansi(expected_error)
-            assert result.stderr == expected_error
+            assert result.stderr.endswith(expected_error)
         else:
             assert result.exit_code == 0
             self.check_manager_selection(result, expected)

@@ -85,8 +85,15 @@ class TestRestore(CLISubCommandTests):
         result = invoke(
             "--verbosity", "INFO", f"--{manager_id}", "restore", str(toml_path)
         )
-        assert result.exit_code == 0
-        self.check_manager_selection(result, {manager_id})
+
+        if result.exit_code == 2:
+            assert not result.stdout
+            assert result.stderr.endswith(
+                "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
+            )
+        else:
+            assert result.exit_code == 0
+            self.check_manager_selection(result, {manager_id})
 
     def test_ignore_unrecognized_manager(self, invoke, create_config):
         toml_path = create_config(

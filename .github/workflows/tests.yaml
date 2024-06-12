@@ -124,7 +124,7 @@ jobs:
       # See: meta_package_manager/test_manager_homebrew.py::TestCask test.
       HOMEBREW_NO_INSTALL_FROM_API: "1"
     steps:
-      - uses: actions/checkout@v4.1.6
+      - uses: actions/checkout@v4.1.7
 
       - name: Python ${{ matrix.python-version }} - Install
         uses: actions/setup-python@v5.1.0

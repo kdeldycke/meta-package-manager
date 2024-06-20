@@ -1,9 +1,6 @@
 # Installation
 
-```{admonition} Danger: **Misleading package name**
----
-class: danger
----
+```{danger} Danger: **Misleading package name**
 ![Angry package](assets/angry-paper-box.png){w=50px align=right}
 
 There is a *`mpm`* Python module on PyPi that has nothing to do with this project. Avoid it!
@@ -111,26 +108,17 @@ This is the preferred way of testing `mpm` without polluting your machine. They 
 
 All links above points to the latest released version of `mpm`.
 
-```{admonition} Older releases
----
-class: seealso
----
+```{seealso} Older releases
 If you need to test previous versions for regression, compatibility or general troubleshooting, you'll find the old binaries attached as assets to [past releases on GitHub](https://github.com/kdeldycke/meta-package-manager/releases).
 ```
 
-```{admonition} Development builds
----
-class: caution
----
+```{caution} Development builds
 Each commit to the development branch triggers the compilation of binaries. This way you can easily test the bleeding edge version of `mpm` and report any issue.
 
 Look at the [list of latest binary builds](https://github.com/kdeldycke/meta-package-manager/actions/workflows/release.yaml?query=branch%3Amain+is%3Asuccess). Then select the latest `Build & release`/`release.yaml` workflow run and download the binary artifact corresponding to your platform and architecture.
 ```
 
-````{admonition} ABI targets
----
-class: seelalso
----
+````{note} ABI targets
 ```{code-block} shell-session
 $ file ./mpm*
 ./mpm-linux-x64.bin:   ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=d0a8ae1ffa469465a836c1505504d1b1c75725b0, for GNU/Linux 3.2.0, stripped
@@ -205,10 +193,7 @@ $ mpm --version
 mpm, version 5.11.1
 ```
 
-````{admonition}
----
-class: tip
----
+````{tip}
 At this moment, `mpm` can be installed with itself via these managers:
 
 ```{code-block} shell-session

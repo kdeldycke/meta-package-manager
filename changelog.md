@@ -2,9 +2,8 @@
 
 ## [5.17.0 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v5.16.0...main)
 
-```{important}
-This version is not released yet and is under active development.
-```
+> \[!IMPORTANT\]
+> This version is not released yet and is under active development.
 
 - \[mpm\] Add `--no-<manager-id>` negative selection flags for each single manager. Closes {issue}`882`.
 - \[mpm\] Deprecate `-m`/`--manager` and `-e`/`--exclude` options in favor of single `--<manager-id>`/`--no-<manager-id>` selectors.

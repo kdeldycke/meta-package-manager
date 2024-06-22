@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.17.1 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v5.17.0...main)
+
+> \[!IMPORTANT\]
+> This version is not released yet and is under active development.
+
 ## [5.17.0 (2024-06-22)](https://github.com/kdeldycke/meta-package-manager/compare/v5.16.0...v5.17.0)
 
 - \[mpm\] Add `--no-<manager-id>` negative selection flags for each single manager. Closes {issue}`882`.

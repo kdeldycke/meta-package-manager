@@ -466,9 +466,8 @@ class PackageManager(metaclass=MetaPackageManager):
 
         logging.debug(
             "Search for "
-            + ", ".join(theme.invoked_command(cli) for cli in search_filenames)
-            + " in "
-            + ", ".join(str(p) for p in search_path_list),
+            f"{', '.join(theme.invoked_command(cli) for cli in search_filenames)} in:"
+            f"\n{'\n'.join(str(p) for p in search_path_list)}"
         )
 
         for search_path in search_path_list:
@@ -606,7 +605,7 @@ class PackageManager(metaclass=MetaPackageManager):
            <meta_package_manager.base.PackageManager.fresh>`.
         """
         logging.debug(
-            f"{self.id} "
+            f"{theme.invoked_command(self.id)} "
             f"is deprecated: {self.deprecated}; "
             f"is supported: {self.supported}; "
             f"found at: {highlight_cli_name(self.cli_path, self.cli_names)}; "

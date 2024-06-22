@@ -419,7 +419,7 @@ def mpm(
         else ", ".join(map(theme.invoked_command, managers_to_remove))
     )
     logging.info(f"User selection of managers by priority: {selection_string}")
-    logging.info(f"Managers to drop by user: {deselection_string}")
+    logging.info(f"Managers dropped by user: {deselection_string}")
 
     # Select the subset of manager to target, and apply manager-level options.
     selected_managers = partial(

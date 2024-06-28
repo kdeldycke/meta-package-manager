@@ -23,7 +23,7 @@
   managers instead of videos
 - `mpm` solves [XKCD #1654 - *Universal Install Script*](https://xkcd.com/1654/)
 
----
+______________________________________________________________________
 
 ## Features
 
@@ -59,7 +59,7 @@
 
 <!-- operation-matrix-start -->
 
-| Package manager                                                                         | Min. version | BSD[^bsd_without_macos] | Linux[^linux] | macOS | Unix[^unix] | Windows | `installed` | `outdated` | `search` | `install` | `upgrade` | `upgrade_all` | `remove` | `sync` | `cleanup` |
+| Package manager                                                                         | Min. version | BSD\[^bsd_without_macos\] | Linux\[^linux\] | macOS | Unix\[^unix\] | Windows | `installed` | `outdated` | `search` | `install` | `upgrade` | `upgrade_all` | `remove` | `sync` | `cleanup` |
 | --------------------------------------------------------------------------------------- | ------------ | :---------------------: | :-----------: | :---: | :---------: | :-----: | :---------: | :--------: | :------: | :-------: | :-------: | :-----------: | :------: | :----: | :-------: |
 | [`apm`](https://atom.io/packages) [⚠️](https://github.blog/2022-06-08-sunsetting-atom/) | 1.0.0        |           🅱️            |      🐧       |  🍎   |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
 | [`apt`](https://wiki.debian.org/AptCLI)                                                 | 1.0.0        |           🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
@@ -92,11 +92,11 @@
 | [`yum`](http://yum.baseurl.org)                                                         | 4.0.0        |           🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
 | [`zypper`](https://en.opensuse.org/Portal:Zypper)                                       | 1.14.0       |           🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
 
-[^bsd_without_macos]: BSD: FreeBSD, NetBSD, OpenBSD, SunOS.
+\[^bsd_without_macos\]: BSD: FreeBSD, NetBSD, OpenBSD, SunOS.
 
-[^linux]: Linux: Linux, Windows Subsystem for Linux v2.
+\[^linux\]: Linux: Linux, Windows Subsystem for Linux v2.
 
-[^unix]: Unix: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.
+\[^unix\]: Unix: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.
 
 <!-- operation-matrix-end -->
 
@@ -142,7 +142,7 @@ Standalone executables of `mpm`'s latest version are available as direct downloa
 
 | Platform          | `x86_64`                                                                                                                         | `arm64`                                                                                                                          |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Linux**[^linux] | [Download `mpm-linux-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     |                                                                                                                                  |
+| **Linux**\[^linux\] | [Download `mpm-linux-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     |                                                                                                                                  |
 | **macOS**         | [Download `mpm-macos-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     | [Download `mpm-macos-arm64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-arm64.bin) |
 | **Windows**       | [Download `mpm-windows-x64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) |                                                                                                                                  |
 
@@ -249,8 +249,8 @@ Other subcommands and options are documented in:
   [list of use-cases](https://kdeldycke.github.io/meta-package-manager/usecase.html)
   where you’ll find inspiration on how to leverage `mpm` power
 
-[^bsd_without_macos]: BSD: FreeBSD, NetBSD, OpenBSD, SunOS.
+\[^bsd_without_macos\]: BSD: FreeBSD, NetBSD, OpenBSD, SunOS.
 
-[^linux]: Linux: Linux, Windows Subsystem for Linux v2.
+\[^linux\]: Linux: Linux, Windows Subsystem for Linux v2.
 
-[^unix]: Unix: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.
+\[^unix\]: Unix: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.

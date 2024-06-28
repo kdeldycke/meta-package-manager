@@ -186,10 +186,10 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 
 | OS      |         `mpm`          | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
 | ------- | :--------------------: | :------------: | :-----------: | :----------: | :----------: |
-| BSD     | 🅱️[^bsd_without_macos] |                |               |              |              |
-| Linux   |       🐧[^linux]        |       🐧        |       🐧       |      🐧       |      🐧       |
+| BSD     | 🅱️\[^bsd_without_macos\] |                |               |              |              |
+| Linux   |       🐧\[^linux\]        |       🐧        |       🐧       |      🐧       |      🐧       |
 | macOS   |           🍎            |       🍎        |       🍎       |      🍎       |      🍎       |
-| Unix    |      `>_`[^unix]       |                |               |              |              |
+| Unix    |      `>_`\[^unix\]       |                |               |              |              |
 | Windows |           🪟            |       🪟        |       🪟       |              |              |
 
 ## Distribution
@@ -246,16 +246,13 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 
 ## Project's URL
 
-[^1]: <https://github.com/topgrade-rs/topgrade>
+\[^bsd_without_macos\]: BSD: FreeBSD, NetBSD, OpenBSD, SunOS.
 
-[^2]: <https://github.com/rami3l/pacaptr>
+\[^linux\]: Linux: Linux, Windows Subsystem for Linux v2.
 
-[^3]: <https://github.com/icy/pacapt>
+\[^unix\]: Unix: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.
 
-[^4]: <https://github.com/emilengler/sysget>
-
-[^bsd_without_macos]: BSD: FreeBSD, NetBSD, OpenBSD, SunOS.
-
-[^linux]: Linux: Linux, Windows Subsystem for Linux v2.
-
-[^unix]: Unix: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.
+[^1]: https://github.com/topgrade-rs/topgrade
+[^2]: https://github.com/rami3l/pacaptr
+[^3]: https://github.com/icy/pacapt
+[^4]: https://github.com/emilengler/sysget

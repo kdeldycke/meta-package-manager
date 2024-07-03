@@ -466,9 +466,9 @@ class PackageManager(metaclass=MetaPackageManager):
 
         logging.debug(
             "Search for "
-            f"{', '.join(theme.invoked_command(cli) for cli in search_filenames)} in:"
-            "\n"
-            f"{'\n'.join(str(p) for p in search_path_list)}"
+            + ", ".join(theme.invoked_command(cli) for cli in search_filenames)
+            + " in:\n"
+            + "\n".join(str(p) for p in search_path_list)
         )
 
         for search_path in search_path_list:

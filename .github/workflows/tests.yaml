@@ -46,7 +46,7 @@ jobs:
               # Only test the oldest and latest Python version supported and the upcoming one. Skip the intermediates
               # to speed up the tests.
               "python-version": {
-                  "3.8",
+                  "3.9",
                   "3.12",
                   "3.13-dev",
               }
@@ -59,13 +59,7 @@ jobs:
           ]
 
           # List of unstable criterions.
-          unstable: list[dict[str, str]] = [
-              # cffi does not work on Python 3.13-dev yet on macOS:
-              #   Building wheel for cffi (pyproject.toml) did not run successfully.
-              #   Failed to build cffi
-              #   ERROR: Could not build wheels for cffi, which is required to install pyproject.toml-based projects
-              {"os": "macos-14", "python-version": "3.13-dev"},
-          ]
+          unstable: list[dict[str, str]] = []
 
           # Build the job matrix.
           jobs: list[dict[str, str]] = []
@@ -528,35 +522,37 @@ jobs:
         run: |
           choco install steamcmd --no-progress --yes
 
-      # Mpm.
-      - name: Poetry - Upgrade
+      - name: Install uv
         run: |
-          python -m pip install --upgrade poetry
-      - name: mpm - Install
+          python -m pip install -r https://raw.githubusercontent.com/kdeldycke/workflows/v4.1.4/requirements/uv.txt
+      - name: Install project
         run: |
-          poetry install --with test --no-interaction
+          uv venv --system
+          uv pip install ".[test]"
+
+      # CLI tests.
       - name: mpm --help
         run: |
-          poetry run mpm
+          uv run mpm
       - name: mpm --verbosity DEBUG --version
         run: |
-          poetry run mpm --verbosity DEBUG --version
+          uv run mpm --verbosity DEBUG --version
       - name: mpm managers
         run: |
-          poetry run mpm managers
+          uv run mpm managers
       - name: mpm --all-managers managers
         run: |
-          poetry run mpm --all-managers managers
+          uv run mpm --all-managers managers
 
       - name: Parallel non-destructive tests
         run: >
-          poetry run pytest --exitfirst
+          uv run pytest --exitfirst
           --numprocesses=auto --run-non-destructive --skip-destructive
           --ignore=./tests/test_bar_plugin.py
 
       - name: Sequential random destructive tests
         run: >
-          poetry run pytest --exitfirst
+          uv run pytest --exitfirst
           --numprocesses=0 --skip-non-destructive --run-destructive
           --ignore=./tests/test_bar_plugin.py
 
@@ -565,24 +561,24 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           ./meta_package_manager/bar_plugin.py --search-mpm
-      - name: poetry run bar_plugin.py --search-mpm
+      - name: uv run bar_plugin.py --search-mpm
         if: runner.os == 'macOS'
         run: |
-          poetry run ./meta_package_manager/bar_plugin.py --search-mpm
+          uv run ./meta_package_manager/bar_plugin.py --search-mpm
       - name: bar_plugin.py
         if: runner.os == 'macOS'
         run: |
           ./meta_package_manager/bar_plugin.py
-      - name: poetry run bar_plugin.py
+      - name: uv run bar_plugin.py
         if: runner.os == 'macOS'
         run: |
-          poetry run ./meta_package_manager/bar_plugin.py
+          uv run ./meta_package_manager/bar_plugin.py
 
       - name: Sequential, bar plugin tests - macOS
         if: runner.os == 'macOS'
         # XXX bar plugin calls way too many external commands to be run in parallel.
         run: >
-          poetry run pytest --exitfirst
+          uv run pytest --exitfirst
           --numprocesses=0 --run-non-destructive --run-destructive
           ./tests/test_bar_plugin.py
 

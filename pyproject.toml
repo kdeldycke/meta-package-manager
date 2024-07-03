@@ -1,14 +1,12 @@
-[tool.poetry]
-# Docs: https://python-poetry.org/docs/pyproject/
+[project]
+# Docs: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
 name = "meta-package-manager"
 version = "5.17.0"
+# Python versions and their status: https://devguide.python.org/versions/
+requires-python = ">= 3.9"
 description = "🎁 wraps all package managers with a unifying CLI"
-license = 'GPL-2.0-or-later'
-authors = ["Kevin Deldycke <kevin@deldycke.com>"]
+authors = [{ name = "Kevin Deldycke", email = "kevin@deldycke.com" }]
 readme = "readme.md"
-homepage = 'https://github.com/kdeldycke/meta-package-manager'
-repository = 'https://github.com/kdeldycke/meta-package-manager'
-documentation = 'https://kdeldycke.github.io/meta-package-manager'
 keywords = [
     'CLI',
     'apm',
@@ -68,9 +66,15 @@ classifiers = [
     'Intended Audience :: Developers',
     'Intended Audience :: Information Technology',
     'Intended Audience :: System Administrators',
+    'License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)',
     'Operating System :: MacOS :: MacOS X',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX :: Linux',
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     'Programming Language :: Python :: Implementation :: CPython',
     'Topic :: Software Development :: Libraries :: Python Modules',
     'Topic :: System :: Archiving :: Packaging',
@@ -79,69 +83,60 @@ classifiers = [
     'Topic :: Utilities',
     'Typing :: Typed',
 ]
+dependencies = [
+    "boltons ~= 24.0.0",
+    "click-extra ~= 4.8.3",
+    "more-itertools ~= 10.2.0",
+    "packageurl-python ~= 0.15.0",
+    "tabulate [widechars] ~= 0.9.0",
+    "tomli ~= 2.0.1 ; python_version < '3.11'",
+    "tomli_w ~= 1.0.0",
+    "xmltodict ~= 0.13.0",
+]
 
-[tool.poetry.urls]
+[project.optional-dependencies]
+test = [
+    "click-extra [pytest] ~= 4.8.3",
+    "coverage [toml] ~= 7.5.4",
+    "pytest ~= 8.2.2",
+    # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html
+    "pytest-cov ~= 5.0.0",
+    "pytest-github-actions-annotate-failures ~= 0.2.0",
+    "pytest-randomly ~= 3.15.0",
+    "pytest-xdist [psutil] ~= 3.2.1",
+]
+typing = [
+    "types-PyYAML ~= 6.0.12.9",
+    "types-tabulate ~= 0.9.0.2",
+    "types-xmltodict ~= 0.13.0.2",
+    "typing-extensions ~= 4.3.0 ; python_version < '3.10'",
+]
+docs = [
+    "click-extra [sphinx] ~= 4.8.3",
+    "furo ~= 2024.1.29",
+    "myst-parser ~= 3.0.0",
+    # Sphinx 7.2.0 is the first version to drop Python 3.8.
+    "sphinx >= 7.2.0",
+    "sphinx-autodoc-typehints ~= 2.2.2",
+    "sphinx-click ~= 6.0.0",
+    "sphinx-copybutton ~= 0.5.2",
+    # sphinx-design 0.5.0 is the first to allow Sphinx 7.
+    "sphinx-design ~= 0.6.0",
+    "sphinx-issues ~= 4.0.0",
+    "sphinxcontrib-mermaid ~= 0.9.2",
+    "sphinxext-opengraph ~= 0.9.0",
+    "tomli ~= 2.0.1 ; python_version < '3.11'",
+]
+
+[project.urls]
+"Homepage" = 'https://github.com/kdeldycke/meta-package-manager'
+"Documentation" = 'https://kdeldycke.github.io/meta-package-manager'
+"Repository" = 'https://github.com/kdeldycke/meta-package-manager'
 "Funding" = "https://github.com/sponsors/kdeldycke"
 "Issues" = "https://github.com/kdeldycke/meta-package-manager/issues"
 "Changelog" = "https://kdeldycke.github.io/meta-package-manager/changelog.html"
 
-[tool.poetry.dependencies]
-# Python versions and their status: https://devguide.python.org/versions/
-python = "^3.8"
-boltons = "^24.0.0"
-click-extra = "^4.8.3"
-more-itertools = "^10.2.0"
-packageurl-python = "^0.15.0"
-tabulate = { version = "^0.9.0", extras = ["widechars"] }
-tomli = { version = "^2.0.1", python = "< 3.11" }
-tomli_w = "^1.0.0"
-xmltodict = "^0.13.0"
-
-# docutils 0.21 cannot be installed with poetry
-# See https://github.com/python-poetry/poetry/issues/9293
-docutils = "!=0.21"
-
-[tool.poetry.group.test]
-optional = true
-
-[tool.poetry.group.test.dependencies]
-click-extra = { version = "^4.8.3", extras = ["pytest"] }
-coverage = { version = "^7.2.3", extras = ["toml"] }
-pytest = "^8.0.2"
-# More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html
-pytest-cov = "^5.0.0"
-pytest-github-actions-annotate-failures = "^0.2.0"
-pytest-randomly = "^3.12.0"
-pytest-xdist = { version = "^3.2.1", extras = ["psutil"] }
-
-[tool.poetry.group.typing]
-optional = true
-
-[tool.poetry.group.typing.dependencies]
-types-PyYAML = "^6.0.12.9"
-types-tabulate = "^0.9.0.2"
-types-xmltodict = "^0.13.0.2"
-typing-extensions = { version = "^4.3.0", python = "< 3.10" }
-
-[tool.poetry.group.docs]
-optional = true
-
-[tool.poetry.group.docs.dependencies]
-click-extra = { version = "^4.8.3", extras = ["sphinx"] }
-furo = "^2024.1.29"
-myst-parser = "^3.0.0"
-# Sphinx 6 is the first version to drop Python 3.7.
-sphinx = ">=6"
-sphinx-autodoc-typehints = "^2.0.0"
-sphinx-click = "^6.0.0"
-sphinx-copybutton = "^0.5.2"
-# sphinx-design 0.5.0 is the first to allow Sphinx 7.
-sphinx-design = "^0.5.0"
-sphinx-issues = "^4.0.0"
-sphinxcontrib-mermaid = "^0.9"
-sphinxext-opengraph = "^0.9.0"
-
-[tool.poetry.scripts]
+[project.scripts]
 mpm = 'meta_package_manager.__main__:main'
 
 [tool.nuitka]
@@ -168,7 +163,6 @@ module = ["boltons.*", "packageurl.*"]
 
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml
-testpaths = ["tests/"]
 addopts = [
     "--numprocesses=auto",
     "--dist=loadgroup",
@@ -208,7 +202,7 @@ ignore_missing_version = true
 filename = "./meta_package_manager/bar_plugin.py"
 
 [[tool.bumpversion.files]]
-# Update version in Poetry and Nuitka sections.
+# Update version in project section.
 filename = "./pyproject.toml"
 search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
@@ -248,7 +242,3 @@ default.extend-ignore-identifiers-re = [
     #     |
     "ist",
 ]
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"

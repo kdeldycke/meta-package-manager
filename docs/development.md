@@ -50,8 +50,10 @@ $ git checkout main
 Install package in editable mode with all development dependencies:
 
 ```shell-session
-$ python3 -m pip install poetry
-$ poetry install --all-extras
+$ python -m pip install uv
+$ uv venv
+$ source .venv/bin/activate
+$ uv pip install --all-extras .
 ```
 
 Now you’re ready to hack and abuse `git`.
@@ -61,24 +63,24 @@ Now you’re ready to hack and abuse `git`.
 After the steps above, you are free to play with the bleeding edge version of `mpm`:
 
 ```shell-session
-$ poetry run mpm --version
-mpm, version 4.13.0-dev
+$ uv run mpm --version
 (...)
+mpm, version 4.13.0
 ```
 
 ## Unit-tests
 
-Simply run:
+Run unit-tests with:
 
 ```shell-session
-$ poetry install --with tests
-$ poetry run pytest
+$ uv install ".[test]"
+$ uv run pytest
 ```
 
 Which should be the same as running non-destructive unit-tests in parallel with:
 
 ```shell-session
-$ poetry run pytest --numprocesses=auto --skip-destructive ./tests
+$ uv run pytest --numprocesses=auto --skip-destructive
 ```
 
 ````{danger}
@@ -86,7 +88,7 @@ If you're not afraid of `mpm` tests messing around with the package managers on 
 can run the subset of destructive tests with:
 
 ```shell-session
-$ poetry run pytest --numprocesses=0 --skip-non-destructive --run-destructive ./tests
+$ uv run pytest --numprocesses=0 --skip-non-destructive --run-destructive
 ```
 
 As you can see above we recommend running these tests in (non-deterministic) sequential order as most
@@ -103,8 +105,8 @@ The documentation you’re currently reading can be built locally with
 [Sphinx](https://www.sphinx-doc.org):
 
 ```shell-session
-$ poetry install --with docs
-$ poetry run sphinx-build -b html ./docs ./docs/html
+$ uv install ".[docs]"
+$ uv run sphinx-build -b html ./docs ./docs/html
 ```
 
 The generation of API documentation is

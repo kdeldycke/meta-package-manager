@@ -8,9 +8,11 @@
 - \[mpm\] Add `--no-<manager-id>` negative selection flags for each single manager. Closes {issue}`882`.
 - \[mpm\] Deprecate `-m`/`--manager` and `-e`/`--exclude` options in favor of single `--<manager-id>`/`--no-<manager-id>` selectors.
 - \[mpm\] Stop CLI execution if manager selection parameters ends up with no managers being retained.
+- \[mpm\] Switch from Poetry to `uv`.
+- \[mpm\] Drop support for Python 3.8.
 - \[mpm\] Add dependency on `more-itertools`.
 - \[mpm\] Add metadata and icon to binaries produced by Nuitka.
-- \[mpm\] Mark all Python 3.13-dev tests as stable on all platforms but macOS.
+- \[mpm\] Mark Python 3.13-dev tests as stable.
 - \[bar-plugin\] Reactivate login shells invocation tests.
 - \[bar-plugin\] Skip rendering tests on GitHub.
 - \[mpm\] Remove `sys.path` cleaning hack in `__main__` invocation.

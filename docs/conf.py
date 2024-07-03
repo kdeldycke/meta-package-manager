@@ -15,12 +15,10 @@ toml_path = project_path / "pyproject.toml"
 toml_config = tomllib.loads(toml_path.read_text())
 
 # Redistribute pyproject.toml config to Sphinx.
-project_id = toml_config["tool"]["poetry"]["name"]
-version = release = toml_config["tool"]["poetry"]["version"]
-url = toml_config["tool"]["poetry"]["homepage"]
-author = ", ".join(
-    a.split("<")[0].strip() for a in toml_config["tool"]["poetry"]["authors"]
-)
+project_id = toml_config["project"]["name"]
+version = release = toml_config["project"]["version"]
+url = toml_config["project"]["urls"]["Homepage"]
+author = ", ".join(author["name"] for author in toml_config["project"]["authors"])
 
 # Title-case each word of the project ID.
 project = " ".join(word.title() for word in project_id.split("-"))

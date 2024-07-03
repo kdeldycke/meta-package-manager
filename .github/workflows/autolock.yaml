@@ -8,4 +8,4 @@ name: Autolock
 jobs:
 
   autolock:
-    uses: kdeldycke/workflows/.github/workflows/autolock.yaml@v3.5.11
+    uses: kdeldycke/workflows/.github/workflows/autolock.yaml@v4.1.4

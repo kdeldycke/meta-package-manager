@@ -4,5 +4,5 @@ pacman:
     - pacman -Sy --noconfirm python-pip
     - python -m pip install -r https://raw.githubusercontent.com/kdeldycke/workflows/v4.1.4/requirements/uv.txt
     - uv venv --system
-    - uv pip install --all-extras .
+    - uv pip install --all-extras --requirement pyproject.toml .
     - uv run mpm --pacman -v DEBUG install vim

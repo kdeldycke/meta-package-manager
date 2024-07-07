@@ -31,10 +31,10 @@ class UV(PackageManager):
 
     requirement = "0.1.45"
     """`v0.1.45 <https://github.com/astral-sh/uv/releases/tag/0.1.45>`_ is the first
-    version to support ``--format=json`` parameter
+    version to support ``--format=json`` parameter.
     """
 
-    pre_args = ("--color never",)
+    pre_args = ("--color", "never")
     """
           ```text
           --color <COLOR_CHOICE>

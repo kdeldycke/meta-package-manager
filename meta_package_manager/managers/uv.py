@@ -24,7 +24,7 @@ from click_extra.platforms import ALL_PLATFORMS
 from meta_package_manager.base import Package, PackageManager
 
 
-class Uv(PackageManager):
+class UV(PackageManager):
     homepage_url = "https://astral.sh"
 
     platforms = ALL_PLATFORMS

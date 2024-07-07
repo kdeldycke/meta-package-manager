@@ -74,7 +74,7 @@ PYTHON_MIN_VERSION = (3, 8, 0)
 MPM_MIN_VERSION = (5, 0, 0)
 """Mpm v5.0.0 was the first version taking care of the complete layout rendering."""
 
-Venv = Enum("Venv", ["PIPENV", "POETRY", "VIRTUALENV"])
+Venv = Enum("Venv", ["PIPENV", "UV", "POETRY", "VIRTUALENV"])
 """Type of virtualenv we are capable of detecting."""
 
 
@@ -219,6 +219,9 @@ class MPMPlugin:
         """
         if (folder / "Pipfile").is_file():
             return Venv.PIPENV, (f"PIPENV_PIPFILE='{folder}'", "pipenv", "run", "mpm")
+
+        if (folder / "uv.lock").is_file():
+            return Venv.UV, ("uv", "run", "mpm")
 
         if (folder / "poetry.lock").is_file():
             return Venv.POETRY, ("poetry", "run", "--directory", str(folder), "mpm")

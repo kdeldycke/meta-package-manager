@@ -8,6 +8,7 @@
 - \[uv\] Add support for `uv` package manager for Python.
 - \[mpm\] Add `--no-<manager-id>` negative selection flags for each single manager. Closes {issue}`882`.
 - \[mpm\] Deprecate `-m`/`--manager` and `-e`/`--exclude` options in favor of single `--<manager-id>`/`--no-<manager-id>` selectors.
+- \[bar-plugin\] Identify `uv`-based virtual envs to run `mpm` executable.
 - \[mpm\] Stop CLI execution if manager selection parameters ends up with no managers being retained.
 - \[mpm\] Switch from Poetry to `uv`.
 - \[mpm\] Drop support for Python 3.8.

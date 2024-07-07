@@ -5,6 +5,7 @@
 > \[!IMPORTANT\]
 > This version is not released yet and is under active development.
 
+- \[uv\] Add support for `uv` package manager for Python.
 - \[mpm\] Add `--no-<manager-id>` negative selection flags for each single manager. Closes {issue}`882`.
 - \[mpm\] Deprecate `-m`/`--manager` and `-e`/`--exclude` options in favor of single `--<manager-id>`/`--no-<manager-id>` selectors.
 - \[mpm\] Stop CLI execution if manager selection parameters ends up with no managers being retained.

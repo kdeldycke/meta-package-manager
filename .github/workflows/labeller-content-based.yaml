@@ -116,6 +116,9 @@ jobs:
           - "steam"
           - "valve"
 
+        "📦 manager: uv":
+          - "uv"
+
         "📦 manager: vscode":
           - "vscode"
           - "visual studio code"

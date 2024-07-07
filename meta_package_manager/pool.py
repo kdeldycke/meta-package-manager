@@ -46,6 +46,7 @@ from .managers.pkg import PKG
 from .managers.scoop import Scoop
 from .managers.snap import Snap
 from .managers.steamcmd import SteamCMD
+from .managers.uv import Uv
 from .managers.vscode import VSCode
 from .managers.winget import WinGet
 from .managers.yarn import Yarn
@@ -79,6 +80,7 @@ manager_classes = (
     Scoop,
     Snap,
     SteamCMD,
+    Uv,
     VSCode,
     WinGet,
     Yarn,

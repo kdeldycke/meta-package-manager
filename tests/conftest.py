@@ -183,6 +183,8 @@ PACKAGE_IDS = {
     "scoop": "main/meta-package-manager",
     "snap": "standard-notes",
     "steamcmd": "740",
+    # https://pypi.org/project/meta-package-manager
+    "uv": "meta-package-manager",
     "vscode": "tamasfe.even-better-toml",
     "winget": "Microsoft.PowerToys",
     "yarn": "awesome-lint",

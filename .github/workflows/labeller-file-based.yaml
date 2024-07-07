@@ -152,6 +152,12 @@ jobs:
               - meta_package_manager/managers/steamcmd*
               - tests/*steamcmd*
 
+        "📦 manager: uv":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/uv*
+              - tests/*uv*
+
         "📦 manager: vscode":
           - changed-files:
             - any-glob-to-any-file:

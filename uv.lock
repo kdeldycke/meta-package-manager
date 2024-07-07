@@ -325,9 +325,9 @@ wheels = [
 
 [[distribution]]
 name = "furo"
-version = "2024.1.29"
+version = "2024.5.6"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/00/6d/7d0f35b9fba4394675bd90d44baadde8f20fe6e38c2481ef42cf05cd74f8/furo-2024.1.29.tar.gz", hash = "sha256:4d6b2fe3f10a6e36eb9cc24c1e7beb38d7a23fc7b3c382867503b7fcac8a1e02", size = 1657869 }
+sdist = { url = "https://files.pythonhosted.org/packages/66/c3/259585edebac22f97d6af6043d20fba6b0aea906a2f9d57346a53d2d77a5/furo-2024.5.6.tar.gz", hash = "sha256:81f205a6605ebccbb883350432b4831c0196dd3d1bc92f61e1f459045b3d2b0b", size = 1661282 }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "pygments" },
@@ -335,7 +335,7 @@ dependencies = [
     { name = "sphinx-basic-ng" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/88/1b/6e2c959476fcdaea2aeb8fe5807ed6df8189086a7cd17904de5272db53e9/furo-2024.1.29-py3-none-any.whl", hash = "sha256:3548be2cef45a32f8cdc0272d415fcb3e5fa6a0eb4ddfe21df3ecf1fe45a13cf", size = 325212 },
+    { url = "https://files.pythonhosted.org/packages/85/bf/dd5333ddd6318e04871e96b2567cb3b87955588f30fc705e8692c6865ac8/furo-2024.5.6-py3-none-any.whl", hash = "sha256:490a00d08c0a37ecc90de03ae9227e8eb5d6f7f750edf9807f398a2bdf2358de", size = 341199 },
 ]
 
 [[distribution]]
@@ -557,11 +557,11 @@ typing = [
 
 [[distribution]]
 name = "more-itertools"
-version = "10.2.0"
+version = "10.3.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/df/ad/7905a7fd46ffb61d976133a4f47799388209e73cbc8c1253593335da88b4/more-itertools-10.2.0.tar.gz", hash = "sha256:8fccb480c43d3e99a00087634c06dd02b0d50fbf088b380de5a41a015ec239e1", size = 114449 }
+sdist = { url = "https://files.pythonhosted.org/packages/01/33/77f586de725fc990d12dda3d4efca4a41635be0f99a987b9cc3a78364c13/more-itertools-10.3.0.tar.gz", hash = "sha256:e5d93ef411224fbcef366a6e8ddc4c5781bc6359d43412a65dd5964e46111463", size = 118147 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/50/e2/8e10e465ee3987bb7c9ab69efb91d867d93959095f4807db102d07995d94/more_itertools-10.2.0-py3-none-any.whl", hash = "sha256:686b06abe565edfab151cb8fd385a05651e1fdf8f0a14191e4439283421f8684", size = 57015 },
+    { url = "https://files.pythonhosted.org/packages/bb/23/2d1cdb0427aecb2b150dc2ac2d15400990c4f05585b3fbc1b5177d74d7fb/more_itertools-10.3.0-py3-none-any.whl", hash = "sha256:ea6a02e24a9161e51faad17a8782b92a0df82c12c1c8886fec7f0c3fa1a1b320", size = 59245 },
 ]
 
 [[distribution]]
@@ -724,15 +724,15 @@ wheels = [
 
 [[distribution]]
 name = "pytest-xdist"
-version = "3.2.1"
+version = "3.6.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/e3/f8/de2dcd2938c05270c9881cb1463dea388acd0b239ee76809160420157784/pytest-xdist-3.2.1.tar.gz", hash = "sha256:1849bd98d8b242b948e472db7478e090bf3361912a8fed87992ed94085f54727", size = 76362 }
+sdist = { url = "https://files.pythonhosted.org/packages/41/c4/3c310a19bc1f1e9ef50075582652673ef2bfc8cd62afef9585683821902f/pytest_xdist-3.6.1.tar.gz", hash = "sha256:ead156a4db231eec769737f57668ef58a2084a34b2e55c4a8fa20d861107300d", size = 84060 }
 dependencies = [
     { name = "execnet" },
     { name = "pytest" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/41/69/319ff6c2bda31b0ab0710d2bb406d53f7d9c13a1c572696479a16322d9dc/pytest_xdist-3.2.1-py3-none-any.whl", hash = "sha256:37290d161638a20b672401deef1cba812d110ac27e35d213f091d15b8beb40c9", size = 41026 },
+    { url = "https://files.pythonhosted.org/packages/6d/82/1d96bf03ee4c0fdc3c0cbe61470070e659ca78dc0086fb88b66c185e2449/pytest_xdist-3.6.1-py3-none-any.whl", hash = "sha256:9ed4adfb68a016610848639bb7e02c9352d5d9f03d04809919e2dafc3be4cca7", size = 46108 },
 ]
 
 [distribution.optional-dependencies]
@@ -1010,14 +1010,14 @@ wheels = [
 
 [[distribution]]
 name = "sphinx-issues"
-version = "4.0.0"
+version = "4.1.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/dd/8b/d0c10bb1a98273c08cbe6fe773bada84597d250960c91dbe7d1a97f6df7d/sphinx_issues-4.0.0.tar.gz", hash = "sha256:5b8fcc229ffaeaef53fef0dca88dc89bc14b4aa81f221d9682a64ecced02e25d", size = 13945 }
+sdist = { url = "https://files.pythonhosted.org/packages/ba/fb/fa7829987e801056f16d8c63ace3f1d6f91e44940ad00f512450581ed63f/sphinx_issues-4.1.0.tar.gz", hash = "sha256:a67f7ef31d164b420b2f21b6c9b020baeb4a014afd4045f5be314c984e8ee520", size = 14148 }
 dependencies = [
     { name = "sphinx" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b0/a6/47612ac521feed91757ad78284072a50ad9f64f49d7237c47c59a75d14df/sphinx_issues-4.0.0-py3-none-any.whl", hash = "sha256:ce1ee87682eb8e661d2d500672756916f113ac0a37da3678aa474b7d8ce3d039", size = 8118 },
+    { url = "https://files.pythonhosted.org/packages/d0/7c/0a7c1a38392f2922b4b693dd8acd6a4c7e662ee66db058bdf314bd22ce3f/sphinx_issues-4.1.0-py3-none-any.whl", hash = "sha256:d779dddff441175c9fddb7a4018eca38f9f6cdb1e0a2fe31d93b4f89587c7ba1", size = 8248 },
 ]
 
 [[distribution]]

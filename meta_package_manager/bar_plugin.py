@@ -194,12 +194,18 @@ class MPMPlugin:
             seen.add(normalized_path)
 
             process = run(
-                (normalized_path, "--version"),
+                (
+                    normalized_path,
+                    "-c",
+                    "import sys; "
+                    "v = sys.version_info; "
+                    # Ignore releaselevel and serial component of the version number.
+                    "print(f'{v.major}.{v.minor}.{v.micro}')",
+                ),
                 capture_output=True,
                 encoding="utf-8",
             )
-            version_string = process.stdout.split()[1]
-            python_version = tuple(map(int, version_string.split(".")))
+            python_version = tuple(map(int, process.stdout.split(".")))
             # Is Python too old?
             if python_version < PYTHON_MIN_VERSION:
                 continue

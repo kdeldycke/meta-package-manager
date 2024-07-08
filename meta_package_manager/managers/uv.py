@@ -133,7 +133,7 @@ class UV(PackageManager):
         package_specs = package_id
         if version:
             package_specs += f" == {version}"
-        return self.run_cli("pip", "install", "--upgrade", f'"{package_specs}"')
+        return self.build_cli("pip", "install", "--upgrade", f'"{package_specs}"')
 
     def remove(self, package_id: str) -> str:
         """Remove one package.

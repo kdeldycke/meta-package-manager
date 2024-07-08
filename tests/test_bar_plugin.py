@@ -16,11 +16,9 @@
 
 from __future__ import annotations
 
-import os
 import re
 import subprocess
 from collections import Counter
-from configparser import RawConfigParser
 from itertools import product
 
 import pytest
@@ -194,19 +192,6 @@ class TestBarPlugin:
     @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
     @pytest.mark.parametrize("submenu_layout", (True, False, None))
     @pytest.mark.parametrize("table_rendering", (True, False, None))
-    @pytest.mark.xfail(
-        # XXX I don't how to fix this error I only get on GitHub action runners:
-        #   Warning: 'mpm' is an entry point defined in pyproject.toml, but it's not
-        #   installed as a script. You may get improper `sys.argv[0]`.
-        #   The support to run uninstalled scripts will be removed in a future release.
-        #   Run `poetry install` to resolve and get rid of this message.
-        condition=RawConfigParser.BOOLEAN_STATES.get(
-            os.getenv("GITHUB_ACTIONS"),  # type: ignore[arg-type]
-            False,
-        ),
-        strict=True,
-        reason="Poetry cannot resolved script context",
-    )
     def test_rendering(self, submenu_layout, table_rendering):
         extra_checks = []
         if table_rendering is False:

@@ -114,63 +114,63 @@ def test_extra_option_allowlist():
 
 selection_cases = {
     "single_selector": (
-        {"keep": ("pip",)},
-        ("pip",),
+        {"keep": ("uv",)},
+        ("uv",),
     ),
     "list_input": (
-        {"keep": ["pip"]},
-        ("pip",),
+        {"keep": ["uv"]},
+        ("uv",),
     ),
     "set_input": (
-        {"keep": {"pip"}},
-        ("pip",),
+        {"keep": {"uv"}},
+        ("uv",),
     ),
     "empty_selector": (
         {"keep": ()},
         (),
     ),
     "duplicate_selectors": (
-        {"keep": ("pip", "pip")},
-        ("pip",),
+        {"keep": ("uv", "uv")},
+        ("uv",),
     ),
     "multiple_selectors": (
-        {"keep": ("pip", "gem")},
-        ("pip", "gem"),
+        {"keep": ("uv", "gem")},
+        ("uv", "gem"),
     ),
     "ordered_selectors": (
-        {"keep": ("gem", "pip")},
-        ("gem", "pip"),
+        {"keep": ("gem", "uv")},
+        ("gem", "uv"),
     ),
     "single_exclusion": (
-        {"drop": {"pip"}},
+        {"drop": {"uv"}},
         tuple(
             mid
             for mid in pool.all_manager_ids
-            if pool[mid].supported and pool[mid].available and mid != "pip"
+            if pool[mid].supported and pool[mid].available and mid != "uv"
         ),
     ),
     "duplicate_exclusions": (
-        {"drop": ("pip", "pip")},
+        {"drop": ("uv", "uv")},
         tuple(
             mid
             for mid in pool.all_manager_ids
-            if pool[mid].supported and pool[mid].available and mid != "pip"
+            if pool[mid].supported and pool[mid].available and mid != "uv"
         ),
     ),
     "multiple_exclusions": (
-        {"drop": ("pip", "gem")},
+        {"drop": ("uv", "gem")},
         tuple(
             mid
             for mid in pool.all_manager_ids
-            if pool[mid].supported and pool[mid].available and mid not in ("pip", "gem")
+            if pool[mid].supported and pool[mid].available and mid not in ("uv", "gem")
         ),
     ),
     "selector_priority": (
-        {"keep": {"pip"}, "drop": {"gem"}},
-        ("pip",),
+        {"keep": {"uv"}, "drop": {"gem"}},
+        ("uv",),
     ),
     "exclusion_override": (
-        {"keep": {"pip"}, "drop": {"pip"}},
+        {"keep": {"uv"}, "drop": {"uv"}},
         (),
     ),
     "default_selection": (

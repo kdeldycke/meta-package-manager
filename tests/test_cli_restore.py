@@ -115,9 +115,9 @@ class TestRestore(CLISubCommandTests):
     @pytest.mark.destructive()
     def test_restore_single_manager(self, invoke, create_config):
         toml_path = create_config(
-            "pip-npm-dummy.toml",
+            "uv-npm-dummy.toml",
             """
-            [pip]
+            [uv]
             leftpad = "0.1.2"
 
             [npm]
@@ -129,16 +129,16 @@ class TestRestore(CLISubCommandTests):
             "--verbosity", "INFO", "--npm", "restore", str(toml_path), color=False
         )
         assert result.exit_code == 0
-        assert "pip-npm-dummy.toml" in result.stderr
-        assert "Restore pip packages..." not in result.stderr
+        assert "uv-npm-dummy.toml" in result.stderr
+        assert "Restore uv packages..." not in result.stderr
         assert "Restore npm packages..." in result.stderr
 
     @pytest.mark.destructive()
     def test_restore_excluded_manager(self, invoke, create_config):
         toml_path = create_config(
-            "pip-npm-dummy.toml",
+            "uv-npm-dummy.toml",
             """
-            [pip]
+            [uv]
             leftpad = "0.1.2"
 
             [npm]
@@ -155,19 +155,19 @@ class TestRestore(CLISubCommandTests):
             color=False,
         )
         assert result.exit_code == 0
-        assert "pip-npm-dummy.toml" in result.stderr
-        assert "Restore pip packages..." in result.stderr
+        assert "uv-npm-dummy.toml" in result.stderr
+        assert "Restore uv packages..." in result.stderr
         assert "Restore npm packages..." not in result.stderr
 
     def test_empty_manager(self, invoke, create_config):
         toml_path = create_config(
-            "pip-empty.toml",
+            "uv-empty.toml",
             """
-            [pip]
+            [uv]
             """,
         )
 
         result = invoke("--verbosity", "INFO", "restore", str(toml_path), color=False)
         assert result.exit_code == 0
-        assert "pip-empty.toml" in result.stderr
-        assert "Restore pip packages..." in result.stderr
+        assert "uv-empty.toml" in result.stderr
+        assert "Restore uv packages..." in result.stderr

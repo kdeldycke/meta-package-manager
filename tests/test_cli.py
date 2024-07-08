@@ -43,7 +43,7 @@ top_level_param = "to_ignore"
 [mpm]
 verbosity = "DEBUG"
 blahblah = 234
-manager = ["pip", "npm", "gem"]
+manager = ["uv", "npm", "gem"]
 
 [garbage]
 
@@ -227,67 +227,67 @@ class TestManagerSelection(InspectCLIOutput):
     @pytest.mark.parametrize(
         ("args", "expected"),
         (
-            pytest.param(("--manager", "pip"), {"pip"}, id="single_selector"),
-            pytest.param(("--pip",), {"pip"}, id="single_flag_selector"),
-            pytest.param(("--manager", "pip") * 2, {"pip"}, id="duplicate_selectors"),
-            pytest.param(("--pip",) * 2, {"pip"}, id="duplicate_flag_selectors"),
+            pytest.param(("--manager", "uv"), {"uv"}, id="single_selector"),
+            pytest.param(("--uv",), {"uv"}, id="single_flag_selector"),
+            pytest.param(("--manager", "uv") * 2, {"uv"}, id="duplicate_selectors"),
+            pytest.param(("--uv",) * 2, {"uv"}, id="duplicate_flag_selectors"),
             pytest.param(
-                ("--manager", "pip", "--pip"),
-                {"pip"},
+                ("--manager", "uv", "--uv"),
+                {"uv"},
                 id="duplicate_mixed_selectors",
             ),
             pytest.param(
-                ("--manager", "pip", "--manager", "gem"),
-                {"pip", "gem"},
+                ("--manager", "uv", "--manager", "gem"),
+                {"uv", "gem"},
                 id="multiple_selectors",
             ),
             pytest.param(
-                ("--manager", "pip", "--gem"),
-                {"pip", "gem"},
+                ("--manager", "uv", "--gem"),
+                {"uv", "gem"},
                 id="multiple_mixed_selectors",
             ),
             pytest.param(
-                ("--gem", "--pip"),
-                {"pip", "gem"},
+                ("--gem", "--uv"),
+                {"uv", "gem"},
                 id="ordered_selectors",
             ),
             pytest.param(
-                ("--gem", "--manager", "pip"),
-                {"pip", "gem"},
+                ("--gem", "--manager", "uv"),
+                {"uv", "gem"},
                 id="ordered_mixed_selectors",
             ),
             pytest.param(
-                ("--no-pip",),
-                set(pool.default_manager_ids) - {"pip"},
+                ("--no-uv",),
+                set(pool.default_manager_ids) - {"uv"},
                 id="single_exclusion",
             ),
             pytest.param(
-                ("--no-pip",) * 2,
-                set(pool.default_manager_ids) - {"pip"},
+                ("--no-uv",) * 2,
+                set(pool.default_manager_ids) - {"uv"},
                 id="duplicate_exclusions",
             ),
             pytest.param(
-                ("--no-pip", "--no-gem"),
-                set(pool.default_manager_ids) - {"pip", "gem"},
+                ("--no-uv", "--no-gem"),
+                set(pool.default_manager_ids) - {"uv", "gem"},
                 id="multiple_exclusions",
             ),
             pytest.param(
-                ("--pip", "--no-gem"),
-                {"pip"},
+                ("--uv", "--no-gem"),
+                {"uv"},
                 id="selector_priority_ordered",
             ),
             pytest.param(
-                ("--no-gem", "--pip"),
-                {"pip"},
+                ("--no-gem", "--uv"),
+                {"uv"},
                 id="selector_priority_reversed",
             ),
             pytest.param(
-                ("--pip", "--no-pip"),
+                ("--uv", "--no-uv"),
                 None,
                 id="exclusion_precedence_ordered",
             ),
             pytest.param(
-                ("--no-pip", "--pip"),
+                ("--no-uv", "--uv"),
                 None,
                 id="exclusion_precedence_reversed",
             ),
@@ -311,7 +311,7 @@ class TestManagerSelection(InspectCLIOutput):
         conf_path = create_config("conf.toml", TEST_CONF_FILE)
         result = invoke("--config", str(conf_path), "managers", color=False)
         assert result.exit_code == 0
-        self.check_manager_selection(result, ("pip", "npm", "gem"))
+        self.check_manager_selection(result, ("uv", "npm", "gem"))
         assert "debug: " in result.stderr
 
     @pytest.mark.skip(reason="Generated config file is not isolated from other tests.")
@@ -326,7 +326,7 @@ class TestManagerSelection(InspectCLIOutput):
             color=False,
         )
         assert result.exit_code == 0
-        self.check_manager_selection(result, ("pip", "npm", "gem"))
+        self.check_manager_selection(result, ("uv", "npm", "gem"))
         assert "error: " not in result.stderr
         assert "warning: " not in result.stderr
         assert "info: " not in result.stderr

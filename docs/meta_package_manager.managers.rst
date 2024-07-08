@@ -169,6 +169,14 @@ meta\_package\_manager.managers.steamcmd module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.managers.uv module
+-----------------------------------------
+
+.. automodule:: meta_package_manager.managers.uv
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.managers.vscode module
 ---------------------------------------------
 

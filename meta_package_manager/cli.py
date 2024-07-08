@@ -140,13 +140,7 @@ def update_manager_selection(
         # Because the parameter's name is transformed into a Python identifier on
         # instantiation, we have to reverse the process to get our value.
         # Example: --apt-mint => apt_mint => apt-mint
-        manager_id = param.name
-        if sys.version_info >= (3, 9):
-            manager_id = manager_id.removeprefix("no_")
-        else:
-            if manager_id.startswith("no_"):
-                manager_id = manager_id[3:]
-        manager_id = manager_id.replace("_", "-")
+        manager_id = param.name.removeprefix("no_").replace("_", "-")
         assert (
             manager_id == value
         ), f"unrecognized single manager selector {param.name!r}"
@@ -229,13 +223,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     bar_path = Path(bar_plugin.__file__).expanduser().resolve()
     home_dir = Path.home()
 
-    starts_with_home = False
-    if sys.version_info >= (3, 9):
-        starts_with_home = bar_path.is_relative_to(home_dir)
-    else:
-        starts_with_home = home_dir == bar_path or home_dir in bar_path.parents
-
-    if starts_with_home:
+    if bar_path.is_relative_to(home_dir):
         home_shorthand = Path("~")
         shorten_bar_path = home_shorthand / bar_path.relative_to(home_dir)
         assert shorten_bar_path.expanduser().resolve() == bar_path

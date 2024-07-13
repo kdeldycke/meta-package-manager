@@ -222,6 +222,11 @@ class MPMPlugin:
         a command from the virtualenv context.
 
         Returns ``(None, None)`` if the folder is not a venv.
+
+        Inspired by `autoswitch_virtualenv.plugin.zsh
+        <https://github.com/MichaelAquilina/zsh-autoswitch-virtualenv/blob/master/autoswitch_virtualenv.plugin.zsh#L50>`_
+        and `uv's get_interpreter_info.py
+        https://github.com/astral-sh/uv/blob/f770b25/crates/uv-python/python/get_interpreter_info.py>`_.
         """
         if (folder / "Pipfile").is_file():
             return Venv.PIPENV, (f"PIPENV_PIPFILE='{folder}'", "pipenv", "run", "mpm")

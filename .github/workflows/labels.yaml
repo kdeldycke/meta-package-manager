@@ -24,24 +24,14 @@ jobs:
           python-version: "3.12"
       - name: Install uv
         run: |
-          python -m pip install -r https://raw.githubusercontent.com/kdeldycke/workflows/v4.3.1/requirements/uv.txt
+          python -m pip install -r https://raw.githubusercontent.com/kdeldycke/workflows/v4.3.4/requirements/uv.txt
       - name: Install project
         run: |
           uv --no-progress venv --system
           uv --no-progress pip install .
       - name: Generate labels
         run: |
-          uv --no-progress run python ./.github/generate_labels.py
-      - name: Discard all local changes but the label definitions file
-        run: |
-          # Remove untracked directories and files.
-          git clean -fd
-          # Temporarily stash our target file.
-          git stash -- ./.github/labels-extra.json
-          # Reset all repository.
-          git checkout --force
-          # Restore modified file. Do not fail if no file has been stashed.
-          git stash pop || true
+          uv --no-progress run --frozen -- python ./.github/generate_labels.py
       - uses: peter-evans/create-pull-request@v6.1.0
         with:
           assignees: ${{ github.actor }}
@@ -59,9 +49,11 @@ jobs:
             </details>
           labels: "🤖 ci"
           branch: update-labels
+          add-paths: |
+            .github/labels-extra.json
 
   labels:
-    uses: kdeldycke/workflows/.github/workflows/labels.yaml@v4.3.1
+    uses: kdeldycke/workflows/.github/workflows/labels.yaml@v4.3.4
     needs: generate-labels
     with:
       extra-label-files: |

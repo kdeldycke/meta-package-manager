@@ -86,7 +86,7 @@ classifiers = [
 ]
 dependencies = [
     "boltons ~= 24.0.0",
-    "click-extra ~= 4.8.3",
+    "click-extra ~= 4.9.0",
     "more-itertools ~= 10.3.0",
     "packageurl-python ~= 0.15.0",
     "tabulate [widechars] ~= 0.9.0",
@@ -97,7 +97,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-    "click-extra [pytest] ~= 4.8.3",
+    "click-extra [pytest] ~= 4.9.0",
     "coverage [toml] ~= 7.6.0",
     "pytest ~= 8.3.1",
     # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html
@@ -113,7 +113,7 @@ typing = [
     "typing-extensions ~= 4.3.0 ; python_version < '3.10'",
 ]
 docs = [
-    "click-extra [sphinx] ~= 4.8.3",
+    "click-extra [sphinx] ~= 4.9.0",
     "furo ~= 2024.7.18",
     "myst-parser ~= 3.0.0",
     # Sphinx 7.2.0 is the first version to drop Python 3.8.

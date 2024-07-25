@@ -119,7 +119,7 @@ class ManagerPool:
         for klass in manager_classes:
             manager = klass()
             register[manager.id] = manager
-        return register
+        return register  # type: ignore[return-value]
 
     # Emulates some dict methods.
 

@@ -129,8 +129,8 @@ class Package:
 
     def __post_init__(self) -> None:
         # Make sure version strings are parsed into proper objects.
-        self.installed_version = parse_version(self.installed_version)
-        self.latest_version = parse_version(self.latest_version)
+        self.installed_version = parse_version(self.installed_version)  # type: ignore[arg-type]
+        self.latest_version = parse_version(self.latest_version)  # type: ignore[arg-type]
 
 
 def packages_asdict(packages: Iterator[Package], keep_fields: tuple[str, ...]):
@@ -551,7 +551,7 @@ class PackageManager(metaclass=MetaPackageManager):
             if parts:
                 version_string = parts.groupdict().get("version")
                 logging.debug(f"Extracted version: {version_string!r}")
-                parsed_version = parse_version(version_string)
+                parsed_version = parse_version(version_string)  # type: ignore[arg-type]
                 logging.debug(f"Parsed version: {parsed_version!r}")
                 return parsed_version
         return None

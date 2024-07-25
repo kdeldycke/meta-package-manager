@@ -150,7 +150,7 @@ class Specifier:
 
     @cached_property
     def parsed_version(self) -> TokenizedString:
-        return parse_version(self.version)
+        return parse_version(self.version)  # type:ignore[arg-type]
 
     @cached_property
     def is_blank(self) -> bool:

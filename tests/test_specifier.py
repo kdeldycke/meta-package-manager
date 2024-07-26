@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from string import ascii_lowercase, digits
 
 import pytest
 from boltons.iterutils import flatten
@@ -26,8 +27,16 @@ from meta_package_manager.specifier import PURL_MAP, EmptyReduction, Solver, Spe
 
 
 def test_purl_map():
+    # Check pURL type IDs. See:
+    # https://github.com/package-url/purl-spec/blob/master/PURL-SPECIFICATION.rst#rules-for-each-purl-component
+    for purl_type in PURL_MAP:
+        assert purl_type.isascii()
+        assert purl_type[0] in ascii_lowercase
+        assert set(purl_type).issubset(ascii_lowercase + digits + ".+-")
+
     # Check all our supported managers are registered.
     assert set(pool.all_manager_ids).issubset(PURL_MAP)
+
     # Check our hard-coded purl mapping points to implemented managers.
     assert (
         set(pool.all_manager_ids)

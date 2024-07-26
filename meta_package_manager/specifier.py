@@ -40,29 +40,99 @@ and purls.
     package_id@version
 """
 
-
-# 1:1 mapping between purl types and mpm manager IDs.
 PURL_MAP: dict[str, set[str] | None] = {mid: {mid} for mid in pool.all_manager_ids}
-# Manager IDs collected by looking at packageurl-python source code.
-PURL_MAP.update(
-    {
-        "alpine": None,
-        "bitbucket": None,
-        "deb": {"apt", "apt-mint"},
-        "docker": None,
-        "generic": None,
-        "github": None,
-        "gitlab": None,
-        "golang": None,
-        "hackage": None,
-        "maven": None,
-        "nuget": None,
-        "pypi": {"pip", "pipx"},
-        "rpm": {"dnf", "yum", "zypper"},
-        "rubygems": {"gem"},
-        "sourceforge": None,
-    },
-)
+non_canonical_map = {
+    "alpine": None,
+    "alpm": None,
+    "android": None,
+    "apache": None,
+    "apk": None,
+    "bitbucket": None,
+    "bitnami": None,
+    "bower": None,
+    "buildroot": None,
+    "carthage": None,
+    "chef": None,
+    "chocolatey": None,
+    "clojars": None,
+    "cocoapods": None,
+    "conan": None,
+    "conda": None,
+    "coreos": None,
+    "cpan": None,
+    "cran": None,
+    "crystal": None,
+    "ctan": None,
+    "deb": {"apt", "apt-mint"},
+    "docker": None,
+    "drupal": None,
+    "dtype": None,
+    "dub": None,
+    "ebuild": None,
+    "eclipse": None,
+    "elm": None,
+    "generic": None,
+    "gitea": None,
+    "github": None,
+    "gitlab": None,
+    "golang": None,
+    "gradle": None,
+    "guix": None,
+    "hackage": None,
+    "haxe": None,
+    "helm": None,
+    "hex": None,
+    "huggingface": None,
+    "julia": None,
+    "luarocks": None,
+    "maven": None,
+    "melpa": None,
+    "meteor": None,
+    "mlflow": None,
+    "nim": None,
+    "nix": None,
+    "nuget": None,
+    "oci": None,
+    "opam": None,
+    "openwrt": None,
+    "osgi": None,
+    "p2": None,
+    "pear": None,
+    "pecl": None,
+    "perl6": None,
+    "platformio": None,
+    "pub": None,
+    "puppet": None,
+    "pypi": {"pip", "pipx"},
+    "qpkg": None,
+    "rpm": {"dnf", "yum", "zypper"},
+    "rubygems": {"gem"},
+    "sourceforge": None,
+    "sublime": None,
+    "swid": None,
+    "terraform": None,
+    "vagrant": None,
+    "vim": None,
+    "wordpress": None,
+    "yocto": None,
+}
+# Check canonical manager IDs are not overlapping the manually maintained non-canonical mapping.
+overlaps = set(PURL_MAP).intersection(non_canonical_map)
+if overlaps:
+    raise ValueError(f"Some pURL scheme types are overlapping: {overlaps}")
+PURL_MAP.update(non_canonical_map)
+""" Map pURL's types to MPM's manager IDs.
+
+.. warning::
+
+    There is `no canonical list of ``pkg:<type>/...`` prefixes defined in the pURL
+    specification.
+
+    So our strategy consists in producing a 1:1 mapping between pURL types and manager
+    IDs. Then we augment this mapping with diverse `aliases we found lying around in the
+    pURL literature, examples and libraries
+    <https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst>`_.
+"""
 
 
 @dataclass(frozen=True)

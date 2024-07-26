@@ -116,7 +116,8 @@ non_canonical_map = {
     "wordpress": None,
     "yocto": None,
 }
-# Check canonical manager IDs are not overlapping the manually maintained non-canonical mapping.
+# Check canonical manager IDs are not overlapping the manually maintained
+# non-canonical mapping.
 overlaps = set(PURL_MAP).intersection(non_canonical_map)
 if overlaps:
     raise ValueError(f"Some pURL scheme types are overlapping: {overlaps}")

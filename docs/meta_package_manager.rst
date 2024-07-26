@@ -89,6 +89,14 @@ meta\_package\_manager.pool module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.spdx module
+----------------------------------
+
+.. automodule:: meta_package_manager.spdx
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.specifier module
 ---------------------------------------
 

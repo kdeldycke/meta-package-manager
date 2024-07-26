@@ -44,6 +44,7 @@ from click_extra.testing import (
     env_copy,
     format_cli_prompt,
 )
+from packageurl import PackageURL
 
 from .version import TokenizedString, parse_version
 
@@ -110,6 +111,13 @@ class Package:
     id: str
     """ID is required and is the primary key used by the manager."""
 
+    manager_id: str
+    """Handy to backtrack whose manager this package belongs to.
+
+    The manager ID is good enough and allows for no coupling with the parent manager
+    object.
+    """
+
     name: str | None = None
 
     description: str | None = None
@@ -131,6 +139,13 @@ class Package:
         # Make sure version strings are parsed into proper objects.
         self.installed_version = parse_version(self.installed_version)  # type: ignore[arg-type]
         self.latest_version = parse_version(self.latest_version)  # type: ignore[arg-type]
+
+    @cached_property
+    def purl(self) -> str:
+        """Generates the package's pURL."""
+        return PackageURL(
+            type=self.manager_id, name=self.id, version=self.installed_version
+        ).to_string()
 
 
 def packages_asdict(packages: Iterator[Package], keep_fields: tuple[str, ...]):
@@ -340,8 +355,13 @@ class PackageManager(metaclass=MetaPackageManager):
     cli_errors: list[CLIError]
     """Accumulate all CLI errors encountered by the package manager."""
 
-    package: type[Package] = Package
-    """The dataclass to use to produce Package objects from the manager."""
+    def package(self, **kwargs) -> Package:
+        """Instanciate a ``Package`` object from the manager.
+
+        Sets its ``manage_id`` to the manager it belongs to.
+        """
+        kwargs.setdefault("manager_id", self.id)
+        return Package(**kwargs)
 
     def __init__(self) -> None:
         """Initialize ``cli_errors`` list."""

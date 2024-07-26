@@ -56,6 +56,7 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib  # type: ignore[import-not-found]
 
+
 from . import __version__, bar_plugin
 from .base import (
     CLIError,
@@ -75,12 +76,14 @@ from .output import (
 )
 from .platforms import encoding_args
 from .pool import pool
+from .spdx import SPDX, ExportFormat
 from .specifier import VERSION_SEP, Solver, Specifier
 
 # Subcommand sections.
 EXPLORE = Section("Explore subcommands")
 MAINTENANCE = Section("Maintenance subcommands")
 SNAPSHOTS = Section("Package snapshots subcommands")
+SBOM = Section("SBOM subcommands")
 
 
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
@@ -89,6 +92,22 @@ XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
 
 See the corresponding :issue:`implementation rationale in issue #10 <10>`.
 """
+
+
+def is_stdout(filepath: Path) -> bool:
+    return str(filepath) == "-"
+
+
+@contextmanager
+def file_writer(filepath):
+    """A context-aware file writer which default to stdout if no path is
+    provided."""
+    if is_stdout(filepath):
+        yield sys.stdout
+    else:
+        writer = filepath.open("w")
+        yield writer
+        writer.close()
 
 
 def update_manager_selection(
@@ -234,10 +253,18 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 
 # XXX Why is Sphinx skipping Click methods in documentation?
 
+# Add a help subcommand:
+# npm help <term>    search for help on <term>
+# npm help npm       more involved overview
+
+
+#    -j N, --jobs=N      Specify the allowed number of parallel C compiler
+#                        jobs. Defaults to the system CPU count.
+
 
 @extra_group(
     # XXX Default verbosity has been changed in Click Extra 4.0.0 from INFO to WARNING.
-    context_settings={"default_map": {"verbosity": "INFO"}},
+    # context_settings={"default_map": {"verbosity": "INFO"}},
 )
 @option_group(
     "Package manager selection options",
@@ -751,7 +778,7 @@ def search(ctx, extended, exact, refilter, query):
     # --extended implies --description.
     show_description = ctx.obj.description
     if extended and not ctx.obj.description:
-        logging.warning("--extended option forces --description option.")
+        logging.info("--extended option forces --description option.")
         show_description = True
 
     # Build-up a global list of package matches per manager.
@@ -848,7 +875,7 @@ def which(ctx, cli_names):
     which takes precedence on other paths.
     """
     if ctx.obj.sort_by:
-        logging.debug("Ignore --sort-by option for which command.")
+        logging.warning("Ignore --sort-by option for which command.")
 
     # Machine-friendly data rendering.
     if ctx.meta["click_extra.table_format"] == "json":
@@ -956,7 +983,7 @@ def install(ctx, packages_specs):
     unmatched_packages = packages_per_managers.get(None, [])
     for spec in unmatched_packages:
         for manager in selected_managers:
-            logging.debug(
+            logging.info(
                 f"Try to install {spec} with {theme.invoked_command(manager.id)}.",
             )
 
@@ -1093,13 +1120,13 @@ def upgrade(ctx, all, packages_specs):
             source_manager_ids.add(spec.manager_id)
         # Package is not bound to a manager by the user's specifiers.
         else:
-            logging.debug(
+            logging.info(
                 f"{spec} not tied to a manager. Search all managers recognizing it.",
             )
             # Find all the managers that have the package installed.
             for manager in sourcing_managers:
                 if package_id in map(attrgetter("id"), manager.installed):
-                    logging.debug(
+                    logging.info(
                         f"{package_id} has been installed "
                         f"with {theme.invoked_command(manager.id)}.",
                     )
@@ -1165,13 +1192,13 @@ def remove(ctx, packages_specs):
             source_manager_ids.add(spec.manager_id)
         # Package is not bound to a manager by the user's specifiers.
         else:
-            logging.debug(
+            logging.info(
                 f"{spec} not tied to a manager. Search all managers recognizing it.",
             )
             # Find all the managers that have the package installed.
             for manager in sourcing_managers:
                 if package_id in map(attrgetter("id"), manager.installed):
-                    logging.debug(
+                    logging.info(
                         f"{package_id} has been installed "
                         f"with {theme.invoked_command(manager.id)}.",
                     )
@@ -1242,11 +1269,7 @@ def cleanup(ctx):
 )
 @argument(
     "toml_path",
-    type=file_path(
-        writable=True,
-        resolve_path=True,
-        allow_dash=True,
-    ),
+    type=file_path(writable=True, resolve_path=True, allow_dash=True),
     default="-",
 )
 @pass_context
@@ -1263,10 +1286,6 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
     the same order as the manager selection priority. Each section will contain a list of
     package IDs and their installed version.
     """
-
-    def is_stdout(filepath):
-        return str(filepath) == "-"
-
     if is_stdout(toml_path):
         if merge:
             logging.critical(
@@ -1326,17 +1345,6 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
     if merge or update_version:
         installed_data = tomllib.loads(toml_path.read_text(**encoding_args))
 
-    @contextmanager
-    def file_writer(filepath):
-        """A context-aware file writer which default to stdout if no path is
-        provided."""
-        if is_stdout(filepath):
-            yield sys.stdout
-        else:
-            writer = filepath.open("w")
-            yield writer
-            writer.close()
-
     with file_writer(toml_path) as f:
         # Leave some metadata as comment.
         f.write(f"# Generated by mpm v{__version__}.\n")
@@ -1387,13 +1395,15 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
 
 
 @mpm.command(
-    short_help="Install packages in batch as specified by TOML files.",
+    short_help="Install packages referenced in TOML files.",
     section=SNAPSHOTS,
 )
 @argument("toml_files", type=File("r"), required=True, nargs=-1)
 @pass_context
 def restore(ctx, toml_files):
     """Read TOML files then install or upgrade each package referenced in them."""
+    # TODO: add an artificial order for managers, so that the [cask] section can install
+    # mas CLI first then have [mas] section work in one-go. Use-case: my dotfiles.
     for toml_input in toml_files:
         is_stdin = isinstance(toml_input, TextIOWrapper)
         if is_stdin:
@@ -1435,3 +1445,75 @@ def restore(ctx, toml_files):
                 logging.info(f"Install {spec}...")
                 output = manager.install(spec.package_id, version=spec.version)
                 echo(output)
+
+
+@mpm.command(
+    short_help="Create SPDX document of installed packages.",
+    section=SBOM,
+)
+@option(
+    "--format",
+    type=Choice(ExportFormat.values(), case_sensitive=False),
+    help=f"File format to export to. Defaults to JSON for {sys.stdout.name}. If not "
+    "provided, will be autodetected from file extension.",
+)
+@option(
+    "--overwrite",
+    "--force",
+    "--replace",
+    is_flag=True,
+    default=False,
+    help="Allow the provided SPDX file to be silently wiped out if it already exists.",
+)
+@argument(
+    "spdx_path",
+    type=file_path(writable=True, resolve_path=True, allow_dash=True),
+    default="-",
+)
+@pass_context
+def spdx(ctx, format, overwrite, spdx_path):
+    """Export list of installed packages to a SPDX document."""
+    if is_stdout(spdx_path):
+        if overwrite:
+            logging.warning("Ignore the --overwrite/--force/--replace option.")
+        logging.info(f"Print SPDX export to {sys.stdout.name}")
+
+    else:
+        logging.info(f"Export installed packages to {spdx_path}")
+        if spdx_path.exists():
+            msg = "Target file exist and will be overwritten."
+            if overwrite:
+                logging.warning(msg)
+            else:
+                logging.critical(msg)
+                ctx.exit(2)
+
+    # Get format Enum from ID.
+    export_format = ExportFormat.from_value(format)
+
+    # <stdout> format defaults to JSON.
+    if is_stdout(spdx_path):
+        if not export_format:
+            export_format = ExportFormat.JSON
+    # If no export format has been provided, guess it from file name.
+    else:
+        guessed_format = SPDX.autodetect_export_format(spdx_path)
+        if not export_format:
+            export_format = guessed_format
+        else:
+            if export_format != guessed_format:
+                logging.critical(
+                    f"Selected {export_format} does not match file extension."
+                )
+                ctx.exit(2)
+
+    spdx = SPDX(export_format)
+    spdx.init_doc()
+
+    for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
+        logging.info(f"Exporting packages from {theme.invoked_command(manager.id)}...")
+        for package in manager.installed:
+            spdx.add_package(manager, package)
+
+    with file_writer(spdx_path) as f:
+        spdx.export(f)

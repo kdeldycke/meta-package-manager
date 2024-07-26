@@ -169,6 +169,14 @@ tests.test\_pool module
    :undoc-members:
    :show-inheritance:
 
+tests.test\_spdx module
+-----------------------
+
+.. automodule:: tests.test_spdx
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 tests.test\_specifier module
 ----------------------------
 

@@ -136,7 +136,7 @@ class SPDX(SBOM):
         creation_info = CreationInfo(
             spdx_version="SPDX-2.3",
             spdx_id=self.DOC_ID,
-            # Because mpm is a system-wide tool, we choosed to name the document after
+            # Because mpm is a system-wide tool, we chose to name the document after
             # the host operating system platform it was run on.
             name=system_id,
             # Point directly to the mpm release on GitHub so we can get some additional

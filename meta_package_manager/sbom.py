@@ -179,7 +179,8 @@ class SPDX(SBOM):
             )
         ]
 
-        # A DESCRIBES relationship asserts that the document indeed describes the package.
+        # A DESCRIBES relationship asserts that the document indeed describes the
+        # package.
         self.document.relationships += [
             Relationship(self.DOC_ID, RelationshipType.DESCRIBES, package_docid)
         ]

@@ -89,10 +89,10 @@ meta\_package\_manager.pool module
    :undoc-members:
    :show-inheritance:
 
-meta\_package\_manager.spdx module
+meta\_package\_manager.sbom module
 ----------------------------------
 
-.. automodule:: meta_package_manager.spdx
+.. automodule:: meta_package_manager.sbom
    :members:
    :undoc-members:
    :show-inheritance:

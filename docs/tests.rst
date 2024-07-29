@@ -169,10 +169,10 @@ tests.test\_pool module
    :undoc-members:
    :show-inheritance:
 
-tests.test\_spdx module
+tests.test\_sbom module
 -----------------------
 
-.. automodule:: tests.test_spdx
+.. automodule:: tests.test_sbom
    :members:
    :undoc-members:
    :show-inheritance:

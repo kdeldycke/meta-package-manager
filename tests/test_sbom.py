@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import pytest
 
-from meta_package_manager.spdx import normalize_spdx_id
+from meta_package_manager.sbom import SPDX
 
 
 @pytest.mark.parametrize(
@@ -26,8 +26,8 @@ from meta_package_manager.spdx import normalize_spdx_id
     (
         ("SPDXRef-Package-brew-openjdk@11", "SPDXRef-Package-brew-openjdk-11"),
         ("SPDXRef-my.Super.package", "SPDXRef-my.Super.package"),
-        ("SPDXRef-my---Super.package", "SPDXRef-my-Super.package"),
+        ("SPDXRef-my---Super.package-------", "SPDXRef-my-Super.package"),
     ),
 )
 def test_normalize_spdx_id(raw_str, expected):
-    assert normalize_spdx_id(raw_str) == expected
+    assert SPDX.normalize_spdx_id(raw_str) == expected

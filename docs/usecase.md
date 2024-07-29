@@ -211,64 +211,8 @@ arss = "0.2.3"
 (...)
 ```
 
-## Maintain list of installed packages
-
-To keep the list produced above up to date, you can resort to the `--update-version` option:
-
-```shell-session
-$ mpm snapshot --update-version packages.toml
-(...)
-```
-
-And if your want to add the new packages you installed since your last snapshot, there is the `--merge` option for that:
-
-```shell-session
-$ mpm snapshot --merge packages.toml
-(...)
-```
-
-Of course you can still call the backup
-
-## Switch systems
-
-You used to work on macOS. Now you’d like to move to Linux. To reduce friction
-during your migration, you can make an inventory of all your installed packages with `mpm`,
-then reinstall them on your new distribution.
-
-1. Backup a list of all installed packages on macOS:
-
-   ```shell-session
-   $ mpm backup packages.toml
-   ```
-
-1. On your brand new Linux distribution, restore all packages with:
-
-   ```shell-session
-   $ mpm restore packages.toml
-   ```
-
-```{todo}
-Implement a best matchig strategy, across package managers of different kinds.
-```
-
-## Speculative use-cases
-
-A list of ideas and concepts `mpm` could support in the future
-
-### SBOM: Software Bill of Materials
-
-```{admonition} Context
-The [Log4Shell vulnerability](https://en.wikipedia.org/wiki/Log4Shell) debacle was a wake-up call for the industry. This dependency was deeply embedded in the legacy stack of companies and administrations. They all had huge difficulty to identify its presence, writing custom detection scripts and scanning their software artifacts.
-
-As a response to this crisis, [SBOM tools have now became a category of their own](https://en.wikipedia.org/wiki/Software_supply_chain). To the point that [a US executive order has also been released](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/) to modernize cybersecurity practices and enforce the production of SBOM to track the software supply chain.
-```
-
-```{todo}
-`mpm` doesn't implement SBOM features yet. This work is tracked by {issue}`936`.
-```
-
 ````{tip} JSON & CSV exports
-In the mean time, you can export the list of installed packages in JSON:
+Alternatively, you can export the list of installed packages in JSON:
 
 ```shell-session
 $ mpm --output-format json installed > installed_package.json
@@ -329,9 +273,69 @@ charliermarsh.ruff,,vscode,2023.6.0
 ExecutableBookProject.myst-highlight,,vscode,0.11.0
 GitHub.copilot,,vscode,1.73.8685
 ```
-
-There's probably a tool somewhere that will allow you to transform these machine-readable exports to a proper SBOM file format.
 ````
+
+## Maintain list of installed packages
+
+To keep the list produced above up to date, you can resort to the `--update-version` option:
+
+```shell-session
+$ mpm snapshot --update-version packages.toml
+(...)
+```
+
+And if your want to add the new packages you installed since your last snapshot, there is the `--merge` option for that:
+
+```shell-session
+$ mpm snapshot --merge packages.toml
+(...)
+```
+
+Of course you can still call the backup
+
+## Switch systems
+
+You used to work on macOS. Now you’d like to move to Linux. To reduce friction
+during your migration, you can make an inventory of all your installed packages with `mpm`,
+then reinstall them on your new distribution.
+
+1. Backup a list of all installed packages on macOS:
+
+   ```shell-session
+   $ mpm backup packages.toml
+   ```
+
+1. On your brand new Linux distribution, restore all packages with:
+
+   ```shell-session
+   $ mpm restore packages.toml
+   ```
+
+```{todo}
+Implement a best matchig strategy, across package managers of different kinds.
+```
+
+## SBOM: Software Bill of Materials
+
+```{admonition} Context
+The [Log4Shell vulnerability](https://en.wikipedia.org/wiki/Log4Shell) debacle was a wake-up call for the industry. This dependency was deeply embedded in the legacy stack of companies and administrations. They all had huge difficulty to identify its presence, writing custom detection scripts and scanning their software artifacts.
+
+As a response to this crisis, [SBOM tools have now became a category of their own](https://en.wikipedia.org/wiki/Software_supply_chain). To the point that [a US executive order has also been released](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/) to modernize cybersecurity practices and enforce the production of SBOM to track the software supply chain.
+```
+
+Well `mpm` is capable of exporting the list to different SBOM standards and formats:
+
+|Standard | [SPDX](https://spdx.dev) | [CycloneDX](https://cyclonedx.org)|
+| -- | :--:| :--:|
+|JSON|  ✓  |  ✓ |
+|XML| ✓  |  ✓ |
+|YAML| ✓ | |
+|RDF XML  | ✓  | |
+|TAG VALUE | ✓ | |
+
+## Speculative use-cases
+
+A list of ideas and concepts `mpm` could support in the future
 
 ### List vulnerabilities
 

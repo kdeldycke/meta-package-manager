@@ -52,8 +52,8 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | Cleanup: orphans                  |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
 | Backup / Lock / Freeze            |   ✓   |                |               |              |              |
 | Restore                           |   ✓   |                |               |              |              |
-| SPDX SBOM export                  |   ✓   |                |               |              |              |
-| CycloneDX SBOM export             |   ✓   |                |               |              |              |
+| [SPDX](https://spdx.dev) SBOM export                  |   ✓   |                |               |              |              |
+| [CycloneDX](https://cyclonedx.org) SBOM export             |   ✓   |                |               |              |              |
 
 ## Package manager support
 

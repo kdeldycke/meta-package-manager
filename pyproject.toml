@@ -19,6 +19,7 @@ keywords = [
     'choco',
     'chocotaley',
     'composer',
+    'cyclonedx',
     'dnf',
     'emerge',
     'flatpak',
@@ -47,6 +48,7 @@ keywords = [
     'sbom',
     'scoop',
     'snap',
+    'spdx',
     'steamcmd',
     'uv',
     'visual studio code',
@@ -89,6 +91,7 @@ classifiers = [
 dependencies = [
     "boltons ~= 24.0.0",
     "click-extra ~= 4.9.0",
+    "cyclonedx-python-lib [json-validation,xml-validation] ~= 7.5.1",
     "more-itertools ~= 10.3.0",
     "packageurl-python ~= 0.15.0",
     "spdx-tools ~= 0.8.2",

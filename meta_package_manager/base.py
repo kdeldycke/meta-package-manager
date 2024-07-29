@@ -141,11 +141,11 @@ class Package:
         self.latest_version = parse_version(self.latest_version)  # type: ignore[arg-type]
 
     @cached_property
-    def purl(self) -> str:
-        """Generates the package's pURL."""
+    def purl(self) -> PackageURL:
+        """Returns the package's pURL object."""
         return PackageURL(
-            type=self.manager_id, name=self.id, version=self.installed_version
-        ).to_string()
+            type=self.manager_id, name=self.id, version=str(self.installed_version)
+        )
 
 
 def packages_asdict(packages: Iterator[Package], keep_fields: tuple[str, ...]):

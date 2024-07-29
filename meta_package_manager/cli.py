@@ -76,7 +76,7 @@ from .output import (
 )
 from .platforms import encoding_args
 from .pool import pool
-from .spdx import SPDX, ExportFormat
+from .sbom import SPDX, CycloneDX, ExportFormat
 from .specifier import VERSION_SEP, Solver, Specifier
 
 # Subcommand sections.
@@ -1448,13 +1448,18 @@ def restore(ctx, toml_files):
 
 
 @mpm.command(
-    short_help="Create SPDX document of installed packages.",
+    short_help="Export installed packages to a SBOM document.",
     section=SBOM,
+)
+@option(
+    "--spdx/--cyclonedx",
+    default=True,
+    help="SBOM standard to export to.",
 )
 @option(
     "--format",
     type=Choice(ExportFormat.values(), case_sensitive=False),
-    help=f"File format to export to. Defaults to JSON for {sys.stdout.name}. If not "
+    help=f"File format of the export. Defaults to JSON for {sys.stdout.name}. If not "
     "provided, will be autodetected from file extension.",
 )
 @option(
@@ -1463,24 +1468,26 @@ def restore(ctx, toml_files):
     "--replace",
     is_flag=True,
     default=False,
-    help="Allow the provided SPDX file to be silently wiped out if it already exists.",
+    help="Allow the target file to be silently wiped out if it already exists.",
 )
 @argument(
-    "spdx_path",
+    "export_path",
     type=file_path(writable=True, resolve_path=True, allow_dash=True),
     default="-",
 )
 @pass_context
-def spdx(ctx, format, overwrite, spdx_path):
-    """Export list of installed packages to a SPDX document."""
-    if is_stdout(spdx_path):
+def sbom(ctx, spdx, format, overwrite, export_path):
+    """Export list of installed packages to a SPDX or CycloneDX file."""
+    standard = "SPDX" if spdx else "CycloneDX"
+
+    if is_stdout(export_path):
         if overwrite:
             logging.warning("Ignore the --overwrite/--force/--replace option.")
-        logging.info(f"Print SPDX export to {sys.stdout.name}")
+        logging.info(f"Print {standard} export to {sys.stdout.name}")
 
     else:
-        logging.info(f"Export installed packages to {spdx_path}")
-        if spdx_path.exists():
+        logging.info(f"Export installed packages in {standard} format to {export_path}")
+        if export_path.exists():
             msg = "Target file exist and will be overwritten."
             if overwrite:
                 logging.warning(msg)
@@ -1492,12 +1499,12 @@ def spdx(ctx, format, overwrite, spdx_path):
     export_format = ExportFormat.from_value(format)
 
     # <stdout> format defaults to JSON.
-    if is_stdout(spdx_path):
+    if is_stdout(export_path):
         if not export_format:
             export_format = ExportFormat.JSON
     # If no export format has been provided, guess it from file name.
     else:
-        guessed_format = SPDX.autodetect_export_format(spdx_path)
+        guessed_format = SBOM.autodetect_export_format(export_path)
         if not export_format:
             export_format = guessed_format
         else:
@@ -1507,13 +1514,21 @@ def spdx(ctx, format, overwrite, spdx_path):
                 )
                 ctx.exit(2)
 
-    spdx = SPDX(export_format)
-    spdx.init_doc()
+    if spdx:
+        sbom_class = SPDX
+    else:
+        if export_format not in (ExportFormat.JSON, ExportFormat.XML):
+            logging.critical(f"{standard} does not support {export_format} format.")
+            ctx.exit(2)
+        sbom_class = CycloneDX
+
+    sbom = sbom_class(export_format)
+    sbom.init_doc()
 
     for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
         logging.info(f"Exporting packages from {theme.invoked_command(manager.id)}...")
         for package in manager.installed:
-            spdx.add_package(manager, package)
+            sbom.add_package(manager, package)
 
-    with file_writer(spdx_path) as f:
-        spdx.export(f)
+    with file_writer(export_path) as f:
+        sbom.export(f)

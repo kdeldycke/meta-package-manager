@@ -53,6 +53,7 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | Backup / Lock / Freeze            |   ✓   |                |               |              |              |
 | Restore                           |   ✓   |                |               |              |              |
 | SPDX SBOM export                  |   ✓   |                |               |              |              |
+| CycloneDX SBOM export             |   ✓   |                |               |              |              |
 
 ## Package manager support
 

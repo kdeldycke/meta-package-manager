@@ -44,6 +44,7 @@
 - Upgrade all outdated packages.
 - Backup list of installed packages to TOML file.
 - Restore/install list of packages from TOML files.
+- Software Bill of Materials: export SBOM to SPDX and CycloneDX files.
 - Pin-point commands to a subset of package managers (include/exclude
   selectors).
 - Support plain, versioned and [purl](https://github.com/package-url/purl-spec) package specifiers.

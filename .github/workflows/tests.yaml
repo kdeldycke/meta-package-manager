@@ -543,6 +543,24 @@ jobs:
       - name: mpm --all-managers managers
         run: |
           uv --no-progress run --frozen -- mpm --all-managers managers
+      - name: mpm installed
+        run: |
+          uv --no-progress run --frozen -- mpm installed
+      - name: mpm outdated
+        run: |
+          uv --no-progress run --frozen -- mpm outdated
+      - name: mpm which mpm
+        run: |
+          uv --no-progress run --frozen -- mpm which mpm
+      - name: mpm backup
+        run: |
+          uv --no-progress run --frozen -- mpm backup
+      - name: mpm sbom --spdx
+        run: |
+          uv --no-progress run --frozen -- mpm sbom --spdx
+      - name: mpm sbom --cyclonedx
+        run: |
+          uv --no-progress run --frozen -- mpm sbom --cyclonedx
 
       - name: Parallel non-destructive tests
         run: >

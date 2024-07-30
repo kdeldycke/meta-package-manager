@@ -49,9 +49,11 @@ from spdx_tools.spdx.model import (
     RelationshipType,
 )
 from spdx_tools.spdx.model import Package as SPDXPackage
+from spdx_tools.spdx.validation.document_validator import validate_full_spdx_document
 from spdx_tools.spdx.writer.json import json_writer
 from spdx_tools.spdx.writer.rdf import rdf_writer
 from spdx_tools.spdx.writer.tagvalue import tagvalue_writer
+from spdx_tools.spdx.writer.write_utils import convert
 from spdx_tools.spdx.writer.xml import xml_writer
 from spdx_tools.spdx.writer.yaml import yaml_writer
 
@@ -191,23 +193,29 @@ class SPDX(SBOM):
         """Similar to ``spdx_tools.spdx.writer.write_anything.write_file`` but write
         directly to provided stream instead of file path.
         """
-        writer: Any = None
+        writer: Any
         if self.export_format == ExportFormat.JSON:
-            writer = json_writer.write_document_to_stream
+            writer = json_writer
         elif self.export_format == ExportFormat.YAML:
-            writer = yaml_writer.write_document_to_stream
+            writer = yaml_writer
         elif self.export_format == ExportFormat.XML:
-            writer = xml_writer.write_document_to_stream
+            writer = xml_writer
         elif self.export_format == ExportFormat.TAG_VALUE:
-            writer = tagvalue_writer.write_document_to_stream
+            writer = tagvalue_writer
         elif self.export_format == ExportFormat.RDF_XML:
-            writer = rdf_writer.write_document_to_stream
+            writer = rdf_writer
         else:
             raise ValueError(f"{self.export_format} not supported.")
 
-        if writer:
-            logging.debug(f"Export with {writer.__module__}.{writer.__name__}")
-            writer(self.document, stream)
+        logging.debug("Validate document.")
+        errors = validate_full_spdx_document(self.document)
+        if errors:
+            document_dict = convert(self.document, None)
+            logging.debug(document_dict)
+            raise ValueError(f"Document is not valid. Errors: {errors}")
+
+        logging.debug(f"Export with {writer.__name__}")
+        writer.write_document_to_stream(self.document, stream, validate=False)
 
 
 class CycloneDX(SBOM):
@@ -317,29 +325,23 @@ class CycloneDX(SBOM):
 
     def export(self, stream: IO):
         if self.export_format == ExportFormat.JSON:
-            self.export_json(stream)
+            content = JsonV1Dot5(self.document).output_as_string(indent=2)
+            validator = JsonStrictValidator(SchemaVersion.V1_5)
+
         elif self.export_format == ExportFormat.XML:
-            self.export_xml(stream)
+            writer = make_outputter(self.document, OutputFormat.XML, SchemaVersion.V1_6)
+            content = writer.output_as_string(indent=2)
+            validator = make_schemabased_validator(
+                writer.output_format, writer.schema_version
+            )
+
         else:
             raise ValueError(f"{self.export_format} not supported.")
 
-    def export_json(self, stream: IO):
-        content = JsonV1Dot5(self.document).output_as_string(indent=2)
-
-        errors = JsonStrictValidator(SchemaVersion.V1_5).validate_str(content)
+        logging.debug("Validate document.")
+        errors = validator.validate_str(content)
         if errors:
-            raise ValueError(repr(errors))
-
-        stream.write(content)
-
-    def export_xml(self, stream: IO):
-        writer = make_outputter(self.document, OutputFormat.XML, SchemaVersion.V1_6)
-        content = writer.output_as_string(indent=2)
-
-        errors = make_schemabased_validator(
-            writer.output_format, writer.schema_version
-        ).validate_str(content)
-        if errors:
-            raise ValueError(repr(errors))
+            logging.debug(content)
+            raise ValueError(f"Document is not valid. Errors: {errors}")
 
         stream.write(content)

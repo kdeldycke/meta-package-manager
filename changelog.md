@@ -6,6 +6,8 @@
 > This version is not released yet and is under active development.
 
 - \[mpm\] Add new command to export installed packages to a SBOM file in SPDX or CycloneDX standard. Closes {issue}`936`.
+- \[mpm\] Add new dependencies on `spdx-tools` and `cyclonedex-python-lib`.
+- \[mpm\] Update list of recognized pURL scheme types.
 
 ## [5.17.0 (2024-07-07)](https://github.com/kdeldycke/meta-package-manager/compare/v5.16.0...v5.17.0)
 

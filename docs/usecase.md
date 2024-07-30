@@ -253,7 +253,7 @@ place to start an extremely productive hacking session.
 
 But maintaining `dotfiles` is a pain.
 
-`mpm` can help you keep an inventory of application to install accross all package managers. It has a dedicated TOML file format which reference all packages and their version, per-manager.
+`mpm` can help you keep an inventory of application to install across all package managers. It has a dedicated TOML file format which reference all packages and their version, per-manager.
 
 Think of this as a kind of [`Dockerfile`](https://docs.docker.com/guides/docker-concepts/building-images/writing-a-dockerfile/) or [`.Brewfile`](https://homebrew-file.readthedocs.io/en/latest/usage.html). A way to run `mpm install` in auto-pilot so it can install packages in batch.
 

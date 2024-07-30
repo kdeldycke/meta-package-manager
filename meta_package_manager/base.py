@@ -356,7 +356,7 @@ class PackageManager(metaclass=MetaPackageManager):
     """Accumulate all CLI errors encountered by the package manager."""
 
     def package(self, **kwargs) -> Package:
-        """Instanciate a ``Package`` object from the manager.
+        """Instantiate a ``Package`` object from the manager.
 
         Sets its ``manage_id`` to the manager it belongs to.
         """

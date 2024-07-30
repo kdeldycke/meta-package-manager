@@ -533,7 +533,7 @@ jobs:
       # CLI tests.
       - name: mpm --help
         run: |
-          uv --no-progress run --frozen -- mpm --verbosity DEBUG
+          uv --no-progress run --frozen -- mpm
       - name: mpm --version
         run: |
           uv --no-progress run --frozen -- mpm --verbosity DEBUG --version

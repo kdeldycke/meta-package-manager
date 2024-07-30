@@ -312,11 +312,9 @@ wheels = [
 ]
 
 [distribution.optional-dependencies]
-json-validation = [
+validation = [
     { name = "jsonschema" },
     { name = "jsonschema", extra = ["format"] },
-]
-xml-validation = [
     { name = "lxml" },
 ]
 
@@ -722,7 +720,7 @@ source = { editable = "." }
 dependencies = [
     { name = "boltons" },
     { name = "click-extra" },
-    { name = "cyclonedx-python-lib", extra = ["json-validation", "xml-validation"] },
+    { name = "cyclonedx-python-lib", extra = ["validation"] },
     { name = "more-itertools" },
     { name = "packageurl-python" },
     { name = "spdx-tools" },

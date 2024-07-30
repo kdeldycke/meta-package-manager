@@ -21,7 +21,7 @@ import re
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import IO
+from typing import IO, Any
 
 from boltons.ecoutils import get_profile
 from click_extra.platforms import CURRENT_OS_LABEL
@@ -85,8 +85,6 @@ class ExportFormat(Enum):
 
 
 class SBOM:
-    document: Document | None = None
-
     def __init__(self, export_format: ExportFormat = ExportFormat.JSON) -> None:
         """Defaults to JSON export format."""
         self.export_format = export_format
@@ -115,6 +113,8 @@ class SBOM:
 class SPDX(SBOM):
     DOC_ID = "SPDXRef-DOCUMENT"
 
+    document: Document
+
     @classmethod
     def normalize_spdx_id(cls, str: str) -> str:
         """SPDX IDs must only contain letters, numbers, ``.`` and ``-``."""
@@ -123,14 +123,16 @@ class SPDX(SBOM):
     def init_doc(self) -> None:
         profile = get_profile()
         system_id = self.normalize_spdx_id(
-            "-".join((
-                CURRENT_OS_LABEL,
-                profile["linux_dist_name"],
-                profile["linux_dist_version"],
-                profile["uname"]["system"],
-                profile["uname"]["release"],
-                profile["uname"]["machine"],
-            ))
+            "-".join(
+                (
+                    CURRENT_OS_LABEL,
+                    profile["linux_dist_name"],
+                    profile["linux_dist_version"],
+                    profile["uname"]["system"],
+                    profile["uname"]["release"],
+                    profile["uname"]["machine"],
+                )
+            )
         )
 
         creation_info = CreationInfo(
@@ -189,7 +191,7 @@ class SPDX(SBOM):
         """Similar to ``spdx_tools.spdx.writer.write_anything.write_file`` but write
         directly to provided stream instead of file path.
         """
-        writer = None
+        writer: Any = None
         if self.export_format == ExportFormat.JSON:
             writer = json_writer.write_document_to_stream
         elif self.export_format == ExportFormat.YAML:
@@ -209,11 +211,13 @@ class SPDX(SBOM):
 
 
 class CycloneDX(SBOM):
+    document: Bom
+
     def init_doc(self) -> None:
         gh_url = "https://github.com/kdeldycke/meta-package-manager"
         doc_url = "https://kdeldycke.github.io/meta-package-manager"
-        bom = Bom()
-        bom.metadata.component = Component(
+        self.document = Bom()
+        self.document.metadata.component = Component(
             name="meta-package-manager",
             type=ComponentType.APPLICATION,
             bom_ref=f"meta-package-manager@{__version__}",
@@ -292,7 +296,6 @@ class CycloneDX(SBOM):
                 ),
             ],
         )
-        self.document = bom
 
     def add_package(self, manager: PackageManager, package: Package) -> None:
         data = Component(
@@ -300,14 +303,17 @@ class CycloneDX(SBOM):
             type=ComponentType.APPLICATION,
             # Package pURL is unique thanks to the
             # (Manager ID, Package ID, Version) triple.
-            bom_ref=package.purl,
+            bom_ref=package.purl.to_string(),
             group=package.manager_id,
             version=str(package.installed_version),
             description=package.description,
             purl=package.purl,
         )
         self.document.components.add(data)
-        self.document.register_dependency(self.document.metadata.component, [data])
+        self.document.register_dependency(
+            self.document.metadata.component,  # type:ignore[arg-type]
+            [data],
+        )
 
     def export(self, stream: IO):
         if self.export_format == ExportFormat.JSON:

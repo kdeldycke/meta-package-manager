@@ -44,6 +44,8 @@ from spdx_tools.spdx.model import (
     ActorType,
     CreationInfo,
     Document,
+    ExternalPackageRef,
+    ExternalPackageRefCategory,
     PackagePurpose,
     Relationship,
     RelationshipType,
@@ -87,6 +89,8 @@ class ExportFormat(Enum):
 
 
 class SBOM:
+    """Utilities shared by all SBOM classes."""
+
     def __init__(self, export_format: ExportFormat = ExportFormat.JSON) -> None:
         """Defaults to JSON export format."""
         self.export_format = export_format
@@ -113,7 +117,13 @@ class SBOM:
 
 
 class SPDX(SBOM):
+    """Generates an SPDX document from a list of packages.
+
+    `SPDX 2.3 specifications <https://spdx.github.io/spdx-spec/v2.3/>`_.
+    """
+
     DOC_ID = "SPDXRef-DOCUMENT"
+    """Document root ID."""
 
     document: Document
 
@@ -123,6 +133,10 @@ class SPDX(SBOM):
         return "-".join((s for s in re.split(r"[^a-zA-Z0-9\.]", str) if s))
 
     def init_doc(self) -> None:
+        """
+        `SPDX document metadata specifications
+        <https://spdx.github.io/spdx-spec/v2.3/document-creation-information/>`_.
+        """
         profile = get_profile()
         system_id = self.normalize_spdx_id(
             "-".join(
@@ -137,35 +151,37 @@ class SPDX(SBOM):
             )
         )
 
-        creation_info = CreationInfo(
-            spdx_version="SPDX-2.3",
-            spdx_id=self.DOC_ID,
-            # Because mpm is a system-wide tool, we chose to name the document after
-            # the host operating system platform it was run on.
-            name=system_id,
-            # Point directly to the mpm release on GitHub so we can get some additional
-            # meaning from an URI that is not supposed to have any meaning. We add a
-            # trailing "/<random_unique_id>" to the URI as the namespace is supposed to
-            # be unique for each document. See:
-            # https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#65-spdx-document-namespace-field
-            document_namespace=(
-                "https://github.com/kdeldycke/meta-package-manager/releases/tag/"
-                f"v{__version__}/{profile['guid']}"
-            ),
-            creators=[Actor(ActorType.TOOL, f"meta-package-manager-{__version__}")],
-            created=datetime.now(),
-            data_license="CC0-1.0",
+        self.document = Document(
+            CreationInfo(
+                spdx_version="SPDX-2.3",
+                spdx_id=self.DOC_ID,
+                # Because mpm is a system-wide tool, we chose to name the document
+                # after the host operating system platform it was run on.
+                name=system_id,
+                # Point directly to the mpm release on GitHub so we can get some
+                # additional meaning from an URI that is not supposed to have any
+                # meaning. We add a trailing "/<random_unique_id>" to the URI as the
+                # namespace is supposed to be unique for each document. See:
+                # https://spdx.github.io/spdx-spec/v2.3/document-creation-information/#65-spdx-document-namespace-field
+                document_namespace=(
+                    "https://github.com/kdeldycke/meta-package-manager/releases/tag/"
+                    f"v{__version__}/{profile['guid']}"
+                ),
+                creators=[Actor(ActorType.TOOL, f"meta-package-manager-{__version__}")],
+                created=datetime.now(),
+                data_license="CC0-1.0",
+            )
         )
-
-        self.document = Document(creation_info)
-        self.document.packages = []
-        self.document.relationships = []
 
     def add_package(self, manager: PackageManager, package: Package) -> None:
-        package_docid = self.normalize_spdx_id(
-            f"SPDXRef-Package-{package.manager_id}-{package.id}"
-        )
-        self.document.packages += [
+        """
+        `SPDX package metadata specifications
+        <https://spdx.github.io/spdx-spec/v2.3/package-information/>`_.
+        """
+        # pURL string, by its virtue of containing all important metadata of a package,
+        # makes perfect unique IDs.
+        package_docid = self.normalize_spdx_id(f"SPDXRef-{package.purl}")
+        self.document.packages.append(
             SPDXPackage(
                 name=package.id,
                 spdx_id=package_docid,
@@ -179,15 +195,22 @@ class SPDX(SBOM):
                 files_analyzed=False,
                 summary=package.name,
                 description=package.description,
+                external_references=[
+                    ExternalPackageRef(
+                        ExternalPackageRefCategory.PACKAGE_MANAGER,
+                        "purl",
+                        package.purl.to_string(),
+                    )
+                ],
                 primary_package_purpose=PackagePurpose.INSTALL,
             )
-        ]
+        )
 
         # A DESCRIBES relationship asserts that the document indeed describes the
         # package.
-        self.document.relationships += [
+        self.document.relationships.append(
             Relationship(self.DOC_ID, RelationshipType.DESCRIBES, package_docid)
-        ]
+        )
 
     def export(self, stream: IO):
         """Similar to ``spdx_tools.spdx.writer.write_anything.write_file`` but write
@@ -219,12 +242,26 @@ class SPDX(SBOM):
 
 
 class CycloneDX(SBOM):
+    """Generates a CycloneDX document from a list of packages.
+
+    `CycloneDX 1.5 specifications <https://cyclonedx.org/docs/1.5>`_.
+    """
+
     document: Bom
 
     def init_doc(self) -> None:
+        """
+        `CycloneDX document metadata specifications
+        <https://cyclonedx.org/docs/1.5/json/#metadata/>`_.
+        """
         gh_url = "https://github.com/kdeldycke/meta-package-manager"
         doc_url = "https://kdeldycke.github.io/meta-package-manager"
         self.document = Bom()
+
+        # XXX lifecycles not supported yet:
+        # https://github.com/CycloneDX/cyclonedx-python-lib/issues/578
+        # self.document.metadata.lifecycles = [{"phase": "operations"}]
+
         self.document.metadata.component = Component(
             name="meta-package-manager",
             type=ComponentType.APPLICATION,
@@ -306,11 +343,15 @@ class CycloneDX(SBOM):
         )
 
     def add_package(self, manager: PackageManager, package: Package) -> None:
+        """
+        `CycloneDX package metadata specifications
+        <https://cyclonedx.org/docs/1.5/json/#components>`_.
+        """
         data = Component(
             name=package.id,
             type=ComponentType.APPLICATION,
-            # Package pURL is unique thanks to the
-            # (Manager ID, Package ID, Version) triple.
+            # pURL string, by its virtue of containing all important metadata of a
+            # package, makes perfect unique IDs.
             bom_ref=package.purl.to_string(),
             group=package.manager_id,
             version=str(package.installed_version),

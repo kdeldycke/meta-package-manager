@@ -135,6 +135,8 @@ class Package:
     so we're just going to allow string type.
     """
 
+    arch: str | None = None
+
     def __post_init__(self) -> None:
         # Make sure version strings are parsed into proper objects.
         self.installed_version = parse_version(self.installed_version)  # type: ignore[arg-type]
@@ -143,8 +145,14 @@ class Package:
     @cached_property
     def purl(self) -> PackageURL:
         """Returns the package's pURL object."""
+        qualifiers = {}
+        if self.arch:
+            qualifiers["arch"] = self.arch
         return PackageURL(
-            type=self.manager_id, name=self.id, version=str(self.installed_version)
+            type=self.manager_id,
+            name=self.id,
+            version=str(self.installed_version),
+            qualifiers=qualifiers,
         )
 
 

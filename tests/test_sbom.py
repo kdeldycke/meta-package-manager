@@ -27,6 +27,26 @@ from meta_package_manager.sbom import SPDX
         ("SPDXRef-Package-brew-openjdk@11", "SPDXRef-Package-brew-openjdk-11"),
         ("SPDXRef-my.Super.package", "SPDXRef-my.Super.package"),
         ("SPDXRef-my---Super.package-------", "SPDXRef-my-Super.package"),
+        (
+            "pkg:alpm/arch/pacman@6.0.1-1?arch=x86_64",
+            "pkg-alpm-arch-pacman-6.0.1-1-arch-x86-64",
+        ),
+        (
+            "pkg:alpm/arch/containers-common@1:0.47.4-4?arch=x86_64",
+            "pkg-alpm-arch-containers-common-1-0.47.4-4-arch-x86-64",
+        ),
+        (
+            "pkg:bitnami/wordpress@6.2.0?arch=arm64&distro=debian-12",
+            "pkg-bitnami-wordpress-6.2.0-arch-arm64-distro-debian-12",
+        ),
+        (
+            "pkg:cocoapods/GoogleUtilities@7.5.2#NSData+zlib",
+            "pkg-cocoapods-GoogleUtilities-7.5.2-NSData-zlib",
+        ),
+        (
+            "pkg:deb/debian/curl@7.50.3-1?arch=i386&distro=jessie",
+            "pkg-deb-debian-curl-7.50.3-1-arch-i386-distro-jessie",
+        ),
     ),
 )
 def test_normalize_spdx_id(raw_str, expected):

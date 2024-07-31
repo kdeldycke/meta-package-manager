@@ -68,38 +68,30 @@ class APT(PackageManager):
             ► apt --quiet list --installed
             Listing...
             adduser/xenial,now 3.113+nmu3ubuntu4 all [installed]
-            base-files/xenial-updates,now 9.4ubuntu4.3 amd64 [installed]
-            base-passwd/xenial,now 3.5.39 amd64 [installed]
-            bash/xenial-updates,now 4.3-14ubuntu1.1 amd64 [installed]
             bc/xenial,now 1.06.95-9build1 amd64 [installed]
             bsdmainutils/xenial,now 9.0.6ubuntu3 amd64 [installed,automatic]
-            bsdutils/xenial-updates,now 1:2.27.1-6ubuntu3.1 amd64 [installed]
             ca-certificates/xenial,now 20160104ubuntu1 all [installed]
-            coreutils/xenial,now 8.25-2ubuntu2 amd64 [installed]
             cron/xenial,now 3.0pl1-128ubuntu2 amd64 [installed]
-            dash/xenial,now 0.5.8-2.1ubuntu2 amd64 [installed]
             debconf/xenial,now 1.5.58ubuntu1 all [installed]
             debianutils/xenial,now 4.7 amd64 [installed]
             diffutils/xenial,now 1:3.3-3 amd64 [installed]
-            dpkg/xenial-updates,now 1.18.4ubuntu1.1 amd64 [installed]
-            dstat/xenial,now 0.7.2-4 all [installed]
-            e2fslibs/xenial,now 1.42.13-1ubuntu1 amd64 [installed]
             e2fsprogs/xenial,now 1.42.13-1ubuntu1 amd64 [installed]
             ethstatus/xenial,now 0.4.3ubuntu2 amd64 [installed]
             file/xenial,now 1:5.25-2ubuntu1 amd64 [installed]
             findutils/xenial,now 4.6.0+git+20160126-2 amd64 [installed]
-            fio/xenial,now 2.2.10-1ubuntu1 amd64 [installed]
-            gcc-6-base/xenial,now 6.0.1-0ubuntu1 amd64 [installed]
-            groff-base/xenial,now 1.22.3-7 amd64 [installed,automatic]
+            libidn2-0/jammy,now 2.3.2-2build1 amd64 [installed,automatic]
+            libidn2-0/jammy,now 2.3.2-2build1 i386 [installed,automatic]
         """
         output = self.run_cli("list", "--installed")
 
-        regexp = re.compile(r"(\S+)\/\S+ (\S+) .*")
+        regexp = re.compile(r"(\S+)\/\S+ (\S+) (\S+) .*")
         for package in output.splitlines():
             match = regexp.match(package)
             if match:
-                package_id, installed_version = match.groups()
-                yield self.package(id=package_id, installed_version=installed_version)
+                package_id, installed_version, arch = match.groups()
+                yield self.package(
+                    id=package_id, installed_version=installed_version, arch=arch
+                )
 
     @property
     def outdated(self) -> Iterator[Package]:

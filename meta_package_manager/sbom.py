@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import logging
 import re
-import sys
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -230,10 +229,9 @@ class SPDX(SBOM):
             writer = tagvalue_writer
         elif self.export_format == ExportFormat.RDF_XML:
             writer = rdf_writer
-            # RDF writer expects a binary-mode IO stream but <stdout> is string-based
-            # by default.
-            if stream == sys.stdout:
-                stream = sys.stdout.buffer
+            # RDF writer expects a binary-mode IO stream but the one provided is
+            # string-based.
+            stream = stream.buffer
         else:
             raise ValueError(f"{self.export_format} not supported.")
 

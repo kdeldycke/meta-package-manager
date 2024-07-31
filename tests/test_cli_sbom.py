@@ -16,6 +16,8 @@
 
 from __future__ import annotations
 
+import json
+import re
 from pathlib import Path
 
 import pytest
@@ -118,30 +120,43 @@ class TestSBOM(CLISubCommandTests):
             f"info: Skip unavailable {mid} manager." in stderr,
         )
 
-    def test_default_all_managers_spdx_output_to_console(self, invoke, subcmd):
+    def test_default_spdx_json_output_to_console(self, invoke, subcmd):
         result = invoke(subcmd)
         assert result.exit_code == 0
         assert "Print SPDX export to <stdout>" in result.stderr
         self.check_manager_selection(result)
+        json_content = json.loads(result.stdout)
+        assert json_content
+        assert json_content["spdxVersion"] == "SPDX-2.3"
 
-    @pytest.mark.parametrize("export_format", ExportFormat.values())
+    @pytest.mark.parametrize(
+        "output_file", ("-", *(f"export.{f}" for f in ExportFormat.values()))
+    )
     @pytest.mark.parametrize("standard_name", ("SPDX", "CycloneDX"))
-    def test_output_to_file(self, invoke, subcmd, export_format, standard_name):
-        result = invoke(subcmd, f"--{standard_name.lower()}", "--format", export_format)
+    def test_output_to_file(self, invoke, subcmd, output_file, standard_name):
+        # Let the CLI auto-detect the format.
+        result = invoke(subcmd, f"--{standard_name.lower()}", output_file)
 
-        if standard_name == "CycloneDX" and export_format not in (
-            ExportFormat.JSON.value,
-            ExportFormat.XML.value,
+        if standard_name == "CycloneDX" and output_file not in (
+            "export.json",
+            "export.xml",
+            "-",
         ):
             assert result.exit_code == 2
-            assert (
-                f"CycloneDX does not support {ExportFormat.from_value(export_format)}"
-                " format." in result.stderr
-            )
+            assert "CycloneDX does not support" in result.stderr
             assert not result.stdout
 
         else:
-            assert result.exit_code == 0
-            assert f"Print {standard_name} export to <stdout>" in result.stderr
+            if output_file == "-":
+                assert f"Print {standard_name} export to <stdout>" in result.stderr
+                assert result.stdout
+
+            else:
+                assert re.search(
+                    rf"Export installed packages in {standard_name} to \S+{output_file}",
+                    result.stderr,
+                )
+                assert not result.stdout
+
             assert result.exit_code == 0
             self.check_manager_selection(result)

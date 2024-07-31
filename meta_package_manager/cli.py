@@ -1486,7 +1486,7 @@ def sbom(ctx, spdx, format, overwrite, export_path):
         logging.info(f"Print {standard} export to {sys.stdout.name}")
 
     else:
-        logging.info(f"Export installed packages in {standard} format to {export_path}")
+        logging.info(f"Export installed packages in {standard} to {export_path}")
         if export_path.exists():
             msg = "Target file exist and will be overwritten."
             if overwrite:

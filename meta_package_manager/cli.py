@@ -76,14 +76,14 @@ from .output import (
 )
 from .platforms import encoding_args
 from .pool import pool
-from .sbom import SPDX, CycloneDX, ExportFormat
+from .sbom import SBOM, SPDX, CycloneDX, ExportFormat
 from .specifier import VERSION_SEP, Solver, Specifier
 
 # Subcommand sections.
 EXPLORE = Section("Explore subcommands")
 MAINTENANCE = Section("Maintenance subcommands")
 SNAPSHOTS = Section("Package snapshots subcommands")
-SBOM = Section("SBOM subcommands")
+SBOM_SECTION = Section("SBOM subcommands")
 
 
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
@@ -1449,7 +1449,7 @@ def restore(ctx, toml_files):
 
 @mpm.command(
     short_help="Export installed packages to a SBOM document.",
-    section=SBOM,
+    section=SBOM_SECTION,
 )
 @option(
     "--spdx/--cyclonedx",

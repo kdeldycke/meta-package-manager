@@ -104,16 +104,17 @@ class SBOM:
         """
         suffixes = tuple(s.lower() for s in file_path.suffixes[-2:])
         export_format = None
-        if suffixes == (".rdf", ".xml") or suffixes[-1] == ".rdf":
-            export_format = ExportFormat.RDF_XML
-        elif suffixes[-1] in (".tag", ".spdx"):
-            export_format = ExportFormat.TAG_VALUE
-        elif suffixes[-1] == ".json":
-            export_format = ExportFormat.JSON
-        elif suffixes[-1] == ".xml":
-            export_format = ExportFormat.XML
-        elif suffixes[-1] in (".yaml", ".yml"):
-            export_format = ExportFormat.YAML
+        if suffixes:
+            if suffixes == (".rdf", ".xml") or suffixes[-1] == ".rdf":
+                export_format = ExportFormat.RDF_XML
+            elif suffixes[-1] in (".tag", ".spdx"):
+                export_format = ExportFormat.TAG_VALUE
+            elif suffixes[-1] == ".json":
+                export_format = ExportFormat.JSON
+            elif suffixes[-1] == ".xml":
+                export_format = ExportFormat.XML
+            elif suffixes[-1] in (".yaml", ".yml"):
+                export_format = ExportFormat.YAML
         logging.debug(f"File suffixes {suffixes} resolves to {export_format}.")
         return export_format
 

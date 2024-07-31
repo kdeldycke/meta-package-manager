@@ -16,10 +16,12 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from meta_package_manager.base import Operations
-from meta_package_manager.sbom import SPDX, ExportFormat
+from meta_package_manager.sbom import SBOM, SPDX, ExportFormat
 
 from .test_cli import CLISubCommandTests
 
@@ -28,6 +30,50 @@ from .test_cli import CLISubCommandTests
 def subcmd():
     # The details of operations are only logged at INFO level.
     return "--verbosity", "INFO", "sbom"
+
+
+@pytest.mark.parametrize(
+    ("file_path", "expected"),
+    (
+        ("export.rdf", ExportFormat.RDF_XML),
+        ("export.rDf", ExportFormat.RDF_XML),
+        ("export.rdf.random", None),
+        ("exportrdf", None),
+        ("export.rdf.xml", ExportFormat.RDF_XML),
+        ("export.Rdf.xMl", ExportFormat.RDF_XML),
+        ("export.rdf.xml.random", None),
+        ("export.rdfxml", None),
+        ("exportrdfxml", None),
+        ("export.tag", ExportFormat.TAG_VALUE),
+        ("export.tAg", ExportFormat.TAG_VALUE),
+        ("export.tag.random", None),
+        ("exporttag", None),
+        ("export.spdx", ExportFormat.TAG_VALUE),
+        ("export.sPdx", ExportFormat.TAG_VALUE),
+        ("export.spdx.random", None),
+        ("exportspdx", None),
+        ("export.json", ExportFormat.JSON),
+        ("export.jSon", ExportFormat.JSON),
+        ("export.json.random", None),
+        ("exportjson", None),
+        ("export.xml", ExportFormat.XML),
+        ("export.xMl", ExportFormat.XML),
+        ("export.xml.random", None),
+        ("exportxml", None),
+        ("export.yaml", ExportFormat.YAML),
+        ("export.yAml", ExportFormat.YAML),
+        ("export.yaml.random", None),
+        ("exportyaml", None),
+        ("export.yml", ExportFormat.YAML),
+        ("export.yMl", ExportFormat.YAML),
+        ("export.yml.random", None),
+        ("exportyml", None),
+        ("export.random", None),
+        ("export", None),
+    ),
+)
+def test_file_autodetect(file_path, expected):
+    assert SBOM.autodetect_export_format(Path(file_path)) == expected
 
 
 @pytest.mark.parametrize(

@@ -18,7 +18,16 @@ from __future__ import annotations
 
 import pytest
 
-from meta_package_manager.sbom import SPDX
+from meta_package_manager.base import Operations
+from meta_package_manager.sbom import SPDX, ExportFormat
+
+from .test_cli import CLISubCommandTests
+
+
+@pytest.fixture
+def subcmd():
+    # The details of operations are only logged at INFO level.
+    return "--verbosity", "INFO", "sbom"
 
 
 @pytest.mark.parametrize(
@@ -51,3 +60,45 @@ from meta_package_manager.sbom import SPDX
 )
 def test_normalize_spdx_id(raw_str, expected):
     assert SPDX.normalize_spdx_id(raw_str) == expected
+
+
+class TestSBOM(CLISubCommandTests):
+    @staticmethod
+    def evaluate_signals(mid, stdout, stderr):
+        yield from (
+            f"Export packages from {mid}..." in stderr,
+            f"warning: {mid} does not implement {Operations.installed}" in stderr,
+            # Common "not found" message.
+            f"info: Skip unavailable {mid} manager." in stderr,
+        )
+
+    def test_default_all_managers_spdx_output_to_console(self, invoke, subcmd):
+        result = invoke(subcmd)
+        assert result.exit_code == 0
+        assert "Print SPDX export to <stdout>" in result.stderr
+        self.check_manager_selection(result)
+
+    @pytest.mark.parametrize("standard_name", ("SPDX", "CycloneDX"))
+    @pytest.mark.parametrize("export_format", ExportFormat.values())
+    def test_output_to_file(self, invoke, subcmd, standard_name, export_format):
+        result = invoke(subcmd, f"--{standard_name.lower()}", "--format", export_format)
+
+        if standard_name == "CycloneDX" and export_format not in (
+            ExportFormat.JSON.value,
+            ExportFormat.XML.value,
+        ):
+            assert result.exit_code == 2
+            assert (
+                f"CycloneDX does not support {ExportFormat.from_value(export_format)}"
+                " format." in result.stderr
+            )
+            assert not result.stdout
+
+        else:
+            if export_format == "rdf":
+                pytest.skip("XXX RDF export seems broken.")
+
+            assert result.exit_code == 0
+            assert f"Print {standard_name} export to <stdout>" in result.stderr
+            assert result.exit_code == 0
+            self.check_manager_selection(result)

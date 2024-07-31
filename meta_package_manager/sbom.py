@@ -93,6 +93,7 @@ class SBOM:
 
     def __init__(self, export_format: ExportFormat = ExportFormat.JSON) -> None:
         """Defaults to JSON export format."""
+        logging.debug(f"Set export format to {export_format}")
         self.export_format = export_format
 
     @staticmethod
@@ -230,7 +231,7 @@ class SPDX(SBOM):
         else:
             raise ValueError(f"{self.export_format} not supported.")
 
-        logging.debug("Validate document.")
+        logging.debug("Validate document...")
         errors = validate_full_spdx_document(self.document)
         if errors:
             document_dict = convert(self.document, None)
@@ -379,7 +380,7 @@ class CycloneDX(SBOM):
         else:
             raise ValueError(f"{self.export_format} not supported.")
 
-        logging.debug("Validate document.")
+        logging.debug("Validate document...")
         errors = validator.validate_str(content)
         if errors:
             logging.debug(content)

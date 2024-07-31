@@ -1526,7 +1526,7 @@ def sbom(ctx, spdx, format, overwrite, export_path):
     sbom.init_doc()
 
     for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
-        logging.info(f"Exporting packages from {theme.invoked_command(manager.id)}...")
+        logging.info(f"Export packages from {theme.invoked_command(manager.id)}...")
         for package in manager.installed:
             sbom.add_package(manager, package)
 

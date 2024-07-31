@@ -1036,8 +1036,3 @@
 
 - \[mpm\] Initial public release.
 - \[brew,cask\] Add support for Homebrew and Cask.
-
-```{todo}
-Replace sub-title above with shorter `` {commit}`1.0.0 (2016-07-05) <170ce9>` ``
-role once {issue}`sloria/sphinx-issues#116` is resolved.
-```

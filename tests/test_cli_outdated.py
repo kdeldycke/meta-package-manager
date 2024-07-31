@@ -42,8 +42,8 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
     def evaluate_signals(mid, stdout, stderr):
         yield from (
             f"warning: {mid} does not implement {Operations.outdated}" in stderr,
-            # Common "not found" warning message.
-            f"warning: Skip unavailable {mid} manager." in stderr,
+            # Common "not found" message.
+            f"info: Skip unavailable {mid} manager." in stderr,
             # Stats line at the end of output.
             f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
         )

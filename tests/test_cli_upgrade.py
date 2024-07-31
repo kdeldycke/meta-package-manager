@@ -48,8 +48,8 @@ class TestUpgrade(CLISubCommandTests):
             f"warning: {mid} does not implement {Operations.upgrade_all}." in stderr,
             f"Upgrade all outdated packages from {mid}..." in stderr,
             bool(re.search(rf"Upgrade \S+ with {mid}\.\.\.", stderr)),
-            # Common "not found" warning message.
-            f"warning: Skip unavailable {mid} manager." in stderr,
+            # Common "not found" message.
+            f"info: Skip unavailable {mid} manager." in stderr,
         )
 
     @pytest.mark.parametrize("all_option", ("--all", None))

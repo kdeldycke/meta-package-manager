@@ -264,7 +264,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 
 @extra_group(
     # XXX Default verbosity has been changed in Click Extra 4.0.0 from INFO to WARNING.
-    # context_settings={"default_map": {"verbosity": "INFO"}},
+    context_settings={"default_map": {"verbosity": "INFO"}},
 )
 @option_group(
     "Package manager selection options",

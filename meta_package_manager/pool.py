@@ -250,7 +250,7 @@ class ManagerPool:
 
             # Filters out inactive managers.
             if drop_inactive and not manager.available:
-                logging.warning(
+                logging.info(
                     f"Skip unavailable {theme.invoked_command(manager_id)} manager.",
                 )
                 continue

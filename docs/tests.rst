@@ -89,6 +89,14 @@ tests.test\_cli\_restore module
    :undoc-members:
    :show-inheritance:
 
+tests.test\_cli\_sbom module
+----------------------------
+
+.. automodule:: tests.test_cli_sbom
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 tests.test\_cli\_search module
 ------------------------------
 
@@ -165,14 +173,6 @@ tests.test\_pool module
 -----------------------
 
 .. automodule:: tests.test_pool
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-tests.test\_sbom module
------------------------
-
-.. automodule:: tests.test_sbom
    :members:
    :undoc-members:
    :show-inheritance:

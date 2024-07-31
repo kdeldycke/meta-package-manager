@@ -99,13 +99,13 @@ def is_stdout(filepath: Path) -> bool:
 
 
 @contextmanager
-def file_writer(filepath):
+def file_writer(filepath, mode: str = "w"):
     """A context-aware file writer which default to stdout if no path is
     provided."""
     if is_stdout(filepath):
         yield sys.stdout
     else:
-        writer = filepath.open("w")
+        writer = filepath.open(mode)
         yield writer
         writer.close()
 

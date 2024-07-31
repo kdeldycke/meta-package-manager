@@ -78,9 +78,9 @@ class TestSBOM(CLISubCommandTests):
         assert "Print SPDX export to <stdout>" in result.stderr
         self.check_manager_selection(result)
 
-    @pytest.mark.parametrize("standard_name", ("SPDX", "CycloneDX"))
     @pytest.mark.parametrize("export_format", ExportFormat.values())
-    def test_output_to_file(self, invoke, subcmd, standard_name, export_format):
+    @pytest.mark.parametrize("standard_name", ("SPDX", "CycloneDX"))
+    def test_output_to_file(self, invoke, subcmd, export_format, standard_name):
         result = invoke(subcmd, f"--{standard_name.lower()}", "--format", export_format)
 
         if standard_name == "CycloneDX" and export_format not in (
@@ -95,9 +95,6 @@ class TestSBOM(CLISubCommandTests):
             assert not result.stdout
 
         else:
-            if export_format == "rdf":
-                pytest.skip("XXX RDF export seems broken.")
-
             assert result.exit_code == 0
             assert f"Print {standard_name} export to <stdout>" in result.stderr
             assert result.exit_code == 0

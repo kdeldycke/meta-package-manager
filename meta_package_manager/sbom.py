@@ -68,8 +68,8 @@ class ExportFormat(Enum):
     """A user-friendly version of ``spdx_tools.spdx.formats.FileFormat``."""
 
     JSON = "json"
-    YAML = "yaml"
     XML = "xml"
+    YAML = "yaml"
     TAG_VALUE = "tag"
     RDF_XML = "rdf"
     """Map format to user-friendly IDs."""
@@ -106,14 +106,14 @@ class SBOM:
         if suffixes:
             if suffixes == (".rdf", ".xml") or suffixes[-1] == ".rdf":
                 export_format = ExportFormat.RDF_XML
-            elif suffixes[-1] in (".tag", ".spdx"):
-                export_format = ExportFormat.TAG_VALUE
             elif suffixes[-1] == ".json":
                 export_format = ExportFormat.JSON
             elif suffixes[-1] == ".xml":
                 export_format = ExportFormat.XML
             elif suffixes[-1] in (".yaml", ".yml"):
                 export_format = ExportFormat.YAML
+            elif suffixes[-1] in (".tag", ".spdx"):
+                export_format = ExportFormat.TAG_VALUE
         logging.debug(f"File suffixes {suffixes} resolves to {export_format}.")
         return export_format
 
@@ -221,10 +221,10 @@ class SPDX(SBOM):
         writer: Any
         if self.export_format == ExportFormat.JSON:
             writer = json_writer
-        elif self.export_format == ExportFormat.YAML:
-            writer = yaml_writer
         elif self.export_format == ExportFormat.XML:
             writer = xml_writer
+        elif self.export_format == ExportFormat.YAML:
+            writer = yaml_writer
         elif self.export_format == ExportFormat.TAG_VALUE:
             writer = tagvalue_writer
         elif self.export_format == ExportFormat.RDF_XML:

@@ -757,6 +757,7 @@ test = [
     { name = "pytest-randomly" },
     { name = "pytest-xdist" },
     { name = "pytest-xdist", extra = ["psutil"] },
+    { name = "pyyaml" },
 ]
 typing = [
     { name = "types-pyyaml" },

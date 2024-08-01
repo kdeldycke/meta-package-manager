@@ -19,8 +19,10 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from xml.etree import ElementTree
 
 import pytest
+from yaml import Loader, load
 
 from meta_package_manager.base import Operations
 from meta_package_manager.sbom import SBOM, SPDX, ExportFormat
@@ -37,39 +39,56 @@ def subcmd():
 @pytest.mark.parametrize(
     ("file_path", "expected"),
     (
+        # .json
+        ("export.json", ExportFormat.JSON),
+        ("export.jSon", ExportFormat.JSON),
+        ("export.json.random", None),
+        ("exportjson", None),
+        (".json", None),
+        # .xml
+        ("export.xml", ExportFormat.XML),
+        ("export.xMl", ExportFormat.XML),
+        ("export.xml.random", None),
+        ("exportxml", None),
+        (".xml", None),
+        # .yaml
+        ("export.yaml", ExportFormat.YAML),
+        ("export.yAml", ExportFormat.YAML),
+        ("export.yaml.random", None),
+        ("exportyaml", None),
+        (".yaml", None),
+        # .yml
+        ("export.yml", ExportFormat.YAML),
+        ("export.yMl", ExportFormat.YAML),
+        ("export.yml.random", None),
+        ("exportyml", None),
+        (".yml", None),
+        # .tag
+        ("export.tag", ExportFormat.TAG_VALUE),
+        ("export.tAg", ExportFormat.TAG_VALUE),
+        ("export.tag.random", None),
+        ("exporttag", None),
+        (".tag", None),
+        # .spdx
+        ("export.spdx", ExportFormat.TAG_VALUE),
+        ("export.sPdx", ExportFormat.TAG_VALUE),
+        ("export.spdx.random", None),
+        ("exportspdx", None),
+        (".spdx", None),
+        # .rdf
         ("export.rdf", ExportFormat.RDF_XML),
         ("export.rDf", ExportFormat.RDF_XML),
         ("export.rdf.random", None),
         ("exportrdf", None),
+        (".rdf", None),
+        # .rdf.xml
         ("export.rdf.xml", ExportFormat.RDF_XML),
         ("export.Rdf.xMl", ExportFormat.RDF_XML),
         ("export.rdf.xml.random", None),
         ("export.rdfxml", None),
         ("exportrdfxml", None),
-        ("export.tag", ExportFormat.TAG_VALUE),
-        ("export.tAg", ExportFormat.TAG_VALUE),
-        ("export.tag.random", None),
-        ("exporttag", None),
-        ("export.spdx", ExportFormat.TAG_VALUE),
-        ("export.sPdx", ExportFormat.TAG_VALUE),
-        ("export.spdx.random", None),
-        ("exportspdx", None),
-        ("export.json", ExportFormat.JSON),
-        ("export.jSon", ExportFormat.JSON),
-        ("export.json.random", None),
-        ("exportjson", None),
-        ("export.xml", ExportFormat.XML),
-        ("export.xMl", ExportFormat.XML),
-        ("export.xml.random", None),
-        ("exportxml", None),
-        ("export.yaml", ExportFormat.YAML),
-        ("export.yAml", ExportFormat.YAML),
-        ("export.yaml.random", None),
-        ("exportyaml", None),
-        ("export.yml", ExportFormat.YAML),
-        ("export.yMl", ExportFormat.YAML),
-        ("export.yml.random", None),
-        ("exportyml", None),
+        (".rdf.xml", ExportFormat.XML),
+        # Unidentified extension
         ("export.random", None),
         ("export", None),
     ),
@@ -129,34 +148,72 @@ class TestSBOM(CLISubCommandTests):
         assert json_content
         assert json_content["spdxVersion"] == "SPDX-2.3"
 
-    @pytest.mark.parametrize(
-        "output_file", ("-", *(f"export.{f}" for f in ExportFormat.values()))
-    )
+    @pytest.mark.parametrize("export_format", (None, *ExportFormat))
     @pytest.mark.parametrize("standard_name", ("SPDX", "CycloneDX"))
-    def test_output_to_file(self, invoke, subcmd, output_file, standard_name):
+    def test_output_to_file(self, invoke, subcmd, export_format, standard_name):
         # Let the CLI auto-detect the format.
-        result = invoke(subcmd, f"--{standard_name.lower()}", output_file)
+        file_name = f"export.{export_format.value}" if export_format else "-"
+        result = invoke(subcmd, f"--{standard_name.lower()}", file_name)
 
-        if standard_name == "CycloneDX" and output_file not in (
-            "export.json",
-            "export.xml",
-            "-",
+        if standard_name == "CycloneDX" and export_format not in (
+            ExportFormat.JSON,
+            ExportFormat.XML,
+            None,
         ):
             assert result.exit_code == 2
-            assert "CycloneDX does not support" in result.stderr
+            assert f"CycloneDX does not support {export_format}" in result.stderr
             assert not result.stdout
 
         else:
-            if output_file == "-":
+            if not export_format:
                 assert f"Print {standard_name} export to <stdout>" in result.stderr
                 assert result.stdout
+                content = result.stdout
 
             else:
                 assert re.search(
-                    rf"Export installed packages in {standard_name} to \S*{output_file}",
+                    rf"Export installed packages in {standard_name} to \S*{file_name}",
                     result.stderr,
                 )
                 assert not result.stdout
+                content = Path(file_name).read_text()
 
             assert result.exit_code == 0
             self.check_manager_selection(result)
+
+            if export_format == ExportFormat.JSON:
+                json_content = json.loads(content)
+                assert json_content
+                if standard_name == "SPDX":
+                    assert json_content["spdxVersion"] == "SPDX-2.3"
+                else:
+                    assert json_content["bomFormat"] == "CycloneDX"
+
+            elif export_format == ExportFormat.XML:
+                xml_content = ElementTree.fromstring(content)
+                if standard_name == "SPDX":
+                    assert xml_content.find("spdxVersion").text == "SPDX-2.3"
+                else:
+                    assert xml_content.tag == "{http://cyclonedx.org/schema/bom/1.6}bom"
+
+            elif export_format == ExportFormat.YAML:
+                yaml_content = load(content, Loader=Loader)
+                assert yaml_content
+                assert yaml_content["spdxVersion"] == "SPDX-2.3"
+
+            elif export_format == ExportFormat.TAG_VALUE:
+                assert content.splitlines()[:2] == [
+                    "## Document Information",
+                    "SPDXVersion: SPDX-2.3",
+                ]
+
+            elif export_format == ExportFormat.RDF_XML:
+                assert (
+                    ElementTree.fromstring(content)
+                    .find(
+                        "spdx:SpdxDocument/spdx:specVersion",
+                        {"spdx": "http://spdx.org/rdf/terms#"},
+                    )
+                    .text
+                    == "SPDX-2.3"
+                )

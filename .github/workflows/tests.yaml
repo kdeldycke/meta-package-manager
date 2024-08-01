@@ -55,11 +55,16 @@ jobs:
           include: list[dict[str, str]] = []
 
           # List of variants to exclude from the matrix.
-          exclude: list[dict[str, str]] = [
-          ]
+          exclude: list[dict[str, str]] = []
 
           # List of unstable criterions.
-          unstable: list[dict[str, str]] = []
+          unstable: list[dict[str, str]] = [
+              # XXX The Windows runner does not have the necessary libxml2 headers to build lxml.
+              #   C:\Users\RUNNER~1\AppData\Local\Temp\xmlXPathInitdre5ccrb.c(1): fatal error C1083:
+              #   Cannot open include file: 'libxml/xpath.h': No such file or directory
+              #   Could not find function xmlCheckVersion in library libxml2. Is libxml2 installed?
+              {"os": "windows-2022", "python-version": "3.13-dev"},
+          ]
 
           # Build the job matrix.
           jobs: list[dict[str, str]] = []
@@ -525,6 +530,11 @@ jobs:
       - name: Install uv
         run: |
           python -m pip install -r https://raw.githubusercontent.com/kdeldycke/workflows/v4.4.1/requirements/uv.txt
+      - name: Linux - Install Python 3.13-dev requirements
+        if: runner.os == 'Linux' && matrix.python-version == '3.13-dev'
+        # Error: Please make sure the libxml2 and libxslt development packages are installed.
+        run: |
+          sudo apt --quiet --yes install libxml2-dev libxslt-dev
       - name: Install project
         run: |
           uv --no-progress venv --system

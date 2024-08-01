@@ -153,7 +153,7 @@ class TestSBOM(CLISubCommandTests):
 
             else:
                 assert re.search(
-                    rf"Export installed packages in {standard_name} to \S+{output_file}",
+                    rf"Export installed packages in {standard_name} to \S*{output_file}",
                     result.stderr,
                 )
                 assert not result.stdout

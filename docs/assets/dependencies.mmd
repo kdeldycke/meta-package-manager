@@ -1,50 +1,83 @@
 flowchart TD
     classDef missing stroke-dasharray: 5
+    beartype["beartype\n0.18.5"]
     boltons["boltons\n24.0.0"]
+    boolean-py["boolean.py\n4.0"]
     bracex["bracex\n2.4"]
-    certifi["certifi\n2024.2.2"]
+    certifi["certifi\n2024.7.4"]
     charset-normalizer["charset-normalizer\n3.3.2"]
-    click-extra["click-extra\n4.8.1"]
+    click-extra["click-extra\n4.9.0"]
     click_0["click\n8.1.7"]
     cloup["cloup\n3.0.5"]
     commentjson["commentjson\n0.9.0"]
-    docutils["docutils\n0.20.1"]
+    cyclonedx-python-lib["cyclonedx-python-lib\n7.5.1"]
+    defusedxml["defusedxml\n0.7.1"]
     idna["idna\n3.7"]
+    isodate["isodate\n0.6.1"]
     lark-parser["lark-parser\n0.7.8"]
+    license-expression["license-expression\n30.3.0"]
     mergedeep["mergedeep\n1.3.4"]
-    meta-package-manager["meta-package-manager\n5.16.0"]
-    packageurl-python["packageurl-python\n0.15.0"]
+    meta-package-manager["meta-package-manager\n5.18.0"]
+    more-itertools["more-itertools\n10.3.0"]
+    packageurl-python["packageurl-python\n0.15.6"]
+    ply["ply\n3.11"]
+    py-serializable["py-serializable\n1.1.0"]
+    pyparsing["pyparsing\n3.1.2"]
     pyyaml["PyYAML\n6.0.1"]
-    regex["regex\n2024.5.15"]
-    requests["requests\n2.32.2"]
+    rdflib["rdflib\n7.0.0"]
+    requests["requests\n2.32.3"]
+    semantic-version["semantic-version\n2.10.0"]
+    six["six\n1.16.0"]
+    sortedcontainers["sortedcontainers\n2.4.0"]
+    spdx-tools["spdx-tools\n0.8.2"]
     tabulate["tabulate\n0.9.0"]
     tomli-w["tomli_w\n1.0.0"]
-    urllib3["urllib3\n2.2.1"]
+    uritools["uritools\n4.0.3"]
+    urllib3["urllib3\n2.2.2"]
     wcmatch["wcmatch\n8.5.2"]
     xmltodict["xmltodict\n0.13.0"]
-    click-extra -- ">=0.13.0,<0.14.0" --> xmltodict
-    click-extra -- ">=0.9,<0.10" --> tabulate
-    click-extra -- ">=0.9.0,<0.10.0" --> commentjson
-    click-extra -- ">=1.3.4,<2.0.0" --> mergedeep
-    click-extra -- ">=2.28.2,<3.0.0" --> requests
-    click-extra -- ">=2024.4.16,<2025.0.0" --> regex
-    click-extra -- ">=24.0.0,<25.0.0" --> boltons
-    click-extra -- ">=3.0.5,<4.0.0" --> cloup
-    click-extra -- ">=6.0.0,<7.0.0" --> pyyaml
-    click-extra -- ">=8.1.4,<9.0.0" --> click_0
-    click-extra -- ">=8.5,<9.0" --> wcmatch
+    click-extra -- "~=0.13.0" --> xmltodict
+    click-extra -- "~=0.9" --> tabulate
+    click-extra -- "~=0.9.0" --> commentjson
+    click-extra -- "~=1.3.4" --> mergedeep
+    click-extra -- "~=2.32.3" --> requests
+    click-extra -- "~=24.0.0" --> boltons
+    click-extra -- "~=3.0.5" --> cloup
+    click-extra -- "~=6.0.0" --> pyyaml
+    click-extra -- "~=8.1.4" --> click_0
+    click-extra -- "~=8.5" --> wcmatch
     cloup -- ">=8.0,<9.0" --> click_0
     commentjson -- ">=0.7.1,<0.8.0" --> lark-parser
-    meta-package-manager -- "!=0.21" --> docutils
-    meta-package-manager -- ">=0.13.0,<0.14.0" --> xmltodict
-    meta-package-manager -- ">=0.15.0,<0.16.0" --> packageurl-python
-    meta-package-manager -- ">=0.9.0,<0.10.0" --> tabulate
-    meta-package-manager -- ">=1.0.0,<2.0.0" --> tomli-w
-    meta-package-manager -- ">=24.0.0,<25.0.0" --> boltons
-    meta-package-manager -- ">=4.8.1,<5.0.0" --> click-extra
+    cyclonedx-python-lib -- ">=0.11,<2" --> packageurl-python
+    cyclonedx-python-lib -- ">=1.1.0,<2.0.0" --> py-serializable
+    cyclonedx-python-lib -- ">=2.4.0,<3.0.0" --> sortedcontainers
+    cyclonedx-python-lib -- ">=30,<31" --> license-expression
+    isodate -- "any" --> six
+    license-expression -- ">=4.0" --> boolean-py
+    meta-package-manager -- "~=0.13.0" --> xmltodict
+    meta-package-manager -- "~=0.15.0" --> packageurl-python
+    meta-package-manager -- "~=0.8.2" --> spdx-tools
+    meta-package-manager -- "~=0.9.0" --> tabulate
+    meta-package-manager -- "~=1.0.0" --> tomli-w
+    meta-package-manager -- "~=10.3.0" --> more-itertools
+    meta-package-manager -- "~=24.0.0" --> boltons
+    meta-package-manager -- "~=4.9.0" --> click-extra
+    meta-package-manager -- "~=7.5.1" --> cyclonedx-python-lib
+    py-serializable -- ">=0.7.1,<0.8.0" --> defusedxml
+    rdflib -- ">=0.6.0,<0.7.0" --> isodate
+    rdflib -- ">=2.1.0,<4" --> pyparsing
     requests -- ">=1.21.1,<3" --> urllib3
     requests -- ">=2,<4" --> charset-normalizer
     requests -- ">=2.5,<4" --> idna
     requests -- ">=2017.4.17" --> certifi
+    spdx-tools -- "any" --> beartype
+    spdx-tools -- "any" --> click_0
+    spdx-tools -- "any" --> license-expression
+    spdx-tools -- "any" --> ply
+    spdx-tools -- "any" --> pyyaml
+    spdx-tools -- "any" --> rdflib
+    spdx-tools -- "any" --> semantic-version
+    spdx-tools -- "any" --> uritools
+    spdx-tools -- "any" --> xmltodict
     wcmatch -- ">=2.1.1" --> bracex
 

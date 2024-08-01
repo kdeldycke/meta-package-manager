@@ -36,7 +36,7 @@ from cyclonedx.model.contact import OrganizationalEntity
 from cyclonedx.output import make_outputter
 from cyclonedx.output.json import JsonV1Dot5
 from cyclonedx.schema import OutputFormat, SchemaVersion
-from cyclonedx.validation import make_schemabased_validator
+from cyclonedx.validation import BaseSchemabasedValidator, make_schemabased_validator
 from cyclonedx.validation.json import JsonStrictValidator
 from packageurl import PackageURL
 from spdx_tools.spdx.model import (
@@ -231,14 +231,14 @@ class SPDX(SBOM):
             writer = rdf_writer
             # RDF writer expects a binary-mode IO stream but the one provided is
             # string-based.
-            stream = stream.buffer
+            stream = stream.buffer  # type: ignore[attr-defined]
         else:
             raise ValueError(f"{self.export_format} not supported.")
 
         logging.debug("Validate document...")
         errors = validate_full_spdx_document(self.document)
         if errors:
-            document_dict = convert(self.document, None)
+            document_dict = convert(self.document, None)  # type: ignore[arg-type]
             logging.debug(document_dict)
             raise ValueError(f"Document is not valid. Errors: {errors}")
 
@@ -370,6 +370,7 @@ class CycloneDX(SBOM):
         )
 
     def export(self, stream: IO):
+        validator: BaseSchemabasedValidator
         if self.export_format == ExportFormat.JSON:
             content = JsonV1Dot5(self.document).output_as_string(indent=2)
             validator = JsonStrictValidator(SchemaVersion.V1_5)

@@ -715,7 +715,7 @@ wheels = [
 
 [[distribution]]
 name = "meta-package-manager"
-version = "5.18.0"
+version = "5.18.1"
 source = { editable = "." }
 dependencies = [
     { name = "boltons" },

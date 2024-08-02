@@ -1,9 +1,6 @@
 # Changelog
 
-## [5.18.0 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v5.17.0...main)
-
-> \[!IMPORTANT\]
-> This version is not released yet and is under active development.
+## [5.18.0 (2024-08-02)](https://github.com/kdeldycke/meta-package-manager/compare/v5.17.0...v5.18.0)
 
 - \[mpm\] Add new command to export installed packages to a SBOM file in SPDX or CycloneDX standard. Closes {issue}`936`.
 - \[mpm\] Add new dependencies on `spdx-tools` and `cyclonedex-python-lib`.

@@ -121,7 +121,7 @@ typing = [
 ]
 docs = [
     "click-extra [sphinx] ~= 4.9.0",
-    "furo ~= 2024.7.18",
+    "furo ~= 2024.8.6",
     "myst-parser ~= 3.0.0",
     # Sphinx 7.2.0 is the first version to drop Python 3.8.
     "sphinx >= 7.2.0",

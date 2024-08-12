@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Introspection utilities to produce comparison matrixes between managers."""
+"""Introspection utilities to produce feature inventory of all managers."""
 
 from __future__ import annotations
 
@@ -27,8 +27,21 @@ from .platforms import PLATFORM_GROUPS
 from .pool import pool
 
 
+def managers_sankey() -> str:
+    """Produce a sankey diagram to map ``mpm`` to all its supported managers."""
+    table = []
+    for mid, m in sorted(pool.items()):
+        line = f"Meta Package Manager,{mid},1"
+        table.append(line)
+
+    output = "```mermaid\nsankey-beta\n\n"
+    output += "\n".join(table)
+    output += "\n```"
+    return output
+
+
 def operation_matrix() -> str:
-    """Inspect manager and print a matrix of their current implementation."""
+    """Produce a table of managers' metadata and supported operations."""
     # Build up the column titles.
     headers = [
         "Package manager",
@@ -109,10 +122,19 @@ def operation_matrix() -> str:
 
 
 def update_readme() -> None:
-    """Update `readme.md` at the root of the project with the implementation table for
-    each manager we support."""
+    """Update ``readme.md`` with implementation table for each manager we support."""
+
+    readme = Path(__file__).parent.parent.joinpath("readme.md")
+
     replace_content(
-        Path(__file__).parent.parent.joinpath("readme.md"),
+        readme,
+        "<!-- managers-sankey-start -->\n",
+        "\n<!-- managers-sankey-end -->",
+        managers_sankey(),
+    )
+
+    replace_content(
+        readme,
         "<!-- operation-matrix-start -->\n\n",
         "\n\n<!-- operation-matrix-end -->",
         operation_matrix(),

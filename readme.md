@@ -56,7 +56,49 @@
 - Because `mpm` try to wrap all other package managers, it became another
   pathological case of [XKCD #927: Standards](https://xkcd.com/927/)
 
-## Supported package managers and operations
+## Supported package managers
+
+One CLI to rule them all:
+
+<!-- managers-sankey-start -->
+```mermaid
+sankey-beta
+
+Meta Package Manager,apm,1
+Meta Package Manager,apt,1
+Meta Package Manager,apt-mint,1
+Meta Package Manager,brew,1
+Meta Package Manager,cargo,1
+Meta Package Manager,cask,1
+Meta Package Manager,choco,1
+Meta Package Manager,composer,1
+Meta Package Manager,dnf,1
+Meta Package Manager,emerge,1
+Meta Package Manager,flatpak,1
+Meta Package Manager,gem,1
+Meta Package Manager,mas,1
+Meta Package Manager,npm,1
+Meta Package Manager,opkg,1
+Meta Package Manager,pacaur,1
+Meta Package Manager,pacman,1
+Meta Package Manager,paru,1
+Meta Package Manager,pip,1
+Meta Package Manager,pipx,1
+Meta Package Manager,pkg,1
+Meta Package Manager,scoop,1
+Meta Package Manager,snap,1
+Meta Package Manager,steamcmd,1
+Meta Package Manager,uv,1
+Meta Package Manager,vscode,1
+Meta Package Manager,winget,1
+Meta Package Manager,yarn,1
+Meta Package Manager,yay,1
+Meta Package Manager,yum,1
+Meta Package Manager,zypper,1
+```
+<!-- managers-sankey-end -->
+
+## Metadata and operations
 
 <!-- operation-matrix-start -->
 

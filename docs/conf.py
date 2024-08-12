@@ -56,6 +56,9 @@ myst_enable_extensions = [
 ]
 myst_fence_as_directive = ["mermaid"]
 
+# Always use the latest version of Mermaid.
+mermaid_version = "latest"
+
 master_doc = "index"
 
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]

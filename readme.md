@@ -62,6 +62,11 @@ One CLI to rule them all:
 
 <!-- managers-sankey-start -->
 ```mermaid
+---
+config:
+  sankey:
+    showValues: false
+---
 sankey-beta
 
 Meta Package Manager,apm,1

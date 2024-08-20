@@ -142,7 +142,7 @@ docs = [
 "Repository" = 'https://github.com/kdeldycke/meta-package-manager'
 "Funding" = "https://github.com/sponsors/kdeldycke"
 "Issues" = "https://github.com/kdeldycke/meta-package-manager/issues"
-"Changelog" = "https://kdeldycke.github.io/meta-package-manager/changelog.html"
+"Changelog" = "https://github.com/kdeldycke/meta-package-manager/blob/main/changelog.md"
 
 [project.scripts]
 mpm = 'meta_package_manager.__main__:main'

@@ -537,7 +537,7 @@ jobs:
           sudo apt --quiet --yes install libxml2-dev libxslt-dev
       - name: Install project
         run: |
-          uv --no-progress venv --system
+          uv --no-progress venv
           uv --no-progress pip install ".[test]"
 
       # CLI tests.

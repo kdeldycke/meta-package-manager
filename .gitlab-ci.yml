@@ -3,6 +3,6 @@ pacman:
   script:
     - pacman -Sy --noconfirm python-pip
     - python -m pip install -r https://raw.githubusercontent.com/kdeldycke/workflows/v4.1.4/requirements/uv.txt
-    - uv venv
-    - uv pip install --all-extras --requirement pyproject.toml .
-    - uv run mpm --pacman -v DEBUG install vim
+    - uv --no-progress venv
+    - uv --no-progress sync --all-extras --dev
+    - uv --no-progress run --frozen -- mpm --pacman -v DEBUG install vim

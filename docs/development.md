@@ -53,7 +53,7 @@ Install package in editable mode with all development dependencies:
 $ python -m pip install uv
 $ uv venv
 $ source .venv/bin/activate
-$ uv pip install --all-extras --requirement pyproject.toml .
+$ uv sync --all-extras --dev
 ```
 
 Now you’re ready to hack and abuse `git`.

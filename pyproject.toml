@@ -179,6 +179,7 @@ addopts = [
     # Source: https://github.com/pytest-dev/pytest-xdist/issues/855#issuecomment-1344986156
     "--maxschedchunk=1",
     "--durations=10",
+    "--cov=meta_package_manager",
     "--cov-report=term",
     "--cov-report=xml",
     # XXX --run-non-destructiveis not required as this is the default behavior.

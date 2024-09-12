@@ -25,7 +25,7 @@ from meta_package_manager.base import Package, PackageManager
 
 
 class UV(PackageManager):
-    homepage_url = "https://astral.sh"
+    homepage_url = "https://docs.astral.sh/uv"
 
     platforms = ALL_PLATFORMS
 

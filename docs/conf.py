@@ -54,6 +54,8 @@ myst_enable_extensions = [
     "strikethrough",
     "tasklist",
 ]
+# XXX Allow ```mermaid``` directive to be used without curly braces (```{mermaid}```), see:
+# https://github.com/mgaitan/sphinxcontrib-mermaid/issues/99#issuecomment-2339587001
 myst_fence_as_directive = ["mermaid"]
 
 # Always use the latest version of Mermaid.

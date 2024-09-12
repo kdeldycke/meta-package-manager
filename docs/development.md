@@ -53,7 +53,7 @@ Install package in editable mode with all development dependencies:
 $ python -m pip install uv
 $ uv venv
 $ source .venv/bin/activate
-$ uv sync --all-extras --dev
+$ uv sync --all-extras
 ```
 
 Now you’re ready to hack and abuse `git`.

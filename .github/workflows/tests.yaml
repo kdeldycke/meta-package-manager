@@ -538,7 +538,7 @@ jobs:
       - name: Install project
         run: |
           uv --no-progress venv
-          uv --no-progress pip install ".[test]"
+          uv --no-progress sync --extra test
 
       # CLI tests.
       - name: mpm --help

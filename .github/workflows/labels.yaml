@@ -32,7 +32,7 @@ jobs:
       - name: Generate labels
         run: |
           uv --no-progress run --frozen -- python ./.github/generate_labels.py
-      - uses: peter-evans/create-pull-request@v6.1.0
+      - uses: peter-evans/create-pull-request@v7.0.3
         with:
           assignees: ${{ github.actor }}
           commit-message: "[github] Update extra labels."

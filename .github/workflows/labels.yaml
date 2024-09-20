@@ -53,7 +53,7 @@ jobs:
             .github/labels-extra.json
 
   labels:
-    uses: kdeldycke/workflows/.github/workflows/labels.yaml@v4.4.3
+    uses: kdeldycke/workflows/.github/workflows/labels.yaml@v4.6.0
     needs: generate-labels
     with:
       extra-label-files: |

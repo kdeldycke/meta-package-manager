@@ -144,6 +144,9 @@ docs = [
 [project.scripts]
 mpm = 'meta_package_manager.__main__:main'
 
+[tool.uv]
+package = true
+
 [tool.nuitka]
 product-name = "Meta Package Manager"
 file-description = "🎁 wraps all package managers with a unifying CLI"

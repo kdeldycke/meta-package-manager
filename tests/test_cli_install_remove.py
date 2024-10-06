@@ -20,7 +20,7 @@ import re
 
 import pytest
 from boltons.strutils import strip_ansi
-from click_extra.platforms import is_windows
+from extra_platforms import is_windows
 
 from meta_package_manager.pool import pool
 

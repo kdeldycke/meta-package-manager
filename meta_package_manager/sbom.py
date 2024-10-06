@@ -24,7 +24,6 @@ from pathlib import Path
 from typing import IO, Any
 
 from boltons.ecoutils import get_profile
-from click_extra.platforms import CURRENT_OS_LABEL
 from cyclonedx.model import (
     ExternalReference,
     ExternalReferenceType,
@@ -38,6 +37,7 @@ from cyclonedx.output.json import JsonV1Dot5
 from cyclonedx.schema import OutputFormat, SchemaVersion
 from cyclonedx.validation import BaseSchemabasedValidator, make_schemabased_validator
 from cyclonedx.validation.json import JsonStrictValidator
+from extra_platforms import CURRENT_OS_LABEL
 from packageurl import PackageURL
 from spdx_tools.spdx.model import (
     Actor,

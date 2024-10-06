@@ -20,10 +20,19 @@ from __future__ import annotations
 from pathlib import Path
 
 from click_extra.docs_update import replace_content
+from extra_platforms import (
+    BSD,
+    BSD_WITHOUT_MACOS,
+    LINUX_LIKE,
+    MACOS,
+    UNIX,
+    WINDOWS,
+    Group,
+    Platform,
+)
 from tabulate import tabulate
 
 from .base import Operations
-from .platforms import PLATFORM_GROUPS
 from .pool import pool
 
 
@@ -40,6 +49,36 @@ def managers_sankey() -> str:
     return output
 
 
+UNIX_WITHOUT_BSD_LINUX = Group(
+    "unix_without_bsd_linux",
+    "Any Unix but BSDs and Linux-like",
+    "⨂",
+    # UNIX - BSD - LINUX_LIKE
+    tuple(p for p in UNIX if p not in BSD and p not in LINUX_LIKE),
+)
+"""All Unix platforms, without macOS or any Linux-like.
+
+..todo:
+    Contribute to extra-platforms?
+"""
+
+
+MAIN_PLATFORMS: tuple[Group | Platform, ...] = (
+    BSD_WITHOUT_MACOS,
+    LINUX_LIKE,
+    MACOS,
+    UNIX_WITHOUT_BSD_LINUX,
+    WINDOWS,
+)
+"""Groups or platforms that will have their own dedicated column in the matrix.
+
+This list is manually maintained with the objective of minimizing the matrix verbosity
+and make it readable.
+
+The order of this list determine the order of the resulting columns.
+"""
+
+
 def operation_matrix() -> str:
     """Produce a table of managers' metadata and supported operations."""
     # Build up the column titles.
@@ -51,16 +90,16 @@ def operation_matrix() -> str:
     # Footnotes are used to details the OSes covered by each platform group.
     footnotes = []
 
-    for group in PLATFORM_GROUPS:
-        header_title = group.name
+    for p_obj in MAIN_PLATFORMS:
+        header_title = p_obj.name
         # Add footnote for groups with more than one platform.
-        if len(group.platforms) > 1:
-            footnote_tag = f"[^{group.id}]"
+        if isinstance(p_obj, Group) and len(p_obj) > 1:
+            footnote_tag = f"[^{p_obj.id}]"
             header_title += footnote_tag
             platforms_string = ", ".join(
-                sorted((p.name for p in group.platforms), key=str.casefold),
+                sorted((p.name for p in p_obj.platforms), key=str.casefold),
             )
-            footnotes.append(f"{footnote_tag}: {group.name}: {platforms_string}.")
+            footnotes.append(f"{footnote_tag}: {p_obj.name}: {platforms_string}.")
         headers.append(header_title)
 
     headers.extend(f"`{op.name}`" for op in Operations)
@@ -72,17 +111,18 @@ def operation_matrix() -> str:
             + ("" if not m.deprecated else f" [⚠️]({m.deprecation_url})"),
             f"{m.requirement}",
         ]
-        for group in PLATFORM_GROUPS:
-            line.append(
-                group.icon if group.issubset(m.platforms) and group.icon else "",
-            )
+        for p_obj in MAIN_PLATFORMS:
+            if (isinstance(p_obj, Platform) and p_obj in m.platforms) or (
+                isinstance(p_obj, Group) and p_obj.issubset(m.platforms)
+            ):
+                line.append(p_obj.icon if p_obj.icon else "")
         for op in Operations:
             line.append("✓" if m.implements(op) else "")
         table.append(line)
 
     # Set each column alignment.
     alignments = ["left", "left"]
-    alignments.extend(["center"] * len(PLATFORM_GROUPS))
+    alignments.extend(["center"] * len(MAIN_PLATFORMS))
     alignments.extend(["center"] * len(Operations))
 
     rendered_table = tabulate(

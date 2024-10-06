@@ -49,7 +49,10 @@ from click_extra import (
 )
 from click_extra.colorize import KO, OK, highlight
 from click_extra.colorize import default_theme as theme
-from click_extra.platforms import reduce
+from extra_platforms import (
+    is_windows,
+    reduce,
+)
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -74,7 +77,6 @@ from .output import (
     print_stats,
     print_table,
 )
-from .platforms import encoding_args
 from .pool import pool
 from .sbom import SBOM, SPDX, CycloneDX, ExportFormat
 from .specifier import VERSION_SEP, Solver, Specifier
@@ -94,7 +96,15 @@ See the corresponding :issue:`implementation rationale in issue #10 <10>`.
 """
 
 
+encoding_args = {"encoding": "utf-8"} if is_windows() else {}
+"""Forcing encoding is required on Windows."""
+
+
 def is_stdout(filepath: Path) -> bool:
+    """Check if a file path is set to stdout.
+
+    Prevents the creation of a ``-`` file in the current directory.
+    """
     return str(filepath) == "-"
 
 
@@ -223,7 +233,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 
     - the full ``/home/user/.python/site-packages/mpm/bar_plugin.py`` path is
       simplified to ``~/.python/site-packages/mpm/bar_plugin.py``,
-    - but ``/usr/bin/python3.9/mpm/bar_plugin.py`` is returned as-is.
+    - but ``/usr/bin/python3.10/mpm/bar_plugin.py`` is returned as-is.
     """
     # Option has not been called.
     if not value:

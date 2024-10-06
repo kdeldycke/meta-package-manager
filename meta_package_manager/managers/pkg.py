@@ -20,7 +20,7 @@ import json
 import re
 from typing import Iterator
 
-from click_extra.platforms import UNIX
+from extra_platforms import UNIX
 
 from meta_package_manager.base import Package, PackageManager
 from meta_package_manager.capabilities import (

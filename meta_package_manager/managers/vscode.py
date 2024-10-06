@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from typing import Iterator
 
-from click_extra.platforms import ALL_PLATFORMS
+from extra_platforms import ALL_PLATFORMS
 
 from meta_package_manager.base import Package, PackageManager
 from meta_package_manager.capabilities import version_not_implemented

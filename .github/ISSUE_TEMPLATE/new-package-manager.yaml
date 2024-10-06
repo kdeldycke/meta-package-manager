@@ -40,10 +40,10 @@ body:
       label: Platforms
       description: Platforms supported by the package manager.
       options:
-        - label: "🅱️ BSD (FreeBSD, NetBSD, OpenBSD, SunOS)"
-        - label: "🐧 Linux (Linux, Windows Subsystem for Linux v2)"
+        - label: "🅱️ Any BSD but macOS (FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS)"
+        - label: "🐧+ Any Linux and compatibility layers (ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CentOS, CloudLinux OS, Debian, Exherbo Linux, Fedora, Gentoo Linux, Guix System, IBM PowerKVM, KVM for IBM z Systems, Linux Mint, Mageia, Mandriva Linux, openSUSE, Oracle Linux, Parallels, Pidora, Raspbian, RedHat Enterprise Linux, Rocky Linux, Scientific Linux, Slackware, SUSE Linux Enterprise Server, Ubuntu, Unknown Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer)"
         - label: "🍎 macOS"
-        - label: "`>_` Unix (AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1)"
+        - label: "⨂ Any Unix but BSDs and Linux-like (IBM AIX, Cygwin, GNU/Hurd, Solaris)"
         - label: "🪟 Windows"
 
   - type: textarea

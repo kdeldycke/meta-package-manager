@@ -20,18 +20,23 @@ import json
 import re
 import sys
 from collections import Counter
+from itertools import permutations
 from pathlib import Path
 
 from boltons.iterutils import flatten
+from extra_platforms import Group, Platform
 from yaml import Loader, load
+
+from .conftest import all_managers
 
 if sys.version_info >= (3, 11):
     import tomllib
 else:
     import tomli as tomllib  # type: ignore[import-not-found]
 
+from meta_package_manager.cli import encoding_args
+from meta_package_manager.inventory import MAIN_PLATFORMS
 from meta_package_manager.labels import MANAGER_PREFIX, PLATFORM_PREFIX
-from meta_package_manager.platforms import PLATFORM_GROUPS, encoding_args
 from meta_package_manager.pool import pool
 
 """ Test all non-code artifacts depending on manager definitions.
@@ -46,6 +51,36 @@ platform or manager addition.
 """
 
 PROJECT_ROOT = Path(__file__).parent.parent
+
+
+def test_platform_groups_no_overlap():
+    """Check our platform groups are mutually exclusive."""
+    for a, b in permutations(MAIN_PLATFORMS, 2):
+        if isinstance(a, Group):
+            # XXX This test can be remove with extra-platforms > 1.3.1.
+            if isinstance(b, Platform):
+                b = [b]
+            assert a.isdisjoint(b)
+
+
+@all_managers
+def test_all_platforms_covered_by_groups(manager):
+    """Check all platforms supported by managers are covered by a local group."""
+    leftover_platforms = set(manager.platforms.copy())
+
+    for p_obj in MAIN_PLATFORMS:
+        if isinstance(p_obj, Group):
+            # Check the group fully overlap the manager platforms.
+            if p_obj.issubset(manager.platforms):
+                # Remove the group platforms from the uncovered list.
+                leftover_platforms -= set(p_obj.platforms)
+        elif isinstance(p_obj, Platform):
+            if p_obj in manager.platforms and p_obj in leftover_platforms:
+                leftover_platforms.remove(p_obj)
+
+    assert len(leftover_platforms) == 0
+    # At this stage we know all platforms of the manager can be partitioned by a
+    # combination of PLATFORM_GROUPS elements, without any overlap or leftover.
 
 
 def test_project_metadata():
@@ -72,7 +107,12 @@ def test_changelog():
                 flatten(
                     (
                         pool.all_manager_ids,
-                        PLATFORM_GROUPS.platform_ids,
+                        (p.id for p in MAIN_PLATFORMS if isinstance(p, Platform)),
+                        (
+                            g.platform_ids
+                            for g in MAIN_PLATFORMS
+                            if isinstance(g, Group)
+                        ),
                         "mpm",
                         "bar-plugin",
                     ),
@@ -92,10 +132,10 @@ def test_new_package_manager_issue_template():
     ]
 
     reference_labels = []
-    for group in PLATFORM_GROUPS:
-        label = f"{group.icon} {group.name}"
-        if len(group) > 1:
-            label += f" ({', '.join(p.name for p in group.platforms)})"
+    for p_obj in MAIN_PLATFORMS:
+        label = f"{p_obj.icon} {p_obj.name}"
+        if isinstance(p_obj, Group) and len(p_obj) > 1:
+            label += f" ({', '.join(p.name for p in p_obj.platforms)})"
         reference_labels.append({"label": label})
 
     assert template_platforms == reference_labels

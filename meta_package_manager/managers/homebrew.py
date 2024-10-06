@@ -22,7 +22,7 @@ import re
 from operator import methodcaller
 from typing import Iterator
 
-from click_extra.platforms import LINUX, MACOS, WSL2
+from extra_platforms import LINUX_LIKE, MACOS
 
 from meta_package_manager.base import Package, PackageManager
 from meta_package_manager.capabilities import version_not_implemented
@@ -35,7 +35,7 @@ class Homebrew(PackageManager):
     Homebrew is the umbrella project providing both brew and brew cask commands.
     """
 
-    platforms = {LINUX, MACOS, WSL2}
+    platforms = {LINUX_LIKE, MACOS}
     """Homebrew core is now compatible with `Linux and Windows Subsystem for Linux (WSL)
     2 <https://docs.brew.sh/Homebrew-on-Linux>`_."""
 

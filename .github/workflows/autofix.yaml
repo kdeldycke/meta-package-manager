@@ -30,7 +30,7 @@ jobs:
       - name: Install project
         run: |
           uv --no-progress venv
-          uv --no-progress pip install .
+          uv --no-progress sync --all-extras
       - name: Update readme
         run: >
           uv --no-progress run --frozen --

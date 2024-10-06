@@ -46,7 +46,7 @@ jobs:
               # Only test the oldest and latest Python version supported and the upcoming one. Skip the intermediates
               # to speed up the tests.
               "python-version": {
-                  "3.9",
+                  "3.10",
                   "3.12",
                   "3.13-dev",
               }

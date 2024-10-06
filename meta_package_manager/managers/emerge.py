@@ -19,7 +19,7 @@ from __future__ import annotations
 import re
 from typing import Iterator
 
-from click_extra.platforms import UNIX_WITHOUT_MACOS
+from extra_platforms import UNIX_WITHOUT_MACOS
 
 from meta_package_manager.base import Package, PackageManager
 from meta_package_manager.capabilities import version_not_implemented

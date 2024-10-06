@@ -20,7 +20,7 @@ import json
 from typing import Any, Iterator
 
 from boltons.iterutils import remap
-from click_extra.platforms import ALL_PLATFORMS
+from extra_platforms import ALL_PLATFORMS
 
 from meta_package_manager.base import Arg, NestedArgs, Package, PackageManager
 from meta_package_manager.capabilities import (

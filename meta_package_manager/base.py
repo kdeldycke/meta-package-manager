@@ -34,7 +34,7 @@ from unittest.mock import patch
 from boltons.iterutils import flatten, unique
 from boltons.strutils import strip_ansi
 from click_extra.colorize import default_theme as theme
-from click_extra.platforms import UNIX, Group, Platform, current_os
+from extra_platforms import UNIX, Group, Platform, current_os
 from click_extra.testing import (
     INDENT,
     Arg,

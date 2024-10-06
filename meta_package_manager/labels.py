@@ -17,11 +17,14 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Dict, FrozenSet
 
 from boltons.iterutils import flatten
+from extra_platforms import Group, Platform
 
-from .platforms import PLATFORM_GROUPS
+from .inventory import MAIN_PLATFORMS
 from .pool import pool
 
 LABELS: list[tuple[str, str, str]] = [
@@ -51,13 +54,14 @@ def generate_labels(
     prefix: str,
     color: str,
 ) -> dict[str, str]:
-    """Generate labels."""
-    # Check group definitions.
-    group_entries = tuple(flatten(groups.values()))
-    grouped_labels = set(group_entries)
-    # Check there is no duplucates between groups.
-    assert len(group_entries) == len(grouped_labels)
-    # Check all labels to groups are referenced in the full label set.
+    """Generate labels.
+
+    A dedocated label is produced for each entry of the ``all_labels`` parameter,
+    unless it is part of a ``group``. In which case a dedicated label for that group
+    will be created.
+    """
+    # Check all labels to group are referenced in the full label set.
+    grouped_labels = set(flatten(groups.values()))
     assert grouped_labels.issubset(all_labels)
 
     label_map = {}
@@ -117,9 +121,12 @@ MANAGER_LABELS = generate_labels(
 
 PLATFORM_PREFIX = "🖥 platform: "
 
-PLATFORM_LABEL_GROUPS: TLabelGroup = {
-    g.name: frozenset(p.name for p in g.platforms) for g in PLATFORM_GROUPS
-}
+PLATFORM_LABEL_GROUPS: TLabelGroup = {}
+for p_obj in MAIN_PLATFORMS:
+    if isinstance(p_obj, Group):
+        PLATFORM_LABEL_GROUPS[p_obj.name] = frozenset(p.name for p in p_obj.platforms)
+    elif isinstance(p_obj, Platform):
+        PLATFORM_LABEL_GROUPS[p_obj.name] = frozenset((p_obj.name,))
 """Similar platforms are grouped together under the same label."""
 
 all_platform_label_ids = frozenset(flatten(PLATFORM_LABEL_GROUPS.values()))
@@ -134,3 +141,31 @@ PLATFORM_LABELS = generate_labels(
 
 # Force sorting of labels.
 LABELS = sorted(LABELS, key=lambda i: str.casefold(i[0]))
+
+
+def write_labels():
+    """Write down labels into JSON file."""
+    json_file = (
+        Path(__file__)
+        .parent.joinpath("../.github/labels-extra.json")
+        .resolve(strict=True)
+    )
+
+    # Debug messages.
+    for label_name, _, _ in LABELS:
+        print(f"Generated label: {label_name}")
+    print(f"{len(LABELS)} labels generated.")
+    print(f"Saving to: {json_file}")
+
+    # Save to json definition file.
+    label_defs = [
+        dict(zip(["name", "color", "description"], label)) for label in LABELS
+    ]
+    json_file.write_text(
+        json.dumps(
+            label_defs,
+            indent=2,
+            separators=(",", ": "),
+            ensure_ascii=False,
+        ),
+    )

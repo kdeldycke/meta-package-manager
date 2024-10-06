@@ -5,6 +5,8 @@
 > \[!IMPORTANT\]
 > This version is not released yet and is under active development.
 
+- \[mpm\] Drop support for Python 3.9.
+- \[mpm\] Replace local platform utilities by `extra-platforms` dependency.
 - \[mpm\] Add a Sankey diagram of all supported package managers.
 
 ## [5.18.0 (2024-08-02)](https://github.com/kdeldycke/meta-package-manager/compare/v5.17.0...v5.18.0)

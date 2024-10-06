@@ -25,7 +25,7 @@ from string import ascii_letters, ascii_lowercase, digits
 import pytest
 from boltons.iterutils import unique
 from boltons.urlutils import URL
-from click_extra.platforms import ALL_PLATFORMS, Platform
+from extra_platforms import ALL_PLATFORMS, Platform
 
 from meta_package_manager import cli
 from meta_package_manager.base import Operations, PackageManager

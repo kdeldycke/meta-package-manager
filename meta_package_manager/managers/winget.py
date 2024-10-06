@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from typing import Generator, Iterator
 
-from click_extra.platforms import WINDOWS
+from extra_platforms import WINDOWS
 
 from meta_package_manager.base import Package, PackageManager
 

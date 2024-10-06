@@ -115,7 +115,9 @@ def operation_matrix() -> str:
             if (isinstance(p_obj, Platform) and p_obj in m.platforms) or (
                 isinstance(p_obj, Group) and p_obj.issubset(m.platforms)
             ):
-                line.append(p_obj.icon if p_obj.icon else "")
+                line.append(p_obj.icon)
+            else:
+                line.append("")
         for op in Operations:
             line.append("✓" if m.implements(op) else "")
         table.append(line)

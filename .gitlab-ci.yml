@@ -2,7 +2,7 @@ pacman:
   image: archlinux
   script:
     - pacman -Sy --noconfirm python-pip
-    - python -m pip install -r https://raw.githubusercontent.com/kdeldycke/workflows/v4.1.4/requirements/uv.txt
+    - python -m pip install -r https://raw.githubusercontent.com/kdeldycke/workflows/v4.6.0/requirements/uv.txt
     - uv --no-progress venv
     - uv --no-progress sync --all-extras
     - uv --no-progress run --frozen -- mpm --pacman -v DEBUG install vim

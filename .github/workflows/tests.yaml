@@ -36,19 +36,21 @@ jobs:
           from itertools import product
           from pathlib import Path
 
+          # To speed up the tests, we only test the latest available OS for each platform. For Python, we only test
+          # against the oldest and newest major supported version and skip intermediates. We also test on the upcoming
+          # development version to anticipate issues.
           variants: dict[str, set[str]] = {
-              # Available OSes: https://github.com/actions/runner-images#available-images
+              # Available OS: https://github.com/actions/runner-images#available-images
               "os": {
                   "ubuntu-24.04",
-                  "macos-14",
+                  "macos-15",
                   "windows-2022",
               },
-              # Only test the oldest and latest Python version supported and the upcoming one. Skip the intermediates
-              # to speed up the tests.
+              # Available Python: https://github.com/actions/python-versions/blob/main/versions-manifest.json
               "python-version": {
                   "3.10",
-                  "3.12",
-                  "3.13-dev",
+                  "3.13",
+                  "3.14-dev",
               }
           }
           # TODO: List of additional variants to include in the matrix.
@@ -58,13 +60,7 @@ jobs:
           exclude: list[dict[str, str]] = []
 
           # List of unstable criterions.
-          unstable: list[dict[str, str]] = [
-              # XXX The Windows runner does not have the necessary libxml2 headers to build lxml.
-              #   C:\Users\RUNNER~1\AppData\Local\Temp\xmlXPathInitdre5ccrb.c(1): fatal error C1083:
-              #   Cannot open include file: 'libxml/xpath.h': No such file or directory
-              #   Could not find function xmlCheckVersion in library libxml2. Is libxml2 installed?
-              {"os": "windows-2022", "python-version": "3.13-dev"},
-          ]
+          unstable: list[dict[str, str]] = []
 
           # Build the job matrix.
           jobs: list[dict[str, str]] = []
@@ -438,7 +434,7 @@ jobs:
           sudo apt --quiet --yes install dnf
 
       # Zypper
-      - name: Zypper - Ubuntu >= 20.04 install
+      - name: Zypper - Linux install
         if: runner.os == 'Linux'
         run: |
           sudo apt --quiet --yes install zypper
@@ -529,12 +525,7 @@ jobs:
 
       - name: Install uv
         run: |
-          python -m pip install -r https://raw.githubusercontent.com/kdeldycke/workflows/v4.4.3/requirements/uv.txt
-      - name: Linux - Install Python 3.13-dev requirements
-        if: runner.os == 'Linux' && matrix.python-version == '3.13-dev'
-        # Error: Please make sure the libxml2 and libxslt development packages are installed.
-        run: |
-          sudo apt --quiet --yes install libxml2-dev libxslt-dev
+          python -m pip install -r https://raw.githubusercontent.com/kdeldycke/workflows/v4.6.0/requirements/uv.txt
       - name: Install project
         run: |
           uv --no-progress venv

@@ -125,24 +125,24 @@
     "description": "Xbar/SwiftBar plugin code, documentation and features"
   },
   {
-    "name": "🖥 platform: BSD",
+    "name": "🖥 platform: Any BSD but macOS",
     "color": "#bfd4f2",
-    "description": "FreeBSD, NetBSD, OpenBSD, SunOS"
+    "description": "FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS"
   },
   {
-    "name": "🖥 platform: Linux",
+    "name": "🖥 platform: Any Linux and compatibility layers",
     "color": "#bfd4f2",
-    "description": "Linux, Windows Subsystem for Linux v2"
+    "description": "ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CentOS, CloudLinux OS, Debian, Exherbo Linux, Fedora, Gentoo Linux, Guix System, IBM PowerKVM, KVM for IBM z Systems, Linux Mint, Mageia, Mandriva Linux, openSUSE, Oracle Linux, Parallels, Pidora, Raspbian, RedHat Enterprise Linux, Rocky Linux, Scientific Linux, Slackware, SUSE Linux Enterprise Server, Ubuntu, Unknown Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer"
+  },
+  {
+    "name": "🖥 platform: Any Unix but BSDs and Linux-like",
+    "color": "#bfd4f2",
+    "description": "Cygwin, GNU/Hurd, IBM AIX, Solaris"
   },
   {
     "name": "🖥 platform: macOS",
     "color": "#bfd4f2",
     "description": "macOS"
-  },
-  {
-    "name": "🖥 platform: Unix",
-    "color": "#bfd4f2",
-    "description": "AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1"
   },
   {
     "name": "🖥 platform: Windows",

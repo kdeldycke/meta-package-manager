@@ -26,7 +26,6 @@ import builtins
 import contextlib
 import json
 import logging
-import sys
 from functools import cached_property, partial
 from io import StringIO
 from operator import itemgetter
@@ -206,10 +205,7 @@ def print_stats(manager_stats: Counter) -> None:
         per_manager_totals = (
             f" ({', '.join(f'{k}: {v}' for k, v in manager_stats.most_common())})"
         )
-    if sys.version_info >= (3, 10):
-        total = manager_stats.total()
-    else:
-        total = sum(manager_stats.values())
+    total = manager_stats.total()
     plural = "s" if total > 1 else ""
     echo(f"{total} package{plural} total{per_manager_totals}.", err=True)
 

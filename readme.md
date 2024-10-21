@@ -61,6 +61,7 @@
 One CLI to rule them all:
 
 <!-- managers-sankey-start -->
+
 ```mermaid
 ---
 config: {"sankey": {"showValues": false, "width": 800, "height": 400}}
@@ -99,6 +100,7 @@ Meta Package Manager,yay,1
 Meta Package Manager,yum,1
 Meta Package Manager,zypper,1
 ```
+
 <!-- managers-sankey-end -->
 
 ## Metadata and operations
@@ -138,12 +140,6 @@ Meta Package Manager,zypper,1
 | [`yay`](https://github.com/Jguer/yay)                                                   | 11.0.0       |           🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`yum`](http://yum.baseurl.org)                                                         | 4.0.0        |           🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
 | [`zypper`](https://en.opensuse.org/Portal:Zypper)                                       | 1.14.0       |           🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
-
-[^bsd_without_macos]: BSD: FreeBSD, NetBSD, OpenBSD, SunOS.
-
-[^linux]: Linux: Linux, Windows Subsystem for Linux v2.
-
-[^unix]: Unix: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.
 
 <!-- operation-matrix-end -->
 

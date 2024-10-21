@@ -53,9 +53,9 @@ def managers_sankey() -> str:
             width: 800
             height: 400
         ---
-        sankey-beta
+        sankey-beta\n
         """)
-    output += "\n" + "\n".join(table)
+    output += "\n".join(table)
     output += "\n```"
     return output
 

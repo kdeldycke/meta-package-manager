@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from textwrap import dedent
 
 from click_extra.docs_update import replace_content
 from extra_platforms import (
@@ -43,8 +44,18 @@ def managers_sankey() -> str:
         line = f"Meta Package Manager,{mid},1"
         table.append(line)
 
-    output = "```mermaid\nsankey-beta\n\n"
-    output += "\n".join(table)
+    output = dedent("""\
+        ```mermaid
+        ---
+        config:
+          sankey:
+            showValues: false
+            width: 800
+            height: 400
+        ---
+        sankey-beta
+        """)
+    output += "\n" + "\n".join(table)
     output += "\n```"
     return output
 

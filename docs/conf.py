@@ -60,19 +60,6 @@ myst_fence_as_directive = ["mermaid"]
 
 # Always use the latest version of Mermaid.
 mermaid_version = "latest"
-# XXX Force hiding of Sankey values globally while we wait for in-place front-matter
-# support: https://github.com/mgaitan/sphinxcontrib-mermaid/issues/147
-mermaid_init_js = """
-  const config = {
-    startOnLoad: true,
-    sankey: {
-      width: 800,
-      height: 400,
-      showValues: false,
-    },
-  };
-  mermaid.initialize(config);
-"""
 mermaid_d3_zoom = True
 
 master_doc = "index"

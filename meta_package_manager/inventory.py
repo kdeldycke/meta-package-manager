@@ -47,11 +47,7 @@ def managers_sankey() -> str:
     output = dedent("""\
         ```mermaid
         ---
-        config:
-          sankey:
-            showValues: false
-            width: 800
-            height: 400
+        config: {"sankey": {"showValues": false, "width": 800, "height": 400}}
         ---
         sankey-beta\n
         """)

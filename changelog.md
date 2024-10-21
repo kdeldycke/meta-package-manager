@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.18.2 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v5.18.1...main)
+
+> [!IMPORTANT]
+> This version is not released yet and is under active development.
+
 ## [5.18.1 (2024-10-21)](https://github.com/kdeldycke/meta-package-manager/compare/v5.18.0...v5.18.1)
 
 - \[mpm\] Add official support for Python 3.13.

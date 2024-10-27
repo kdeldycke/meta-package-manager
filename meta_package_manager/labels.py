@@ -97,6 +97,7 @@ MANAGER_PREFIX = "📦 manager: "
 MANAGER_LABEL_GROUPS: TLabelGroup = {
     "dnf-based": frozenset({"dnf", "yum"}),
     "dpkg-based": frozenset({"apt", "apt-mint", "opkg"}),
+    "homebrew": frozenset({"brew", "cask"}),
     "npm-based": frozenset({"npm", "yarn"}),
     "pacman-based": frozenset({"pacman", "pacaur", "paru", "yay"}),
     "pip-based": frozenset({"pip", "pipx"}),

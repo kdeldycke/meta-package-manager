@@ -57,9 +57,6 @@ def test_platform_groups_no_overlap():
     """Check our platform groups are mutually exclusive."""
     for a, b in permutations(MAIN_PLATFORMS, 2):
         if isinstance(a, Group):
-            # XXX This test can be remove with extra-platforms > 1.3.1.
-            if isinstance(b, Platform):
-                b = [b]
             assert a.isdisjoint(b)
 
 

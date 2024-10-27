@@ -181,7 +181,7 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "4.11.0"
+version = "4.11.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
@@ -197,9 +197,9 @@ dependencies = [
     { name = "wcmatch" },
     { name = "xmltodict" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/30/41/eb3eb3a4a0c0ebd70d2af7a60245e01d41b370392165a24ffb3e4925a6c3/click_extra-4.11.0.tar.gz", hash = "sha256:4b81ffef93926db22b0a0f223b061e5d70e812a7e30b7de0753faf706e0422e7", size = 87098 }
+sdist = { url = "https://files.pythonhosted.org/packages/c8/a9/1385ca444f88d1013a442aabcb4da6b9f43a9bf6d0fb1b9a87fd527cb5f2/click_extra-4.11.1.tar.gz", hash = "sha256:08c2ad40d0bb73379a9787fcde44b62de95e9661686fd8af7b4ce4e73a5dd8c8", size = 87098 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8d/2a/6f3e983709879f2a849316a54a46f27ead598a3297de3d46d67e51826ff3/click_extra-4.11.0-py3-none-any.whl", hash = "sha256:ea7d644f80ac1ef7273399f1f94c05391a9cf5d9461193ce3964655f2722e3d7", size = 70618 },
+    { url = "https://files.pythonhosted.org/packages/cc/a0/a044093e57e9c8291e13008e418bd9da496090bdbc948ee95c8c5c0f55f8/click_extra-4.11.1-py3-none-any.whl", hash = "sha256:497a371e365d1203a4e249fd93b7049ea946f44b99453c6eaddf7d872945dac8", size = 70612 },
 ]
 
 [package.optional-dependencies]
@@ -375,15 +375,15 @@ wheels = [
 
 [[package]]
 name = "extra-platforms"
-version = "1.3.1"
+version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
     { name = "distro" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/34/42/98f5510cd5f2da57c8b8538dfd159098ac2855664955af304b5e3d742cc7/extra_platforms-1.3.1.tar.gz", hash = "sha256:9db54044d242d604f2e6c7cf781f48f4c296c24be301714afc177a05c8f410e8", size = 36386 }
+sdist = { url = "https://files.pythonhosted.org/packages/11/f1/58ec684dda5706076479e575ab55349995fa43ffa9f6ca41c09a3dab32a1/extra_platforms-1.4.0.tar.gz", hash = "sha256:846d8c88b8a1412fc2648b01496337036f2131c101a0564619441005e72c8751", size = 37297 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/df/d5/b58cb75b37f4b235aea83a64504cd43146faaa90443fff175ef9a5c8eca9/extra_platforms-1.3.1-py3-none-any.whl", hash = "sha256:6d1cd10b58d04c082fda187809cadbd1d97b7e6ceeb61e7b5de6a9301b404efc", size = 24925 },
+    { url = "https://files.pythonhosted.org/packages/a2/39/6927c44dc28e9ef5d107c468bd68c818732ec61f33dca02792fa82bc02a3/extra_platforms-1.4.0-py3-none-any.whl", hash = "sha256:7d418a8212811defc6e620f0cd4cb57eeaa8f8945644ef6af5e5631c27de23af", size = 25292 },
 ]
 
 [package.optional-dependencies]
@@ -540,14 +540,14 @@ sdist = { url = "https://files.pythonhosted.org/packages/34/b8/aa7d6cf2d5efdd2fc
 
 [[package]]
 name = "license-expression"
-version = "30.3.1"
+version = "30.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boolean-py" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/57/8b/dbe230196eee2de208ba87dcfae69c46db9d7ed70e2f30f143bf994ee075/license_expression-30.3.1.tar.gz", hash = "sha256:60d5bec1f3364c256a92b9a08583d7ea933c7aa272c8d36d04144a89a3858c01", size = 174601 }
+sdist = { url = "https://files.pythonhosted.org/packages/c7/97/df5570fe2f1046bb5f6eeed55815ef11e371e9310d53bd94ec8efe4173f4/license_expression-30.4.0.tar.gz", hash = "sha256:6464397f8ed4353cc778999caec43b099f8d8d5b335f282e26a9eb9435522f05", size = 176230 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/91/84/a7cf5dfa141501a20cb63595f02edfe38e0db2e3cc34e4f3cd273cc285df/license_expression-30.3.1-py3-none-any.whl", hash = "sha256:97904b9185c7bbb1e98799606fa7424191c375e70ba63a524b6f7100e42ddc46", size = 109008 },
+    { url = "https://files.pythonhosted.org/packages/fc/f8/5699e6d6ea5156d53059ff07464b5d64389b084f67cb08ec97c711e587fc/license_expression-30.4.0-py3-none-any.whl", hash = "sha256:7c8f240c6e20d759cb8455e49cb44a923d9e25c436bf48d7e5b8eea660782c04", size = 110571 },
 ]
 
 [[package]]
@@ -734,7 +734,7 @@ wheels = [
 
 [[package]]
 name = "meta-package-manager"
-version = "5.18.1"
+version = "5.19.0"
 source = { editable = "." }
 dependencies = [
     { name = "boltons" },
@@ -784,12 +784,12 @@ typing = [
 [package.metadata]
 requires-dist = [
     { name = "boltons", specifier = "~=24.0.0" },
-    { name = "click-extra", specifier = "~=4.11.0" },
-    { name = "click-extra", extras = ["pytest"], marker = "extra == 'test'", specifier = "~=4.11.0" },
-    { name = "click-extra", extras = ["sphinx"], marker = "extra == 'docs'", specifier = "~=4.11.0" },
+    { name = "click-extra", specifier = "~=4.11.1" },
+    { name = "click-extra", extras = ["pytest"], marker = "extra == 'test'", specifier = "~=4.11.1" },
+    { name = "click-extra", extras = ["sphinx"], marker = "extra == 'docs'", specifier = "~=4.11.1" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'test'", specifier = "~=7.6.0" },
     { name = "cyclonedx-python-lib", extras = ["validation"], specifier = "~=7.6.0" },
-    { name = "extra-platforms", extras = ["pytest"], specifier = "~=1.3.1" },
+    { name = "extra-platforms", extras = ["pytest"], specifier = "~=1.4.0" },
     { name = "furo", marker = "extra == 'docs'", specifier = "~=2024.8.6" },
     { name = "more-itertools", specifier = "~=10.5.0" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = "~=4.0.0" },
@@ -801,22 +801,22 @@ requires-dist = [
     { name = "pytest-xdist", extras = ["psutil"], marker = "extra == 'test'", specifier = "~=3.6.1" },
     { name = "pyyaml", marker = "extra == 'test'", specifier = "~=6.0.0" },
     { name = "spdx-tools", specifier = "~=0.8.2" },
-    { name = "sphinx", marker = "extra == 'docs'", specifier = "~=8.0.2" },
-    { name = "sphinx-autodoc-typehints", marker = "extra == 'docs'", specifier = "~=2.4.0" },
+    { name = "sphinx", marker = "extra == 'docs'", specifier = "~=8.1.3" },
+    { name = "sphinx-autodoc-typehints", marker = "extra == 'docs'", specifier = "~=2.5.0" },
     { name = "sphinx-click", marker = "extra == 'docs'", specifier = "~=6.0.0" },
     { name = "sphinx-copybutton", marker = "extra == 'docs'", specifier = "~=0.5.2" },
     { name = "sphinx-design", marker = "extra == 'docs'", specifier = "~=0.6.0" },
-    { name = "sphinx-issues", marker = "extra == 'docs'", specifier = "~=4.1.0" },
+    { name = "sphinx-issues", marker = "extra == 'docs'", specifier = "~=5.0.0" },
     { name = "sphinxcontrib-mermaid", marker = "extra == 'docs'", specifier = "~=1.0.0" },
     { name = "sphinxext-opengraph", marker = "extra == 'docs'", specifier = "~=0.9.0" },
     { name = "tabulate", extras = ["widechars"], specifier = "~=0.9.0" },
     { name = "tomli", marker = "python_full_version < '3.11'", specifier = "~=2.0.1" },
     { name = "tomli", marker = "python_full_version < '3.11' and extra == 'docs'", specifier = "~=2.0.1" },
-    { name = "tomli-w", specifier = "~=1.0.0" },
+    { name = "tomli-w", specifier = "~=1.1.0" },
     { name = "types-pyyaml", marker = "extra == 'typing'", specifier = "~=6.0.12.9" },
     { name = "types-tabulate", marker = "extra == 'typing'", specifier = "~=0.9.0.2" },
-    { name = "types-xmltodict", marker = "extra == 'typing'", specifier = "~=0.13.0.2" },
-    { name = "xmltodict", specifier = "~=0.13.0" },
+    { name = "types-xmltodict", marker = "extra == 'typing'", specifier = "~=0.14.0.20241009" },
+    { name = "xmltodict", specifier = "~=0.14.2" },
 ]
 
 [[package]]
@@ -865,15 +865,16 @@ wheels = [
 
 [[package]]
 name = "pallets-sphinx-themes"
-version = "2.1.3"
+version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
     { name = "sphinx" },
+    { name = "sphinx-notfound-page" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5c/3e/e7d1595b2a454da81518d75ebe32aa52c3e49091ca8f8fa94cfad5e76e72/pallets_sphinx_themes-2.1.3.tar.gz", hash = "sha256:853ccdc2698ab0a2532cfc23037e08ff16ef36fdbde57dda122946bba1f71c0a", size = 20124 }
+sdist = { url = "https://files.pythonhosted.org/packages/3b/08/c57dd89e45dbc976930200a2cb7826ed76f3c9791454a9fcd1cde3f17177/pallets_sphinx_themes-2.3.0.tar.gz", hash = "sha256:6293ced11a1d5d3de7268af1acd60428732b5a9e6051a47a596c6d9a083e60d9", size = 21029 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f1/72/ba9b1af06e2e9207b8696eb05e5cbd59f4c2e1790ca974acdca685eb48ac/pallets_sphinx_themes-2.1.3-py3-none-any.whl", hash = "sha256:cd452422d97159c966904f81950c9be650583a3633b85d6321e23fb31b43a1d0", size = 26557 },
+    { url = "https://files.pythonhosted.org/packages/ff/7d/a4aa06e452e031559dcfb066e035d2615ebfa6148e93514d7c36030004c1/pallets_sphinx_themes-2.3.0-py3-none-any.whl", hash = "sha256:7ed13de3743c462c2804e2aa63d96cc9ffa82cb76d0251cea03de9bcd9f8dbec", size = 24745 },
 ]
 
 [[package]]
@@ -1281,7 +1282,7 @@ wheels = [
 
 [[package]]
 name = "sphinx"
-version = "8.0.2"
+version = "8.1.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "alabaster" },
@@ -1302,21 +1303,21 @@ dependencies = [
     { name = "sphinxcontrib-serializinghtml" },
     { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/25/a7/3cc3d6dcad70aba2e32a3ae8de5a90026a0a2fdaaa0756925e3a120249b6/sphinx-8.0.2.tar.gz", hash = "sha256:0cce1ddcc4fd3532cf1dd283bc7d886758362c5c1de6598696579ce96d8ffa5b", size = 8189041 }
+sdist = { url = "https://files.pythonhosted.org/packages/6f/6d/be0b61178fe2cdcb67e2a92fc9ebb488e3c51c4f74a36a7824c0adf23425/sphinx-8.1.3.tar.gz", hash = "sha256:43c1911eecb0d3e161ad78611bc905d1ad0e523e4ddc202a58a821773dc4c927", size = 8184611 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4d/61/2ad169c6ff1226b46e50da0e44671592dbc6d840a52034a0193a99b28579/sphinx-8.0.2-py3-none-any.whl", hash = "sha256:56173572ae6c1b9a38911786e206a110c9749116745873feae4f9ce88e59391d", size = 3498950 },
+    { url = "https://files.pythonhosted.org/packages/26/60/1ddff83a56d33aaf6f10ec8ce84b4c007d9368b21008876fceda7e7381ef/sphinx-8.1.3-py3-none-any.whl", hash = "sha256:09719015511837b76bf6e03e42eb7595ac8c2e41eeb9c29c5b755c6b677992a2", size = 3487125 },
 ]
 
 [[package]]
 name = "sphinx-autodoc-typehints"
-version = "2.4.4"
+version = "2.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "sphinx" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/50/ae/a7053b6efb12cf98ccdc59d23672d2da8e73b74bd501f93c68dfecf9535a/sphinx_autodoc_typehints-2.4.4.tar.gz", hash = "sha256:e743512da58b67a06579a1462798a6907664ab77460758a43234adeac350afbf", size = 40572 }
+sdist = { url = "https://files.pythonhosted.org/packages/2e/a0/4f17d564c86aa269749d99dd498a5c94abe0915d2ff349187f8ff8c75994/sphinx_autodoc_typehints-2.5.0.tar.gz", hash = "sha256:259e1026b218d563d72743f417fcc25906a9614897fe37f91bd8d7d58f748c3b", size = 40822 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6e/8b/1f0474e576ea6c035ddf7b064474f7d3598edc8404a088ec1194d8386db6/sphinx_autodoc_typehints-2.4.4-py3-none-any.whl", hash = "sha256:940de2951fd584d147e46772579fdc904f945c5f1ee1a78c614646abfbbef18b", size = 19976 },
+    { url = "https://files.pythonhosted.org/packages/fa/ae/322d05bec884977b89eced3af811c228652a9e25f9646ee6236890987214/sphinx_autodoc_typehints-2.5.0-py3-none-any.whl", hash = "sha256:53def4753239683835b19bfa8b68c021388bd48a096efcb02cdab508ece27363", size = 20104 },
 ]
 
 [[package]]
@@ -1371,14 +1372,26 @@ wheels = [
 
 [[package]]
 name = "sphinx-issues"
-version = "4.1.0"
+version = "5.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "sphinx" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ba/fb/fa7829987e801056f16d8c63ace3f1d6f91e44940ad00f512450581ed63f/sphinx_issues-4.1.0.tar.gz", hash = "sha256:a67f7ef31d164b420b2f21b6c9b020baeb4a014afd4045f5be314c984e8ee520", size = 14148 }
+sdist = { url = "https://files.pythonhosted.org/packages/ab/2b/5bc6fac05eba113665f18d4ebe3c1180d1ce3e7b6fd6823835dbec48dd4e/sphinx_issues-5.0.0.tar.gz", hash = "sha256:192e43cf071ed7aead401cd14fd15076ecb0866238c095d672180618740c6bae", size = 14021 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d0/7c/0a7c1a38392f2922b4b693dd8acd6a4c7e662ee66db058bdf314bd22ce3f/sphinx_issues-4.1.0-py3-none-any.whl", hash = "sha256:d779dddff441175c9fddb7a4018eca38f9f6cdb1e0a2fe31d93b4f89587c7ba1", size = 8248 },
+    { url = "https://files.pythonhosted.org/packages/1d/14/a1b38212db8d327f53f2f56f0ed81c8b80ee2c2160e8819069c0d329d0a9/sphinx_issues-5.0.0-py3-none-any.whl", hash = "sha256:d80704a01c8af3d76586771a67a9e48f2d1a6091a0377458c49908460a6a31ea", size = 8063 },
+]
+
+[[package]]
+name = "sphinx-notfound-page"
+version = "1.0.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "sphinx" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/73/7d/c545883c714319380325a52c9f80d093c97e718d812fd8090e42b1a08508/sphinx_notfound_page-1.0.4.tar.gz", hash = "sha256:2a52f49cd367b5c4e64072de1591cc367714098500abf4ecb9a3ecb4fec25aae", size = 519228 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/87/c4/877a5beffb8dcaf35e919c4c3cad56732c76370d106126394f4ca211ad7f/sphinx_notfound_page-1.0.4-py3-none-any.whl", hash = "sha256:f7c26ae0df3cf3d6f38f56b068762e6203d0ebb7e1c804de1059598d7dd8b9d8", size = 8170 },
 ]
 
 [[package]]
@@ -1485,11 +1498,11 @@ wheels = [
 
 [[package]]
 name = "tomli-w"
-version = "1.0.0"
+version = "1.1.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/49/05/6bf21838623186b91aedbda06248ad18f03487dc56fbc20e4db384abde6c/tomli_w-1.0.0.tar.gz", hash = "sha256:f463434305e0336248cac9c2dc8076b707d8a12d019dd349f5c1e382dd1ae1b9", size = 6531 }
+sdist = { url = "https://files.pythonhosted.org/packages/d4/19/b65f1a088ee23e37cdea415b357843eca8b1422a7b11a9eee6e35d4ec273/tomli_w-1.1.0.tar.gz", hash = "sha256:49e847a3a304d516a169a601184932ef0f6b61623fe680f836a2aa7128ed0d33", size = 6929 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bb/01/1da9c66ecb20f31ed5aa5316a957e0b1a5e786a0d9689616ece4ceaf1321/tomli_w-1.0.0-py3-none-any.whl", hash = "sha256:9f2a07e8be30a0729e533ec968016807069991ae2fd921a78d42f429ae5f4463", size = 5984 },
+    { url = "https://files.pythonhosted.org/packages/c4/ac/ce90573ba446a9bbe65838ded066a805234d159b4446ae9f8ec5bbd36cbd/tomli_w-1.1.0-py3-none-any.whl", hash = "sha256:1403179c78193e3184bfaade390ddbd071cba48a32a2e62ba11aae47490c63f7", size = 6440 },
 ]
 
 [[package]]
@@ -1521,11 +1534,11 @@ wheels = [
 
 [[package]]
 name = "types-xmltodict"
-version = "0.13.0.3"
+version = "0.14.0.20241009"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/4f/bc/191d95f4e18ee8ffe626046574805fad7734827146e6ad39d56149fb1f62/types-xmltodict-0.13.0.3.tar.gz", hash = "sha256:8884534bab0364c4b22d5973f3c8153ff40d413a801d9e70eb893e676909f1fc", size = 2689 }
+sdist = { url = "https://files.pythonhosted.org/packages/05/28/f1c86d869d74342553c74bd88d6f615427b544fd06f30fdaa68cb4369cd1/types-xmltodict-0.14.0.20241009.tar.gz", hash = "sha256:9224c2422c5b6359cf826685b4ee50b14dc2cb9134561ab793ef6b03dd7108e1", size = 3224 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9a/31/8046c84acfc397e60afe39ac5cdaf1ba5cf95eef11a1e995c3e951f08ba5/types_xmltodict-0.13.0.3-py3-none-any.whl", hash = "sha256:cb251c59e838986d8402b10d804225ade9fd6c9f66d01dc45cd6cfdf43640128", size = 2503 },
+    { url = "https://files.pythonhosted.org/packages/15/5e/6d81048a06f956ccec74c61fe5c30784e6a865876dc4ab02e99099e4ee0c/types_xmltodict-0.14.0.20241009-py3-none-any.whl", hash = "sha256:92812e17ffa9171416b35806cb5f4ed3f8f52b6724b2c555e4733e902ef4afd0", size = 2859 },
 ]
 
 [[package]]
@@ -1587,9 +1600,9 @@ wheels = [
 
 [[package]]
 name = "xmltodict"
-version = "0.13.0"
+version = "0.14.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/39/0d/40df5be1e684bbaecdb9d1e0e40d5d482465de6b00cbb92b84ee5d243c7f/xmltodict-0.13.0.tar.gz", hash = "sha256:341595a488e3e01a85a9d8911d8912fd922ede5fecc4dce437eb4b6c8d037e56", size = 33813 }
+sdist = { url = "https://files.pythonhosted.org/packages/50/05/51dcca9a9bf5e1bce52582683ce50980bcadbc4fa5143b9f2b19ab99958f/xmltodict-0.14.2.tar.gz", hash = "sha256:201e7c28bb210e374999d1dde6382923ab0ed1a8a5faeece48ab525b7810a553", size = 51942 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/94/db/fd0326e331726f07ff7f40675cd86aa804bfd2e5016c727fa761c934990e/xmltodict-0.13.0-py2.py3-none-any.whl", hash = "sha256:aa89e8fd76320154a40d19a0df04a4695fb9dc5ba977cbb68ab3e4eb225e7852", size = 9971 },
+    { url = "https://files.pythonhosted.org/packages/d6/45/fc303eb433e8a2a271739c98e953728422fa61a3c1f36077a49e395c972e/xmltodict-0.14.2-py2.py3-none-any.whl", hash = "sha256:20cc7d723ed729276e808f26fb6b3599f786cbc37e06c65e192ba77c40f20aac", size = 9981 },
 ]

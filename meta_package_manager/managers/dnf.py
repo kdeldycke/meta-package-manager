@@ -188,6 +188,16 @@ class DNF(PackageManager):
         self.run_cli("--assumeyes", "autoremove", sudo=True)
         self.run_cli("clean", "all")
 
+    def remove(self, package_id: str) -> str:
+        """Remove one package and one only.
+
+        .. code-block:: shell-session
+
+            ► sudo dnf --color=never --assumeyes autoremove package_id
+        """
+
+        return self.run_cli("--assumeyes", "autoremove", package_id, sudo=True)
+
 
 class YUM(DNF):
     """Yum is dnf is yum."""

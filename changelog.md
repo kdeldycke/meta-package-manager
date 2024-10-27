@@ -5,6 +5,10 @@
 > [!IMPORTANT]
 > This version is not released yet and is under active development.
 
+- \[vscodium\] Add support for VSCOdium plugins.
+- \[dnf,yum,vscode\] Implement `remove` operation.
+- \[dnf,yum\] Use query template instead of regex parsing to retrieve package data.
+- \[flatpak\] Fix parsing of descriptions with spaces.
 - \[mpm\] Add official support for Python 3.13.
 - \[mpm\] Drop support for Python 3.9.
 - \[mpm\] Replace local platform utilities by `extra-platforms` dependency.

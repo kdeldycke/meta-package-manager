@@ -5,7 +5,7 @@
 > [!IMPORTANT]
 > This version is not released yet and is under active development.
 
-- \[vscodium\] Add support for VSCOdium plugins.
+- \[vscodium\] Add support for VSCodium plugins.
 - \[dnf,yum,vscode\] Implement `remove` operation.
 - \[dnf,yum\] Use query template instead of regex parsing to retrieve package data.
 - \[flatpak\] Fix parsing of descriptions with spaces.

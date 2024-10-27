@@ -100,6 +100,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     "npm-based": frozenset({"npm", "yarn"}),
     "pacman-based": frozenset({"pacman", "pacaur", "paru", "yay"}),
     "pip-based": frozenset({"pip", "pipx"}),
+    "vscode-based": frozenset({"vscode", "vscodium"}),
 }
 """Managers sharing some origin or implementation are grouped together under the same
 label."""

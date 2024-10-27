@@ -161,14 +161,6 @@ tests.test\_managers module
    :undoc-members:
    :show-inheritance:
 
-tests.test\_platforms module
-----------------------------
-
-.. automodule:: tests.test_platforms
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 tests.test\_pool module
 -----------------------
 

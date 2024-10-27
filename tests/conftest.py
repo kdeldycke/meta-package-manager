@@ -186,6 +186,7 @@ PACKAGE_IDS = {
     # https://pypi.org/project/meta-package-manager
     "uv": "meta-package-manager",
     "vscode": "tamasfe.even-better-toml",
+    "vscodium": "tamasfe.even-better-toml",
     "winget": "Microsoft.PowerToys",
     "yarn": "awesome-lint",
     # https://aur.archlinux.org/packages/meta-package-manager

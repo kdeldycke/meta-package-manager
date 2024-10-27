@@ -84,7 +84,6 @@ class VSCode(PackageManager):
         return self.run_cli("--uninstall-extension", package_id)
 
 
-class VsCodium(VSCode):
-    name = "VSCodium"
-    homepage_url = "https://vscodium.com//"
+class VSCodium(VSCode):
+    homepage_url = "https://vscodium.com"
     cli_names = ("codium",)

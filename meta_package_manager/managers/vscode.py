@@ -73,7 +73,7 @@ class VSCode(PackageManager):
             ► code --install-extension tamasfe.even-better-toml
         """
         return self.run_cli("--install-extension", package_id)
-
+      
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
@@ -82,3 +82,8 @@ class VSCode(PackageManager):
             ► code --uninstall-extension tamasfe.even-better-toml
         """
         return self.run_cli("--uninstall-extension", package_id)
+
+
+class VSCodium(VSCode):
+    homepage_url = "https://vscodium.com"
+    cli_names = ("codium",)

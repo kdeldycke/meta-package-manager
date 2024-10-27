@@ -117,8 +117,9 @@ jobs:
         "📦 manager: uv":
           - "uv"
 
-        "📦 manager: vscode":
+        "📦 manager: vscode-based":
           - "vscode"
+          - "vscodium"
           - "visual studio code"
           - "visual studio"
 

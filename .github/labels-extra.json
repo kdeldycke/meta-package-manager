@@ -100,9 +100,9 @@
     "description": "uv"
   },
   {
-    "name": "📦 manager: vscode",
+    "name": "📦 manager: vscode-based",
     "color": "#bfdadc",
-    "description": "vscode"
+    "description": "vscode, vscodium"
   },
   {
     "name": "📦 manager: winget",

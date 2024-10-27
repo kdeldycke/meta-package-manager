@@ -152,7 +152,7 @@ jobs:
               - meta_package_manager/managers/uv*
               - tests/*uv*
 
-        "📦 manager: vscode":
+        "📦 manager: vscode-based":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/vscode*

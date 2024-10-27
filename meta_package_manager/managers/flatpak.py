@@ -149,7 +149,7 @@ class Flatpak(PackageManager):
         regexp = re.compile(
             r"""
             ^(?P<package_name>\S+)\t
-            (?P<description>\S+)\t
+            (?P<description>.+)\t
             (?P<package_id>\S+)\t
             (?P<version>\S+)\t
             (?P<branch>\S+)\t

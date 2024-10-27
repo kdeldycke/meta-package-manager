@@ -50,7 +50,7 @@ class DNF(PackageManager):
 
     pre_args = ("--color=never",)
 
-    list_cmd_regexp = re.compile(r"(\S+)\.\S+\s+(\S+)\s+\S+")
+    DELEMITER = "___MPM___"
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -58,20 +58,19 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            ► dnf --color=never list --installed
+            ► dnf repoquery --userinstalled --qf FORMAT
             Installed Packages
-            acl.x86_64         2.2.53-1.el8                         @anaconda
-            audit.x86_64       3.0-0.10.20180831git0047a6c.el8      @anaconda
-            audit-libs.x86_64  3.0-0.10.20180831git0047a6c.el8      @anaconda
+            acl 2.2.53-1.el8 annaconda_dummary x86_64
+            audit 2.2.53-1.el8 audit_dummary x86_64
+            audit-libs 2.2.53-1.el8 audit_libs_dummary x86_64
             (...)
         """
-        output = self.run_cli("list", "--installed")
+        qf = ["%{name}", "%{version}", "%{summary}", "%{arch}"]
+        output = self.run_cli("repoquery", "--userinstalled", "--qf", DNF.DELEMITER.join(qf))
 
-        for package in output.splitlines()[1:]:
-            match = self.list_cmd_regexp.match(package)
-            if match:
-                package_id, installed_version = match.groups()
-                yield self.package(id=package_id, installed_version=installed_version)
+        for line_package in output.splitlines():
+            package_id, installed_version, summary, arch = line_package.split(DNF.DELEMITER)
+            yield self.package(id=package_id, description=summary, installed_version=installed_version, arch=arch)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -79,21 +78,25 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            ► dnf --color=never list --upgrades
-            Last metadata expiration check: 0:22:12 ago on Sun 03 Apr 2022.
-            Available Upgrades
-            acl.x86_64               2.2.53-1.el8                        updates
-            audit.x86_64             3.0-0.10.20180831git0047a6c.el8     updates
-            audit-libs.x86_64        3.0-0.10.20180831git0047a6c.el8     updates
+            ► dnf repoquery --upgrades --qf FORMAT
+            Installed Packages
+            acl 2.2.53-1.el8 2.6.53-1.el8 annaconda_dummary x86_64
+            audit 2.2.53-1.el8 2.5.53-1.el8 audit_dummary x86_64
+            audit-libs 2.2.53-1.el8 2.6.53-1.el8 audit_libs_dummary x86_64
             (...)
         """
-        output = self.run_cli("list", "--upgrades")
+        qf = ["%{name}", "%{version}", "%{evr}", "%{summary}", "%{arch}"]
+        output = self.run_cli("repoquery", "--upgrades", "--qf", DNF.DELEMITER.join(qf))
 
-        for package in output.splitlines()[2:]:
-            match = self.list_cmd_regexp.match(package)
-            if match:
-                package_id, latest_version = match.groups()
-                yield self.package(id=package_id, latest_version=latest_version)
+        for line_package in output.splitlines():
+            package_id, installed_version, last_version, summary, arch = line_package.split(DNF.DELEMITER)
+            yield self.package(
+                id=package_id,
+                description=summary,
+                installed_version=installed_version,
+                arch=arch,
+                latest_version=last_version,
+            )
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
@@ -187,6 +190,16 @@ class DNF(PackageManager):
         """
         self.run_cli("--assumeyes", "autoremove", sudo=True)
         self.run_cli("clean", "all")
+
+    def remove(self, package_id: str) -> str:
+        """Remove one package and one only.
+
+        .. code-block:: shell-session
+
+            ► sudo dnf --color=never --assumeyes autoremove package_id
+        """
+
+        return self.run_cli("--assumeyes", "autoremove", package_id, sudo=True)
 
 
 class YUM(DNF):

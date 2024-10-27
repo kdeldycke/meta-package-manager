@@ -149,7 +149,7 @@ class Flatpak(PackageManager):
         regexp = re.compile(
             r"""
             ^(?P<package_name>\S+)\t
-            (?P<description>\S+)\t
+            (?P<description>.+)\t
             (?P<package_id>\S+)\t
             (?P<version>\S+)\t
             (?P<branch>\S+)\t
@@ -179,9 +179,9 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            ► flatpak install org.gnome.Dictionary
+            ► flatpak install --noninteractive org.gnome.Dictionary
         """
-        return self.run_cli("install", package_id)
+        return self.run_cli("install", "--noninteractive", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided

@@ -73,7 +73,7 @@ class VSCode(PackageManager):
             ► code --install-extension tamasfe.even-better-toml
         """
         return self.run_cli("--install-extension", package_id)
-      
+
     def remove(self, package_id: str) -> str:
         """Remove one package.
 

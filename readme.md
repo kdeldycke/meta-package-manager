@@ -93,6 +93,7 @@ Meta Package Manager,snap,1
 Meta Package Manager,steamcmd,1
 Meta Package Manager,uv,1
 Meta Package Manager,vscode,1
+Meta Package Manager,vscodium,1
 Meta Package Manager,winget,1
 Meta Package Manager,yarn,1
 Meta Package Manager,yay,1
@@ -133,6 +134,7 @@ Meta Package Manager,zypper,1
 | [`steamcmd`](https://developer.valvesoftware.com/wiki/SteamCMD)                         | None         |           🅱️            |      🐧       |  🍎   |    `>_`     |   🪟    |             |            |          |     ✓     |           |               |          |        |           |
 | [`uv`](https://astral.sh)                                                               | 0.1.45       |           🅱️            |      🐧       |  🍎   |    `>_`     |   🪟    |      ✓      |            |          |     ✓     |     ✓     |               |    ✓     |        |           |
 | [`vscode`](https://code.visualstudio.com)                                               | 1.60.0       |           🅱️            |      🐧       |  🍎   |    `>_`     |   🪟    |      ✓      |            |          |     ✓     |           |               |          |        |           |
+| [`vscodium`](https://vscodium.com/)                                               | 1.60.0       |           🅱️            |      🐧       |  🍎   |    `>_`     |   🪟    |      ✓      |            |          |     ✓     |           |               |          |        |           |
 | [`winget`](https://github.com/microsoft/winget-cli)                                     | 1.7          |                         |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`yarn`](https://yarnpkg.com)                                                           | 1.20.0       |           🅱️            |      🐧       |  🍎   |    `>_`     |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`yay`](https://github.com/Jguer/yay)                                                   | 11.0.0       |           🅱️            |      🐧       |       |    `>_`     |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |

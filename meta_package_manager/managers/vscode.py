@@ -73,3 +73,9 @@ class VSCode(PackageManager):
             ► code --install-extension tamasfe.even-better-toml
         """
         return self.run_cli("--install-extension", package_id)
+
+
+class VsCodium(VSCode):
+    name = "VSCodium"
+    homepage_url = "https://vscodium.com//"
+    cli_names = ("codium",)

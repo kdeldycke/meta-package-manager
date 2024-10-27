@@ -28,23 +28,11 @@ jobs:
               - meta_package_manager/managers/apm*
               - tests/*apm*
 
-        "📦 manager: brew":
-          - changed-files:
-            - any-glob-to-any-file:
-              - meta_package_manager/managers/homebrew*
-              - tests/*homebrew*
-
         "📦 manager: cargo":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/cargo*
               - tests/*cargo*
-
-        "📦 manager: cask":
-          - changed-files:
-            - any-glob-to-any-file:
-              - meta_package_manager/managers/homebrew*
-              - tests/*homebrew*
 
         "📦 manager: choco":
           - changed-files:
@@ -91,6 +79,12 @@ jobs:
             - any-glob-to-any-file:
               - meta_package_manager/managers/gem*
               - tests/*gem*
+
+        "📦 manager: homebrew":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/homebrew*
+              - tests/*homebrew*
 
         "📦 manager: mas":
           - changed-files:

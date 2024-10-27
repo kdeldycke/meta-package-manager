@@ -5,19 +5,9 @@
     "description": "apm"
   },
   {
-    "name": "📦 manager: brew",
-    "color": "#bfdadc",
-    "description": "brew"
-  },
-  {
     "name": "📦 manager: cargo",
     "color": "#bfdadc",
     "description": "cargo"
-  },
-  {
-    "name": "📦 manager: cask",
-    "color": "#bfdadc",
-    "description": "cask"
   },
   {
     "name": "📦 manager: choco",
@@ -53,6 +43,11 @@
     "name": "📦 manager: gem",
     "color": "#bfdadc",
     "description": "gem"
+  },
+  {
+    "name": "📦 manager: homebrew",
+    "color": "#bfdadc",
+    "description": "brew, cask"
   },
   {
     "name": "📦 manager: mas",

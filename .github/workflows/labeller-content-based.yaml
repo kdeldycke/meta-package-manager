@@ -28,19 +28,10 @@ jobs:
           - "apm"
           - "atom"
 
-        "📦 manager: brew":
-          - "brew"
-          - "homebrew"
-          - "tap"
-          - "formula"
-
         "📦 manager: cargo":
           - "cargo"
           - "rust"
           - "crate"
-
-        "📦 manager: cask":
-          - "cask"
 
         "📦 manager: choco":
           - "choco"
@@ -80,6 +71,13 @@ jobs:
         "📦 manager: gem":
           - "gem"
           - "ruby"
+
+        "📦 manager: homebrew":
+          - "brew"
+          - "cask"
+          - "homebrew"
+          - "tap"
+          - "formula"
 
         "📦 manager: mas":
           - "mas"

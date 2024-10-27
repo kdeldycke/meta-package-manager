@@ -66,11 +66,20 @@ class DNF(PackageManager):
             (...)
         """
         qf = ["%{name}", "%{version}", "%{summary}", "%{arch}"]
-        output = self.run_cli("repoquery", "--userinstalled", "--qf", DNF.DELIMITER.join(qf))
+        output = self.run_cli(
+            "repoquery", "--userinstalled", "--qf", DNF.DELIMITER.join(qf)
+        )
 
         for line_package in output.splitlines():
-            package_id, installed_version, summary, arch = line_package.split(DNF.DELIMITER)
-            yield self.package(id=package_id, description=summary, installed_version=installed_version, arch=arch)
+            package_id, installed_version, summary, arch = line_package.split(
+                DNF.DELIMITER
+            )
+            yield self.package(
+                id=package_id,
+                description=summary,
+                installed_version=installed_version,
+                arch=arch,
+            )
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -89,7 +98,9 @@ class DNF(PackageManager):
         output = self.run_cli("repoquery", "--upgrades", "--qf", DNF.DELIMITER.join(qf))
 
         for line_package in output.splitlines():
-            package_id, installed_version, last_version, summary, arch = line_package.split(DNF.DELIMITER)
+            package_id, installed_version, last_version, summary, arch = (
+                line_package.split(DNF.DELIMITER)
+            )
             yield self.package(
                 id=package_id,
                 description=summary,

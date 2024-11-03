@@ -16,12 +16,13 @@
 
 from __future__ import annotations
 
+import io
 import logging
 import re
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import IO, Any
+from typing import Any
 
 from boltons.ecoutils import get_profile
 from cyclonedx.model import (
@@ -100,6 +101,9 @@ class SBOM:
     def autodetect_export_format(file_path: Path) -> ExportFormat | None:
         """Better version of ``spdx_tools.spdx.formats.file_name_to_format`` which is
         based on ``Path`` objects and is case-insensitive.
+
+        .. todo:
+            Contribute generic autodetection method to Click Extra?
         """
         suffixes = tuple(s.lower() for s in file_path.suffixes[-2:])
         export_format = None
@@ -141,14 +145,16 @@ class SPDX(SBOM):
         """
         profile = get_profile()
         system_id = self.normalize_spdx_id(
-            "-".join((
-                CURRENT_OS_LABEL,
-                profile["linux_dist_name"],
-                profile["linux_dist_version"],
-                profile["uname"]["system"],
-                profile["uname"]["release"],
-                profile["uname"]["machine"],
-            ))
+            "-".join(
+                (
+                    CURRENT_OS_LABEL,
+                    profile["linux_dist_name"],
+                    profile["linux_dist_version"],
+                    profile["uname"]["system"],
+                    profile["uname"]["release"],
+                    profile["uname"]["machine"],
+                )
+            )
         )
 
         self.document = Document(
@@ -212,10 +218,12 @@ class SPDX(SBOM):
             Relationship(self.DOC_ID, RelationshipType.DESCRIBES, package_docid)
         )
 
-    def export(self, stream: IO):
+    def export(self) -> str:
         """Similar to ``spdx_tools.spdx.writer.write_anything.write_file`` but write
         directly to provided stream instead of file path.
         """
+        stream = io.StringIO()
+
         writer: Any
         if self.export_format == ExportFormat.JSON:
             writer = json_writer
@@ -227,9 +235,8 @@ class SPDX(SBOM):
             writer = tagvalue_writer
         elif self.export_format == ExportFormat.RDF_XML:
             writer = rdf_writer
-            # RDF writer expects a binary-mode IO stream but the one provided is
-            # string-based.
-            stream = stream.buffer  # type: ignore[attr-defined]
+            # RDF writer expects a binary-mode IO stream.
+            stream = io.BytesIO()
         else:
             raise ValueError(f"{self.export_format} not supported.")
 
@@ -242,6 +249,7 @@ class SPDX(SBOM):
 
         logging.debug(f"Export with {writer.__name__}")
         writer.write_document_to_stream(self.document, stream, validate=False)
+        return stream.getvalue()
 
 
 class CycloneDX(SBOM):
@@ -367,7 +375,7 @@ class CycloneDX(SBOM):
             [data],
         )
 
-    def export(self, stream: IO):
+    def export(self) -> str:
         validator: BaseSchemabasedValidator
         if self.export_format == ExportFormat.JSON:
             content = JsonV1Dot5(self.document).output_as_string(indent=2)
@@ -389,4 +397,4 @@ class CycloneDX(SBOM):
             logging.debug(content)
             raise ValueError(f"Document is not valid. Errors: {errors}")
 
-        stream.write(content)
+        return content

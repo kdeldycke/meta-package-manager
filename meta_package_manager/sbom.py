@@ -234,7 +234,7 @@ class SPDX(SBOM):
         elif self.export_format == ExportFormat.RDF_XML:
             writer = rdf_writer
             # RDF writer expects a binary-mode IO stream.
-            stream = io.BytesIO()
+            stream = io.BytesIO()  # type: ignore[assignment]
         else:
             raise ValueError(f"{self.export_format} not supported.")
 

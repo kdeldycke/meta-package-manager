@@ -309,7 +309,7 @@ toml = [
 
 [[package]]
 name = "cyclonedx-python-lib"
-version = "7.6.2"
+version = "8.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "license-expression" },
@@ -317,9 +317,9 @@ dependencies = [
     { name = "py-serializable" },
     { name = "sortedcontainers" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/36/8f/a2de02ce7263312b51cb3946593b608ef996949295b69b31a9ed0e71ec92/cyclonedx_python_lib-7.6.2.tar.gz", hash = "sha256:31186c5725ac0cfcca433759a407b1424686cdc867b47cc86e6cf83691310903", size = 1124315 }
+sdist = { url = "https://files.pythonhosted.org/packages/5f/5e/92fbc03f1ab980ccd2b942e3b3cda0c60a5828a673837b4ee1eaceb924a0/cyclonedx_python_lib-8.4.0.tar.gz", hash = "sha256:1d86efc1e81c0fd01141658b8aed5248c4f4d8d300d7ced9e1dfc39abeafc0a9", size = 1131530 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cf/27/9ec1959eb4c23bdbec690f17a64562e664746762c0b8becf3ec2e95579d7/cyclonedx_python_lib-7.6.2-py3-none-any.whl", hash = "sha256:c42fab352cc0f7418d1b30def6751d9067ebcf0e8e4be210fc14d6e742a9edcc", size = 361381 },
+    { url = "https://files.pythonhosted.org/packages/6e/a0/6f889b4485e83787244e7fbb21d1060b95d2b3bed564414610d596cb2032/cyclonedx_python_lib-8.4.0-py3-none-any.whl", hash = "sha256:fd44efd601f651c8865acf0dfeacb0df19a2b50ec69ead0262096fd2f67197b9", size = 372295 },
 ]
 
 [package.optional-dependencies]
@@ -779,7 +779,7 @@ requires-dist = [
     { name = "click-extra", extras = ["pytest"], marker = "extra == 'test'", specifier = "~=4.11.1" },
     { name = "click-extra", extras = ["sphinx"], marker = "extra == 'docs'", specifier = "~=4.11.1" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'test'", specifier = "~=7.6.0" },
-    { name = "cyclonedx-python-lib", extras = ["validation"], specifier = "~=7.6.0" },
+    { name = "cyclonedx-python-lib", extras = ["validation"], specifier = "~=8.4.0" },
     { name = "extra-platforms", extras = ["pytest"], specifier = "~=1.4.0" },
     { name = "furo", marker = "extra == 'docs'", specifier = "~=2024.8.6" },
     { name = "more-itertools", specifier = "~=10.5.0" },

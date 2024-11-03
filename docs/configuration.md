@@ -35,7 +35,7 @@ following config file:
 
 ```toml
 [mpm]
-exclude = [ "pip",]
+exclude = ["pip"]
 ```
 
 ## Overlapping managers
@@ -48,7 +48,7 @@ For instance, if `yay` is your preferred helper and `pacman` and `paru` are poll
 
 ```toml
 [mpm]
-exclude = [ "pacman", "paru",]
+exclude = ["pacman", "paru"]
 ```
 
 ## Troubleshooting

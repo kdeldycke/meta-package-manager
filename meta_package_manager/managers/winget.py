@@ -60,23 +60,23 @@ class WinGet(PackageManager):
         """Parse a table from the output of a winget command and returns a generator of cells."""
         # Extract table.
         table_start = "Name "
-        assert (
-            table_start in output
-        ), f"Cannot find table starting with {table_start!r} in:\n{output}"
-        assert (
-            output.count(table_start) == 1
-        ), f"{table_start!r} not unique in:\n{output}"
+        assert table_start in output, (
+            f"Cannot find table starting with {table_start!r} in:\n{output}"
+        )
+        assert output.count(table_start) == 1, (
+            f"{table_start!r} not unique in:\n{output}"
+        )
         table = output.split(table_start, 1)[1]
 
         # Check table format.
         lines = table.splitlines()
         table_width = len(lines[0])
-        assert (
-            lines[1] == "-" * table_width
-        ), f"Table headers not followed by expected separator:\n{table}"
-        assert all(
-            len(line) <= table_width for line in lines[2:]
-        ), f"Table lines with different width:\n{table}"
+        assert lines[1] == "-" * table_width, (
+            f"Table headers not followed by expected separator:\n{table}"
+        )
+        assert all(len(line) <= table_width for line in lines[2:]), (
+            f"Table lines with different width:\n{table}"
+        )
 
         # Guess column positions.
         headers = []

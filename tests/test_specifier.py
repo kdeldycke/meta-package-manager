@@ -217,7 +217,7 @@ def test_parse_specs(spec_string, expected):
             {"pkg:rpm/ping@2011-04.gamma"},
             None,
             ValueError,
-            id="unresolveable_multiple_aliases",
+            id="unresolvable_multiple_aliases",
         ),
         pytest.param(
             {"pkg:npm/leftpad", "leftpad@77.10.0"},

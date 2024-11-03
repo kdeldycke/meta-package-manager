@@ -161,9 +161,9 @@ def update_manager_selection(
         # instantiation, we have to reverse the process to get our value.
         # Example: --apt-mint => apt_mint => apt-mint
         manager_id = param.name.removeprefix("no_").replace("_", "-")
-        assert (
-            manager_id == value
-        ), f"unrecognized single manager selector {param.name!r}"
+        assert manager_id == value, (
+            f"unrecognized single manager selector {param.name!r}"
+        )
         if param.name.startswith("no_"):
             assert isinstance(value, str)
             to_remove.add(value)

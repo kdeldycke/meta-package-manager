@@ -170,9 +170,9 @@ def update_manager_selection(
         # instantiation, we have to reverse the process to get our value.
         # Example: --apt-mint => apt_mint => apt-mint
         manager_id = param.name.removeprefix("no_").replace("_", "-")
-        assert (
-            manager_id == value
-        ), f"unrecognized single manager selector {param.name!r}"
+        assert manager_id == value, (
+            f"unrecognized single manager selector {param.name!r}"
+        )
         if param.name.startswith("no_"):
             assert isinstance(value, str)
             to_remove.add(value)
@@ -534,8 +534,7 @@ def managers(ctx):
             highlight_cli_name(manager.cli_path, manager.cli_names)
             if manager.cli_path
             else (
-                f"{', '.join(map(theme.invoked_command, manager.cli_names))} "
-                "not found"
+                f"{', '.join(map(theme.invoked_command, manager.cli_names))} not found"
             ),
         )
 

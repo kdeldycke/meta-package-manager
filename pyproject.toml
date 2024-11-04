@@ -90,7 +90,7 @@ classifiers = [
     'Typing :: Typed',
 ]
 dependencies = [
-    "boltons ~= 24.0.0",
+    "boltons ~= 24.1.0",
     "click-extra ~= 4.11.1",
     "cyclonedx-python-lib [validation] ~= 8.4.0",
     "extra-platforms [pytest] ~= 1.4.0",

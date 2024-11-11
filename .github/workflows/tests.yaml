@@ -181,43 +181,7 @@ jobs:
           choco upgrade chocolatey --no-progress --yes
       - name: Chocolatey - Pin un-upgradeable packages
         if: runner.os == 'Windows'
-        # XXX The upgrade all step below fails for strawberryperl package on windows-2022 runners v2.313.0:
-        #
-        #   You have nginx v1.25.3 installed. Version 1.25.4 is available based on your source(s).
-        #
-        #   nginx v1.25.4 [Approved]
-        #   nginx package files upgrade completed. Performing other installation steps.
-        #   Port '80' is in use by 'System'...
-        #   ERROR: Please specify a different port number...
-        #   Environment Vars (like PATH) have changed. Close/reopen your shell to
-        #    see the changes (or in powershell/cmd.exe just type `refreshenv`).
-        #   The upgrade of nginx was NOT successful.
-        #   Error while running 'C:\ProgramData\chocolatey\lib\nginx\tools\chocolateyInstall.ps1'.
-        #    See log for details.
-        #
-        #   You have strawberryperl v5.32.1.1 installed. Version 5.38.2.2 is available based on your source(s).
-        #
-        #   strawberryperl v5.38.2.2 [Approved]
-        #   strawberryperl package files upgrade completed. Performing other installation steps.
-        #   Downloading strawberryperl 64 bit
-        #     from 'https://github.com/StrawberryPerl/Perl-Dist-Strawberry/strawberry-perl-5.38.2.2-64bit.msi'
-        #
-        #   Download of strawberry-perl-5.38.2.2-64bit.msi (171.74 MB) completed.
-        #   Hashes match.
-        #   Installing strawberryperl...
-        #   WARNING: Generic MSI Error. This is a local environment error, not an issue with a package or the MSI
-        #   itself - it could mean a pending reboot is necessary prior to install or something else (like the same
-        #   version is already installed). Please see MSI log if available. If not, try again adding
-        #   '--install-arguments="'/l*v c:\StrawberryPerl_msi_install.log'"'. Then search the MSI Log for
-        #   "Return Value 3" and look above that for the error.
-        #   ERROR: Running ["C:\Windows\System32\msiexec.exe" /i "C:\Users\runneradmin\AppData\Local\Temp\chocolatey
-        #   \StrawberryPerl\5.38.2.2\strawberry-perl-5.38.2.2-64bit.msi" /qn /norestart ] was not successful. Exit
-        #   code was '1603'. Exit code indicates the following: Generic MSI Error. This is a local environment error,
-        #   not an issue with a package or the MSI itself - it could mean a pending reboot is necessary prior to
-        #   install or something else (like the same version is already installed). Please see MSI log if available.
-        #   If not, try again adding '--install-arguments="'/l*v c:\StrawberryPerl_msi_install.log'"'. Then search
-        #   the MSI Log for "Return Value 3" and look above that for the error..
-        #   The upgrade of strawberryperl was NOT successful.
+        # XXX The upgrade all step below fails for rtools package on windows-2022 runners v2.320.0:
         #
         # You have R.Project v4.4.1 installed. Version 4.4.2 is available based on your source(s).
         # PATH environment variable has C:\Program Files\R\R-4.4.1\bin in it. Removing...
@@ -249,8 +213,6 @@ jobs:
         # Error while running 'C:\ProgramData\chocolatey\lib\rtools\tools\chocolateyInstall.ps1'.
         #  See log for details.
         run: |
-          choco pin add --name="nginx"
-          choco pin add --name="strawberryperl"
           choco pin add --name="rtools"
       - name: Chocolatey - Windows full upgrade
         if: runner.os == 'Windows'

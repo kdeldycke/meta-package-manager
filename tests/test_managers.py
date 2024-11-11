@@ -18,14 +18,16 @@ from __future__ import annotations
 
 import ast
 import inspect
+import os
 import re
+import sys
 from pathlib import Path, PurePath
 from string import ascii_letters, ascii_lowercase, digits
 
 import pytest
 from boltons.iterutils import unique
 from boltons.urlutils import URL
-from extra_platforms import ALL_PLATFORMS, Platform
+from extra_platforms import ALL_PLATFORMS, Platform, is_windows
 
 from meta_package_manager import cli
 from meta_package_manager.base import Operations, PackageManager
@@ -121,7 +123,10 @@ def test_cli_search_path(manager):
     for search_path in manager.cli_search_path:
         path_obj = Path(search_path).resolve()
         assert path_obj.is_absolute()
-        assert not path_obj.is_reserved()
+        if sys.version_info >= (3, 13) and is_windows():
+            assert not os.path.isreserved(path_obj)
+        else:
+            assert not path_obj.is_reserved()
         if path_obj.exists():
             assert path_obj.is_file() or path_obj.is_dir()
 
@@ -167,7 +172,10 @@ def test_cli_path(manager):
     if manager.cli_path is not None:
         assert isinstance(manager.cli_path, Path)
         assert manager.cli_path.is_absolute()
-        assert not manager.cli_path.is_reserved()
+        if sys.version_info >= (3, 13) and is_windows():
+            assert not os.path.isreserved(manager.cli_path)
+        else:
+            assert not manager.cli_path.is_reserved()
         assert manager.cli_path.is_file()
 
 

@@ -200,12 +200,14 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         """
         result = invoke("--cargo", "search", "co")
         assert result.exit_code == 0
-        # co
-        assert "│ \x1b[32m\x1b[1mco\x1b[0m " in result.stdout
+        # co2mon
+        assert "│ \x1b[32m\x1b[1mco\x1b[0m2mon " in result.stdout
         # acco
         assert "│ ac\x1b[32m\x1b[1mco\x1b[0m " in result.stdout
         # bicoro
         assert "│ bi\x1b[32m\x1b[1mco\x1b[0mro " in result.stdout
+        # more_cargo_co
+        assert "│ more_cargo_\x1b[32m\x1b[1mco\x1b[0m " in result.stdout
         # cocomo-core
         assert (
             "│ \x1b[32m\x1b[1mcoco\x1b[0mmo-\x1b[32m\x1b[1mco\x1b[0mre "

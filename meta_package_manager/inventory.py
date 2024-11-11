@@ -60,8 +60,7 @@ UNIX_WITHOUT_BSD_LINUX = Group(
     "unix_without_bsd_linux",
     "Any Unix but BSDs and Linux-like",
     "⨂",
-    # UNIX - BSD - LINUX_LIKE
-    tuple(p for p in UNIX if p not in BSD and p not in LINUX_LIKE),
+    tuple(UNIX - BSD - LINUX_LIKE),
 )
 """All Unix platforms, without macOS or any Linux-like.
 

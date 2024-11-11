@@ -218,9 +218,40 @@ jobs:
         #   If not, try again adding '--install-arguments="'/l*v c:\StrawberryPerl_msi_install.log'"'. Then search
         #   the MSI Log for "Return Value 3" and look above that for the error..
         #   The upgrade of strawberryperl was NOT successful.
+        #
+        # You have R.Project v4.4.1 installed. Version 4.4.2 is available based on your source(s).
+        # PATH environment variable has C:\Program Files\R\R-4.4.1\bin in it. Removing...
+        # Downloading package from source 'https://community.chocolatey.org/api/v2/'
+        #
+        # R.Project v4.4.2 [Approved]
+        # R.Project package files upgrade completed. Performing other installation steps.
+        # Installing r.project...
+        # r.project has been installed.
+        #   R.Project can be automatically uninstalled.
+        #  The upgrade of R.Project was successful.
+        #   Deployed to 'C:\Program Files\R\R-4.4.2\'
+        #
+        # You have rtools v4.4.6104 installed. Version 4.4.6335 is available based on your source(s).
+        # Downloading package from source 'https://community.chocolatey.org/api/v2/'
+        #
+        # rtools v4.4.6335 [Approved]
+        # rtools package files upgrade completed. Performing other installation steps.
+        # Downloading rtools 64 bit
+        #   from 'https://github.com/r-windows/rtools-chocolatey/releases/download/6335/rtools44-6335-6327.exe'
+        #
+        # Download of rtools44-6335-6327.exe (435.06 MB) completed.
+        # Hashes match.
+        # Installing rtools...
+        # Chocolatey timed out waiting for the command to finish. The timeout
+        #  specified (or the default value) was '2700' seconds. Perhaps try a
+        #  higher `--execution-timeout`? See `choco -h` for details.
+        # The upgrade of rtools was NOT successful.
+        # Error while running 'C:\ProgramData\chocolatey\lib\rtools\tools\chocolateyInstall.ps1'.
+        #  See log for details.
         run: |
           choco pin add --name="nginx"
           choco pin add --name="strawberryperl"
+          choco pin add --name="rtools"
       - name: Chocolatey - Windows full upgrade
         if: runner.os == 'Windows'
         # We upgrade all packages preemptively as the test suite will attempt it but fail,

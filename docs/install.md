@@ -1,14 +1,5 @@
 # Installation
 
-```{danger} Danger: **Misleading package name**
-![Angry package](assets/angry-paper-box.png){w=50px align=right}
-
-There is a *`mpm`* Python module on PyPi that has nothing to do with this project. Avoid it!
-
-The **real package is named `meta-package-manager`**. Only the latter provides the {command}`mpm` CLI
-you're looking for.
-```
-
 ## From packages
 
 `mpm` is available on several popular package managers:
@@ -93,6 +84,15 @@ $ yay -S meta-package-manager
 ```
 ````
 `````
+
+```{danger} Danger: **Misleading package name**
+![Angry package](assets/angry-paper-box.png){w=50px align=right}
+
+There is a *`mpm`* Python module on PyPi that has nothing to do with this project. Avoid it!
+
+The **real package is named `meta-package-manager`**. Only the latter provides the {command}`mpm` CLI
+you're looking for.
+```
 
 ## Binaries
 

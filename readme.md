@@ -153,9 +153,7 @@ Meta Package Manager,zypper,1
 
 ## Installation
 
-[All installation methods](https://kdeldycke.github.io/meta-package-manager/install.html) are available in the documentation.
-
-Below are the most popular ones:
+All [installation methods](https://kdeldycke.github.io/meta-package-manager/install.html) are available in the documentation. Below are the most popular ones:
 
 ### macOS
 
@@ -173,7 +171,7 @@ $ brew install meta-package-manager
 > scoop install main/meta-package-manager
 ```
 
-### From sources
+### Python
 
 [`pipx`](https://pipx.pypa.io) is the cleanest way to install `mpm` from sources on any platform:
 
@@ -183,7 +181,7 @@ $ pipx install meta-package-manager
 
 ### Executables
 
-Standalone executables of `mpm`'s latest version are available as direct downloads for several platforms and architectures:
+Standalone binaries of `mpm`'s latest version are available as direct downloads for several platforms and architectures:
 
 | Platform          | `x86_64`                                                                                                                         | `arm64`                                                                                                                          |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |

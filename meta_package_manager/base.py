@@ -31,10 +31,9 @@ from textwrap import dedent, indent, shorten
 from typing import ContextManager, Generator, Iterable, Iterator, cast
 from unittest.mock import patch
 
-from boltons.iterutils import flatten, unique
+from boltons.iterutils import unique
 from boltons.strutils import strip_ansi
 from click_extra.colorize import default_theme as theme
-from extra_platforms import UNIX, Group, Platform, current_os
 from click_extra.testing import (
     INDENT,
     Arg,
@@ -44,6 +43,8 @@ from click_extra.testing import (
     env_copy,
     format_cli_prompt,
 )
+from extra_platforms import UNIX, Group, current_os
+from extra_platforms.group import _TNestedSources
 from packageurl import PackageURL
 
 from .version import TokenizedString, parse_version
@@ -185,16 +186,7 @@ class MetaPackageManager(type):
             cls.virtual = name == "PackageManager" or not cls.cli_names
 
         if "platforms" in dct:
-            platforms = set()
-            for spec in flatten([dct["platforms"]]):
-                if isinstance(spec, Platform):
-                    platforms.add(spec)
-                elif isinstance(spec, Group):
-                    platforms |= set(spec.platforms)
-                else:
-                    msg = f"Unrecognized platform specifier: {spec!r}"
-                    raise ValueError(msg)
-            cls.platforms = frozenset(platforms)
+            cls.platforms = frozenset(Group._extract_platforms(dct["platforms"]))
 
 
 def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | None:
@@ -262,9 +254,7 @@ class PackageManager(metaclass=MetaPackageManager):
     homepage_url: str | None = None
     """Home page of the project, only used in documentation for reference."""
 
-    platforms: Group | Platform | Iterable[Group | Platform] | frozenset[Platform] = (
-        frozenset()
-    )
+    platforms: _TNestedSources = frozenset()
     """List of platforms supported by the manager.
 
     Allows for a mishmash of platforms and groups. Will be normalized into a frozen set

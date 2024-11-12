@@ -61,6 +61,7 @@
 One CLI to rule them all:
 
 <!-- managers-sankey-start -->
+
 ```mermaid
 ---
 config: {"sankey": {"showValues": false, "width": 800, "height": 400}}
@@ -100,6 +101,7 @@ Meta Package Manager,yay,1
 Meta Package Manager,yum,1
 Meta Package Manager,zypper,1
 ```
+
 <!-- managers-sankey-end -->
 
 ## Metadata and operations

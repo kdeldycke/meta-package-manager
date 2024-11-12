@@ -167,8 +167,8 @@ def update_readme() -> None:
 
     replace_content(
         readme,
-        "<!-- managers-sankey-start -->\n",
-        "\n<!-- managers-sankey-end -->",
+        "<!-- managers-sankey-start -->\n\n",
+        "\n\n<!-- managers-sankey-end -->",
         managers_sankey(),
     )
 

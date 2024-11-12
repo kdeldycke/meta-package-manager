@@ -56,7 +56,7 @@ def generate_labels(
 ) -> dict[str, str]:
     """Generate labels.
 
-    A dedocated label is produced for each entry of the ``all_labels`` parameter,
+    A dedicated label is produced for each entry of the ``all_labels`` parameter,
     unless it is part of a ``group``. In which case a dedicated label for that group
     will be created.
     """
@@ -83,10 +83,18 @@ def generate_labels(
         assert label_name not in all_labels
         for label_id in label_ids:
             label_map[label_id] = label_name
+        # Build a description that is less than 100 characters.
+        description = ""
+        truncation_mark = ", …"
+        for item_id in sorted(label_ids, key=str.casefold):
+            new_item = f", {item_id}" if description else item_id
+            if len(description) + len(new_item) <= 100 - len(truncation_mark):
+                description += new_item
+            else:
+                description += truncation_mark
+                break
         # Register label to the global registry.
-        LABELS.append(
-            (label_name, color, ", ".join(sorted(label_ids, key=str.casefold))),
-        )
+        LABELS.append((label_name, color, description))
 
     # Sort label_map by their name.
     return dict(sorted(label_map.items(), key=lambda i: str.casefold(i[1])))

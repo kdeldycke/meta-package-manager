@@ -36,7 +36,7 @@ else:
 
 from meta_package_manager.cli import encoding_args
 from meta_package_manager.inventory import MAIN_PLATFORMS
-from meta_package_manager.labels import MANAGER_PREFIX, PLATFORM_PREFIX
+from meta_package_manager.labels import LABELS, MANAGER_PREFIX, PLATFORM_PREFIX
 from meta_package_manager.pool import pool
 
 """ Test all non-code artifacts depending on manager definitions.
@@ -121,6 +121,14 @@ def test_changelog():
                     ),
                 ),
             )
+
+
+def test_labels():
+    for name, color, description in LABELS:
+        assert name
+        assert color
+        assert color.startswith("#")
+        assert len(description) <= 100
 
 
 def test_new_package_manager_issue_template():

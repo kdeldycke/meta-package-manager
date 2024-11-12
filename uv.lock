@@ -181,7 +181,7 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "4.11.2"
+version = "4.11.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
@@ -197,9 +197,9 @@ dependencies = [
     { name = "wcmatch" },
     { name = "xmltodict" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/30/9c/f04c6ebb6164e8bf1d06b6d9d80be3688b892c65b9b21844b84f3a02cfd2/click_extra-4.11.2.tar.gz", hash = "sha256:6722c585f1cb4487ae75c917e48bf99e25e87d17b5491cc711974090b30e7cf1", size = 87101 }
+sdist = { url = "https://files.pythonhosted.org/packages/53/15/54b0203cb67cdb79f017e2ab57fbc5e77033e82e8e41afe0ae9c14ca3848/click_extra-4.11.3.tar.gz", hash = "sha256:1e475fc6ac4cf319b63d7ff6d9f156974feec000164b6a96d7107e6e3ff97832", size = 87091 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e0/2e/4bd81fbdb363eaedd9b28810082232164f3f48cef7589c5cbdbfb313723e/click_extra-4.11.2-py3-none-any.whl", hash = "sha256:032f2c4b6732e8fc8a7a89c6fbafa859006debe1d26f22233db987357260ef9c", size = 70612 },
+    { url = "https://files.pythonhosted.org/packages/1a/07/8961a669c5702f91aed1d059cd3907134d446fd40fa74523ee73d7769021/click_extra-4.11.3-py3-none-any.whl", hash = "sha256:a693c5206682029562fe413353ff1cc362e731e357fb86df71c5268bd491b446", size = 70609 },
 ]
 
 [package.optional-dependencies]
@@ -375,15 +375,15 @@ wheels = [
 
 [[package]]
 name = "extra-platforms"
-version = "1.5.0"
+version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
     { name = "distro" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0c/93/0d8ebe07ba36b656fc9a1f44a6a5d22ad9e3aa5eae8733a6aec1670033e9/extra_platforms-1.5.0.tar.gz", hash = "sha256:f5a2929b2bb4613a8516a6dfae8a05bf54436f5fc0b0011a7c6f6589a3906630", size = 40261 }
+sdist = { url = "https://files.pythonhosted.org/packages/e0/a7/7fb81009b351e4f3194806cad083515bc11d9df0c86d731c7913840598fa/extra_platforms-1.6.0.tar.gz", hash = "sha256:dbef8d68019362690bd87fcb98ea287e7d381d7b1758a500d66abea320485234", size = 40464 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/53/68/8776d087b482a6572bd8e299dba28292606f033ee29f58e4175f54a56c13/extra_platforms-1.5.0-py3-none-any.whl", hash = "sha256:bf772fda836c111d9772ac754059db96c913cf82b1eef33b380fa9bcd6dd4171", size = 27383 },
+    { url = "https://files.pythonhosted.org/packages/e5/1c/205a8e36650ac5984b55493453dbb80283c55b2fe5c9f66f87d104a5951b/extra_platforms-1.6.0-py3-none-any.whl", hash = "sha256:fdd27b0babec649dda212f9a16ddd9edd12f8288996de729422c6fe60fd1c588", size = 27510 },
 ]
 
 [package.optional-dependencies]
@@ -775,12 +775,12 @@ typing = [
 [package.metadata]
 requires-dist = [
     { name = "boltons", specifier = "~=24.1.0" },
-    { name = "click-extra", specifier = "~=4.11.2" },
-    { name = "click-extra", extras = ["pytest"], marker = "extra == 'test'", specifier = "~=4.11.2" },
-    { name = "click-extra", extras = ["sphinx"], marker = "extra == 'docs'", specifier = "~=4.11.2" },
+    { name = "click-extra", specifier = "~=4.11.3" },
+    { name = "click-extra", extras = ["pytest"], marker = "extra == 'test'", specifier = "~=4.11.3" },
+    { name = "click-extra", extras = ["sphinx"], marker = "extra == 'docs'", specifier = "~=4.11.3" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'test'", specifier = "~=7.6.0" },
     { name = "cyclonedx-python-lib", extras = ["validation"], specifier = "~=8.4.0" },
-    { name = "extra-platforms", extras = ["pytest"], specifier = "~=1.5.0" },
+    { name = "extra-platforms", extras = ["pytest"], specifier = "~=1.6.0" },
     { name = "furo", marker = "extra == 'docs'", specifier = "~=2024.8.6" },
     { name = "more-itertools", specifier = "~=10.5.0" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = "~=4.0.0" },
@@ -1581,11 +1581,11 @@ wheels = [
 
 [[package]]
 name = "webcolors"
-version = "24.8.0"
+version = "24.11.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/fe/f8/53150a5bda7e042840b14f0236e1c0a4819d403658e3d453237983addfac/webcolors-24.8.0.tar.gz", hash = "sha256:08b07af286a01bcd30d583a7acadf629583d1f79bfef27dd2c2c5c263817277d", size = 42392 }
+sdist = { url = "https://files.pythonhosted.org/packages/7b/29/061ec845fb58521848f3739e466efd8250b4b7b98c1b6c5bf4d40b419b7e/webcolors-24.11.1.tar.gz", hash = "sha256:ecb3d768f32202af770477b8b65f318fa4f566c22948673a977b00d589dd80f6", size = 45064 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f0/33/12020ba99beaff91682b28dc0bbf0345bbc3244a4afbae7644e4fa348f23/webcolors-24.8.0-py3-none-any.whl", hash = "sha256:fc4c3b59358ada164552084a8ebee637c221e4059267d0f8325b3b560f6c7f0a", size = 15027 },
+    { url = "https://files.pythonhosted.org/packages/60/e8/c0e05e4684d13459f93d312077a9a2efbe04d59c393bc2b8802248c908d4/webcolors-24.11.1-py3-none-any.whl", hash = "sha256:515291393b4cdf0eb19c155749a096f779f7d909f7cceea072791cb9095b92e9", size = 14934 },
 ]
 
 [[package]]

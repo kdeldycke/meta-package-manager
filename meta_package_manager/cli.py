@@ -50,6 +50,8 @@ from click_extra.colorize import KO, OK, highlight
 from click_extra.colorize import default_theme as theme
 from extra_platforms import is_windows, reduce
 
+from meta_package_manager.inventory import MAIN_PLATFORMS
+
 if sys.version_info >= (3, 11):
     import tomllib
 else:
@@ -161,9 +163,9 @@ def update_manager_selection(
         # instantiation, we have to reverse the process to get our value.
         # Example: --apt-mint => apt_mint => apt-mint
         manager_id = param.name.removeprefix("no_").replace("_", "-")
-        assert manager_id == value, (
-            f"unrecognized single manager selector {param.name!r}"
-        )
+        assert (
+            manager_id == value
+        ), f"unrecognized single manager selector {param.name!r}"
         if param.name.startswith("no_"):
             assert isinstance(value, str)
             to_remove.add(value)
@@ -514,7 +516,9 @@ def managers(ctx):
         os_infos = OK if manager.supported else KO
         if not manager.supported:
             os_infos += " {}".format(
-                ", ".join(sorted(p.name for p in reduce(manager.platforms))),
+                ", ".join(
+                    sorted(p.name for p in reduce(manager.platforms, MAIN_PLATFORMS))
+                ),
             )
         if manager.deprecated:
             os_infos += f" {theme.warning('(deprecated)')}"

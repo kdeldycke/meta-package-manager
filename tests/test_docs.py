@@ -53,7 +53,7 @@ platform or manager addition.
 PROJECT_ROOT = Path(__file__).parent.parent
 
 
-def test_platform_groups_no_overlap():
+def test_local_groups_no_overlap():
     """Check our platform groups are mutually exclusive."""
     for a, b in permutations(MAIN_PLATFORMS, 2):
         if isinstance(a, Group):
@@ -61,7 +61,7 @@ def test_platform_groups_no_overlap():
 
 
 @all_managers
-def test_all_platforms_covered_by_groups(manager):
+def test_all_platforms_covered_by_local_groups(manager):
     """Check all platforms supported by managers are covered by a local group."""
     leftover_platforms = set(manager.platforms.copy())
 
@@ -77,7 +77,7 @@ def test_all_platforms_covered_by_groups(manager):
 
     assert len(leftover_platforms) == 0
     # At this stage we know all platforms of the manager can be partitioned by a
-    # combination of PLATFORM_GROUPS elements, without any overlap or leftover.
+    # combination of MAIN_PLATFORMS elements, without any overlap or leftover.
 
 
 def test_project_metadata():

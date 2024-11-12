@@ -22,12 +22,11 @@ from textwrap import dedent
 
 from click_extra.docs_update import replace_content
 from extra_platforms import (
-    BSD,
+    ANY_WINDOWS,
     BSD_WITHOUT_MACOS,
     LINUX_LIKE,
     MACOS,
-    UNIX,
-    WINDOWS,
+    UNIX_WITHOUT_MACOS,
     Group,
     Platform,
 )
@@ -35,6 +34,28 @@ from tabulate import tabulate
 
 from .base import Operations
 from .pool import pool
+
+MAIN_PLATFORMS: tuple[Group | Platform, ...] = (
+    BSD_WITHOUT_MACOS.copy(id="bsd", name="BSD"),
+    LINUX_LIKE.copy(id="linux", name="Linux"),
+    MACOS,
+    UNIX_WITHOUT_MACOS.copy(
+        id="unix",
+        name="Unix",
+        platforms=tuple(UNIX_WITHOUT_MACOS - BSD_WITHOUT_MACOS - LINUX_LIKE),
+    ),
+    ANY_WINDOWS.copy(id="windows", name="Windows"),
+)
+"""Top-level classification of platforms.
+
+This is the local reference used to classify the execution targets of ``mpm``.
+
+Each entry of this list will have its own dedicated column in the matrix. This list is
+manually maintained with tweaked IDs and names to minimize the matrix verbosity and
+make it readable both in CLI and documentation.
+
+The order of this list determine the order of the resulting columns.
+"""
 
 
 def managers_sankey() -> str:
@@ -54,35 +75,6 @@ def managers_sankey() -> str:
     output += "\n".join(table)
     output += "\n```"
     return output
-
-
-UNIX_WITHOUT_BSD_LINUX = Group(
-    "unix_without_bsd_linux",
-    "Any Unix but BSDs and Linux-like",
-    "⨂",
-    tuple(UNIX - BSD - LINUX_LIKE),
-)
-"""All Unix platforms, without macOS or any Linux-like.
-
-..todo:
-    Contribute to extra-platforms?
-"""
-
-
-MAIN_PLATFORMS: tuple[Group | Platform, ...] = (
-    BSD_WITHOUT_MACOS,
-    LINUX_LIKE,
-    MACOS,
-    UNIX_WITHOUT_BSD_LINUX,
-    WINDOWS,
-)
-"""Groups or platforms that will have their own dedicated column in the matrix.
-
-This list is manually maintained with the objective of minimizing the matrix verbosity
-and make it readable.
-
-The order of this list determine the order of the resulting columns.
-"""
 
 
 def operation_matrix() -> str:

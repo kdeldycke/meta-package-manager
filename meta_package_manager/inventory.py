@@ -77,7 +77,7 @@ def managers_sankey() -> str:
     return output
 
 
-def operation_matrix() -> str:
+def operation_matrix() -> tuple[str, str]:
     """Produce a table of managers' metadata and supported operations."""
     # Build up the column titles.
     headers = [
@@ -152,12 +152,7 @@ def operation_matrix() -> str:
     lines = rendered_table.splitlines()
     lines[1] = header_separator
 
-    output = "\n".join(lines)
-    if footnotes:
-        output += "\n\n"
-        output += "\n\n".join(footnotes)
-
-    return output
+    return "\n".join(lines), "\n\n".join(footnotes)
 
 
 def update_readme() -> None:
@@ -172,9 +167,16 @@ def update_readme() -> None:
         managers_sankey(),
     )
 
+    matrix, footnotes = operation_matrix()
     replace_content(
         readme,
         "<!-- operation-matrix-start -->\n\n",
         "\n\n<!-- operation-matrix-end -->",
-        operation_matrix(),
+        matrix,
+    )
+    replace_content(
+        readme,
+        "<!-- operation-footnotes-start -->\n\n",
+        "\n\n<!-- operation-footnotes-end -->",
+        footnotes,
     )

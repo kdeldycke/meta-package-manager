@@ -143,12 +143,6 @@ Meta Package Manager,zypper,1
 | [`yum`](http://yum.baseurl.org)                                                         | 4.0.0        |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`zypper`](https://en.opensuse.org/Portal:Zypper)                                       | 1.14.0       |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
 
-[^bsd]: BSD: FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS.
-
-[^linux]: Linux: ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CentOS, CloudLinux OS, Debian, Exherbo Linux, Fedora, Gentoo Linux, Guix System, IBM PowerKVM, KVM for IBM z Systems, Linux Mint, Mageia, Mandriva Linux, openSUSE, Oracle Linux, Parallels, Pidora, Raspbian, RedHat Enterprise Linux, Rocky Linux, Scientific Linux, Slackware, SUSE Linux Enterprise Server, Tuxedo OS, Ubuntu, Unknown Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer.
-
-[^unix]: Unix: Cygwin, GNU/Hurd, IBM AIX, Solaris.
-
 <!-- operation-matrix-end -->
 
 > [!NOTE]
@@ -298,8 +292,12 @@ Other subcommands and options are documented in:
   [list of use-cases](https://kdeldycke.github.io/meta-package-manager/usecase.html)
   where you’ll find inspiration on how to leverage `mpm` power
 
-[^bsd_without_macos]: BSD: FreeBSD, NetBSD, OpenBSD, SunOS.
+<!-- operation-footnotes-start -->
 
-[^linux]: Linux: Linux, Windows Subsystem for Linux v2.
+[^bsd]: BSD: FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS.
 
-[^unix]: Unix: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.
+[^linux]: Linux: ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CentOS, CloudLinux OS, Debian, Exherbo Linux, Fedora, Gentoo Linux, Guix System, IBM PowerKVM, KVM for IBM z Systems, Linux Mint, Mageia, Mandriva Linux, openSUSE, Oracle Linux, Parallels, Pidora, Raspbian, RedHat Enterprise Linux, Rocky Linux, Scientific Linux, Slackware, SUSE Linux Enterprise Server, Tuxedo OS, Ubuntu, Unknown Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer.
+
+[^unix]: Unix: Cygwin, GNU/Hurd, IBM AIX, Solaris.
+
+<!-- operation-footnotes-end -->

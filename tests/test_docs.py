@@ -53,6 +53,12 @@ platform or manager addition.
 PROJECT_ROOT = Path(__file__).parent.parent
 
 
+def test_unique_local_group_ids():
+    """Check our platform groups have unique identifiers."""
+    group_ids = [p.id for p in MAIN_PLATFORMS]
+    assert len(group_ids) == len(set(group_ids))
+
+
 def test_local_groups_no_overlap():
     """Check our platform groups are mutually exclusive."""
     for a, b in permutations(MAIN_PLATFORMS, 2):

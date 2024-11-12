@@ -257,7 +257,7 @@ class PackageManager(metaclass=MetaPackageManager):
     platforms: _TNestedSources = frozenset()
     """List of platforms supported by the manager.
 
-    Allows for a mishmash of platforms and groups. Will be normalized into a frozen set
+    Allows for a mishmash of platforms and groups. Will be normalized into a `frozenset`
     of ``Platform`` instances at instantiation.
     """
 

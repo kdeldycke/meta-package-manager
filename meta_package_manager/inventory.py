@@ -37,7 +37,7 @@ from .pool import pool
 
 MAIN_PLATFORMS: tuple[Group | Platform, ...] = (
     BSD_WITHOUT_MACOS.copy(id="bsd", name="BSD"),
-    LINUX_LIKE.copy(id="linux", name="Linux"),
+    LINUX_LIKE.copy(id="linux", name="Linux", icon="🐧"),
     MACOS,
     UNIX_WITHOUT_MACOS.copy(
         id="unix",
@@ -110,12 +110,11 @@ def operation_matrix() -> str:
             f"{m.requirement}",
         ]
         for p_obj in MAIN_PLATFORMS:
-            if (isinstance(p_obj, Platform) and p_obj in m.platforms) or (
-                isinstance(p_obj, Group) and p_obj.issubset(m.platforms)
-            ):
-                line.append(p_obj.icon)
-            else:
-                line.append("")
+            line.append(
+                p_obj.icon
+                if m.platforms.issuperset(Group._extract_platforms(p_obj))
+                else ""
+            )
         for op in Operations:
             line.append("✓" if m.implements(op) else "")
         table.append(line)

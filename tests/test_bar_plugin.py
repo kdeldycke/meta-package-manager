@@ -186,6 +186,7 @@ class TestBarPlugin:
         # Check all required regex did match at least once.
         for index, (regex, required) in enumerate(checks):
             if required and not match_counter[index]:
+                print(process.stdout)
                 msg = f"{regex!r} regex did not match any plugin output line."
                 raise Exception(msg)
 

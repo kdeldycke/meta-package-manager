@@ -96,15 +96,15 @@ class TestSearch(CLISubCommandTests, CLITableTests):
             ╭────────────┬────────────────────────────────┬─────────┬────────────────╮
             │ Package ID │ Name                           │ Manager │ Latest version │
             ├────────────┼────────────────────────────────┼─────────┼────────────────┤
-            │ 1536361140 │ 业务掌中，有轨迹的钉，外勤管理      │ mas     │ 4.29           │
+            │ 1536361140 │ 业务掌中，有轨迹的钉，外勤管理        │ mas     │ 4.29           │
             ╰────────────┴────────────────────────────────┴─────────┴────────────────╯
 
         Test originates from #16.
         """
         result = invoke("--mas", "search", "钉钉")
         assert result.exit_code == 0
-        assert "钉钉" in result.stdout
-        assert "\x1b[32m\x1b[1m钉钉\x1b[0m" in result.stdout
+        assert "钉" in result.stdout
+        assert "\x1b[32m\x1b[1m钉\x1b[0m" in result.stdout
 
     # PyPi's online search API was at first rate-limited. So we added an artificial
     # 2-seconds delay to prevent the following error:

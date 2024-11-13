@@ -34,19 +34,20 @@ class UV(PackageManager):
     version to introduce ``pip list --outdated`` command.
     """
 
-    pre_args = ("--color", "never")
+    pre_args = ("--color", "never", "--no-progress")
     """
-    ```text
-    --color color-choice
-    Control colors in output
+    - ``--color color-choice``
+        Control colors in output [default: ``auto``]
 
-    [default: auto]
+        Possible values:
+        - ``auto``: Enables colored output only when the output is going to a terminal or TTY with support
+        - ``always``: Enables colored output regardless of the detected environment
+        - ``never``: Disables colored output
 
-    Possible values:
-    - auto: Enables colored output only when the output is going to a terminal or TTY with support
-    - always: Enables colored output regardless of the detected environment
-    - never: Disables colored output
-    ```
+    - ``--no-progress``
+        Hide all progress outputs.
+
+        For example, spinners or progress bars.
     """
 
     version_regex = r"uv\s+(?P<version>\S+)"
@@ -63,7 +64,7 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            ► uv --color never pip list --format=json | jq
+            ► uv --color never --no-progress pip list --format=json | jq
             [
               {
                 "name": "markupsafe",
@@ -96,7 +97,7 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            ► uv --color never pip list --outdated --format=json | jq
+            ► uv --color never --no-progress pip list --outdated --format=json | jq
             [
               {
                 "name": "lark-parser",
@@ -127,7 +128,7 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            ► uv --color never pip install "tomli_w == 1.0.0"
+            ► uv --color never --no-progress pip install "tomli_w == 1.0.0"
             Resolved 1 package in 574ms
             Installed 1 package in 2ms
              + tomli-w==1.0.0
@@ -146,7 +147,7 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            ► uv --color never pip install --upgrade "tomli_w == 0.4.0"
+            ► uv --color never --no-progress pip install --upgrade "tomli_w == 0.4.0"
             Resolved 1 package in 1ms
             Uninstalled 1 package in 0.54ms
             Installed 1 package in 0.94ms
@@ -155,7 +156,7 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            ► uv --color never pip install --upgrade "tomli_w"
+            ► uv --color never --no-progress pip install --upgrade "tomli_w"
             Resolved 1 package in 2ms
             Uninstalled 1 package in 1ms
             Installed 1 package in 2ms

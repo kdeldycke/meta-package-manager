@@ -35,9 +35,10 @@ class MAS(PackageManager):
 
     platforms = MACOS
 
-    # 'mas search' has been fixed in 1.8.7:
-    # https://github.com/mas-cli/mas/pull/505
     requirement = "1.8.7"
+    """`1.8.7 <https://github.com/mas-cli/mas/releases/tag/v1.8.7>`_ is fixing the
+    ``mas search`` command.
+    """
 
     version_cli_options = ("version",)
     """

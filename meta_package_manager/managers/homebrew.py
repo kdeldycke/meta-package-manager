@@ -42,7 +42,8 @@ class Homebrew(PackageManager):
     requirement = "2.7.0"
     """Vanilla ``brew`` and ``cask`` CLIs now shares the same version.
 
-    ``2.7.0`` is the first release to enforce the use of ``--cask`` option.
+    `2.7.0 <https://github.com/Homebrew/brew/releases/tag/2.7.0>`_ is the first release
+    to enforce the use of ``--cask`` option.
     """
 
     # Declare this manager as virtual, i.e. not tied to a real CLI.

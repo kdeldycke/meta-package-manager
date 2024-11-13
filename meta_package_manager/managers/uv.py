@@ -29,9 +29,9 @@ class UV(PackageManager):
 
     platforms = ALL_PLATFORMS
 
-    requirement = "0.1.45"
-    """`v0.1.45 <https://github.com/astral-sh/uv/releases/tag/0.1.45>`_ is the first
-    version to support ``--format=json`` parameter.
+    requirement = "0.5.0"
+    """`0.5.0 <https://github.com/astral-sh/uv/releases/tag/0.5.0>`_ is the first
+    version to introduce ``pip list --outdated`` command.
     """
 
     pre_args = ("--color", "never")
@@ -88,6 +88,38 @@ class UV(PackageManager):
                 yield self.package(
                     id=package["name"],
                     installed_version=package["version"],
+                )
+
+    @property
+    def outdated(self) -> Iterator[Package]:
+        """Fetch outdated packages.
+
+        .. code-block:: shell-session
+
+            ► uv pip list --outdated --format=json | jq
+            [
+              {
+                "name": "lark-parser",
+                "version": "0.7.8",
+                "latest_version": "0.12.0",
+                "latest_filetype": "wheel"
+              },
+              {
+                "name": "types-setuptools",
+                "version": "75.3.0.20241107",
+                "latest_version": "75.3.0.20241112",
+                "latest_filetype": "wheel"
+              }
+            ]
+        """
+        output = self.run_cli("pip", "list", "--outdated", "--format=json")
+
+        if output:
+            for package in json.loads(output):
+                yield self.package(
+                    id=package["name"],
+                    installed_version=package["version"],
+                    latest_version=package["latest_version"],
                 )
 
     def install(self, package_id: str, version: str | None = None) -> str:

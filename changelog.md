@@ -9,7 +9,7 @@
 - \[dnf,mas,vscode,yum\] Implement `remove` operation.
 - \[dnf,yum\] Use query template instead of regex parsing to retrieve package data.
 - \[flatpak\] Fix parsing of descriptions with spaces.
-- \[uv\] Implement `outdated` operation.
+- \[uv\] Implement `outdated` and `cleanup` operation.
 - \[uv\] Bump minimal requirement to `0.5.0`.
 - \[uv\] Always invoke `uv` with `--no-progress` parameter.
 - \[mas\] Bump minimal requirement to `1.8.7`.

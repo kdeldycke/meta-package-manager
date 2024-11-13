@@ -173,8 +173,25 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            ► uv --color never pip uninstall tomli_w
+            ► uv --color never --no-progress pip uninstall tomli_w
             Uninstalled 1 package in 5ms
              - tomli-w==1.0.0
         """
         return self.run_cli("pip", "uninstall", package_id)
+
+    def cleanup(self) -> None:
+        """Removes things we don't need anymore.
+
+        .. code-block:: shell-session
+
+            ► uv --color never --no-progress cache clean
+            Clearing cache at: /Users/kde/Library/Caches/uv
+            Removed 97279 files (2.0GiB)
+
+        .. code-block:: shell-session
+
+            ► uv --color never --no-progress cache prune
+            No cache found at: /Users/kde/.cache/uv
+        """
+        self.run_cli("cache", "clean")
+        self.run_cli("cache", "prune")

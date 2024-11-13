@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.19.1 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v5.19.0...main)
+
+> [!IMPORTANT]
+> This version is not released yet and is under active development.
+
 ## [5.19.0 (2024-11-13)](https://github.com/kdeldycke/meta-package-manager/compare/v5.18.0...v5.19.0)
 
 - \[vscodium\] Add support for VSCodium plugins.

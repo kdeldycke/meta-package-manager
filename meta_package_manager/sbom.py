@@ -145,16 +145,14 @@ class SPDX(SBOM):
         """
         profile = get_profile()
         system_id = self.normalize_spdx_id(
-            "-".join(
-                (
-                    current_os().name,
-                    profile["linux_dist_name"],
-                    profile["linux_dist_version"],
-                    profile["uname"]["system"],
-                    profile["uname"]["release"],
-                    profile["uname"]["machine"],
-                )
-            )
+            "-".join((
+                current_os().name,
+                profile["linux_dist_name"],
+                profile["linux_dist_version"],
+                profile["uname"]["system"],
+                profile["uname"]["release"],
+                profile["uname"]["machine"],
+            ))
         )
 
         self.document = Document(

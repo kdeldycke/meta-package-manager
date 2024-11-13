@@ -82,9 +82,6 @@ class TestSearch(CLISubCommandTests, CLITableTests):
                 for f in pkg:
                     assert isinstance(pkg[f], str) or pkg[f] is None
 
-    # XXX mas CLI has been deactivated in GitHub action runner because it timed out.
-    # See: https://github.com/kdeldycke/meta-package-manager/commit/2f0cf1c
-    @pytest.mark.skip(reason="mas is not available in macOS GitHub runner")
     @unless_macos
     def test_unicode_search(self, invoke):
         """Check ``mpm`` is accepting unicode as search query.
@@ -96,17 +93,18 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         .. code-block:: shell-session
 
             ► mpm --mas search 钉钉
-            ╭────────────┬──────┬─────────┬────────────────╮
-            │ Package ID │ Name │ Manager │ Latest version │
-            ├────────────┼──────┼─────────┼────────────────┤
-            │ 1435447041 │ 钉钉 │ mas     │ 7.5.0          │
-            ╰────────────┴──────┴─────────┴────────────────╯
+            ╭────────────┬────────────────────────────────┬─────────┬────────────────╮
+            │ Package ID │ Name                           │ Manager │ Latest version │
+            ├────────────┼────────────────────────────────┼─────────┼────────────────┤
+            │ 1536361140 │ 业务掌中，有轨迹的钉，外勤管理      │ mas     │ 4.29           │
+            ╰────────────┴────────────────────────────────┴─────────┴────────────────╯
 
         Test originates from #16.
         """
         result = invoke("--mas", "search", "钉钉")
         assert result.exit_code == 0
         assert "钉钉" in result.stdout
+        assert "\x1b[32m\x1b[1m钉钉\x1b[0m" in result.stdout
 
     # PyPi's online search API was at first rate-limited. So we added an artificial
     # 2-seconds delay to prevent the following error:

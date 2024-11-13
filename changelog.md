@@ -9,6 +9,8 @@
 - \[dnf,yum,vscode\] Implement `remove` operation.
 - \[dnf,yum\] Use query template instead of regex parsing to retrieve package data.
 - \[flatpak\] Fix parsing of descriptions with spaces.
+- \[mas\] Bump minimal requirement to `1.8.7`.
+- \[mas\] Reactivate `mas` tests.
 - \[mpm\] Add official support for Python 3.13.
 - \[mpm\] Drop support for Python 3.9.
 - \[mpm\] Replace local platform utilities by `extra-platforms` dependency.

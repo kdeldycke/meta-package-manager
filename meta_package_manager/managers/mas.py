@@ -193,3 +193,14 @@ class MAS(PackageManager):
             ► mas upgrade 945397020
         """
         return self.build_cli("upgrade", package_id)
+
+    def remove(self, package_id: str) -> str:
+        """Removes a package.
+
+        .. code-block:: shell-session
+
+            ► sudo mas uninstall 1494051017
+            Password:
+            Deleted '/Applications/SimpleLogin.app' to '/Users/kde/.Trash/SimpleLogin.app'
+        """
+        return self.run_cli("uninstall", package_id, sudo=True)

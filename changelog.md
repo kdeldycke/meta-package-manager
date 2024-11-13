@@ -6,7 +6,7 @@
 > This version is not released yet and is under active development.
 
 - \[vscodium\] Add support for VSCodium plugins.
-- \[dnf,yum,vscode\] Implement `remove` operation.
+- \[dnf,mas,vscode,yum\] Implement `remove` operation.
 - \[dnf,yum\] Use query template instead of regex parsing to retrieve package data.
 - \[flatpak\] Fix parsing of descriptions with spaces.
 - \[mas\] Bump minimal requirement to `1.8.7`.

@@ -20,6 +20,7 @@ import json
 import re
 import subprocess
 import sys
+from textwrap import dedent
 from typing import Collection, Iterator
 
 import pytest
@@ -331,6 +332,26 @@ class TestManagerSelection(InspectCLIOutput):
         assert "warning: " not in result.stderr
         assert "info: " not in result.stderr
         assert "debug: " not in result.stderr
+
+    @pytest.mark.skip(reason="Generated config file is not isolated from other tests.")
+    def test_conf_and_parameter_mix_keep_order(self, invoke, create_config):
+        """"""
+        conf_path = create_config(
+            "conf.toml",
+            dedent("""\
+                [mpm]
+                npm = true
+                flatpak = false
+                manager = ["gem"]
+                cargo = false
+                pipx = true
+                """),
+        )
+        result = invoke(
+            "--uv", "--no-pip", "--config", str(conf_path), "managers", color=False
+        )
+        assert result.exit_code == 0
+        self.check_manager_selection(result, ("uv", "npm", "gem", "pipx"))
 
 
 class CLISubCommandTests(InspectCLIOutput):

@@ -19,11 +19,13 @@ from __future__ import annotations
 import logging
 import sys
 from collections import Counter, namedtuple
+from configparser import RawConfigParser
 from datetime import datetime
 from functools import partial
 from io import TextIOWrapper
 from operator import attrgetter
 from pathlib import Path
+from textwrap import dedent
 from typing import IO, Iterable
 from unittest.mock import patch
 
@@ -114,64 +116,63 @@ def prep_path(filepath: Path) -> IO | None:
 
 
 def update_manager_selection(
-    ctx: Context, param: Parameter, value: str | Iterable[str] | None
+    ctx: Context, param: Parameter, value: str | Iterable[str] | bool | None
 ) -> None:
     """Update global selection list of managers in the context.
 
     Accumulate and merge all manager selectors to form the initial population enforced by the user.
     """
     # Option has not been called.
-    if not value:
+    if value is None:
         return
 
-    # Is a list to keep the natural order of selection.
+    # Use a list to keep the natural order of selection.
     to_add: list[str] = []
-    # Is a set because we removal takes precedence over addition, so we don't
-    # care about user's order.
+    # Use a set because removal takes precedence over addition: we don't care
+    # about user's order.
     to_remove: set[str] = set()
 
     assert param.name
 
     # Add the value of --manager list.
     if param.name == "manager":
-        for manager_id in value:
-            logging.warning(
-                f"The `--include {theme.invoked_command(manager_id)}` option is "
-                f"deprecated. Use `--{theme.invoked_command(manager_id)}` single "
-                "selector instead.",
-            )
         to_add.extend(value)
 
     # Add the value of --exclude list.
     elif param.name == "exclude":
-        for manager_id in value:
-            logging.warning(
-                f"The `--exclude {theme.invoked_command(manager_id)}` option is "
-                f"deprecated. Use `--no-{theme.invoked_command(manager_id)}` single "
-                "selector instead.",
-            )
         to_remove.update(value)
 
     # Update the list of managers with the XKCD preset.
     elif param.name == "xkcd":
-        to_add.extend(XKCD_MANAGER_ORDER)
+        if value:
+            to_add.extend(XKCD_MANAGER_ORDER)
 
     # Update selection with single selectors.
     else:
-        assert value in pool.all_manager_ids, f"{value!r} is not a recognized manage ID"
         # Because the parameter's name is transformed into a Python identifier on
         # instantiation, we have to reverse the process to get our value.
         # Example: --apt-mint => apt_mint => apt-mint
         manager_id = param.name.removeprefix("no_").replace("_", "-")
-        assert manager_id == value, (
-            f"unrecognized single manager selector {param.name!r}"
-        )
-        if param.name.startswith("no_"):
-            assert isinstance(value, str)
-            to_remove.add(value)
+        assert (
+            manager_id in pool.all_manager_ids
+        ), f"unrecognized single manager selector {param.name!r}"
+
+        # Normalize the value to a boolean.
+        if isinstance(value, str):
+            value = RawConfigParser.BOOLEAN_STATES.get(value.lower(), value)
+        assert value in (
+            manager_id,
+            True,
+            False,
+        ), f"unexpected value {value!r} for {param!r}"
+
+        if param.name.startswith("no_") ^ (value is False):
+            to_remove.add(manager_id)
         else:
-            assert isinstance(value, str)
-            to_add.append(value)
+            to_add.append(manager_id)
+
+    logging.debug(f"Managers added by {param}: {to_add}")
+    logging.debug(f"Managers removed by {param}: {to_remove}")
 
     # Initialize the shared context object to accumulate there the selection results.
     if ctx.obj is None:
@@ -271,13 +272,20 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 )
 @option_group(
     "Package manager selection options",
-    "These options allow you to restrict the subcommand to a subset of managers. "
-    "By default, mpm will evaluate all managers supported on the current platform. "
-    "To only target a subset of managers, use the --<manager-id> selectors below. "
-    "To remove a manager from the selection, use the --no-<manager-id> selectors.  "
-    "The order of the selectors is preserved for priority-sensitive subcommands. "
-    "Exclusion of a manager always takes precedence over inclusion, whatever the "
-    "parameter position.",
+    # ---------------------- 80 characters reference limit ----------------------- #
+    dedent("""\
+    \b
+    Use these options to restrict the subcommand to a subset of managers.
+
+    \b
+    - By default, mpm will evaluate all managers supported on the current platform.
+    - Only target a subset of managers with the --<manager-id> selectors.
+    - Remove a manager from the selection with --no-<manager-id> selectors.
+    - Order of the selectors is preserved for priority-sensitive subcommands.
+    - Exclusion of a manager always takes precedence over its inclusion.
+    \b
+
+    """),
     *single_manager_selectors(),
     option(
         "-a",
@@ -304,6 +312,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         type=Choice(pool.all_manager_ids, case_sensitive=False),
         multiple=True,
         expose_value=False,
+        hidden=True,
         callback=update_manager_selection,
         help="(Deprecated) Use --<manager-id> single selector instead.",
     ),
@@ -313,6 +322,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         type=Choice(pool.all_manager_ids, case_sensitive=False),
         multiple=True,
         expose_value=False,
+        hidden=True,
         callback=update_manager_selection,
         help="(Deprecated) Use --no-<manager-id> single selector instead.",
     ),
@@ -427,16 +437,16 @@ def mpm(
         user_selection = ctx.obj.get("managers_to_add", None)
         managers_to_remove = ctx.obj.get("managers_to_remove", None)
     selection_string = (
-        repr(user_selection)
+        ": None"
         if not user_selection
         else "> " + " > ".join(map(theme.invoked_command, user_selection))
     )
     deselection_string = (
-        repr(managers_to_remove)
+        "None"
         if not managers_to_remove
-        else ", ".join(map(theme.invoked_command, managers_to_remove))
+        else ", ".join(map(theme.invoked_command, sorted(managers_to_remove)))
     )
-    logging.info(f"User selection of managers by priority: {selection_string}")
+    logging.info(f"User selection of managers by priority {selection_string}")
     logging.info(f"Managers dropped by user: {deselection_string}")
 
     # Select the subset of manager to target, and apply manager-level options.

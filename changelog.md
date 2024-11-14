@@ -5,6 +5,10 @@
 > [!IMPORTANT]
 > This version is not released yet and is under active development.
 
+- [mpm] Hide `--manager` and `--exclude` options from help output and silence deprecation warnings. Closes {issue}`1358`.
+- [mpm] Add detailed documentation on manager selection with configuration file.
+- [mpm] Fix mixing of manager selector lists and flags.
+
 ## [5.19.0 (2024-11-13)](https://github.com/kdeldycke/meta-package-manager/compare/v5.18.0...v5.19.0)
 
 - \[vscodium\] Add support for VSCodium plugins.

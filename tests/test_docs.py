@@ -24,7 +24,7 @@ from itertools import permutations
 from pathlib import Path
 
 from boltons.iterutils import flatten
-from extra_platforms import Group, Platform
+from extra_platforms import Group
 from yaml import Loader, load
 
 from .conftest import all_managers
@@ -96,31 +96,30 @@ def test_project_metadata():
 
 def test_changelog():
     content = PROJECT_ROOT.joinpath("changelog.md").read_text(**encoding_args)
-
     assert content.startswith("# Changelog\n")
 
-    entry_pattern = re.compile(r"^\* \[(?P<category>[a-z,]+)\] (?P<entry>.+)")
+    entry_pattern = re.compile(r"^- \\\[(?P<category>[a-z,\-]+)\\\] (?P<entry>.+)")
+
+    allowed_categories = set(
+        (
+            *pool.all_manager_ids,
+            *(p.id for p in MAIN_PLATFORMS),
+            "mpm",
+            "bar-plugin",
+        )
+    )
+
     for line in content.splitlines():
-        if line.startswith("*"):
+        if line.startswith("-"):
             match = entry_pattern.match(line)
             assert match
             entry = match.groupdict()
             assert entry["category"]
-            assert set(entry["category"].split(",")).issubset(
-                flatten(
-                    (
-                        pool.all_manager_ids,
-                        (p.id for p in MAIN_PLATFORMS if isinstance(p, Platform)),
-                        (
-                            g.platform_ids
-                            for g in MAIN_PLATFORMS
-                            if isinstance(g, Group)
-                        ),
-                        "mpm",
-                        "bar-plugin",
-                    ),
-                ),
-            )
+            categories = entry["category"].split(",")
+            assert len(categories)
+            assert len(categories) == len(set(categories))
+            assert categories == sorted(categories)
+            assert set(categories).issubset(allowed_categories)
 
 
 def test_labels():

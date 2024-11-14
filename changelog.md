@@ -307,7 +307,7 @@
 ## [5.2.0 (2022-06-16)](https://github.com/kdeldycke/meta-package-manager/compare/v5.1.0...v5.2.0)
 
 - \[yay\] Add `yay` support. Refs {issue}`527`.
-- \[mpm,pip,pipx,pacman\] Add `remove` operation.
+- \[mpm,pacman,pip,pipx\] Add `remove` operation.
 - \[mpm\] Add description in search results. Refs {issue}`503`.
 - \[mpm\] Always refilters search results manually to refine gross matchings.
 - \[mpm\] Document `brew` and Arch Linux installation. Refs {issue}`527`.
@@ -816,7 +816,7 @@
 - \[mpm\] Add new `search` operation. Closes {issue}`22`.
 - \[npm\] Bump minimal requirement of `npm` to `4.0.*`.
 - \[mpm\] Rename `list` operation to `installed`.
-- \[gem,npm,apm,linux\] Allow use of `gem`, `npm` and `apm` managers on Linux.
+- \[apm,gem,linux,npm\] Allow use of `apm`, `gem` and `npm` managers on Linux.
 - \[mpm\] Add new `--stats`/`--no-stats` boolean flags. Closes {issue}`8`.
 - \[mpm\] Add new `--stop-on-error`/`--continue-on-error` parameters to make
   CLI errors either blocking or non-blocking.
@@ -906,11 +906,11 @@
 - \[mpm\] Fix rendering of unicode logs.
 - \[mpm\] Bump requirement to `click_log >= 0.1.5`.
 - \[bar-plugin\] Force `LANG` environment variable to `en_US.UTF-8`.
-- \[mpm,bar-plugin\] Share same code path for CLI execution between `mpm` and
+- \[bar-plugin,mpm\] Share same code path for CLI execution between `mpm` and
   BitBar plugin.
 - \[mpm\] Add a `-d`/`--dry-run` option to `mpm upgrade` sub-command.
 - \[macos\] Remove hard-requirement on `macOS` platform. Refs {issue}`7`.
-- \[mpm,macos\] Fix upgrade of `setuptools` in `macOS` and Python 3.3 Travis
+- \[macos,mpm\] Fix upgrade of `setuptools` in `macOS` and Python 3.3 Travis
   jobs.
 
 ## [2.0.0 (2016-12-04)](https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...v2.0.0)
@@ -938,7 +938,7 @@
 - \[mpm\] Differentiate packages names and IDs. Closes {issue}`11`.
 - \[mpm\] Sort list of outdated packages by lower-cased package names first.
 - \[mpm\] Add `upgrade_cli` field for each outdated packages in JSON output.
-- \[mpm,bar-plugin\] Allow user to choose rendering of `upgrade_cli` field to
+- \[bar-plugin,mpm\] Allow user to choose rendering of `upgrade_cli` field to
   either one-liner, fragments or BitBar format. Closes {issue}`14`.
 - \[mpm\] Include errors reported by each manager in JSON output of
   `mpm outdated` command.
@@ -1045,7 +1045,7 @@
 
 ## [1.2.0 (2016-07-08)](https://github.com/kdeldycke/meta-package-manager/compare/v1.1.0...v1.2.0)
 
-- \[pip,npm,apm,gem\] Add support for both `pip2` and `pip3`, Node's `npm`,
+- \[apm,gem,npm,pip\] Add support for both `pip2` and `pip3`, Node's `npm`,
   Atom's `apm`, Ruby's `gem`.
 - \[cask\] Fixup `brew cask` checking.
 - \[mpm\] Don't die on errors.

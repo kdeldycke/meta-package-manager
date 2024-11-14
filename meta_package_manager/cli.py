@@ -437,7 +437,7 @@ def mpm(
         user_selection = ctx.obj.get("managers_to_add", None)
         managers_to_remove = ctx.obj.get("managers_to_remove", None)
     selection_string = (
-        ": None"
+        ": Platform default"
         if not user_selection
         else "> " + " > ".join(map(theme.invoked_command, user_selection))
     )

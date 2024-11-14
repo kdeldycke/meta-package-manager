@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Dict, FrozenSet
 
 from boltons.iterutils import flatten
-from extra_platforms import Group, Platform
+from extra_platforms import Group
 
 from .inventory import MAIN_PLATFORMS
 from .pool import pool
@@ -133,10 +133,9 @@ PLATFORM_PREFIX = "🖥 platform: "
 
 PLATFORM_LABEL_GROUPS: TLabelGroup = {}
 for p_obj in MAIN_PLATFORMS:
-    if isinstance(p_obj, Group):
-        PLATFORM_LABEL_GROUPS[p_obj.name] = frozenset(p.name for p in p_obj.platforms)
-    elif isinstance(p_obj, Platform):
-        PLATFORM_LABEL_GROUPS[p_obj.name] = frozenset((p_obj.name,))
+    PLATFORM_LABEL_GROUPS[p_obj.name] = frozenset(
+        p.name for p in Group._extract_platforms(p_obj)
+    )
 """Similar platforms are grouped together under the same label."""
 
 all_platform_label_ids = frozenset(flatten(PLATFORM_LABEL_GROUPS.values()))

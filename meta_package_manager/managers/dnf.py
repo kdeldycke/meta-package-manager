@@ -40,7 +40,7 @@ class DNF(PackageManager):
 
     requirement = "4.0.0"
 
-    cli_names = ("dnf",)
+    cli_names = ("dnf4",)
     """
     .. code-block:: shell-session
 
@@ -65,12 +65,15 @@ class DNF(PackageManager):
             audit-libs 2.2.53-1.el8 audit_libs_dummary x86_64
             (...)
         """
-        qf = ["%{name}", "%{version}", "%{summary}", "%{arch}"]
+        qf = ["%{name}", "%{version}", "%{summary}", "%{arch}\n"]
         output = self.run_cli(
             "repoquery", "--userinstalled", "--qf", DNF.DELIMITER.join(qf)
         )
 
         for line_package in output.splitlines():
+            # remove empty new line
+            if not line_package:
+                continue
             package_id, installed_version, summary, arch = line_package.split(
                 DNF.DELIMITER
             )
@@ -94,10 +97,13 @@ class DNF(PackageManager):
             audit-libs 2.2.53-1.el8 2.6.53-1.el8 audit_libs_dummary x86_64
             (...)
         """
-        qf = ["%{name}", "%{version}", "%{evr}", "%{summary}", "%{arch}"]
+        qf = ["%{name}", "%{version}", "%{evr}", "%{summary}", "%{arch}\n"]
         output = self.run_cli("repoquery", "--upgrades", "--qf", DNF.DELIMITER.join(qf))
 
         for line_package in output.splitlines():
+            # remove empty new line
+            if not line_package:
+                continue
             package_id, installed_version, last_version, summary, arch = (
                 line_package.split(DNF.DELIMITER)
             )
@@ -211,6 +217,13 @@ class DNF(PackageManager):
         """
 
         return self.run_cli("--assumeyes", "autoremove", package_id, sudo=True)
+
+
+class DNF5(DNF):
+    homepage_url = "https://github.com/rpm-software-management/dnf5"
+    requirement = "5.0.0"
+    cli_names = ("dnf5",)
+    pre_args = ()
 
 
 class YUM(DNF):

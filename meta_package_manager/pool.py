@@ -31,7 +31,7 @@ from .managers.apt import APT, APT_Mint
 from .managers.cargo import Cargo
 from .managers.chocolatey import Choco
 from .managers.composer import Composer
-from .managers.dnf import DNF, YUM
+from .managers.dnf import DNF, DNF5, YUM
 from .managers.emerge import Emerge
 from .managers.flatpak import Flatpak
 from .managers.gem import Gem
@@ -65,6 +65,7 @@ manager_classes = (
     Choco,
     Composer,
     DNF,
+    DNF5,
     Emerge,
     Flatpak,
     Gem,

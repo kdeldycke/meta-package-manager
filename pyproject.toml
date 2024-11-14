@@ -91,7 +91,7 @@ classifiers = [
 ]
 dependencies = [
     "boltons ~= 24.1.0",
-    "click-extra ~= 4.11.3",
+    "click-extra ~= 4.11.4",
     "cyclonedx-python-lib [validation] ~= 8.4.0",
     "extra-platforms [pytest] ~= 1.6.0",
     "more-itertools ~= 10.5.0",

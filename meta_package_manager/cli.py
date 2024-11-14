@@ -137,11 +137,13 @@ def update_manager_selection(
     # Add the value of --manager list.
     if param.name == "manager":
         if value:
+            assert isinstance(value, Iterable)
             to_add.extend(value)
 
     # Add the value of --exclude list.
     elif param.name == "exclude":
         if value:
+            assert isinstance(value, Iterable)
             to_remove.update(value)
 
     # Update the list of managers with the XKCD preset.

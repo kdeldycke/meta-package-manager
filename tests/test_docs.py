@@ -71,15 +71,11 @@ def test_all_platforms_covered_by_local_groups(manager):
     """Check all platforms supported by managers are covered by a local group."""
     leftover_platforms = set(manager.platforms.copy())
 
-    for p_obj in MAIN_PLATFORMS:
-        if isinstance(p_obj, Group):
-            # Check the group fully overlap the manager platforms.
-            if p_obj.issubset(manager.platforms):
-                # Remove the group platforms from the uncovered list.
-                leftover_platforms -= set(p_obj.platforms)
-        elif isinstance(p_obj, Platform):
-            if p_obj in manager.platforms and p_obj in leftover_platforms:
-                leftover_platforms.remove(p_obj)
+    for main_platform in (set(Group._extract_platforms(i)) for i in MAIN_PLATFORMS):
+        # Check the group fully overlap the manager platforms.
+        if main_platform.issubset(manager.platforms):
+            # Remove the group platforms from the uncovered list.
+            leftover_platforms -= main_platform
 
     assert len(leftover_platforms) == 0
     # At this stage we know all platforms of the manager can be partitioned by a

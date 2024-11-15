@@ -1092,7 +1092,7 @@ def upgrade(ctx, all, packages_specs):
     Packages unrecognized by any selected manager will be skipped.
     """
     if not all and not packages_specs:
-        logging.warning("No package provided, assume -A/--all option.")
+        logging.info("No package provided, assume -A/--all option.")
         all = True
 
     # Full upgrade.

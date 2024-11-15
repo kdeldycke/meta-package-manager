@@ -191,10 +191,10 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 
 | OS      |         `mpm`          | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
 | ------- | :--------------------: | :------------: | :-----------: | :----------: | :----------: |
-| BSD     | 🅱️[^bsd_without_macos] |                |               |              |              |
+| BSD     | 🅱️[^bsd] |                |               |              |              |
 | Linux   |       🐧[^linux]       |       🐧       |      🐧       |      🐧      |      🐧      |
 | macOS   |           🍎           |       🍎       |      🍎       |      🍎      |      🍎      |
-| Unix    |      `>_`[^unix]       |                |               |              |              |
+| Unix    |      ⨂[^unix]       |                |               |              |              |
 | Windows |           🪟           |       🪟       |      🪟       |              |              |
 
 ## Distribution
@@ -259,8 +259,8 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 
 [^4]: <https://github.com/emilengler/sysget>
 
-[^bsd_without_macos]: BSD: FreeBSD, NetBSD, OpenBSD, SunOS.
+[^bsd]: BSD: FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS.
 
-[^linux]: Linux: Linux, Windows Subsystem for Linux v2.
+[^linux]: Linux: ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CentOS, CloudLinux OS, Debian, Exherbo Linux, Fedora, Gentoo Linux, Guix System, IBM PowerKVM, KVM for IBM z Systems, Linux Mint, Mageia, Mandriva Linux, openSUSE, Oracle Linux, Parallels, Pidora, Raspbian, RedHat Enterprise Linux, Rocky Linux, Scientific Linux, Slackware, SUSE Linux Enterprise Server, Tuxedo OS, Ubuntu, Unknown Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer.
 
-[^unix]: Unix: AIX, Cygwin, GNU/Hurd, Solaris, Windows Subsystem for Linux v1.
+[^unix]: Unix: Cygwin, GNU/Hurd, IBM AIX, Solaris.

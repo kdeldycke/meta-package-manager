@@ -80,6 +80,7 @@ Meta Package Manager,dnf,1
 Meta Package Manager,dnf5,1
 Meta Package Manager,emerge,1
 Meta Package Manager,flatpak,1
+Meta Package Manager,fwupd,1
 Meta Package Manager,gem,1
 Meta Package Manager,mas,1
 Meta Package Manager,npm,1
@@ -123,6 +124,7 @@ Meta Package Manager,zypper,1
 | [`dnf5`](https://github.com/rpm-software-management/dnf5)                               | 5.0.0        |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`emerge`](https://wiki.gentoo.org/wiki/Portage#emerge)                                 | 3.0.0        |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
 | [`flatpak`](https://flatpak.org)                                                        | 1.2.0        |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |     ✓     |
+| [`fwupd`](https://fwupd.org)                                                            | 1.9.5        |           |      🐧       |       |             |         |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |          |   ✓    |           |
 | [`gem`](https://rubygems.org)                                                           | 2.5.0        |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`mas`](https://github.com/argon/mas)                                                   | 1.8.7        |           |               |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`npm`](https://www.npmjs.com)                                                          | 4.0.0        |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |

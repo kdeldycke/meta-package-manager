@@ -25,6 +25,11 @@
     "description": "dnf, yum"
   },
   {
+    "name": "📦 manager: dnf5",
+    "color": "#bfdadc",
+    "description": "dnf5"
+  },
+  {
     "name": "📦 manager: dpkg-based",
     "color": "#bfdadc",
     "description": "apt, apt-mint, opkg"

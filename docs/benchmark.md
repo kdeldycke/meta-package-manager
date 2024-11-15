@@ -85,7 +85,8 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `dein`                  |       |       ✓        |               |              |              |
 | `deno`                  |       |       ✓        |               |              |              |
 | `distrobox`             |       |       ✓        |               |              |              |
-| `dnf`                   |   ✓   |                |       ✓       |              |      ✓       |
+| `dnf4`                  |   ✓   |                |       ✓       |              |      ✓       |
+| `dnf5`                  |   ✓   |                |               |              |              |
 | `dotnet`                |       |       ✓        |               |              |              |
 | `emacs`                 |       |       ✓        |               |              |              |
 | `emerge`                |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |

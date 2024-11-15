@@ -96,14 +96,12 @@ def test_changelog():
 
     entry_pattern = re.compile(r"^- \\\[(?P<category>[a-z0-9,\-]+)\\\] (?P<entry>.+)")
 
-    allowed_categories = set(
-        (
-            *pool.all_manager_ids,
-            *(p.id for p in MAIN_PLATFORMS),
-            "mpm",
-            "bar-plugin",
-        )
-    )
+    allowed_categories = set((
+        *pool.all_manager_ids,
+        *(p.id for p in MAIN_PLATFORMS),
+        "mpm",
+        "bar-plugin",
+    ))
 
     for line in content.splitlines():
         if line.startswith("-"):

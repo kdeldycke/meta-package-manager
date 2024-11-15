@@ -40,7 +40,7 @@ class DNF(PackageManager):
 
     requirement = "4.0.0"
 
-    cli_names = ("dnf", "dnf4")
+    cli_names: tuple[str, ...] = ("dnf", "dnf4")
     """
     .. code-block:: shell-session
 
@@ -48,7 +48,7 @@ class DNF(PackageManager):
         4.9.0
     """
 
-    pre_args = ("--color=never",)
+    pre_args: tuple[str, ...] = ("--color=never",)
 
     DELIMITER = "___MPM___"
 
@@ -227,8 +227,8 @@ class DNF5(DNF):
 
     cli_names = ("dnf5",)
 
-    pre_args = tuple()
-    """Reset global option inherited from `DNF`.
+    pre_args = ()
+    """Reset global options inherited from the `DNF` above.
 
     `dnf5` does not support `--color=never` parameter.
     """

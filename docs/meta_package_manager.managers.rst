@@ -65,10 +65,26 @@ meta\_package\_manager.managers.emerge module
    :undoc-members:
    :show-inheritance:
 
+meta\_package\_manager.managers.eopkg module
+--------------------------------------------
+
+.. automodule:: meta_package_manager.managers.eopkg
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 meta\_package\_manager.managers.flatpak module
 ----------------------------------------------
 
 .. automodule:: meta_package_manager.managers.flatpak
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+meta\_package\_manager.managers.fwupd module
+--------------------------------------------
+
+.. automodule:: meta_package_manager.managers.fwupd
    :members:
    :undoc-members:
    :show-inheritance:

@@ -37,6 +37,7 @@ exact = true
 As you can see in the example above, you can select which package managers you want `mpm` to consider by default.
 
 So the following configuration:
+
 ```toml
 [mpm]
 verbosity = "INFO"
@@ -47,6 +48,7 @@ pipx = true
 Is equivalent to always running any commands with the `--verbosity INFO`, `--flatpak` and `--pipx` parameters.
 
 So if we call `mpm managers` with the above configuration, we will get the following output:
+
 ```shell-session
 $ mpm managers
 info: User selection of managers by priority: > flatpak > pipx

@@ -164,6 +164,7 @@ PACKAGE_IDS = {
     "choco": "ccleaner",
     "composer": "illuminate/contracts",
     "dnf": "usd",
+    "dnf5": "usd",
     "emerge": "dev-vcs/git",
     "flatpak": "org.gnome.Dictionary",
     "gem": "markdown",

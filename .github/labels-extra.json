@@ -22,7 +22,7 @@
   {
     "name": "📦 manager: dnf-based",
     "color": "#bfdadc",
-    "description": "dnf, yum"
+    "description": "dnf, dnf5, yum"
   },
   {
     "name": "📦 manager: dpkg-based",

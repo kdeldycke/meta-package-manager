@@ -40,7 +40,7 @@ class DNF(PackageManager):
 
     requirement = "4.0.0"
 
-    cli_names = ("dnf4",)
+    cli_names = ("dnf", "dnf4")
     """
     .. code-block:: shell-session
 
@@ -221,9 +221,17 @@ class DNF(PackageManager):
 
 class DNF5(DNF):
     homepage_url = "https://github.com/rpm-software-management/dnf5"
+
     requirement = "5.0.0"
+    """dnf5 is the new reference package manager as of Fedora 41."""
+
     cli_names = ("dnf5",)
-    pre_args = ()
+
+    pre_args = tuple()
+    """Reset global option inherited from `DNF`.
+
+    `dnf5` does not support `--color=never` parameter.
+    """
 
 
 class YUM(DNF):

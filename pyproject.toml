@@ -21,6 +21,7 @@ keywords = [
     'composer',
     'cyclonedx',
     'dnf',
+    'dnf5',
     'emerge',
     'flatpak',
     'gem',

@@ -167,6 +167,7 @@ PACKAGE_IDS = {
     "dnf5": "usd",
     "emerge": "dev-vcs/git",
     "flatpak": "org.gnome.Dictionary",
+    "fwupd": "f95c9218acd12697af946874bfe4239587209232",
     "gem": "markdown",
     "mas": "747648890",  # Telegram
     "npm": "raven",

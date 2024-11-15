@@ -5,6 +5,7 @@
 > [!IMPORTANT]
 > This version is not released yet and is under active development.
 
+- \[fwupd\] Add support for new `fwupd` manager. Closes {issue}`1289`.
 - \[dnf5\] Add support for new `dnf5` manager. Refs {pr}`1423`.
 - \[mpm\] Hide `--manager` and `--exclude` options from help output and silence deprecation warnings. Closes {issue}`1358`.
 - \[mpm\] Add detailed documentation on manager selection with configuration file.

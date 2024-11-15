@@ -24,6 +24,7 @@ keywords = [
     'dnf5',
     'emerge',
     'flatpak',
+    'fwupd',
     'gem',
     'homebrew',
     'mac app store',

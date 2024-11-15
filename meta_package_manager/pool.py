@@ -34,6 +34,7 @@ from .managers.composer import Composer
 from .managers.dnf import DNF, DNF5, YUM
 from .managers.emerge import Emerge
 from .managers.flatpak import Flatpak
+from .managers.fwupd import FWUPD
 from .managers.gem import Gem
 from .managers.homebrew import Brew, Cask
 from .managers.mas import MAS
@@ -68,6 +69,7 @@ manager_classes = (
     DNF5,
     Emerge,
     Flatpak,
+    FWUPD,
     Gem,
     MAS,
     NPM,

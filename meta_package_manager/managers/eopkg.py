@@ -166,12 +166,12 @@ class EOPKG(PackageManager):
             firefox-dbginfo - Debug symbols for firefox
         """
         # Extended search is the default behavior.
-        args = []
+        arg = ""
         # Non-extended search restrict matching to package name only.
         if not extended:
-            args = ("--name",)
+            arg = "--name"
 
-        output = self.run_cli("search", args, query)
+        output = self.run_cli("search", arg, query)
 
         regexp = re.compile(r"^(?P<package_id>\S+)\s+- (?P<description>\.+)$")
 

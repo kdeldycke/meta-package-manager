@@ -23,6 +23,7 @@ keywords = [
     'dnf',
     'dnf5',
     'emerge',
+    'eopkg',
     'flatpak',
     'fwupd',
     'gem',

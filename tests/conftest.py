@@ -166,6 +166,7 @@ PACKAGE_IDS = {
     "dnf": "usd",
     "dnf5": "usd",
     "emerge": "dev-vcs/git",
+    "eopkg": "firefox",
     "flatpak": "org.gnome.Dictionary",
     "fwupd": "f95c9218acd12697af946874bfe4239587209232",
     "gem": "markdown",

@@ -90,7 +90,7 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `dotnet`                |       |       ✓        |               |              |              |
 | `emacs`                 |       |       ✓        |               |              |              |
 | `emerge`                |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |
-| `eopkg`                 |       |                |               |              |      ✓       |
+| `eopkg`                 |   ✓   |       ✓        |               |              |      ✓       |
 | `etc-update`            |       |       ✓        |               |              |              |
 | `fisher`                |       |       ✓        |               |              |              |
 | `flatpak`               |   ✓   |       ✓        |               |              |      ✓       |

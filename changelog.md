@@ -5,6 +5,7 @@
 > [!IMPORTANT]
 > This version is not released yet and is under active development.
 
+- \[eopkg\] Add support for new `eopkg` manager. Closes {issue}`1093`.
 - \[fwupd\] Add support for new `fwupd` manager. Closes {issue}`1289`.
 - \[dnf5\] Add support for new `dnf5` manager. Refs {pr}`1423`.
 - \[mpm\] Hide `--manager` and `--exclude` options from help output and silence deprecation warnings. Closes {issue}`1358`.

@@ -64,8 +64,8 @@ def test_manager_classes_order():
 
 def test_manager_count():
     """Check all implemented package managers are accounted for, and unique."""
-    assert len(manager_classes) == 34
-    assert len(pool) == 34
+    assert len(manager_classes) == 35
+    assert len(pool) == 35
     assert len(pool) == len(pool.all_manager_ids)
     assert pool.all_manager_ids == tuple(sorted(set(pool)))
 

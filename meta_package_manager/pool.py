@@ -33,6 +33,7 @@ from .managers.chocolatey import Choco
 from .managers.composer import Composer
 from .managers.dnf import DNF, DNF5, YUM
 from .managers.emerge import Emerge
+from .managers.eopkg import EOPKG
 from .managers.flatpak import Flatpak
 from .managers.fwupd import FWUPD
 from .managers.gem import Gem
@@ -68,6 +69,7 @@ manager_classes = (
     DNF,
     DNF5,
     Emerge,
+    EOPKG,
     Flatpak,
     FWUPD,
     Gem,

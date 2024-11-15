@@ -35,6 +35,11 @@
     "description": "emerge"
   },
   {
+    "name": "📦 manager: eopkg",
+    "color": "#bfdadc",
+    "description": "eopkg"
+  },
+  {
     "name": "📦 manager: flatpak",
     "color": "#bfdadc",
     "description": "flatpak"

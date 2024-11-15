@@ -40,6 +40,11 @@
     "description": "flatpak"
   },
   {
+    "name": "📦 manager: fwupd",
+    "color": "#bfdadc",
+    "description": "fwupd"
+  },
+  {
     "name": "📦 manager: gem",
     "color": "#bfdadc",
     "description": "gem"

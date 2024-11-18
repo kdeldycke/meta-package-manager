@@ -68,11 +68,23 @@ jobs:
               - meta_package_manager/managers/emerge*
               - tests/*emerge*
 
+        "📦 manager: eopkg":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/eopkg*
+              - tests/*eopkg*
+
         "📦 manager: flatpak":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/flatpak*
               - tests/*flatpak*
+
+        "📦 manager: fwupd":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/fwupd*
+              - tests/*fwupd*
 
         "📦 manager: gem":
           - changed-files:

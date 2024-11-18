@@ -64,9 +64,18 @@ jobs:
           - "portage"
           - "gentoo"
 
+        "📦 manager: eopkg":
+          - "eopkg"
+          - "solus"
+
         "📦 manager: flatpak":
           - "flatpak"
           - "flat"
+
+        "📦 manager: fwupd":
+          - "fwupd"
+          - "fwupdmgr"
+          - "lvfs"
 
         "📦 manager: gem":
           - "gem"

@@ -189,13 +189,13 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 
 ## Operating system support
 
-| OS      |         `mpm`          | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
-| ------- | :--------------------: | :------------: | :-----------: | :----------: | :----------: |
-| BSD     | 🅱️[^bsd] |                |               |              |              |
-| Linux   |       🐧[^linux]       |       🐧       |      🐧       |      🐧      |      🐧      |
-| macOS   |           🍎           |       🍎       |      🍎       |      🍎      |      🍎      |
-| Unix    |      ⨂[^unix]       |                |               |              |              |
-| Windows |           🪟           |       🪟       |      🪟       |              |              |
+| OS      |   `mpm`    | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] |
+| ------- | :--------: | :------------: | :-----------: | :----------: | :----------: |
+| BSD     |  🅱️[^bsd]  |                |               |              |              |
+| Linux   | 🐧[^linux] |       🐧       |      🐧       |      🐧      |      🐧      |
+| macOS   |     🍎     |       🍎       |      🍎       |      🍎      |      🍎      |
+| Unix    |  ⨂[^unix]  |                |               |              |              |
+| Windows |     🪟     |       🪟       |      🪟       |              |              |
 
 ## Distribution
 

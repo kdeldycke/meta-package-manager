@@ -162,21 +162,27 @@ def update_readme() -> None:
 
     replace_content(
         readme,
+        managers_sankey(),
         "<!-- managers-sankey-start -->\n\n",
         "\n\n<!-- managers-sankey-end -->",
-        managers_sankey(),
     )
 
     matrix, footnotes = operation_matrix()
     replace_content(
         readme,
+        matrix,
         "<!-- operation-matrix-start -->\n\n",
         "\n\n<!-- operation-matrix-end -->",
-        matrix,
     )
     replace_content(
         readme,
-        "<!-- operation-footnotes-start -->\n\n",
-        "\n\n<!-- operation-footnotes-end -->",
         footnotes,
+        "<!-- operation-footnotes-start -->\n\n",
+        # XXX mdformat-footnote is stripping all HTML comments after footnotes:
+        # https://github.com/executablebooks/mdformat-footnote/issues/11
+        # So we can't protect the content with an end tag here. This is dangerous, as
+        # it could lead to content loss if the footnotes are not already properly
+        # positioned at the end of the file.
+        # "\n\n<!-- operation-footnotes-end -->",
+        None,
     )

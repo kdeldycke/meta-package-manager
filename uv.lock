@@ -181,7 +181,7 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "4.11.4"
+version = "4.11.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
@@ -197,9 +197,9 @@ dependencies = [
     { name = "wcmatch" },
     { name = "xmltodict" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/84/d1/f8a0a91b15c972cee922a23389e6c2c0411be4b363289a94c0850fc2be36/click_extra-4.11.4.tar.gz", hash = "sha256:ffebd1f1ef096d296d61193ff96d03aac85b55952608cdaa934e4d5bfc963dd9", size = 87246 }
+sdist = { url = "https://files.pythonhosted.org/packages/6b/95/91202f785473dbd40af553f669921911159eb9bd433e2ef6d9140faa5c61/click_extra-4.11.5.tar.gz", hash = "sha256:cab14bd14e7173ab335b08d37bd0ff31175bc4d3f1cb8b701683211f67139335", size = 87373 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f2/9f/76d77873c9ca58c73bfa2810996d11eda3bbf8c45a5eeb7637bb5c3f3214/click_extra-4.11.4-py3-none-any.whl", hash = "sha256:f24af73f3926d871a93ac5d4b424ba73327bccd865d02a15495bacecb3ca2da0", size = 70662 },
+    { url = "https://files.pythonhosted.org/packages/84/84/e8de1c9eb15c05a4a09313f4594f6b7feeff52084de7a0207cf4e4d2678e/click_extra-4.11.5-py3-none-any.whl", hash = "sha256:158aa2c08da830a520c51b578566b6f820cbab44ce277ba29249895c55e65515", size = 70806 },
 ]
 
 [package.optional-dependencies]
@@ -775,9 +775,9 @@ typing = [
 [package.metadata]
 requires-dist = [
     { name = "boltons", specifier = "~=24.1.0" },
-    { name = "click-extra", specifier = "~=4.11.4" },
-    { name = "click-extra", extras = ["pytest"], marker = "extra == 'test'", specifier = "~=4.11.3" },
-    { name = "click-extra", extras = ["sphinx"], marker = "extra == 'docs'", specifier = "~=4.11.3" },
+    { name = "click-extra", specifier = "~=4.11.5" },
+    { name = "click-extra", extras = ["pytest"], marker = "extra == 'test'", specifier = "~=4.11.5" },
+    { name = "click-extra", extras = ["sphinx"], marker = "extra == 'docs'", specifier = "~=4.11.5" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'test'", specifier = "~=7.6.0" },
     { name = "cyclonedx-python-lib", extras = ["validation"], specifier = "~=8.4.0" },
     { name = "extra-platforms", extras = ["pytest"], specifier = "~=1.6.0" },

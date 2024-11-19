@@ -10,40 +10,23 @@ name: Build & release
 jobs:
 
   release:
-    uses: kdeldycke/workflows/.github/workflows/release.yaml@v4.7.2
+    uses: kdeldycke/workflows/.github/workflows/release.yaml@v4.8.1
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+    with:
+      binaries-test-plan: |
+        # Runs the same binary tests as in the brew official Formula:
+        # https://github.com/Homebrew/homebrew-core/blob/f0a4d69/Formula/meta-package-manager.rb#L401-L413
 
-  test-binaries:
-    needs: release
-    strategy:
-      matrix: ${{ fromJSON(needs.release.outputs.nuitka_matrix) }}
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4.1.8
-        id: artifacts
-        with:
-          name: ${{ matrix.bin_name }}
-      - name: Set binary permissions
-        if: runner.os != 'Windows'
-        run: |
-          chmod +x ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }}
+        # Test combination of version and verbosity.
+        --verbosity DEBUG --version
 
-      # Runs the same binary tests as in the brew official Formula:
-      # https://github.com/Homebrew/homebrew-core/blob/f0a4d69/Formula/meta-package-manager.rb#L401-L413
-      - name: mpm --verbosity DEBUG --version
-        run: |
-          ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }} --verbosity DEBUG --version
-      - name: mpm --help
-        run: |
-          ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }} --help
-      - name: mpm --output-format csv --all-managers managers
-        run: >
-          ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }}
-          --output-format csv --all-managers managers
-      - name: mpm --no-color --output-format csv installed
+        # Test help output.
+        --help
+
+        # Test CSV export.
+        --output-format csv --all-managers managers
+
         # XXX Ideally we would like to use --no-color to simplify Homebrew's formula checks.
         # See: https://github.com/kdeldycke/meta-package-manager/issues/1004
-        run: |
-          ${{ steps.artifacts.outputs.download-path }}/${{ matrix.bin_name }} --no-color --output-format csv installed
+        --no-color --output-format csv installed

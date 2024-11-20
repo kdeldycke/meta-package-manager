@@ -30,3 +30,4 @@ jobs:
         # XXX Ideally we would like to use --no-color to simplify Homebrew's formula checks.
         # See: https://github.com/kdeldycke/meta-package-manager/issues/1004
         --no-color --output-format csv installed
+      timeout: 300

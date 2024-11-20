@@ -178,11 +178,9 @@ def update_readme() -> None:
         readme,
         footnotes,
         "<!-- operation-footnotes-start -->\n\n",
-        # XXX mdformat-footnote is stripping all HTML comments after footnotes:
+        # mdformat-footnote is stripping all HTML comments after footnotes:
         # https://github.com/executablebooks/mdformat-footnote/issues/11
-        # So we can't protect the content with an end tag here. This is dangerous, as
-        # it could lead to content loss if the footnotes are not already properly
-        # positioned at the end of the file.
-        # "\n\n<!-- operation-footnotes-end -->",
-        None,
+        # So we protect the content to be replaced with an end tag that we put at the
+        # tail of the last footnote line, without any carriage return.
+        "<!-- operation-footnotes-end -->\n",
     )

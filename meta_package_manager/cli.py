@@ -50,7 +50,7 @@ from click_extra import (
 )
 from click_extra.colorize import KO, OK, highlight
 from click_extra.colorize import default_theme as theme
-from extra_platforms import is_windows, reduce
+from extra_platforms import reduce
 
 from meta_package_manager.inventory import MAIN_PLATFORMS
 
@@ -94,10 +94,6 @@ XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
 
 See the corresponding :issue:`implementation rationale in issue #10 <10>`.
 """
-
-
-encoding_args = {"encoding": "utf-8"} if is_windows() else {}
-"""Forcing encoding is required on Windows."""
 
 
 def is_stdout(filepath: Path) -> bool:
@@ -1361,7 +1357,7 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
         "installed_version",
     )
     if merge or update_version:
-        installed_data = tomllib.loads(toml_path.read_text(**encoding_args))
+        installed_data = tomllib.loads(toml_path.read_text(encoding="utf-8"))
 
     # Leave some metadata as comment.
     content = (
@@ -1426,12 +1422,12 @@ def restore(ctx, toml_files):
     for toml_input in toml_files:
         is_stdin = isinstance(toml_input, TextIOWrapper)
         if is_stdin:
-            toml_input.reconfigure(**encoding_args)
+            toml_input.reconfigure(encoding="utf-8")
             toml_filepath = toml_input.name
             toml_content = toml_input.read()
         else:
             toml_filepath = Path(toml_input.name).resolve()
-            toml_content = toml_filepath.read_text(**encoding_args)
+            toml_content = toml_filepath.read_text(encoding="utf-8")
 
         logging.info(f"Load package list from {toml_filepath}")
         doc = tomllib.loads(toml_content)

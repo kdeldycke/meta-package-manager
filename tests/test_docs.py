@@ -34,7 +34,6 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib  # type: ignore[import-not-found]
 
-from meta_package_manager.cli import encoding_args
 from meta_package_manager.inventory import MAIN_PLATFORMS
 from meta_package_manager.labels import LABELS, MANAGER_PREFIX, PLATFORM_PREFIX
 from meta_package_manager.pool import pool
@@ -85,13 +84,13 @@ def test_all_platforms_covered_by_local_groups(manager):
 def test_project_metadata():
     # Fetch general information about the project from pyproject.toml.
     toml_path = PROJECT_ROOT.joinpath("pyproject.toml").resolve()
-    toml_config = tomllib.loads(toml_path.read_text(**encoding_args))
+    toml_config = tomllib.loads(toml_path.read_text(encoding="utf-8"))
     # Check all managers are referenced in Python package keywords.
     assert set(pool.all_manager_ids).issubset(toml_config["project"]["keywords"])
 
 
 def test_changelog():
-    content = PROJECT_ROOT.joinpath("changelog.md").read_text(**encoding_args)
+    content = PROJECT_ROOT.joinpath("changelog.md").read_text(encoding="utf-8")
     assert content.startswith("# Changelog\n")
 
     entry_pattern = re.compile(r"^- \[(?P<category>[a-z0-9,\-]+)\] (?P<entry>.+)")
@@ -128,7 +127,7 @@ def test_new_package_manager_issue_template():
     """Check all platforms groups are referenced in the issue template."""
     content = PROJECT_ROOT.joinpath(
         ".github/ISSUE_TEMPLATE/new-package-manager.yaml",
-    ).read_text(**encoding_args)
+    ).read_text(encoding="utf-8")
     assert content
 
     template_platforms = load(content, Loader=Loader)["body"][3]["attributes"][
@@ -148,7 +147,7 @@ def test_new_package_manager_issue_template():
 def test_labeller_rules():
     # Extract list of extra labels.
     content = PROJECT_ROOT.joinpath(".github/labels-extra.json").read_text(
-        **encoding_args,
+        encoding="utf-8"
     )
     assert content
 
@@ -175,7 +174,7 @@ def test_labeller_rules():
     # Extract rules from json blurb serialized into YAML.
     content = PROJECT_ROOT.joinpath(
         ".github/workflows/labeller-content-based.yaml",
-    ).read_text(**encoding_args)
+    ).read_text(encoding="utf-8")
     assert "kdeldycke/workflows/.github/workflows/labeller-file-based.yaml" in content
     extra_rules = load(content, Loader=Loader)["jobs"]["labeller"]["with"][
         "extra-rules"

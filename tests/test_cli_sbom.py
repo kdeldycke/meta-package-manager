@@ -176,7 +176,7 @@ class TestSBOM(CLISubCommandTests):
                     result.stderr,
                 )
                 assert not result.stdout
-                content = Path(file_name).read_text()
+                content = Path(file_name).read_text(encoding="utf-8")
 
             assert result.exit_code == 0
             self.check_manager_selection(result)

@@ -42,9 +42,9 @@ jobs:
           variants: dict[str, set[str]] = {
               # Available OS: https://github.com/actions/runner-images#available-images
               "os": {
-                  "ubuntu-24.04",
-                  "macos-15",
-                  "windows-2022",
+                  "ubuntu-24.04", # x86
+                  "macos-15",     # arm64
+                  "windows-2022", # x86
               },
               # Available Python: https://github.com/actions/python-versions/blob/main/versions-manifest.json
               "python-version": {

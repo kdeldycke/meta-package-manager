@@ -63,7 +63,7 @@ Now you’re ready to hack and abuse `git`.
 After the steps above, you are free to play with the bleeding edge version of `mpm`:
 
 ```shell-session
-$ uv run mpm --version
+$ uv run -- mpm --version
 (...)
 mpm, version 4.13.0
 ```
@@ -73,8 +73,8 @@ mpm, version 4.13.0
 Run unit-tests with:
 
 ```shell-session
-$ uv install ".[test]"
-$ uv run pytest
+$ uv sync --extra test
+$ uv run -- pytest
 ```
 
 Which should be the same as running non-destructive unit-tests in parallel with:
@@ -105,8 +105,8 @@ The documentation you’re currently reading can be built locally with
 [Sphinx](https://www.sphinx-doc.org):
 
 ```shell-session
-$ uv install ".[docs]"
-$ uv run sphinx-build -b html ./docs ./docs/html
+$ uv sync --extra docs
+$ uv run -- sphinx-build -b html ./docs ./docs/html
 ```
 
 The generation of API documentation is

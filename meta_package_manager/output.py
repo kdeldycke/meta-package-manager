@@ -62,8 +62,12 @@ def colored_diff(a, b, style_common=None, style_a=None, style_b=None):
     trailing differences.
 
     Always returns 2 strings.
+
+    ..todo::
+
+        Contribute back to click-extra.
     """
-    # Set defaults stling methods.
+    # Set defaults styling methods.
     style_common = partial(style, fg="bright_black")
     style_a = partial(style, fg="red")
     style_b = partial(style, fg="green")

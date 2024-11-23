@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.20.1 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v5.20.0...main)
+
+> [!IMPORTANT]
+> This version is not released yet and is under active development.
+
 ## [5.20.0 (2024-11-23)](https://github.com/kdeldycke/meta-package-manager/compare/v5.19.0...v5.20.0)
 
 - [eopkg] Add support for new `eopkg` manager. Closes {issue}`1093`.

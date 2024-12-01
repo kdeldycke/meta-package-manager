@@ -281,7 +281,6 @@ jobs:
       - name: Cargo - macOS install
         if: runner.os == 'macOS'
         run: |
-          brew unlink pkg-config@0.29.2
           brew install rust
       - name: Cargo - Linux install
         if: runner.os == 'Linux'

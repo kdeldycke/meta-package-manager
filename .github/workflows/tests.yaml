@@ -564,7 +564,7 @@ jobs:
       - name: Install project
         run: |
           uv --no-progress venv
-          uv --no-progress sync --extra test
+          uv --no-progress sync --frozen --extra test
 
       # CLI tests.
       - name: mpm --help

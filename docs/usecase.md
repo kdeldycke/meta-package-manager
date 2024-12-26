@@ -470,5 +470,7 @@ a way to fund all those.
 Homebrew is already featuring
 [some commands in that direction](https://github.com/Homebrew/brew/pull/7900).
 
+And also see this article in which [someone algorithmically donated $5000+ to Open Source via GitHub Sponsors and PyPI data](https://kvinogradov.com/algo-sponsors/).
+
 This is being discussed at {issue}`501`.
 ```

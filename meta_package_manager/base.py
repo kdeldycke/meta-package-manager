@@ -624,12 +624,12 @@ class PackageManager(metaclass=MetaPackageManager):
            <meta_package_manager.base.PackageManager.fresh>`.
         """
         logging.debug(
-            f"{theme.invoked_command(self.id)} "
-            f"is deprecated: {self.deprecated}; "
-            f"is supported: {self.supported}; "
+            f"{theme.invoked_command(self.id)} is: "
+            f"deprecated? {self.deprecated}; "
+            f"supported? {self.supported}; "
             f"found at: {highlight_cli_name(self.cli_path, self.cli_names)}; "
-            f"is executable: {self.executable}; "
-            f"is fresh: {self.fresh}.",
+            f"executable? {self.executable}; "
+            f"fresh? {self.fresh}.",
         )
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 

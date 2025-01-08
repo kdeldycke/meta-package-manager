@@ -19,7 +19,6 @@ from __future__ import annotations
 import json
 from typing import Any, Iterator
 
-from boltons.iterutils import remap
 from extra_platforms import ALL_PLATFORMS
 
 from meta_package_manager.base import Arg, NestedArgs, Package, PackageManager
@@ -43,7 +42,7 @@ class NPM(PackageManager):
         # prefix folder instead of the current working directory.
         "--global",
         # Suppress the progress bar.
-        "--progress=false",
+        "--no-progress",
         # Suppress the update notification when using an older version of npm than
         # the latest.
         "--no-update-notifier",
@@ -67,7 +66,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 --json outdated
             {
               "error": {
@@ -94,59 +93,50 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
-                --json list | jq
+            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+                --json --depth 0 list | jq
             {
+              "name": "lib",
               "dependencies": {
+                "@eslint/json": {
+                  "version": "0.9.0",
+                  "overridden": false
+                },
+                "@mermaid-js/mermaid-cli": {
+                  "version": "10.8.0",
+                  "overridden": false
+                },
+                "corepack": {
+                  "version": "0.30.0",
+                  "overridden": false
+                },
+                "google-closure-compiler": {
+                  "version": "20240317.0.0",
+                  "overridden": false
+                },
                 "npm": {
-                  "version": "4.0.5",
-                  "dependencies": {
-                    "JSONStream": {
-                      "version": "1.2.1",
-                      "from": "JSONStream@latest",
-                      "resolved": "https://(...)/JSONStream-1.2.1.tgz",
-                      "dependencies": {
-                        "jsonparse": {
-                          "version": "1.2.0",
-                          "from": "jsonparse@>=1.2.0 <2.0.0",
-                          "resolved": "https://(...)/jsonparse-1.2.0.tgz"
-                        },
-                        "through": {
-                          "version": "2.3.8",
-                          "from": "through@>=2.2.7 <3.0.0",
-                          "resolved": "https://(...)/through-2.3.8.tgz"
-                        }
-                      }
-                    },
-                    "abbrev": {
-                      "version": "1.0.9",
-                      "from": "abbrev@1.0.9",
-                      "resolved": "https://(...)/abbrev-1.0.9.tgz"
-                    },
-                    "ansi-regex": {
-                      "version": "2.0.0",
-                      "from": "ansi-regex@2.0.0",
-                      "resolved": "https://(...)/ansi-regex-2.0.0.tgz"
-                    },
-            (...)
+                  "version": "10.9.2",
+                  "overridden": false
+                },
+                "raven": {
+                  "version": "2.6.4",
+                  "overridden": false
+                },
+                "wrangler": {
+                  "version": "3.51.2",
+                  "overridden": false
+                }
+              }
+            }
         """
-        installed = []
-
-        output = self.run_cli("--json", "list")
+        output = self.run_cli("--json", "--depth", "0", "list")
 
         if output:
-
-            def visit(path, key: str, value: str) -> bool:
-                if key == "version":
-                    package_id = path[-1]
-                    installed.append(
-                        self.package(id=package_id, installed_version=value),
-                    )
-                return True
-
-            remap(json.loads(output), visit=visit)
-
-        yield from installed
+            for pkg_id, pkg_infos in json.loads(output)["dependencies"].items():
+                yield self.package(
+                    id=pkg_id,
+                    installed_version=pkg_infos["version"],
+                )
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -154,7 +144,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 --json outdated | jq
             {
               "my-linked-package": {
@@ -174,14 +164,14 @@ class NPM(PackageManager):
         output = self.run_cli("--json", "outdated")
 
         if output:
-            for package_id, values in json.loads(output).items():
-                if values["wanted"] == "linked":
+            for pkg_id, pkg_infos in json.loads(output).items():
+                if pkg_infos["wanted"] == "linked":
                     continue
                 yield self.package(
-                    id=f"{package_id}",
+                    id=f"{pkg_id}",
                     # It seems "current" is not always populated.
-                    installed_version=values.get("current"),
-                    latest_version=values["latest"],
+                    installed_version=pkg_infos.get("current"),
+                    latest_version=pkg_infos["latest"],
                 )
 
     @search_capabilities(exact_support=False)
@@ -195,7 +185,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 search --json python | jq
             [
               {
@@ -264,7 +254,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 search --json --no-description python | jq
         """
         search_args = []
@@ -274,11 +264,11 @@ class NPM(PackageManager):
         output = self.run_cli("search", "--json", search_args, query)
 
         if output:
-            for pkg in json.loads(output):
+            for pkg_infos in json.loads(output):
                 yield self.package(
-                    id=pkg.get("name"),
-                    description=pkg.get("description"),
-                    latest_version=pkg.get("version"),
+                    id=pkg_infos.get("name"),
+                    description=pkg_infos.get("description"),
+                    latest_version=pkg_infos.get("version"),
                 )
 
     @version_not_implemented
@@ -287,7 +277,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 install markdown
 
             added 3 packages in 3s
@@ -300,7 +290,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 upgrade
         """
         return self.build_cli("update")
@@ -315,7 +305,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 upgrade raven
         """
         return self.build_cli("upgrade", f"{package_id}")
@@ -325,7 +315,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --progress=false --no-update-notifier --no-fund --no-audit \
+            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 uninstall raven
         """
         return self.run_cli("uninstall", package_id)

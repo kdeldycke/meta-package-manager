@@ -82,6 +82,16 @@ def props(spec: Specifier):
             id="version_spec",
         ),
         pytest.param(
+            "@eslint/json",
+            ({"package_id": "@eslint/json", "manager_id": None, "version": None},),
+            id="version_spec",
+        ),
+        pytest.param(
+            "@eslint/json@0.9.0",
+            ({"package_id": "@eslint/json", "manager_id": None, "version": "0.9.0"},),
+            id="version_spec",
+        ),
+        pytest.param(
             "pkg:npm/leftpad",
             (
                 {

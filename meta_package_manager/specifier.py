@@ -27,13 +27,13 @@ from typing import Final, Iterable, Iterator, Sequence
 from packageurl import PackageURL
 
 from .pool import pool
-from .version import TokenizedString, parse_version
+from .version import TokenizedString, is_version, parse_version
 
 VERSION_SEP: Final = "@"
 """Separator used by ``mpm`` to split package's ID from its version:
 
 This has been chosen as a separator because it is shared by popular package managers
-and purls.
+(like ``npm``) and pURLs.
 
 ..code-block::
 
@@ -185,39 +185,49 @@ class Specifier:
         )
 
     @classmethod
-    def from_string(cls, spec_str: str) -> Iterator[Specifier]:
+    def from_string(cls, spec_str: str) -> tuple[Specifier, ...]:
         """Parse a string into a package specifier.
 
         Supports various formats:
         - plain ``package_id``
         - simple package ID with version: ``package_id@version``
-        - purl: ``pkg:npm/left-pad@3.7``
+        - package with multiple version separators: ``@eslint/json@0.9.0``
+        - pURL: ``pkg:npm/left-pad@3.7``
 
         If a specifier resolves to multiple constraints (as it might be the case for
-        purl), we produce and returns all variations. That way the ``Solver`` below has
+        pURL), we produce and returns all variations. That way the ``Solver`` below has
         all necessary details to resolve the constraints.
 
-        Returns a generator of ``Specifier``.
+        Returns a tuple of ``Specifier``.
         """
         specs = cls.parse_purl(spec_str)
         if specs:
-            yield from specs
+            return specs
 
-        # Specifier contains a version.
-        elif VERSION_SEP in spec_str:
-            package_id, version = spec_str.split(VERSION_SEP, 1)
-            yield cls(
-                raw_spec=spec_str,
-                package_id=package_id,
-                version=version,
-            )
+        # Specifier contains a version separator.
+        if VERSION_SEP in spec_str:
+            # Extract the string after the last version separator and check it really
+            # is a version string. This accounts for special cases like
+            # @eslint/json@0.9.0.
+            parts = spec_str.split(VERSION_SEP)
+            package_id = VERSION_SEP.join(parts[:-1])
+            version = parts[-1]
+            if package_id and is_version(version):
+                return (
+                    cls(
+                        raw_spec=spec_str,
+                        package_id=package_id,
+                        version=version,
+                    ),
+                )
 
         # The spec is the plain package ID.
-        else:
-            yield cls(
+        return (
+            cls(
                 raw_spec=spec_str,
                 package_id=spec_str,
-            )
+            ),
+        )
 
     @cached_property
     def parsed_version(self) -> TokenizedString:

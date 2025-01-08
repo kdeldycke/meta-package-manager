@@ -5,6 +5,7 @@
 > [!IMPORTANT]
 > This version is not released yet and is under active development.
 
+- [mpm] Fix parsing of package specifiers with multiple version separators.
 - [npm] Fix retrieval of installed packages.
 
 ## [5.20.0 (2024-11-23)](https://github.com/kdeldycke/meta-package-manager/compare/v5.19.0...v5.20.0)

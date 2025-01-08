@@ -21,7 +21,12 @@ from random import shuffle
 
 import pytest
 
-from meta_package_manager.version import Token, TokenizedString, parse_version
+from meta_package_manager.version import (
+    Token,
+    TokenizedString,
+    is_version,
+    parse_version,
+)
 
 
 def reverse_fixtures(table):
@@ -229,6 +234,20 @@ version_list = (
 @pytest.mark.parametrize(("v_string", "v_tuple"), version_list)
 def test_version_tokenizer(v_string, v_tuple):
     assert TokenizedString(v_string) == v_tuple
+
+
+@pytest.mark.parametrize(
+    ("v_string", "expected"),
+    (
+        # Strings recognized as versions.
+        *((v_string, True) for v_string, _ in version_list),
+        # Not recognized as versions.
+        ("left-pad", False),
+        ("@eslint/json", False),
+    ),
+)
+def test_is_version(v_string, expected):
+    assert is_version(v_string) is expected
 
 
 compared_gt = (

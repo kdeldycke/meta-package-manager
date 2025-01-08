@@ -34,6 +34,9 @@ class Token:
     Support natural comparison with ``str`` and ``int`` types.
 
     We mainly use them here to compare versions and package IDs.
+
+    ..todo::
+        Make it a dataclass.
     """
 
     string: str
@@ -148,6 +151,9 @@ class TokenizedString:
     """Tokenize a string for user-friendly sorting.
 
     Essentially a wrapper around a list of ``Token`` instances.
+
+    ..todo::
+        Make it a dataclass.
     """
 
     separator: str = ""
@@ -315,4 +321,31 @@ class TokenizedString:
 
 
 parse_version = partial(TokenizedString, separator=".")
-"""Utility method tweaking ``TokenizedString`` for dot-based serialization."""
+"""Utility method tweaking ``TokenizedString`` for dot-based serialization.
+
+..todo::
+    Enforce splitting of token along separator.
+"""
+
+
+def is_version(string: str) -> bool:
+    """Returns `True` if the string looks like a version.
+
+    Heuristics used that qualify a version string:
+    - at least one of the token is an integer, or
+    - there is only one non-integer token.
+
+    ..todo::
+        Enforce splitting of token along separator.
+    """
+    version = parse_version(string)
+
+    # At least one of the token is an integer.
+    if any((token.integer is not None for token in version)):
+        return True
+
+    # There is only one non-integer token.
+    if len(version.tokens) == 1:
+        return True
+
+    return False

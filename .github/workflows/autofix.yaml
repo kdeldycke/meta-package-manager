@@ -56,6 +56,6 @@ jobs:
             readme.md
 
   autofix:
-    uses: kdeldycke/workflows/.github/workflows/autofix.yaml@v4.8.4
+    uses: kdeldycke/workflows/.github/workflows/autofix.yaml@v4.14.2
     # Depends on the previous job so that the Markdown syntax auto-fixer can have an effect on auto-updated content.
     needs: update-readme

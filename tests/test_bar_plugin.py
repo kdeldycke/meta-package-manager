@@ -23,7 +23,8 @@ from itertools import product
 
 import pytest
 from boltons.iterutils import flatten
-from click_extra.testing import args_cleanup, env_copy
+from click_extra.envvar import env_copy
+from click_extra.testing import args_cleanup
 from extra_platforms.pytest import unless_macos
 
 from meta_package_manager import bar_plugin

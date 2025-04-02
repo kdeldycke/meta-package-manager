@@ -93,10 +93,10 @@ classifiers = [
     'Typing :: Typed',
 ]
 dependencies = [
-    "boltons ~= 24.1.0",
-    "click-extra ~= 4.11.7",
+    "boltons ~= 25.0.0",
+    "click-extra ~= 4.15.0",
     "cyclonedx-python-lib [validation] ~= 8.5.0",
-    "extra-platforms [pytest] ~= 1.6.0",
+    "extra-platforms [pytest] ~= 2.1.0",
     "more-itertools ~= 10.5.0",
     "packageurl-python ~= 0.16.0",
     "spdx-tools ~= 0.8.2",
@@ -108,7 +108,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-    "click-extra [pytest] ~= 4.11.7",
+    "click-extra [pytest] ~= 4.15.0",
     "coverage [toml] ~= 7.6.0",
     "pytest ~= 8.3.1",
     "pyyaml ~= 6.0.0",
@@ -124,7 +124,7 @@ typing = [
     "types-xmltodict ~= 0.14.0.20241009",
 ]
 docs = [
-    "click-extra [sphinx] ~= 4.11.7",
+    "click-extra [sphinx] ~= 4.15.0",
     "furo ~= 2024.8.6",
     "myst-parser ~= 4.0.0",
     "sphinx ~= 8.1.3",

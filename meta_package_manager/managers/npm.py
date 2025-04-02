@@ -19,9 +19,10 @@ from __future__ import annotations
 import json
 from typing import Any, Iterator
 
+from click_extra.testing import TArg, TNestedArgs
 from extra_platforms import ALL_PLATFORMS
 
-from meta_package_manager.base import Arg, NestedArgs, Package, PackageManager
+from meta_package_manager.base import Package, PackageManager
 from meta_package_manager.capabilities import (
     search_capabilities,
     version_not_implemented,
@@ -59,7 +60,7 @@ class NPM(PackageManager):
         6.13.7
     """
 
-    def run_cli(self, *args: Arg | NestedArgs, **kwargs: Any) -> str:
+    def run_cli(self, *args: TArg | TNestedArgs, **kwargs: Any) -> str:
         """Like the common run_cli helper, but silence NPM's JSON output on error.
 
         NPM is prone to breakage if local node version is not in sync:

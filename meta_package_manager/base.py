@@ -28,26 +28,24 @@ from enum import Enum
 from functools import cached_property
 from pathlib import Path
 from textwrap import dedent, indent, shorten
-from typing import ContextManager, Generator, Iterable, Iterator, cast
+from typing import TYPE_CHECKING, ContextManager, Generator, Iterable, Iterator, cast
 from unittest.mock import patch
 
 from boltons.iterutils import unique
 from boltons.strutils import strip_ansi
 from click_extra.colorize import default_theme as theme
-from click_extra.testing import (
-    INDENT,
-    Arg,
-    EnvVars,
-    NestedArgs,
-    args_cleanup,
-    env_copy,
-    format_cli_prompt,
-)
+from click_extra.envvar import env_copy
+from click_extra.testing import INDENT, args_cleanup, format_cli_prompt
 from extra_platforms import UNIX, Group, current_os
-from extra_platforms.group import _TNestedSources
 from packageurl import PackageURL
 
 from .version import TokenizedString, parse_version
+
+if TYPE_CHECKING:
+    from click_extra.envvar import TEnvVars
+    from click_extra.testing import TArg, TNestedArgs
+    from extra_platforms.group import _TNestedSources
+
 
 Operations = Enum(
     "Operations",
@@ -299,7 +297,7 @@ class PackageManager(metaclass=MetaPackageManager):
     platforms.
     """
 
-    extra_env: EnvVars | None = None
+    extra_env: TEnvVars | None = None
     """Additional environment variables to add to the current context.
 
     Automatically applied on each
@@ -633,7 +631,7 @@ class PackageManager(metaclass=MetaPackageManager):
         )
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
-    def run(self, *args: Arg | NestedArgs, extra_env: EnvVars | None = None) -> str:
+    def run(self, *args: TArg | TNestedArgs, extra_env: TEnvVars | None = None) -> str:
         """Run a shell command, return the output and accumulate error messages.
 
         ``args`` is allowed to be a nested structure of iterables, in which case it will
@@ -699,14 +697,14 @@ class PackageManager(metaclass=MetaPackageManager):
 
     def build_cli(
         self,
-        *args: Arg | NestedArgs,
+        *args: TArg | TNestedArgs,
         auto_pre_cmds: bool = True,
         auto_pre_args: bool = True,
         auto_post_args: bool = True,
-        override_pre_cmds: NestedArgs | None = None,
+        override_pre_cmds: TNestedArgs | None = None,
         override_cli_path: Path | None = None,
-        override_pre_args: NestedArgs | None = None,
-        override_post_args: NestedArgs | None = None,
+        override_pre_args: TNestedArgs | None = None,
+        override_post_args: TNestedArgs | None = None,
         sudo: bool = False,
     ) -> tuple[str, ...]:
         """Build the package manager CLI by combining the custom ``*args`` with the
@@ -754,7 +752,7 @@ class PackageManager(metaclass=MetaPackageManager):
         ``override_pre_cmds`` parameter is not allowed to be set and the
         ``auto_pre_cmds`` parameter is forced to ``False``.
         """
-        params: list[Arg | NestedArgs] = []
+        params: list[TArg | TNestedArgs] = []
 
         # Sudo replaces any pre-command, be it overridden or automatic.
         if sudo:
@@ -794,16 +792,16 @@ class PackageManager(metaclass=MetaPackageManager):
 
     def run_cli(
         self,
-        *args: Arg | NestedArgs,
+        *args: TArg | TNestedArgs,
         auto_extra_env: bool = True,
         auto_pre_cmds: bool = True,
         auto_pre_args: bool = True,
         auto_post_args: bool = True,
-        override_extra_env: EnvVars | None = None,
-        override_pre_cmds: NestedArgs | None = None,
+        override_extra_env: TEnvVars | None = None,
+        override_pre_cmds: TNestedArgs | None = None,
         override_cli_path: Path | None = None,
-        override_pre_args: NestedArgs | None = None,
-        override_post_args: NestedArgs | None = None,
+        override_pre_args: TNestedArgs | None = None,
+        override_post_args: TNestedArgs | None = None,
         force_exec: bool = False,
         sudo: bool = False,
     ) -> str:

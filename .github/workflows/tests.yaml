@@ -18,93 +18,32 @@ concurrency:
 
 jobs:
 
-  test-matrix:
-    # There is no way to selective flags collections of elements in a matrix, without having to flag all combinations.
-    # This will became unmaintainable and tedious so we use this job to pre-compute which jobs is going to get our
-    # "stable" flag.
-    name: "OS/Python/stable matrix pre-compute"
-    runs-on: ubuntu-24.04
-    outputs:
-      test_matrix: ${{ steps.create_matrix.outputs.matrix }}
-    steps:
-      - name: Create JSON matrix
-        id: create_matrix
-        shell: python
-        run: |
-          import json
-          import os
-          from itertools import product
-          from pathlib import Path
-
-          # To speed up the tests, we only test the latest available OS for each platform. For Python, we only test
-          # against the oldest and newest major supported version and skip intermediates. We also test on the upcoming
-          # development version to anticipate issues.
-          variants: dict[str, set[str]] = {
-              # Available OS: https://github.com/actions/runner-images#available-images
-              "os": {
-                  "ubuntu-24.04", # x86
-                  "macos-15",     # arm64
-                  "windows-2022", # x86
-              },
-              # Available Python: https://github.com/actions/python-versions/blob/main/versions-manifest.json
-              "python-version": {
-                  "3.10",
-                  "3.13",
-                  "3.14-dev",
-              }
-          }
-          # TODO: List of additional variants to include in the matrix.
-          include: list[dict[str, str]] = []
-
-          # List of variants to exclude from the matrix.
-          exclude: list[dict[str, str]] = []
-
-          # List of unstable criterions.
-          unstable: list[dict[str, str]] = [
-              # XXX error: the configured Python interpreter version (3.14) is
-              # newer than PyO3's maximum supported version (3.13)
-              {"python-version": "3.14-dev"},
-          ]
-
-          # Build the job matrix.
-          jobs: list[dict[str, str]] = []
-          for variants in product(*[{(key, value) for value in values} for key, values in variants.items()]):
-              job = dict(variants)
-
-              # Match the job against the exclude criterions.
-              exclude_job = False
-              for criterion in exclude:
-                  if set(criterion.items()).issubset(job.items()):
-                      exclude_job = True
-                      break
-              if exclude_job:
-                  continue
-
-              # Match the job against the unstable criterions.
-              job["state"] = "stable"
-              for criterion in unstable:
-                  if set(criterion.items()).issubset(job.items()):
-                      job["state"] = "unstable"
-                      break
-
-              jobs.append(job)
-
-          matrix = json.dumps({"include": jobs})
-
-          env_file = Path(os.getenv("GITHUB_OUTPUT"))
-          env_file.write_text(f"matrix={matrix}")
-
-      - name: Print JSON matrix
-        run: |
-          echo '${{ steps.create_matrix.outputs.matrix }}'
-          jq -aR <<< echo '${{ steps.create_matrix.outputs.matrix }}'
-
   tests:
-    needs:
-      - test-matrix
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.test-matrix.outputs.test_matrix) }}
+      matrix:
+        # Available OS: https://github.com/actions/runner-images#available-images
+        # To speed up the tests, we only test the latest available OS for each platform.
+        os:
+          - ubuntu-24.04  # x86
+          - macos-15      # arm64
+          - windows-2025  # x86
+        # Available Python: https://github.com/actions/python-versions/blob/main/versions-manifest.json
+        # For Python, we only test against the oldest and newest major supported version and skip intermediates. We
+        # also test on the upcoming development version to anticipate issues.
+        python-version:
+          - "3.10"
+          - "3.13"
+          - "3.14"
+        include:
+          # Default all jobs as stable, unless marked otherwise below.
+          - state: stable
+          # XXX PyO3 does not support 3.14 yet: https://github.com/PyO3/pyo3/issues/4662
+          #   error: the configured Python interpreter version (3.14) is
+          #   newer than PyO3's maximum supported version (3.13)
+          - state: unstable
+            python-version: "3.14"
+    name: "${{ matrix.state == 'stable' && '✅' || '⁉️' }} ${{ matrix.os }} / py${{ matrix.python-version }}"
     runs-on: ${{ matrix.os }}
     # We keep going when a job flagged as not stable fails.
     continue-on-error: ${{ matrix.state == 'unstable' }}
@@ -124,11 +63,6 @@ jobs:
       HOMEBREW_NO_INSTALL_FROM_API: "1"
     steps:
       - uses: actions/checkout@v4.2.2
-
-      - name: Python ${{ matrix.python-version }} - Install
-        uses: actions/setup-python@v5.3.0
-        with:
-          python-version: ${{ matrix.python-version }}
 
       - name: Linux - Fix runner cache folder permissions
         if: runner.os == 'Linux'
@@ -563,7 +497,7 @@ jobs:
           sudo apt --quiet --yes install libxml-dev libxslt-dev
       - name: Install project
         run: |
-          uv --no-progress venv
+          uv --no-progress venv --python ${{ matrix.python-version }}
           uv --no-progress sync --frozen --extra test
 
       # CLI tests.
@@ -639,7 +573,12 @@ jobs:
           --numprocesses=0 --run-non-destructive --run-destructive
           ./tests/test_bar_plugin.py
 
-      - name: Coverage - Upload Codecov
-        uses: codecov/codecov-action@v5.1.2
+      - name: Codecov - coverage
+        uses: codecov/codecov-action@v5.4.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Codecov - test results
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1.0.4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

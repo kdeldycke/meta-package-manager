@@ -28,12 +28,6 @@ call:
 $ python -m pip install meta-package-manager
 ```
 
-On some system, due to the Python 2.x to 3.x migration, you'll have to call `python3` directly:
-
-```{code-block} shell-session
-$ python3 -m pip install meta-package-manager
-```
-
 Other variations includes:
 
 ```{code-block} shell-session
@@ -243,14 +237,6 @@ mpm, version 4.13.0
 (...)
 ```
 
-Or on some systems:
-
-```shell-session
-$ python3 -m meta_package_manager --version
-mpm, version 4.13.0
-(...)
-```
-
 ## Password prompts and `sudo`
 
 The majority of package managers on Linux requires `sudo` to perform system-wide operations.
@@ -280,9 +266,9 @@ Both cases are not handled gracefully by `mpm`, which [doesn't support (yet) int
 A workaround on Linux is to install `mpm` with `sudo`, so you'll be able to invoke it with `sudo` too:
 
 ```shell-session
-$ sudo python3 -m pip install meta-package-manager
+$ sudo python -m pip install meta-package-manager
 (...)
-$ sudo python3 -m meta_package_manager upgrade
+$ sudo python -m meta_package_manager upgrade
 (...)
 ```
 

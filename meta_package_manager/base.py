@@ -272,9 +272,11 @@ class PackageManager(metaclass=MetaPackageManager):
     """List of CLI names the package manager is known as.
 
     This list of recognized CLI names is ordered by priority. That way we can influence
-    the search of the right binary. This was helpful in the case of the Python
-    transition from 2.x to 3.x, where multiple versions of the same executable were
-    named ``python`` or ``python3``.
+    the search of the right binary.
+
+    ..hint::
+        This was helpful in the case of the Python transition from 2.x to 3.x, where
+        multiple versions of the same executable were named ``python`` or ``python3``.
 
     By default, this property's value is derived from the manager's ID (see the
     ``MetaPackageManager.__init__`` method above).

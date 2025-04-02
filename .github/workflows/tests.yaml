@@ -9,6 +9,13 @@ name: Tests
     # Run tests every Monday at 9:17 to catch regressions.
     - cron: "17 9 * * 1"
 
+concurrency:
+  # Group workflow jobs so new commits cancels in-progress execution triggered by previous commits. Source:
+  # https://mail.python.org/archives/list/pypa-committers@python.org/thread/PCBCQMJF64JGRBOX7E2EE4YLKHT4DI55/
+  # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/control-the-concurrency-of-workflows-and-jobs
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 jobs:
 
   test-matrix:

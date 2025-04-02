@@ -248,7 +248,7 @@ class MPMPlugin:
         return None
 
     def search_mpm(self) -> Generator[tuple[str, ...], None, None]:
-        """Iterare over possible CLI commands to execute ``mpm``.
+        """Iterate over possible CLI commands to execute ``mpm``.
 
         Should be able to produce the full spectrum of alternative commands we can use
         to invoke ``mpm`` over different context.

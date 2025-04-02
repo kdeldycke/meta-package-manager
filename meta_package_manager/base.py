@@ -36,7 +36,7 @@ from boltons.strutils import strip_ansi
 from click_extra.colorize import default_theme as theme
 from click_extra.envvar import env_copy
 from click_extra.testing import INDENT, args_cleanup, format_cli_prompt
-from extra_platforms import UNIX, Group, current_os
+from extra_platforms import UNIX, Group, current_platforms
 from packageurl import PackageURL
 
 from .version import TokenizedString, parse_version
@@ -576,8 +576,8 @@ class PackageManager(metaclass=MetaPackageManager):
     def supported(self) -> bool:
         """Is the package manager supported on that platform?"""
         # At this point self.platforms is normalized as a frozenset of Platform
-        # instances, but mypy doesn't know it.
-        return current_os() in self.platforms  # type: ignore[operator]
+        # instances.
+        return len(self.platforms.intersection(current_platforms())) > 0
 
     @cached_property
     def executable(self) -> bool:
@@ -756,7 +756,7 @@ class PackageManager(metaclass=MetaPackageManager):
 
         # Sudo replaces any pre-command, be it overridden or automatic.
         if sudo:
-            if current_os() not in UNIX:
+            if len(UNIX.intersection(current_platforms())) > 0:
                 msg = "sudo only supported on UNIX."
                 raise NotImplementedError(msg)
             if override_pre_cmds:

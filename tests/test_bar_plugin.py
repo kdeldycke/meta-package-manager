@@ -20,10 +20,11 @@ import re
 import subprocess
 from collections import Counter
 from itertools import product
+from typing import cast
 
 import pytest
 from boltons.iterutils import flatten
-from click_extra.envvar import env_copy
+from click_extra.envvar import TEnvVars, env_copy
 from click_extra.testing import args_cleanup
 from extra_platforms.pytest import unless_macos
 
@@ -155,13 +156,13 @@ class TestBarPlugin:
         ),
     ]
 
-    def _plugin_output_checks(self, checklist, extra_env=None):
+    def _plugin_output_checks(self, checklist, extra_env: TEnvVars | None = None):
         """Run the plugin script and check its output against the checklist."""
         process = subprocess.run(
             bar_plugin.__file__,
             capture_output=True,
             encoding="utf-8",
-            env=env_copy(extra_env),
+            env=cast("subprocess._ENV", env_copy(extra_env)),
         )
 
         assert not process.stderr

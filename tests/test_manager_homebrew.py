@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
+from typing import cast
 
 import pytest
 from click_extra.envvar import env_copy
@@ -105,7 +106,7 @@ def install_cask():
         """
         process = subprocess.run(
             ("brew", "cleanup", "-s", "--prune=all"),
-            env=env_copy({"HOMEBREW_NO_AUTO_UPDATE": "1"}),
+            env=cast("subprocess._ENV", env_copy({"HOMEBREW_NO_AUTO_UPDATE": "1"})),
         )
         assert not process.stderr
         assert process.returncode == 0

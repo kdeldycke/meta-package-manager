@@ -7,6 +7,7 @@
 
 - [mpm] Fix parsing of package specifiers with multiple version separators.
 - [npm] Fix retrieval of installed packages.
+- [bar-plugin] Bump minimal Python version to 3.10 to aligns it with `mpm` itself.
 
 ## [5.20.0 (2024-11-23)](https://github.com/kdeldycke/meta-package-manager/compare/v5.19.0...v5.20.0)
 

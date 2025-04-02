@@ -155,7 +155,7 @@ Meta Package Manager,zypper,1
 > Missing manager
 > If your favorite manager is missing or does not support an operation, you can influence its implementation: [open a ticket to document its output](https://github.com/kdeldycke/meta-package-manager/issues/new?assignees=&labels=%F0%9F%8E%81+feature+request&template=new-package-manager.yaml) or [read the contribution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html) and submit a pull request.
 >
-> I can do that work for you if you [purchase business support 🤝 or sponsor the project 🫶](https://github.com/sponsors/kdeldycke).
+> You can help if you [purchase business support 🤝](https://github.com/sponsors/kdeldycke) or [sponsor the project 🫶](https://github.com/sponsors/kdeldycke).
 
 ## Installation
 

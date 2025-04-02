@@ -101,11 +101,14 @@ html_theme_options = {
     "source_branch": "main",
     "source_directory": "docs/",
     "announcement": (
-        f"{project} works fine, but its sole maintainer is distracted by life "
-        "😶‍🌫️.<br/>You can influence it with purchase of "
+        f"{project} works fine, but is <em>maintained by only one person</em> "
+        "😶‍🌫️.<br/>You can help if you "
         "<strong><a class='reference external' "
         f"href='https://github.com/sponsors/{github_user}'>"
-        "business support 🤝 and sponsorship 🫶</a></strong>."
+        "purchase business support 🤝</a></strong> or "
+        "<strong><a class='reference external' "
+        f"href='https://github.com/sponsors/{github_user}'>"
+        "sponsor the project 🫶</a></strong>."
     ),
 }
 

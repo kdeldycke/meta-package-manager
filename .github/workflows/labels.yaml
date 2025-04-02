@@ -12,24 +12,17 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4.2.2
-      - uses: actions/setup-python@v5.3.0
-        with:
-          python-version: "3.13"
       - name: Install uv
         run: |
           python -m pip install -r https://raw.githubusercontent.com/kdeldycke/workflows/v4.15.5/requirements/uv.txt
-      - name: Install project
-        run: |
-          uv --no-progress venv
-          uv --no-progress sync --frozen --all-extras
       - name: Generate labels
         run: >
-          uv --no-progress run --frozen --
+          uv --no-progress run --frozen --all-extras --
           python -c 'from meta_package_manager.labels import write_labels; write_labels()'
       - uses: peter-evans/create-pull-request@v7.0.6
         with:
           assignees: ${{ github.actor }}
-          commit-message: "[github] Update extra labels."
+          commit-message: "[github] Update extra labels"
           title: "[github] Update extra labels"
           body: >
             <details><summary><code>Workflow metadata</code></summary>

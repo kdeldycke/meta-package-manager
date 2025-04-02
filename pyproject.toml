@@ -185,8 +185,12 @@ addopts = [
     "--maxschedchunk=1",
     "--durations=10",
     "--cov=meta_package_manager",
+    "--cov-branch",
+    "--cov-precision=2",
     "--cov-report=term",
     "--cov-report=xml",
+    "--junitxml=junit.xml",
+    "--override-ini=junit_family=legacy",
     # XXX --run-non-destructiveis not required as this is the default behavior.
     # We would love to add it to the command line to make sure pytest is properly recognizing it and loads our
     # customization from ``./tests/conftest.py``. But because of issue
@@ -195,12 +199,6 @@ addopts = [
 ]
 # Make sure tests that are expected to fail do not resurect and start working all of a sudden.
 xfail_strict = true
-
-# https://coverage.readthedocs.io/en/latest/config.html
-[tool.coverage.run]
-branch = true
-[tool.coverage.report]
-precision = 2
 
 [tool.bumpversion]
 current_version = "5.20.1"

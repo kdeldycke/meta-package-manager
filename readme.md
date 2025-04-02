@@ -179,10 +179,10 @@ $ brew install meta-package-manager
 
 ### Python
 
-[`pipx`](https://pipx.pypa.io) is the cleanest way to install `mpm` from sources on any platform:
+[`uv`](https://docs.astral.sh/uv/getting-started/installation/) is the fastest way to run `mpm` from sources on any platform, thanks to its [`uvx` command](https://docs.astral.sh/uv/guides/tools/#running-tools):
 
 ```shell-session
-$ pipx install meta-package-manager
+$ uvx --from meta-package-manager mpm
 ```
 
 ### Executables

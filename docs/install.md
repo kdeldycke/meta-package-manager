@@ -8,21 +8,36 @@
 
 `````{tab-set}
 
+````{tab-item} uvx
+Easiest way is to [install `uv`](https://docs.astral.sh/uv/getting-started/installation/), then use it to run `mpm` ad-hoc with the [`uvx` command](https://docs.astral.sh/uv/guides/tools/#running-tools):
+
+```{code-block} shell-session
+$ uvx --from meta-package-manager mpm
+```
+
+To install `mpm` system-wide, use the [`uv tool`](https://docs.astral.sh/uv/guides/tools/#installing-tools) command:
+
+```{code-block} shell-session
+$ uv tool install meta-package-manager
+```
+
+Then you can run `mpm` directly:
+
+```{code-block} shell-session
+$ mpm --version
+```
+````
+
 ````{tab-item} pipx
-Easiest way is to [install `pipx`](https://pipx.pypa.io/stable/installation/), then use it to install `mpm`:
+[`pipx`](https://pipx.pypa.io/stable/installation/) is a great way to install Python applications globally:
 
 ```{code-block} shell-session
 $ pipx install meta-package-manager
 ```
-
-```{note}
-`pipx` is to `pip` what `npx` is to `npm`: a clean way to install and run Python applications in isolated environments.
-```
 ````
 
 ````{tab-item} pip
-You can install the latest stable release and its dependencies with a simple `pip`
-call:
+You can install the latest stable release and its dependencies with a simple `pip` call:
 
 ```{code-block} shell-session
 $ python -m pip install meta-package-manager

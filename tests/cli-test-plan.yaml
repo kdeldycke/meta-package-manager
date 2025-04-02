@@ -1,0 +1,63 @@
+# This test plan checks some high-level behavior of the mpm CLI.
+
+# Runs the same binary tests as in the brew official Formula:
+# https://github.com/Homebrew/homebrew-core/blob/f0a4d69/Formula/meta-package-manager.rb#L401-L413
+
+# Check mpm is reporting the correct version of itself.
+- cli_parameters: --version
+  exit_code: 0
+  stdout_contains: "mpm, version"
+  stdout_regex_fullmatch: "\x1b\\[97mmpm\x1b\\[0m, version \x1b\\[32mNone\x1b\\[0m\\n"
+
+# Check mpm is reporting its usage in help screen.
+- cli_parameters: --help
+  exit_code: 0
+  strip_ansi: true
+  stdout_contains:
+    - "Usage: mpm [OPTIONS] COMMAND [ARGS]..."
+    - "-h, --help"
+
+# Check mpm is detecting brew and report it as a manager in a table row.
+- cli_parameters: --output-format csv --all-managers managers
+  exit_code: 0
+  stdout_regex_matches:
+    - "\x1b\\[32mbrew\x1b\\[0m,Homebrew Formulae,\x1b\\[32m✓\x1b\\[0m,\x1b\\[32m✓\x1b\\[0m \S+,\x1b\\[32m✓\x1b\\[0m,\x1b\\[32m✓\x1b\\[0m \S+\n"
+
+# Same as above, but without colors.
+- cli_parameters: --no-color --output-format csv --all-managers managers
+  exit_code: 0
+  # XXX --no-color does not apply to CSV export: https://github.com/kdeldycke/meta-package-manager/issues/1004
+  # So we force the ANSI stripping.
+  strip_ansi: true
+  stdout_contains:
+    - "brew,Homebrew Formulae,✓,✓ \S+,✓,✓ \S+\n"
+
+# Check mpm is reporting itself as installed via brew in a table row.
+- cli_parameters: --output-format csv installed
+  exit_code: 0
+  stdout_regex_matches:
+    - "meta-package-manager,,brew,\S+\n"
+
+- cli_parameters: managers
+  exit_code: 0
+
+- cli_parameters: --all-managers managers
+  exit_code: 0
+
+- cli_parameters: installed
+  exit_code: 0
+
+- cli_parameters: outdated
+  exit_code: 0
+
+- cli_parameters: which mpm
+  exit_code: 0
+
+- cli_parameters: backup
+  exit_code: 0
+
+- cli_parameters: sbom --spdx
+  exit_code: 0
+
+- cli_parameters: sbom --cyclonedx
+  exit_code: 0

@@ -14,19 +14,4 @@ jobs:
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
     with:
-      binaries-test-plan: |
-        # Runs the same binary tests as in the brew official Formula:
-        # https://github.com/Homebrew/homebrew-core/blob/f0a4d69/Formula/meta-package-manager.rb#L401-L413
-
-        # Test combination of version and verbosity.
-        --verbosity DEBUG --version
-
-        # Test help output.
-        --help
-
-        # Test CSV export.
-        # XXX Ideally we would like to use --no-color to simplify Homebrew's formula checks.
-        # See: https://github.com/kdeldycke/meta-package-manager/issues/1004
-        # --output-format csv --all-managers managers
-        --no-color --output-format csv installed
       timeout: 300

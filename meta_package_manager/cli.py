@@ -271,7 +271,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     context_settings={"default_map": {"verbosity": "INFO"}},
 )
 @option_group(
-    "Package manager selection options",
+    "Package manager selection",
     # ---------------------- 80 characters reference limit ----------------------- #
     dedent("""\
     \b
@@ -279,8 +279,8 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 
     \b
     - By default, mpm will evaluate all managers supported on the current platform.
-    - Only target a subset of managers with the --<manager-id> selectors.
-    - Remove a manager from the selection with --no-<manager-id> selectors.
+    - Use the --<manager-id> selectors to restrict target to a subset of managers.
+    - To remove a manager from the selection, use --no-<manager-id> selectors.
     - Order of the selectors is preserved for priority-sensitive subcommands.
     - Exclusion of a manager always takes precedence over its inclusion.
     \b

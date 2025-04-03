@@ -758,7 +758,7 @@ class PackageManager(metaclass=MetaPackageManager):
 
         # Sudo replaces any pre-command, be it overridden or automatic.
         if sudo:
-            if len(UNIX.intersection(current_platforms())) > 0:
+            if len(UNIX.intersection(current_platforms())) == 0:
                 msg = "sudo only supported on UNIX."
                 raise NotImplementedError(msg)
             if override_pre_cmds:

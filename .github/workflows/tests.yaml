@@ -389,9 +389,9 @@ jobs:
       - name: WinGet - Windows install
         if: runner.os == 'Windows'
         # uses: Cyberboss/install-winget@v1.1.1
-        uses: kdeldycke/install-winget@windows-2025-fix
-        # run: |
-        #   winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
+        #uses: kdeldycke/install-winget@windows-2025-fix
+        run: |
+          winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
 
       # DNF
       - name: DNF - Linux install

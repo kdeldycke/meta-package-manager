@@ -386,8 +386,10 @@ jobs:
       # WinGet
       - name: WinGet - Windows install
         if: runner.os == 'Windows'
-        run: |
+        # Ignore exit code, as WinGet will fail if it is already up-to-date.
+        run: >
           winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
+          || & { "ignore failure"; $global:LASTEXITCODE = 0 }
 
       # DNF
       - name: DNF - Linux install

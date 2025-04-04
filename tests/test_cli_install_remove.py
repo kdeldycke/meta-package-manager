@@ -19,8 +19,6 @@ from __future__ import annotations
 import re
 
 import pytest
-from boltons.strutils import strip_ansi
-from extra_platforms import is_windows
 
 from meta_package_manager.pool import pool
 
@@ -114,12 +112,9 @@ class TestInstallRemove(CLISubCommandTests):
 
             if result.exit_code == 2:
                 assert not result.stdout
-                expected_error = (
+                assert result.stderr.endswith(
                     "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
                 )
-                if is_windows():
-                    expected_error = strip_ansi(expected_error)
-                assert result.stderr.endswith(expected_error)
             else:
                 assert result.exit_code == 0
                 self.check_manager_selection(

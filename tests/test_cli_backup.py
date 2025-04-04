@@ -18,8 +18,6 @@
 from __future__ import annotations
 
 import pytest
-from boltons.strutils import strip_ansi
-from extra_platforms import is_windows
 
 from meta_package_manager.base import Operations
 
@@ -69,10 +67,9 @@ class TestBackup(CLISubCommandTests):
         assert "mpm-packages.toml" in result.stderr
         if result.exit_code == 2:
             assert not result.stdout
-            expected_error = "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
-            if is_windows():
-                expected_error = strip_ansi(expected_error)
-            assert result.stderr.endswith(expected_error)
+            assert result.stderr.endswith(
+                "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
+            )
         else:
             assert result.exit_code == 0
             self.check_manager_selection(result, {manager_id})

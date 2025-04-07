@@ -64,12 +64,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4.2.2
 
-      - name: Linux - Fix runner cache folder permissions
-        if: runner.os == 'Linux'
-        run: |
-          mkdir -p /home/runner/.cache
-          sudo chown -R runner /home/runner/.cache
-
       ### Install or upgrade package managers on each platform, and made them
       ### ready to use for mpm.
 

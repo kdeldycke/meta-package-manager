@@ -92,19 +92,21 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
         .. code-block:: shell-session
 
-            ► mpm --mas search 钉钉
-            ╭────────────┬────────────────────────────────┬─────────┬────────────────╮
-            │ Package ID │ Name                           │ Manager │ Latest version │
-            ├────────────┼────────────────────────────────┼─────────┼────────────────┤
-            │ 1536361140 │ 业务掌中，有轨迹的钉，外勤管理        │ mas     │ 4.29           │
-            ╰────────────┴────────────────────────────────┴─────────┴────────────────╯
+            ► mpm --mas search 钉
+            info: User selection of managers by priority > mas
+            info: Managers dropped by user: None
+            ╭────────────┬───────────────────┬─────────┬────────────────╮
+            │ Package ID │ Name              │ Manager │ Latest version │
+            ├────────────┼───────────────────┼─────────┼────────────────┤
+            │ 1435447041 │ 钉钉 - 让进步发生 │ mas     │ 7.6.57         │
+            ╰────────────┴───────────────────┴─────────┴────────────────╯
 
         Test originates from #16.
         """
-        result = invoke("--mas", "search", "业")
+        result = invoke("--mas", "search", "钉")
         assert result.exit_code == 0
-        assert "业" in result.stdout
-        assert "\x1b[32m\x1b[1m业\x1b[0m" in result.stdout
+        assert "钉钉" in result.stdout
+        assert " \x1b[32m\x1b[1m钉钉\x1b[0m " in result.stdout
 
     # PyPi's online search API was at first rate-limited. So we added an artificial
     # 2-seconds delay to prevent the following error:

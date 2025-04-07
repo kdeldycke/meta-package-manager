@@ -437,16 +437,16 @@ def mpm(
         user_selection = ctx.obj.get("managers_to_add", None)
         managers_to_remove = ctx.obj.get("managers_to_remove", None)
     selection_string = (
-        ": platform default"
+        " platform default"
         if not user_selection
-        else " > " + " > ".join(map(theme.invoked_command, user_selection))
+        else "> " + " > ".join(map(theme.invoked_command, user_selection))
     )
     deselection_string = (
         "None"
         if not managers_to_remove
         else ", ".join(map(theme.invoked_command, sorted(managers_to_remove)))
     )
-    logging.info(f"User selection of managers by priority{selection_string}")
+    logging.info(f"User selection of managers by priority:{selection_string}")
     logging.info(f"Managers dropped by user: {deselection_string}")
 
     # Select the subset of manager to target, and apply manager-level options.

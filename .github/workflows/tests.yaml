@@ -307,6 +307,9 @@ jobs:
       # WinGet
       - name: WinGet - Windows install
         if: runner.os == 'Windows'
+        # XXX Force shell configuration to PowerShell, even if it is the default for Windows runners, so the actionlint
+        # job from the lint.yaml workflow will not try to validate the command syntax with shellcheck.
+        shell: pwsh
         # Ignore exit code, as WinGet will fail if it is already up-to-date.
         run: >
           winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity

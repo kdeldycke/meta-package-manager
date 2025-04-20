@@ -6,6 +6,11 @@ body:
   - type: markdown
     attributes:
       value: >
+        > [!TIP]
+        > Don't bother creating an issue if you're about to propose an immediate fix as a PR. Directly create a PR to
+        > avoid splitting the discussion in multiple places.
+
+
         Before filling this bug report, try to isolate the issue by targetting only one manager, by running `mpm` with
         a single `--<manager_id>`/`--manager <manager_id>` option.
 

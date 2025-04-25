@@ -295,7 +295,7 @@ toml = [
 
 [[package]]
 name = "cyclonedx-python-lib"
-version = "9.1.0"
+version = "10.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "license-expression" },
@@ -303,9 +303,9 @@ dependencies = [
     { name = "py-serializable" },
     { name = "sortedcontainers" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/66/fc/abaad5482f7b59c9a0a9d8f354ce4ce23346d582a0d85730b559562bbeb4/cyclonedx_python_lib-9.1.0.tar.gz", hash = "sha256:86935f2c88a7b47a529b93c724dbd3e903bc573f6f8bd977628a7ca1b5dadea1", size = 1048735, upload_time = "2025-02-27T17:23:40.367Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/af/67/d75d34d2f9ce71524a8d0b7e1d8328523f059a0b10ccc98ed05b3b82e93c/cyclonedx_python_lib-10.0.0.tar.gz", hash = "sha256:d0b3deb90659faf3acc909e487af216199c1a0ee976e1601ea13649bd6a070db", size = 1033605, upload_time = "2025-04-23T09:52:27.327Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/53/f1/f3be2e9820a2c26fa77622223e91f9c504e1581830930d477e06146073f4/cyclonedx_python_lib-9.1.0-py3-none-any.whl", hash = "sha256:55693fca8edaecc3363b24af14e82cc6e659eb1e8353e58b587c42652ce0fb52", size = 374968, upload_time = "2025-02-27T17:23:37.766Z" },
+    { url = "https://files.pythonhosted.org/packages/49/08/00502eb810b77e3b3eb68141995745d6bb6b4bde2cc5d6682ae4f1f90ab6/cyclonedx_python_lib-10.0.0-py3-none-any.whl", hash = "sha256:30eb0d7774b0a0448b3480d11e40591d2798b4b44d15707c15e6ca06bf9f4246", size = 374986, upload_time = "2025-04-23T09:52:25.36Z" },
 ]
 
 [package.optional-dependencies]
@@ -759,10 +759,10 @@ requires-dist = [
     { name = "click-extra", extras = ["pytest"], marker = "extra == 'test'", specifier = "~=4.15.0" },
     { name = "click-extra", extras = ["sphinx"], marker = "extra == 'docs'", specifier = "~=4.15.0" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'test'", specifier = "~=7.8.0" },
-    { name = "cyclonedx-python-lib", extras = ["validation"], specifier = "~=9.1.0" },
+    { name = "cyclonedx-python-lib", extras = ["validation"], specifier = "~=10.0.0" },
     { name = "extra-platforms", extras = ["pytest"], specifier = "~=2.1.0" },
     { name = "furo", marker = "extra == 'docs'", specifier = "~=2024.8.6" },
-    { name = "more-itertools", specifier = "~=10.6.0" },
+    { name = "more-itertools", specifier = "~=10.7.0" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = "~=4.0.0" },
     { name = "packageurl-python", specifier = "~=0.16.0" },
     { name = "pytest", marker = "extra == 'test'", specifier = "~=8.3.1" },
@@ -793,11 +793,11 @@ provides-extras = ["test", "typing", "docs"]
 
 [[package]]
 name = "more-itertools"
-version = "10.6.0"
+version = "10.7.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/88/3b/7fa1fe835e2e93fd6d7b52b2f95ae810cf5ba133e1845f726f5a992d62c2/more-itertools-10.6.0.tar.gz", hash = "sha256:2cd7fad1009c31cc9fb6a035108509e6547547a7a738374f10bd49a09eb3ee3b", size = 125009, upload_time = "2025-01-14T16:22:47.626Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ce/a0/834b0cebabbfc7e311f30b46c8188790a37f89fc8d756660346fe5abfd09/more_itertools-10.7.0.tar.gz", hash = "sha256:9fddd5403be01a94b204faadcff459ec3568cf110265d3c54323e1e866ad29d3", size = 127671, upload_time = "2025-04-22T14:17:41.838Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/23/62/0fe302c6d1be1c777cab0616e6302478251dfbf9055ad426f5d0def75c89/more_itertools-10.6.0-py3-none-any.whl", hash = "sha256:6eb054cb4b6db1473f6e15fcc676a08e4732548acd47c708f0e179c2c7c01e89", size = 63038, upload_time = "2025-01-14T16:22:46.014Z" },
+    { url = "https://files.pythonhosted.org/packages/2b/9f/7ba6f94fc1e9ac3d2b853fdff3035fb2fa5afbed898c4a72b8a020610594/more_itertools-10.7.0-py3-none-any.whl", hash = "sha256:d43980384673cb07d2f7d2d918c616b30c659c089ee23953f601d6609c67510e", size = 65278, upload_time = "2025-04-22T14:17:40.49Z" },
 ]
 
 [[package]]

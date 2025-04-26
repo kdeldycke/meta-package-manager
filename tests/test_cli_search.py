@@ -24,7 +24,7 @@ from time import sleep
 
 import pytest
 from boltons.iterutils import same
-from extra_platforms.pytest import unless_macos
+from extra_platforms.pytest import unless_macos  # type: ignore[attr-defined]
 
 from meta_package_manager.base import Operations, Package
 from meta_package_manager.pool import pool

@@ -23,7 +23,7 @@ from typing import cast
 
 import pytest
 from click_extra.envvar import env_copy
-from extra_platforms.pytest import unless_macos
+from extra_platforms.pytest import unless_macos  # type: ignore[attr-defined]
 
 
 @pytest.fixture

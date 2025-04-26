@@ -26,7 +26,7 @@ import pytest
 from boltons.iterutils import flatten
 from click_extra.envvar import TEnvVars, env_copy
 from click_extra.testing import args_cleanup
-from extra_platforms.pytest import unless_macos
+from extra_platforms.pytest import unless_macos  # type: ignore[attr-defined]
 
 from meta_package_manager import bar_plugin
 from meta_package_manager.version import parse_version
@@ -170,7 +170,7 @@ class TestBarPlugin:
 
         checks = checklist + self.common_checklist
 
-        match_counter = Counter()
+        match_counter = Counter()  # type: ignore[var-annotated]
 
         for line in process.stdout.splitlines():
             # The line is expected to match at least one regex.

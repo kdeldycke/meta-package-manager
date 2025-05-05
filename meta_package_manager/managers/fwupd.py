@@ -41,8 +41,6 @@ class FWUPD(PackageManager):
     cli_names = ("fwupdmgr",)
 
     pre_args = (
-        # Schedule installation for next reboot when possible.
-        "--offline",
         # Answer yes to all questions.
         "--assume-yes",
         # Do not check or prompt for reboot after update.
@@ -74,7 +72,7 @@ class FWUPD(PackageManager):
 
         .. code-block:: shell-session
 
-            ► fwupdmgr --offline --assume-yes --no-reboot-check --no-device-prompt get-devices --json | jq
+            ► fwupdmgr --assume-yes --no-reboot-check --no-device-prompt get-devices --json | jq
             {
               "Devices": [
                 {
@@ -330,7 +328,7 @@ class FWUPD(PackageManager):
 
         .. code-block:: shell-session
 
-            ► fwupdmgr --offline --assume-yes --no-reboot-check --no-device-prompt get-updates --json | jq
+            ► fwupdmgr --assume-yes --no-reboot-check --no-device-prompt get-updates --json | jq
             {
               "Devices" : [
                 {
@@ -509,7 +507,7 @@ class FWUPD(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo fwupdmgr --offline --assume-yes --no-reboot-check --no-device-prompt install 362301da643102b9f38477387e2193e57abaa590
+            ► sudo fwupdmgr  --assume-yes --no-reboot-check --no-device-prompt install 362301da643102b9f38477387e2193e57abaa590
             WARNING: UEFI capsule updates not available or enabled in firmware setup
             See https://github.com/fwupd/fwupd/wiki/PluginFlag:capsules-unsupported for more information.
             0.	Cancel
@@ -520,7 +518,7 @@ class FWUPD(PackageManager):
             Scheduling…              [***************************************]
             Successfully installed firmware
 
-            ► sudo fwupdmgr --offline --assume-yes --no-reboot-check --no-device-prompt install 362301da643102b9f38477387e2193e57abaa590 21
+            ► sudo fwupdmgr --assume-yes --no-reboot-check --no-device-prompt install 362301da643102b9f38477387e2193e57abaa590 21
             WARNING: UEFI capsule updates not available or enabled in firmware setup
             See https://github.com/fwupd/fwupd/wiki/PluginFlag:capsules-unsupported for more information.
             Scheduling…              [***************************************]
@@ -537,7 +535,7 @@ class FWUPD(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo fwupdmgr --offline --assume-yes --no-reboot-check --no-device-prompt update
+            ► sudo fwupdmgr --assume-yes --no-reboot-check --no-device-prompt update
         """
         return self.build_cli("update", sudo=True)
 
@@ -551,7 +549,7 @@ class FWUPD(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo fwupdmgr --offline --assume-yes --no-reboot-check --no-device-prompt update 362301da643102b9f38477387e2193e57abaa590
+            ► sudo fwupdmgr --assume-yes --no-reboot-check --no-device-prompt update 362301da643102b9f38477387e2193e57abaa590
             WARNING: UEFI capsule updates not available or enabled in firmware setup
             See https://github.com/fwupd/fwupd/wiki/PluginFlag:capsules-unsupported for more information.
             Scheduling…              [ -                                     ]
@@ -564,7 +562,7 @@ class FWUPD(PackageManager):
 
         .. code-block:: shell-session
 
-            ► fwupdmgr --offline --assume-yes --no-reboot-check --no-device-prompt refresh --force
+            ► fwupdmgr --assume-yes --no-reboot-check --no-device-prompt refresh --force
             Updating lvfs
             Downloading…             [***************************************]
             Successfully downloaded new metadata: 1 local device supported

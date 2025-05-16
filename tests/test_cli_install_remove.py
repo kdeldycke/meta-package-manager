@@ -89,24 +89,6 @@ class TestInstallRemove(CLISubCommandTests):
             it find one providing the package we seek to install, after which the
             process stop.
         """
-        # XXX Skip this test on GitHub Actions as it's too slow:
-        #
-        # ► mpm --mas install 747648890
-        # ► <output> stream:
-        #   (...)
-        #   info: Install 747648890 package with mas...
-        #
-        # ► Exit code: 1
-        #
-        # Traceback (most recent call last):
-        #   (...)
-        #   File ".../lib/python3.10/subprocess.py", line 1198, in _check_timeout
-        #     raise TimeoutExpired(
-        # subprocess.TimeoutExpired: Command '('/opt/homebrew/bin/mas', 'install',
-        # '747648890')' timed out after 500 seconds
-        if manager_id == "mas":
-            pytest.skip("mas timeout on GitHub Actions.")
-
         for command in ("install", "remove"):
             result = invoke(f"--{manager_id}", command, package_id)
 

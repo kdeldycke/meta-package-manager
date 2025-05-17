@@ -24,7 +24,10 @@ from time import sleep
 
 import pytest
 from boltons.iterutils import same
-from extra_platforms.pytest import unless_macos  # type: ignore[attr-defined]
+from extra_platforms.pytest import (  # type: ignore[attr-defined]
+    skip_github_ci,
+    unless_macos,
+)
 
 from meta_package_manager.base import Operations, Package
 from meta_package_manager.pool import pool
@@ -83,6 +86,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
                     assert isinstance(pkg[f], str) or pkg[f] is None
 
     @unless_macos
+    @skip_github_ci
     def test_unicode_search(self, invoke):
         """Check ``mpm`` is accepting unicode as search query.
 
@@ -102,6 +106,10 @@ class TestSearch(CLISubCommandTests, CLITableTests):
             ╰────────────┴───────────────────┴─────────┴────────────────╯
 
         Test originates from #16.
+
+        .. caution::
+            Test is skipped on GitHub Actions as ``mas`` does not have access there
+            to a registered account on the App Store. So the search returns no results.
         """
         result = invoke("--mas", "search", "钉")
         assert result.exit_code == 0

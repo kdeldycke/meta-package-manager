@@ -32,7 +32,7 @@ jobs:
         # For Python, we only test against the oldest and newest major supported version and skip intermediates. We
         # also test on the upcoming development version to anticipate issues.
         python-version:
-          - "3.10"
+          - "3.11"
           - "3.13"
           - "3.14"
         include:
@@ -194,11 +194,11 @@ jobs:
       #      code, output, error = run_cmd(
       #    File ".../site-packages/click_extra/run.py", line 110, in run_cmd
       #      process = subprocess.run(
-      #    File ".../python3.10/subprocess.py", line 503, in run
+      #    File ".../python3.11/subprocess.py", line 503, in run
       #      with Popen(*popenargs, **kwargs) as process:
-      #    File ".../python3.10/subprocess.py", line 971, in __init__
+      #    File ".../python3.11/subprocess.py", line 971, in __init__
       #      self._execute_child(args, executable, preexec_fn, close_fds,
-      #    File ".../python3.10/subprocess.py", line 1847, in _execute_child
+      #    File ".../python3.11/subprocess.py", line 1847, in _execute_child
       #      raise child_exception_type(errno_num, err_msg, err_filename)
       #  FileNotFoundError: [Errno 2] No such file or directory: '/usr/local/bin/yarn'
       #

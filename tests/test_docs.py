@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import json
 import re
-import sys
+import tomllib
 from collections import Counter
 from itertools import permutations
 from pathlib import Path
@@ -27,16 +27,11 @@ from boltons.iterutils import flatten
 from extra_platforms import Group
 from yaml import Loader, load
 
-from .conftest import all_managers
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # type: ignore[import-not-found]
-
 from meta_package_manager.inventory import MAIN_PLATFORMS
 from meta_package_manager.labels import LABELS, MANAGER_PREFIX, PLATFORM_PREFIX
 from meta_package_manager.pool import pool
+
+from .conftest import all_managers
 
 """ Test all non-code artifacts depending on manager definitions.
 

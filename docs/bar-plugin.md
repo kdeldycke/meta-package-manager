@@ -83,7 +83,7 @@ Once `mpm` is installed on your system, it can dynamiccaly be located with the d
 
 ```shell-session
 $ mpm --bar-plugin-path
-~/Library/Python/3.10/lib/python/site-packages/meta_package_manager/bar_plugin.py
+~/Library/Python/3.11/lib/python/site-packages/meta_package_manager/bar_plugin.py
 ```
 
 This option is handy for deployment and initial configuration of Xbar/SwiftBar. I personally

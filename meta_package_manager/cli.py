@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 import sys
+import tomllib
 from collections import Counter, namedtuple
 from configparser import RawConfigParser
 from datetime import datetime
@@ -53,12 +54,6 @@ from click_extra.colorize import default_theme as theme
 from extra_platforms import reduce
 
 from meta_package_manager.inventory import MAIN_PLATFORMS
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # type: ignore[import-not-found]
-
 
 from . import __version__, bar_plugin
 from .base import (

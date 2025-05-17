@@ -3,7 +3,7 @@
 name = "meta-package-manager"
 version = "5.21.0"
 # Python versions and their status: https://devguide.python.org/versions/
-requires-python = ">= 3.10"
+requires-python = ">= 3.11"
 description = "🎁 wraps all package managers with a unifying CLI"
 authors = [{ name = "Kevin Deldycke", email = "kevin@deldycke.com" }]
 readme = "readme.md"
@@ -79,7 +79,6 @@ classifiers = [
     'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX :: Linux',
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -101,7 +100,6 @@ dependencies = [
     "packageurl-python ~= 0.16.0",
     "spdx-tools ~= 0.8.2",
     "tabulate [widechars] ~= 0.9.0",
-    "tomli ~= 2.0.1 ; python_version < '3.11'",
     "tomli_w ~= 1.2.0",
     "xmltodict ~= 0.14.2",
 ]
@@ -135,7 +133,6 @@ docs = [
     "sphinx-issues ~= 5.0.0",
     "sphinxcontrib-mermaid ~= 1.0.0",
     "sphinxext-opengraph ~= 0.10.0",
-    "tomli ~= 2.0.1 ; python_version < '3.11'",
 ]
 
 [project.urls]

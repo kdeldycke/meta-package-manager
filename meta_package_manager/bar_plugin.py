@@ -68,7 +68,7 @@ from subprocess import run
 from textwrap import dedent
 from typing import Generator
 
-PYTHON_MIN_VERSION = (3, 10, 0)
+PYTHON_MIN_VERSION = (3, 11, 0)
 """Minimal requirement is aligned to mpm."""
 
 MPM_MIN_VERSION = (5, 0, 0)

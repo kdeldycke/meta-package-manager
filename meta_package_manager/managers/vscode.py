@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from typing import Iterator
 
-from extra_platforms import ALL_PLATFORMS
+from extra_platforms import ALL_PLATFORMS_WITHOUT_CI
 
 from meta_package_manager.base import Package, PackageManager
 from meta_package_manager.capabilities import version_not_implemented
@@ -29,7 +29,7 @@ class VSCode(PackageManager):
 
     homepage_url = "https://code.visualstudio.com"
 
-    platforms = ALL_PLATFORMS
+    platforms = ALL_PLATFORMS_WITHOUT_CI
 
     requirement = "1.60.0"
 

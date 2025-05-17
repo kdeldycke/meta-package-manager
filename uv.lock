@@ -327,15 +327,15 @@ wheels = [
 
 [[package]]
 name = "extra-platforms"
-version = "3.2.0"
+version = "3.2.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
     { name = "distro" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5a/d6/a9f0dc9a3c40d27677a9d460ce7517205f95a9956bfbe8ba65cb70b9a963/extra_platforms-3.2.0.tar.gz", hash = "sha256:73dfa198454e98154dbe9d8d791e7d492d86635392805dde6bfbbbf97fc68e6c", size = 40461, upload-time = "2025-05-17T06:38:50.58Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/dd/1a/c873e50659bf18e0b2846665b0632d7c7c093b0db1ee517c7ea49d563496/extra_platforms-3.2.1.tar.gz", hash = "sha256:8af8990224736a38c16ffa823dfcf4d8035f63aef3edb67cc137e08a45d585ce", size = 40684, upload-time = "2025-05-17T16:50:14.691Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ef/b4/edd4d02274e452d9db9b18b240e2583069543a8ea0ca11ec22d20f32fb71/extra_platforms-3.2.0-py3-none-any.whl", hash = "sha256:665777decef0b42c0d6687f60478e5660671f1e5545587a5d557d726f5aa630b", size = 34205, upload-time = "2025-05-17T06:38:49.198Z" },
+    { url = "https://files.pythonhosted.org/packages/74/81/c320bd9f41f8c2ea38bc4a7cbaff62bfbaf7fb469e6593250ba77c2b5bc8/extra_platforms-3.2.1-py3-none-any.whl", hash = "sha256:a43daacaee6ee8e592b6b7ffef11cadbbcd5efa5a078d9d13aa0687bf8600e5c", size = 34266, upload-time = "2025-05-17T16:50:13.567Z" },
 ]
 
 [package.optional-dependencies]
@@ -682,7 +682,7 @@ requires-dist = [
     { name = "click-extra", extras = ["sphinx"], marker = "extra == 'docs'", specifier = "~=4.15.0" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'test'", specifier = "~=7.8.0" },
     { name = "cyclonedx-python-lib", extras = ["validation"], specifier = "~=10.0.0" },
-    { name = "extra-platforms", extras = ["pytest"], specifier = "~=3.2.0" },
+    { name = "extra-platforms", extras = ["pytest"], specifier = "~=3.2.1" },
     { name = "furo", marker = "extra == 'docs'", specifier = "~=2024.8.6" },
     { name = "more-itertools", specifier = "~=10.7.0" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = "~=4.0.0" },

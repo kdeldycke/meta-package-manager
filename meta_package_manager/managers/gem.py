@@ -19,7 +19,7 @@ from __future__ import annotations
 import re
 from typing import Iterator
 
-from extra_platforms import ALL_PLATFORMS
+from extra_platforms import ALL_PLATFORMS_WITHOUT_CI
 
 from meta_package_manager.base import Package, PackageManager
 from meta_package_manager.capabilities import (
@@ -49,7 +49,7 @@ class Gem(PackageManager):
 
     homepage_url = "https://rubygems.org"
 
-    platforms = ALL_PLATFORMS
+    platforms = ALL_PLATFORMS_WITHOUT_CI
 
     # Default to the version shipped with the latest maintained macOS version,
     # i.e. macOS 10.13 High Sierra, which is bundled with gem 2.5.2.

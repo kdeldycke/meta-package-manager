@@ -21,7 +21,7 @@ import re
 from functools import cached_property
 from typing import Iterator
 
-from extra_platforms import ALL_PLATFORMS
+from extra_platforms import ALL_PLATFORMS_WITHOUT_CI
 
 from meta_package_manager.base import Package, PackageManager
 from meta_package_manager.capabilities import (
@@ -35,7 +35,7 @@ class Yarn(PackageManager):
 
     homepage_url = "https://yarnpkg.com"
 
-    platforms = ALL_PLATFORMS
+    platforms = ALL_PLATFORMS_WITHOUT_CI
 
     requirement = "1.20.0"
     """

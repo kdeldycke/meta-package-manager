@@ -20,7 +20,7 @@ import json
 import re
 from typing import Iterator
 
-from extra_platforms import ALL_PLATFORMS
+from extra_platforms import ALL_PLATFORMS_WITHOUT_CI
 
 from meta_package_manager.base import Package, PackageManager
 from meta_package_manager.capabilities import (
@@ -34,7 +34,7 @@ class Composer(PackageManager):
 
     homepage_url = "https://getcomposer.org"
 
-    platforms = ALL_PLATFORMS
+    platforms = ALL_PLATFORMS_WITHOUT_CI
 
     requirement = "1.4.0"
 

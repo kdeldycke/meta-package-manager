@@ -197,6 +197,14 @@ class TestBarPlugin:
     @pytest.mark.parametrize("table_rendering", (True, False, None))
     def test_rendering(self, submenu_layout, table_rendering):
         extra_checks = []
+        # XXX Package upgrade line is not required, as it may be skipped in the
+        # final rendering of the plugin if no outdated packages are found:
+        #     📦✓ ⚠️1 | dropdown=false
+        #     ---
+        #     brew - 0 package | font=Menlo size=12
+        #     ---
+        #     cask - 0 package | font=Menlo size=12
+        #     ...
         if table_rendering is False:
             extra_checks.extend(
                 (
@@ -206,7 +214,7 @@ class TestBarPlugin:
                     (
                         r"(--)?[\S ]+ \S+ → \S+ \| shell=\S+( param\d+=\S+)+ "
                         r"refresh=true terminal=(false|true alternate=true)$",
-                        True,
+                        False,
                     ),
                 ),
             )
@@ -221,7 +229,7 @@ class TestBarPlugin:
                         r"(--)?[\S ]+\s+\S+ → \S+\s+\| shell=\S+( param\d+=\S+)+ "
                         r"font=Menlo size=12 refresh=true "
                         r"terminal=(false|true alternate=true)?$",
-                        True,
+                        False,
                     ),
                 ),
             )

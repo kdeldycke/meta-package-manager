@@ -44,7 +44,7 @@ from .version import TokenizedString, parse_version
 if TYPE_CHECKING:
     from click_extra.envvar import TEnvVars
     from click_extra.testing import TArg, TNestedArgs
-    from extra_platforms.group import _TNestedSources
+    from extra_platforms.group import _TNestedReferences
 
 
 Operations = Enum(
@@ -252,7 +252,7 @@ class PackageManager(metaclass=MetaPackageManager):
     homepage_url: str | None = None
     """Home page of the project, only used in documentation for reference."""
 
-    platforms: _TNestedSources = frozenset()
+    platforms: _TNestedReferences = frozenset()
     """List of platforms supported by the manager.
 
     Allows for a mishmash of platforms and groups. Will be normalized into a `frozenset`

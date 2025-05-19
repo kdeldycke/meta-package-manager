@@ -9,7 +9,7 @@ name: Labeller (content-based)
 jobs:
 
   labeller:
-    uses: kdeldycke/workflows/.github/workflows/labeller-file-based.yaml@v4.16.4
+    uses: kdeldycke/workflows/.github/workflows/labeller-file-based.yaml@v4.16.5
     with:
       extra-rules: |
         "🔌 bar-plugin":

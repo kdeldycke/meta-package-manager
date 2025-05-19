@@ -68,8 +68,11 @@ from subprocess import run
 from textwrap import dedent
 from typing import Generator
 
-PYTHON_MIN_VERSION = (3, 11, 0)
-"""Minimal requirement is aligned to mpm."""
+PYTHON_MIN_VERSION = (3, 9, 0)
+"""Minimal requirement is aligned to macOS default.
+
+See: https://kdeldycke.github.io/meta-package-manager/bar-plugin.html#python-3-9-required
+"""
 
 MPM_MIN_VERSION = (5, 0, 0)
 """Mpm v5.0.0 was the first version taking care of the complete layout rendering."""

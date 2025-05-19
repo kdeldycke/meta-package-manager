@@ -9,7 +9,7 @@
 - [mpm] Fix parsing of package specifiers with multiple version separators.
 - [npm] Fix retrieval of installed packages.
 - [fwupd] Remove `--offline` parameter which has been silently disabled and has now been remove in v2.0.0 of `fwupd`. Refs {pr}`1511`.
-- [bar-plugin] Bump minimal Python version to 3.11 to aligns it with `mpm` itself.
+- [bar-plugin] Bump minimal Python version to 3.9 to aligns it with macOS default.
 - [mpm] Remove reference to `python3` command in documentation to reduce confusion.
 - [mpm] Build `arm64` binary for Linux and Windows.
 - [mpm] Use post-build binary test plans to check CLI behavior.

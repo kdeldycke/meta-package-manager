@@ -96,12 +96,12 @@ $ ln -sf "$(mpm --bar-plugin-path)" "${HOME}/Library/Application Support/xbar/pl
 
 The plugin **requires Python 3.9 or newer**. Which is the version that ships with the latest macOS releases:
 
-| macOS version | Python version[^1] |
-|----------------|----------------|
-| 16.x - TBA      | 3.9.6          |
-| 15.x - Sequoia      | 3.9.6          |
-| 14.x - Sonoma   | 3.9.6          |
-| 13.x - Ventura | 3.8.9           |
+| macOS version  | Python version[^1] |
+| -------------- | ------------------ |
+| 16.x - TBA     | 3.9.6              |
+| 15.x - Sequoia | 3.9.6              |
+| 14.x - Sonoma  | 3.9.6              |
+| 13.x - Ventura | 3.8.9              |
 
 [^1] Source: https://ihaveahax.net/wiki/Python_version_information#Xcode_(macOS)
 
@@ -109,12 +109,12 @@ That way, the plugin is compatible with the latest macOS releases out of the box
 
 .. caution::
 
-   It looks like since Monterey (macOS), there is no default Python version installed anymore, and the `python` CLI is a stub that points to the App Store to install Xcode:
+It looks like since Monterey (macOS), there is no default Python version installed anymore, and the `python` CLI is a stub that points to the App Store to install Xcode:
 
-   ```shell-session
-   $ python3 --version
-   xcode-select: note: no developer tools were found at '/Applications/Xcode.app', requesting install. Choose an option in the dialog to download the command line developer tools.
-   ```
+```shell-session
+$ python3 --version
+xcode-select: note: no developer tools were found at '/Applications/Xcode.app', requesting install. Choose an option in the dialog to download the command line developer tools.
+```
 
 ## Development workflow
 

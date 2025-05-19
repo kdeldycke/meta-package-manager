@@ -142,11 +142,19 @@ class TestBarPlugin:
         (r"(🎁↑\d+|📦✓)( ⚠️\d+)? \| dropdown=false$", True),
         # Submenus and sections marker. Required.
         (r"-{3,5}$", True),
-        # Upgrade all line. Required.
+        # Upgrade all line.
+        # XXX Upgrade all line is not required, as it may be skipped in the
+        # final rendering of the plugin if no outdated packages are found:
+        #     📦✓ ⚠️1 | dropdown=false
+        #     ---
+        #     brew - 0 package | font=Menlo size=12
+        #     ---
+        #     cask - 0 package | font=Menlo size=12
+        #     ...
         (
             r"(--)?🆙 Upgrade all \S+ packages? \| shell=\S+( param\d+=\S+)+ "
             r"refresh=true terminal=(false|true alternate=true)$",
-            True,
+            False,
         ),
         # Error line. Optional.
         (

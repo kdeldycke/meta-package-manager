@@ -103,18 +103,18 @@ The plugin **requires Python 3.9 or newer**. Which is the version that ships wit
 | 14.x - Sonoma  | 3.9.6              |
 | 13.x - Ventura | 3.8.9              |
 
-[^1] Source: https://ihaveahax.net/wiki/Python_version_information#Xcode_(macOS)
-
 That way, the plugin is compatible with the latest macOS releases out of the box, and can be run as-is without any extra dependency.
 
-.. caution::
-
+````{caution}
 It looks like since Monterey (macOS), there is no default Python version installed anymore, and the `python` CLI is a stub that points to the App Store to install Xcode:
 
 ```shell-session
 $ python3 --version
 xcode-select: note: no developer tools were found at '/Applications/Xcode.app', requesting install. Choose an option in the dialog to download the command line developer tools.
 ```
+````
+
+[^1] Source: https://ihaveahax.net/wiki/Python_version_information#Xcode_(macOS)
 
 ## Development workflow
 

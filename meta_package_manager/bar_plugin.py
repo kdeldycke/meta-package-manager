@@ -10,9 +10,9 @@
 # <xbar.var>boolean(VAR_SUBMENU_LAYOUT=false): Group packages into a sub-menu for each manager.</xbar.var>
 # <xbar.var>boolean(VAR_TABLE_RENDERING=true): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
 # XXX Deactivate font-related options for Xbar. Default variable value does not allow `=` character in Xbar. See: https://github.com/matryer/xbar/issues/832
-# <!--xbar.var>string(VAR_DEFAULT_FONT=""): Default font to use for non-monospaced text.</xbar.var-->
-# <!--xbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Default configuration for monospace fonts, including errors. Is used for table rendering.</xbar.var-->
-# <swiftbar.environment>[VAR_SUBMENU_LAYOUT: false, VAR_TABLE_RENDERING: true, VAR_DEFAULT_FONT: , VAR_MONOSPACE_FONT: 'font=Menlo size=12']</swiftbar.environment>
+# <!--xbar.var>string(VAR_DEFAULT_FONT=""): Font name for non-monospaced text.</xbar.var-->
+# <!--xbar.var>string(VAR_MONOSPACE_FONT="Menlo"): Font name for monospace fonts, including errors. Used for table rendering.</xbar.var-->
+# <swiftbar.environment>[VAR_SUBMENU_LAYOUT: false, VAR_TABLE_RENDERING: true, VAR_DEFAULT_FONT: , VAR_MONOSPACE_FONT: Menlo]</swiftbar.environment>
 """Xbar and SwiftBar plugin for Meta Package Manager (i.e. the :command:`mpm` CLI).
 
 Default update cycle should be set to several hours so we have a chance to get
@@ -98,12 +98,14 @@ class MPMPlugin:
         font_string: str,
         valid_ids: set[str] | None = None,
     ) -> str:
-        if valid_ids is None:
+        if not valid_ids:
             valid_ids = {"color", "font", "size"}
         valid_params = {}
         for param in font_string.split():
-            param_id, param_value = param.split("=", 1)
-            if param_id in valid_ids:
+            param_args = param.split("=", 1)
+            param_id = param_args[0]
+            param_value = param_args[1].strip() if len(param_args) > 1 else None
+            if param_id in valid_ids and param_value:
                 valid_params[param_id] = param_value
         return " ".join(f"{k}={v}" for k, v in valid_params.items())
 
@@ -126,20 +128,20 @@ class MPMPlugin:
     def default_font(self) -> str:
         """Make it easier to change font, sizes and colors of the output."""
         return self.normalize_params(
-            self.getenv_str("VAR_DEFAULT_FONT", ""),  # type: ignore
+            f"font={self.getenv_str('VAR_DEFAULT_FONT', '')}"  # type: ignore
         )
 
     @cached_property
     def monospace_font(self) -> str:
         """Make it easier to change font, sizes and colors of the output."""
         return self.normalize_params(
-            self.getenv_str("VAR_MONOSPACE_FONT", "font=Menlo size=12"),  # type: ignore
+            f"font={self.getenv_str('VAR_MONOSPACE_FONT', 'Menlo')}"  # type: ignore
         )
 
     @cached_property
     def error_font(self) -> str:
         """Error font is based on monospace font."""
-        return self.normalize_params(f"{self.monospace_font} color=red")
+        return self.normalize_params(f"{self.monospace_font} size=12 color=red")
 
     @cached_property
     def is_swiftbar(self) -> bool:

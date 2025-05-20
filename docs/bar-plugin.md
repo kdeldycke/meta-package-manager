@@ -19,8 +19,8 @@ The plugin is configurable with these environment variables:
 | --------------------- | ----------------------------------------------------------------------------------------- | ------- | -------------------- | :--------------: | :------------------------------------------------: |
 | `VAR_SUBMENU_LAYOUT`  | Group packages into a sub-menu for each manager.                                          | Boolean | `False`              |        ✅        |                         ✅                         |
 | `VAR_TABLE_RENDERING` | Aligns package names and versions in a table for easier visual parsing.                   | Boolean | `True`               |        ✅        |                         ✅                         |
-| `VAR_DEFAULT_FONT`    | Default font to use for non-monospaced text.                                              | String  | Empty                |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
-| `VAR_MONOSPACE_FONT`  | Default configuration for monospace fonts, including errors. Is used for table rendering. | String  | `font=Menlo size=12` |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
+| `VAR_DEFAULT_FONT`    | Font name for non-monospaced text.                                              | String  | Empty                |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
+| `VAR_MONOSPACE_FONT`  | Font name for monospace fonts, including errors. Used for table rendering. | String  | `Menlo` |        ✅        | [❌\*](https://github.com/matryer/xbar/issues/832) |
 
 ## Screenshots
 

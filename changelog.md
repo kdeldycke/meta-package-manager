@@ -9,6 +9,7 @@
 - [mpm] Fix parsing of package specifiers with multiple version separators.
 - [npm] Fix retrieval of installed packages.
 - [fwupd] Remove `--offline` parameter which has been silently disabled and has now been remove in v2.0.0 of `fwupd`. Refs {pr}`1511`.
+- [bar-plugin] Restrict `VAR_DEFAULT_FONT` and `VAR_MONOSPACE_FONT` configurability from full-font parameters to font name only to bypass [SwiftBar parsing issue](https://github.com/swiftbar/SwiftBar/issues/445).
 - [bar-plugin] Bump minimal Python version to 3.9 to aligns it with macOS default.
 - [mpm] Remove reference to `python3` command in documentation to reduce confusion.
 - [mpm] Build `arm64` binary for Linux and Windows.

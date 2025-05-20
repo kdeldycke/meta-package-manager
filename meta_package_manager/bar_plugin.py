@@ -6,37 +6,13 @@
 # <xbar.desc>List outdated packages and manage upgrades.</xbar.desc>
 # <xbar.dependencies>python,mpm</xbar.dependencies>
 # <xbar.image>https://raw.githubusercontent.com/kdeldycke/meta-package-manager/refs/heads/main/docs/assets/xbar-submenu-table-rendering.png</xbar.image>
-# <xbar.abouturl>
-#    https://kdeldycke.github.io/meta-package-manager/bar-plugin.html
-# </xbar.abouturl>
-# <xbar.var>
-#   boolean(VAR_SUBMENU_LAYOUT=false):
-#   Group packages into a sub-menu for each manager.
-# </xbar.var>
-# <xbar.var>
-#   boolean(VAR_TABLE_RENDERING=true):
-#   Aligns package names and versions in a table for easier visual parsing.
-# </xbar.var>
-#
-# XXX Deactivate font-related options for Xbar. Default variable value does not allow
-# XXX `=` character in Xbar. See: https://github.com/matryer/xbar/issues/832
-# <!--xbar.var>
-#   string(VAR_DEFAULT_FONT=""):
-#   Default font to use for non-monospaced text.
-# </xbar.var-->
-# <!--xbar.var>
-#   string(VAR_MONOSPACE_FONT="font=Menlo size=12"):
-#   Default configuration for monospace fonts, including errors.
-#   Is used for table rendering.
-# </xbar.var-->
-# <swiftbar.environment>
-#   [
-#       VAR_SUBMENU_LAYOUT: false,
-#       VAR_TABLE_RENDERING: true,
-#       VAR_DEFAULT_FONT: ,
-#       VAR_MONOSPACE_FONT: font=Menlo size=12
-#   ]
-# </swiftbar.environment>
+# <xbar.abouturl>https://kdeldycke.github.io/meta-package-manager/bar-plugin.html</xbar.abouturl>
+# <xbar.var>boolean(VAR_SUBMENU_LAYOUT=false): Group packages into a sub-menu for each manager.</xbar.var>
+# <xbar.var>boolean(VAR_TABLE_RENDERING=true): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
+# XXX Deactivate font-related options for Xbar. Default variable value does not allow `=` character in Xbar. See: https://github.com/matryer/xbar/issues/832
+# <!--xbar.var>string(VAR_DEFAULT_FONT=""): Default font to use for non-monospaced text.</xbar.var-->
+# <!--xbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Default configuration for monospace fonts, including errors. Is used for table rendering.</xbar.var-->
+# <swiftbar.environment>[VAR_SUBMENU_LAYOUT: false, VAR_TABLE_RENDERING: true, VAR_DEFAULT_FONT: , VAR_MONOSPACE_FONT: 'font=Menlo size=12']</swiftbar.environment>
 """Xbar and SwiftBar plugin for Meta Package Manager (i.e. the :command:`mpm` CLI).
 
 Default update cycle should be set to several hours so we have a chance to get

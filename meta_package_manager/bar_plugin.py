@@ -39,6 +39,7 @@ from enum import Enum
 from functools import cached_property
 from operator import itemgetter, methodcaller
 from pathlib import Path
+from shlex import shlex
 from shutil import which
 from subprocess import run
 from textwrap import dedent
@@ -115,14 +116,27 @@ class MPMPlugin:
         """
         if not valid_ids:
             valid_ids = {"color", "font", "size"}
-        valid_params = {}
-        for param in font_string.split():
-            param_args = param.split("=", 1)
-            param_id = param_args[0]
-            param_value = param_args[1].strip() if len(param_args) > 1 else None
-            if param_id in valid_ids and param_value:
-                valid_params[param_id] = param_value
-        return " ".join(f"{k}={v}" for k, v in valid_params.items())
+        params = {}
+
+        key = None
+        previous_token_is_separator = False
+        for token in shlex(font_string):
+            # Flag the token as a separator if it is an equal sign.
+            if token == "=":
+                previous_token_is_separator = True
+            # Token positioned just after an equal sign is a value. Let's attach it to
+            # the key and store it in the params dictionary.
+            elif previous_token_is_separator:
+                if key and key in valid_ids:
+                    params[key] = token
+                # Reset the flag and key.
+                previous_token_is_separator = False
+                key = None
+            # Any token is considered a potential key until we find an equal sign.
+            else:
+                key = token
+
+        return " ".join(f"{k}={v}" for k, v in params.items())
 
     @staticmethod
     def v_to_str(version_tuple: tuple[int, ...] | None) -> str:

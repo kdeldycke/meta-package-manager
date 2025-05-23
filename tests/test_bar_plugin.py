@@ -32,6 +32,35 @@ from meta_package_manager import bar_plugin
 from meta_package_manager.version import parse_version
 
 
+@pytest.mark.parametrize(
+    ("param_string", "results"),
+    (
+        ("font=Menlo", "font=Menlo"),
+        ("font=Menlo size=12", "font=Menlo size=12"),
+        ("      font=Menlo      ", "font=Menlo"),
+        ("      font   =   Menlo      ", "font=Menlo"),
+        ("      font   =   Menlo  Menlo    ", "font=Menlo"),
+        ("", ""),
+        ("        ", ""),
+        ("  font=      ", ""),
+        ("  font      ", ""),
+        ("   = foo ", ""),
+        ("=", ""),
+        ("==", ""),
+        ("   =  =    ", ""),
+        ("random=", ""),
+        ("RANDOM=", ""),
+        ("Font=", ""),
+        ("font=Menlo font=Menlo", "font=Menlo"),
+        ("size=10 size=20", "size=20"),
+        ("font='Comic Sans MS'", "font='Comic Sans MS'"),
+        ('font="Comic Sans MS"', 'font="Comic Sans MS"'),
+    ),
+)
+def test_normalize_params(param_string, results):
+    assert bar_plugin.MPMPlugin.normalize_params(param_string) == results
+
+
 def _invocation_matrix(*iterables):
     """Pre-compute a matrix of all possible options for invocation."""
     for args in product(*iterables):

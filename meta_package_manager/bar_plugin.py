@@ -10,9 +10,9 @@
 # <xbar.var>boolean(VAR_SUBMENU_LAYOUT=false): Group packages into a sub-menu for each manager.</xbar.var>
 # <xbar.var>boolean(VAR_TABLE_RENDERING=true): Aligns package names and versions in a table for easier visual parsing.</xbar.var>
 # XXX Deactivate font-related options for Xbar. Default variable value does not allow `=` character in Xbar. See: https://github.com/matryer/xbar/issues/832
-# <!--xbar.var>string(VAR_DEFAULT_FONT=""): Font name for non-monospaced text.</xbar.var-->
-# <!--xbar.var>string(VAR_MONOSPACE_FONT="Menlo"): Font name for monospace fonts, including errors. Used for table rendering.</xbar.var-->
-# <swiftbar.environment>[VAR_SUBMENU_LAYOUT: false, VAR_TABLE_RENDERING: true, VAR_DEFAULT_FONT: , VAR_MONOSPACE_FONT: Menlo]</swiftbar.environment>
+# <!--xbar.var>string(VAR_DEFAULT_FONT=""): Font parameters for regular text.</xbar.var-->
+# <!--xbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Font parameters for monospace text. Used for table rendering and error messages.</xbar.var-->
+# <swiftbar.environment>[VAR_SUBMENU_LAYOUT: false, VAR_TABLE_RENDERING: true, VAR_DEFAULT_FONT: , VAR_MONOSPACE_FONT: font=Menlo size=12]</swiftbar.environment>
 """Xbar and SwiftBar plugin for Meta Package Manager (i.e. the :command:`mpm` CLI).
 
 Default update cycle should be set to several hours so we have a chance to get
@@ -50,6 +50,15 @@ PYTHON_MIN_VERSION = (3, 9, 0)
 
 See: https://kdeldycke.github.io/meta-package-manager/bar-plugin.html#python-3-9-required
 """
+
+SWIFTBAR_MIN_VERSION = (2, 1, 2)
+"""SwiftBar v2.1.2 fix an issue with multiple parameters in the font strings.
+
+See: https://github.com/swiftbar/SwiftBar/issues/445
+"""
+
+XBAR_MIN_VERSION = (2, 1, 7)
+"""Xbar v2.1.7-beta is the latest version available on Homebrew."""
 
 MPM_MIN_VERSION = (5, 0, 0)
 """Mpm v5.0.0 was the first version taking care of the complete layout rendering."""
@@ -139,8 +148,13 @@ class MPMPlugin:
         return " ".join(f"{k}={v}" for k, v in params.items())
 
     @staticmethod
-    def v_to_str(version_tuple: tuple[int, ...] | None) -> str:
-        """Transforms into a string a tuple of integers representing a version."""
+    def str_to_version(version_string: str) -> tuple[int, ...]:
+        """Transforms a string into a tuple of integers representing a version."""
+        return tuple(map(int, version_string.strip().split(".")))
+
+    @staticmethod
+    def version_to_str(version_tuple: tuple[int, ...] | None) -> str:
+        """Transforms a tuple of integers representing a version into a string."""
         if not version_tuple:
             return "None"
         return ".".join(map(str, version_tuple))
@@ -157,20 +171,20 @@ class MPMPlugin:
     def default_font(self) -> str:
         """Make it easier to change font, sizes and colors of the output."""
         return self.normalize_params(
-            f"font={self.getenv_str('VAR_DEFAULT_FONT', '')}"  # type: ignore
+            self.getenv_str("VAR_DEFAULT_FONT", ""),  # type: ignore
         )
 
     @cached_property
     def monospace_font(self) -> str:
         """Make it easier to change font, sizes and colors of the output."""
         return self.normalize_params(
-            f"font={self.getenv_str('VAR_MONOSPACE_FONT', 'Menlo')}"  # type: ignore
+            self.getenv_str("VAR_MONOSPACE_FONT", "font=Menlo size=12"),  # type: ignore
         )
 
     @cached_property
     def error_font(self) -> str:
         """Error font is based on monospace font."""
-        return self.normalize_params(f"{self.monospace_font} size=12 color=red")
+        return self.normalize_params(f"{self.monospace_font} color=red size=10")
 
     @cached_property
     def is_swiftbar(self) -> bool:
@@ -215,7 +229,7 @@ class MPMPlugin:
                 capture_output=True,
                 encoding="utf-8",
             )
-            python_version = tuple(map(int, process.stdout.split(".")))
+            python_version = self.str_to_version(process.stdout)
             # Is Python too old?
             if python_version < PYTHON_MIN_VERSION:
                 continue
@@ -335,8 +349,7 @@ class MPMPlugin:
                 re.VERBOSE | re.MULTILINE,
             ).search(process.stdout)
             if match:
-                version_string = match.groupdict()["version"]
-                version = tuple(map(int, version_string.split(".")))
+                version = self.str_to_version(match.groupdict()["version"])
                 # Is mpm too old?
                 if version >= MPM_MIN_VERSION:
                     up_to_date = True
@@ -425,6 +438,20 @@ class MPMPlugin:
 
     def print_menu(self) -> None:
         """Print the main menu."""
+        # Check if we have a recent version of SwiftBar.
+        # XXX Xbar does not provide yet a version number in the environment variables.
+        if self.is_swiftbar:
+            swiftbar_version_str = self.getenv_str("SWIFTBAR_VERSION", "")
+            swiftbar_version = self.str_to_version(swiftbar_version_str)
+            if swiftbar_version and swiftbar_version < SWIFTBAR_MIN_VERSION:
+                self.print_error_header()
+                self.print_error(
+                    f"SwiftBar v{swiftbar_version_str} found, but "
+                    f"v{self.version_to_str(SWIFTBAR_MIN_VERSION)} is required.",
+                )
+                return
+
+        # Check if we have a recent version of mpm.
         mpm_args, runnable, up_to_date, _version, error = self.best_mpm
         if not runnable or not up_to_date:
             self.print_error_header()
@@ -432,7 +459,7 @@ class MPMPlugin:
                 self.print_error(error)
                 print("---")
             action_msg = "Install" if not runnable else "Upgrade"
-            min_version_str = self.v_to_str(MPM_MIN_VERSION)
+            min_version_str = self.version_to_str(MPM_MIN_VERSION)
             self.pp(
                 f"{action_msg} mpm >= v{min_version_str}",
                 f"shell={self.all_pythons[0]}",

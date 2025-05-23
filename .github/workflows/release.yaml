@@ -26,6 +26,11 @@ jobs:
           echo "INCLUDE=$env:RUNNER_TEMP\libxml2_libxslt\include;$env:INCLUDE" >> $env:GITHUB_ENV
           echo "LIB=$env:RUNNER_TEMP\libxml2_libxslt\lib;$env:LIB" >> $env:GITHUB_ENV
 
+      - run: |
+          vcpkg install libxml2:arm64-windows
+          vcpkg install libxslt:arm64-windows
+          vcpkg integrate install
+
       - uses: actions/checkout@v4.2.2
       # XXX We use setup-python to install ARM64 flavor of Python on Windows because uv does not support it yet:
       # https://github.com/astral-sh/python-build-standalone/issues/386

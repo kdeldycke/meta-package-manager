@@ -98,6 +98,21 @@ class MPMPlugin:
         font_string: str,
         valid_ids: set[str] | None = None,
     ) -> str:
+        """Parse a multi-parameters string and return a normalized string.
+
+        The string is expected to be a space-separated list of parameters, each
+        parameter being a key/value pair separated by an equal sign.
+
+        Only keeps the parameters that are in the ``valid_ids`` set and ignores the
+        rest. By default, only ``color``, ``font`` and ``size`` are kept.
+
+        Multiple values for the same parameter will be deduplicated, and the last one
+        will be kept.
+
+        Available parameters are:
+        - https://github.com/swiftbar/SwiftBar?tab=readme-ov-file#parameters
+        - https://github.com/matryer/xbar-plugins/blob/main/CONTRIBUTING.md#parameters
+        """
         if not valid_ids:
             valid_ids = {"color", "font", "size"}
         valid_params = {}

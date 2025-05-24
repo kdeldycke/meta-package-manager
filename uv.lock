@@ -330,15 +330,15 @@ wheels = [
 
 [[package]]
 name = "extra-platforms"
-version = "3.2.1"
+version = "3.2.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
     { name = "distro" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/dd/1a/c873e50659bf18e0b2846665b0632d7c7c093b0db1ee517c7ea49d563496/extra_platforms-3.2.1.tar.gz", hash = "sha256:8af8990224736a38c16ffa823dfcf4d8035f63aef3edb67cc137e08a45d585ce", size = 40684, upload-time = "2025-05-17T16:50:14.691Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c5/c9/23e1e12c48d684d9cb9977ddf5715de08b4a7a2bb954a2542d9252644b0f/extra_platforms-3.2.2.tar.gz", hash = "sha256:71ff20f757e0a73204cd5142caf0d35760ea8304a5bbd914c78fc3bdb6bdd8ea", size = 41086, upload-time = "2025-05-24T13:55:38.051Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/74/81/c320bd9f41f8c2ea38bc4a7cbaff62bfbaf7fb469e6593250ba77c2b5bc8/extra_platforms-3.2.1-py3-none-any.whl", hash = "sha256:a43daacaee6ee8e592b6b7ffef11cadbbcd5efa5a078d9d13aa0687bf8600e5c", size = 34266, upload-time = "2025-05-17T16:50:13.567Z" },
+    { url = "https://files.pythonhosted.org/packages/a9/ad/618f63ef9d922b272bfbcfa34d6111816536f9e566e57a4c9f4c1e502bfb/extra_platforms-3.2.2-py3-none-any.whl", hash = "sha256:2b525ddd06bf73a35369ee85fdf79d8f922b1302765f4c488d003007fc49f75d", size = 34490, upload-time = "2025-05-24T13:55:36.636Z" },
 ]
 
 [package.optional-dependencies]

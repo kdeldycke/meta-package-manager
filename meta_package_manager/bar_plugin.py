@@ -148,8 +148,10 @@ class MPMPlugin:
         return " ".join(f"{k}={v}" for k, v in params.items())
 
     @staticmethod
-    def str_to_version(version_string: str) -> tuple[int, ...]:
+    def str_to_version(version_string: str | None) -> tuple[int, ...]:
         """Transforms a string into a tuple of integers representing a version."""
+        if not version_string:
+            return ()
         return tuple(map(int, version_string.strip().split(".")))
 
     @staticmethod
@@ -443,7 +445,7 @@ class MPMPlugin:
         if self.is_swiftbar:
             swiftbar_version_str = self.getenv_str("SWIFTBAR_VERSION", "")
             swiftbar_version = self.str_to_version(swiftbar_version_str)
-            if swiftbar_version and swiftbar_version < SWIFTBAR_MIN_VERSION:
+            if not swiftbar_version or swiftbar_version < SWIFTBAR_MIN_VERSION:
                 self.print_error_header()
                 self.print_error(
                     f"SwiftBar v{swiftbar_version_str} found, but "

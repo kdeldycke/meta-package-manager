@@ -13,7 +13,8 @@
 - [bar-plugin] Check minimal version of SwiftBar is 2.1.2.
 - [bar-plugin] Reduce size of error messages from 12 to 10.
 - [mpm] Remove reference to `python3` command in documentation to reduce confusion.
-- [mpm] Build `arm64` binary for Linux and Windows.
+- [mpm] Build `arm64` binary for Linux.
+- [mpm] Try to build `arm64` binary for Windows but mark it as unstable.
 - [mpm] Use post-build binary test plans to check CLI behavior.
 - [mpm] Run tests on `windows-2025` instead of `windows-2022`.
 - [mpm] Reactivates concurrency limits on tests.

@@ -114,7 +114,7 @@ test = [
     "pytest-cov ~= 6.1.0",
     "pytest-github-actions-annotate-failures ~= 0.3.0",
     "pytest-randomly ~= 3.16.0",
-    "pytest-xdist [psutil] ~= 3.6.1",
+    "pytest-xdist [psutil] ~= 3.7.0",
 ]
 typing = [
     "types-PyYAML ~= 6.0.12.9",

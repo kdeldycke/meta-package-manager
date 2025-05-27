@@ -45,4 +45,4 @@ jobs:
       #
       # So keep an eye on Meta Package Manager builds, maybe one day it will
       # succeed once the lxml project will works on Windows ARM64.
-      unstable: windows-arm64
+      unstable-targets: windows-arm64

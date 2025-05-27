@@ -10,8 +10,39 @@ name: Build & release
 jobs:
 
   release:
-    uses: kdeldycke/workflows/.github/workflows/release.yaml@v4.16.7
+    uses: kdeldycke/workflows/.github/workflows/release.yaml@v4.17.1
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
     with:
       timeout: 300
+      # XXX Projects dependendong on lxml will not be able to compile on Windows
+      # ARM64: https://bugs.launchpad.net/lxml/+bug/2004481
+      #
+      # I tried to rely on vcpkg but this didn't work:
+      #   - run: |
+      #       vcpkg install libxml2:arm64-windows
+      #       vcpkg install libxslt:arm64-windows
+      #       vcpkg integrate install
+      #
+      # Another possibility would be to install the pre-built binaries available
+      # at: https://github.com/lxml/libxml2-win-binaries
+      #
+      # But all build attempts ends up with:
+      #   C:\Users\RUNNER~1\AppData\Local\Temp\xmlXPathInit8xwj7_4f.c(1): fatal
+      #   error C1083: Cannot open include file: 'libxml/xpath.h': No such file
+      #   or directory
+      #   ***********************************************************************
+      #   Could not find function xmlXPathInit in library libxml2. Is libxml2
+      #   installed?
+      #   Is your C compiler installed and configured correctly?
+      #   ***********************************************************************
+      #   error: command 'C:\\Program Files\\Microsoft Visual
+      #   Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostARM64
+      #   \\ARM64\\cl.exe'
+      #   failed with exit code 2
+      #   hint: This usually indicates a problem with the package or the build
+      #   environment.
+      #
+      # So keep an eye on Meta Package Manager builds, maybe one day it will
+      # succeed once the lxml project will works on Windows ARM64.
+      unstable: windows-arm64

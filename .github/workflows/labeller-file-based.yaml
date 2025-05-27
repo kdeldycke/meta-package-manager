@@ -6,7 +6,7 @@ name: Labeller (file-based)
 jobs:
 
   labeller:
-    uses: kdeldycke/workflows/.github/workflows/labeller-file-based.yaml@v4.16.7
+    uses: kdeldycke/workflows/.github/workflows/labeller-file-based.yaml@v4.17.1
     with:
       extra-rules: |
         "🔌 bar-plugin":

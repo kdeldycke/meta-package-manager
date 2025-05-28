@@ -70,7 +70,7 @@
   skip_platforms: windows
   exit_code: 0
   stdout_regex_matches: >-
-    \x1b\[32mbrew\x1b\[0m,Homebrew Formulae,\x1b\[32m✓\x1b\[0m,\x1b\[32m✓\x1b\[0m
+    \x1b\[32mcargo\x1b\[0m,Rust's cargo,\x1b\[32m✓\x1b\[0m,\x1b\[32m✓\x1b\[0m
     \S+,\x1b\[32m✓\x1b\[0m,\x1b\[32m✓\x1b\[0m \S+\n
 
 # Same as above, but without colors.
@@ -128,7 +128,7 @@
   # So we force the ANSI stripping.
   strip_ansi: true
   stdout_regex_matches:
-    - brew,Homebrew Formulae,✓,✓ \S+,✓,✓ \S+\n
+    - cargo,Rust's cargo,✓,✓ \S+,✓,✓ \S+\n
 
 # Check mpm is reporting itself as installed via brew in a table row.
 - cli_parameters: --output-format csv installed

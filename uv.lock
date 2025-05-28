@@ -162,7 +162,7 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "5.0.0"
+version = "5.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
@@ -176,9 +176,9 @@ dependencies = [
     { name = "wcmatch" },
     { name = "xmltodict" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/01/c2/a47dbed58ae2b8c9b4401c8e44fe0f8fa9febad95674674ccb356b5a05e9/click_extra-5.0.0.tar.gz", hash = "sha256:6d8dac57a41cf84009b68ac10090a29f648fa1007bdba524f788445b0c4032aa", size = 92357, upload-time = "2025-05-13T13:22:59.688Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7c/0a/80624abf9c2fe72d9fb1b0a30deafe8bdd421a67162518c65bcd4f4827f0/click_extra-5.0.1.tar.gz", hash = "sha256:0f67e86c812f0880abf54b255e80a51df03281081ac68ef5d2c857297cd4302c", size = 92602, upload-time = "2025-05-28T11:17:21.033Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/54/00/7111a11398930c765fe040a4a41b898c315c75c11f669e1ba67eeec4068c/click_extra-5.0.0-py3-none-any.whl", hash = "sha256:027c686cfd61ace2204312db6345f3b63278fe6321da72267a833fd9462d9fae", size = 74876, upload-time = "2025-05-13T13:22:58.229Z" },
+    { url = "https://files.pythonhosted.org/packages/cc/dd/d8ba2019bc4089b32bf6ee13fe72ce7700fefb9adca725ec04a0c1607d9d/click_extra-5.0.1-py3-none-any.whl", hash = "sha256:a813678548fbb37c123802a9638e5d5f809e0e1c6016b1d35d5d234b092d4600", size = 75046, upload-time = "2025-05-28T11:17:19.423Z" },
 ]
 
 [package.optional-dependencies]
@@ -432,7 +432,7 @@ wheels = [
 
 [[package]]
 name = "jsonschema"
-version = "4.23.0"
+version = "4.24.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -440,9 +440,9 @@ dependencies = [
     { name = "referencing" },
     { name = "rpds-py" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/38/2e/03362ee4034a4c917f697890ccd4aec0800ccf9ded7f511971c75451deec/jsonschema-4.23.0.tar.gz", hash = "sha256:d71497fef26351a33265337fa77ffeb82423f3ea21283cd9467bb03999266bc4", size = 325778, upload-time = "2024-07-08T18:40:05.546Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bf/d3/1cf5326b923a53515d8f3a2cd442e6d7e94fcc444716e879ea70a0ce3177/jsonschema-4.24.0.tar.gz", hash = "sha256:0b4e8069eb12aedfa881333004bccaec24ecef5a8a6a4b6df142b2cc9599d196", size = 353480, upload-time = "2025-05-26T18:48:10.459Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/69/4a/4f9dbeb84e8850557c02365a0eee0649abe5eb1d84af92a25731c6c0f922/jsonschema-4.23.0-py3-none-any.whl", hash = "sha256:fbadb6f8b144a8f8cf9f0b89ba94501d143e50411a1278633f56a7acf7fd5566", size = 88462, upload-time = "2024-07-08T18:40:00.165Z" },
+    { url = "https://files.pythonhosted.org/packages/a2/3d/023389198f69c722d039351050738d6755376c8fd343e91dc493ea485905/jsonschema-4.24.0-py3-none-any.whl", hash = "sha256:a462455f19f5faf404a7902952b6f0e3ce868f3ee09a359b05eca6673bd8412d", size = 88709, upload-time = "2025-05-26T18:48:08.417Z" },
 ]
 
 [package.optional-dependencies]
@@ -680,9 +680,9 @@ typing = [
 [package.metadata]
 requires-dist = [
     { name = "boltons", specifier = "~=25.0.0" },
-    { name = "click-extra", specifier = "~=5.0.0" },
-    { name = "click-extra", extras = ["pytest"], marker = "extra == 'test'", specifier = "~=5.0.0" },
-    { name = "click-extra", extras = ["sphinx"], marker = "extra == 'docs'", specifier = "~=5.0.0" },
+    { name = "click-extra", specifier = "~=5.0.1" },
+    { name = "click-extra", extras = ["pytest"], marker = "extra == 'test'", specifier = "~=5.0.1" },
+    { name = "click-extra", extras = ["sphinx"], marker = "extra == 'docs'", specifier = "~=5.0.1" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'test'", specifier = "~=7.8.0" },
     { name = "cyclonedx-python-lib", extras = ["validation"], specifier = "~=10.0.0" },
     { name = "extra-platforms", extras = ["pytest"], specifier = "~=3.2.1" },
@@ -694,7 +694,7 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'test'", specifier = "~=6.1.0" },
     { name = "pytest-github-actions-annotate-failures", marker = "extra == 'test'", specifier = "~=0.3.0" },
     { name = "pytest-randomly", marker = "extra == 'test'", specifier = "~=3.16.0" },
-    { name = "pytest-xdist", extras = ["psutil"], marker = "extra == 'test'", specifier = "~=3.6.1" },
+    { name = "pytest-xdist", extras = ["psutil"], marker = "extra == 'test'", specifier = "~=3.7.0" },
     { name = "pyyaml", marker = "extra == 'test'", specifier = "~=6.0.0" },
     { name = "spdx-tools", specifier = "~=0.8.2" },
     { name = "sphinx", marker = "extra == 'docs'", specifier = "~=8.2.3" },
@@ -887,15 +887,15 @@ wheels = [
 
 [[package]]
 name = "pytest-xdist"
-version = "3.6.1"
+version = "3.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "execnet" },
     { name = "pytest" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/41/c4/3c310a19bc1f1e9ef50075582652673ef2bfc8cd62afef9585683821902f/pytest_xdist-3.6.1.tar.gz", hash = "sha256:ead156a4db231eec769737f57668ef58a2084a34b2e55c4a8fa20d861107300d", size = 84060, upload-time = "2024-04-28T19:29:54.414Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/49/dc/865845cfe987b21658e871d16e0a24e871e00884c545f246dd8f6f69edda/pytest_xdist-3.7.0.tar.gz", hash = "sha256:f9248c99a7c15b7d2f90715df93610353a485827bc06eefb6566d23f6400f126", size = 87550, upload-time = "2025-05-26T21:18:20.251Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6d/82/1d96bf03ee4c0fdc3c0cbe61470070e659ca78dc0086fb88b66c185e2449/pytest_xdist-3.6.1-py3-none-any.whl", hash = "sha256:9ed4adfb68a016610848639bb7e02c9352d5d9f03d04809919e2dafc3be4cca7", size = 46108, upload-time = "2024-04-28T19:29:52.813Z" },
+    { url = "https://files.pythonhosted.org/packages/0d/b2/0e802fde6f1c5b2f7ae7e9ad42b83fd4ecebac18a8a8c2f2f14e39dce6e1/pytest_xdist-3.7.0-py3-none-any.whl", hash = "sha256:7d3fbd255998265052435eb9daa4e99b62e6fb9cfb6efd1f858d4d8c0c7f0ca0", size = 46142, upload-time = "2025-05-26T21:18:18.759Z" },
 ]
 
 [package.optional-dependencies]

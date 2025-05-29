@@ -137,15 +137,19 @@
     - pytz,,uv,\S+\n
 
 - cli_parameters: managers
+  skip_platforms: windows
   exit_code: 0
 
 - cli_parameters: --all-managers managers
+  skip_platforms: windows
   exit_code: 0
 
 - cli_parameters: installed
+  skip_platforms: windows
   exit_code: 0
 
 - cli_parameters: outdated
+  skip_platforms: windows
   exit_code: 0
 
 - cli_parameters: which mpm

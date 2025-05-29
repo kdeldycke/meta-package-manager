@@ -134,7 +134,7 @@
 - cli_parameters: --output-format csv installed
   exit_code: 0
   stdout_regex_matches:
-    - meta-package-manager,,brew,\S+\n
+    - pytz,,uv,\S+\n
 
 - cli_parameters: managers
   exit_code: 0

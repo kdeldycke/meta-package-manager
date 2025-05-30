@@ -167,7 +167,7 @@ class Specifier:
             logging.debug(f"{spec_str} is not a pURL: {ex}")
             return None
 
-        manager_ids = set()
+        manager_ids: set[str] | None = None
         # If the pURL type is recognized, it is used to find the corresponding manager.
         if purl.type in PURL_MAP:
             manager_ids = PURL_MAP.get(purl.type)

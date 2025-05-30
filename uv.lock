@@ -632,7 +632,7 @@ wheels = [
 
 [[package]]
 name = "meta-package-manager"
-version = "5.21.0"
+version = "5.21.1"
 source = { editable = "." }
 dependencies = [
     { name = "boltons" },

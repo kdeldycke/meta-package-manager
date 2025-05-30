@@ -40,10 +40,9 @@ This has been chosen as a separator because it is shared by popular package mana
     package_id@version
 """
 
-PURL_MAP: dict[str, set[str] | None] = {mid: {mid} for mid in pool.all_manager_ids}
-non_canonical_map = {
+PURL_MAP: dict[str, set[str] | None] = {
     "alpine": None,
-    "alpm": None,
+    "alpm": {"pacman", "pacaur", "paru", "yay"},
     "android": None,
     "apache": None,
     "apk": None,
@@ -51,11 +50,13 @@ non_canonical_map = {
     "bitnami": None,
     "bower": None,
     "buildroot": None,
+    "cargo": {"cargo"},
     "carthage": None,
     "chef": None,
-    "chocolatey": None,
+    "chocolatey": {"choco"},
     "clojars": None,
     "cocoapods": None,
+    "composer": {"composer"},
     "conan": None,
     "conda": None,
     "coreos": None,
@@ -68,9 +69,10 @@ non_canonical_map = {
     "drupal": None,
     "dtype": None,
     "dub": None,
-    "ebuild": None,
+    "ebuild": {"emerge"},
     "eclipse": None,
     "elm": None,
+    "gem": {"gem"},
     "generic": None,
     "gitea": None,
     "github": None,
@@ -91,10 +93,11 @@ non_canonical_map = {
     "mlflow": None,
     "nim": None,
     "nix": None,
+    "npm": {"npm", "yarn"},
     "nuget": None,
     "oci": None,
     "opam": None,
-    "openwrt": None,
+    "openwrt": {"opkg"},
     "osgi": None,
     "p2": None,
     "pear": None,
@@ -103,9 +106,9 @@ non_canonical_map = {
     "platformio": None,
     "pub": None,
     "puppet": None,
-    "pypi": {"pip", "pipx"},
+    "pypi": {"pip", "pipx", "uv"},
     "qpkg": None,
-    "rpm": {"dnf", "yum", "zypper"},
+    "rpm": {"dnf", "dnf5", "yum", "zypper"},
     "rubygems": {"gem"},
     "sourceforge": None,
     "sublime": None,
@@ -116,23 +119,20 @@ non_canonical_map = {
     "wordpress": None,
     "yocto": None,
 }
-# Check canonical manager IDs are not overlapping the manually maintained
-# non-canonical mapping.
-overlaps = set(PURL_MAP).intersection(non_canonical_map)
-if overlaps:
-    raise ValueError(f"Some pURL scheme types are overlapping: {overlaps}")
-PURL_MAP.update(non_canonical_map)
-""" Map pURL's types to MPM's manager IDs.
+"""Map pURL's types to MPM's manager IDs.
+
+Keys are recognized pURL's types, and values are the set of MPM's manager IDs that can
+handle the package type.
 
 .. warning::
 
-    There is `no canonical list of ``pkg:<type>/...`` prefixes defined in the pURL
+    There is no official list of ``pkg:<type>/...`` prefixes defined in the pURL
     specification.
 
-    So our strategy consists in producing a 1:1 mapping between pURL types and manager
-    IDs. Then we augment this mapping with diverse `aliases we found lying around in the
-    pURL literature, examples and libraries
-    <https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst>`_.
+    The only source we found lying around in the pURL literature is this `list of
+    diverse aliases, examples and libraries
+    <https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst>`_. We use
+    this document to compile the keys of this ``PURL_MAP`` mapping.
 """
 
 
@@ -156,24 +156,29 @@ class Specifier:
 
     @classmethod
     def parse_purl(cls, spec_str: str) -> tuple[Specifier, ...] | None:
-        """Parse a purl string.
+        """Resolve a pURL into its corresponding manager candidates.
 
         Yields ``Specifier`` objects or returns ``None``.
         """
-        # Try to parse specifier as a purl.
+        # Try to parse specifier as a pURL.
         try:
             purl = PackageURL.from_string(spec_str)
         except ValueError as ex:
-            logging.debug(f"{spec_str} is not a purl: {ex}")
+            logging.debug(f"{spec_str} is not a pURL: {ex}")
             return None
 
-        # Specifier is a purl, extract its metadata.
-        manager_ids = PURL_MAP.get(purl.type)
+        manager_ids = set()
+        # If the pURL type is recognized, it is used to find the corresponding manager.
+        if purl.type in PURL_MAP:
+            manager_ids = PURL_MAP.get(purl.type)
+        # If the pURL type matches a manager, we use it as-is.
+        elif purl.type in pool.all_manager_ids:
+            manager_ids = {purl.type}
         if not manager_ids:
-            msg = f"Unrecognized {purl.type} purl type."
+            msg = f"Unrecognized {purl.type} pURL type."
             raise ValueError(msg)
 
-        # The purl can be handled by one manager or more.
+        # The pURL can be handled by one manager or more.
         return tuple(
             Specifier(
                 raw_spec=spec_str,
@@ -242,7 +247,7 @@ class Specifier:
     def __str__(self) -> str:
         """Human readable string of the spec.
 
-        Dynamiccaly adds version, its separator and manage ID prefix (in purl syntax).
+        Dynamiccaly adds version, its separator and manage ID prefix (in pURL syntax).
         """
         string = self.package_id
         if self.version:

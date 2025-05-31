@@ -62,7 +62,7 @@ class Pip(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► python -m pip --no-color --version
+        $ python -m pip --no-color --version
         pip 2.0.2 from /usr/local/lib/python/site-packages/pip (python 3.7)
     """
 
@@ -76,7 +76,7 @@ class Pip(PackageManager):
         Runs:
 
             .. code-block:: shell-session
-                ► python --version --version
+                $ python --version --version
                 Python 3.10.10 (Feb  8 2023, 05:34) [Clang 14.0.0 (clang-1400.0.29.202)]
         """
         if self.executable:
@@ -99,7 +99,7 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            ► python -m pip --no-color list --format=json --verbose --quiet \
+            $ python -m pip --no-color list --format=json --verbose --quiet \
             > | jq
             [
              {
@@ -146,7 +146,7 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            ► python -m pip --no-color list --format=json --outdated \
+            $ python -m pip --no-color list --format=json --outdated \
             > --verbose --quiet | jq
             [
               {
@@ -242,7 +242,7 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            ► python -m pip --no-color search abc
+            $ python -m pip --no-color search abc
             ABC (0.0.0)                 - UNKNOWN
             micropython-abc (0.0.1)     - Dummy abc module for MicroPython
             abc1 (1.2.0)                - a list about my think
@@ -283,7 +283,7 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            ► python -m pip --no-color install arrow
+            $ python -m pip --no-color install arrow
             Collecting arrow
               Using cached arrow-1.1.1-py3-none-any.whl (60 kB)
             Collecting python-dateutil>=2.7.0
@@ -304,7 +304,7 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            ► python -m pip --no-color install --user --upgrade six
+            $ python -m pip --no-color install --user --upgrade six
             Collecting six
               Using cached six-1.15.0-py2.py3-none-any.whl (10 kB)
             Installing collected packages: six
@@ -328,6 +328,6 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            ► python -m pip --no-color uninstall --yes arrow
+            $ python -m pip --no-color uninstall --yes arrow
         """
         return self.run_cli("uninstall", "--yes", package_id)

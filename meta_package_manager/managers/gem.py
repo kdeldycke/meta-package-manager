@@ -38,7 +38,7 @@ class Gem(PackageManager):
         like:
 
         .. code-block:: shell-session
-            ► sudo dseditgroup -o edit -a -t user wheel
+            $ sudo dseditgroup -o edit -a -t user wheel
 
         And then do ``visudo`` to make it so the ``wheel`` group does not require
         a password. There is a line already there for it, you just need to
@@ -57,7 +57,7 @@ class Gem(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► gem --version
+        $ gem --version
         3.0.3
     """
 
@@ -72,7 +72,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            ► gem list --quiet
+            $ gem list --quiet
             bigdecimal (default: 1.4.1)
             bundler (default: 1.17.2)
             CFPropertyList (2.3.6)
@@ -111,7 +111,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            ► gem outdated --quiet
+            $ gem outdated --quiet
             did_you_mean (1.0.0 < 1.0.2)
             io-console (0.4.5 < 0.4.6)
             json (1.8.3 < 2.0.1)
@@ -141,7 +141,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            ► gem search python --versions --quiet
+            $ gem search python --versions --quiet
             at_coder_friends-generator-python_ref (0.2.0)
             bee_python (0.2.3)
             dependabot-python (0.117.5)
@@ -154,7 +154,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            ► gem search python --versions --exact --quiet
+            $ gem search python --versions --exact --quiet
             python (0.0.1)
         """
         search_arg = []
@@ -184,7 +184,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            ► gem install --user-install --quiet markdown
+            $ gem install --user-install --quiet markdown
             Fetching kramdown-2.3.1.gem
             Fetching concurrent-ruby-1.1.9.gem
             (...)
@@ -215,7 +215,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            ► gem update --user-install --quiet
+            $ gem update --user-install --quiet
         """
         return self.build_cli(
             "update",
@@ -235,7 +235,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            ► gem update --user-install --quiet markdown
+            $ gem update --user-install --quiet markdown
         """
         return self.build_cli(
             "update",
@@ -250,7 +250,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            ► gem uninstall --user-install --quiet left-pad
+            $ gem uninstall --user-install --quiet left-pad
             Successfully uninstalled left-pad-1.1.0
         """
         return self.run_cli("uninstall", package_id)
@@ -260,7 +260,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            ► gem cleanup --quiet
+            $ gem cleanup --quiet
             Cleaning up installed gems...
             Attempting to uninstall test-unit-3.2.9
             Unable to uninstall test-unit-3.2.9:

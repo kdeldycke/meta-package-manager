@@ -96,7 +96,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
 
         .. code-block:: shell-session
 
-            ► mpm --mas search 钉
+            $ mpm --mas search 钉
             info: User selection of managers by priority > mas
             info: Managers dropped by user: None
             ╭────────────┬───────────────────┬─────────┬────────────────╮

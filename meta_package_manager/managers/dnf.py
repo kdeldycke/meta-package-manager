@@ -44,7 +44,7 @@ class DNF(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► dnf --version
+        $ dnf --version
         4.9.0
     """
 
@@ -58,7 +58,7 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            ► dnf repoquery --userinstalled --qf FORMAT
+            $ dnf repoquery --userinstalled --qf FORMAT
             Installed Packages
             acl 2.2.53-1.el8 annaconda_dummary x86_64
             audit 2.2.53-1.el8 audit_dummary x86_64
@@ -90,7 +90,7 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            ► dnf repoquery --upgrades --qf FORMAT
+            $ dnf repoquery --upgrades --qf FORMAT
             Installed Packages
             acl 2.2.53-1.el8 2.6.53-1.el8 annaconda_dummary x86_64
             audit 2.2.53-1.el8 2.5.53-1.el8 audit_dummary x86_64
@@ -127,7 +127,7 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            ► dnf --color=never search usd
+            $ dnf --color=never search usd
             Last metadata expiration check: 0:06:37 ago on Sun 03 Apr 2022.
             =================== Name Exactly Matched: usd =====================
             usd.aarch64 : 3D VFX pipeline interchange file format
@@ -159,7 +159,7 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo dnf --color=never --assumeyes install pip
+            $ sudo dnf --color=never --assumeyes install pip
         """
         return self.run_cli("--assumeyes", "install", package_id, sudo=True)
 
@@ -169,7 +169,7 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo dnf --color=never --assumeyes upgrade
+            $ sudo dnf --color=never --assumeyes upgrade
         """
         return self.build_cli("upgrade", sudo=True)
 
@@ -184,7 +184,7 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo dnf --color=never --assumeyes upgrade pip
+            $ sudo dnf --color=never --assumeyes upgrade pip
         """
         return self.build_cli("upgrade", package_id, sudo=True)
 
@@ -193,7 +193,7 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            ► dnf --color=never check-update
+            $ dnf --color=never check-update
         """
         self.run_cli("check-update")
 
@@ -202,8 +202,8 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo dnf --color=never --assumeyes autoremove
-            ► dnf --color=never clean all
+            $ sudo dnf --color=never --assumeyes autoremove
+            $ dnf --color=never clean all
         """
         self.run_cli("--assumeyes", "autoremove", sudo=True)
         self.run_cli("clean", "all")
@@ -213,7 +213,7 @@ class DNF(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo dnf --color=never --assumeyes autoremove package_id
+            $ sudo dnf --color=never --assumeyes autoremove package_id
         """
 
         return self.run_cli("--assumeyes", "autoremove", package_id, sudo=True)

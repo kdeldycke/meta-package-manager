@@ -67,7 +67,7 @@ class Homebrew(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► brew --version
+        $ brew --version
         Homebrew 1.8.6-124-g6cd4c31
         Homebrew/homebrew-core (git revision 533d; last commit 2018-12-28)
         Homebrew/homebrew-cask (git revision 5095b; last commit 2018-12-28)
@@ -79,7 +79,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew list --versions --formula
+            $ brew list --versions --formula
             ack 2.14
             apg 2.2.3
             audacity (!) 2.1.2
@@ -94,7 +94,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew list --versions --cask
+            $ brew list --versions --cask
             aerial 1.2beta5
             android-file-transfer latest
             audacity (!) 2.1.2
@@ -139,7 +139,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew outdated --json=v2 --formula | jq
+            $ brew outdated --json=v2 --formula | jq
             {
               "formulae": [
                 {
@@ -166,7 +166,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew outdated --json=v2 --cask | jq
+            $ brew outdated --json=v2 --cask | jq
             {
               "formulae": [],
               "casks": [
@@ -185,7 +185,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew outdated --json=v2 --greedy --cask | jq
+            $ brew outdated --json=v2 --greedy --cask | jq
             {
               "formulae": [],
               "casks": [
@@ -260,7 +260,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew search sed
+            $ brew search sed
             ==> Formulae
             gnu-sed ✔                    libxdg-basedir               minised
             ==> Casks
@@ -271,13 +271,13 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew search sed --formulae
+            $ brew search sed --formulae
             ==> Formulae
             gnu-sed ✔                    libxdg-basedir               minised
 
         .. code-block:: shell-session
 
-            ► brew search sed --cask
+            $ brew search sed --cask
             ==> Casks
             eclipse-dsl                       marsedit
             focused                           physicseditor
@@ -286,25 +286,25 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew search python --formulae
+            $ brew search python --formulae
             ==> Formulae
             app-engine-python   boost-python3   python ✔          python-yq
             boost-python        gst-python      python-markdown   python@3.8 ✔
 
         .. code-block:: shell-session
 
-            ► brew search "/^ssed$/" --formulae
+            $ brew search "/^ssed$/" --formulae
             ==> Formulae
             ssed
 
         .. code-block:: shell-session
 
-            ► brew search "/^sed$/" --formulae
+            $ brew search "/^sed$/" --formulae
             Error: No formula or cask found for "/^sed$/".
 
         .. code-block:: shell-session
 
-            ► brew search tetris --formulae --desc
+            $ brew search tetris --formulae --desc
             ==> Formulae
             bastet: Bastard Tetris
             netris: Networked variant of tetris
@@ -313,7 +313,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew search tetris --cask --desc
+            $ brew search tetris --cask --desc
             ==> Casks
             not-tetris: (Not Tetris) [no description]
             tetrio: (TETR.IO) Free-to-play Tetris clone
@@ -376,7 +376,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew install jpeginfo --formula
+            $ brew install jpeginfo --formula
             ==> Downloading https://ghcr.io/core/jpeginfo/manifests/1.6.1_1-1
             ############################################################## 100.0%
             ==> Downloading https://ghcr.io/core/jpeginfo/blobs/sha256:27bb35884368b83
@@ -387,7 +387,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew install pngyu --cask
+            $ brew install pngyu --cask
             ==> Downloading https://nukesaq.github.io/Pngyu/download/Pngyu_mac_101.zip
             ################################################################## 100.0%
             ==> Installing Cask pngyu
@@ -404,7 +404,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew upgrade --formula
+            $ brew upgrade --formula
             ==> Upgrading 2 outdated packages:
             node 13.11.0 -> 13.12.0
             sdl2 2.0.12 -> 2.0.12_1
@@ -435,7 +435,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew upgrade --cask
+            $ brew upgrade --cask
             ==> Casks with `auto_updates` or `version :latest` will not be upgraded
             ==> Upgrading 1 outdated packages:
             aerial 2.0.7 -> 2.0.8
@@ -464,7 +464,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew upgrade dupeguru --cask
+            $ brew upgrade dupeguru --cask
             ==> Upgrading 1 outdated package:
             dupeguru 4.2.0 -> 4.2.1
             ==> Upgrading dupeguru
@@ -484,7 +484,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew uninstall bat
+            $ brew uninstall bat
             Uninstalling /usr/local/Cellar/bat/0.21.0... (14 files, 5MB)
         """
         return self.run_cli("uninstall", package_id)
@@ -494,7 +494,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew update --quiet
+            $ brew update --quiet
             Already up-to-date.
         """
         self.run_cli("update", "--quiet", auto_post_args=False)
@@ -509,7 +509,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew cleanup -s --prune=all
+            $ brew cleanup -s --prune=all
             Removing: ~/Library/Caches/Homebrew/node--1.bottle.tar.gz... (9MB)
             Warning: Skipping sdl2: most recent version 2.0.12_1 not installed
             Removing: ~/Library/Caches/Homebrew/Cask/aerial--1.8.1.zip... (5MB)
@@ -522,7 +522,7 @@ class Homebrew(PackageManager):
 
         .. code-block:: shell-session
 
-            ► brew autoremove
+            $ brew autoremove
             ==> Uninstalling 17 unneeded formulae:
             gtkmm3
             highlight

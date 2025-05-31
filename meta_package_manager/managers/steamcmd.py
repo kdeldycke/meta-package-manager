@@ -54,7 +54,7 @@ class SteamCMD(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► steamcmd +quit
+        $ steamcmd +quit
         Redirecting stderr to '~/Library/Application Support/Steam/logs/stderr.txt'
         [  0%] Checking for available updates...
         [----] Verifying installation...
@@ -69,7 +69,7 @@ class SteamCMD(PackageManager):
 
         .. code-block:: shell-session
 
-            ► steamcmd +app_update 740 validate +quit
+            $ steamcmd +app_update 740 validate +quit
         """
         return self.run_cli("+app_update", package_id, "validate")
 
@@ -84,6 +84,6 @@ class SteamCMD(PackageManager):
 
         .. code-block:: shell-session
 
-            ► steamcmd +app_update 740 validate +quit
+            $ steamcmd +app_update 740 validate +quit
         """
         return self.build_cli("+app_update", package_id, "validate")

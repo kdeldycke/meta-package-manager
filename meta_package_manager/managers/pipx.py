@@ -35,7 +35,7 @@ class Pipx(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► pipx --version
+        $ pipx --version
         1.0.0
     """
 
@@ -45,7 +45,7 @@ class Pipx(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pipx list --json | jq
+            $ pipx list --json | jq
             {
               "pipx_spec_version": "0.1",
               "venvs": {
@@ -102,7 +102,7 @@ class Pipx(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pipx runpip poetry list --no-color --format=json --outdated \
+            $ pipx runpip poetry list --no-color --format=json --outdated \
             > --verbose --quiet | jq
             [
               {
@@ -163,7 +163,7 @@ class Pipx(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pipx install pycowsay
+            $ pipx install pycowsay
             installed package pycowsay 0.0.0.1, installed using Python 3.10.4
             These apps are now globally available
                 - pycowsay
@@ -189,7 +189,7 @@ class Pipx(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pipx uninstall pycowsay
+            $ pipx uninstall pycowsay
             uninstalled pycowsay! ✨ 🌟 ✨
         """
         return self.run_cli("uninstall", package_id)

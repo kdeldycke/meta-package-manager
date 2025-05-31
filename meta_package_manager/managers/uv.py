@@ -54,7 +54,7 @@ class UV(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► uv --version
+        $ uv --version
         uv 0.2.21 (ebfe6d8fc 2024-07-03)
     """
 
@@ -64,7 +64,7 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            ► uv --color never --no-progress pip list --format=json | jq
+            $ uv --color never --no-progress pip list --format=json | jq
             [
               {
                 "name": "markupsafe",
@@ -97,7 +97,7 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            ► uv --color never --no-progress pip list --outdated --format=json | jq
+            $ uv --color never --no-progress pip list --outdated --format=json | jq
             [
               {
                 "name": "lark-parser",
@@ -128,7 +128,7 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            ► uv --color never --no-progress pip install "tomli_w == 1.0.0"
+            $ uv --color never --no-progress pip install "tomli_w == 1.0.0"
             Resolved 1 package in 574ms
             Installed 1 package in 2ms
              + tomli-w==1.0.0
@@ -147,7 +147,7 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            ► uv --color never --no-progress pip install --upgrade "tomli_w == 0.4.0"
+            $ uv --color never --no-progress pip install --upgrade "tomli_w == 0.4.0"
             Resolved 1 package in 1ms
             Uninstalled 1 package in 0.54ms
             Installed 1 package in 0.94ms
@@ -156,7 +156,7 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            ► uv --color never --no-progress pip install --upgrade "tomli_w"
+            $ uv --color never --no-progress pip install --upgrade "tomli_w"
             Resolved 1 package in 2ms
             Uninstalled 1 package in 1ms
             Installed 1 package in 2ms
@@ -173,7 +173,7 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            ► uv --color never --no-progress pip uninstall tomli_w
+            $ uv --color never --no-progress pip uninstall tomli_w
             Uninstalled 1 package in 5ms
              - tomli-w==1.0.0
         """
@@ -184,13 +184,13 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            ► uv --color never --no-progress cache clean
+            $ uv --color never --no-progress cache clean
             Clearing cache at: /Users/kde/Library/Caches/uv
             Removed 97279 files (2.0GiB)
 
         .. code-block:: shell-session
 
-            ► uv --color never --no-progress cache prune
+            $ uv --color never --no-progress cache prune
             No cache found at: /Users/kde/.cache/uv
         """
         self.run_cli("cache", "clean")

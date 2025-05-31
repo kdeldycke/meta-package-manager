@@ -58,7 +58,7 @@ class Zypper(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► zypper --version
+        $ zypper --version
         zypper 1.14.11
     """
 
@@ -74,7 +74,7 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
                 --xmlout search --details --type package [*args]
             <?xml version='1.0'?>
             <stream>
@@ -158,7 +158,7 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
                 --xmlout search --details --type package --installed-only
         """
         for package in self._search("--installed-only"):
@@ -170,7 +170,7 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
                 --xmlout list-updates
             <?xml version='1.0'?>
             <stream>
@@ -221,22 +221,22 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
                 --xmlout search --details --type package kopete
 
         .. code-block:: shell-session
 
-            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
                 --xmlout search --details --type package --search-description kopete
 
         .. code-block:: shell-session
 
-            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
                 --xmlout search --details --type package --match-exact kopete
 
         .. code-block:: shell-session
 
-            ► zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
+            $ zypper --no-color --no-abbrev --non-interactive --no-cd --no-refresh \
                 --xmlout search --details --type package --search-description \
                 --match-exact kopete
         """
@@ -255,7 +255,7 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+            $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
                 --no-refresh install kopete
         """
         return self.run_cli("install", package_id, sudo=True)
@@ -266,7 +266,7 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+            $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
                 --no-refresh update
         """
         return self.build_cli("update", sudo=True)
@@ -282,7 +282,7 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+            $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
                 --no-refresh update kopete
         """
         return self.build_cli("update", package_id, sudo=True)
@@ -292,7 +292,7 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+            $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
                 --no-refresh refresh
         """
         self.run_cli("refresh", sudo=True)
@@ -302,7 +302,7 @@ class Zypper(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+            $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
                 --no-refresh clean
         """
         self.run_cli("clean", sudo=True)

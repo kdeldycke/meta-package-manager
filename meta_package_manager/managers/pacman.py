@@ -44,7 +44,7 @@ class Pacman(PackageManager):
 
     .. code-block:: shell-session
 
-        ► pacman --version
+        $ pacman --version
 
          .--.                  Pacman v6.0.1 - libalpm v13.0.1
         / _.-' .-.  .-.  .-.   Copyright (C) 2006-2021 Pacman Development Team
@@ -60,7 +60,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pacman --noconfirm --query
+            $ pacman --noconfirm --query
             a52dec 0.7.4-11
             aalib 1.4rc5-14
             abseil-cpp 20211102.0-2
@@ -85,7 +85,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pacman --noconfirm --query --upgrades
+            $ pacman --noconfirm --query --upgrades
             linux 4.19.1.arch1-1 -> 4.19.2.arch1-1
             linux-headers 4.19.1.arch1-1 -> 4.19.2.arch1-1
         """
@@ -111,7 +111,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pacman --noconfirm --sync --search fire
+            $ pacman --noconfirm --sync --search fire
             extra/dump_syms 0.0.7-1
                 Symbol dumper for Firefox
             extra/firefox 99.0-1
@@ -150,7 +150,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo pacman --noconfirm --sync firefox
+            $ sudo pacman --noconfirm --sync firefox
         """
         return self.run_cli("--sync", package_id, sudo=True)
 
@@ -159,7 +159,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo pacman --noconfirm --sync --refresh --sysupgrade
+            $ sudo pacman --noconfirm --sync --refresh --sysupgrade
         """
         return self.build_cli("--sync", "--refresh", "--sysupgrade", sudo=True)
 
@@ -173,7 +173,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo pacman --noconfirm --sync firefox
+            $ sudo pacman --noconfirm --sync firefox
         """
         return self.build_cli("--sync", package_id, sudo=True)
 
@@ -182,7 +182,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo pacman --noconfirm --remove firefox
+            $ sudo pacman --noconfirm --remove firefox
         """
         return self.run_cli("--remove", package_id, sudo=True)
 
@@ -191,7 +191,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pacman --noconfirm --sync --refresh
+            $ pacman --noconfirm --sync --refresh
         """
         self.run_cli("--sync", "--refresh")
 
@@ -200,7 +200,7 @@ class Pacman(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo pacman --noconfirm --sync --clean --clean
+            $ sudo pacman --noconfirm --sync --clean --clean
         """
         self.run_cli("--sync", "--clean", "--clean", sudo=True)
 
@@ -217,7 +217,7 @@ class Pacaur(Pacman):
 
     .. code-block:: shell-session
 
-        ► pacaur --version
+        $ pacaur --version
         pacaur 4.8.6
     """
 
@@ -235,7 +235,7 @@ class Paru(Pacman):
 
     .. code-block:: shell-session
 
-        ► paru --version
+        $ paru --version
         paru v1.10.0 - libalpm v13.0.1
     """
 
@@ -252,6 +252,6 @@ class Yay(Pacman):
 
     .. code-block:: shell-session
 
-        ► yay --version
+        $ yay --version
         yay v11.1.2 - libalpm v13.0.1
     """

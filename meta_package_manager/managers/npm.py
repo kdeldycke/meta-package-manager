@@ -56,7 +56,7 @@ class NPM(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► npm --version
+        $ npm --version
         6.13.7
     """
 
@@ -67,7 +67,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 --json outdated
             {
               "error": {
@@ -94,7 +94,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 --json --depth 0 list | jq
             {
               "name": "lib",
@@ -145,7 +145,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 --json outdated | jq
             {
               "my-linked-package": {
@@ -186,7 +186,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 search --json python | jq
             [
               {
@@ -255,7 +255,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 search --json --no-description python | jq
         """
         search_args = []
@@ -278,7 +278,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 install markdown
 
             added 3 packages in 3s
@@ -291,7 +291,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 upgrade
         """
         return self.build_cli("update")
@@ -306,7 +306,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 upgrade raven
         """
         return self.build_cli("upgrade", f"{package_id}")
@@ -316,7 +316,7 @@ class NPM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
                 uninstall raven
         """
         return self.run_cli("uninstall", package_id)

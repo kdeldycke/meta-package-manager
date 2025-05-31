@@ -47,7 +47,7 @@ class Cargo(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► cargo --version
+        $ cargo --version
         cargo 1.59.0
     """
 
@@ -57,7 +57,7 @@ class Cargo(PackageManager):
 
         .. code-block:: shell-session
 
-            ► cargo --color never --quiet install --list
+            $ cargo --color never --quiet install --list
             bore-cli v0.4.0:
                 bore
             ripgrep v13.0.0:
@@ -91,7 +91,7 @@ class Cargo(PackageManager):
 
         .. code-block:: shell-session
 
-            ► cargo --color never --quiet search --limit 100 python
+            $ cargo --color never --quiet search --limit 100 python
             python = "0.0.0"                  # Python.
             pyo3-asyncio = "0.16.0"           # PyO3 utilities for Python's Asyncio
             pyo3-asyncio-macros = "0.16.0"    # Proc Macro Attributes for PyO3 Asyncio
@@ -124,7 +124,7 @@ class Cargo(PackageManager):
 
         .. code-block:: shell-session
 
-            ► cargo --color never install bore-cli
+            $ cargo --color never install bore-cli
               Updating crates.io index
             Downloaded bore-cli v0.4.0
             Downloaded 1 crate (20.9 KB) in 0.26s
@@ -145,7 +145,7 @@ class Cargo(PackageManager):
 
         .. code-block:: shell-session
 
-            ► cargo --color never uninstall bore-cli
+            $ cargo --color never uninstall bore-cli
                 Removing /Users/me/.cargo/bin/bore
         """
         return self.run_cli("uninstall", package_id)

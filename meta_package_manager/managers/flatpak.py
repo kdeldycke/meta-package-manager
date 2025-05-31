@@ -39,7 +39,7 @@ class Flatpak(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► flatpak --version
+        $ flatpak --version
         Flatpak 1.4.2
     """
 
@@ -49,7 +49,7 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            ► flatpak list --app --columns=name,application,version \
+            $ flatpak list --app --columns=name,application,version \
             > --ostree-verbose
             Name                      Application ID                   Version
             Peek                      com.uploadedlobster.peek         1.3.1
@@ -85,7 +85,7 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            ► flatpak remote-ls --app --updates --columns=name,application,version \
+            $ flatpak remote-ls --app --updates --columns=name,application,version \
                 --ostree-verbose
             GNOME Dictionary    org.gnome.Dictionary    3.26.0  stable  x86_64
         """
@@ -141,7 +141,7 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            ► flatpak search gitg --ostree-verbose
+            $ flatpak search gitg --ostree-verbose
             gitg    GUI for git        org.gnome.gitg  3.32.1  stable  flathub
         """
         output = self.run_cli("search", query, "--ostree-verbose")
@@ -179,7 +179,7 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            ► flatpak install --noninteractive org.gnome.Dictionary
+            $ flatpak install --noninteractive org.gnome.Dictionary
         """
         return self.run_cli("install", "--noninteractive", package_id)
 
@@ -189,7 +189,7 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            ► flatpak update --noninteractive
+            $ flatpak update --noninteractive
         """
         return self.build_cli("update", "--noninteractive")
 
@@ -204,7 +204,7 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            ► flatpak update --noninteractive org.gnome.Dictionary
+            $ flatpak update --noninteractive org.gnome.Dictionary
         """
         return self.build_cli("update", "--noninteractive", package_id)
 
@@ -216,6 +216,6 @@ class Flatpak(PackageManager):
 
         .. code-block:: shell-session
 
-            ► flatpak repair --user
+            $ flatpak repair --user
         """
         self.run_cli("repair", "--user")

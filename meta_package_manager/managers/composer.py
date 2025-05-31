@@ -44,7 +44,7 @@ class Composer(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► composer --version
+        $ composer --version
         Composer version 2.1.8 2021-09-15 13:55:14
     """
 
@@ -54,7 +54,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            ► composer global show --format=json | jq
+            $ composer global show --format=json | jq
             {
               "installed": [
                 {
@@ -92,7 +92,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            ► composer global outdated --format=json
+            $ composer global outdated --format=json
             {
                 "installed": [
                     {
@@ -133,7 +133,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            ► composer global search symfony
+            $ composer global search symfony
             symfony/symfony The Symfony PHP framework
             symfony/yaml Symfony Yaml Component
             symfony/var-dumper Symfony (...) dumping PHP variables
@@ -152,7 +152,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            ► composer global search --only-name python
+            $ composer global search --only-name python
             hiqdev/hidev-python
             aanro/pythondocx
             laravel-admin-ext/python-editor
@@ -164,7 +164,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            ► search global --only-name pythonphp/pythonphp
+            $ search global --only-name pythonphp/pythonphp
             pythonphp/pythonphp
         """
         search_args = []
@@ -190,7 +190,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            ► composer global install illuminate/contracts
+            $ composer global install illuminate/contracts
         """
         return self.run_cli("install", package_id)
 
@@ -200,7 +200,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            ► composer global update
+            $ composer global update
         """
         return self.build_cli("update")
 
@@ -215,7 +215,7 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            ► composer global update illuminate/contracts
+            $ composer global update illuminate/contracts
         """
         return self.build_cli("update", package_id)
 
@@ -226,6 +226,6 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            ► composer global clear-cache
+            $ composer global clear-cache
         """
         self.run_cli("clear-cache")

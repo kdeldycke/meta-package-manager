@@ -41,7 +41,7 @@ class Yarn(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► yarn --version
+        $ yarn --version
         1.22.11
     """
 
@@ -51,7 +51,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn global --json list --depth 0
+            $ yarn global --json list --depth 0
             {"type":"activityStart","data":{"id":0}}
             {"type":"activityTick","data":{"id":0,"name":"awesome-lint@^0.18.0"}}
             {"type":"activityTick","data":{"id":0,"name":"arrify@^2.0.1"}}
@@ -72,7 +72,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn global list --depth 0
+            $ yarn global list --depth 0
             yarn global v1.22.19
             info "awesome-lint@0.18.0" has binaries:
                - awesome-lint
@@ -95,7 +95,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn global dir
+            $ yarn global dir
             ~/.config/yarn/global
         """
         return self.run_cli("global", "dir", force_exec=True).rstrip()
@@ -106,7 +106,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn --json outdated --cwd ~/.config/yarn/global | jq
+            $ yarn --json outdated --cwd ~/.config/yarn/global | jq
             {"type":"warning","data":"package.json: No license field"}
             {
               "type": "info",
@@ -142,7 +142,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn outdated --cwd ~/.config/yarn/global
+            $ yarn outdated --cwd ~/.config/yarn/global
             yarn outdated v1.22.19
             warning package.json: No license field
             info Color legend :
@@ -182,7 +182,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn --json info python | jq
+            $ yarn --json info python | jq
             {
               "type": "inspect",
               "data": {
@@ -271,7 +271,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn global add awesome-lint
+            $ yarn global add awesome-lint
             yarn global v1.22.19
             [1/4] 🔍  Resolving packages...
             [2/4] 🚚  Fetching packages...
@@ -290,7 +290,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn global upgrade --latest
+            $ yarn global upgrade --latest
             yarn global v1.22.19
             [1/4] 🔍  Resolving packages...
             [2/4] 🚚  Fetching packages...
@@ -326,7 +326,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn global upgrade markdown --latest
+            $ yarn global upgrade markdown --latest
             yarn global v1.22.19
             [1/4] 🔍  Resolving packages...
             [2/4] 🚚  Fetching packages...
@@ -348,7 +348,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn global remove awesome-lint
+            $ yarn global remove awesome-lint
             yarn global v1.22.19
             [1/2] 🗑  Removing module awesome-lint...
             [2/2] 🔨  Regenerating lockfile and installing missing dependencies...
@@ -364,7 +364,7 @@ class Yarn(PackageManager):
 
         .. code-block:: shell-session
 
-            ► yarn cache clean --all
+            $ yarn cache clean --all
             yarn cache v1.22.19
             success Cleared cache.
             ✨  Done in 0.35s.

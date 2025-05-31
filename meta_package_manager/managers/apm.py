@@ -53,7 +53,7 @@ class APM(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► apm --version
+        $ apm --version
         apm  2.6.2
         npm  6.14.13
         node 12.14.1 x64
@@ -68,7 +68,7 @@ class APM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apm list --json | jq
+            $ apm list --json | jq
             {
               "core": [
                 {
@@ -175,7 +175,7 @@ class APM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apm outdated --compatible --json | jq
+            $ apm outdated --compatible --json | jq
             [
               {
                 "_args": [
@@ -340,7 +340,7 @@ class APM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apm search --json python | jq
+            $ apm search --json python | jq
             [
               {
                 "name": "atom-python-run",
@@ -417,7 +417,7 @@ class APM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apm search --no-description --json python | jq
+            $ apm search --no-description --json python | jq
         """
         search_args = []
         if not extended:
@@ -439,7 +439,7 @@ class APM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apm install image-view
+            $ apm install image-view
             The image-view package is bundled with Atom and should not be explicitly
             installed. You can run `apm uninstall image-view` to uninstall it and then
             the version bundled with Atom will be used.
@@ -453,7 +453,7 @@ class APM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apm update --no-confirm
+            $ apm update --no-confirm
         """
         return self.build_cli("update", "--no-confirm")
 
@@ -468,6 +468,6 @@ class APM(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apm update --no-confirm image-view
+            $ apm update --no-confirm image-view
         """
         return self.build_cli("update", "--no-confirm", package_id)

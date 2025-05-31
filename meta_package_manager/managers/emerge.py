@@ -45,7 +45,7 @@ class Emerge(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► emerge --version
+        $ emerge --version
         Portage 3.0.30 (python 3.9.9-final-0, gcc-11.2.1, 5.15.32-gentoo-r1 x86_64)
     """
 
@@ -62,7 +62,7 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            ► qlist --installed --verbose --nocolor
+            $ qlist --installed --verbose --nocolor
             acct-group/audio-0-r1
             acct-group/cron-0
             app-admin/hddtemp-0.3_beta15-r29
@@ -109,7 +109,7 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            ► emerge --update --deep --pretend --columns --color n --nospinner @world
+            $ emerge --update --deep --pretend --columns --color n --nospinner @world
             [blocks  B     ] app-text/dos2unix
             [ebuild   N    ] app-games/qstat   [25c]
             [ebuild    R   ] sys-apps/sed      [2.4.7-r6]
@@ -169,7 +169,7 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            ► emerge --search --color n --nospinner blah
+            $ emerge --search --color n --nospinner blah
 
             [ Results for search key : blah ]
             Searching...
@@ -194,15 +194,15 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            ► emerge --search --color n --nospinner %^sed$
+            $ emerge --search --color n --nospinner %^sed$
 
         .. code-block:: shell-session
 
-            ► emerge --searchdesc --color n --nospinner sed
+            $ emerge --searchdesc --color n --nospinner sed
 
         .. code-block:: shell-session
 
-            ► emerge --searchdesc --color n --nospinner %^sed$
+            $ emerge --searchdesc --color n --nospinner %^sed$
         """
         search_param = "--search"
         if extended:
@@ -236,7 +236,7 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo emerge --color n --nospinner dev-vcs/git
+            $ sudo emerge --color n --nospinner dev-vcs/git
         """
         return self.run_cli("--color", "n", "--nospinner", package_id, sudo=True)
 
@@ -246,7 +246,7 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo emerge --update --newuse --deep --color n --nospinner @world
+            $ sudo emerge --update --newuse --deep --color n --nospinner @world
         """
         return self.build_cli(
             "--update",
@@ -270,7 +270,7 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo emerge --update --color n --nospinner dev-vcs/git
+            $ sudo emerge --update --color n --nospinner dev-vcs/git
         """
         return self.build_cli(
             "--update",
@@ -286,7 +286,7 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo emerge --sync --color n --nospinner
+            $ sudo emerge --sync --color n --nospinner
         """
         self.run_cli("--sync", "--color", "n", "--nospinner", sudo=True)
 
@@ -310,9 +310,9 @@ class Emerge(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo emerge --update --newuse --deep --color n --nospinner @world
-            ► sudo emerge --depclean
-            ► sudo eclean distfiles
+            $ sudo emerge --update --newuse --deep --color n --nospinner @world
+            $ sudo emerge --depclean
+            $ sudo eclean distfiles
         """
         # Forces an upgrade first, as recommended by emerge documentation.
         self.upgrade()

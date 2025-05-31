@@ -41,7 +41,7 @@ class Snap(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► snap --version
+        $ snap --version
         snap       2.44.1
         snapd      2.44.1
         series     16
@@ -55,7 +55,7 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
 
-            ► snap list --color=never
+            $ snap list --color=never
             Name    Version    Rev   Aufzeichnung   Herausgeber     Hinweise
             core    16-2.44.1  8935  latest/stable  canonical✓      core
             wechat  2.0        7     latest/stable  ubuntu-dawndiy  -
@@ -74,7 +74,7 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
 
-            ► snap refresh --list --color=never
+            $ snap refresh --list --color=never
             Name            Version  Rev  Herausgeber     Hinweise
             standard-notes  3.3.5    8    standardnotes✓  -
         """
@@ -103,7 +103,7 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
 
-            ► snap find doc --color=never
+            $ snap find doc --color=never
             Name       Version      Herausgeber  Hinweise  Zusammenfassung
             journey    2.14.3       2appstudio   -         Your private diary.
             nextcloud  17.0.5snap1  nextcloud✓   -         Nextcloud Server
@@ -134,7 +134,7 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
 
-            ► snap install standard-notes --color=never
+            $ snap install standard-notes --color=never
         """
         return self.run_cli("install", package_id)
 
@@ -144,7 +144,7 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
 
-            ► snap refresh --color=never
+            $ snap refresh --color=never
         """
         return self.build_cli("refresh")
 
@@ -159,6 +159,6 @@ class Snap(PackageManager):
 
         .. code-block:: shell-session
 
-            ► snap refresh standard-notes --color=never
+            $ snap refresh standard-notes --color=never
         """
         return self.build_cli("refresh", package_id)

@@ -37,7 +37,7 @@ class VSCode(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► code --version
+        $ code --version
         1.60.2
         7f6ab5485bbc008386c4386d08766667e155244e
         x64
@@ -49,7 +49,7 @@ class VSCode(PackageManager):
 
         .. code-block:: shell-session
 
-            ► code --list-extensions --show-versions
+            $ code --list-extensions --show-versions
             ms-python.python@2021.9.1246542782
             ms-python.vscode-pylance@2021.9.3
             ms-toolsai.jupyter@2021.8.2041215044
@@ -70,7 +70,7 @@ class VSCode(PackageManager):
 
         .. code-block:: shell-session
 
-            ► code --install-extension tamasfe.even-better-toml
+            $ code --install-extension tamasfe.even-better-toml
         """
         return self.run_cli("--install-extension", package_id)
 
@@ -79,7 +79,7 @@ class VSCode(PackageManager):
 
         .. code-block:: shell-session
 
-            ► code --uninstall-extension tamasfe.even-better-toml
+            $ code --uninstall-extension tamasfe.even-better-toml
         """
         return self.run_cli("--uninstall-extension", package_id)
 

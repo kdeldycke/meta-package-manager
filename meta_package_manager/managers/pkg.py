@@ -40,7 +40,7 @@ class PKG(PackageManager):
 
     """
     .. code-block:: shell-session
-        ► pkg --version
+        $ pkg --version
         1.20.9
     """
 
@@ -50,7 +50,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pkg query -e "%a = 0" "%n %v %c"
+            $ pkg query -e "%a = 0" "%n %v %c"
             7-zip 21.07_2 Console version of the 7-Zip file archiver
             ap24-mod_mpm_itk 2.4.7_2 Run each vhost under a separate uid and gid
             apache24 2.4.57 Version 2.4.x of Apache web server
@@ -80,7 +80,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pkg upgrade --dry-run
+            $ pkg upgrade --dry-run
             Updating FreeBSD repository catalogue...
             FreeBSD repository is up to date.
             All repositories are up to date.
@@ -112,7 +112,7 @@ class PKG(PackageManager):
 
             .. code-block:: shell-session
 
-                ► pkg version --like "<"
+                $ pkg version --like "<"
                 Updating FreeBSD repository catalogue...
                 FreeBSD repository is up to date.
                 All repositories are up to date.
@@ -144,7 +144,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pkg search --raw --raw-format json-compact --search name nginx
+            $ pkg search --raw --raw-format json-compact --search name nginx
             {
                 "name": "nginx",
                 "version": "1.24.0_14,3",
@@ -175,7 +175,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pkg search --raw --raw-format json-compact --search name --exact nginx
+            $ pkg search --raw --raw-format json-compact --search name --exact nginx
             {
                 "name": "nginx",
                 "origin": "www/nginx",
@@ -317,7 +317,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pkg search --raw --raw-format json-compact \
+            $ pkg search --raw --raw-format json-compact \
               --search name --search comment --search description nginx
         """
         search_args = ["--raw", "--raw-format", "json-compact", "--search", "name"]
@@ -342,7 +342,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pkg install --yes dmg2img
+            $ pkg install --yes dmg2img
             Updating FreeBSD repository catalogue...
             FreeBSD repository is up to date.
             All repositories are up to date.
@@ -364,7 +364,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pkg upgrade --yes
+            $ pkg upgrade --yes
         """
         return self.build_cli("upgrade", "--yes")
 
@@ -379,7 +379,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pkg upgrade --yes dmg2img
+            $ pkg upgrade --yes dmg2img
         """
         return self.build_cli("upgrade", "--yes", package_id)
 
@@ -388,7 +388,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pkg delete --yes dmg2img
+            $ pkg delete --yes dmg2img
             Checking integrity... done (0 conflicting)
             Deinstallation has been requested for the following 1 packages:
 
@@ -407,7 +407,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► IGNORE_OSVERSION=yes pkg update
+            $ IGNORE_OSVERSION=yes pkg update
             Updating FreeBSD repository catalogue...
             Fetching meta.conf: 100%    163 B   0.2kB/s    00:01
             Fetching packagesite.pkg: 100%    7 MiB   3.6MB/s    00:02
@@ -419,7 +419,7 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pkg update
+            $ pkg update
             Updating FreeBSD repository catalogue...
             Fetching meta.conf: 100%    163 B   0.2kB/s    00:01
             Fetching packagesite.pkg: 100%    7 MiB   3.6MB/s    00:02
@@ -437,13 +437,13 @@ class PKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► pkg autoremove --yes
+            $ pkg autoremove --yes
             Checking integrity... done (0 conflicting)
             Nothing to do.
 
         .. code-block:: shell-session
 
-            ► pkg clean --yes --all
+            $ pkg clean --yes --all
             Nothing to do.
         """
         self.run_cli("autoremove", "--yes")

@@ -40,9 +40,9 @@ class Scoop(PackageManager):
     version_regex = r"^v(?P<version>\S+)\s.+"
     """Search version at the start of a line.
 
-    .. code-block:: shell-session
+    .. code-block:: pwsh-session
 
-        ► scoop --version
+        > scoop --version
         Current Scoop version:
         v0.2.4 - Released at 2022-08-08
 
@@ -61,9 +61,9 @@ class Scoop(PackageManager):
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
 
-        .. code-block:: shell-session
+        .. code-block:: pwsh-session
 
-            ►  scoop list
+            >  scoop list
             Installed apps:
 
             Name   Version          Source Updated             Info
@@ -93,9 +93,9 @@ class Scoop(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
-        .. code-block:: shell-session
+        .. code-block:: pwsh-session
 
-            ► scoop status
+            > scoop status
             Name           Installed Version Latest Version Missing Dependencies Info
             ----           ----------------- -------------- -------------------- ----
             demulshooter   16.7.2            18.7.3
@@ -135,9 +135,9 @@ class Scoop(PackageManager):
             :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` refine
             them.
 
-        .. code-block:: shell-session
+        .. code-block:: pwsh-session
 
-            ► scoop search zip
+            > scoop search zip
             Results from local buckets...
 
             Name             Version         Source Binaries
@@ -172,9 +172,9 @@ class Scoop(PackageManager):
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
 
-        .. code-block:: shell-session
+        .. code-block:: pwsh-session
 
-            ► scoop install 7zip
+            > scoop install 7zip
             Installing '7zip' (22.01) [64bit] from main bucket
             7z2201-x64.msi (1.8 MB) [====================] 100%
             Checking hash of 7z2201-x64.msi ... ok.
@@ -197,9 +197,9 @@ class Scoop(PackageManager):
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
-        .. code-block:: shell-session
+        .. code-block:: pwsh-session
 
-            ► scoop update --all
+            > scoop update --all
         """
         return self.build_cli("update", "--all")
 
@@ -212,18 +212,18 @@ class Scoop(PackageManager):
         """Generates the CLI to upgrade all packages (default) or only the one provided
         as parameter.
 
-        .. code-block:: shell-session
+        .. code-block:: pwsh-session
 
-            ► scoop update 7zip
+            > scoop update 7zip
         """
         return self.build_cli("update", package_id)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
-        .. code-block:: shell-session
+        .. code-block:: pwsh-session
 
-            ► scoop uninstall 7zip --purge
+            > scoop uninstall 7zip --purge
             Uninstalling '7zip' (22.01).
             Removing shim '7z.shim'.
             Removing shim '7z.exe'.
@@ -236,14 +236,14 @@ class Scoop(PackageManager):
     def sync(self) -> None:
         """Sync package metadata.
 
-        .. code-block:: shell-session
+        .. code-block:: pwsh-session
 
-            ► scoop status
+            > scoop status
             WARN  Scoop out of date. Run 'scoop update' to get the latest changes.
 
-        .. code-block:: shell-session
+        .. code-block:: pwsh-session
 
-            ► scoop update
+            > scoop update
             Updating Scoop...
             Updating 'main' bucket...
             Converting 'main' bucket to git repo...
@@ -251,9 +251,9 @@ class Scoop(PackageManager):
             The main bucket was added successfully.
             Scoop was updated successfully!
 
-        .. code-block:: shell-session
+        .. code-block:: pwsh-session
 
-            ► scoop status
+            > scoop status
             Scoop is up to date.
             Everything is ok!
         """
@@ -262,9 +262,9 @@ class Scoop(PackageManager):
     def cleanup(self) -> None:
         """Removes things we don't need anymore.
 
-        .. code-block:: shell-session
+        .. code-block:: pwsh-session
 
-            ► scoop cleanup --all --cache
+            > scoop cleanup --all --cache
             Everything is shiny now!
         """
         self.run_cli("cleanup", "--all", "--cache")

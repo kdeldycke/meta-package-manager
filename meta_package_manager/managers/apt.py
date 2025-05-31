@@ -55,7 +55,7 @@ class APT(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► apt --version
+        $ apt --version
         apt 2.0.6 (amd64)
     """
 
@@ -65,7 +65,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt --quiet list --installed
+            $ apt --quiet list --installed
             Listing...
             adduser/xenial,now 3.113+nmu3ubuntu4 all [installed]
             bc/xenial,now 1.06.95-9build1 amd64 [installed]
@@ -99,7 +99,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt --quiet list --upgradable
+            $ apt --quiet list --upgradable
             Listing...
             apt/xenial-updates 1.2.19 amd64 [upgradable from: 1.2.15ubuntu0.2]
             nano/xenial-updates 2.5.3-2ubuntu2 amd64 [upgradable from: 2.5.3-2]
@@ -122,7 +122,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt --quiet search abc --names-only
+            $ apt --quiet search abc --names-only
             Sorting...
             Full Text Search...
             abcde/xenial 2.7.1-1 all
@@ -145,7 +145,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt --quiet search ^sed$ --names-only
+            $ apt --quiet search ^sed$ --names-only
             Sorting...
             Full Text Search...
             sed/xenial 2.1.9-3 all
@@ -153,7 +153,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► apt --quiet search abc --full
+            $ apt --quiet search abc --full
             Sorting...
             Full Text Search...
             abcde/xenial 2.7.1-1 all
@@ -211,7 +211,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo apt --quiet --yes install git
+            $ sudo apt --quiet --yes install git
         """
         return self.run_cli("--yes", "install", package_id, sudo=True)
 
@@ -221,7 +221,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo apt --quiet --yes upgrade
+            $ sudo apt --quiet --yes upgrade
         """
         return self.build_cli("--yes", "upgrade", sudo=True)
 
@@ -236,7 +236,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo apt --quiet --yes install --only-upgrade git
+            $ sudo apt --quiet --yes install --only-upgrade git
         """
         return self.build_cli(
             "--yes",
@@ -251,7 +251,7 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo apt --quiet --yes update
+            $ sudo apt --quiet --yes update
             Hit:1 http://archive.ubuntu.com xenial InRelease
             Get:2 http://archive.ubuntu.com xenial-updates InRelease [102 kB]
             Get:3 http://archive.ubuntu.com xenial-security InRelease [102 kB]
@@ -268,8 +268,8 @@ class APT(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo apt --quiet --yes autoremove
-            ► sudo apt --quiet --yes clean
+            $ sudo apt --quiet --yes autoremove
+            $ sudo apt --quiet --yes clean
         """
         for command in ("autoremove", "clean"):
             self.run_cli("--yes", command, sudo=True)
@@ -291,7 +291,7 @@ class APT_Mint(APT):
     """
     .. code-block:: shell-session
 
-        ► apt version apt
+        $ apt version apt
         1.6.11
     """
 
@@ -304,7 +304,7 @@ class APT_Mint(APT):
 
         .. code-block:: shell-session
 
-            ► /usr/local/bin/apt --quiet search sed
+            $ /usr/local/bin/apt --quiet search sed
             v   librust-slog-2.5+erased-serde-dev  -
             p   python3-blessed                    - Practical wrapper
             i   sed                                - GNU stream editor
@@ -312,7 +312,7 @@ class APT_Mint(APT):
 
         .. code-block:: shell-session
 
-            ► /usr/local/bin/apt --quiet search ^sed$
+            $ /usr/local/bin/apt --quiet search ^sed$
             i   sed              - GNU stream editor
             p   sed:i386         - GNU stream editor
         """

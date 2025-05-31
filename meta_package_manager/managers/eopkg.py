@@ -43,7 +43,7 @@ class EOPKG(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► eopkg --version
+        $ eopkg --version
         eopkg 3.2.0
     """
 
@@ -53,7 +53,7 @@ class EOPKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► eopkg --no-color list-installed --install-info
+            $ eopkg --no-color list-installed --install-info
             Package Name          |St|        Version|  Rel.|  Distro|       Date
             =====================================================================
             aalib                 | i|        1.4.0_5|     8|   Solus|14 Oct 2024
@@ -96,7 +96,7 @@ class EOPKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► eopkg --no-color list-upgrades --install-info
+            $ eopkg --no-color list-upgrades --install-info
             Package Name          |St|        Version|  Rel.|  Distro|       Date
             =====================================================================
             adwaita-icon-theme   | i|           46.2|    28|   Solus|14 Oct 2024
@@ -128,7 +128,7 @@ class EOPKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► eopkg --no-color search firefox
+            $ eopkg --no-color search firefox
             gjs-dbginfo                 - Debug symbols for gjs
             bleachbit                   - BleachBit frees disk space and maintains privacy
             firefox                     - Firefox web browser
@@ -142,7 +142,7 @@ class EOPKG(PackageManager):
             gjs-devel                   - Development files for gjs
             geckodriver-dbginfo         - Debug symbols for geckodriver
 
-            ► eopkg --no-color search firefox --name --summary --description
+            $ eopkg --no-color search firefox --name --summary --description
             gjs-dbginfo                 - Debug symbols for gjs
             bleachbit                   - BleachBit frees disk space and maintains privacy
             firefox                     - Firefox web browser
@@ -160,7 +160,7 @@ class EOPKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► eopkg --no-color search firefox --name
+            $ eopkg --no-color search firefox --name
             firefox         - Firefox web browser
             eid-mw-firefox  - Belgian eID add-on for Mozilla Firefox
             firefox-dbginfo - Debug symbols for firefox
@@ -184,7 +184,7 @@ class EOPKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo eopkg --no-color install --yes-all 0ad
+            $ sudo eopkg --no-color install --yes-all 0ad
             Warning: Updates available, checking reverse dependencies of runtime dependencies for safety.
             Following packages will be installed:
             0ad          0ad-data         assimp           at-spi2             baobab             breeze-icons      budgie-control-center  budgie-desktop      dav1d                  enet                   evolution-data-server       ffmpeg
@@ -214,7 +214,7 @@ class EOPKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo eopkg --no-color upgrade --yes-all
+            $ sudo eopkg --no-color upgrade --yes-all
         """
         return self.build_cli("upgrade", sudo=True)
 
@@ -229,7 +229,7 @@ class EOPKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo eopkg --no-color upgrade --yes-all xz
+            $ sudo eopkg --no-color upgrade --yes-all xz
             Updating repositories
             Updating repository: Solus
             eopkg-index.xml.xz.sha1sum     (40.0  B)100%      0.00 --/- [--:--:--] [complete]
@@ -280,7 +280,7 @@ class EOPKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo eopkg --no-color remove --yes-all firefox
+            $ sudo eopkg --no-color remove --yes-all firefox
             The following list of packages will be removed
             in the respective order to satisfy dependencies:
             firefox
@@ -319,7 +319,7 @@ class EOPKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo --no-color eopkg update-repo
+            $ sudo --no-color eopkg update-repo
             Updating repository: Solus
             eopkg-index.xml.xz.sha1sum  (40.0  B)100%   0.00 --/- [--:--:--] [complete]
             eopkg-index.xml.xz           (3.1 MB)100%  87.40 KB/s [00:00:34] [complete]
@@ -335,9 +335,9 @@ class EOPKG(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo eopkg --no-color remove-orphans --yes-all
-            ► sudo eopkg --no-color clean
-            ► sudo eopkg --no-color delete-cache
+            $ sudo eopkg --no-color remove-orphans --yes-all
+            $ sudo eopkg --no-color clean
+            $ sudo eopkg --no-color delete-cache
         """
         self.run_cli("remove-orphans", "--yes-all", sudo=True)
         self.run_cli("clean", sudo=True)

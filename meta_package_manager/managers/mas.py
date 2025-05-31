@@ -44,7 +44,7 @@ class MAS(PackageManager):
     """
     .. code-block:: shell-session
 
-        ► mas version
+        $ mas version
         1.8.3
     """
 
@@ -54,7 +54,7 @@ class MAS(PackageManager):
 
         .. code-block:: shell-session
 
-            ► mas list
+            $ mas list
             1569813296  1Password for Safari                 (2.3.5)
             1295203466  Microsoft Remote Desktop             (10.7.6)
             409183694   Keynote                              (12.0)
@@ -89,7 +89,7 @@ class MAS(PackageManager):
 
         .. code-block:: shell-session
 
-            ► mas outdated
+            $ mas outdated
             409183694  Keynote (11.0 -> 12.0)
             1176895641 Spark   (2.11.20 -> 2.11.21)
         """
@@ -135,7 +135,7 @@ class MAS(PackageManager):
 
         .. code-block:: shell-session
 
-            ► mas search python
+            $ mas search python
                689176796  Python Runner   (1.3)
                630736088  Learning Python (1.0)
                945397020  Run Python      (1.0)
@@ -166,7 +166,7 @@ class MAS(PackageManager):
 
         .. code-block:: shell-session
 
-            ► mas install 945397020
+            $ mas install 945397020
         """
         return self.run_cli("install", package_id)
 
@@ -176,7 +176,7 @@ class MAS(PackageManager):
 
         .. code-block:: shell-session
 
-            ► mas upgrade
+            $ mas upgrade
         """
         return self.build_cli("upgrade")
 
@@ -191,7 +191,7 @@ class MAS(PackageManager):
 
         .. code-block:: shell-session
 
-            ► mas upgrade 945397020
+            $ mas upgrade 945397020
         """
         return self.build_cli("upgrade", package_id)
 
@@ -200,7 +200,7 @@ class MAS(PackageManager):
 
         .. code-block:: shell-session
 
-            ► sudo mas uninstall 1494051017
+            $ sudo mas uninstall 1494051017
             Password:
             Deleted '/Applications/SimpleLogin.app' to '/Users/kde/.Trash/SimpleLogin.app'
         """

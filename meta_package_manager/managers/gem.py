@@ -61,9 +61,6 @@ class Gem(PackageManager):
         3.0.3
     """
 
-    # Help mpm a little bit in its search for the `gem` binary.
-    cli_search_path = ("/usr/local/opt/ruby/bin/gem", "/usr/local/opt/ruby/bin")
-
     post_args = ("--quiet",)  # Silence command progress meter
 
     @property

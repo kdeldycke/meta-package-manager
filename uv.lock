@@ -162,7 +162,7 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "5.0.1"
+version = "5.0.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
@@ -176,9 +176,9 @@ dependencies = [
     { name = "wcmatch" },
     { name = "xmltodict" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7c/0a/80624abf9c2fe72d9fb1b0a30deafe8bdd421a67162518c65bcd4f4827f0/click_extra-5.0.1.tar.gz", hash = "sha256:0f67e86c812f0880abf54b255e80a51df03281081ac68ef5d2c857297cd4302c", size = 92602, upload-time = "2025-05-28T11:17:21.033Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e3/33/32aea2ec2bbb3c3723a8a46a50e210637cd20686447a0977738fe3b51032/click_extra-5.0.2.tar.gz", hash = "sha256:53d7ce1a048c8777fa4efcc9c8d786d09a99484cf9cc6de91e258055af36265d", size = 92712, upload-time = "2025-05-31T12:31:16.744Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cc/dd/d8ba2019bc4089b32bf6ee13fe72ce7700fefb9adca725ec04a0c1607d9d/click_extra-5.0.1-py3-none-any.whl", hash = "sha256:a813678548fbb37c123802a9638e5d5f809e0e1c6016b1d35d5d234b092d4600", size = 75046, upload-time = "2025-05-28T11:17:19.423Z" },
+    { url = "https://files.pythonhosted.org/packages/9a/6b/e01bb85e1218a73bb2d14f9d49ddc86f7cda9cb2d865c4d713de29384112/click_extra-5.0.2-py3-none-any.whl", hash = "sha256:d42db2b41f2c38640947606f8482b85497305be4bcef2cca0f02a541f0201cd0", size = 75217, upload-time = "2025-05-31T12:31:14.902Z" },
 ]
 
 [package.optional-dependencies]
@@ -680,9 +680,9 @@ typing = [
 [package.metadata]
 requires-dist = [
     { name = "boltons", specifier = "~=25.0.0" },
-    { name = "click-extra", specifier = "~=5.0.1" },
-    { name = "click-extra", extras = ["pytest"], marker = "extra == 'test'", specifier = "~=5.0.1" },
-    { name = "click-extra", extras = ["sphinx"], marker = "extra == 'docs'", specifier = "~=5.0.1" },
+    { name = "click-extra", specifier = "~=5.0.2" },
+    { name = "click-extra", extras = ["pytest"], marker = "extra == 'test'", specifier = "~=5.0.2" },
+    { name = "click-extra", extras = ["sphinx"], marker = "extra == 'docs'", specifier = "~=5.0.2" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'test'", specifier = "~=7.8.0" },
     { name = "cyclonedx-python-lib", extras = ["validation"], specifier = "~=10.0.0" },
     { name = "extra-platforms", extras = ["pytest"], specifier = "~=3.2.1" },

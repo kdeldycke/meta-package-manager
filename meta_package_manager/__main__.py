@@ -22,28 +22,7 @@
 
 from __future__ import annotations
 
-
-def main():
-    """Execute the CLI but force its name to not let Click defaults to:
-
-    .. code-block:: shell-session
-        $ python -m meta_package_manager --version
-        python -m meta_package_manager, version 5.10.0
-
-    Indirection via this ``main()`` method was `required to reconcile
-    <https://github.com/python-poetry/poetry/issues/5981>`_:
-
-        - plain inline package call: ``python -m meta_package_manager``,
-        - ``pyproject.toml`` entry point: ``mpm = 'meta_package_manager.__main__:main``,
-        - Nuitka's main module invocation requirement:
-          ``python -m nuitka (...) meta_package_manager/__main__.py``
-
-    That way we can deduce all three cases from the entry point.
-    """
+if __name__ == "__main__":
     from meta_package_manager.cli import mpm
 
-    mpm(prog_name=mpm.name)
-
-
-if __name__ == "__main__":
-    main()
+    mpm()

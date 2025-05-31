@@ -133,6 +133,11 @@ handle the package type.
     diverse aliases, examples and libraries
     <https://github.com/package-url/purl-spec/blob/master/PURL-TYPES.rst>`_. We use
     this document to compile the keys of this ``PURL_MAP`` mapping.
+
+.. todo::
+
+    Reuse the mapping that is proposed upstream to the `package-url Python
+    project <https://github.com/package-url/packageurl-python/pull/188>`_.
 """
 
 

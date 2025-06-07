@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.21.2 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v5.21.1...main)
+
+> [!IMPORTANT]
+> This version is not released yet and is under active development.
+
 ## [5.21.1 (2025-06-07)](https://github.com/kdeldycke/meta-package-manager/compare/v5.21.0...v5.21.1)
 
 - [mpm] Remap pURL types to managers. Closes {issue}`1460`.

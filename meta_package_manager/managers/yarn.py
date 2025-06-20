@@ -31,6 +31,8 @@ from meta_package_manager.capabilities import (
 
 
 class Yarn(PackageManager):
+    """See command equivalences at: https://github.com/antfu-collective/ni?tab=readme-ov-file#ni."""
+
     name = "Node's yarn"
 
     homepage_url = "https://yarnpkg.com"

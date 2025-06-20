@@ -30,6 +30,8 @@ from meta_package_manager.capabilities import (
 
 
 class NPM(PackageManager):
+    """See command equivalences at: https://github.com/antfu-collective/ni?tab=readme-ov-file#ni."""
+
     name = "Node's npm"
 
     homepage_url = "https://www.npmjs.com"

@@ -92,7 +92,7 @@ class TestInstallRemove(CLISubCommandTests):
         # XXX Skip this test on GitHub Actions as it's too slow:
         #
         # $ mpm --mas install 747648890
-        # <output$ stream:
+        # <output> stream:
         #   (...)
         #   info: Install 747648890 package with mas...
         #

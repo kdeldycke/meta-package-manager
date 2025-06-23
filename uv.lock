@@ -84,11 +84,11 @@ wheels = [
 
 [[package]]
 name = "bracex"
-version = "2.5.post1"
+version = "2.6"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d6/6c/57418c4404cd22fe6275b8301ca2b46a8cdaa8157938017a9ae0b3edf363/bracex-2.5.post1.tar.gz", hash = "sha256:12c50952415bfa773d2d9ccb8e79651b8cdb1f31a42f6091b804f6ba2b4a66b6", size = 26641, upload-time = "2024-09-28T21:41:22.017Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/63/9a/fec38644694abfaaeca2798b58e276a8e61de49e2e37494ace423395febc/bracex-2.6.tar.gz", hash = "sha256:98f1347cd77e22ee8d967a30ad4e310b233f7754dbf31ff3fceb76145ba47dc7", size = 26642, upload-time = "2025-06-22T19:12:31.254Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4b/02/8db98cdc1a58e0abd6716d5e63244658e6e63513c65f469f34b6f1053fd0/bracex-2.5.post1-py3-none-any.whl", hash = "sha256:13e5732fec27828d6af308628285ad358047cec36801598368cb28bc631dbaf6", size = 11558, upload-time = "2024-09-28T21:41:21.016Z" },
+    { url = "https://files.pythonhosted.org/packages/9d/2a/9186535ce58db529927f6cf5990a849aa9e052eea3e2cfefe20b9e1802da/bracex-2.6-py3-none-any.whl", hash = "sha256:0b0049264e7340b3ec782b5cb99beb325f36c3782a32e36e876452fd49a09952", size = 11508, upload-time = "2025-06-22T19:12:29.781Z" },
 ]
 
 [[package]]
@@ -805,11 +805,11 @@ wheels = [
 
 [[package]]
 name = "pygments"
-version = "2.19.1"
+version = "2.19.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/7c/2d/c3338d48ea6cc0feb8446d8e6937e1408088a72a39937982cc6111d17f84/pygments-2.19.1.tar.gz", hash = "sha256:61c16d2a8576dc0649d9f39e089b5f02bcd27fba10d8fb4dcc28173f7a45151f", size = 4968581, upload-time = "2025-01-06T17:26:30.443Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b0/77/a5b8c569bf593b0140bde72ea885a803b82086995367bf2037de0159d924/pygments-2.19.2.tar.gz", hash = "sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887", size = 4968631, upload-time = "2025-06-21T13:39:12.283Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8a/0b/9fcc47d19c48b59121088dd6da2488a49d5f72dacf8262e2790a1d2c7d15/pygments-2.19.1-py3-none-any.whl", hash = "sha256:9ea1544ad55cecf4b8242fab6dd35a93bbce657034b0611ee383099054ab6d8c", size = 1225293, upload-time = "2025-01-06T17:26:25.553Z" },
+    { url = "https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b", size = 1225217, upload-time = "2025-06-21T13:39:07.939Z" },
 ]
 
 [[package]]
@@ -1479,14 +1479,14 @@ wheels = [
 
 [[package]]
 name = "wcmatch"
-version = "10.0"
+version = "10.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "bracex" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/41/ab/b3a52228538ccb983653c446c1656eddf1d5303b9cb8b9aef6a91299f862/wcmatch-10.0.tar.gz", hash = "sha256:e72f0de09bba6a04e0de70937b0cf06e55f36f37b3deb422dfaf854b867b840a", size = 115578, upload-time = "2024-09-26T18:39:52.505Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/79/3e/c0bdc27cf06f4e47680bd5803a07cb3dfd17de84cde92dd217dcb9e05253/wcmatch-10.1.tar.gz", hash = "sha256:f11f94208c8c8484a16f4f48638a85d771d9513f4ab3f37595978801cb9465af", size = 117421, upload-time = "2025-06-22T19:14:02.49Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ab/df/4ee467ab39cc1de4b852c212c1ed3becfec2e486a51ac1ce0091f85f38d7/wcmatch-10.0-py3-none-any.whl", hash = "sha256:0dd927072d03c0a6527a20d2e6ad5ba8d0380e60870c383bc533b71744df7b7a", size = 39347, upload-time = "2024-09-26T18:39:51.002Z" },
+    { url = "https://files.pythonhosted.org/packages/eb/d8/0d1d2e9d3fabcf5d6840362adcf05f8cf3cd06a73358140c3a97189238ae/wcmatch-10.1-py3-none-any.whl", hash = "sha256:5848ace7dbb0476e5e55ab63c6bbd529745089343427caa5537f230cc01beb8a", size = 39854, upload-time = "2025-06-22T19:14:00.978Z" },
 ]
 
 [[package]]

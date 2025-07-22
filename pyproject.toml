@@ -123,7 +123,7 @@ typing = [
 ]
 docs = [
     "click-extra [sphinx] ~= 5.0.2",
-    "furo ~= 2024.8.6",
+    "furo ~= 2025.7.19",
     "myst-parser ~= 4.0.0",
     "sphinx ~= 8.2.3",
     "sphinx-autodoc-typehints ~= 3.2.0",

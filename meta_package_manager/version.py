@@ -13,7 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Helpers and utilities to parse and compare version numbers."""
+"""Helpers and utilities to parse and compare version numbers.
+
+Version comparison is a tricky business, see:
+- https://www.python.org/dev/peps/pep-0440/
+- https://github.com/xenoterracide/falsehoods/blob/master/versions.md
+- https://wiki.gentoo.org/wiki/Project:Perl/Version-Scheme
+"""
 
 from __future__ import annotations
 

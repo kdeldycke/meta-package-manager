@@ -582,7 +582,7 @@ class PackageManager(metaclass=MetaPackageManager):
                     version_string = parts.groupdict().get("version")
                     logging.debug(f"Extracted version: {version_string!r}")
                     if version_string:
-                        parsed_version = parse_version(version_string)  # type: ignore[arg-type]
+                        parsed_version = parse_version(version_string)
                         logging.debug(f"Parsed version: {parsed_version!r}")
                         if parsed_version:
                             return parsed_version

@@ -39,7 +39,11 @@ class Scoop(PackageManager):
 
     version_regexes = (
         r"^v(?P<version>\S+)\s.+",
+        # XXX Scoop does not always provide a clean version string:
+        # https://github.com/ScoopInstaller/Scoop/issues/6457
+        # https://github.com/ScoopInstaller/Scoop/issues/6270
         r"^.+,\stag:\sv(?P<version>\S+),\s.+",
+        r"^.+\sBump\sto\sversion\s(?P<version>\S+)\s.+",
     )
     """Search version at the start of a line.
 
@@ -52,17 +56,30 @@ class Scoop(PackageManager):
         'main' bucket:
         5a5b13b6c (HEAD -> master, origin/HEAD) oh-my-posh: Update to version 11.1.1
 
-    Fallback on parsing ``git log`` output as Scoop does not always provide a clean
-    version string:
+    .. attention::
 
-    .. code-block:: pwsh-session
+        `Scoop does not always provide a clean version string
+        <https://github.com/ScoopInstaller/Scoop/issues/6457>`_.
 
-        > scoop --version
-        Current Scoop version:
-        b588a06e (HEAD -> master, tag: v0.5.3, origin/master, origin/HEAD) Bump 0.5.3
+        So we fallback on parsing various ``git log`` output:
 
-        'main' bucket:
-        46c50c6b0 (HEAD -> master, origin/master, origin/HEAD) fix arm64 version
+        .. code-block:: pwsh-session
+
+            > scoop --version
+            Current Scoop version:
+            b588a06e (HEAD -> master, tag: v0.5.3, origin/master, origin/HEAD) Bump 0.5.3
+
+            'main' bucket:
+            46c50c6b0 (HEAD -> master, origin/master, origin/HEAD) fix arm64 version
+
+        .. code-block:: pwsh-session
+
+            > scoop --version
+            Current Scoop version:
+            b588a06e chore(release): Bump to version 0.5.3 (resync) (#6436)
+
+            'main' bucket:
+            46c50c6b0 aqua: fix arm64 version (#7071)
     """
 
     @staticmethod

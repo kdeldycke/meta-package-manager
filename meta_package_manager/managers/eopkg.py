@@ -39,7 +39,7 @@ class EOPKG(PackageManager):
 
     pre_args = ("--no-color",)
 
-    version_regex = r"eopkg\s+(?P<version>\S+)"
+    version_regexes = (r"eopkg\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
 

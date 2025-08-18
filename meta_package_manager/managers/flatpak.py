@@ -35,7 +35,7 @@ class Flatpak(PackageManager):
 
     requirement = "1.2.0"
 
-    version_regex = r"Flatpak\s+(?P<version>\S+)"
+    version_regexes = (r"Flatpak\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
 

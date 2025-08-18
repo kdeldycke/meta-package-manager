@@ -40,7 +40,7 @@ class Composer(PackageManager):
 
     pre_args = ("global",)
 
-    version_regex = r"Composer\s+version\s+(?P<version>\S+)"
+    version_regexes = (r"Composer\s+version\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
 

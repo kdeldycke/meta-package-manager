@@ -50,7 +50,7 @@ class UV(PackageManager):
         For example, spinners or progress bars.
     """
 
-    version_regex = r"uv\s+(?P<version>\S+)"
+    version_regexes = (r"uv\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
 

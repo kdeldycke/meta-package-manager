@@ -5,8 +5,9 @@
 > [!IMPORTANT]
 > This version is not released yet and is under active development.
 
-- [mpm] Remap pURL types to managers. Closes {issue}`1460`.
 - [gem] Remove hard-coded `gem` CLI search path.
+- [mpm] Remap pURL types to managers. Closes {issue}`1460`.
+- [mpm] Allow multiple regular expressions to be used for version matching.
 
 ## [5.21.0 (2025-05-28)](https://github.com/kdeldycke/meta-package-manager/compare/v5.20.0...v5.21.0)
 

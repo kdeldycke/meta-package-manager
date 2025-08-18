@@ -160,11 +160,14 @@ def test_version_cli_options(manager):
 def test_version_regex(manager):
     """Version regex is required.
 
-    Check it compiles and match has a version group.
+    Check it compiles and match has a ``<version>`` group.
     """
-    assert isinstance(manager.version_regex, str)
-    regex = re.compile(manager.version_regex)
-    assert "version" in regex.groupindex
+    assert isinstance(manager.version_regexes, tuple)
+    for regex in manager.version_regexes:
+        assert isinstance(regex, str)
+        assert regex
+        regex = re.compile(manager.version_regex)
+        assert "version" in regex.groupindex
 
 
 @all_managers

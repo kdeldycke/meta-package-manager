@@ -39,7 +39,7 @@ class Pacman(PackageManager):
 
     pre_args = ("--noconfirm",)
 
-    version_regex = r".*Pacman\s+v(?P<version>\S+)"
+    version_regexes = (r".*Pacman\s+v(?P<version>\S+)",)
     r"""Search version right after the ``Pacman `` string.
 
     .. code-block:: shell-session
@@ -212,7 +212,7 @@ class Pacaur(Pacman):
 
     requirement = "4.0.0"
 
-    version_regex = r"pacaur\s+(?P<version>\S+)"
+    version_regexes = (r"pacaur\s+(?P<version>\S+)",)
     r"""Search version right after the ``pacaur`` string.
 
     .. code-block:: shell-session
@@ -230,7 +230,7 @@ class Paru(Pacman):
     # v1.9.3 is the first version implementing the --sysupgrade option.
     requirement = "1.9.3"
 
-    version_regex = r"paru\s+v(?P<version>\S+)"
+    version_regexes = (r"paru\s+v(?P<version>\S+)",)
     r"""Search version right after the ``paru`` string.
 
     .. code-block:: shell-session
@@ -247,7 +247,7 @@ class Yay(Pacman):
 
     requirement = "11.0.0"
 
-    version_regex = r"yay\s+v(?P<version>\S+)"
+    version_regexes = (r"yay\s+v(?P<version>\S+)",)
     r"""Search version right after the ``yay`` string.
 
     .. code-block:: shell-session

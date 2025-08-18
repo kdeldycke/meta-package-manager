@@ -63,7 +63,7 @@ class Homebrew(PackageManager):
         # "HOMEBREW_CASK_OPTS": "--no-quarantine",
     }
 
-    version_regex = r"Homebrew\s+(?P<version>\S+)"
+    version_regexes = (r"Homebrew\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
 

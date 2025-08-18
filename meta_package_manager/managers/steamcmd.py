@@ -50,7 +50,7 @@ class SteamCMD(PackageManager):
     post_args = ("+quit",)
 
     version_cli_options = ("+quit",)
-    version_regex = r"Valve\ Corporation\ -\ version\ (?P<version>\S+)"
+    version_regexes = (r"Valve\ Corporation\ -\ version\ (?P<version>\S+)",)
     """
     .. code-block:: shell-session
 

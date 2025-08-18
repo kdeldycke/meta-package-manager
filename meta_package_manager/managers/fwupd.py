@@ -49,7 +49,7 @@ class FWUPD(PackageManager):
         "--no-device-prompt",
     )
 
-    version_regex = r"compile\s+org\.freedesktop\.fwupd\s+(?P<version>\S+)\s+"
+    version_regexes = (r"compile\s+org\.freedesktop\.fwupd\s+(?P<version>\S+)\s+",)
     """
     .. code-block:: shell-session
 

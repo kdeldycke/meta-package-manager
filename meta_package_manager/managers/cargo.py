@@ -43,7 +43,7 @@ class Cargo(PackageManager):
         "--quiet",  # Do not print cargo log messages.
     )
 
-    version_regex = r"cargo\s+(?P<version>\S+)"
+    version_regexes = (r"cargo\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
 

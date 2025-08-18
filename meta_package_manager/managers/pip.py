@@ -58,7 +58,7 @@ class Pip(PackageManager):
     )
 
     version_cli_options = (*pre_args, "--version")
-    version_regex = r"pip\s+(?P<version>\S+)"
+    version_regexes = (r"pip\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
 

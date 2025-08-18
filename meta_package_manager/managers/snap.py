@@ -37,7 +37,7 @@ class Snap(PackageManager):
 
     post_args = ("--color=never",)
 
-    version_regex = r"snap\s+(?P<version>\S+)"
+    version_regexes = (r"snap\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
 

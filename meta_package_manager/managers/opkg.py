@@ -35,7 +35,7 @@ class OPKG(PackageManager):
 
     requirement = "0.2.0"
 
-    version_regex = r"opkg\s+version\s+(?P<version>\S+)"
+    version_regexes = (r"opkg\s+version\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
 

@@ -326,13 +326,25 @@ class PackageManager(metaclass=MetaPackageManager):
     """
 
     version_cli_options: tuple[str, ...] = ("--version",)
-    """List of options to get the version from the package manager CLI."""
+    """CLI options used to produce the version of the package manager.
 
-    version_regex: str = r"(?P<version>\S+)"
-    """Regular expression used to extract the version number from the result of the CLI
-    run with the options above. It doesn't matter if the regex returns unsanitized and
-    crappy string. The :py:func:`meta_package_manager.base.PackageManager.version`
-    method will clean and normalized it.
+    The raw output produced by the package manager CLI will be parsed with the
+    :py:attr:`version_regexes <meta_package_manager.base.PackageManager.version_regexes>`
+    below to extract the version number.
+    """
+
+    version_regexes: tuple[str, ...] = (r"(?P<version>\S+)",)
+    """Regular expressions used to extract the version number.
+
+    This property must be a tuple of strings, each of which is a valid regular
+    expression that must contain a `group
+    <https://docs.python.org/3/library/re.html#index-18>`_ named ``<version>``.
+
+    The first of these regexes producing a match and returning non-empty ``<version>``
+    group will be used as the version string of the package manager.
+
+    That version string will then be sanitized and normalized by
+    :py:func:`meta_package_manager.base.PackageManager.version`.
 
     By default match the first part that is space-separated.
     """
@@ -562,16 +574,18 @@ class PackageManager(metaclass=MetaPackageManager):
                 # Unidentified error: re-raise.
                 raise
 
-            # Extract the version with the regex.
-            parts = re.compile(self.version_regex, re.MULTILINE | re.VERBOSE).search(
-                output,
-            )
-            if parts:
-                version_string = parts.groupdict().get("version")
-                logging.debug(f"Extracted version: {version_string!r}")
-                parsed_version = parse_version(version_string)  # type: ignore[arg-type]
-                logging.debug(f"Parsed version: {parsed_version!r}")
-                return parsed_version
+            # Try each regex to extract the version.
+            for regex in self.version_regexes:
+                logging.debug(f"Use {regex!r} to extracting version.")
+                parts = re.compile(regex, re.MULTILINE | re.VERBOSE).search(output)
+                if parts:
+                    version_string = parts.groupdict().get("version")
+                    logging.debug(f"Extracted version: {version_string!r}")
+                    if version_string:
+                        parsed_version = parse_version(version_string)  # type: ignore[arg-type]
+                        logging.debug(f"Parsed version: {parsed_version!r}")
+                        if parsed_version:
+                            return parsed_version
         return None
 
     @cached_property

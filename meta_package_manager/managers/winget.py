@@ -48,7 +48,7 @@ class WinGet(PackageManager):
         Disable interactive prompts.
     """
 
-    version_regex = r"v\s+(?P<version>\S+)"
+    version_regexes = (r"v\s+(?P<version>\S+)",)
     """
     .. code-block:: pwsh-session
 

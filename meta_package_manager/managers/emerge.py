@@ -41,7 +41,7 @@ class Emerge(PackageManager):
 
     requirement = "3.0.0"
 
-    version_regex = r"Portage\s+(?P<version>\S+)"
+    version_regexes = (r"Portage\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
 

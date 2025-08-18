@@ -54,7 +54,7 @@ class Zypper(PackageManager):
         "--no-refresh",
     )
 
-    version_regex = r"zypper\s+(?P<version>\S+)"
+    version_regexes = (r"zypper\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
 

@@ -51,7 +51,7 @@ class APT(PackageManager):
     Source: https://manpages.org/apt-get/8#options
     """
 
-    version_regex = r"apt\s+(?P<version>\S+)"
+    version_regexes = (r"apt\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
 

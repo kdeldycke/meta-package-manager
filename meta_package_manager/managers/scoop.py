@@ -37,7 +37,10 @@ class Scoop(PackageManager):
 
     requirement = "0.2.4"
 
-    version_regexes = (r"^v(?P<version>\S+)\s.+",)
+    version_regexes = (
+        r"^v(?P<version>\S+)\s.+",
+        r"^.+,\stag:\sv(?P<version>\S+),\s.+",
+    )
     """Search version at the start of a line.
 
     .. code-block:: pwsh-session
@@ -48,6 +51,18 @@ class Scoop(PackageManager):
 
         'main' bucket:
         5a5b13b6c (HEAD -> master, origin/HEAD) oh-my-posh: Update to version 11.1.1
+
+    Fallback on parsing ``git log`` output as Scoop does not always provide a clean
+    version string:
+
+    .. code-block:: pwsh-session
+
+        > scoop --version
+        Current Scoop version:
+        b588a06e (HEAD -> master, tag: v0.5.3, origin/master, origin/HEAD) Bump 0.5.3
+
+        'main' bucket:
+        46c50c6b0 (HEAD -> master, origin/master, origin/HEAD) fix arm64 version
     """
 
     @staticmethod

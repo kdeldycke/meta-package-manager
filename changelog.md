@@ -5,6 +5,7 @@
 > [!IMPORTANT]
 > This version is not released yet and is under active development.
 
+- [scoop] Fix parsing of `scoop` version to support raw Git output.
 - [gem] Remove hard-coded `gem` CLI search path.
 - [mpm] Remap pURL types to managers. Closes {issue}`1460`.
 - [mpm] Allow multiple regular expressions to be used for version matching.

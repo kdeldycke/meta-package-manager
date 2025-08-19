@@ -476,6 +476,8 @@ jobs:
       # https://github.com/Homebrew/homebrew-core/blob/master/Formula/meta-package-manager.rb
       - run: |
           brew install meta-package-manager
+      - run: |
+          mpm --version
 
   pip-install-mpm:
     strategy:
@@ -492,6 +494,8 @@ jobs:
       # https://pypi.org/project/meta-package-manager
       - run: |
           pip install meta-package-manager
+      - run: |
+          mpm --version
 
   pipx-install-mpm:
     strategy:
@@ -511,6 +515,8 @@ jobs:
       # https://pypi.org/project/meta-package-manager
       - run: |
           pipx install meta-package-manager
+      - run: |
+          mpm --version
 
   scoop-install-mpm:
     strategy:
@@ -525,8 +531,12 @@ jobs:
           iwr get.scoop.sh -outfile 'install.ps1'
           .\install.ps1 -RunAsAdmin
       # https://github.com/ScoopInstaller/Main/blob/master/bucket/meta-package-manager.json
-      - run: |
+      - shell: pwsh
+        run: |
           scoop install main/meta-package-manager
+      - shell: pwsh
+        run: |
+          mpm --version
 
   uv-install-mpm:
     strategy:
@@ -544,4 +554,4 @@ jobs:
           python -m pip install uv
       # https://pypi.org/project/meta-package-manager
       - run: |
-          uv pip install meta-package-manager
+          uvx pip install meta-package-manager --version

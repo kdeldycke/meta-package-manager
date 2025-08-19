@@ -104,10 +104,7 @@ class MPMPlugin:
         return RawConfigParser.BOOLEAN_STATES[value]
 
     @staticmethod
-    def normalize_params(
-        font_string: str,
-        valid_ids: set[str] | None = None,
-    ) -> str:
+    def normalize_params(font_string: str, valid_ids: set[str] | None = None) -> str:
         """Parse a multi-parameters string and return a normalized string.
 
         The string is expected to be a space-separated list of parameters, each

@@ -469,6 +469,10 @@ jobs:
           - macos-13          # x86
     runs-on: ${{ matrix.os }}
     steps:
+      - if: runner.os == 'Linux'
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo "/home/linuxbrew/.linuxbrew/bin/" >> "$GITHUB_PATH"
       # https://github.com/Homebrew/homebrew-core/blob/master/Formula/meta-package-manager.rb
       - run: |
           brew install meta-package-manager
@@ -501,6 +505,9 @@ jobs:
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
     steps:
+      - run: |
+          python -m pip install --upgrade pipx
+
       # https://pypi.org/project/meta-package-manager
       - run: |
           pipx install meta-package-manager
@@ -513,6 +520,10 @@ jobs:
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
     steps:
+      - shell: pwsh
+        run: |
+          iwr get.scoop.sh -outfile 'install.ps1'
+          .\install.ps1 -RunAsAdmin
       # https://github.com/ScoopInstaller/Main/blob/master/bucket/meta-package-manager.json
       - run: |
           scoop install main/meta-package-manager
@@ -529,6 +540,8 @@ jobs:
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
     steps:
+      - run: |
+          python -m pip install uv
       # https://pypi.org/project/meta-package-manager
       - run: |
           uv pip install meta-package-manager

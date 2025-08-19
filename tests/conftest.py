@@ -157,8 +157,7 @@ PACKAGE_IDS = {
     "apm": "markdown-pdf",
     "apt": "wget",
     "apt-mint": "exiftool",
-    # https://github.com/Homebrew/homebrew-core/blob/master/Formula/meta-package-manager.rb
-    "brew": "meta-package-manager",
+    "brew": "wget",
     "cargo": "colorous",
     "cask": "pngyu",
     "choco": "ccleaner",
@@ -175,29 +174,26 @@ PACKAGE_IDS = {
     "opkg": "enigma2-hotplug",
     "pacaur": "manjaro-hello",
     "pacman": "manjaro-hello",
-    # https://aur.archlinux.org/packages/meta-package-manager
-    "paru": "meta-package-manager",
-    # https://pypi.org/project/meta-package-manager
-    "pip": "meta-package-manager",
-    # https://pypi.org/project/meta-package-manager
-    "pipx": "meta-package-manager",
+    "paru": "wget",
+    "pip": "pytz",
+    "pipx": "pytz",
     "pkg": "dmg2img",
-    # https://github.com/ScoopInstaller/Main/blob/master/bucket/meta-package-manager.json
-    "scoop": "main/meta-package-manager",
+    "scoop": "main/wget",
     "snap": "standard-notes",
     "steamcmd": "740",
-    # https://pypi.org/project/meta-package-manager
-    "uv": "meta-package-manager",
+    "uv": "pytz",
     "vscode": "tamasfe.even-better-toml",
     "vscodium": "tamasfe.even-better-toml",
     "winget": "Microsoft.PowerToys",
     "yarn": "awesome-lint",
-    # https://aur.archlinux.org/packages/meta-package-manager
-    "yay": "meta-package-manager",
+    "yay": "wget",
     "yum": "usd",
     "zypper": "git",
 }
-"""List of existing package IDs to install for each supported package manager.
+"""Package IDs to be used for install tests for each manager.
+
+We manually selected these packages to ensure that they are not too large, and are
+low-impact software that does not interfere with the system they are installed on.
 
 Only to be used for destructive tests.
 """

@@ -456,3 +456,103 @@ jobs:
         uses: codecov/test-results-action@v1.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  # Test that mpm from other package managers.
+
+  brew-install-mpm:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04-arm  # arm64
+          - ubuntu-24.04      # x86
+          - macos-15          # arm64
+          - macos-13          # x86
+    runs-on: ${{ matrix.os }}
+    steps:
+      # https://github.com/Homebrew/homebrew-core/blob/master/Formula/meta-package-manager.rb
+      - run: |
+          brew install meta-package-manager
+
+  paru-install-mpm:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04-arm  # arm64
+          - ubuntu-24.04      # x86
+    runs-on: ${{ matrix.os }}
+    steps:
+      # https://aur.archlinux.org/packages/meta-package-manager
+      - run: |
+          sudo paru meta-package-manager
+
+  pip-install-mpm:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04-arm  # arm64
+          - ubuntu-24.04      # x86
+          - macos-15          # arm64
+          - macos-13          # x86
+          - windows-11-arm    # arm64
+          - windows-2025      # x86
+    runs-on: ${{ matrix.os }}
+    steps:
+      # https://pypi.org/project/meta-package-manager
+      - run: |
+          pip install meta-package-manager
+
+  pipx-install-mpm:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04-arm  # arm64
+          - ubuntu-24.04      # x86
+          - macos-15          # arm64
+          - macos-13          # x86
+          - windows-11-arm    # arm64
+          - windows-2025      # x86
+    runs-on: ${{ matrix.os }}
+    steps:
+      # https://pypi.org/project/meta-package-manager
+      - run: |
+          pipx install meta-package-manager
+
+  scoop-install-mpm:
+    strategy:
+      matrix:
+        os:
+          - windows-11-arm    # arm64
+          - windows-2025      # x86
+    runs-on: ${{ matrix.os }}
+    steps:
+      # https://github.com/ScoopInstaller/Main/blob/master/bucket/meta-package-manager.json
+      - run: |
+          scoop install main/meta-package-manager
+
+  uv-install-mpm:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04-arm  # arm64
+          - ubuntu-24.04      # x86
+          - macos-15          # arm64
+          - macos-13          # x86
+          - windows-11-arm    # arm64
+          - windows-2025      # x86
+    runs-on: ${{ matrix.os }}
+    steps:
+      # https://pypi.org/project/meta-package-manager
+      - run: |
+          uv pip install meta-package-manager
+
+  yay-install-mpm:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04-arm  # arm64
+          - ubuntu-24.04      # x86
+    runs-on: ${{ matrix.os }}
+    steps:
+      # https://aur.archlinux.org/packages/meta-package-manager
+      - run: |
+          sudo yay meta-package-manager

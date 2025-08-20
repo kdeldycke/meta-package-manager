@@ -144,7 +144,7 @@ docs = [
 "Changelog" = "https://github.com/kdeldycke/meta-package-manager/blob/main/changelog.md"
 
 [project.scripts]
-mpm = 'meta_package_manager.cli:mpm'
+mpm = "meta_package_manager.__main__:main"
 
 [tool.uv]
 package = true

@@ -10,7 +10,9 @@ name: Build & release
 jobs:
 
   release:
-    uses: kdeldycke/workflows/.github/workflows/release.yaml@v4.18.0
+    # XXX Use development branch to benefits from the fix for missing RFC 3987 syntax data file.
+    # Refs: https://github.com/Nuitka/Nuitka/pull/3578
+    uses: kdeldycke/workflows/.github/workflows/release.yaml@main
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
     with:

@@ -101,7 +101,7 @@ dependencies = [
     "spdx-tools ~= 0.8.2",
     "tabulate [widechars] ~= 0.9.0",
     "tomli_w ~= 1.2.0",
-    "xmltodict ~= 0.14.2",
+    "xmltodict ~= 0.15.1",
 ]
 
 [project.optional-dependencies]

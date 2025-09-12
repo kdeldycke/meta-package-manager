@@ -113,7 +113,7 @@ test = [
     # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html
     "pytest-cov ~= 6.2.1",
     "pytest-github-actions-annotate-failures ~= 0.3.0",
-    "pytest-randomly ~= 3.16.0",
+    "pytest-randomly ~= 4.0.1",
     "pytest-xdist [psutil] ~= 3.8.0",
 ]
 typing = [

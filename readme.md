@@ -161,6 +161,14 @@ Meta Package Manager,zypper,1
 
 All [installation methods](https://kdeldycke.github.io/meta-package-manager/install.html) are available in the documentation. Below are the most popular ones:
 
+### Try it now
+
+[`uv`](https://docs.astral.sh/uv/getting-started/installation/) is the fastest way to run `mpm` on any platform, thanks to its [`uvx` command](https://docs.astral.sh/uv/guides/tools/#running-tools):
+
+```shell-session
+$ uvx --from meta-package-manager -- mpm
+```
+
 ### macOS
 
 `mpm` is part of the official [Homebrew](https://brew.sh) default tap, so you can install it with:
@@ -175,14 +183,6 @@ $ brew install meta-package-manager
 
 ```pwsh-session
 > scoop install main/meta-package-manager
-```
-
-### Python
-
-[`uv`](https://docs.astral.sh/uv/getting-started/installation/) is the fastest way to run `mpm` from sources on any platform, thanks to its [`uvx` command](https://docs.astral.sh/uv/guides/tools/#running-tools):
-
-```shell-session
-$ uvx --from meta-package-manager mpm
 ```
 
 ### Executables

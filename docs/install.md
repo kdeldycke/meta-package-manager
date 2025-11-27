@@ -267,7 +267,7 @@ $ mpm --yay  install meta-package-manager
 ```
 ````
 
-## Run `mpm`
+## Python module usage
 
 Meta package manager should now be available system-wide:
 
@@ -322,8 +322,7 @@ $ sudo python -m meta_package_manager upgrade
 
 ## Shell completion
 
-Completion for popular shell
-[rely on Click feature](https://click.palletsprojects.com/en/stable/shell-completion/).
+Completion for popular shell [rely on Click feature](https://click.palletsprojects.com/en/stable/shell-completion/).
 
 `````{tab-set}
 

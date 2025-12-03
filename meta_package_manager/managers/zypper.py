@@ -34,6 +34,10 @@ if TYPE_CHECKING:
     from ..base import Package
     from ..version import TokenizedString
 
+    class SearchResult(TypedDict):
+        id: str
+        version: TokenizedString
+
 
 class Zypper(PackageManager):
     """Zypper package manager.
@@ -68,10 +72,6 @@ class Zypper(PackageManager):
         $ zypper --version
         zypper 1.14.11
     """
-
-    class SearchResult(TypedDict):
-        id: str
-        version: TokenizedString
 
     def _search(self, *args: str) -> Iterator[SearchResult]:
         """Utility method to parse and interpret results of the ``zypper search``

@@ -28,6 +28,7 @@ from enum import Enum
 from functools import cached_property
 from pathlib import Path
 from textwrap import dedent, indent, shorten
+from typing import cast
 from unittest.mock import patch
 
 from boltons.iterutils import unique
@@ -44,7 +45,6 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterable, Iterator
     from contextlib import AbstractContextManager
-    from typing import cast
 
     from click_extra._types import TArg, TEnvVars, TNestedArgs
     from extra_platforms import Group

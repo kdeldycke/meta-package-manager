@@ -21,7 +21,7 @@ import re
 from extra_platforms import MACOS
 
 from ..base import PackageManager
-from ..capabilities import version_not_implemented
+from ..capabilities import search_capabilities, version_not_implemented
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

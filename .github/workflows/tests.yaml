@@ -446,6 +446,14 @@ jobs:
         run: |
           uv --no-progress sync --frozen --extra test
 
+      - name: Run local CLI
+        run: |
+          uv run -- mpm --version
+      - name: Run CLI from module
+        run: |
+          uv run        -m meta_package_manager --version
+          uv run python -m meta_package_manager --version
+
       - name: Parallel non-destructive tests
         run: >
           uv --no-progress run --frozen --

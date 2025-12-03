@@ -192,7 +192,7 @@ pretty = true
 ignore_missing_imports = true
 module = ["packageurl.*"]
 
-[tool.pytest.ini_options]
+[tool.pytest]
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml
 addopts = [
     "--numprocesses=auto",

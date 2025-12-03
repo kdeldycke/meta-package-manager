@@ -425,12 +425,18 @@ jobs:
         run: |
           choco install steamcmd --no-progress --yes
 
-      - name: Install uv
+      - name: Install UV
+        uses: astral-sh/setup-uv@v7.1.4
+      - name: Install Python ${{ matrix.python-version }}
+        # If UV cannot find the requested Python version, it exits with code 2, which let the job pass unnoticed on
+        # Windows. So we force the shell to bash, even on Windows, and "set -e" to ensure any error in the install
+        # process is caught and fails the job. It works because Windows runners too Git Bash available).
+        shell: bash
         run: |
-          python -m pip install -r https://raw.githubusercontent.com/kdeldycke/workflows/v4.18.0/requirements/uv.txt
+          set -e
+          uv --no-progress venv --python ${{ matrix.python-version }}
       - name: Install project
         run: |
-          uv --no-progress venv --python ${{ matrix.python-version }}
           uv --no-progress sync --frozen --extra test
 
       - name: Parallel non-destructive tests

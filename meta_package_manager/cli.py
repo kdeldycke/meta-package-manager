@@ -40,8 +40,8 @@ from click_extra import (
     Section,
     argument,
     echo,
-    extra_group,
     file_path,
+    group,
     option,
     option_group,
     pass_context,
@@ -284,7 +284,7 @@ def custom_extra_params() -> list[Parameter]:
     return params
 
 
-@extra_group(
+@group(
     # XXX Default verbosity has been changed in Click Extra 4.0.0 from INFO to WARNING.
     context_settings={"default_map": {"verbosity": "INFO"}},
     params=custom_extra_params(),

@@ -60,7 +60,7 @@ jobs:
       # See: meta_package_manager/test_manager_homebrew.py::TestCask test.
       HOMEBREW_NO_INSTALL_FROM_API: "1"
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v6.0.1
 
       ### Install or upgrade package managers on each platform, and made them
       ### ready to use for mpm.

@@ -20,27 +20,34 @@ jobs:
 
   tests:
     strategy:
+      # We delegate the failure decision to each job, by the way of the "continue-on-error" flag.
       fail-fast: false
       matrix:
         # Available OS: https://github.com/actions/runner-images#available-images
         # To speed up the tests, we only test the latest available OS for each platform.
         os:
           - ubuntu-slim   # x86
-          - macos-15      # arm64
+          - macos-26      # arm64
           - windows-2025  # x86
-        # Available Python: https://github.com/actions/python-versions/blob/main/versions-manifest.json
         # For Python, we only test against the oldest and newest major supported version and skip intermediates. We
         # also test on the upcoming development version to anticipate issues.
         python-version:
           - "3.11"
-          - "3.13"
+          # Ignore intermediate versions to reduce CI load.
+          # - "3.12"
+          # - "3.13"
           - "3.14"
+          - "3.14t"
+          - "3.15"
+          - "3.15t"
         include:
           # Default all jobs as stable, unless marked otherwise below.
           - state: stable
-          # XXX Pydantic does not support 3.14 yet: https://github.com/pydantic/pydantic/issues/11613
+          # XXX Python 3.15 is still in development.
           - state: unstable
-            python-version: "3.14"
+            python-version: "3.15"
+          - state: unstable
+            python-version: "3.15t"
     name: "${{ matrix.state == 'stable' && '✅' || '⁉️' }} ${{ matrix.os }} / py${{ matrix.python-version }}"
     runs-on: ${{ matrix.os }}
     # We keep going when a job flagged as not stable fails.
@@ -498,8 +505,8 @@ jobs:
         os:
           - ubuntu-24.04-arm  # arm64
           - ubuntu-slim       # x86
-          - macos-15          # arm64
-          - macos-13          # x86
+          - macos-26          # arm64
+          - macos-15-intel    # x86
     runs-on: ${{ matrix.os }}
     steps:
       - if: runner.os == 'Linux'
@@ -518,8 +525,8 @@ jobs:
         os:
           - ubuntu-24.04-arm  # arm64
           - ubuntu-slim       # x86
-          - macos-15          # arm64
-          - macos-13          # x86
+          - macos-26          # arm64
+          - macos-15-intel    # x86
           - windows-11-arm    # arm64
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
@@ -536,8 +543,8 @@ jobs:
         os:
           - ubuntu-24.04-arm  # arm64
           - ubuntu-slim       # x86
-          - macos-15          # arm64
-          - macos-13          # x86
+          - macos-26          # arm64
+          - macos-15-intel    # x86
           - windows-11-arm    # arm64
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
@@ -577,14 +584,19 @@ jobs:
         os:
           - ubuntu-24.04-arm  # arm64
           - ubuntu-slim       # x86
-          - macos-15          # arm64
-          - macos-13          # x86
+          - macos-26          # arm64
+          - macos-15-intel    # x86
           - windows-11-arm    # arm64
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
     steps:
-      - run: |
-          python -m pip install uv
+      - uses: astral-sh/setup-uv@v7.1.4
       # https://pypi.org/project/meta-package-manager
-      - run: |
-          uvx pip install meta-package-manager --version
+      - name: Run stable CLI
+        run: |
+          uvx    --from meta-package-manager -- mpm --version
+          uv run --with meta-package-manager -- mpm --version
+      - name: Run dev CLI
+        run: |
+          uvx    --from git+https://github.com/kdeldycke/meta_package_manager -- mpm --version
+          uv run --with git+https://github.com/kdeldycke/meta_package_manager -- mpm --version

@@ -26,6 +26,12 @@ from extra_platforms import Group
 from .inventory import MAIN_PLATFORMS
 from .pool import pool
 
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    TLabelSet = frozenset[str]
+    TLabelGroup = dict[str, TLabelSet]
+
+
 LABELS: list[tuple[str, str, str]] = [
     (
         "🔌 bar-plugin",
@@ -41,10 +47,6 @@ Structure:
 
     ("label_name", "color", "optional_description")
 """
-
-
-TLabelSet = frozenset[str]
-TLabelGroup = dict[str, TLabelSet]
 
 
 def generate_labels(

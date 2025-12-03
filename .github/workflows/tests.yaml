@@ -517,6 +517,12 @@ jobs:
           - macos-15-intel    # x86
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Unlock CPU on macos-15-intel
+        if: matrix.os == 'macos-15-intel'
+        # See https://github.com/actions/runner-images/issues/13358
+        run: |
+          sudo defaults -currentHost write /Library/Preferences/com.apple.powerlogd SMCMonitorCadence 0
+          sudo killall PerfPowerServices || true
       - if: runner.os == 'Linux'
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -539,6 +545,12 @@ jobs:
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Unlock CPU on macos-15-intel
+        if: matrix.os == 'macos-15-intel'
+        # See https://github.com/actions/runner-images/issues/13358
+        run: |
+          sudo defaults -currentHost write /Library/Preferences/com.apple.powerlogd SMCMonitorCadence 0
+          sudo killall PerfPowerServices || true
       # https://pypi.org/project/meta-package-manager
       - run: |
           pip install meta-package-manager
@@ -557,6 +569,12 @@ jobs:
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Unlock CPU on macos-15-intel
+        if: matrix.os == 'macos-15-intel'
+        # See https://github.com/actions/runner-images/issues/13358
+        run: |
+          sudo defaults -currentHost write /Library/Preferences/com.apple.powerlogd SMCMonitorCadence 0
+          sudo killall PerfPowerServices || true
       - run: |
           python -m pip install --upgrade pipx
 
@@ -598,6 +616,12 @@ jobs:
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Unlock CPU on macos-15-intel
+        if: matrix.os == 'macos-15-intel'
+        # See https://github.com/actions/runner-images/issues/13358
+        run: |
+          sudo defaults -currentHost write /Library/Preferences/com.apple.powerlogd SMCMonitorCadence 0
+          sudo killall PerfPowerServices || true
       - uses: astral-sh/setup-uv@v7.1.4
       # https://pypi.org/project/meta-package-manager
       - name: Run stable CLI

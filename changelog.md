@@ -14,6 +14,7 @@
 - [mpm] Run tests on Python `3.14`, `3.15`, `3.14t` and `3.15t`.
 - [mpm] Skip tests on intermediate Python versions (`3.12` and `3.13`) to reduce CI load.
 - [mpm] Replace `ubuntu-24.04` by `ubuntu-slim`, `macos-15` by `macos-26`, and `macos-13` by `macos-15-intel` in workflow jobs.
+- [mpm] Unlock a CPU core stuck at 100% utilization on `macos-15-intel`.
 - [mpm] Use `astral-sh/setup-uv` action to install `uv` instead of manually installing it with `pip`.
 
 ## [5.21.0 (2025-05-28)](https://github.com/kdeldycke/meta-package-manager/compare/v5.20.0...v5.21.0)

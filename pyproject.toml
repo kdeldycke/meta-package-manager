@@ -91,47 +91,67 @@ classifiers = [
     'Topic :: Utilities',
     'Typing :: Typed',
 ]
+# Semantic versioning works in theory. In practice, it is hard to guarantee.
+# That's why we rely on >= specifier instead of ~= to relax constraints. This gives more freedom to packagers to
+# release hotfixes for security vulnerabilities in the future.
+# See also discussion about upper limits at: https://iscinumpy.dev/post/bound-version-constraints/#tldr
+# All minimal version choice are documented. Reasons to bump a minimal version are:
+# - bug fixes,
+# - security fixes,
+# - new code path we depends on,
+# - aligns minimal Python requirements to ours,
+# - adds new explicit support Python version.
 dependencies = [
-    "boltons ~= 25.0.0",
-    "click-extra ~= 5.0.2",
-    "cyclonedx-python-lib [validation] ~= 11.0.0",
-    "extra-platforms [pytest] ~= 3.2.1",
-    "more-itertools ~= 10.7.0",
-    "packageurl-python ~= 0.17.1",
-    "spdx-tools ~= 0.8.2",
-    "tabulate [widechars] ~= 0.9.0",
-    "tomli_w ~= 1.2.0",
-    "xmltodict ~= 0.15.1",
+    # boltons 25.0.0 is the first version to support Python 3.13.
+    "boltons >= 25.0.0",
+    # click-extra 7.3.0 fix version fetching.
+    "click-extra >= 7.3.0",
+    "cyclonedx-python-lib [validation] >= 11.0.0",
+    # extra-platforms 5.0.0 is the first version to re-introduce support for Python 3.10.
+    "extra-platforms >= 5.0.0",
+    "more-itertools >= 10.7.0",
+    "packageurl-python >= 0.17.1",
+    "spdx-tools >= 0.8.2",
+    # tabulate 0.9 is the first to add `*grid` and `*outline` formats.
+    "tabulate [widechars] >= 0.9",
+    "tomli_w >= 1.2.0",
+    "xmltodict >= 0.15.1",
 ]
 
 [project.optional-dependencies]
+## Non-runtime dependencies, for development and CI, are using the ~= specifier to reduce randomness.
+## Unless the package has been referenced in sections above, in which case we align the version specifier.
 test = [
-    "click-extra [pytest] ~= 5.0.2",
-    "coverage [toml] ~= 7.10.1",
-    "pytest ~= 8.4.0",
+    # click-extra 7.3.0 fix version fetching.
+    "click-extra [pytest] >= 7.3.0",
+    "coverage [toml] ~= 7.12.0",
+    # extra-platforms 5.0.0 is the first version to re-introduce support for Python 3.10.
+    "extra-platforms >= 5.0.0",
+    "pytest ~= 9.0.1",
     "pyyaml ~= 6.0.0",
-    # More pytest plugins at: https://docs.pytest.org/en/latest/reference/plugin_list.html
-    "pytest-cov ~= 6.2.1",
+    "pytest-cov ~= 7.0.0",
     "pytest-github-actions-annotate-failures ~= 0.3.0",
     "pytest-randomly ~= 4.0.1",
     "pytest-xdist [psutil] ~= 3.8.0",
 ]
 typing = [
+    "types-boltons ~= 25.0.0.20250919",
     "types-PyYAML ~= 6.0.12.9",
     "types-tabulate ~= 0.9.0.2",
-    "types-xmltodict ~= 0.14.0.20241009",
+    "types-xmltodict ~= 1.0.1.20250920",
 ]
 docs = [
-    "click-extra [sphinx] ~= 5.0.2",
-    "furo ~= 2025.7.19",
+    # click-extra 7.2.0 support transformation of GitHub alerts to MyST admonitions.
+    "click-extra [sphinx] >= 7.2.0",
+    "furo ~= 2025.9.25",
     "myst-parser ~= 4.0.0",
     "sphinx ~= 8.2.3",
     "sphinx-autodoc-typehints ~= 3.2.0",
-    "sphinx-click ~= 6.0.0",
+    "sphinx-click ~= 6.1.0",
     "sphinx-copybutton ~= 0.5.2",
     "sphinx-design ~= 0.6.0",
     "sphinx-issues ~= 5.0.0",
-    "sphinxcontrib-mermaid ~= 1.0.0",
+    "sphinxcontrib-mermaid ~= 1.2.3",
     "sphinxext-opengraph ~= 0.13.0",
 ]
 

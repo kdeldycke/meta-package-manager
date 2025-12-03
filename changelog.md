@@ -9,6 +9,7 @@
 - [gem] Remove hard-coded `gem` CLI search path.
 - [mpm] Remap pURL types to managers. Closes {issue}`1460`.
 - [mpm] Allow multiple regular expressions to be used for version matching.
+- [mpm] Remove maximum capped version of all dependencies (relax all `~=` specifiers to `>=`). This gives more freedom to downstream and upstream packagers. Document each minimal version choice.
 
 ## [5.21.0 (2025-05-28)](https://github.com/kdeldycke/meta-package-manager/compare/v5.20.0...v5.21.0)
 

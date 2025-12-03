@@ -26,6 +26,7 @@ import builtins
 import contextlib
 import json
 import logging
+from enum import StrEnum
 from functools import cached_property, partial
 from io import StringIO
 from operator import itemgetter
@@ -35,10 +36,16 @@ from unittest.mock import patch
 
 from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
-from click_extra import echo, get_current_context, style
+from click_extra import echo, style
 from click_extra.colorize import default_theme as theme
-from click_extra.tabulate import output_formats
-from tabulate import DataRow, TableFormat, tabulate
+from click_extra.table import (
+    DataRow,
+    TableFormatOption,
+    TabulateTableFormat,
+    print_table,
+    tabulate,
+)
+from click_extra.table import TableFormat as BaseTableFormat
 
 from .bar_plugin import MPMPlugin
 from .pool import pool
@@ -97,7 +104,13 @@ def colored_diff(a, b, style_common=None, style_a=None, style_b=None):
     return colored_a, colored_b
 
 
-output_formats = sorted([*output_formats, "json"])
+# Create extended enum by combining base members with new ones.
+ExtendedTableFormat = StrEnum(
+    "ExtendedTableFormat",
+    dict(
+        sorted({**{e.name: e.value for e in BaseTableFormat}, "JSON": "json"}.items())
+    ),
+)
 
 
 def print_json(data):
@@ -125,12 +138,15 @@ def print_json(data):
     )
 
 
-def print_table(
+def print_sorted_table(
     header_defs: list[tuple[str, str]],
     rows: Iterable[Sequence[str | TokenizedString]],
     sort_key: str | None = None,
+    table_format: ExtendedTableFormat | None = None,
+    **kwargs,
 ) -> None:
-    """Print a table.
+    """Augment :py:func:`click_extra.context.ClickContext.print_table` with sorting
+    capabilities.
 
     ``header_defs`` parameter is an ordered list of tuple whose first item is the
     column's label and the second the column's ID. Example:
@@ -187,11 +203,21 @@ def print_table(
             sorting_key.append(key)
         return tuple(sorting_key)
 
-    ctx = get_current_context()
-    ctx.find_root().print_table(  # type: ignore[attr-defined]
-        sorted(rows, key=sort_method),
-        header_labels,
+    print_table(
+        table_data=sorted(rows, key=sort_method),
+        headers=header_labels,
+        table_format=table_format,
+        kwargs=kwargs,
     )
+
+
+class SortedTableFormatOption(TableFormatOption):
+    """Custom ``--table-format`` with support of table sorting."""
+
+    def init_formatter(self, ctx, param, table_format) -> None:
+        """Replace the original ``print_table`` by ``print_sorted_table``."""
+        super().init_formatter(ctx, param, table_format)
+        ctx.print_table = partial(print_sorted_table, table_format=table_format)
 
 
 def print_stats(manager_stats: Counter) -> None:
@@ -289,7 +315,7 @@ class BarPluginRenderer(MPMPlugin):
                 "refresh=true",
             )
 
-    plain_table_format = TableFormat(
+    plain_table_format = TabulateTableFormat(
         lineabove=None,
         linebelowheader=None,
         linebetweenrows=None,

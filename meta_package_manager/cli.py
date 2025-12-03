@@ -36,6 +36,7 @@ from click_extra import (
     STRING,
     Choice,
     Context,
+    EnumChoice,
     File,
     IntRange,
     Parameter,
@@ -47,10 +48,11 @@ from click_extra import (
     option,
     option_group,
     pass_context,
-    table_format_option,
 )
 from click_extra.colorize import KO, OK, highlight
 from click_extra.colorize import default_theme as theme
+from click_extra.commands import default_extra_params
+from click_extra.table import TableFormatOption
 from extra_platforms import reduce
 
 from meta_package_manager.inventory import MAIN_PLATFORMS
@@ -66,11 +68,11 @@ from .base import (
 from .output import (
     SORTABLE_FIELDS,
     BarPluginRenderer,
+    ExtendedTableFormat,
+    SortedTableFormatOption,
     colored_diff,
-    output_formats,
     print_json,
     print_stats,
-    print_table,
 )
 from .pool import pool
 from .sbom import SBOM, SPDX, CycloneDX, ExportFormat
@@ -261,9 +263,27 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 #                        jobs. Defaults to the system CPU count.
 
 
+def custom_extra_params() -> list[Parameter]:
+    """Replace the default ``TableFormatOption`` with our ``SortedTableFormatOption``."""
+    params = []
+    for param in default_extra_params():
+        if isinstance(param, TableFormatOption):
+            params.append(
+                SortedTableFormatOption(
+                    param_decls=("-o", "--output-format"),
+                    type=EnumChoice(ExtendedTableFormat),
+                    help="Rendering format of the output.",
+                )
+            )
+        else:
+            params.append(param)
+    return params
+
+
 @extra_group(
     # XXX Default verbosity has been changed in Click Extra 4.0.0 from INFO to WARNING.
     context_settings={"default_map": {"verbosity": "INFO"}},
+    params=custom_extra_params(),
 )
 @option_group(
     "Package manager selection",
@@ -352,12 +372,6 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 )
 @option_group(
     "Output options",
-    table_format_option(
-        "-o",
-        "--output-format",
-        type=Choice(output_formats, case_sensitive=False),
-        help="Rendering mode of the output.",
-    ),
     option(
         "--description",
         is_flag=True,
@@ -405,7 +419,7 @@ def mpm(
     """CLI options shared by all subcommands."""
     # Silence all log messages for JSON rendering unless in debug mode.
     if (
-        ctx.meta["click_extra.table_format"] == "json"
+        ctx.meta["click_extra.table_format"] == ExtendedTableFormat.JSON
         and ctx.meta["click_extra.verbosity"] != "DEBUG"
     ):
         logging.disable()
@@ -491,7 +505,7 @@ def managers(ctx):
     }
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == "json":
+    if ctx.meta["click_extra.table_format"] == ExtendedTableFormat.JSON:
         manager_data = {}
         # Build up the data structure of manager metadata.
         fields = (
@@ -558,7 +572,7 @@ def managers(ctx):
             ),
         )
 
-    print_table(
+    ctx.print_table(
         (
             ("Manager ID", "manager_id"),
             ("Name", "manager_name"),
@@ -631,7 +645,7 @@ def installed(ctx, duplicates):
             installed_data[manager_id]["packages"] = duplicate_packages
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == "json":
+    if ctx.meta["click_extra.table_format"] == ExtendedTableFormat.JSON:
         print_json(installed_data)
         ctx.exit()
 
@@ -657,7 +671,7 @@ def installed(ctx, duplicates):
         sort_by = "package_id"
 
     # Print table.
-    print_table(
+    ctx.print_table(
         (
             ("Package ID", "package_id"),
             ("Name", "package_name"),
@@ -708,7 +722,7 @@ def outdated(ctx, plugin_output):
         )
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == "json":
+    if ctx.meta["click_extra.table_format"] == ExtendedTableFormat.JSON:
         print_json(outdated_data)
         ctx.exit()
 
@@ -736,7 +750,7 @@ def outdated(ctx, plugin_output):
             )
 
     # Sort and print table.
-    print_table(
+    ctx.print_table(
         (
             ("Package ID", "package_id"),
             ("Name", "package_name"),
@@ -820,7 +834,7 @@ def search(ctx, extended, exact, refilter, query):
         )
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == "json":
+    if ctx.meta["click_extra.table_format"] == ExtendedTableFormat.JSON:
         print_json(matches)
         ctx.exit()
 
@@ -862,7 +876,7 @@ def search(ctx, extended, exact, refilter, query):
     ]
     if show_description:
         headers.append(("Description", "description"))
-    print_table(headers, table, ctx.obj.sort_by)
+    ctx.print_table(headers, table, ctx.obj.sort_by)
 
     if ctx.obj.stats:
         print_stats(Counter({k: len(v["packages"]) for k, v in matches.items()}))
@@ -887,7 +901,7 @@ def which(ctx, cli_names):
         logging.warning("Ignore --sort-by option for which command.")
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == "json":
+    if ctx.meta["click_extra.table_format"] == ExtendedTableFormat.JSON:
         cli_data = []
         for manager in ctx.obj.selected_managers():
             cli_data.append(
@@ -915,7 +929,7 @@ def which(ctx, cli_names):
                     symlink,
                 ),
             )
-    print_table(
+    ctx.print_table(
         (
             ("Manager ID", None),
             ("Priority", None),

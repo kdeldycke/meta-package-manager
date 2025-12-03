@@ -5,6 +5,8 @@
 > [!IMPORTANT]
 > This version is not released yet and is under active development.
 
+- [mpm] Add `--no-config` option inherited from Click Extra.
+- [mpm] Replace Click Extra's default `--table-format` option by our `--output-format` option, which allows sorted table rendering and JSON output.
 - [scoop] Fix parsing of `scoop` version to support raw Git output.
 - [gem] Remove hard-coded `gem` CLI search path.
 - [mpm] Remap pURL types to managers. Closes {issue}`1460`.

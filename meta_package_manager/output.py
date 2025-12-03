@@ -31,7 +31,6 @@ from functools import cached_property, partial
 from io import StringIO
 from operator import itemgetter
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterable, Sequence
 from unittest.mock import patch
 
 from boltons.iterutils import flatten
@@ -51,8 +50,11 @@ from .bar_plugin import MPMPlugin
 from .pool import pool
 from .version import TokenizedString
 
+TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections import Counter
+    from collections.abc import Iterable, Sequence
+    from typing import Any
 
 SORTABLE_FIELDS = {
     "manager_id",

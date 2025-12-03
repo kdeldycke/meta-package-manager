@@ -27,7 +27,6 @@ from io import TextIOWrapper
 from operator import attrgetter
 from pathlib import Path
 from textwrap import dedent
-from typing import IO, Iterable
 from unittest.mock import patch
 
 import tomli_w
@@ -35,11 +34,9 @@ from boltons.cacheutils import LRI, cached
 from click_extra import (
     STRING,
     Choice,
-    Context,
     EnumChoice,
     File,
     IntRange,
-    Parameter,
     Section,
     argument,
     echo,
@@ -55,8 +52,6 @@ from click_extra.commands import default_extra_params
 from click_extra.table import TableFormatOption
 from extra_platforms import reduce
 
-from meta_package_manager.inventory import MAIN_PLATFORMS
-
 from . import __version__, bar_plugin
 from .base import (
     CLIError,
@@ -65,6 +60,7 @@ from .base import (
     highlight_cli_name,
     packages_asdict,
 )
+from .inventory import MAIN_PLATFORMS
 from .output import (
     SORTABLE_FIELDS,
     BarPluginRenderer,
@@ -77,6 +73,14 @@ from .output import (
 from .pool import pool
 from .sbom import SBOM, SPDX, CycloneDX, ExportFormat
 from .specifier import VERSION_SEP, Solver, Specifier
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from typing import IO
+
+    from click_extra import Context, Parameter
+
 
 # Subcommand sections.
 EXPLORE = Section("Explore subcommands")

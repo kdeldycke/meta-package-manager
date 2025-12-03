@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import logging
 from functools import cached_property
-from typing import TYPE_CHECKING, Final, Iterable, Iterator
 
 from boltons.iterutils import unique
 from click_extra import get_current_context
@@ -54,8 +53,13 @@ from .managers.winget import WinGet
 from .managers.yarn import Yarn
 from .managers.zypper import Zypper
 
+TYPE_CHECKING = False
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
+    from typing import Final
+
     from .base import Operations, PackageManager
+
 
 manager_classes = (
     APM,

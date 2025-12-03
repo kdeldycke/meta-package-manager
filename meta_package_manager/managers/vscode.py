@@ -16,12 +16,16 @@
 
 from __future__ import annotations
 
-from typing import Iterator
-
 from extra_platforms import ALL_PLATFORMS_WITHOUT_CI
 
-from meta_package_manager.base import Package, PackageManager
-from meta_package_manager.capabilities import version_not_implemented
+from ..base import PackageManager
+from ..capabilities import version_not_implemented
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from ..base import Package
 
 
 class VSCode(PackageManager):

@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Dict, FrozenSet
 
 from boltons.iterutils import flatten
 from extra_platforms import Group
@@ -44,8 +43,8 @@ Structure:
 """
 
 
-TLabelSet = FrozenSet[str]
-TLabelGroup = Dict[str, TLabelSet]
+TLabelSet = frozenset[str]
+TLabelGroup = dict[str, TLabelSet]
 
 
 def generate_labels(

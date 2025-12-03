@@ -16,11 +16,15 @@
 
 from __future__ import annotations
 
-from typing import Generator, Iterator
-
 from extra_platforms import WINDOWS
 
-from meta_package_manager.base import Package, PackageManager
+from ..base import PackageManager
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Generator, Iterator
+
+    from ..base import Package
 
 
 class WinGet(PackageManager):

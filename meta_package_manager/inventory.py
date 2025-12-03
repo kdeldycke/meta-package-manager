@@ -28,12 +28,16 @@ from extra_platforms import (
     MACOS,
     UNIX_WITHOUT_MACOS,
     Group,
-    Platform,
 )
 from tabulate import tabulate
 
 from .base import Operations
 from .pool import pool
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from extra_platforms import Platform
+
 
 MAIN_PLATFORMS: tuple[Group | Platform, ...] = (
     BSD_WITHOUT_MACOS.copy(id="bsd", name="BSD"),

@@ -20,13 +20,18 @@ import json
 import logging
 import re
 from operator import methodcaller
-from typing import Iterator
 
 from extra_platforms import LINUX_LIKE, MACOS
 
-from meta_package_manager.base import Package, PackageManager
-from meta_package_manager.capabilities import version_not_implemented
-from meta_package_manager.version import parse_version
+from ..base import PackageManager
+from ..capabilities import version_not_implemented
+from ..version import parse_version
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from ..base import Package
 
 
 class Homebrew(PackageManager):

@@ -20,8 +20,8 @@ import json
 import re
 import subprocess
 import sys
+from collections.abc import Collection, Iterator
 from textwrap import dedent
-from typing import Collection, Iterator
 
 import pytest
 from boltons.strutils import strip_ansi

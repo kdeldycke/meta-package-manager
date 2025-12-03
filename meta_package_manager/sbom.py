@@ -21,15 +21,9 @@ import logging
 import re
 from datetime import datetime
 from enum import Enum
-from pathlib import Path
-from typing import Any
 
 from boltons.ecoutils import get_profile
-from cyclonedx.model import (
-    ExternalReference,
-    ExternalReferenceType,
-    XsUri,
-)
+from cyclonedx.model import ExternalReference, ExternalReferenceType, XsUri
 from cyclonedx.model.bom import Bom
 from cyclonedx.model.component import Component, ComponentType
 from cyclonedx.model.contact import OrganizationalEntity
@@ -60,9 +54,14 @@ from spdx_tools.spdx.writer.write_utils import convert
 from spdx_tools.spdx.writer.xml import xml_writer
 from spdx_tools.spdx.writer.yaml import yaml_writer
 
-from meta_package_manager.base import Package, PackageManager
-
 from . import __version__
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from pathlib import Path
+    from typing import Any
+
+    from .base import Package, PackageManager
 
 
 class ExportFormat(Enum):

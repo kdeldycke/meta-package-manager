@@ -28,7 +28,6 @@ from enum import Enum
 from functools import cached_property
 from pathlib import Path
 from textwrap import dedent, indent, shorten
-from typing import TYPE_CHECKING, ContextManager, Generator, Iterable, Iterator, cast
 from unittest.mock import patch
 
 from boltons.iterutils import unique
@@ -36,15 +35,22 @@ from boltons.strutils import strip_ansi
 from click_extra.colorize import default_theme as theme
 from click_extra.envvar import env_copy
 from click_extra.testing import INDENT, args_cleanup, format_cli_prompt
-from extra_platforms import UNIX, Group, Platform, current_platforms
+from extra_platforms import UNIX, Group, current_platforms
 from packageurl import PackageURL
 
-from .version import TokenizedString, parse_version
+from .version import parse_version
 
+TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from click_extra.envvar import TEnvVars
-    from click_extra.testing import TArg, TNestedArgs
-    from extra_platforms.group import _TNestedReferences
+    from collections.abc import Generator, Iterable, Iterator
+    from contextlib import AbstractContextManager
+    from typing import cast
+
+    from click_extra._types import TArg, TEnvVars, TNestedArgs
+    from extra_platforms import Group
+    from extra_platforms._types import _TNestedReferences
+
+    from .version import TokenizedString
 
 
 Operations = Enum(
@@ -866,8 +872,8 @@ class PackageManager(metaclass=MetaPackageManager):
             extra_env = self.extra_env
 
         # No-op context manager without any effects.
-        local_option1: ContextManager = nullcontext()
-        local_option2: ContextManager = nullcontext()
+        local_option1: AbstractContextManager = nullcontext()
+        local_option2: AbstractContextManager = nullcontext()
         # Temporarily replace --dry-run and --stop-on-error user options with our own.
         if force_exec:
             local_option1 = patch.object(self, "dry_run", False)

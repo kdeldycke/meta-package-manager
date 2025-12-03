@@ -25,7 +25,8 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from typing import Any, Iterator
+    from collections.abc import Iterator
+    from typing import Any
 
     from click_extra._types import TArg, TNestedArgs
 

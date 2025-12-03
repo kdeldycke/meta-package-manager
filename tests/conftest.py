@@ -19,8 +19,6 @@ from __future__ import annotations
 
 from functools import partial
 from operator import attrgetter
-from pathlib import Path
-from typing import TYPE_CHECKING
 
 import pytest
 
@@ -31,7 +29,10 @@ from pytest import fixture, param
 from meta_package_manager.cli import mpm
 from meta_package_manager.pool import manager_classes, pool
 
+TYPE_CHECKING = False
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from _pytest.config import Config
 
 

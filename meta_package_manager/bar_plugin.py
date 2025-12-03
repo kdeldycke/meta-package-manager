@@ -43,7 +43,11 @@ from shlex import shlex
 from shutil import which
 from subprocess import run
 from textwrap import dedent
-from typing import Generator
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
 
 PYTHON_MIN_VERSION = (3, 9, 0)
 """Minimal requirement is aligned to macOS default.

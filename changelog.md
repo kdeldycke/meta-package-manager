@@ -18,6 +18,7 @@
 - [mpm] Replace `ubuntu-24.04` by `ubuntu-slim`, `macos-15` by `macos-26`, and `macos-13` by `macos-15-intel` in workflow jobs.
 - [mpm] Unlock a CPU core stuck at 100% utilization on `macos-15-intel`.
 - [mpm] Use `astral-sh/setup-uv` action to install `uv` instead of manually installing it with `pip`.
+- [mpm] Move all typing-related imports behind a hard-coded `TYPE_CHECKING` guard to avoid runtime imports.
 
 ## [5.21.0 (2025-05-28)](https://github.com/kdeldycke/meta-package-manager/compare/v5.20.0...v5.21.0)
 

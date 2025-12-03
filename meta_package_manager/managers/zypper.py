@@ -18,14 +18,21 @@ from __future__ import annotations
 
 from itertools import groupby
 from operator import itemgetter
-from typing import Iterator, TypedDict
 
 import xmltodict
 from extra_platforms import UNIX_WITHOUT_MACOS
 
-from meta_package_manager.base import Package, PackageManager
-from meta_package_manager.capabilities import version_not_implemented
-from meta_package_manager.version import TokenizedString, parse_version
+from ..base import PackageManager
+from ..capabilities import version_not_implemented
+from ..version import parse_version
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from typing import TypedDict
+
+    from ..base import Package
+    from ..version import TokenizedString
 
 
 class Zypper(PackageManager):

@@ -27,9 +27,13 @@ import operator
 import re
 from copy import deepcopy
 from functools import partial
-from typing import Iterator
 
 from boltons import strutils
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
 
 ALNUM_EXTRACTOR = re.compile("(\\d+ | [a-z]+)", re.VERBOSE)
 

@@ -17,16 +17,18 @@
 from __future__ import annotations
 
 import re
-from typing import Iterator
 
 from extra_platforms import ALL_PLATFORMS_WITHOUT_CI
 
-from meta_package_manager.base import Package, PackageManager
-from meta_package_manager.capabilities import (
-    search_capabilities,
-    version_not_implemented,
-)
-from meta_package_manager.version import parse_version
+from ..base import PackageManager
+from ..capabilities import search_capabilities, version_not_implemented
+from ..version import parse_version
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from ..base import Package
 
 
 class Gem(PackageManager):

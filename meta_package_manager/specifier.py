@@ -22,12 +22,19 @@ from dataclasses import dataclass
 from functools import cached_property
 from itertools import groupby
 from operator import attrgetter
-from typing import Final, Iterable, Iterator, Sequence
 
 from packageurl import PackageURL
 
 from .pool import pool
-from .version import TokenizedString, is_version, parse_version
+from .version import is_version, parse_version
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator, Sequence
+    from typing import Final
+
+    from .version import TokenizedString
+
 
 VERSION_SEP: Final = "@"
 """Separator used by ``mpm`` to split package's ID from its version:

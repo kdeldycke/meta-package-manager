@@ -20,9 +20,12 @@ from __future__ import annotations
 
 import logging
 from functools import wraps
-from typing import TYPE_CHECKING, Callable, Iterator, ParamSpec, TypeVar
 
+TYPE_CHECKING = False
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from typing import Callable, ParamSpec, TypeVar
+
     from .base import Package, PackageManager
 
     P = ParamSpec("P")

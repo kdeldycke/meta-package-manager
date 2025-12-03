@@ -17,11 +17,16 @@
 from __future__ import annotations
 
 import json
-from typing import Iterator
 
 from extra_platforms import ALL_PLATFORMS_WITHOUT_CI
 
-from meta_package_manager.base import Package, PackageManager
+from ..base import Package, PackageManager
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from ..base import Package
 
 
 class UV(PackageManager):

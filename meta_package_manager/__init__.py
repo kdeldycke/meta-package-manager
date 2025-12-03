@@ -15,6 +15,8 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Expose package-wide elements."""
 
+from __future__ import annotations
+
 __version__ = "5.21.1"
 """Examples of valid version strings according :pep:`440#version-scheme`:
 

@@ -25,7 +25,7 @@ jobs:
         # Available OS: https://github.com/actions/runner-images#available-images
         # To speed up the tests, we only test the latest available OS for each platform.
         os:
-          - ubuntu-24.04  # x86
+          - ubuntu-slim   # x86
           - macos-15      # arm64
           - windows-2025  # x86
         # Available Python: https://github.com/actions/python-versions/blob/main/versions-manifest.json
@@ -491,7 +491,7 @@ jobs:
       matrix:
         os:
           - ubuntu-24.04-arm  # arm64
-          - ubuntu-24.04      # x86
+          - ubuntu-slim       # x86
           - macos-15          # arm64
           - macos-13          # x86
     runs-on: ${{ matrix.os }}
@@ -511,7 +511,7 @@ jobs:
       matrix:
         os:
           - ubuntu-24.04-arm  # arm64
-          - ubuntu-24.04      # x86
+          - ubuntu-slim       # x86
           - macos-15          # arm64
           - macos-13          # x86
           - windows-11-arm    # arm64
@@ -529,7 +529,7 @@ jobs:
       matrix:
         os:
           - ubuntu-24.04-arm  # arm64
-          - ubuntu-24.04      # x86
+          - ubuntu-slim       # x86
           - macos-15          # arm64
           - macos-13          # x86
           - windows-11-arm    # arm64
@@ -570,7 +570,7 @@ jobs:
       matrix:
         os:
           - ubuntu-24.04-arm  # arm64
-          - ubuntu-24.04      # x86
+          - ubuntu-slim       # x86
           - macos-15          # arm64
           - macos-13          # x86
           - windows-11-arm    # arm64

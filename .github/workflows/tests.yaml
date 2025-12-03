@@ -26,7 +26,7 @@ jobs:
         # Available OS: https://github.com/actions/runner-images#available-images
         # To speed up the tests, we only test the latest available OS for each platform.
         os:
-          - ubuntu-slim   # x86
+          - ubuntu-24.04  # x86
           - macos-26      # arm64
           - windows-2025  # x86
         # For Python, we only test against the oldest and newest major supported version and skip intermediates. We

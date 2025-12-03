@@ -386,7 +386,7 @@ def custom_extra_params() -> list[Parameter]:
         "-s",
         "--sort-by",
         type=EnumChoice(SortableField),
-        default="manager_id",
+        default=SortableField.MANAGER_ID,
         help="Sort results.",
     ),
     # option('--sort-asc/--sort-desc', default=True)
@@ -578,12 +578,12 @@ def managers(ctx):
 
     ctx.find_root().print_table(
         (
-            ("Manager ID", "manager_id"),
-            ("Name", "manager_name"),
+            ("Manager ID", SortableField.MANAGER_ID),
+            ("Name", SortableField.MANAGER_NAME),
             ("Supported", None),
             ("CLI", None),
             ("Executable", None),
-            ("Version", "version"),
+            ("Version", SortableField.VERSION),
         ),
         table,
         ctx.obj.sort_by,
@@ -677,10 +677,10 @@ def installed(ctx, duplicates):
     # Print table.
     ctx.find_root().print_table(
         (
-            ("Package ID", "package_id"),
-            ("Name", "package_name"),
-            ("Manager", "manager_id"),
-            ("Installed version", "version"),
+            ("Package ID", SortableField.PACKAGE_ID),
+            ("Name", SortableField.PACKAGE_NAME),
+            ("Manager", SortableField.MANAGER_ID),
+            ("Installed version", SortableField.VERSION),
         ),
         table,
         sort_by,
@@ -756,10 +756,10 @@ def outdated(ctx, plugin_output):
     # Sort and print table.
     ctx.find_root().print_table(
         (
-            ("Package ID", "package_id"),
-            ("Name", "package_name"),
-            ("Manager", "manager_id"),
-            ("Installed version", "version"),
+            ("Package ID", SortableField.PACKAGE_ID),
+            ("Name", SortableField.PACKAGE_NAME),
+            ("Manager", SortableField.MANAGER_ID),
+            ("Installed version", SortableField.VERSION),
             ("Latest version", None),
         ),
         table,
@@ -873,13 +873,13 @@ def search(ctx, extended, exact, refilter, query):
 
     # Sort and print table.
     headers = [
-        ("Package ID", "package_id"),
-        ("Name", "package_name"),
-        ("Manager", "manager_id"),
-        ("Latest version", "version"),
+        ("Package ID", SortableField.PACKAGE_ID),
+        ("Name", SortableField.PACKAGE_NAME),
+        ("Manager", SortableField.MANAGER_ID),
+        ("Latest version", SortableField.VERSION),
     ]
     if show_description:
-        headers.append(("Description", "description"))
+        headers.append(("Description", None))
     ctx.find_root().print_table(headers, table, ctx.obj.sort_by)
 
     if ctx.obj.stats:
@@ -935,12 +935,13 @@ def which(ctx, cli_names):
             )
     ctx.find_root().print_table(
         (
-            ("Manager ID", None),
+            ("Manager ID", SortableField.MANAGER_ID),
             ("Priority", None),
             ("CLI path", None),
             ("Symlink destination", None),
         ),
         table,
+        ctx.obj.sort_by,
     )
 
 

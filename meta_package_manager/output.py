@@ -142,7 +142,7 @@ def print_json(data):
 
 
 def print_sorted_table(
-    header_defs: list[tuple[str, str]],
+    header_defs: list[tuple[str, SortableField | None]],
     rows: Iterable[Sequence[str | TokenizedString]],
     sort_key: SortableField | None = None,
     table_format: ExtendedTableFormat | None = None,
@@ -152,20 +152,21 @@ def print_sorted_table(
     capabilities.
 
     ``header_defs`` parameter is an ordered list of tuple whose first item is the
-    column's label and the second the column's ID. Example:
+    column's label and the second the column's ID used for sorting. For columns that
+    should not be used for sorting, set the column ID to ``None``.
 
     .. code-block:: python
 
         [
-            ("Column 1", "column1"),
-            ("User's name", "name"),
-            ("Package manager", "manager_id"),
+            ("Package manager", SortableField.MANAGER_NAME),
+            ("Column 1", None),
+            ("User's name", None),
+            ("Package ID", SortableField.PACKAGE_ID),
             ...,
         ]
 
-    Rows can be sorted by providing the column's ID to ``sort_key`` parameter. By
-    default, ``None`` means the table will be sorted in the order of columns provided by
-    ``header_defs``.
+    Rows can be sorted by providing the ``sort_key`` parameter. If ``None``, the table
+    will be sorted in the natural order sets by ``header_defs``.
     """
     # Do not print anything, not even table headers if no rows.
     if not rows:

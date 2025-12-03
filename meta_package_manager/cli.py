@@ -20,6 +20,7 @@ import logging
 import sys
 import tomllib
 from collections import Counter, namedtuple
+from collections.abc import Iterable
 from configparser import RawConfigParser
 from datetime import datetime
 from functools import partial
@@ -76,7 +77,6 @@ from .specifier import VERSION_SEP, Solver, Specifier
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterable
     from typing import IO
 
     from click_extra import Context, Parameter
@@ -1489,7 +1489,8 @@ def restore(ctx, toml_files):
 )
 @option(
     "--format",
-    type=Choice(ExportFormat.values(), case_sensitive=False),
+    "export_format",
+    type=EnumChoice(ExportFormat),
     help=f"File format of the export. Defaults to JSON for {sys.stdout.name}. If not "
     "provided, will be autodetected from file extension.",
 )
@@ -1507,7 +1508,7 @@ def restore(ctx, toml_files):
     default="-",
 )
 @pass_context
-def sbom(ctx, spdx, format, overwrite, export_path):
+def sbom(ctx, spdx, export_format, overwrite, export_path):
     """Export list of installed packages to a SPDX or CycloneDX file."""
     standard = "SPDX" if spdx else "CycloneDX"
 
@@ -1525,9 +1526,6 @@ def sbom(ctx, spdx, format, overwrite, export_path):
             else:
                 logging.critical(msg)
                 ctx.exit(2)
-
-    # Get format Enum from ID.
-    export_format = ExportFormat.from_value(format)
 
     # <stdout> format defaults to JSON.
     if is_stdout(export_path):

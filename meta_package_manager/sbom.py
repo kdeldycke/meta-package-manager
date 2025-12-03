@@ -20,7 +20,7 @@ import io
 import logging
 import re
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from boltons.ecoutils import get_profile
 from cyclonedx.model import ExternalReference, ExternalReferenceType, XsUri
@@ -64,28 +64,17 @@ if TYPE_CHECKING:
     from .base import Package, PackageManager
 
 
-class ExportFormat(Enum):
-    """A user-friendly version of ``spdx_tools.spdx.formats.FileFormat``."""
+class ExportFormat(StrEnum):
+    """A user-friendly version of ``spdx_tools.spdx.formats.FileFormat``.
+
+    Map format to user-friendly IDs.
+    """
 
     JSON = "json"
     XML = "xml"
     YAML = "yaml"
     TAG_VALUE = "tag"
     RDF_XML = "rdf"
-    """Map format to user-friendly IDs."""
-
-    @classmethod
-    def from_value(cls, format_id: str | None = None) -> ExportFormat | None:
-        if not format_id:
-            return None
-        matches = tuple(e for e in cls if e.value == format_id)
-        assert len(matches) == 1
-        return matches[0]
-
-    @classmethod
-    def values(cls) -> tuple[str, ...]:
-        """Returns a ``tuple`` with user-friendly format IDs."""
-        return tuple(i.value for i in cls)
 
 
 class SBOM:

@@ -405,7 +405,7 @@ class MPMPlugin:
         """
         if label.strip():
             print(
-                # Do not strip the label to keep character alignements, especially in
+                # Do not strip the label to keep character alignments, especially in
                 # table rendering and Python tracebacks.
                 label,
                 "|",

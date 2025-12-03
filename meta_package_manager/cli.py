@@ -849,8 +849,8 @@ def search(ctx, extended, exact, refilter, query):
     highlight_query = cached(LRI(max_size=1000))(
         partial(
             highlight,
-            substrings=query_parts,
-            styling_method=theme.search,
+            patterns=query_parts,
+            styling_func=theme.search,
             ignore_case=True,
         ),
     )

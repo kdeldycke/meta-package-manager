@@ -62,9 +62,9 @@ from .base import (
 )
 from .inventory import MAIN_PLATFORMS
 from .output import (
-    SORTABLE_FIELDS,
     BarPluginRenderer,
     ExtendedTableFormat,
+    SortableField,
     SortedTableFormatOption,
     colored_diff,
     print_json,
@@ -385,7 +385,7 @@ def custom_extra_params() -> list[Parameter]:
     option(
         "-s",
         "--sort-by",
-        type=Choice(sorted(SORTABLE_FIELDS), case_sensitive=False),
+        type=EnumChoice(SortableField),
         default="manager_id",
         help="Sort results.",
     ),
@@ -576,7 +576,7 @@ def managers(ctx):
             ),
         )
 
-    ctx.print_table(
+    ctx.find_root().print_table(
         (
             ("Manager ID", "manager_id"),
             ("Name", "manager_name"),
@@ -672,10 +672,10 @@ def installed(ctx, duplicates):
         logging.info(
             "Force table sorting on package ID because of --duplicates option."
         )
-        sort_by = "package_id"
+        sort_by = SortableField.PACKAGE_ID
 
     # Print table.
-    ctx.print_table(
+    ctx.find_root().print_table(
         (
             ("Package ID", "package_id"),
             ("Name", "package_name"),
@@ -754,7 +754,7 @@ def outdated(ctx, plugin_output):
             )
 
     # Sort and print table.
-    ctx.print_table(
+    ctx.find_root().print_table(
         (
             ("Package ID", "package_id"),
             ("Name", "package_name"),
@@ -880,7 +880,7 @@ def search(ctx, extended, exact, refilter, query):
     ]
     if show_description:
         headers.append(("Description", "description"))
-    ctx.print_table(headers, table, ctx.obj.sort_by)
+    ctx.find_root().print_table(headers, table, ctx.obj.sort_by)
 
     if ctx.obj.stats:
         print_stats(Counter({k: len(v["packages"]) for k, v in matches.items()}))
@@ -933,7 +933,7 @@ def which(ctx, cli_names):
                     symlink,
                 ),
             )
-    ctx.print_table(
+    ctx.find_root().print_table(
         (
             ("Manager ID", None),
             ("Priority", None),

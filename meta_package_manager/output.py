@@ -56,14 +56,15 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
     from typing import Any
 
-SORTABLE_FIELDS = {
-    "manager_id",
-    "manager_name",
-    "package_id",
-    "package_name",
-    "version",
-}
-"""List of fields IDs allowed to be sorted."""
+
+class SortableField(StrEnum):
+    """Fields IDs allowed to be sorted."""
+
+    MANAGER_ID = "manager_id"
+    MANAGER_NAME = "manager_name"
+    PACKAGE_ID = "package_id"
+    PACKAGE_NAME = "package_name"
+    VERSION = "version"
 
 
 def colored_diff(a, b, style_common=None, style_a=None, style_b=None):
@@ -143,7 +144,7 @@ def print_json(data):
 def print_sorted_table(
     header_defs: list[tuple[str, str]],
     rows: Iterable[Sequence[str | TokenizedString]],
-    sort_key: str | None = None,
+    sort_key: SortableField | None = None,
     table_format: ExtendedTableFormat | None = None,
     **kwargs,
 ) -> None:
@@ -209,7 +210,7 @@ def print_sorted_table(
         table_data=sorted(rows, key=sort_method),
         headers=header_labels,
         table_format=table_format,
-        kwargs=kwargs,
+        **kwargs,
     )
 
 

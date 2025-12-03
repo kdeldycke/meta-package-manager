@@ -196,7 +196,7 @@ def single_manager_selectors():
             option(
                 f"--{manager_id}",
                 flag_value=manager_id,
-                default=False,
+                default=None,
                 help=f"{deprecated_msg}Select {manager.name}.",
                 expose_value=False,
                 callback=update_manager_selection,
@@ -206,7 +206,7 @@ def single_manager_selectors():
             option(
                 f"--no-{manager_id}",
                 flag_value=manager_id,
-                default=False,
+                default=None,
                 help=f"{deprecated_msg}Deselect {manager.name}.",
                 expose_value=False,
                 callback=update_manager_selection,
@@ -319,7 +319,7 @@ def custom_extra_params() -> list[Parameter]:
         "-x",
         "--xkcd",
         is_flag=True,
-        default=False,
+        default=None,
         expose_value=False,
         callback=update_manager_selection,
         help="Preset manager selection as defined by XKCD #1654. Equivalent to: "
@@ -330,6 +330,7 @@ def custom_extra_params() -> list[Parameter]:
         "--manager",
         type=Choice(pool.all_manager_ids, case_sensitive=False),
         multiple=True,
+        default=None,
         expose_value=False,
         hidden=True,
         callback=update_manager_selection,
@@ -340,6 +341,7 @@ def custom_extra_params() -> list[Parameter]:
         "--exclude",
         type=Choice(pool.all_manager_ids, case_sensitive=False),
         multiple=True,
+        default=None,
         expose_value=False,
         hidden=True,
         callback=update_manager_selection,

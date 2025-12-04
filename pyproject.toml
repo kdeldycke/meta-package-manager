@@ -262,16 +262,15 @@ replace = "date-released: {utcnow:%Y-%m-%d}"
 [tool.typos]
 default.extend-ignore-identifiers-re = [
     # error: `ist` should be `is`, `it`, `its`, `sit`, `list`
-    #   --> ./docs/development.md:121:10
-    #     |
-    # 121 | - [chalk.ist](https://chalk.ist)
-    #     |          ^^^
-    #     |
+    #     ╭▸ ./docs/development.md:125:10
+    #     │
+    # 125 │ - [chalk.ist](https://chalk.ist)
+    #     ╰╴         ━━━
     # error: `ist` should be `is`, `it`, `its`, `sit`, `list`
-    #   --> ./docs/development.md:121:29
-    #     |
-    # 121 | - [chalk.ist](https://chalk.ist)
-    #     |                             ^^^
-    #     |
+    #     ╭▸ ./docs/development.md:125:29
+    #     │
+    # 125 │ - [chalk.ist](https://chalk.ist)
+    #     ╰╴                            ━━━
+    #
     "ist",
 ]

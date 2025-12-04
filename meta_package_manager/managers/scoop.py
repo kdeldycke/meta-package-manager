@@ -44,6 +44,7 @@ class Scoop(PackageManager):
         # XXX Scoop does not always provide a clean version string:
         # https://github.com/ScoopInstaller/Scoop/issues/6457
         # https://github.com/ScoopInstaller/Scoop/issues/6270
+        # https://github.com/ScoopInstaller/Scoop/pull/6463
         r"^.+,\stag:\sv(?P<version>\S+),\s.+",
         r"^.+\sBump\sto\sversion\s(?P<version>\S+)\s.+",
     )

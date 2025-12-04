@@ -597,16 +597,7 @@ class PackageManager(metaclass=MetaPackageManager):
     @cached_property
     def supported(self) -> bool:
         """Is the package manager supported on that platform?"""
-        return (
-            len(
-                # XXX At this point self.platforms is normalized as a frozenset of
-                # Platform instances.
-                cast("frozenset[Platform]", self.platforms).intersection(
-                    current_platforms()
-                )
-            )
-            > 0
-        )
+        return len(self.platforms.intersection(current_platforms())) > 0
 
     @cached_property
     def executable(self) -> bool:

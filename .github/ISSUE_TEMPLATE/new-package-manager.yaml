@@ -10,12 +10,12 @@ body:
         matrix](https://github.com/kdeldycke/meta-package-manager#supported-package-managers-and-operations).
 
 
-        If you are a developper, you can try to implement support yourself. [Check the contribution
+        If you are a developer, you can try to implement support yourself. [Check the contribution
         guide](https://kdeldycke.github.io/meta-package-manager/contributing.html) and propose a Pull Request.
 
 
-        If you are not a developper, you can still help the project by documenting some of the package manager
-        metadata below. And better: if you contibute some raw output of the package manager, the maintainers
+        If you are not a developer, you can still help the project by documenting some of the package manager
+        metadata below. And better: if you contribute some raw output of the package manager, the maintainers
         can try a blind implementation of the new manager.
 
   - type: input
@@ -146,7 +146,7 @@ body:
       label: Upgrade command
       description: >
         Command and output to upgrade a package. Provides all variations which allows to upgrade only one package or
-        all, as well as the CLI targetting one version in particular.
+        all, as well as the CLI targeting one version in particular.
       render: shell-session
       placeholder: |
         $ brew upgrade dupeguru --cask

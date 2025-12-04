@@ -134,7 +134,7 @@
 - cli_parameters: --output-format csv installed
   exit_code: 0
   stdout_regex_matches:
-    - pytz,,uv,\S+\n
+    - tzdata,,uv,\S+\n
 
 - cli_parameters: managers
   skip_platforms: windows

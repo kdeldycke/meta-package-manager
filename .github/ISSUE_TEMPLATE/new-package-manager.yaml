@@ -117,7 +117,7 @@ body:
       placeholder: |
         $ brew search sed
         ==> Formulae
-        gnu-sed ✔                    libxdg-basedir               minised
+        gnu-sed ✔                    libxdg-basedir
         ==> Casks
         eclipse-dsl                       marsedit
         google-adwords-editor             prefs-editor

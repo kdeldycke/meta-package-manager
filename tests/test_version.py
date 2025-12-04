@@ -307,7 +307,7 @@ def test_version_comparison_lt(ver1, ver2):
 )
 def test_version_sorting(sequence):
     sorted_version = list(map(TokenizedString, sequence))
-    ramdom_order = sorted_version.copy()
-    shuffle(ramdom_order)
-    assert ramdom_order != sorted_version
-    assert sorted(ramdom_order) == sorted_version
+    random_order = sorted_version.copy()
+    shuffle(random_order)
+    assert random_order != sorted_version
+    assert sorted(random_order) == sorted_version

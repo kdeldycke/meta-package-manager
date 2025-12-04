@@ -329,7 +329,7 @@ then reinstall them on your new distribution.
    ```
 
 ```{todo}
-Implement a best matchig strategy, across package managers of different kinds.
+Implement a best matching strategy, across package managers of different kinds.
 ```
 
 ## SBOM: Software Bill of Materials

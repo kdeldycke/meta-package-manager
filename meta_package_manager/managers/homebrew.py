@@ -267,7 +267,7 @@ class Homebrew(PackageManager):
 
             $ brew search sed
             ==> Formulae
-            gnu-sed ✔                    libxdg-basedir               minised
+            gnu-sed ✔                    libxdg-basedir
             ==> Casks
             eclipse-dsl                       marsedit
             focused                           physicseditor
@@ -278,7 +278,7 @@ class Homebrew(PackageManager):
 
             $ brew search sed --formulae
             ==> Formulae
-            gnu-sed ✔                    libxdg-basedir               minised
+            gnu-sed ✔                    libxdg-basedir
 
         .. code-block:: shell-session
 

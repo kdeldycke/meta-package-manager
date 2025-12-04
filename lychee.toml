@@ -1,0 +1,11 @@
+# ref: https://github.com/lycheeverse/lychee/blob/master/lychee.example.toml
+
+# XXX One day we might move this config directly into pyproject.toml:
+# https://github.com/lycheeverse/lychee/issues/1930
+
+exclude = [
+    # Skip suggesting redirecting generic download links to their binary artefact.
+    "^https://github.com/.+/releases/.+/download/.*$",
+    # Allow redirects of generic DOI URLs to their specific Zenodo release page.
+    "^https://doi.org/.+/zenodo.*$",
+]

@@ -207,10 +207,15 @@ def print_sorted_table(
             sorting_key.append(key)
         return tuple(sorting_key)
 
+    # Convert ExtendedTableFormat to BaseTableFormat if needed.
+    base_format = None
+    if table_format is not None and table_format.name in BaseTableFormat.__members__:
+        base_format = BaseTableFormat[table_format.name]
+
     print_table(
         table_data=sorted(rows, key=sort_method),
         headers=header_labels,
-        table_format=table_format,
+        table_format=base_format,
         **kwargs,
     )
 

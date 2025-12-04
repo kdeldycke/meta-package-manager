@@ -42,11 +42,11 @@ body:
       options:
         - label: 🅱️ BSD (FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS)
         - label: >-
-            🐧 Linux (ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CentOS, CloudLinux OS, Debian,
+            🐧 Linux (ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, CloudLinux OS, Debian,
             Exherbo Linux, Fedora, Gentoo Linux, Guix System, IBM PowerKVM, KVM for IBM z Systems, Linux Mint, Mageia,
-            Mandriva Linux, Nobara, openSUSE, Oracle Linux, Parallels, Pidora, Raspbian, RedHat Enterprise Linux,
-            Rocky Linux, Scientific Linux, Slackware, SUSE Linux Enterprise Server, openSUSE Tumbleweed, Tuxedo OS,
-            Ubuntu, Unknown Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer)
+            Mandriva Linux, Nobara, openSUSE, Oracle Linux, Parallels, Pidora, Raspbian, RedHat Enterprise Linux, Rocky
+            Linux, Scientific Linux, Slackware, SUSE Linux Enterprise Server, openSUSE Tumbleweed, Tuxedo OS, Ubuntu,
+            Ultramarine, Unknown Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer)
         - label: 🍎 macOS
         - label: ⨂ Unix (IBM AIX, Cygwin, GNU/Hurd, Solaris)
         - label: 🪟 Windows

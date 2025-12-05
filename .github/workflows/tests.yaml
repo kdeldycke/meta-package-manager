@@ -446,6 +446,7 @@ jobs:
         run: |
           uv --no-progress sync --frozen --extra test
 
+      # mpm CLI runs.
       - name: Run local CLI
         run: |
           uv run -- mpm --version
@@ -454,21 +455,7 @@ jobs:
           uv run        -m meta_package_manager --version
           uv run python -m meta_package_manager --version
 
-      - name: Parallel non-destructive tests
-        run: >
-          uv --no-progress run --frozen --
-          pytest --exitfirst
-          --numprocesses=auto --run-non-destructive --skip-destructive
-          --ignore=./tests/test_bar_plugin.py
-
-      - name: Sequential random destructive tests
-        run: >
-          uv --no-progress run --frozen --
-          pytest --exitfirst
-          --numprocesses=0 --skip-non-destructive --run-destructive
-          --ignore=./tests/test_bar_plugin.py
-
-      # Bar plugin test runs.
+      # Bar plugin runs.
       - name: bar_plugin.py --search-mpm
         if: runner.os == 'macOS'
         run: |
@@ -486,14 +473,30 @@ jobs:
         run: |
           uv --no-progress run --frozen -- ./meta_package_manager/bar_plugin.py
 
+      # Test suite runs.
+      - name: Parallel non-destructive tests
+        run: >
+          uv --no-progress run --frozen --
+          pytest --exitfirst
+          --numprocesses=auto --run-non-destructive --skip-destructive
+          --ignore=./tests/test_bar_plugin.py
+
+      # Bar plugin calls way too many external commands to be run in parallel.
       - name: Sequential, bar plugin tests - macOS
         if: runner.os == 'macOS'
-        # XXX bar plugin calls way too many external commands to be run in parallel.
         run: >
           uv --no-progress run --frozen --
           pytest --exitfirst
           --numprocesses=0 --run-non-destructive --run-destructive
           ./tests/test_bar_plugin.py
+
+      # Run destructive tests last, as they alters the system packages.
+      - name: Sequential random destructive tests
+        run: >
+          uv --no-progress run --frozen --
+          pytest --exitfirst
+          --numprocesses=0 --skip-non-destructive --run-destructive
+          --ignore=./tests/test_bar_plugin.py
 
       - name: Codecov - coverage
         uses: codecov/codecov-action@v5.5.1

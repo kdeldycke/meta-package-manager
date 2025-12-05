@@ -72,7 +72,6 @@ autodoc_member_order = "bysource"
 autodoc_default_flags = ["members", "undoc-members", "show-inheritance"]
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
-# https://www.sphinx-doc.org/en/master/usage/extensions/todo.html
 todo_include_todos = True
 
 # GitHub pre-implemented shortcuts.

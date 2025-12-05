@@ -188,7 +188,7 @@ class TestBarPlugin:
         ),
         # Error line. Optional.
         (
-            r"(--)?.+ \| font=Menlo size=10 color=red trim=false "
+            r"(--)?.+ \| font=[Mm]enlo size=10 color=red trim=false "
             r"ansi=false emojize=false( symbolize=false)?$",
             False,
         ),
@@ -261,11 +261,11 @@ class TestBarPlugin:
             extra_checks.extend(
                 (
                     # Package manager section header.
-                    (r"(⚠️ )?\S+ - \d+ packages?\s+\| font=Menlo size=12", True),
+                    (r"(⚠️ )?\S+ - \d+ packages?\s+\| font=[Mm]enlo size=12", True),
                     # Package upgrade line.
                     (
                         r"(--)?[\S ]+\s+\S+ → \S+\s+\| shell=\S+( param\d+=\S+)+ "
-                        r"font=Menlo size=12 refresh=true "
+                        r"font=[Mm]enlo size=12 refresh=true "
                         r"terminal=(false|true alternate=true)?$",
                         False,
                     ),

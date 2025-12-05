@@ -19,6 +19,7 @@ from __future__ import annotations
 import io
 import logging
 import re
+import sys
 from datetime import datetime
 from enum import StrEnum
 
@@ -55,6 +56,11 @@ from spdx_tools.spdx.writer.xml import xml_writer
 from spdx_tools.spdx.writer.yaml import yaml_writer
 
 from . import __version__
+
+if sys.version_info >= (3, 11):
+    from enum import StrEnum
+else:
+    from backports.strenum import StrEnum  # type: ignore[import-not-found]
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

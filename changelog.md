@@ -13,9 +13,10 @@
 - [mpm] Allow multiple regular expressions to be used for version matching.
 - [mpm] Remove maximum capped version of all dependencies (relax all `~=` specifiers to `>=`). This gives more freedom to downstream and upstream packagers. Document each minimal version choice.
 - [mpm] Add official support of Python 3.14.
+- [mpm] Re-introduce Python 3.10 support.
+- [mpm] Run tests on Python `3.10`, `3.14`, `3.15`, `3.14t` and `3.15t`.
+- [mpm] Skip tests on intermediate Python versions (`3.11`, `3.12` and `3.13`) to reduce CI load.
 - [mpm] Produce `mpm-windows-arm64.exe` Windows binary for `arm64` architecture.
-- [mpm] Run tests on Python `3.14`, `3.15`, `3.14t` and `3.15t`.
-- [mpm] Skip tests on intermediate Python versions (`3.12` and `3.13`) to reduce CI load.
 - [mpm] Replace `ubuntu-24.04` by `ubuntu-slim`, `macos-15` by `macos-26`, and `macos-13` by `macos-15-intel` in workflow jobs.
 - [mpm] Unlock a CPU core stuck at 100% utilization on `macos-15-intel`.
 - [mpm] Use `astral-sh/setup-uv` action to install `uv` instead of manually installing it with `pip`.

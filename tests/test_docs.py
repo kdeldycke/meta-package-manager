@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import json
 import re
-import tomllib
+import sys
 from collections import Counter
 from itertools import permutations
 from pathlib import Path
@@ -32,6 +32,12 @@ from meta_package_manager.labels import LABELS, MANAGER_PREFIX, PLATFORM_PREFIX
 from meta_package_manager.pool import pool
 
 from .conftest import all_managers
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib  # type: ignore[import-not-found]
+
 
 """ Test all non-code artifacts depending on manager definitions.
 

@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import logging
 import sys
-import tomllib
 from collections import Counter, namedtuple
 from collections.abc import Iterable
 from configparser import RawConfigParser
@@ -74,6 +73,11 @@ from .output import (
 from .pool import pool
 from .sbom import SBOM, SPDX, CycloneDX, ExportFormat
 from .specifier import VERSION_SEP, Solver, Specifier
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib  # type: ignore[import-not-found]
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

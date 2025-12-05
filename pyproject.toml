@@ -3,7 +3,7 @@
 name = "meta-package-manager"
 version = "5.22.0"
 # Python versions and their status: https://devguide.python.org/versions/
-requires-python = ">= 3.11"
+requires-python = ">= 3.10"
 description = "🎁 wraps all package managers with a unifying CLI"
 authors = [{ name = "Kevin Deldycke", email = "kevin@deldycke.com" }]
 readme = "readme.md"
@@ -82,6 +82,7 @@ classifiers = [
     "Operating System :: POSIX :: BSD :: NetBSD",
     "Operating System :: POSIX :: BSD :: OpenBSD",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -106,6 +107,8 @@ classifiers = [
 # - aligns minimal Python requirements to ours,
 # - adds new explicit support Python version.
 dependencies = [
+    # backports.strenum 1.3.0 is required to support enum.StrEnum in Python 3.10.
+    "backports.strenum >= 1.3.0 ; python_version < '3.11'",
     # boltons 25.0.0 is the first version to support Python 3.13.
     "boltons >= 25.0.0",
     # click-extra 7.3.0 fix version fetching.
@@ -118,6 +121,8 @@ dependencies = [
     "spdx-tools >= 0.8.2",
     # tabulate 0.9 is the first to add `*grid` and `*outline` formats.
     "tabulate [widechars] >= 0.9",
+    # tomllib is not part of the standard library before Python 3.11. Version 2.3.0 is the first to support Python 3.14.
+    "tomli >= 2.3.0 ; python_version < '3.11'",
     "tomli_w >= 1.2.0",
     "xmltodict >= 0.15.1",
 ]
@@ -149,8 +154,10 @@ docs = [
     "click-extra [sphinx] >= 7.2.0",
     "furo ~= 2025.9.25",
     "myst-parser ~= 4.0.0",
-    "sphinx ~= 8.2.3",
-    "sphinx-autodoc-typehints ~= 3.5.2",
+    # Sphinx  8.0.0 is the first version to drop Python 3.9, like us.
+    "sphinx >= 8.0.0",
+    # sphinx-autodoc-typehints 2.4.0 is the first version that is aligned to our Python >= 3.10 requirement.
+    "sphinx-autodoc-typehints >= 2.4.0",
     "sphinx-click ~= 6.2.0",
     "sphinx-copybutton ~= 0.5.2",
     "sphinx-design ~= 0.6.0",

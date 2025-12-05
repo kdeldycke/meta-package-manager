@@ -26,6 +26,7 @@ import builtins
 import contextlib
 import json
 import logging
+import sys
 from enum import StrEnum
 from functools import cached_property, partial
 from io import StringIO
@@ -49,6 +50,11 @@ from tabulate import tabulate
 from .bar_plugin import MPMPlugin
 from .pool import pool
 from .version import TokenizedString
+
+if sys.version_info >= (3, 11):
+    from enum import StrEnum
+else:
+    from backports.strenum import StrEnum  # type: ignore[import-not-found]
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

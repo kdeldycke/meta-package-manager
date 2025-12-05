@@ -32,8 +32,9 @@ jobs:
         # For Python, we only test against the oldest and newest major supported version and skip intermediates. We
         # also test on the upcoming development version to anticipate issues.
         python-version:
-          - "3.11"
+          - "3.10"
           # Ignore intermediate versions to reduce CI load.
+          # - "3.11"
           # - "3.12"
           # - "3.13"
           - "3.14"
@@ -661,7 +662,7 @@ jobs:
       - uses: astral-sh/setup-uv@v7.1.4
         with:
           # windows-2025 runners have only Python 3.9 installed.
-          python-version: ${{ matrix.os == 'windows-2025' && '3.11' || ''}}
+          python-version: ${{ matrix.os == 'windows-2025' && '3.10' || ''}}
       # https://pypi.org/project/meta-package-manager
       - name: Run stable CLI
         run: |

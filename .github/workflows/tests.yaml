@@ -648,7 +648,7 @@ jobs:
           - ubuntu-slim       # x86
           - macos-26          # arm64
           - macos-15-intel    # x86
-          - windows-11-arm    # arm64
+          # - windows-11-arm  # arm64
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
     steps:

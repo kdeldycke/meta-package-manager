@@ -18,9 +18,7 @@ from __future__ import annotations
 
 import json
 import re
-import sys
 from functools import cached_property
-from pathlib import Path
 
 from extra_platforms import ALL_PLATFORMS_WITHOUT_CI
 
@@ -29,7 +27,7 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterable, Iterator
+    from collections.abc import Iterator
 
     from ..base import Package
     from ..version import TokenizedString

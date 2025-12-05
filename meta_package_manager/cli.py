@@ -269,7 +269,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 
 def custom_extra_params() -> list[Parameter]:
     """Replace the default ``TableFormatOption`` with our ``SortedTableFormatOption``."""
-    params = []
+    params: list[Parameter] = []
     for param in default_extra_params():
         if isinstance(param, TableFormatOption):
             params.append(

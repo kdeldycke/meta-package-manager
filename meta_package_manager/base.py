@@ -47,7 +47,7 @@ if TYPE_CHECKING:
     from contextlib import AbstractContextManager
 
     from click_extra._types import TArg, TEnvVars, TNestedArgs
-    from extra_platforms import Group
+    from extra_platforms import Platform
     from extra_platforms._types import _TNestedReferences
 
     from .version import TokenizedString
@@ -258,7 +258,7 @@ class PackageManager(metaclass=MetaPackageManager):
     homepage_url: str | None = None
     """Home page of the project, only used in documentation for reference."""
 
-    platforms: _TNestedReferences = frozenset()
+    platforms: frozenset[Platform] | _TNestedReferences = frozenset()
     """List of platforms supported by the manager.
 
     Allows for a mishmash of platforms and groups. Will be normalized into a `frozenset`
@@ -597,7 +597,9 @@ class PackageManager(metaclass=MetaPackageManager):
     @cached_property
     def supported(self) -> bool:
         """Is the package manager supported on that platform?"""
-        return len(self.platforms.intersection(current_platforms())) > 0
+        # After metaclass initialization, platforms is always a frozenset[Platform].
+        platforms = cast("frozenset[Platform]", self.platforms)
+        return len(platforms.intersection(current_platforms())) > 0
 
     @cached_property
     def executable(self) -> bool:

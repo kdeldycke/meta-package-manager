@@ -42,9 +42,9 @@ from click_extra.table import (
     TableFormatOption,
     TabulateTableFormat,
     print_table,
-    tabulate,
 )
 from click_extra.table import TableFormat as BaseTableFormat
+from tabulate import tabulate
 
 from .bar_plugin import MPMPlugin
 from .pool import pool
@@ -108,7 +108,7 @@ def colored_diff(a, b, style_common=None, style_a=None, style_b=None):
 
 
 # Create extended enum by combining base members with new ones.
-ExtendedTableFormat = StrEnum(
+ExtendedTableFormat = StrEnum(  # type: ignore[misc]
     "ExtendedTableFormat",
     dict(
         sorted({**{e.name: e.value for e in BaseTableFormat}, "JSON": "json"}.items())
@@ -172,7 +172,7 @@ def print_sorted_table(
     if not rows:
         return
 
-    header_labels = (style(label, bold=True) for label, _ in header_defs)
+    header_labels = tuple(style(label, bold=True) for label, _ in header_defs)
 
     # Check there is no duplicate column IDs.
     header_ids = [col_id for _, col_id in header_defs if col_id]
@@ -212,8 +212,14 @@ def print_sorted_table(
     if table_format is not None and table_format.name in BaseTableFormat.__members__:
         base_format = BaseTableFormat[table_format.name]
 
+    # Sort and convert rows to list of strings for print_table
+    sorted_rows: list[Sequence[str | None]] = [
+        tuple(str(cell) if cell is not None else None for cell in row)
+        for row in sorted(rows, key=sort_method)
+    ]
+
     print_table(
-        table_data=sorted(rows, key=sort_method),
+        table_data=sorted_rows,
         headers=header_labels,
         table_format=base_format,
         **kwargs,

@@ -21,7 +21,6 @@ import logging
 import re
 import sys
 from datetime import datetime
-from enum import StrEnum
 
 from boltons.ecoutils import get_profile
 from cyclonedx.model import ExternalReference, ExternalReferenceType, XsUri
@@ -86,7 +85,10 @@ class ExportFormat(StrEnum):
 class SBOM:
     """Utilities shared by all SBOM classes."""
 
-    def __init__(self, export_format: ExportFormat = ExportFormat.JSON) -> None:
+    def __init__(
+        self,
+        export_format: ExportFormat = ExportFormat.JSON,  # type: ignore[assignment]
+    ) -> None:
         """Defaults to JSON export format."""
         logging.debug(f"Set export format to {export_format}")
         self.export_format = export_format
@@ -113,7 +115,7 @@ class SBOM:
             elif suffixes[-1] in (".tag", ".spdx"):
                 export_format = ExportFormat.TAG_VALUE
         logging.debug(f"File suffixes {suffixes} resolves to {export_format}.")
-        return export_format
+        return export_format  # type: ignore[return-value]
 
 
 class SPDX(SBOM):

@@ -27,7 +27,6 @@ import contextlib
 import json
 import logging
 import sys
-from enum import StrEnum
 from functools import cached_property, partial
 from io import StringIO
 from operator import itemgetter
@@ -114,7 +113,7 @@ def colored_diff(a, b, style_common=None, style_a=None, style_b=None):
 
 
 # Create extended enum by combining base members with new ones.
-ExtendedTableFormat = StrEnum(  # type: ignore[misc]
+ExtendedTableFormat = StrEnum(
     "ExtendedTableFormat",
     dict(
         sorted({**{e.name: e.value for e in BaseTableFormat}, "JSON": "json"}.items())
@@ -151,7 +150,7 @@ def print_sorted_table(
     header_defs: list[tuple[str, SortableField | None]],
     rows: Iterable[Sequence[str | TokenizedString]],
     sort_key: SortableField | None = None,
-    table_format: ExtendedTableFormat | None = None,
+    table_format: ExtendedTableFormat | None = None,  # type: ignore[valid-type]
     **kwargs,
 ) -> None:
     """Augment :py:func:`click_extra.context.ClickContext.print_table` with sorting
@@ -214,9 +213,8 @@ def print_sorted_table(
         return tuple(sorting_key)
 
     # Convert ExtendedTableFormat to BaseTableFormat if needed.
-    base_format = None
-    if table_format is not None and table_format.name in BaseTableFormat.__members__:
-        base_format = BaseTableFormat[table_format.name]
+    if table_format is not None:
+        table_format = BaseTableFormat[table_format.name]  # type: ignore[unreachable]
 
     # Sort and convert rows to list of strings for print_table
     sorted_rows: list[Sequence[str | None]] = [
@@ -227,7 +225,7 @@ def print_sorted_table(
     print_table(
         table_data=sorted_rows,
         headers=header_labels,
-        table_format=base_format,
+        table_format=table_format,
         **kwargs,
     )
 

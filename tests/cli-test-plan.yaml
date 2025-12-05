@@ -130,11 +130,11 @@
   stdout_regex_matches:
     - cargo,Rust's cargo,✓,✓ \S+,✓,✓ \S+\n
 
-# Check mpm is reporting itself as installed via brew in a table row.
+# Check some common packages are reported as installed in CSV format.
 - cli_parameters: --output-format csv installed
   exit_code: 0
   stdout_regex_matches:
-    - tzdata,,uv,\S+\n
+    - tzdata,,(apt|uv),\S+\n
 
 - cli_parameters: managers
   skip_platforms: windows

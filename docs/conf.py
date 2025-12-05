@@ -158,7 +158,8 @@ def convert_gh_admonitions(app, relative_path, parent_docname, contents):
                 if not replacing:
                     continue
                 # remove GH directive to match MyST directive
-                # since we are replacing on the original line, this will preserve the right indent, if any
+                # since we are replacing on the original line, this will preserve the
+                # right indent, if any
                 if line_roi.startswith("> "):
                     line = line.replace("> ", "", 1)
                 elif line_roi.rstrip() == ">":

@@ -188,8 +188,13 @@ docs = [
 [project.scripts]
 mpm = "meta_package_manager.__main__:main"
 
-[tool.uv]
-package = true
+[build-system]
+requires = ["uv_build >= 0.9.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# Package is at root level, not in "./src/".
+module-root = ""
 
 [tool.nuitka]
 product-name = "Meta Package Manager"

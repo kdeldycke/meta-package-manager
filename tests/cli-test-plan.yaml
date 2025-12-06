@@ -130,11 +130,19 @@
   stdout_regex_matches:
     - cargo,Rust's cargo,✓,✓ \S+,✓,✓ \S+\n
 
-# Check some common packages are reported as installed in CSV format.
+# Check some common packages are reported as installed in CSV format (Linux/macOS).
 - cli_parameters: --output-format csv installed
+  skip_platforms: windows
   exit_code: 0
   stdout_regex_matches:
     - tzdata,,(apt|uv),\S+\n
+
+# Check some common packages are reported as installed in CSV format (Windows).
+- cli_parameters: --output-format csv installed
+  only_platforms: windows
+  exit_code: 0
+  stdout_regex_matches:
+    - chocolatey,,choco,\S+\n
 
 - cli_parameters: managers
   skip_platforms: windows

@@ -12,6 +12,7 @@
 - [mpm] Remap pURL types to managers. Closes {issue}`1460`.
 - [mpm] Allow multiple regular expressions to be used for version matching.
 - [mpm] Remove maximum capped version of all dependencies (relax all `~=` specifiers to `>=`). This gives more freedom to downstream and upstream packagers. Document each minimal version choice.
+- [mpm] Add cooldown period for dependabot and `uv.lock` updates.
 - [mpm] Merge all label syncing jobs into a single one.
 - [mpm] Change the `test`, `typing` and `docs` extra dependency groups into development dependency groups.
 - [mpm] Add official support of Python 3.14.

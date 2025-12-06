@@ -1,5 +1,3 @@
-# https://docs.github.com/en/github/administering-a-repository
-# /configuration-options-for-dependency-updates
 ---
 version: 2
 updates:
@@ -9,6 +7,12 @@ updates:
     versioning-strategy: increase-if-necessary
     schedule:
       interval: "daily"
+    cooldown:
+      # Use prime numbers to stagger updates.
+      default-days: 7
+      semver-major-days: 29
+      semver-minor-days: 11
+      semver-patch-days: 5
     labels:
       - "📦 dependencies"
     assignees:
@@ -18,6 +22,9 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    cooldown:
+      # Use prime numbers to stagger updates.
+      default-days: 7
     labels:
       - "📦 dependencies"
     assignees:

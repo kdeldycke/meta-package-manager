@@ -1,4 +1,4 @@
-# Configuration
+# {octicon}`sliders` Configuration
 
 All `mpm` options can be set with a configuration file.
 

@@ -31,9 +31,9 @@ API <meta_package_manager>
 tests
 genindex
 modindex
-todolist
 changelog
 history
+todolist
 code-of-conduct
 license
 GitHub repository <https://github.com/kdeldycke/meta-package-manager>

@@ -13,6 +13,7 @@
 - [mpm] Allow multiple regular expressions to be used for version matching.
 - [mpm] Remove maximum capped version of all dependencies (relax all `~=` specifiers to `>=`). This gives more freedom to downstream and upstream packagers. Document each minimal version choice.
 - [mpm] Merge all label syncing jobs into a single one.
+- [mpm] Change the `test`, `typing` and `docs` extra dependency groups into development dependency groups.
 - [mpm] Add official support of Python 3.14.
 - [mpm] Re-introduce Python 3.10 support.
 - [mpm] Run tests on Python `3.10`, `3.14`, `3.15`, `3.14t` and `3.15t`.

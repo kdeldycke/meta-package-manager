@@ -893,7 +893,7 @@ dependencies = [
     { name = "xmltodict" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 docs = [
     { name = "click-extra", extra = ["sphinx"] },
     { name = "furo" },
@@ -932,41 +932,48 @@ requires-dist = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'", specifier = ">=1.3.0" },
     { name = "boltons", specifier = ">=25.0.0" },
     { name = "click-extra", specifier = ">=7.3.0" },
-    { name = "click-extra", extras = ["pytest"], marker = "extra == 'test'", specifier = ">=7.3.0" },
-    { name = "click-extra", extras = ["sphinx"], marker = "extra == 'docs'", specifier = ">=7.2.0" },
-    { name = "coverage", extras = ["toml"], marker = "extra == 'test'", specifier = "~=7.12.0" },
-    { name = "cyclonedx-python-lib", extras = ["validation"], specifier = ">=11.0.0" },
+    { name = "cyclonedx-python-lib", extras = ["validation"], specifier = ">=11.2.0" },
     { name = "extra-platforms", specifier = ">=5.0.0" },
-    { name = "extra-platforms", marker = "extra == 'test'", specifier = ">=5.0.0" },
-    { name = "furo", marker = "extra == 'docs'", specifier = "~=2025.9.25" },
-    { name = "more-itertools", specifier = ">=10.7.0" },
-    { name = "myst-parser", marker = "extra == 'docs'", specifier = "~=4.0.0" },
-    { name = "packageurl-python", specifier = ">=0.17.1" },
-    { name = "pytest", marker = "extra == 'test'", specifier = "~=9.0.1" },
-    { name = "pytest-cov", marker = "extra == 'test'", specifier = "~=7.0.0" },
-    { name = "pytest-github-actions-annotate-failures", marker = "extra == 'test'", specifier = "~=0.3.0" },
-    { name = "pytest-randomly", marker = "extra == 'test'", specifier = "~=4.0.1" },
-    { name = "pytest-xdist", extras = ["psutil"], marker = "extra == 'test'", specifier = "~=3.8.0" },
-    { name = "pyyaml", marker = "extra == 'test'", specifier = "~=6.0.0" },
+    { name = "more-itertools", specifier = ">=10.8.0" },
+    { name = "packageurl-python", specifier = ">=0.16.0" },
     { name = "spdx-tools", specifier = ">=0.8.2" },
-    { name = "sphinx", marker = "extra == 'docs'", specifier = ">=8.0.0" },
-    { name = "sphinx-autodoc-typehints", marker = "extra == 'docs'", specifier = ">=2.4.0" },
-    { name = "sphinx-click", marker = "extra == 'docs'", specifier = "~=6.2.0" },
-    { name = "sphinx-copybutton", marker = "extra == 'docs'", specifier = "~=0.5.2" },
-    { name = "sphinx-design", marker = "extra == 'docs'", specifier = "~=0.6.0" },
-    { name = "sphinx-issues", marker = "extra == 'docs'", specifier = "~=5.0.0" },
-    { name = "sphinxcontrib-mermaid", marker = "extra == 'docs'", specifier = "~=1.2.3" },
-    { name = "sphinxext-opengraph", marker = "extra == 'docs'", specifier = "~=0.13.0" },
     { name = "tabulate", extras = ["widechars"], specifier = ">=0.9" },
     { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.3.0" },
-    { name = "tomli-w", specifier = ">=1.2.0" },
-    { name = "types-boltons", marker = "extra == 'typing'", specifier = "~=25.0.0.20250919" },
-    { name = "types-pyyaml", marker = "extra == 'typing'", specifier = "~=6.0.12.9" },
-    { name = "types-tabulate", marker = "extra == 'typing'", specifier = "~=0.9.0.2" },
-    { name = "types-xmltodict", marker = "extra == 'typing'", specifier = "~=1.0.1.20250920" },
-    { name = "xmltodict", specifier = ">=0.15.1" },
+    { name = "tomli-w", specifier = ">=1.1.0" },
+    { name = "xmltodict", specifier = ">=1.0.0" },
 ]
-provides-extras = ["test", "typing", "docs"]
+
+[package.metadata.requires-dev]
+docs = [
+    { name = "click-extra", extras = ["sphinx"] },
+    { name = "furo", specifier = "~=2025.9.25" },
+    { name = "myst-parser", specifier = "~=4.0.0" },
+    { name = "sphinx" },
+    { name = "sphinx-autodoc-typehints", specifier = ">=2.4.0" },
+    { name = "sphinx-click", specifier = "~=6.2.0" },
+    { name = "sphinx-copybutton", specifier = "~=0.5.2" },
+    { name = "sphinx-design", specifier = "~=0.6.0" },
+    { name = "sphinx-issues", specifier = "~=5.0.0" },
+    { name = "sphinxcontrib-mermaid", specifier = "~=1.2.3" },
+    { name = "sphinxext-opengraph", specifier = "~=0.13.0" },
+]
+test = [
+    { name = "click-extra", extras = ["pytest"] },
+    { name = "coverage", extras = ["toml"], specifier = "~=7.12.0" },
+    { name = "extra-platforms" },
+    { name = "pytest", specifier = "~=9.0.1" },
+    { name = "pytest-cov", specifier = "~=7.0.0" },
+    { name = "pytest-github-actions-annotate-failures", specifier = "~=0.3.0" },
+    { name = "pytest-randomly", specifier = "~=4.0.1" },
+    { name = "pytest-xdist", extras = ["psutil"], specifier = "~=3.8.0" },
+    { name = "pyyaml", specifier = "~=6.0.0" },
+]
+typing = [
+    { name = "types-boltons", specifier = "~=25.0.0.20250919" },
+    { name = "types-pyyaml", specifier = "~=6.0.12.9" },
+    { name = "types-tabulate", specifier = "~=0.9.0.2" },
+    { name = "types-xmltodict", specifier = "~=1.0.1.20250920" },
+]
 
 [[package]]
 name = "more-itertools"
@@ -1906,11 +1913,11 @@ wheels = [
 
 [[package]]
 name = "urllib3"
-version = "2.5.0"
+version = "2.6.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/15/22/9ee70a2574a4f4599c47dd506532914ce044817c7752a79b6a51286319bc/urllib3-2.5.0.tar.gz", hash = "sha256:3fc47733c7e419d4bc3f6b3dc2b4f890bb743906a30d56ba4a5bfa4bbff92760", size = 393185, upload-time = "2025-06-18T14:07:41.644Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1c/43/554c2569b62f49350597348fc3ac70f786e3c32e7f19d266e19817812dd3/urllib3-2.6.0.tar.gz", hash = "sha256:cb9bcef5a4b345d5da5d145dc3e30834f58e8018828cbc724d30b4cb7d4d49f1", size = 432585, upload-time = "2025-12-05T15:08:47.885Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a7/c2/fe1e52489ae3122415c51f387e221dd0773709bad6c6cdaa599e8a2c5185/urllib3-2.5.0-py3-none-any.whl", hash = "sha256:e6b01673c0fa6a13e374b50871808eb3bf7046c4b125b216f6bf1cc604cff0dc", size = 129795, upload-time = "2025-06-18T14:07:40.39Z" },
+    { url = "https://files.pythonhosted.org/packages/56/1a/9ffe814d317c5224166b23e7c47f606d6e473712a2fad0f704ea9b99f246/urllib3-2.6.0-py3-none-any.whl", hash = "sha256:c90f7a39f716c572c4e3e58509581ebd83f9b59cced005b7db7ad2d22b0db99f", size = 131083, upload-time = "2025-12-05T15:08:45.983Z" },
 ]
 
 [[package]]

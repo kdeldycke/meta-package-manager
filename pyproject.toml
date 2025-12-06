@@ -113,29 +113,37 @@ dependencies = [
     "boltons >= 25.0.0",
     # click-extra 7.3.0 fix version fetching.
     "click-extra >= 7.3.0",
-    "cyclonedx-python-lib [validation] >= 11.0.0",
+    # cyclonedx-python-lib 11.2.0 is the first to support Python 3.14.
+    "cyclonedx-python-lib [validation] >= 11.2.0",
     # extra-platforms 5.0.0 is the first version to re-introduce support for Python 3.10.
     "extra-platforms >= 5.0.0",
-    "more-itertools >= 10.7.0",
-    "packageurl-python >= 0.17.1",
+    # more-itertools 10.8.0 is the first to support Python 3.14.
+    "more-itertools >= 10.8.0",
+    # packageurl-python 0.16.0 is the first to support Python 3.13.
+    "packageurl-python >= 0.16.0",
+    # spdx-tools 0.8.2 is the first version we used to implement SPDX support.
     "spdx-tools >= 0.8.2",
     # tabulate 0.9 is the first to add `*grid` and `*outline` formats.
     "tabulate [widechars] >= 0.9",
     # tomllib is not part of the standard library before Python 3.11. Version 2.3.0 is the first to support Python 3.14.
     "tomli >= 2.3.0 ; python_version < '3.11'",
-    "tomli_w >= 1.2.0",
-    "xmltodict >= 0.15.1",
+    # tomli_w 1.1.0 is the first to remove Python 3.8 support.
+    "tomli_w >= 1.1.0",
+    # xmltodict 1.0.0 is just the first major release.
+    "xmltodict >= 1.0.0",
 ]
+# Package referenced above and also featured in [project.optional-dependencies] or [dependency-groups]
+# will be set without version specifier as they are already constrained.
 
+# Runtime extra dependency groups, also relying on >= specifiers as explained above.
 [project.optional-dependencies]
-## Non-runtime dependencies, for development and CI, are using the ~= specifier to reduce randomness.
-## Unless the package has been referenced in sections above, in which case we align the version specifier.
+
+# Non-runtime development dependency groups, using the ~= specifier to reduce randomness.
+[dependency-groups]
 test = [
-    # click-extra 7.3.0 fix version fetching.
-    "click-extra [pytest] >= 7.3.0",
+    "click-extra [pytest]",
     "coverage [toml] ~= 7.12.0",
-    # extra-platforms 5.0.0 is the first version to re-introduce support for Python 3.10.
-    "extra-platforms >= 5.0.0",
+    "extra-platforms",
     "pytest ~= 9.0.1",
     "pyyaml ~= 6.0.0",
     "pytest-cov ~= 7.0.0",
@@ -150,12 +158,10 @@ typing = [
     "types-xmltodict ~= 1.0.1.20250920",
 ]
 docs = [
-    # click-extra 7.2.0 support transformation of GitHub alerts to MyST admonitions.
-    "click-extra [sphinx] >= 7.2.0",
+    "click-extra [sphinx]",
     "furo ~= 2025.9.25",
     "myst-parser ~= 4.0.0",
-    # Sphinx  8.0.0 is the first version to drop Python 3.9, like us.
-    "sphinx >= 8.0.0",
+    "sphinx",
     # sphinx-autodoc-typehints 2.4.0 is the first version that is aligned to our Python >= 3.10 requirement.
     "sphinx-autodoc-typehints >= 2.4.0",
     "sphinx-click ~= 6.2.0",

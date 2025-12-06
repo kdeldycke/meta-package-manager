@@ -17,7 +17,7 @@ jobs:
       - uses: astral-sh/setup-uv@v7.1.4
       - name: Update readme
         run: >
-          uv --no-progress run --frozen --all-extras --
+          uv --no-progress run --frozen --
           python -c 'from meta_package_manager.inventory import update_readme; update_readme()'
       - uses: peter-evans/create-pull-request@v7.0.9
         with:
@@ -40,6 +40,6 @@ jobs:
             readme.md
 
   autofix:
-    uses: kdeldycke/workflows/.github/workflows/autofix.yaml@v4.24.6
+    uses: kdeldycke/workflows/.github/workflows/autofix.yaml@v4.25.0
     # Depends on the previous job so that the Markdown syntax auto-fixer can have an effect on auto-updated content.
     needs: update-readme

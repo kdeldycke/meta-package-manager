@@ -137,6 +137,11 @@ dependencies = [
 
 # Runtime extra dependency groups, also relying on >= specifiers as explained above.
 [project.optional-dependencies]
+yaml = ["click-extra [yaml]"]
+json5 = ["click-extra [json5]"]
+jsonc = ["click-extra [jsonc]"]
+hjson = ["click-extra [hjson]"]
+xml = ["click-extra [xml]"]
 
 # Non-runtime development dependency groups, using the ~= specifier to reduce randomness.
 [dependency-groups]

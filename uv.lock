@@ -247,6 +247,15 @@ wheels = [
 ]
 
 [package.optional-dependencies]
+hjson = [
+    { name = "hjson" },
+]
+json5 = [
+    { name = "json5" },
+]
+jsonc = [
+    { name = "json-with-comments" },
+]
 pytest = [
     { name = "pytest" },
 ]
@@ -256,6 +265,12 @@ sphinx = [
     { name = "pygments-ansi-color" },
     { name = "sphinx", version = "8.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "sphinx", version = "8.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+]
+xml = [
+    { name = "xmltodict" },
+]
+yaml = [
+    { name = "pyyaml" },
 ]
 
 [[package]]
@@ -503,6 +518,15 @@ wheels = [
 ]
 
 [[package]]
+name = "hjson"
+version = "3.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/82/e5/0b56d723a76ca67abadbf7fb71609fb0ea7e6926e94fcca6c65a85b36a0e/hjson-3.1.0.tar.gz", hash = "sha256:55af475a27cf83a7969c808399d7bccdec8fb836a07ddbd574587593b9cdcf75", size = 40541, upload-time = "2022-08-13T02:53:01.919Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1f/7f/13cd798d180af4bf4c0ceddeefba2b864a63c71645abc0308b768d67bb81/hjson-3.1.0-py3-none-any.whl", hash = "sha256:65713cdcf13214fb554eb8b4ef803419733f4f5e551047c9b711098ab7186b89", size = 54018, upload-time = "2022-08-13T02:52:59.899Z" },
+]
+
+[[package]]
 name = "idna"
 version = "3.11"
 source = { registry = "https://pypi.org/simple" }
@@ -560,6 +584,24 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz", hash = "sha256:0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d", size = 245115, upload-time = "2025-03-05T20:05:02.478Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/62/a1/3d680cbfd5f4b8f15abc1d571870c5fc3e594bb582bc3b64ea099db13e56/jinja2-3.1.6-py3-none-any.whl", hash = "sha256:85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67", size = 134899, upload-time = "2025-03-05T20:05:00.369Z" },
+]
+
+[[package]]
+name = "json-with-comments"
+version = "1.2.10"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bf/6d/638e8adbb2b92bb0803c092dd8ae6482945961c8545fc7e2f21c48233928/json_with_comments-1.2.10.tar.gz", hash = "sha256:0020b321cf6c80963c85f95ce985e71332f1797ed49abfd1cd675b3bdee24a28", size = 6788, upload-time = "2024-12-10T05:46:37.415Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/00/8a/f67dadb0648f00ac2249d3ef32532f0d5a2e72016f8426290ce6fe575870/json_with_comments-1.2.10-py3-none-any.whl", hash = "sha256:d7989c2577b1f8cbba735209f8d388d21017feb42ef30c29c230040f86b42700", size = 6533, upload-time = "2024-12-10T05:46:34.856Z" },
+]
+
+[[package]]
+name = "json5"
+version = "0.12.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/12/ae/929aee9619e9eba9015207a9d2c1c54db18311da7eb4dcf6d41ad6f0eb67/json5-0.12.1.tar.gz", hash = "sha256:b2743e77b3242f8d03c143dd975a6ec7c52e2f2afe76ed934e53503dd4ad4990", size = 52191, upload-time = "2025-08-12T19:47:42.583Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/85/e2/05328bd2621be49a6fed9e3030b1e51a2d04537d3f816d211b9cc53c5262/json5-0.12.1-py3-none-any.whl", hash = "sha256:d9c9b3bc34a5f54d43c35e11ef7cb87d8bdd098c6ace87117a7b7e83e705c1d5", size = 36119, upload-time = "2025-08-12T19:47:41.131Z" },
 ]
 
 [[package]]
@@ -876,7 +918,7 @@ wheels = [
 
 [[package]]
 name = "meta-package-manager"
-version = "5.22.0"
+version = "6.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'" },
@@ -891,6 +933,23 @@ dependencies = [
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "tomli-w" },
     { name = "xmltodict" },
+]
+
+[package.optional-dependencies]
+hjson = [
+    { name = "click-extra", extra = ["hjson"] },
+]
+json5 = [
+    { name = "click-extra", extra = ["json5"] },
+]
+jsonc = [
+    { name = "click-extra", extra = ["jsonc"] },
+]
+xml = [
+    { name = "click-extra", extra = ["xml"] },
+]
+yaml = [
+    { name = "click-extra", extra = ["yaml"] },
 ]
 
 [package.dev-dependencies]
@@ -932,6 +991,11 @@ requires-dist = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'", specifier = ">=1.3.0" },
     { name = "boltons", specifier = ">=25.0.0" },
     { name = "click-extra", specifier = ">=7.3.0" },
+    { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'" },
+    { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'" },
+    { name = "click-extra", extras = ["jsonc"], marker = "extra == 'jsonc'" },
+    { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'" },
+    { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
     { name = "cyclonedx-python-lib", extras = ["validation"], specifier = ">=11.2.0" },
     { name = "extra-platforms", specifier = ">=5.0.0" },
     { name = "more-itertools", specifier = ">=10.8.0" },
@@ -942,6 +1006,7 @@ requires-dist = [
     { name = "tomli-w", specifier = ">=1.1.0" },
     { name = "xmltodict", specifier = ">=1.0.0" },
 ]
+provides-extras = ["yaml", "json5", "jsonc", "hjson", "xml"]
 
 [package.metadata.requires-dev]
 docs = [

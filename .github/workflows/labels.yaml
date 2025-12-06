@@ -38,8 +38,316 @@ jobs:
             .github/labels-extra.json
 
   labels:
-    uses: kdeldycke/workflows/.github/workflows/labels.yaml@v4.24.6
+    uses: kdeldycke/workflows/.github/workflows/labels.yaml@v4.25.0
     needs: generate-labels
     with:
       extra-label-files: |
         .github/labels-extra.json
+      extra-file-rules: |
+        "🔌 bar-plugin":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/bar_plugin/*
+              - tests/*bar_plugin*
+
+        "📦 manager: apm":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/apm*
+              - tests/*apm*
+
+        "📦 manager: cargo":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/cargo*
+              - tests/*cargo*
+
+        "📦 manager: choco":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/chocolatey*
+              - tests/*chocolatey*
+
+        "📦 manager: composer":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/composer*
+              - tests/*composer*
+
+        "📦 manager: dnf-based":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/dnf*
+              - tests/*dnf*
+
+        "📦 manager: dpkg-based":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/apt*
+              - meta_package_manager/managers/dpkg*
+              - meta_package_manager/managers/opkg*
+              - tests/*apt*
+              - tests/*dpkg*
+              - tests/*opkg*
+
+        "📦 manager: emerge":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/emerge*
+              - tests/*emerge*
+
+        "📦 manager: eopkg":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/eopkg*
+              - tests/*eopkg*
+
+        "📦 manager: flatpak":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/flatpak*
+              - tests/*flatpak*
+
+        "📦 manager: fwupd":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/fwupd*
+              - tests/*fwupd*
+
+        "📦 manager: gem":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/gem*
+              - tests/*gem*
+
+        "📦 manager: homebrew":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/homebrew*
+              - tests/*homebrew*
+
+        "📦 manager: mas":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/mas*
+              - tests/*mas*
+
+        "📦 manager: mpm":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/*
+
+        "📦 manager: npm-based":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/npm*
+              - meta_package_manager/managers/yarn*
+              - tests/*npm*
+              - tests/*yarn*
+
+        "📦 manager: pacman-based":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/pacman*
+              - meta_package_manager/managers/pacaur*
+              - meta_package_manager/managers/paru*
+              - meta_package_manager/managers/yay*
+              - tests/*pacman*
+              - tests/*pacaur*
+              - tests/*paru*
+              - tests/*yay*
+
+        "📦 manager: pip-based":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/pip*
+              - tests/*pip*
+
+        "📦 manager: pkg":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/pkg*
+
+        "📦 manager: scoop":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/scoop*
+              - tests/*scoop*
+
+        "📦 manager: snap":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/snap*
+              - tests/*snap*
+
+        "📦 manager: steamcmd":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/steamcmd*
+              - tests/*steamcmd*
+
+        "📦 manager: uv":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/uv*
+              - tests/*uv*
+
+        "📦 manager: vscode-based":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/vscode*
+              - tests/*vscode*
+
+        "📦 manager: winget":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/winget*
+              - tests/*winget*
+
+        "📦 manager: zypper":
+          - changed-files:
+            - any-glob-to-any-file:
+              - meta_package_manager/managers/zypper*
+              - tests/*zypper*
+      extra-content-rules: |
+        "🔌 bar-plugin":
+          - "xbar"
+          - "swiftbar"
+          - "plugin"
+
+        "📦 manager: apm":
+          - "apm"
+          - "atom"
+
+        "📦 manager: cargo":
+          - "cargo"
+          - "rust"
+          - "crate"
+
+        "📦 manager: choco":
+          - "choco"
+          - "chocolatey"
+
+        "📦 manager: composer":
+          - "composer"
+          - "php"
+
+        "📦 manager: dnf-based":
+          - "dnf"
+          - "yum"
+          - "rpm"
+          - "fedora"
+          - "redhat"
+          - "rhel"
+
+        "📦 manager: dpkg-based":
+          - "apt"
+          - "apt-mint"
+          - "aptitude"
+          - "dpkg"
+          - "opkg"
+          - "ubuntu"
+          - "debian"
+          - "mint"
+
+        "📦 manager: emerge":
+          - "emerge"
+          - "portage"
+          - "gentoo"
+
+        "📦 manager: eopkg":
+          - "eopkg"
+          - "solus"
+
+        "📦 manager: flatpak":
+          - "flatpak"
+          - "flat"
+
+        "📦 manager: fwupd":
+          - "fwupd"
+          - "fwupdmgr"
+          - "lvfs"
+
+        "📦 manager: gem":
+          - "gem"
+          - "ruby"
+
+        "📦 manager: homebrew":
+          - "brew"
+          - "cask"
+          - "homebrew"
+          - "tap"
+          - "formula"
+
+        "📦 manager: mas":
+          - "mas"
+          - "app store"
+          - "app-store"
+
+        "📦 manager: npm-based":
+          - "npm"
+          - "node"
+          - "yarn"
+
+        "📦 manager: pacman-based":
+          - "pacman"
+          - "arch"
+          - "pacaur"
+          - "paru"
+          - "yay"
+
+        "📦 manager: pip-based":
+          - "pip"
+          - "pipx"
+
+        "📦 manager: pkg":
+          - "pkg"
+
+        "📦 manager: scoop":
+          - "scoop"
+
+        "📦 manager: snap":
+          - "snap"
+
+        "📦 manager: steamcmd":
+          - "steamcmd"
+          - "steam"
+          - "valve"
+
+        "📦 manager: uv":
+          - "uv"
+
+        "📦 manager: vscode-based":
+          - "vscode"
+          - "vscodium"
+          - "visual studio code"
+          - "visual studio"
+
+        "📦 manager: winget":
+          - "winget"
+
+        "📦 manager: zypper":
+          - "zypper"
+          - "opensuse"
+          - "suse"
+
+        "🖥 platform: BSD":
+          - "bsd"
+
+        "🖥 platform: Linux":
+          - "linux"
+
+        "🖥 platform: macOS":
+          - "macos"
+          - "mac os"
+          - "osx"
+          - "os x"
+          - "apple"
+
+        "🖥 platform: Unix":
+          - "unix"
+
+        "🖥 platform: Windows":
+          - "windows"
+          - "c:"
+          - "microsoft"

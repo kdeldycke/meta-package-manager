@@ -172,13 +172,13 @@ def test_labeller_rules():
     }
     assert canonical_platforms
 
-    # Extract rules from json blurb serialized into YAML.
+    # Extract rules from the labels workflow.
     content = PROJECT_ROOT.joinpath(
-        ".github/workflows/labeller-content-based.yaml",
+        ".github/workflows/labels.yaml",
     ).read_text(encoding="utf-8")
-    assert "kdeldycke/workflows/.github/workflows/labeller-file-based.yaml" in content
-    extra_rules = load(content, Loader=Loader)["jobs"]["labeller"]["with"][
-        "extra-rules"
+    assert "kdeldycke/workflows/.github/workflows/labels.yaml" in content
+    extra_rules = load(content, Loader=Loader)["jobs"]["labels"]["with"][
+        "extra-content-rules"
     ]
     rules = load(extra_rules, Loader=Loader)
     assert rules

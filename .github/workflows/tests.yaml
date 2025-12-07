@@ -144,6 +144,7 @@ jobs:
         #   The upgrade of strawberryperl was NOT successful.
         run: |
           choco pin add --name="strawberryperl"
+          choco pin add --name="rtools"
       - name: Chocolatey - Windows full upgrade
         if: runner.os == 'Windows'
         # We upgrade all packages preemptively as the test suite will attempt it but fail,

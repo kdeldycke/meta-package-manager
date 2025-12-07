@@ -147,34 +147,34 @@ xml = ["click-extra [xml]"]
 [dependency-groups]
 test = [
     "click-extra [pytest]",
-    "coverage [toml] ~= 7.12.0",
+    "coverage [toml] >= 7.12.0",
     "extra-platforms",
-    "pytest ~= 9.0.1",
-    "pyyaml ~= 6.0.0",
-    "pytest-cov ~= 7.0.0",
-    "pytest-github-actions-annotate-failures ~= 0.3.0",
-    "pytest-randomly ~= 4.0.1",
-    "pytest-xdist [psutil] ~= 3.8.0",
+    "pytest >= 9.0.1",
+    "pyyaml >= 6.0.0",
+    "pytest-cov >= 7.0.0",
+    "pytest-github-actions-annotate-failures >= 0.3.0",
+    "pytest-randomly >= 4.0.1",
+    "pytest-xdist [psutil] >= 3.8.0",
 ]
 typing = [
-    "types-boltons ~= 25.0.0.20250919",
-    "types-PyYAML ~= 6.0.12.9",
-    "types-tabulate ~= 0.9.0.2",
-    "types-xmltodict ~= 1.0.1.20250920",
+    "types-boltons >= 25.0.0.20250919",
+    "types-PyYAML >= 6.0.12.9",
+    "types-tabulate >= 0.9.0.2",
+    "types-xmltodict >= 1.0.1.20250920",
 ]
 docs = [
     "click-extra [sphinx]",
-    "furo ~= 2025.9.25",
-    "myst-parser ~= 4.0.0",
+    "furo >= 2025.9.25",
+    "myst-parser >= 4.0.0",
     "sphinx",
     # sphinx-autodoc-typehints 2.4.0 is the first version that is aligned to our Python >= 3.10 requirement.
     "sphinx-autodoc-typehints >= 2.4.0",
-    "sphinx-click ~= 6.2.0",
-    "sphinx-copybutton ~= 0.5.2",
-    "sphinx-design ~= 0.6.0",
-    "sphinx-issues ~= 5.0.0",
-    "sphinxcontrib-mermaid ~= 1.2.3",
-    "sphinxext-opengraph ~= 0.13.0",
+    "sphinx-click >= 6.2.0",
+    "sphinx-copybutton >= 0.5.2",
+    "sphinx-design >= 0.6.0",
+    "sphinx-issues >= 5.0.0",
+    "sphinxcontrib-mermaid >= 1.2.3",
+    "sphinxext-opengraph >= 0.13.0",
 ]
 
 [project.urls]

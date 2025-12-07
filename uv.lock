@@ -481,14 +481,14 @@ wheels = [
 
 [[package]]
 name = "extra-platforms"
-version = "5.0.1"
+version = "5.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "distro" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fe/13/bcc99643d71c1c5e1bd0571549fe32275aac6cf905b4c84ee21bf9f0eb41/extra_platforms-5.0.1.tar.gz", hash = "sha256:96dddd8e16711187305e20cbc8005efada786155b658ac6983647c975a70ca34", size = 47529, upload-time = "2025-11-15T13:44:39.852Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4b/87/594306b0ce79517405b2886bca0e390819ead2c17f66d6d8a013bf767bc2/extra_platforms-5.1.0.tar.gz", hash = "sha256:53c11441c8e7552e70d351fe225222dbcc8d6addcfafaf10b72501d22f36394b", size = 31882, upload-time = "2025-12-06T15:30:19.501Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bb/15/e58cbea0cdcdf438aef5a559dec097b5f8ec65867cd279bb090d1ea934c2/extra_platforms-5.0.1-py3-none-any.whl", hash = "sha256:f5da34ea34405c61d98dece3aa4292be41b8722476310a0c6f3242c71c15547a", size = 34391, upload-time = "2025-11-15T13:44:38.563Z" },
+    { url = "https://files.pythonhosted.org/packages/e4/43/9c871fe567f8e22e0f9d9e32f99a7d50b8faf92963a8360476f897134d96/extra_platforms-5.1.0-py3-none-any.whl", hash = "sha256:9b76fc1eb55078f9fbf6b051282a238fb141018452958e2d956d9967a94dcf0a", size = 34244, upload-time = "2025-12-06T15:30:18.388Z" },
 ]
 
 [[package]]
@@ -1011,33 +1011,33 @@ provides-extras = ["yaml", "json5", "jsonc", "hjson", "xml"]
 [package.metadata.requires-dev]
 docs = [
     { name = "click-extra", extras = ["sphinx"] },
-    { name = "furo", specifier = "~=2025.9.25" },
-    { name = "myst-parser", specifier = "~=4.0.0" },
+    { name = "furo", specifier = ">=2025.9.25" },
+    { name = "myst-parser", specifier = ">=4.0.0" },
     { name = "sphinx" },
     { name = "sphinx-autodoc-typehints", specifier = ">=2.4.0" },
-    { name = "sphinx-click", specifier = "~=6.2.0" },
-    { name = "sphinx-copybutton", specifier = "~=0.5.2" },
-    { name = "sphinx-design", specifier = "~=0.6.0" },
-    { name = "sphinx-issues", specifier = "~=5.0.0" },
-    { name = "sphinxcontrib-mermaid", specifier = "~=1.2.3" },
-    { name = "sphinxext-opengraph", specifier = "~=0.13.0" },
+    { name = "sphinx-click", specifier = ">=6.2.0" },
+    { name = "sphinx-copybutton", specifier = ">=0.5.2" },
+    { name = "sphinx-design", specifier = ">=0.6.0" },
+    { name = "sphinx-issues", specifier = ">=5.0.0" },
+    { name = "sphinxcontrib-mermaid", specifier = ">=1.2.3" },
+    { name = "sphinxext-opengraph", specifier = ">=0.13.0" },
 ]
 test = [
     { name = "click-extra", extras = ["pytest"] },
-    { name = "coverage", extras = ["toml"], specifier = "~=7.12.0" },
+    { name = "coverage", extras = ["toml"], specifier = ">=7.12.0" },
     { name = "extra-platforms" },
-    { name = "pytest", specifier = "~=9.0.1" },
-    { name = "pytest-cov", specifier = "~=7.0.0" },
-    { name = "pytest-github-actions-annotate-failures", specifier = "~=0.3.0" },
-    { name = "pytest-randomly", specifier = "~=4.0.1" },
-    { name = "pytest-xdist", extras = ["psutil"], specifier = "~=3.8.0" },
-    { name = "pyyaml", specifier = "~=6.0.0" },
+    { name = "pytest", specifier = ">=9.0.1" },
+    { name = "pytest-cov", specifier = ">=7.0.0" },
+    { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },
+    { name = "pytest-randomly", specifier = ">=4.0.1" },
+    { name = "pytest-xdist", extras = ["psutil"], specifier = ">=3.8.0" },
+    { name = "pyyaml", specifier = ">=6.0.0" },
 ]
 typing = [
-    { name = "types-boltons", specifier = "~=25.0.0.20250919" },
-    { name = "types-pyyaml", specifier = "~=6.0.12.9" },
-    { name = "types-tabulate", specifier = "~=0.9.0.2" },
-    { name = "types-xmltodict", specifier = "~=1.0.1.20250920" },
+    { name = "types-boltons", specifier = ">=25.0.0.20250919" },
+    { name = "types-pyyaml", specifier = ">=6.0.12.9" },
+    { name = "types-tabulate", specifier = ">=0.9.0.2" },
+    { name = "types-xmltodict", specifier = ">=1.0.1.20250920" },
 ]
 
 [[package]]
@@ -1173,7 +1173,7 @@ wheels = [
 
 [[package]]
 name = "pytest"
-version = "9.0.1"
+version = "9.0.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
@@ -1184,9 +1184,9 @@ dependencies = [
     { name = "pygments" },
     { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/07/56/f013048ac4bc4c1d9be45afd4ab209ea62822fb1598f40687e6bf45dcea4/pytest-9.0.1.tar.gz", hash = "sha256:3e9c069ea73583e255c3b21cf46b8d3c56f6e3a1a8f6da94ccb0fcf57b9d73c8", size = 1564125, upload-time = "2025-11-12T13:05:09.333Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d1/db/7ef3487e0fb0049ddb5ce41d3a49c235bf9ad299b6a25d5780a89f19230f/pytest-9.0.2.tar.gz", hash = "sha256:75186651a92bd89611d1d9fc20f0b4345fd827c41ccd5c299a868a05d70edf11", size = 1568901, upload-time = "2025-12-06T21:30:51.014Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0b/8b/6300fb80f858cda1c51ffa17075df5d846757081d11ab4aa35cef9e6258b/pytest-9.0.1-py3-none-any.whl", hash = "sha256:67be0030d194df2dfa7b556f2e56fb3c3315bd5c8822c6951162b92b32ce7dad", size = 373668, upload-time = "2025-11-12T13:05:07.379Z" },
+    { url = "https://files.pythonhosted.org/packages/3b/ab/b3226f0bd7cdcf710fbede2b3548584366da3b19b5021e74f5bde2a8fa3f/pytest-9.0.2-py3-none-any.whl", hash = "sha256:711ffd45bf766d5264d487b917733b453d917afd2b0ad65223959f59089f875b", size = 374801, upload-time = "2025-12-06T21:30:49.154Z" },
 ]
 
 [[package]]

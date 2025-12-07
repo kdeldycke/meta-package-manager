@@ -61,8 +61,6 @@ myst_enable_extensions = [
 # https://github.com/mgaitan/sphinxcontrib-mermaid/issues/99#issuecomment-2339587001
 myst_fence_as_directive = ["mermaid"]
 
-# Always use the latest version of Mermaid.
-mermaid_version = "latest"
 mermaid_d3_zoom = True
 
 master_doc = "index"

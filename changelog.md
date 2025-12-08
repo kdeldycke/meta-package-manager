@@ -1,5 +1,10 @@
 # Changelog
 
+## [6.0.1 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.0.0...main)
+
+> [!IMPORTANT]
+> This version is not released yet and is under active development.
+
 ## [6.0.0 (2025-12-08)](https://github.com/kdeldycke/meta-package-manager/compare/v5.21.0...v6.0.0)
 
 - [mpm] Add `--no-config` option inherited from Click Extra.

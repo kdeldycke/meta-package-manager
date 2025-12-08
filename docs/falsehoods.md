@@ -33,6 +33,8 @@ Implementing `mpm` exposed me to many edge-cases and pitfalls of package managem
 1. A package is found under the same name in different package managers.
 1. Package managers
    [can resolve dependencies](https://github.com/pypa/pip/issues/988).
+1. Package managers [resolve dependencies the same way](https://github.com/ecosyste-ms/package-manager-resolvers).
+1. Package managers [solvers are correct and complete](https://arxiv.org/abs/2011.07851).
 1. All dependencies are provided by the package manager.
 1. Package managers have a CLI.
 1. Package managers behave the same across OSes and distributions.

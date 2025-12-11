@@ -45,16 +45,14 @@
 - Backup list of installed packages to TOML file.
 - Restore/install list of packages from TOML files.
 - Software Bill of Materials: export installed packages to [SPDX](https://spdx.dev) and [CycloneDX](https://cyclonedx.org) SBOM files.
-- Pin-point commands to a subset of package managers (include/exclude
-  selectors).
+- Pin-point commands to a subset of package managers (include/exclude selectors).
 - Support plain, versioned and [purl](https://github.com/package-url/purl-spec) package specifiers.
 - Export output to JSON or print user-friendly tables.
+- [Standalone executables](#executables) for Linux, macOS and Windows.
 - Shell auto-completion for Bash, Zsh and Fish.
-- Provides a
-  [Xbar/SwiftBar plugin](https://kdeldycke.github.io/meta-package-manager/bar-plugin.html) for
+- Provides a [Xbar/SwiftBar plugin](https://kdeldycke.github.io/meta-package-manager/bar-plugin.html) for
   friendly macOS integration.
-- Because `mpm` try to wrap all other package managers, it became another
-  pathological case of [XKCD #927: Standards](https://xkcd.com/927/)
+- Because `mpm` try to wrap all other package managers, it became another pathological case of [XKCD #927: Standards](https://xkcd.com/927/)
 
 ## Supported package managers
 
@@ -152,7 +150,6 @@ Meta Package Manager,zypper,1
 <!-- operation-matrix-end -->
 
 > [!NOTE]
-> Missing manager
 > If your favorite manager is missing or does not support an operation, you can influence its implementation: [open a ticket to document its output](https://github.com/kdeldycke/meta-package-manager/issues/new?assignees=&labels=%F0%9F%8E%81+feature+request&template=new-package-manager.yaml) or [read the contribution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html) and submit a pull request.
 >
 > You can help if you [purchase business support 🤝](https://github.com/sponsors/kdeldycke) or [sponsor the project 🫶](https://github.com/sponsors/kdeldycke).
@@ -163,7 +160,7 @@ All [installation methods](https://kdeldycke.github.io/meta-package-manager/inst
 
 ### Try it now
 
-[`uv`](https://docs.astral.sh/uv/getting-started/installation/) is the fastest way to run `mpm` on any platform, thanks to its [`uvx` command](https://docs.astral.sh/uv/guides/tools/#running-tools):
+Thanks to [`uv`](https://docs.astral.sh/uv/getting-started/installation/), you can run `mpm` on any platform in one command, without installation or venv:
 
 ```shell-session
 $ uvx --from meta-package-manager -- mpm
@@ -187,7 +184,7 @@ $ brew install meta-package-manager
 
 ### Executables
 
-Standalone binaries of `mpm`'s latest version are available as direct downloads for several platforms and architectures:
+Standalone binaries of `mpm` latest version are available as direct downloads for several platforms and architectures:
 
 | Platform    | `arm64`                                                                                                                              | `x86_64`                                                                                                                         |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -292,11 +289,8 @@ If your favorite manager is not supported yet, you can help! See the [contributi
 
 Other subcommands and options are documented in:
 
-- the
-  [detailed help screens](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html)
-- the
-  [list of use-cases](https://kdeldycke.github.io/meta-package-manager/usecase.html)
-  where you’ll find inspiration on how to leverage `mpm` power
+- the [detailed help screens](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html)
+- the [list of use-cases](https://kdeldycke.github.io/meta-package-manager/usecase.html) where you’ll find inspiration on how to leverage `mpm` power
 
 <!-- operation-footnotes-start -->
 

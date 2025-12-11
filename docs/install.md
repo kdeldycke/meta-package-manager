@@ -12,7 +12,9 @@ So you can install the latest stable release with your favorite package manager 
 $ pip install meta-package-manager
 ```
 
-```{danger} Danger: **Misleading package name**
+```{danger}
+**Misleading package name**
+
 ![Angry package](assets/angry-paper-box.png){w=50px align=right}
 
 There is a *`mpm`* Python module on PyPi that has nothing to do with this project. Avoid it!
@@ -148,11 +150,11 @@ This is the preferred way of testing `mpm` without polluting your machine. They 
 
 All links above points to the latest released version of `mpm`.
 
-```{seealso} Older releases
+```{seealso}
 If you need to test previous versions for regression, compatibility or general troubleshooting, you'll find the old binaries attached as assets to [past releases on GitHub](https://github.com/kdeldycke/meta-package-manager/releases).
 ```
 
-```{caution} Development builds
+```{caution}
 Each commit to the development branch triggers the compilation of binaries. This way you can easily test the bleeding edge version of `mpm` and report any issue.
 
 Look at the [list of latest binary builds](https://github.com/kdeldycke/meta-package-manager/actions/workflows/release.yaml?query=branch%3Amain+is%3Asuccess). Then select the latest `Build & release`/`release.yaml` workflow run and download the binary artifact corresponding to your platform and architecture.
@@ -269,7 +271,7 @@ $ mpm --yay  install meta-package-manager
 
 ## Python module usage
 
-Meta package manager should now be available system-wide:
+Meta Package Manager should now be available system-wide:
 
 ```shell-session
 $ mpm --version
@@ -395,9 +397,9 @@ _MPM_COMPLETE=fish_source mpm > ~/.config/fish/completions/mpm.fish
 
 `````
 
-## Python dependencies
+## Main dependencies
 
-FYI, here is a graph of Python package dependencies:
+This is a graph of the default, main dependencies of the Python package:
 
 ```mermaid assets/dependencies.mmd
 :align: center

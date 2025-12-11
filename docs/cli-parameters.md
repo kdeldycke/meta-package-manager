@@ -1,4 +1,4 @@
-# CLI parameters
+# {octicon}`command-palette` CLI parameters
 
 ## Help screen
 

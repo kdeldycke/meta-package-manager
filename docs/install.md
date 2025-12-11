@@ -44,6 +44,12 @@ $ uvx --from meta-package-manager@5.21.0 -- mpm
 $ uvx --from git+https://github.com/kdeldycke/meta-package-manager -- mpm
 ```
 ````
+
+````{tab-item} Local version
+```shell-session
+$ uvx --from file:///Users/me/code/meta-package-manager -- mpm
+```
+````
 `````
 
 This will download `meta-package-manager` (the package), and run `mpm`, the CLI included in the package.

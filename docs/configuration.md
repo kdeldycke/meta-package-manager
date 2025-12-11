@@ -4,15 +4,13 @@ All `mpm` options can be set with a configuration file.
 
 ## Location
 
-Location depends on OS (see
-[`click-extra` doc](https://kdeldycke.github.io/click-extra/config.html#pattern-matching)):
+Location depends on OS (see [`click-extra` doc](https://kdeldycke.github.io/click-extra/config.html#default-folder)):
 
-- macOS:
-  `~/Library/Application Support/mpm/*.{toml,yaml,yml,json,ini,xml}`
-- Unix:
-  `~/.config/mpm/*.{toml,yaml,yml,json,ini,xml}`
-- Windows (roaming):
-  `C:\Users\<user>\AppData\Roaming\mpm\*.{toml,yaml,yml,json,ini,xml}`
+| Platform | Folder                                    |
+| :------- | :---------------------------------------- |
+| macOS    | `~/Library/Application Support/mpm/`   |
+| Unix     | `~/.config/mpm/`                       |
+| Windows  | `C:\Users\<user>\AppData\Roaming\mpm\` |
 
 ## TOML sample
 
@@ -118,8 +116,7 @@ paru = false
 
 You can easily debug the way `mpm` source its configuration with the `--show-params`:
 
-```{eval-rst}
-.. click:run::
-    from meta_package_manager.cli import mpm
-    invoke(mpm, args=["--show-params"])
+```{click:run}
+from meta_package_manager.cli import mpm
+invoke(mpm, args=["--table-format", "vertical", "--show-params"])
 ```

@@ -501,7 +501,7 @@ jobs:
           --ignore=./tests/test_bar_plugin.py
 
       - name: Codecov - coverage
-        uses: codecov/codecov-action@v5.5.1
+        uses: codecov/codecov-action@v5.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Codecov - test results

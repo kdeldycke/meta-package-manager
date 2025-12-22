@@ -435,7 +435,7 @@ jobs:
           choco install steamcmd --no-progress --yes
 
       - name: Install UV
-        uses: astral-sh/setup-uv@v7.1.4
+        uses: astral-sh/setup-uv@v7.1.6
       - name: Install Python ${{ matrix.python-version }}
         # If UV cannot find the requested Python version, it exits with code 2, which let the job pass unnoticed on
         # Windows. So we force the shell to bash, even on Windows, and "set -e" to ensure any error in the install
@@ -660,7 +660,7 @@ jobs:
         run: |
           sudo defaults -currentHost write /Library/Preferences/com.apple.powerlogd SMCMonitorCadence 0
           sudo killall PerfPowerServices || true
-      - uses: astral-sh/setup-uv@v7.1.4
+      - uses: astral-sh/setup-uv@v7.1.6
         with:
           # windows-2025 runners have only Python 3.9 installed.
           python-version: ${{ matrix.os == 'windows-2025' && '3.10' || ''}}

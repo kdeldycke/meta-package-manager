@@ -400,7 +400,7 @@ jobs:
       - name: Ruby & Gem - Ubuntu
         # As of Ubuntu 21.04, RubyGems is exclusively managed by APT. A call to "sudo gem update --system"
         # ends up with the following error:
-        #   ERROR:  Your RubyGems was installed trough APT, and upgrading it through RubyGems
+        #   ERROR:  Your RubyGems was installed through APT, and upgrading it through RubyGems
         #   itself is unsupported. If you really need the latest version of RubyGems (tip:
         #   you usually don't), then you need to install RubyGems (and Ruby) manually,
         #   maybe using tools like ruby-install, rvm, etc.

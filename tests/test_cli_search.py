@@ -24,10 +24,7 @@ from time import sleep
 
 import pytest
 from boltons.iterutils import same
-from extra_platforms.pytest import (  # type: ignore[attr-defined]
-    skip_github_ci,
-    unless_macos,
-)
+from extra_platforms.pytest import skip_github_ci, unless_macos
 
 from meta_package_manager.base import Operations, Package
 from meta_package_manager.pool import pool

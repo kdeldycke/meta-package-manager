@@ -27,7 +27,7 @@ from boltons.iterutils import flatten
 from click_extra._types import TEnvVars
 from click_extra.envvar import env_copy
 from click_extra.testing import args_cleanup
-from extra_platforms.pytest import unless_macos  # type: ignore[attr-defined]
+from extra_platforms.pytest import unless_macos
 
 from meta_package_manager import bar_plugin
 from meta_package_manager.version import parse_version

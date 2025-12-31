@@ -99,7 +99,13 @@ def operation_matrix() -> tuple[str, str]:
             footnote_tag = f"[^{p_obj.id}]"
             header_title += footnote_tag
             platforms_string = ", ".join(
-                sorted((p.name for p in p_obj.members.values()), key=str.casefold),
+                sorted(
+                    (
+                        p.name
+                        for p in p_obj.members.values()  # type: ignore[attr-defined]
+                    ),
+                    key=str.casefold,
+                ),
             )
             footnotes.append(f"{footnote_tag}: {p_obj.name}: {platforms_string}.")
         headers.append(header_title)

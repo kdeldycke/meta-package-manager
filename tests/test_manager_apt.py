@@ -20,7 +20,7 @@ from __future__ import annotations
 import subprocess
 
 import pytest
-from extra_platforms.pytest import unless_linux  # type: ignore[attr-defined]
+from extra_platforms.pytest import unless_linux
 
 
 @pytest.fixture

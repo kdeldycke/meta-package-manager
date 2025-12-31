@@ -6,8 +6,8 @@ All `mpm` options can be set with a configuration file.
 
 Location depends on OS (see [`click-extra` doc](https://kdeldycke.github.io/click-extra/config.html#default-folder)):
 
-| Platform | Folder                                    |
-| :------- | :---------------------------------------- |
+| Platform | Folder                                 |
+| :------- | :------------------------------------- |
 | macOS    | `~/Library/Application Support/mpm/`   |
 | Unix     | `~/.config/mpm/`                       |
 | Windows  | `C:\Users\<user>\AppData\Roaming\mpm\` |

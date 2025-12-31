@@ -135,7 +135,7 @@ PLATFORM_PREFIX = "🖥 platform: "
 PLATFORM_LABEL_GROUPS: TLabelGroup = {}
 for p_obj in MAIN_PLATFORMS:
     PLATFORM_LABEL_GROUPS[p_obj.name] = frozenset(
-        p.name for p in Group._extract_platforms(p_obj)
+        p.name for p in Group._extract_members(p_obj)
     )
 """Similar platforms are grouped together under the same label."""
 

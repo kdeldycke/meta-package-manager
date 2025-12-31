@@ -484,14 +484,10 @@ wheels = [
 
 [[package]]
 name = "extra-platforms"
-version = "5.0.1"
-source = { registry = "https://pypi.org/simple" }
+version = "6.0.0"
+source = { git = "https://github.com/kdeldycke/extra-platforms?branch=main#6ed5d5e64c509fe1764aed930091953500771c2f" }
 dependencies = [
     { name = "distro" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/fe/13/bcc99643d71c1c5e1bd0571549fe32275aac6cf905b4c84ee21bf9f0eb41/extra_platforms-5.0.1.tar.gz", hash = "sha256:96dddd8e16711187305e20cbc8005efada786155b658ac6983647c975a70ca34", size = 47529, upload-time = "2025-11-15T13:44:39.852Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/bb/15/e58cbea0cdcdf438aef5a559dec097b5f8ec65867cd279bb090d1ea934c2/extra_platforms-5.0.1-py3-none-any.whl", hash = "sha256:f5da34ea34405c61d98dece3aa4292be41b8722476310a0c6f3242c71c15547a", size = 34391, upload-time = "2025-11-15T13:44:38.563Z" },
 ]
 
 [[package]]
@@ -1000,7 +996,7 @@ requires-dist = [
     { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'" },
     { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
     { name = "cyclonedx-python-lib", extras = ["validation"], specifier = ">=11.2.0" },
-    { name = "extra-platforms", specifier = ">=5.0.0" },
+    { name = "extra-platforms", git = "https://github.com/kdeldycke/extra-platforms?branch=main" },
     { name = "more-itertools", specifier = ">=10.8.0" },
     { name = "packageurl-python", specifier = ">=0.16.0" },
     { name = "spdx-tools", specifier = ">=0.8.2" },
@@ -1028,7 +1024,7 @@ docs = [
 test = [
     { name = "click-extra", extras = ["pytest"] },
     { name = "coverage", extras = ["toml"], specifier = ">=7.12.0" },
-    { name = "extra-platforms" },
+    { name = "extra-platforms", git = "https://github.com/kdeldycke/extra-platforms?branch=main" },
     { name = "pytest", specifier = ">=9.0.1" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },

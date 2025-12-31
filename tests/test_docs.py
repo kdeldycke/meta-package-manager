@@ -71,7 +71,7 @@ def test_all_platforms_covered_by_local_groups(manager):
     """Check all platforms supported by managers are covered by a local group."""
     leftover_platforms = set(manager.platforms.copy())
 
-    for main_platform in (set(Group._extract_platforms(i)) for i in MAIN_PLATFORMS):
+    for main_platform in (set(Group._extract_members(i)) for i in MAIN_PLATFORMS):
         # Check the group fully overlap the manager platforms.
         if main_platform.issubset(manager.platforms):
             # Remove the group platforms from the uncovered list.
@@ -139,7 +139,7 @@ def test_new_package_manager_issue_template():
     for p_obj in MAIN_PLATFORMS:
         label = f"{p_obj.icon} {p_obj.name}"
         if isinstance(p_obj, Group) and len(p_obj) > 1:
-            label += f" ({', '.join(p.name for p in p_obj.platforms)})"
+            label += f" ({', '.join(p.name for p in p_obj.members.values())})"
         reference_labels.append({"label": label})
 
     assert template_platforms == reference_labels

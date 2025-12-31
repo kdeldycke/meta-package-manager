@@ -115,8 +115,8 @@ dependencies = [
     "click-extra >= 7.2.0",
     # cyclonedx-python-lib 11.2.0 is the first to support Python 3.14.
     "cyclonedx-python-lib [validation] >= 11.2.0",
-    # extra-platforms 5.0.0 is the first version to re-introduce support for Python 3.10.
-    "extra-platforms >= 5.0.0",
+    # We depends on some internals changed in extra-platforms 6.0.0.
+    "extra-platforms >= 6.0.0",
     # more-itertools 10.8.0 is the first to support Python 3.14.
     "more-itertools >= 10.8.0",
     # packageurl-python 0.16.0 is the first to support Python 3.13.
@@ -132,9 +132,12 @@ dependencies = [
     # xmltodict 1.0.0 is just the first major release.
     "xmltodict >= 1.0.0",
 ]
+
+[tool.uv.sources]
+extra-platforms = { git = "https://github.com/kdeldycke/extra-platforms", branch = "main" }
+
 # Package referenced above and also featured in [project.optional-dependencies] or [dependency-groups]
 # will be set without version specifier as they are already constrained.
-
 [project.optional-dependencies]
 yaml = ["click-extra [yaml]"]
 json5 = ["click-extra [json5]"]

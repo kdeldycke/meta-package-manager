@@ -46,7 +46,7 @@ MAIN_PLATFORMS: tuple[Group | Platform, ...] = (
     UNIX_WITHOUT_MACOS.copy(
         id="unix",
         name="Unix",
-        platforms=tuple(UNIX_WITHOUT_MACOS - BSD_WITHOUT_MACOS - LINUX_LIKE),
+        members=tuple(UNIX_WITHOUT_MACOS - BSD_WITHOUT_MACOS - LINUX_LIKE),
     ),
     ANY_WINDOWS.copy(id="windows", name="Windows"),
 )
@@ -99,7 +99,7 @@ def operation_matrix() -> tuple[str, str]:
             footnote_tag = f"[^{p_obj.id}]"
             header_title += footnote_tag
             platforms_string = ", ".join(
-                sorted((p.name for p in p_obj.platforms), key=str.casefold),
+                sorted((p.name for p in p_obj.members.values()), key=str.casefold),
             )
             footnotes.append(f"{footnote_tag}: {p_obj.name}: {platforms_string}.")
         headers.append(header_title)
@@ -116,7 +116,7 @@ def operation_matrix() -> tuple[str, str]:
         for p_obj in MAIN_PLATFORMS:
             line.append(
                 p_obj.icon
-                if m.platforms.issuperset(Group._extract_platforms(p_obj))
+                if m.platforms.issuperset(Group._extract_members(p_obj))
                 else ""
             )
         for op in Operations:

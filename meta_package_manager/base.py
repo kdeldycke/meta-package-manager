@@ -36,7 +36,7 @@ from boltons.strutils import strip_ansi
 from click_extra.colorize import default_theme as theme
 from click_extra.envvar import env_copy
 from click_extra.testing import INDENT, args_cleanup, format_cli_prompt
-from extra_platforms import UNIX, Group, current_platforms
+from extra_platforms import UNIX, Group, Platform, current_platforms
 from packageurl import PackageURL
 
 from .version import parse_version
@@ -47,8 +47,6 @@ if TYPE_CHECKING:
     from contextlib import AbstractContextManager
 
     from click_extra._types import TArg, TEnvVars, TNestedArgs
-    from extra_platforms import Platform
-    from extra_platforms._types import _TNestedReferences
 
     from .version import TokenizedString
 
@@ -190,7 +188,10 @@ class MetaPackageManager(type):
             cls.virtual = name == "PackageManager" or not cls.cli_names
 
         if "platforms" in dct:
-            cls.platforms = frozenset(Group._extract_platforms(dct["platforms"]))
+            cls.platforms = frozenset(Group._extract_members(dct["platforms"]))
+            assert all(isinstance(p, Platform) for p in cls.platforms), (
+                f"Manager {cls} has invalid entries in its platforms list."
+            )
 
 
 def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | None:
@@ -258,11 +259,11 @@ class PackageManager(metaclass=MetaPackageManager):
     homepage_url: str | None = None
     """Home page of the project, only used in documentation for reference."""
 
-    platforms: frozenset[Platform] | _TNestedReferences = frozenset()
+    platforms: frozenset[Platform] = frozenset()
     """List of platforms supported by the manager.
 
-    Allows for a mishmash of platforms and groups. Will be normalized into a `frozenset`
-    of ``Platform`` instances at instantiation.
+    Allows for a mishmash of platforms and groups of platforms. Will be normalized into a
+    `frozenset` of ``Platform`` instances at instantiation.
     """
 
     requirement: str | None = None

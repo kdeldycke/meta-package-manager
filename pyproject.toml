@@ -134,9 +134,6 @@ dependencies = [
     "xmltodict >= 1.0.0",
 ]
 
-[tool.uv.sources]
-extra-platforms = { git = "https://github.com/kdeldycke/extra-platforms", branch = "main" }
-
 # Package referenced above and also featured in [project.optional-dependencies] or [dependency-groups]
 # will be set without version specifier as they are already constrained.
 [project.optional-dependencies]
@@ -202,6 +199,8 @@ module-root = ""
 [tool.uv]
 # Cooldown period.
 exclude-newer = "1 week"
+# XXX Disable exclusion of brand new extra-platforms releases.
+exclude-newer-package = { extra-platforms = "0 day" }
 
 [tool.nuitka]
 product-name = "Meta Package Manager"

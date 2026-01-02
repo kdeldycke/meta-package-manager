@@ -1,7 +1,7 @@
 [project]
 # Docs: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
 name = "meta-package-manager"
-version = "6.0.1"
+version = "6.0.2"
 # Python versions and their status: https://devguide.python.org/versions/
 requires-python = ">= 3.10"
 description = "🎁 wraps all package managers with a unifying CLI"
@@ -179,7 +179,7 @@ docs = [
 
 [project.urls]
 "Homepage" = "https://github.com/kdeldycke/meta-package-manager"
-"Download" = "https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.0.1"
+"Download" = "https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.0.2"
 "Changelog" = "https://github.com/kdeldycke/meta-package-manager/blob/main/changelog.md"
 "Issues" = "https://github.com/kdeldycke/meta-package-manager/issues"
 "Repository" = "https://github.com/kdeldycke/meta-package-manager"
@@ -206,8 +206,8 @@ exclude-newer-package = { extra-platforms = "0 day" }
 product-name = "Meta Package Manager"
 file-description = "🎁 wraps all package managers with a unifying CLI"
 copyright = "Kevin Deldycke <kevin@deldycke.com> and contributors. Distributed under GPL-2.0-or-later license."
-file-version = "6.0.1"
-product-version = "6.0.1"
+file-version = "6.0.2"
+product-version = "6.0.2"
 macos-app-icon = "docs/assets/icon.png"
 linux-icon = "docs/assets/icon.png"
 windows-icon-from-ico = "docs/assets/icon.png"
@@ -251,7 +251,7 @@ addopts = [
 xfail_strict = true
 
 [tool.bumpversion]
-current_version = "6.0.1"
+current_version = "6.0.2"
 allow_dirty = true
 
 [[tool.bumpversion.files]]

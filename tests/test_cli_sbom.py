@@ -209,7 +209,8 @@ class TestSBOM(CLISubCommandTests):
 
             elif export_format == ExportFormat.RDF_XML:
                 assert (
-                    ElementTree.fromstring(content)
+                    ElementTree
+                    .fromstring(content)
                     .find(
                         "spdx:SpdxDocument/spdx:specVersion",
                         {"spdx": "http://spdx.org/rdf/terms#"},

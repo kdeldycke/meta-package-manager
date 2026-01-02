@@ -506,7 +506,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Codecov - test results
         if: ${{ !cancelled() }}
-        uses: codecov/test-results-action@v1.2.1
+        uses: codecov/codecov-action@v5.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -553,12 +553,6 @@ jobs:
           - macos-15-intel    # x86
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Unlock CPU on macos-15-intel
-        if: matrix.os == 'macos-15-intel'
-        # See https://github.com/actions/runner-images/issues/13358
-        run: |
-          sudo defaults -currentHost write /Library/Preferences/com.apple.powerlogd SMCMonitorCadence 0
-          sudo killall PerfPowerServices || true
       - if: runner.os == 'Linux'
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -581,12 +575,6 @@ jobs:
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Unlock CPU on macos-15-intel
-        if: matrix.os == 'macos-15-intel'
-        # See https://github.com/actions/runner-images/issues/13358
-        run: |
-          sudo defaults -currentHost write /Library/Preferences/com.apple.powerlogd SMCMonitorCadence 0
-          sudo killall PerfPowerServices || true
       # https://pypi.org/project/meta-package-manager
       - run: |
           pip install meta-package-manager
@@ -605,15 +593,8 @@ jobs:
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Unlock CPU on macos-15-intel
-        if: matrix.os == 'macos-15-intel'
-        # See https://github.com/actions/runner-images/issues/13358
-        run: |
-          sudo defaults -currentHost write /Library/Preferences/com.apple.powerlogd SMCMonitorCadence 0
-          sudo killall PerfPowerServices || true
       - run: |
           python -m pip install --upgrade pipx
-
       # https://pypi.org/project/meta-package-manager
       - run: |
           pipx install meta-package-manager
@@ -654,12 +635,6 @@ jobs:
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Unlock CPU on macos-15-intel
-        if: matrix.os == 'macos-15-intel'
-        # See https://github.com/actions/runner-images/issues/13358
-        run: |
-          sudo defaults -currentHost write /Library/Preferences/com.apple.powerlogd SMCMonitorCadence 0
-          sudo killall PerfPowerServices || true
       - uses: astral-sh/setup-uv@v7.1.6
         with:
           # windows-2025 runners have only Python 3.9 installed.

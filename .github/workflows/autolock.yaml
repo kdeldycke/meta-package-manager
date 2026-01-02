@@ -2,10 +2,10 @@
 name: Autolock
 "on":
   schedule:
-    # Run weekly, every Monday at 8:43.
-    - cron: "43 8 * * 1"
+    # Run weekly, every Monday at 4:43.
+    - cron: "43 4 * * 1"
 
 jobs:
 
   autolock:
-    uses: kdeldycke/workflows/.github/workflows/autolock.yaml@v4.25.2
+    uses: kdeldycke/workflows/.github/workflows/autolock.yaml@v4.25.4

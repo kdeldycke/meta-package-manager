@@ -5,6 +5,13 @@
 > [!IMPORTANT]
 > This version is not released yet and is under active development.
 
+- [mpm] Move auto-lock time from 8:43 to 4:43.
+- [mpm] Set cooldown period via the `pyproject.toml`.
+- [mpm] Add Download link to project metadata.
+- [mpm] Include license file in package.
+- [mpm] Replace deprecated `codecov/test-results-action` by `codecov/codecov-action`.
+- [mpm] Remove utilization workaround for `macos-15-intel`.
+
 ## [6.0.0 (2025-12-08)](https://github.com/kdeldycke/meta-package-manager/compare/v5.21.0...v6.0.0)
 
 - [mpm] Add `--no-config` option inherited from Click Extra.

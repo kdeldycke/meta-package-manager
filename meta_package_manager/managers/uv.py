@@ -30,6 +30,13 @@ if TYPE_CHECKING:
 
 
 class UV(PackageManager):
+    """
+    .. hint::
+        Package spec are not quoted anywhere here to `workaround issues
+        <https://github.com/kdeldycke/meta-package-manager/issues/1653>`_ with how `uv`
+        fails to parses them sometimes.
+    """
+
     homepage_url = "https://docs.astral.sh/uv"
 
     platforms = ALL_PLATFORMS
@@ -133,15 +140,15 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            $ uv --color never --no-progress pip install "tomli_w == 1.0.0"
+            $ uv --color never --no-progress pip install tomli_w==1.0.0
             Resolved 1 package in 574ms
             Installed 1 package in 2ms
              + tomli-w==1.0.0
         """
         package_specs = package_id
         if version:
-            package_specs += f" == {version}"
-        return self.run_cli("pip", "install", f'"{package_specs}"')
+            package_specs += f"=={version}"
+        return self.run_cli("pip", "install", package_specs)
 
     def upgrade_one_cli(
         self,
@@ -152,7 +159,7 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            $ uv --color never --no-progress pip install --upgrade "tomli_w == 0.4.0"
+            $ uv --color never --no-progress pip install --upgrade tomli_w==0.4.0
             Resolved 1 package in 1ms
             Uninstalled 1 package in 0.54ms
             Installed 1 package in 0.94ms
@@ -161,7 +168,7 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            $ uv --color never --no-progress pip install --upgrade "tomli_w"
+            $ uv --color never --no-progress pip install --upgrade tomli_w
             Resolved 1 package in 2ms
             Uninstalled 1 package in 1ms
             Installed 1 package in 2ms
@@ -170,8 +177,8 @@ class UV(PackageManager):
         """
         package_specs = package_id
         if version:
-            package_specs += f" == {version}"
-        return self.build_cli("pip", "install", "--upgrade", f'"{package_specs}"')
+            package_specs += f"=={version}"
+        return self.build_cli("pip", "install", "--upgrade", package_specs)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.

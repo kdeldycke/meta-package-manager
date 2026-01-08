@@ -5,6 +5,8 @@
 > [!IMPORTANT]
 > This version is not released yet and is under active development.
 
+- [uv] Workaround `uv` parsing issues with package specifiers by not quoting them. Closes {issue}`1653`.
+
 ## [6.0.1 (2026-01-02)](https://github.com/kdeldycke/meta-package-manager/compare/v6.0.0...v6.0.1)
 
 - [mpm] Move auto-lock time from 8:43 to 4:43.

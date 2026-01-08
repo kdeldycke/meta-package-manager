@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import json
 
-from extra_platforms import ALL_PLATFORMS_WITHOUT_CI
+from extra_platforms import ALL_PLATFORMS
 
 from ..base import Package, PackageManager
 
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 class UV(PackageManager):
     homepage_url = "https://docs.astral.sh/uv"
 
-    platforms = ALL_PLATFORMS_WITHOUT_CI
+    platforms = ALL_PLATFORMS
 
     requirement = "0.5.0"
     """`0.5.0 <https://github.com/astral-sh/uv/releases/tag/0.5.0>`_ is the first

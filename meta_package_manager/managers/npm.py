@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import json
 
-from extra_platforms import ALL_PLATFORMS_WITHOUT_CI
+from extra_platforms import ALL_PLATFORMS
 
 from ..base import PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
@@ -40,7 +40,7 @@ class NPM(PackageManager):
 
     homepage_url = "https://www.npmjs.com"
 
-    platforms = ALL_PLATFORMS_WITHOUT_CI
+    platforms = ALL_PLATFORMS
 
     requirement = "4.0.0"
 

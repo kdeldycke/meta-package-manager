@@ -16,7 +16,7 @@
 
 from __future__ import annotations
 
-from extra_platforms import ALL_PLATFORMS_WITHOUT_CI
+from extra_platforms import ALL_PLATFORMS
 
 from ..base import PackageManager
 from ..capabilities import version_not_implemented
@@ -33,7 +33,7 @@ class VSCode(PackageManager):
 
     homepage_url = "https://code.visualstudio.com"
 
-    platforms = ALL_PLATFORMS_WITHOUT_CI
+    platforms = ALL_PLATFORMS
 
     requirement = "1.60.0"
 

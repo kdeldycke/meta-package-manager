@@ -20,7 +20,7 @@ import json
 import re
 from functools import cached_property
 
-from extra_platforms import ALL_PLATFORMS_WITHOUT_CI
+from extra_platforms import ALL_PLATFORMS
 
 from ..base import PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
@@ -39,7 +39,7 @@ class Yarn(PackageManager):
 
     homepage_url = "https://yarnpkg.com"
 
-    platforms = ALL_PLATFORMS_WITHOUT_CI
+    platforms = ALL_PLATFORMS
 
     requirement = "1.20.0"
     """

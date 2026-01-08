@@ -19,7 +19,7 @@ from __future__ import annotations
 import json
 from operator import attrgetter
 
-from extra_platforms import ALL_PLATFORMS_WITHOUT_CI
+from extra_platforms import ALL_PLATFORMS
 
 from ..base import PackageManager
 from ..capabilities import version_not_implemented
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 class Pipx(PackageManager):
     homepage_url = "https://pipx.pypa.io"
 
-    platforms = ALL_PLATFORMS_WITHOUT_CI
+    platforms = ALL_PLATFORMS
 
     requirement = "1.0.0"
     """

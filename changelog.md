@@ -1,5 +1,10 @@
 # Changelog
 
+## [6.0.3 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.0.2...main)
+
+> [!IMPORTANT]
+> This version is not released yet and is under active development.
+
 ## [6.0.2 (2026-01-09)](https://github.com/kdeldycke/meta-package-manager/compare/v6.0.1...v6.0.2)
 
 - [uv] Workaround `uv` parsing issues with package specifiers by not quoting them. Closes {issue}`1653`.

@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import json
+import re
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -207,3 +208,139 @@ class UV(PackageManager):
         """
         self.run_cli("cache", "clean")
         self.run_cli("cache", "prune")
+
+
+class Uvx(PackageManager):
+    """UV tool manager for isolated Python tools.
+
+    Like ``pipx``, but uses ``uv tool`` commands.
+    """
+
+    cli_names = ["uv"]
+
+    homepage_url = "https://docs.astral.sh/uv/guides/tools/"
+
+    platforms = ALL_PLATFORMS
+
+    requirement = "0.3.0"
+    """`0.3.0 <https://github.com/astral-sh/uv/releases/tag/0.3.0>`_ is the first
+    version to introduce ``pip tool`` command and stabilize the tool
+    interface.
+    """
+
+    pre_args = ("--color", "never", "--no-progress")
+    """
+    - ``--color color-choice``
+        Control colors in output [default: ``auto``]
+
+        Possible values:
+        - ``auto``: Enables colored output only when the output is going to a terminal or TTY with support
+        - ``always``: Enables colored output regardless of the detected environment
+        - ``never``: Disables colored output
+
+    - ``--no-progress``
+        Hide all progress outputs.
+
+        For example, spinners or progress bars.
+    """
+
+    version_regexes = (r"uv\s+(?P<version>\S+)",)
+    """
+    .. code-block:: shell-session
+
+        $ uv --version
+        uv 0.2.21 (ebfe6d8fc 2024-07-03)
+    """
+
+    @property
+    def installed(self) -> Iterator[Package]:
+        """Fetch installed packages.
+
+        .. code-block:: shell-session
+
+            $ uv --color never --no-progress tool list
+            pycowsay v0.0.0.1
+            - pycowsay
+        """
+        output = self.run_cli("tool", "list")
+
+        if output:
+            # Parse lines like "package_name vX.Y.Z"
+            package_regex = re.compile(r"^(?P<package_id>\S+)\s+v(?P<version>\S+)$")
+            for line in output.splitlines():
+                match = package_regex.match(line)
+                if match:
+                    yield self.package(
+                        id=match.group("package_id"),
+                        installed_version=match.group("version"),
+                    )
+
+    def install(self, package_id: str, version: str | None = None) -> str:
+        """Install one package.
+
+        .. code-block:: shell-session
+
+            $ uv --color never --no-progress tool install pycowsay
+            Resolved 1 package in 487ms
+            Prepared 1 package in 174ms
+            Installed 1 package in 5ms
+            + pycowsay==0.0.0.2
+            Installed 1 executable: pycowsay
+
+        .. code-block:: shell-session
+
+            $ uv --color never --no-progress tool install pycowsay==0.0.0.2
+            Resolved 1 package in 0.87ms
+            Installed 1 package in 2ms
+            + pycowsay==0.0.0.2
+            Installed 1 executable: pycowsay
+        """
+        package_specs = package_id
+        if version:
+            package_specs += f"=={version}"
+        return self.run_cli("tool", "install", package_specs)
+
+    def upgrade_all_cli(self) -> tuple[str, ...]:
+        """Generates the CLI to upgrade all packages.
+
+        .. code-block:: shell-session
+
+            $ uv --color never --no-progress tool upgrade --all
+            Updated pycowsay v0.0.0.1 -> v0.0.0.2
+                - pycowsay
+        """
+        return self.build_cli("tool", "upgrade", "--all")
+
+    def upgrade_one_cli(
+        self,
+        package_id: str,
+        version: str | None = None,
+    ) -> tuple[str, ...]:
+        """Generates the CLI to upgrade the package provided as parameter.
+
+        .. code-block:: shell-session
+
+            $ uv --color never --no-progress tool upgrade pycowsay
+            Updated pycowsay v0.0.0.1 -> v0.0.0.2
+                - pycowsay
+
+        .. code-block:: shell-session
+
+            $ uv --color never --no-progress tool upgrade pycowsay==0.0.0.2
+            Updated pycowsay v0.0.0.1 -> v0.0.0.2
+                - pycowsay
+        """
+        package_specs = package_id
+        if version:
+            package_specs += f"=={version}"
+        return self.build_cli("tool", "upgrade", package_specs)
+
+    def remove(self, package_id: str) -> str:
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            $ uv --color never --no-progress tool uninstall pycowsay
+            Uninstalled 1 executable: pycowsay
+        """
+        return self.run_cli("tool", "uninstall", package_id)

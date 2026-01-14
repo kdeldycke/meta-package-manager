@@ -1,4 +1,4 @@
-# Contribution guide
+# {octicon}`git-pull-request` Contribution guide
 
 Good candidates for new package manager:
 

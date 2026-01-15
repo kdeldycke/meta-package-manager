@@ -922,7 +922,7 @@ wheels = [
 
 [[package]]
 name = "meta-package-manager"
-version = "6.0.2"
+version = "6.0.3"
 source = { editable = "." }
 dependencies = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'" },

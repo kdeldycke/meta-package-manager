@@ -216,7 +216,7 @@ class Uvx(PackageManager):
     Like ``pipx``, but uses ``uv tool`` commands.
     """
 
-    cli_names = ["uv"]
+    cli_names = ("uv",)
 
     homepage_url = "https://docs.astral.sh/uv/guides/tools/"
 

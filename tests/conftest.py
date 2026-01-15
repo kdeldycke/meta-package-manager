@@ -183,6 +183,7 @@ PACKAGE_IDS = {
     "snap": "standard-notes",
     "steamcmd": "740",
     "uv": "pytz",
+    "uvx": "pycowsay",
     "vscode": "tamasfe.even-better-toml",
     "vscodium": "tamasfe.even-better-toml",
     "winget": "Microsoft.PowerToys",

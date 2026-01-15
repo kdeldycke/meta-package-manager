@@ -271,6 +271,10 @@ $ mpm --pipx install meta-package-manager
 ```
 
 ```{code-block} shell-session
+$ mpm --uvx install meta-package-manager
+```
+
+```{code-block} shell-session
 $ mpm --yay  install meta-package-manager
 ```
 ````

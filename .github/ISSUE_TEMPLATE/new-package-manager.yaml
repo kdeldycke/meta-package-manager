@@ -5,13 +5,20 @@ body:
 
   - type: markdown
     attributes:
-      value: >
+      value: >      
         Before filling this feature request, double check your manager is missing from the [support
         matrix](https://github.com/kdeldycke/meta-package-manager#supported-package-managers-and-operations).
 
 
         If you are a developer, you can try to implement support yourself. [Check the contribution
         guide](https://kdeldycke.github.io/meta-package-manager/contributing.html) and propose a Pull Request.
+
+
+        > [!TIP]
+
+        > Don't bother creating an issue if you're about to propose a PR to implement it. Directly create a PR to
+
+        > avoid splitting the discussion in multiple places.
 
 
         If you are not a developer, you can still help the project by documenting some of the package manager

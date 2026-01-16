@@ -22,7 +22,7 @@ from textwrap import dedent
 
 from click_extra.docs_update import replace_content
 from extra_platforms import (
-    ANY_WINDOWS,
+    ALL_WINDOWS,
     BSD_WITHOUT_MACOS,
     LINUX_LIKE,
     MACOS,
@@ -48,7 +48,7 @@ MAIN_PLATFORMS: tuple[Group | Platform, ...] = (
         name="Unix",
         members=tuple(UNIX_WITHOUT_MACOS - BSD_WITHOUT_MACOS - LINUX_LIKE),
     ),
-    ANY_WINDOWS.copy(id="windows", name="Windows"),
+    ALL_WINDOWS.copy(id="windows", name="Windows"),
 )
 """Top-level classification of platforms.
 

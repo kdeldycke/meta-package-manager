@@ -2,13 +2,17 @@ version = 1
 revision = 3
 requires-python = ">=3.10"
 resolution-markers = [
-    "python_full_version >= '3.11'",
+    "python_full_version >= '3.12'",
+    "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
 ]
 
 [options]
-exclude-newer = "2026-01-09T10:34:35.676701841Z"
+exclude-newer = "2026-01-09T10:53:48.244334Z"
 exclude-newer-span = "P1W"
+
+[options.exclude-newer-package]
+extra-platforms = { timestamp = "2026-01-16T10:53:48.244679Z", span = "PT0S" }
 
 [[package]]
 name = "accessible-pygments"
@@ -122,11 +126,11 @@ wheels = [
 
 [[package]]
 name = "certifi"
-version = "2025.11.12"
+version = "2026.1.4"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a2/8c/58f469717fa48465e4a50c014a0400602d3c437d7c0c468e17ada824da3a/certifi-2025.11.12.tar.gz", hash = "sha256:d8ab5478f2ecd78af242878415affce761ca6bc54a22a27e026d7c25357c3316", size = 160538, upload-time = "2025-11-12T02:54:51.517Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e0/2d/a891ca51311197f6ad14a7ef42e2399f36cf2f9bd44752b3dc4eab60fdc5/certifi-2026.1.4.tar.gz", hash = "sha256:ac726dd470482006e014ad384921ed6438c457018f4b3d204aea4281258b2120", size = 154268, upload-time = "2026-01-04T02:42:41.825Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/70/7d/9bc192684cea499815ff478dfcdc13835ddf401365057044fb721ec6bddb/certifi-2025.11.12-py3-none-any.whl", hash = "sha256:97de8790030bbd5c2d96b7ec782fc2f7820ef8dba6db909ccf95449f2d062d4b", size = 159438, upload-time = "2025-11-12T02:54:49.735Z" },
+    { url = "https://files.pythonhosted.org/packages/e6/ad/3cc14f097111b4de0040c83a525973216457bbeeb63739ef1ed275c1c021/certifi-2026.1.4-py3-none-any.whl", hash = "sha256:9943707519e4add1115f44c2bc244f782c0249876bf51b6599fee1ffbedd685c", size = 152900, upload-time = "2026-01-04T02:42:40.15Z" },
 ]
 
 [[package]]
@@ -485,14 +489,10 @@ wheels = [
 
 [[package]]
 name = "extra-platforms"
-version = "6.0.0"
-source = { registry = "https://pypi.org/simple" }
+version = "7.0.0"
+source = { git = "https://github.com/kdeldycke/extra-platforms?branch=main#2351c34421e6bd05125ecf914813a3e147bc6ad7" }
 dependencies = [
     { name = "distro" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/fb/df/73e313d4ecca7b703b6f369d9ed0c2c0d4d8a149e1c675e9915f8426a513/extra_platforms-6.0.0.tar.gz", hash = "sha256:ff0d392e390d2447183af4b300dd4569d2dbf760adf1e30c2b0cefb30ee58488", size = 45977, upload-time = "2026-01-02T09:15:41.019Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/99/13/0a6a20bd85679d30d8e85d4e63397f8deabe2e9614d6a656ad3e02a76fb7/extra_platforms-6.0.0-py3-none-any.whl", hash = "sha256:732619d1f7db602e12189a66a7de7d8492607452c2d1b5444952174e92864ed0", size = 53001, upload-time = "2026-01-02T09:15:42.193Z" },
 ]
 
 [[package]]
@@ -619,7 +619,7 @@ wheels = [
 
 [[package]]
 name = "jsonschema"
-version = "4.25.1"
+version = "4.26.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -627,9 +627,9 @@ dependencies = [
     { name = "referencing" },
     { name = "rpds-py" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/74/69/f7185de793a29082a9f3c7728268ffb31cb5095131a9c139a74078e27336/jsonschema-4.25.1.tar.gz", hash = "sha256:e4a9655ce0da0c0b67a085847e00a3a51449e1157f4f75e9fb5aa545e122eb85", size = 357342, upload-time = "2025-08-18T17:03:50.038Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b3/fc/e067678238fa451312d4c62bf6e6cf5ec56375422aee02f9cb5f909b3047/jsonschema-4.26.0.tar.gz", hash = "sha256:0c26707e2efad8aa1bfc5b7ce170f3fccc2e4918ff85989ba9ffa9facb2be326", size = 366583, upload-time = "2026-01-07T13:41:07.246Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bf/9c/8c95d856233c1f82500c2450b8c68576b4cf1c871db3afac5c34ff84e6fd/jsonschema-4.25.1-py3-none-any.whl", hash = "sha256:3fba0169e345c7175110351d456342c364814cfcf3b964ba4587f22915230a63", size = 90040, upload-time = "2025-08-18T17:03:48.373Z" },
+    { url = "https://files.pythonhosted.org/packages/69/90/f63fb5873511e014207a475e2bb4e8b2e570d655b00ac19a9a0ca0a385ee/jsonschema-4.26.0-py3-none-any.whl", hash = "sha256:d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce", size = 90630, upload-time = "2026-01-07T13:41:05.306Z" },
 ]
 
 [package.optional-dependencies]
@@ -1001,7 +1001,7 @@ requires-dist = [
     { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'" },
     { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
     { name = "cyclonedx-python-lib", extras = ["validation"], specifier = ">=11.2.0" },
-    { name = "extra-platforms", specifier = ">=6.0.0" },
+    { name = "extra-platforms", git = "https://github.com/kdeldycke/extra-platforms?branch=main" },
     { name = "more-itertools", specifier = ">=10.8.0" },
     { name = "packageurl-python", specifier = ">=0.16.0" },
     { name = "spdx-tools", specifier = ">=0.8.2" },
@@ -1029,7 +1029,7 @@ docs = [
 test = [
     { name = "click-extra", extras = ["pytest"] },
     { name = "coverage", extras = ["toml"], specifier = ">=7.12.0" },
-    { name = "extra-platforms" },
+    { name = "extra-platforms", git = "https://github.com/kdeldycke/extra-platforms?branch=main" },
     { name = "pytest", specifier = ">=9.0.1" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },
@@ -1646,7 +1646,8 @@ name = "sphinx"
 version = "8.2.3"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.11'",
+    "python_full_version >= '3.12'",
+    "python_full_version == '3.11.*'",
 ]
 dependencies = [
     { name = "alabaster", marker = "python_full_version >= '3.11'" },
@@ -1692,7 +1693,8 @@ name = "sphinx-autodoc-typehints"
 version = "3.5.2"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.11'",
+    "python_full_version >= '3.12'",
+    "python_full_version == '3.11.*'",
 ]
 dependencies = [
     { name = "sphinx", version = "8.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },

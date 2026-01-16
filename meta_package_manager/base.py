@@ -36,7 +36,7 @@ from boltons.strutils import strip_ansi
 from click_extra.colorize import default_theme as theme
 from click_extra.envvar import env_copy
 from click_extra.testing import INDENT, args_cleanup, format_cli_prompt
-from extra_platforms import UNIX, Group, Platform, current_platforms
+from extra_platforms import Group, Platform, is_unix
 from packageurl import PackageURL
 
 from .version import parse_version
@@ -602,7 +602,7 @@ class PackageManager(metaclass=MetaPackageManager):
         """Is the package manager supported on that platform?"""
         # After metaclass initialization, platforms is always a frozenset[Platform].
         platforms = cast("frozenset[Platform]", self.platforms)
-        return len(platforms.intersection(current_platforms())) > 0
+        return any(p.current for p in platforms)
 
     @cached_property
     def executable(self) -> bool:
@@ -781,7 +781,7 @@ class PackageManager(metaclass=MetaPackageManager):
 
         # Sudo replaces any pre-command, be it overridden or automatic.
         if sudo:
-            if len(UNIX.intersection(current_platforms())) == 0:
+            if not is_unix():
                 msg = "sudo only supported on UNIX."
                 raise NotImplementedError(msg)
             if override_pre_cmds:

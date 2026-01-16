@@ -32,7 +32,7 @@ from cyclonedx.output.json import JsonV1Dot5
 from cyclonedx.schema import OutputFormat, SchemaVersion
 from cyclonedx.validation import BaseSchemabasedValidator, make_schemabased_validator
 from cyclonedx.validation.json import JsonStrictValidator
-from extra_platforms import current_os
+from extra_platforms import current_platform
 from packageurl import PackageURL
 from spdx_tools.spdx.model import (
     Actor,
@@ -142,7 +142,7 @@ class SPDX(SBOM):
         profile = get_profile()
         system_id = self.normalize_spdx_id(
             "-".join((
-                current_os().name,
+                current_platform().name,
                 profile["linux_dist_name"],
                 profile["linux_dist_version"],
                 profile["uname"]["system"],

@@ -210,7 +210,7 @@ class UV(PackageManager):
         self.run_cli("cache", "prune")
 
 
-class Uvx(PackageManager):
+class UVX(PackageManager):
     """UV tool manager for isolated Python tools.
 
     Like ``pipx``, but uses ``uv tool`` commands.

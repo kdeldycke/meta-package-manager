@@ -47,7 +47,7 @@ from .managers.pkg import PKG
 from .managers.scoop import Scoop
 from .managers.snap import Snap
 from .managers.steamcmd import SteamCMD
-from .managers.uv import UV, Uvx
+from .managers.uv import UV, UVX
 from .managers.vscode import VSCode, VSCodium
 from .managers.winget import WinGet
 from .managers.yarn import Yarn
@@ -90,7 +90,7 @@ manager_classes = (
     Snap,
     SteamCMD,
     UV,
-    Uvx,
+    UVX,
     VSCode,
     VSCodium,
     WinGet,

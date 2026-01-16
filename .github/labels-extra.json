@@ -105,9 +105,9 @@
     "description": "steamcmd"
   },
   {
-    "name": "📦 manager: uv",
+    "name": "📦 manager: uv-based",
     "color": "#bfdadc",
-    "description": "uv"
+    "description": "uv, uvx"
   },
   {
     "name": "📦 manager: vscode-based",

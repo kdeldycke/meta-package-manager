@@ -8,11 +8,11 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-01-09T10:53:48.244334Z"
+exclude-newer = "2026-01-10T17:15:09.410929Z"
 exclude-newer-span = "P1W"
 
 [options.exclude-newer-package]
-extra-platforms = { timestamp = "2026-01-16T10:53:48.244679Z", span = "PT0S" }
+extra-platforms = { timestamp = "2026-01-17T17:15:09.411241Z", span = "PT0S" }
 
 [[package]]
 name = "accessible-pygments"
@@ -490,7 +490,7 @@ wheels = [
 [[package]]
 name = "extra-platforms"
 version = "7.0.0"
-source = { git = "https://github.com/kdeldycke/extra-platforms?branch=main#2351c34421e6bd05125ecf914813a3e147bc6ad7" }
+source = { git = "https://github.com/kdeldycke/extra-platforms?branch=main#bd2f4d43f82caee02bee3164fc125684b7aa0f6a" }
 dependencies = [
     { name = "distro" },
 ]

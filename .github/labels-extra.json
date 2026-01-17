@@ -132,7 +132,7 @@
   {
     "name": "🖥 platform: BSD",
     "color": "#bfd4f2",
-    "description": "FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS"
+    "description": "DragonFly BSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS"
   },
   {
     "name": "🖥 platform: Linux",
@@ -147,7 +147,7 @@
   {
     "name": "🖥 platform: Unix",
     "color": "#bfd4f2",
-    "description": "Cygwin, GNU/Hurd, IBM AIX, Solaris"
+    "description": "Cygwin, GNU/Hurd, Haiku, IBM AIX, illumos, Solaris"
   },
   {
     "name": "🖥 platform: Windows",

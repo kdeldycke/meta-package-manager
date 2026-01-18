@@ -30,8 +30,9 @@ if TYPE_CHECKING:
     from ..base import Package
 
 
-class UV(PackageManager):
-    """
+class UVBase(PackageManager):
+    """Virtual package manager shared by ``UV`` and ``UVX`` CLI defined below.
+
     .. hint::
         Package spec are not quoted anywhere here to `workaround issues
         <https://github.com/kdeldycke/meta-package-manager/issues/1653>`_ with how `uv`
@@ -40,12 +41,15 @@ class UV(PackageManager):
 
     homepage_url = "https://docs.astral.sh/uv"
 
-    platforms = ALL_PLATFORMS
-
     requirement = "0.5.0"
     """`0.5.0 <https://github.com/astral-sh/uv/releases/tag/0.5.0>`_ is the first
     version to introduce ``pip list --outdated`` command.
     """
+
+    platforms = ALL_PLATFORMS
+
+    # Declare this manager as virtual, i.e. not tied to a real CLI.
+    virtual = True
 
     pre_args = ("--color", "never", "--no-progress")
     """
@@ -70,6 +74,17 @@ class UV(PackageManager):
         $ uv --version
         uv 0.2.21 (ebfe6d8fc 2024-07-03)
     """
+
+    def _build_package_spec(self, package_id: str, version: str | None = None) -> str:
+        """Build package specification with optional version constraint."""
+        package_specs = package_id
+        if version:
+            package_specs += f"=={version}"
+        return package_specs
+
+
+class UV(UVBase):
+    """Python package manager using uv pip commands."""
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -141,14 +156,9 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            $ uv --color never --no-progress pip install tomli_w==1.0.0
-            Resolved 1 package in 574ms
-            Installed 1 package in 2ms
-             + tomli-w==1.0.0
+            $ uv --color never --no-progress pip install arrow
         """
-        package_specs = package_id
-        if version:
-            package_specs += f"=={version}"
+        package_specs = self._build_package_spec(package_id, version)
         return self.run_cli("pip", "install", package_specs)
 
     def upgrade_one_cli(
@@ -160,25 +170,9 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            $ uv --color never --no-progress pip install --upgrade tomli_w==0.4.0
-            Resolved 1 package in 1ms
-            Uninstalled 1 package in 0.54ms
-            Installed 1 package in 0.94ms
-             - tomli-w==0.2.0
-             + tomli-w==0.4.0
-
-        .. code-block:: shell-session
-
-            $ uv --color never --no-progress pip install --upgrade tomli_w
-            Resolved 1 package in 2ms
-            Uninstalled 1 package in 1ms
-            Installed 1 package in 2ms
-             - tomli-w==0.4.0
-             + tomli-w==1.0.0
+            $ uv --color never --no-progress pip install --upgrade arrow
         """
-        package_specs = package_id
-        if version:
-            package_specs += f"=={version}"
+        package_specs = self._build_package_spec(package_id, version)
         return self.build_cli("pip", "install", "--upgrade", package_specs)
 
     def remove(self, package_id: str) -> str:
@@ -186,9 +180,7 @@ class UV(PackageManager):
 
         .. code-block:: shell-session
 
-            $ uv --color never --no-progress pip uninstall tomli_w
-            Uninstalled 1 package in 5ms
-             - tomli-w==1.0.0
+            $ uv --color never --no-progress pip uninstall arrow
         """
         return self.run_cli("pip", "uninstall", package_id)
 
@@ -210,7 +202,7 @@ class UV(PackageManager):
         self.run_cli("cache", "prune")
 
 
-class UVX(PackageManager):
+class UVX(UVBase):
     """UV tool manager for isolated Python tools.
 
     Like ``pipx``, but uses ``uv tool`` commands.
@@ -219,38 +211,6 @@ class UVX(PackageManager):
     cli_names = ("uv",)
 
     homepage_url = "https://docs.astral.sh/uv/guides/tools/"
-
-    platforms = ALL_PLATFORMS
-
-    requirement = "0.3.0"
-    """`0.3.0 <https://github.com/astral-sh/uv/releases/tag/0.3.0>`_ is the first
-    version to introduce ``pip tool`` command and stabilize the tool
-    interface.
-    """
-
-    pre_args = ("--color", "never", "--no-progress")
-    """
-    - ``--color color-choice``
-        Control colors in output [default: ``auto``]
-
-        Possible values:
-        - ``auto``: Enables colored output only when the output is going to a terminal or TTY with support
-        - ``always``: Enables colored output regardless of the detected environment
-        - ``never``: Disables colored output
-
-    - ``--no-progress``
-        Hide all progress outputs.
-
-        For example, spinners or progress bars.
-    """
-
-    version_regexes = (r"uv\s+(?P<version>\S+)",)
-    """
-    .. code-block:: shell-session
-
-        $ uv --version
-        uv 0.2.21 (ebfe6d8fc 2024-07-03)
-    """
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -281,24 +241,23 @@ class UVX(PackageManager):
         .. code-block:: shell-session
 
             $ uv --color never --no-progress tool install pycowsay
-            Resolved 1 package in 487ms
-            Prepared 1 package in 174ms
-            Installed 1 package in 5ms
-            + pycowsay==0.0.0.2
-            Installed 1 executable: pycowsay
+        """
+        package_specs = self._build_package_spec(package_id, version)
+        return self.run_cli("tool", "install", package_specs)
+
+    def upgrade_one_cli(
+        self,
+        package_id: str,
+        version: str | None = None,
+    ) -> tuple[str, ...]:
+        """Generates the CLI to upgrade the package provided as parameter.
 
         .. code-block:: shell-session
 
-            $ uv --color never --no-progress tool install pycowsay==0.0.0.2
-            Resolved 1 package in 0.87ms
-            Installed 1 package in 2ms
-            + pycowsay==0.0.0.2
-            Installed 1 executable: pycowsay
+            $ uv --color never --no-progress tool upgrade pycowsay
         """
-        package_specs = package_id
-        if version:
-            package_specs += f"=={version}"
-        return self.run_cli("tool", "install", package_specs)
+        package_specs = self._build_package_spec(package_id, version)
+        return self.build_cli("tool", "upgrade", package_specs)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages.
@@ -311,36 +270,11 @@ class UVX(PackageManager):
         """
         return self.build_cli("tool", "upgrade", "--all")
 
-    def upgrade_one_cli(
-        self,
-        package_id: str,
-        version: str | None = None,
-    ) -> tuple[str, ...]:
-        """Generates the CLI to upgrade the package provided as parameter.
-
-        .. code-block:: shell-session
-
-            $ uv --color never --no-progress tool upgrade pycowsay
-            Updated pycowsay v0.0.0.1 -> v0.0.0.2
-                - pycowsay
-
-        .. code-block:: shell-session
-
-            $ uv --color never --no-progress tool upgrade pycowsay==0.0.0.2
-            Updated pycowsay v0.0.0.1 -> v0.0.0.2
-                - pycowsay
-        """
-        package_specs = package_id
-        if version:
-            package_specs += f"=={version}"
-        return self.build_cli("tool", "upgrade", package_specs)
-
     def remove(self, package_id: str) -> str:
         """Remove one package.
 
         .. code-block:: shell-session
 
             $ uv --color never --no-progress tool uninstall pycowsay
-            Uninstalled 1 executable: pycowsay
         """
         return self.run_cli("tool", "uninstall", package_id)

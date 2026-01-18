@@ -139,7 +139,7 @@ def test_new_package_manager_issue_template():
     for p_obj in MAIN_PLATFORMS:
         label = f"{p_obj.icon} {p_obj.name}"
         if isinstance(p_obj, Group) and len(p_obj) > 1:
-            label += f" ({', '.join(p.name for p in p_obj.members)})"
+            label += f" ({', '.join(p.name for p in p_obj.members.values())})"
         reference_labels.append({"label": label})
 
     assert template_platforms == reference_labels

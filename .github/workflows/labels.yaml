@@ -186,7 +186,7 @@ jobs:
               - meta_package_manager/managers/steamcmd*
               - tests/*steamcmd*
 
-        "📦 manager: uv":
+        "📦 manager: uv-based":
           - changed-files:
             - any-glob-to-any-file:
               - meta_package_manager/managers/uv*
@@ -314,8 +314,9 @@ jobs:
           - "steam"
           - "valve"
 
-        "📦 manager: uv":
+        "📦 manager: uv-based":
           - "uv"
+          - "uvx"
 
         "📦 manager: vscode-based":
           - "vscode"

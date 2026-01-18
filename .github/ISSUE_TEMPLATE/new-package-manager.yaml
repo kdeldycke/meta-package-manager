@@ -47,7 +47,7 @@ body:
       label: Platforms
       description: Platforms supported by the package manager.
       options:
-        - label: 🅱️ BSD (FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS)
+        - label: 🅱️ BSD (DragonFly BSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS)
         - label: >-
             🐧 Linux (ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, CloudLinux OS, Debian,
             Exherbo Linux, Fedora, Gentoo Linux, Guix System, IBM PowerKVM, KVM for IBM z Systems, Linux Mint, Mageia,
@@ -55,7 +55,7 @@ body:
             Linux, Scientific Linux, Slackware, SUSE Linux Enterprise Server, openSUSE Tumbleweed, Tuxedo OS, Ubuntu,
             Ultramarine, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer)
         - label: 🍎 macOS
-        - label: ⨂ Unix (IBM AIX, Cygwin, GNU/Hurd, Solaris)
+        - label: ⨂ Unix (IBM AIX, Cygwin, Haiku, GNU/Hurd, illumos, Solaris)
         - label: 🪟 Windows
 
   - type: textarea

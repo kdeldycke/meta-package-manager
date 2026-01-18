@@ -135,10 +135,6 @@ dependencies = [
     "xmltodict >= 1.0.0",
 ]
 
-[tool.uv.sources]
-# XXX Field-test upcoming extra-platforms API.
-extra-platforms = { git = "https://github.com/kdeldycke/extra-platforms", branch = "main" }
-
 # Package referenced above and also featured in [project.optional-dependencies] or [dependency-groups]
 # will be set without version specifier as they are already constrained.
 [project.optional-dependencies]

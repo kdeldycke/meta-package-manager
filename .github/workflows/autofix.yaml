@@ -13,7 +13,7 @@ jobs:
     name: Update readme
     runs-on: ubuntu-slim
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
       - uses: astral-sh/setup-uv@v7.2.0
       - name: Update readme
         run: >

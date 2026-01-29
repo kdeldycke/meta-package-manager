@@ -44,7 +44,7 @@ class Choco(PackageManager):
     <https://docs.chocolatey.org/en-us/guides/upgrading-to-chocolatey-v2-v6#the-list-command-now-lists-local-packages-only-and-the-local-only-and-lo-options-have-been-removed>`_.
     """
 
-    post_args = ("--no-progress", "--no-color")
+    post_args = ("--no-progress", "--no-color", "--retry-count=3")
     """
     .. code-block:: pwsh-session
 
@@ -58,7 +58,7 @@ class Choco(PackageManager):
 
         .. code-block:: pwsh-session
 
-            > choco list --limit-output --no-progress --no-color
+            > choco list --limit-output --no-progress --no-color --retry-count=3
             adobereader|11.0.10
             ccleaner|5.03.5128
             chocolatey|0.9.9.2
@@ -81,7 +81,7 @@ class Choco(PackageManager):
 
         .. code-block:: pwsh-session
 
-            > choco outdated --limit-output --no-progress --no-color
+            > choco outdated --limit-output --no-progress --no-color --retry-count=3
             7zip.commandline|16.02.0.20170209|16.02.0.20170209|false
             7zip.portable|18.1|18.1|false
             atom|1.23.3|1.24.0|false
@@ -109,7 +109,7 @@ class Choco(PackageManager):
 
         .. code-block:: pwsh-session
 
-            > choco search VirtualBox --limit-output --no-progress --no-color
+            > choco search VirtualBox --limit-output --no-progress --no-color --retry-count=3
             virtualbox|6.1.0
             VirtualBox.ExtensionPack|5.1.10.20161223
             enigmavirtualbox|9.20
@@ -121,7 +121,7 @@ class Choco(PackageManager):
         .. code-block:: pwsh-session
 
             > choco search VirtualBox --by-id-only --limit-output --no-progress \
-                --no-color
+                --no-color --retry-count=3
             virtualbox|6.1.0
             VirtualBox.ExtensionPack|5.1.10.20161223
             enigmavirtualbox|9.20
@@ -130,12 +130,12 @@ class Choco(PackageManager):
         .. code-block:: pwsh-session
 
             > choco search VirtualBox --by-id-only --exact --limit-output \
-                --no-progress --no-color
+                --no-progress --no-color --retry-count=3
             virtualbox|6.1.0
 
         .. code-block:: pwsh-session
 
-            > choco search virtualbox --exact --limit-output --no-progress --no-color
+            > choco search virtualbox --exact --limit-output --no-progress --no-color --retry-count=3
             virtualbox|6.1.0
         """
         query_params = ["--limit-output"]
@@ -158,7 +158,7 @@ class Choco(PackageManager):
 
         .. code-block:: pwsh-session
 
-            > choco install ccleaner --yes --limit-output --no-progress --no-color
+            > choco install ccleaner --yes --limit-output --no-progress --no-color --retry-count=3
         """
         return self.run_cli("install", package_id, "--yes", "--limit-output")
 
@@ -168,7 +168,7 @@ class Choco(PackageManager):
 
         .. code-block:: pwsh-session
 
-            > choco upgrade all --yes --limit-output --no-progress --no-color
+            > choco upgrade all --yes --limit-output --no-progress --no-color --retry-count=3
         """
         return self.build_cli("upgrade", "all", "--yes", "--limit-output")
 
@@ -183,6 +183,6 @@ class Choco(PackageManager):
 
         .. code-block:: pwsh-session
 
-            > choco upgrade ccleaner --yes --limit-output --no-progress --no-color
+            > choco upgrade ccleaner --yes --limit-output --no-progress --no-color --retry-count=3
         """
         return self.build_cli("upgrade", package_id, "--yes", "--limit-output")

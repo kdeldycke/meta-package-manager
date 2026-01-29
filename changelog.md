@@ -5,6 +5,8 @@
 > [!IMPORTANT]
 > This version is not released yet and is under active development.
 
+- Add `--retry-count=3` option to all `choco` invocations.
+
 ## [6.1.0 (2026-01-18)](https://github.com/kdeldycke/meta-package-manager/compare/v6.0.2...v6.1.0)
 
 - [uvx] Add `uvx` support for managing isolated Python tools via `uv tool`. Closes {issue}`1656`, {pr}`1657`.

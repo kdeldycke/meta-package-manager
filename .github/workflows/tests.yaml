@@ -116,7 +116,7 @@ jobs:
       - name: Chocolatey - Windows self-upgrade
         if: runner.os == 'Windows'
         run: |
-          choco upgrade chocolatey --no-progress --yes
+          choco upgrade chocolatey --no-progress --yes --retry-count=3
       - name: Chocolatey - Pin un-upgradeable packages
         if: runner.os == 'Windows'
         # XXX The upgrade all step below fails for strawberryperl package on windows-2025 runners v2.327.1:
@@ -150,7 +150,7 @@ jobs:
         # We upgrade all packages preemptively as the test suite will attempt it but fail,
         # because of mpm's enforced timeout.
         run: |
-          choco upgrade all --no-progress --yes --ignore-package-exit-codes --ignore-detected-reboot
+          choco upgrade all --no-progress --yes --ignore-package-exit-codes --ignore-detected-reboot --retry-count=3
 
       # NPM
       - name: NPM - Linux install
@@ -178,7 +178,7 @@ jobs:
       - name: Cargo - Windows install
         if: runner.os == 'Windows'
         run: |
-          choco install rust --no-progress --yes
+          choco install rust --no-progress --yes --retry-count=3
 
       # Yarn
       - name: Yarn - macOS install
@@ -248,7 +248,7 @@ jobs:
       # be achieve unless we re-open a new shell. A thing we cannot do in a GitHub Action. So we simply do not install
       # it on Windows for now.
       #
-      #   ► choco install yarn --no-progress --yes
+      #   ► choco install yarn --no-progress --yes --retry-count=3
       #   Chocolatey v1.3.0
       #   Download of yarn-1.22.19.msi (1.6 MB) completed.
       #   yarn has been installed.
@@ -306,7 +306,7 @@ jobs:
       # - name: Yarn - Windows install
       #   if: runner.os == 'Windows'
       #   run: |
-      #     choco install yarn --no-progress --yes
+      #     choco install yarn --no-progress --yes --retry-count=3
 
       # Composer
       - name: Composer - macOS install
@@ -316,7 +316,7 @@ jobs:
       - name: Composer - Windows upgrade
         if: runner.os == 'Windows'
         run: |
-          choco upgrade composer --no-progress --yes
+          choco upgrade composer --no-progress --yes --retry-count=3
 
       # MAS
       - name: MAS - macOS install
@@ -379,7 +379,7 @@ jobs:
       - name: VSCode - Windows install
         if: runner.os == 'Windows'
         run: |
-          choco install vscode --no-progress --yes
+          choco install vscode --no-progress --yes --retry-count=3
 
       # Gem
       - name: Ruby & Gem - Windows upgrade
@@ -389,7 +389,7 @@ jobs:
         # https://github.com/actions/runner-images/discussions/6065
         # https://docs.chocolatey.org/en-us/troubleshooting#why-does-choco-tab-not-work-for-me
         run: |
-          choco upgrade ruby --no-progress --yes
+          choco upgrade ruby --no-progress --yes --retry-count=3
           Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
           refreshenv
           gem update --quiet --system
@@ -432,7 +432,7 @@ jobs:
       - name: SteamCMD - Windows install
         if: runner.os == 'Windows'
         run: |
-          choco install steamcmd --no-progress --yes
+          choco install steamcmd --no-progress --yes --retry-count=3
 
       - name: Install UV
         uses: astral-sh/setup-uv@v7.2.0

@@ -36,7 +36,7 @@ from boltons.strutils import strip_ansi
 from click_extra.colorize import default_theme as theme
 from click_extra.envvar import env_copy
 from click_extra.testing import INDENT, args_cleanup, format_cli_prompt
-from extra_platforms import Group, Platform, is_unix  # type: ignore[attr-defined]
+from extra_platforms import Group, Platform, extract_members, is_unix
 from packageurl import PackageURL
 
 from .version import parse_version
@@ -188,7 +188,7 @@ class MetaPackageManager(type):
             cls.virtual = name == "PackageManager" or not cls.cli_names
 
         if "platforms" in dct:
-            cls.platforms = frozenset(Group._extract_members(dct["platforms"]))
+            cls.platforms = frozenset(extract_members(dct["platforms"]))
             assert all(isinstance(p, Platform) for p in cls.platforms), (
                 f"Manager {cls} has invalid entries in its platforms list."
             )

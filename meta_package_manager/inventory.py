@@ -28,6 +28,7 @@ from extra_platforms import (
     MACOS,
     UNIX_WITHOUT_MACOS,
     Group,
+    extract_members,
 )
 from tabulate import tabulate
 
@@ -122,7 +123,7 @@ def operation_matrix() -> tuple[str, str]:
         for p_obj in MAIN_PLATFORMS:
             line.append(
                 p_obj.icon
-                if m.platforms.issuperset(Group._extract_members(p_obj))
+                if m.platforms.issuperset(extract_members(p_obj))
                 else ""
             )
         for op in Operations:

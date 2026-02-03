@@ -117,8 +117,8 @@ dependencies = [
     "click-extra >= 7.2.0",
     # cyclonedx-python-lib 11.2.0 is the first to support Python 3.14.
     "cyclonedx-python-lib [validation] >= 11.2.0",
-    # We depends on some internals changed in extra-platforms 7.0.0.
-    "extra-platforms >= 7.0.0",
+    # extra-platforms 8.0.0 removes deprecated symbols and add extract_members().
+    "extra-platforms >= 8.0.0",
     # more-itertools 10.8.0 is the first to support Python 3.14.
     "more-itertools >= 10.8.0",
     # packageurl-python 0.16.0 is the first to support Python 3.13.

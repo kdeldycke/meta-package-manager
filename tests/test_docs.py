@@ -24,7 +24,7 @@ from itertools import permutations
 from pathlib import Path
 
 from boltons.iterutils import flatten
-from extra_platforms import Group
+from extra_platforms import Group, extract_members
 from yaml import Loader, load
 
 from meta_package_manager.inventory import MAIN_PLATFORMS
@@ -71,7 +71,7 @@ def test_all_platforms_covered_by_local_groups(manager):
     """Check all platforms supported by managers are covered by a local group."""
     leftover_platforms = set(manager.platforms.copy())
 
-    for main_platform in (set(Group._extract_members(i)) for i in MAIN_PLATFORMS):
+    for main_platform in (set(extract_members(i)) for i in MAIN_PLATFORMS):
         # Check the group fully overlap the manager platforms.
         if main_platform.issubset(manager.platforms):
             # Remove the group platforms from the uncovered list.

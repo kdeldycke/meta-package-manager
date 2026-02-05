@@ -21,7 +21,7 @@ import json
 from pathlib import Path
 
 from boltons.iterutils import flatten
-from extra_platforms import Group, extract_members
+from extra_platforms import extract_members
 
 from .inventory import MAIN_PLATFORMS
 from .pool import pool

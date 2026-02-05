@@ -121,9 +121,7 @@ def operation_matrix() -> tuple[str, str]:
         ]
         for p_obj in MAIN_PLATFORMS:
             line.append(
-                p_obj.icon
-                if m.platforms.issuperset(extract_members(p_obj))
-                else ""
+                p_obj.icon if m.platforms.issuperset(extract_members(p_obj)) else ""
             )
         for op in Operations:
             line.append("✓" if m.implements(op) else "")

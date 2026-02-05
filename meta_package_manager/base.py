@@ -36,10 +36,7 @@ from boltons.strutils import strip_ansi
 from click_extra.colorize import default_theme as theme
 from click_extra.envvar import env_copy
 from click_extra.testing import INDENT, args_cleanup, format_cli_prompt
-from extra_platforms import (
-    Group, Platform, extract_members,
-    is_unix, # type: ignore[attr-defined]
-)
+from extra_platforms import Group, Platform, extract_members, is_unix  # type: ignore[attr-defined]
 from packageurl import PackageURL
 
 from .version import parse_version

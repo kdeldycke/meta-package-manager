@@ -119,8 +119,8 @@ jobs:
           choco upgrade chocolatey --no-progress --yes --retry-count=3
       - name: Chocolatey - Pin un-upgradeable packages
         if: runner.os == 'Windows'
-        # XXX The upgrade all step below fails for strawberryperl package on windows-2025 runners v2.327.1:
-        #
+        # XXX The "choco upgrade all" step below fails for some packages. Just ignore them by pinning them.
+
         #   You have strawberryperl v5.40.2.2 installed. Version 5.42.0.1 is available based on your source(s).
         #   Downloading package from source 'https://community.chocolatey.org/api/v2/'
         #
@@ -142,9 +142,18 @@ jobs:
         #   adding '--install-arguments="'/l*v c:\StrawberryPerl_msi_install.log'"'. Then search the MSI Log for
         #   "Return Value 3" and look above that for the error.
         #   The upgrade of strawberryperl was NOT successful.
+
+        #   nginx v1.29.5 [Approved]
+        #   nginx package files upgrade completed. Performing other installation steps.
+        #   Port '80' is in use by 'System'...
+        #   ERROR: Please specify a different port number...
+        #   Environment Vars (like PATH) have changed. Close/reopen your shell to
+        #    see the changes (or in powershell/cmd.exe just type `refreshenv`).
+        #   The upgrade of nginx was NOT successful.
         run: |
           choco pin add --name="strawberryperl"
           choco pin add --name="rtools"
+          choco pin add --name="nginx"
       - name: Chocolatey - Windows full upgrade
         if: runner.os == 'Windows'
         # We upgrade all packages preemptively as the test suite will attempt it but fail,

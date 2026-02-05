@@ -37,13 +37,7 @@ from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from click_extra import echo, style
 from click_extra.colorize import default_theme as theme
-from click_extra.table import (
-    DataRow,
-    TableFormatOption,
-    TabulateTableFormat,
-    print_table,
-    render_table as tabulate_table,
-)
+from click_extra.table import TableFormatOption, print_table, render_table
 from click_extra.table import TableFormat as BaseTableFormat
 
 from .bar_plugin import MPMPlugin
@@ -59,7 +53,6 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections import Counter
     from collections.abc import Iterable, Sequence
-    from typing import Any
 
 
 class SortableField(StrEnum):
@@ -334,56 +327,6 @@ class BarPluginRenderer(MPMPlugin):
                 "refresh=true",
             )
 
-    plain_table_format = TabulateTableFormat(
-        lineabove=None,
-        linebelowheader=None,
-        linebetweenrows=None,
-        linebelow=None,
-        headerrow=DataRow("", " ", ""),
-        datarow=DataRow("", " ", ""),
-        padding=0,
-        with_header_hide=None,
-    )
-    """Simple rendering format with single-space separated columns used in the function
-    below."""
-
-    @staticmethod
-    def render_table(
-        table_data: Sequence[Sequence[str]] | None,
-    ) -> Any | list:
-        """Renders a table data with pre-configured alignment centered around the third
-        column.
-
-        Returns a list of strings, one item per line.
-
-        .. code-block:: pycon
-
-            >>> table_data = [
-            ...     ("xmlrpc", "0.3.1", "→", "0.4"),
-            ...     ("blockblock", "5.33,VHSDGataYCcV8xqv5TSZA", "→", "5.39"),
-            ...     ("sed", "2", "→", "2021.0328"),
-            ... ]
-            >>> print(render_table(table_data))
-            xmlrpc                          0.3.1 → 0.4
-            blockblock 5.33,VHSDGataYCcV8xqv5TSZA → 5.39
-            sed                                 2 → 2021.0328
-
-        ..todo::
-
-            Use upcoming ``tabulate.SEPARATING_LINE`` to produce the whole bar plugin
-            table in one go and have all version numbers from all managers aligned. See:
-            https://github.com/astanin/python-tabulate/commit/dab256d1f64da97720c1459478a3cc0a4ea7a91e
-        """
-        if not table_data:
-            return []
-        return tabulate_table(
-            table_data,
-            table_format=None,
-            tablefmt=BarPluginRenderer.plain_table_format,
-            colalign=("left", "right", "center", "left"),
-            disable_numparse=True,
-        ).splitlines()
-
     def _render(self, outdated_data) -> None:
         """Main method implementing the final structured rendering in *Bar plugin
         dialect.
@@ -430,7 +373,12 @@ class BarPluginRenderer(MPMPlugin):
             # Table-like rendering
             if self.table_rendering:
                 header = f"{manager['id']} - {package_count} {package_label}"
-                formatted_lines = self.render_table([p[0] for p in table])
+                formatted_lines = render_table(
+                    [p[0] for p in table],
+                    table_format=BaseTableFormat.ALIGNED,
+                    colalign=("left", "right", "center", "left"),
+                    disable_numparse=True,
+                ).splitlines()
 
             # Variable-width / non-table / non-monospaced rendering.
             else:

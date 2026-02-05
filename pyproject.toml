@@ -200,6 +200,10 @@ exclude-newer = "1 week"
 # XXX Disable exclusion of brand new extra-platforms and click-extra releases.
 exclude-newer-package = { extra-platforms = "0 day", "click-extra" = "0 day" }
 
+[tool.uv.sources]
+# XXX Use main branch of click-extra to test unreleased features.
+click-extra = { git = "https://github.com/kdeldycke/click-extra.git", branch = "main" }
+
 [tool.nuitka]
 product-name = "Meta Package Manager"
 file-description = "🎁 wraps all package managers with a unifying CLI"

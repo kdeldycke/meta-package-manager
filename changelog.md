@@ -6,7 +6,8 @@
 > This version is not released yet and is under active development.
 
 - [choco] Add `--retry-count=3` option to all `choco` invocations.
-- [mpm] Upgrade to `extra-platforms` 8.0.0. Remove usgae of deprecated functions.
+- [mpm] Upgrade to `extra-platforms` 8.0.0. Remove usage of deprecated functions.
+- [mpm] Remove direct dependency on `tabulate`.
 
 ## [6.1.0 (2026-01-18)](https://github.com/kdeldycke/meta-package-manager/compare/v6.0.2...v6.1.0)
 

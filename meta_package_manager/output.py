@@ -42,9 +42,9 @@ from click_extra.table import (
     TableFormatOption,
     TabulateTableFormat,
     print_table,
+    render_table as tabulate_table,
 )
 from click_extra.table import TableFormat as BaseTableFormat
-from tabulate import tabulate
 
 from .bar_plugin import MPMPlugin
 from .pool import pool
@@ -376,8 +376,9 @@ class BarPluginRenderer(MPMPlugin):
         """
         if not table_data:
             return []
-        return tabulate(
+        return tabulate_table(
             table_data,
+            table_format=None,
             tablefmt=BarPluginRenderer.plain_table_format,
             colalign=("left", "right", "center", "left"),
             disable_numparse=True,

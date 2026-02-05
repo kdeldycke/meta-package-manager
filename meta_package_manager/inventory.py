@@ -21,6 +21,7 @@ from pathlib import Path
 from textwrap import dedent
 
 from click_extra.docs_update import replace_content
+from click_extra.table import TableFormat, render_table
 from extra_platforms import (
     ALL_WINDOWS,
     BSD_WITHOUT_MACOS,
@@ -30,8 +31,6 @@ from extra_platforms import (
     Group,
     extract_members,
 )
-from tabulate import tabulate
-
 from .base import Operations
 from .pool import pool
 
@@ -135,35 +134,15 @@ def operation_matrix() -> tuple[str, str]:
     alignments.extend(["center"] * len(MAIN_PLATFORMS))
     alignments.extend(["center"] * len(Operations))
 
-    rendered_table = tabulate(
+    rendered_table = render_table(
         table,
         headers=headers,
-        tablefmt="github",
+        table_format=TableFormat.GITHUB,
         colalign=alignments,
         disable_numparse=True,
     )
 
-    # Manually produce Markdown alignment hints. This has been proposed upstream at:
-    # https://github.com/astanin/python-tabulate/pull/261
-    # https://github.com/astanin/python-tabulate/issues/53
-    separators = []
-    for col_index, header in enumerate(headers):
-        cells = [line[col_index] for line in table] + [header]
-        max_len = max(len(c) for c in cells)
-        align = alignments[col_index]
-        if align == "center":
-            sep = f":{'-' * (max_len - 2)}:"
-        elif align == "right":
-            sep = f"{'-' * (max_len - 1)}:"
-        else:
-            sep = "-" * max_len
-        separators.append(sep)
-    header_separator = f"| {' | '.join(separators)} |"
-
-    lines = rendered_table.splitlines()
-    lines[1] = header_separator
-
-    return "\n".join(lines), "\n\n".join(footnotes)
+    return rendered_table, "\n\n".join(footnotes)
 
 
 def update_readme() -> None:

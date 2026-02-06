@@ -1,0 +1,1254 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content=" Installation" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="install.html" />
+<meta property="og:site_name" content="Meta Package Manager" />
+<meta property="og:description" content="Installation: Packaging status Meta Package Manager is distributed on PyPi. So you can install the latest stable release with your favorite package manager like pip: Try it now: You can try Meta Pa..." />
+<meta name="description" content="Installation: Packaging status Meta Package Manager is distributed on PyPi. So you can install the latest stable release with your favorite package manager like pip: Try it now: You can try Meta Pa..." />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Use-cases" href="usecase.html"><link rel="prev" title="Features" href="index.html">
+        <link rel="prefetch" href="_static/logo-square.svg" as="image">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>Installation - Meta Package Manager</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80449d92" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     Meta Package Manager works fine, but is <em>maintained by only one person</em> 😶‍🌫️.<br/>You can help if you <strong><a class='reference external' href='https://github.com/sponsors/kdeldycke'>purchase business support 🤝</a></strong> or <strong><a class='reference external' href='https://github.com/sponsors/kdeldycke'>sponsor the project 🫶</a></strong>. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">Meta Package Manager</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/logo-square.svg" alt="Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#"><svg aria-hidden="true" class="sd-octicon sd-octicon-download" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path><path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path></svg> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usecase.html">Use-cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-parameters.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-command-palette" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="m6.354 8.04-4.773 4.773a.75.75 0 1 0 1.061 1.06L7.945 8.57a.75.75 0 0 0 0-1.06L2.642 2.206a.75.75 0 0 0-1.06 1.061L6.353 8.04ZM8.75 11.5a.75.75 0 0 0 0 1.5h5.5a.75.75 0 0 0 0-1.5h-5.5Z"></path></svg> CLI parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-sliders" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M15 2.75a.75.75 0 0 1-.75.75h-4a.75.75 0 0 1 0-1.5h4a.75.75 0 0 1 .75.75Zm-8.5.75v1.25a.75.75 0 0 0 1.5 0v-4a.75.75 0 0 0-1.5 0V2H1.75a.75.75 0 0 0 0 1.5H6.5Zm1.25 5.25a.75.75 0 0 0 0-1.5h-6a.75.75 0 0 0 0 1.5h6ZM15 8a.75.75 0 0 1-.75.75H11.5V10a.75.75 0 1 1-1.5 0V6a.75.75 0 0 1 1.5 0v1.25h2.75A.75.75 0 0 1 15 8Zm-9 5.25v-2a.75.75 0 0 0-1.5 0v1.25H1.75a.75.75 0 0 0 0 1.5H4.5v1.25a.75.75 0 0 0 1.5 0v-2Zm9 0a.75.75 0 0 1-.75.75h-6a.75.75 0 0 1 0-1.5h6a.75.75 0 0 1 .75.75Z"></path></svg> Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bar-plugin.html">Xbar and SwiftBar plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="falsehoods.html">Falsehoods programmers believe about package managers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark.html">Benchmark</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-git-pull-request" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"></path></svg> Contribution guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="meta_package_manager.html">API</a><input aria-label="Toggle navigation of API" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.managers.html">meta_package_manager.managers package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">tests package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-diff" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M8.75 1.75V5H12a.75.75 0 0 1 0 1.5H8.75v3.25a.75.75 0 0 1-1.5 0V6.5H4A.75.75 0 0 1 4 5h3.25V1.75a.75.75 0 0 1 1.5 0ZM4 13h8a.75.75 0 0 1 0 1.5H4A.75.75 0 0 1 4 13Z"></path></svg> Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-log" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M5 8.25a.75.75 0 0 1 .75-.75h4a.75.75 0 0 1 0 1.5h-4A.75.75 0 0 1 5 8.25ZM4 10.5A.75.75 0 0 0 4 12h4a.75.75 0 0 0 0-1.5H4Z"></path><path d="M13-.005c1.654 0 3 1.328 3 3 0 .982-.338 1.933-.783 2.818-.443.879-1.028 1.758-1.582 2.588l-.011.017c-.568.853-1.104 1.659-1.501 2.446-.398.789-.623 1.494-.623 2.136a1.5 1.5 0 1 0 2.333-1.248.75.75 0 0 1 .834-1.246A3 3 0 0 1 13 16H3a3 3 0 0 1-3-3c0-1.582.891-3.135 1.777-4.506.209-.322.418-.637.623-.946.473-.709.923-1.386 1.287-2.048H2.51c-.576 0-1.381-.133-1.907-.783A2.68 2.68 0 0 1 0 2.995a3 3 0 0 1 3-3Zm0 1.5a1.5 1.5 0 0 0-1.5 1.5c0 .476.223.834.667 1.132A.75.75 0 0 1 11.75 5.5H5.368c-.467 1.003-1.141 2.015-1.773 2.963-.192.289-.381.571-.558.845C2.13 10.711 1.5 11.916 1.5 13A1.5 1.5 0 0 0 3 14.5h7.401A2.989 2.989 0 0 1 10 13c0-.979.338-1.928.784-2.812.441-.874 1.023-1.748 1.575-2.576l.017-.026c.568-.853 1.103-1.658 1.501-2.448.398-.79.623-1.497.623-2.143 0-.838-.669-1.5-1.5-1.5Zm-10 0a1.5 1.5 0 0 0-1.5 1.5c0 .321.1.569.27.778.097.12.325.227.74.227h7.674A2.737 2.737 0 0 1 10 2.995c0-.546.146-1.059.401-1.5Z"></path></svg> History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="todolist.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-checklist" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M2.5 1.75v11.5c0 .138.112.25.25.25h3.17a.75.75 0 0 1 0 1.5H2.75A1.75 1.75 0 0 1 1 13.25V1.75C1 .784 1.784 0 2.75 0h8.5C12.216 0 13 .784 13 1.75v7.736a.75.75 0 0 1-1.5 0V1.75a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25Zm13.274 9.537v-.001l-4.557 4.45a.75.75 0 0 1-1.055-.008l-1.943-1.95a.75.75 0 0 1 1.062-1.058l1.419 1.425 4.026-3.932a.75.75 0 1 1 1.048 1.074ZM4.75 4h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM4 7.75A.75.75 0 0 1 4.75 7h2a.75.75 0 0 1 0 1.5h-2A.75.75 0 0 1 4 7.75Z"></path></svg> Todo-list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code-of-conduct.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-code-of-conduct" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M8.048 2.241c.964-.709 2.079-1.238 3.325-1.241a4.616 4.616 0 0 1 3.282 1.355c.41.408.757.86.996 1.428.238.568.348 1.206.347 1.968 0 2.193-1.505 4.254-3.081 5.862-1.496 1.526-3.213 2.796-4.249 3.563l-.22.163a.749.749 0 0 1-.895 0l-.221-.163c-1.036-.767-2.753-2.037-4.249-3.563C1.51 10.008.007 7.952.002 5.762a4.614 4.614 0 0 1 1.353-3.407C3.123.585 6.223.537 8.048 2.24Zm-1.153.983c-1.25-1.033-3.321-.967-4.48.191a3.115 3.115 0 0 0-.913 2.335c0 1.556 1.109 3.24 2.652 4.813C5.463 11.898 6.96 13.032 8 13.805c.353-.262.758-.565 1.191-.905l-1.326-1.223a.75.75 0 0 1 1.018-1.102l1.48 1.366c.328-.281.659-.577.984-.887L9.99 9.802a.75.75 0 1 1 1.019-1.103l1.384 1.28c.295-.329.566-.661.81-.995L12.92 8.7l-1.167-1.168c-.674-.671-1.78-.664-2.474.03-.268.269-.538.537-.802.797-.893.882-2.319.843-3.185-.032-.346-.35-.693-.697-1.043-1.047a.75.75 0 0 1-.04-1.016c.162-.191.336-.401.52-.623.62-.748 1.356-1.637 2.166-2.417Zm7.112 4.442c.313-.65.491-1.293.491-1.916v-.001c0-.614-.088-1.045-.23-1.385-.143-.339-.357-.633-.673-.949a3.111 3.111 0 0 0-2.218-.915c-1.092.003-2.165.627-3.226 1.602-.823.755-1.554 1.637-2.228 2.45l-.127.154.562.566a.755.755 0 0 0 1.066.02l.794-.79c1.258-1.258 3.312-1.31 4.594-.032.396.394.792.791 1.173 1.173Z"></path></svg> Code of conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-law" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M8.75.75V2h.985c.304 0 .603.08.867.231l1.29.736c.038.022.08.033.124.033h2.234a.75.75 0 0 1 0 1.5h-.427l2.111 4.692a.75.75 0 0 1-.154.838l-.53-.53.529.531-.001.002-.002.002-.006.006-.006.005-.01.01-.045.04c-.21.176-.441.327-.686.45C14.556 10.78 13.88 11 13 11a4.498 4.498 0 0 1-2.023-.454 3.544 3.544 0 0 1-.686-.45l-.045-.04-.016-.015-.006-.006-.004-.004v-.001a.75.75 0 0 1-.154-.838L12.178 4.5h-.162c-.305 0-.604-.079-.868-.231l-1.29-.736a.245.245 0 0 0-.124-.033H8.75V13h2.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5h2.5V3.5h-.984a.245.245 0 0 0-.124.033l-1.289.737c-.265.15-.564.23-.869.23h-.162l2.112 4.692a.75.75 0 0 1-.154.838l-.53-.53.529.531-.001.002-.002.002-.006.006-.016.015-.045.04c-.21.176-.441.327-.686.45C4.556 10.78 3.88 11 3 11a4.498 4.498 0 0 1-2.023-.454 3.544 3.544 0 0 1-.686-.45l-.045-.04-.016-.015-.006-.006-.004-.004v-.001a.75.75 0 0 1-.154-.838L2.178 4.5H1.75a.75.75 0 0 1 0-1.5h2.234a.249.249 0 0 0 .125-.033l1.288-.737c.265-.15.564-.23.869-.23h.984V.75a.75.75 0 0 1 1.5 0Zm2.945 8.477c.285.135.718.273 1.305.273s1.02-.138 1.305-.273L13 6.327Zm-10 0c.285.135.718.273 1.305.273s1.02-.138 1.305-.273L3 6.327Z"></path></svg> License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager">GitHub repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/sponsors/kdeldycke">Funding</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/kdeldycke/meta-package-manager/blob/main/docs/install.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/kdeldycke/meta-package-manager/edit/main/docs/install.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="installation">
+<h1><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-download" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path><path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path></svg> Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h1>
+<aside class="sidebar">
+<p><a class="reference external" href="https://repology.org/project/meta-package-manager/versions"><img alt="Packaging status" src="https://repology.org/badge/vertical-allrepos/meta-package-manager.svg" /></a></p>
+</aside>
+<p>Meta Package Manager is <a class="reference external" href="https://pypi.org/project/meta-package-manager/">distributed on PyPi</a>.</p>
+<p>So you can install the latest stable release with your favorite package manager <a class="reference external" href="https://pip.pypa.io">like <code class="docutils literal notranslate"><span class="pre">pip</span></code></a>:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p><strong>Misleading package name</strong></p>
+<p><a class="reference internal" href="_images/angry-paper-box.png"><img alt="Angry package" class="align-right" src="_images/angry-paper-box.png" style="width: 50px;" /></a></p>
+<p>There is a <em><code class="docutils literal notranslate"><span class="pre">mpm</span></code></em> Python module on PyPi that has nothing to do with this project. Avoid it!</p>
+<p>The <strong>real package is named <code class="docutils literal notranslate"><span class="pre">meta-package-manager</span></code></strong>. Only the latter provides the <strong class="command">mpm</strong> CLI you’re looking for.</p>
+</div>
+<section id="try-it-now">
+<h2>Try it now<a class="headerlink" href="#try-it-now" title="Link to this heading">¶</a></h2>
+<p>You can try Meta Package Manager right now in your terminal, without installing any dependency or virtual env <a class="reference external" href="https://docs.astral.sh/uv/guides/tools/">thanks to <code class="docutils literal notranslate"><span class="pre">uvx</span></code></a>:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Latest version</label><div class="sd-tab-content docutils">
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uvx<span class="w"> </span>--from<span class="w"> </span>meta-package-manager<span class="w"> </span>--<span class="w"> </span>mpm
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Specific version</label><div class="sd-tab-content docutils">
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uvx<span class="w"> </span>--from<span class="w"> </span>meta-package-manager@5.21.0<span class="w"> </span>--<span class="w"> </span>mpm
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-2" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+Development version</label><div class="sd-tab-content docutils">
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uvx<span class="w"> </span>--from<span class="w"> </span>git+https://github.com/kdeldycke/meta-package-manager<span class="w"> </span>--<span class="w"> </span>mpm
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-3" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+Local version</label><div class="sd-tab-content docutils">
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uvx<span class="w"> </span>--from<span class="w"> </span>file:///Users/me/code/meta-package-manager<span class="w"> </span>--<span class="w"> </span>mpm
+</pre></div>
+</div>
+</div>
+</div>
+<p>This will download <code class="docutils literal notranslate"><span class="pre">meta-package-manager</span></code> (the package), and run <code class="docutils literal notranslate"><span class="pre">mpm</span></code>, the CLI included in the package.</p>
+</section>
+<section id="installation-methods">
+<h2>Installation methods<a class="headerlink" href="#installation-methods" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">mpm</span></code> is available on several popular package managers:</p>
+<p><img alt="Yo dawg, I herd you like package managers..." class="align-center" src="_images/yo-dawg-meta-package-manager.jpg" /></p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
+uvx</label><div class="sd-tab-content docutils">
+<p>Easiest way is to <a class="reference external" href="https://docs.astral.sh/uv/getting-started/installation/">install <code class="docutils literal notranslate"><span class="pre">uv</span></code></a>, then install <code class="docutils literal notranslate"><span class="pre">meta-package-manager</span></code> system-wide, with the <a class="reference external" href="https://docs.astral.sh/uv/guides/tools/#installing-tools"><code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">tool</span></code></a> command:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uv<span class="w"> </span>tool<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<p>Then you can run <code class="docutils literal notranslate"><span class="pre">mpm</span></code> directly:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>--version
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
+pipx</label><div class="sd-tab-content docutils">
+<p><a class="reference external" href="https://pipx.pypa.io/stable/installation/"><code class="docutils literal notranslate"><span class="pre">pipx</span></code></a> is a great way to install Python applications globally:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pipx<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-6" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-6">
+pip</label><div class="sd-tab-content docutils">
+<p>You can install the latest stable release and its dependencies with a simple <code class="docutils literal notranslate"><span class="pre">pip</span></code> call:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<p>Other variations includes:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip3<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<p>If you have difficulties to use <code class="docutils literal notranslate"><span class="pre">pip</span></code>, see
+<a class="reference external" href="https://pip.pypa.io/en/stable/installation/"><code class="docutils literal notranslate"><span class="pre">pip</span></code>’s own installation instructions</a>.</p>
+</div>
+<input id="sd-tab-item-7" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-7">
+brew</label><div class="sd-tab-content docutils">
+<p>Meta Package Manager is <a class="reference external" href="https://formulae.brew.sh/formula/meta-package-manager">available as an Homebrew formula</a>, so you just need to:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>brew<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-8" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-8">
+Scoop</label><div class="sd-tab-content docutils">
+<p>Meta Package Manager is available in the <code class="docutils literal notranslate"><span class="pre">main</span></code> repository of <a class="reference external" href="https://scoop.sh">Scoop</a>, so you just need to:</p>
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt; </span><span class="n">scoop</span> <span class="n">install</span> <span class="n">main</span><span class="p">/</span><span class="n">meta-package-manager</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-9" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-9">
+Arch Linux</label><div class="sd-tab-content docutils">
+<p>An <code class="docutils literal notranslate"><span class="pre">mpm</span></code> package is <a class="reference external" href="https://aur.archlinux.org/packages/meta-package-manager">available on AUR</a> and can be installed with any AUR helper:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pacaur<span class="w"> </span>-S<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pacman<span class="w"> </span>-S<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>paru<span class="w"> </span>-S<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>yay<span class="w"> </span>-S<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="binaries">
+<h2>Binaries<a class="headerlink" href="#binaries" title="Link to this heading">¶</a></h2>
+<p>Binaries are compiled at each release, so you can skip the installation process above and download the standalone executables directly.</p>
+<p>This is the preferred way of testing <code class="docutils literal notranslate"><span class="pre">mpm</span></code> without polluting your machine. They also offer the possibility of running the CLI on older systems not supporting the minimal Python version required by <code class="docutils literal notranslate"><span class="pre">mpm</span></code>.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Platform</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">arm64</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">x86_64</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Linux</strong></p></td>
+<td><p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-arm64.bin">Download <code class="docutils literal notranslate"><span class="pre">mpm-linux-arm64.bin</span></code></a></p></td>
+<td><p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin">Download <code class="docutils literal notranslate"><span class="pre">mpm-linux-x64.bin</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>macOS</strong></p></td>
+<td><p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-arm64.bin">Download <code class="docutils literal notranslate"><span class="pre">mpm-macos-arm64.bin</span></code></a></p></td>
+<td><p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin">Download <code class="docutils literal notranslate"><span class="pre">mpm-macos-x64.bin</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Windows</strong></p></td>
+<td><p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-arm64.exe">Download <code class="docutils literal notranslate"><span class="pre">mpm-windows-arm64.exe</span></code></a></p></td>
+<td><p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe">Download <code class="docutils literal notranslate"><span class="pre">mpm-windows-x64.exe</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>All links above points to the latest released version of <code class="docutils literal notranslate"><span class="pre">mpm</span></code>.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>If you need to test previous versions for regression, compatibility or general troubleshooting, you’ll find the old binaries attached as assets to <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/releases">past releases on GitHub</a>.</p>
+</div>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>Each commit to the development branch triggers the compilation of binaries. This way you can easily test the bleeding edge version of <code class="docutils literal notranslate"><span class="pre">mpm</span></code> and report any issue.</p>
+<p>Look at the <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/actions/workflows/release.yaml?query=branch%3Amain+is%3Asuccess">list of latest binary builds</a>. Then select the latest <code class="docutils literal notranslate"><span class="pre">Build</span> <span class="pre">&amp;</span> <span class="pre">release</span></code>/<code class="docutils literal notranslate"><span class="pre">release.yaml</span></code> workflow run and download the binary artifact corresponding to your platform and architecture.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>ABI targets</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>file<span class="w"> </span>./mpm*
+<span class="go">./mpm-linux-arm64.bin:   ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, BuildID[sha1]=520bfc6f2bb21f48ad568e46752888236552b26a, for GNU/Linux 3.7.0, stripped</span>
+<span class="go">./mpm-linux-x64.bin:     ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=56ba24bccfa917e6ce9009223e4e83924f616d46, for GNU/Linux 3.2.0, stripped</span>
+<span class="go">./mpm-macos-arm64.bin:   Mach-O 64-bit executable arm64</span>
+<span class="go">./mpm-macos-x64.bin:     Mach-O 64-bit executable x86_64</span>
+<span class="go">./mpm-windows-arm64.exe: PE32+ executable (console) Aarch64, for MS Windows</span>
+<span class="go">./mpm-windows-x64.exe:   PE32+ executable (console) x86-64, for MS Windows</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="self-bootstrapping">
+<h2>Self-bootstrapping<a class="headerlink" href="#self-bootstrapping" title="Link to this heading">¶</a></h2>
+<p>In a funny twist, <code class="docutils literal notranslate"><span class="pre">mpm</span></code> can be installed with itself.</p>
+<p>Which means there is a way to bootstrap its deployment on an unknown system. Just <a class="reference internal" href="#binaries"><span class="xref myst">download the binary</span></a> corresponding to your platform and architecture:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>curl<span class="w"> </span>--fail<span class="w"> </span>--remote-name<span class="w"> </span>https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin
+<span class="gp">#</span><span class="c1">################################################## 100.0%</span>
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>file<span class="w"> </span>./mpm-macos-x64.bin
+<span class="go">./mpm-macos-x64.bin: Mach-O 64-bit executable x86_64</span>
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>chmod<span class="w"> </span>+x<span class="w"> </span>./mpm-macos-x64.bin
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>./mpm-macos-x64.bin<span class="w"> </span>--version
+<span class="go">mpm, version 5.7.0</span>
+</pre></div>
+</div>
+<p>Then let <code class="docutils literal notranslate"><span class="pre">mpm</span></code> discovers which package managers are available on your machine and choose the one providing a path to <code class="docutils literal notranslate"><span class="pre">mpm</span></code> installation:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>./mpm-macos-x64.bin<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+<span class="go">warning: Skip unavailable cargo manager.</span>
+<span class="go">warning: Skip unavailable steamcmd manager.</span>
+<span class="go">Installation priority: brew &gt; cask &gt; composer &gt; gem &gt; mas &gt; npm &gt; pip &gt; pipx &gt; vscode &gt; yarn</span>
+<span class="go">warning: No meta-package-manager package found on brew.</span>
+<span class="go">warning: No meta-package-manager package found on cask.</span>
+<span class="go">warning: No meta-package-manager package found on composer.</span>
+<span class="go">warning: No meta-package-manager package found on gem.</span>
+<span class="go">warning: No meta-package-manager package found on mas.</span>
+<span class="go">warning: No meta-package-manager package found on npm.</span>
+<span class="go">warning: pip does not implement search operation.</span>
+<span class="go">meta-package-manager existence unconfirmed, try to directly install it...</span>
+<span class="go">Install meta-package-manager package with pip...</span>
+<span class="go">Collecting meta-package-manager</span>
+<span class="go">  Downloading meta_package_manager-5.11.1-py3-none-any.whl (161 kB)</span>
+<span class="go">     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 161.5/161.5 kB 494.7 kB/s eta 0:00:00</span>
+<span class="gp gp-VirtualEnv">(...)</span>
+<span class="go">Installing collected packages: (...) meta-package-manager</span>
+<span class="go">Successfully installed (...) meta-package-manager-5.11.1</span>
+</pre></div>
+</div>
+<p>And now you can remove the local binary and enjoy the system-wide <code class="docutils literal notranslate"><span class="pre">mpm</span></code> that was installed by itself:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>rm<span class="w"> </span>-f<span class="w"> </span>./mpm-macos-x64.bin
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>which<span class="w"> </span>mpm
+<span class="go">/opt/homebrew/bin/mpm</span>
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>--version
+<span class="go">mpm, version 5.11.1</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>At this moment, <code class="docutils literal notranslate"><span class="pre">mpm</span></code> can be installed with itself via these managers:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>--brew<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>--pacaur<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>--pacman<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>--paru<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>--pip<span class="w">  </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>--pipx<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>--uvx<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>--yay<span class="w">  </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+</div>
+</section>
+<section id="python-module-usage">
+<h2>Python module usage<a class="headerlink" href="#python-module-usage" title="Link to this heading">¶</a></h2>
+<p>Meta Package Manager should now be available system-wide:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>--version
+<span class="go">mpm, version 4.13.0</span>
+<span class="gp gp-VirtualEnv">(...)</span>
+</pre></div>
+</div>
+<p>If not, you can directly execute the module from Python:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>meta_package_manager<span class="w"> </span>--version
+<span class="go">mpm, version 4.13.0</span>
+<span class="gp gp-VirtualEnv">(...)</span>
+</pre></div>
+</div>
+</section>
+<section id="password-prompts-and-sudo">
+<h2>Password prompts and <code class="docutils literal notranslate"><span class="pre">sudo</span></code><a class="headerlink" href="#password-prompts-and-sudo" title="Link to this heading">¶</a></h2>
+<p>The majority of package managers on Linux requires <code class="docutils literal notranslate"><span class="pre">sudo</span></code> to perform system-wide operations.</p>
+<p>On other OSes you’ll be prompted to enter your password to install kernel extensions:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>brew<span class="w"> </span>install<span class="w"> </span>--cask<span class="w"> </span>macfuse
+<span class="go">==&gt; Caveats</span>
+<span class="go">macfuse requires a kernel extension to work.</span>
+<span class="go">If the installation fails, retry after you enable it in:</span>
+<span class="go">  System Preferences → Security &amp; Privacy → General</span>
+
+<span class="go">For more information, refer to vendor documentation or this Apple Technical Note:</span>
+<span class="go">  https://developer.apple.com/library/content/technotes/tn2459/_index.html</span>
+
+<span class="go">==&gt; Downloading https://github.com/osxfuse/osxfuse/releases/download/macfuse-4.2.5/macfuse-4.2.5.dmg</span>
+<span class="go">Already downloaded: /Users/kde/Library/Caches/Homebrew/downloads/d7961d772f16bad95962f1a780b545a5dbb4788ec6e1ec757994bb5296397b1c--macfuse-4.2.5.dmg</span>
+<span class="go">==&gt; Installing Cask macfuse</span>
+<span class="go">==&gt; Running installer for macfuse; your password may be necessary.</span>
+<span class="go">Package installers may write to any location; options such as `--appdir` are ignored.</span>
+<span class="go">Password:</span>
+</pre></div>
+</div>
+<p>Both cases are not handled gracefully by <code class="docutils literal notranslate"><span class="pre">mpm</span></code>, which <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/33">doesn’t support (yet) interactive password</a> management and capture.</p>
+<p>A workaround on Linux is to install <code class="docutils literal notranslate"><span class="pre">mpm</span></code> with <code class="docutils literal notranslate"><span class="pre">sudo</span></code>, so you’ll be able to invoke it with <code class="docutils literal notranslate"><span class="pre">sudo</span></code> too:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>sudo<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+<span class="gp gp-VirtualEnv">(...)</span>
+<span class="gp">$ </span>sudo<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>meta_package_manager<span class="w"> </span>upgrade
+<span class="gp gp-VirtualEnv">(...)</span>
+</pre></div>
+</div>
+</section>
+<section id="shell-completion">
+<h2>Shell completion<a class="headerlink" href="#shell-completion" title="Link to this heading">¶</a></h2>
+<p>Completion for popular shell <a class="reference external" href="https://click.palletsprojects.com/en/stable/shell-completion/">rely on Click feature</a>.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-10" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="bash" for="sd-tab-item-10">
+Bash</label><div class="sd-tab-content docutils">
+<p>Add this to <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">eval</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span><span class="nv">_MPM_COMPLETE</span><span class="o">=</span>bash_source<span class="w"> </span>mpm<span class="k">)</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-11" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="zsh" for="sd-tab-item-11">
+Zsh</label><div class="sd-tab-content docutils">
+<p>Add this to <code class="docutils literal notranslate"><span class="pre">~/.zshrc</span></code>:</p>
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span><span class="nb">eval</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span><span class="nv">_MPM_COMPLETE</span><span class="o">=</span>zsh_source<span class="w"> </span>mpm<span class="k">)</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-12" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="fish" for="sd-tab-item-12">
+Fish</label><div class="sd-tab-content docutils">
+<p>Add this to <code class="docutils literal notranslate"><span class="pre">~/.config/fish/completions/mpm.fish</span></code>:</p>
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span><span class="nb">eval</span><span class="w"> </span><span class="o">(</span>env<span class="w"> </span><span class="nv">_MPM_COMPLETE</span><span class="o">=</span>fish_source<span class="w"> </span>mpm<span class="o">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Alternatively, export the generated completion code as a static script to be
+executed:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-13" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="bash" for="sd-tab-item-13">
+Bash</label><div class="sd-tab-content docutils">
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nv">_MPM_COMPLETE</span><span class="o">=</span>bash_source<span class="w"> </span>mpm<span class="w"> </span>&gt;<span class="w"> </span>~/.mpm-complete.bash
+</pre></div>
+</div>
+<p>Then source it from <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>.<span class="w"> </span>~/.mpm-complete.bash
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-14" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="zsh" for="sd-tab-item-14">
+Zsh</label><div class="sd-tab-content docutils">
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nv">_MPM_COMPLETE</span><span class="o">=</span>zsh_source<span class="w"> </span>mpm<span class="w"> </span>&gt;<span class="w"> </span>~/.mpm-complete.zsh
+</pre></div>
+</div>
+<p>Then source it from <code class="docutils literal notranslate"><span class="pre">~/.zshrc</span></code>:</p>
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span>.<span class="w"> </span>~/.mpm.zsh
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-15" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="fish" for="sd-tab-item-15">
+Fish</label><div class="sd-tab-content docutils">
+<div class="highlight-fish notranslate"><div class="highlight"><pre><span></span><span class="nv">_MPM_COMPLETE</span><span class="o">=</span>fish_source mpm <span class="o">&gt;</span> ~/.config/fish/completions/mpm.fish
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="main-dependencies">
+<h2>Main dependencies<a class="headerlink" href="#main-dependencies" title="Link to this heading">¶</a></h2>
+<p>This is a graph of the default, main dependencies of the Python package:</p>
+<pre align="center" class="mermaid align-center">
+        flowchart TD
+    classDef missing stroke-dasharray: 5
+    beartype[&quot;beartype\n0.22.8&quot;]
+    boltons[&quot;boltons\n25.0.0&quot;]
+    boolean-py[&quot;boolean.py\n5.0&quot;]
+    bracex[&quot;bracex\n2.6&quot;]
+    certifi[&quot;certifi\n2025.11.12&quot;]
+    charset-normalizer[&quot;charset-normalizer\n3.4.4&quot;]
+    click-extra[&quot;click-extra\n7.3.0&quot;]
+    click_0[&quot;click\n8.3.1&quot;]
+    cloup[&quot;cloup\n3.0.8&quot;]
+    cyclonedx-python-lib[&quot;cyclonedx-python-lib\n11.6.0&quot;]
+    deepmerge[&quot;deepmerge\n2.0&quot;]
+    defusedxml[&quot;defusedxml\n0.7.1&quot;]
+    distro[&quot;distro\n1.9.0&quot;]
+    extra-platforms[&quot;extra-platforms\n5.1.0&quot;]
+    idna[&quot;idna\n3.11&quot;]
+    license-expression[&quot;license-expression\n30.4.4&quot;]
+    meta-package-manager[&quot;meta-package-manager\n6.0.0&quot;]
+    more-itertools[&quot;more-itertools\n10.8.0&quot;]
+    packageurl-python[&quot;packageurl-python\n0.17.6&quot;]
+    ply[&quot;ply\n3.11&quot;]
+    py-serializable[&quot;py-serializable\n2.1.0&quot;]
+    pyparsing[&quot;pyparsing\n3.2.5&quot;]
+    pyyaml[&quot;PyYAML\n6.0.3&quot;]
+    rdflib[&quot;rdflib\n7.5.0&quot;]
+    requests[&quot;requests\n2.32.5&quot;]
+    semantic-version[&quot;semantic-version\n2.10.0&quot;]
+    sortedcontainers[&quot;sortedcontainers\n2.4.0&quot;]
+    spdx-tools[&quot;spdx-tools\n0.8.3&quot;]
+    tabulate[&quot;tabulate\n0.9.0&quot;]
+    tomli-w[&quot;tomli_w\n1.2.0&quot;]
+    typing-extensions[&quot;typing_extensions\n4.15.0&quot;]
+    uritools[&quot;uritools\n5.0.0&quot;]
+    urllib3[&quot;urllib3\n2.6.0&quot;]
+    wcmatch[&quot;wcmatch\n10.1&quot;]
+    xmltodict[&quot;xmltodict\n1.0.2&quot;]
+    click-extra -- &quot;&gt;=0.9&quot; --&gt; tabulate
+    click-extra -- &quot;&gt;=10.0&quot; --&gt; wcmatch
+    click-extra -- &quot;&gt;=2.0&quot; --&gt; deepmerge
+    click-extra -- &quot;&gt;=2.32.5&quot; --&gt; requests
+    click-extra -- &quot;&gt;=25.0.0&quot; --&gt; boltons
+    click-extra -- &quot;&gt;=3.0.7&quot; --&gt; cloup
+    click-extra -- &quot;&gt;=5.0.0&quot; --&gt; extra-platforms
+    click-extra -- &quot;&gt;=8.3.1&quot; --&gt; click_0
+    cloup -- &quot;&gt;=8.0,&lt;9.0&quot; --&gt; click_0
+    cyclonedx-python-lib -- &quot;&gt;=0.11,&lt;2&quot; --&gt; packageurl-python
+    cyclonedx-python-lib -- &quot;&gt;=2.1.0,&lt;3.0.0&quot; --&gt; py-serializable
+    cyclonedx-python-lib -- &quot;&gt;=2.4.0,&lt;3.0.0&quot; --&gt; sortedcontainers
+    cyclonedx-python-lib -- &quot;&gt;=30,&lt;31&quot; --&gt; license-expression
+    cyclonedx-python-lib -- &quot;&gt;=4.6,&lt;5.0&quot; --&gt; typing-extensions
+    extra-platforms -- &quot;&gt;=1.9.0&quot; --&gt; distro
+    license-expression -- &quot;&gt;=4.0&quot; --&gt; boolean-py
+    meta-package-manager -- &quot;&gt;=0.16.0&quot; --&gt; packageurl-python
+    meta-package-manager -- &quot;&gt;=0.8.2&quot; --&gt; spdx-tools
+    meta-package-manager -- &quot;&gt;=0.9&quot; --&gt; tabulate
+    meta-package-manager -- &quot;&gt;=1.0.0&quot; --&gt; xmltodict
+    meta-package-manager -- &quot;&gt;=1.1.0&quot; --&gt; tomli-w
+    meta-package-manager -- &quot;&gt;=10.8.0&quot; --&gt; more-itertools
+    meta-package-manager -- &quot;&gt;=11.2.0&quot; --&gt; cyclonedx-python-lib
+    meta-package-manager -- &quot;&gt;=25.0.0&quot; --&gt; boltons
+    meta-package-manager -- &quot;&gt;=5.0.0&quot; --&gt; extra-platforms
+    meta-package-manager -- &quot;&gt;=7.3.0&quot; --&gt; click-extra
+    py-serializable -- &quot;&gt;=0.7.1,&lt;0.8.0&quot; --&gt; defusedxml
+    rdflib -- &quot;&gt;=2.1.0,&lt;4&quot; --&gt; pyparsing
+    requests -- &quot;&gt;=1.21.1,&lt;3&quot; --&gt; urllib3
+    requests -- &quot;&gt;=2,&lt;4&quot; --&gt; charset-normalizer
+    requests -- &quot;&gt;=2.5,&lt;4&quot; --&gt; idna
+    requests -- &quot;&gt;=2017.4.17&quot; --&gt; certifi
+    spdx-tools -- &quot;any&quot; --&gt; beartype
+    spdx-tools -- &quot;any&quot; --&gt; click_0
+    spdx-tools -- &quot;any&quot; --&gt; license-expression
+    spdx-tools -- &quot;any&quot; --&gt; ply
+    spdx-tools -- &quot;any&quot; --&gt; pyyaml
+    spdx-tools -- &quot;any&quot; --&gt; rdflib
+    spdx-tools -- &quot;any&quot; --&gt; semantic-version
+    spdx-tools -- &quot;any&quot; --&gt; uritools
+    spdx-tools -- &quot;any&quot; --&gt; xmltodict
+    wcmatch -- &quot;&gt;=2.1.1&quot; --&gt; bracex
+
+
+    </pre></section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="usecase.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Use-cases</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Home</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Kevin Deldycke and contributors
+            </div>
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on 2026-02-06</div>
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-download" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path><path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path></svg> Installation</a><ul>
+<li><a class="reference internal" href="#try-it-now">Try it now</a></li>
+<li><a class="reference internal" href="#installation-methods">Installation methods</a></li>
+<li><a class="reference internal" href="#binaries">Binaries</a></li>
+<li><a class="reference internal" href="#self-bootstrapping">Self-bootstrapping</a></li>
+<li><a class="reference internal" href="#python-module-usage">Python module usage</a></li>
+<li><a class="reference internal" href="#password-prompts-and-sudo">Password prompts and <code class="docutils literal notranslate"><span class="pre">sudo</span></code></a></li>
+<li><a class="reference internal" href="#shell-completion">Shell completion</a></li>
+<li><a class="reference internal" href="#main-dependencies">Main dependencies</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=f0c0c503"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        all_mermaids.forEach((el) => {
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+        await mermaid.run();
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+
+    if ("True" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll(".mermaid svg");
+            if(all_mermaids.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else if(svgs.size() !== mermaids_to_add_zoom) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else {
+                svgs.each(function() {
+                    var svg = d3.select(this);
+                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+                    var inner = svg.select("g");
+                    var zoom = d3.zoom().on("zoom", function(event) {
+                        inner.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+                });
+            }
+        }
+    } else if(all_mermaids.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("True" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);</script>
+    </body>
+</html>

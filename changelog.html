@@ -1,0 +1,1798 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content=" Changelog" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="changelog.html" />
+<meta property="og:site_name" content="Meta Package Manager" />
+<meta property="og:description" content="Changelog: 6.1.2 (unreleased): 6.1.1 (2026-02-05):[choco] Add--retry-count=3 option to all choco invocations.,[mpm] Upgrade to extra-platforms 8.0.0. Remove usage of deprecated functions.,[mpm] Rem..." />
+<meta name="description" content="Changelog: 6.1.2 (unreleased): 6.1.1 (2026-02-05):[choco] Add--retry-count=3 option to all choco invocations.,[mpm] Upgrade to extra-platforms 8.0.0. Remove usage of deprecated functions.,[mpm] Rem..." />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="History" href="history.html">
+        <link rel="prefetch" href="_static/logo-square.svg" as="image">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>Changelog - Meta Package Manager</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80449d92" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     Meta Package Manager works fine, but is <em>maintained by only one person</em> 😶‍🌫️.<br/>You can help if you <strong><a class='reference external' href='https://github.com/sponsors/kdeldycke'>purchase business support 🤝</a></strong> or <strong><a class='reference external' href='https://github.com/sponsors/kdeldycke'>sponsor the project 🫶</a></strong>. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">Meta Package Manager</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/logo-square.svg" alt="Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-download" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path><path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path></svg> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usecase.html">Use-cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-parameters.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-command-palette" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="m6.354 8.04-4.773 4.773a.75.75 0 1 0 1.061 1.06L7.945 8.57a.75.75 0 0 0 0-1.06L2.642 2.206a.75.75 0 0 0-1.06 1.061L6.353 8.04ZM8.75 11.5a.75.75 0 0 0 0 1.5h5.5a.75.75 0 0 0 0-1.5h-5.5Z"></path></svg> CLI parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-sliders" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M15 2.75a.75.75 0 0 1-.75.75h-4a.75.75 0 0 1 0-1.5h4a.75.75 0 0 1 .75.75Zm-8.5.75v1.25a.75.75 0 0 0 1.5 0v-4a.75.75 0 0 0-1.5 0V2H1.75a.75.75 0 0 0 0 1.5H6.5Zm1.25 5.25a.75.75 0 0 0 0-1.5h-6a.75.75 0 0 0 0 1.5h6ZM15 8a.75.75 0 0 1-.75.75H11.5V10a.75.75 0 1 1-1.5 0V6a.75.75 0 0 1 1.5 0v1.25h2.75A.75.75 0 0 1 15 8Zm-9 5.25v-2a.75.75 0 0 0-1.5 0v1.25H1.75a.75.75 0 0 0 0 1.5H4.5v1.25a.75.75 0 0 0 1.5 0v-2Zm9 0a.75.75 0 0 1-.75.75h-6a.75.75 0 0 1 0-1.5h6a.75.75 0 0 1 .75.75Z"></path></svg> Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bar-plugin.html">Xbar and SwiftBar plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="falsehoods.html">Falsehoods programmers believe about package managers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark.html">Benchmark</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-git-pull-request" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"></path></svg> Contribution guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="meta_package_manager.html">API</a><input aria-label="Toggle navigation of API" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.managers.html">meta_package_manager.managers package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">tests package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module Index</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#"><svg aria-hidden="true" class="sd-octicon sd-octicon-diff" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M8.75 1.75V5H12a.75.75 0 0 1 0 1.5H8.75v3.25a.75.75 0 0 1-1.5 0V6.5H4A.75.75 0 0 1 4 5h3.25V1.75a.75.75 0 0 1 1.5 0ZM4 13h8a.75.75 0 0 1 0 1.5H4A.75.75 0 0 1 4 13Z"></path></svg> Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-log" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M5 8.25a.75.75 0 0 1 .75-.75h4a.75.75 0 0 1 0 1.5h-4A.75.75 0 0 1 5 8.25ZM4 10.5A.75.75 0 0 0 4 12h4a.75.75 0 0 0 0-1.5H4Z"></path><path d="M13-.005c1.654 0 3 1.328 3 3 0 .982-.338 1.933-.783 2.818-.443.879-1.028 1.758-1.582 2.588l-.011.017c-.568.853-1.104 1.659-1.501 2.446-.398.789-.623 1.494-.623 2.136a1.5 1.5 0 1 0 2.333-1.248.75.75 0 0 1 .834-1.246A3 3 0 0 1 13 16H3a3 3 0 0 1-3-3c0-1.582.891-3.135 1.777-4.506.209-.322.418-.637.623-.946.473-.709.923-1.386 1.287-2.048H2.51c-.576 0-1.381-.133-1.907-.783A2.68 2.68 0 0 1 0 2.995a3 3 0 0 1 3-3Zm0 1.5a1.5 1.5 0 0 0-1.5 1.5c0 .476.223.834.667 1.132A.75.75 0 0 1 11.75 5.5H5.368c-.467 1.003-1.141 2.015-1.773 2.963-.192.289-.381.571-.558.845C2.13 10.711 1.5 11.916 1.5 13A1.5 1.5 0 0 0 3 14.5h7.401A2.989 2.989 0 0 1 10 13c0-.979.338-1.928.784-2.812.441-.874 1.023-1.748 1.575-2.576l.017-.026c.568-.853 1.103-1.658 1.501-2.448.398-.79.623-1.497.623-2.143 0-.838-.669-1.5-1.5-1.5Zm-10 0a1.5 1.5 0 0 0-1.5 1.5c0 .321.1.569.27.778.097.12.325.227.74.227h7.674A2.737 2.737 0 0 1 10 2.995c0-.546.146-1.059.401-1.5Z"></path></svg> History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="todolist.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-checklist" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M2.5 1.75v11.5c0 .138.112.25.25.25h3.17a.75.75 0 0 1 0 1.5H2.75A1.75 1.75 0 0 1 1 13.25V1.75C1 .784 1.784 0 2.75 0h8.5C12.216 0 13 .784 13 1.75v7.736a.75.75 0 0 1-1.5 0V1.75a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25Zm13.274 9.537v-.001l-4.557 4.45a.75.75 0 0 1-1.055-.008l-1.943-1.95a.75.75 0 0 1 1.062-1.058l1.419 1.425 4.026-3.932a.75.75 0 1 1 1.048 1.074ZM4.75 4h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM4 7.75A.75.75 0 0 1 4.75 7h2a.75.75 0 0 1 0 1.5h-2A.75.75 0 0 1 4 7.75Z"></path></svg> Todo-list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code-of-conduct.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-code-of-conduct" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M8.048 2.241c.964-.709 2.079-1.238 3.325-1.241a4.616 4.616 0 0 1 3.282 1.355c.41.408.757.86.996 1.428.238.568.348 1.206.347 1.968 0 2.193-1.505 4.254-3.081 5.862-1.496 1.526-3.213 2.796-4.249 3.563l-.22.163a.749.749 0 0 1-.895 0l-.221-.163c-1.036-.767-2.753-2.037-4.249-3.563C1.51 10.008.007 7.952.002 5.762a4.614 4.614 0 0 1 1.353-3.407C3.123.585 6.223.537 8.048 2.24Zm-1.153.983c-1.25-1.033-3.321-.967-4.48.191a3.115 3.115 0 0 0-.913 2.335c0 1.556 1.109 3.24 2.652 4.813C5.463 11.898 6.96 13.032 8 13.805c.353-.262.758-.565 1.191-.905l-1.326-1.223a.75.75 0 0 1 1.018-1.102l1.48 1.366c.328-.281.659-.577.984-.887L9.99 9.802a.75.75 0 1 1 1.019-1.103l1.384 1.28c.295-.329.566-.661.81-.995L12.92 8.7l-1.167-1.168c-.674-.671-1.78-.664-2.474.03-.268.269-.538.537-.802.797-.893.882-2.319.843-3.185-.032-.346-.35-.693-.697-1.043-1.047a.75.75 0 0 1-.04-1.016c.162-.191.336-.401.52-.623.62-.748 1.356-1.637 2.166-2.417Zm7.112 4.442c.313-.65.491-1.293.491-1.916v-.001c0-.614-.088-1.045-.23-1.385-.143-.339-.357-.633-.673-.949a3.111 3.111 0 0 0-2.218-.915c-1.092.003-2.165.627-3.226 1.602-.823.755-1.554 1.637-2.228 2.45l-.127.154.562.566a.755.755 0 0 0 1.066.02l.794-.79c1.258-1.258 3.312-1.31 4.594-.032.396.394.792.791 1.173 1.173Z"></path></svg> Code of conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-law" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M8.75.75V2h.985c.304 0 .603.08.867.231l1.29.736c.038.022.08.033.124.033h2.234a.75.75 0 0 1 0 1.5h-.427l2.111 4.692a.75.75 0 0 1-.154.838l-.53-.53.529.531-.001.002-.002.002-.006.006-.006.005-.01.01-.045.04c-.21.176-.441.327-.686.45C14.556 10.78 13.88 11 13 11a4.498 4.498 0 0 1-2.023-.454 3.544 3.544 0 0 1-.686-.45l-.045-.04-.016-.015-.006-.006-.004-.004v-.001a.75.75 0 0 1-.154-.838L12.178 4.5h-.162c-.305 0-.604-.079-.868-.231l-1.29-.736a.245.245 0 0 0-.124-.033H8.75V13h2.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5h2.5V3.5h-.984a.245.245 0 0 0-.124.033l-1.289.737c-.265.15-.564.23-.869.23h-.162l2.112 4.692a.75.75 0 0 1-.154.838l-.53-.53.529.531-.001.002-.002.002-.006.006-.016.015-.045.04c-.21.176-.441.327-.686.45C4.556 10.78 3.88 11 3 11a4.498 4.498 0 0 1-2.023-.454 3.544 3.544 0 0 1-.686-.45l-.045-.04-.016-.015-.006-.006-.004-.004v-.001a.75.75 0 0 1-.154-.838L2.178 4.5H1.75a.75.75 0 0 1 0-1.5h2.234a.249.249 0 0 0 .125-.033l1.288-.737c.265-.15.564-.23.869-.23h.984V.75a.75.75 0 0 1 1.5 0Zm2.945 8.477c.285.135.718.273 1.305.273s1.02-.138 1.305-.273L13 6.327Zm-10 0c.285.135.718.273 1.305.273s1.02-.138 1.305-.273L3 6.327Z"></path></svg> License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager">GitHub repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/sponsors/kdeldycke">Funding</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/kdeldycke/meta-package-manager/blob/main/docs/changelog.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/kdeldycke/meta-package-manager/edit/main/docs/changelog.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="changelog">
+<h1><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-diff" viewBox="0 0 16 16" aria-hidden="true"><path d="M8.75 1.75V5H12a.75.75 0 0 1 0 1.5H8.75v3.25a.75.75 0 0 1-1.5 0V6.5H4A.75.75 0 0 1 4 5h3.25V1.75a.75.75 0 0 1 1.5 0ZM4 13h8a.75.75 0 0 1 0 1.5H4A.75.75 0 0 1 4 13Z"></path></svg> Changelog<a class="headerlink" href="#changelog" title="Link to this heading">¶</a></h1>
+<section id="unreleased">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v6.1.1...main">6.1.2 (unreleased)</a><a class="headerlink" href="#unreleased" title="Link to this heading">¶</a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This version is not released yet and is under active development.</p>
+</div>
+</section>
+<section id="id1">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v6.1.0...v6.1.1">6.1.1 (2026-02-05)</a><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[choco] Add <code class="docutils literal notranslate"><span class="pre">--retry-count=3</span></code> option to all <code class="docutils literal notranslate"><span class="pre">choco</span></code> invocations.</p></li>
+<li><p>[mpm] Upgrade to <code class="docutils literal notranslate"><span class="pre">extra-platforms</span></code> 8.0.0. Remove usage of deprecated functions.</p></li>
+<li><p>[mpm] Remove direct dependency on <code class="docutils literal notranslate"><span class="pre">tabulate</span></code>.</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v6.0.2...v6.1.0">6.1.0 (2026-01-18)</a><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[uvx] Add <code class="docutils literal notranslate"><span class="pre">uvx</span></code> support for managing isolated Python tools via <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">tool</span></code>. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/1656">#1656</a>, <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/1657">#1657</a>.</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v6.0.1...v6.0.2">6.0.2 (2026-01-09)</a><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[uv] Workaround <code class="docutils literal notranslate"><span class="pre">uv</span></code> parsing issues with package specifiers by not quoting them. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/1653">#1653</a>.</p></li>
+</ul>
+</section>
+<section id="id4">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v6.0.0...v6.0.1">6.0.1 (2026-01-02)</a><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Move auto-lock time from 8:43 to 4:43.</p></li>
+<li><p>[mpm] Set cooldown period via the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>.</p></li>
+<li><p>[mpm] Add Download link to project metadata.</p></li>
+<li><p>[mpm] Include license file in package.</p></li>
+<li><p>[mpm] Replace deprecated <code class="docutils literal notranslate"><span class="pre">codecov/test-results-action</span></code> by <code class="docutils literal notranslate"><span class="pre">codecov/codecov-action</span></code>.</p></li>
+<li><p>[mpm] Remove utilization workaround for <code class="docutils literal notranslate"><span class="pre">macos-15-intel</span></code>.</p></li>
+</ul>
+</section>
+<section id="id5">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.21.0...v6.0.0">6.0.0 (2025-12-08)</a><a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add <code class="docutils literal notranslate"><span class="pre">--no-config</span></code> option inherited from Click Extra.</p></li>
+<li><p>[mpm] Replace Click Extra’s default <code class="docutils literal notranslate"><span class="pre">--table-format</span></code> option by our <code class="docutils literal notranslate"><span class="pre">--output-format</span></code> option, which allows sorted table rendering and JSON output.</p></li>
+<li><p>[scoop] Fix parsing of <code class="docutils literal notranslate"><span class="pre">scoop</span></code> version to support raw Git output.</p></li>
+<li><p>[gem] Remove hard-coded <code class="docutils literal notranslate"><span class="pre">gem</span></code> CLI search path.</p></li>
+<li><p>[mpm] Remap pURL types to managers. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/1460">#1460</a>.</p></li>
+<li><p>[mpm] Allow multiple regular expressions to be used for version matching.</p></li>
+<li><p>[mpm] Remove maximum capped version of all dependencies (relax all <code class="docutils literal notranslate"><span class="pre">~=</span></code> specifiers to <code class="docutils literal notranslate"><span class="pre">&gt;=</span></code>). This gives more freedom to downstream and upstream packagers. Document each minimal version choice.</p></li>
+<li><p>[mpm] Add cooldown period for dependabot and <code class="docutils literal notranslate"><span class="pre">uv.lock</span></code> updates.</p></li>
+<li><p>[mpm] Merge all label syncing jobs into a single one.</p></li>
+<li><p>[mpm] Add <code class="docutils literal notranslate"><span class="pre">yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">json5</span></code>, <code class="docutils literal notranslate"><span class="pre">jsonc</span></code>, <code class="docutils literal notranslate"><span class="pre">hjson</span></code> and <code class="docutils literal notranslate"><span class="pre">xml</span></code> extra dependencies to support respective configuration file formats.</p></li>
+<li><p>[mpm] Change the <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">typing</span></code> and <code class="docutils literal notranslate"><span class="pre">docs</span></code> extra dependency groups into development dependency groups.</p></li>
+<li><p>[mpm] Add official support of Python 3.14.</p></li>
+<li><p>[mpm] Re-introduce Python 3.10 support.</p></li>
+<li><p>[mpm] Run tests on Python <code class="docutils literal notranslate"><span class="pre">3.10</span></code>, <code class="docutils literal notranslate"><span class="pre">3.14</span></code>, <code class="docutils literal notranslate"><span class="pre">3.15</span></code>, <code class="docutils literal notranslate"><span class="pre">3.14t</span></code> and <code class="docutils literal notranslate"><span class="pre">3.15t</span></code>.</p></li>
+<li><p>[mpm] Skip tests on intermediate Python versions (<code class="docutils literal notranslate"><span class="pre">3.11</span></code>, <code class="docutils literal notranslate"><span class="pre">3.12</span></code> and <code class="docutils literal notranslate"><span class="pre">3.13</span></code>) to reduce CI load.</p></li>
+<li><p>[mpm] Produce <code class="docutils literal notranslate"><span class="pre">mpm-windows-arm64.exe</span></code> Windows binary for <code class="docutils literal notranslate"><span class="pre">arm64</span></code> architecture.</p></li>
+<li><p>[mpm] Replace <code class="docutils literal notranslate"><span class="pre">ubuntu-24.04</span></code> by <code class="docutils literal notranslate"><span class="pre">ubuntu-slim</span></code>, <code class="docutils literal notranslate"><span class="pre">macos-15</span></code> by <code class="docutils literal notranslate"><span class="pre">macos-26</span></code>, and <code class="docutils literal notranslate"><span class="pre">macos-13</span></code> by <code class="docutils literal notranslate"><span class="pre">macos-15-intel</span></code> in workflow jobs.</p></li>
+<li><p>[mpm] Unlock a CPU core stuck at 100% utilization on <code class="docutils literal notranslate"><span class="pre">macos-15-intel</span></code>.</p></li>
+<li><p>[mpm] Use <code class="docutils literal notranslate"><span class="pre">astral-sh/setup-uv</span></code> action to install <code class="docutils literal notranslate"><span class="pre">uv</span></code> instead of manually installing it with <code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p></li>
+<li><p>[mpm] Move all typing-related imports behind a hard-coded <code class="docutils literal notranslate"><span class="pre">TYPE_CHECKING</span></code> guard to avoid runtime imports.</p></li>
+</ul>
+</section>
+<section id="id6">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.20.0...v5.21.0">5.21.0 (2025-05-28)</a><a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Drop support for Python 3.10.</p></li>
+<li><p>[mpm] Fix parsing of package specifiers with multiple version separators.</p></li>
+<li><p>[npm] Fix retrieval of installed packages.</p></li>
+<li><p>[fwupd] Remove <code class="docutils literal notranslate"><span class="pre">--offline</span></code> parameter which has been silently disabled and has now been remove in v2.0.0 of <code class="docutils literal notranslate"><span class="pre">fwupd</span></code>. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/1511">#1511</a>.</p></li>
+<li><p>[bar-plugin] Bump minimal Python version to 3.9 to aligns it with macOS default.</p></li>
+<li><p>[bar-plugin] Check minimal version of SwiftBar is 2.1.2.</p></li>
+<li><p>[bar-plugin] Reduce size of error messages from 12 to 10.</p></li>
+<li><p>[mpm] Remove reference to <code class="docutils literal notranslate"><span class="pre">python3</span></code> command in documentation to reduce confusion.</p></li>
+<li><p>[mpm] Build <code class="docutils literal notranslate"><span class="pre">arm64</span></code> binary for Linux.</p></li>
+<li><p>[mpm] Try to build <code class="docutils literal notranslate"><span class="pre">arm64</span></code> binary for Windows but mark it as unstable.</p></li>
+<li><p>[mpm] Use post-build binary test plans to check CLI behavior.</p></li>
+<li><p>[mpm] Run tests on <code class="docutils literal notranslate"><span class="pre">windows-2025</span></code> instead of <code class="docutils literal notranslate"><span class="pre">windows-2022</span></code>.</p></li>
+<li><p>[mpm] Reactivates concurrency limits on tests.</p></li>
+<li><p>[mpm] Uploads codecov test results.</p></li>
+</ul>
+</section>
+<section id="id7">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.19.0...v5.20.0">5.20.0 (2024-11-23)</a><a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[eopkg] Add support for new <code class="docutils literal notranslate"><span class="pre">eopkg</span></code> manager. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/1093">#1093</a>.</p></li>
+<li><p>[fwupd] Add support for new <code class="docutils literal notranslate"><span class="pre">fwupd</span></code> manager. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/1289">#1289</a>.</p></li>
+<li><p>[dnf5] Add support for new <code class="docutils literal notranslate"><span class="pre">dnf5</span></code> manager. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/1423">#1423</a>.</p></li>
+<li><p>[mpm] Hide <code class="docutils literal notranslate"><span class="pre">--manager</span></code> and <code class="docutils literal notranslate"><span class="pre">--exclude</span></code> options from help output and silence deprecation warnings. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/1358">#1358</a>.</p></li>
+<li><p>[mpm] Add detailed documentation on manager selection with configuration file.</p></li>
+<li><p>[mpm] Fix mixing of manager selector lists and flags.</p></li>
+</ul>
+</section>
+<section id="id8">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.18.0...v5.19.0">5.19.0 (2024-11-13)</a><a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[vscodium] Add support for VSCodium plugins.</p></li>
+<li><p>[dnf,mas,vscode,yum] Implement <code class="docutils literal notranslate"><span class="pre">remove</span></code> operation.</p></li>
+<li><p>[dnf,yum] Use query template instead of regex parsing to retrieve package data.</p></li>
+<li><p>[flatpak] Fix parsing of descriptions with spaces.</p></li>
+<li><p>[uv] Implement <code class="docutils literal notranslate"><span class="pre">outdated</span></code> and <code class="docutils literal notranslate"><span class="pre">cleanup</span></code> operation.</p></li>
+<li><p>[uv] Bump minimal requirement to <code class="docutils literal notranslate"><span class="pre">0.5.0</span></code>.</p></li>
+<li><p>[uv] Always invoke <code class="docutils literal notranslate"><span class="pre">uv</span></code> with <code class="docutils literal notranslate"><span class="pre">--no-progress</span></code> parameter.</p></li>
+<li><p>[mas] Bump minimal requirement to <code class="docutils literal notranslate"><span class="pre">1.8.7</span></code>.</p></li>
+<li><p>[mas] Reactivate <code class="docutils literal notranslate"><span class="pre">mas</span></code> tests.</p></li>
+<li><p>[mpm] Add official support for Python 3.13.</p></li>
+<li><p>[mpm] Drop support for Python 3.9.</p></li>
+<li><p>[mpm] Replace local platform utilities by <code class="docutils literal notranslate"><span class="pre">extra-platforms</span></code> dependency.</p></li>
+<li><p>[mpm] Run tests on Python 3.14-dev.</p></li>
+<li><p>[mpm] Run tests and actions on <code class="docutils literal notranslate"><span class="pre">ubuntu-24.04</span></code> instead of <code class="docutils literal notranslate"><span class="pre">ubuntu-22.04</span></code>.</p></li>
+<li><p>[mpm] Run tests on <code class="docutils literal notranslate"><span class="pre">macos-15</span></code> instead of <code class="docutils literal notranslate"><span class="pre">macos-14</span></code>.</p></li>
+<li><p>[mpm] Add a Sankey diagram of all supported package managers.</p></li>
+</ul>
+</section>
+<section id="id9">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.17.0...v5.18.0">5.18.0 (2024-08-02)</a><a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add new command to export installed packages to a SBOM file in SPDX or CycloneDX standard. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/936">#936</a>.</p></li>
+<li><p>[mpm] Add new dependencies on <code class="docutils literal notranslate"><span class="pre">spdx-tools</span></code> and <code class="docutils literal notranslate"><span class="pre">cyclonedex-python-lib</span></code>.</p></li>
+<li><p>[mpm] Update list of recognized pURL scheme types.</p></li>
+<li><p>[apt] Add architecture in package metadata.</p></li>
+</ul>
+</section>
+<section id="id10">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.16.0...v5.17.0">5.17.0 (2024-07-07)</a><a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[uv] Add support for <code class="docutils literal notranslate"><span class="pre">uv</span></code> package manager for Python.</p></li>
+<li><p>[mpm] Add <code class="docutils literal notranslate"><span class="pre">--no-&lt;manager-id&gt;</span></code> negative selection flags for each single manager. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/882">#882</a>.</p></li>
+<li><p>[mpm] Deprecate <code class="docutils literal notranslate"><span class="pre">-m</span></code>/<code class="docutils literal notranslate"><span class="pre">--manager</span></code> and <code class="docutils literal notranslate"><span class="pre">-e</span></code>/<code class="docutils literal notranslate"><span class="pre">--exclude</span></code> options in favor of single <code class="docutils literal notranslate"><span class="pre">--&lt;manager-id&gt;</span></code>/<code class="docutils literal notranslate"><span class="pre">--no-&lt;manager-id&gt;</span></code> selectors.</p></li>
+<li><p>[bar-plugin] Identify <code class="docutils literal notranslate"><span class="pre">uv</span></code>-based virtual envs to run <code class="docutils literal notranslate"><span class="pre">mpm</span></code> executable.</p></li>
+<li><p>[mpm] Stop CLI execution if manager selection parameters ends up with no managers being retained.</p></li>
+<li><p>[mpm] Switch from Poetry to <code class="docutils literal notranslate"><span class="pre">uv</span></code>.</p></li>
+<li><p>[mpm] Drop support for Python 3.8.</p></li>
+<li><p>[mpm] Add dependency on <code class="docutils literal notranslate"><span class="pre">more-itertools</span></code>.</p></li>
+<li><p>[mpm] Add metadata and icon to binaries produced by Nuitka.</p></li>
+<li><p>[mpm] Mark Python 3.13-dev tests as stable.</p></li>
+<li><p>[bar-plugin] Reactivate login shells invocation tests.</p></li>
+<li><p>[bar-plugin] Skip rendering tests on GitHub.</p></li>
+<li><p>[mpm] Remove <code class="docutils literal notranslate"><span class="pre">sys.path</span></code> cleaning hack in <code class="docutils literal notranslate"><span class="pre">__main__</span></code> invocation.</p></li>
+<li><p>[mpm] Reactivate config file test for <code class="docutils literal notranslate"><span class="pre">restore</span></code> subcommand.</p></li>
+</ul>
+</section>
+<section id="id11">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.15.0...v5.16.0">5.16.0 (2024-05-24)</a><a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[winget] Add support for WinGet on Windows. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/500">#500</a> and <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/1241">#1241</a>.</p></li>
+<li><p>[scoop] Add <code class="docutils literal notranslate"><span class="pre">mpm</span></code> installation instructions with <code class="docutils literal notranslate"><span class="pre">scoop</span></code>.</p></li>
+<li><p>[bar-plugin] Dynamiccaly search for Python, virtual envs and <code class="docutils literal notranslate"><span class="pre">mpm</span></code> executable instead of relying on hard-coded <code class="docutils literal notranslate"><span class="pre">PATH</span></code> environment variable.</p></li>
+<li><p>[bar-plugin] Replace <code class="docutils literal notranslate"><span class="pre">--check-mpm</span></code> parameter by <code class="docutils literal notranslate"><span class="pre">--search-mpm</span></code> with complete results reporting.</p></li>
+<li><p>[mpm] Slim down package by moving unit tests out of the main package.</p></li>
+<li><p>[mpm] Split <code class="docutils literal notranslate"><span class="pre">dev</span></code> dependency groups into optional <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">typing</span></code> and <code class="docutils literal notranslate"><span class="pre">docs</span></code> groups.</p></li>
+<li><p>[mpm] Remove direct dependency on <code class="docutils literal notranslate"><span class="pre">click</span></code> and <code class="docutils literal notranslate"><span class="pre">mypy</span></code>.</p></li>
+<li><p>[mpm] Make <code class="docutils literal notranslate"><span class="pre">typing-extensions</span></code> dependency optional.</p></li>
+</ul>
+</section>
+<section id="id12">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.14.2...v5.15.0">5.15.0 (2024-02-25)</a><a class="headerlink" href="#id12" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[pkg] Add support for <code class="docutils literal notranslate"><span class="pre">pkg</span></code> on FreeBSD.</p></li>
+<li><p>[choco] Bump minimal <code class="docutils literal notranslate"><span class="pre">choco</span></code> requirement to <code class="docutils literal notranslate"><span class="pre">2.0.0</span></code>.</p></li>
+<li><p>[bar-plugin] Keep original indention of Python traceback.</p></li>
+<li><p>[mpm] Build <code class="docutils literal notranslate"><span class="pre">arm64</span></code> binaries on <code class="docutils literal notranslate"><span class="pre">macos-14</span></code>.</p></li>
+<li><p>[mpm] Run tests on <code class="docutils literal notranslate"><span class="pre">macos-14</span></code> instead of <code class="docutils literal notranslate"><span class="pre">macos-13</span></code>.</p></li>
+<li><p>[mpm] Run tests on Python 3.13-dev branch.</p></li>
+<li><p>[mas] Deactivate integration tests for <code class="docutils literal notranslate"><span class="pre">mas</span></code> on macOS, which always timeout.</p></li>
+<li><p>[mpm] Reintroduce coloring of version. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/1152">#1152</a>.</p></li>
+<li><p>[mpm] Use external workflow to manage issues and PRs content-based labelling.</p></li>
+</ul>
+</section>
+<section id="id13">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.14.1...v5.14.2">5.14.2 (2024-01-17)</a><a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix installation from <code class="docutils literal notranslate"><span class="pre">pipx</span></code>. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/1154">#1154</a>.</p></li>
+</ul>
+</section>
+<section id="id14">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.14.0...v5.14.1">5.14.1 (2024-01-16)</a><a class="headerlink" href="#id14" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[bar-plugin] Always call <code class="docutils literal notranslate"><span class="pre">mpm</span> <span class="pre">--version</span></code> without color.</p></li>
+<li><p>[bar-plugin] Increase robustness of <code class="docutils literal notranslate"><span class="pre">mpm</span></code> version parsing, whether its colored or not.</p></li>
+<li><p>[mpm] Temporary disable version output in color to fix already installed plugin/binary pairs. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/1152">#1152</a>.</p></li>
+</ul>
+</section>
+<section id="id15">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.13.1...v5.14.0">5.14.0 (2024-01-12)</a><a class="headerlink" href="#id15" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add a <code class="docutils literal notranslate"><span class="pre">-t</span></code>/<code class="docutils literal notranslate"><span class="pre">--timeout</span></code> option to set the maximum duration of each CLI call. Defaults to 10 minutes.</p></li>
+<li><p>[mpm] Drop support of Python 3.7.</p></li>
+<li><p>[scoop] Fix parsing of Scoop version.</p></li>
+<li><p>[mpm] Group platforms by family in the <code class="docutils literal notranslate"><span class="pre">managers</span></code> subcommand.</p></li>
+<li><p>[mpm] Run tests and actions on released Python 3.12 version.</p></li>
+<li><p>[mpm] Run tests on <code class="docutils literal notranslate"><span class="pre">macos-13</span></code>. Remove tests on <code class="docutils literal notranslate"><span class="pre">macos-12</span></code>, <code class="docutils literal notranslate"><span class="pre">macos-11</span></code>, <code class="docutils literal notranslate"><span class="pre">ubuntu-20.04</span></code> and <code class="docutils literal notranslate"><span class="pre">windows-2019</span></code>.</p></li>
+<li><p>[mpm] Run bar plugin unittests in their independent, non-parallel step.</p></li>
+<li><p>[mpm] Skip testing on intermediate Python versions to speed up CI. Only the oldest and latest supported.</p></li>
+<li><p>[mpm] Skip configuration-related tests while we investigate test isolation.</p></li>
+<li><p>[mpm] Fix fetching of full local copy of cask tap in tests to allow for checkout of past formula.</p></li>
+<li><p>[mpm] Replace unmaintained <code class="docutils literal notranslate"><span class="pre">bump2version</span></code> by <code class="docutils literal notranslate"><span class="pre">bump-my-version</span></code>.</p></li>
+</ul>
+</section>
+<section id="id16">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.13.0...v5.13.1">5.13.1 (2023-05-04)</a><a class="headerlink" href="#id16" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[apt] Fix omission of the final result in an <code class="docutils literal notranslate"><span class="pre">apt</span></code> (non-mint) search.</p></li>
+<li><p>[mpm] Defaults to case-insensitive, lexicographical sort of package IDs in <code class="docutils literal notranslate"><span class="pre">backup</span></code> subcommand.</p></li>
+<li><p>[mpm] Update <code class="docutils literal notranslate"><span class="pre">brew</span></code> installation instructions now that <code class="docutils literal notranslate"><span class="pre">mpm</span></code> is available in official Homebrew repository.</p></li>
+</ul>
+</section>
+<section id="id17">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.12.0...v5.13.0">5.13.0 (2023-03-31)</a><a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add new <code class="docutils literal notranslate"><span class="pre">which</span></code>/<code class="docutils literal notranslate"><span class="pre">locate</span></code> subcommand to search for CLIs in user’s environment.</p></li>
+<li><p>[mpm] Allow usage of <code class="docutils literal notranslate"><span class="pre">sudo</span></code> for CLI invocation on all UNIXes, not Linux only. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/976">#976</a>.</p></li>
+<li><p>[apt] Fix parsing of search results for <code class="docutils literal notranslate"><span class="pre">apt</span></code> and <code class="docutils literal notranslate"><span class="pre">apt-mint</span></code>. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/881">#881</a> and <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/966">#966</a>.</p></li>
+<li><p>[mpm] Adds <code class="docutils literal notranslate"><span class="pre">--run-destructive</span></code>, <code class="docutils literal notranslate"><span class="pre">--skip-destructive</span></code>, <code class="docutils literal notranslate"><span class="pre">--run-non-destructive</span></code> and <code class="docutils literal notranslate"><span class="pre">--skip-non-destructive</span></code> custom options to Pytest.</p></li>
+<li><p>[mpm] Run non-destructive tests in parallel and destructive ones in sequential order.</p></li>
+<li><p>[mpm] Move all documentation assets to <code class="docutils literal notranslate"><span class="pre">assets</span></code> subfolder.</p></li>
+</ul>
+</section>
+<section id="id18">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.11.7...v5.12.0">5.12.0 (2023-02-25)</a><a class="headerlink" href="#id18" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Refactor CLI search to allow all matching to be reported. This will open the way to future support of multiple versions of the same package manager. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/629">#629</a>.</p></li>
+<li><p>[mpm] Exclude empty files for our CLI search results to skip Microsoft’s dummy placeholders on Windows. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/927">#927</a>.</p></li>
+<li><p>[mpm] Fix composition of CLI search path on Windows.</p></li>
+<li><p>[mpm] Deduplicate entries in the list of composed CLI search path.</p></li>
+<li><p>[mpm] Do not search for CLI in current directory on Windows.</p></li>
+<li><p>[mpm] Fix case-insensitive highlighting of CLI names in path on Windows.</p></li>
+<li><p>[yarn] Do not test <code class="docutils literal notranslate"><span class="pre">yarn</span></code> on Linux and Windows.</p></li>
+<li><p>[mpm] Do not force test order on Windows.</p></li>
+</ul>
+</section>
+<section id="id19">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.11.6...v5.11.7">5.11.7 (2023-02-20)</a><a class="headerlink" href="#id19" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix overlapping detection of <code class="docutils literal notranslate"><span class="pre">linux</span></code> and <code class="docutils literal notranslate"><span class="pre">wsl2</span></code> platforms. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/944">#944</a>.</p></li>
+<li><p>[pip] Print Python’s own version in debug logs before checking for Pip’s version.</p></li>
+<li><p>[mpm] Code, comments and documentation style change to conform to new QA workflows based on <code class="docutils literal notranslate"><span class="pre">ruff</span></code>.</p></li>
+<li><p>[mpm] Produce dependency graph in Mermaid instead of Graphviz. Add new dev dependency on <code class="docutils literal notranslate"><span class="pre">sphinxcontrib-mermaid</span></code>.</p></li>
+</ul>
+</section>
+<section id="id20">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.11.5...v5.11.6">5.11.6 (2023-02-12)</a><a class="headerlink" href="#id20" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix collection of artifact files from their folder.</p></li>
+</ul>
+</section>
+<section id="id21">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.11.4...v5.11.5">5.11.5 (2023-02-12)</a><a class="headerlink" href="#id21" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix collection of artifact files from their folder.</p></li>
+</ul>
+</section>
+<section id="id22">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.11.3...v5.11.4">5.11.4 (2023-02-12)</a><a class="headerlink" href="#id22" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix attachment of binaries to GitHub release.</p></li>
+</ul>
+</section>
+<section id="id23">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.11.2...v5.11.3">5.11.3 (2023-02-12)</a><a class="headerlink" href="#id23" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix attachment of binaries to GitHub release.</p></li>
+</ul>
+</section>
+<section id="id24">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.11.1...v5.11.2">5.11.2 (2023-02-11)</a><a class="headerlink" href="#id24" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Refine bug report template.</p></li>
+<li><p>[mpm] Fix attachment of binaries to GitHub release.</p></li>
+</ul>
+</section>
+<section id="id25">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.11.0...v5.11.1">5.11.1 (2023-02-10)</a><a class="headerlink" href="#id25" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Remove temporary direct dependency on <code class="docutils literal notranslate"><span class="pre">charset-normalizer</span></code>, fix has been pushed upstream to Nuitka.</p></li>
+<li><p>[mpm] Rename artifacts attached to releases to benefits from stable URLs pointing to latest downloads.</p></li>
+<li><p>[mpm] Fix some Windows unittests.</p></li>
+</ul>
+</section>
+<section id="id26">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.10.2...v5.11.0">5.11.0 (2023-01-29)</a><a class="headerlink" href="#id26" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Unlock run on any Unix-like platform. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/872">#872</a>.</p></li>
+<li><p>[brew] Activate <code class="docutils literal notranslate"><span class="pre">brew</span></code> on Windows Subsystem for Linux v2.</p></li>
+<li><p>[choco] Bump minimal <code class="docutils literal notranslate"><span class="pre">choco</span></code> requirement to <code class="docutils literal notranslate"><span class="pre">0.10.4</span></code>.</p></li>
+<li><p>[mpm] Depends on <code class="docutils literal notranslate"><span class="pre">charset-normalizer</span> <span class="pre">&lt;</span> <span class="pre">3</span></code> to fix Nuitka compilation.</p></li>
+<li><p>[mpm] Run tests on Python <code class="docutils literal notranslate"><span class="pre">3.12-dev</span></code>.</p></li>
+<li><p>[mpm] Reduce verbosity of pre-install steps in GitHub actions.</p></li>
+<li><p>[mpm] Test <code class="docutils literal notranslate"><span class="pre">mpm</span></code> binaries.</p></li>
+<li><p>[mpm] Force upgrade of Ruby on Windows test runners.</p></li>
+<li><p>[mpm] Fix installation of old formulae in brew unittests.</p></li>
+<li><p>[mpm] Force re-detection of <code class="docutils literal notranslate"><span class="pre">npm</span></code> CLI location on macOS subcommand unittests.</p></li>
+<li><p>[mpm] Add new GitHub labels for newly supported platforms.</p></li>
+<li><p>[mpm] Generates dependency graph in Graphviz format.</p></li>
+</ul>
+</section>
+<section id="id27">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.10.1...v5.10.2">5.10.2 (2022-12-19)</a><a class="headerlink" href="#id27" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix uploading of artifacts to GitHub release.</p></li>
+</ul>
+</section>
+<section id="id28">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.10.0...v5.10.1">5.10.1 (2022-12-19)</a><a class="headerlink" href="#id28" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix uploading of Nuitka binaries to GitHub release.</p></li>
+</ul>
+</section>
+<section id="id29">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.9.0...v5.10.0">5.10.0 (2022-12-19)</a><a class="headerlink" href="#id29" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Build standalone executable for macOS, Linux and Windows. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/725">#725</a>.</p></li>
+<li><p>[mpm] Force default output encoding of Windows executable to fix issue on Windows CI agents.</p></li>
+<li><p>[bar-plugin] Disable <code class="docutils literal notranslate"><span class="pre">--bar-plugin-path</span></code> option if CLI not installed from sources.</p></li>
+<li><p>[bar-plugin] Rename and move <code class="docutils literal notranslate"><span class="pre">meta_package_manager.7h.py</span></code> bar plugin script to eliminate dynamic module loading.</p></li>
+<li><p>[mpm] Replace dynamic loading of package manager definition by static code.</p></li>
+<li><p>[mpm] Highlight package manager’s executable name when printing their path in logs.</p></li>
+<li><p>[mpm] Hint at deprecation of manager in the support matrix.</p></li>
+<li><p>[mpm] Execute all workflows with Python 3.11.</p></li>
+</ul>
+</section>
+<section id="id30">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.8.0...v5.9.0">5.9.0 (2022-11-17)</a><a class="headerlink" href="#id30" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[pacaur] Implement <code class="docutils literal notranslate"><span class="pre">pacaur</span></code> support. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/816">#816</a>.</p></li>
+<li><p>[mpm] Allow managers to be flagged as deprecated.</p></li>
+<li><p>[apm] Flag <code class="docutils literal notranslate"><span class="pre">apm</span></code> as deprecated.</p></li>
+<li><p>[mpm] Remove Atom integration tests.</p></li>
+<li><p>[mpm] Fix propagation of user selection of managers in <code class="docutils literal notranslate"><span class="pre">upgrade</span></code> and <code class="docutils literal notranslate"><span class="pre">remove</span></code> subcommands.</p></li>
+<li><p>[mpm] Fix production of specifiers in <code class="docutils literal notranslate"><span class="pre">restore</span></code> subcommand.</p></li>
+<li><p>[mpm] Fix installation of Scoop on Windows in unittests.</p></li>
+<li><p>[mpm] Fix installation of brew on Ubuntu in unittests.</p></li>
+<li><p>[mpm] Use form-based issue templates for bug reports and new package manager support requests.</p></li>
+<li><p>[mpm] Remove use of deprecated <code class="docutils literal notranslate"><span class="pre">::set-output</span></code> directives and replace them by environment files.</p></li>
+</ul>
+</section>
+<section id="id31">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.7.0...v5.8.0">5.8.0 (2022-10-05)</a><a class="headerlink" href="#id31" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[gem] Implement <code class="docutils literal notranslate"><span class="pre">remove</span></code> operation.</p></li>
+<li><p>[mpm] Allow multiple packages to be fed to <code class="docutils literal notranslate"><span class="pre">install</span></code>, <code class="docutils literal notranslate"><span class="pre">upgrade</span></code> and <code class="docutils literal notranslate"><span class="pre">remove</span></code> subcommands.</p></li>
+<li><p>[mpm] Allow for a mix of plain, <code class="docutils literal notranslate"><span class="pre">&#64;</span></code>-based and <code class="docutils literal notranslate"><span class="pre">pkg:</span></code>-prefixed purl specifiers on <code class="docutils literal notranslate"><span class="pre">install</span></code>, <code class="docutils literal notranslate"><span class="pre">upgrade</span></code> and <code class="docutils literal notranslate"><span class="pre">remove</span></code> subcommands. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/669">#669</a>.</p></li>
+<li><p>[mpm] Pass version specifier to <code class="docutils literal notranslate"><span class="pre">install</span></code> operation in <code class="docutils literal notranslate"><span class="pre">restore</span></code> subcommand.</p></li>
+<li><p>[mpm] Output warning for <code class="docutils literal notranslate"><span class="pre">install</span></code> and <code class="docutils literal notranslate"><span class="pre">upgrade_one_cli</span></code> operations not implementing version parameter.</p></li>
+<li><p>[mpm] Remove GitHub edit link workaround in documentation.</p></li>
+</ul>
+</section>
+<section id="id32">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.6.2...v5.7.0">5.7.0 (2022-09-27)</a><a class="headerlink" href="#id32" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[scoop] Add support for Scoop on Windows. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/546">#546</a>.</p></li>
+<li><p>[mpm] Fix imports from <code class="docutils literal notranslate"><span class="pre">click.extra</span></code>. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/783">#783</a>.</p></li>
+</ul>
+</section>
+<section id="id33">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.6.1...v5.6.2">5.6.2 (2022-09-27)</a><a class="headerlink" href="#id33" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix imports from <code class="docutils literal notranslate"><span class="pre">click.extra</span></code>.</p></li>
+</ul>
+</section>
+<section id="id34">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.6.0...v5.6.1">5.6.1 (2022-09-26)</a><a class="headerlink" href="#id34" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix import from private <code class="docutils literal notranslate"><span class="pre">click.extra</span></code> submodule.</p></li>
+</ul>
+</section>
+<section id="id35">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.5.1...v5.6.0">5.6.0 (2022-09-26)</a><a class="headerlink" href="#id35" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[brew,cask] Add support for <code class="docutils literal notranslate"><span class="pre">remove</span></code> operation in homebrew.</p></li>
+<li><p>[pacman] Fix <code class="docutils literal notranslate"><span class="pre">pacman</span></code> install operation. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/766">#766</a>.</p></li>
+<li><p>[bar-plugin] Check for minimal Python version.</p></li>
+<li><p>[mpm] Run tests on <code class="docutils literal notranslate"><span class="pre">ubuntu-22.04</span></code> and <code class="docutils literal notranslate"><span class="pre">macos-12</span></code>.</p></li>
+<li><p>[mpm] Remove tests on <code class="docutils literal notranslate"><span class="pre">macos-10.15</span></code> and <code class="docutils literal notranslate"><span class="pre">ubuntu-18.04</span></code>, they’re deprecated by GitHub.</p></li>
+<li><p>[mpm] Fix plugin rendering tests.</p></li>
+<li><p>[mpm] Always run plugin rendering tests in Poetry venv.</p></li>
+<li><p>[bar-plugin] Add a <code class="docutils literal notranslate"><span class="pre">--check-mpm</span></code> option to tests the mpm binary search phase without running a full outdated package listing.</p></li>
+<li><p>[mpm] Tests Python and plugin invocation in lots of shell configuration.</p></li>
+<li><p>[mpm] Deactivate login shell tests.</p></li>
+<li><p>[mpm] Force Homebrew tap repair in tests.</p></li>
+<li><p>[mpm] Dynamiccaly get location of Homebrew Cask formulas in tests.</p></li>
+<li><p>[mpm] Install <code class="docutils literal notranslate"><span class="pre">dnf</span></code> in tests as of <code class="docutils literal notranslate"><span class="pre">ubuntu-22.04</span></code>. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/563">#563</a>.</p></li>
+<li><p>[mpm] Add <code class="docutils literal notranslate"><span class="pre">upgrade_all</span></code> operation in support matrix.</p></li>
+<li><p>[mpm] Rely on external workflow to set Python version parameters for <code class="docutils literal notranslate"><span class="pre">mypy</span></code>, <code class="docutils literal notranslate"><span class="pre">black</span></code> and <code class="docutils literal notranslate"><span class="pre">pyupgrade</span></code> jobs.</p></li>
+</ul>
+</section>
+<section id="id36">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.5.0...v5.5.1">5.5.1 (2022-07-08)</a><a class="headerlink" href="#id36" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Eliminate rendering of <code class="docutils literal notranslate"><span class="pre">None</span></code> cells to <code class="docutils literal notranslate"><span class="pre">&lt;null&gt;</span></code> in tables.</p></li>
+<li><p>[mpm] Add a <code class="docutils literal notranslate"><span class="pre">--refilter</span></code>/<code class="docutils literal notranslate"><span class="pre">--no-refilter</span></code> option to <code class="docutils literal notranslate"><span class="pre">search</span></code> to allow bypassing of <code class="docutils literal notranslate"><span class="pre">mpm</span></code> default refiltering.</p></li>
+<li><p>[npm] Implements <code class="docutils literal notranslate"><span class="pre">remove</span></code> operation.</p></li>
+<li><p>[npm] Use canonical commands for operations.</p></li>
+<li><p>[npm] Reduce output verbosity with <code class="docutils literal notranslate"><span class="pre">--no-fund</span></code> and <code class="docutils literal notranslate"><span class="pre">--no-audit</span></code> options.</p></li>
+<li><p>[yarn] Implements <code class="docutils literal notranslate"><span class="pre">remove</span></code> operation.</p></li>
+<li><p>[yarn] Fix, document and cleanup all global commands.</p></li>
+<li><p>[yarn] Set minimal <code class="docutils literal notranslate"><span class="pre">yarn</span></code> version to <code class="docutils literal notranslate"><span class="pre">1.20.0</span></code>, as it should have been.</p></li>
+<li><p>[bar-plugin] Silence all errors but critical ones on <code class="docutils literal notranslate"><span class="pre">outdated</span></code> invocation to prevent a failing manager to block rendering of the plugin output.</p></li>
+</ul>
+</section>
+<section id="id37">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.4.0...v5.5.0">5.5.0 (2022-07-08)</a><a class="headerlink" href="#id37" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Restore behavior of having <code class="docutils literal notranslate"><span class="pre">upgrade</span></code> assuming <code class="docutils literal notranslate"><span class="pre">--all</span></code> option on a bare call. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/715">#715</a>.</p></li>
+<li><p>[cask] Fix parsing of multiple reported installed versions.</p></li>
+<li><p>[emerge] Locate and validate <code class="docutils literal notranslate"><span class="pre">qlist</span></code> and <code class="docutils literal notranslate"><span class="pre">eclean</span></code> CLI availability.</p></li>
+<li><p>[snap] Fix parsing of empty search results.</p></li>
+<li><p>[mpm] Allow package name to be empty instead of duplicating it to package ID.</p></li>
+<li><p>[mpm] Keep the operation matrix on the <code class="docutils literal notranslate"><span class="pre">readme.md</span></code> in sync with current code by inspecting implementation.</p></li>
+<li><p>[mpm] Add type hints. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/655">#655</a>.</p></li>
+<li><p>[mpm] Auto-check type hinting in CI.</p></li>
+<li><p>[mpm] Render type hints in documentation.</p></li>
+<li><p>[mpm] Add metadata for easy citation in academic content.</p></li>
+<li><p>[mpm] Deactivate Atom install in macOS tests as it seems broken.</p></li>
+</ul>
+</section>
+<section id="id38">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.3.0...v5.4.0">5.4.0 (2022-06-28)</a><a class="headerlink" href="#id38" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Allow global <code class="docutils literal notranslate"><span class="pre">upgrade</span></code> of a subset of packages from the command line if no ambiguity is identified.</p></li>
+<li><p>[mpm] Add a <code class="docutils literal notranslate"><span class="pre">-A</span></code>/<code class="docutils literal notranslate"><span class="pre">--all</span></code> option to <code class="docutils literal notranslate"><span class="pre">upgrade</span></code> operation.</p></li>
+<li><p>[mpm] Add a <code class="docutils literal notranslate"><span class="pre">-d</span></code>/<code class="docutils literal notranslate"><span class="pre">--duplicates</span></code> option to <code class="docutils literal notranslate"><span class="pre">installed</span></code> operation to only show packages sharing the same ID across multiple managers.</p></li>
+<li><p>[mpm] Add a global <code class="docutils literal notranslate"><span class="pre">--description</span></code> option but only implement it for <code class="docutils literal notranslate"><span class="pre">search</span></code> operation.</p></li>
+<li><p>[mpm] Always show description for <code class="docutils literal notranslate"><span class="pre">--extended</span></code> search. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/503">#503</a>.</p></li>
+<li><p>[mpm] Rename <code class="docutils literal notranslate"><span class="pre">--package-name</span></code> search option to <code class="docutils literal notranslate"><span class="pre">--id-name-only</span></code>.</p></li>
+<li><p>[mpm] Add operation aliases:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">list</span></code> → <code class="docutils literal notranslate"><span class="pre">installed</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">uninstall</span></code> → <code class="docutils literal notranslate"><span class="pre">remove</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">update</span></code> → <code class="docutils literal notranslate"><span class="pre">upgrade</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lock</span></code>/<code class="docutils literal notranslate"><span class="pre">freeze</span></code>/<code class="docutils literal notranslate"><span class="pre">snapshot</span></code> → <code class="docutils literal notranslate"><span class="pre">backup</span></code></p></li>
+</ul>
+</li>
+<li><p>[mpm] Add a <code class="docutils literal notranslate"><span class="pre">--merge</span></code> option on <code class="docutils literal notranslate"><span class="pre">backup</span></code> operation to update target TOML file with new installed packages.</p></li>
+<li><p>[mpm] Add an <code class="docutils literal notranslate"><span class="pre">--update-version</span></code> option on <code class="docutils literal notranslate"><span class="pre">backup</span></code> operation to only update version in the target TOML file.</p></li>
+<li><p>[mpm] Add a <code class="docutils literal notranslate"><span class="pre">--overwrite</span></code>/<code class="docutils literal notranslate"><span class="pre">--force</span></code>/<code class="docutils literal notranslate"><span class="pre">--replace</span></code> option on <code class="docutils literal notranslate"><span class="pre">backup</span></code> operation to force TOML overwrite if destination file exists.</p></li>
+<li><p>[pipx] Implement <code class="docutils literal notranslate"><span class="pre">outdated</span></code> operation.</p></li>
+<li><p>[pip] Do not wait for user confirmation on <code class="docutils literal notranslate"><span class="pre">remove</span></code> operation.</p></li>
+<li><p>[mpm] Switch package ID and name columns in table rendering.</p></li>
+<li><p>[mpm] Rename all <code class="docutils literal notranslate"><span class="pre">*-like</span></code> labels to <code class="docutils literal notranslate"><span class="pre">*-based</span></code> to help finer identification of families.</p></li>
+</ul>
+</section>
+<section id="id39">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.2.0...v5.3.0">5.3.0 (2022-06-25)</a><a class="headerlink" href="#id39" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[paru] Add <code class="docutils literal notranslate"><span class="pre">paru</span></code> support.</p></li>
+<li><p>[pacman,paru,yay] Run <code class="docutils literal notranslate"><span class="pre">install</span></code>, <code class="docutils literal notranslate"><span class="pre">upgrade</span></code>, <code class="docutils literal notranslate"><span class="pre">remove</span></code> and <code class="docutils literal notranslate"><span class="pre">cleanup</span></code> operations with <code class="docutils literal notranslate"><span class="pre">sudo</span></code>.</p></li>
+<li><p>[brew,cask] Implement extended search on description.</p></li>
+<li><p>[cargo] Implement <code class="docutils literal notranslate"><span class="pre">remove</span></code> operation.</p></li>
+<li><p>[mas] Fix parsing of variable-length output in <code class="docutils literal notranslate"><span class="pre">installed</span></code> and <code class="docutils literal notranslate"><span class="pre">outdated</span></code> operations.</p></li>
+<li><p>[npm] Apply global variables to all operations.</p></li>
+<li><p>[bar-plugin] Fix rendering of package managers without outdated packages. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/631">#631</a>.</p></li>
+<li><p>[mpm] Colorize version differences in <code class="docutils literal notranslate"><span class="pre">outdated</span></code> operation output.</p></li>
+<li><p>[mpm] Add manager homepage URL metadata.</p></li>
+<li><p>[mpm] Keep results matching description in <code class="docutils literal notranslate"><span class="pre">--extended</span></code> search mode.</p></li>
+<li><p>[mpm] Simplify <code class="docutils literal notranslate"><span class="pre">installed</span></code>, <code class="docutils literal notranslate"><span class="pre">outdated</span></code> and <code class="docutils literal notranslate"><span class="pre">search</span></code> operation by relying on generators and a <code class="docutils literal notranslate"><span class="pre">package</span></code> dataclass.</p></li>
+<li><p>[mpm] Disable workflow grouping and concurrency management.</p></li>
+</ul>
+</section>
+<section id="id40">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.1.0...v5.2.0">5.2.0 (2022-06-16)</a><a class="headerlink" href="#id40" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[yay] Add <code class="docutils literal notranslate"><span class="pre">yay</span></code> support. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/527">#527</a>.</p></li>
+<li><p>[mpm,pacman,pip,pipx] Add <code class="docutils literal notranslate"><span class="pre">remove</span></code> operation.</p></li>
+<li><p>[mpm] Add description in search results. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/503">#503</a>.</p></li>
+<li><p>[mpm] Always refilters search results manually to refine gross matchings.</p></li>
+<li><p>[mpm] Document <code class="docutils literal notranslate"><span class="pre">brew</span></code> and Arch Linux installation. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/527">#527</a>.</p></li>
+<li><p>[mpm] Benchmark distribution of all <code class="docutils literal notranslate"><span class="pre">mpm</span></code> alternatives.</p></li>
+<li><p>[mpm] Group workflow jobs so new commits cancels in-progress execution triggered by previous commits.</p></li>
+<li><p>[mpm] Run tests on early Python 3.11 releases.</p></li>
+</ul>
+</section>
+<section id="id41">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.0.1...v5.1.0">5.1.0 (2022-05-15)</a><a class="headerlink" href="#id41" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[pipx] Add <code class="docutils literal notranslate"><span class="pre">pipx</span></code> support. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/468">#468</a>.</p></li>
+<li><p>[cargo] Add <code class="docutils literal notranslate"><span class="pre">cargo</span></code> support. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/633">#633</a>.</p></li>
+<li><p>[mpm] Factorize search result refiltering code.</p></li>
+<li><p>[mpm] Regroup <code class="docutils literal notranslate"><span class="pre">dnf</span></code> and <code class="docutils literal notranslate"><span class="pre">yum</span></code> labels.</p></li>
+</ul>
+</section>
+<section id="id42">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v5.0.0...v5.0.1">5.0.1 (2022-04-28)</a><a class="headerlink" href="#id42" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[apt] Fix commands incompatible with <code class="docutils literal notranslate"><span class="pre">--yes</span></code> option. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/625">#625</a>.</p></li>
+<li><p>[mpm] Add <code class="docutils literal notranslate"><span class="pre">topgrade</span></code> and <code class="docutils literal notranslate"><span class="pre">pacaptr</span></code> in the list of benchmarked alternatives.</p></li>
+<li><p>[mpm] Rename <code class="docutils literal notranslate"><span class="pre">alternative</span></code> page to <code class="docutils literal notranslate"><span class="pre">benchmark</span></code>.</p></li>
+<li><p>[mpm] Fix label unittests.</p></li>
+</ul>
+</section>
+<section id="id43">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.13.1...v5.0.0">5.0.0 (2022-04-25)</a><a class="headerlink" href="#id43" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[zypper] Add <code class="docutils literal notranslate"><span class="pre">zypper</span></code> support for Suse and OpenSuse. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/566">#566</a>.</p></li>
+<li><p>[emerge] Add <code class="docutils literal notranslate"><span class="pre">emerge</span></code> support.</p></li>
+<li><p>[steamcmd] Add <code class="docutils literal notranslate"><span class="pre">steamcmd</span></code> support. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/10">#10</a>.</p></li>
+<li><p>[yum] Add dedicated <code class="docutils literal notranslate"><span class="pre">yum</span></code> package manager. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/415">#415</a>.</p></li>
+<li><p>[bar-plugin] Add new <code class="docutils literal notranslate"><span class="pre">DEFAULT_FONT</span></code> and <code class="docutils literal notranslate"><span class="pre">MONOSPACE_FONT</span></code> variable.</p></li>
+<li><p>[bar-plugin] Rename all reference of <code class="docutils literal notranslate"><span class="pre">xbar</span></code> to the generic <code class="docutils literal notranslate"><span class="pre">bar-plugin</span></code> label.</p></li>
+<li><p>[bar-plugin] Improve search for Python and <code class="docutils literal notranslate"><span class="pre">mpm</span></code> executable.</p></li>
+<li><p>[bar-plugin] Restructure the plugin ↔ mpm relationship to delegate all
+plugin layout and rendering logic to <code class="docutils literal notranslate"><span class="pre">mpm</span></code>.</p></li>
+<li><p>[bar-plugin] Prevent leaks when modifying environment variables.</p></li>
+<li><p>[mpm] Allow <code class="docutils literal notranslate"><span class="pre">installed</span></code> and <code class="docutils literal notranslate"><span class="pre">outdated</span></code> commands to be optionally
+implemented by package managers.</p></li>
+<li><p>[mpm] Add new <code class="docutils literal notranslate"><span class="pre">--plugin-output</span></code> option to <code class="docutils literal notranslate"><span class="pre">outdated</span></code> command.</p></li>
+<li><p>[mpm] Add <code class="docutils literal notranslate"><span class="pre">tabulate</span></code> as direct dependency and refactor table alignment in
+plugin around it.</p></li>
+<li><p>[mpm] Rename <code class="docutils literal notranslate"><span class="pre">--xbar-plugin-path</span></code> option to <code class="docutils literal notranslate"><span class="pre">--bar-plugin-path</span></code>.</p></li>
+<li><p>[mpm] Remove <code class="docutils literal notranslate"><span class="pre">-c</span></code>/<code class="docutils literal notranslate"><span class="pre">--cli-format</span></code> option.</p></li>
+<li><p>[mpm] Use short-form selection option and fully-qualified path in
+<code class="docutils literal notranslate"><span class="pre">mpm</span></code>-based upgrade-all CLIs produced by <code class="docutils literal notranslate"><span class="pre">outdated</span></code> command.</p></li>
+<li><p>[mpm] Add dedicated execution path for running sudo-prefixed commands.</p></li>
+<li><p>[mpm] Fix local overriding of CLI parameters leading to missing <code class="docutils literal notranslate"><span class="pre">sudo</span></code>
+pre-command. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/579">#579</a>.</p></li>
+<li><p>[mpm] Use string highlighting code from <code class="docutils literal notranslate"><span class="pre">click-extra</span> <span class="pre">&gt;=</span> <span class="pre">2.1.0</span></code>.</p></li>
+<li><p>[mpm] Add edit links to documentation.</p></li>
+</ul>
+</section>
+<section id="id44">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.13.0...v4.13.1">4.13.1 (2022-04-17)</a><a class="headerlink" href="#id44" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[apt] Add missing <code class="docutils literal notranslate"><span class="pre">sudo</span></code> pre-commands for <code class="docutils literal notranslate"><span class="pre">apt</span></code> calls that requires it.
+Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/496">#496</a> and <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/579">#579</a>.</p></li>
+<li><p>[snap] Fix command argument order. Address <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/579">#579</a>.</p></li>
+<li><p>[bar-plugin] Fix location of <code class="docutils literal notranslate"><span class="pre">mpm</span></code> binary on Apple Silicon machines.</p></li>
+<li><p>[mpm] Replace <code class="docutils literal notranslate"><span class="pre">sphinx_tabs</span></code> by <code class="docutils literal notranslate"><span class="pre">sphinx-design</span></code>.</p></li>
+<li><p>[mpm] Add SwiftBar plugin screenshots.</p></li>
+<li><p>[mpm] Remove date-based shallowing of Homebrew git repository in unittests
+and considers the local runner copy to already be unshallowed.</p></li>
+</ul>
+</section>
+<section id="id45">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.12.1...v4.13.0">4.13.0 (2022-04-16)</a><a class="headerlink" href="#id45" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[pacman] Add support for <code class="docutils literal notranslate"><span class="pre">pacman</span></code>. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/416">#416</a>.</p></li>
+<li><p>[apt-mint] Fix search. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/572">#572</a> and <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/573">#573</a>.</p></li>
+<li><p>[apt-mint] Fix <code class="docutils literal notranslate"><span class="pre">--apt-mint</span></code> shortcut option.</p></li>
+<li><p>[bar-plugin] Add support for SwiftBar.</p></li>
+<li><p>[bar-plugin] Add new <code class="docutils literal notranslate"><span class="pre">TABLE_RENDERING</span></code> option to plugin.</p></li>
+<li><p>[bar-plugin] Improve alignment of labels in monospaced font rendering.</p></li>
+<li><p>[bar-plugin] Tweak icons.</p></li>
+<li><p>[mpm] Allow the <code class="docutils literal notranslate"><span class="pre">meta_package_manager</span></code> module to be directly executed.</p></li>
+<li><p>[mpm] Add <code class="docutils literal notranslate"><span class="pre">--xbar-plugin-path</span></code> option.</p></li>
+<li><p>[mpm] Fix normalization of CLI arguments.</p></li>
+<li><p>[mpm] Fix file not found error on non-Windows platform during version checking.</p></li>
+</ul>
+</section>
+<section id="id46">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.12.0...v4.12.1">4.12.1 (2022-04-05)</a><a class="headerlink" href="#id46" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Make CLI path evaluation more robust on Windows. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/542">#542</a>.</p></li>
+</ul>
+</section>
+<section id="id47">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.11.0...v4.12.0">4.12.0 (2022-04-04)</a><a class="headerlink" href="#id47" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[dnf] Add support for <code class="docutils literal notranslate"><span class="pre">dnf</span></code>. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/516">#516</a>, refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/415">#415</a>.</p></li>
+<li><p>[yum] Allow <code class="docutils literal notranslate"><span class="pre">yum</span></code> to act as <code class="docutils literal notranslate"><span class="pre">dnf</span></code>. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/415">#415</a>.</p></li>
+<li><p>[brew,cask] Fix execution of <code class="docutils literal notranslate"><span class="pre">sync</span></code> command.</p></li>
+<li><p>[mpm] Fix extraction of version. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/536">#536</a>.</p></li>
+</ul>
+</section>
+<section id="id48">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.10.0...v4.11.0">4.11.0 (2022-04-03)</a><a class="headerlink" href="#id48" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[brew,cask] Do not let homebrew auto-update on other commands. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/36">#36</a>.</p></li>
+<li><p>[brew,cask] Disable analytics and env hints in logs.</p></li>
+<li><p>[bar-plugin] Fix log verbosity and unittests for xbar plugin.</p></li>
+<li><p>[mpm] Show in debug logs the extra environment variable used for CLIs.</p></li>
+<li><p>[mpm] Enforce code structure in package manager definition files.</p></li>
+<li><p>[mpm] Fix documentation generation.</p></li>
+</ul>
+</section>
+<section id="id49">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.9.10...v4.10.0">4.10.0 (2022-03-31)</a><a class="headerlink" href="#id49" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Allow for package managers to simultaneously set a list of
+pre-commands and environment variables, as well as global arguments before
+and after the custom ones.</p></li>
+<li><p>[mpm] Always run unittest in parallel. Adds development dependency on
+<code class="docutils literal notranslate"><span class="pre">pytest-xdist</span></code> and <code class="docutils literal notranslate"><span class="pre">psutil</span></code>.</p></li>
+<li><p>[mpm] Use the <code class="docutils literal notranslate"><span class="pre">tomllib</span></code> from the standard library starting with Python
+3.11.</p></li>
+<li><p>[mpm] Cap <code class="docutils literal notranslate"><span class="pre">click-extra</span></code> requirement to <code class="docutils literal notranslate"><span class="pre">&lt;1.7.0</span></code> to fix regression. Closes
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/518">#518</a>.</p></li>
+</ul>
+</section>
+<section id="id50">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.9.9...v4.9.10">4.9.10 (2022-03-09)</a><a class="headerlink" href="#id50" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix execution error on Python 3.10 by updating <code class="docutils literal notranslate"><span class="pre">click-extra</span></code>. Closes
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/467">#467</a>.</p></li>
+<li><p>[mpm] Reactivate all unittests on Python 3.10.</p></li>
+<li><p>[mpm] Remove artificial capping of Python 3.9 to some workflows.</p></li>
+<li><p>[mpm] Use external workflow for dependency graph generation and Python code
+modernization.</p></li>
+<li><p>[mpm] Remove direct dependency on <code class="docutils literal notranslate"><span class="pre">cloup</span></code>, <code class="docutils literal notranslate"><span class="pre">simplejson</span></code> and <code class="docutils literal notranslate"><span class="pre">pipdeptree</span></code>.</p></li>
+</ul>
+</section>
+<section id="id51">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.9.8...v4.9.9">4.9.9 (2022-01-15)</a><a class="headerlink" href="#id51" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix upload of build artifacts in GitHub release.</p></li>
+</ul>
+</section>
+<section id="id52">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.9.7...v4.9.8">4.9.8 (2022-01-15)</a><a class="headerlink" href="#id52" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix propagation of build artifacts to GitHub release and PyPi.</p></li>
+<li><p>[mpm] Fix test of labelling rules.</p></li>
+<li><p>[mpm] Remove local dependency on <code class="docutils literal notranslate"><span class="pre">graphviz</span></code> now that fixes were pushed
+upstream.</p></li>
+</ul>
+</section>
+<section id="id53">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.9.6...v4.9.7">4.9.7 (2022-01-11)</a><a class="headerlink" href="#id53" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add release version in artifacts produced by Poetry builds.</p></li>
+<li><p>[mpm] Pass local PyPi token to reused workflow to fix publishing.</p></li>
+</ul>
+</section>
+<section id="id54">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.9.5...v4.9.6">4.9.6 (2022-01-11)</a><a class="headerlink" href="#id54" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix detection of Poetry in build workflow.</p></li>
+</ul>
+</section>
+<section id="id55">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.9.4...v4.9.5">4.9.5 (2022-01-11)</a><a class="headerlink" href="#id55" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Use external workflow for package building and publishing via Poetry.</p></li>
+<li><p>[mpm] Reused external label maintenance workflows and definitions.</p></li>
+<li><p>[mpm] Add our custom labels to external syncing workflow.</p></li>
+<li><p>[mpm] Auto-label sponsors.</p></li>
+<li><p>[mpm] Remove changelog code left-overs.</p></li>
+<li><p>[mpm] Aligns content of all PRs locally produced by workflows.</p></li>
+</ul>
+</section>
+<section id="id56">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.9.3...v4.9.4">4.9.4 (2022-01-04)</a><a class="headerlink" href="#id56" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Re-integrate artifacts in GitHub release on tagging.</p></li>
+</ul>
+</section>
+<section id="id57">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.9.2...v4.9.3">4.9.3 (2022-01-04)</a><a class="headerlink" href="#id57" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix GitHub release’s content update.</p></li>
+</ul>
+</section>
+<section id="id58">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.9.1...v4.9.2">4.9.2 (2022-01-04)</a><a class="headerlink" href="#id58" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Regenerate GitHub release content body dynamiccaly on tagging.</p></li>
+</ul>
+</section>
+<section id="id59">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.9.0...v4.9.1">4.9.1 (2022-01-04)</a><a class="headerlink" href="#id59" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Automate minor and major version bump.</p></li>
+<li><p>[mpm] Automate release preparation workflow.</p></li>
+<li><p>[mpm] Trigger tagging, build and version bump on release event.</p></li>
+<li><p>[mpm] Add a debug workflow for troubleshooting.</p></li>
+</ul>
+</section>
+<section id="id60">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.8.0...v4.9.0">4.9.0 (2022-01-03)</a><a class="headerlink" href="#id60" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add single manager selector aliases: <code class="docutils literal notranslate"><span class="pre">--apm</span></code>, <code class="docutils literal notranslate"><span class="pre">--apt</span></code>, <code class="docutils literal notranslate"><span class="pre">--apt-mint</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--brew</span></code>, <code class="docutils literal notranslate"><span class="pre">--cask</span></code>. <code class="docutils literal notranslate"><span class="pre">--choco</span></code>, <code class="docutils literal notranslate"><span class="pre">--composer</span></code>, <code class="docutils literal notranslate"><span class="pre">--flatpak</span></code>, <code class="docutils literal notranslate"><span class="pre">--gem</span></code>, <code class="docutils literal notranslate"><span class="pre">--mas</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--npm</span></code>, <code class="docutils literal notranslate"><span class="pre">--opkg</span></code>, <code class="docutils literal notranslate"><span class="pre">--pip</span></code>, <code class="docutils literal notranslate"><span class="pre">--snap</span></code>, <code class="docutils literal notranslate"><span class="pre">--vscode</span></code> and <code class="docutils literal notranslate"><span class="pre">--yarn</span></code>.</p></li>
+<li><p>[brew,cask] Thorough cleanup: call <code class="docutils literal notranslate"><span class="pre">autoremove</span></code> commands to remove unused
+dependencies and use <code class="docutils literal notranslate"><span class="pre">--prune=all</span></code> to scrub the whole cache.</p></li>
+<li><p>[mpm] Switch default table rendering to <code class="docutils literal notranslate"><span class="pre">rounded_outline</span></code>.</p></li>
+<li><p>[mpm] Rely on <code class="docutils literal notranslate"><span class="pre">click-extra</span></code> for table rendering and tests.</p></li>
+<li><p>[mpm] Remove direct dependencies on <code class="docutils literal notranslate"><span class="pre">click-log</span></code> and <code class="docutils literal notranslate"><span class="pre">cli-helpers</span></code>.</p></li>
+<li><p>[mpm] Automate post-release version bump.</p></li>
+<li><p>[mpm] Outsource some workflow definition to external repository.</p></li>
+<li><p>[mpm] Fix generation of dependency graph.</p></li>
+</ul>
+</section>
+<section id="id61">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.7.0...v4.8.0">4.8.0 (2021-11-01)</a><a class="headerlink" href="#id61" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add <code class="docutils literal notranslate"><span class="pre">--color</span></code>/<code class="docutils literal notranslate"><span class="pre">--no-color</span></code> (aliased to <code class="docutils literal notranslate"><span class="pre">--ansi</span></code>/<code class="docutils literal notranslate"><span class="pre">--no-ansi</span></code>) flags.</p></li>
+<li><p>[mpm] Forces no color on JSON output.</p></li>
+<li><p>[mpm] Group commands and options in help screen.</p></li>
+<li><p>[mpm] Colorize options, choices, metavars and default values in help
+screens.</p></li>
+<li><p>[mpm] Reintroduce coloring of <code class="docutils literal notranslate"><span class="pre">--version</span></code> option.</p></li>
+<li><p>[mpm] Add dependency on <code class="docutils literal notranslate"><span class="pre">click-extra</span></code>.</p></li>
+<li><p>[mpm] Use <code class="docutils literal notranslate"><span class="pre">sphinx-click</span></code> to auto-generate CLI documentation.</p></li>
+<li><p>[mpm] Autofix Markdown content with <code class="docutils literal notranslate"><span class="pre">mdformat</span></code>.</p></li>
+<li><p>[mpm] Simplify project management by abandoning the dual use of
+<code class="docutils literal notranslate"><span class="pre">main</span></code>/<code class="docutils literal notranslate"><span class="pre">develop</span></code> branches.</p></li>
+</ul>
+</section>
+<section id="id62">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.6.0...v4.7.0">4.7.0 (2021-10-13)</a><a class="headerlink" href="#id62" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add help screen coloring.</p></li>
+<li><p>[mpm] Change documentation theme from classic RTD to furo.</p></li>
+<li><p>[mpm] Move documentation from <code class="docutils literal notranslate"><span class="pre">readthedocs.org</span></code> to <code class="docutils literal notranslate"><span class="pre">github.io</span></code>.</p></li>
+<li><p>[mpm] Rewrite documentation from rST to MyST.</p></li>
+<li><p>[mpm] Add dependency on <code class="docutils literal notranslate"><span class="pre">cloup</span></code>.</p></li>
+<li><p>[mpm] Removes <code class="docutils literal notranslate"><span class="pre">click-help-colors</span></code> dependency.</p></li>
+<li><p>[mpm] Run tests on Python 3.10.</p></li>
+<li><p>[mpm] Add a contribution guide stub in documentation. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/276">#276</a>.</p></li>
+</ul>
+</section>
+<section id="id63">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.5.0...v4.6.0">4.6.0 (2021-10-04)</a><a class="headerlink" href="#id63" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Implements XKCD 1654. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/10">#10</a>.</p></li>
+<li><p>[mpm] Add <code class="docutils literal notranslate"><span class="pre">-x</span></code>/<code class="docutils literal notranslate"><span class="pre">--xkcd</span></code> option to forces manager selection.</p></li>
+<li><p>[mpm] Let <code class="docutils literal notranslate"><span class="pre">-m</span></code>/<code class="docutils literal notranslate"><span class="pre">--manager</span></code> multi-option keep order.</p></li>
+</ul>
+</section>
+<section id="id64">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.4.0...v4.5.0">4.5.0 (2021-09-30)</a><a class="headerlink" href="#id64" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[choco] Add Chocolatey package manager.</p></li>
+<li><p>[mpm] Skip by default the evaluation of package managers not supported on
+the user’s platform. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/278">#278</a>.</p></li>
+<li><p>[mpm] Add a <code class="docutils literal notranslate"><span class="pre">-a</span></code>/<code class="docutils literal notranslate"><span class="pre">--all-managers</span></code> option to force the evaluation of all
+managers.</p></li>
+<li><p>[mpm] Fix highlighting of substrings in search results.</p></li>
+</ul>
+</section>
+<section id="id65">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.3.0...v4.4.0">4.4.0 (2021-09-27)</a><a class="headerlink" href="#id65" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add a global <code class="docutils literal notranslate"><span class="pre">-d</span></code>/<code class="docutils literal notranslate"><span class="pre">--dry-run</span></code> option.</p></li>
+<li><p>[apt] Add dedicated <code class="docutils literal notranslate"><span class="pre">apt-mint</span></code> manager to handle the special case of <code class="docutils literal notranslate"><span class="pre">apt</span></code>
+on Linux Mint.</p></li>
+<li><p>[bar-plugin] Let xbar plugin check minimal mpm version requirement.</p></li>
+<li><p>[mpm] Use regexpes to extract package manager versions.</p></li>
+<li><p>[mpm] Add beta <code class="docutils literal notranslate"><span class="pre">windows-2022</span></code> CI/CD build target.</p></li>
+<li><p>[mpm] Remove all the unused utilities to discard some table rendering on
+Windows.</p></li>
+</ul>
+</section>
+<section id="id66">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.2.0...v4.3.0">4.3.0 (2021-09-25)</a><a class="headerlink" href="#id66" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add new <code class="docutils literal notranslate"><span class="pre">install</span></code> command. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/21">#21</a>.</p></li>
+<li><p>[vscode] Add support for Visual Studio Code plugins.</p></li>
+<li><p>[mpm] Finish complete <code class="docutils literal notranslate"><span class="pre">restore</span></code> command implementation. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/38">#38</a>.</p></li>
+<li><p>[mpm] Remove un-enforced poetry-like caret-based version specification from
+TOML backup files.</p></li>
+<li><p>[mpm] Forces logger state reset before each CLI call in unittests.</p></li>
+</ul>
+</section>
+<section id="id67">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.1.0...v4.2.0">4.2.0 (2021-09-21)</a><a class="headerlink" href="#id67" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add support for TOML configuration file. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/66">#66</a>.</p></li>
+<li><p>[mpm] Add <code class="docutils literal notranslate"><span class="pre">-C</span></code>/<code class="docutils literal notranslate"><span class="pre">--config</span></code> option to point to specific configuration file.</p></li>
+<li><p>[mpm] Upgrade to Click 8.x.</p></li>
+<li><p>[mpm] Add support for <code class="docutils literal notranslate"><span class="pre">psql_unicode</span></code> and <code class="docutils literal notranslate"><span class="pre">minimal</span></code> table format.</p></li>
+<li><p>[mpm] Set default table format to <code class="docutils literal notranslate"><span class="pre">psql_unicode</span></code> instead of <code class="docutils literal notranslate"><span class="pre">fancy_grid</span></code> to
+reduce visual noise.</p></li>
+<li><p>[mpm] Add support for environment variables for all parameters, prefixed
+with <code class="docutils literal notranslate"><span class="pre">MPM_</span></code>.</p></li>
+<li><p>[mpm] Let Click produce default values in help screen.</p></li>
+<li><p>[mpm] Replace <code class="docutils literal notranslate"><span class="pre">tomlkit</span></code> dependency by <code class="docutils literal notranslate"><span class="pre">tomli</span></code> and <code class="docutils literal notranslate"><span class="pre">tomli_w</span></code>.</p></li>
+<li><p>[bar-plugin] Fix xbar plugin output format.</p></li>
+<li><p>[bar-plugin] Rename <code class="docutils literal notranslate"><span class="pre">VAR_SUBMENU_lAYOUT</span></code> environment variable to
+<code class="docutils literal notranslate"><span class="pre">VAR_SUBMENU_LAYOUT</span></code>.</p></li>
+<li><p>[mpm] Remove support for <code class="docutils literal notranslate"><span class="pre">--cli-format</span> <span class="pre">bitbar</span></code> option. Use <code class="docutils literal notranslate"><span class="pre">xbar</span></code> value
+instead.</p></li>
+</ul>
+</section>
+<section id="id68">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v4.0.0...v4.1.0">4.1.0 (2021-05-01)</a><a class="headerlink" href="#id68" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[bar-plugin] Add new <code class="docutils literal notranslate"><span class="pre">Submenu</span> <span class="pre">layout</span></code> boolean option in xbar plugin UI.</p></li>
+<li><p>[bar-plugin] Rename <code class="docutils literal notranslate"><span class="pre">XBAR_MPM_SUBMENU</span></code> environment variable to
+<code class="docutils literal notranslate"><span class="pre">VAR_SUBMENU_lAYOUT</span></code>.</p></li>
+<li><p>[mpm] Allow search of multiple CLI names for a package manager.</p></li>
+<li><p>[pip] Fix search of <code class="docutils literal notranslate"><span class="pre">python3</span></code> binary on macOS. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/247">#247</a>.</p></li>
+</ul>
+</section>
+<section id="id69">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v3.6.0...v4.0.0">4.0.0 (2021-04-27)</a><a class="headerlink" href="#id69" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[bar-plugin] Upgrade BitBar plugin to new xbar format.</p></li>
+<li><p>[bar-plugin] Drop xbar plugin requirement on Python 2.x and bump it up to Python
+3.7.3.</p></li>
+<li><p>[bar-plugin] Update references of BitBar to xbar.</p></li>
+<li><p>[bar-plugin] Rename <code class="docutils literal notranslate"><span class="pre">BITBAR_MPM_SUBMENU</span></code> environment variable to
+<code class="docutils literal notranslate"><span class="pre">XBAR_MPM_SUBMENU</span></code>.</p></li>
+<li><p>[mpm] Rename <code class="docutils literal notranslate"><span class="pre">--cli-format</span> <span class="pre">bitbar</span></code> option to <code class="docutils literal notranslate"><span class="pre">--cli-format</span> <span class="pre">xbar</span></code>.</p></li>
+<li><p>[mpm] Auto-generate API documentation via a GitHub action workflow.</p></li>
+<li><p>[mpm] Only trigger dependency graph update on tagging to reduce noise.</p></li>
+<li><p>[mpm] Re-introduce <code class="docutils literal notranslate"><span class="pre">isort</span></code>.</p></li>
+</ul>
+</section>
+<section id="id70">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v3.5.2...v3.6.0">3.6.0 (2021-01-03)</a><a class="headerlink" href="#id70" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[brew] Add support for <code class="docutils literal notranslate"><span class="pre">brew</span></code> on Linux.</p></li>
+<li><p>[brew,cask] Bump minimal requirement of <code class="docutils literal notranslate"><span class="pre">brew</span></code> to <code class="docutils literal notranslate"><span class="pre">2.7.0</span></code>.</p></li>
+<li><p>[cask] Address deprecation of <code class="docutils literal notranslate"><span class="pre">cask</span></code> CLI subcommands.</p></li>
+<li><p>[pip] <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">search</span></code> has been disabled by maintainers because of server-side
+high-load.</p></li>
+<li><p>[mpm] Add test runs against new OSes and distributions: <code class="docutils literal notranslate"><span class="pre">ubuntu-18.04</span></code> and
+<code class="docutils literal notranslate"><span class="pre">macos-11.0</span></code>.</p></li>
+<li><p>[mpm] Remove <code class="docutils literal notranslate"><span class="pre">pycodestyle</span></code> now that we rely on <code class="docutils literal notranslate"><span class="pre">black</span></code>.</p></li>
+<li><p>[mpm] Add emoji to issue labels.</p></li>
+</ul>
+</section>
+<section id="id71">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v3.5.1...v3.5.2">3.5.2 (2020-10-29)</a><a class="headerlink" href="#id71" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Run tests on Python 3.9.</p></li>
+<li><p>[mpm] Upgrade to <code class="docutils literal notranslate"><span class="pre">Poetry</span> <span class="pre">1.1.0</span></code>.</p></li>
+<li><p>[mpm] Colorize version screen and add debug data.</p></li>
+<li><p>[mpm] Test publishing to PyPi in dry-run mode by the way of Poetry.</p></li>
+<li><p>[mpm] Make all keyword-based choice parameters (<code class="docutils literal notranslate"><span class="pre">--manager</span></code>, <code class="docutils literal notranslate"><span class="pre">--exclude</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--output-format</span></code>, <code class="docutils literal notranslate"><span class="pre">--sort-by</span></code> and <code class="docutils literal notranslate"><span class="pre">--cli-format</span></code>) case-insensitive.</p></li>
+<li><p>[mpm] Pin versions of OSes and distributions in CI workflows to
+<code class="docutils literal notranslate"><span class="pre">ubuntu-20.04</span></code>, <code class="docutils literal notranslate"><span class="pre">macos-10.15</span></code> and <code class="docutils literal notranslate"><span class="pre">windows-2019</span></code>.</p></li>
+<li><p>[mpm] Always print errors in unittest’s CLI calls.</p></li>
+<li><p>[mpm] Slow-down tests to prevent PyPi rate-limiting on live API.</p></li>
+<li><p>[mpm] Fix <code class="docutils literal notranslate"><span class="pre">brew</span></code> setup on macOS CI runners.</p></li>
+<li><p>[mpm] Fix <code class="docutils literal notranslate"><span class="pre">npm</span></code> setup in Ubuntu 18.04 and 20.04 CI runners.</p></li>
+<li><p>[mpm] Use latest <code class="docutils literal notranslate"><span class="pre">Atom</span></code> version in Ubuntu CI runners.</p></li>
+</ul>
+</section>
+<section id="id72">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v3.5.0...v3.5.1">3.5.1 (2020-10-03)</a><a class="headerlink" href="#id72" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Defaults to <code class="docutils literal notranslate"><span class="pre">--continue-on-error</span></code> instead of stopping.</p></li>
+<li><p>[mpm] Force checking of CLI being a file.</p></li>
+<li><p>[mpm] Auto-optimize images.</p></li>
+<li><p>[mpm] Auto-lock closed issues and PRs after a moment of inactivity.</p></li>
+</ul>
+</section>
+<section id="id73">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v3.4.2...v3.5.0">3.5.0 (2020-09-20)</a><a class="headerlink" href="#id73" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix <code class="docutils literal notranslate"><span class="pre">--stop-on-error</span></code> parameter: it was never taken into account.</p></li>
+<li><p>[brew,cask] Bump minimal requirement of <code class="docutils literal notranslate"><span class="pre">brew</span></code> to <code class="docutils literal notranslate"><span class="pre">2.5.0</span></code>.</p></li>
+<li><p>[brew,cask] Fix warning to deprecated options.</p></li>
+<li><p>[npm] Always fix JSON parsing on error for any npm subcommand.</p></li>
+</ul>
+</section>
+<section id="id74">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v3.4.1...v3.4.2">3.4.2 (2020-09-13)</a><a class="headerlink" href="#id74" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[brew,cask] Do not mix-up brew and cask upgrades.</p></li>
+<li><p>[npm] Skip parsing of JSON results on error.</p></li>
+</ul>
+</section>
+<section id="id75">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v3.4.0...v3.4.1">3.4.1 (2020-09-02)</a><a class="headerlink" href="#id75" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Rename <code class="docutils literal notranslate"><span class="pre">master</span></code> branch to <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p></li>
+</ul>
+</section>
+<section id="id76">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v3.3.0...v3.4.0">3.4.0 (2020-08-18)</a><a class="headerlink" href="#id76" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[yarn] Set minimal requirement to <code class="docutils literal notranslate"><span class="pre">1.20.0</span></code>.</p></li>
+<li><p>[yarn] Fix deprecated global arguments.</p></li>
+<li><p>[bar-plugin] Force refresh of local package databases before fetching outdated
+ones.</p></li>
+<li><p>[mpm] Add utilities to read a config TOML file. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/66">#66</a>.</p></li>
+<li><p>[mpm] Auto-format Python code with Black.</p></li>
+<li><p>[mpm] Move <code class="docutils literal notranslate"><span class="pre">pytest</span></code> config from <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> to <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>.</p></li>
+<li><p>[mpm] Removes <code class="docutils literal notranslate"><span class="pre">isort</span></code>.</p></li>
+<li><p>[mpm] Auto-update Python’s dependencies.</p></li>
+<li><p>[mpm] Auto-update GitHub actions.</p></li>
+<li><p>[mpm] Auto-update <code class="docutils literal notranslate"><span class="pre">.gitignore</span></code> file.</p></li>
+<li><p>[mpm] Auto-update <code class="docutils literal notranslate"><span class="pre">.mailmap</span></code> file.</p></li>
+<li><p>[mpm] Lint all YAML files. Add dependency on <code class="docutils literal notranslate"><span class="pre">yamllint</span></code> package.</p></li>
+<li><p>[mpm] Removes <code class="docutils literal notranslate"><span class="pre">requires.io</span></code> and Scrutinizer badges.</p></li>
+<li><p>[mpm] Revert to <code class="docutils literal notranslate"><span class="pre">pipdeptree</span></code> to produce package dependency graph.</p></li>
+</ul>
+</section>
+<section id="id77">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v3.2.0...v3.3.0">3.3.0 (2020-06-23)</a><a class="headerlink" href="#id77" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[bar-plugin] Each entry in the drop-down menu can now be called into a terminal
+to track the execution by holding the <code class="docutils literal notranslate"><span class="pre">Option</span></code> key.</p></li>
+<li><p>[bar-plugin] Fix rendering of upgrade CLI in Bitbar dialect.</p></li>
+<li><p>[mpm] Hint for lack of <code class="docutils literal notranslate"><span class="pre">sync</span></code> and <code class="docutils literal notranslate"><span class="pre">cleanup</span></code> support by managers.</p></li>
+<li><p>[mpm] Do not print table headers if there is no row to print.</p></li>
+<li><p>[mpm] Always print non-fatal <code class="docutils literal notranslate"><span class="pre">&lt;stderr&gt;</span></code> output as warning mode.</p></li>
+<li><p>[mpm] Skip table rendering tests if no table is printed to stdout. Fixes
+flacky tests.</p></li>
+<li><p>[mpm] Replace internal helpers with upstreamed <code class="docutils literal notranslate"><span class="pre">boltons</span> <span class="pre">20.2.0</span></code> utils.</p></li>
+<li><p>[mpm] Force test marked as <code class="docutils literal notranslate"><span class="pre">xfail</span></code> count as failure if they succeed.</p></li>
+<li><p>[mpm] Always check wheel content.</p></li>
+<li><p>[mpm] Automate creation of GitHub release.</p></li>
+<li><p>[mpm] Automate publishing of package to PyPi on tagging.</p></li>
+<li><p>[mpm] Save build artifacts on each CI runs.</p></li>
+<li><p>[mpm] Auto-sort module imports.</p></li>
+<li><p>[mpm] Auto-fix common typos.</p></li>
+<li><p>[mpm] Lint JSON files.</p></li>
+<li><p>[mpm] Automate GitHub label generation and synchronization.</p></li>
+<li><p>[mpm] Automatically applies labels on PRs and issues depending on their
+changed files and content.</p></li>
+<li><p>[mpm] Check label rules against manager definitions. Adds development
+dependency on <code class="docutils literal notranslate"><span class="pre">PyYAML</span></code>.</p></li>
+</ul>
+</section>
+<section id="id78">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v3.1.0...v3.2.0">3.2.0 (2020-05-31)</a><a class="headerlink" href="#id78" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[snap] Add support for <code class="docutils literal notranslate"><span class="pre">snap</span></code> on Linux.</p></li>
+<li><p>[cask] Rely on JSON output to fetch outdated packages.</p></li>
+<li><p>[brew,cask] Bump minimal requirement to 2.2.15.</p></li>
+<li><p>[pip] Remove <code class="docutils literal notranslate"><span class="pre">pip2</span></code>/<code class="docutils literal notranslate"><span class="pre">pip3</span></code> distinctions, use system’s python and call <code class="docutils literal notranslate"><span class="pre">pip</span></code>
+module.</p></li>
+<li><p>[windows] Allow discarding of some table rendering on Windows.</p></li>
+<li><p>[mpm] Add <code class="docutils literal notranslate"><span class="pre">--time</span></code>/<code class="docutils literal notranslate"><span class="pre">--no-time</span></code> flag to show elapsed execution time. Closes
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/9">#9</a>.</p></li>
+<li><p>[mpm] Print table rendering, stats and timing in console output instead of
+logger to allow them to be greppable.</p></li>
+<li><p>[bar-plugin] Test plugin with Python 2.7.</p></li>
+<li><p>[mpm] Allow for manager-specific search path to help hunting down CLIs.</p></li>
+<li><p>[mpm] Highlight CLI and indent results in debug output.</p></li>
+<li><p>[mpm] Bump dependency to <code class="docutils literal notranslate"><span class="pre">pylint</span> <span class="pre">2.5</span></code> and <code class="docutils literal notranslate"><span class="pre">cli-helpers</span> <span class="pre">2.0</span></code>.</p></li>
+<li><p>[mpm] Use local copy of <code class="docutils literal notranslate"><span class="pre">boltons</span></code> utils while we wait for upstream release.</p></li>
+<li><p>[mpm] Move pylint config from <code class="docutils literal notranslate"><span class="pre">setup.cfg</span></code> to <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>.</p></li>
+<li><p>[mpm] Fail CI and QA checks if pylint score lower than 9.</p></li>
+<li><p>[mpm] Add more platform definition unittests.</p></li>
+<li><p>[mpm] Unittests all rendering modes in all subcommands.</p></li>
+<li><p>[mpm] Randomize unittests.</p></li>
+<li><p>[mpm] Drop support of Python 3.6.</p></li>
+<li><p>[mpm] Use group-tabs in Sphinx docs.</p></li>
+</ul>
+</section>
+<section id="id79">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v3.0.0...v3.1.0">3.1.0 (2020-04-02)</a><a class="headerlink" href="#id79" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add new <code class="docutils literal notranslate"><span class="pre">cleanup</span></code> command. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/5">#5</a>.</p></li>
+<li><p>[mpm] Improve table sorting with new version-aware tokenizer.</p></li>
+<li><p>[mpm] Highlight manager IDs depending on their availability in <code class="docutils literal notranslate"><span class="pre">managers</span></code>
+command.</p></li>
+<li><p>[gem] Ignore <code class="docutils literal notranslate"><span class="pre">default:</span></code> prefix on package version parsing.</p></li>
+<li><p>[mpm] Remove <code class="docutils literal notranslate"><span class="pre">packaging</span></code> dependency. Rely on internal version parsing.</p></li>
+<li><p>[mpm] Add new <code class="docutils literal notranslate"><span class="pre">--exact</span></code> and <code class="docutils literal notranslate"><span class="pre">--extended</span></code> parameters to <code class="docutils literal notranslate"><span class="pre">search</span></code> command.</p></li>
+<li><p>[mpm] Highlight search matches in console output.</p></li>
+<li><p>[mas] Retrieve version in search results.</p></li>
+<li><p>[mas] Bump minimal version to <code class="docutils literal notranslate"><span class="pre">1.6.1</span></code>.</p></li>
+<li><p>[mpm] Allow stats to be printed for <code class="docutils literal notranslate"><span class="pre">backup</span></code> command.</p></li>
+<li><p>[gem] Bump minimal requirement to <code class="docutils literal notranslate"><span class="pre">2.5.0</span></code>.</p></li>
+</ul>
+</section>
+<section id="id80">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v2.9.0...v3.0.0">3.0.0 (2020-03-25)</a><a class="headerlink" href="#id80" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add new <code class="docutils literal notranslate"><span class="pre">backup</span></code> and dummy <code class="docutils literal notranslate"><span class="pre">restore</span></code> commands to respectively dump
+and load up list of installed packages to/from a TOML file. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/38">#38</a>.</p></li>
+<li><p>[mpm] Add dependency on <code class="docutils literal notranslate"><span class="pre">tomlkit</span></code>.</p></li>
+<li><p>[yarn] Add support for <code class="docutils literal notranslate"><span class="pre">yarn</span></code> package manager for Linux, macOS and Windows.</p></li>
+<li><p>[yarn] Install yarn on all unittest platforms.</p></li>
+<li><p>[mpm] Allow exclusion of a subset of package managers. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/45">#45</a>.</p></li>
+<li><p>[pip] Collect installer metadata on listing.</p></li>
+<li><p>[pip] Bump minimal requirement of <code class="docutils literal notranslate"><span class="pre">pip</span></code> to <code class="docutils literal notranslate"><span class="pre">10.0.*</span></code>.</p></li>
+<li><p>[mpm] Prepend <code class="docutils literal notranslate"><span class="pre">/usr/local/bin</span></code> to cli search path.</p></li>
+<li><p>[npm] <code class="docutils literal notranslate"><span class="pre">install</span> <span class="pre">package&#64;version</span></code> instead of <code class="docutils literal notranslate"><span class="pre">update</span> <span class="pre">package</span></code>.</p></li>
+<li><p>[npm] Skip update notifier.</p></li>
+<li><p>[brew,cask] Allow independent search for each manager.</p></li>
+<li><p>[brew,cask] Bump minimal requirement of to <code class="docutils literal notranslate"><span class="pre">2.2.9</span></code>.</p></li>
+<li><p>[mpm] Allow sorting restuls by packages, managers or version. Closes
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/35">#35</a> and <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/37">#37</a>.</p></li>
+<li><p>[mpm] Add shell completion for Bash, Zsh and Fish.</p></li>
+<li><p>[mpm] Do not force sync when calling outdated. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/36">#36</a>.</p></li>
+<li><p>[apt] Fallback on <code class="docutils literal notranslate"><span class="pre">apt</span> <span class="pre">version</span> <span class="pre">apt</span></code> when looking for version. Closes
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/57">#57</a> and <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/52">#52</a>.</p></li>
+<li><p>[mpm] Removes all copyright dates.</p></li>
+<li><p>[mpm] Replace unmaintained <code class="docutils literal notranslate"><span class="pre">bumpversion</span></code> by <code class="docutils literal notranslate"><span class="pre">bump2version</span></code>.</p></li>
+<li><p>[mpm] Raise requirement to <code class="docutils literal notranslate"><span class="pre">click</span> <span class="pre">7.1</span></code>.</p></li>
+<li><p>[mpm] Raise requirement to <code class="docutils literal notranslate"><span class="pre">boltons</span> <span class="pre">&gt;=</span> <span class="pre">20.0</span></code>.</p></li>
+</ul>
+</section>
+<section id="id81">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v2.8.0...v2.9.0">2.9.0 (2020-03-18)</a><a class="headerlink" href="#id81" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Drop support of Python 2.7, 3.4 and 3.5. Add support for Python 3.8.</p></li>
+<li><p>[windows] Add support for <code class="docutils literal notranslate"><span class="pre">apm</span></code>, <code class="docutils literal notranslate"><span class="pre">composer</span></code>, <code class="docutils literal notranslate"><span class="pre">gem</span></code>, <code class="docutils literal notranslate"><span class="pre">npm</span></code> and <code class="docutils literal notranslate"><span class="pre">pip2</span></code> on
+Windows.</p></li>
+<li><p>[linux] Add support for <code class="docutils literal notranslate"><span class="pre">Flatpak</span></code> and <code class="docutils literal notranslate"><span class="pre">opkg</span></code> package managers on Linux.</p></li>
+<li><p>[gem] Force Ruby <code class="docutils literal notranslate"><span class="pre">gem</span></code> to install packages to user-install by default. Refs
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/58">#58</a>.</p></li>
+<li><p>[pip] Force Python <code class="docutils literal notranslate"><span class="pre">pip</span></code> upgrade to user-installed packages. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/58">#58</a>.</p></li>
+<li><p>[brew] Fix call to <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">upgrade</span> <span class="pre">--cleanup</span></code>. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/50">#50</a>.</p></li>
+<li><p>[brew] Fix parsing of <code class="docutils literal notranslate"><span class="pre">brew</span></code> version. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/49">#49</a> and <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/51">#51</a>.</p></li>
+<li><p>[mpm] Switch from Travis to GitHub actions.</p></li>
+<li><p>[composer] Install <code class="docutils literal notranslate"><span class="pre">composer</span></code> in all platforms CI runners.</p></li>
+<li><p>[linux] Install <code class="docutils literal notranslate"><span class="pre">flatpak</span></code> in Linux CI runner.</p></li>
+<li><p>[windows] Install <code class="docutils literal notranslate"><span class="pre">apm</span></code> in Windows CI runner.</p></li>
+<li><p>[mpm] Bump requirement to <code class="docutils literal notranslate"><span class="pre">click-log</span> <span class="pre">&gt;=</span> <span class="pre">0.3</span></code>.</p></li>
+<li><p>[mpm] Add non-blocking Pylint code quality checks in CI.</p></li>
+<li><p>[mpm] Check for conflicting dependencies in CI.</p></li>
+<li><p>[mpm] Use Poetry for package and virtualenv management.</p></li>
+<li><p>[mpm] Replace <code class="docutils literal notranslate"><span class="pre">pipdeptree</span></code> by Poetry CLI output.</p></li>
+<li><p>[mpm] Remove <code class="docutils literal notranslate"><span class="pre">backports.shutil_which</span></code> dependency.</p></li>
+<li><p>[mpm] Update <code class="docutils literal notranslate"><span class="pre">.gitignore</span></code>.</p></li>
+<li><p>[mpm] Drop all Python 3.0 <code class="docutils literal notranslate"><span class="pre">__future__</span></code> imports.</p></li>
+<li><p>[mpm] Add detailed usage CLI page in documentation.</p></li>
+</ul>
+</section>
+<section id="id82">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v2.7.0...v2.8.0">2.8.0 (2019-01-03)</a><a class="headerlink" href="#id82" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[composer] Add support for PHP <code class="docutils literal notranslate"><span class="pre">composer</span></code>.</p></li>
+<li><p>[cask] Remove <code class="docutils literal notranslate"><span class="pre">cask</span></code>-specific <code class="docutils literal notranslate"><span class="pre">version</span></code>, <code class="docutils literal notranslate"><span class="pre">sync</span></code> and <code class="docutils literal notranslate"><span class="pre">search</span></code> command.
+Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/47">#47</a>.</p></li>
+<li><p>[brew] Vanilla brew and cask CLIs now shares the same version requirements.</p></li>
+<li><p>[brew] Bump minimal requirement of <code class="docutils literal notranslate"><span class="pre">brew</span></code> and <code class="docutils literal notranslate"><span class="pre">cask</span></code> to <code class="docutils literal notranslate"><span class="pre">1.7.4</span></code>.</p></li>
+<li><p>[mpm] Activate unittests in Python 3.7.</p></li>
+<li><p>[mpm] Drop Travis unittests on deprecated Ubuntu Precise targets and
+vintage Mac OS X 10.10 and 10.11.</p></li>
+<li><p>[mpm] Use latest macOS 10.12 and 10.13 Travis images.</p></li>
+</ul>
+</section>
+<section id="id83">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v2.6.1...v2.7.0">2.7.0 (2018-04-02)</a><a class="headerlink" href="#id83" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add new <code class="docutils literal notranslate"><span class="pre">--ignore-auto-updates</span></code> and <code class="docutils literal notranslate"><span class="pre">--include-auto-updates</span></code> boolean
+flags.</p></li>
+<li><p>[mpm] Support even fancier table output rendering, including <code class="docutils literal notranslate"><span class="pre">csv</span></code> and
+<code class="docutils literal notranslate"><span class="pre">html</span></code>.</p></li>
+<li><p>[mpm] Depends on <code class="docutils literal notranslate"><span class="pre">cli-helpers</span></code> package to render tables.</p></li>
+<li><p>[mpm] Removes direct dependency on <code class="docutils literal notranslate"><span class="pre">tabulate</span></code>.</p></li>
+<li><p>[cask] Fix minimal version check for <code class="docutils literal notranslate"><span class="pre">cask</span></code>. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/41">#41</a> and
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/44">#44</a>.</p></li>
+<li><p>[bar-plugin] Do not run BitBar plugin unittests but on macOS.</p></li>
+</ul>
+</section>
+<section id="id84">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v2.6.0...v2.6.1">2.6.1 (2017-11-05)</a><a class="headerlink" href="#id84" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix Travis unittests.</p></li>
+</ul>
+</section>
+<section id="id85">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v2.5.0...v2.6.0">2.6.0 (2017-09-11)</a><a class="headerlink" href="#id85" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[apt] Add support for <code class="docutils literal notranslate"><span class="pre">apt</span></code> on Linux systems.</p></li>
+<li><p>[pip] Use pip 9.0 JSON output. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/18">#18</a>.</p></li>
+<li><p>[pip] Bump minimal requirement of <code class="docutils literal notranslate"><span class="pre">pip</span></code> to <code class="docutils literal notranslate"><span class="pre">9.0.*</span></code>.</p></li>
+<li><p>[cask] Use new <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">cask</span> <span class="pre">outdated</span></code> command.</p></li>
+<li><p>[cask] Remove usage of deprecated <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">cask</span> <span class="pre">update</span></code> command.</p></li>
+<li><p>[cask] Bump minimal requirement of <code class="docutils literal notranslate"><span class="pre">cask</span></code> to <code class="docutils literal notranslate"><span class="pre">1.1.12</span></code>.</p></li>
+<li><p>[mpm] Add dependency on <code class="docutils literal notranslate"><span class="pre">simplejson</span></code>.</p></li>
+<li><p>[mpm] Bump requirement to <code class="docutils literal notranslate"><span class="pre">click_log</span> <span class="pre">&gt;=</span> <span class="pre">0.2.0</span></code>. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/39">#39</a>.</p></li>
+<li><p>[mpm] Replace <code class="docutils literal notranslate"><span class="pre">nose</span></code> by <code class="docutils literal notranslate"><span class="pre">pytest</span></code>.</p></li>
+<li><p>[mpm] Only notify by mail of test failures.</p></li>
+</ul>
+</section>
+<section id="id86">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v2.4.0...v2.5.0">2.5.0 (2017-03-01)</a><a class="headerlink" href="#id86" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Auto-detect location of manager CLI on the system.</p></li>
+<li><p>[mpm] Add new <code class="docutils literal notranslate"><span class="pre">search</span></code> operation. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/22">#22</a>.</p></li>
+<li><p>[npm] Bump minimal requirement of <code class="docutils literal notranslate"><span class="pre">npm</span></code> to <code class="docutils literal notranslate"><span class="pre">4.0.*</span></code>.</p></li>
+<li><p>[mpm] Rename <code class="docutils literal notranslate"><span class="pre">list</span></code> operation to <code class="docutils literal notranslate"><span class="pre">installed</span></code>.</p></li>
+<li><p>[apm,gem,linux,npm] Allow use of <code class="docutils literal notranslate"><span class="pre">apm</span></code>, <code class="docutils literal notranslate"><span class="pre">gem</span></code> and <code class="docutils literal notranslate"><span class="pre">npm</span></code> managers on Linux.</p></li>
+<li><p>[mpm] Add new <code class="docutils literal notranslate"><span class="pre">--stats</span></code>/<code class="docutils literal notranslate"><span class="pre">--no-stats</span></code> boolean flags. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/8">#8</a>.</p></li>
+<li><p>[mpm] Add new <code class="docutils literal notranslate"><span class="pre">--stop-on-error</span></code>/<code class="docutils literal notranslate"><span class="pre">--continue-on-error</span></code> parameters to make
+CLI errors either blocking or non-blocking.</p></li>
+<li><p>[mpm] Allow reporting of several CLI errors by managers.</p></li>
+<li><p>[mpm] Allow selection of a subset of managers.</p></li>
+<li><p>[mpm] Do not force a <code class="docutils literal notranslate"><span class="pre">sync</span></code> before listing installed packages in CLI.</p></li>
+<li><p>[mpm] Rework API documentation.</p></li>
+<li><p>[cask] Add unittest to cover unicode names for Cask packages. Closes
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/16">#16</a>.</p></li>
+<li><p>[cask] Add unittest to cover Cask packages with multiple names. Refs
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/26">#26</a>.</p></li>
+<li><p>[mpm] Drop support of Python 3.3.</p></li>
+</ul>
+</section>
+<section id="id87">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v2.3.0...v2.4.0">2.4.0 (2017-01-28)</a><a class="headerlink" href="#id87" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add new <code class="docutils literal notranslate"><span class="pre">list</span></code> operation. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/20">#20</a>.</p></li>
+<li><p>[mas] Fix upgrade of <code class="docutils literal notranslate"><span class="pre">mas</span></code> packages. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/32">#32</a>.</p></li>
+<li><p>[bar-plugin] Document BitBar plugin release process.</p></li>
+<li><p>[mpm] Colorize check-marks in CLI output.</p></li>
+<li><p>[mpm] Decouple <code class="docutils literal notranslate"><span class="pre">sync</span></code> and <code class="docutils literal notranslate"><span class="pre">outdated</span></code> actions in all managers.</p></li>
+<li><p>[mpm] Cache output of <code class="docutils literal notranslate"><span class="pre">outdated</span></code> command.</p></li>
+<li><p>[mpm] Add global todo list in documentation.</p></li>
+<li><p>[mpm] Bump requirement to <code class="docutils literal notranslate"><span class="pre">boltons</span> <span class="pre">&gt;=</span> <span class="pre">17.0.0</span></code> for Python 3.3 compatibility.</p></li>
+</ul>
+</section>
+<section id="id88">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v2.2.0...v2.3.0">2.3.0 (2017-01-15)</a><a class="headerlink" href="#id88" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add Sphinx documentation. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/24">#24</a>.</p></li>
+<li><p>[mpm] Add installation instructions. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/19">#19</a>.</p></li>
+<li><p>[mpm] Add a list of <em>Falsehoods Programmers Believe About Package
+Managers</em>.</p></li>
+<li><p>[mpm] Add a <code class="docutils literal notranslate"><span class="pre">.mailmap</span></code> config file to consolidate contributor’s identity.</p></li>
+<li><p>[bar-plugin] Make it easier to change the font, size and color of text in
+BitBar plugin.</p></li>
+<li><p>[bar-plugin] Move error icon in BitBar plugin to the front of manager name.</p></li>
+<li><p>[cask] Fix parsing of <code class="docutils literal notranslate"><span class="pre">cask</span></code> packages with multiple names. Closes
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/26">#26</a>.</p></li>
+<li><p>[bar-plugin] Move BitBar plugin documentation to dedicated page.</p></li>
+<li><p>[mpm] Fix exceptions when commands gives no output. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/29">#29</a> and
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/31">#31</a>.</p></li>
+<li><p>[cask] Fix <code class="docutils literal notranslate"><span class="pre">cask</span> <span class="pre">update</span></code> deprecation warning. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/28">#28</a>.</p></li>
+<li><p>[mpm] Activate unittests in Python 3.6.</p></li>
+<li><p>[mpm] Replace double by single-width characters in <code class="docutils literal notranslate"><span class="pre">mpm</span></code> output to fix
+table misalignment. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/30">#30</a>.</p></li>
+</ul>
+</section>
+<section id="id89">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v2.1.1...v2.2.0">2.2.0 (2016-12-25)</a><a class="headerlink" href="#id89" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Rename <code class="docutils literal notranslate"><span class="pre">supported</span></code> property of managers to <code class="docutils literal notranslate"><span class="pre">fresh</span></code>.</p></li>
+<li><p>[mpm] Allow restriction of package managers to a platform. Closes
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/7">#7</a>.</p></li>
+<li><p>[mpm] Include <code class="docutils literal notranslate"><span class="pre">supported</span></code> property in <code class="docutils literal notranslate"><span class="pre">mpm</span> <span class="pre">managers</span></code> sub-command.</p></li>
+<li><p>[bar-plugin] Add optional submenu rendering for BitBar plugin. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/23">#23</a>.</p></li>
+<li><p>[bar-plugin] Move <code class="docutils literal notranslate"><span class="pre">Upgrade</span> <span class="pre">all</span></code> menu entry to the bottom of each section in
+BitBar plugin.</p></li>
+<li><p>[pip] Allow destructive unittests in Travis CI jobs.</p></li>
+<li><p>[pip] Allow usage of <code class="docutils literal notranslate"><span class="pre">pip2</span></code> and <code class="docutils literal notranslate"><span class="pre">pip3</span></code> managers on Linux.</p></li>
+<li><p>[mpm] Print current platform in debug messages.</p></li>
+<li><p>[mpm] Unittest detection of managers on each platform.</p></li>
+</ul>
+</section>
+<section id="id90">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v2.1.0...v2.1.1">2.1.1 (2016-12-17)</a><a class="headerlink" href="#id90" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[brew,cask] Fix parsing of non-point releases of <code class="docutils literal notranslate"><span class="pre">brew</span></code> and <code class="docutils literal notranslate"><span class="pre">cask</span></code>
+versions. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/15">#15</a>.</p></li>
+<li><p>[bar-plugin] Do not render emoji in BitBar plugin menu entries.</p></li>
+<li><p>[bar-plugin] Do not trim error messages rendered in BitBar plugin.</p></li>
+<li><p>[mpm] Do not strip CLI output. Keep original format.</p></li>
+<li><p>[mpm] Fix full changelog link.</p></li>
+</ul>
+</section>
+<section id="id91">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v2.0.0...v2.1.0">2.1.0 (2016-12-14)</a><a class="headerlink" href="#id91" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[bar-plugin] Adjust rendering of BitBar plugin errors.</p></li>
+<li><p>[mpm] Fix fetching of log level names in Python 3.4+.</p></li>
+<li><p>[mpm] Print CLI output in unittests.</p></li>
+<li><p>[mpm] Print more debug info in unittests when CLI produce tracebacks.</p></li>
+<li><p>[macos] Drop support and unittests on Mac OS X 10.9.</p></li>
+<li><p>[macos] Add new macOS 10.12 target for Travis CI builds.</p></li>
+<li><p>[bar-plugin] Move BitBar plugin within the Python module.</p></li>
+<li><p>[mpm] Show unmet version requirements in table output for <code class="docutils literal notranslate"><span class="pre">mpm</span> <span class="pre">managers</span></code>
+sub-command.</p></li>
+<li><p>[mpm] Fix duplicates in outdated packages by indexing them by ID.</p></li>
+<li><p>[bar-plugin] Unittest simple call of BitBar plugin.</p></li>
+<li><p>[mpm] Always print the raw, un-normalized version of managers, as reported
+by themselves.</p></li>
+<li><p>[mpm] Fetch version of all managers.</p></li>
+<li><p>[mpm] Make manager version mandatory.</p></li>
+<li><p>[mpm] Bump requirement to <code class="docutils literal notranslate"><span class="pre">readme_renderer</span> <span class="pre">&gt;=</span> <span class="pre">16.0</span></code>.</p></li>
+<li><p>[mpm] Always remove ANSI codes from CLI output.</p></li>
+<li><p>[mpm] Fix rendering of unicode logs.</p></li>
+<li><p>[mpm] Bump requirement to <code class="docutils literal notranslate"><span class="pre">click_log</span> <span class="pre">&gt;=</span> <span class="pre">0.1.5</span></code>.</p></li>
+<li><p>[bar-plugin] Force <code class="docutils literal notranslate"><span class="pre">LANG</span></code> environment variable to <code class="docutils literal notranslate"><span class="pre">en_US.UTF-8</span></code>.</p></li>
+<li><p>[bar-plugin,mpm] Share same code path for CLI execution between <code class="docutils literal notranslate"><span class="pre">mpm</span></code> and
+BitBar plugin.</p></li>
+<li><p>[mpm] Add a <code class="docutils literal notranslate"><span class="pre">-d</span></code>/<code class="docutils literal notranslate"><span class="pre">--dry-run</span></code> option to <code class="docutils literal notranslate"><span class="pre">mpm</span> <span class="pre">upgrade</span></code> sub-command.</p></li>
+<li><p>[macos] Remove hard-requirement on <code class="docutils literal notranslate"><span class="pre">macOS</span></code> platform. Refs <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/7">#7</a>.</p></li>
+<li><p>[macos,mpm] Fix upgrade of <code class="docutils literal notranslate"><span class="pre">setuptools</span></code> in <code class="docutils literal notranslate"><span class="pre">macOS</span></code> and Python 3.3 Travis
+jobs.</p></li>
+</ul>
+</section>
+<section id="id92">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...v2.0.0">2.0.0 (2016-12-04)</a><a class="headerlink" href="#id92" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[bar-plugin] Rewrite BitBar plugin based on <code class="docutils literal notranslate"><span class="pre">mpm</span></code>. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/13">#13</a>.</p></li>
+<li><p>[bar-plugin] Render errors with a monospaced font in BitBar plugin.</p></li>
+<li><p>[mpm] Add missing <code class="docutils literal notranslate"><span class="pre">CHANGES.rst</span></code> in <code class="docutils literal notranslate"><span class="pre">MANIFEST.in</span></code>.</p></li>
+<li><p>[mpm] Make wheels generated under Python 2 environnment available for
+Python 3 too.</p></li>
+<li><p>[mpm] Only show latest changes in the long description of the package
+instead of the full changelog.</p></li>
+<li><p>[mpm] Add link to full changelog in package’s long description.</p></li>
+<li><p>[mpm] Bump trove classifiers status out of beta.</p></li>
+<li><p>[mpm] Fix package keywords.</p></li>
+<li><p>[mpm] Bump minimal <code class="docutils literal notranslate"><span class="pre">pycodestyle</span></code> requirement to 2.1.0.</p></li>
+<li><p>[mpm] Always check for package metadata in Travis CI jobs.</p></li>
+<li><p>[mpm] Add <code class="docutils literal notranslate"><span class="pre">upgrade_all_cli</span></code> field for each package manager in JSON output
+of <code class="docutils literal notranslate"><span class="pre">mpm</span> <span class="pre">outdated</span></code> command.</p></li>
+</ul>
+</section>
+<section id="id93">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v1.11.0...v1.12.0">1.12.0 (2016-12-03)</a><a class="headerlink" href="#id93" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Rename <code class="docutils literal notranslate"><span class="pre">mpm</span> <span class="pre">update</span></code> command to <code class="docutils literal notranslate"><span class="pre">mpm</span> <span class="pre">upgrade</span></code>.</p></li>
+<li><p>[mpm] Allow restriction to only one package manager for each sub-command.
+Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/12">#12</a>.</p></li>
+<li><p>[mpm] Differentiate packages names and IDs. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/11">#11</a>.</p></li>
+<li><p>[mpm] Sort list of outdated packages by lower-cased package names first.</p></li>
+<li><p>[mpm] Add <code class="docutils literal notranslate"><span class="pre">upgrade_cli</span></code> field for each outdated packages in JSON output.</p></li>
+<li><p>[bar-plugin,mpm] Allow user to choose rendering of <code class="docutils literal notranslate"><span class="pre">upgrade_cli</span></code> field to
+either one-liner, fragments or BitBar format. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/14">#14</a>.</p></li>
+<li><p>[mpm] Include errors reported by each manager in JSON output of
+<code class="docutils literal notranslate"><span class="pre">mpm</span> <span class="pre">outdated</span></code> command.</p></li>
+<li><p>[cask] Fix parsing of multiple versions of <code class="docutils literal notranslate"><span class="pre">cask</span></code> installed packages.</p></li>
+<li><p>[brew,cask] Fix lexicographical sorting of <code class="docutils literal notranslate"><span class="pre">brew</span></code> and <code class="docutils literal notranslate"><span class="pre">cask</span></code> package
+versions.</p></li>
+<li><p>[mpm] Fix fall-back to iterative full upgrade command.</p></li>
+<li><p>[mpm] Fix computation of outdated packages statistics.</p></li>
+</ul>
+</section>
+<section id="id94">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v1.10.0...v1.11.0">1.11.0 (2016-11-30)</a><a class="headerlink" href="#id94" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Allow rendering of output data into <code class="docutils literal notranslate"><span class="pre">json</span></code>.</p></li>
+<li><p>[mpm] Sort list of outdated packages by lower-cased package IDs.</p></li>
+<li><p>[brew,cask] Bump minimal requirement of <code class="docutils literal notranslate"><span class="pre">brew</span></code> to 1.0.0 and <code class="docutils literal notranslate"><span class="pre">cask</span></code> to
+1.1.0.</p></li>
+<li><p>[cask] Fix fetching of outdated <code class="docutils literal notranslate"><span class="pre">cask</span></code> packages.</p></li>
+<li><p>[cask] Fix upgrade of <code class="docutils literal notranslate"><span class="pre">cask</span></code> packages.</p></li>
+</ul>
+</section>
+<section id="id95">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v1.9.0...v1.10.0">1.10.0 (2016-10-04)</a><a class="headerlink" href="#id95" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add optional <code class="docutils literal notranslate"><span class="pre">version</span></code> property on package manager definitions.</p></li>
+<li><p>[mpm] Allow each package manager to set requirement on its own version.</p></li>
+<li><p>[mas] Let <code class="docutils literal notranslate"><span class="pre">mas</span></code> report its own version.</p></li>
+<li><p>[mas] Bump minimal requirement of <code class="docutils literal notranslate"><span class="pre">mas</span></code> to 1.3.1.</p></li>
+<li><p>[mas] Fetch currently installed version from <code class="docutils literal notranslate"><span class="pre">mas</span></code>. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/4">#4</a>.</p></li>
+<li><p>[mas] Fix parsing of <code class="docutils literal notranslate"><span class="pre">mas</span></code> package versions after the 1.3.1 release.</p></li>
+<li><p>[mpm] Cache lazy properties to speed metadata computation.</p></li>
+<li><p>[mpm] Shows detailed state of package managers in CLI.</p></li>
+</ul>
+</section>
+<section id="id96">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v1.8.0...v1.9.0">1.9.0 (2016-09-23)</a><a class="headerlink" href="#id96" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Fix <code class="docutils literal notranslate"><span class="pre">bumpversion</span></code> configuration to target <code class="docutils literal notranslate"><span class="pre">CHANGES.rst</span></code> instead of
+<code class="docutils literal notranslate"><span class="pre">README.rst</span></code>.</p></li>
+<li><p>[mpm] Render list of detected managers in a table.</p></li>
+<li><p>[macos] Use <code class="docutils literal notranslate"><span class="pre">conda</span></code> in Travis tests to install specific versions of Python
+across the range of macOS workers.</p></li>
+<li><p>[macos] Drop support for PyPy while we search a way to install it on macOS
+with Travis.</p></li>
+<li><p>[mpm] Let <code class="docutils literal notranslate"><span class="pre">mpm</span></code> auto-detect package manager definitions.</p></li>
+<li><p>[mpm] Show package manager IDs in <code class="docutils literal notranslate"><span class="pre">mpm</span> <span class="pre">managers</span></code> CLI output.</p></li>
+<li><p>[mpm] Rename <code class="docutils literal notranslate"><span class="pre">package_manager.7h.py</span></code> BitBar plugin to
+<code class="docutils literal notranslate"><span class="pre">meta_package_manager.7h.py</span></code>.</p></li>
+<li><p>[mpm] Give each package manager its own dedicated short string ID.</p></li>
+<li><p>[mpm] Keep a cache of instantiated package manager.</p></li>
+<li><p>[mpm] Add unittests around package manager definitions.</p></li>
+<li><p>[mpm] Do not display location of inactive managers, even if hard-coded.</p></li>
+<li><p>[mpm] Split-up CLI-producing methods and CLI running methods in
+<code class="docutils literal notranslate"><span class="pre">PackageManager</span></code> base class.</p></li>
+<li><p>[mpm] Add a new <code class="docutils literal notranslate"><span class="pre">update</span></code> CLI sub-command.</p></li>
+<li><p>[mpm] Add a new <code class="docutils literal notranslate"><span class="pre">sync</span></code> CLI sub-command.</p></li>
+<li><p>[mpm] Rename managers’ <code class="docutils literal notranslate"><span class="pre">active</span></code> property to <code class="docutils literal notranslate"><span class="pre">available</span></code>.</p></li>
+<li><p>[mpm] Move all package manager definitions in a dedicated folder.</p></li>
+<li><p>[mpm] Add simple CLI unittests. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/2">#2</a>.</p></li>
+<li><p>[mpm] Implement <code class="docutils literal notranslate"><span class="pre">outdated</span></code> CLI sub-command.</p></li>
+<li><p>[mpm] Allow selection of table rendering.</p></li>
+<li><p>[cask] Fix parsing of unversioned cask packages. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/pull/6">#6</a>.</p></li>
+</ul>
+</section>
+<section id="id97">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...v1.8.0">1.8.0 (2016-08-22)</a><a class="headerlink" href="#id97" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Move the plugin to its own repository.</p></li>
+<li><p>[mpm] Rename <code class="docutils literal notranslate"><span class="pre">package-manager</span></code> project to <code class="docutils literal notranslate"><span class="pre">meta-package-manager</span></code>.</p></li>
+<li><p>[mpm] Add a <code class="docutils literal notranslate"><span class="pre">README.rst</span></code> file.</p></li>
+<li><p>[mpm] License under GPLv2+.</p></li>
+<li><p>[mpm] Add <code class="docutils literal notranslate"><span class="pre">.gitignore</span></code> config.</p></li>
+<li><p>[mpm] Add Python package skeleton. Closes <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/1">#1</a>.</p></li>
+<li><p>[mpm] Split <code class="docutils literal notranslate"><span class="pre">CHANGES.rst</span></code> out of <code class="docutils literal notranslate"><span class="pre">README.rst</span></code>.</p></li>
+<li><p>[mpm] Add Travis CI configuration.</p></li>
+<li><p>[mpm] Use semver-like 3-components version number.</p></li>
+<li><p>[bar-plugin] Copy all BitBar plugin code to Python module.</p></li>
+<li><p>[mpm] Give each supported package manager its own module file.</p></li>
+<li><p>[mpm] Add minimal <code class="docutils literal notranslate"><span class="pre">mpm</span></code> meta CLI to list supported package managers.</p></li>
+<li><p>[mpm] Add default <code class="docutils literal notranslate"><span class="pre">bumpversion</span></code>, <code class="docutils literal notranslate"><span class="pre">isort</span></code>, <code class="docutils literal notranslate"><span class="pre">nosetests</span></code>, <code class="docutils literal notranslate"><span class="pre">coverage</span></code>, <code class="docutils literal notranslate"><span class="pre">pep8</span></code>
+and <code class="docutils literal notranslate"><span class="pre">pylint</span></code> default configuration.</p></li>
+</ul>
+</section>
+<section id="id98">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v1.6.0...v1.7.0">1.7.0 (2016-08-16)</a><a class="headerlink" href="#id98" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[brew] Fix issues with <code class="docutils literal notranslate"><span class="pre">$PATH</span></code> not having Homebrew/Macports.</p></li>
+<li><p>[pip] New workaround for full <code class="docutils literal notranslate"><span class="pre">pip</span></code> upgrade command.</p></li>
+<li><p>[cask] Workaround for Homebrew Cask full upgrade command.</p></li>
+<li><p>[mpm] Grammar fix when 0 packages need to be upgraded.</p></li>
+</ul>
+</section>
+<section id="id99">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v1.5.0...v1.6.0">1.6.0 (2016-08-10)</a><a class="headerlink" href="#id99" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[pip] Work around the lacks of full <code class="docutils literal notranslate"><span class="pre">pip</span></code> upgrade command.</p></li>
+<li><p>[mpm] Fix <code class="docutils literal notranslate"><span class="pre">UnicodeDecodeError</span></code> on parsing CLI output.</p></li>
+</ul>
+</section>
+<section id="id100">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v1.4.0...v1.5.0">1.5.0 (2016-07-25)</a><a class="headerlink" href="#id100" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mas] Add support for <code class="docutils literal notranslate"><span class="pre">mas</span></code>.</p></li>
+<li><p>[mpm] Don’t show all <code class="docutils literal notranslate"><span class="pre">stderr</span></code> as <code class="docutils literal notranslate"><span class="pre">err</span></code> (check return code for error state).</p></li>
+</ul>
+</section>
+<section id="id101">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v1.3.0...v1.4.0">1.4.0 (2016-07-10)</a><a class="headerlink" href="#id101" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Don’t attempt to parse empty lines.</p></li>
+<li><p>[npm] Check for linked <code class="docutils literal notranslate"><span class="pre">npm</span></code> packages.</p></li>
+<li><p>[gem] Support system or Homebrew Ruby Gems (with proper <code class="docutils literal notranslate"><span class="pre">sudo</span></code> setup).</p></li>
+</ul>
+</section>
+<section id="id102">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v1.2.0...v1.3.0">1.3.0 (2016-07-09)</a><a class="headerlink" href="#id102" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Add changelog.</p></li>
+<li><p>[mpm] Add reference to package manager’s issues.</p></li>
+<li><p>[cask] Force Cask update before evaluating available packages.</p></li>
+<li><p>[mpm] Add sample of command output as version parsing can be tricky.</p></li>
+</ul>
+</section>
+<section id="id103">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v1.1.0...v1.2.0">1.2.0 (2016-07-08)</a><a class="headerlink" href="#id103" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[apm,gem,npm,pip] Add support for both <code class="docutils literal notranslate"><span class="pre">pip2</span></code> and <code class="docutils literal notranslate"><span class="pre">pip3</span></code>, Node’s <code class="docutils literal notranslate"><span class="pre">npm</span></code>,
+Atom’s <code class="docutils literal notranslate"><span class="pre">apm</span></code>, Ruby’s <code class="docutils literal notranslate"><span class="pre">gem</span></code>.</p></li>
+<li><p>[cask] Fixup <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">cask</span></code> checking.</p></li>
+<li><p>[mpm] Don’t die on errors.</p></li>
+</ul>
+</section>
+<section id="id104">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/compare/v1.0.0...v1.1.0">1.1.0 (2016-07-07)</a><a class="headerlink" href="#id104" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[pip] Add support for Python’s <code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p></li>
+</ul>
+</section>
+<section id="id105">
+<h2><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/commit/170ce9">1.0.0 (2016-07-05)</a><a class="headerlink" href="#id105" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>[mpm] Initial public release.</p></li>
+<li><p>[brew,cask] Add support for Homebrew and Cask.</p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="history.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-log" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 8.25a.75.75 0 0 1 .75-.75h4a.75.75 0 0 1 0 1.5h-4A.75.75 0 0 1 5 8.25ZM4 10.5A.75.75 0 0 0 4 12h4a.75.75 0 0 0 0-1.5H4Z"></path><path d="M13-.005c1.654 0 3 1.328 3 3 0 .982-.338 1.933-.783 2.818-.443.879-1.028 1.758-1.582 2.588l-.011.017c-.568.853-1.104 1.659-1.501 2.446-.398.789-.623 1.494-.623 2.136a1.5 1.5 0 1 0 2.333-1.248.75.75 0 0 1 .834-1.246A3 3 0 0 1 13 16H3a3 3 0 0 1-3-3c0-1.582.891-3.135 1.777-4.506.209-.322.418-.637.623-.946.473-.709.923-1.386 1.287-2.048H2.51c-.576 0-1.381-.133-1.907-.783A2.68 2.68 0 0 1 0 2.995a3 3 0 0 1 3-3Zm0 1.5a1.5 1.5 0 0 0-1.5 1.5c0 .476.223.834.667 1.132A.75.75 0 0 1 11.75 5.5H5.368c-.467 1.003-1.141 2.015-1.773 2.963-.192.289-.381.571-.558.845C2.13 10.711 1.5 11.916 1.5 13A1.5 1.5 0 0 0 3 14.5h7.401A2.989 2.989 0 0 1 10 13c0-.979.338-1.928.784-2.812.441-.874 1.023-1.748 1.575-2.576l.017-.026c.568-.853 1.103-1.658 1.501-2.448.398-.79.623-1.497.623-2.143 0-.838-.669-1.5-1.5-1.5Zm-10 0a1.5 1.5 0 0 0-1.5 1.5c0 .321.1.569.27.778.097.12.325.227.74.227h7.674A2.737 2.737 0 0 1 10 2.995c0-.546.146-1.059.401-1.5Z"></path></svg> History</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Kevin Deldycke and contributors
+            </div>
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on 2026-02-06</div>
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-diff" viewBox="0 0 16 16" aria-hidden="true"><path d="M8.75 1.75V5H12a.75.75 0 0 1 0 1.5H8.75v3.25a.75.75 0 0 1-1.5 0V6.5H4A.75.75 0 0 1 4 5h3.25V1.75a.75.75 0 0 1 1.5 0ZM4 13h8a.75.75 0 0 1 0 1.5H4A.75.75 0 0 1 4 13Z"></path></svg> Changelog</a><ul>
+<li><a class="reference internal" href="#unreleased">6.1.2 (unreleased)</a></li>
+<li><a class="reference internal" href="#id1">6.1.1 (2026-02-05)</a></li>
+<li><a class="reference internal" href="#id2">6.1.0 (2026-01-18)</a></li>
+<li><a class="reference internal" href="#id3">6.0.2 (2026-01-09)</a></li>
+<li><a class="reference internal" href="#id4">6.0.1 (2026-01-02)</a></li>
+<li><a class="reference internal" href="#id5">6.0.0 (2025-12-08)</a></li>
+<li><a class="reference internal" href="#id6">5.21.0 (2025-05-28)</a></li>
+<li><a class="reference internal" href="#id7">5.20.0 (2024-11-23)</a></li>
+<li><a class="reference internal" href="#id8">5.19.0 (2024-11-13)</a></li>
+<li><a class="reference internal" href="#id9">5.18.0 (2024-08-02)</a></li>
+<li><a class="reference internal" href="#id10">5.17.0 (2024-07-07)</a></li>
+<li><a class="reference internal" href="#id11">5.16.0 (2024-05-24)</a></li>
+<li><a class="reference internal" href="#id12">5.15.0 (2024-02-25)</a></li>
+<li><a class="reference internal" href="#id13">5.14.2 (2024-01-17)</a></li>
+<li><a class="reference internal" href="#id14">5.14.1 (2024-01-16)</a></li>
+<li><a class="reference internal" href="#id15">5.14.0 (2024-01-12)</a></li>
+<li><a class="reference internal" href="#id16">5.13.1 (2023-05-04)</a></li>
+<li><a class="reference internal" href="#id17">5.13.0 (2023-03-31)</a></li>
+<li><a class="reference internal" href="#id18">5.12.0 (2023-02-25)</a></li>
+<li><a class="reference internal" href="#id19">5.11.7 (2023-02-20)</a></li>
+<li><a class="reference internal" href="#id20">5.11.6 (2023-02-12)</a></li>
+<li><a class="reference internal" href="#id21">5.11.5 (2023-02-12)</a></li>
+<li><a class="reference internal" href="#id22">5.11.4 (2023-02-12)</a></li>
+<li><a class="reference internal" href="#id23">5.11.3 (2023-02-12)</a></li>
+<li><a class="reference internal" href="#id24">5.11.2 (2023-02-11)</a></li>
+<li><a class="reference internal" href="#id25">5.11.1 (2023-02-10)</a></li>
+<li><a class="reference internal" href="#id26">5.11.0 (2023-01-29)</a></li>
+<li><a class="reference internal" href="#id27">5.10.2 (2022-12-19)</a></li>
+<li><a class="reference internal" href="#id28">5.10.1 (2022-12-19)</a></li>
+<li><a class="reference internal" href="#id29">5.10.0 (2022-12-19)</a></li>
+<li><a class="reference internal" href="#id30">5.9.0 (2022-11-17)</a></li>
+<li><a class="reference internal" href="#id31">5.8.0 (2022-10-05)</a></li>
+<li><a class="reference internal" href="#id32">5.7.0 (2022-09-27)</a></li>
+<li><a class="reference internal" href="#id33">5.6.2 (2022-09-27)</a></li>
+<li><a class="reference internal" href="#id34">5.6.1 (2022-09-26)</a></li>
+<li><a class="reference internal" href="#id35">5.6.0 (2022-09-26)</a></li>
+<li><a class="reference internal" href="#id36">5.5.1 (2022-07-08)</a></li>
+<li><a class="reference internal" href="#id37">5.5.0 (2022-07-08)</a></li>
+<li><a class="reference internal" href="#id38">5.4.0 (2022-06-28)</a></li>
+<li><a class="reference internal" href="#id39">5.3.0 (2022-06-25)</a></li>
+<li><a class="reference internal" href="#id40">5.2.0 (2022-06-16)</a></li>
+<li><a class="reference internal" href="#id41">5.1.0 (2022-05-15)</a></li>
+<li><a class="reference internal" href="#id42">5.0.1 (2022-04-28)</a></li>
+<li><a class="reference internal" href="#id43">5.0.0 (2022-04-25)</a></li>
+<li><a class="reference internal" href="#id44">4.13.1 (2022-04-17)</a></li>
+<li><a class="reference internal" href="#id45">4.13.0 (2022-04-16)</a></li>
+<li><a class="reference internal" href="#id46">4.12.1 (2022-04-05)</a></li>
+<li><a class="reference internal" href="#id47">4.12.0 (2022-04-04)</a></li>
+<li><a class="reference internal" href="#id48">4.11.0 (2022-04-03)</a></li>
+<li><a class="reference internal" href="#id49">4.10.0 (2022-03-31)</a></li>
+<li><a class="reference internal" href="#id50">4.9.10 (2022-03-09)</a></li>
+<li><a class="reference internal" href="#id51">4.9.9 (2022-01-15)</a></li>
+<li><a class="reference internal" href="#id52">4.9.8 (2022-01-15)</a></li>
+<li><a class="reference internal" href="#id53">4.9.7 (2022-01-11)</a></li>
+<li><a class="reference internal" href="#id54">4.9.6 (2022-01-11)</a></li>
+<li><a class="reference internal" href="#id55">4.9.5 (2022-01-11)</a></li>
+<li><a class="reference internal" href="#id56">4.9.4 (2022-01-04)</a></li>
+<li><a class="reference internal" href="#id57">4.9.3 (2022-01-04)</a></li>
+<li><a class="reference internal" href="#id58">4.9.2 (2022-01-04)</a></li>
+<li><a class="reference internal" href="#id59">4.9.1 (2022-01-04)</a></li>
+<li><a class="reference internal" href="#id60">4.9.0 (2022-01-03)</a></li>
+<li><a class="reference internal" href="#id61">4.8.0 (2021-11-01)</a></li>
+<li><a class="reference internal" href="#id62">4.7.0 (2021-10-13)</a></li>
+<li><a class="reference internal" href="#id63">4.6.0 (2021-10-04)</a></li>
+<li><a class="reference internal" href="#id64">4.5.0 (2021-09-30)</a></li>
+<li><a class="reference internal" href="#id65">4.4.0 (2021-09-27)</a></li>
+<li><a class="reference internal" href="#id66">4.3.0 (2021-09-25)</a></li>
+<li><a class="reference internal" href="#id67">4.2.0 (2021-09-21)</a></li>
+<li><a class="reference internal" href="#id68">4.1.0 (2021-05-01)</a></li>
+<li><a class="reference internal" href="#id69">4.0.0 (2021-04-27)</a></li>
+<li><a class="reference internal" href="#id70">3.6.0 (2021-01-03)</a></li>
+<li><a class="reference internal" href="#id71">3.5.2 (2020-10-29)</a></li>
+<li><a class="reference internal" href="#id72">3.5.1 (2020-10-03)</a></li>
+<li><a class="reference internal" href="#id73">3.5.0 (2020-09-20)</a></li>
+<li><a class="reference internal" href="#id74">3.4.2 (2020-09-13)</a></li>
+<li><a class="reference internal" href="#id75">3.4.1 (2020-09-02)</a></li>
+<li><a class="reference internal" href="#id76">3.4.0 (2020-08-18)</a></li>
+<li><a class="reference internal" href="#id77">3.3.0 (2020-06-23)</a></li>
+<li><a class="reference internal" href="#id78">3.2.0 (2020-05-31)</a></li>
+<li><a class="reference internal" href="#id79">3.1.0 (2020-04-02)</a></li>
+<li><a class="reference internal" href="#id80">3.0.0 (2020-03-25)</a></li>
+<li><a class="reference internal" href="#id81">2.9.0 (2020-03-18)</a></li>
+<li><a class="reference internal" href="#id82">2.8.0 (2019-01-03)</a></li>
+<li><a class="reference internal" href="#id83">2.7.0 (2018-04-02)</a></li>
+<li><a class="reference internal" href="#id84">2.6.1 (2017-11-05)</a></li>
+<li><a class="reference internal" href="#id85">2.6.0 (2017-09-11)</a></li>
+<li><a class="reference internal" href="#id86">2.5.0 (2017-03-01)</a></li>
+<li><a class="reference internal" href="#id87">2.4.0 (2017-01-28)</a></li>
+<li><a class="reference internal" href="#id88">2.3.0 (2017-01-15)</a></li>
+<li><a class="reference internal" href="#id89">2.2.0 (2016-12-25)</a></li>
+<li><a class="reference internal" href="#id90">2.1.1 (2016-12-17)</a></li>
+<li><a class="reference internal" href="#id91">2.1.0 (2016-12-14)</a></li>
+<li><a class="reference internal" href="#id92">2.0.0 (2016-12-04)</a></li>
+<li><a class="reference internal" href="#id93">1.12.0 (2016-12-03)</a></li>
+<li><a class="reference internal" href="#id94">1.11.0 (2016-11-30)</a></li>
+<li><a class="reference internal" href="#id95">1.10.0 (2016-10-04)</a></li>
+<li><a class="reference internal" href="#id96">1.9.0 (2016-09-23)</a></li>
+<li><a class="reference internal" href="#id97">1.8.0 (2016-08-22)</a></li>
+<li><a class="reference internal" href="#id98">1.7.0 (2016-08-16)</a></li>
+<li><a class="reference internal" href="#id99">1.6.0 (2016-08-10)</a></li>
+<li><a class="reference internal" href="#id100">1.5.0 (2016-07-25)</a></li>
+<li><a class="reference internal" href="#id101">1.4.0 (2016-07-10)</a></li>
+<li><a class="reference internal" href="#id102">1.3.0 (2016-07-09)</a></li>
+<li><a class="reference internal" href="#id103">1.2.0 (2016-07-08)</a></li>
+<li><a class="reference internal" href="#id104">1.1.0 (2016-07-07)</a></li>
+<li><a class="reference internal" href="#id105">1.0.0 (2016-07-05)</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=f0c0c503"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>

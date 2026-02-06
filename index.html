@@ -1,0 +1,1683 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Features" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="index.html" />
+<meta property="og:site_name" content="Meta Package Manager" />
+<meta property="og:description" content="Last release Python versions Downloads Unittests status Coverage status Documentation status DOI What is Meta Package Manager? provides the mpm CLI, a wrapper around all package managers, mpm is li..." />
+<meta name="description" content="Last release Python versions Downloads Unittests status Coverage status Documentation status DOI What is Meta Package Manager? provides the mpm CLI, a wrapper around all package managers, mpm is li..." />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Installation" href="install.html">
+        <link rel="prefetch" href="_static/logo-square.svg" as="image">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>Meta Package Manager</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80449d92" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     Meta Package Manager works fine, but is <em>maintained by only one person</em> 😶‍🌫️.<br/>You can help if you <strong><a class='reference external' href='https://github.com/sponsors/kdeldycke'>purchase business support 🤝</a></strong> or <strong><a class='reference external' href='https://github.com/sponsors/kdeldycke'>sponsor the project 🫶</a></strong>. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="#"><div class="brand">Meta Package Manager</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/logo-square.svg" alt="Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-download" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path><path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path></svg> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usecase.html">Use-cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-parameters.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-command-palette" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="m6.354 8.04-4.773 4.773a.75.75 0 1 0 1.061 1.06L7.945 8.57a.75.75 0 0 0 0-1.06L2.642 2.206a.75.75 0 0 0-1.06 1.061L6.353 8.04ZM8.75 11.5a.75.75 0 0 0 0 1.5h5.5a.75.75 0 0 0 0-1.5h-5.5Z"></path></svg> CLI parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-sliders" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M15 2.75a.75.75 0 0 1-.75.75h-4a.75.75 0 0 1 0-1.5h4a.75.75 0 0 1 .75.75Zm-8.5.75v1.25a.75.75 0 0 0 1.5 0v-4a.75.75 0 0 0-1.5 0V2H1.75a.75.75 0 0 0 0 1.5H6.5Zm1.25 5.25a.75.75 0 0 0 0-1.5h-6a.75.75 0 0 0 0 1.5h6ZM15 8a.75.75 0 0 1-.75.75H11.5V10a.75.75 0 1 1-1.5 0V6a.75.75 0 0 1 1.5 0v1.25h2.75A.75.75 0 0 1 15 8Zm-9 5.25v-2a.75.75 0 0 0-1.5 0v1.25H1.75a.75.75 0 0 0 0 1.5H4.5v1.25a.75.75 0 0 0 1.5 0v-2Zm9 0a.75.75 0 0 1-.75.75h-6a.75.75 0 0 1 0-1.5h6a.75.75 0 0 1 .75.75Z"></path></svg> Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bar-plugin.html">Xbar and SwiftBar plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="falsehoods.html">Falsehoods programmers believe about package managers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark.html">Benchmark</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-git-pull-request" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"></path></svg> Contribution guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="meta_package_manager.html">API</a><input aria-label="Toggle navigation of API" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="meta_package_manager.managers.html">meta_package_manager.managers package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">tests package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="py-modindex.html">Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-diff" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M8.75 1.75V5H12a.75.75 0 0 1 0 1.5H8.75v3.25a.75.75 0 0 1-1.5 0V6.5H4A.75.75 0 0 1 4 5h3.25V1.75a.75.75 0 0 1 1.5 0ZM4 13h8a.75.75 0 0 1 0 1.5H4A.75.75 0 0 1 4 13Z"></path></svg> Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-log" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M5 8.25a.75.75 0 0 1 .75-.75h4a.75.75 0 0 1 0 1.5h-4A.75.75 0 0 1 5 8.25ZM4 10.5A.75.75 0 0 0 4 12h4a.75.75 0 0 0 0-1.5H4Z"></path><path d="M13-.005c1.654 0 3 1.328 3 3 0 .982-.338 1.933-.783 2.818-.443.879-1.028 1.758-1.582 2.588l-.011.017c-.568.853-1.104 1.659-1.501 2.446-.398.789-.623 1.494-.623 2.136a1.5 1.5 0 1 0 2.333-1.248.75.75 0 0 1 .834-1.246A3 3 0 0 1 13 16H3a3 3 0 0 1-3-3c0-1.582.891-3.135 1.777-4.506.209-.322.418-.637.623-.946.473-.709.923-1.386 1.287-2.048H2.51c-.576 0-1.381-.133-1.907-.783A2.68 2.68 0 0 1 0 2.995a3 3 0 0 1 3-3Zm0 1.5a1.5 1.5 0 0 0-1.5 1.5c0 .476.223.834.667 1.132A.75.75 0 0 1 11.75 5.5H5.368c-.467 1.003-1.141 2.015-1.773 2.963-.192.289-.381.571-.558.845C2.13 10.711 1.5 11.916 1.5 13A1.5 1.5 0 0 0 3 14.5h7.401A2.989 2.989 0 0 1 10 13c0-.979.338-1.928.784-2.812.441-.874 1.023-1.748 1.575-2.576l.017-.026c.568-.853 1.103-1.658 1.501-2.448.398-.79.623-1.497.623-2.143 0-.838-.669-1.5-1.5-1.5Zm-10 0a1.5 1.5 0 0 0-1.5 1.5c0 .321.1.569.27.778.097.12.325.227.74.227h7.674A2.737 2.737 0 0 1 10 2.995c0-.546.146-1.059.401-1.5Z"></path></svg> History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="todolist.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-checklist" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M2.5 1.75v11.5c0 .138.112.25.25.25h3.17a.75.75 0 0 1 0 1.5H2.75A1.75 1.75 0 0 1 1 13.25V1.75C1 .784 1.784 0 2.75 0h8.5C12.216 0 13 .784 13 1.75v7.736a.75.75 0 0 1-1.5 0V1.75a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25Zm13.274 9.537v-.001l-4.557 4.45a.75.75 0 0 1-1.055-.008l-1.943-1.95a.75.75 0 0 1 1.062-1.058l1.419 1.425 4.026-3.932a.75.75 0 1 1 1.048 1.074ZM4.75 4h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM4 7.75A.75.75 0 0 1 4.75 7h2a.75.75 0 0 1 0 1.5h-2A.75.75 0 0 1 4 7.75Z"></path></svg> Todo-list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code-of-conduct.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-code-of-conduct" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M8.048 2.241c.964-.709 2.079-1.238 3.325-1.241a4.616 4.616 0 0 1 3.282 1.355c.41.408.757.86.996 1.428.238.568.348 1.206.347 1.968 0 2.193-1.505 4.254-3.081 5.862-1.496 1.526-3.213 2.796-4.249 3.563l-.22.163a.749.749 0 0 1-.895 0l-.221-.163c-1.036-.767-2.753-2.037-4.249-3.563C1.51 10.008.007 7.952.002 5.762a4.614 4.614 0 0 1 1.353-3.407C3.123.585 6.223.537 8.048 2.24Zm-1.153.983c-1.25-1.033-3.321-.967-4.48.191a3.115 3.115 0 0 0-.913 2.335c0 1.556 1.109 3.24 2.652 4.813C5.463 11.898 6.96 13.032 8 13.805c.353-.262.758-.565 1.191-.905l-1.326-1.223a.75.75 0 0 1 1.018-1.102l1.48 1.366c.328-.281.659-.577.984-.887L9.99 9.802a.75.75 0 1 1 1.019-1.103l1.384 1.28c.295-.329.566-.661.81-.995L12.92 8.7l-1.167-1.168c-.674-.671-1.78-.664-2.474.03-.268.269-.538.537-.802.797-.893.882-2.319.843-3.185-.032-.346-.35-.693-.697-1.043-1.047a.75.75 0 0 1-.04-1.016c.162-.191.336-.401.52-.623.62-.748 1.356-1.637 2.166-2.417Zm7.112 4.442c.313-.65.491-1.293.491-1.916v-.001c0-.614-.088-1.045-.23-1.385-.143-.339-.357-.633-.673-.949a3.111 3.111 0 0 0-2.218-.915c-1.092.003-2.165.627-3.226 1.602-.823.755-1.554 1.637-2.228 2.45l-.127.154.562.566a.755.755 0 0 0 1.066.02l.794-.79c1.258-1.258 3.312-1.31 4.594-.032.396.394.792.791 1.173 1.173Z"></path></svg> Code of conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html"><svg aria-hidden="true" class="sd-octicon sd-octicon-law" height="1.0em" version="1.1" viewbox="0 0 16 16" width="1.0em"><path d="M8.75.75V2h.985c.304 0 .603.08.867.231l1.29.736c.038.022.08.033.124.033h2.234a.75.75 0 0 1 0 1.5h-.427l2.111 4.692a.75.75 0 0 1-.154.838l-.53-.53.529.531-.001.002-.002.002-.006.006-.006.005-.01.01-.045.04c-.21.176-.441.327-.686.45C14.556 10.78 13.88 11 13 11a4.498 4.498 0 0 1-2.023-.454 3.544 3.544 0 0 1-.686-.45l-.045-.04-.016-.015-.006-.006-.004-.004v-.001a.75.75 0 0 1-.154-.838L12.178 4.5h-.162c-.305 0-.604-.079-.868-.231l-1.29-.736a.245.245 0 0 0-.124-.033H8.75V13h2.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5h2.5V3.5h-.984a.245.245 0 0 0-.124.033l-1.289.737c-.265.15-.564.23-.869.23h-.162l2.112 4.692a.75.75 0 0 1-.154.838l-.53-.53.529.531-.001.002-.002.002-.006.006-.016.015-.045.04c-.21.176-.441.327-.686.45C4.556 10.78 3.88 11 3 11a4.498 4.498 0 0 1-2.023-.454 3.544 3.544 0 0 1-.686-.45l-.045-.04-.016-.015-.006-.006-.004-.004v-.001a.75.75 0 0 1-.154-.838L2.178 4.5H1.75a.75.75 0 0 1 0-1.5h2.234a.249.249 0 0 0 .125-.033l1.288-.737c.265-.15.564-.23.869-.23h.984V.75a.75.75 0 0 1 1.5 0Zm2.945 8.477c.285.135.718.273 1.305.273s1.02-.138 1.305-.273L13 6.327Zm-10 0c.285.135.718.273 1.305.273s1.02-.138 1.305-.273L3 6.327Z"></path></svg> License</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager">GitHub repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/sponsors/kdeldycke">Funding</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/kdeldycke/meta-package-manager/blob/main/docs/index.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/kdeldycke/meta-package-manager/edit/main/docs/index.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <p align="center">
+  <a href="https://github.com/kdeldycke/meta-package-manager/">
+    <img src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/logo-banner.svg" alt="Meta Package Manager">
+  </a>
+</p>
+<a href="https://xkcd.com/1654/" alt="XKCD #1654: Universal Install Script">
+<img align="right" width="20%" height="20%" src="http://imgs.xkcd.com/comics/universal_install_script.png"/>
+</a>
+<p><a class="reference external" href="https://pypi.org/project/meta-package-manager"><img alt="Last release" src="https://img.shields.io/pypi/v/meta-package-manager.svg" /></a>
+<a class="reference external" href="https://pypi.org/project/meta-package-manager"><img alt="Python versions" src="https://img.shields.io/pypi/pyversions/meta-package-manager.svg" /></a>
+<a class="reference external" href="https://pepy.tech/projects/meta_package_manager"><img alt="Downloads" src="https://static.pepy.tech/badge/meta_package_manager/month" /></a>
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Amain"><img alt="Unittests status" src="https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=main" /></a>
+<a class="reference external" href="https://app.codecov.io/gh/kdeldycke/meta-package-manager"><img alt="Coverage status" src="https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/badge.svg" /></a>
+<a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/actions/workflows/docs.yaml?query=branch%3Amain"><img alt="Documentation status" src="https://github.com/kdeldycke/meta-package-manager/actions/workflows/docs.yaml/badge.svg?branch=main" /></a>
+<a class="reference external" href="https://doi.org/10.5281/zenodo.6809571"><img alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.6809571.svg" /></a></p>
+<p><strong>What is Meta Package Manager?</strong></p>
+<ul class="simple">
+<li><p>provides the <code class="docutils literal notranslate"><span class="pre">mpm</span></code> CLI, a wrapper around all package managers</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mpm</span></code> is like <a class="reference external" href="https://github.com/yt-dlp/yt-dlp"><code class="docutils literal notranslate"><span class="pre">yt-dlp</span></code></a>, but for package
+managers instead of videos</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mpm</span></code> solves <a class="reference external" href="https://xkcd.com/1654/">XKCD #1654 - <em>Universal Install Script</em></a></p></li>
+</ul>
+<hr class="docutils" />
+<section id="features">
+<h1>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h1>
+<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-outdated-cli.png"/>
+<img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.png"/>
+<ul class="simple">
+<li><p>Inventory and list all package managers available on the system.</p></li>
+<li><p>Supports macOS, Linux and Windows.</p></li>
+<li><p><a class="reference internal" href="#executables"><span class="xref myst">Standalone executables</span></a> for Linux, macOS and Windows.</p></li>
+<li><p>List installed packages.</p></li>
+<li><p>List duplicate installed packages.</p></li>
+<li><p>Search for packages.</p></li>
+<li><p>Install a package.</p></li>
+<li><p>Remove a package.</p></li>
+<li><p>List outdated packages.</p></li>
+<li><p>Sync local package infos.</p></li>
+<li><p>Upgrade all outdated packages.</p></li>
+<li><p>Backup list of installed packages to TOML file.</p></li>
+<li><p>Restore/install list of packages from TOML files.</p></li>
+<li><p>Software Bill of Materials: export installed packages to <a class="reference external" href="https://spdx.dev">SPDX</a> and <a class="reference external" href="https://cyclonedx.org">CycloneDX</a> SBOM files.</p></li>
+<li><p>Pin-point commands to a subset of package managers (include/exclude selectors).</p></li>
+<li><p>Support plain, versioned and <a class="reference external" href="https://github.com/package-url/purl-spec">purl</a> package specifiers.</p></li>
+<li><p>Export output to JSON or print user-friendly tables.</p></li>
+<li><p><a class="reference internal" href="#executables"><span class="xref myst">Standalone executables</span></a> for Linux, macOS and Windows.</p></li>
+<li><p>Shell auto-completion for Bash, Zsh and Fish.</p></li>
+<li><p>Provides a <a class="reference external" href="https://kdeldycke.github.io/meta-package-manager/bar-plugin.html">Xbar/SwiftBar plugin</a> for
+friendly macOS integration.</p></li>
+<li><p>Because <code class="docutils literal notranslate"><span class="pre">mpm</span></code> try to wrap all other package managers, it became another pathological case of <a class="reference external" href="https://xkcd.com/927/">XKCD #927: Standards</a></p></li>
+</ul>
+</section>
+<section id="supported-package-managers">
+<h1>Supported package managers<a class="headerlink" href="#supported-package-managers" title="Link to this heading">¶</a></h1>
+<p>One CLI to rule them all:</p>
+<!-- managers-sankey-start -->
+<pre  class="mermaid">
+        ---
+config:
+  sankey:
+    height: 400
+    showValues: false
+    width: 800
+
+---
+sankey-beta
+
+Meta Package Manager,apm,1
+Meta Package Manager,apt,1
+Meta Package Manager,apt-mint,1
+Meta Package Manager,brew,1
+Meta Package Manager,cargo,1
+Meta Package Manager,cask,1
+Meta Package Manager,choco,1
+Meta Package Manager,composer,1
+Meta Package Manager,dnf,1
+Meta Package Manager,dnf5,1
+Meta Package Manager,emerge,1
+Meta Package Manager,eopkg,1
+Meta Package Manager,flatpak,1
+Meta Package Manager,fwupd,1
+Meta Package Manager,gem,1
+Meta Package Manager,mas,1
+Meta Package Manager,npm,1
+Meta Package Manager,opkg,1
+Meta Package Manager,pacaur,1
+Meta Package Manager,pacman,1
+Meta Package Manager,paru,1
+Meta Package Manager,pip,1
+Meta Package Manager,pipx,1
+Meta Package Manager,pkg,1
+Meta Package Manager,scoop,1
+Meta Package Manager,snap,1
+Meta Package Manager,steamcmd,1
+Meta Package Manager,uv,1
+Meta Package Manager,uvx,1
+Meta Package Manager,vscode,1
+Meta Package Manager,vscodium,1
+Meta Package Manager,winget,1
+Meta Package Manager,yarn,1
+Meta Package Manager,yay,1
+Meta Package Manager,yum,1
+Meta Package Manager,zypper,1
+    </pre><!-- managers-sankey-end -->
+</section>
+<section id="metadata-and-operations">
+<h1>Metadata and operations<a class="headerlink" href="#metadata-and-operations" title="Link to this heading">¶</a></h1>
+<!-- operation-matrix-start -->
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head text-left"><p>Package manager</p></th>
+<th class="head text-left"><p>Min. version</p></th>
+<th class="head text-center"><p>BSD<a class="footnote-reference brackets" href="#bsd" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></th>
+<th class="head text-center"><p>Linux<a class="footnote-reference brackets" href="#linux" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></th>
+<th class="head text-center"><p>macOS</p></th>
+<th class="head text-center"><p>Unix<a class="footnote-reference brackets" href="#unix" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></th>
+<th class="head text-center"><p>Windows</p></th>
+<th class="head text-center"><p><code class="docutils literal notranslate"><span class="pre">installed</span></code></p></th>
+<th class="head text-center"><p><code class="docutils literal notranslate"><span class="pre">outdated</span></code></p></th>
+<th class="head text-center"><p><code class="docutils literal notranslate"><span class="pre">search</span></code></p></th>
+<th class="head text-center"><p><code class="docutils literal notranslate"><span class="pre">install</span></code></p></th>
+<th class="head text-center"><p><code class="docutils literal notranslate"><span class="pre">upgrade</span></code></p></th>
+<th class="head text-center"><p><code class="docutils literal notranslate"><span class="pre">upgrade_all</span></code></p></th>
+<th class="head text-center"><p><code class="docutils literal notranslate"><span class="pre">remove</span></code></p></th>
+<th class="head text-center"><p><code class="docutils literal notranslate"><span class="pre">sync</span></code></p></th>
+<th class="head text-center"><p><code class="docutils literal notranslate"><span class="pre">cleanup</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://atom.io/packages"><code class="docutils literal notranslate"><span class="pre">apm</span></code></a> <a class="reference external" href="https://github.blog/2022-06-08-sunsetting-atom/">⚠️</a></p></td>
+<td class="text-left"><p>1.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://wiki.debian.org/AptCLI"><code class="docutils literal notranslate"><span class="pre">apt</span></code></a></p></td>
+<td class="text-left"><p>1.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/52"><code class="docutils literal notranslate"><span class="pre">apt-mint</span></code></a></p></td>
+<td class="text-left"><p>1.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://brew.sh"><code class="docutils literal notranslate"><span class="pre">brew</span></code></a></p></td>
+<td class="text-left"><p>2.7.0</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://doc.rust-lang.org/cargo/"><code class="docutils literal notranslate"><span class="pre">cargo</span></code></a></p></td>
+<td class="text-left"><p>1.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://github.com/Homebrew/homebrew-cask"><code class="docutils literal notranslate"><span class="pre">cask</span></code></a></p></td>
+<td class="text-left"><p>2.7.0</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://chocolatey.org"><code class="docutils literal notranslate"><span class="pre">choco</span></code></a></p></td>
+<td class="text-left"><p>2.0.0</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://getcomposer.org"><code class="docutils literal notranslate"><span class="pre">composer</span></code></a></p></td>
+<td class="text-left"><p>1.4.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://github.com/rpm-software-management/dnf"><code class="docutils literal notranslate"><span class="pre">dnf</span></code></a></p></td>
+<td class="text-left"><p>4.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://github.com/rpm-software-management/dnf5"><code class="docutils literal notranslate"><span class="pre">dnf5</span></code></a></p></td>
+<td class="text-left"><p>5.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://wiki.gentoo.org/wiki/Portage#emerge"><code class="docutils literal notranslate"><span class="pre">emerge</span></code></a></p></td>
+<td class="text-left"><p>3.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://github.com/getsolus/eopkg/"><code class="docutils literal notranslate"><span class="pre">eopkg</span></code></a></p></td>
+<td class="text-left"><p>3.2.0</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://flatpak.org"><code class="docutils literal notranslate"><span class="pre">flatpak</span></code></a></p></td>
+<td class="text-left"><p>1.2.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://fwupd.org"><code class="docutils literal notranslate"><span class="pre">fwupd</span></code></a></p></td>
+<td class="text-left"><p>1.9.5</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://rubygems.org"><code class="docutils literal notranslate"><span class="pre">gem</span></code></a></p></td>
+<td class="text-left"><p>2.5.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://github.com/argon/mas"><code class="docutils literal notranslate"><span class="pre">mas</span></code></a></p></td>
+<td class="text-left"><p>1.8.7</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://www.npmjs.com"><code class="docutils literal notranslate"><span class="pre">npm</span></code></a></p></td>
+<td class="text-left"><p>4.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://git.yoctoproject.org/cgit/cgit.cgi/opkg/"><code class="docutils literal notranslate"><span class="pre">opkg</span></code></a></p></td>
+<td class="text-left"><p>0.2.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://github.com/E5ten/pacaur"><code class="docutils literal notranslate"><span class="pre">pacaur</span></code></a></p></td>
+<td class="text-left"><p>4.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://wiki.archlinux.org/title/pacman"><code class="docutils literal notranslate"><span class="pre">pacman</span></code></a></p></td>
+<td class="text-left"><p>5.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://github.com/Morganamilo/paru"><code class="docutils literal notranslate"><span class="pre">paru</span></code></a></p></td>
+<td class="text-left"><p>1.9.3</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://pip.pypa.io"><code class="docutils literal notranslate"><span class="pre">pip</span></code></a></p></td>
+<td class="text-left"><p>10.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://pipx.pypa.io"><code class="docutils literal notranslate"><span class="pre">pipx</span></code></a></p></td>
+<td class="text-left"><p>1.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://github.com/freebsd/pkg"><code class="docutils literal notranslate"><span class="pre">pkg</span></code></a></p></td>
+<td class="text-left"><p>1.11</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://scoop.sh"><code class="docutils literal notranslate"><span class="pre">scoop</span></code></a></p></td>
+<td class="text-left"><p>0.2.4</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://snapcraft.io"><code class="docutils literal notranslate"><span class="pre">snap</span></code></a></p></td>
+<td class="text-left"><p>2.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://developer.valvesoftware.com/wiki/SteamCMD"><code class="docutils literal notranslate"><span class="pre">steamcmd</span></code></a></p></td>
+<td class="text-left"><p>None</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://docs.astral.sh/uv"><code class="docutils literal notranslate"><span class="pre">uv</span></code></a></p></td>
+<td class="text-left"><p>0.5.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://docs.astral.sh/uv/guides/tools/"><code class="docutils literal notranslate"><span class="pre">uvx</span></code></a></p></td>
+<td class="text-left"><p>0.5.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://code.visualstudio.com"><code class="docutils literal notranslate"><span class="pre">vscode</span></code></a></p></td>
+<td class="text-left"><p>1.60.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://vscodium.com"><code class="docutils literal notranslate"><span class="pre">vscodium</span></code></a></p></td>
+<td class="text-left"><p>1.60.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://github.com/microsoft/winget-cli"><code class="docutils literal notranslate"><span class="pre">winget</span></code></a></p></td>
+<td class="text-left"><p>1.7</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="https://yarnpkg.com"><code class="docutils literal notranslate"><span class="pre">yarn</span></code></a></p></td>
+<td class="text-left"><p>1.20.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p>🍎</p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p>🪟</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://github.com/Jguer/yay"><code class="docutils literal notranslate"><span class="pre">yay</span></code></a></p></td>
+<td class="text-left"><p>11.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p><a class="reference external" href="http://yum.baseurl.org"><code class="docutils literal notranslate"><span class="pre">yum</span></code></a></p></td>
+<td class="text-left"><p>4.0.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p><a class="reference external" href="https://en.opensuse.org/Portal:Zypper"><code class="docutils literal notranslate"><span class="pre">zypper</span></code></a></p></td>
+<td class="text-left"><p>1.14.0</p></td>
+<td class="text-center"><p>🅱️</p></td>
+<td class="text-center"><p>🐧</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>⨂</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p>✓</p></td>
+<td class="text-center"><p>✓</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- operation-matrix-end -->
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If your favorite manager is missing or does not support an operation, you can influence its implementation: <a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/issues/new?assignees=&amp;amp;labels=%F0%9F%8E%81+feature+request&amp;amp;template=new-package-manager.yaml">open a ticket to document its output</a> or <a class="reference external" href="https://kdeldycke.github.io/meta-package-manager/contributing.html">read the contribution guide</a> and submit a pull request.</p>
+<p>You can help if you <a class="reference external" href="https://github.com/sponsors/kdeldycke">purchase business support 🤝</a> or <a class="reference external" href="https://github.com/sponsors/kdeldycke">sponsor the project 🫶</a>.</p>
+</div>
+</section>
+<section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h1>
+<p>All <a class="reference external" href="https://kdeldycke.github.io/meta-package-manager/install.html">installation methods</a> are available in the documentation. Below are the most popular ones:</p>
+<section id="try-it-now">
+<h2>Try it now<a class="headerlink" href="#try-it-now" title="Link to this heading">¶</a></h2>
+<p>Thanks to <a class="reference external" href="https://docs.astral.sh/uv/getting-started/installation/"><code class="docutils literal notranslate"><span class="pre">uv</span></code></a>, you can run <code class="docutils literal notranslate"><span class="pre">mpm</span></code> on any platform in one command, without installation or venv:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uvx<span class="w"> </span>--from<span class="w"> </span>meta-package-manager<span class="w"> </span>--<span class="w"> </span>mpm
+</pre></div>
+</div>
+</section>
+<section id="macos">
+<h2>macOS<a class="headerlink" href="#macos" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">mpm</span></code> is part of the official <a class="reference external" href="https://brew.sh">Homebrew</a> default tap, so you can install it with:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>brew<span class="w"> </span>install<span class="w"> </span>meta-package-manager
+</pre></div>
+</div>
+</section>
+<section id="windows">
+<h2>Windows<a class="headerlink" href="#windows" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">mpm</span></code> is available in the <code class="docutils literal notranslate"><span class="pre">main</span></code> repository of <a class="reference external" href="https://scoop.sh">Scoop</a>, so you just need to:</p>
+<div class="highlight-pwsh-session notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt; </span><span class="n">scoop</span> <span class="n">install</span> <span class="n">main</span><span class="p">/</span><span class="n">meta-package-manager</span>
+</pre></div>
+</div>
+</section>
+<section id="executables">
+<h2>Executables<a class="headerlink" href="#executables" title="Link to this heading">¶</a></h2>
+<p>Standalone binaries of <code class="docutils literal notranslate"><span class="pre">mpm</span></code> latest version are available as direct downloads for several platforms and architectures:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Platform</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">arm64</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">x86_64</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Linux</strong></p></td>
+<td><p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-arm64.bin">Download <code class="docutils literal notranslate"><span class="pre">mpm-linux-arm64.bin</span></code></a></p></td>
+<td><p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin">Download <code class="docutils literal notranslate"><span class="pre">mpm-linux-x64.bin</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>macOS</strong></p></td>
+<td><p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-arm64.bin">Download <code class="docutils literal notranslate"><span class="pre">mpm-macos-arm64.bin</span></code></a></p></td>
+<td><p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin">Download <code class="docutils literal notranslate"><span class="pre">mpm-macos-x64.bin</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Windows</strong></p></td>
+<td><p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-arm64.exe">Download <code class="docutils literal notranslate"><span class="pre">mpm-windows-arm64.exe</span></code></a></p></td>
+<td><p><a class="reference external" href="https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe">Download <code class="docutils literal notranslate"><span class="pre">mpm-windows-x64.exe</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="quickstart">
+<h1>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading">¶</a></h1>
+<section id="list-installed-packages">
+<h2>List installed packages<a class="headerlink" href="#list-installed-packages" title="Link to this heading">¶</a></h2>
+<p>List all packages installed on current system:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>installed
+<span class="go">╭─────────────────────────────┬─────────────────────────────┬─────────┬────────────────────╮</span>
+<span class="go">│ Package name                │ ID                          │ Manager │ Installed version  │</span>
+<span class="go">├─────────────────────────────┼─────────────────────────────┼─────────┼────────────────────┤</span>
+<span class="go">│ github                      │ github                      │ apm     │ 0.36.9             │</span>
+<span class="go">│ update-package-dependencies │ update-package-dependencies │ apm     │ 0.13.1             │</span>
+<span class="go">│ rust                        │ rust                        │ brew    │ 1.55.0             │</span>
+<span class="go">│ x264                        │ x264                        │ brew    │ r3060              │</span>
+<span class="go">│ atom                        │ atom                        │ cask    │ 1.58.0             │</span>
+<span class="go">│ visual-studio-code          │ visual-studio-code          │ cask    │ 1.52.0             │</span>
+<span class="go">│ nokogiri                    │ nokogiri                    │ gem     │ x86_64-darwin      │</span>
+<span class="go">│ rake                        │ rake                        │ gem     │ 13.0.3             │</span>
+<span class="go">│ iMovie                      │ 408981434                   │ mas     │ 10.2.5             │</span>
+<span class="go">│ Telegram                    │ 747648890                   │ mas     │ 8.1                │</span>
+<span class="go">│ npm                         │ npm                         │ npm     │ 7.24.0             │</span>
+<span class="go">│ raven                       │ raven                       │ npm     │ 2.6.4              │</span>
+<span class="go">│ jupyterlab                  │ jupyterlab                  │ pip     │ 3.1.14             │</span>
+<span class="go">│ Sphinx                      │ Sphinx                      │ pip     │ 4.2.0              │</span>
+<span class="go">│ ms-python.python            │ ms-python.python            │ vscode  │ 2021.10.1317843341 │</span>
+<span class="go">│ ms-toolsai.jupyter          │ ms-toolsai.jupyter          │ vscode  │ 2021.9.1001312534  │</span>
+<span class="go">╰─────────────────────────────┴─────────────────────────────┴─────────┴────────────────────╯</span>
+<span class="go">16 packages total (brew: 2, pip: 2, apm: 2, gem: 2, cask: 2, mas: 2, vscode: 2, npm: 2, composer: 0).</span>
+</pre></div>
+</div>
+</section>
+<section id="list-outdated-packages">
+<h2>List outdated packages<a class="headerlink" href="#list-outdated-packages" title="Link to this heading">¶</a></h2>
+<p>List all packages installed for which an upgrade is available:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>outdated
+<span class="go">╭──────────────┬─────────────┬─────────┬───────────────────┬────────────────╮</span>
+<span class="go">│ Package name │ ID          │ Manager │ Installed version │ Latest version │</span>
+<span class="go">├──────────────┼─────────────┼─────────┼───────────────────┼────────────────┤</span>
+<span class="go">│ curl         │ curl        │ brew    │ 7.79.1            │ 7.79.1_1       │</span>
+<span class="go">│ git          │ git         │ brew    │ 2.33.0            │ 2.33.0_1       │</span>
+<span class="go">│ openssl@1.1  │ openssl@1.1 │ brew    │ 1.1.1l            │ 1.1.1l_1       │</span>
+<span class="go">│ rake         │ rake        │ gem     │ 13.0.3            │ 13.0.6         │</span>
+<span class="go">│ Telegram     │ 747648890   │ mas     │ 8.1               │ 8.1.3          │</span>
+<span class="go">│ npm          │ npm@8.0.0   │ npm     │ 7.24.0            │ 8.0.0          │</span>
+<span class="go">│ pip          │ pip         │ pip     │ 21.2.4            │ 21.3           │</span>
+<span class="go">│ regex        │ regex       │ pip     │ 2021.9.30         │ 2021.10.8      │</span>
+<span class="go">╰──────────────┴─────────────┴─────────┴───────────────────┴────────────────╯</span>
+<span class="go">8 packages total (brew: 3, pip: 2, gem: 1, mas: 1, npm: 1, apm: 0, cask: 0, composer: 0).</span>
+</pre></div>
+</div>
+</section>
+<section id="list-managers">
+<h2>List managers<a class="headerlink" href="#list-managers" title="Link to this heading">¶</a></h2>
+<p>If you wonder why your package manager doesn’t seems to be identified, you can list all those recognized by <code class="docutils literal notranslate"><span class="pre">mpm</span></code> with:</p>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpm<span class="w"> </span>--all-managers<span class="w"> </span>managers
+<span class="go">╭────────────┬────────────────────┬────────────────┬──────────────────────────────┬────────────┬───────────╮</span>
+<span class="go">│ Manager ID │ Name               │ Supported      │ CLI                          │ Executable │ Version   │</span>
+<span class="go">├────────────┼────────────────────┼────────────────┼──────────────────────────────┼────────────┼───────────┤</span>
+<span class="go">│ apm        │ Atom&#39;s apm         │ ✓              │ ✘ apm not found              │            │           │</span>
+<span class="go">│ apt        │ APT                │ ✘ Linux only   │ ✓ /usr/bin/apt               │ ✓          │ ✘         │</span>
+<span class="go">│ apt-mint   │ Linux Mint&#39;s apt   │ ✘ Linux only   │ ✓ /usr/bin/apt               │ ✓          │ ✘         │</span>
+<span class="go">│ brew       │ Homebrew Formulae  │ ✓              │ ✓ /opt/homebrew/bin/brew     │ ✓          │ ✓ 3.6.3   │</span>
+<span class="go">│ cargo      │ Rust&#39;s cargo       │ ✓              │ ✓ /opt/homebrew/bin/cargo    │ ✓          │ ✓ 1.64.0  │</span>
+<span class="go">│ cask       │ Homebrew Cask      │ ✓              │ ✓ /opt/homebrew/bin/brew     │ ✓          │ ✓ 3.6.3   │</span>
+<span class="go">│ choco      │ Chocolatey         │ ✘ Windows only │ ✘ choco not found            │            │           │</span>
+<span class="go">│ composer   │ PHP&#39;s Composer     │ ✓              │ ✓ /opt/homebrew/bin/composer │ ✓          │ ✓ 2.4.2   │</span>
+<span class="go">│ dnf        │ DNF                │ ✘ Linux only   │ ✘ dnf not found              │            │           │</span>
+<span class="go">│ emerge     │ Emerge             │ ✘ Linux only   │ ✘ emerge not found           │            │           │</span>
+<span class="go">│ flatpak    │ Flatpak            │ ✘ Linux only   │ ✘ flatpak not found          │            │           │</span>
+<span class="go">│ gem        │ Ruby Gems          │ ✓              │ ✓ /usr/bin/gem               │ ✓          │ ✓ 3.0.3.1 │</span>
+<span class="go">│ mas        │ Mac AppStore       │ ✓              │ ✓ /opt/homebrew/bin/mas      │ ✓          │ ✓ 1.8.6   │</span>
+<span class="go">│ npm        │ Node&#39;s npm         │ ✓              │ ✓ /opt/homebrew/bin/npm      │ ✓          │ ✓ 8.19.2  │</span>
+<span class="go">│ opkg       │ OPKG               │ ✘ Linux only   │ ✘ opkg not found             │            │           │</span>
+<span class="go">│ pacman     │ Pacman             │ ✘ Linux only   │ ✘ pacman not found           │            │           │</span>
+<span class="go">│ paru       │ Paru               │ ✘ Linux only   │ ✘ paru not found             │            │           │</span>
+<span class="go">│ pip        │ Pip                │ ✓              │ ✓ ~/.pyenv/shims/python3     │ ✓          │ ✓ 22.2.2  │</span>
+<span class="go">│ pipx       │ Pipx               │ ✓              │ ✓ /opt/homebrew/bin/pipx     │ ✓          │ ✓ 1.1.0   │</span>
+<span class="go">│ scoop      │ Scoop              │ ✘ Windows only │ ✘ scoop not found            │            │           │</span>
+<span class="go">│ snap       │ Snap               │ ✘ Linux only   │ ✘ snap not found             │            │           │</span>
+<span class="go">│ steamcmd   │ Valve Steam        │ ✓              │ ✘ steamcmd not found         │            │           │</span>
+<span class="go">│ vscode     │ Visual Studio Code │ ✓              │ ✓ /opt/homebrew/bin/code     │ ✓          │ ✓ 1.71.2  │</span>
+<span class="go">│ yarn       │ Node&#39;s yarn        │ ✓              │ ✓ /opt/homebrew/bin/yarn     │ ✓          │ ✓ 1.22.19 │</span>
+<span class="go">│ yay        │ Yay                │ ✘ Linux only   │ ✘ yay not found              │            │           │</span>
+<span class="go">│ yum        │ YUM                │ ✘ Linux only   │ ✘ yum not found              │            │           │</span>
+<span class="go">│ zypper     │ Zypper             │ ✘ Linux only   │ ✘ zypper not found           │            │           │</span>
+<span class="go">╰────────────┴────────────────────┴────────────────┴──────────────────────────────┴────────────┴───────────╯</span>
+</pre></div>
+</div>
+<p>If your favorite manager is not supported yet, you can help! See the <a class="reference external" href="https://kdeldycke.github.io/meta-package-manager/contributing.html">contribution guide</a>.</p>
+</section>
+</section>
+<section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h1>
+<p>Other subcommands and options are documented in:</p>
+<ul class="simple">
+<li><p>the <a class="reference external" href="https://kdeldycke.github.io/meta-package-manager/cli-parameters.html">detailed help screens</a></p></li>
+<li><p>the <a class="reference external" href="https://kdeldycke.github.io/meta-package-manager/usecase.html">list of use-cases</a> where you’ll find inspiration on how to leverage <code class="docutils literal notranslate"><span class="pre">mpm</span></code> power</p></li>
+</ul>
+<!-- operation-footnotes-start -->
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="bsd" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>BSD: DragonFly BSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS.</p>
+</aside>
+<aside class="footnote brackets" id="linux" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>Linux: ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, CloudLinux OS, Debian, Exherbo Linux, Fedora, Gentoo Linux, Guix System, IBM PowerKVM, KVM for IBM z Systems, Linux Mint, Mageia, Mandriva Linux, Nobara, openSUSE, openSUSE Tumbleweed, Oracle Linux, Parallels, Pidora, Raspbian, RedHat Enterprise Linux, Rocky Linux, Scientific Linux, Slackware, SUSE Linux Enterprise Server, Tuxedo OS, Ubuntu, Ultramarine, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer.</p>
+</aside>
+<aside class="footnote brackets" id="unix" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
+<p>Unix: Cygwin, GNU/Hurd, Haiku, IBM AIX, illumos, Solaris.<!-- operation-footnotes-end --></p>
+</aside>
+</aside>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="install.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title"><svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-download" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path><path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path></svg> Installation</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; Kevin Deldycke and contributors
+            </div>
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on 2026-02-06</div>
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=f0c0c503"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        all_mermaids.forEach((el) => {
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+        await mermaid.run();
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+
+    if ("True" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll(".mermaid svg");
+            if(all_mermaids.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else if(svgs.size() !== mermaids_to_add_zoom) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else {
+                svgs.each(function() {
+                    var svg = d3.select(this);
+                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+                    var inner = svg.select("g");
+                    var zoom = d3.zoom().on("zoom", function(event) {
+                        inner.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+                });
+            }
+        }
+    } else if(all_mermaids.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("True" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);</script>
+    </body>
+</html>

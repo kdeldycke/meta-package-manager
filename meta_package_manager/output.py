@@ -373,12 +373,15 @@ class BarPluginRenderer(MPMPlugin):
             # Table-like rendering
             if self.table_rendering:
                 header = f"{manager['id']} - {package_count} {package_label}"
-                formatted_lines = render_table(
-                    [p[0] for p in table],
-                    table_format=BaseTableFormat.ALIGNED,
-                    colalign=("left", "right", "center", "left"),
-                    disable_numparse=True,
-                ).splitlines()
+                if table:
+                    formatted_lines = render_table(
+                        [p[0] for p in table],
+                        table_format=BaseTableFormat.ALIGNED,
+                        colalign=("left", "right", "center", "left"),
+                        disable_numparse=True,
+                    ).splitlines()
+                else:
+                    formatted_lines = []
 
             # Variable-width / non-table / non-monospaced rendering.
             else:

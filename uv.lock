@@ -8,12 +8,12 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-01-29T19:38:36.355848128Z"
+exclude-newer = "2026-01-30T05:52:43.99864382Z"
 exclude-newer-span = "P1W"
 
 [options.exclude-newer-package]
-extra-platforms = { timestamp = "2026-02-05T19:38:36.355855041Z", span = "PT0S" }
-click-extra = { timestamp = "2026-02-05T19:38:36.355860522Z", span = "PT0S" }
+extra-platforms = { timestamp = "2026-02-06T05:52:43.998650543Z", span = "PT0S" }
+click-extra = { timestamp = "2026-02-06T05:52:43.998657485Z", span = "PT0S" }
 
 [[package]]
 name = "accessible-pygments"
@@ -966,7 +966,7 @@ wheels = [
 
 [[package]]
 name = "meta-package-manager"
-version = "6.1.1"
+version = "6.1.2"
 source = { editable = "." }
 dependencies = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'" },

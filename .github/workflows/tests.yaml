@@ -444,7 +444,7 @@ jobs:
           choco install steamcmd --no-progress --yes --retry-count=3
 
       - name: Install UV
-        uses: astral-sh/setup-uv@v7.2.0
+        uses: astral-sh/setup-uv@v7.3.0
       - name: Install Python ${{ matrix.python-version }}
         # If UV cannot find the requested Python version, it exits with code 2, which let the job pass unnoticed on
         # Windows. So we force the shell to bash, even on Windows, and "set -e" to ensure any error in the install
@@ -645,7 +645,7 @@ jobs:
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: astral-sh/setup-uv@v7.2.0
+      - uses: astral-sh/setup-uv@v7.3.0
         with:
           # windows-2025 runners have only Python 3.9 installed.
           python-version: ${{ matrix.os == 'windows-2025' && '3.10' || ''}}

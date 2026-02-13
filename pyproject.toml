@@ -197,8 +197,6 @@ module-root = ""
 [tool.uv]
 # Cooldown period.
 exclude-newer = "1 week"
-# XXX Disable exclusion of brand new extra-platforms and click-extra releases.
-exclude-newer-package = { extra-platforms = "0 day", "click-extra" = "0 day" }
 
 [tool.nuitka]
 product-name = "Meta Package Manager"

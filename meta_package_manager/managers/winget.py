@@ -50,6 +50,11 @@ class WinGet(PackageManager):
 
     ``--disable-interactivity``:
         Disable interactive prompts.
+
+    ..todo::
+        Add the ``--no-progress`` option once it is available in the stable release:
+        - https://github.com/microsoft/winget-cli/pull/6049
+        - https://github.com/microsoft/winget-cli/issues/3494#issuecomment-3921618377
     """
 
     version_regexes = (r"v\s+(?P<version>\S+)",)

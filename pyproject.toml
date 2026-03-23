@@ -224,15 +224,10 @@ default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "Jav
 default.extend-ignore-re = [ "(?s)<!-- typos:off -->.*?<!-- typos:on -->" ]
 default.extend-ignore-identifiers-re = [
   # error: `ist` should be `is`, `it`, `its`, `sit`, `list`
-  #     ╭▸ ./docs/development.md:125:10
+  #     ╭▸ ./claude.md
   #     │
-  # 125 │ - [chalk.ist](https://chalk.ist)
+  #     │ - [chalk.ist](https://chalk.ist)
   #     ╰╴         ━━━
-  # error: `ist` should be `is`, `it`, `its`, `sit`, `list`
-  #     ╭▸ ./docs/development.md:125:29
-  #     │
-  # 125 │ - [chalk.ist](https://chalk.ist)
-  #     ╰╴                            ━━━
   #
   "ist",
 ]

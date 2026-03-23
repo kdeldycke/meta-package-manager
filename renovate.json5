@@ -5,6 +5,7 @@
   // PR and issue settings.
   labels: ["📦 dependencies"],
   dependencyDashboardLabels: ["📦 dependencies"],
+  assignees: ["kdeldycke"],
 
   // Schedule settings.
   timezone: "UTC",
@@ -49,20 +50,9 @@
       matchFileNames: [".github/workflows/**"],
       postUpgradeTasks: {
         commands: [
-          "bash -c 'curl -fsSL https://github.com/astral-sh/uv/releases/download/0.10.9/uv-x86_64-unknown-linux-gnu.tar.gz --output /tmp/uv.tar.gz && echo 20d79708222611fa540b5c9ed84f352bcd3937740e51aacc0f8b15b271c57594  /tmp/uv.tar.gz | sha256sum --check && tar xzf /tmp/uv.tar.gz --strip-components=1 -C /tmp && /tmp/uvx --no-progress repomatic==6.5.0 update-checksums {{{packageFile}}}'",
+          "bash -c 'curl -fsSL https://github.com/astral-sh/uv/releases/download/0.10.10/uv-x86_64-unknown-linux-gnu.tar.gz --output /tmp/uv.tar.gz && echo 3e1027f26ce8c7e4c32e2277a7fed2cb410f2f1f9320d3df97653d40e21f415b  /tmp/uv.tar.gz | sha256sum --check && tar xzf /tmp/uv.tar.gz --strip-components=1 -C /tmp && /tmp/uvx --no-progress repomatic==6.6.0 update-checksums {{{packageFile}}}'",
         ],
         fileFilters: [".github/workflows/**"],
-        executionMode: "update",
-      },
-    },
-    {
-      description: "Update SHA-256 checksums after binary version bumps in tool registry.",
-      matchFileNames: ["repomatic/tool_runner.py"],
-      postUpgradeTasks: {
-        commands: [
-          "bash -c 'curl -fsSL https://github.com/astral-sh/uv/releases/download/0.10.9/uv-x86_64-unknown-linux-gnu.tar.gz --output /tmp/uv.tar.gz && echo 20d79708222611fa540b5c9ed84f352bcd3937740e51aacc0f8b15b271c57594  /tmp/uv.tar.gz | sha256sum --check && tar xzf /tmp/uv.tar.gz --strip-components=1 -C /tmp && /tmp/uvx --no-progress repomatic==6.5.0 update-checksums --registry'",
-        ],
-        fileFilters: ["repomatic/tool_runner.py"],
         executionMode: "update",
       },
     },
@@ -109,59 +99,6 @@
       ],
       depNameTemplate: "rhysd/actionlint",
       datasourceTemplate: "github-releases",
-    },
-    {
-      description: "Update actionlint version in tool runner registry.",
-      customType: "regex",
-      fileMatch: ["repomatic/tool_runner\\.py$"],
-      matchStrings: [
-        // Matches the version field in the actionlint ToolSpec entry.
-        "\"actionlint\":\\s*ToolSpec\\([^)]*version=\"(?<currentValue>[0-9.]+)\"",
-      ],
-      depNameTemplate: "rhysd/actionlint",
-      datasourceTemplate: "github-releases",
-    },
-    {
-      description: "Update labelmaker version in tool runner registry.",
-      customType: "regex",
-      fileMatch: ["repomatic/tool_runner\\.py$"],
-      matchStrings: [
-        "\"labelmaker\":\\s*ToolSpec\\([^)]*version=\"(?<currentValue>[0-9.]+)\"",
-      ],
-      depNameTemplate: "jwodder/labelmaker",
-      datasourceTemplate: "github-releases",
-    },
-    {
-      description: "Update lychee version in tool runner registry.",
-      customType: "regex",
-      fileMatch: ["repomatic/tool_runner\\.py$"],
-      matchStrings: [
-        "\"lychee\":\\s*ToolSpec\\([^)]*version=\"(?<currentValue>[0-9.]+)\"",
-      ],
-      depNameTemplate: "lycheeverse/lychee",
-      datasourceTemplate: "github-releases",
-      extractVersionTemplate: "^lychee-v(?<version>.*)$",
-    },
-    {
-      description: "Update typos version in tool runner registry.",
-      customType: "regex",
-      fileMatch: ["repomatic/tool_runner\\.py$"],
-      matchStrings: [
-        "\"typos\":\\s*ToolSpec\\([^)]*version=\"(?<currentValue>[0-9.]+)\"",
-      ],
-      depNameTemplate: "crate-ci/typos",
-      datasourceTemplate: "github-releases",
-    },
-    {
-      description: "Update Biome version in tool runner registry.",
-      customType: "regex",
-      fileMatch: ["repomatic/tool_runner\\.py$"],
-      matchStrings: [
-        "\"biome\":\\s*ToolSpec\\([^)]*version=\"(?<currentValue>[0-9.]+)\"",
-      ],
-      depNameTemplate: "biomejs/biome",
-      datasourceTemplate: "github-releases",
-      extractVersionTemplate: "^@biomejs/biome@(?<version>.*)$",
     },
     {
       description: "Update Python packages in uv/uvx commands.",

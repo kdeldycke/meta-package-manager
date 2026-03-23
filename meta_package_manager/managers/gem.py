@@ -65,6 +65,8 @@ class Gem(PackageManager):
 
     post_args = ("--quiet",)  # Silence command progress meter
 
+    _VERSION_SPLITTER = re.compile(r",|default:| ")
+
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
@@ -99,7 +101,7 @@ class Gem(PackageManager):
                 # Guess latest installed version.
                 version = max(
                     parse_version(v)
-                    for v in re.compile(r",|default:| ").split(versions)
+                    for v in self._VERSION_SPLITTER.split(versions)
                     if v
                 )
                 yield self.package(id=package_id, installed_version=version)

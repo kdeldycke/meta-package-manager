@@ -66,9 +66,8 @@ class Snap(PackageManager):
         output = self.run_cli("list")
 
         for package in output.splitlines()[1:]:
-            package_id = package.split()[0]
-            installed_version = package.split()[1]
-            yield self.package(id=package_id, installed_version=installed_version)
+            parts = package.split()
+            yield self.package(id=parts[0], installed_version=parts[1])
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -82,16 +81,16 @@ class Snap(PackageManager):
         """
         output = self.run_cli("refresh", "--list")
 
+        # Build a lookup of installed versions to avoid one CLI call per package.
+        installed_versions = {p.id: p.installed_version for p in self.installed}
+
         for package in output.splitlines()[1:]:
-            package_id = package.split()[0]
-            latest_version = package.split()[1]
-            installed_version = (
-                self.run_cli("list", package_id).splitlines()[-1].split()[1]
-            )
+            parts = package.split()
+            package_id = parts[0]
             yield self.package(
                 id=package_id,
-                latest_version=latest_version,
-                installed_version=installed_version,
+                latest_version=parts[1],
+                installed_version=installed_versions.get(package_id),
             )
 
     @search_capabilities(extended_support=False, exact_support=False)

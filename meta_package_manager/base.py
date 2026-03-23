@@ -505,7 +505,7 @@ class PackageManager(metaclass=MetaPackageManager):
         # normalization process happens with the ``key`` lookup.
         search_path_list: list[Path] = unique(
             # Manager-specific search path takes precedence over default environment.
-            (Path(p) for p in list(self.cli_search_path) + os.get_exec_path(env=env)),
+            (Path(p) for p in (*self.cli_search_path, *os.get_exec_path(env=env))),
             key=normalize_path,
         )
 
@@ -967,7 +967,7 @@ class PackageManager(metaclass=MetaPackageManager):
                 search_content.add(match.description)
 
             # Normalize searched content.
-            serialized_content = "".join({s.lower() for s in search_content if s})
+            serialized_content = "".join(s.lower() for s in search_content if s)
 
             # Exclude packages not matching any part of the query.
             if not any(part in serialized_content for part in normalized_query_parts):

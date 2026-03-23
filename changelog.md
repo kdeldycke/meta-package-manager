@@ -5,6 +5,7 @@
 > [!IMPORTANT]
 > This version is not released yet and is under active development.
 
+- [mpm] Upgrade from reusable workflows to `repomatic`.
 - [mpm] Inline `replace_content` utility from `click-extra` which was removed in `7.6.2`.
 - [mpm] Simplify `uvx` invocation from `uvx --from meta-package-manager -- mpm` to `uvx meta-package-manager`.
 

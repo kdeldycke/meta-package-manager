@@ -1,17 +1,25 @@
 ---
-name: Build & release
+name: 🚀 Build & release
 "on":
-  # Target are chosen so that all commits get a chance to have their build tested.
   push:
     branches:
       - main
   pull_request:
+    branches-ignore:
+      - prepare-release
+      - "renovate/**"
+    paths:
+      - "meta_package_manager/**"
+      - "tests/**"
+      - pyproject.toml
+      - uv.lock
+      - .github/workflows/release.yaml
+  workflow_dispatch:
 
 jobs:
 
   release:
-    uses: kdeldycke/workflows/.github/workflows/release.yaml@v4.25.5
+    uses: kdeldycke/repomatic/.github/workflows/release.yaml@v6.5.0
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-    with:
-      timeout: 300
+      WORKFLOW_UPDATE_GITHUB_PAT: ${{ secrets.WORKFLOW_UPDATE_GITHUB_PAT }}

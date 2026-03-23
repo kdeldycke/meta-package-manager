@@ -26,9 +26,13 @@ jobs:
         # Available OS: https://github.com/actions/runner-images#available-images
         # To speed up the tests, we only test the latest available OS for each platform.
         os:
-          - ubuntu-24.04  # x86
-          - macos-26      # arm64
-          - windows-2025  # x86
+          - ubuntu-24.04      # x86
+          - ubuntu-24.04-arm  # arm64
+          - macos-26          # arm64
+          - macos-15-intel    # x86
+          # XXX windows-11-arm excluded: lxml cannot compile on Windows ARM64.
+          # See: https://bugs.launchpad.net/lxml/+bug/2004481
+          - windows-2025      # x86
         # For Python, we only test against the oldest and newest major supported version and skip intermediates. We
         # also test on the upcoming development version to anticipate issues.
         python-version:
@@ -444,7 +448,15 @@ jobs:
           choco install steamcmd --no-progress --yes --retry-count=3
 
       - name: Install UV
-        uses: astral-sh/setup-uv@v7.2.0
+        uses: astral-sh/setup-uv@v7.3.1
+      - name: Force native ARM64 Python on Windows ARM64
+        # Workaround for https://github.com/astral-sh/uv/issues/12906: uv defaults to x86_64 Python on ARM64 Windows,
+        # relying on transparent emulation. Native extensions with Rust (e.g., test-results-parser from codecov-cli)
+        # fail to compile because the ARM64 Rust toolchain lacks the x86_64-pc-windows-msvc target. Setting UV_PYTHON
+        # to an architecture-qualified specifier forces uv (and uvx) to use native ARM64 Python for all steps.
+        if: runner.os == 'Windows' && runner.arch == 'ARM64'
+        shell: bash
+        run: echo "UV_PYTHON=cpython-${{ matrix.python-version }}-aarch64" >> "$GITHUB_ENV"
       - name: Install Python ${{ matrix.python-version }}
         # If UV cannot find the requested Python version, it exits with code 2, which let the job pass unnoticed on
         # Windows. So we force the shell to bash, even on Windows, and "set -e" to ensure any error in the install
@@ -452,7 +464,7 @@ jobs:
         shell: bash
         run: |
           set -e
-          uv --no-progress venv --python ${{ matrix.python-version }}
+          uv --no-progress venv --python "${UV_PYTHON:-${{ matrix.python-version }}}"
       - name: Install project
         run: |
           uv --no-progress sync --frozen --all-extras --group test
@@ -509,16 +521,31 @@ jobs:
           --numprocesses=0 --skip-non-destructive --run-destructive
           --ignore=./tests/test_bar_plugin.py
 
-      - name: Codecov - coverage
-        uses: codecov/codecov-action@v5.5.2
-        with:
-          report_type: coverage
-          token: ${{ secrets.CODECOV_TOKEN }}
-      - name: Codecov - test results
-        uses: codecov/codecov-action@v5.5.2
-        with:
-          report_type: test_results
-          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload coverage to Codecov
+        # Skip on prepare-release PRs: Codecov cannot create commits on protected branches.
+        if: github.head_ref != 'prepare-release'
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        shell: bash
+        run: >
+          uvx --no-progress 'codecov-cli==11.2.6'
+          --auto-load-params-from githubactions
+          upload-process
+          --git-service github
+          --report-type coverage
+          --token "${CODECOV_TOKEN}"
+      - name: Upload test results to Codecov
+        if: github.head_ref != 'prepare-release'
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        shell: bash
+        run: >
+          uvx --no-progress 'codecov-cli==11.2.6'
+          --auto-load-params-from githubactions
+          upload-process
+          --git-service github
+          --report-type test_results
+          --token "${CODECOV_TOKEN}"
 
   # Test that mpm from other package managers.
   #
@@ -645,7 +672,7 @@ jobs:
           - windows-2025      # x86
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: astral-sh/setup-uv@v7.2.0
+      - uses: astral-sh/setup-uv@v7.3.1
         with:
           # windows-2025 runners have only Python 3.9 installed.
           python-version: ${{ matrix.os == 'windows-2025' && '3.10' || ''}}

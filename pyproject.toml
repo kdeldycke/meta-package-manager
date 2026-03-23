@@ -117,8 +117,8 @@ dependencies = [
     "click-extra >= 7.6.2",
     # cyclonedx-python-lib 11.2.0 is the first to support Python 3.14.
     "cyclonedx-python-lib [validation] >= 11.2.0",
-    # extra-platforms 8.0.0 removes deprecated symbols and add extract_members().
-    "extra-platforms >= 8.0.0",
+    # extra-platforms 10.0.0 drops the distro dependency.
+    "extra-platforms >= 10.0.0",
     # more-itertools 10.8.0 is the first to support Python 3.14.
     "more-itertools >= 10.8.0",
     # packageurl-python 0.16.0 is the first to support Python 3.13.
@@ -621,6 +621,10 @@ labels.extra-content-rules = '''
 '''
 
 [tool.typos]
+# Correct capitalization for proper nouns.
+default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "JavaScript", MacOS = "macOS", PyPi = "PyPI", Typescript = "TypeScript" }
+# Skip content between <!-- typos:off --> and <!-- typos:on --> markers.
+default.extend-ignore-re = ["(?s)<!-- typos:off -->.*?<!-- typos:on -->"]
 default.extend-ignore-identifiers-re = [
     # error: `ist` should be `is`, `it`, `its`, `sit`, `list`
     #     ╭▸ ./docs/development.md:125:10

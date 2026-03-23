@@ -8,7 +8,7 @@
   exit_code: 0
   stdout_contains: "\x1b[97mmpm\x1b[0m, version \x1b[32m"
   stdout_regex_fullmatch: >-
-    \x1b\[97mmpm\x1b\[0m, version \x1b\[32mNone\x1b\[0m\n
+    \x1b\[97mmpm\x1b\[0m, version \x1b\[32m[0-9]+\.[0-9]+\.[0-9]+\x1b\[0m\n
 
 # Check mpm is reporting its usage in help screen.
 - cli_parameters: --help

@@ -7,6 +7,7 @@ requires-python = ">= 3.10"
 description = "🎁 wraps all package managers with a unifying CLI"
 authors = [{ name = "Kevin Deldycke", email = "kevin@deldycke.com" }]
 readme = "readme.md"
+license = "GPL-2.0-or-later"
 license-files = ["license"]
 keywords = [
     'CLI',
@@ -76,7 +77,6 @@ classifiers = [
     'Intended Audience :: Developers',
     'Intended Audience :: Information Technology',
     'Intended Audience :: System Administrators',
-    'License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)',
     'Operating System :: MacOS :: MacOS X',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX :: Linux',

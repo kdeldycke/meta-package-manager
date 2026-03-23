@@ -390,7 +390,8 @@ jobs:
         run: |
           brew install --cask visual-studio-code
       - name: VSCode - Linux install
-        if: runner.os == 'Linux'
+        # XXX VS Code snap is only available for amd64, not arm64.
+        if: runner.os == 'Linux' && runner.arch == 'X64'
         run: |
           sudo snap install --classic code
       - name: VSCode - Windows install

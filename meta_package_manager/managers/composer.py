@@ -178,12 +178,14 @@ class Composer(PackageManager):
         regexp = re.compile(
             r"""
             ^(?P<package_id>\S+\/\S+)
-            (?P<description> .*)?
+            (?:\s+(?P<description>\S.*))?
             """,
             re.MULTILINE | re.VERBOSE,
         )
 
-        for package_id, description in regexp.findall(output):
+        for match in regexp.finditer(output):
+            package_id = match.group("package_id")
+            description = match.group("description")
             yield self.package(id=package_id, description=description)
 
     @version_not_implemented

@@ -10,6 +10,7 @@
 - [mpm] Simplify `uvx` invocation from `uvx --from meta-package-manager -- mpm` to `uvx meta-package-manager`.
 - [brew,cask] Add `--quiet` option to all `brew` invocations to reduce log verbosity.
 - [composer] Add `--no-ansi` option to all `composer` invocations.
+- [composer] Fix search regex to strip whitespace-only descriptions.
 - [dnf,dnf5,yum] Add `--quiet` option to all invocations to reduce log verbosity.
 - [emerge] Add `--quiet`, `--color n` and `--nospinner` to `pre_args`. Refactor inline flags.
 - [pacman,pacaur,paru,yay] Add `--color never` option to all invocations.

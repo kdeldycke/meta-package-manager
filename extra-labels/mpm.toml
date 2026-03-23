@@ -1,0 +1,154 @@
+[[profiles.default.labels]]
+name = "📦 manager: apm"
+color = "bfdadc"
+description = "apm"
+
+[[profiles.default.labels]]
+name = "📦 manager: cargo"
+color = "bfdadc"
+description = "cargo"
+
+[[profiles.default.labels]]
+name = "📦 manager: choco"
+color = "bfdadc"
+description = "choco"
+
+[[profiles.default.labels]]
+name = "📦 manager: composer"
+color = "bfdadc"
+description = "composer"
+
+[[profiles.default.labels]]
+name = "📦 manager: dnf-based"
+color = "bfdadc"
+description = "dnf, dnf5, yum"
+
+[[profiles.default.labels]]
+name = "📦 manager: dpkg-based"
+color = "bfdadc"
+description = "apt, apt-mint, opkg"
+
+[[profiles.default.labels]]
+name = "📦 manager: emerge"
+color = "bfdadc"
+description = "emerge"
+
+[[profiles.default.labels]]
+name = "📦 manager: eopkg"
+color = "bfdadc"
+description = "eopkg"
+
+[[profiles.default.labels]]
+name = "📦 manager: flatpak"
+color = "bfdadc"
+description = "flatpak"
+
+[[profiles.default.labels]]
+name = "📦 manager: fwupd"
+color = "bfdadc"
+description = "fwupd"
+
+[[profiles.default.labels]]
+name = "📦 manager: gem"
+color = "bfdadc"
+description = "gem"
+
+[[profiles.default.labels]]
+name = "📦 manager: homebrew"
+color = "bfdadc"
+description = "brew, cask"
+
+[[profiles.default.labels]]
+name = "📦 manager: mas"
+color = "bfdadc"
+description = "mas"
+
+[[profiles.default.labels]]
+name = "📦 manager: mpm"
+color = "bfdadc"
+description = "mpm"
+
+[[profiles.default.labels]]
+name = "📦 manager: npm-based"
+color = "bfdadc"
+description = "npm, yarn"
+
+[[profiles.default.labels]]
+name = "📦 manager: pacman-based"
+color = "bfdadc"
+description = "pacaur, pacman, paru, yay"
+
+[[profiles.default.labels]]
+name = "📦 manager: pip-based"
+color = "bfdadc"
+description = "pip, pipx"
+
+[[profiles.default.labels]]
+name = "📦 manager: pkg"
+color = "bfdadc"
+description = "pkg"
+
+[[profiles.default.labels]]
+name = "📦 manager: scoop"
+color = "bfdadc"
+description = "scoop"
+
+[[profiles.default.labels]]
+name = "📦 manager: snap"
+color = "bfdadc"
+description = "snap"
+
+[[profiles.default.labels]]
+name = "📦 manager: steamcmd"
+color = "bfdadc"
+description = "steamcmd"
+
+[[profiles.default.labels]]
+name = "📦 manager: uv-based"
+color = "bfdadc"
+description = "uv, uvx"
+
+[[profiles.default.labels]]
+name = "📦 manager: vscode-based"
+color = "bfdadc"
+description = "vscode, vscodium"
+
+[[profiles.default.labels]]
+name = "📦 manager: winget"
+color = "bfdadc"
+description = "winget"
+
+[[profiles.default.labels]]
+name = "📦 manager: zypper"
+color = "bfdadc"
+description = "zypper"
+
+[[profiles.default.labels]]
+name = "🔌 bar-plugin"
+color = "fef2c0"
+description = "Xbar/SwiftBar plugin code, documentation and features"
+
+[[profiles.default.labels]]
+name = "🖥 platform: BSD"
+color = "bfd4f2"
+description = "DragonFly BSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS"
+
+[[profiles.default.labels]]
+name = "🖥 platform: Linux"
+color = "bfd4f2"
+description = "Alpine Linux, ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, …"
+
+[[profiles.default.labels]]
+name = "🖥 platform: macOS"
+color = "bfd4f2"
+description = "macOS"
+
+[[profiles.default.labels]]
+name = "🖥 platform: Unix"
+color = "bfd4f2"
+description = "Cygwin, GNU/Hurd, Haiku, IBM AIX, illumos, Solaris"
+
+[[profiles.default.labels]]
+name = "🖥 platform: Windows"
+color = "bfd4f2"
+description = "Windows"

@@ -17,9 +17,6 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
 from boltons.iterutils import flatten
 from extra_platforms import extract_members
 
@@ -152,31 +149,3 @@ PLATFORM_LABELS = generate_labels(
 
 # Force sorting of labels.
 LABELS = sorted(LABELS, key=lambda i: str.casefold(i[0]))
-
-
-def write_labels():
-    """Write down labels into JSON file."""
-    json_file = (
-        Path(__file__)
-        .parent.joinpath("../.github/labels-extra.json")
-        .resolve(strict=True)
-    )
-
-    # Debug messages.
-    for label_name, _, _ in LABELS:
-        print(f"Generated label: {label_name}")
-    print(f"{len(LABELS)} labels generated.")
-    print(f"Saving to: {json_file}")
-
-    # Save to json definition file.
-    label_defs = [
-        dict(zip(["name", "color", "description"], label)) for label in LABELS
-    ]
-    json_file.write_text(
-        json.dumps(
-            label_defs,
-            indent=2,
-            separators=(",", ": "),
-            ensure_ascii=False,
-        ),
-    )

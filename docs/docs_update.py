@@ -29,7 +29,10 @@ from extra_platforms import Group, extract_members
 
 from meta_package_manager.base import Operations
 from meta_package_manager.inventory import MAIN_PLATFORMS
+from meta_package_manager.labels import LABELS
 from meta_package_manager.pool import pool
+
+PROJECT_ROOT = Path(__file__).parent.parent
 
 
 def managers_sankey() -> str:
@@ -145,9 +148,32 @@ def replace_content(
     )
 
 
+def write_labels() -> None:
+    """Write extra labels as a labelmaker TOML file for repomatic's ``sync-labels``."""
+    labels_dir = PROJECT_ROOT / "extra-labels"
+    labels_dir.mkdir(exist_ok=True)
+    toml_file = labels_dir / "mpm.toml"
+
+    entries = []
+    for label_name, color, description in LABELS:
+        # Strip leading '#' from color to match labelmaker/repomatic convention.
+        color = color.lstrip("#")
+        # Escape any backslashes and double-quotes in TOML strings.
+        name_escaped = label_name.replace("\\", "\\\\").replace('"', '\\"')
+        desc_escaped = description.replace("\\", "\\\\").replace('"', '\\"')
+        entries.append(
+            f'[[profiles.default.labels]]\n'
+            f'name = "{name_escaped}"\n'
+            f'color = "{color}"\n'
+            f'description = "{desc_escaped}"'
+        )
+
+    toml_file.write_text("\n\n".join(entries) + "\n")
+
+
 def update_readme() -> None:
     """Update ``readme.md`` with implementation table for each manager we support."""
-    readme = Path(__file__).parent.parent.joinpath("readme.md")
+    readme = PROJECT_ROOT / "readme.md"
 
     replace_content(
         readme,
@@ -176,4 +202,5 @@ def update_readme() -> None:
 
 
 if __name__ == "__main__":
+    write_labels()
     update_readme()

@@ -16,14 +16,11 @@
 
 from __future__ import annotations
 
-import json
 import re
 import sys
-from collections import Counter
 from itertools import permutations
 from pathlib import Path
 
-from boltons.iterutils import flatten
 from extra_platforms import Group, extract_members
 from yaml import Loader, load
 
@@ -145,22 +142,21 @@ def test_new_package_manager_issue_template():
     assert template_platforms == reference_labels
 
 
-def test_labeller_rules():
-    # Extract list of extra labels.
-    content = PROJECT_ROOT.joinpath(".github/labels-extra.json").read_text(
-        encoding="utf-8"
-    )
+def test_extra_labels_toml():
+    """Check the generated extra-labels TOML file is consistent with LABELS registry."""
+    toml_path = PROJECT_ROOT / "extra-labels" / "mpm.toml"
+    content = toml_path.read_text(encoding="utf-8")
     assert content
 
-    extra_labels = [lbl["name"] for lbl in json.loads(content)]
+    labels_data = tomllib.loads(content)
+    extra_labels = [lbl["name"] for lbl in labels_data["profiles"]["default"]["labels"]]
     assert extra_labels
 
-    # Canonical labels are uniques.
+    # Labels are unique.
     assert len(extra_labels) == len(set(extra_labels))
     canonical_labels = set(extra_labels)
-    assert canonical_labels
 
-    # Extract and categorize labels.
+    # Contains both manager and platform labels.
     canonical_managers = {
         lbl
         for lbl in canonical_labels
@@ -172,21 +168,6 @@ def test_labeller_rules():
     }
     assert canonical_platforms
 
-    # Extract rules from the labels workflow.
-    content = PROJECT_ROOT.joinpath(
-        ".github/workflows/labels.yaml",
-    ).read_text(encoding="utf-8")
-    assert "kdeldycke/workflows/.github/workflows/labels.yaml" in content
-    extra_rules = load(content, Loader=Loader)["jobs"]["labels"]["with"][
-        "extra-content-rules"
-    ]
-    rules = load(extra_rules, Loader=Loader)
-    assert rules
-
-    # Each keyword match one rule only.
-    rules_keywords = Counter(flatten(rules.values()))
-    assert rules_keywords
-    assert max(rules_keywords.values()) == 1
-
-    # Check that all canonical labels are referenced in rules.
-    assert (canonical_labels - {"📦 manager: mpm"}).issubset(rules.keys())
+    # TOML file matches the in-memory LABELS registry.
+    registry_names = {name for name, _, _ in LABELS}
+    assert canonical_labels == registry_names

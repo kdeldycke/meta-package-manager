@@ -217,19 +217,6 @@ macos-app-icon = "docs/assets/icon.png"
 linux-icon = "docs/assets/icon.png"
 windows-icon-from-ico = "docs/assets/icon.png"
 
-[tool.lychee]
-# ref: https://github.com/lycheeverse/lychee/blob/master/lychee.example.toml
-exclude = [
-    # GitHub renders issue comments with JavaScript, so the linkcheck builder cannot find them.
-    "^https://github.com/.+#issuecomment-\\d+$",
-    # Skip suggesting redirecting generic download links to their binary artefact.
-    "^https://github.com/.+/releases/.+/download/.*$",
-    # Allow redirects of generic DOI URLs to their specific Zenodo release page.
-    "^https://doi.org/.+/zenodo.*$",
-    # Allow redirects to the official pip documentation.
-    "^https://pip.pypa.io/.*$",
-]
-
 [tool.typos]
 # Correct capitalization for proper nouns.
 default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "JavaScript", MacOS = "macOS", PyPi = "PyPI", Typescript = "TypeScript" }
@@ -331,6 +318,19 @@ warn_return_any = true
 warn_unreachable = true
 pretty = true
 overrides = [ { ignore_missing_imports = true, module = [ "packageurl.*" ] } ]
+
+[tool.lychee]
+# ref: https://github.com/lycheeverse/lychee/blob/master/lychee.example.toml
+exclude = [
+  # GitHub renders issue comments with JavaScript, so the linkcheck builder cannot find them.
+  "^https://github.com/.+#issuecomment-\\d+$",
+  # Skip suggesting redirecting generic download links to their binary artefact.
+  "^https://github.com/.+/releases/.+/download/.*$",
+  # Allow redirects of generic DOI URLs to their specific Zenodo release page.
+  "^https://doi.org/.+/zenodo.*$",
+  # Allow redirects to the official pip documentation.
+  "^https://pip.pypa.io/.*$",
+]
 
 [tool.repomatic]
 # Override default exclude to include skills (default: ['labels', 'skills', 'zizmor']).

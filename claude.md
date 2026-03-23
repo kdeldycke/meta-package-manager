@@ -1,11 +1,22 @@
-# {octicon}`tools` Development
+# CLAUDE.md
+
+This file provides guidance to [Claude Code](https://claude.ai/code) when working with code in this repository.
+
+## Project overview
+
+Meta Package Manager (`mpm`) is a CLI that wraps multiple package managers (Homebrew, apt, pip, npm, etc.) behind a unified interface. It can list, search, install, upgrade, and remove packages across all supported managers simultaneously.
+
+## Upstream conventions
+
+This repository uses reusable workflows from [`kdeldycke/repomatic`](https://github.com/kdeldycke/repomatic) and follows the conventions established there. For code style, documentation, testing, and design principles, refer to the upstream `claude.md` as the canonical reference.
+
+**Contributing upstream:** If you spot inefficiencies, improvements, or missing features in the reusable workflows, propose changes via a pull request or issue at [`kdeldycke/repomatic`](https://github.com/kdeldycke/repomatic/issues).
 
 ## Philosophy
 
 1. First create something that works (to provide business value).
-1. Then something that’s beautiful (to lower maintenance costs).
-1. Finally works on performance (to avoid wasting time on premature
-   optimizations).
+1. Then something that's beautiful (to lower maintenance costs).
+1. Finally works on performance (to avoid wasting time on premature optimizations).
 
 ## Stability policy
 
@@ -35,9 +46,9 @@ Which boils down to the following these rules of thumb regarding stability:
 [![Unittests status](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/kdeldycke/meta-package-manager/actions/workflows/tests.yaml?query=branch%3Amain)
 [![Coverage status](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main/graph/badge.svg)](https://codecov.io/gh/kdeldycke/meta-package-manager/branch/main)
 
-## Setup environment
+## Commands
 
-This **step is required** for all the other sections from this page.
+### Setup environment
 
 Check out latest development branch:
 
@@ -56,9 +67,7 @@ $ source .venv/bin/activate
 $ uv sync --all-extras
 ```
 
-Now you’re ready to hack and abuse `git`.
-
-## Test `mpm` development version
+### Test `mpm` development version
 
 After the steps above, you are free to play with the bleeding edge version of `mpm`:
 
@@ -68,7 +77,7 @@ $ uv run -- mpm --version
 mpm, version 4.13.0
 ```
 
-## Unit-tests
+### Unit-tests
 
 Run unit-tests with:
 
@@ -83,26 +92,17 @@ Which should be the same as running non-destructive unit-tests in parallel with:
 $ uv run pytest --numprocesses=auto --skip-destructive
 ```
 
-````{danger}
-If you're not afraid of `mpm` tests messing around with the package managers on your system, you
-can run the subset of destructive tests with:
+Destructive tests mess with the package managers on your system. Run them sequentially:
 
 ```shell-session
 $ uv run pytest --numprocesses=0 --skip-non-destructive --run-destructive
 ```
 
-As you can see above we recommend running these tests in (non-deterministic) sequential order as most
-package managers don't support concurrency.
-````
+Sequential order is recommended as most package managers don't support concurrency.
 
-## Coding style
+### Documentation
 
-[Code linting is handled by a workflow](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/lint.yaml).
-
-## Documentation
-
-The documentation you’re currently reading can be built locally with
-[Sphinx](https://www.sphinx-doc.org):
+Build Sphinx documentation locally:
 
 ```shell-session
 $ uv sync --extra docs
@@ -123,38 +123,3 @@ To produce clean and fancy terminals screenshots, use either:
 - [Carbon](https://github.com/carbon-app/carbon)
 - [CodeKeep](https://codekeep.io/screenshot)
 - [chalk.ist](https://chalk.ist)
-
-## Changelog
-
-Before a release, the maintainers will review and rewrite the changelog to make
-it clean and readable. Inspiration can be drawn from the
-[keep a changelog manifesto](https://keepachangelog.com).
-
-Changes can be inspected by using the comparison URL between the last tagged
-version and the `main` branch. This link is available at the top of the
-{doc}`/changelog`.
-
-## Release process
-
-All steps of the release process and version management are automated in the
-[`changelog.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/changelog.yaml) and
-[`release.yaml`](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/release.yaml) and workflows.
-
-All there's left to do is to:
-
-- [check the open draft prepare-release PR](https://github.com/kdeldycke/meta-package-manager/pulls?q=is%3Apr+is%3Aopen+head%3Aprepare-release)
-  and its changes,
-- click the `Ready for review` button,
-- click the `Rebase and merge` button,
-- let the workflows tag the release and set back the `main` branch into a
-  development state.
-
-## Version bump
-
-Versions are bumped to their next `patch` revision during the release process
-above by the
-[`release.yaml` workflow](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/release.yaml).
-
-At any point during development, you can bump the version by merging either the
-`minor-version-increment` or `major-version-increment` branch, each available
-in their own PR.

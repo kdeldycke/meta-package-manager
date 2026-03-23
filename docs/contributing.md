@@ -40,3 +40,11 @@ For inspiration, look how past commits that adds a brand new package manager loo
 - [`uv` for Python projects on all platforms](https://github.com/kdeldycke/meta-package-manager/commit/28b071dd8f17c3cb0af2c17647c41ea05dcdcb14)
 - [`WinGet` for Windows](https://github.com/kdeldycke/meta-package-manager/commit/0e70cf9fd94f68bdceddff692d9fa35d40b8676b)
 - [`pkg` for FreeBSD](https://github.com/kdeldycke/meta-package-manager/commit/35ee268022b39b482a452d6c874a522e7856ce7e)
+
+## `claude.md` file
+
+```{include} ../claude.md
+---
+start-line: 2
+---
+```

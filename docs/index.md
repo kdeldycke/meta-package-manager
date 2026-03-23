@@ -29,7 +29,6 @@ maxdepth: 2
 hidden:
 ---
 contributing
-development
 API <meta_package_manager>
 tests
 genindex

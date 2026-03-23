@@ -37,8 +37,7 @@ from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from click_extra import echo, style
 from click_extra.colorize import default_theme as theme
-from click_extra.table import TableFormatOption, print_table, render_table
-from click_extra.table import TableFormat as BaseTableFormat
+from click_extra.table import TableFormat, TableFormatOption, print_table, render_table
 
 from .bar_plugin import MPMPlugin
 from .pool import pool
@@ -105,15 +104,6 @@ def colored_diff(a, b, style_common=None, style_a=None, style_b=None):
     return colored_a, colored_b
 
 
-# Create extended enum by combining base members with new ones.
-ExtendedTableFormat = StrEnum(
-    "ExtendedTableFormat",
-    dict(
-        sorted({**{e.name: e.value for e in BaseTableFormat}, "JSON": "json"}.items())
-    ),
-)
-
-
 def print_json(data):
     """Pretty-print Python data to JSON and output results to ``<stdout>``.
 
@@ -143,7 +133,7 @@ def print_sorted_table(
     header_defs: list[tuple[str, SortableField | None]],
     rows: Iterable[Sequence[str | TokenizedString]],
     sort_key: SortableField | None = None,
-    table_format: ExtendedTableFormat | None = None,  # type: ignore[valid-type]
+    table_format: TableFormat | None = None,
     **kwargs,
 ) -> None:
     """Augment :py:func:`click_extra.context.ClickContext.print_table` with sorting
@@ -204,10 +194,6 @@ def print_sorted_table(
                 key = TokenizedString(strip_ansi(cell))
             sorting_key.append(key)
         return tuple(sorting_key)
-
-    # Convert ExtendedTableFormat to BaseTableFormat if needed.
-    if table_format is not None:
-        table_format = BaseTableFormat[table_format.name]  # type: ignore[unreachable]
 
     # Sort and convert rows to list of strings for print_table
     sorted_rows: list[Sequence[str | None]] = [
@@ -376,7 +362,7 @@ class BarPluginRenderer(MPMPlugin):
                 if table:
                     formatted_lines = render_table(
                         [p[0] for p in table],
-                        table_format=BaseTableFormat.ALIGNED,
+                        table_format=TableFormat.ALIGNED,
                         colalign=("left", "right", "center", "left"),
                         disable_numparse=True,
                     ).splitlines()

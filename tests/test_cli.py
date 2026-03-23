@@ -27,7 +27,7 @@ import pytest
 from boltons.strutils import strip_ansi
 
 from meta_package_manager import __version__
-from meta_package_manager.output import ExtendedTableFormat
+from click_extra.table import TableFormat
 from meta_package_manager.pool import pool
 
 from .conftest import default_manager_ids
@@ -364,7 +364,7 @@ class CLITableTests:
     Any table output is also allowed to be rendered as JSON.
     """
 
-    @pytest.mark.parametrize("mode", ExtendedTableFormat)
+    @pytest.mark.parametrize("mode", TableFormat)
     def test_all_table_rendering(self, invoke, mode):
         result = invoke("--output-format", mode, "installed")
         assert result.exit_code == 0

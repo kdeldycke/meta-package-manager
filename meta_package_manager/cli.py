@@ -46,6 +46,7 @@ from click_extra import (
     option_group,
     pass_context,
 )
+from click_extra.table import TableFormat
 from click_extra.colorize import KO, OK, highlight
 from click_extra.colorize import default_theme as theme
 from click_extra.commands import default_extra_params
@@ -63,7 +64,6 @@ from .base import (
 from .inventory import MAIN_PLATFORMS
 from .output import (
     BarPluginRenderer,
-    ExtendedTableFormat,
     SortableField,
     SortedTableFormatOption,
     colored_diff,
@@ -279,7 +279,7 @@ def custom_extra_params() -> list[Parameter]:
             params.append(
                 SortedTableFormatOption(
                     param_decls=("-o", "--output-format"),
-                    type=EnumChoice(ExtendedTableFormat),
+                    type=EnumChoice(TableFormat),
                     help="Rendering format of the output.",
                 )
             )
@@ -429,7 +429,7 @@ def mpm(
     """CLI options shared by all subcommands."""
     # Silence all log messages for JSON rendering unless in debug mode.
     if (
-        ctx.meta["click_extra.table_format"] == ExtendedTableFormat.JSON
+        ctx.meta["click_extra.table_format"] == TableFormat.JSON
         and ctx.meta["click_extra.verbosity"] != "DEBUG"
     ):
         logging.disable()
@@ -515,7 +515,7 @@ def managers(ctx):
     }
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == ExtendedTableFormat.JSON:
+    if ctx.meta["click_extra.table_format"] == TableFormat.JSON:
         manager_data = {}
         # Build up the data structure of manager metadata.
         fields = (
@@ -655,7 +655,7 @@ def installed(ctx, duplicates):
             installed_data[manager_id]["packages"] = duplicate_packages
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == ExtendedTableFormat.JSON:
+    if ctx.meta["click_extra.table_format"] == TableFormat.JSON:
         print_json(installed_data)
         ctx.exit()
 
@@ -732,7 +732,7 @@ def outdated(ctx, plugin_output):
         )
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == ExtendedTableFormat.JSON:
+    if ctx.meta["click_extra.table_format"] == TableFormat.JSON:
         print_json(outdated_data)
         ctx.exit()
 
@@ -844,7 +844,7 @@ def search(ctx, extended, exact, refilter, query):
         )
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == ExtendedTableFormat.JSON:
+    if ctx.meta["click_extra.table_format"] == TableFormat.JSON:
         print_json(matches)
         ctx.exit()
 
@@ -911,7 +911,7 @@ def which(ctx, cli_names):
         logging.warning("Ignore --sort-by option for which command.")
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == ExtendedTableFormat.JSON:
+    if ctx.meta["click_extra.table_format"] == TableFormat.JSON:
         cli_data = []
         for manager in ctx.obj.selected_managers():
             cli_data.append(

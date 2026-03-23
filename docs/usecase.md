@@ -1,4 +1,4 @@
-# Use-cases
+# {octicon}`light-bulb` Use-cases
 
 A collection of user’s problems and how `mpm` solves them.
 

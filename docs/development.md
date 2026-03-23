@@ -1,4 +1,4 @@
-# Development
+# {octicon}`tools` Development
 
 ## Philosophy
 

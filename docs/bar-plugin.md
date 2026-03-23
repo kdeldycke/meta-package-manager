@@ -1,4 +1,4 @@
-# Xbar and SwiftBar plugin
+# {octicon}`plug` Xbar and SwiftBar plugin
 
 The Meta Package Manager project is actively maintaining a plugin that is both compatible with
 [Xbar](https://github.com/matryer/xbar) and [SwiftBar](https://github.com/swiftbar/SwiftBar).

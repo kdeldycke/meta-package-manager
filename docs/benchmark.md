@@ -1,4 +1,4 @@
-# Benchmark
+# {octicon}`meter` Benchmark
 
 Attempting to unify all package managers is a Sisyphean task.
 

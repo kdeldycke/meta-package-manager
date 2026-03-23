@@ -19,6 +19,9 @@ falsehoods
 benchmark
 ```
 
+% XXX Furo doesn't support icons in toctree entries natively.
+% CSS workaround in _static/custom.css, see: https://github.com/pradyunsg/furo/discussions/921
+
 ```{toctree}
 ---
 caption: Development

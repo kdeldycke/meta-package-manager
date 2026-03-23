@@ -301,6 +301,8 @@ search = "date-released: \\d{{4}}-\\d{{2}}-\\d{{2}}"
 replace = "date-released: {utcnow:%Y-%m-%d}"
 
 [tool.repomatic]
+# Override default exclude to include skills (default: ['labels', 'skills', 'zizmor']).
+exclude = ["labels", "zizmor"]
 # Source paths for workflow trigger filters.
 workflow.source-paths = ["meta_package_manager"]
 # Test plan for binary testing.

@@ -951,6 +951,9 @@ class PackageManager(metaclass=MetaPackageManager):
             try to produce results as precise as possible using the native filtering
             capabilities of the package manager CLI.
         """
+        # Pre-compute normalized query parts once for all results.
+        normalized_query_parts = {p.lower() for p in self.query_parts(query)}
+
         for match in self.search(query, extended, exact):
             # Look by default into package ID and name.
             search_content = {match.id, match.name}
@@ -967,12 +970,7 @@ class PackageManager(metaclass=MetaPackageManager):
             serialized_content = "".join({s.lower() for s in search_content if s})
 
             # Exclude packages not matching any part of the query.
-            confirmed_match = False
-            for part in {p.lower() for p in self.query_parts(query)}:
-                if part in serialized_content:
-                    confirmed_match = True
-                    break
-            if not confirmed_match:
+            if not any(part in serialized_content for part in normalized_query_parts):
                 continue
 
             # Report the package as matching.
@@ -1028,12 +1026,12 @@ class PackageManager(metaclass=MetaPackageManager):
                     "upgrade_all_cli operation not implemented. "
                     "Call single upgrade operation on each package, one-by-one.",
                 )
-                log = ""
+                logs = []
                 for package in self.outdated:
                     output = self.upgrade(package.id)
                     if output:
-                        log += f"\n{output}"
-                return log
+                        logs.append(output)
+                return "\n".join(logs)
 
         return self.run(cli, extra_env=self.extra_env)
 

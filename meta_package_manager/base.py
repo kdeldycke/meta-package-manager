@@ -37,10 +37,11 @@ from click_extra.colorize import default_theme as theme
 from click_extra.envvar import env_copy
 from click_extra.testing import INDENT, args_cleanup, format_cli_prompt
 from extra_platforms import (
+    UNIX,
     Group,
     Platform,
+    current_platform,
     extract_members,
-    is_unix,
 )
 from packageurl import PackageURL
 

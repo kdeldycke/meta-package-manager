@@ -8,7 +8,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-03-16T09:17:50.141876Z"
+exclude-newer = "2026-03-16T13:04:11.448333Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -288,6 +288,9 @@ sphinx = [
     { name = "sphinx", version = "8.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "sphinx", version = "9.0.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
     { name = "sphinx", version = "9.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+]
+toml = [
+    { name = "tomlkit" },
 ]
 xml = [
     { name = "xmltodict" },
@@ -1006,6 +1009,9 @@ json5 = [
 jsonc = [
     { name = "click-extra", extra = ["jsonc"] },
 ]
+toml = [
+    { name = "click-extra", extra = ["toml"] },
+]
 xml = [
     { name = "click-extra", extra = ["xml"] },
 ]
@@ -1034,7 +1040,7 @@ docs = [
     { name = "sphinxext-opengraph" },
 ]
 test = [
-    { name = "click-extra", extra = ["pytest"] },
+    { name = "click-extra", extra = ["pytest", "toml"] },
     { name = "coverage", extra = ["toml"] },
     { name = "extra-platforms" },
     { name = "pytest" },
@@ -1052,49 +1058,51 @@ typing = [
 
 [package.metadata]
 requires-dist = [
-    { name = "backports-strenum", marker = "python_full_version < '3.11'", specifier = ">=1.3.0" },
-    { name = "boltons", specifier = ">=25.0.0" },
+    { name = "backports-strenum", marker = "python_full_version < '3.11'", specifier = ">=1.3" },
+    { name = "boltons", specifier = ">=25" },
     { name = "click-extra", specifier = ">=7.6.2" },
     { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'" },
     { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'" },
     { name = "click-extra", extras = ["jsonc"], marker = "extra == 'jsonc'" },
+    { name = "click-extra", extras = ["toml"], marker = "extra == 'toml'" },
     { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'" },
     { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
-    { name = "cyclonedx-python-lib", extras = ["validation"], specifier = ">=11.2.0" },
-    { name = "extra-platforms", specifier = ">=8.0.0" },
-    { name = "more-itertools", specifier = ">=10.8.0" },
-    { name = "packageurl-python", specifier = ">=0.16.0" },
+    { name = "cyclonedx-python-lib", extras = ["validation"], specifier = ">=11.2" },
+    { name = "extra-platforms", specifier = ">=10" },
+    { name = "more-itertools", specifier = ">=10.8" },
+    { name = "packageurl-python", specifier = ">=0.16" },
     { name = "spdx-tools", specifier = ">=0.8.2" },
-    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.3.0" },
-    { name = "tomli-w", specifier = ">=1.1.0" },
-    { name = "xmltodict", specifier = ">=1.0.0" },
+    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.3" },
+    { name = "tomli-w", specifier = ">=1.1" },
+    { name = "xmltodict", specifier = ">=1" },
 ]
-provides-extras = ["yaml", "json5", "jsonc", "hjson", "xml"]
+provides-extras = ["toml", "yaml", "json5", "jsonc", "hjson", "xml"]
 
 [package.metadata.requires-dev]
 docs = [
     { name = "click-extra", extras = ["sphinx"] },
     { name = "furo", specifier = ">=2025.9.25" },
-    { name = "myst-parser", specifier = ">=4.0.0" },
+    { name = "myst-parser", specifier = ">=4" },
     { name = "sphinx" },
-    { name = "sphinx-autodoc-typehints", specifier = ">=2.4.0" },
-    { name = "sphinx-click", specifier = ">=6.1.0" },
+    { name = "sphinx-autodoc-typehints", specifier = ">=2.4" },
+    { name = "sphinx-click", specifier = ">=6.1" },
     { name = "sphinx-copybutton", specifier = ">=0.5.2" },
-    { name = "sphinx-design", specifier = ">=0.6.0" },
-    { name = "sphinx-issues", specifier = ">=5.0.0" },
+    { name = "sphinx-design", specifier = ">=0.6" },
+    { name = "sphinx-issues", specifier = ">=5" },
     { name = "sphinxcontrib-mermaid", specifier = ">=1.2.3" },
-    { name = "sphinxext-opengraph", specifier = ">=0.13.0" },
+    { name = "sphinxext-opengraph", specifier = ">=0.13" },
 ]
 test = [
     { name = "click-extra", extras = ["pytest"] },
-    { name = "coverage", extras = ["toml"], specifier = ">=7.12.0" },
+    { name = "click-extra", extras = ["toml"] },
+    { name = "coverage", extras = ["toml"], specifier = ">=7.12" },
     { name = "extra-platforms" },
     { name = "pytest", specifier = ">=9.0.1" },
-    { name = "pytest-cov", specifier = ">=7.0.0" },
-    { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3.0" },
+    { name = "pytest-cov", specifier = ">=7" },
+    { name = "pytest-github-actions-annotate-failures", specifier = ">=0.3" },
     { name = "pytest-randomly", specifier = ">=4.0.1" },
-    { name = "pytest-xdist", extras = ["psutil"], specifier = ">=3.8.0" },
-    { name = "pyyaml", specifier = ">=6.0.0" },
+    { name = "pytest-xdist", extras = ["psutil"], specifier = ">=3.8" },
+    { name = "pyyaml", specifier = ">=6" },
 ]
 typing = [
     { name = "types-boltons", specifier = ">=25.0.0.20250919" },
@@ -2068,6 +2076,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/19/75/241269d1da26b624c0d5e110e8149093c759b7a286138f4efd61a60e75fe/tomli_w-1.2.0.tar.gz", hash = "sha256:2dd14fac5a47c27be9cd4c976af5a12d87fb1f0b4512f81d69cce3b35ae25021", size = 7184, upload-time = "2025-01-15T12:07:24.262Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c7/18/c86eb8e0202e32dd3df50d43d7ff9854f8e0603945ff398974c1d91ac1ef/tomli_w-1.2.0-py3-none-any.whl", hash = "sha256:188306098d013b691fcadc011abd66727d3c414c571bb01b1a174ba8c983cf90", size = 6675, upload-time = "2025-01-15T12:07:22.074Z" },
+]
+
+[[package]]
+name = "tomlkit"
+version = "0.14.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c3/af/14b24e41977adb296d6bd1fb59402cf7d60ce364f90c890bd2ec65c43b5a/tomlkit-0.14.0.tar.gz", hash = "sha256:cf00efca415dbd57575befb1f6634c4f42d2d87dbba376128adb42c121b87064", size = 187167, upload-time = "2026-01-13T01:14:53.304Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b5/11/87d6d29fb5d237229d67973a6c9e06e048f01cf4994dee194ab0ea841814/tomlkit-0.14.0-py3-none-any.whl", hash = "sha256:592064ed85b40fa213469f81ac584f67a4f2992509a7c3ea2d632208623a3680", size = 39310, upload-time = "2026-01-13T01:14:51.965Z" },
 ]
 
 [[package]]

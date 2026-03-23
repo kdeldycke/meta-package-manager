@@ -147,6 +147,7 @@ dependencies = [
 # Package referenced above and also featured in [project.optional-dependencies] or [dependency-groups]
 # will be set without version specifier as they are already constrained.
 [project.optional-dependencies]
+toml = [ "click-extra[toml]" ]
 yaml = [ "click-extra[yaml]" ]
 json5 = [ "click-extra[json5]" ]
 jsonc = [ "click-extra[jsonc]" ]
@@ -169,6 +170,7 @@ meta-package-manager = "meta_package_manager.__main__:main"
 [dependency-groups]
 test = [
   "click-extra[pytest]",
+  "click-extra[toml]",
   "coverage[toml]>=7.12",
   "extra-platforms",
   "pytest>=9.0.1",

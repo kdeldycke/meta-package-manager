@@ -908,10 +908,13 @@ def which(ctx, cli_names):
 
     # Machine-friendly data rendering.
     if ctx.meta["click_extra.table_format"] == TableFormat.JSON:
-        cli_data = [{
-                    "manager_id": manager.id,
-                    "cli_paths": list(manager.search_all_cli(cli_names)),
-                } for manager in ctx.obj.selected_managers()]
+        cli_data = [
+            {
+                "manager_id": manager.id,
+                "cli_paths": list(manager.search_all_cli(cli_names)),
+            }
+            for manager in ctx.obj.selected_managers()
+        ]
         print_json(cli_data)
         ctx.exit()
 

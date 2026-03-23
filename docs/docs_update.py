@@ -92,7 +92,10 @@ def operation_matrix() -> tuple[str, str]:
             + ("" if not m.deprecated else f" [⚠️]({m.deprecation_url})"),
             f"{m.requirement}",
         ]
-        line.extend(p_obj.icon if m.platforms.issuperset(extract_members(p_obj)) else "" for p_obj in MAIN_PLATFORMS)
+        line.extend(
+            p_obj.icon if m.platforms.issuperset(extract_members(p_obj)) else ""
+            for p_obj in MAIN_PLATFORMS
+        )
         line.extend("✓" if m.implements(op) else "" for op in Operations)
         table.append(line)
 

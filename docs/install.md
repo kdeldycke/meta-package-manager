@@ -54,6 +54,18 @@ $ uvx --from file:///Users/me/code/meta-package-manager -- mpm
 
 This will download `meta-package-manager` (the package), and run `mpm`, the CLI included in the package.
 
+## Try the library
+
+You can also try the library itself in an interactive Python shell without installing anything on your system:
+
+```{code-block} shell-session
+$ uvx --with meta-package-manager python
+>>> from meta_package_manager.pool import pool
+>>> list(pool['brew'].installed)
+[...]
+>>>
+```
+
 ## Installation methods
 
 `mpm` is available on several popular package managers:
@@ -407,10 +419,52 @@ _MPM_COMPLETE=fish_source mpm > ~/.config/fish/completions/mpm.fish
 
 `````
 
-## Main dependencies
+## Default dependencies
 
 This is a graph of the default, main dependencies of the Python package:
 
 ```mermaid assets/dependencies.mmd
 :align: center
 ```
+
+## Extra dependencies
+
+For additional features, you may need to install extra dependencies.
+
+These extras add support for additional [configuration file formats](configuration.md#other-formats):
+
+- HJSON configuration files:
+
+  ```{code-block} shell-session
+  $ pip install meta-package-manager[hjson]
+  ```
+
+- JSON5 configuration files:
+
+  ```{code-block} shell-session
+  $ pip install meta-package-manager[json5]
+  ```
+
+- JSONC configuration files:
+
+  ```{code-block} shell-session
+  $ pip install meta-package-manager[jsonc]
+  ```
+
+- TOML table format output:
+
+  ```{code-block} shell-session
+  $ pip install meta-package-manager[toml]
+  ```
+
+- XML configuration files and table format:
+
+  ```{code-block} shell-session
+  $ pip install meta-package-manager[xml]
+  ```
+
+- YAML configuration files and table format:
+
+  ```{code-block} shell-session
+  $ pip install meta-package-manager[yaml]
+  ```

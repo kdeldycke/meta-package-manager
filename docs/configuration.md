@@ -28,6 +28,10 @@ pipx = true
 exact = true
 ```
 
+```{seealso}
+Install [extra dependencies](install.md#extra-dependencies) for additional format support.
+```
+
 ## Selecting managers
 
 ### Default managers

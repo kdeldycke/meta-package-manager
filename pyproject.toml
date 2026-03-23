@@ -199,8 +199,6 @@ module-root = ""
 [tool.uv]
 # Cooldown period.
 exclude-newer = "1 week"
-# Bypass cooldown for packages that need a newer version than the window allows.
-exclude-newer-package = { click-extra = "1 hour" }
 
 [tool.nuitka]
 product-name = "Meta Package Manager"

@@ -202,7 +202,7 @@ class ManagerPool:
         drop: Iterable[str] | None = None,
         keep_deprecated: bool = False,
         keep_unsupported: bool = False,
-        drop_inactive: bool = True,
+        drop_not_found: bool = True,
         implements_operation: Operations | None = None,
         **extra_options: bool | int,
     ) -> Iterator[PackageManager]:
@@ -216,7 +216,7 @@ class ManagerPool:
         Deprecated managers are also excluded by default, unless ``keep_deprecated`` is
         ``True``.
 
-        ``drop_inactive`` filters out managers that where not found on the system.
+        ``drop_not_found`` filters out managers whose CLI was not found on the system.
 
         ``implements_operation`` filters out managers which do not implements the
         provided operation.
@@ -259,8 +259,8 @@ class ManagerPool:
                 )
                 continue
 
-            # Filters out inactive managers.
-            if drop_inactive and not manager.available:
+            # Filters out managers whose CLI was not found.
+            if drop_not_found and not manager.available:
                 logging.info(
                     f"Skip unavailable {theme.invoked_command(manager_id)} manager.",
                 )

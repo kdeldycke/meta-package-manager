@@ -213,16 +213,16 @@ selection_cases = {
             if pool[mid].supported and pool[mid].available
         ),
     ),
-    "drop_inactive": (
-        {"drop_inactive": True},
+    "drop_not_found": (
+        {"drop_not_found": True},
         tuple(
             mid
             for mid in pool.all_manager_ids
             if not pool[mid].deprecated and pool[mid].supported and pool[mid].available
         ),
     ),
-    "keep_inactive": (
-        {"drop_inactive": False},
+    "keep_not_found": (
+        {"drop_not_found": False},
         tuple(
             mid
             for mid in pool.all_manager_ids

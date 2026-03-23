@@ -507,9 +507,9 @@ def managers(ctx):
     """List all supported package managers and autodetect their presence on the
     system."""
     select_params = {
-        # Do not drop inactive managers. Keep them to show off how mpm is reacting
-        # to the local platform.
-        "drop_inactive": False,
+        # Do not drop managers whose CLI was not found. Keep them to show off how
+        # mpm is reacting to the local platform.
+        "drop_not_found": False,
     }
 
     # Machine-friendly data rendering.

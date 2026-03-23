@@ -111,7 +111,7 @@ Meta Package Manager,zypper,1
 <!-- operation-matrix-start -->
 
 | Package manager                                                                         | Min. version | BSD[^bsd] | Linux[^linux] | macOS | Unix[^unix] | Windows | `installed` | `outdated` | `search` | `install` | `upgrade` | `upgrade_all` | `remove` | `sync` | `cleanup` |
-| :-------------------------------------------------------------------------------------- | :----------- | :-------: | :-----------: | :---: | :---------: | :-----: | :---------: | :--------: | :------: | :-------: | :-------: | :-----------: | :------: | :----: | :-------: |
+|:----------------------------------------------------------------------------------------|:-------------|:---------:|:-------------:|:-----:|:-----------:|:-------:|:-----------:|:----------:|:--------:|:---------:|:---------:|:-------------:|:--------:|:------:|:---------:|
 | [`apm`](https://atom.io/packages) [⚠️](https://github.blog/2022-06-08-sunsetting-atom/) | 1.0.0        |    🅱️     |      🐧       |  🍎   |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
 | [`apt`](https://wiki.debian.org/AptCLI)                                                 | 1.0.0        |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
 | [`apt-mint`](https://github.com/kdeldycke/meta-package-manager/issues/52)               | 1.0.0        |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
@@ -298,6 +298,6 @@ Other subcommands and options are documented in:
 
 [^bsd]: BSD: DragonFly BSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS.
 
-[^linux]: Linux: Alpine Linux, ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, CloudLinux OS, Debian, Exherbo Linux, Fedora, Gentoo Linux, Guix System, IBM PowerKVM, Kali Linux, KVM for IBM z Systems, Linux Mint, Mageia, Mandriva Linux, Manjaro Linux, Nobara, openSUSE, openSUSE Tumbleweed, OpenWrt, Oracle Linux, Parallels, Pidora, Raspbian, RedHat Enterprise Linux, Rocky Linux, Scientific Linux, Slackware, SUSE Linux Enterprise Server, Tuxedo OS, Ubuntu, Ultramarine, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer.
+[^linux]: Linux: Alpine Linux, ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, CloudLinux OS, Debian, Exherbo Linux, Fedora, Generic Linux, Gentoo Linux, Guix System, IBM PowerKVM, Kali Linux, KVM for IBM z Systems, Linux Mint, Mageia, Mandriva Linux, Manjaro Linux, Nobara, openSUSE, openSUSE Tumbleweed, OpenWrt, Oracle Linux, Parallels, Pidora, Raspbian, RedHat Enterprise Linux, Rocky Linux, Scientific Linux, Slackware, SUSE Linux Enterprise Server, Tuxedo OS, Ubuntu, Ultramarine, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer.
 
 [^unix]: Unix: Cygwin, GNU/Hurd, Haiku, IBM AIX, illumos, Solaris.<!-- operation-footnotes-end -->

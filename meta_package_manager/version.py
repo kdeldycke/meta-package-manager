@@ -351,7 +351,7 @@ def is_version(string: str) -> bool:
     version = parse_version(string)
 
     # At least one of the token is an integer.
-    if any((token.integer is not None for token in version)):
+    if any(token.integer is not None for token in version):
         return True
 
     # There is only one non-integer token.

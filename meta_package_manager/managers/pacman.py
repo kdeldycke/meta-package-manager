@@ -39,7 +39,7 @@ class Pacman(PackageManager):
 
     requirement = "5.0.0"
 
-    pre_args = ("--noconfirm",)
+    pre_args = ("--noconfirm", "--color", "never")
 
     version_regexes = (r".*Pacman\s+v(?P<version>\S+)",)
     r"""Search version right after the ``Pacman `` string.

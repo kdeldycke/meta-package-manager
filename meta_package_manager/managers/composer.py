@@ -40,7 +40,7 @@ class Composer(PackageManager):
 
     requirement = "1.4.0"
 
-    pre_args = ("global",)
+    pre_args = ("global", "--no-ansi")
 
     version_regexes = (r"Composer\s+version\s+(?P<version>\S+)",)
     """

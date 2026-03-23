@@ -42,6 +42,9 @@ class Yarn(PackageManager):
     platforms = ALL_PLATFORMS
 
     requirement = "1.20.0"
+
+    pre_args = ("--silent",)
+
     """
     .. code-block:: shell-session
 

@@ -50,7 +50,7 @@ class DNF(PackageManager):
         4.9.0
     """
 
-    pre_args: tuple[str, ...] = ("--color=never",)
+    pre_args: tuple[str, ...] = ("--color=never", "--quiet")
 
     DELIMITER = "___MPM___"
 
@@ -229,7 +229,7 @@ class DNF5(DNF):
 
     cli_names = ("dnf5",)
 
-    pre_args = ()
+    pre_args = ("--quiet",)
     """Reset global options inherited from the `DNF` above.
 
     `dnf5` does not support `--color=never` parameter.

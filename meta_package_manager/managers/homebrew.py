@@ -119,7 +119,7 @@ class Homebrew(PackageManager):
             /reporting_bugs/uninstall_wrongly_reports_cask_as_not_installed.md
             and https://github.com/kdeldycke/meta-package-manager/issues/17 .
         """
-        output = self.run_cli("list", "--versions")
+        output = self.run_cli("list", "--quiet", "--versions")
 
         regexp = re.compile(
             r"""
@@ -230,7 +230,7 @@ class Homebrew(PackageManager):
             options.append("--greedy")
 
         # List available updates.
-        output = self.run_cli("outdated", options)
+        output = self.run_cli("outdated", "--quiet", options)
 
         if output:
             package_list = json.loads(output)
@@ -331,7 +331,7 @@ class Homebrew(PackageManager):
 
         # Additional search on description only.
         if extended:
-            output = self.run_cli("search", query, "--desc")
+            output = self.run_cli("search", "--quiet", query, "--desc")
 
             regexp = re.compile(
                 r"""
@@ -361,7 +361,7 @@ class Homebrew(PackageManager):
         if exact:
             query = f"/^{query}$/"
 
-        output = self.run_cli("search", query)
+        output = self.run_cli("search", "--quiet", query)
 
         regexp = re.compile(
             r"""
@@ -400,7 +400,7 @@ class Homebrew(PackageManager):
             ==> Moving App 'Pngyu.app' to '/Applications/Pngyu.app'
             🍺  pngyu was successfully installed!
         """
-        return self.run_cli("install", package_id)
+        return self.run_cli("install", "--quiet", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
@@ -455,7 +455,7 @@ class Homebrew(PackageManager):
             ==> Purging files for version 2.0.7 of Cask aerial
             🍺  aerial was successfully upgraded!
         """
-        return self.build_cli("upgrade")
+        return self.build_cli("upgrade", "--quiet")
 
     @version_not_implemented
     def upgrade_one_cli(
@@ -483,7 +483,7 @@ class Homebrew(PackageManager):
             ==> Purging files for version 4.2.0 of Cask dupeguru
             🍺  dupeguru was successfully upgraded!
         """
-        return self.build_cli("upgrade", package_id)
+        return self.build_cli("upgrade", "--quiet", package_id)
 
     def remove(self, package_id: str) -> str:
         """Removes a package.
@@ -493,7 +493,7 @@ class Homebrew(PackageManager):
             $ brew uninstall bat
             Uninstalling /usr/local/Cellar/bat/0.21.0... (14 files, 5MB)
         """
-        return self.run_cli("uninstall", package_id)
+        return self.run_cli("uninstall", "--quiet", package_id)
 
     def sync(self) -> None:
         """Sync package metadata.
@@ -549,8 +549,8 @@ class Homebrew(PackageManager):
             Uninstalling /usr/local/Cellar/lua@5.1/5.1.5_8... (22 files, 245.6KB)
             Uninstalling /usr/local/Cellar/nasm/2.15.05... (29 files, 2.9MB)
         """
-        self.run_cli("autoremove", auto_post_args=False)
-        self.run_cli("cleanup", "-s", "--prune=all", auto_post_args=False)
+        self.run_cli("autoremove", "--quiet", auto_post_args=False)
+        self.run_cli("cleanup", "--quiet", "-s", "--prune=all", auto_post_args=False)
 
 
 class Brew(Homebrew):

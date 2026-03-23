@@ -41,6 +41,8 @@ class PKG(PackageManager):
     requirement = "1.11"
     """1.11 is the first version to support ``IGNORE_OSVERSION`` environment variable."""
 
+    pre_args = ("--quiet",)
+
     """
     .. code-block:: shell-session
         $ pkg --version

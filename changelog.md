@@ -8,6 +8,13 @@
 - [mpm] Upgrade from reusable workflows to `repomatic`.
 - [mpm] Inline `replace_content` utility from `click-extra` which was removed in `7.6.2`.
 - [mpm] Simplify `uvx` invocation from `uvx --from meta-package-manager -- mpm` to `uvx meta-package-manager`.
+- [brew,cask] Add `--quiet` option to all `brew` invocations to reduce log verbosity.
+- [composer] Add `--no-ansi` option to all `composer` invocations.
+- [dnf,dnf5,yum] Add `--quiet` option to all invocations to reduce log verbosity.
+- [emerge] Add `--quiet`, `--color n` and `--nospinner` to `pre_args`. Refactor inline flags.
+- [pacman,pacaur,paru,yay] Add `--color never` option to all invocations.
+- [pkg] Add `--quiet` option to all `pkg` invocations to reduce log verbosity.
+- [yarn] Add `--silent` option to all `yarn` invocations to suppress console logs.
 
 ## [`6.1.1` (2026-02-06)](https://github.com/kdeldycke/meta-package-manager/compare/v6.1.0...v6.1.1)
 

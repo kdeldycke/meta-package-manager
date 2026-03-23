@@ -46,6 +46,8 @@ class Emerge(PackageManager):
 
     requirement = "3.0.0"
 
+    pre_args = ("--quiet", "--color", "n", "--nospinner")
+
     version_regexes = (r"Portage\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
@@ -85,6 +87,7 @@ class Emerge(PackageManager):
             "--verbose",
             "--nocolor",
             override_cli_path=qlist_path,
+            auto_pre_args=False,
         )
 
         regexp = re.compile(
@@ -128,9 +131,6 @@ class Emerge(PackageManager):
             "--deep",
             "--pretend",
             "--columns",
-            "--color",
-            "n",
-            "--nospinner",
             "@world",
         )
 
@@ -216,7 +216,7 @@ class Emerge(PackageManager):
         if exact:
             query = f"%^{query}$"
 
-        output = self.run_cli(search_param, "--color", "n", "--nospinner", query)
+        output = self.run_cli(search_param, query)
 
         regexp = re.compile(
             r"""
@@ -243,7 +243,7 @@ class Emerge(PackageManager):
 
             $ sudo emerge --color n --nospinner dev-vcs/git
         """
-        return self.run_cli("--color", "n", "--nospinner", package_id, sudo=True)
+        return self.run_cli(package_id, sudo=True)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided
@@ -257,9 +257,6 @@ class Emerge(PackageManager):
             "--update",
             "--newuse",
             "--deep",
-            "--color",
-            "n",
-            "--nospinner",
             "@world",
             sudo=True,
         )
@@ -279,9 +276,6 @@ class Emerge(PackageManager):
         """
         return self.build_cli(
             "--update",
-            "--color",
-            "n",
-            "--nospinner",
             package_id,
             sudo=True,
         )
@@ -293,7 +287,7 @@ class Emerge(PackageManager):
 
             $ sudo emerge --sync --color n --nospinner
         """
-        self.run_cli("--sync", "--color", "n", "--nospinner", sudo=True)
+        self.run_cli("--sync", sudo=True)
 
     def cleanup(self) -> None:
         """Removes things we don't need anymore.
@@ -326,4 +320,9 @@ class Emerge(PackageManager):
 
         eclean_path = self.which("eclean")
         if eclean_path:
-            self.run_cli("distfiles", override_cli_path=eclean_path, sudo=True)
+            self.run_cli(
+                "distfiles",
+                override_cli_path=eclean_path,
+                auto_pre_args=False,
+                sudo=True,
+            )

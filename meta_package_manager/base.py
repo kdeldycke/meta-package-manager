@@ -695,6 +695,7 @@ class PackageManager(metaclass=MetaPackageManager):
                 timeout=self.timeout,
                 encoding="utf-8",
                 env=cast("subprocess._ENV", env_copy(extra_env)),
+                check=False,
             )
             code = result.returncode
             output = result.stdout
@@ -786,7 +787,7 @@ class PackageManager(metaclass=MetaPackageManager):
 
         # Sudo replaces any pre-command, be it overridden or automatic.
         if sudo:
-            if not is_unix():
+            if current_platform() not in UNIX:
                 msg = "sudo only supported on UNIX."
                 raise NotImplementedError(msg)
             if override_pre_cmds:

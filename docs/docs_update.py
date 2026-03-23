@@ -92,12 +92,8 @@ def operation_matrix() -> tuple[str, str]:
             + ("" if not m.deprecated else f" [⚠️]({m.deprecation_url})"),
             f"{m.requirement}",
         ]
-        for p_obj in MAIN_PLATFORMS:
-            line.append(
-                p_obj.icon if m.platforms.issuperset(extract_members(p_obj)) else ""
-            )
-        for op in Operations:
-            line.append("✓" if m.implements(op) else "")
+        line.extend(p_obj.icon if m.platforms.issuperset(extract_members(p_obj)) else "" for p_obj in MAIN_PLATFORMS)
+        line.extend("✓" if m.implements(op) else "" for op in Operations)
         table.append(line)
 
     # Set each column alignment.
@@ -162,7 +158,7 @@ def write_labels() -> None:
         name_escaped = label_name.replace("\\", "\\\\").replace('"', '\\"')
         desc_escaped = description.replace("\\", "\\\\").replace('"', '\\"')
         entries.append(
-            f'[[profiles.default.labels]]\n'
+            f"[[profiles.default.labels]]\n"
             f'name = "{name_escaped}"\n'
             f'color = "{color}"\n'
             f'description = "{desc_escaped}"'

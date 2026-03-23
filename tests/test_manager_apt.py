@@ -30,6 +30,7 @@ def exact_search():
             ("apt", "search", f"^{package_id}$"),
             capture_output=True,
             encoding="utf-8",
+            check=False,
         )
         assert process.returncode == 0
         return process.stdout

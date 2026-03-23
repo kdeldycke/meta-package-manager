@@ -355,7 +355,4 @@ def is_version(string: str) -> bool:
         return True
 
     # There is only one non-integer token.
-    if len(version.tokens) == 1:
-        return True
-
-    return False
+    return len(version.tokens) == 1

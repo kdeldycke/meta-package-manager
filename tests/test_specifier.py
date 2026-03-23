@@ -266,7 +266,7 @@ def test_parse_specs(spec_string, expected):
             id="multiple_versions",
         ),
         pytest.param(
-            {"left-pad@99.00", "left-pad@99.00"},
+            {"left-pad@99.00"},
             None,
             Specifier.from_string("left-pad@99.00"),
             id="duplicate_version_spec",

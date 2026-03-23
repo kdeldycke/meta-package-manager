@@ -25,9 +25,9 @@ from textwrap import dedent
 
 import pytest
 from boltons.strutils import strip_ansi
+from click_extra.table import TableFormat
 
 from meta_package_manager import __version__
-from click_extra.table import TableFormat
 from meta_package_manager.pool import pool
 
 from .conftest import default_manager_ids
@@ -145,6 +145,7 @@ class TestCommonCLI:
             (sys.executable, "-m", "meta_package_manager", "--version"),
             capture_output=True,
             encoding="utf-8",
+            check=False,
         )
         assert process.returncode == 0
         assert not process.stderr
@@ -331,7 +332,6 @@ class TestManagerSelection(InspectCLIOutput):
 
     @pytest.mark.skip(reason="Generated config file is not isolated from other tests.")
     def test_conf_and_parameter_mix_keep_order(self, invoke, create_config):
-        """"""
         conf_path = create_config(
             "conf.toml",
             dedent("""\

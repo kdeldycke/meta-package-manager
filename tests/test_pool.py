@@ -71,8 +71,8 @@ def test_manager_count():
 
 
 def test_cached_pool():
-    assert pool == pool
-    assert pool is pool
+    assert pool == pool  # noqa: PLR0124
+    assert pool is pool  # noqa: PLR0124
 
 
 @maintained_manager_ids

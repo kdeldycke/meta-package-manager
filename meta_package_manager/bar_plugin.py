@@ -231,6 +231,7 @@ class MPMPlugin:
                 ),
                 capture_output=True,
                 encoding="utf-8",
+                check=False,
             )
             python_version = self.str_to_version(process.stdout)
             # Is Python too old?
@@ -325,6 +326,7 @@ class MPMPlugin:
                 (*mpm_cli_args, "--no-color", "--version"),
                 capture_output=True,
                 encoding="utf-8",
+                check=False,
             )
             error = process.stderr
         except FileNotFoundError as ex:
@@ -483,7 +485,7 @@ class MPMPlugin:
             return
 
         # Force a sync of all local package databases.
-        run((*mpm_args, "--verbosity", "ERROR", "sync"))
+        run((*mpm_args, "--verbosity", "ERROR", "sync"), check=False)
 
         # Fetch outdated packages from all package managers available on the system.
         # We defer all rendering to mpm itself so it can compute more intricate layouts.
@@ -494,6 +496,7 @@ class MPMPlugin:
             (*mpm_args, "--verbosity", "CRITICAL", "outdated", "--plugin-output"),
             capture_output=True,
             encoding="utf-8",
+            check=False,
         )
 
         # Bail-out immediately on errors related to mpm self-execution or if mpm is

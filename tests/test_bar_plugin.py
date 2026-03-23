@@ -20,7 +20,7 @@ import re
 import subprocess
 from collections import Counter
 from itertools import product
-from typing import cast
+from typing import ClassVar, cast
 
 import pytest
 from boltons.iterutils import flatten
@@ -167,7 +167,7 @@ def _subcmd_args(
 
 @unless_macos
 class TestBarPlugin:
-    common_checklist = [
+    common_checklist: ClassVar[list] = [
         # Menubar line. Required.
         (r"(🎁↑\d+|📦✓)( ⚠️\d+)? \| dropdown=false$", True),
         # Submenus and sections marker. Required.
@@ -201,6 +201,7 @@ class TestBarPlugin:
             capture_output=True,
             encoding="utf-8",
             env=cast("subprocess._ENV", env_copy(extra_env)),
+            check=False,
         )
 
         assert not process.stderr
@@ -221,14 +222,14 @@ class TestBarPlugin:
             if not matches:
                 print(process.stdout)
                 msg = f"plugin output line {line!r} did not match any regex."
-                raise Exception(msg)
+                raise Exception(msg)  # noqa: TRY002
 
         # Check all required regex did match at least once.
         for index, (regex, required) in enumerate(checks):
             if required and not match_counter[index]:
                 print(process.stdout)
                 msg = f"{regex!r} regex did not match any plugin output line."
-                raise Exception(msg)
+                raise Exception(msg)  # noqa: TRY002
 
     @pytest.mark.xdist_group(name="avoid_concurrent_plugin_runs")
     @pytest.mark.parametrize("submenu_layout", (True, False, None))
@@ -292,6 +293,7 @@ class TestBarPlugin:
             _subcmd_args(shell_args, bar_plugin.__file__, "--search-mpm"),
             capture_output=True,
             encoding="utf-8",
+            check=False,
         )
 
         assert not process.stderr
@@ -312,6 +314,7 @@ class TestBarPlugin:
             _subcmd_args(shell_args, *python_args, "--version"),
             capture_output=True,
             encoding="utf-8",
+            check=False,
         )
 
         assert not process.stderr

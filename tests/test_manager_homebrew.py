@@ -49,6 +49,7 @@ def install_cask():
             ("brew", "--repository"),
             capture_output=True,
             encoding="utf-8",
+            check=False,
         )
         assert process.returncode == 0
         assert not process.stderr
@@ -88,6 +89,7 @@ def install_cask():
                 commit,
                 f"{package_id}.rb",
             ),
+            check=False,
         )
         assert not process.stderr
         assert process.returncode == 0
@@ -107,12 +109,15 @@ def install_cask():
         process = subprocess.run(
             ("brew", "cleanup", "-s", "--prune=all"),
             env=cast("subprocess._ENV", env_copy({"HOMEBREW_NO_AUTO_UPDATE": "1"})),
+            check=False,
         )
         assert not process.stderr
         assert process.returncode == 0
 
     def brew_uninstall(package_id):
-        process = subprocess.run(("brew", "uninstall", "--cask", "--force", package_id))
+        process = subprocess.run(
+            ("brew", "uninstall", "--cask", "--force", package_id), check=False
+        )
         assert not process.stderr
         assert process.returncode == 0
 

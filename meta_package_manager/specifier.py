@@ -31,7 +31,7 @@ from .version import is_version, parse_version
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Sequence
-    from typing import Final
+    from typing import ClassVar, Final
 
     from .version import TokenizedString
 
@@ -279,7 +279,7 @@ class Solver:
 
     manager_priority: Sequence[str] = []
 
-    spec_pool: set[Specifier] = set()
+    spec_pool: ClassVar[set[Specifier]] = set()
 
     def __init__(
         self,
@@ -309,10 +309,7 @@ class Solver:
         for manager_id in self.manager_priority:
             # Returns the first manager in the priority list if no filtering needs to
             # be performed.
-            if not keep_managers:
-                return manager_id
-            # Returns the first matching manager in the priority list.
-            elif manager_id in keep_managers:
+            if not keep_managers or manager_id in keep_managers:
                 return manager_id
         # No single top-priority manager can selected.
         return None

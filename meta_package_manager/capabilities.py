@@ -23,8 +23,8 @@ from functools import wraps
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-    from typing import Callable, ParamSpec, TypeVar
+    from collections.abc import Callable, Iterator
+    from typing import ParamSpec, TypeVar
 
     from .base import Package, PackageManager
 

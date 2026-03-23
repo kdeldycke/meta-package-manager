@@ -20,7 +20,7 @@ import io
 import logging
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 from boltons.ecoutils import get_profile
 from cyclonedx.model import ExternalReference, ExternalReferenceType, XsUri
@@ -41,11 +41,11 @@ from spdx_tools.spdx.model import (
     Document,
     ExternalPackageRef,
     ExternalPackageRefCategory,
+    Package as SPDXPackage,
     PackagePurpose,
     Relationship,
     RelationshipType,
 )
-from spdx_tools.spdx.model import Package as SPDXPackage
 from spdx_tools.spdx.validation.document_validator import validate_full_spdx_document
 from spdx_tools.spdx.writer.json import json_writer
 from spdx_tools.spdx.writer.rdf import rdf_writer
@@ -132,7 +132,7 @@ class SPDX(SBOM):
     @classmethod
     def normalize_spdx_id(cls, str: str) -> str:
         """SPDX IDs must only contain letters, numbers, ``.`` and ``-``."""
-        return "-".join((s for s in re.split(r"[^a-zA-Z0-9\.]", str) if s))
+        return "-".join(s for s in re.split(r"[^a-zA-Z0-9\.]", str) if s)
 
     def init_doc(self) -> None:
         """
@@ -168,7 +168,7 @@ class SPDX(SBOM):
                     f"v{__version__}/{profile['guid']}"
                 ),
                 creators=[Actor(ActorType.TOOL, f"meta-package-manager-{__version__}")],
-                created=datetime.now(),
+                created=datetime.now(tz=timezone.utc),
                 data_license="CC0-1.0",
             )
         )

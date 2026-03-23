@@ -1,14 +1,28 @@
 ---
-name: Tests
+name: 🔬 Tests
 "on":
   workflow_dispatch:
   push:
     branches:
       - main
+    paths:
+      - meta_package_manager/**
+      - tests/**
+      - pyproject.toml
+      - uv.lock
+      - .github/workflows/tests.yaml
   pull_request:
+    branches-ignore:
+      - prepare-release
+    paths:
+      - meta_package_manager/**
+      - tests/**
+      - pyproject.toml
+      - uv.lock
+      - .github/workflows/tests.yaml
   schedule:
-    # Run tests every Monday at 9:17 to catch regressions.
-    - cron: "17 9 * * 1"
+    # Run tests monthly to catch regressions from dependency or environment changes.
+    - cron: "17 9 1 * *"
 
 concurrency:
   # Group workflow jobs so new commits cancels in-progress execution triggered by previous commits. Source:
@@ -45,15 +59,12 @@ jobs:
           - "3.14"
           - "3.14t"
           - "3.15"
-          - "3.15t"
         include:
           # Default all jobs as stable, unless marked otherwise below.
           - state: stable
           # XXX Python 3.15 is still in development.
           - state: unstable
             python-version: "3.15"
-          - state: unstable
-            python-version: "3.15t"
     name: "${{ matrix.state == 'stable' && '✅' || '⁉️' }} ${{ matrix.os }} / py${{ matrix.python-version }}"
     runs-on: ${{ matrix.os }}
     # We keep going when a job flagged as not stable fails.
@@ -127,37 +138,8 @@ jobs:
           choco upgrade chocolatey --no-progress --yes --retry-count=3
       - name: Chocolatey - Pin un-upgradeable packages
         if: runner.os == 'Windows'
-        # XXX The "choco upgrade all" step below fails for some packages. Just ignore them by pinning them.
-
-        #   You have strawberryperl v5.40.2.2 installed. Version 5.42.0.1 is available based on your source(s).
-        #   Downloading package from source 'https://community.chocolatey.org/api/v2/'
-        #
-        #   strawberryperl v5.42.0.1 [Approved]
-        #   strawberryperl package files upgrade completed. Performing other installation steps.
-        #   Downloading strawberryperl 64 bit
-        #     from 'https://github.com/StrawberryPerl/Perl-Dist-Strawberry/releases/download/SP_54201_64bit
-        #     /strawberry-perl-5.42.0.1-64bit.msi'
-        #
-        #   Download of strawberry-perl-5.42.0.1-64bit.msi (198.4 MB) completed.
-        #   Hashes match.
-        #   Installing strawberryperl...
-        #   ERROR: Running ["C:\Windows\System32\msiexec.exe" /i
-        #   "C:\Users\runneradmin\AppData\Local\Temp\chocolatey\StrawberryPerl\5.42.0.1
-        #   \strawberry-perl-5.42.0.1-64bit.msi" /qn /norestart] was not successful. Exit code was '1603'.
-        #   Exit code indicates the following: Generic MSI Error. This is a local environment error, not an issue with
-        #   a package or the MSI itself - it could mean a pending reboot is necessary prior to install or something
-        #   else (like the same version is already installed). Please see MSI log if available. If not, try again
-        #   adding '--install-arguments="'/l*v c:\StrawberryPerl_msi_install.log'"'. Then search the MSI Log for
-        #   "Return Value 3" and look above that for the error.
-        #   The upgrade of strawberryperl was NOT successful.
-
-        #   nginx v1.29.5 [Approved]
-        #   nginx package files upgrade completed. Performing other installation steps.
-        #   Port '80' is in use by 'System'...
-        #   ERROR: Please specify a different port number...
-        #   Environment Vars (like PATH) have changed. Close/reopen your shell to
-        #    see the changes (or in powershell/cmd.exe just type `refreshenv`).
-        #   The upgrade of nginx was NOT successful.
+        # XXX The "choco upgrade all" step below fails for some packages (strawberryperl MSI error, rtools, nginx
+        # port conflict). Pin them to prevent upgrade failures.
         run: |
           choco pin add --name="strawberryperl"
           choco pin add --name="rtools"
@@ -203,127 +185,8 @@ jobs:
         run: |
           brew install yarn
 
-      # XXX Upgrading Yarn on Linux via mpm is not working. Like in Windows below.
-      #
-      #  ► sudo apt --quiet --yes install yarn
-      #  The following NEW packages will be installed:
-      #    yarn
-      #  (...)
-      #  Setting up yarn (1.22.19-1) ...
-      #  (...)
-      #  _____________ TestUpgrade.test_manager_selection[single_exclusion] _____________
-      #  (...)
-      #  ----------------------------- Captured stdout call -----------------------------
-      #  (...)
-      #  ► mpm --exclude pip upgrade --all
-      #    Upgrade all outdated packages from apt...
-      #    (...)
-      #    Upgrade all outdated packages from yarn...
-      #  Return code: 1
-      #  Traceback (most recent call last):
-      #    File ".../site-packages/click/testing.py", line 408, in invoke
-      #      return_value = cli.main(args=args or (), prog_name=prog_name, **extra)
-      #    File ".../site-packages/click_extra/commands.py", line 159, in main
-      #      return super().main(*args, **kwargs)
-      #    File ".../site-packages/click/core.py", line 1055, in main
-      #      rv = self.invoke(ctx)
-      #    File ".../site-packages/click_extra/commands.py", line 213, in invoke
-      #      return super().invoke(ctx)
-      #    File ".../site-packages/click/core.py", line 1657, in invoke
-      #      return _process_result(sub_ctx.command.invoke(sub_ctx))
-      #    File ".../site-packages/click/core.py", line 1404, in invoke
-      #      return ctx.invoke(self.callback, **ctx.params)
-      #    File ".../site-packages/click/core.py", line 760, in invoke
-      #      return __callback(*args, **kwargs)
-      #    File ".../site-packages/click/decorators.py", line 26, in new_func
-      #      return f(get_current_context(), *args, **kwargs)
-      #    File ".../meta_package_manager/cli.py", line 892, in upgrade
-      #      output = manager.upgrade()
-      #    File ".../meta_package_manager/base.py", line 974, in upgrade
-      #      return self.run(cli, extra_env=self.extra_env)
-      #    File ".../meta_package_manager/base.py", line 643, in run
-      #      code, output, error = run_cmd(
-      #    File ".../site-packages/click_extra/run.py", line 110, in run_cmd
-      #      process = subprocess.run(
-      #    File ".../python3.11/subprocess.py", line 503, in run
-      #      with Popen(*popenargs, **kwargs) as process:
-      #    File ".../python3.11/subprocess.py", line 971, in __init__
-      #      self._execute_child(args, executable, preexec_fn, close_fds,
-      #    File ".../python3.11/subprocess.py", line 1847, in _execute_child
-      #      raise child_exception_type(errno_num, err_msg, err_filename)
-      #  FileNotFoundError: [Errno 2] No such file or directory: '/usr/local/bin/yarn'
-      #
-      # - name: Yarn - Linux install
-      #   if: runner.os == 'Linux'
-      #   run: |
-      #     curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-      #     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-      #     sudo apt --quiet --yes update
-      #     sudo apt --quiet --yes install yarn
-
-      # XXX Upgrading Yarn on Windows via mpm is not working, as it seems to requires PATH re-evaluation, which cannot
-      # be achieve unless we re-open a new shell. A thing we cannot do in a GitHub Action. So we simply do not install
-      # it on Windows for now.
-      #
-      #   ► choco install yarn --no-progress --yes --retry-count=3
-      #   Chocolatey v1.3.0
-      #   Download of yarn-1.22.19.msi (1.6 MB) completed.
-      #   yarn has been installed.
-      #   (...)
-      #   Environment Vars (like PATH) have changed. Close/reopen your shell to
-      #    see the changes (or in powershell/cmd.exe just type `refreshenv`).
-      #    The install of yarn was successful.
-      #     Software installed as 'msi', install location is likely default.
-      #   (...)
-      #   ___________ TestUpgrade.test_manager_selection[multiple_exclusions] ___________
-      #   (...)
-      #   ---------------------------- Captured stdout call -----------------------------
-      #   ► mpm --exclude pip --exclude gem upgrade --all
-      #     mwarning: cargo does not implement Operations.upgrade_all.
-      #     Upgrade all outdated packages from choco...
-      #     (...)
-      #     warning: Skip unavailable scoop manager.
-      #     warning: steamcmd does not implement Operations.upgrade_all.
-      #     warning: vscode does not implement Operations.upgrade_all.
-      #     Upgrade all outdated packages from yarn...
-      #   Return code: 1
-      #   Traceback (most recent call last):
-      #     File "...\site-packages\click\testing.py", line 408, in invoke
-      #       return_value = cli.main(args=args or (), prog_name=prog_name, **extra)
-      #     File "...\site-packages\click_extra\commands.py", line 159, in main
-      #       return super().main(*args, **kwargs)
-      #     File "...\site-packages\click\core.py", line 1055, in main
-      #       rv = self.invoke(ctx)
-      #     File "...\site-packages\click_extra\commands.py", line 213, in invoke
-      #       return super().invoke(ctx)
-      #     File "...\site-packages\click\core.py", line 1657, in invoke
-      #       return _process_result(sub_ctx.command.invoke(sub_ctx))
-      #     File "...\site-packages\click\core.py", line 1404, in invoke
-      #       return ctx.invoke(self.callback, **ctx.params)
-      #     File "...\site-packages\click\core.py", line 760, in invoke
-      #       return __callback(*args, **kwargs)
-      #     File "...\site-packages\click\decorators.py", line 26, in new_func
-      #       return f(get_current_context(), *args, **kwargs)
-      #     File "...\meta_package_manager\cli.py", line 892, in upgrade
-      #       output = manager.upgrade()
-      #     File "...\meta_package_manager\base.py", line 974, in upgrade
-      #       return self.run(cli, extra_env=self.extra_env)
-      #     File "...\meta_package_manager\base.py", line 643, in run
-      #       code, output, error = run_cmd(
-      #     File "...\site-packages\click_extra\run.py", line 110, in run_cmd
-      #       process = subprocess.run(
-      #     File "...\Python\3.11.2\x64\Lib\subprocess.py", line 548, in run
-      #       with Popen(*popenargs, **kwargs) as process:
-      #     File "...\Python\3.11.2\x64\Lib\subprocess.py", line 1024, in __init__
-      #       self._execute_child(args, executable, preexec_fn, close_fds,
-      #     File "...\Python\3.11.2\x64\Lib\subprocess.py", line 1493, in _execute_child
-      #       hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
-      #   FileNotFoundError: [WinError 2] The system cannot find the file specified
-      #
-      # - name: Yarn - Windows install
-      #   if: runner.os == 'Windows'
-      #   run: |
-      #     choco install yarn --no-progress --yes --retry-count=3
+      # XXX Yarn is only installed on macOS. On Linux and Windows, Yarn's post-install binary path is not registered
+      # in PATH within the same GitHub Actions shell session, causing FileNotFoundError during mpm upgrade tests.
 
       # Composer
       - name: Composer - macOS install
@@ -416,12 +279,7 @@ jobs:
         run: |
           sudo gem update --quiet --system
       - name: Ruby & Gem - Ubuntu
-        # As of Ubuntu 21.04, RubyGems is exclusively managed by APT. A call to "sudo gem update --system"
-        # ends up with the following error:
-        #   ERROR:  Your RubyGems was installed through APT, and upgrading it through RubyGems
-        #   itself is unsupported. If you really need the latest version of RubyGems (tip:
-        #   you usually don't), then you need to install RubyGems (and Ruby) manually,
-        #   maybe using tools like ruby-install, rvm, etc.
+        # As of Ubuntu 21.04, RubyGems is exclusively managed by APT; "gem update --system" is unsupported.
         if: runner.os == 'Linux'
         run: |
           sudo apt --quiet --yes install ruby-rubygems
@@ -484,22 +342,12 @@ jobs:
           uv run python -m meta_package_manager --version
 
       # Bar plugin runs.
-      - name: bar_plugin.py --search-mpm
-        if: runner.os == 'macOS'
-        run: |
-          ./meta_package_manager/bar_plugin.py --search-mpm
       - name: uv run bar_plugin.py --search-mpm
         if: runner.os == 'macOS'
-        run: |
-          uv --no-progress run --frozen -- ./meta_package_manager/bar_plugin.py --search-mpm
-      - name: bar_plugin.py
-        if: runner.os == 'macOS'
-        run: |
-          ./meta_package_manager/bar_plugin.py
+        run: uv --no-progress run --frozen -- ./meta_package_manager/bar_plugin.py --search-mpm
       - name: uv run bar_plugin.py
         if: runner.os == 'macOS'
-        run: |
-          uv --no-progress run --frozen -- ./meta_package_manager/bar_plugin.py
+        run: uv --no-progress run --frozen -- ./meta_package_manager/bar_plugin.py
 
       # Test suite runs.
       - name: Parallel non-destructive tests
@@ -552,47 +400,58 @@ jobs:
           --report-type test_results
           --token "${CODECOV_TOKEN}"
 
-  # Test that mpm from other package managers.
-  #
-  # XXX Projects dependendong on lxml will not be able to compile on Windows
-  # ARM64: https://bugs.launchpad.net/lxml/+bug/2004481
-  #
-  # I tried to rely on vcpkg but this didn't work:
-  #   - run: |
-  #       vcpkg install libxml2:arm64-windows
-  #       vcpkg install libxslt:arm64-windows
-  #       vcpkg integrate install
-  #
-  # Another possibility would be to install the pre-built binaries available
-  # at: https://github.com/lxml/libxml2-win-binaries
-  #
-  # But all build attempts ends up with:
-  #   C:\Users\RUNNER~1\AppData\Local\Temp\xmlXPathInit8xwj7_4f.c(1): fatal
-  #   error C1083: Cannot open include file: 'libxml/xpath.h': No such file
-  #   or directory
-  #   ***********************************************************************
-  #   Could not find function xmlXPathInit in library libxml2. Is libxml2
-  #   installed?
-  #   Is your C compiler installed and configured correctly?
-  #   ***********************************************************************
-  #   error: command 'C:\\Program Files\\Microsoft Visual
-  #   Studio\\2022\\Enterprise\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostARM64
-  #   \\ARM64\\cl.exe'
-  #   failed with exit code 2
-  #   hint: This usually indicates a problem with the package or the build
-  #   environment.
-  #
-  # So keep an eye on Meta Package Manager builds, maybe one day it will
-  # succeed once the lxml project will works on Windows ARM64.
+  # Test mpm installability from other package managers.
+  # XXX windows-11-arm excluded from all install jobs below; see lxml ARM64 note in the test matrix above.
+
+  once-tests:
+    name: 🔂 Once tests
+    runs-on: ubuntu-slim
+    steps:
+      - uses: astral-sh/setup-uv@v7.3.1
+      - name: Install Python
+        run: uv --no-progress venv --python 3.14
+
+      # https://pypi.org/project/meta-package-manager
+      - name: Run stable CLI via uv
+        run: |
+          uvx    meta-package-manager               --version
+          uvx    --from meta-package-manager -- mpm --version
+          uv run --with meta-package-manager -- mpm --version
+      - name: Run dev CLI via uv
+        run: |
+          uvx    --from git+https://github.com/kdeldycke/meta-package-manager -- mpm --version
+          uv run --with git+https://github.com/kdeldycke/meta-package-manager -- mpm --version
+
+      - name: Run stable CLI via uv tool
+        run: |
+          uv tool install meta-package-manager
+          mpm --version
+          uv tool uninstall meta-package-manager
+      - name: Run dev CLI via uv tool
+        run: |
+          uv tool install git+https://github.com/kdeldycke/meta-package-manager
+          mpm --version
+          uv tool uninstall meta-package-manager
+
+      - name: Run CLI via pipx
+        run: |
+          uv tool install pipx
+          pipx run meta-package-manager --version
+          pipx run --spec meta-package-manager mpm --version
+          pipx run --spec git+https://github.com/kdeldycke/meta-package-manager mpm --version
+          uv tool uninstall pipx
+
+      - name: Run CLI via pip
+        run: |
+          pip install meta-package-manager
+          mpm --version
 
   brew-install-mpm:
     strategy:
       matrix:
         os:
-          - ubuntu-24.04-arm  # arm64
-          - ubuntu-slim       # x86
-          - macos-26          # arm64
-          - macos-15-intel    # x86
+          - ubuntu-slim  # x86
+          - macos-26     # arm64
     runs-on: ${{ matrix.os }}
     steps:
       - if: runner.os == 'Linux'
@@ -600,56 +459,11 @@ jobs:
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           echo "/home/linuxbrew/.linuxbrew/bin/" >> "$GITHUB_PATH"
       # https://github.com/Homebrew/homebrew-core/blob/master/Formula/meta-package-manager.rb
-      - run: |
-          brew install meta-package-manager
-      - run: |
-          mpm --version
-
-  pip-install-mpm:
-    strategy:
-      matrix:
-        os:
-          - ubuntu-24.04-arm  # arm64
-          - ubuntu-slim       # x86
-          - macos-26          # arm64
-          - macos-15-intel    # x86
-          # - windows-11-arm  # arm64
-          - windows-2025      # x86
-    runs-on: ${{ matrix.os }}
-    steps:
-      # https://pypi.org/project/meta-package-manager
-      - run: |
-          pip install meta-package-manager
-      - run: |
-          mpm --version
-
-  pipx-install-mpm:
-    strategy:
-      matrix:
-        os:
-          - ubuntu-24.04-arm  # arm64
-          - ubuntu-slim       # x86
-          - macos-26          # arm64
-          - macos-15-intel    # x86
-          # - windows-11-arm  # arm64
-          - windows-2025      # x86
-    runs-on: ${{ matrix.os }}
-    steps:
-      - run: |
-          python -m pip install --upgrade pipx
-      # https://pypi.org/project/meta-package-manager
-      - run: |
-          pipx install meta-package-manager
-      - run: |
-          mpm --version
+      - run: brew install meta-package-manager
+      - run: mpm --version
 
   scoop-install-mpm:
-    strategy:
-      matrix:
-        os:
-          - windows-11-arm    # arm64
-          - windows-2025      # x86
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-2025
     steps:
       - shell: pwsh
         run: |
@@ -659,35 +473,6 @@ jobs:
           "$env:USERPROFILE\scoop\shims" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
       # https://github.com/ScoopInstaller/Main/blob/master/bucket/meta-package-manager.json
       - shell: pwsh
-        run: |
-          scoop install main/meta-package-manager
+        run: scoop install main/meta-package-manager
       - shell: pwsh
-        run: |
-          mpm --version
-
-  uv-install-mpm:
-    strategy:
-      matrix:
-        os:
-          - ubuntu-24.04-arm  # arm64
-          - ubuntu-slim       # x86
-          - macos-26          # arm64
-          - macos-15-intel    # x86
-          # - windows-11-arm  # arm64
-          - windows-2025      # x86
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: astral-sh/setup-uv@v7.3.1
-        with:
-          # windows-2025 runners have only Python 3.9 installed.
-          python-version: ${{ matrix.os == 'windows-2025' && '3.10' || ''}}
-      # https://pypi.org/project/meta-package-manager
-      - name: Run stable CLI
-        run: |
-          uvx    meta-package-manager               --version
-          uvx    --from meta-package-manager -- mpm --version
-          uv run --with meta-package-manager -- mpm --version
-      - name: Run dev CLI
-        run: |
-          uvx    --from git+https://github.com/kdeldycke/meta-package-manager -- mpm --version
-          uv run --with git+https://github.com/kdeldycke/meta-package-manager -- mpm --version
+        run: mpm --version

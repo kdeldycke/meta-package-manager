@@ -1,7 +1,7 @@
 [project]
 # Docs: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
 name = "meta-package-manager"
-version = "6.1.2"
+version = "6.1.2.dev0"
 # Python versions and their status: https://devguide.python.org/versions/
 requires-python = ">= 3.10"
 description = "🎁 wraps all package managers with a unifying CLI"
@@ -177,7 +177,7 @@ docs = [
 
 [project.urls]
 "Homepage" = "https://github.com/kdeldycke/meta-package-manager"
-"Download" = "https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.1.2"
+"Download" = "https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.1.2.dev0"
 "Changelog" = "https://github.com/kdeldycke/meta-package-manager/blob/main/changelog.md"
 "Issues" = "https://github.com/kdeldycke/meta-package-manager/issues"
 "Repository" = "https://github.com/kdeldycke/meta-package-manager"
@@ -204,8 +204,8 @@ exclude-newer = "1 week"
 product-name = "Meta Package Manager"
 file-description = "🎁 wraps all package managers with a unifying CLI"
 copyright = "Kevin Deldycke <kevin@deldycke.com> and contributors. Distributed under GPL-2.0-or-later license."
-file-version = "6.1.2"
-product-version = "6.1.2"
+file-version = "6.1.2.dev0"
+product-version = "6.1.2.dev0"
 macos-app-icon = "docs/assets/icon.png"
 linux-icon = "docs/assets/icon.png"
 windows-icon-from-ico = "docs/assets/icon.png"
@@ -249,17 +249,25 @@ addopts = [
 xfail_strict = true
 
 [tool.bumpversion]
-current_version = "6.1.2"
+current_version = "6.1.2.dev0"
 allow_dirty = true
+ignore_missing_files = true
+# Parse versions with an optional .devN suffix (PEP 440).
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\.dev(?P<dev>\\d+))?"
+serialize = [
+  "{major}.{minor}.{patch}.dev{dev}",
+  "{major}.{minor}.{patch}",
+]
+# When dev is "release" (its optional value), the .devN suffix is omitted.
+# Bumping patch/minor/major resets dev to "0", producing X.Y.Z.dev0.
+# Bumping dev goes from "0" to "release", stripping the suffix for release.
+parts.dev.values = [ "0", "release" ]
+parts.dev.optional_value = "release"
 
 [[tool.bumpversion.files]]
 # Update Python package version in any __init__.py file.
 glob = "./**/__init__.py"
 ignore_missing_version = true
-
-[[tool.bumpversion.files]]
-# Update version in bar plugin.
-filename = "./meta_package_manager/bar_plugin.py"
 
 [[tool.bumpversion.files]]
 # Update version in [project] section.
@@ -270,14 +278,14 @@ replace = 'version = "{new_version}"'
 [[tool.bumpversion.files]]
 # Update version in download URL.
 filename = "./pyproject.toml"
-search = 'releases/tag/v{current_version}'
-replace = 'releases/tag/v{new_version}'
+search = "releases/tag/v{current_version}"
+replace = "releases/tag/v{new_version}"
 
 [[tool.bumpversion.files]]
-# Update the version in standard Markdown changelog.
+# Update the version in Markdown changelog.
 filename = "./changelog.md"
-search = "## [{current_version} (unreleased)]("
-replace = "## [{new_version} (unreleased)]("
+search = "## [`{current_version}` (unreleased)]("
+replace = "## [`{new_version}` (unreleased)]("
 
 [[tool.bumpversion.files]]
 # Update the version in the citation file.

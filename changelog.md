@@ -9,21 +9,33 @@
 - [mpm] Inline `replace_content` utility from `click-extra` which was removed in `7.6.2`.
 - [mpm] Simplify `uvx` invocation from `uvx --from meta-package-manager -- mpm` to `uvx meta-package-manager`.
 
-## [6.1.1 (2026-02-05)](https://github.com/kdeldycke/meta-package-manager/compare/v6.1.0...v6.1.1)
+## [`6.1.1` (2026-02-06)](https://github.com/kdeldycke/meta-package-manager/compare/v6.1.0...v6.1.1)
+
+> [!NOTE]
+> `6.1.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/6.1.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.1.1).
 
 - [choco] Add `--retry-count=3` option to all `choco` invocations.
 - [mpm] Upgrade to `extra-platforms` 8.0.0. Remove usage of deprecated functions.
 - [mpm] Remove direct dependency on `tabulate`.
 
-## [6.1.0 (2026-01-18)](https://github.com/kdeldycke/meta-package-manager/compare/v6.0.2...v6.1.0)
+## [`6.1.0` (2026-01-18)](https://github.com/kdeldycke/meta-package-manager/compare/v6.0.2...v6.1.0)
+
+> [!NOTE]
+> `6.1.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/6.1.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.1.0).
 
 - [uvx] Add `uvx` support for managing isolated Python tools via `uv tool`. Closes {issue}`1656`, {pr}`1657`.
 
-## [6.0.2 (2026-01-09)](https://github.com/kdeldycke/meta-package-manager/compare/v6.0.1...v6.0.2)
+## [`6.0.2` (2026-01-09)](https://github.com/kdeldycke/meta-package-manager/compare/v6.0.1...v6.0.2)
+
+> [!NOTE]
+> `6.0.2` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/6.0.2/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.0.2).
 
 - [uv] Workaround `uv` parsing issues with package specifiers by not quoting them. Closes {issue}`1653`.
 
-## [6.0.1 (2026-01-02)](https://github.com/kdeldycke/meta-package-manager/compare/v6.0.0...v6.0.1)
+## [`6.0.1` (2026-01-02)](https://github.com/kdeldycke/meta-package-manager/compare/v6.0.0...v6.0.1)
+
+> [!NOTE]
+> `6.0.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/6.0.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.0.1).
 
 - [mpm] Move auto-lock time from 8:43 to 4:43.
 - [mpm] Set cooldown period via the `pyproject.toml`.
@@ -32,7 +44,10 @@
 - [mpm] Replace deprecated `codecov/test-results-action` by `codecov/codecov-action`.
 - [mpm] Remove utilization workaround for `macos-15-intel`.
 
-## [6.0.0 (2025-12-08)](https://github.com/kdeldycke/meta-package-manager/compare/v5.21.0...v6.0.0)
+## [`6.0.0` (2025-12-08)](https://github.com/kdeldycke/meta-package-manager/compare/v5.21.0...v6.0.0)
+
+> [!NOTE]
+> `6.0.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/6.0.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.0.0).
 
 - [mpm] Add `--no-config` option inherited from Click Extra.
 - [mpm] Replace Click Extra's default `--table-format` option by our `--output-format` option, which allows sorted table rendering and JSON output.
@@ -55,7 +70,10 @@
 - [mpm] Use `astral-sh/setup-uv` action to install `uv` instead of manually installing it with `pip`.
 - [mpm] Move all typing-related imports behind a hard-coded `TYPE_CHECKING` guard to avoid runtime imports.
 
-## [5.21.0 (2025-05-28)](https://github.com/kdeldycke/meta-package-manager/compare/v5.20.0...v5.21.0)
+## [`5.21.0` (2025-05-29)](https://github.com/kdeldycke/meta-package-manager/compare/v5.20.0...v5.21.0)
+
+> [!NOTE]
+> `5.21.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.21.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.21.0).
 
 - [mpm] Drop support for Python 3.10.
 - [mpm] Fix parsing of package specifiers with multiple version separators.
@@ -72,7 +90,10 @@
 - [mpm] Reactivates concurrency limits on tests.
 - [mpm] Uploads codecov test results.
 
-## [5.20.0 (2024-11-23)](https://github.com/kdeldycke/meta-package-manager/compare/v5.19.0...v5.20.0)
+## [`5.20.0` (2024-11-25)](https://github.com/kdeldycke/meta-package-manager/compare/v5.19.0...v5.20.0)
+
+> [!NOTE]
+> `5.20.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.20.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.20.0).
 
 - [eopkg] Add support for new `eopkg` manager. Closes {issue}`1093`.
 - [fwupd] Add support for new `fwupd` manager. Closes {issue}`1289`.
@@ -81,7 +102,10 @@
 - [mpm] Add detailed documentation on manager selection with configuration file.
 - [mpm] Fix mixing of manager selector lists and flags.
 
-## [5.19.0 (2024-11-13)](https://github.com/kdeldycke/meta-package-manager/compare/v5.18.0...v5.19.0)
+## [`5.19.0` (2024-11-14)](https://github.com/kdeldycke/meta-package-manager/compare/v5.18.0...v5.19.0)
+
+> [!NOTE]
+> `5.19.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.19.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.19.0).
 
 - [vscodium] Add support for VSCodium plugins.
 - [dnf,mas,vscode,yum] Implement `remove` operation.
@@ -100,14 +124,20 @@
 - [mpm] Run tests on `macos-15` instead of `macos-14`.
 - [mpm] Add a Sankey diagram of all supported package managers.
 
-## [5.18.0 (2024-08-02)](https://github.com/kdeldycke/meta-package-manager/compare/v5.17.0...v5.18.0)
+## [`5.18.0` (2024-08-02)](https://github.com/kdeldycke/meta-package-manager/compare/v5.17.0...v5.18.0)
+
+> [!NOTE]
+> `5.18.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.18.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.18.0).
 
 - [mpm] Add new command to export installed packages to a SBOM file in SPDX or CycloneDX standard. Closes {issue}`936`.
 - [mpm] Add new dependencies on `spdx-tools` and `cyclonedex-python-lib`.
 - [mpm] Update list of recognized pURL scheme types.
 - [apt] Add architecture in package metadata.
 
-## [5.17.0 (2024-07-07)](https://github.com/kdeldycke/meta-package-manager/compare/v5.16.0...v5.17.0)
+## [`5.17.0` (2024-07-08)](https://github.com/kdeldycke/meta-package-manager/compare/v5.16.0...v5.17.0)
+
+> [!NOTE]
+> `5.17.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.17.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.17.0).
 
 - [uv] Add support for `uv` package manager for Python.
 - [mpm] Add `--no-<manager-id>` negative selection flags for each single manager. Closes {issue}`882`.
@@ -124,7 +154,10 @@
 - [mpm] Remove `sys.path` cleaning hack in `__main__` invocation.
 - [mpm] Reactivate config file test for `restore` subcommand.
 
-## [5.16.0 (2024-05-24)](https://github.com/kdeldycke/meta-package-manager/compare/v5.15.0...v5.16.0)
+## [`5.16.0` (2024-05-24)](https://github.com/kdeldycke/meta-package-manager/compare/v5.15.0...v5.16.0)
+
+> [!NOTE]
+> `5.16.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.16.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.16.0).
 
 - [winget] Add support for WinGet on Windows. Closes {issue}`500` and {issue}`1241`.
 - [scoop] Add `mpm` installation instructions with `scoop`.
@@ -135,7 +168,10 @@
 - [mpm] Remove direct dependency on `click` and `mypy`.
 - [mpm] Make `typing-extensions` dependency optional.
 
-## [5.15.0 (2024-02-25)](https://github.com/kdeldycke/meta-package-manager/compare/v5.14.2...v5.15.0)
+## [`5.15.0` (2024-02-25)](https://github.com/kdeldycke/meta-package-manager/compare/v5.14.2...v5.15.0)
+
+> [!NOTE]
+> `5.15.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.15.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.15.0).
 
 - [pkg] Add support for `pkg` on FreeBSD.
 - [choco] Bump minimal `choco` requirement to `2.0.0`.
@@ -147,17 +183,26 @@
 - [mpm] Reintroduce coloring of version. Refs {pr}`1152`.
 - [mpm] Use external workflow to manage issues and PRs content-based labelling.
 
-## [5.14.2 (2024-01-17)](https://github.com/kdeldycke/meta-package-manager/compare/v5.14.1...v5.14.2)
+## [`5.14.2` (2024-01-17)](https://github.com/kdeldycke/meta-package-manager/compare/v5.14.1...v5.14.2)
+
+> [!NOTE]
+> `5.14.2` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.14.2/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.14.2).
 
 - [mpm] Fix installation from `pipx`. Closes {issue}`1154`.
 
-## [5.14.1 (2024-01-16)](https://github.com/kdeldycke/meta-package-manager/compare/v5.14.0...v5.14.1)
+## [`5.14.1` (2024-01-16)](https://github.com/kdeldycke/meta-package-manager/compare/v5.14.0...v5.14.1)
+
+> [!NOTE]
+> `5.14.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.14.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.14.1).
 
 - [bar-plugin] Always call `mpm --version` without color.
 - [bar-plugin] Increase robustness of `mpm` version parsing, whether its colored or not.
 - [mpm] Temporary disable version output in color to fix already installed plugin/binary pairs. Closes {pr}`1152`.
 
-## [5.14.0 (2024-01-12)](https://github.com/kdeldycke/meta-package-manager/compare/v5.13.1...v5.14.0)
+## [`5.14.0` (2024-01-13)](https://github.com/kdeldycke/meta-package-manager/compare/v5.13.1...v5.14.0)
+
+> [!NOTE]
+> `5.14.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.14.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.14.0).
 
 - [mpm] Add a `-t`/`--timeout` option to set the maximum duration of each CLI call. Defaults to 10 minutes.
 - [mpm] Drop support of Python 3.7.
@@ -171,13 +216,19 @@
 - [mpm] Fix fetching of full local copy of cask tap in tests to allow for checkout of past formula.
 - [mpm] Replace unmaintained `bump2version` by `bump-my-version`.
 
-## [5.13.1 (2023-05-04)](https://github.com/kdeldycke/meta-package-manager/compare/v5.13.0...v5.13.1)
+## [`5.13.1` (2023-05-06)](https://github.com/kdeldycke/meta-package-manager/compare/v5.13.0...v5.13.1)
+
+> [!NOTE]
+> `5.13.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.13.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.13.1).
 
 - [apt] Fix omission of the final result in an `apt` (non-mint) search.
 - [mpm] Defaults to case-insensitive, lexicographical sort of package IDs in `backup` subcommand.
 - [mpm] Update `brew` installation instructions now that `mpm` is available in official Homebrew repository.
 
-## [5.13.0 (2023-03-31)](https://github.com/kdeldycke/meta-package-manager/compare/v5.12.0...v5.13.0)
+## [`5.13.0` (2023-04-04)](https://github.com/kdeldycke/meta-package-manager/compare/v5.12.0...v5.13.0)
+
+> [!NOTE]
+> `5.13.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.13.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.13.0).
 
 - [mpm] Add new `which`/`locate` subcommand to search for CLIs in user's environment.
 - [mpm] Allow usage of `sudo` for CLI invocation on all UNIXes, not Linux only. Closes {issue}`976`.
@@ -186,7 +237,10 @@
 - [mpm] Run non-destructive tests in parallel and destructive ones in sequential order.
 - [mpm] Move all documentation assets to `assets` subfolder.
 
-## [5.12.0 (2023-02-25)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.7...v5.12.0)
+## [`5.12.0` (2023-02-25)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.7...v5.12.0)
+
+> [!NOTE]
+> `5.12.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.12.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.12.0).
 
 - [mpm] Refactor CLI search to allow all matching to be reported. This will open the way to future support of multiple versions of the same package manager. Refs {issue}`629`.
 - [mpm] Exclude empty files for our CLI search results to skip Microsoft's dummy placeholders on Windows. Closes {issue}`927`.
@@ -197,41 +251,74 @@
 - [yarn] Do not test `yarn` on Linux and Windows.
 - [mpm] Do not force test order on Windows.
 
-## [5.11.7 (2023-02-20)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.6...v5.11.7)
+## [`5.11.7` (2023-02-20)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.6...v5.11.7)
+
+> [!NOTE]
+> `5.11.7` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.11.7/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.11.7).
 
 - [mpm] Fix overlapping detection of `linux` and `wsl2` platforms. Closes {issue}`944`.
 - [pip] Print Python's own version in debug logs before checking for Pip's version.
 - [mpm] Code, comments and documentation style change to conform to new QA workflows based on `ruff`.
 - [mpm] Produce dependency graph in Mermaid instead of Graphviz. Add new dev dependency on `sphinxcontrib-mermaid`.
 
-## [5.11.6 (2023-02-12)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.5...v5.11.6)
+## [`5.11.6` (2023-02-12)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.5...v5.11.6)
+
+> [!NOTE]
+> `5.11.6` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.11.6/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.11.6).
 
 - [mpm] Fix collection of artifact files from their folder.
 
-## [5.11.5 (2023-02-12)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.4...v5.11.5)
+## [`5.11.5` (2023-02-12)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.4...v5.11.5)
+
+> [!NOTE]
+> `5.11.5` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.11.5/).
+
+> [!WARNING]
+> `5.11.5` is **not available** on 🐙 GitHub.
 
 - [mpm] Fix collection of artifact files from their folder.
 
-## [5.11.4 (2023-02-12)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.3...v5.11.4)
+## [`5.11.4` (2023-02-12)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.3...v5.11.4)
+
+> [!NOTE]
+> `5.11.4` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.11.4/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.11.4).
 
 - [mpm] Fix attachment of binaries to GitHub release.
 
-## [5.11.3 (2023-02-12)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.2...v5.11.3)
+## [`5.11.3` (2023-02-12)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.2...v5.11.3)
+
+> [!NOTE]
+> `5.11.3` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.11.3/).
+
+> [!WARNING]
+> `5.11.3` is **not available** on 🐙 GitHub.
 
 - [mpm] Fix attachment of binaries to GitHub release.
 
-## [5.11.2 (2023-02-11)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.1...v5.11.2)
+## [`5.11.2` (2023-02-11)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.1...v5.11.2)
+
+> [!NOTE]
+> `5.11.2` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.11.2/).
+
+> [!WARNING]
+> `5.11.2` is **not available** on 🐙 GitHub.
 
 - [mpm] Refine bug report template.
 - [mpm] Fix attachment of binaries to GitHub release.
 
-## [5.11.1 (2023-02-10)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.0...v5.11.1)
+## [`5.11.1` (2023-02-10)](https://github.com/kdeldycke/meta-package-manager/compare/v5.11.0...v5.11.1)
+
+> [!NOTE]
+> `5.11.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.11.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.11.1).
 
 - [mpm] Remove temporary direct dependency on `charset-normalizer`, fix has been pushed upstream to Nuitka.
 - [mpm] Rename artifacts attached to releases to benefits from stable URLs pointing to latest downloads.
 - [mpm] Fix some Windows unittests.
 
-## [5.11.0 (2023-01-29)](https://github.com/kdeldycke/meta-package-manager/compare/v5.10.2...v5.11.0)
+## [`5.11.0` (2023-01-30)](https://github.com/kdeldycke/meta-package-manager/compare/v5.10.2...v5.11.0)
+
+> [!NOTE]
+> `5.11.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.11.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.11.0).
 
 - [mpm] Unlock run on any Unix-like platform. Closes {issue}`872`.
 - [brew] Activate `brew` on Windows Subsystem for Linux v2.
@@ -246,15 +333,24 @@
 - [mpm] Add new GitHub labels for newly supported platforms.
 - [mpm] Generates dependency graph in Graphviz format.
 
-## [5.10.2 (2022-12-19)](https://github.com/kdeldycke/meta-package-manager/compare/v5.10.1...v5.10.2)
+## [`5.10.2` (2022-12-19)](https://github.com/kdeldycke/meta-package-manager/compare/v5.10.1...v5.10.2)
+
+> [!NOTE]
+> `5.10.2` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.10.2/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.10.2).
 
 - [mpm] Fix uploading of artifacts to GitHub release.
 
-## [5.10.1 (2022-12-19)](https://github.com/kdeldycke/meta-package-manager/compare/v5.10.0...v5.10.1)
+## [`5.10.1` (2022-12-19)](https://github.com/kdeldycke/meta-package-manager/compare/v5.10.0...v5.10.1)
+
+> [!NOTE]
+> `5.10.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.10.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.10.1).
 
 - [mpm] Fix uploading of Nuitka binaries to GitHub release.
 
-## [5.10.0 (2022-12-19)](https://github.com/kdeldycke/meta-package-manager/compare/v5.9.0...v5.10.0)
+## [`5.10.0` (2022-12-19)](https://github.com/kdeldycke/meta-package-manager/compare/v5.9.0...v5.10.0)
+
+> [!NOTE]
+> `5.10.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.10.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.10.0).
 
 - [mpm] Build standalone executable for macOS, Linux and Windows. Closes {issue}`725`.
 - [mpm] Force default output encoding of Windows executable to fix issue on Windows CI agents.
@@ -265,7 +361,10 @@
 - [mpm] Hint at deprecation of manager in the support matrix.
 - [mpm] Execute all workflows with Python 3.11.
 
-## [5.9.0 (2022-11-17)](https://github.com/kdeldycke/meta-package-manager/compare/v5.8.0...v5.9.0)
+## [`5.9.0` (2022-11-20)](https://github.com/kdeldycke/meta-package-manager/compare/v5.8.0...v5.9.0)
+
+> [!NOTE]
+> `5.9.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.9.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.9.0).
 
 - [pacaur] Implement `pacaur` support. Closes {issue}`816`.
 - [mpm] Allow managers to be flagged as deprecated.
@@ -278,7 +377,10 @@
 - [mpm] Use form-based issue templates for bug reports and new package manager support requests.
 - [mpm] Remove use of deprecated `::set-output` directives and replace them by environment files.
 
-## [5.8.0 (2022-10-05)](https://github.com/kdeldycke/meta-package-manager/compare/v5.7.0...v5.8.0)
+## [`5.8.0` (2022-10-05)](https://github.com/kdeldycke/meta-package-manager/compare/v5.7.0...v5.8.0)
+
+> [!NOTE]
+> `5.8.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.8.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.8.0).
 
 - [gem] Implement `remove` operation.
 - [mpm] Allow multiple packages to be fed to `install`, `upgrade` and `remove` subcommands.
@@ -287,20 +389,32 @@
 - [mpm] Output warning for `install` and `upgrade_one_cli` operations not implementing version parameter.
 - [mpm] Remove GitHub edit link workaround in documentation.
 
-## [5.7.0 (2022-09-27)](https://github.com/kdeldycke/meta-package-manager/compare/v5.6.2...v5.7.0)
+## [`5.7.0` (2022-09-28)](https://github.com/kdeldycke/meta-package-manager/compare/v5.6.2...v5.7.0)
+
+> [!NOTE]
+> `5.7.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.7.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.7.0).
 
 - [scoop] Add support for Scoop on Windows. Closes {issue}`546`.
 - [mpm] Fix imports from `click.extra`. Closes {issue}`783`.
 
-## [5.6.2 (2022-09-27)](https://github.com/kdeldycke/meta-package-manager/compare/v5.6.1...v5.6.2)
+## [`5.6.2` (2022-09-27)](https://github.com/kdeldycke/meta-package-manager/compare/v5.6.1...v5.6.2)
+
+> [!NOTE]
+> `5.6.2` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.6.2/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.6.2).
 
 - [mpm] Fix imports from `click.extra`.
 
-## [5.6.1 (2022-09-26)](https://github.com/kdeldycke/meta-package-manager/compare/v5.6.0...v5.6.1)
+## [`5.6.1` (2022-09-26)](https://github.com/kdeldycke/meta-package-manager/compare/v5.6.0...v5.6.1)
+
+> [!NOTE]
+> `5.6.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.6.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.6.1).
 
 - [mpm] Fix import from private `click.extra` submodule.
 
-## [5.6.0 (2022-09-26)](https://github.com/kdeldycke/meta-package-manager/compare/v5.5.1...v5.6.0)
+## [`5.6.0` (2022-09-26)](https://github.com/kdeldycke/meta-package-manager/compare/v5.5.1...v5.6.0)
+
+> [!NOTE]
+> `5.6.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.6.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.6.0).
 
 - [brew,cask] Add support for `remove` operation in homebrew.
 - [pacman] Fix `pacman` install operation. Closes {pr}`766`.
@@ -318,7 +432,10 @@
 - [mpm] Add `upgrade_all` operation in support matrix.
 - [mpm] Rely on external workflow to set Python version parameters for `mypy`, `black` and `pyupgrade` jobs.
 
-## [5.5.1 (2022-07-08)](https://github.com/kdeldycke/meta-package-manager/compare/v5.5.0...v5.5.1)
+## [`5.5.1` (2022-07-11)](https://github.com/kdeldycke/meta-package-manager/compare/v5.5.0...v5.5.1)
+
+> [!NOTE]
+> `5.5.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.5.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.5.1).
 
 - [mpm] Eliminate rendering of `None` cells to `<null>` in tables.
 - [mpm] Add a `--refilter`/`--no-refilter` option to `search` to allow bypassing of `mpm` default refiltering.
@@ -330,7 +447,10 @@
 - [yarn] Set minimal `yarn` version to `1.20.0`, as it should have been.
 - [bar-plugin] Silence all errors but critical ones on `outdated` invocation to prevent a failing manager to block rendering of the plugin output.
 
-## [5.5.0 (2022-07-08)](https://github.com/kdeldycke/meta-package-manager/compare/v5.4.0...v5.5.0)
+## [`5.5.0` (2022-07-08)](https://github.com/kdeldycke/meta-package-manager/compare/v5.4.0...v5.5.0)
+
+> [!NOTE]
+> `5.5.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.5.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.5.0).
 
 - [mpm] Restore behavior of having `upgrade` assuming `--all` option on a bare call. Closes {issue}`715`.
 - [cask] Fix parsing of multiple reported installed versions.
@@ -344,7 +464,10 @@
 - [mpm] Add metadata for easy citation in academic content.
 - [mpm] Deactivate Atom install in macOS tests as it seems broken.
 
-## [5.4.0 (2022-06-28)](https://github.com/kdeldycke/meta-package-manager/compare/v5.3.0...v5.4.0)
+## [`5.4.0` (2022-06-29)](https://github.com/kdeldycke/meta-package-manager/compare/v5.3.0...v5.4.0)
+
+> [!NOTE]
+> `5.4.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.4.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.4.0).
 
 - [mpm] Allow global `upgrade` of a subset of packages from the command line if no ambiguity is identified.
 - [mpm] Add a `-A`/`--all` option to `upgrade` operation.
@@ -365,7 +488,10 @@
 - [mpm] Switch package ID and name columns in table rendering.
 - [mpm] Rename all `*-like` labels to `*-based` to help finer identification of families.
 
-## [5.3.0 (2022-06-25)](https://github.com/kdeldycke/meta-package-manager/compare/v5.2.0...v5.3.0)
+## [`5.3.0` (2022-06-25)](https://github.com/kdeldycke/meta-package-manager/compare/v5.2.0...v5.3.0)
+
+> [!NOTE]
+> `5.3.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.3.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.3.0).
 
 - [paru] Add `paru` support.
 - [pacman,paru,yay] Run `install`, `upgrade`, `remove` and `cleanup` operations with `sudo`.
@@ -380,7 +506,10 @@
 - [mpm] Simplify `installed`, `outdated` and `search` operation by relying on generators and a `package` dataclass.
 - [mpm] Disable workflow grouping and concurrency management.
 
-## [5.2.0 (2022-06-16)](https://github.com/kdeldycke/meta-package-manager/compare/v5.1.0...v5.2.0)
+## [`5.2.0` (2022-06-16)](https://github.com/kdeldycke/meta-package-manager/compare/v5.1.0...v5.2.0)
+
+> [!NOTE]
+> `5.2.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.2.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.2.0).
 
 - [yay] Add `yay` support. Refs {issue}`527`.
 - [mpm,pacman,pip,pipx] Add `remove` operation.
@@ -391,21 +520,30 @@
 - [mpm] Group workflow jobs so new commits cancels in-progress execution triggered by previous commits.
 - [mpm] Run tests on early Python 3.11 releases.
 
-## [5.1.0 (2022-05-15)](https://github.com/kdeldycke/meta-package-manager/compare/v5.0.1...v5.1.0)
+## [`5.1.0` (2022-05-15)](https://github.com/kdeldycke/meta-package-manager/compare/v5.0.1...v5.1.0)
+
+> [!NOTE]
+> `5.1.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.1.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.1.0).
 
 - [pipx] Add `pipx` support. Closes {issue}`468`.
 - [cargo] Add `cargo` support. Closes {issue}`633`.
 - [mpm] Factorize search result refiltering code.
 - [mpm] Regroup `dnf` and `yum` labels.
 
-## [5.0.1 (2022-04-28)](https://github.com/kdeldycke/meta-package-manager/compare/v5.0.0...v5.0.1)
+## [`5.0.1` (2022-04-28)](https://github.com/kdeldycke/meta-package-manager/compare/v5.0.0...v5.0.1)
+
+> [!NOTE]
+> `5.0.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.0.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.0.1).
 
 - [apt] Fix commands incompatible with `--yes` option. Closes {issue}`625`.
 - [mpm] Add `topgrade` and `pacaptr` in the list of benchmarked alternatives.
 - [mpm] Rename `alternative` page to `benchmark`.
 - [mpm] Fix label unittests.
 
-## [5.0.0 (2022-04-25)](https://github.com/kdeldycke/meta-package-manager/compare/v4.13.1...v5.0.0)
+## [`5.0.0` (2022-04-25)](https://github.com/kdeldycke/meta-package-manager/compare/v4.13.1...v5.0.0)
+
+> [!NOTE]
+> `5.0.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/5.0.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v5.0.0).
 
 - [zypper] Add `zypper` support for Suse and OpenSuse. Closes {issue}`566`.
 - [emerge] Add `emerge` support.
@@ -432,7 +570,10 @@
 - [mpm] Use string highlighting code from `click-extra >= 2.1.0`.
 - [mpm] Add edit links to documentation.
 
-## [4.13.1 (2022-04-17)](https://github.com/kdeldycke/meta-package-manager/compare/v4.13.0...v4.13.1)
+## [`4.13.1` (2022-04-17)](https://github.com/kdeldycke/meta-package-manager/compare/v4.13.0...v4.13.1)
+
+> [!NOTE]
+> `4.13.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.13.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.13.1).
 
 - [apt] Add missing `sudo` pre-commands for `apt` calls that requires it.
   Closes {issue}`496` and {issue}`579`.
@@ -443,7 +584,10 @@
 - [mpm] Remove date-based shallowing of Homebrew git repository in unittests
   and considers the local runner copy to already be unshallowed.
 
-## [4.13.0 (2022-04-16)](https://github.com/kdeldycke/meta-package-manager/compare/v4.12.1...v4.13.0)
+## [`4.13.0` (2022-04-16)](https://github.com/kdeldycke/meta-package-manager/compare/v4.12.1...v4.13.0)
+
+> [!NOTE]
+> `4.13.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.13.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.13.0).
 
 - [pacman] Add support for `pacman`. Closes {issue}`416`.
 - [apt-mint] Fix search. Closes {issue}`572` and {pr}`573`.
@@ -457,18 +601,27 @@
 - [mpm] Fix normalization of CLI arguments.
 - [mpm] Fix file not found error on non-Windows platform during version checking.
 
-## [4.12.1 (2022-04-05)](https://github.com/kdeldycke/meta-package-manager/compare/v4.12.0...v4.12.1)
+## [`4.12.1` (2022-04-06)](https://github.com/kdeldycke/meta-package-manager/compare/v4.12.0...v4.12.1)
+
+> [!NOTE]
+> `4.12.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.12.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.12.1).
 
 - [mpm] Make CLI path evaluation more robust on Windows. Closes {issue}`542`.
 
-## [4.12.0 (2022-04-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.11.0...v4.12.0)
+## [`4.12.0` (2022-04-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.11.0...v4.12.0)
+
+> [!NOTE]
+> `4.12.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.12.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.12.0).
 
 - [dnf] Add support for `dnf`. Closes {issue}`516`, refs {issue}`415`.
 - [yum] Allow `yum` to act as `dnf`. Closes {issue}`415`.
 - [brew,cask] Fix execution of `sync` command.
 - [mpm] Fix extraction of version. Closes {issue}`536`.
 
-## [4.11.0 (2022-04-03)](https://github.com/kdeldycke/meta-package-manager/compare/v4.10.0...v4.11.0)
+## [`4.11.0` (2022-04-03)](https://github.com/kdeldycke/meta-package-manager/compare/v4.10.0...v4.11.0)
+
+> [!NOTE]
+> `4.11.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.11.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.11.0).
 
 - [brew,cask] Do not let homebrew auto-update on other commands. Refs {issue}`36`.
 - [brew,cask] Disable analytics and env hints in logs.
@@ -477,7 +630,10 @@
 - [mpm] Enforce code structure in package manager definition files.
 - [mpm] Fix documentation generation.
 
-## [4.10.0 (2022-03-31)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.10...v4.10.0)
+## [`4.10.0` (2022-03-31)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.10...v4.10.0)
+
+> [!NOTE]
+> `4.10.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.10.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.10.0).
 
 - [mpm] Allow for package managers to simultaneously set a list of
   pre-commands and environment variables, as well as global arguments before
@@ -489,7 +645,10 @@
 - [mpm] Cap `click-extra` requirement to `<1.7.0` to fix regression. Closes
   {issue}`518`.
 
-## [4.9.10 (2022-03-09)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.9...v4.9.10)
+## [`4.9.10` (2022-03-09)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.9...v4.9.10)
+
+> [!NOTE]
+> `4.9.10` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.9.10/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.9.10).
 
 - [mpm] Fix execution error on Python 3.10 by updating `click-extra`. Closes
   {issue}`467`.
@@ -499,27 +658,45 @@
   modernization.
 - [mpm] Remove direct dependency on `cloup`, `simplejson` and `pipdeptree`.
 
-## [4.9.9 (2022-01-15)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.8...v4.9.9)
+## [`4.9.9` (2022-01-15)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.8...v4.9.9)
+
+> [!NOTE]
+> `4.9.9` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.9.9/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.9.9).
 
 - [mpm] Fix upload of build artifacts in GitHub release.
 
-## [4.9.8 (2022-01-15)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.7...v4.9.8)
+## [`4.9.8` (2022-01-15)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.7...v4.9.8)
+
+> [!NOTE]
+> `4.9.8` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.9.8/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.9.8).
 
 - [mpm] Fix propagation of build artifacts to GitHub release and PyPi.
 - [mpm] Fix test of labelling rules.
 - [mpm] Remove local dependency on `graphviz` now that fixes were pushed
   upstream.
 
-## [4.9.7 (2022-01-11)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.6...v4.9.7)
+## [`4.9.7` (2022-01-11)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.6...v4.9.7)
+
+> [!WARNING]
+> `4.9.7` is **not available** on 🐍 PyPI and 🐙 GitHub.
 
 - [mpm] Add release version in artifacts produced by Poetry builds.
 - [mpm] Pass local PyPi token to reused workflow to fix publishing.
 
-## [4.9.6 (2022-01-11)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.5...v4.9.6)
+## [`4.9.6` (2022-01-11)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.5...v4.9.6)
+
+> [!NOTE]
+> `4.9.6` is available on [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.9.6).
+
+> [!WARNING]
+> `4.9.6` is **not available** on 🐍 PyPI.
 
 - [mpm] Fix detection of Poetry in build workflow.
 
-## [4.9.5 (2022-01-11)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.4...v4.9.5)
+## [`4.9.5` (2022-01-11)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.4...v4.9.5)
+
+> [!WARNING]
+> `4.9.5` is **not available** on 🐍 PyPI and 🐙 GitHub.
 
 - [mpm] Use external workflow for package building and publishing via Poetry.
 - [mpm] Reused external label maintenance workflows and definitions.
@@ -528,26 +705,41 @@
 - [mpm] Remove changelog code left-overs.
 - [mpm] Aligns content of all PRs locally produced by workflows.
 
-## [4.9.4 (2022-01-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.3...v4.9.4)
+## [`4.9.4` (2022-01-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.3...v4.9.4)
+
+> [!NOTE]
+> `4.9.4` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.9.4/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.9.4).
 
 - [mpm] Re-integrate artifacts in GitHub release on tagging.
 
-## [4.9.3 (2022-01-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.2...v4.9.3)
+## [`4.9.3` (2022-01-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.2...v4.9.3)
+
+> [!NOTE]
+> `4.9.3` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.9.3/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.9.3).
 
 - [mpm] Fix GitHub release's content update.
 
-## [4.9.2 (2022-01-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.1...v4.9.2)
+## [`4.9.2` (2022-01-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.1...v4.9.2)
+
+> [!NOTE]
+> `4.9.2` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.9.2/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.9.2).
 
 - [mpm] Regenerate GitHub release content body dynamiccaly on tagging.
 
-## [4.9.1 (2022-01-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.0...v4.9.1)
+## [`4.9.1` (2022-01-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.0...v4.9.1)
+
+> [!NOTE]
+> `4.9.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.9.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.9.1).
 
 - [mpm] Automate minor and major version bump.
 - [mpm] Automate release preparation workflow.
 - [mpm] Trigger tagging, build and version bump on release event.
 - [mpm] Add a debug workflow for troubleshooting.
 
-## [4.9.0 (2022-01-03)](https://github.com/kdeldycke/meta-package-manager/compare/v4.8.0...v4.9.0)
+## [`4.9.0` (2022-01-03)](https://github.com/kdeldycke/meta-package-manager/compare/v4.8.0...v4.9.0)
+
+> [!NOTE]
+> `4.9.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.9.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.9.0).
 
 - [mpm] Add single manager selector aliases: `--apm`, `--apt`, `--apt-mint`,
   `--brew`, `--cask`. `--choco`, `--composer`, `--flatpak`, `--gem`, `--mas`,
@@ -561,7 +753,10 @@
 - [mpm] Outsource some workflow definition to external repository.
 - [mpm] Fix generation of dependency graph.
 
-## [4.8.0 (2021-11-01)](https://github.com/kdeldycke/meta-package-manager/compare/v4.7.0...v4.8.0)
+## [`4.8.0` (2021-11-01)](https://github.com/kdeldycke/meta-package-manager/compare/v4.7.0...v4.8.0)
+
+> [!NOTE]
+> `4.8.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.8.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.8.0).
 
 - [mpm] Add `--color`/`--no-color` (aliased to `--ansi`/`--no-ansi`) flags.
 - [mpm] Forces no color on JSON output.
@@ -575,7 +770,13 @@
 - [mpm] Simplify project management by abandoning the dual use of
   `main`/`develop` branches.
 
-## [4.7.0 (2021-10-13)](https://github.com/kdeldycke/meta-package-manager/compare/v4.6.0...v4.7.0)
+## [`4.7.0` (2021-10-13)](https://github.com/kdeldycke/meta-package-manager/compare/v4.6.0...v4.7.0)
+
+> [!NOTE]
+> `4.7.0` is available on [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.7.0).
+
+> [!WARNING]
+> `4.7.0` is **not available** on 🐍 PyPI.
 
 - [mpm] Add help screen coloring.
 - [mpm] Change documentation theme from classic RTD to furo.
@@ -586,13 +787,19 @@
 - [mpm] Run tests on Python 3.10.
 - [mpm] Add a contribution guide stub in documentation. Closes {issue}`276`.
 
-## [4.6.0 (2021-10-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.5.0...v4.6.0)
+## [`4.6.0` (2021-10-04)](https://github.com/kdeldycke/meta-package-manager/compare/v4.5.0...v4.6.0)
+
+> [!NOTE]
+> `4.6.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.6.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.6.0).
 
 - [mpm] Implements XKCD 1654. Closes {issue}`10`.
 - [mpm] Add `-x`/`--xkcd` option to forces manager selection.
 - [mpm] Let `-m`/`--manager` multi-option keep order.
 
-## [4.5.0 (2021-09-30)](https://github.com/kdeldycke/meta-package-manager/compare/v4.4.0...v4.5.0)
+## [`4.5.0` (2021-09-30)](https://github.com/kdeldycke/meta-package-manager/compare/v4.4.0...v4.5.0)
+
+> [!NOTE]
+> `4.5.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.5.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.5.0).
 
 - [choco] Add Chocolatey package manager.
 - [mpm] Skip by default the evaluation of package managers not supported on
@@ -601,7 +808,10 @@
   managers.
 - [mpm] Fix highlighting of substrings in search results.
 
-## [4.4.0 (2021-09-27)](https://github.com/kdeldycke/meta-package-manager/compare/v4.3.0...v4.4.0)
+## [`4.4.0` (2021-09-27)](https://github.com/kdeldycke/meta-package-manager/compare/v4.3.0...v4.4.0)
+
+> [!NOTE]
+> `4.4.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.4.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.4.0).
 
 - [mpm] Add a global `-d`/`--dry-run` option.
 - [apt] Add dedicated `apt-mint` manager to handle the special case of `apt`
@@ -612,7 +822,10 @@
 - [mpm] Remove all the unused utilities to discard some table rendering on
   Windows.
 
-## [4.3.0 (2021-09-25)](https://github.com/kdeldycke/meta-package-manager/compare/v4.2.0...v4.3.0)
+## [`4.3.0` (2021-09-25)](https://github.com/kdeldycke/meta-package-manager/compare/v4.2.0...v4.3.0)
+
+> [!NOTE]
+> `4.3.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.3.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.3.0).
 
 - [mpm] Add new `install` command. Closes {issue}`21`.
 - [vscode] Add support for Visual Studio Code plugins.
@@ -621,7 +834,10 @@
   TOML backup files.
 - [mpm] Forces logger state reset before each CLI call in unittests.
 
-## [4.2.0 (2021-09-21)](https://github.com/kdeldycke/meta-package-manager/compare/v4.1.0...v4.2.0)
+## [`4.2.0` (2021-09-21)](https://github.com/kdeldycke/meta-package-manager/compare/v4.1.0...v4.2.0)
+
+> [!NOTE]
+> `4.2.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.2.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.2.0).
 
 - [mpm] Add support for TOML configuration file. Closes {issue}`66`.
 - [mpm] Add `-C`/`--config` option to point to specific configuration file.
@@ -639,7 +855,10 @@
 - [mpm] Remove support for `--cli-format bitbar` option. Use `xbar` value
   instead.
 
-## [4.1.0 (2021-05-01)](https://github.com/kdeldycke/meta-package-manager/compare/v4.0.0...v4.1.0)
+## [`4.1.0` (2021-05-01)](https://github.com/kdeldycke/meta-package-manager/compare/v4.0.0...v4.1.0)
+
+> [!NOTE]
+> `4.1.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.1.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.1.0).
 
 - [bar-plugin] Add new `Submenu layout` boolean option in xbar plugin UI.
 - [bar-plugin] Rename `XBAR_MPM_SUBMENU` environment variable to
@@ -647,7 +866,10 @@
 - [mpm] Allow search of multiple CLI names for a package manager.
 - [pip] Fix search of `python3` binary on macOS. Closes {issue}`247`.
 
-## [4.0.0 (2021-04-27)](https://github.com/kdeldycke/meta-package-manager/compare/v3.6.0...v4.0.0)
+## [`4.0.0` (2021-04-27)](https://github.com/kdeldycke/meta-package-manager/compare/v3.6.0...v4.0.0)
+
+> [!NOTE]
+> `4.0.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.0.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.0.0).
 
 - [bar-plugin] Upgrade BitBar plugin to new xbar format.
 - [bar-plugin] Drop xbar plugin requirement on Python 2.x and bump it up to Python
@@ -660,7 +882,10 @@
 - [mpm] Only trigger dependency graph update on tagging to reduce noise.
 - [mpm] Re-introduce `isort`.
 
-## [3.6.0 (2021-01-03)](https://github.com/kdeldycke/meta-package-manager/compare/v3.5.2...v3.6.0)
+## [`3.6.0` (2021-01-03)](https://github.com/kdeldycke/meta-package-manager/compare/v3.5.2...v3.6.0)
+
+> [!NOTE]
+> `3.6.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/3.6.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v3.6.0).
 
 - [brew] Add support for `brew` on Linux.
 - [brew,cask] Bump minimal requirement of `brew` to `2.7.0`.
@@ -672,7 +897,10 @@
 - [mpm] Remove `pycodestyle` now that we rely on `black`.
 - [mpm] Add emoji to issue labels.
 
-## [3.5.2 (2020-10-29)](https://github.com/kdeldycke/meta-package-manager/compare/v3.5.1...v3.5.2)
+## [`3.5.2` (2020-10-29)](https://github.com/kdeldycke/meta-package-manager/compare/v3.5.1...v3.5.2)
+
+> [!NOTE]
+> `3.5.2` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/3.5.2/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v3.5.2).
 
 - [mpm] Run tests on Python 3.9.
 - [mpm] Upgrade to `Poetry 1.1.0`.
@@ -688,30 +916,45 @@
 - [mpm] Fix `npm` setup in Ubuntu 18.04 and 20.04 CI runners.
 - [mpm] Use latest `Atom` version in Ubuntu CI runners.
 
-## [3.5.1 (2020-10-03)](https://github.com/kdeldycke/meta-package-manager/compare/v3.5.0...v3.5.1)
+## [`3.5.1` (2020-10-03)](https://github.com/kdeldycke/meta-package-manager/compare/v3.5.0...v3.5.1)
+
+> [!NOTE]
+> `3.5.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/3.5.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v3.5.1).
 
 - [mpm] Defaults to `--continue-on-error` instead of stopping.
 - [mpm] Force checking of CLI being a file.
 - [mpm] Auto-optimize images.
 - [mpm] Auto-lock closed issues and PRs after a moment of inactivity.
 
-## [3.5.0 (2020-09-20)](https://github.com/kdeldycke/meta-package-manager/compare/v3.4.2...v3.5.0)
+## [`3.5.0` (2020-09-20)](https://github.com/kdeldycke/meta-package-manager/compare/v3.4.2...v3.5.0)
+
+> [!NOTE]
+> `3.5.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/3.5.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v3.5.0).
 
 - [mpm] Fix `--stop-on-error` parameter: it was never taken into account.
 - [brew,cask] Bump minimal requirement of `brew` to `2.5.0`.
 - [brew,cask] Fix warning to deprecated options.
 - [npm] Always fix JSON parsing on error for any npm subcommand.
 
-## [3.4.2 (2020-09-13)](https://github.com/kdeldycke/meta-package-manager/compare/v3.4.1...v3.4.2)
+## [`3.4.2` (2020-09-13)](https://github.com/kdeldycke/meta-package-manager/compare/v3.4.1...v3.4.2)
+
+> [!NOTE]
+> `3.4.2` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/3.4.2/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v3.4.2).
 
 - [brew,cask] Do not mix-up brew and cask upgrades.
 - [npm] Skip parsing of JSON results on error.
 
-## [3.4.1 (2020-09-02)](https://github.com/kdeldycke/meta-package-manager/compare/v3.4.0...v3.4.1)
+## [`3.4.1` (2020-09-02)](https://github.com/kdeldycke/meta-package-manager/compare/v3.4.0...v3.4.1)
+
+> [!NOTE]
+> `3.4.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/3.4.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v3.4.1).
 
 - [mpm] Rename `master` branch to `main`.
 
-## [3.4.0 (2020-08-18)](https://github.com/kdeldycke/meta-package-manager/compare/v3.3.0...v3.4.0)
+## [`3.4.0` (2020-08-18)](https://github.com/kdeldycke/meta-package-manager/compare/v3.3.0...v3.4.0)
+
+> [!NOTE]
+> `3.4.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/3.4.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v3.4.0).
 
 - [yarn] Set minimal requirement to `1.20.0`.
 - [yarn] Fix deprecated global arguments.
@@ -729,7 +972,10 @@
 - [mpm] Removes `requires.io` and Scrutinizer badges.
 - [mpm] Revert to `pipdeptree` to produce package dependency graph.
 
-## [3.3.0 (2020-06-23)](https://github.com/kdeldycke/meta-package-manager/compare/v3.2.0...v3.3.0)
+## [`3.3.0` (2020-06-23)](https://github.com/kdeldycke/meta-package-manager/compare/v3.2.0...v3.3.0)
+
+> [!NOTE]
+> `3.3.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/3.3.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v3.3.0).
 
 - [bar-plugin] Each entry in the drop-down menu can now be called into a terminal
   to track the execution by holding the `Option` key.
@@ -754,7 +1000,10 @@
 - [mpm] Check label rules against manager definitions. Adds development
   dependency on `PyYAML`.
 
-## [3.2.0 (2020-05-31)](https://github.com/kdeldycke/meta-package-manager/compare/v3.1.0...v3.2.0)
+## [`3.2.0` (2020-05-31)](https://github.com/kdeldycke/meta-package-manager/compare/v3.1.0...v3.2.0)
+
+> [!NOTE]
+> `3.2.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/3.2.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v3.2.0).
 
 - [snap] Add support for `snap` on Linux.
 - [cask] Rely on JSON output to fetch outdated packages.
@@ -779,7 +1028,10 @@
 - [mpm] Drop support of Python 3.6.
 - [mpm] Use group-tabs in Sphinx docs.
 
-## [3.1.0 (2020-04-02)](https://github.com/kdeldycke/meta-package-manager/compare/v3.0.0...v3.1.0)
+## [`3.1.0` (2020-04-02)](https://github.com/kdeldycke/meta-package-manager/compare/v3.0.0...v3.1.0)
+
+> [!NOTE]
+> `3.1.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/3.1.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v3.1.0).
 
 - [mpm] Add new `cleanup` command. Closes {issue}`5`.
 - [mpm] Improve table sorting with new version-aware tokenizer.
@@ -794,7 +1046,10 @@
 - [mpm] Allow stats to be printed for `backup` command.
 - [gem] Bump minimal requirement to `2.5.0`.
 
-## [3.0.0 (2020-03-25)](https://github.com/kdeldycke/meta-package-manager/compare/v2.9.0...v3.0.0)
+## [`3.0.0` (2020-03-25)](https://github.com/kdeldycke/meta-package-manager/compare/v2.9.0...v3.0.0)
+
+> [!NOTE]
+> `3.0.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/3.0.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v3.0.0).
 
 - [mpm] Add new `backup` and dummy `restore` commands to respectively dump
   and load up list of installed packages to/from a TOML file. Refs {issue}`38`.
@@ -820,7 +1075,10 @@
 - [mpm] Raise requirement to `click 7.1`.
 - [mpm] Raise requirement to `boltons >= 20.0`.
 
-## [2.9.0 (2020-03-18)](https://github.com/kdeldycke/meta-package-manager/compare/v2.8.0...v2.9.0)
+## [`2.9.0` (2020-03-18)](https://github.com/kdeldycke/meta-package-manager/compare/v2.8.0...v2.9.0)
+
+> [!NOTE]
+> `2.9.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/2.9.0/).
 
 - [mpm] Drop support of Python 2.7, 3.4 and 3.5. Add support for Python 3.8.
 - [windows] Add support for `apm`, `composer`, `gem`, `npm` and `pip2` on
@@ -845,7 +1103,10 @@
 - [mpm] Drop all Python 3.0 `__future__` imports.
 - [mpm] Add detailed usage CLI page in documentation.
 
-## [2.8.0 (2019-01-03)](https://github.com/kdeldycke/meta-package-manager/compare/v2.7.0...v2.8.0)
+## [`2.8.0` (2019-01-03)](https://github.com/kdeldycke/meta-package-manager/compare/v2.7.0...v2.8.0)
+
+> [!NOTE]
+> `2.8.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/2.8.0/).
 
 - [composer] Add support for PHP `composer`.
 - [cask] Remove `cask`-specific `version`, `sync` and `search` command.
@@ -857,7 +1118,10 @@
   vintage Mac OS X 10.10 and 10.11.
 - [mpm] Use latest macOS 10.12 and 10.13 Travis images.
 
-## [2.7.0 (2018-04-02)](https://github.com/kdeldycke/meta-package-manager/compare/v2.6.1...v2.7.0)
+## [`2.7.0` (2018-04-02)](https://github.com/kdeldycke/meta-package-manager/compare/v2.6.1...v2.7.0)
+
+> [!NOTE]
+> `2.7.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/2.7.0/).
 
 - [mpm] Add new `--ignore-auto-updates` and `--include-auto-updates` boolean
   flags.
@@ -869,11 +1133,17 @@
   {pr}`44`.
 - [bar-plugin] Do not run BitBar plugin unittests but on macOS.
 
-## [2.6.1 (2017-11-05)](https://github.com/kdeldycke/meta-package-manager/compare/v2.6.0...v2.6.1)
+## [`2.6.1` (2017-11-05)](https://github.com/kdeldycke/meta-package-manager/compare/v2.6.0...v2.6.1)
+
+> [!NOTE]
+> `2.6.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/2.6.1/).
 
 - [mpm] Fix Travis unittests.
 
-## [2.6.0 (2017-09-11)](https://github.com/kdeldycke/meta-package-manager/compare/v2.5.0...v2.6.0)
+## [`2.6.0` (2017-09-10)](https://github.com/kdeldycke/meta-package-manager/compare/v2.5.0...v2.6.0)
+
+> [!NOTE]
+> `2.6.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/2.6.0/).
 
 - [apt] Add support for `apt` on Linux systems.
 - [pip] Use pip 9.0 JSON output. Closes {issue}`18`.
@@ -886,7 +1156,10 @@
 - [mpm] Replace `nose` by `pytest`.
 - [mpm] Only notify by mail of test failures.
 
-## [2.5.0 (2017-03-01)](https://github.com/kdeldycke/meta-package-manager/compare/v2.4.0...v2.5.0)
+## [`2.5.0` (2017-03-01)](https://github.com/kdeldycke/meta-package-manager/compare/v2.4.0...v2.5.0)
+
+> [!NOTE]
+> `2.5.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/2.5.0/).
 
 - [mpm] Auto-detect location of manager CLI on the system.
 - [mpm] Add new `search` operation. Closes {issue}`22`.
@@ -906,7 +1179,10 @@
   {issue}`26`.
 - [mpm] Drop support of Python 3.3.
 
-## [2.4.0 (2017-01-28)](https://github.com/kdeldycke/meta-package-manager/compare/v2.3.0...v2.4.0)
+## [`2.4.0` (2017-01-28)](https://github.com/kdeldycke/meta-package-manager/compare/v2.3.0...v2.4.0)
+
+> [!NOTE]
+> `2.4.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/2.4.0/).
 
 - [mpm] Add new `list` operation. Closes {issue}`20`.
 - [mas] Fix upgrade of `mas` packages. Closes {issue}`32`.
@@ -917,7 +1193,10 @@
 - [mpm] Add global todo list in documentation.
 - [mpm] Bump requirement to `boltons >= 17.0.0` for Python 3.3 compatibility.
 
-## [2.3.0 (2017-01-15)](https://github.com/kdeldycke/meta-package-manager/compare/v2.2.0...v2.3.0)
+## [`2.3.0` (2017-01-15)](https://github.com/kdeldycke/meta-package-manager/compare/v2.2.0...v2.3.0)
+
+> [!NOTE]
+> `2.3.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/2.3.0/).
 
 - [mpm] Add Sphinx documentation. Closes {issue}`24`.
 - [mpm] Add installation instructions. Closes {issue}`19`.
@@ -937,7 +1216,10 @@
 - [mpm] Replace double by single-width characters in `mpm` output to fix
   table misalignment. Closes {issue}`30`.
 
-## [2.2.0 (2016-12-25)](https://github.com/kdeldycke/meta-package-manager/compare/v2.1.1...v2.2.0)
+## [`2.2.0` (2016-12-25)](https://github.com/kdeldycke/meta-package-manager/compare/v2.1.1...v2.2.0)
+
+> [!NOTE]
+> `2.2.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/2.2.0/).
 
 - [mpm] Rename `supported` property of managers to `fresh`.
 - [mpm] Allow restriction of package managers to a platform. Closes
@@ -951,7 +1233,10 @@
 - [mpm] Print current platform in debug messages.
 - [mpm] Unittest detection of managers on each platform.
 
-## [2.1.1 (2016-12-17)](https://github.com/kdeldycke/meta-package-manager/compare/v2.1.0...v2.1.1)
+## [`2.1.1` (2016-12-17)](https://github.com/kdeldycke/meta-package-manager/compare/v2.1.0...v2.1.1)
+
+> [!NOTE]
+> `2.1.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/2.1.1/).
 
 - [brew,cask] Fix parsing of non-point releases of `brew` and `cask`
   versions. Closes {issue}`15`.
@@ -960,7 +1245,10 @@
 - [mpm] Do not strip CLI output. Keep original format.
 - [mpm] Fix full changelog link.
 
-## [2.1.0 (2016-12-14)](https://github.com/kdeldycke/meta-package-manager/compare/v2.0.0...v2.1.0)
+## [`2.1.0` (2016-12-14)](https://github.com/kdeldycke/meta-package-manager/compare/v2.0.0...v2.1.0)
+
+> [!NOTE]
+> `2.1.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/2.1.0/).
 
 - [bar-plugin] Adjust rendering of BitBar plugin errors.
 - [mpm] Fix fetching of log level names in Python 3.4+.
@@ -989,7 +1277,10 @@
 - [macos,mpm] Fix upgrade of `setuptools` in `macOS` and Python 3.3 Travis
   jobs.
 
-## [2.0.0 (2016-12-04)](https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...v2.0.0)
+## [`2.0.0` (2016-12-04)](https://github.com/kdeldycke/meta-package-manager/compare/v1.12.0...v2.0.0)
+
+> [!NOTE]
+> `2.0.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/2.0.0/).
 
 - [bar-plugin] Rewrite BitBar plugin based on `mpm`. Closes {issue}`13`.
 - [bar-plugin] Render errors with a monospaced font in BitBar plugin.
@@ -1006,7 +1297,10 @@
 - [mpm] Add `upgrade_all_cli` field for each package manager in JSON output
   of `mpm outdated` command.
 
-## [1.12.0 (2016-12-03)](https://github.com/kdeldycke/meta-package-manager/compare/v1.11.0...v1.12.0)
+## [`1.12.0` (2016-12-03)](https://github.com/kdeldycke/meta-package-manager/compare/v1.11.0...v1.12.0)
+
+> [!NOTE]
+> `1.12.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/1.12.0/).
 
 - [mpm] Rename `mpm update` command to `mpm upgrade`.
 - [mpm] Allow restriction to only one package manager for each sub-command.
@@ -1024,7 +1318,10 @@
 - [mpm] Fix fall-back to iterative full upgrade command.
 - [mpm] Fix computation of outdated packages statistics.
 
-## [1.11.0 (2016-11-30)](https://github.com/kdeldycke/meta-package-manager/compare/v1.10.0...v1.11.0)
+## [`1.11.0` (2016-11-30)](https://github.com/kdeldycke/meta-package-manager/compare/v1.10.0...v1.11.0)
+
+> [!NOTE]
+> `1.11.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/1.11.0/).
 
 - [mpm] Allow rendering of output data into `json`.
 - [mpm] Sort list of outdated packages by lower-cased package IDs.
@@ -1033,7 +1330,10 @@
 - [cask] Fix fetching of outdated `cask` packages.
 - [cask] Fix upgrade of `cask` packages.
 
-## [1.10.0 (2016-10-04)](https://github.com/kdeldycke/meta-package-manager/compare/v1.9.0...v1.10.0)
+## [`1.10.0` (2016-10-04)](https://github.com/kdeldycke/meta-package-manager/compare/v1.9.0...v1.10.0)
+
+> [!NOTE]
+> `1.10.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/1.10.0/).
 
 - [mpm] Add optional `version` property on package manager definitions.
 - [mpm] Allow each package manager to set requirement on its own version.
@@ -1044,7 +1344,10 @@
 - [mpm] Cache lazy properties to speed metadata computation.
 - [mpm] Shows detailed state of package managers in CLI.
 
-## [1.9.0 (2016-09-23)](https://github.com/kdeldycke/meta-package-manager/compare/v1.8.0...v1.9.0)
+## [`1.9.0` (2016-09-23)](https://github.com/kdeldycke/meta-package-manager/compare/v1.8.0...v1.9.0)
+
+> [!NOTE]
+> `1.9.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/1.9.0/).
 
 - [mpm] Fix `bumpversion` configuration to target `CHANGES.rst` instead of
   `README.rst`.
@@ -1072,7 +1375,10 @@
 - [mpm] Allow selection of table rendering.
 - [cask] Fix parsing of unversioned cask packages. Closes {pr}`6`.
 
-## [1.8.0 (2016-08-22)](https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...v1.8.0)
+## [`1.8.0` (2016-08-22)](https://github.com/kdeldycke/meta-package-manager/compare/v1.7.0...v1.8.0)
+
+> [!NOTE]
+> `1.8.0` is the *first version* available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/1.8.0/).
 
 - [mpm] Move the plugin to its own repository.
 - [mpm] Rename `package-manager` project to `meta-package-manager`.
@@ -1089,48 +1395,48 @@
 - [mpm] Add default `bumpversion`, `isort`, `nosetests`, `coverage`, `pep8`
   and `pylint` default configuration.
 
-## [1.7.0 (2016-08-16)](https://github.com/kdeldycke/meta-package-manager/compare/v1.6.0...v1.7.0)
+## [`1.7.0` (2016-08-16)](https://github.com/kdeldycke/meta-package-manager/compare/v1.6.0...v1.7.0)
 
 - [brew] Fix issues with `$PATH` not having Homebrew/Macports.
 - [pip] New workaround for full `pip` upgrade command.
 - [cask] Workaround for Homebrew Cask full upgrade command.
 - [mpm] Grammar fix when 0 packages need to be upgraded.
 
-## [1.6.0 (2016-08-10)](https://github.com/kdeldycke/meta-package-manager/compare/v1.5.0...v1.6.0)
+## [`1.6.0` (2016-08-10)](https://github.com/kdeldycke/meta-package-manager/compare/v1.5.0...v1.6.0)
 
 - [pip] Work around the lacks of full `pip` upgrade command.
 - [mpm] Fix `UnicodeDecodeError` on parsing CLI output.
 
-## [1.5.0 (2016-07-25)](https://github.com/kdeldycke/meta-package-manager/compare/v1.4.0...v1.5.0)
+## [`1.5.0` (2016-07-25)](https://github.com/kdeldycke/meta-package-manager/compare/v1.4.0...v1.5.0)
 
 - [mas] Add support for `mas`.
 - [mpm] Don't show all `stderr` as `err` (check return code for error state).
 
-## [1.4.0 (2016-07-10)](https://github.com/kdeldycke/meta-package-manager/compare/v1.3.0...v1.4.0)
+## [`1.4.0` (2016-07-10)](https://github.com/kdeldycke/meta-package-manager/compare/v1.3.0...v1.4.0)
 
 - [mpm] Don't attempt to parse empty lines.
 - [npm] Check for linked `npm` packages.
 - [gem] Support system or Homebrew Ruby Gems (with proper `sudo` setup).
 
-## [1.3.0 (2016-07-09)](https://github.com/kdeldycke/meta-package-manager/compare/v1.2.0...v1.3.0)
+## [`1.3.0` (2016-07-09)](https://github.com/kdeldycke/meta-package-manager/compare/v1.2.0...v1.3.0)
 
 - [mpm] Add changelog.
 - [mpm] Add reference to package manager's issues.
 - [cask] Force Cask update before evaluating available packages.
 - [mpm] Add sample of command output as version parsing can be tricky.
 
-## [1.2.0 (2016-07-08)](https://github.com/kdeldycke/meta-package-manager/compare/v1.1.0...v1.2.0)
+## [`1.2.0` (2016-07-08)](https://github.com/kdeldycke/meta-package-manager/compare/v1.1.0...v1.2.0)
 
 - [apm,gem,npm,pip] Add support for both `pip2` and `pip3`, Node's `npm`,
   Atom's `apm`, Ruby's `gem`.
 - [cask] Fixup `brew cask` checking.
 - [mpm] Don't die on errors.
 
-## [1.1.0 (2016-07-07)](https://github.com/kdeldycke/meta-package-manager/compare/v1.0.0...v1.1.0)
+## [`1.1.0` (2016-07-07)](https://github.com/kdeldycke/meta-package-manager/compare/v1.0.0...v1.1.0)
 
 - [pip] Add support for Python's `pip`.
 
-## [1.0.0 (2016-07-05)](https://github.com/kdeldycke/meta-package-manager/commit/170ce9)
+## [`1.0.0` (2016-07-05)](https://github.com/kdeldycke/meta-package-manager/commit/170ce9)
 
 - [mpm] Initial public release.
 - [brew,cask] Add support for Homebrew and Cask.

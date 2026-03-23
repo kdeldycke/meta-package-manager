@@ -1,157 +1,157 @@
 [
-  {
-    "name": "📦 manager: apm",
-    "color": "#bfdadc",
-    "description": "apm"
-  },
-  {
-    "name": "📦 manager: cargo",
-    "color": "#bfdadc",
-    "description": "cargo"
-  },
-  {
-    "name": "📦 manager: choco",
-    "color": "#bfdadc",
-    "description": "choco"
-  },
-  {
-    "name": "📦 manager: composer",
-    "color": "#bfdadc",
-    "description": "composer"
-  },
-  {
-    "name": "📦 manager: dnf-based",
-    "color": "#bfdadc",
-    "description": "dnf, dnf5, yum"
-  },
-  {
-    "name": "📦 manager: dpkg-based",
-    "color": "#bfdadc",
-    "description": "apt, apt-mint, opkg"
-  },
-  {
-    "name": "📦 manager: emerge",
-    "color": "#bfdadc",
-    "description": "emerge"
-  },
-  {
-    "name": "📦 manager: eopkg",
-    "color": "#bfdadc",
-    "description": "eopkg"
-  },
-  {
-    "name": "📦 manager: flatpak",
-    "color": "#bfdadc",
-    "description": "flatpak"
-  },
-  {
-    "name": "📦 manager: fwupd",
-    "color": "#bfdadc",
-    "description": "fwupd"
-  },
-  {
-    "name": "📦 manager: gem",
-    "color": "#bfdadc",
-    "description": "gem"
-  },
-  {
-    "name": "📦 manager: homebrew",
-    "color": "#bfdadc",
-    "description": "brew, cask"
-  },
-  {
-    "name": "📦 manager: mas",
-    "color": "#bfdadc",
-    "description": "mas"
-  },
-  {
-    "name": "📦 manager: mpm",
-    "color": "#bfdadc",
-    "description": "mpm"
-  },
-  {
-    "name": "📦 manager: npm-based",
-    "color": "#bfdadc",
-    "description": "npm, yarn"
-  },
-  {
-    "name": "📦 manager: pacman-based",
-    "color": "#bfdadc",
-    "description": "pacaur, pacman, paru, yay"
-  },
-  {
-    "name": "📦 manager: pip-based",
-    "color": "#bfdadc",
-    "description": "pip, pipx"
-  },
-  {
-    "name": "📦 manager: pkg",
-    "color": "#bfdadc",
-    "description": "pkg"
-  },
-  {
-    "name": "📦 manager: scoop",
-    "color": "#bfdadc",
-    "description": "scoop"
-  },
-  {
-    "name": "📦 manager: snap",
-    "color": "#bfdadc",
-    "description": "snap"
-  },
-  {
-    "name": "📦 manager: steamcmd",
-    "color": "#bfdadc",
-    "description": "steamcmd"
-  },
-  {
-    "name": "📦 manager: uv-based",
-    "color": "#bfdadc",
-    "description": "uv, uvx"
-  },
-  {
-    "name": "📦 manager: vscode-based",
-    "color": "#bfdadc",
-    "description": "vscode, vscodium"
-  },
-  {
-    "name": "📦 manager: winget",
-    "color": "#bfdadc",
-    "description": "winget"
-  },
-  {
-    "name": "📦 manager: zypper",
-    "color": "#bfdadc",
-    "description": "zypper"
-  },
-  {
-    "name": "🔌 bar-plugin",
-    "color": "#fef2c0",
-    "description": "Xbar/SwiftBar plugin code, documentation and features"
-  },
-  {
-    "name": "🖥 platform: BSD",
-    "color": "#bfd4f2",
-    "description": "DragonFly BSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS"
-  },
-  {
-    "name": "🖥 platform: Linux",
-    "color": "#bfd4f2",
-    "description": "ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, CloudLinux OS, Debian, …"
-  },
-  {
-    "name": "🖥 platform: macOS",
-    "color": "#bfd4f2",
-    "description": "macOS"
-  },
-  {
-    "name": "🖥 platform: Unix",
-    "color": "#bfd4f2",
-    "description": "Cygwin, GNU/Hurd, Haiku, IBM AIX, illumos, Solaris"
-  },
-  {
-    "name": "🖥 platform: Windows",
-    "color": "#bfd4f2",
-    "description": "Windows"
-  }
+	{
+		"name": "📦 manager: apm",
+		"color": "#bfdadc",
+		"description": "apm"
+	},
+	{
+		"name": "📦 manager: cargo",
+		"color": "#bfdadc",
+		"description": "cargo"
+	},
+	{
+		"name": "📦 manager: choco",
+		"color": "#bfdadc",
+		"description": "choco"
+	},
+	{
+		"name": "📦 manager: composer",
+		"color": "#bfdadc",
+		"description": "composer"
+	},
+	{
+		"name": "📦 manager: dnf-based",
+		"color": "#bfdadc",
+		"description": "dnf, dnf5, yum"
+	},
+	{
+		"name": "📦 manager: dpkg-based",
+		"color": "#bfdadc",
+		"description": "apt, apt-mint, opkg"
+	},
+	{
+		"name": "📦 manager: emerge",
+		"color": "#bfdadc",
+		"description": "emerge"
+	},
+	{
+		"name": "📦 manager: eopkg",
+		"color": "#bfdadc",
+		"description": "eopkg"
+	},
+	{
+		"name": "📦 manager: flatpak",
+		"color": "#bfdadc",
+		"description": "flatpak"
+	},
+	{
+		"name": "📦 manager: fwupd",
+		"color": "#bfdadc",
+		"description": "fwupd"
+	},
+	{
+		"name": "📦 manager: gem",
+		"color": "#bfdadc",
+		"description": "gem"
+	},
+	{
+		"name": "📦 manager: homebrew",
+		"color": "#bfdadc",
+		"description": "brew, cask"
+	},
+	{
+		"name": "📦 manager: mas",
+		"color": "#bfdadc",
+		"description": "mas"
+	},
+	{
+		"name": "📦 manager: mpm",
+		"color": "#bfdadc",
+		"description": "mpm"
+	},
+	{
+		"name": "📦 manager: npm-based",
+		"color": "#bfdadc",
+		"description": "npm, yarn"
+	},
+	{
+		"name": "📦 manager: pacman-based",
+		"color": "#bfdadc",
+		"description": "pacaur, pacman, paru, yay"
+	},
+	{
+		"name": "📦 manager: pip-based",
+		"color": "#bfdadc",
+		"description": "pip, pipx"
+	},
+	{
+		"name": "📦 manager: pkg",
+		"color": "#bfdadc",
+		"description": "pkg"
+	},
+	{
+		"name": "📦 manager: scoop",
+		"color": "#bfdadc",
+		"description": "scoop"
+	},
+	{
+		"name": "📦 manager: snap",
+		"color": "#bfdadc",
+		"description": "snap"
+	},
+	{
+		"name": "📦 manager: steamcmd",
+		"color": "#bfdadc",
+		"description": "steamcmd"
+	},
+	{
+		"name": "📦 manager: uv-based",
+		"color": "#bfdadc",
+		"description": "uv, uvx"
+	},
+	{
+		"name": "📦 manager: vscode-based",
+		"color": "#bfdadc",
+		"description": "vscode, vscodium"
+	},
+	{
+		"name": "📦 manager: winget",
+		"color": "#bfdadc",
+		"description": "winget"
+	},
+	{
+		"name": "📦 manager: zypper",
+		"color": "#bfdadc",
+		"description": "zypper"
+	},
+	{
+		"name": "🔌 bar-plugin",
+		"color": "#fef2c0",
+		"description": "Xbar/SwiftBar plugin code, documentation and features"
+	},
+	{
+		"name": "🖥 platform: BSD",
+		"color": "#bfd4f2",
+		"description": "DragonFly BSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS"
+	},
+	{
+		"name": "🖥 platform: Linux",
+		"color": "#bfd4f2",
+		"description": "ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, CloudLinux OS, Debian, …"
+	},
+	{
+		"name": "🖥 platform: macOS",
+		"color": "#bfd4f2",
+		"description": "macOS"
+	},
+	{
+		"name": "🖥 platform: Unix",
+		"color": "#bfd4f2",
+		"description": "Cygwin, GNU/Hurd, Haiku, IBM AIX, illumos, Solaris"
+	},
+	{
+		"name": "🖥 platform: Windows",
+		"color": "#bfd4f2",
+		"description": "Windows"
+	}
 ]

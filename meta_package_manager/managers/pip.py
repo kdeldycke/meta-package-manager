@@ -47,6 +47,19 @@ class Pip(PackageManager):
 
     requirement = "10.0.0"
 
+    _SEARCH_REGEXP = re.compile(
+        r"""
+        ^(?P<package_id>\S+)  # A string with a char at least.
+        \                     # A space.
+        \((?P<version>.*?)\)  # Content between parenthesis.
+        [ ]+-                 # A space or more, then a dash.
+        (?P<description>      # Start of the multi-line desc group.
+            (?:[ ]+.*\s)+     # Lines of strings prefixed by spaces.
+        )
+        """,
+        re.MULTILINE | re.VERBOSE,
+    )
+
     # Targets `python3` CLI first to allow for some systems (like macOS) to keep the
     # default `python` CLI tied to the Python 2.x ecosystem.
     cli_names = ("python3", "python")
@@ -257,20 +270,7 @@ class Pip(PackageManager):
         """
         output = self.run_cli("search", query)
 
-        regexp = re.compile(
-            r"""
-            ^(?P<package_id>\S+)  # A string with a char at least.
-            \                     # A space.
-            \((?P<version>.*?)\)  # Content between parenthesis.
-            [ ]+-                 # A space or more, then a dash.
-            (?P<description>      # Start of the multi-line desc group.
-                (?:[ ]+.*\s)+     # Lines of strings prefixed by spaces.
-            )
-            """,
-            re.MULTILINE | re.VERBOSE,
-        )
-
-        for package_id, version, description in regexp.findall(output):
+        for package_id, version, description in self._SEARCH_REGEXP.findall(output):
             yield self.package(
                 id=package_id,
                 description=description,

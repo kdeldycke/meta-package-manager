@@ -40,6 +40,14 @@ class Composer(PackageManager):
 
     requirement = "1.4.0"
 
+    _SEARCH_REGEXP = re.compile(
+        r"""
+        ^(?P<package_id>\S+\/\S+)
+        (?:\s+(?P<description>\S.*))?
+        """,
+        re.MULTILINE | re.VERBOSE,
+    )
+
     pre_args = ("global", "--no-ansi")
 
     version_regexes = (r"Composer\s+version\s+(?P<version>\S+)",)
@@ -175,15 +183,7 @@ class Composer(PackageManager):
 
         output = self.run_cli("search", search_args, query)
 
-        regexp = re.compile(
-            r"""
-            ^(?P<package_id>\S+\/\S+)
-            (?:\s+(?P<description>\S.*))?
-            """,
-            re.MULTILINE | re.VERBOSE,
-        )
-
-        for match in regexp.finditer(output):
+        for match in self._SEARCH_REGEXP.finditer(output):
             package_id = match.group("package_id")
             description = match.group("description")
             yield self.package(id=package_id, description=description)

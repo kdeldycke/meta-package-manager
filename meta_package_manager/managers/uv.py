@@ -212,6 +212,8 @@ class UVX(UVBase):
 
     homepage_url = "https://docs.astral.sh/uv/guides/tools/"
 
+    _INSTALLED_REGEXP = re.compile(r"^(?P<package_id>\S+)\s+v(?P<version>\S+)$")
+
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
@@ -225,10 +227,8 @@ class UVX(UVBase):
         output = self.run_cli("tool", "list")
 
         if output:
-            # Parse lines like "package_name vX.Y.Z"
-            package_regex = re.compile(r"^(?P<package_id>\S+)\s+v(?P<version>\S+)$")
             for line in output.splitlines():
-                match = package_regex.match(line)
+                match = self._INSTALLED_REGEXP.match(line)
                 if match:
                     yield self.package(
                         id=match.group("package_id"),

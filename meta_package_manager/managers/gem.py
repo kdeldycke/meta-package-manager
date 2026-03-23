@@ -66,6 +66,19 @@ class Gem(PackageManager):
     post_args = ("--quiet",)  # Silence command progress meter
 
     _VERSION_SPLITTER = re.compile(r",|default:| ")
+    _INSTALLED_REGEXP = re.compile(r"(\S+) \((.+)\)")
+    _OUTDATED_REGEXP = re.compile(r"(\S+) \((\S+) < (\S+)\)")
+    _SEARCH_REGEXP = re.compile(
+        r"""
+        (?P<package_id>\S+)     # Any string.
+        \                       # A space.
+        \(                      # Start of content in parenthesis.
+            (?P<version>\S+)    # Version string.
+            (?:\ \S+)?          # Optional platform value after space.
+        \)
+        """,
+        re.VERBOSE,
+    )
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -93,9 +106,8 @@ class Gem(PackageManager):
         """
         output = self.run_cli("list")
 
-        regexp = re.compile(r"(\S+) \((.+)\)")
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._INSTALLED_REGEXP.match(package)
             if match:
                 package_id, versions = match.groups()
                 # Guess latest installed version.
@@ -122,9 +134,8 @@ class Gem(PackageManager):
         """
         output = self.run_cli("outdated")
 
-        regexp = re.compile(r"(\S+) \((\S+) < (\S+)\)")
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._OUTDATED_REGEXP.match(package)
             if match:
                 package_id, current_version, latest_version = match.groups()
                 yield self.package(
@@ -164,19 +175,7 @@ class Gem(PackageManager):
 
         output = self.run_cli("search", query, "--versions", search_arg)
 
-        regexp = re.compile(
-            r"""
-            (?P<package_id>\S+)     # Any string.
-            \                       # A space.
-            \(                      # Start of content in parenthesis.
-                (?P<version>\S+)    # Version string.
-                (?:\ \S+)?          # Optional platform value after space.
-            \)
-            """,
-            re.VERBOSE,
-        )
-
-        for package_id, version in regexp.findall(output):
+        for package_id, version in self._SEARCH_REGEXP.findall(output):
             yield self.package(id=package_id, latest_version=version)
 
     @version_not_implemented

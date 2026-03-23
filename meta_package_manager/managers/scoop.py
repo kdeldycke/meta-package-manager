@@ -39,6 +39,37 @@ class Scoop(PackageManager):
 
     requirement = "0.2.4"
 
+    _LIST_REGEXP = re.compile(
+        r"""
+        (?P<package_id>\S+)  # Any string.
+        \s+                  # Any number of blank chars.
+        (?P<version>\S+)     # Version string.
+        \s+                  # Any number of blank chars.
+        .+                   # Any string.
+        """,
+        re.VERBOSE,
+    )
+    _OUTDATED_REGEXP = re.compile(
+        r"""
+        (?P<package_id>\S+)         # Any string.
+        \ +                         # One space or more.
+        (?P<installed_version>\S*)  # Version string.
+        \ +                         # One space or more.
+        (?P<latest_version>\S*)     # Version string.
+        """,
+        re.VERBOSE,
+    )
+    _SEARCH_REGEXP = re.compile(
+        r"""
+        (?P<package_id>\S+)  # Any string.
+        \ +                  # One space or more.
+        (?P<version>\S+)     # Version string.
+        \ +                  # One space or more.
+        \S+                  # Any string.
+        """,
+        re.VERBOSE,
+    )
+
     version_regexes = (
         r"^v(?P<version>\S+)\s.+",
         # XXX Scoop does not always provide a clean version string:
@@ -110,18 +141,7 @@ class Scoop(PackageManager):
         """
         output = self.run_cli("list")
 
-        regexp = re.compile(
-            r"""
-            (?P<package_id>\S+)  # Any string.
-            \s+                  # Any number of blank chars.
-            (?P<version>\S+)     # Version string.
-            \s+                  # Any number of blank chars.
-            .+                   # Any string.
-            """,
-            re.VERBOSE,
-        )
-
-        for package_id, version in regexp.findall(self.remove_headers(output)):
+        for package_id, version in self._LIST_REGEXP.findall(self.remove_headers(output)):
             yield self.package(id=package_id, installed_version=version)
 
     @property
@@ -140,18 +160,7 @@ class Scoop(PackageManager):
         """
         output = self.run_cli("scoop", "status")
 
-        regexp = re.compile(
-            r"""
-            (?P<package_id>\S+)         # Any string.
-            \ +                         # One space or more.
-            (?P<installed_version>\S*)  # Version string.
-            \ +                         # One space or more.
-            (?P<latest_version>\S*)     # Version string.
-            """,
-            re.VERBOSE,
-        )
-
-        for package_id, installed_version, latest_version in regexp.findall(
+        for package_id, installed_version, latest_version in self._OUTDATED_REGEXP.findall(
             self.remove_headers(output),
         ):
             yield self.package(
@@ -189,18 +198,9 @@ class Scoop(PackageManager):
         """
         output = self.run_cli("search", query)
 
-        regexp = re.compile(
-            r"""
-            (?P<package_id>\S+)  # Any string.
-            \ +                  # One space or more.
-            (?P<version>\S+)     # Version string.
-            \ +                  # One space or more.
-            \S+                  # Any string.
-            """,
-            re.VERBOSE,
-        )
-
-        for package_id, version in regexp.findall(self.remove_headers(output)):
+        for package_id, version in self._SEARCH_REGEXP.findall(
+            self.remove_headers(output),
+        ):
             yield self.package(id=package_id, latest_version=version)
 
     @version_not_implemented

@@ -37,6 +37,21 @@ class Flatpak(PackageManager):
 
     requirement = "1.2.0"
 
+    _LIST_REGEXP = re.compile(
+        r"(?P<name>.+?)\t(?P<package_id>\S+)\t?(?P<latest_version>.*)",
+    )
+    _SEARCH_REGEXP = re.compile(
+        r"""
+        ^(?P<package_name>\S+)\t
+        (?P<description>.+)\t
+        (?P<package_id>\S+)\t
+        (?P<version>\S+)\t
+        (?P<branch>\S+)\t
+        (?P<remotes>.+)
+        """,
+        re.VERBOSE,
+    )
+
     version_regexes = (r"Flatpak\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
@@ -67,12 +82,8 @@ class Flatpak(PackageManager):
             "--ostree-verbose",
         )
 
-        regexp = re.compile(
-            r"(?P<name>.+?)\t(?P<package_id>\S+)\t?(?P<latest_version>.*)",
-        )
-
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._LIST_REGEXP.match(package)
             if match:
                 name, package_id, installed_version = match.groups()
                 yield self.package(
@@ -99,12 +110,8 @@ class Flatpak(PackageManager):
             "--ostree-verbose",
         )
 
-        regexp = re.compile(
-            r"(?P<name>.+?)\t(?P<package_id>\S+)\t?(?P<latest_version>.*)",
-        )
-
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._LIST_REGEXP.match(package)
             if match:
                 name, package_id, latest_version = match.groups()
 
@@ -148,18 +155,6 @@ class Flatpak(PackageManager):
         """
         output = self.run_cli("search", query, "--ostree-verbose")
 
-        regexp = re.compile(
-            r"""
-            ^(?P<package_name>\S+)\t
-            (?P<description>.+)\t
-            (?P<package_id>\S+)\t
-            (?P<version>\S+)\t
-            (?P<branch>\S+)\t
-            (?P<remotes>.+)
-            """,
-            re.VERBOSE,
-        )
-
         for (
             package_name,
             description,
@@ -167,7 +162,7 @@ class Flatpak(PackageManager):
             version,
             _branch,
             _remotes,
-        ) in regexp.findall(output):
+        ) in self._SEARCH_REGEXP.findall(output):
             yield self.package(
                 id=package_id,
                 name=package_name,

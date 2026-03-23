@@ -45,6 +45,12 @@ class Yarn(PackageManager):
 
     pre_args = ("--silent",)
 
+    _INSTALLED_REGEXP = re.compile(
+        r"^.+\"data\":\"\\\"(?P<package_id>\S+)"
+        r"@(?P<version>\S+)\\\" has binaries:\"\}$",
+        re.MULTILINE,
+    )
+
     """
     .. code-block:: shell-session
 
@@ -87,13 +93,7 @@ class Yarn(PackageManager):
         """
         output = self.run_cli("global", "--json", "list", "--depth", "0")
 
-        regexp = re.compile(
-            r"^.+\"data\":\"\\\"(?P<package_id>\S+)"
-            r"@(?P<version>\S+)\\\" has binaries:\"\}$",
-            re.MULTILINE,
-        )
-
-        for package_id, version in regexp.findall(output):
+        for package_id, version in self._INSTALLED_REGEXP.findall(output):
             yield self.package(id=package_id, installed_version=version)
 
     @cached_property

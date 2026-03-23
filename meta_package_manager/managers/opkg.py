@@ -37,6 +37,19 @@ class OPKG(PackageManager):
 
     requirement = "0.2.0"
 
+    _INSTALLED_REGEXP = re.compile(r"(\S+) - (\S+)")
+    _OUTDATED_REGEXP = re.compile(r"(\S+) - (\S+) - (\S+)")
+    _SEARCH_REGEXP = re.compile(
+        r"""
+        (?P<package_id>\S+)
+        \ -\
+        (?P<version>\S+)
+        \ -\
+        (?P<description>.+)
+        """,
+        re.VERBOSE | re.MULTILINE,
+    )
+
     version_regexes = (r"opkg\s+version\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
@@ -75,9 +88,8 @@ class OPKG(PackageManager):
         """
         output = self.run_cli("list-installed")
 
-        regexp = re.compile(r"(\S+) - (\S+)")
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._INSTALLED_REGEXP.match(package)
             if match:
                 package_id, installed_version = match.groups()
                 yield self.package(id=package_id, installed_version=installed_version)
@@ -94,9 +106,8 @@ class OPKG(PackageManager):
         """
         output = self.run_cli("list-upgradable")
 
-        regexp = re.compile(r"(\S+) - (\S+) - (\S+)")
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._OUTDATED_REGEXP.match(package)
             if match:
                 package_id, installed_version, latest_version = match.groups()
                 yield self.package(
@@ -124,18 +135,7 @@ class OPKG(PackageManager):
         """
         output = self.run_cli("list")
 
-        regexp = re.compile(
-            r"""
-            (?P<package_id>\S+)
-            \ -\
-            (?P<version>\S+)
-            \ -\
-            (?P<description>.+)
-            """,
-            re.VERBOSE | re.MULTILINE,
-        )
-
-        for package_id, version, description in regexp.findall(output):
+        for package_id, version, description in self._SEARCH_REGEXP.findall(output):
             yield self.package(
                 id=package_id,
                 description=description,

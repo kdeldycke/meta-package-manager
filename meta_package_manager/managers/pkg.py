@@ -43,6 +43,9 @@ class PKG(PackageManager):
 
     pre_args = ("--quiet",)
 
+    _INSTALLED_REGEXP = re.compile(r"(\S+) (\S+) (.+)")
+    _OUTDATED_REGEXP = re.compile(r"(\S+): (\S+) -> (\S+) .+")
+
     """
     .. code-block:: shell-session
         $ pkg --version
@@ -68,9 +71,8 @@ class PKG(PackageManager):
         """
         output = self.run_cli("query", "-e", r'"%a = 0"', r'"%n %v %c"')
 
-        regexp = re.compile(r"(\S+) (\S+) (.+)")
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._INSTALLED_REGEXP.match(package)
             if match:
                 package_id, installed_version, description = match.groups()
                 yield self.package(
@@ -131,9 +133,8 @@ class PKG(PackageManager):
 
         outdated_list = output.split("Installed packages to be UPGRADED:", 1)[1].strip()
 
-        regexp = re.compile(r"(\S+): (\S+) -> (\S+) .+")
         for package in outdated_list.splitlines():
-            match = regexp.match(package.strip())
+            match = self._OUTDATED_REGEXP.match(package.strip())
             if match:
                 package_id, installed_version, latest_version = match.groups()
                 yield self.package(

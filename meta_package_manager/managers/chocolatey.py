@@ -45,6 +45,9 @@ class Choco(PackageManager):
     """
 
     post_args = ("--no-progress", "--no-color", "--retry-count=3")
+
+    _INSTALLED_REGEXP = re.compile(r"(.+)\|(.+)")
+    _OUTDATED_REGEXP = re.compile(r"(.+)\|(.+)\|(.+)\|.+")
     """
     .. code-block:: pwsh-session
 
@@ -68,9 +71,8 @@ class Choco(PackageManager):
         """
         output = self.run_cli("list", "--limit-output")
 
-        regexp = re.compile(r"(.+)\|(.+)")
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._INSTALLED_REGEXP.match(package)
             if match:
                 package_id, installed_version = match.groups()
                 yield self.package(id=package_id, installed_version=installed_version)
@@ -93,9 +95,8 @@ class Choco(PackageManager):
         """
         output = self.run_cli("outdated", "--limit-output")
 
-        regexp = re.compile(r"(.+)\|(.+)\|(.+)\|.+")
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._OUTDATED_REGEXP.match(package)
             if match:
                 package_id, installed_version, latest_version = match.groups()
                 yield self.package(
@@ -148,8 +149,7 @@ class Choco(PackageManager):
 
         output = self.run_cli("search", query, query_params)
 
-        regexp = re.compile(r"(.+)\|(.+)")
-        for package_id, latest_version in regexp.findall(output):
+        for package_id, latest_version in self._INSTALLED_REGEXP.findall(output):
             yield self.package(id=package_id, latest_version=latest_version)
 
     @version_not_implemented

@@ -48,6 +48,54 @@ class Emerge(PackageManager):
 
     pre_args = ("--quiet", "--color", "n", "--nospinner")
 
+    _INSTALLED_REGEXP = re.compile(
+        r"""
+        (
+            ?P<package_id>\S+   # Non-whitespace string...
+            (?!-r)              # ...if not directly followred by the "-r" string.
+        )
+        -                       # A dash.
+        (
+            ?P<version>[^\s-]+  # Any non-whitespace/non-dash string.
+            (?:-r\d+)?          # Optional revision suffix led by a -, non-grouped.
+        )
+        """,
+        re.VERBOSE,
+    )
+    _OUTDATED_REGEXP = re.compile(
+        r"""
+        \[.+\]                               # Update state.
+        \                                    # A space.
+        (?P<package_id>\S+)                  # Non-whitespace string.
+        \s+                                  # Any spacing.
+        (?:\[                                # Non-matching group
+                                             #   starting with a '['.
+            (?P<latest_version>[^\s\/:]+)    # Any non-spaced string
+                                             #   until a ':' or '/' is met.
+            \S*                              # Left-over parts of the version,
+                                             #   after a ':' or '/'.
+        \])?                                 # Optional group ending with a ']'.
+        \s+                                  # Any spacing.
+        (?:\[                                # Non-matching group
+                                             #   starting with a '['.
+            (?P<installed_version>[^\s\/:]+) # Any non-spaced string
+                                             #   until a ':' or '/' is met.
+            \S*                              # Left-over parts of the version,
+                                             #   after a ':' or '/'.
+        \])?                                 # Optional group ending with a ']'.
+        """,
+        re.VERBOSE,
+    )
+    _SEARCH_REGEXP = re.compile(
+        r"""
+        ^\*\s+(?P<package_id>\S+)\n
+        \s+Latest\ version\ available:\s+(?P<latest_version>\S+)\n
+        (?:\s+.+\n)+?
+        \s+Description:\s+(?P<description>.+)\n
+        """,
+        re.MULTILINE | re.VERBOSE,
+    )
+
     version_regexes = (r"Portage\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
@@ -90,23 +138,8 @@ class Emerge(PackageManager):
             auto_pre_args=False,
         )
 
-        regexp = re.compile(
-            r"""
-            (
-                ?P<package_id>\S+   # Non-whitespace string...
-                (?!-r)              # ...if not directly followred by the "-r" string.
-            )
-            -                       # A dash.
-            (
-                ?P<version>[^\s-]+  # Any non-whitespace/non-dash string.
-                (?:-r\d+)?          # Optional revision suffix led by a -, non-grouped.
-            )
-            """,
-            re.VERBOSE,
-        )
-
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._INSTALLED_REGEXP.match(package)
             if match:
                 package_id, installed_version = match.groups()
                 yield self.package(id=package_id, installed_version=installed_version)
@@ -134,33 +167,8 @@ class Emerge(PackageManager):
             "@world",
         )
 
-        regexp = re.compile(
-            r"""
-            \[.+\]                               # Update state.
-            \                                    # A space.
-            (?P<package_id>\S+)                  # Non-whitespace string.
-            \s+                                  # Any spacing.
-            (?:\[                                # Non-matching group
-                                                 #   starting with a '['.
-                (?P<latest_version>[^\s\/:]+)    # Any non-spaced string
-                                                 #   until a ':' or '/' is met.
-                \S*                              # Left-over parts of the version,
-                                                 #   after a ':' or '/'.
-            \])?                                 # Optional group ending with a ']'.
-            \s+                                  # Any spacing.
-            (?:\[                                # Non-matching group
-                                                 #   starting with a '['.
-                (?P<installed_version>[^\s\/:]+) # Any non-spaced string
-                                                 #   until a ':' or '/' is met.
-                \S*                              # Left-over parts of the version,
-                                                 #   after a ':' or '/'.
-            \])?                                 # Optional group ending with a ']'.
-            """,
-            re.VERBOSE,
-        )
-
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._OUTDATED_REGEXP.match(package)
             if match:
                 package_id, latest_version, installed_version = match.groups()
                 yield self.package(
@@ -218,17 +226,7 @@ class Emerge(PackageManager):
 
         output = self.run_cli(search_param, query)
 
-        regexp = re.compile(
-            r"""
-            ^\*\s+(?P<package_id>\S+)\n
-            \s+Latest\ version\ available:\s+(?P<latest_version>\S+)\n
-            (?:\s+.+\n)+?
-            \s+Description:\s+(?P<description>.+)\n
-            """,
-            re.MULTILINE | re.VERBOSE,
-        )
-
-        for package_id, version, description in regexp.findall(output):
+        for package_id, version, description in self._SEARCH_REGEXP.findall(output):
             yield self.package(
                 id=package_id,
                 description=description,

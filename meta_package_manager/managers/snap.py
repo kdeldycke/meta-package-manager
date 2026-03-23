@@ -39,6 +39,11 @@ class Snap(PackageManager):
 
     post_args = ("--color=never",)
 
+    _SEARCH_REGEXP = re.compile(
+        r"^(?P<package_id>\S+)\s+(?P<version>\S+)\s+\S+\s+\S+\s+(?P<description>.+)$",
+        re.MULTILINE,
+    )
+
     version_regexes = (r"snap\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
@@ -118,11 +123,9 @@ class Snap(PackageManager):
                 headerless_table = table[1]
 
         if headerless_table:
-            regexp = re.compile(
-                r"^(?P<package_id>\S+)\s+(?P<version>\S+)\s+\S+\s+\S+\s+(?P<description>.+)$",
-                re.MULTILINE,
-            )
-            for package_id, version, description in regexp.findall(headerless_table):
+            for package_id, version, description in self._SEARCH_REGEXP.findall(
+                headerless_table,
+            ):
                 yield self.package(
                     id=package_id,
                     description=description,

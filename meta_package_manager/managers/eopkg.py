@@ -41,6 +41,13 @@ class EOPKG(PackageManager):
 
     pre_args = ("--no-color",)
 
+    _LIST_REGEXP = re.compile(
+        r"^(?P<package_id>\S+)\s+\|\.+\|\s+(?P<version>\.+)\|\.+\|\.+\|\.+$",
+    )
+    _SEARCH_REGEXP = re.compile(
+        r"^(?P<package_id>\S+)\s+- (?P<description>\.+)$",
+    )
+
     version_regexes = (r"eopkg\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
@@ -82,12 +89,8 @@ class EOPKG(PackageManager):
         """
         output = self.run_cli("list-installed", "--install-info")
 
-        regexp = re.compile(
-            r"^(?P<package_id>\S+)\s+\|\.+\|\s+(?P<version>\.+)\|\.+\|\.+\|\.+$"
-        )
-
         for package in output.splitlines()[:-2]:
-            match = regexp.match(package)
+            match = self._LIST_REGEXP.match(package)
             if match:
                 package_id, installed_version = match.groups()
                 yield self.package(id=package_id, installed_version=installed_version)
@@ -108,12 +111,8 @@ class EOPKG(PackageManager):
         """
         output = self.run_cli("list-upgrades", "--install-info")
 
-        regexp = re.compile(
-            r"^(?P<package_id>\S+)\s+\|\.+\|\s+(?P<version>\.+)\|\.+\|\.+\|\.+$"
-        )
-
         for package in output.splitlines()[:-2]:
-            match = regexp.match(package)
+            match = self._LIST_REGEXP.match(package)
             if match:
                 package_id, installed_version = match.groups()
                 yield self.package(id=package_id, installed_version=installed_version)
@@ -175,9 +174,7 @@ class EOPKG(PackageManager):
 
         output = self.run_cli("search", arg, query)
 
-        regexp = re.compile(r"^(?P<package_id>\S+)\s+- (?P<description>\.+)$")
-
-        for package_id, description in regexp.findall(output):
+        for package_id, description in self._SEARCH_REGEXP.findall(output):
             yield self.package(id=package_id, description=description)
 
     @version_not_implemented

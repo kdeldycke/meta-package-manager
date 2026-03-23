@@ -47,6 +47,22 @@ class APT(PackageManager):
     requirement = "1.0.0"
 
     pre_args = ("--quiet",)
+
+    _INSTALLED_REGEXP = re.compile(r"(\S+)\/\S+ (\S+) (\S+) .*")
+    _OUTDATED_REGEXP = re.compile(r"(\S+)\/\S+ (\S+).*\[upgradable from: (\S+)\]")
+    _SEARCH_REGEXP = re.compile(
+        r"""
+        ^(?P<package_id>\S+)  # A string with a char at least.
+        /\S+\                 # A slash, any non-spaced string, then a space.
+        (?P<version>\S+)      # Any non-spaced string.
+        \                     # A space.
+        (?:.+)\n              # Any content ending the line.
+        (?P<description>      # Start of the multi-line desc group.
+            (?:\ \ .+\n?)+    # Line(s) of content prefixed by 2 spaces.
+        )
+        """,
+        re.MULTILINE | re.VERBOSE,
+    )
     """
     ``--quiet``: produces output suitable for logging, omitting progress indicators.
 
@@ -86,9 +102,8 @@ class APT(PackageManager):
         """
         output = self.run_cli("list", "--installed")
 
-        regexp = re.compile(r"(\S+)\/\S+ (\S+) (\S+) .*")
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._INSTALLED_REGEXP.match(package)
             if match:
                 package_id, installed_version, arch = match.groups()
                 yield self.package(
@@ -108,9 +123,8 @@ class APT(PackageManager):
         """
         output = self.run_cli("list", "--upgradable")
 
-        regexp = re.compile(r"(\S+)\/\S+ (\S+).*\[upgradable from: (\S+)\]")
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._OUTDATED_REGEXP.match(package)
             if match:
                 package_id, latest_version, installed_version = match.groups()
                 yield self.package(
@@ -186,21 +200,7 @@ class APT(PackageManager):
 
         output = self.run_cli("search", query, search_arg)
 
-        regexp = re.compile(
-            r"""
-            ^(?P<package_id>\S+)  # A string with a char at least.
-            /\S+\                 # A slash, any non-spaced string, then a space.
-            (?P<version>\S+)      # Any non-spaced string.
-            \                     # A space.
-            (?:.+)\n              # Any content ending the line.
-            (?P<description>      # Start of the multi-line desc group.
-                (?:\ \ .+\n?)+    # Line(s) of content prefixed by 2 spaces.
-            )
-            """,
-            re.MULTILINE | re.VERBOSE,
-        )
-
-        for package_id, version, description in regexp.findall(output):
+        for package_id, version, description in self._SEARCH_REGEXP.findall(output):
             yield self.package(
                 id=package_id,
                 description=description,
@@ -287,6 +287,20 @@ class APT_Mint(APT):
 
     homepage_url = "https://github.com/kdeldycke/meta-package-manager/issues/52"
 
+    _MINT_SEARCH_REGEXP = re.compile(
+        r"""
+        \S                       # One non-space character.
+        \s+                      # One space or more.
+        (?P<package_id>[^\s:]+)  # Any non-space until whitespace or semi-colon.
+        (?:\:\S+)?               # Optional arch suffix after package and semi-colon
+        \s+                      # One space or more.
+        -                        # A dash.
+        \ ?                      # An optional space.
+        (?P<description>.+)?     # Optional content string.
+        """,
+        re.VERBOSE,
+    )
+
     cli_names = ("apt",)
 
     version_cli_options = ("version", "apt")
@@ -324,19 +338,5 @@ class APT_Mint(APT):
 
         output = self.run_cli("search", query)
 
-        regexp = re.compile(
-            r"""
-            \S                       # One non-space character.
-            \s+                      # One space or more.
-            (?P<package_id>[^\s:]+)  # Any non-space until whitespace or semi-colon.
-            (?:\:\S+)?               # Optional arch suffix after package and semi-colon
-            \s+                      # One space or more.
-            -                        # A dash.
-            \ ?                      # An optional space.
-            (?P<description>.+)?     # Optional content string.
-            """,
-            re.VERBOSE,
-        )
-
-        for package_id, description in regexp.findall(output):
+        for package_id, description in self._MINT_SEARCH_REGEXP.findall(output):
             yield self.package(id=package_id, description=description)

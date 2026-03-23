@@ -41,6 +41,13 @@ class Pacman(PackageManager):
 
     pre_args = ("--noconfirm", "--color", "never")
 
+    _INSTALLED_REGEXP = re.compile(r"(\S+) (\S+)")
+    _OUTDATED_REGEXP = re.compile(r"(\S+) (\S+) -> (\S+)")
+    _SEARCH_REGEXP = re.compile(
+        r"(?P<repo_id>\S+?)/(?P<package_id>\S+)\s+(?P<version>\S+).*\n\s+(?P<description>.+)",
+        re.MULTILINE | re.VERBOSE,
+    )
+
     version_regexes = (r".*Pacman\s+v(?P<version>\S+)",)
     r"""Search version right after the ``Pacman `` string.
 
@@ -74,9 +81,8 @@ class Pacman(PackageManager):
         """
         output = self.run_cli("--query")
 
-        regexp = re.compile(r"(\S+) (\S+)")
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._INSTALLED_REGEXP.match(package)
             if match:
                 package_id, installed_version = match.groups()
                 yield self.package(id=package_id, installed_version=installed_version)
@@ -93,9 +99,8 @@ class Pacman(PackageManager):
         """
         output = self.run_cli("--query", "--upgrades")
 
-        regexp = re.compile(r"(\S+) (\S+) -> (\S+)")
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._OUTDATED_REGEXP.match(package)
             if match:
                 package_id, installed_version, latest_version = match.groups()
                 yield self.package(
@@ -134,12 +139,9 @@ class Pacman(PackageManager):
 
         output = self.run_cli("--sync", "--search", query)
 
-        regexp = re.compile(
-            r"(?P<repo_id>\S+?)/(?P<package_id>\S+)\s+(?P<version>\S+).*\n\s+(?P<description>.+)",
-            re.MULTILINE | re.VERBOSE,
-        )
-
-        for _repo_id, package_id, version, description in regexp.findall(output):
+        for _repo_id, package_id, version, description in self._SEARCH_REGEXP.findall(
+            output,
+        ):
             yield self.package(
                 id=package_id,
                 description=description,

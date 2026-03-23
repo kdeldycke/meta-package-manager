@@ -45,6 +45,14 @@ class Cargo(PackageManager):
         "--quiet",  # Do not print cargo log messages.
     )
 
+    _INSTALLED_REGEXP = re.compile(
+        r"^(?P<package_id>\S+)\s+v(?P<package_version>\S+):$",
+    )
+    _SEARCH_REGEXP = re.compile(
+        r"^(?P<package_id>\S+)\s+=\s+\"(?P<version>\S+)\"\s+#\s+(?P<description>.+)$",
+        re.MULTILINE,
+    )
+
     version_regexes = (r"cargo\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
@@ -67,10 +75,8 @@ class Cargo(PackageManager):
         """
         output = self.run_cli("install", "--list")
 
-        regexp = re.compile(r"^(?P<package_id>\S+)\s+v(?P<package_version>\S+):$")
-
         for package in output.splitlines():
-            match = regexp.match(package)
+            match = self._INSTALLED_REGEXP.match(package)
             if match:
                 package_id, package_version = match.groups()
                 yield self.package(id=package_id, installed_version=package_version)
@@ -108,12 +114,7 @@ class Cargo(PackageManager):
         """
         output = self.run_cli("search", "--limit", "100", query)
 
-        regexp = re.compile(
-            r"^(?P<package_id>\S+)\s+=\s+\"(?P<version>\S+)\"\s+#\s+(?P<description>.+)$",
-            re.MULTILINE,
-        )
-
-        for package_id, version, description in regexp.findall(output):
+        for package_id, version, description in self._SEARCH_REGEXP.findall(output):
             yield self.package(
                 id=package_id,
                 description=description,

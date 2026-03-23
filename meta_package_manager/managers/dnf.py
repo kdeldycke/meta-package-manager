@@ -52,6 +52,8 @@ class DNF(PackageManager):
 
     pre_args: tuple[str, ...] = ("--color=never", "--quiet")
 
+    _SEARCH_REGEXP = re.compile(r"(\S+)\.\S+\s:\s(\S+)")
+
     DELIMITER = "___MPM___"
 
     @property
@@ -142,7 +144,6 @@ class DNF(PackageManager):
         """
         output = self.run_cli("search", query)
 
-        regexp = re.compile(r"(\S+)\.\S+\s:\s(\S+)")
 
         for line in output.splitlines()[1:]:
             # Skip section headers.
@@ -150,7 +151,7 @@ class DNF(PackageManager):
                 continue
 
             # Extract package ID and description.
-            match = regexp.match(line)
+            match = self._SEARCH_REGEXP.match(line)
             if match:
                 package_id, description = match.groups()
                 yield self.package(id=package_id, description=description)

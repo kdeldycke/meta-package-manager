@@ -37,6 +37,34 @@ class MAS(PackageManager):
 
     platforms = MACOS
 
+    _INSTALLED_REGEXP = re.compile(
+        r"""
+        (?P<package_id>\d+)
+        \s+
+        (?P<package_name>.+?)
+        \s+
+        \(
+            (?P<version>\S+)
+        \)
+        """,
+        re.MULTILINE | re.VERBOSE,
+    )
+
+    _OUTDATED_REGEXP = re.compile(
+        r"""
+        (?P<package_id>\d+)
+        \s+
+        (?P<package_name>.+?)
+        \s+
+        \(
+            (?P<installed_version>\S+)
+            \s+->\s+
+            (?P<latest_version>\S+)
+        \)
+        """,
+        re.MULTILINE | re.VERBOSE,
+    )
+
     requirement = "1.8.7"
     """`1.8.7 <https://github.com/mas-cli/mas/releases/tag/v1.8.7>`_ is fixing the
     ``mas search`` command.
@@ -65,20 +93,7 @@ class MAS(PackageManager):
         """
         output = self.run_cli("list")
 
-        regexp = re.compile(
-            r"""
-            (?P<package_id>\d+)
-            \s+
-            (?P<package_name>.+?)
-            \s+
-            \(
-                (?P<version>\S+)
-            \)
-            """,
-            re.MULTILINE | re.VERBOSE,
-        )
-
-        for package_id, package_name, version in regexp.findall(output):
+        for package_id, package_name, version in self._INSTALLED_REGEXP.findall(output):
             yield self.package(
                 id=package_id,
                 name=package_name,
@@ -97,27 +112,12 @@ class MAS(PackageManager):
         """
         output = self.run_cli("outdated")
 
-        regexp = re.compile(
-            r"""
-            (?P<package_id>\d+)
-            \s+
-            (?P<package_name>.+?)
-            \s+
-            \(
-                (?P<installed_version>\S+)
-                \s+->\s+
-                (?P<latest_version>\S+)
-            \)
-            """,
-            re.MULTILINE | re.VERBOSE,
-        )
-
         for (
             package_id,
             package_name,
             installed_version,
             latest_version,
-        ) in regexp.findall(output):
+        ) in self._OUTDATED_REGEXP.findall(output):
             yield self.package(
                 id=package_id,
                 name=package_name,
@@ -146,20 +146,7 @@ class MAS(PackageManager):
         """
         output = self.run_cli("search", query)
 
-        regexp = re.compile(
-            r"""
-            (?P<package_id>\d+)
-            \s+
-            (?P<package_name>.+?)
-            \s+
-            \(
-                (?P<version>\S+)
-            \)
-            """,
-            re.MULTILINE | re.VERBOSE,
-        )
-
-        for package_id, package_name, version in regexp.findall(output):
+        for package_id, package_name, version in self._INSTALLED_REGEXP.findall(output):
             yield self.package(id=package_id, name=package_name, latest_version=version)
 
     @version_not_implemented

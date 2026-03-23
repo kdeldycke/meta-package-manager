@@ -69,6 +69,39 @@ class Homebrew(PackageManager):
         # "HOMEBREW_CASK_OPTS": "--no-quarantine",
     }
 
+    _INSTALLED_REGEXP = re.compile(
+        r"""
+        (?P<package_id>\S+)     # Any non-empty characters.
+        (?P<removed> \(!\))?    # Package removed flag.
+        \                       # A space.
+        (?P<versions>.+)        # Versions.
+        """,
+        re.VERBOSE,
+    )
+    _SEARCH_DESC_REGEXP = re.compile(
+        r"""
+        (?:==>\s\S+\s)?           # Ignore section starting with '==>'.
+        (?P<package_id>\S+)       # Any non-empty characters.
+        :                         # Semi-colon.
+        (                         # Optional group start (ignored below with _).
+            \s+                   # Blank characters.
+            \(                    # Opening parenthesis.
+            (?P<package_name>.+)  # Any string.
+            \)                    # Closing parenthesis.
+        )?                        # Optional group end.
+        \s+                       # Blank characters.
+        (?P<description>.+)       # Any string.
+        """,
+        re.VERBOSE,
+    )
+    _SEARCH_REGEXP = re.compile(
+        r"""
+        (?:==>\s\S+\s)?           # Ignore section starting with '==>'.
+        (?P<package_id>[^\s✔]+)   # Anything not a whitespace or ✔.
+        """,
+        re.VERBOSE,
+    )
+
     version_regexes = (r"Homebrew\s+(?P<version>\S+)",)
     """
     .. code-block:: shell-session
@@ -121,19 +154,9 @@ class Homebrew(PackageManager):
         """
         output = self.run_cli("list", "--quiet", "--versions")
 
-        regexp = re.compile(
-            r"""
-            (?P<package_id>\S+)     # Any non-empty characters.
-            (?P<removed> \(!\))?    # Package removed flag.
-            \                       # A space.
-            (?P<versions>.+)        # Versions.
-            """,
-            re.VERBOSE,
-        )
-
         for package_id, _removed, versions in map(
             methodcaller("groups"),
-            regexp.finditer(output),
+            self._INSTALLED_REGEXP.finditer(output),
         ):
             # Keep highest version found.
             version = max(map(parse_version, versions.split()))
@@ -333,24 +356,9 @@ class Homebrew(PackageManager):
         if extended:
             output = self.run_cli("search", "--quiet", query, "--desc")
 
-            regexp = re.compile(
-                r"""
-                (?:==>\s\S+\s)?           # Ignore section starting with '==>'.
-                (?P<package_id>\S+)       # Any non-empty characters.
-                :                         # Semi-colon.
-                (                         # Optional group start (ignored below with _).
-                    \s+                   # Blank characters.
-                    \(                    # Opening parenthesis.
-                    (?P<package_name>.+)  # Any string.
-                    \)                    # Closing parenthesis.
-                )?                        # Optional group end.
-                \s+                       # Blank characters.
-                (?P<description>.+)       # Any string.
-                """,
-                re.VERBOSE,
-            )
-
-            for package_id, _, package_name, description in regexp.findall(output):
+            for package_id, _, package_name, description in (
+                self._SEARCH_DESC_REGEXP.findall(output)
+            ):
                 matched_ids.add(package_id)
                 pkg = self.package(id=package_id, name=package_name)
                 if description != "[no description]":
@@ -363,15 +371,7 @@ class Homebrew(PackageManager):
 
         output = self.run_cli("search", "--quiet", query)
 
-        regexp = re.compile(
-            r"""
-            (?:==>\s\S+\s)?           # Ignore section starting with '==>'.
-            (?P<package_id>[^\s✔]+)   # Anything not a whitespace or ✔.
-            """,
-            re.VERBOSE,
-        )
-
-        for package_id in regexp.findall(output):
+        for package_id in self._SEARCH_REGEXP.findall(output):
             # Deduplicate search results.
             if package_id not in matched_ids:
                 yield self.package(id=package_id)

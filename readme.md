@@ -25,31 +25,38 @@
 
 ---
 
+## Quick start
+
+Thanks to [`uv`](https://docs.astral.sh/uv/getting-started/installation/), you can run `mpm` on any platform in one command, without installation or venv:
+
+```shell-session
+$ uvx meta-package-manager
+```
+
 ## Features
 
 <img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-outdated-cli.png"/>
 
 <img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.png"/>
 
-- Inventory and list all package managers available on the system.
+- Inventory and list all [package managers](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#managers) available on the system.
 - Supports macOS, Linux and Windows.
 - [Standalone executables](#executables) for Linux, macOS and Windows.
-- List installed packages.
-- List duplicate installed packages.
-- Search for packages.
-- Install a package.
-- Remove a package.
-- List outdated packages.
-- Sync local package infos.
-- Upgrade all outdated packages.
-- Backup list of installed packages to TOML file.
-- Restore/install list of packages from TOML files.
-- Software Bill of Materials: export installed packages to [SPDX](https://spdx.dev) and [CycloneDX](https://cyclonedx.org) SBOM files.
-- Pin-point commands to a subset of package managers (include/exclude selectors).
+- [List installed packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#installed).
+- [List duplicate installed packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#duplicates).
+- [Search for packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#search).
+- [Install a package](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#install).
+- [Remove a package](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#remove).
+- [List outdated packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#outdated).
+- [Sync local package infos](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#sync).
+- [Upgrade all outdated packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#upgrade).
+- [Backup list of installed packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#backup) to TOML file.
+- [Restore/install list of packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#restore) from TOML files.
+- [Software Bill of Materials](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#sbom): export installed packages to [SPDX](https://spdx.dev) and [CycloneDX](https://cyclonedx.org) SBOM files.
+- Pin-point commands to a [subset of package managers](https://kdeldycke.github.io/meta-package-manager/usecase.html) (include/exclude selectors).
 - Support plain, versioned and [purl](https://github.com/package-url/purl-spec) package specifiers.
-- Export output to JSON or print user-friendly tables.
-- [Standalone executables](#executables) for Linux, macOS and Windows.
-- Shell auto-completion for Bash, Zsh and Fish.
+- Export output to [JSON or user-friendly tables](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm).
+- [Shell auto-completion](https://kdeldycke.github.io/meta-package-manager/install.html) for Bash, Zsh and Fish.
 - Provides a [Xbar/SwiftBar plugin](https://kdeldycke.github.io/meta-package-manager/bar-plugin.html) for
   friendly macOS integration.
 - Because `mpm` try to wrap all other package managers, it became another pathological case of [XKCD #927: Standards](https://xkcd.com/927/)
@@ -160,14 +167,6 @@ Meta Package Manager,zypper,1
 
 All [installation methods](https://kdeldycke.github.io/meta-package-manager/install.html) are available in the documentation. Below are the most popular ones:
 
-### Try it now
-
-Thanks to [`uv`](https://docs.astral.sh/uv/getting-started/installation/), you can run `mpm` on any platform in one command, without installation or venv:
-
-```shell-session
-$ uvx meta-package-manager
-```
-
 ### macOS
 
 `mpm` is part of the official [Homebrew](https://brew.sh) default tap, so you can install it with:
@@ -193,6 +192,8 @@ Standalone binaries of `mpm` latest version are available as direct downloads fo
 | **Linux**   | [Download `mpm-linux-arm64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-arm64.bin)     | [Download `mpm-linux-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-linux-x64.bin)     |
 | **macOS**   | [Download `mpm-macos-arm64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-arm64.bin)     | [Download `mpm-macos-x64.bin`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-macos-x64.bin)     |
 | **Windows** | [Download `mpm-windows-arm64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-arm64.exe) | [Download `mpm-windows-x64.exe`](https://github.com/kdeldycke/meta-package-manager/releases/latest/download/mpm-windows-x64.exe) |
+
+No need to install Python or `uv`. Useful for CI/CD pipelines running on minimal images, or old platforms where dependency management is painful.
 
 ## Quickstart
 
@@ -286,6 +287,14 @@ $ mpm --all-managers managers
 ```
 
 If your favorite manager is not supported yet, you can help! See the [contribution guide](https://kdeldycke.github.io/meta-package-manager/contributing.html).
+
+## Used in
+
+Check these projects to get real-life examples of `mpm` usage:
+
+- ![GitHub stars](https://img.shields.io/github/stars/kdeldycke/dotfiles?label=%E2%AD%90&style=flat-square) [Dotfiles](https://github.com/kdeldycke/dotfiles) - macOS dotfiles for Python developers, using `mpm` to manage system packages.
+
+Feel free to send a PR to add your project in this list if you are relying on `mpm` in any way.
 
 ## Usage
 

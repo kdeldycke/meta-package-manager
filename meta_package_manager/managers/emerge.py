@@ -50,14 +50,14 @@ class Emerge(PackageManager):
 
     _INSTALLED_REGEXP = re.compile(
         r"""
-        (
-            ?P<package_id>\S+   # Non-whitespace string...
-            (?!-r)              # ...if not directly followred by the "-r" string.
+        (?P<package_id>        # Named group must not split (?P< across lines.
+            \S+                # Non-whitespace string...
+            (?!-r)             # ...if not directly followed by the "-r" string.
         )
-        -                       # A dash.
-        (
-            ?P<version>[^\s-]+  # Any non-whitespace/non-dash string.
-            (?:-r\d+)?          # Optional revision suffix led by a -, non-grouped.
+        -                      # A dash.
+        (?P<version>           # Named group must not split (?P< across lines.
+            [^\s-]+            # Any non-whitespace/non-dash string.
+            (?:-r\d+)?         # Optional revision suffix led by a -, non-grouped.
         )
         """,
         re.VERBOSE,

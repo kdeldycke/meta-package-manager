@@ -223,6 +223,13 @@ default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "Jav
 # Skip content between <!-- typos:off --> and <!-- typos:on --> markers.
 default.extend-ignore-re = [ "(?s)<!-- typos:off -->.*?<!-- typos:on -->" ]
 default.extend-ignore-identifiers-re = [
+  # error: `certifi` should be `certify`, `certifies`, `certified`
+  #   ╭▸ ./docs/assets/dependencies.mmd:7:5
+  #   │
+  # 7 │     certifi["certifi\n2025.11.12"]
+  #   ╰╴    ━━━━━━━
+  #
+  "certifi",
   # error: `ist` should be `is`, `it`, `its`, `sit`, `list`
   #     ╭▸ ./claude.md
   #     │

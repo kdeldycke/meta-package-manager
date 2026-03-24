@@ -30,8 +30,6 @@ from ..version import parse_version
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from typing import ClassVar
-
     from ..base import Package
 
 
@@ -41,7 +39,7 @@ class Homebrew(PackageManager):
     Homebrew is the umbrella project providing both brew and brew cask commands.
     """
 
-    platforms: ClassVar[set] = {LINUX_LIKE, MACOS}
+    platforms = {LINUX_LIKE, MACOS}
     """Homebrew core is now compatible with `Linux and Windows Subsystem for Linux (WSL)
     2 <https://docs.brew.sh/Homebrew-on-Linux>`_."""
 
@@ -55,7 +53,7 @@ class Homebrew(PackageManager):
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     virtual = True
 
-    extra_env: ClassVar[dict[str, str]] = {
+    extra_env: dict[str, str] = {
         # Disable analytics.
         "HOMEBREW_NO_ANALYTICS": "1",
         # Disable configuration hints to reduce verbosity.
@@ -568,7 +566,7 @@ class Cask(Homebrew):
 
     homepage_url = "https://github.com/Homebrew/homebrew-cask"
 
-    platforms: ClassVar[set] = {MACOS}
+    platforms = {MACOS}
     """Casks are only available on macOS, not Linux or WSL."""
 
     cli_names = ("brew",)

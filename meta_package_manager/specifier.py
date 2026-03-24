@@ -31,7 +31,7 @@ from .version import is_version, parse_version
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Sequence
-    from typing import ClassVar, Final
+    from typing import Final
 
     from .version import TokenizedString
 
@@ -279,13 +279,12 @@ class Solver:
 
     manager_priority: Sequence[str] = []
 
-    spec_pool: ClassVar[set[Specifier]] = set()
-
     def __init__(
         self,
         spec_strings: Iterable[str] | None = None,
         manager_priority=None,
     ) -> None:
+        self.spec_pool: set[Specifier] = set()
         if spec_strings:
             self.populate_from_strings(spec_strings)
         if manager_priority:

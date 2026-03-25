@@ -27,6 +27,7 @@ from cyclonedx.model import ExternalReference, ExternalReferenceType, XsUri
 from cyclonedx.model.bom import Bom
 from cyclonedx.model.component import Component, ComponentType
 from cyclonedx.model.contact import OrganizationalEntity
+from cyclonedx.model.lifecycle import LifecyclePhase, PredefinedLifecycle
 from cyclonedx.output import make_outputter
 from cyclonedx.output.json import JsonV1Dot5
 from cyclonedx.schema import OutputFormat, SchemaVersion
@@ -263,9 +264,10 @@ class CycloneDX(SBOM):
         doc_url = "https://kdeldycke.github.io/meta-package-manager"
         self.document = Bom()
 
-        # XXX lifecycles not supported yet:
-        # https://github.com/CycloneDX/cyclonedx-python-lib/issues/578
-        # self.document.metadata.lifecycles = [{"phase": "operations"}]
+        # mpm produces an inventory of what is installed on a live system.
+        self.document.metadata.lifecycles = [
+            PredefinedLifecycle(phase=LifecyclePhase.OPERATIONS),
+        ]
 
         self.document.metadata.component = Component(
             name="meta-package-manager",

@@ -17,6 +17,7 @@
 - [pkg] Add `--quiet` option to all `pkg` invocations to reduce log verbosity.
 - [yarn] Add `--silent` option to all `yarn` invocations to suppress console logs.
 - [mpm] Pre-compile regexes at class level across all managers.
+- [mpm] Set CycloneDX SBOM lifecycle phase to `operations`.
 
 ## [`6.1.1` (2026-02-06)](https://github.com/kdeldycke/meta-package-manager/compare/v6.1.0...v6.1.1)
 

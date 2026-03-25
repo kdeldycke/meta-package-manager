@@ -1,19 +1,15 @@
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # type: ignore[import-not-found]
+import tomllib  # type: ignore[import-not-found]  # stdlib >=3.11; docs require >=3.12.
 
 
 project_path = Path(__file__).parent.parent.resolve()
 
 # Fetch general information about the project from pyproject.toml.
 toml_path = project_path / "pyproject.toml"
-toml_config = tomllib.loads(toml_path.read_text())
+toml_config = tomllib.loads(toml_path.read_text(encoding="utf-8"))
 
 # Redistribute pyproject.toml config to Sphinx.
 project_id = toml_config["project"]["name"]
@@ -87,6 +83,8 @@ issues_github_path = f"{github_user}/{project_id}"
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
+    "click": ("https://click.palletsprojects.com", None),
+    "click-extra": ("https://kdeldycke.github.io/click-extra", None),
 }
 
 # Prefix document path to section labels, to use:
@@ -121,6 +119,13 @@ linkcheck_anchors_ignore = [
     r"issuecomment-\d+",
     r"readme",
     r"L\d+",
+]
+
+linkcheck_ignore = [
+    # These sites return 403 to bots but are valid.
+    r"https://guix\.gnu\.org",
+    # GitHub fragment anchors are rendered client-side and not visible to linkcheck.
+    r"https://github\.com/kdeldycke/click-extra#",
 ]
 
 # Footer content.

@@ -30,12 +30,16 @@ You can try Meta Package Manager right now in your terminal, without installing 
 ````{tab-item} Latest version
 ```shell-session
 $ uvx meta-package-manager
+Installed 21 packages in 42ms
+Usage: mpm [OPTIONS] COMMAND [ARGS]...
 ```
 ````
 
 ````{tab-item} Specific version
 ```shell-session
 $ uvx meta-package-manager@5.21.0
+Installed 21 packages in 42ms
+Usage: mpm [OPTIONS] COMMAND [ARGS]...
 ```
 ````
 
@@ -60,6 +64,9 @@ You can also try the library itself in an interactive Python shell without insta
 
 ```{code-block} shell-session
 $ uvx --with meta-package-manager python
+Installed 21 packages in 42ms
+Python 3.13.2 (main, Feb  4 2025, 14:51:09) [Clang 16.0.0 (clang-1600.0.26.6)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
 >>> from meta_package_manager.pool import pool
 >>> list(pool['brew'].installed)
 [...]
@@ -74,8 +81,14 @@ $ uvx --with meta-package-manager python
 
 `````{tab-set}
 
-````{tab-item} uvx
-Easiest way is to [install `uv`](https://docs.astral.sh/uv/getting-started/installation/), then install `meta-package-manager` system-wide, with the [`uv tool`](https://docs.astral.sh/uv/guides/tools/#installing-tools) command:
+````{tab-item} uv
+Easiest way is to [install `uv`](https://docs.astral.sh/uv/getting-started/installation/), then use it to add `meta-package-manager` to your project:
+
+```{code-block} shell-session
+$ uv add meta-package-manager
+```
+
+Or to install it system-wide, with the [`uv tool`](https://docs.astral.sh/uv/guides/tools/#installing-tools) command:
 
 ```{code-block} shell-session
 $ uv tool install meta-package-manager
@@ -85,6 +98,12 @@ Then you can run `mpm` directly:
 
 ```{code-block} shell-session
 $ mpm --version
+```
+
+Or to install it in your current virtual environment:
+
+```{code-block} shell-session
+$ uv pip install meta-package-manager
 ```
 ````
 
@@ -430,6 +449,8 @@ This is a graph of the default, main dependencies of the Python package:
 ## Extra dependencies
 
 For additional features, you may need to install extra dependencies.
+
+### Data formats
 
 These extras add support for additional [configuration file formats](configuration.md#other-formats):
 

@@ -339,6 +339,16 @@ exclude = [
   "^https://pip.pypa.io/.*$",
 ]
 
+[tool.gitleaks.allowlist]
+description = "False positives"
+commits = [
+    # Old Travis CI HOMEBREW_GITHUB_API_TOKEN (revoked).
+    "ee7613d49366694877177d82e207e870afb3cc1f",
+    # Example brew cask output containing API_KEY="abcdef123456".
+    "745247e5c74122de9ec2dd95cbd3b8510fe224d5",
+    "e31111be719406940519f52c9d4406e97fb368a3",
+]
+
 [tool.repomatic]
 exclude = [ "labels", "skills/awesome-triage" ]
 # Source paths for workflow trigger filters.

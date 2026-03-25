@@ -143,10 +143,13 @@ jobs:
           choco pin add --name="nginx"
       - name: Chocolatey - Windows full upgrade
         if: runner.os == 'Windows'
-        # We upgrade all packages preemptively as the test suite will attempt it but fail,
-        # because of mpm's enforced timeout.
+        # Best-effort: upgrade all packages preemptively as the test suite will attempt it but fail because of mpm's
+        # enforced timeout. The Chocolatey CDN occasionally returns 503 for individual packages, causing a non-zero
+        # exit code despite --ignore-package-exit-codes (which only covers installer exit codes, not download errors).
+        # Force exit 0 so transient CDN failures don't block the test suite.
         run: |
           choco upgrade all --no-progress --yes --ignore-package-exit-codes --ignore-detected-reboot --retry-count=3
+          exit 0
 
       # NPM
       - name: NPM - Linux install

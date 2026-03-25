@@ -347,8 +347,8 @@ class MPMPlugin:
                 version                 # The "version" string
                 \                       # A space
                 [^\.]*?                 # Any minimal (non-greedy) string without a dot
-                (?P<version>[0-9\.]+)   # Version composed of numbers and dots
-                [^\.]*?                 # Any minimal (non-greedy) string without a dot
+                (?P<version>[0-9]+(?:\.[0-9]+)+)   # Version composed of numbers and dots
+                .*?                     # Any trailing string (ANSI codes, .dev suffix, etc.)
                 $                       # End of the string
                 """,
                 re.VERBOSE | re.MULTILINE,

@@ -8,7 +8,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-03-18T09:36:39.643283294Z"
+exclude-newer = "2026-03-18T15:07:38.921221663Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -983,7 +983,7 @@ wheels = [
 
 [[package]]
 name = "meta-package-manager"
-version = "6.1.2.dev0"
+version = "6.2.0.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'" },

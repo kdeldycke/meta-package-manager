@@ -340,8 +340,7 @@ exclude = [
 ]
 
 [tool.repomatic]
-# Override default exclude to include skills (default: ['labels', 'skills', 'zizmor']).
-exclude = [ "labels", "zizmor" ]
+exclude = [ "labels" ]
 # Source paths for workflow trigger filters.
 workflow.source-paths = [ "meta_package_manager" ]
 # Test plan for binary testing.

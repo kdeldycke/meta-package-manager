@@ -4,7 +4,7 @@
 [![Packaging status](https://repology.org/badge/vertical-allrepos/meta-package-manager.svg)](https://repology.org/project/meta-package-manager/versions)
 ```
 
-Meta Package Manager is [distributed on PyPi](https://pypi.org/project/meta-package-manager/).
+Meta Package Manager is [distributed on PyPI](https://pypi.org/project/meta-package-manager/).
 
 So you can install the latest stable release with your favorite package manager [like `pip`](https://pip.pypa.io):
 
@@ -17,7 +17,7 @@ $ pip install meta-package-manager
 
 ![Angry package](assets/angry-paper-box.png){w=50px align=right}
 
-There is a *`mpm`* Python module on PyPi that has nothing to do with this project. Avoid it!
+There is a *`mpm`* Python module on PyPI that has nothing to do with this project. Avoid it!
 
 The **real package is named `meta-package-manager`**. Only the latter provides the {command}`mpm` CLI you're looking for.
 ```

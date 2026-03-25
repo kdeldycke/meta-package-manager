@@ -113,7 +113,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         assert "钉钉" in result.stdout
         assert " \x1b[32m\x1b[1m钉钉\x1b[0m " in result.stdout
 
-    # PyPi's online search API was at first rate-limited. So we added an artificial
+    # PyPI's online search API was at first rate-limited. So we added an artificial
     # 2-seconds delay to prevent the following error:
     #   xmlrpc.client.Fault: <Fault -32500: 'HTTPTooManyRequests: The action could not
     #   be performed because there were too many requests by the client. Limit may

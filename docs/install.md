@@ -82,13 +82,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 `````{tab-set}
 
 ````{tab-item} uv
-Easiest way is to [install `uv`](https://docs.astral.sh/uv/getting-started/installation/), then use it to add `meta-package-manager` to your project:
-
-```{code-block} shell-session
-$ uv add meta-package-manager
-```
-
-Or to install it system-wide, with the [`uv tool`](https://docs.astral.sh/uv/guides/tools/#installing-tools) command:
+Easiest way is to [install `uv`](https://docs.astral.sh/uv/getting-started/installation/), then install `meta-package-manager` system-wide with the [`uv tool`](https://docs.astral.sh/uv/guides/tools/#installing-tools) command:
 
 ```{code-block} shell-session
 $ uv tool install meta-package-manager
@@ -100,10 +94,10 @@ Then you can run `mpm` directly:
 $ mpm --version
 ```
 
-Or to install it in your current virtual environment:
+To use `mpm` as a library in your project instead:
 
 ```{code-block} shell-session
-$ uv pip install meta-package-manager
+$ uv add meta-package-manager
 ```
 ````
 
@@ -448,44 +442,54 @@ This is a graph of the default, main dependencies of the Python package:
 
 ## Extra dependencies
 
-For additional features, you may need to install extra dependencies.
+By default, `mpm` supports TOML [configuration files](configuration.md) and all standard [table formats](https://kdeldycke.github.io/click-extra/table.html#table-formats). Optional extras unlock additional configuration file formats and table output formats:
 
-### Data formats
+``````{list-table}
+:header-rows: 1
+:widths: 10 40 50
 
-These extras add support for additional [configuration file formats](configuration.md#other-formats):
+* - Extra
+  - Install command
+  - Unlocks
+* - `hjson`
+  - ```{code-block} shell-session
+    $ pip install meta-package-manager[hjson]
+    ```
+  - - [HJSON](https://kdeldycke.github.io/click-extra/config.html#hjson) config files: `--config mpm.hjson`
+    - [`hjson` table format](https://kdeldycke.github.io/click-extra/table.html#table-formats): `--table-format hjson`
+* - `json5`
+  - ```{code-block} shell-session
+    $ pip install meta-package-manager[json5]
+    ```
+  - - [JSON5](https://kdeldycke.github.io/click-extra/config.html#json5) config files: `--config mpm.json5`
+* - `jsonc`
+  - ```{code-block} shell-session
+    $ pip install meta-package-manager[jsonc]
+    ```
+  - - [JSONC](https://kdeldycke.github.io/click-extra/config.html#jsonc) config files: `--config mpm.jsonc`
+* - `toml`
+  - ```{code-block} shell-session
+    $ pip install meta-package-manager[toml]
+    ```
+  - - [`toml` table format](https://kdeldycke.github.io/click-extra/table.html#table-formats): `--table-format toml`
+* - `xml`
+  - ```{code-block} shell-session
+    $ pip install meta-package-manager[xml]
+    ```
+  - - [XML](https://kdeldycke.github.io/click-extra/config.html#xml) config files: `--config mpm.xml`
+    - [`xml` table format](https://kdeldycke.github.io/click-extra/table.html#table-formats): `--table-format xml`
+* - `yaml`
+  - ```{code-block} shell-session
+    $ pip install meta-package-manager[yaml]
+    ```
+  - - [YAML](https://kdeldycke.github.io/click-extra/config.html#yaml) config files: `--config mpm.yaml`
+    - [`yaml` table format](https://kdeldycke.github.io/click-extra/table.html#table-formats): `--table-format yaml`
+``````
 
-- HJSON configuration files:
+````{tip}
+Install all extras at once with:
 
-  ```{code-block} shell-session
-  $ pip install meta-package-manager[hjson]
-  ```
-
-- JSON5 configuration files:
-
-  ```{code-block} shell-session
-  $ pip install meta-package-manager[json5]
-  ```
-
-- JSONC configuration files:
-
-  ```{code-block} shell-session
-  $ pip install meta-package-manager[jsonc]
-  ```
-
-- TOML table format output:
-
-  ```{code-block} shell-session
-  $ pip install meta-package-manager[toml]
-  ```
-
-- XML configuration files and table format:
-
-  ```{code-block} shell-session
-  $ pip install meta-package-manager[xml]
-  ```
-
-- YAML configuration files and table format:
-
-  ```{code-block} shell-session
-  $ pip install meta-package-manager[yaml]
-  ```
+```{code-block} shell-session
+$ pip install meta-package-manager[hjson,json5,jsonc,toml,xml,yaml]
+```
+````

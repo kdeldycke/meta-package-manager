@@ -149,9 +149,12 @@ class TestCommonCLI:
         )
         assert process.returncode == 0
         assert not process.stderr
-        assert (
-            process.stdout
-            == f"\x1b[97mmpm\x1b[0m, version \x1b[32m{__version__}\x1b[0m\n"
+        # click_extra appends ``+<git_short_hash>`` to ``.dev`` versions at
+        # runtime, so accept the optional local version identifier suffix.
+        assert re.fullmatch(
+            rf"\x1b\[97mmpm\x1b\[0m, version "
+            rf"\x1b\[32m{re.escape(__version__)}(\+[0-9a-f]+)?\x1b\[0m\n",
+            process.stdout,
         )
 
     def test_timeout(self, invoke):

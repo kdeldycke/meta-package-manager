@@ -124,7 +124,7 @@ def test_labels():
 def test_new_package_manager_issue_template():
     """Check all platforms groups are referenced in the issue template."""
     content = PROJECT_ROOT.joinpath(
-        ".github/ISSUE_TEMPLATE/new-package-manager.yaml",
+        ".github/ISSUE_TEMPLATE/new-package-manager.yml",
     ).read_text(encoding="utf-8")
     assert content
 

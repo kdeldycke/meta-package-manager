@@ -679,7 +679,7 @@
 > [!NOTE]
 > `4.9.8` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/4.9.8/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v4.9.8).
 
-- [mpm] Fix propagation of build artifacts to GitHub release and PyPi.
+- [mpm] Fix propagation of build artifacts to GitHub release and PyPI.
 - [mpm] Fix test of labelling rules.
 - [mpm] Remove local dependency on `graphviz` now that fixes were pushed
   upstream.
@@ -690,7 +690,7 @@
 > `4.9.7` is **not available** on 🐍 PyPI and 🐙 GitHub.
 
 - [mpm] Add release version in artifacts produced by Poetry builds.
-- [mpm] Pass local PyPi token to reused workflow to fix publishing.
+- [mpm] Pass local PyPI token to reused workflow to fix publishing.
 
 ## [`4.9.6` (2022-01-11)](https://github.com/kdeldycke/meta-package-manager/compare/v4.9.5...v4.9.6)
 
@@ -914,13 +914,13 @@
 - [mpm] Run tests on Python 3.9.
 - [mpm] Upgrade to `Poetry 1.1.0`.
 - [mpm] Colorize version screen and add debug data.
-- [mpm] Test publishing to PyPi in dry-run mode by the way of Poetry.
+- [mpm] Test publishing to PyPI in dry-run mode by the way of Poetry.
 - [mpm] Make all keyword-based choice parameters (`--manager`, `--exclude`,
   `--output-format`, `--sort-by` and `--cli-format`) case-insensitive.
 - [mpm] Pin versions of OSes and distributions in CI workflows to
   `ubuntu-20.04`, `macos-10.15` and `windows-2019`.
 - [mpm] Always print errors in unittest's CLI calls.
-- [mpm] Slow-down tests to prevent PyPi rate-limiting on live API.
+- [mpm] Slow-down tests to prevent PyPI rate-limiting on live API.
 - [mpm] Fix `brew` setup on macOS CI runners.
 - [mpm] Fix `npm` setup in Ubuntu 18.04 and 20.04 CI runners.
 - [mpm] Use latest `Atom` version in Ubuntu CI runners.
@@ -998,7 +998,7 @@
 - [mpm] Force test marked as `xfail` count as failure if they succeed.
 - [mpm] Always check wheel content.
 - [mpm] Automate creation of GitHub release.
-- [mpm] Automate publishing of package to PyPi on tagging.
+- [mpm] Automate publishing of package to PyPI on tagging.
 - [mpm] Save build artifacts on each CI runs.
 - [mpm] Auto-sort module imports.
 - [mpm] Auto-fix common typos.

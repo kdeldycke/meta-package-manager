@@ -6,10 +6,10 @@
 
 Meta Package Manager is [distributed on PyPI](https://pypi.org/project/meta-package-manager/).
 
-So you can install the latest stable release with your favorite package manager [like `pip`](https://pip.pypa.io):
+So you can install the latest stable release [with `uv`](https://docs.astral.sh/uv/):
 
 ```{code-block} shell-session
-$ pip install meta-package-manager
+$ uv tool install meta-package-manager
 ```
 
 ```{danger}
@@ -351,9 +351,9 @@ Both cases are not handled gracefully by `mpm`, which [doesn't support (yet) int
 A workaround on Linux is to install `mpm` with `sudo`, so you'll be able to invoke it with `sudo` too:
 
 ```shell-session
-$ sudo python -m pip install meta-package-manager
+$ sudo uv tool install meta-package-manager
 (...)
-$ sudo python -m meta_package_manager upgrade
+$ sudo mpm upgrade
 (...)
 ```
 
@@ -453,34 +453,34 @@ By default, `mpm` supports TOML [configuration files](configuration.md) and all 
   - Unlocks
 * - `hjson`
   - ```{code-block} shell-session
-    $ pip install meta-package-manager[hjson]
+    $ uv pip install meta-package-manager[hjson]
     ```
   - - [HJSON](https://kdeldycke.github.io/click-extra/config.html#hjson) config files: `--config mpm.hjson`
     - [`hjson` table format](https://kdeldycke.github.io/click-extra/table.html#table-formats): `--table-format hjson`
 * - `json5`
   - ```{code-block} shell-session
-    $ pip install meta-package-manager[json5]
+    $ uv pip install meta-package-manager[json5]
     ```
   - - [JSON5](https://kdeldycke.github.io/click-extra/config.html#json5) config files: `--config mpm.json5`
 * - `jsonc`
   - ```{code-block} shell-session
-    $ pip install meta-package-manager[jsonc]
+    $ uv pip install meta-package-manager[jsonc]
     ```
   - - [JSONC](https://kdeldycke.github.io/click-extra/config.html#jsonc) config files: `--config mpm.jsonc`
 * - `toml`
   - ```{code-block} shell-session
-    $ pip install meta-package-manager[toml]
+    $ uv pip install meta-package-manager[toml]
     ```
   - - [`toml` table format](https://kdeldycke.github.io/click-extra/table.html#table-formats): `--table-format toml`
 * - `xml`
   - ```{code-block} shell-session
-    $ pip install meta-package-manager[xml]
+    $ uv pip install meta-package-manager[xml]
     ```
   - - [XML](https://kdeldycke.github.io/click-extra/config.html#xml) config files: `--config mpm.xml`
     - [`xml` table format](https://kdeldycke.github.io/click-extra/table.html#table-formats): `--table-format xml`
 * - `yaml`
   - ```{code-block} shell-session
-    $ pip install meta-package-manager[yaml]
+    $ uv pip install meta-package-manager[yaml]
     ```
   - - [YAML](https://kdeldycke.github.io/click-extra/config.html#yaml) config files: `--config mpm.yaml`
     - [`yaml` table format](https://kdeldycke.github.io/click-extra/table.html#table-formats): `--table-format yaml`
@@ -490,6 +490,6 @@ By default, `mpm` supports TOML [configuration files](configuration.md) and all 
 Install all extras at once with:
 
 ```{code-block} shell-session
-$ pip install meta-package-manager[hjson,json5,jsonc,toml,xml,yaml]
+$ uv pip install meta-package-manager[hjson,json5,jsonc,toml,xml,yaml]
 ```
 ````

@@ -54,7 +54,7 @@ class Homebrew(PackageManager):
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     virtual = True
 
-    extra_env = {
+    extra_env = {  # noqa: RUF012
         # Disable analytics.
         "HOMEBREW_NO_ANALYTICS": "1",
         # Disable configuration hints to reduce verbosity.

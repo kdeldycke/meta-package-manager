@@ -30,7 +30,6 @@ from ..version import parse_version
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from typing import ClassVar
 
     from ..base import Package
 
@@ -55,7 +54,7 @@ class Homebrew(PackageManager):
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     virtual = True
 
-    extra_env: ClassVar[dict[str, str]] = {
+    extra_env = {
         # Disable analytics.
         "HOMEBREW_NO_ANALYTICS": "1",
         # Disable configuration hints to reduce verbosity.
@@ -568,7 +567,7 @@ class Cask(Homebrew):
 
     homepage_url = "https://github.com/Homebrew/homebrew-cask"
 
-    platforms = MACOS
+    platforms = MACOS  # type: ignore[assignment]
     """Casks are only available on macOS, not Linux or WSL."""
 
     cli_names = ("brew",)

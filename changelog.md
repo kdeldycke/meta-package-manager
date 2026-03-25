@@ -1,6 +1,6 @@
 # Changelog
 
-## [6.1.2.dev0 (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.1.1...main)
+## [`6.1.2.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.1.1...main)
 
 > [!IMPORTANT]
 > This version is not released yet and is under active development.
@@ -13,7 +13,7 @@
 - [composer] Fix search regex to strip whitespace-only descriptions.
 - [dnf,dnf5,yum] Add `--quiet` option to all invocations to reduce log verbosity.
 - [emerge] Add `--quiet`, `--color n` and `--nospinner` to `pre_args`. Refactor inline flags.
-- [pacman,pacaur,paru,yay] Add `--color never` option to all invocations.
+- [pacaur,pacman,paru,yay] Add `--color never` option to all invocations.
 - [pkg] Add `--quiet` option to all `pkg` invocations to reduce log verbosity.
 - [yarn] Add `--silent` option to all `yarn` invocations to suppress console logs.
 - [mpm] Pre-compile regexes at class level across all managers.

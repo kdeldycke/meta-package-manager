@@ -413,39 +413,51 @@ jobs:
         run: uv --no-progress venv --python 3.14
 
       # https://pypi.org/project/meta-package-manager
-      - name: Run stable CLI via uv
+      - name: Run stable CLI
         run: |
-          uvx    meta-package-manager               --version
-          uvx    --from meta-package-manager -- mpm --version
-          uv run --with meta-package-manager -- mpm --version
-      - name: Run dev CLI via uv
+          uvx    meta-package-manager                                              --version
+          uvx    --from meta-package-manager                    -- mpm             --version
+          uv run --with meta-package-manager                    -- mpm             --version
+          uv run --with meta-package-manager                    -- meta-package-manager --version
+          uv run --with meta-package-manager                    -m meta_package_manager --version
+          uv run --with meta-package-manager              python -m meta_package_manager --version
+      - name: Run dev CLI
         run: |
-          uvx    --from git+https://github.com/kdeldycke/meta-package-manager -- mpm --version
-          uv run --with git+https://github.com/kdeldycke/meta-package-manager -- mpm --version
+          uvx    --from git+https://github.com/kdeldycke/meta-package-manager -- mpm                 --version
+          uvx    --from git+https://github.com/kdeldycke/meta-package-manager -- meta-package-manager --version
+          uv run --with git+https://github.com/kdeldycke/meta-package-manager -- mpm                 --version
+          uv run --with git+https://github.com/kdeldycke/meta-package-manager -- meta-package-manager --version
+          uv run --with git+https://github.com/kdeldycke/meta-package-manager -m meta_package_manager --version
+          uv run --with git+https://github.com/kdeldycke/meta-package-manager python -m meta_package_manager --version
 
       - name: Run stable CLI via uv tool
         run: |
-          uv tool install meta-package-manager
-          mpm --version
-          uv tool uninstall meta-package-manager
+          uv --no-progress tool install meta-package-manager
+          mpm                  --version
+          meta-package-manager --version
+          uv --no-progress tool uninstall meta-package-manager
       - name: Run dev CLI via uv tool
         run: |
-          uv tool install git+https://github.com/kdeldycke/meta-package-manager
-          mpm --version
-          uv tool uninstall meta-package-manager
+          uv --no-progress tool install git+https://github.com/kdeldycke/meta-package-manager
+          mpm                  --version
+          meta-package-manager --version
+          uv --no-progress tool uninstall meta-package-manager
 
       - name: Run CLI via pipx
         run: |
-          uv tool install pipx
-          pipx run meta-package-manager --version
-          pipx run --spec meta-package-manager mpm --version
-          pipx run --spec git+https://github.com/kdeldycke/meta-package-manager mpm --version
-          uv tool uninstall pipx
+          uv --no-progress tool install pipx
+          pipx run                                                                    meta-package-manager --version
+          pipx run --spec meta-package-manager                                        mpm                  --version
+          pipx run --spec meta-package-manager                                        meta-package-manager --version
+          pipx run --spec git+https://github.com/kdeldycke/meta-package-manager       mpm                  --version
+          pipx run --spec git+https://github.com/kdeldycke/meta-package-manager       meta-package-manager --version
+          uv --no-progress tool uninstall pipx
 
       - name: Run CLI via pip
         run: |
           pip install meta-package-manager
-          mpm --version
+          mpm                  --version
+          meta-package-manager --version
 
   brew-install-mpm:
     strategy:

@@ -287,7 +287,8 @@ jobs:
         run: |
           brew install --cask steamcmd
       - name: SteamCMD - Linux install
-        if: runner.os == 'Linux'
+        # XXX Steam and SteamCMD packages are only available for x86, not arm64.
+        if: runner.os == 'Linux' && runner.arch == 'X64'
         # Some notes on the Steam situation on Linux:
         # https://popey.com/blog/2023/08/i386-in-ubuntu-wont-die/
         run: |

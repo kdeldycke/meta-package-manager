@@ -340,7 +340,7 @@ exclude = [
 ]
 
 [tool.repomatic]
-exclude = [ "labels" ]
+exclude = [ "labels", "skills/awesome-triage" ]
 # Source paths for workflow trigger filters.
 workflow.source-paths = [ "meta_package_manager" ]
 # Test plan for binary testing.

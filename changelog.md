@@ -1,5 +1,10 @@
 # Changelog
 
+## [`6.2.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.0...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`6.2.0` (2026-03-25)](https://github.com/kdeldycke/meta-package-manager/compare/v6.1.1...v6.2.0)
 
 - [mpm] Upgrade from reusable workflows to `repomatic`.

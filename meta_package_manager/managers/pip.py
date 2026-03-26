@@ -157,10 +157,17 @@ class Pip(PackageManager):
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
 
+        .. note::
+
+            The ``--not-required`` flag filters out transitive dependencies,
+            restricting results to top-level packages only. Upgrading transitive
+            dependencies can break version constraints of their parent packages.
+            See :issue:`1214`.
+
         .. code-block:: shell-session
 
             $ python -m pip --no-color list --format=json --outdated \
-            > --verbose --quiet | jq
+            > --not-required --verbose --quiet | jq
             [
               {
                 "latest_filetype": "wheel",
@@ -218,6 +225,7 @@ class Pip(PackageManager):
             "list",
             "--format=json",
             "--outdated",
+            "--not-required",
             "--verbose",
             "--quiet",
             must_succeed=True,

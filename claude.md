@@ -173,6 +173,31 @@ Always update documentation when making changes:
 - **`changelog.md`**: Add a bullet point describing **what** changed (new features, bug fixes, behavior changes), not **why**. Keep entries concise and actionable. Justifications and rationale belong in documentation or code comments, not in the changelog.
 - **`readme.md`**: Update relevant sections when adding/modifying public API, classes, or functions.
 
+## File naming conventions
+
+### Extensions: prefer long form
+
+Use the longest, most explicit file extension available. For YAML, that means `.yaml` (not `.yml`). Apply the same principle to all extensions (e.g., `.html` not `.htm`, `.jpeg` not `.jpg`).
+
+### Filenames: lowercase
+
+Use lowercase filenames everywhere. Avoid shouting-case names like `FUNDING.YML` or `README.MD`.
+
+### GitHub exceptions
+
+GitHub silently ignores certain files unless they use the exact name it expects. These are the known hard constraints where you **cannot** use `.yaml` or lowercase:
+
+| File | Required name | Why |
+|---|---|---|
+| Issue form templates | `.github/ISSUE_TEMPLATE/*.yml` | `.yaml` is not recognized for issue forms |
+| Issue template config | `.github/ISSUE_TEMPLATE/config.yml` | `.yaml` not recognized |
+| Funding config | `.github/funding.yml` | Only `.yml` documented; no evidence `.yaml` works |
+| Release notes config | `.github/release.yml` | Only `.yml` documented |
+| Issue template directory | `.github/ISSUE_TEMPLATE/` | Must be uppercase; GitHub ignores lowercase |
+| Code owners | `CODEOWNERS` | Must be uppercase; no extension |
+
+Workflows (`.github/workflows/*.yaml`) and action metadata (`action.yaml`) officially support both `.yml` and `.yaml` — use `.yaml`.
+
 ## Code style
 
 ### Terminology and spelling
@@ -208,7 +233,7 @@ The version string is always bare (e.g., `1.2.3`). The `v` prefix is a **tag nam
 
 **Rules:**
 
-1. **No `v` prefix on package versions.** Anywhere the version identifies the *package* (PyPI, changelog heading, CLI output), use the bare version: `1.2.3`.
+1. **No `v` prefix on package versions.** Anywhere the version identifies the *package* (PyPI, changelog heading, CLI output, `pyproject.toml`), use the bare version: `1.2.3`.
 2. **`v` prefix on tag references.** Anywhere the version identifies a *git tag* (comparison URLs, action refs, commit messages, PR titles), use `v1.2.3`.
 3. **Always backtick-escape versions in prose.** Both `v1.2.3` (tag) and `1.2.3` (package) are identifiers, not natural language. In markdown, wrap them in backticks: `` `v1.2.3` ``, `` `1.2.3` ``. In reST docstrings, use double backticks: ``` ``v1.2.3`` ```.
 4. **Development versions** follow PEP 440: `1.2.3.dev0` with optional `+{short_sha}` local identifier.
@@ -218,12 +243,17 @@ The version string is always bare (e.g., `1.2.3`). The `v` prefix is a **tag nam
 - All comments in Python files must end with a period.
 - Docstrings use reStructuredText format (vanilla style, not Google/NumPy).
 - Documentation in `./docs/` uses MyST markdown format where possible. Fallback to reStructuredText if necessary.
-- Keep lines within 88 characters in Python files, including docstrings and comments (ruff default). Markdown files have no line-length limit.
+- Keep lines within 88 characters in Python files, including docstrings and comments (ruff default). Markdown files have no line-length limit — do not hard-wrap prose in markdown. Each sentence or logical clause should flow as a single long line; let the renderer handle wrapping.
 - Titles in markdown use sentence case.
+- **Dataclass field docs:** In dataclasses, document fields with attribute docstrings (a string literal immediately after the field declaration), not `:param:` entries in the class docstring. Attribute docstrings are co-located with the field they describe, recognized by Sphinx, and stay in sync when fields are added or reordered. The class docstring should contain only a summary of the class purpose.
 
 ### Documenting code decisions
 
 Document design decisions, trade-offs, and non-obvious implementation choices directly in the code using docstring admonitions (reST `.. warning::`, `.. note::`, `.. caution::`), inline comments, and module-level docstrings for constants that need context.
+
+### `__init__.py` files
+
+Keep `__init__.py` files minimal. They are easy to overlook when scanning a codebase, so avoid placing logic, constants, or re-exports in them. Acceptable content: license headers, package docstrings, `from __future__ import annotations`, and `__version__` (standard Python convention for the root package). Anything else belongs in a named module.
 
 ### `TYPE_CHECKING` block
 
@@ -253,7 +283,7 @@ This project supports Python 3.10+. Be aware of syntax features **not** availabl
 
 ### Imports
 
-- Place imports at the top of the file, unless avoiding circular imports.
+- Place imports at the top of the file, unless avoiding circular imports. **Never use local imports inside functions** — move them to the module level. Local imports hide dependencies, bypass ruff's import sorting, and make it harder to see what a module depends on.
 - **Version-dependent imports** (e.g., `tomllib` fallback for Python 3.10) should be placed **after all normal imports** but **before the `TYPE_CHECKING` block**. This allows ruff to freely sort and organize the normal imports above without interference.
 
 ### YAML workflows
@@ -312,6 +342,7 @@ When invoking `uv` and `uvx` commands in GitHub Actions workflows:
 - Tests should be sorted logically and alphabetically where applicable.
 - Test coverage is tracked with `pytest-cov` and reported to Codecov.
 - Do not use classes for grouping tests. Write test functions as top-level module functions. Only use test classes when they provide shared fixtures, setup/teardown methods, or class-level state.
+- **`@pytest.mark.once` for run-once tests.** Define a custom `once` marker (in `[tool.pytest].markers`) to tag tests that only need to run once — not across the full CI matrix. Typical candidates: CLI entry point invocability, plugin registration, package metadata checks. The main test matrix filters them out with `pytest -m "not once"`, while a dedicated `once-tests` job runs them on a single runner.
 
 ## Design principles
 
@@ -324,9 +355,19 @@ Linting and formatting are automated via GitHub workflows. Developers don't need
 Keep definitions sorted for readability and to minimize merge conflicts:
 
 - **Workflow jobs**: Ordered by execution dependency (upstream jobs first), then alphabetically within the same dependency level.
-- **Python module-level constants and variables**: Alphabetically, unless there is a logical grouping or dependency order.
+- **Python module-level constants and variables**: Alphabetically, unless there is a logical grouping or dependency order. Hard-coded domain constants should be placed at the top of the file, immediately after imports. These constants encode domain assertions and business rules — surfacing them early gives readers an immediate sense of the assumptions the module operates under.
 - **YAML configuration keys**: Alphabetically within each mapping level.
 - **Documentation lists and tables**: Alphabetically, unless a logical order (e.g., chronological in changelog) takes precedence.
+
+### Prefer `uv` over `pip` in documentation
+
+Documentation and install pages must use `uv` as the default package installer. When showing how to install the package, use `uv tool install` (for CLI tools) or `uv pip install` (for libraries/extras). Alternative installers (`pip`, `pipx`, etc.) may appear as secondary options in tab sets or dedicated sections, but `uv` must be the primary/default command shown.
+
+### Idempotency by default
+
+Workflows and CLI commands must be safe to re-run. Running the same command or workflow twice with the same inputs should produce the same result without errors or unwanted side effects.
+
+**In practice:** use `--skip-existing`, check for existing state before writing, prefer upsert semantics, make file-modifying operations convergent.
 
 ### Common maintenance pitfalls
 

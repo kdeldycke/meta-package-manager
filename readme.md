@@ -81,6 +81,7 @@ Meta Package Manager,cargo,1
 Meta Package Manager,cask,1
 Meta Package Manager,choco,1
 Meta Package Manager,composer,1
+Meta Package Manager,cpan,1
 Meta Package Manager,deb-get,1
 Meta Package Manager,dnf,1
 Meta Package Manager,dnf5,1
@@ -132,6 +133,7 @@ Meta Package Manager,zypper,1
 | [`cask`](https://github.com/Homebrew/homebrew-cask)                                     | >=2.7.0         |           |               |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`choco`](https://chocolatey.org)                                                       | >=2.0.0         |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
 | [`composer`](https://getcomposer.org)                                                   | >=1.4.0         |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |     ✓     |
+| [`cpan`](https://www.cpan.org)                                                          | >=1.64          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |          |        |           |
 | [`deb-get`](https://github.com/wimpysworld/deb-get)                                     |                 |           |      🐧       |       |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`dnf`](https://github.com/rpm-software-management/dnf)                                 | >=4.0.0         |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`dnf5`](https://github.com/rpm-software-management/dnf5)                               | >=5.0.0         |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |

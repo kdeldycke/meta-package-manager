@@ -367,6 +367,9 @@ jobs:
         run: >
           uv --no-progress run --frozen --
           pytest --exitfirst
+          --cov-report=xml
+          --junitxml=junit.xml
+          --override-ini=junit_family=legacy
           --numprocesses=auto --run-non-destructive --skip-destructive
           --ignore=./tests/test_bar_plugin.py
 
@@ -376,6 +379,9 @@ jobs:
         run: >
           uv --no-progress run --frozen --
           pytest --exitfirst
+          --cov-report=xml
+          --junitxml=junit.xml
+          --override-ini=junit_family=legacy
           --numprocesses=0 --run-non-destructive --run-destructive
           ./tests/test_bar_plugin.py
 
@@ -384,6 +390,9 @@ jobs:
         run: >
           uv --no-progress run --frozen --
           pytest --exitfirst
+          --cov-report=xml
+          --junitxml=junit.xml
+          --override-ini=junit_family=legacy
           --numprocesses=0 --skip-non-destructive --run-destructive
           --ignore=./tests/test_bar_plugin.py
 

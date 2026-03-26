@@ -101,7 +101,7 @@ def generate_labels(
 MANAGER_PREFIX = "📦 manager: "
 
 MANAGER_LABEL_GROUPS: TLabelGroup = {
-    "dnf-based": frozenset({"dnf", "dnf5", "yum"}),
+    "rpm-based": frozenset({"dnf", "dnf5", "yum", "zypper"}),
     "dpkg-based": frozenset({"apt", "apt-mint", "deb-get", "opkg", "pacstall"}),
     "homebrew": frozenset({"brew", "cask", "zerobrew"}),
     "npm-based": frozenset({"npm", "yarn", "yarn-berry"}),

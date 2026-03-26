@@ -19,14 +19,16 @@ color = "bfdadc"
 description = "composer"
 
 [[profiles.default.labels]]
-name = "📦 manager: dnf-based"
+name = "📦 manager: rpm-based"
 color = "bfdadc"
-description = "dnf, dnf5, yum"
+description = "dnf, dnf5, yum, zypper"
+rename-from = ["📦 manager: dnf-based", "📦 manager: zypper"]
 
 [[profiles.default.labels]]
 name = "📦 manager: dpkg-based"
 color = "bfdadc"
 description = "apt, apt-mint, deb-get, opkg, pacstall"
+rename-from = ["📦 manager: pacstall"]
 
 [[profiles.default.labels]]
 name = "📦 manager: emerge"
@@ -57,6 +59,7 @@ description = "gem"
 name = "📦 manager: homebrew"
 color = "bfdadc"
 description = "brew, cask, zerobrew"
+rename-from = ["📦 manager: zerobrew"]
 
 [[profiles.default.labels]]
 name = "📦 manager: mas"
@@ -123,10 +126,6 @@ name = "📦 manager: winget"
 color = "bfdadc"
 description = "winget"
 
-[[profiles.default.labels]]
-name = "📦 manager: zypper"
-color = "bfdadc"
-description = "zypper"
 
 [[profiles.default.labels]]
 name = "🔌 bar-plugin"

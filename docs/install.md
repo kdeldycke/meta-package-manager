@@ -146,6 +146,14 @@ Meta Package Manager is available in the `main` repository of [Scoop](https://sc
 ```
 ````
 
+````{tab-item} Stew
+[Stew](https://github.com/marwanhawari/stew) installs pre-compiled binaries from GitHub Releases:
+
+```{code-block} shell-session
+$ stew install kdeldycke/meta-package-manager
+```
+````
+
 ````{tab-item} Arch Linux
 An `mpm` package is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager) and can be installed with any AUR helper:
 
@@ -293,6 +301,10 @@ $ mpm --pip  install meta-package-manager
 
 ```{code-block} shell-session
 $ mpm --pipx install meta-package-manager
+```
+
+```{code-block} shell-session
+$ mpm --stew install kdeldycke/meta-package-manager
 ```
 
 ```{code-block} shell-session

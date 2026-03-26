@@ -7,7 +7,8 @@
 
 - [brew,cask] Remove `--quiet` from `outdated` command where it conflicts with `--json`. Closes {issue}`1703`.
 - [npm] Fix crash on `installed` when no global packages are present. Closes {issue}`1603`.
-- [mpm] Bump `click-extra` requirement to `>=7.7.0`. Fixes `--no-color` having no effect on CSV output. Closes {issue}`1004`.
+- [mpm] Fix `--no-color` having no effect on CSV output. Closes {issue}`1004`.
+- [mpm] Fix version reported by compiled (Nuitka) binaries. Closes {issue}`1145`.
 
 ## [`6.2.0` (2026-03-25)](https://github.com/kdeldycke/meta-package-manager/compare/v6.1.1...v6.2.0)
 

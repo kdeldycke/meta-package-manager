@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [brew,cask] Remove `--quiet` from `outdated` command where it conflicts with `--json`. Closes {issue}`1703`.
+- [npm] Fix crash on `installed` when no global packages are present. Closes {issue}`1603`.
 
 ## [`6.2.0` (2026-03-25)](https://github.com/kdeldycke/meta-package-manager/compare/v6.1.1...v6.2.0)
 

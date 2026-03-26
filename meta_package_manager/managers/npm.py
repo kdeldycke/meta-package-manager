@@ -139,7 +139,7 @@ class NPM(PackageManager):
         output = self.run_cli("--json", "--depth", "0", "list")
 
         if output:
-            for pkg_id, pkg_infos in json.loads(output)["dependencies"].items():
+            for pkg_id, pkg_infos in json.loads(output).get("dependencies", {}).items():
                 yield self.package(
                     id=pkg_id,
                     installed_version=pkg_infos["version"],

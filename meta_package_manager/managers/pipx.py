@@ -85,7 +85,7 @@ class Pipx(PackageManager):
               }
             }
         """
-        output = self.run_cli("list", "--json")
+        output = self.run_cli("list", "--json", must_succeed=True)
 
         if output:
             for package_id, package_info in json.loads(output)["venvs"].items():
@@ -148,6 +148,7 @@ class Pipx(PackageManager):
                 "--outdated",
                 "--verbose",
                 "--quiet",
+                must_succeed=True,
             )
 
             if output:

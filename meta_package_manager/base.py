@@ -662,7 +662,12 @@ class PackageManager(metaclass=MetaPackageManager):
         )
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
-    def run(self, *args: TArg | TNestedArgs, extra_env: TEnvVars | None = None) -> str:
+    def run(
+        self,
+        *args: TArg | TNestedArgs,
+        extra_env: TEnvVars | None = None,
+        must_succeed: bool = False,
+    ) -> str:
         """Run a shell command, return the output and accumulate error messages.
 
         ``args`` is allowed to be a nested structure of iterables, in which case it will
@@ -677,6 +682,14 @@ class PackageManager(metaclass=MetaPackageManager):
           * returning ready-to-use normalized strings (dedented and stripped)
           * letting :option:`mpm --dry-run` and :option:`mpm --stop-on-error` have
             expected effect on execution
+
+        :param must_succeed: if ``True``, raise
+            :py:class:`meta_package_manager.base.CLIError` on non-zero exit code
+            regardless of :py:attr:`stop_on_error`. Use for calls whose output is
+            parsed (JSON, XML, regex) and where a silent failure would be
+            indistinguishable from empty results. Unlike ``stop_on_error`` (a
+            user-facing preference for cross-manager resilience), ``must_succeed``
+            is a developer assertion that the invocation itself is correct.
         """
         # Casting to string helps serialize Path and Version objects.
         clean_args = args_cleanup(*args)
@@ -720,7 +733,7 @@ class PackageManager(metaclass=MetaPackageManager):
         if code and error:
             # Produce an exception and eventually raise it.
             exception = CLIError(code, output, error)
-            if self.stop_on_error:
+            if must_succeed or self.stop_on_error:
                 raise exception
             # Accumulate errors.
             self.cli_errors.append(exception)
@@ -835,6 +848,7 @@ class PackageManager(metaclass=MetaPackageManager):
         override_pre_args: TNestedArgs | None = None,
         override_post_args: TNestedArgs | None = None,
         force_exec: bool = False,
+        must_succeed: bool = False,
         sudo: bool = False,
     ) -> str:
         """Build and run the package manager CLI by combining the custom ``*args`` with
@@ -854,6 +868,8 @@ class PackageManager(metaclass=MetaPackageManager):
         * ``override_extra_env=dict()`` to locally overrides the later
         * ``force_exec`` ignores the :option:`mpm --dry-run` and :option:`mpm
           --stop-on-error` options to force the execution and completion of the command.
+        * ``must_succeed`` raises on non-zero exit regardless of
+          :option:`mpm --stop-on-error`. See :py:meth:`run` for details.
         """
         cli = self.build_cli(
             *args,
@@ -883,7 +899,7 @@ class PackageManager(metaclass=MetaPackageManager):
             local_option2 = patch.object(self, "stop_on_error", False)
         # Execute the command with eventual local options.
         with local_option1, local_option2:
-            return self.run(*cli, extra_env=extra_env)
+            return self.run(*cli, extra_env=extra_env, must_succeed=must_succeed)
 
     @property
     def installed(self) -> Iterator[Package]:

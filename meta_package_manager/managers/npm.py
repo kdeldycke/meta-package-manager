@@ -136,7 +136,7 @@ class NPM(PackageManager):
               }
             }
         """
-        output = self.run_cli("--json", "--depth", "0", "list")
+        output = self.run_cli("--json", "--depth", "0", "list", must_succeed=True)
 
         if output:
             for pkg_id, pkg_infos in json.loads(output).get("dependencies", {}).items():
@@ -168,7 +168,7 @@ class NPM(PackageManager):
               }
             }
         """
-        output = self.run_cli("--json", "outdated")
+        output = self.run_cli("--json", "outdated", must_succeed=True)
 
         if output:
             for pkg_id, pkg_infos in json.loads(output).items():
@@ -268,7 +268,7 @@ class NPM(PackageManager):
         if not extended:
             search_args.append("--no-description")
 
-        output = self.run_cli("search", "--json", search_args, query)
+        output = self.run_cli("search", "--json", search_args, query, must_succeed=True)
 
         if output:
             for pkg_infos in json.loads(output):

@@ -110,7 +110,7 @@ class UV(UVBase):
               (...)
             ]
         """
-        output = self.run_cli("pip", "list", "--format=json")
+        output = self.run_cli("pip", "list", "--format=json", must_succeed=True)
 
         if output:
             for package in json.loads(output):
@@ -141,7 +141,7 @@ class UV(UVBase):
               }
             ]
         """
-        output = self.run_cli("pip", "list", "--outdated", "--format=json")
+        output = self.run_cli("pip", "list", "--outdated", "--format=json", must_succeed=True)
 
         if output:
             for package in json.loads(output):
@@ -253,7 +253,7 @@ class UVX(UVBase):
             pycowsay v0.0.0.1 [latest: 0.0.0.2]
             - pycowsay
         """
-        output = self.run_cli("tool", "list", "--outdated")
+        output = self.run_cli("tool", "list", "--outdated", must_succeed=True)
 
         if output:
             for line in output.splitlines():

@@ -130,6 +130,7 @@ class Zypper(PackageManager):
             "package",
             # Additional search arguments.
             *args,
+            must_succeed=True,
         )
         if not output:
             return
@@ -202,7 +203,7 @@ class Zypper(PackageManager):
                 </update-status>
             </stream>
         """
-        output = self.run_cli("--xmlout", "list-updates")
+        output = self.run_cli("--xmlout", "list-updates", must_succeed=True)
         if not output:
             return
 

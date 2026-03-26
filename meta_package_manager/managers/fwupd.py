@@ -316,7 +316,7 @@ class FWUPD(PackageManager):
               ]
             }
         """
-        output = self.run_cli("get-devices", "--json")
+        output = self.run_cli("get-devices", "--json", must_succeed=True)
 
         if output:
             for device in json.loads(output)["Devices"]:
@@ -492,7 +492,7 @@ class FWUPD(PackageManager):
               ]
             }
         """
-        output = self.run_cli("get-updates", "--json")
+        output = self.run_cli("get-updates", "--json", must_succeed=True)
 
         if output:
             for device in json.loads(output)["Devices"]:

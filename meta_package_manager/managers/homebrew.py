@@ -254,7 +254,7 @@ class Homebrew(PackageManager):
         # List available updates. Do not use --quiet here: brew treats --quiet
         # and --json as mutually exclusive. See:
         # https://github.com/kdeldycke/meta-package-manager/issues/1703
-        output = self.run_cli("outdated", options)
+        output = self.run_cli("outdated", options, must_succeed=True)
 
         if output:
             package_list = json.loads(output)

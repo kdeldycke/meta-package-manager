@@ -160,7 +160,7 @@ class APM(PackageManager):
               ]
             }
         """
-        output = self.run_cli("list", "--json")
+        output = self.run_cli("list", "--json", must_succeed=True)
 
         if output:
             for package_list in json.loads(output).values():
@@ -322,7 +322,7 @@ class APM(PackageManager):
               }
             ]
         """
-        output = self.run_cli("outdated", "--compatible", "--json")
+        output = self.run_cli("outdated", "--compatible", "--json", must_succeed=True)
 
         if output:
             for pkg in json.loads(output):
@@ -425,7 +425,7 @@ class APM(PackageManager):
         if not extended:
             search_args.append("--no-description")
 
-        output = self.run_cli("search", search_args, "--json", query)
+        output = self.run_cli("search", search_args, "--json", query, must_succeed=True)
 
         if output:
             for pkg in json.loads(output):

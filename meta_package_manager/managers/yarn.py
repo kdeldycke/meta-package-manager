@@ -91,7 +91,7 @@ class Yarn(PackageManager):
                - awesome-lint
             ✨  Done in 0.13s.
         """
-        output = self.run_cli("global", "--json", "list", "--depth", "0")
+        output = self.run_cli("global", "--json", "list", "--depth", "0", must_succeed=True)
 
         for package_id, version in self._INSTALLED_REGEXP.findall(output):
             yield self.package(id=package_id, installed_version=version)
@@ -160,7 +160,7 @@ class Yarn(PackageManager):
             markdown 0.4.0   0.4.0  0.5.0  dependencies git://github.com/.../md-js.git
             ✨  Done in 0.95s.
         """
-        output = self.run_cli("--json", "outdated", "--cwd", self.global_dir)
+        output = self.run_cli("--json", "outdated", "--cwd", self.global_dir, must_succeed=True)
         if output:
             for line in output.splitlines():
                 if not line:
@@ -259,7 +259,7 @@ class Yarn(PackageManager):
               }
             }
         """
-        output = self.run_cli("--json", "info", query)
+        output = self.run_cli("--json", "info", query, must_succeed=True)
 
         if output:
             result = json.loads(output)

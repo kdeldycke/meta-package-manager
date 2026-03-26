@@ -144,7 +144,7 @@ class Pip(PackageManager):
         """
         # --quiet is required here to silence warning and error messages
         # mangling the JSON content.
-        output = self.run_cli("list", "--format=json", "--verbose", "--quiet")
+        output = self.run_cli("list", "--format=json", "--verbose", "--quiet", must_succeed=True)
 
         if output:
             for package in json.loads(output):
@@ -220,6 +220,7 @@ class Pip(PackageManager):
             "--outdated",
             "--verbose",
             "--quiet",
+            must_succeed=True,
         )
 
         if output:

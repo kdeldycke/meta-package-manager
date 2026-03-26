@@ -89,7 +89,7 @@ class Composer(PackageManager):
                 },
             (...)
         """
-        output = self.run_cli("show", "--format=json")
+        output = self.run_cli("show", "--format=json", must_succeed=True)
         if output:
             package_list = json.loads(output)
             for package in package_list["installed"]:
@@ -122,7 +122,7 @@ class Composer(PackageManager):
                 ]
             }
         """
-        output = self.run_cli("outdated", "--format=json")
+        output = self.run_cli("outdated", "--format=json", must_succeed=True)
 
         if output:
             package_list = json.loads(output)

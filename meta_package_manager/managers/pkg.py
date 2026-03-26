@@ -333,7 +333,7 @@ class PKG(PackageManager):
         if extended:
             search_args += ["--search", "comment", "--search", "description"]
 
-        output = self.run_cli(search_args, query)
+        output = self.run_cli(search_args, query, must_succeed=True)
 
         for package in map(json.loads, output.splitlines()):
             yield self.package(

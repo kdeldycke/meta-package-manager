@@ -182,6 +182,7 @@ PACKAGE_IDS = {
     "scoop": "main/wget",
     "snap": "standard-notes",
     "steamcmd": "740",
+    "stew": "marwanhawari/piu",
     "uv": "pytz",
     "uvx": "pycowsay",
     "vscode": "tamasfe.even-better-toml",

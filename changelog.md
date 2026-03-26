@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [stew] Add Stew package manager for installing pre-compiled binaries from GitHub Releases. Closes {issue}`1680`.
 - [pip] Only report top-level packages as outdated, skipping transitive dependencies. Closes {issue}`1214`.
 - [uvx] Implement `outdated` operation. Bump minimal requirement to `0.10.10`. Closes {pr}`1704`.
 - [mpm] Support version range specifiers (e.g. `>=1.20.0,<2.0.0`) in manager `requirement` field. Refs {issue}`1548`.

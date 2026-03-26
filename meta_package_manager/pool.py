@@ -47,6 +47,7 @@ from .managers.pkg import PKG
 from .managers.scoop import Scoop
 from .managers.snap import Snap
 from .managers.steamcmd import SteamCMD
+from .managers.stew import Stew
 from .managers.uv import UV, UVX
 from .managers.vscode import VSCode, VSCodium
 from .managers.winget import WinGet
@@ -89,6 +90,7 @@ manager_classes = (
     Scoop,
     Snap,
     SteamCMD,
+    Stew,
     UV,
     UVX,
     VSCode,

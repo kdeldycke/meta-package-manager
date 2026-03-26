@@ -212,7 +212,15 @@ class UVX(UVBase):
 
     homepage_url = "https://docs.astral.sh/uv/guides/tools/"
 
+    requirement = "0.10.10"
+    """`0.10.10 <https://github.com/astral-sh/uv/releases/tag/0.10.10>`_ is the first
+    version to introduce ``tool list --outdated`` command.
+    """
+
     _INSTALLED_REGEXP = re.compile(r"^(?P<package_id>\S+)\s+v(?P<version>\S+)$")
+    _OUTDATED_REGEXP = re.compile(
+        r"^(?P<package_id>\S+)\s+v(?P<version>\S+)\s+\[latest:\s+(?P<latest>\S+)\]$",
+    )
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -233,6 +241,28 @@ class UVX(UVBase):
                     yield self.package(
                         id=match.group("package_id"),
                         installed_version=match.group("version"),
+                    )
+
+    @property
+    def outdated(self) -> Iterator[Package]:
+        """Fetch outdated packages.
+
+        .. code-block:: shell-session
+
+            $ uv --color never --no-progress tool list --outdated
+            pycowsay v0.0.0.1 [latest: 0.0.0.2]
+            - pycowsay
+        """
+        output = self.run_cli("tool", "list", "--outdated")
+
+        if output:
+            for line in output.splitlines():
+                match = self._OUTDATED_REGEXP.match(line)
+                if match:
+                    yield self.package(
+                        id=match.group("package_id"),
+                        installed_version=match.group("version"),
+                        latest_version=match.group("latest"),
                     )
 
     def install(self, package_id: str, version: str | None = None) -> str:

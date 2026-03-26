@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [uvx] Implement `outdated` operation. Bump minimal requirement to `0.10.10`.
+
 ## [`6.2.1` (2026-03-26)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.0...v6.2.1)
 
 - [brew,cask] Remove `--quiet` from `outdated` command where it conflicts with `--json`. Closes {issue}`1703`.

@@ -116,7 +116,7 @@ def test_cli_names_type(manager):
     """Check the pointed CLI name and path are file-system compatible."""
     assert manager.cli_names
     for name in manager.cli_names:
-        assert name.isalnum()
+        assert name.replace("-", "").isalnum()
         assert PurePath(name).name == name
 
 

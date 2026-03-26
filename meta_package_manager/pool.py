@@ -30,6 +30,7 @@ from .managers.apt import APT, APT_Mint
 from .managers.cargo import Cargo
 from .managers.chocolatey import Choco
 from .managers.composer import Composer
+from .managers.deb_get import Deb_Get
 from .managers.dnf import DNF, DNF5, YUM
 from .managers.emerge import Emerge
 from .managers.eopkg import EOPKG
@@ -73,6 +74,7 @@ manager_classes = (
     Cask,
     Choco,
     Composer,
+    Deb_Get,
     DNF,
     DNF5,
     Emerge,

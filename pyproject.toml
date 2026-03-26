@@ -22,6 +22,7 @@ keywords = [
   "cli-tools",
   "composer",
   "cyclonedx",
+  "deb-get",
   "dnf",
   "dnf5",
   "emerge",

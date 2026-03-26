@@ -102,7 +102,7 @@ MANAGER_PREFIX = "📦 manager: "
 
 MANAGER_LABEL_GROUPS: TLabelGroup = {
     "dnf-based": frozenset({"dnf", "dnf5", "yum"}),
-    "dpkg-based": frozenset({"apt", "apt-mint", "deb-get", "opkg"}),
+    "dpkg-based": frozenset({"apt", "apt-mint", "deb-get", "opkg", "pacstall"}),
     "homebrew": frozenset({"brew", "cask", "zerobrew"}),
     "npm-based": frozenset({"npm", "yarn", "yarn-berry"}),
     "pacman-based": frozenset({"pacman", "pacaur", "paru", "yay"}),
@@ -110,8 +110,13 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     "uv-based": frozenset({"uv", "uvx"}),
     "vscode-based": frozenset({"vscode", "vscodium"}),
 }
-"""Managers sharing some origin or implementation are grouped together under the same
-label."""
+"""Managers sharing the same ecosystem are grouped together under the same label.
+
+Grouping is by ecosystem (the underlying packaging system), not by installation
+paradigm. For example, source-based helpers like Pacstall and AUR helpers are grouped
+with their ecosystem (dpkg-based and pacman-based respectively), even though they build
+from source rather than fetching pre-built binaries.
+"""
 
 all_manager_label_ids = frozenset(set(pool.all_manager_ids) | {"mpm"})
 """Adds ``mpm`` as its own manager alongside all those implemented."""

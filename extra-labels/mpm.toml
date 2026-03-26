@@ -26,7 +26,7 @@ description = "dnf, dnf5, yum"
 [[profiles.default.labels]]
 name = "📦 manager: dpkg-based"
 color = "bfdadc"
-description = "apt, apt-mint, deb-get, opkg"
+description = "apt, apt-mint, deb-get, opkg, pacstall"
 
 [[profiles.default.labels]]
 name = "📦 manager: emerge"
@@ -77,11 +77,6 @@ description = "npm, yarn, yarn-berry"
 name = "📦 manager: pacman-based"
 color = "bfdadc"
 description = "pacaur, pacman, paru, yay"
-
-[[profiles.default.labels]]
-name = "📦 manager: pacstall"
-color = "bfdadc"
-description = "pacstall"
 
 [[profiles.default.labels]]
 name = "📦 manager: pip-based"

@@ -192,6 +192,7 @@ PACKAGE_IDS = {
     "yarn-berry": "left-pad",
     "yay": "wget",
     "yum": "usd",
+    "zerobrew": "jq",
     "zypper": "git",
 }
 """Package IDs to be used for install tests for each manager.

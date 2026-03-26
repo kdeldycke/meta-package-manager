@@ -119,6 +119,11 @@ color = "bfdadc"
 description = "winget"
 
 [[profiles.default.labels]]
+name = "📦 manager: zerobrew"
+color = "bfdadc"
+description = "zerobrew"
+
+[[profiles.default.labels]]
 name = "📦 manager: zypper"
 color = "bfdadc"
 description = "zypper"

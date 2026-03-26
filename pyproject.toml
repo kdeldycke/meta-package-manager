@@ -71,6 +71,8 @@ keywords = [
   "xbar-plugin",
   "yarn",
   "yay",
+  "zb",
+  "zerobrew",
   "yum",
   "zypper",
 ]
@@ -517,6 +519,12 @@ labels.extra-file-rules = """"🔌 bar-plugin":
       - meta_package_manager/managers/winget*
       - tests/*winget*
 
+"📦 manager: zerobrew":
+  - changed-files:
+    - any-glob-to-any-file:
+      - meta_package_manager/managers/zerobrew*
+      - tests/*zerobrew*
+
 "📦 manager: zypper":
   - changed-files:
     - any-glob-to-any-file:
@@ -639,6 +647,10 @@ labels.extra-content-rules = """"🔌 bar-plugin":
 
 "📦 manager: winget":
   - "winget"
+
+"📦 manager: zerobrew":
+  - "zerobrew"
+  - "zb"
 
 "📦 manager: zypper":
   - "zypper"

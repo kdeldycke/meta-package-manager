@@ -52,6 +52,7 @@ from .managers.uv import UV, UVX
 from .managers.vscode import VSCode, VSCodium
 from .managers.winget import WinGet
 from .managers.yarn import YarnBerry, YarnClassic
+from .managers.zerobrew import ZeroBrew
 from .managers.zypper import Zypper
 
 TYPE_CHECKING = False
@@ -100,6 +101,7 @@ manager_classes = (
     YarnClassic,
     Yay,
     YUM,
+    ZeroBrew,
     Zypper,
 )
 """The list of all classes implementing the specific package managers.

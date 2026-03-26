@@ -71,7 +71,7 @@ def operation_matrix() -> tuple[str, str]:
     # Build up the column titles.
     headers = [
         "Package manager",
-        "Min. version",
+        "Version",
     ]
 
     # Footnotes are used to details the OSes covered by each platform group.
@@ -102,7 +102,7 @@ def operation_matrix() -> tuple[str, str]:
         line = [
             f"[`{mid}`]({m.homepage_url})"
             + ("" if not m.deprecated else f" [⚠️]({m.deprecation_url})"),
-            f"{m.requirement}",
+            m.requirement or "",
         ]
         line.extend(
             p_obj.icon if m.platforms.issuperset(extract_members(p_obj)) else ""

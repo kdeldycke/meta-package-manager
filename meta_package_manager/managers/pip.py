@@ -18,7 +18,9 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from functools import cached_property
+from pathlib import Path
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -27,7 +29,7 @@ from ..capabilities import search_capabilities, version_not_implemented
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Generator, Iterable, Iterator
 
     from ..base import Package
     from ..version import TokenizedString
@@ -63,6 +65,31 @@ class Pip(PackageManager):
     # Targets `python3` CLI first to allow for some systems (like macOS) to keep the
     # default `python` CLI tied to the Python 2.x ecosystem.
     cli_names = ("python3", "python")
+
+    def search_all_cli(
+        self,
+        cli_names: Iterable[str],
+        env=None,
+    ) -> Generator[Path, None, None]:
+        """Prepend the current Python executable to the list of found binaries.
+
+        .. todo::
+
+            Evaluate `pythonfinder <https://github.com/sarugaku/pythonfinder>`_ to
+            replace our custom search logic.
+        """
+        # Get current Python executable.
+        current_python = None
+        current_exec = sys.executable
+        if current_exec:
+            current_python = Path(current_exec)
+            yield current_python
+
+        # Return the rest of the Python executables found on the system as usual.
+        for py_path in super().search_all_cli(cli_names=cli_names, env=env):
+            # Do not yield the current Python executable twice.
+            if current_python and py_path != current_python:
+                yield py_path
 
     pre_args = (
         "-m",

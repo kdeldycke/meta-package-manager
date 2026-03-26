@@ -6,8 +6,9 @@
 > This version is **not released yet** and is under active development.
 
 - [uvx] Implement `outdated` operation. Bump minimal requirement to `0.10.10`. Closes {pr}`1704`.
-- [yarn] Restrict to Yarn Classic (`<2.0.0`). Yarn Berry removed `yarn global` commands. Closes {issue}`1548`.
 - [mpm] Support version range specifiers (e.g. `>=1.20.0,<2.0.0`) in manager `requirement` field. Refs {issue}`1548`.
+- [yarn] Split into Yarn Classic and Yarn Berry managers. Restrict Classic to `<2.0.0`. Closes {issue}`1548`.
+- [yarn-berry] Add Yarn Berry (2.x+) manager with `search` and `cleanup` support.
 - [mpm] Add `must_succeed` parameter to `run_cli` for structured-output calls, preventing silent data loss on CLI failures. Refs {issue}`1703`.
 
 ## [`6.2.1` (2026-03-26)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.0...v6.2.1)

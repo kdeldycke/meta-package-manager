@@ -179,6 +179,7 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `xbps`                  |       |                |       ✓       |      ✓       |      ✓       |
 | `yadm`                  |       |       ✓        |               |              |              |
 | `yarn`                  |   ✓   |       ✓        |               |              |              |
+| `yarn-berry`            |   ✓   |       ✓        |               |              |              |
 | `yay`                   |   ✓   |       ✓        |               |              |              |
 | `yum`                   |   ✓   |                |               |      ✓       |      ✓       |
 | `zim`                   |       |       ✓        |               |              |              |

@@ -50,7 +50,7 @@ from .managers.steamcmd import SteamCMD
 from .managers.uv import UV, UVX
 from .managers.vscode import VSCode, VSCodium
 from .managers.winget import WinGet
-from .managers.yarn import Yarn
+from .managers.yarn import YarnBerry, YarnClassic
 from .managers.zypper import Zypper
 
 TYPE_CHECKING = False
@@ -94,7 +94,8 @@ manager_classes = (
     VSCode,
     VSCodium,
     WinGet,
-    Yarn,
+    YarnBerry,
+    YarnClassic,
     Yay,
     YUM,
     Zypper,

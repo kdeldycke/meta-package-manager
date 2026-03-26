@@ -188,6 +188,7 @@ PACKAGE_IDS = {
     "vscodium": "tamasfe.even-better-toml",
     "winget": "Microsoft.PowerToys",
     "yarn": "awesome-lint",
+    "yarn-berry": "left-pad",
     "yay": "wget",
     "yum": "usd",
     "zypper": "git",

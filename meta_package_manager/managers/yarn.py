@@ -33,15 +33,51 @@ if TYPE_CHECKING:
 
 
 class Yarn(PackageManager):
-    """See command equivalences at: https://github.com/antfu-collective/ni?tab=readme-ov-file#ni."""
+    """Virtual package manager shared by Yarn Classic and Yarn Berry.
 
-    name = "Node's yarn"
+    See command equivalences at:
+    https://github.com/antfu-collective/ni?tab=readme-ov-file#ni
+    """
 
     homepage_url = "https://yarnpkg.com"
 
     platforms = ALL_PLATFORMS
 
+    virtual = True
+
+    def cleanup(self) -> None:
+        """Removes things we don't need anymore.
+
+        See: https://yarnpkg.com/cli/cache/clean
+
+        .. code-block:: shell-session
+
+            $ yarn cache clean --all
+            yarn cache v1.22.19
+            success Cleared cache.
+            ✨  Done in 0.35s.
+        """
+        self.run_cli("cache", "clean", "--all")
+
+
+class YarnClassic(Yarn):
+    """Yarn Classic (1.x) package manager.
+
+    .. warning::
+        Yarn Classic has been in maintenance mode since January 2020. Only
+        critical and security patches are accepted. Yarn Berry (2.x+) is
+        the actively developed line but uses a fundamentally different CLI
+        surface, so it is handled by a separate
+        :py:class:`YarnBerry` manager.
+    """
+
+    id = "yarn"
+
+    name = "Yarn Classic"
+
     requirement = ">=1.20.0,<2.0.0"
+
+    cli_names = ("yarn",)
 
     pre_args = ("--silent",)
 
@@ -118,10 +154,10 @@ class Yarn(PackageManager):
             {
               "type": "info",
               "data":
-                "Color legend : \n"
-                " \"<red>\"    : Major Update backward-incompatible updates \n"
-                " \"<yellow>\" : Minor Update backward-compatible features \n"
-                " \"<green>\"  : Patch Update backward-compatible bug fixes"
+                "Color legend : \\n"
+                " \\"<red>\\"    : Major Update backward-incompatible updates \\n"
+                " \\"<yellow>\\" : Minor Update backward-compatible features \\n"
+                " \\"<green>\\"  : Patch Update backward-compatible bug fixes"
             }
             {
               "type": "table",
@@ -364,16 +400,59 @@ class Yarn(PackageManager):
         """
         return self.run_cli("global", "remove", package_id)
 
-    def cleanup(self) -> None:
-        """Removes things we don't need anymore.
 
-        See: https://yarnpkg.com/cli/cache/clean
+class YarnBerry(Yarn):
+    """Yarn Berry (2.x+) package manager.
+
+    .. warning::
+        Yarn Berry removed ``yarn global`` commands entirely. There is no concept
+        of globally installed packages, so ``installed``, ``outdated``, ``install``,
+        ``upgrade``, and ``remove`` operations are not available.
+    """
+
+    id = "yarn-berry"
+
+    name = "Yarn Berry"
+
+    requirement = ">=2.0.0"
+
+    cli_names = ("yarn",)
+
+    @search_capabilities(extended_support=False, exact_support=False)
+    def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
+        """Fetch matching packages.
+
+        .. warning::
+            Search is simulated by a direct call to ``yarn npm info``, and as a
+            result only works for exact match.
 
         .. code-block:: shell-session
 
-            $ yarn cache clean --all
-            yarn cache v1.22.19
-            success Cleared cache.
-            ✨  Done in 0.35s.
+            $ yarn npm info python --json | jq
+            {
+              "name": "python",
+              "description": "Interact with python child process",
+              "dist-tags": {
+                "latest": "0.0.4"
+              },
+              "versions": [
+                "0.0.0",
+                "0.0.1",
+                "0.0.2",
+                "0.0.3",
+                "0.0.4"
+              ],
+              "version": "0.0.4",
+              (...)
+            }
         """
-        self.run_cli("cache", "clean", "--all")
+        output = self.run_cli("npm", "info", query, "--json")
+
+        if output:
+            package = json.loads(output)
+            yield self.package(
+                id=package["name"],
+                description=package.get("description"),
+                latest_version=package.get("dist-tags", {}).get("latest")
+                or package.get("version"),
+            )

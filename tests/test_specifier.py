@@ -148,6 +148,11 @@ def props(spec: Specifier):
                     "manager_id": "yarn",
                     "version": "2011-04.gamma",
                 },
+                {
+                    "package_id": "left-pad",
+                    "manager_id": "yarn-berry",
+                    "version": "2011-04.gamma",
+                },
             ),
             id="purl_multiple_aliases",
         ),

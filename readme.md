@@ -106,6 +106,7 @@ Meta Package Manager,vscode,1
 Meta Package Manager,vscodium,1
 Meta Package Manager,winget,1
 Meta Package Manager,yarn,1
+Meta Package Manager,yarn-berry,1
 Meta Package Manager,yay,1
 Meta Package Manager,yum,1
 Meta Package Manager,zypper,1
@@ -151,7 +152,8 @@ Meta Package Manager,zypper,1
 | [`vscode`](https://code.visualstudio.com)                                               | 1.60.0       |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |            |          |     ✓     |           |               |    ✓     |        |           |
 | [`vscodium`](https://vscodium.com)                                                      | 1.60.0       |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |            |          |     ✓     |           |               |    ✓     |        |           |
 | [`winget`](https://github.com/microsoft/winget-cli)                                     | 1.7          |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
-| [`yarn`](https://yarnpkg.com)                                                           | 1.20.0       |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
+| [`yarn`](https://yarnpkg.com)                                                           | >=1.20,<2    |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
+| [`yarn-berry`](https://yarnpkg.com)                                                     | >=2.0.0      |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |             |            |    ✓     |           |           |               |          |        |     ✓     |
 | [`yay`](https://github.com/Jguer/yay)                                                   | 11.0.0       |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`yum`](http://yum.baseurl.org)                                                         | 4.0.0        |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`zypper`](https://en.opensuse.org/Portal:Zypper)                                       | 1.14.0       |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
@@ -279,7 +281,8 @@ $ mpm --all-managers managers
 │ snap       │ Snap               │ ✘ Linux only   │ ✘ snap not found             │            │           │
 │ steamcmd   │ Valve Steam        │ ✓              │ ✘ steamcmd not found         │            │           │
 │ vscode     │ Visual Studio Code │ ✓              │ ✓ /opt/homebrew/bin/code     │ ✓          │ ✓ 1.71.2  │
-│ yarn       │ Node's yarn        │ ✓              │ ✓ /opt/homebrew/bin/yarn     │ ✓          │ ✓ 1.22.19 │
+│ yarn       │ Yarn Classic       │ ✓              │ ✓ /opt/homebrew/bin/yarn     │ ✓          │ ✓ 1.22.19 │
+│ yarn-berry │ Yarn Berry         │ ✓              │ ✓ /opt/homebrew/bin/yarn     │ ✓          │ ✗ 1.22.19 │
 │ yay        │ Yay                │ ✘ Linux only   │ ✘ yay not found              │            │           │
 │ yum        │ YUM                │ ✘ Linux only   │ ✘ yum not found              │            │           │
 │ zypper     │ Zypper             │ ✘ Linux only   │ ✘ zypper not found           │            │           │

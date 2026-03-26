@@ -367,7 +367,9 @@ class VersionRange:
     @staticmethod
     def _parse(
         spec: str,
-    ) -> Iterator[tuple[Callable[[TokenizedString, TokenizedString], bool], TokenizedString]]:
+    ) -> Iterator[
+        tuple[Callable[[TokenizedString, TokenizedString], bool], TokenizedString]
+    ]:
         """Yield ``(operator, version)`` pairs from a comma-separated specifier."""
         for part in spec.split(","):
             part = part.strip()

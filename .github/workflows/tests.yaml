@@ -521,3 +521,27 @@ jobs:
         run: scoop install main/meta-package-manager
       - shell: pwsh
         run: mpm --version
+
+  stew-install-mpm:
+    # Installs from GitHub Releases (released version), not the PR code.
+    if: github.event_name != 'pull_request'
+    strategy:
+      matrix:
+        os:
+          - ubuntu-slim  # x86
+          - macos-26     # arm64
+          - windows-2025 # x86
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/setup-go@v6.3.0
+        with:
+          cache: false
+          go-version: stable
+      - name: Install Stew
+        run: go install github.com/marwanhawari/stew@v0.6.0
+      - name: Add Stew bin to PATH
+        shell: bash
+        run: echo "$HOME/.stew/bin" >> "$GITHUB_PATH"
+      # https://github.com/marwanhawari/stew
+      - run: stew install kdeldycke/meta-package-manager
+      - run: mpm --version

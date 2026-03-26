@@ -32,7 +32,7 @@ from boltons import strutils
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
 
 
 ALNUM_EXTRACTOR = re.compile("(\\d+ | [a-z]+)", re.VERBOSE)
@@ -336,6 +336,59 @@ parse_version = partial(TokenizedString, separator=".")
 ..todo::
     Enforce splitting of token along separator.
 """
+
+
+RANGE_OPERATOR = re.compile(r"(?P<op>[><=!]=?|!=)\s*(?P<version>.+)")
+"""Matches a comparison operator prefix followed by a version string."""
+
+OPERATOR_MAP: dict[str, Callable[[TokenizedString, TokenizedString], bool]] = {
+    ">=": operator.ge,
+    ">": operator.gt,
+    "<=": operator.le,
+    "<": operator.lt,
+    "==": operator.eq,
+    "!=": operator.ne,
+}
+
+
+class VersionRange:
+    """A set of version constraints parsed from a comma-separated specifier string.
+
+    Each constraint is an ``(operator, version)`` pair. A version satisfies the
+    range only if it satisfies every constraint.
+
+    Bare version strings (no operator prefix) are treated as ``>=``.
+    """
+
+    def __init__(self, spec: str) -> None:
+        self.spec = spec
+        self.constraints = tuple(self._parse(spec))
+
+    @staticmethod
+    def _parse(
+        spec: str,
+    ) -> Iterator[tuple[Callable[[TokenizedString, TokenizedString], bool], TokenizedString]]:
+        """Yield ``(operator, version)`` pairs from a comma-separated specifier."""
+        for part in spec.split(","):
+            part = part.strip()
+            if not part:
+                continue
+            match = RANGE_OPERATOR.fullmatch(part)
+            if match:
+                op = OPERATOR_MAP[match.group("op")]
+                version = parse_version(match.group("version"))
+            else:
+                # Bare version string is treated as >=.
+                op = operator.ge
+                version = parse_version(part)
+            yield op, version
+
+    def __contains__(self, version: TokenizedString) -> bool:
+        """Return ``True`` if *version* satisfies all constraints."""
+        return all(op(version, ver) for op, ver in self.constraints)
+
+    def __repr__(self) -> str:
+        return f"<VersionRange {self.spec!r}>"
 
 
 def is_version(string: str) -> bool:

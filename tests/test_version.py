@@ -24,6 +24,7 @@ import pytest
 from meta_package_manager.version import (
     Token,
     TokenizedString,
+    VersionRange,
     is_version,
     parse_version,
 )
@@ -311,3 +312,50 @@ def test_version_sorting(sequence):
     shuffle(random_order)
     assert random_order != sorted_version
     assert sorted(random_order) == sorted_version
+
+
+@pytest.mark.parametrize(
+    ("spec", "version", "expected"),
+    (
+        # Bare version string acts as >=.
+        ("1.0.0", "1.0.0", True),
+        ("1.0.0", "2.0.0", True),
+        ("1.0.0", "0.9.0", False),
+        # Explicit >= operator.
+        (">=1.0.0", "1.0.0", True),
+        (">=1.0.0", "2.0.0", True),
+        (">=1.0.0", "0.9.0", False),
+        # Explicit > operator.
+        (">1.0.0", "1.0.1", True),
+        (">1.0.0", "1.0.0", False),
+        # Explicit < operator.
+        ("<2.0.0", "1.9.9", True),
+        ("<2.0.0", "2.0.0", False),
+        ("<2.0.0", "3.0.0", False),
+        # Explicit <= operator.
+        ("<=2.0.0", "2.0.0", True),
+        ("<=2.0.0", "2.0.1", False),
+        # Explicit == operator.
+        ("==1.5.0", "1.5.0", True),
+        ("==1.5.0", "1.5.1", False),
+        # Explicit != operator.
+        ("!=1.5.0", "1.5.0", False),
+        ("!=1.5.0", "1.5.1", True),
+        # Range with two constraints.
+        (">=1.20.0,<2.0.0", "1.20.0", True),
+        (">=1.20.0,<2.0.0", "1.22.19", True),
+        (">=1.20.0,<2.0.0", "1.19.0", False),
+        (">=1.20.0,<2.0.0", "2.0.0", False),
+        (">=1.20.0,<2.0.0", "4.9.2", False),
+        # Range with spaces around constraints.
+        (">=1.0.0 , <3.0.0", "2.0.0", True),
+        (">=1.0.0 , <3.0.0", "0.5.0", False),
+    ),
+)
+def test_version_range(spec, version, expected):
+    assert (parse_version(version) in VersionRange(spec)) is expected
+
+
+def test_version_range_repr():
+    r = VersionRange(">=1.0.0,<2.0.0")
+    assert repr(r) == "<VersionRange '>=1.0.0,<2.0.0'>"

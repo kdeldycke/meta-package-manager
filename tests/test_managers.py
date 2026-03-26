@@ -101,11 +101,14 @@ def test_platforms(manager):
 
 @all_managers
 def test_requirement(manager):
-    """Each manager is required to specify a minimal version or ``None``."""
+    """Each manager is required to specify a version requirement or ``None``."""
     if manager.requirement is not None:
-        assert set(manager.requirement).issubset(digits + ".")
-        # Check provided string is lossless once passed via TokenizedString.
-        assert str(TokenizedString(manager.requirement)) == manager.requirement
+        assert set(manager.requirement).issubset(digits + ".>=<!, ")
+        # Check each version component is lossless once passed via TokenizedString.
+        for part in manager.requirement.split(","):
+            part = part.strip().lstrip("><=!")
+            if part:
+                assert str(TokenizedString(part)) == part
 
 
 @all_managers

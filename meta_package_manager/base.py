@@ -45,7 +45,7 @@ from extra_platforms import (
 )
 from packageurl import PackageURL
 
-from .version import parse_version
+from .version import VersionRange, parse_version
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -275,12 +275,14 @@ class PackageManager(metaclass=MetaPackageManager):
     """
 
     requirement: str | None = None
-    """Minimal required version.
+    """Version requirement specifier.
 
-    Should be a string parseable by
-    :py:class:`meta_package_manager.version.parse_version`.
+    Supports a comma-separated range of constraints (e.g. ``">=1.20.0,<2.0.0"``).
+    A bare version string like ``"1.20.0"`` is treated as ``>=1.20.0``.
 
-    Defaults to ``None``, which deactivate version check entirely.
+    Parsed by :py:class:`meta_package_manager.version.VersionRange`.
+
+    Defaults to ``None``, which deactivates version check entirely.
     """
 
     cli_names: tuple[str, ...]
@@ -629,10 +631,10 @@ class PackageManager(metaclass=MetaPackageManager):
         # Version is mandatory.
         if not self.version:
             return False
-        if self.requirement and self.version < parse_version(self.requirement):
+        if self.requirement and self.version not in VersionRange(self.requirement):
             logging.debug(
-                f"{self.id} {self.version} is older than "
-                f"{self.requirement} version requirement.",
+                f"{self.id} {self.version} does not satisfy "
+                f"{self.requirement!r} version requirement.",
             )
             return False
         return True

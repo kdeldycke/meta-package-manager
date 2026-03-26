@@ -41,7 +41,7 @@ class Yarn(PackageManager):
 
     platforms = ALL_PLATFORMS
 
-    requirement = "1.20.0"
+    requirement = ">=1.20.0,<2.0.0"
 
     pre_args = ("--silent",)
 

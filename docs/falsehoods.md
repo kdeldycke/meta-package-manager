@@ -41,7 +41,7 @@ Implementing `mpm` exposed me to many edge-cases and pitfalls of package managem
 1. Package managers
    [tracks installed versions](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/homebrew.py#L219-L221).
 1. Package managers
-   [can track removed packages](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/homebrew.py#L239-L242)
+   [can track removed packages](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/homebrew.py)
    (see {issue}`17`).
 1. Package managers are documented.
 1. A package manager has a version.
@@ -49,15 +49,15 @@ Implementing `mpm` exposed me to many edge-cases and pitfalls of package managem
 1. Package managers are secure.
 1. Package managers can be unittested.
 1. Package managers
-   [can upgrade all outdated packages](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/pip.py#L94-L97).
+   [can upgrade all outdated packages](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/pip.py).
 1. Package managers are forbidden to upgrade other package managers.
 1. Packages are only managed by one package manager.
 1. Installing a package doesn’t require a reboot.
 1. Package manager
-   [output is consistent](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/mas.py#L42-L44).
+   [output is consistent](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/mas.py).
 1. A package manager can upgrade a package installed by the user.
 1. All
-   [users on the system have access to the package manager](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/gem.py#L95-L100).
+   [users on the system have access to the package manager](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/gem.py).
 1. Package managers do not remove user data.
 1. Package managers
    [can bootstrap themselves](https://github.com/Homebrew/brew/blob/master/docs/Common-Issues.md#brew-complains-about-absence-of-command-line-tools).

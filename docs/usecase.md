@@ -337,7 +337,7 @@ Implement a best matching strategy, across package managers of different kinds.
 ```{admonition} Context
 The [Log4Shell vulnerability](https://en.wikipedia.org/wiki/Log4Shell) debacle was a wake-up call for the industry. This dependency was deeply embedded in the legacy stack of companies and administrations. They all had huge difficulty to identify its presence, writing custom detection scripts and scanning their software artifacts.
 
-As a response to this crisis, [SBOM tools have now became a category of their own](https://en.wikipedia.org/wiki/Software_supply_chain). To the point that [a US executive order has also been released](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/) to modernize cybersecurity practices and enforce the production of SBOM to track the software supply chain.
+As a response to this crisis, [SBOM tools have now became a category of their own](https://en.wikipedia.org/wiki/Software_supply_chain). To the point that [a US executive order has also been released](https://www.whitehouse.gov/briefing-room/statements-releases/2021/05/12/fact-sheet-president-biden-issues-national-security-memorandum-to-improve-cybersecurity/) to modernize cybersecurity practices and enforce the production of SBOM to track the software supply chain.
 ```
 
 Well `mpm` is capable of exporting the list of packages installed on a system to different SBOM standards and formats:

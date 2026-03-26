@@ -97,6 +97,11 @@ color = "bfdadc"
 description = "scoop"
 
 [[profiles.default.labels]]
+name = "📦 manager: sdkman"
+color = "bfdadc"
+description = "sdkman"
+
+[[profiles.default.labels]]
 name = "📦 manager: snap"
 color = "bfdadc"
 description = "snap"

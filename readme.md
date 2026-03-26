@@ -100,6 +100,7 @@ Meta Package Manager,pip,1
 Meta Package Manager,pipx,1
 Meta Package Manager,pkg,1
 Meta Package Manager,scoop,1
+Meta Package Manager,sdkman,1
 Meta Package Manager,snap,1
 Meta Package Manager,steamcmd,1
 Meta Package Manager,stew,1
@@ -151,6 +152,7 @@ Meta Package Manager,zypper,1
 | [`pipx`](https://pipx.pypa.io)                                                          | >=1.0.0         |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`pkg`](https://github.com/freebsd/pkg)                                                 | >=1.11          |    🅱️     |      🐧       |  🍎   |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`scoop`](https://scoop.sh)                                                             | >=0.2.4         |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`sdkman`](https://sdkman.io)                                                           | >=5.0.0         |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
 | [`snap`](https://snapcraft.io)                                                          | >=2.0.0         |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
 | [`steamcmd`](https://developer.valvesoftware.com/wiki/SteamCMD)                         |                 |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |             |            |          |     ✓     |           |               |          |        |           |
 | [`stew`](https://github.com/marwanhawari/stew)                                          | >=0.3.0         |           |      🐧       |  🍎   |             |   🪟    |      ✓      |            |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
@@ -287,6 +289,7 @@ $ mpm --all-managers managers
 │ pip        │ Pip                │ ✓              │ ✓ ~/.pyenv/shims/python3     │ ✓          │ ✓ 22.2.2  │
 │ pipx       │ Pipx               │ ✓              │ ✓ /opt/homebrew/bin/pipx     │ ✓          │ ✓ 1.1.0   │
 │ scoop      │ Scoop              │ ✘ Windows only │ ✘ scoop not found            │            │           │
+│ sdkman     │ SDKMAN             │ ✓              │ ✘ sdkman-init.sh not found   │            │           │
 │ snap       │ Snap               │ ✘ Linux only   │ ✘ snap not found             │            │           │
 │ steamcmd   │ Valve Steam        │ ✓              │ ✘ steamcmd not found         │            │           │
 │ vscode     │ Visual Studio Code │ ✓              │ ✓ /opt/homebrew/bin/code     │ ✓          │ ✓ 1.71.2  │

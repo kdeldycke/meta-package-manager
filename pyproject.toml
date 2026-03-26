@@ -57,6 +57,7 @@ keywords = [
   "rust",
   "sbom",
   "scoop",
+  "sdkman",
   "snap",
   "spdx",
   "steamcmd",
@@ -499,6 +500,12 @@ labels.extra-file-rules = """"🔌 bar-plugin":
       - meta_package_manager/managers/scoop*
       - tests/*scoop*
 
+"📦 manager: sdkman":
+  - changed-files:
+    - any-glob-to-any-file:
+      - meta_package_manager/managers/sdkman*
+      - tests/*sdkman*
+
 "📦 manager: snap":
   - changed-files:
     - any-glob-to-any-file:
@@ -639,6 +646,10 @@ labels.extra-content-rules = """"🔌 bar-plugin":
 
 "📦 manager: scoop":
   - "scoop"
+
+"📦 manager: sdkman":
+  - "sdkman"
+  - "sdk man"
 
 "📦 manager: snap":
   - "snap"

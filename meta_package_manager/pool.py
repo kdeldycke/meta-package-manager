@@ -48,6 +48,7 @@ from .managers.pip import Pip
 from .managers.pipx import Pipx
 from .managers.pkg import PKG
 from .managers.scoop import Scoop
+from .managers.sdkman import SDKMAN
 from .managers.snap import Snap
 from .managers.steamcmd import SteamCMD
 from .managers.stew import Stew
@@ -95,6 +96,7 @@ manager_classes = (
     Pipx,
     PKG,
     Scoop,
+    SDKMAN,
     Snap,
     SteamCMD,
     Stew,

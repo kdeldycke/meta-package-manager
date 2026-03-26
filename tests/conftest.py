@@ -182,6 +182,7 @@ PACKAGE_IDS = {
     "pipx": "pytz",
     "pkg": "dmg2img",
     "scoop": "main/wget",
+    "sdkman": "java",
     "snap": "standard-notes",
     "steamcmd": "740",
     "stew": "marwanhawari/piu",

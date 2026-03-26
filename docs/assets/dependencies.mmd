@@ -1,80 +1,442 @@
-flowchart TD
-    classDef missing stroke-dasharray: 5
-    beartype["beartype\n0.22.8"]
-    boltons["boltons\n25.0.0"]
-    boolean-py["boolean.py\n5.0"]
-    bracex["bracex\n2.6"]
-    certifi["certifi\n2025.11.12"]
-    charset-normalizer["charset-normalizer\n3.4.4"]
-    click-extra["click-extra\n7.3.0"]
-    click_0["click\n8.3.1"]
-    cloup["cloup\n3.0.8"]
-    cyclonedx-python-lib["cyclonedx-python-lib\n11.6.0"]
-    deepmerge["deepmerge\n2.0"]
-    defusedxml["defusedxml\n0.7.1"]
-    distro["distro\n1.9.0"]
-    extra-platforms["extra-platforms\n5.1.0"]
-    idna["idna\n3.11"]
-    license-expression["license-expression\n30.4.4"]
-    meta-package-manager["meta-package-manager\n6.0.0"]
-    more-itertools["more-itertools\n10.8.0"]
-    packageurl-python["packageurl-python\n0.17.6"]
-    ply["ply\n3.11"]
-    py-serializable["py-serializable\n2.1.0"]
-    pyparsing["pyparsing\n3.2.5"]
-    pyyaml["PyYAML\n6.0.3"]
-    rdflib["rdflib\n7.5.0"]
-    requests["requests\n2.32.5"]
-    semantic-version["semantic-version\n2.10.0"]
-    sortedcontainers["sortedcontainers\n2.4.0"]
-    spdx-tools["spdx-tools\n0.8.3"]
-    tabulate["tabulate\n0.9.0"]
-    tomli-w["tomli_w\n1.2.0"]
-    typing-extensions["typing_extensions\n4.15.0"]
-    uritools["uritools\n5.0.0"]
-    urllib3["urllib3\n2.6.0"]
-    wcmatch["wcmatch\n10.1"]
-    xmltodict["xmltodict\n1.0.2"]
-    click-extra -- ">=0.9" --> tabulate
-    click-extra -- ">=10.0" --> wcmatch
-    click-extra -- ">=2.0" --> deepmerge
-    click-extra -- ">=2.32.5" --> requests
-    click-extra -- ">=25.0.0" --> boltons
-    click-extra -- ">=3.0.7" --> cloup
-    click-extra -- ">=5.0.0" --> extra-platforms
-    click-extra -- ">=8.3.1" --> click_0
-    cloup -- ">=8.0,<9.0" --> click_0
-    cyclonedx-python-lib -- ">=0.11,<2" --> packageurl-python
-    cyclonedx-python-lib -- ">=2.1.0,<3.0.0" --> py-serializable
-    cyclonedx-python-lib -- ">=2.4.0,<3.0.0" --> sortedcontainers
-    cyclonedx-python-lib -- ">=30,<31" --> license-expression
-    cyclonedx-python-lib -- ">=4.6,<5.0" --> typing-extensions
-    extra-platforms -- ">=1.9.0" --> distro
-    license-expression -- ">=4.0" --> boolean-py
-    meta-package-manager -- ">=0.16.0" --> packageurl-python
-    meta-package-manager -- ">=0.8.2" --> spdx-tools
-    meta-package-manager -- ">=0.9" --> tabulate
-    meta-package-manager -- ">=1.0.0" --> xmltodict
-    meta-package-manager -- ">=1.1.0" --> tomli-w
-    meta-package-manager -- ">=10.8.0" --> more-itertools
-    meta-package-manager -- ">=11.2.0" --> cyclonedx-python-lib
-    meta-package-manager -- ">=25.0.0" --> boltons
-    meta-package-manager -- ">=5.0.0" --> extra-platforms
-    meta-package-manager -- ">=7.3.0" --> click-extra
-    py-serializable -- ">=0.7.1,<0.8.0" --> defusedxml
-    rdflib -- ">=2.1.0,<4" --> pyparsing
-    requests -- ">=1.21.1,<3" --> urllib3
-    requests -- ">=2,<4" --> charset-normalizer
-    requests -- ">=2.5,<4" --> idna
-    requests -- ">=2017.4.17" --> certifi
-    spdx-tools -- "any" --> beartype
-    spdx-tools -- "any" --> click_0
-    spdx-tools -- "any" --> license-expression
-    spdx-tools -- "any" --> ply
-    spdx-tools -- "any" --> pyyaml
-    spdx-tools -- "any" --> rdflib
-    spdx-tools -- "any" --> semantic-version
-    spdx-tools -- "any" --> uritools
-    spdx-tools -- "any" --> xmltodict
-    wcmatch -- ">=2.1.1" --> bracex
+flowchart LR
+    meta_package_manager[["`meta-package-manager`"]]
 
+    subgraph primary-deps [Primary dependencies]
+        click_extra{{"`click-extra`"}}
+        cyclonedx_python_lib{{"`cyclonedx-python-lib`"}}
+        spdx_tools{{"`spdx-tools`"}}
+        pyyaml{{"`pyyaml`"}}
+        tomli{{"`tomli`"}}
+        xmltodict{{"`xmltodict`"}}
+        boltons{{"`boltons`"}}
+        extra_platforms{{"`extra-platforms`"}}
+        packageurl_python{{"`packageurl-python`"}}
+        backports_strenum{{"`backports-strenum`"}}
+        more_itertools{{"`more-itertools`"}}
+        tomli_w{{"`tomli-w`"}}
+    end
+
+    jsonschema(["`jsonschema`"])
+    referencing(["`referencing`"])
+    requests(["`requests`"])
+    click_0(["`click`"])
+    typing_extensions(["`typing-extensions`"])
+    arrow(["`arrow`"])
+    cloup(["`cloup`"])
+    colorama(["`colorama`"])
+    license_expression(["`license-expression`"])
+    rdflib(["`rdflib`"])
+    attrs(["`attrs`"])
+    idna(["`idna`"])
+    isoduration(["`isoduration`"])
+    jsonschema_specifications(["`jsonschema-specifications`"])
+    py_serializable(["`py-serializable`"])
+    python_dateutil(["`python-dateutil`"])
+    rfc3339_validator(["`rfc3339-validator`"])
+    rfc3987_syntax(["`rfc3987-syntax`"])
+    rpds_py(["`rpds-py`"])
+    six(["`six`"])
+    tabulate(["`tabulate`"])
+    wcmatch(["`wcmatch`"])
+    beartype(["`beartype`"])
+    boolean_py(["`boolean-py`"])
+    bracex(["`bracex`"])
+    certifi(["`certifi`"])
+    charset_normalizer(["`charset-normalizer`"])
+    deepmerge(["`deepmerge`"])
+    defusedxml(["`defusedxml`"])
+    fqdn(["`fqdn`"])
+    isodate(["`isodate`"])
+    jsonpointer(["`jsonpointer`"])
+    lark(["`lark`"])
+    lxml(["`lxml`"])
+    ply(["`ply`"])
+    pyparsing(["`pyparsing`"])
+    rfc3986_validator(["`rfc3986-validator`"])
+    semantic_version(["`semantic-version`"])
+    sortedcontainers(["`sortedcontainers`"])
+    tzdata(["`tzdata`"])
+    uri_template(["`uri-template`"])
+    uritools(["`uritools`"])
+    urllib3(["`urllib3`"])
+    wcwidth(["`wcwidth`"])
+    webcolors(["`webcolors`"])
+
+    subgraph ext_hjson [--extra hjson]
+        hjson(["`hjson`"])
+    end
+
+    subgraph ext_json5 [--extra json5]
+        json5(["`json5`"])
+    end
+
+    subgraph ext_jsonc [--extra jsonc]
+        json_with_comments(["`json-with-comments`"])
+    end
+
+    subgraph grp_docs [--group docs]
+        sphinx{{"`sphinx`"}}
+        myst_parser{{"`myst-parser >=4`"}}
+        furo{{"`furo >=2025.9.25`"}}
+        pygments(["`pygments`"])
+        docutils(["`docutils`"])
+        jinja2(["`jinja2`"])
+        sphinx_click{{"`sphinx-click >=6.1`"}}
+        sphinxcontrib_mermaid{{"`sphinxcontrib-mermaid >=1.2.3`"}}
+        beautifulsoup4(["`beautifulsoup4`"])
+        markdown_it_py(["`markdown-it-py`"])
+        accessible_pygments(["`accessible-pygments`"])
+        mdit_py_plugins(["`mdit-py-plugins`"])
+        packaging(["`packaging`"])
+        pygments_ansi_color(["`pygments-ansi-color`"])
+        sphinx_autodoc_typehints{{"`sphinx-autodoc-typehints >=2.4`"}}
+        sphinx_basic_ng(["`sphinx-basic-ng`"])
+        sphinx_copybutton{{"`sphinx-copybutton >=0.5.2`"}}
+        sphinx_design{{"`sphinx-design >=0.6`"}}
+        sphinx_issues{{"`sphinx-issues >=5`"}}
+        sphinxext_opengraph{{"`sphinxext-opengraph >=0.13`"}}
+        alabaster(["`alabaster`"])
+        babel(["`babel`"])
+        imagesize(["`imagesize`"])
+        markupsafe(["`markupsafe`"])
+        mdurl(["`mdurl`"])
+        roman_numerals(["`roman-numerals`"])
+        snowballstemmer(["`snowballstemmer`"])
+        soupsieve(["`soupsieve`"])
+        sphinxcontrib_applehelp(["`sphinxcontrib-applehelp`"])
+        sphinxcontrib_devhelp(["`sphinxcontrib-devhelp`"])
+        sphinxcontrib_htmlhelp(["`sphinxcontrib-htmlhelp`"])
+        sphinxcontrib_jsmath(["`sphinxcontrib-jsmath`"])
+        sphinxcontrib_qthelp(["`sphinxcontrib-qthelp`"])
+        sphinxcontrib_serializinghtml(["`sphinxcontrib-serializinghtml`"])
+    end
+
+    subgraph grp_test [--group test]
+        pytest{{"`pytest >=9.0.1`"}}
+        pytest_cov{{"`pytest-cov >=7`"}}
+        pytest_xdist{{"`pytest-xdist >=3.8`"}}
+        coverage{{"`coverage >=7.12`"}}
+        exceptiongroup(["`exceptiongroup`"])
+        pluggy(["`pluggy`"])
+        pytest_github_actions_annotate_failures{{"`pytest-github-actions-annotate-failures >=0.3`"}}
+        pytest_randomly{{"`pytest-randomly >=4.0.1`"}}
+        execnet(["`execnet`"])
+        iniconfig(["`iniconfig`"])
+        psutil(["`psutil`"])
+        tomlkit(["`tomlkit`"])
+    end
+
+    subgraph grp_typing [--group typing]
+        types_boltons{{"`types-boltons >=25.0.0.20250919`"}}
+        types_pyyaml{{"`types-pyyaml >=6.0.12.9`"}}
+        types_xmltodict{{"`types-xmltodict >=1.0.1.20250920`"}}
+    end
+
+    meta_package_manager ==>|" >=7.7.0 "| click_extra
+    meta_package_manager ==>|" >=0.8.2 "| spdx_tools
+    meta_package_manager ==>|" >=11.2 "| cyclonedx_python_lib
+    meta_package_manager ==>|" >=6 "| pyyaml
+    meta_package_manager ==>|" >=2.3 "| tomli
+    meta_package_manager ==>|" >=1 "| xmltodict
+    meta_package_manager ==>|" >=25 "| boltons
+    meta_package_manager ==>|" >=10 "| extra_platforms
+    meta_package_manager ==>|" >=0.16 "| packageurl_python
+    meta_package_manager ==>|" >=1.3 "| backports_strenum
+    meta_package_manager ==>|" >=10.8 "| more_itertools
+    meta_package_manager ==>|" >=1.1 "| tomli_w
+    sphinx --> pygments
+    sphinx --> requests
+    sphinx ==> tomli
+    sphinx --> docutils
+    sphinx --> jinja2
+    sphinx --> colorama
+    sphinx --> packaging
+    sphinx --> alabaster
+    sphinx --> babel
+    sphinx --> imagesize
+    sphinx --> roman_numerals
+    sphinx --> snowballstemmer
+    sphinx --> sphinxcontrib_applehelp
+    sphinx --> sphinxcontrib_devhelp
+    sphinx --> sphinxcontrib_htmlhelp
+    sphinx --> sphinxcontrib_jsmath
+    sphinx --> sphinxcontrib_qthelp
+    sphinx --> sphinxcontrib_serializinghtml
+    click_extra ==> sphinx
+    click_extra ==> pytest
+    click_extra --> pygments
+    click_extra --> requests
+    click_extra --> click_0
+    click_extra ==> pyyaml
+    click_extra ==> tomli
+    click_extra --> docutils
+    click_extra --> cloup
+    click_extra ==> xmltodict
+    click_extra ==> boltons
+    click_extra ==> extra_platforms
+    click_extra --> hjson
+    click_extra --> json_with_comments
+    click_extra --> json5
+    click_extra --> pygments_ansi_color
+    click_extra --> tabulate
+    click_extra --> wcmatch
+    click_extra --> deepmerge
+    click_extra --> tomlkit
+    pytest --> pygments
+    pytest ==> tomli
+    pytest --> colorama
+    pytest --> exceptiongroup
+    pytest --> packaging
+    pytest --> pluggy
+    pytest --> iniconfig
+    spdx_tools --> click_0
+    spdx_tools ==> pyyaml
+    spdx_tools --> license_expression
+    spdx_tools --> rdflib
+    spdx_tools ==> xmltodict
+    spdx_tools --> beartype
+    spdx_tools --> ply
+    spdx_tools --> semantic_version
+    spdx_tools --> uritools
+    cyclonedx_python_lib --> jsonschema
+    cyclonedx_python_lib --> referencing
+    cyclonedx_python_lib --> typing_extensions
+    cyclonedx_python_lib --> license_expression
+    cyclonedx_python_lib ==> packageurl_python
+    cyclonedx_python_lib --> py_serializable
+    cyclonedx_python_lib --> lxml
+    cyclonedx_python_lib --> sortedcontainers
+    myst_parser ==> sphinx
+    myst_parser ==> pyyaml
+    myst_parser --> docutils
+    myst_parser --> jinja2
+    myst_parser --> markdown_it_py
+    myst_parser --> mdit_py_plugins
+    furo ==> sphinx
+    furo --> pygments
+    furo --> beautifulsoup4
+    furo --> accessible_pygments
+    furo --> sphinx_basic_ng
+    pytest_cov ==> pytest
+    pytest_cov ==> coverage
+    pytest_cov --> pluggy
+    pytest_xdist ==> pytest
+    pytest_xdist --> execnet
+    pytest_xdist --> psutil
+    sphinx_click ==> sphinx
+    sphinx_click --> click_0
+    sphinx_click --> docutils
+    sphinxcontrib_mermaid ==> sphinx
+    sphinxcontrib_mermaid ==> pyyaml
+    sphinxcontrib_mermaid --> jinja2
+    coverage ==> tomli
+    pytest_github_actions_annotate_failures ==> pytest
+    pytest_randomly ==> pytest
+    sphinx_autodoc_typehints ==> sphinx
+    sphinx_copybutton ==> sphinx
+    sphinx_design ==> sphinx
+    sphinx_issues ==> sphinx
+    sphinxext_opengraph ==> sphinx
+    jsonschema --> referencing
+    jsonschema --> attrs
+    jsonschema --> idna
+    jsonschema --> isoduration
+    jsonschema --> jsonschema_specifications
+    jsonschema --> rfc3339_validator
+    jsonschema --> rfc3987_syntax
+    jsonschema --> rpds_py
+    jsonschema --> fqdn
+    jsonschema --> jsonpointer
+    jsonschema --> rfc3986_validator
+    jsonschema --> uri_template
+    jsonschema --> webcolors
+    referencing --> typing_extensions
+    referencing --> attrs
+    referencing --> rpds_py
+    requests --> idna
+    requests --> certifi
+    requests --> charset_normalizer
+    requests --> urllib3
+    click_0 --> colorama
+    jinja2 --> markupsafe
+    beautifulsoup4 --> typing_extensions
+    beautifulsoup4 --> soupsieve
+    cloup --> click_0
+    cloup --> typing_extensions
+    license_expression --> boolean_py
+    markdown_it_py --> mdurl
+    rdflib --> isodate
+    rdflib --> pyparsing
+    accessible_pygments --> pygments
+    exceptiongroup --> typing_extensions
+    mdit_py_plugins --> markdown_it_py
+    py_serializable --> defusedxml
+    pygments_ansi_color --> pygments
+    sphinx_basic_ng ==> sphinx
+    tabulate --> wcwidth
+    wcmatch --> bracex
+    isoduration --> arrow
+    jsonschema_specifications --> referencing
+    rfc3339_validator --> six
+    rfc3987_syntax --> lark
+    arrow --> python_dateutil
+    arrow --> tzdata
+    python_dateutil --> six
+    meta_package_manager -.-> ext_hjson
+    meta_package_manager -.-> ext_json5
+    meta_package_manager -.-> ext_jsonc
+    meta_package_manager -.-> grp_docs
+    meta_package_manager -.-> grp_test
+    meta_package_manager -.-> grp_typing
+
+    click accessible_pygments "https://pypi.org/project/accessible-pygments/" _blank
+    click alabaster "https://pypi.org/project/alabaster/" _blank
+    click arrow "https://pypi.org/project/arrow/" _blank
+    click attrs "https://pypi.org/project/attrs/" _blank
+    click babel "https://pypi.org/project/babel/" _blank
+    click backports_strenum "https://pypi.org/project/backports-strenum/" _blank
+    click beartype "https://pypi.org/project/beartype/" _blank
+    click beautifulsoup4 "https://pypi.org/project/beautifulsoup4/" _blank
+    click boltons "https://pypi.org/project/boltons/" _blank
+    click boolean_py "https://pypi.org/project/boolean-py/" _blank
+    click bracex "https://pypi.org/project/bracex/" _blank
+    click certifi "https://pypi.org/project/certifi/" _blank
+    click charset_normalizer "https://pypi.org/project/charset-normalizer/" _blank
+    click click_0 "https://pypi.org/project/click/" _blank
+    click click_extra "https://pypi.org/project/click-extra/" _blank
+    click cloup "https://pypi.org/project/cloup/" _blank
+    click colorama "https://pypi.org/project/colorama/" _blank
+    click coverage "https://pypi.org/project/coverage/" _blank
+    click cyclonedx_python_lib "https://pypi.org/project/cyclonedx-python-lib/" _blank
+    click deepmerge "https://pypi.org/project/deepmerge/" _blank
+    click defusedxml "https://pypi.org/project/defusedxml/" _blank
+    click docutils "https://pypi.org/project/docutils/" _blank
+    click exceptiongroup "https://pypi.org/project/exceptiongroup/" _blank
+    click execnet "https://pypi.org/project/execnet/" _blank
+    click extra_platforms "https://pypi.org/project/extra-platforms/" _blank
+    click fqdn "https://pypi.org/project/fqdn/" _blank
+    click furo "https://pypi.org/project/furo/" _blank
+    click hjson "https://pypi.org/project/hjson/" _blank
+    click idna "https://pypi.org/project/idna/" _blank
+    click imagesize "https://pypi.org/project/imagesize/" _blank
+    click iniconfig "https://pypi.org/project/iniconfig/" _blank
+    click isodate "https://pypi.org/project/isodate/" _blank
+    click isoduration "https://pypi.org/project/isoduration/" _blank
+    click jinja2 "https://pypi.org/project/jinja2/" _blank
+    click json_with_comments "https://pypi.org/project/json-with-comments/" _blank
+    click json5 "https://pypi.org/project/json5/" _blank
+    click jsonpointer "https://pypi.org/project/jsonpointer/" _blank
+    click jsonschema "https://pypi.org/project/jsonschema/" _blank
+    click jsonschema_specifications "https://pypi.org/project/jsonschema-specifications/" _blank
+    click lark "https://pypi.org/project/lark/" _blank
+    click license_expression "https://pypi.org/project/license-expression/" _blank
+    click lxml "https://pypi.org/project/lxml/" _blank
+    click markdown_it_py "https://pypi.org/project/markdown-it-py/" _blank
+    click markupsafe "https://pypi.org/project/markupsafe/" _blank
+    click mdit_py_plugins "https://pypi.org/project/mdit-py-plugins/" _blank
+    click mdurl "https://pypi.org/project/mdurl/" _blank
+    click meta_package_manager "https://pypi.org/project/meta-package-manager/" _blank
+    click more_itertools "https://pypi.org/project/more-itertools/" _blank
+    click myst_parser "https://pypi.org/project/myst-parser/" _blank
+    click packageurl_python "https://pypi.org/project/packageurl-python/" _blank
+    click packaging "https://pypi.org/project/packaging/" _blank
+    click pluggy "https://pypi.org/project/pluggy/" _blank
+    click ply "https://pypi.org/project/ply/" _blank
+    click psutil "https://pypi.org/project/psutil/" _blank
+    click py_serializable "https://pypi.org/project/py-serializable/" _blank
+    click pygments "https://pypi.org/project/pygments/" _blank
+    click pygments_ansi_color "https://pypi.org/project/pygments-ansi-color/" _blank
+    click pyparsing "https://pypi.org/project/pyparsing/" _blank
+    click pytest "https://pypi.org/project/pytest/" _blank
+    click pytest_cov "https://pypi.org/project/pytest-cov/" _blank
+    click pytest_github_actions_annotate_failures "https://pypi.org/project/pytest-github-actions-annotate-failures/" _blank
+    click pytest_randomly "https://pypi.org/project/pytest-randomly/" _blank
+    click pytest_xdist "https://pypi.org/project/pytest-xdist/" _blank
+    click python_dateutil "https://pypi.org/project/python-dateutil/" _blank
+    click pyyaml "https://pypi.org/project/pyyaml/" _blank
+    click rdflib "https://pypi.org/project/rdflib/" _blank
+    click referencing "https://pypi.org/project/referencing/" _blank
+    click requests "https://pypi.org/project/requests/" _blank
+    click rfc3339_validator "https://pypi.org/project/rfc3339-validator/" _blank
+    click rfc3986_validator "https://pypi.org/project/rfc3986-validator/" _blank
+    click rfc3987_syntax "https://pypi.org/project/rfc3987-syntax/" _blank
+    click roman_numerals "https://pypi.org/project/roman-numerals/" _blank
+    click rpds_py "https://pypi.org/project/rpds-py/" _blank
+    click semantic_version "https://pypi.org/project/semantic-version/" _blank
+    click six "https://pypi.org/project/six/" _blank
+    click snowballstemmer "https://pypi.org/project/snowballstemmer/" _blank
+    click sortedcontainers "https://pypi.org/project/sortedcontainers/" _blank
+    click soupsieve "https://pypi.org/project/soupsieve/" _blank
+    click spdx_tools "https://pypi.org/project/spdx-tools/" _blank
+    click sphinx "https://pypi.org/project/sphinx/" _blank
+    click sphinx_autodoc_typehints "https://pypi.org/project/sphinx-autodoc-typehints/" _blank
+    click sphinx_basic_ng "https://pypi.org/project/sphinx-basic-ng/" _blank
+    click sphinx_click "https://pypi.org/project/sphinx-click/" _blank
+    click sphinx_copybutton "https://pypi.org/project/sphinx-copybutton/" _blank
+    click sphinx_design "https://pypi.org/project/sphinx-design/" _blank
+    click sphinx_issues "https://pypi.org/project/sphinx-issues/" _blank
+    click sphinxcontrib_applehelp "https://pypi.org/project/sphinxcontrib-applehelp/" _blank
+    click sphinxcontrib_devhelp "https://pypi.org/project/sphinxcontrib-devhelp/" _blank
+    click sphinxcontrib_htmlhelp "https://pypi.org/project/sphinxcontrib-htmlhelp/" _blank
+    click sphinxcontrib_jsmath "https://pypi.org/project/sphinxcontrib-jsmath/" _blank
+    click sphinxcontrib_mermaid "https://pypi.org/project/sphinxcontrib-mermaid/" _blank
+    click sphinxcontrib_qthelp "https://pypi.org/project/sphinxcontrib-qthelp/" _blank
+    click sphinxcontrib_serializinghtml "https://pypi.org/project/sphinxcontrib-serializinghtml/" _blank
+    click sphinxext_opengraph "https://pypi.org/project/sphinxext-opengraph/" _blank
+    click tabulate "https://pypi.org/project/tabulate/" _blank
+    click tomli "https://pypi.org/project/tomli/" _blank
+    click tomli_w "https://pypi.org/project/tomli-w/" _blank
+    click tomlkit "https://pypi.org/project/tomlkit/" _blank
+    click types_boltons "https://pypi.org/project/types-boltons/" _blank
+    click types_pyyaml "https://pypi.org/project/types-pyyaml/" _blank
+    click types_xmltodict "https://pypi.org/project/types-xmltodict/" _blank
+    click typing_extensions "https://pypi.org/project/typing-extensions/" _blank
+    click tzdata "https://pypi.org/project/tzdata/" _blank
+    click uri_template "https://pypi.org/project/uri-template/" _blank
+    click uritools "https://pypi.org/project/uritools/" _blank
+    click urllib3 "https://pypi.org/project/urllib3/" _blank
+    click wcmatch "https://pypi.org/project/wcmatch/" _blank
+    click wcwidth "https://pypi.org/project/wcwidth/" _blank
+    click webcolors "https://pypi.org/project/webcolors/" _blank
+    click xmltodict "https://pypi.org/project/xmltodict/" _blank
+
+    style meta_package_manager stroke-width:3px
+    style backports_strenum stroke-width:3px
+    style boltons stroke-width:3px
+    style click_extra stroke-width:3px
+    style coverage stroke-width:3px
+    style cyclonedx_python_lib stroke-width:3px
+    style extra_platforms stroke-width:3px
+    style furo stroke-width:3px
+    style more_itertools stroke-width:3px
+    style myst_parser stroke-width:3px
+    style packageurl_python stroke-width:3px
+    style pytest stroke-width:3px
+    style pytest_cov stroke-width:3px
+    style pytest_github_actions_annotate_failures stroke-width:3px
+    style pytest_randomly stroke-width:3px
+    style pytest_xdist stroke-width:3px
+    style pyyaml stroke-width:3px
+    style spdx_tools stroke-width:3px
+    style sphinx stroke-width:3px
+    style sphinx_autodoc_typehints stroke-width:3px
+    style sphinx_click stroke-width:3px
+    style sphinx_copybutton stroke-width:3px
+    style sphinx_design stroke-width:3px
+    style sphinx_issues stroke-width:3px
+    style sphinxcontrib_mermaid stroke-width:3px
+    style sphinxext_opengraph stroke-width:3px
+    style tomli stroke-width:3px
+    style tomli_w stroke-width:3px
+    style types_boltons stroke-width:3px
+    style types_pyyaml stroke-width:3px
+    style types_xmltodict stroke-width:3px
+    style xmltodict stroke-width:3px
+
+    style primary-deps fill:#1565C020,stroke:#42A5F5
+    style ext_hjson fill:#7B1FA220,stroke:#BA68C8
+    style ext_json5 fill:#7B1FA220,stroke:#BA68C8
+    style ext_jsonc fill:#7B1FA220,stroke:#BA68C8
+    style grp_docs fill:#546E7A20,stroke:#90A4AE
+    style grp_test fill:#546E7A20,stroke:#90A4AE
+    style grp_typing fill:#546E7A20,stroke:#90A4AE

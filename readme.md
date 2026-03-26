@@ -100,6 +100,7 @@ Meta Package Manager,pkg,1
 Meta Package Manager,scoop,1
 Meta Package Manager,snap,1
 Meta Package Manager,steamcmd,1
+Meta Package Manager,stew,1
 Meta Package Manager,uv,1
 Meta Package Manager,uvx,1
 Meta Package Manager,vscode,1
@@ -109,6 +110,7 @@ Meta Package Manager,yarn,1
 Meta Package Manager,yarn-berry,1
 Meta Package Manager,yay,1
 Meta Package Manager,yum,1
+Meta Package Manager,zerobrew,1
 Meta Package Manager,zypper,1
 ```
 
@@ -147,6 +149,7 @@ Meta Package Manager,zypper,1
 | [`scoop`](https://scoop.sh)                                                             | >=0.2.4         |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`snap`](https://snapcraft.io)                                                          | >=2.0.0         |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
 | [`steamcmd`](https://developer.valvesoftware.com/wiki/SteamCMD)                         |                 |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |             |            |          |     ✓     |           |               |          |        |           |
+| [`stew`](https://github.com/marwanhawari/stew)                                          | >=0.3.0         |           |      🐧       |  🍎   |             |   🪟    |      ✓      |            |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`uv`](https://docs.astral.sh/uv)                                                       | >=0.5.0         |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`uvx`](https://docs.astral.sh/uv/guides/tools/)                                        | >=0.10.10       |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`vscode`](https://code.visualstudio.com)                                               | >=1.60.0        |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |            |          |     ✓     |           |               |    ✓     |        |           |
@@ -156,6 +159,7 @@ Meta Package Manager,zypper,1
 | [`yarn-berry`](https://yarnpkg.com)                                                     | >=2.0.0         |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |             |            |    ✓     |           |           |               |          |        |     ✓     |
 | [`yay`](https://github.com/Jguer/yay)                                                   | >=11.0.0        |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`yum`](http://yum.baseurl.org)                                                         | >=4.0.0         |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`zerobrew`](https://github.com/lucasgelfond/zerobrew)                                  | >=0.2.0         |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |          |     ✓     |           |               |    ✓     |        |           |
 | [`zypper`](https://en.opensuse.org/Portal:Zypper)                                       | >=1.14.0        |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
 
 <!-- operation-matrix-end -->

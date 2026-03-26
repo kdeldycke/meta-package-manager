@@ -62,7 +62,19 @@ jobs:
           # XXX Python 3.15 is still in development.
           - state: unstable
             python-version: "3.15"
+          # Skip experimental Python versions on PRs to reduce CI load.
+          - full-matrix-only: true
+            python-version: "3.14t"
+          - full-matrix-only: true
+            python-version: "3.15"
+          # Skip redundant architecture variants on PRs.
+          - full-matrix-only: true
+            os: macos-15-intel
+          - full-matrix-only: true
+            os: ubuntu-24.04-arm
     name: "${{ matrix.state == 'stable' && '✅' || '⁉️' }} ${{ matrix.os }} / py${{ matrix.python-version }}"
+    # Skip experimental Python versions and redundant architecture variants on PRs.
+    if: "!matrix.full-matrix-only || github.event_name != 'pull_request'"
     runs-on: ${{ matrix.os }}
     # We keep going when a job flagged as not stable fails.
     continue-on-error: ${{ matrix.state == 'unstable' }}
@@ -410,6 +422,8 @@ jobs:
   # XXX windows-11-arm excluded from all install jobs below; see lxml ARM64 note in the test matrix above.
 
   once-tests:
+    # These tests install from PyPI/GitHub, not the PR code, so skip on PRs.
+    if: github.event_name != 'pull_request'
     name: 🔂 Once tests
     runs-on: ubuntu-slim
     steps:
@@ -465,6 +479,8 @@ jobs:
           meta-package-manager --version
 
   brew-install-mpm:
+    # Installs from Homebrew formula (released version), not the PR code.
+    if: github.event_name != 'pull_request'
     strategy:
       matrix:
         os:
@@ -481,6 +497,8 @@ jobs:
       - run: mpm --version
 
   scoop-install-mpm:
+    # Installs from Scoop manifest (released version), not the PR code.
+    if: github.event_name != 'pull_request'
     runs-on: windows-2025
     steps:
       - shell: pwsh

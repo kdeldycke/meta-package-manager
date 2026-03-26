@@ -146,6 +146,14 @@ Meta Package Manager is available in the `main` repository of [Scoop](https://sc
 ```
 ````
 
+````{tab-item} ZeroBrew
+[ZeroBrew](https://github.com/lucasgelfond/zerobrew) is a fast, Homebrew-compatible package manager written in Rust:
+
+```{code-block} shell-session
+$ zb install meta-package-manager
+```
+````
+
 ````{tab-item} Stew
 [Stew](https://github.com/marwanhawari/stew) installs pre-compiled binaries from GitHub Releases:
 
@@ -313,6 +321,10 @@ $ mpm --uvx install meta-package-manager
 
 ```{code-block} shell-session
 $ mpm --yay  install meta-package-manager
+```
+
+```{code-block} shell-session
+$ mpm --zerobrew install meta-package-manager
 ```
 ````
 

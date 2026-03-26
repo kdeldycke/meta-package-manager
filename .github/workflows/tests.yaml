@@ -522,6 +522,33 @@ jobs:
       - shell: pwsh
         run: mpm --version
 
+  zerobrew-install-mpm:
+    # Installs from ZeroBrew (which uses Homebrew formulas), not the PR code.
+    if: github.event_name != 'pull_request'
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-slim
+            asset: zb-linux-x64
+          - os: macos-26
+            asset: zb-darwin-arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install ZeroBrew
+        run: >
+          gh release download v0.2.1
+          --repo lucasgelfond/zerobrew
+          --pattern "${{ matrix.asset }}"
+          --output /usr/local/bin/zb
+          --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - run: chmod +x /usr/local/bin/zb
+      - run: sudo zb init
+      # https://github.com/lucasgelfond/zerobrew
+      - run: zb install meta-package-manager
+      - run: mpm --version
+
   stew-install-mpm:
     # Installs from GitHub Releases (released version), not the PR code.
     if: github.event_name != 'pull_request'

@@ -39,9 +39,9 @@ This is the primary use case of `mpm` and the main reason I built it.
 
 ## Solve XKCD
 
-I then wasted 6 years to implement [XKCD #1654 - *Universal Install Script*](https://xkcd.com/1654/):
+I then wasted 6 years to implement [XKCD #1654 - *Universal Install Script*](https://xkcd.com/1654):
 
-![XKCD #1654 - Universal Install Script](http://imgs.xkcd.com/comics/universal_install_script.png)
+![XKCD #1654 - Universal Install Script](https://imgs.xkcd.com/comics/universal_install_script.png)
 
 So that you can:
 

@@ -22,7 +22,7 @@ description = "composer"
 name = "📦 manager: rpm-based"
 color = "bfdadc"
 description = "dnf, dnf5, yum, zypper"
-rename-from = ["📦 manager: dnf-based", "📦 manager: zypper"]
+rename-from = ["📦 manager: dnf-based"]
 
 [[profiles.default.labels]]
 name = "📦 manager: dpkg-based"

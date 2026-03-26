@@ -8,15 +8,15 @@ Implementing `mpm` exposed me to many edge-cases and pitfalls of package managem
 1. A package has only one name (see {issue}`26`).
 1. A package name is unique.
 1. Package
-   [names are composed of ASCII characters](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/homebrew.py#L205-L206).
+   [names are composed of ASCII characters](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/homebrew.py).
 1. A package name is the same as its ID (see {issue}`11`).
 1. There is only one way to install a package.
 1. Only one version of a package is available on a system.
 1. Shared [dependencies are always compatible](https://en.wikipedia.org/wiki/Dependency_hell).
 1. [Version selection is guaranteed to run fast](https://research.swtch.com/version-sat).
 1. All
-   [packages have a version](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/mas.py#L71-L75).
-1. [Versioned packages are immutable](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/homebrew.py#L230-L231).
+   [packages have a version](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/mas.py).
+1. [Versioned packages are immutable](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/homebrew.py).
 1. Packages can’t upgrade themselves.
 1. A package can be reinstalled.
 

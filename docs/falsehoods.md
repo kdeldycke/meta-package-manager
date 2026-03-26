@@ -60,7 +60,7 @@ Implementing `mpm` exposed me to many edge-cases and pitfalls of package managem
    [users on the system have access to the package manager](https://github.com/kdeldycke/meta-package-manager/blob/v2.2.0/meta_package_manager/managers/gem.py#L95-L100).
 1. Package managers do not remove user data.
 1. Package managers
-   [can bootstrap themselves](https://github.com/Homebrew/brew/blob/master/docs/Common-Issues.md#brew-complains-about-absence-of-command-line-tools).
+   [can bootstrap themselves](https://github.com/Homebrew/brew/blob/master/docs/Common-Issues.md).
 1. Package managers supports multiple architectures.
 1. You
    [only need one package manager](https://utcc.utoronto.ca/~cks/space/blog/tech/PackageManagersTwoTypes).

@@ -35,7 +35,6 @@ import os
 import re
 import sys
 from configparser import RawConfigParser
-from enum import Enum
 from functools import cached_property
 from operator import itemgetter, methodcaller
 from pathlib import Path
@@ -49,12 +48,6 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
 
-PYTHON_MIN_VERSION = (3, 9, 0)
-"""Minimal requirement is aligned to macOS default.
-
-See: https://kdeldycke.github.io/meta-package-manager/bar-plugin.html#python-3-9-required
-"""
-
 SWIFTBAR_MIN_VERSION = (2, 1, 2)
 """SwiftBar v2.1.2 fix an issue with multiple parameters in the font strings.
 
@@ -66,9 +59,6 @@ XBAR_MIN_VERSION = (2, 1, 7)
 
 MPM_MIN_VERSION = (5, 0, 0)
 """Mpm v5.0.0 was the first version taking care of the complete layout rendering."""
-
-Venv = Enum("Venv", ["PIPENV", "UV", "POETRY", "VIRTUALENV"])
-"""Type of virtualenv we are capable of detecting."""
 
 
 class MPMPlugin:
@@ -194,62 +184,12 @@ class MPMPlugin:
         """SwiftBar is kind enough to tell us about its presence."""
         return self.getenv_bool("SWIFTBAR")
 
-    @cached_property
-    def all_pythons(self) -> list[str]:
-        """Search for any Python on the system.
-
-        Returns a generator of normalized and deduplicated ``Path`` to Python binaries.
-
-        Filters out old Python interpreters.
-
-        We first try to locate Python by respecting the environment variables as-is,
-        i.e. as defined by the user. Then we return the Python interpreter used to
-        execute this script.
-
-        TODO: try to tweak the env vars to look for homebrew location etc?
-        """
-        collected = []
-        seen = set()
-        for bin_name in ("python3", "python", sys.executable):
-            py_path = which(bin_name)
-            if not py_path:
-                continue
-
-            normalized_path = os.path.normcase(Path(py_path).resolve())
-            if normalized_path in seen:
-                continue
-            seen.add(normalized_path)
-
-            process = run(
-                (
-                    normalized_path,
-                    "-c",
-                    "import sys; "
-                    "v = sys.version_info; "
-                    # Ignore releaselevel and serial component of the version number.
-                    "print(f'{v.major}.{v.minor}.{v.micro}')",
-                ),
-                capture_output=True,
-                encoding="utf-8",
-                check=False,
-            )
-            python_version = self.str_to_version(process.stdout)
-            # Is Python too old?
-            if python_version < PYTHON_MIN_VERSION:
-                continue
-
-            collected.append(normalized_path)
-
-        return collected
-
     @staticmethod
-    def search_venv(folder: Path) -> tuple[Venv, tuple[str, ...]] | None:
+    def search_venv(folder: Path) -> tuple[str, ...] | None:
         """Search for signs of a virtual env in the provided folder.
 
-        Returns the type of the detected venv and CLI arguments that can be used to run
-        a command from the virtualenv context.
-
-        Returns ``(None, None)`` if the folder is not a venv.
+        Returns CLI arguments that can be used to run ``mpm`` from the virtualenv
+        context, or ``None`` if the folder is not a venv.
 
         Inspired by `autoswitch_virtualenv.plugin.zsh
         <https://github.com/MichaelAquilina/zsh-autoswitch-virtualenv/blob/master/autoswitch_virtualenv.plugin.zsh#L50>`_
@@ -257,16 +197,16 @@ class MPMPlugin:
         https://github.com/astral-sh/uv/blob/f770b25/crates/uv-python/python/get_interpreter_info.py>`_.
         """
         if (folder / "Pipfile").is_file():
-            return Venv.PIPENV, (f"PIPENV_PIPFILE='{folder}'", "pipenv", "run", "mpm")
+            return (f"PIPENV_PIPFILE='{folder}'", "pipenv", "run", "mpm")
 
         if (folder / "uv.lock").is_file():
-            return Venv.UV, ("uv", "run", "mpm")
+            return ("uv", "run", "mpm")
 
         if (folder / "poetry.lock").is_file():
-            return Venv.POETRY, ("poetry", "run", "--directory", str(folder), "mpm")
+            return ("poetry", "run", "--directory", str(folder), "mpm")
 
         if (folder / "requirements.txt").is_file() or (folder / "setup.py").is_file():
-            return Venv.VIRTUALENV, (
+            return (
                 f"VIRTUAL_ENV='{folder}'",
                 "python",
                 "-m",
@@ -298,21 +238,28 @@ class MPMPlugin:
             if folder == Path.home():
                 continue
 
-            venv_found = self.search_venv(folder)
-            if not venv_found:
+            venv_cli = self.search_venv(folder)
+            if not venv_cli:
                 continue
 
-            yield venv_found[1]
+            yield venv_cli
 
         # Search for an mpm executable in the environment, be it a script or a binary.
         mpm_bin = which("mpm")
         if mpm_bin:
             yield (mpm_bin,)
 
-        # Search for a meta_package_manager package installed in any Python found on
-        # the system.
-        for python_path in self.all_pythons:
-            yield python_path, "-m", "meta_package_manager"
+        # Try the Python interpreter running this script, then python3 from PATH.
+        # No version probing needed: check_mpm() validates runnability.
+        seen = set()
+        for py_path in (sys.executable, which("python3")):
+            if not py_path:
+                continue
+            normalized = os.path.normcase(Path(py_path).resolve())
+            if normalized in seen:
+                continue
+            seen.add(normalized)
+            yield (normalized, "-m", "meta_package_manager")
 
     def check_mpm(
         self, mpm_cli_args: tuple[str, ...]
@@ -465,9 +412,14 @@ class MPMPlugin:
                 print("---")
             action_msg = "Install" if not runnable else "Upgrade"
             min_version_str = self.version_to_str(MPM_MIN_VERSION)
+            # Use the Python from the best candidate if it was a python -m invocation,
+            # otherwise fall back to the interpreter running this script.
+            python_path = sys.executable
+            if mpm_args and mpm_args[-1] == "meta_package_manager":
+                python_path = mpm_args[0]
             self.pp(
                 f"{action_msg} mpm >= v{min_version_str}",
-                f"shell={self.all_pythons[0]}",
+                f"shell={python_path}",
                 "param1=-m",
                 "param2=pip",
                 "param3=install",

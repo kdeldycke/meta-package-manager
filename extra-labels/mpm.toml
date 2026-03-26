@@ -104,6 +104,11 @@ color = "bfdadc"
 description = "steamcmd"
 
 [[profiles.default.labels]]
+name = "📦 manager: stew"
+color = "bfdadc"
+description = "stew"
+
+[[profiles.default.labels]]
 name = "📦 manager: uv-based"
 color = "bfdadc"
 description = "uv, uvx"

@@ -40,7 +40,7 @@ class DNF(PackageManager):
 
     platforms = UNIX_WITHOUT_MACOS
 
-    requirement = "4.0.0"
+    requirement = ">=4.0.0"
 
     cli_names: tuple[str, ...] = ("dnf", "dnf4")
     """
@@ -225,7 +225,7 @@ class DNF(PackageManager):
 class DNF5(DNF):
     homepage_url = "https://github.com/rpm-software-management/dnf5"
 
-    requirement = "5.0.0"
+    requirement = ">=5.0.0"
     """dnf5 is the new reference package manager as of Fedora 41."""
 
     cli_names = ("dnf5",)

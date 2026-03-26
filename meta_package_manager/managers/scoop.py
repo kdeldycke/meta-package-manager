@@ -37,7 +37,7 @@ class Scoop(PackageManager):
 
     platforms = WINDOWS
 
-    requirement = "0.2.4"
+    requirement = ">=0.2.4"
 
     _LIST_REGEXP = re.compile(
         r"""

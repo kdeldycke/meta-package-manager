@@ -41,7 +41,7 @@ class UVBase(PackageManager):
 
     homepage_url = "https://docs.astral.sh/uv"
 
-    requirement = "0.5.0"
+    requirement = ">=0.5.0"
     """`0.5.0 <https://github.com/astral-sh/uv/releases/tag/0.5.0>`_ is the first
     version to introduce ``pip list --outdated`` command.
     """
@@ -212,7 +212,7 @@ class UVX(UVBase):
 
     homepage_url = "https://docs.astral.sh/uv/guides/tools/"
 
-    requirement = "0.10.10"
+    requirement = ">=0.10.10"
     """`0.10.10 <https://github.com/astral-sh/uv/releases/tag/0.10.10>`_ is the first
     version to introduce ``tool list --outdated`` command.
     """

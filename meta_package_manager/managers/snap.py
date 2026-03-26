@@ -35,7 +35,7 @@ class Snap(PackageManager):
 
     platforms = UNIX_WITHOUT_MACOS
 
-    requirement = "2.0.0"
+    requirement = ">=2.0.0"
 
     post_args = ("--color=never",)
 

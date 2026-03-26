@@ -32,7 +32,7 @@ class WinGet(PackageManager):
 
     platforms = WINDOWS
 
-    requirement = "1.7"
+    requirement = ">=1.7"
 
     post_args = ("--accept-source-agreements", "--disable-interactivity")
     """

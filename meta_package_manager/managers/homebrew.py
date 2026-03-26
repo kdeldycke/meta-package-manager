@@ -44,7 +44,7 @@ class Homebrew(PackageManager):
     """Homebrew core is now compatible with `Linux and Windows Subsystem for Linux (WSL)
     2 <https://docs.brew.sh/Homebrew-on-Linux>`_."""
 
-    requirement = "2.7.0"
+    requirement = ">=2.7.0"
     """Vanilla ``brew`` and ``cask`` CLIs now shares the same version.
 
     `2.7.0 <https://github.com/Homebrew/brew/releases/tag/2.7.0>`_ is the first release

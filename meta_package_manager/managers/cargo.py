@@ -37,7 +37,7 @@ class Cargo(PackageManager):
 
     platforms = ALL_PLATFORMS
 
-    requirement = "1.0.0"
+    requirement = ">=1.0.0"
 
     pre_args = (
         "--color",

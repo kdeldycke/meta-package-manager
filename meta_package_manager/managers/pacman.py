@@ -37,7 +37,7 @@ class Pacman(PackageManager):
 
     platforms = UNIX_WITHOUT_MACOS
 
-    requirement = "5.0.0"
+    requirement = ">=5.0.0"
 
     pre_args = ("--noconfirm", "--color", "never")
 
@@ -214,7 +214,7 @@ class Pacaur(Pacman):
 
     homepage_url = "https://github.com/E5ten/pacaur"
 
-    requirement = "4.0.0"
+    requirement = ">=4.0.0"
 
     version_regexes = (r"pacaur\s+(?P<version>\S+)",)
     r"""Search version right after the ``pacaur`` string.
@@ -232,7 +232,7 @@ class Paru(Pacman):
     homepage_url = "https://github.com/Morganamilo/paru"
 
     # v1.9.3 is the first version implementing the --sysupgrade option.
-    requirement = "1.9.3"
+    requirement = ">=1.9.3"
 
     version_regexes = (r"paru\s+v(?P<version>\S+)",)
     r"""Search version right after the ``paru`` string.
@@ -249,7 +249,7 @@ class Yay(Pacman):
 
     homepage_url = "https://github.com/Jguer/yay"
 
-    requirement = "11.0.0"
+    requirement = ">=11.0.0"
 
     version_regexes = (r"yay\s+v(?P<version>\S+)",)
     r"""Search version right after the ``yay`` string.

@@ -44,7 +44,7 @@ class Emerge(PackageManager):
 
     platforms = UNIX_WITHOUT_MACOS
 
-    requirement = "3.0.0"
+    requirement = ">=3.0.0"
 
     pre_args = ("--quiet", "--color", "n", "--nospinner")
 

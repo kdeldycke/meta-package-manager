@@ -38,7 +38,7 @@ class Composer(PackageManager):
 
     platforms = ALL_PLATFORMS
 
-    requirement = "1.4.0"
+    requirement = ">=1.4.0"
 
     _SEARCH_REGEXP = re.compile(
         r"""

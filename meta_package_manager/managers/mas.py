@@ -65,7 +65,7 @@ class MAS(PackageManager):
         re.MULTILINE | re.VERBOSE,
     )
 
-    requirement = "1.8.7"
+    requirement = ">=1.8.7"
     """`1.8.7 <https://github.com/mas-cli/mas/releases/tag/v1.8.7>`_ is fixing the
     ``mas search`` command.
     """

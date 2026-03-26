@@ -37,7 +37,7 @@ class Choco(PackageManager):
 
     platforms = WINDOWS
 
-    requirement = "2.0.0"
+    requirement = ">=2.0.0"
     """``2.0.0`` is the first version which is not requiring the ``--local-only`` option, which has been entirely removed.
 
     Source: `choco options and switches

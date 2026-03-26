@@ -35,7 +35,7 @@ class VSCode(PackageManager):
 
     platforms = ALL_PLATFORMS
 
-    requirement = "1.60.0"
+    requirement = ">=1.60.0"
 
     cli_names = ("code",)
     """

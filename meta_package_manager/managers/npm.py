@@ -42,7 +42,7 @@ class NPM(PackageManager):
 
     platforms = ALL_PLATFORMS
 
-    requirement = "4.0.0"
+    requirement = ">=4.0.0"
 
     pre_args = (
         # Operates in "global" mode, so that packages are installed into the

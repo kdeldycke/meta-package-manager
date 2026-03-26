@@ -35,7 +35,7 @@ class Flatpak(PackageManager):
 
     platforms = UNIX_WITHOUT_MACOS
 
-    requirement = "1.2.0"
+    requirement = ">=1.2.0"
 
     _LIST_REGEXP = re.compile(
         r"(?P<name>.+?)\t(?P<package_id>\S+)\t?(?P<latest_version>.*)",

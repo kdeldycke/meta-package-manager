@@ -55,7 +55,7 @@ class Zypper(PackageManager):
 
     platforms = UNIX_WITHOUT_MACOS
 
-    requirement = "1.14.0"
+    requirement = ">=1.14.0"
 
     pre_args = (
         "--no-color",

@@ -35,7 +35,7 @@ class OPKG(PackageManager):
 
     platforms = UNIX_WITHOUT_MACOS
 
-    requirement = "0.2.0"
+    requirement = ">=0.2.0"
 
     _INSTALLED_REGEXP = re.compile(r"(\S+) - (\S+)")
     _OUTDATED_REGEXP = re.compile(r"(\S+) - (\S+) - (\S+)")

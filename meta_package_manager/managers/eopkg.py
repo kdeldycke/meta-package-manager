@@ -37,7 +37,7 @@ class EOPKG(PackageManager):
 
     platforms = LINUX_LIKE
 
-    requirement = "3.2.0"
+    requirement = ">=3.2.0"
 
     pre_args = ("--no-color",)
 

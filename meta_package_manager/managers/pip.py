@@ -45,7 +45,7 @@ class Pip(PackageManager):
 
     platforms = ALL_PLATFORMS
 
-    requirement = "10.0.0"
+    requirement = ">=10.0.0"
 
     _SEARCH_REGEXP = re.compile(
         r"""

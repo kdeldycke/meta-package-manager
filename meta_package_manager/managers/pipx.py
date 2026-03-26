@@ -36,7 +36,7 @@ class Pipx(PackageManager):
 
     platforms = ALL_PLATFORMS
 
-    requirement = "1.0.0"
+    requirement = ">=1.0.0"
     """
     .. code-block:: shell-session
 

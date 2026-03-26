@@ -49,7 +49,7 @@ class APM(PackageManager):
 
     platforms = BSD, LINUX_LIKE, MACOS, WINDOWS
 
-    requirement = "1.0.0"
+    requirement = ">=1.0.0"
 
     version_regexes = (r"apm\s+(?P<version>\S+)",)
     """

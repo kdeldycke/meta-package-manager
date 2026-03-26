@@ -44,7 +44,7 @@ class APT(PackageManager):
 
     platforms = UNIX_WITHOUT_MACOS
 
-    requirement = "1.0.0"
+    requirement = ">=1.0.0"
 
     pre_args = ("--quiet",)
 

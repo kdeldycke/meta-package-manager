@@ -251,8 +251,10 @@ class Homebrew(PackageManager):
         if not self.ignore_auto_updates:
             options.append("--greedy")
 
-        # List available updates.
-        output = self.run_cli("outdated", "--quiet", options)
+        # List available updates. Do not use --quiet here: brew treats --quiet
+        # and --json as mutually exclusive. See:
+        # https://github.com/kdeldycke/meta-package-manager/issues/1703
+        output = self.run_cli("outdated", options)
 
         if output:
             package_list = json.loads(output)

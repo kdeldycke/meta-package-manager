@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [brew,cask] Remove `--quiet` from `outdated` command where it conflicts with `--json`. Closes {issue}`1703`.
+
 ## [`6.2.0` (2026-03-25)](https://github.com/kdeldycke/meta-package-manager/compare/v6.1.1...v6.2.0)
 
 - [mpm] Upgrade from reusable workflows to `repomatic`.

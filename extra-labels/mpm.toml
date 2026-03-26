@@ -56,7 +56,7 @@ description = "gem"
 [[profiles.default.labels]]
 name = "📦 manager: homebrew"
 color = "bfdadc"
-description = "brew, cask"
+description = "brew, cask, zerobrew"
 
 [[profiles.default.labels]]
 name = "📦 manager: mas"
@@ -127,11 +127,6 @@ description = "vscode, vscodium"
 name = "📦 manager: winget"
 color = "bfdadc"
 description = "winget"
-
-[[profiles.default.labels]]
-name = "📦 manager: zerobrew"
-color = "bfdadc"
-description = "zerobrew"
 
 [[profiles.default.labels]]
 name = "📦 manager: zypper"

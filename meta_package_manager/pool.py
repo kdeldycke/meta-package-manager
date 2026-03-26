@@ -41,6 +41,7 @@ from .managers.mas import MAS
 from .managers.npm import NPM
 from .managers.opkg import OPKG
 from .managers.pacman import Pacaur, Pacman, Paru, Yay
+from .managers.pacstall import Pacstall
 from .managers.pip import Pip
 from .managers.pipx import Pipx
 from .managers.pkg import PKG
@@ -84,6 +85,7 @@ manager_classes = (
     OPKG,
     Pacaur,
     Pacman,
+    Pacstall,
     Paru,
     Pip,
     Pipx,

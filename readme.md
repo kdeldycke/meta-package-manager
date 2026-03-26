@@ -93,6 +93,7 @@ Meta Package Manager,npm,1
 Meta Package Manager,opkg,1
 Meta Package Manager,pacaur,1
 Meta Package Manager,pacman,1
+Meta Package Manager,pacstall,1
 Meta Package Manager,paru,1
 Meta Package Manager,pip,1
 Meta Package Manager,pipx,1
@@ -142,6 +143,7 @@ Meta Package Manager,zypper,1
 | [`opkg`](https://git.yoctoproject.org/cgit/cgit.cgi/opkg/)                              | >=0.2.0         |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |           |
 | [`pacaur`](https://github.com/E5ten/pacaur)                                             | >=4.0.0         |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`pacman`](https://wiki.archlinux.org/title/pacman)                                     | >=5.0.0         |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`pacstall`](https://pacstall.dev)                                                      | >=6.0.0         |           |      🐧       |       |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |
 | [`paru`](https://github.com/Morganamilo/paru)                                           | >=1.9.3         |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`pip`](https://pip.pypa.io)                                                            | >=10.0.0        |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`pipx`](https://pipx.pypa.io)                                                          | >=1.0.0         |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
@@ -278,6 +280,7 @@ $ mpm --all-managers managers
 │ npm        │ Node's npm         │ ✓              │ ✓ /opt/homebrew/bin/npm      │ ✓          │ ✓ 8.19.2  │
 │ opkg       │ OPKG               │ ✘ Linux only   │ ✘ opkg not found             │            │           │
 │ pacman     │ Pacman             │ ✘ Linux only   │ ✘ pacman not found           │            │           │
+│ pacstall   │ Pacstall           │ ✘ Linux only   │ ✘ pacstall not found         │            │           │
 │ paru       │ Paru               │ ✘ Linux only   │ ✘ paru not found             │            │           │
 │ pip        │ Pip                │ ✓              │ ✓ ~/.pyenv/shims/python3     │ ✓          │ ✓ 22.2.2  │
 │ pipx       │ Pipx               │ ✓              │ ✓ /opt/homebrew/bin/pipx     │ ✓          │ ✓ 1.1.0   │

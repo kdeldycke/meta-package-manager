@@ -190,6 +190,7 @@ PACKAGE_IDS = {
     "winget": "Microsoft.PowerToys",
     "yarn": "awesome-lint",
     "yarn-berry": "left-pad",
+    "pacstall": "neofetch",
     "yay": "wget",
     "yum": "usd",
     "zerobrew": "jq",

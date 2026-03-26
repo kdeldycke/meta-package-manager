@@ -79,6 +79,11 @@ color = "bfdadc"
 description = "pacaur, pacman, paru, yay"
 
 [[profiles.default.labels]]
+name = "📦 manager: pacstall"
+color = "bfdadc"
+description = "pacstall"
+
+[[profiles.default.labels]]
 name = "📦 manager: pip-based"
 color = "bfdadc"
 description = "pip, pipx"

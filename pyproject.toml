@@ -72,6 +72,7 @@ keywords = [
   "xbar-plugin",
   "yarn",
   "yarn-berry",
+  "pacstall",
   "yay",
   "zb",
   "zerobrew",
@@ -474,6 +475,12 @@ labels.extra-file-rules = """"🔌 bar-plugin":
       - tests/*paru*
       - tests/*yay*
 
+"📦 manager: pacstall":
+  - changed-files:
+    - any-glob-to-any-file:
+      - meta_package_manager/managers/pacstall*
+      - tests/*pacstall*
+
 "📦 manager: pip-based":
   - changed-files:
     - any-glob-to-any-file:
@@ -618,6 +625,9 @@ labels.extra-content-rules = """"🔌 bar-plugin":
   - "pacaur"
   - "paru"
   - "yay"
+
+"📦 manager: pacstall":
+  - "pacstall"
 
 "📦 manager: pip-based":
   - "pip"

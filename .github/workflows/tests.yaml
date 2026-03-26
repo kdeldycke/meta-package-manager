@@ -376,8 +376,11 @@ jobs:
           --ignore=./tests/test_bar_plugin.py
 
       - name: Upload coverage to Codecov
-        # Skip on prepare-release PRs: Codecov cannot create commits on protected branches.
-        if: github.head_ref != 'prepare-release'
+        # Skip on prepare-release PRs (Codecov cannot create commits on protected
+        # branches) and fork PRs (secrets are not available).
+        if: >
+          github.head_ref != 'prepare-release'
+          && github.event.pull_request.head.repo.fork != true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         shell: bash
@@ -389,7 +392,9 @@ jobs:
           --report-type coverage
           --token "${CODECOV_TOKEN}"
       - name: Upload test results to Codecov
-        if: github.head_ref != 'prepare-release'
+        if: >
+          github.head_ref != 'prepare-release'
+          && github.event.pull_request.head.repo.fork != true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         shell: bash

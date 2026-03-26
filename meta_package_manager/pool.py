@@ -29,6 +29,7 @@ from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
 from .managers.cargo import Cargo
 from .managers.chocolatey import Choco
+from .managers.cpan import CPAN
 from .managers.composer import Composer
 from .managers.deb_get import Deb_Get
 from .managers.dnf import DNF, DNF5, YUM
@@ -74,6 +75,7 @@ manager_classes = (
     Cask,
     Choco,
     Composer,
+    CPAN,
     Deb_Get,
     DNF,
     DNF5,

@@ -163,6 +163,7 @@ PACKAGE_IDS = {
     "cask": "pngyu",
     "choco": "ccleaner",
     "composer": "illuminate/contracts",
+    "cpan": "JSON",
     "deb-get": "deb-get",
     "dnf": "usd",
     "dnf5": "usd",

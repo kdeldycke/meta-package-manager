@@ -49,6 +49,14 @@ meta\_package\_manager.managers.composer module
    :show-inheritance:
    :undoc-members:
 
+meta\_package\_manager.managers.cpan module
+-------------------------------------------
+
+.. automodule:: meta_package_manager.managers.cpan
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 meta\_package\_manager.managers.dnf module
 ------------------------------------------
 

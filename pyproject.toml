@@ -124,8 +124,8 @@ dependencies = [
   "backports-strenum>=1.3; python_version<'3.11'",
   # boltons 25.0.0 is the first version to support Python 3.13.
   "boltons>=25",
-  # click-extra 7.6.2 removed the docs_update module we used to depend on.
-  "click-extra>=7.6.2",
+  # click-extra 7.7.0 strips ANSI codes from markup table formats (CSV, HTML, etc.).
+  "click-extra>=7.7.0",
   # cyclonedx-python-lib 11.2.0 is the first to support Python 3.14.
   "cyclonedx-python-lib[validation]>=11.2",
   # extra-platforms 10.0.0 drops the distro dependency.

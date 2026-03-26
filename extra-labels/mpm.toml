@@ -71,7 +71,7 @@ description = "mpm"
 [[profiles.default.labels]]
 name = "📦 manager: npm-based"
 color = "bfdadc"
-description = "npm, yarn"
+description = "npm, yarn, yarn-berry"
 
 [[profiles.default.labels]]
 name = "📦 manager: pacman-based"

@@ -17,6 +17,13 @@
 
 Called by repomatic's ``update-docs`` job to regenerate tables, diagrams and
 other dynamic content in ``readme.md``.
+
+.. warning::
+    The generated Mermaid syntax targets the version bundled with
+    ``sphinxcontrib-mermaid``, currently ``11.12.1``. See the hard-coded
+    ``MERMAID_VERSION`` constant in `sphinxcontrib-mermaid's source
+    <https://github.com/mgaitan/sphinxcontrib-mermaid/blob/master/sphinxcontrib/mermaid/__init__.py>`_.
+    Avoid using Mermaid features introduced after that version.
 """
 
 from __future__ import annotations
@@ -36,7 +43,12 @@ PROJECT_ROOT = Path(__file__).parent.parent
 
 
 def managers_sankey() -> str:
-    """Produce a sankey diagram to map ``mpm`` to all its supported managers."""
+    """Produce a sankey diagram to map ``mpm`` to all its supported managers.
+
+    .. warning::
+        Output must stay compatible with the Mermaid version bundled in
+        ``sphinxcontrib-mermaid``. See module docstring for details.
+    """
     table = []
     for mid, m in sorted(pool.items()):
         line = f"Meta Package Manager,{mid},1"

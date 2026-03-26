@@ -10,6 +10,7 @@
 - [yarn] Split into Yarn Classic and Yarn Berry managers. Restrict Classic to `<2.0.0`. Closes {issue}`1548`.
 - [yarn-berry] Add Yarn Berry (2.x+) manager with `search` and `cleanup` support.
 - [mpm] Add `must_succeed` parameter to `run_cli` for structured-output calls, preventing silent data loss on CLI failures. Refs {issue}`1703`.
+- [mpm] Reduce CI jobs on pull requests from ~47 to ~15 by skipping release builds, experimental Python versions, redundant architecture variants, and install verification tests. Full matrix still runs on push to main.
 
 ## [`6.2.1` (2026-03-26)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.0...v6.2.1)
 

@@ -21,12 +21,18 @@
 
 ## [`6.2.1` (2026-03-26)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.0...v6.2.1)
 
+> [!NOTE]
+> `6.2.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/6.2.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.2.1).
+
 - [brew,cask] Remove `--quiet` from `outdated` command where it conflicts with `--json`. Closes {issue}`1703`.
 - [npm] Fix crash on `installed` when no global packages are present. Closes {issue}`1603`.
 - [mpm] Fix `--no-color` having no effect on CSV output. Closes {issue}`1004`.
 - [mpm] Fix version reported by compiled (Nuitka) binaries. Closes {issue}`1145`.
 
 ## [`6.2.0` (2026-03-25)](https://github.com/kdeldycke/meta-package-manager/compare/v6.1.1...v6.2.0)
+
+> [!NOTE]
+> `6.2.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/6.2.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.2.0).
 
 - [mpm] Upgrade from reusable workflows to `repomatic`.
 - [mpm] Inline `replace_content` utility from `click-extra` which was removed in `7.6.2`.

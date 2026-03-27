@@ -1,10 +1,14 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["config:recommended", "abandonments:recommended"],
+  extends: [
+    "config:recommended",
+    "abandonments:recommended",
+    "helpers:pinGitHubActionDigestsToSemver",
+  ],
 
   // PR and issue settings.
-  labels: ["📦 dependencies"],
-  dependencyDashboardLabels: ["📦 dependencies"],
+  labels: ["🔗 dependencies"],
+  dependencyDashboardLabels: ["🔗 dependencies"],
 
   // Schedule settings.
   timezone: "UTC",
@@ -41,15 +45,14 @@
     },
     {
       description: "Flag dependencies with no recent releases.",
-      matchCurrentAge: "> 1 year",
-      addLabels: ["⚠️ stale dependency"],
+      matchCurrentAge: "> 2 years",
     },
     {
       description: "Update SHA-256 checksums after binary version bumps in workflows.",
       matchFileNames: [".github/workflows/**"],
       postUpgradeTasks: {
         commands: [
-          "bash -c 'curl -fsSL https://github.com/astral-sh/uv/releases/download/0.10.10/uv-x86_64-unknown-linux-gnu.tar.gz --output /tmp/uv.tar.gz && echo 3e1027f26ce8c7e4c32e2277a7fed2cb410f2f1f9320d3df97653d40e21f415b  /tmp/uv.tar.gz | sha256sum --check && tar xzf /tmp/uv.tar.gz --strip-components=1 -C /tmp && /tmp/uvx --no-progress repomatic==6.7.0 update-checksums {{{packageFile}}}'",
+          "bash -c 'curl -fsSL https://github.com/astral-sh/uv/releases/download/0.10.11/uv-x86_64-unknown-linux-gnu.tar.gz --output /tmp/uv.tar.gz && echo 5a360b0de092ddf4131f5313d0411b48c4e95e8107e40c3f8f2e9fcb636b3583  /tmp/uv.tar.gz | sha256sum --check && tar xzf /tmp/uv.tar.gz --strip-components=1 -C /tmp && /tmp/uvx --no-progress repomatic==6.8.0 update-checksums {{{packageFile}}}'",
         ],
         fileFilters: [".github/workflows/**"],
         executionMode: "update",
@@ -60,7 +63,7 @@
       matchFileNames: ["repomatic/tool_runner.py"],
       postUpgradeTasks: {
         commands: [
-          "bash -c 'curl -fsSL https://github.com/astral-sh/uv/releases/download/0.10.10/uv-x86_64-unknown-linux-gnu.tar.gz --output /tmp/uv.tar.gz && echo 3e1027f26ce8c7e4c32e2277a7fed2cb410f2f1f9320d3df97653d40e21f415b  /tmp/uv.tar.gz | sha256sum --check && tar xzf /tmp/uv.tar.gz --strip-components=1 -C /tmp && /tmp/uvx --no-progress repomatic==6.7.0 update-checksums --registry'",
+          "bash -c 'curl -fsSL https://github.com/astral-sh/uv/releases/download/0.10.11/uv-x86_64-unknown-linux-gnu.tar.gz --output /tmp/uv.tar.gz && echo 5a360b0de092ddf4131f5313d0411b48c4e95e8107e40c3f8f2e9fcb636b3583  /tmp/uv.tar.gz | sha256sum --check && tar xzf /tmp/uv.tar.gz --strip-components=1 -C /tmp && /tmp/uvx --no-progress repomatic==6.8.0 update-checksums --registry'",
         ],
         fileFilters: ["repomatic/tool_runner.py"],
         executionMode: "update",
@@ -84,7 +87,7 @@
   // Requires "Dependabot alerts" read permission on the token.
   vulnerabilityAlerts: {
     enabled: true,
-    labels: ["📦 dependencies", "💣 security"],
+    labels: ["🔗 dependencies", "💣 security"],
   },
 
   // Custom managers for hard-coded versions in workflow files.

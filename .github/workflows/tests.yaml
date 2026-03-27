@@ -24,6 +24,8 @@ name: 🔬 Tests
     # Run tests monthly to catch regressions from dependency or environment changes.
     - cron: "17 9 1 * *"
 
+permissions: {}
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ !startsWith(github.event.head_commit.message, '[changelog] Release') }}

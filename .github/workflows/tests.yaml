@@ -408,7 +408,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         shell: bash
         run: >
-          uvx --no-progress 'codecov-cli==11.2.6'
+          uvx --no-progress 'codecov-cli==11.2.7'
           --auto-load-params-from githubactions
           upload-process
           --git-service github
@@ -422,7 +422,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         shell: bash
         run: >
-          uvx --no-progress 'codecov-cli==11.2.6'
+          uvx --no-progress 'codecov-cli==11.2.7'
           --auto-load-params-from githubactions
           upload-process
           --git-service github

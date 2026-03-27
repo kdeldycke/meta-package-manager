@@ -1,0 +1,75 @@
+/* Extend Furo's --icon-* convention with octicons for sidebar toctree entries.
+ * SVG paths from sphinx-design's octicons.json (mark-github is also the same
+ * icon Furo uses in its own page.html footer).
+ * See: https://github.com/pradyunsg/furo/discussions/921
+ *
+ * Caveat: Furo rewrites the current page's sidebar href to "#", so CSS
+ * [href="..."] selectors cannot match the active entry. The icon will be
+ * missing from the sidebar entry of the page you are currently viewing.
+ * Pages using {octicon} in their title don't have this issue since the icon
+ * is inline HTML. A Sphinx extension injecting icons into the <a> content
+ * would be needed to fully fix this for CSS-only entries.
+ */
+:root {
+  --icon-github: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'/%3E%3C/svg%3E");
+  --icon-code-review: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M1.75 1h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 13H8.061l-2.574 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25v-8.5C0 1.784.784 1 1.75 1ZM1.5 2.75v8.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25H1.75a.25.25 0 0 0-.25.25Zm5.28 1.72a.75.75 0 0 1 0 1.06L5.31 7l1.47 1.47a.751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018l-2-2a.75.75 0 0 1 0-1.06l2-2a.75.75 0 0 1 1.06 0Zm2.44 0a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L10.69 7 9.22 5.53a.75.75 0 0 1 0-1.06Z'/%3E%3C/svg%3E");
+  --icon-codescan-checkmark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M10.28 6.28a.75.75 0 1 0-1.06-1.06L6.25 8.19l-.97-.97a.75.75 0 0 0-1.06 1.06l1.5 1.5a.75.75 0 0 0 1.06 0l3.5-3.5Z'%3E%3C/path%3E%3Cpath d='M7.5 15a7.5 7.5 0 1 1 5.807-2.754l2.473 2.474a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215l-2.474-2.473A7.472 7.472 0 0 1 7.5 15Zm0-13.5a6 6 0 1 0 4.094 10.386.748.748 0 0 1 .293-.292 6.002 6.002 0 0 0 1.117-6.486A6.002 6.002 0 0 0 7.5 1.5Z'%3E%3C/path%3E%3C/svg%3E");
+  --icon-list-unordered: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M5.75 2.5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5Zm0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5Zm0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5ZM2 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-6a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z'/%3E%3C/svg%3E");
+  --icon-package: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m8.878.392 5.25 3.045c.54.314.872.89.872 1.514v6.098a1.75 1.75 0 0 1-.872 1.514l-5.25 3.045a1.75 1.75 0 0 1-1.756 0l-5.25-3.045A1.75 1.75 0 0 1 1 11.049V4.951c0-.624.332-1.201.872-1.514L7.122.392a1.75 1.75 0 0 1 1.756 0ZM7.875 1.69l-4.63 2.685L8 7.133l4.755-2.758-4.63-2.685a.248.248 0 0 0-.25 0ZM2.5 5.677v5.372c0 .09.047.171.125.216l4.625 2.683V8.432Zm6.25 8.271 4.625-2.683a.25.25 0 0 0 .125-.216V5.677L8.75 8.432Z'/%3E%3C/svg%3E");
+  --icon-heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m8 14.25.345.666a.75.75 0 0 1-.69 0l-.008-.004-.018-.01a7.152 7.152 0 0 1-.31-.17 22.055 22.055 0 0 1-3.434-2.414C2.045 10.731 0 8.35 0 5.5 0 2.836 2.086 1 4.25 1 5.797 1 7.153 1.802 8 3.02 8.847 1.802 10.203 1 11.75 1 13.914 1 16 2.836 16 5.5c0 2.85-2.045 5.231-3.885 6.818a22.066 22.066 0 0 1-3.744 2.584l-.018.01-.006.003h-.002ZM4.25 2.5c-1.336 0-2.75 1.164-2.75 3 0 2.15 1.58 4.144 3.365 5.682A20.58 20.58 0 0 0 8 13.393a20.58 20.58 0 0 0 3.135-2.211C12.92 9.644 14.5 7.65 14.5 5.5c0-1.836-1.414-3-2.75-3-1.373 0-2.609.986-3.029 2.456a.749.749 0 0 1-1.442 0C6.859 3.486 5.623 2.5 4.25 2.5Z'/%3E%3C/svg%3E");
+}
+
+/* Shared ::before properties for sidebar toctree icons, following Furo's own
+ * mask-image pattern (used for admonitions, search, etc.). The icon color
+ * follows currentColor so it works in both light and dark mode.
+ */
+.sidebar-tree a.reference.internal[href="meta_package_manager.html"]::before,
+.sidebar-tree a.reference.internal[href="tests.html"]::before,
+.sidebar-tree a.reference.internal[href="genindex.html"]::before,
+.sidebar-tree a.reference.internal[href="py-modindex.html"]::before,
+.sidebar-tree a.reference.external[href="https://github.com/kdeldycke/meta-package-manager"]::before,
+.sidebar-tree a.reference.external[href="https://github.com/sponsors/kdeldycke"]::before {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.25em;
+  vertical-align: text-bottom;
+  background-color: currentColor;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* Individual icon assignments. */
+.sidebar-tree a.reference.internal[href="meta_package_manager.html"]::before {
+  -webkit-mask-image: var(--icon-code-review);
+  mask-image: var(--icon-code-review);
+}
+.sidebar-tree a.reference.internal[href="tests.html"]::before {
+  -webkit-mask-image: var(--icon-codescan-checkmark);
+  mask-image: var(--icon-codescan-checkmark);
+}
+.sidebar-tree a.reference.internal[href="genindex.html"]::before {
+  -webkit-mask-image: var(--icon-list-unordered);
+  mask-image: var(--icon-list-unordered);
+}
+.sidebar-tree a.reference.internal[href="py-modindex.html"]::before {
+  -webkit-mask-image: var(--icon-package);
+  mask-image: var(--icon-package);
+}
+.sidebar-tree a.reference.external[href="https://github.com/kdeldycke/meta-package-manager"]::before {
+  -webkit-mask-image: var(--icon-github);
+  mask-image: var(--icon-github);
+}
+.sidebar-tree a.reference.external[href="https://github.com/sponsors/kdeldycke"]::before {
+  -webkit-mask-image: var(--icon-heart);
+  mask-image: var(--icon-heart);
+}
+
+/* Hide Furo's default external-link arrow for entries that have a custom icon. */
+.sidebar-tree a.reference.external[href="https://github.com/kdeldycke/meta-package-manager"]::after,
+.sidebar-tree a.reference.external[href="https://github.com/sponsors/kdeldycke"]::after {
+  content: none;
+}

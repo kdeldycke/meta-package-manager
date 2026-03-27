@@ -4,6 +4,16 @@ name: 🚀 Build & release
   push:
     branches:
       - main
+  pull_request:
+    branches-ignore:
+      - prepare-release
+      - "renovate/**"
+    paths:
+      - "meta_package_manager/**"
+      - "tests/**"
+      - pyproject.toml
+      - uv.lock
+      - .github/workflows/release.yaml
   workflow_dispatch:
 
 jobs:

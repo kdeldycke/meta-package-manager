@@ -458,6 +458,21 @@ requirements. But Docker might be too big for some people.
 `mpm` can be a lightweight alternative to Docker, to abstract the runtime
 from their execution environment.
 
+### Update cooldowns
+
+```{todo}
+`mpm` could support a cooldown period before applying updates, letting newly released versions age for a configurable delay (e.g. 7 days) before they are offered by `mpm upgrade` or `mpm outdated`.
+
+This would mitigate supply chain attacks by giving the community time to identify and yank compromised releases before they land on your machine. The [xz backdoor](https://en.wikipedia.org/wiki/XZ_Utils_backdoor) and [VS Code extension marketplace incidents](https://www.wiz.io/blog/supply-chain-risk-in-vscode-extension-marketplaces) are recent examples of this threat.
+
+Some package managers have no built-in delay mechanism at all (e.g. VS Code extensions only offer auto-update on/off, with no `update.delayDays` option — see [microsoft/vscode#24823](https://github.com/microsoft/vscode/issues/24823)). `mpm` is in a unique position to add a uniform cooldown layer across all managers it wraps.
+
+Prior art:
+- Renovate's [`minimumReleaseAge`](https://docs.renovatebot.com/configuration-options/#minimumreleaseage) delays dependency PRs by a configurable period.
+- uv's [`exclude-newer`](https://docs.astral.sh/uv/reference/settings/#exclude-newer) ignores packages published after a cutoff date.
+- William Woodruff's [*We should all be using dependency cooldowns*](https://blog.yossarian.net/2025/11/21/We-should-all-be-using-dependency-cooldowns).
+```
+
 ### Support and fund open-source?
 
 ```{todo}

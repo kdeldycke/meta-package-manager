@@ -28,8 +28,8 @@ This repository uses reusable workflows from [`kdeldycke/repomatic`](https://git
 ## Philosophy
 
 1. First create something that works (to provide business value).
-1. Then something that's beautiful (to lower maintenance costs).
-1. Finally works on performance (to avoid wasting time on premature optimizations).
+2. Then something that's beautiful (to lower maintenance costs).
+3. Finally works on performance (to avoid wasting time on premature optimizations).
 
 ## Stability policy
 
@@ -156,13 +156,13 @@ When adding new content, consider whether it benefits end users (`readme.md`) or
 
 Each piece of knowledge has one canonical home, chosen by audience. Other locations get a brief pointer ("See `module.py` for rationale.").
 
-| Audience              | Home                      | Content                                                    |
-| :-------------------- | :------------------------ | :--------------------------------------------------------- |
-| End users             | `readme.md`               | Installation, configuration, usage.                        |
-| Developers            | Python docstrings         | Design decisions, trade-offs, "why" explanations.          |
-| Workflow maintainers  | YAML comments             | Brief "what" + pointer to Python code for "why."           |
-| Bug reporters         | `.github/ISSUE_TEMPLATE/` | Reproduction steps, version commands.                      |
-| Contributors / Claude | `CLAUDE.md`               | Conventions, policies, non-obvious rules.                  |
+| Audience              | Home                      | Content                                           |
+| :-------------------- | :------------------------ | :------------------------------------------------ |
+| End users             | `readme.md`               | Installation, configuration, usage.               |
+| Developers            | Python docstrings         | Design decisions, trade-offs, "why" explanations. |
+| Workflow maintainers  | YAML comments             | Brief "what" + pointer to Python code for "why."  |
+| Bug reporters         | `.github/ISSUE_TEMPLATE/` | Reproduction steps, version commands.             |
+| Contributors / Claude | `CLAUDE.md`               | Conventions, policies, non-obvious rules.         |
 
 **YAML to Python distillation:** When workflow YAML files contain lengthy "why" explanations, migrate the rationale to Python module, class, or constant docstrings (using reST admonitions like `.. note::` and `.. warning::`). Trim the YAML comment to a one-line "what" plus a pointer.
 
@@ -187,14 +187,14 @@ Use lowercase filenames everywhere. Avoid shouting-case names like `FUNDING.YML`
 
 GitHub silently ignores certain files unless they use the exact name it expects. These are the known hard constraints where you **cannot** use `.yaml` or lowercase:
 
-| File | Required name | Why |
-|---|---|---|
-| Issue form templates | `.github/ISSUE_TEMPLATE/*.yml` | `.yaml` is not recognized for issue forms |
-| Issue template config | `.github/ISSUE_TEMPLATE/config.yml` | `.yaml` not recognized |
-| Funding config | `.github/funding.yml` | Only `.yml` documented; no evidence `.yaml` works |
-| Release notes config | `.github/release.yml` | Only `.yml` documented |
-| Issue template directory | `.github/ISSUE_TEMPLATE/` | Must be uppercase; GitHub ignores lowercase |
-| Code owners | `CODEOWNERS` | Must be uppercase; no extension |
+| File                     | Required name                       | Why                                               |
+| ------------------------ | ----------------------------------- | ------------------------------------------------- |
+| Issue form templates     | `.github/ISSUE_TEMPLATE/*.yml`      | `.yaml` is not recognized for issue forms         |
+| Issue template config    | `.github/ISSUE_TEMPLATE/config.yml` | `.yaml` not recognized                            |
+| Funding config           | `.github/funding.yml`               | Only `.yml` documented; no evidence `.yaml` works |
+| Release notes config     | `.github/release.yml`               | Only `.yml` documented                            |
+| Issue template directory | `.github/ISSUE_TEMPLATE/`           | Must be uppercase; GitHub ignores lowercase       |
+| Code owners              | `CODEOWNERS`                        | Must be uppercase; no extension                   |
 
 Workflows (`.github/workflows/*.yaml`) and action metadata (`action.yaml`) officially support both `.yml` and `.yaml` — use `.yaml`.
 
@@ -220,16 +220,16 @@ Use correct capitalization for proper nouns and trademarked names:
 
 The version string is always bare (e.g., `1.2.3`). The `v` prefix is a **tag namespace** — it only appears when the reference is to a git tag or something derived from a tag (action ref, comparison URL, commit message). This aligns with PEP 440, PyPI, and semver conventions.
 
-| Context                                | Format                          | Example                              | Rationale                         |
-| :------------------------------------- | :------------------------------ | :----------------------------------- | :-------------------------------- |
-| Python `__version__`, `pyproject.toml` | `1.2.3`                         | `version = "6.1.2"`                  | PEP 440 bare version.             |
-| Git tags                               | `` `v1.2.3` ``                  | `` `v6.1.2` ``                       | Tag namespace convention.         |
-| GitHub comparison URLs                 | `v1.2.3...v1.2.4`               | `compare/v6.1.1...v6.1.2`           | References tags.                  |
-| GitHub action/workflow refs            | `` `@v1.2.3` ``                 | `actions/checkout@v6.0.2`            | References tags.                  |
-| Commit messages                        | `v1.2.3`                        | `[changelog] Release v6.1.2`        | References the tag being created. |
-| CLI `--version` output                 | `1.2.3`                         | `mpm, version 6.1.2`                | Package version, not a tag.       |
-| Changelog headings                     | `` `1.2.3` ``                   | `` ## [`6.1.2` (2026-03-04)] ``     | Package version, code-formatted.  |
-| PyPI URLs                              | `1.2.3`                         | `pypi.org/project/meta-package-manager/6.1.2/` | PyPI uses bare versions.    |
+| Context                                | Format            | Example                                        | Rationale                         |
+| :------------------------------------- | :---------------- | :--------------------------------------------- | :-------------------------------- |
+| Python `__version__`, `pyproject.toml` | `1.2.3`           | `version = "6.1.2"`                            | PEP 440 bare version.             |
+| Git tags                               | `` `v1.2.3` ``    | `` `v6.1.2` ``                                 | Tag namespace convention.         |
+| GitHub comparison URLs                 | `v1.2.3...v1.2.4` | `compare/v6.1.1...v6.1.2`                      | References tags.                  |
+| GitHub action/workflow refs            | `` `@v1.2.3` ``   | `actions/checkout@v6.0.2`                      | References tags.                  |
+| Commit messages                        | `v1.2.3`          | `[changelog] Release v6.1.2`                   | References the tag being created. |
+| CLI `--version` output                 | `1.2.3`           | `mpm, version 6.1.2`                           | Package version, not a tag.       |
+| Changelog headings                     | `` `1.2.3` ``     | `` ## [`6.1.2` (2026-03-04)] ``                | Package version, code-formatted.  |
+| PyPI URLs                              | `1.2.3`           | `pypi.org/project/meta-package-manager/6.1.2/` | PyPI uses bare versions.          |
 
 **Rules:**
 

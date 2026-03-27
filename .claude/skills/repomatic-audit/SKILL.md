@@ -59,18 +59,18 @@ Respect `exclude` entries from `[tool.repomatic]` in `pyproject.toml`. Report ex
 
 Compare these files against the upstream reference:
 
-| File | What to check |
-|---|---|
-| `renovate.json5` | Missing `assignees`, missing package rules, stale binary versions in `postUpgradeTasks` |
-| `pyproject.toml` `[tool.typos]` | Missing `default.extend-identifiers` for common capitalizations (GitHub, macOS, PyPI, iOS, etc.) |
-| `pyproject.toml` `[tool.bumpversion]` | Missing `ignore_missing_files` |
-| `pyproject.toml` `[tool.ruff]` | Missing or divergent lint rules, preview settings |
-| `pyproject.toml` `[tool.mypy]` | Missing settings compared to reference |
-| `.github/ISSUE_TEMPLATE/` | Filename conventions (hyphens, not underscores), missing labels |
-| `.github/code-of-conduct.md` | Stale or non-canonical attribution URLs |
-| `.github/funding.yml` | Compare with reference |
-| `.gitignore` | Compare with reference |
-| `lychee.toml` | Note differences (usually project-specific, just flag for review) |
+| File                                  | What to check                                                                                    |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `renovate.json5`                      | Missing `assignees`, missing package rules, stale binary versions in `postUpgradeTasks`          |
+| `pyproject.toml` `[tool.typos]`       | Missing `default.extend-identifiers` for common capitalizations (GitHub, macOS, PyPI, iOS, etc.) |
+| `pyproject.toml` `[tool.bumpversion]` | Missing `ignore_missing_files`                                                                   |
+| `pyproject.toml` `[tool.ruff]`        | Missing or divergent lint rules, preview settings                                                |
+| `pyproject.toml` `[tool.mypy]`        | Missing settings compared to reference                                                           |
+| `.github/ISSUE_TEMPLATE/`             | Filename conventions (hyphens, not underscores), missing labels                                  |
+| `.github/code-of-conduct.md`          | Stale or non-canonical attribution URLs                                                          |
+| `.github/funding.yml`                 | Compare with reference                                                                           |
+| `.gitignore`                          | Compare with reference                                                                           |
+| `lychee.toml`                         | Note differences (usually project-specific, just flag for review)                                |
 
 Skip files that are intentionally excluded via `exclude` in `[tool.repomatic]`.
 

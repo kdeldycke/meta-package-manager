@@ -138,21 +138,21 @@ under the name `meta_package_manager.7h.py`, to the
 1. [Fork](https://help.github.com/articles/fork-a-repo/) the official
    [Xbar plugin repository](https://github.com/matryer/xbar-plugins).
 
-1. Fetch a local copy of the fork:
+2. Fetch a local copy of the fork:
 
    ```shell-session
    $ git clone https://github.com/kdeldycke/xbar-plugins
    $ cd xbar-plugins
    ```
 
-1. Create a new branch and switch to it:
+3. Create a new branch and switch to it:
 
    ```shell-session
    $ git branch "meta-package-manager-v4.13.1"
    $ git checkout "meta-package-manager-v4.13.1"
    ```
 
-1. Replace existing copy of the plugin with the latest tagged version:
+4. Replace existing copy of the plugin with the latest tagged version:
 
    ```shell-session
    $ wget https://raw.githubusercontent.com/kdeldycke/meta-package-manager/v4.13.1/meta_package_manager/bar_plugin.py
@@ -160,18 +160,18 @@ under the name `meta_package_manager.7h.py`, to the
    $ chmod 755 ./Dev/meta_package_manager.7h.py
    ```
 
-1. Commit the new plugin:
+5. Commit the new plugin:
 
    ```shell-session
    $ git add ./Dev/meta_package_manager.7h.py
    $ git commit -m "Upgrade to Meta Package Manager plugin v4.13.1"
    ```
 
-1. Push new branch:
+6. Push new branch:
 
    ```shell-session
    $ git push --set-upstream origin "meta-package-manager-v4.13.1"
    ```
 
-1. [Create a pull-request](https://help.github.com/articles/creating-a-pull-request/)
+7. [Create a pull-request](https://help.github.com/articles/creating-a-pull-request/)
    in the original repository.

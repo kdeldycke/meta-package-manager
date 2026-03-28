@@ -357,9 +357,12 @@ class Homebrew(PackageManager):
         if extended:
             output = self.run_cli("search", "--quiet", query, "--desc")
 
-            for package_id, _, package_name, description in (
-                self._SEARCH_DESC_REGEXP.findall(output)
-            ):
+            for (
+                package_id,
+                _,
+                package_name,
+                description,
+            ) in self._SEARCH_DESC_REGEXP.findall(output):
                 matched_ids.add(package_id)
                 pkg = self.package(id=package_id, name=package_name)
                 if description != "[no description]":

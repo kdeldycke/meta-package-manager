@@ -4,7 +4,6 @@ from pathlib import Path
 
 import tomllib  # type: ignore[import-not-found]  # stdlib >=3.11; docs require >=3.12.
 
-
 project_path = Path(__file__).parent.parent.resolve()
 
 # Fetch general information about the project from pyproject.toml.

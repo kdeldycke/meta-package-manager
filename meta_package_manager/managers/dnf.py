@@ -144,7 +144,6 @@ class DNF(PackageManager):
         """
         output = self.run_cli("search", query)
 
-
         for line in output.splitlines()[1:]:
             # Skip section headers.
             if line.startswith("="):

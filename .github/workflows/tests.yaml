@@ -326,7 +326,7 @@ jobs:
           choco install steamcmd --no-progress --yes --retry-count=3
 
       - name: Install UV
-        uses: astral-sh/setup-uv@v7.3.1
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
       - name: Force native ARM64 Python on Windows ARM64
         # Workaround for https://github.com/astral-sh/uv/issues/12906: uv defaults to x86_64 Python on ARM64 Windows,
         # relying on transparent emulation. Native extensions with Rust (e.g., test-results-parser from codecov-cli)
@@ -438,7 +438,7 @@ jobs:
     name: 🔂 Once tests
     runs-on: ubuntu-slim
     steps:
-      - uses: astral-sh/setup-uv@v7.3.1
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
       - name: Install Python
         run: uv --no-progress venv --python 3.14
 

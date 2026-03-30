@@ -58,7 +58,7 @@ class ZeroBrew(PackageManager):
     """Default macOS install location."""
 
     # Suppress terminal styling from the ``console`` Rust crate.
-    extra_env = {"NO_COLOR": "1"}
+    extra_env = {"NO_COLOR": "1"}  # noqa: RUF012
 
     version_regexes = (r"zb\s+(?P<version>\S+)",)
     """

@@ -91,7 +91,7 @@ class SDKMAN(PackageManager):
         re.MULTILINE,
     )
 
-    def build_cli(self, *args, **kwargs):
+    def build_cli(self, *args, **kwargs) -> tuple[str, ...]:
         """Wrap all CLI invocations to source the SDKMAN init script in bash.
 
         .. note::

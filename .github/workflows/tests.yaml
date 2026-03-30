@@ -95,7 +95,7 @@ jobs:
       # See: meta_package_manager/test_manager_homebrew.py::TestCask test.
       HOMEBREW_NO_INSTALL_FROM_API: "1"
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       ### Install or upgrade package managers on each platform, and made them
       ### ready to use for mpm.
@@ -326,7 +326,7 @@ jobs:
           choco install steamcmd --no-progress --yes --retry-count=3
 
       - name: Install UV
-        uses: astral-sh/setup-uv@v7.3.1
+        uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098 # v7.3.1
       - name: Force native ARM64 Python on Windows ARM64
         # Workaround for https://github.com/astral-sh/uv/issues/12906: uv defaults to x86_64 Python on ARM64 Windows,
         # relying on transparent emulation. Native extensions with Rust (e.g., test-results-parser from codecov-cli)
@@ -438,7 +438,7 @@ jobs:
     name: 🔂 Once tests
     runs-on: ubuntu-slim
     steps:
-      - uses: astral-sh/setup-uv@v7.3.1
+      - uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098 # v7.3.1
       - name: Install Python
         run: uv --no-progress venv --python 3.14
 
@@ -562,7 +562,7 @@ jobs:
           - windows-2025 # x86
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/setup-go@v6.3.0
+      - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           cache: false
           go-version: stable

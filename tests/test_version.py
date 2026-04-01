@@ -487,6 +487,21 @@ version_list = (
     ("5.15.90.1-2", (5, 15, 90, 1, 2)),
     # Snap revision style.
     ("2.60.4+git2.e7f88a7", (2, 60, 4, "git", 2, "e7f88a7")),
+    # PEP 440 epoch — the ``!`` is a plain separator, epoch semantics lost.
+    ("1!1.0", (1, 1, 0)),
+    # PEP 440 local version — ``+`` is a plain separator.
+    ("1.0+local", (1, 0, "local")),
+    # Semver build metadata — ``+`` is a plain separator.
+    ("1.0.0+build.123", (1, 0, 0, "build", 123)),
+    # Semver pre-release with mixed identifiers.
+    ("1.0.0-alpha.beta", (1, 0, 0, "alpha", "beta")),
+    # RPM release tag.
+    ("1.0-1.fc38", (1, 0, 1, "fc", 38)),
+    # Go pseudo-version.
+    (
+        "v0.0.0-20210101000000-abcdef123456",
+        ("v", 0, 0, 0, 20210101000000, "abcdef", 123456),
+    ),
 )
 
 
@@ -550,6 +565,25 @@ compared_gt = (
     ("3.12.1", "3.12.0a4"),
     # Linux kernel versions.
     ("6.5.0", "5.15.90"),
+    # PEP 440 pre-release chain: alpha < beta < rc < release.
+    ("1.0b1", "1.0a1"),
+    ("1.0rc1", "1.0b1"),
+    ("1.0", "1.0rc1"),
+    # PEP 440 dev within pre-release: release > dev.
+    ("1.0a1", "1.0a1.dev1"),
+    # Semver pre-release numeric ordering.
+    ("1.0.0-alpha.2", "1.0.0-alpha.1"),
+    # Semver more identifiers > fewer (longer is more specific).
+    ("1.0.0-alpha.1", "1.0.0-alpha"),
+    # RPM release bump.
+    ("1.0-2.fc38", "1.0-1.fc38"),
+    # Git describe commit count.
+    ("1.8.6-125-g6cd4c31", "1.8.6-124-g6cd4c31"),
+    # Go pseudo-version date comparison.
+    (
+        "v0.0.0-20210101000000-abcdef123456",
+        "v0.0.0-20200101000000-abcdef123456",
+    ),
 )
 
 
@@ -580,6 +614,10 @@ compared_eq = (
     ("1.2.3", "1-2-3"),
     ("1.2.3", "1_2_3"),
     ("4.2.1", "4-2-1"),
+    # PEP 440 implicit zero on pre-release tag.
+    ("1.0a", "1.0a0"),
+    # Arbitrary trailing zero padding.
+    ("5.0", "5.0.0.0.0"),
 )
 
 
@@ -622,6 +660,18 @@ def test_version_comparison_eq(ver1, ver2):
             "1.10.0",
             "2.0.0",
             "10.0.0",
+        ],
+        # PEP 440 pre-release progression.
+        [
+            None,
+            "1.0a1",
+            "1.0a2",
+            "1.0b1",
+            "1.0rc1",
+            "1.0",
+            "1.0.1",
+            "1.1",
+            "2.0",
         ],
         # Calendar versioning progression.
         [
@@ -719,3 +769,79 @@ def test_parse_version_is_tokenized_string():
     v = parse_version("1.2.3")
     assert isinstance(v, TokenizedString)
     assert v == TokenizedString("1.2.3")
+
+
+# --- Known limitations ---
+#
+# These tests document comparisons that the heuristic tokenizer gets wrong
+# because it does not implement format-specific semantics. Each test is
+# ``xfail(strict=True)`` so it fails loudly if the limitation is removed,
+# letting us claim the fix.
+
+
+@pytest.mark.parametrize(
+    ("ver1", "ver2"),
+    (
+        # PEP 440: epoch outranks any base version.
+        pytest.param("1!1.0", "2.0", id="pep440-epoch"),
+        # PEP 440: post-release > release.
+        pytest.param("1.0.post1", "1.0", id="pep440-post-release"),
+        # Debian: epoch outranks any base version.
+        pytest.param("2:1.0-1", "9.0", id="debian-epoch"),
+        # Debian: revision (the part after the last ``-``) makes a version
+        # newer, but the tokenizer treats string suffixes as pre-release.
+        pytest.param("6.0.1-0ubuntu1", "6.0.1", id="debian-revision"),
+    ),
+)
+@pytest.mark.xfail(strict=True, reason="Epoch / post-release semantics.")
+def test_version_comparison_gt_known_failures(ver1, ver2):
+    assert TokenizedString(ver1) > TokenizedString(ver2)
+
+
+@pytest.mark.parametrize(
+    ("ver1", "ver2"),
+    (
+        # PEP 440: dev releases precede all pre-releases.
+        pytest.param("1.0.dev1", "1.0a1", id="pep440-dev-lt-alpha"),
+        # Semver 11.4.4: numeric identifiers always have lower precedence
+        # than alphanumeric identifiers in pre-release fields. Our
+        # int-outranks-string rule is the exact opposite.
+        pytest.param(
+            "1.0.0-alpha.1",
+            "1.0.0-alpha.beta",
+            id="semver-numeric-lt-string",
+        ),
+    ),
+)
+@pytest.mark.xfail(strict=True, reason="Ordering inversion.")
+def test_version_comparison_lt_known_failures(ver1, ver2):
+    assert TokenizedString(ver1) < TokenizedString(ver2)
+
+
+@pytest.mark.parametrize(
+    ("ver1", "ver2"),
+    (
+        # PEP 440: ``v`` prefix is cosmetic.
+        pytest.param("v1.0", "1.0", id="pep440-v-prefix"),
+        # PEP 440: ``alpha`` is an alias for ``a``.
+        pytest.param("1.0alpha1", "1.0a1", id="pep440-alpha-alias"),
+        # PEP 440: ``c`` is an alias for ``rc``.
+        pytest.param("1.0c1", "1.0rc1", id="pep440-c-rc-alias"),
+        # PEP 440: local version equals base for ordering.
+        pytest.param("1.0+local", "1.0", id="pep440-local-ignored"),
+        # Semver: build metadata is ignored in precedence.
+        pytest.param("1.0.0+build.123", "1.0.0", id="semver-build-metadata"),
+        pytest.param(
+            "1.0.0+build.123",
+            "1.0.0+build.124",
+            id="semver-build-metadata-diff",
+        ),
+        # Perl: floating-point versions treat ``1.1`` as ``1.100``.
+        pytest.param("1.1", "1.10", id="perl-float-equal"),
+        # Gentoo: three-digit-group conversion of Perl versions.
+        pytest.param("1.020030", "1.20.30", id="gentoo-3digit-group"),
+    ),
+)
+@pytest.mark.xfail(strict=True, reason="Format-specific normalization.")
+def test_version_comparison_eq_known_failures(ver1, ver2):
+    assert TokenizedString(ver1) == TokenizedString(ver2)

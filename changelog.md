@@ -20,6 +20,7 @@
 - [cpan] Add CPAN package manager for Perl modules with `installed`, `outdated`, `install`, and `upgrade` support. Closes {issue}`602`.
 - [sdkman] Add SDKMAN! package manager with `installed`, `outdated`, `install`, `upgrade`, `sync`, and `cleanup` support. Closes {issue}`729`.
 - [mpm] Preserve original separators and case in version tokenization for lossless `pretty_print()` round-tripping.
+- [mpm] Fix version comparison so integer tokens sort higher than string tokens (e.g., `3.12.0 > 3.12.0a4`) and trailing `.0` segments are treated as padding.
 
 ## [`6.2.1` (2026-03-26)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.0...v6.2.1)
 

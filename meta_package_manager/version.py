@@ -129,6 +129,11 @@ class Token:
 
     If one at least is not an integer, we convert all of them to string to allow
     comparison.
+
+    When one ``Token`` is an integer and the other is a pure string (i.e., comparing
+    across types between two ``Token`` instances), the integer always sorts higher.
+    This reflects the convention that numeric version segments outrank alphabetic
+    pre-release tags (e.g., ``1 > "beta"``).
     """
 
     def _match_type(self, other):
@@ -140,22 +145,53 @@ class Token:
                 return int
         return str
 
+    def _mixed_type_order(self, other):
+        """Return ordering hint for mixed integer/string ``Token`` pairs.
+
+        Returns ``1`` if ``self`` should sort higher (int vs str), ``-1`` if lower
+        (str vs int), or ``0`` when both are the same kind and normal comparison
+        applies.
+        """
+        if not isinstance(other, Token):
+            return 0
+        if self.isint and not other.isint:
+            return 1
+        if not self.isint and other.isint:
+            return -1
+        return 0
+
     def __eq__(self, other):
+        if self._mixed_type_order(other):
+            return False
         return operator.eq(*map(self._match_type(other), [self, other]))
 
     def __ne__(self, other):
+        if self._mixed_type_order(other):
+            return True
         return operator.ne(*map(self._match_type(other), [self, other]))
 
     def __gt__(self, other):
+        order = self._mixed_type_order(other)
+        if order:
+            return order > 0
         return operator.gt(*map(self._match_type(other), [self, other]))
 
     def __lt__(self, other):
+        order = self._mixed_type_order(other)
+        if order:
+            return order < 0
         return operator.lt(*map(self._match_type(other), [self, other]))
 
     def __ge__(self, other):
+        order = self._mixed_type_order(other)
+        if order:
+            return order > 0
         return operator.ge(*map(self._match_type(other), [self, other]))
 
     def __le__(self, other):
+        order = self._mixed_type_order(other)
+        if order:
+            return order < 0
         return operator.le(*map(self._match_type(other), [self, other]))
 
 
@@ -320,10 +356,51 @@ class TokenizedString:
         objects."""
         return iter(self.tokens)
 
+    @staticmethod
+    def _compare_tuples(
+        a: tuple[Token, ...],
+        b: tuple[Token, ...],
+    ) -> int:
+        """Compare two token tuples with version-aware semantics.
+
+        Returns ``-1``, ``0``, or ``1``.
+
+        When one tuple is a prefix of the other, the first *significant* (non-zero)
+        extra token in the longer tuple decides the outcome:
+
+        - **String token** (pre-release tag): the shorter tuple (release) is greater.
+        - **Integer token** (additional version component): the longer tuple is greater.
+        - **All trailing zeros**: the tuples are equal (trailing ``.0`` is padding).
+        """
+        for ta, tb in zip(a, b):
+            if ta > tb:
+                return 1
+            if ta < tb:
+                return -1
+
+        if len(a) == len(b):
+            return 0
+
+        # One tuple is a prefix of the other. Examine extra tokens.
+        shorter_len = min(len(a), len(b))
+        longer = b if len(a) < len(b) else a
+        # Drop trailing zero-integer tokens (version padding).
+        significant = [t for t in longer[shorter_len:] if not (t.isint and t.integer == 0)]
+
+        if not significant:
+            return 0
+
+        # String token means pre-release suffix → shorter (release) wins.
+        # Integer token means additional version component → longer wins.
+        longer_wins = 1 if significant[0].isint else -1
+        return -longer_wins if len(a) < len(b) else longer_wins
+
     def __eq__(self, other):
         if other is None:
             return False
-        if isinstance(other, (TokenizedString, tuple)):
+        if isinstance(other, TokenizedString):
+            return self._compare_tuples(self.tokens, other.tokens) == 0
+        if isinstance(other, tuple):
             return tuple(self) == tuple(other)
         return super().__eq__(other)
 
@@ -331,35 +408,35 @@ class TokenizedString:
         if other is None:
             return True
         if isinstance(other, TokenizedString):
-            return tuple(self) != tuple(other)
+            return self._compare_tuples(self.tokens, other.tokens) != 0
         return super().__ne__(other)
 
     def __gt__(self, other):
         if other is None:
             return True
         if isinstance(other, TokenizedString):
-            return tuple(self) > tuple(other)
+            return self._compare_tuples(self.tokens, other.tokens) > 0
         return super().__gt__(other)
 
     def __lt__(self, other):
         if other is None:
             return False
         if isinstance(other, TokenizedString):
-            return tuple(self) < tuple(other)
+            return self._compare_tuples(self.tokens, other.tokens) < 0
         return super().__lt__(other)
 
     def __ge__(self, other):
         if other is None:
             return True
         if isinstance(other, TokenizedString):
-            return tuple(self) >= tuple(other)
+            return self._compare_tuples(self.tokens, other.tokens) >= 0
         return super().__ge__(other)
 
     def __le__(self, other):
         if other is None:
             return False
         if isinstance(other, TokenizedString):
-            return tuple(self) <= tuple(other)
+            return self._compare_tuples(self.tokens, other.tokens) <= 0
         return super().__le__(other)
 
 

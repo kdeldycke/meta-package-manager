@@ -71,6 +71,9 @@ ne_values = [
     (Token("abc"), "def"),
     (Token("Z"), "z"),
     (Token("acb"), 123),
+    # Mixed int/string tokens are never equal.
+    (Token(0), Token("a")),
+    (Token("beta"), Token(1)),
 ]
 
 
@@ -88,6 +91,10 @@ gt_values = [
     (Token("a"), "Z"),
     (Token("z"), "Z"),
     (Token("a"), Token("Z")),
+    # Integer tokens always sort higher than string tokens.
+    (Token(0), Token("z")),
+    (Token(1), Token("beta")),
+    (Token(42), Token("rc")),
 ]
 
 
@@ -100,6 +107,10 @@ lt_values = [
     (Token("0"), 9999),
     (Token("ab"), "abc"),
     (Token("Z"), "z"),
+    # String tokens always sort lower than integer tokens.
+    (Token("z"), Token(0)),
+    (Token("beta"), Token(1)),
+    (Token("rc"), Token(42)),
 ]
 
 
@@ -510,19 +521,20 @@ compared_gt = (
     ("0.1", "0"),
     ("0.1", "0.0"),
     ("0.1", "0.0.0.0.0"),
-    # ("0.1", "0.beta2"),
+    ("0.1", "0.beta2"),
     ("2.0", "1.0"),
     ("2.0", "1"),
     ("3.1.10", "3.1.9"),
-    # ("6.2", "6.2.0"),
-    # ("9.52", "9d"),
+    ("9.52", "9d"),
     ("8.2p1_1", "8.2p1"),
     ("3.12.0a4", "3.7.0"),
-    # ("3.12.0", "3.12.0a4"),
-    # ("3.7.7", "3.7-beta2_1"),
-    # ("2.1.1", "2.1.1-git-23hfb2-foobar"),
+    ("3.12.0", "3.12.0a4"),
+    ("3.7.7", "3.7-beta2_1"),
+    ("2.1.1", "2.1.1-git-23hfb2-foobar"),
     (20200313, 20190801),
     ("2020.03.24", "2019.11.28"),
+    # Java version with build metadata hash — the comma/colon structure gets
+    # tokenized into meaningless fragments. Would need format-specific parsing.
     # ("14.0.1,7:664493ef4a6946b186ff29eb326336a2",
     #  "14,36:076bab302c7b4508975440c56f6cc26a"),
     # Major version dominates even when minor/patch are larger.
@@ -564,6 +576,9 @@ compared_eq = (
     # Leading zeros: tokens compare as integers.
     ("01.02.03", "1.2.3"),
     ("2020.03.24", "2020.3.24"),
+    # Trailing .0 is padding.
+    ("6.2", "6.2.0"),
+    ("1.0", "1.0.0.0"),
     # Different separators: comparison is token-based.
     ("1.2.3", "1-2-3"),
     ("1.2.3", "1_2_3"),

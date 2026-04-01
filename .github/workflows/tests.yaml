@@ -532,7 +532,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
       - run: chmod +x /usr/local/bin/zb
-      - run: sudo zb init
+      - name: Initialize ZeroBrew
+        run: |
+          zb init
+          echo "$HOME/.zerobrew/bin" >> "$GITHUB_PATH"
+          echo "$HOME/.local/share/zerobrew/prefix/bin" >> "$GITHUB_PATH"
       # https://github.com/lucasgelfond/zerobrew
       - run: zb install meta-package-manager
       - run: mpm --version

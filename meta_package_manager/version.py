@@ -436,14 +436,19 @@ class TokenizedString:
         tokens = tuple(Token(parts[i]) for i in range(1, len(parts), 2))
         separators = tuple(parts[i] for i in range(2, len(parts) - 1, 2))
 
-        # Split the original string with a case-insensitive regex to preserve
-        # case in pretty_print(). When asciify changes the split structure
-        # (e.g., accented chars become ASCII alnum), fall back to normalized
-        # segments.
-        orig_parts = ALNUM_EXTRACTOR_CI.split(string)
-        orig_segments = tuple(orig_parts[i] for i in range(1, len(orig_parts), 2))
-        if len(orig_segments) != len(tokens):
-            orig_segments = tuple(str(t) for t in tokens)
+        # Extract original-case segments for pretty_print(). When the input
+        # is already ASCII lowercase (the common case), the normalized split
+        # is identical and we skip the second regex.
+        if normalized_str == string:
+            orig_segments = tuple(parts[i] for i in range(1, len(parts), 2))
+        else:
+            orig_parts = ALNUM_EXTRACTOR_CI.split(string)
+            orig_segments = tuple(
+                orig_parts[i] for i in range(1, len(orig_parts), 2)
+            )
+            # Asciify changed the split structure: fall back to normalized.
+            if len(orig_segments) != len(tokens):
+                orig_segments = tuple(str(t) for t in tokens)
 
         return tokens, separators, orig_segments
 
@@ -494,18 +499,21 @@ class TokenizedString:
         if len(a) == len(b):
             return 0
 
-        # One tuple is a prefix of the other. Examine extra tokens.
+        # One tuple is a prefix of the other. Find the first non-zero
+        # extra token to decide the outcome.
         shorter_len = min(len(a), len(b))
         longer = b if len(a) < len(b) else a
-        # Drop trailing zero-integer tokens (version padding).
-        significant = [t for t in longer[shorter_len:] if not (t.isint and t.integer == 0)]
+        first_significant = next(
+            (t for t in longer[shorter_len:] if not (t.isint and t.integer == 0)),
+            None,
+        )
 
-        if not significant:
+        if first_significant is None:
             return 0
 
         # String token means pre-release suffix → shorter (release) wins.
         # Integer token means additional version component → longer wins.
-        longer_wins = 1 if significant[0].isint else -1
+        longer_wins = 1 if first_significant.isint else -1
         return -longer_wins if len(a) < len(b) else longer_wins
 
     def __eq__(self, other):

@@ -361,6 +361,9 @@ commits = [
 exclude = [ "labels", "skills/awesome-triage" ]
 # Source paths for workflow trigger filters.
 workflow.source-paths = [ "meta_package_manager" ]
+# lxml cannot compile on Windows ARM64.
+# See: https://bugs.launchpad.net/lxml/+bug/2004481
+test-matrix.exclude = [ { os = "windows-11-arm" } ]
 # Test plan for binary testing.
 test-plan.file = "./tests/cli-test-plan.yaml"
 # Extra label rules appended to repomatic's default labeller configurations.

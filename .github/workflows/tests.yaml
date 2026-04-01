@@ -32,51 +32,31 @@ concurrency:
 
 jobs:
 
+  metadata:
+    name: 🧬 Project metadata
+    runs-on: ubuntu-slim
+    outputs:
+      metadata: ${{ steps.metadata.outputs.metadata }}
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: astral-sh/setup-uv@v7.4.0
+      - name: Run repomatic metadata
+        id: metadata
+        run: >
+          uvx --no-progress repomatic metadata
+          --format github-json --output "$GITHUB_OUTPUT"
+          test_matrix test_matrix_pr
+
   tests:
+    needs: metadata
     strategy:
       # We delegate the failure decision to each job, by the way of the "continue-on-error" flag.
       fail-fast: false
-      matrix:
-        # Available OS: https://github.com/actions/runner-images#available-images
-        # To speed up the tests, we only test the latest available OS for each platform.
-        os:
-          - ubuntu-24.04      # x86
-          - ubuntu-24.04-arm  # arm64
-          - macos-26          # arm64
-          - macos-15-intel    # x86
-          # XXX windows-11-arm excluded: lxml cannot compile on Windows ARM64.
-          # See: https://bugs.launchpad.net/lxml/+bug/2004481
-          - windows-2025      # x86
-        # For Python, we only test against the oldest and newest major supported version and skip intermediates. We
-        # also test on the upcoming development version to anticipate issues.
-        python-version:
-          - "3.10"
-          # Ignore intermediate versions to reduce CI load.
-          # - "3.11"
-          # - "3.12"
-          # - "3.13"
-          - "3.14"
-          - "3.14t"
-          - "3.15"
-        include:
-          # Default all jobs as stable, unless marked otherwise below.
-          - state: stable
-          # XXX Python 3.15 is still in development.
-          - state: unstable
-            python-version: "3.15"
-          # Skip experimental Python versions on PRs to reduce CI load.
-          - full-matrix-only: true
-            python-version: "3.14t"
-          - full-matrix-only: true
-            python-version: "3.15"
-          # Skip redundant architecture variants on PRs.
-          - full-matrix-only: true
-            os: macos-15-intel
-          - full-matrix-only: true
-            os: ubuntu-24.04-arm
+      matrix: >-
+        ${{ github.event_name != 'pull_request'
+        && fromJSON(needs.metadata.outputs.metadata).test_matrix
+        || fromJSON(needs.metadata.outputs.metadata).test_matrix_pr }}
     name: "${{ matrix.state == 'stable' && '✅' || '⁉️' }} ${{ matrix.os }} / py${{ matrix.python-version }}"
-    # Skip experimental Python versions and redundant architecture variants on PRs.
-    if: "!matrix.full-matrix-only || github.event_name != 'pull_request'"
     runs-on: ${{ matrix.os }}
     # We keep going when a job flagged as not stable fails.
     continue-on-error: ${{ matrix.state == 'unstable' }}

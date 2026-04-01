@@ -12,7 +12,8 @@
 - [yarn] Split into Yarn Classic and Yarn Berry managers. Restrict Classic to `<2.0.0`. Closes {issue}`1548`.
 - [yarn-berry] Add Yarn Berry (2.x+) manager with `search` and `cleanup` support.
 - [mpm] Add `must_succeed` parameter to `run_cli` for structured-output calls, preventing silent data loss on CLI failures. Refs {issue}`1703`.
-- [mpm] Reduce CI jobs on pull requests from ~47 to ~15 by skipping release builds, experimental Python versions, redundant architecture variants, and install verification tests. Full matrix still runs on push to main.
+- [mpm] Reduce CI jobs on pull requests by skipping release builds, experimental Python versions, redundant architecture variants, and install verification tests. Full matrix still runs on push to main.
+- [mpm] Declare `windows-11-arm` exclusion in `[tool.repomatic.test-matrix]` config instead of hardcoding the test matrix inline.
 - [pacstall] Add Pacstall package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, and `sync` support. Closes {issue}`1610`.
 - [zerobrew] Add ZeroBrew manager with `installed`, `outdated`, `install`, and `remove` support. Closes {issue}`1681`.
 - [deb-get] Add deb-get package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support. Closes {issue}`1609`.

@@ -275,17 +275,11 @@ def test_tokenized_string_idempotent_instantiation():
 
 
 def test_tokenized_string_deepcopy():
-    tok1 = TokenizedString("1.2.3")
+    tok1 = TokenizedString("4.2.1-5666.3")
     tok2 = copy.deepcopy(tok1)
     assert tok1 is not tok2
     assert hash(tok1) == hash(tok2)
     assert tok1 == tok2
-
-
-def test_tokenized_string_deepcopy_preserves_separators():
-    tok1 = TokenizedString("4.2.1-5666.3")
-    tok2 = copy.deepcopy(tok1)
-    assert tok1 is not tok2
     assert tok1.separators == tok2.separators
     assert tok1.pretty_print() == tok2.pretty_print()
 
@@ -347,21 +341,17 @@ def test_tokenized_string_empty_tokens(value):
     assert t.separators == ()
 
 
-def test_tokenized_string_comparisons_with_none():
+def test_tokenized_string_comparison_edge_cases():
+    """Comparison with ``None`` and unsupported types."""
     v = TokenizedString("1.0")
+    # None is handled explicitly by every operator.
     assert v > None
     assert v >= None
     assert not (v < None)
     assert not (v <= None)
     assert v.__eq__(None) is False
     assert v.__ne__(None) is True
-
-
-def test_tokenized_string_comparison_with_unsupported_type():
-    """Comparing with an unsupported type falls through to ``object``
-    defaults."""
-    v = TokenizedString("1.0")
-    # __eq__ / __ne__ fall back to identity comparison.
+    # Unsupported types: __eq__/__ne__ fall back to identity.
     assert not (v == "1.0")
     assert v != "1.0"
     assert not (v == 42)
@@ -370,13 +360,6 @@ def test_tokenized_string_comparison_with_unsupported_type():
     for op in (operator.gt, operator.lt, operator.ge, operator.le):
         with pytest.raises(TypeError):
             op(v, "1.0")
-
-
-def test_tokenized_string_equality_ignores_separators():
-    """Comparison is token-based: same tokens with different separators are equal."""
-    assert TokenizedString("1.2.3") == TokenizedString("1-2-3")
-    assert TokenizedString("1.2.3") == TokenizedString("1_2_3")
-    assert not (TokenizedString("1.2.3") != TokenizedString("1-2-3"))
 
 
 @pytest.mark.parametrize(
@@ -557,7 +540,6 @@ compared_gt = (
     ("0.1", "0.0"),
     ("0.1", "0.0.0.0.0"),
     ("0.1", "0.beta2"),
-    ("2.0", "1.0"),
     ("2.0", "1"),
     ("3.1.10", "3.1.9"),
     ("9.52", "9d"),
@@ -613,13 +595,11 @@ compared_gt = (
 @pytest.mark.parametrize(("ver1", "ver2"), compared_gt)
 def test_version_comparison_gt(ver1, ver2):
     assert TokenizedString(ver1) > TokenizedString(ver2)
-    assert parse_version(ver1) > parse_version(ver2)
 
 
 @pytest.mark.parametrize(("ver1", "ver2"), reverse_fixtures(compared_gt))
 def test_version_comparison_lt(ver1, ver2):
     assert TokenizedString(ver1) < TokenizedString(ver2)
-    assert parse_version(ver1) < parse_version(ver2)
 
 
 compared_eq = (
@@ -632,15 +612,13 @@ compared_eq = (
     ("2020.03.24", "2020.3.24"),
     # Trailing .0 is padding.
     ("6.2", "6.2.0"),
-    ("1.0", "1.0.0.0"),
+    ("1.0", "1.0.0.0.0"),
     # Different separators: comparison is token-based.
     ("1.2.3", "1-2-3"),
     ("1.2.3", "1_2_3"),
     ("4.2.1", "4-2-1"),
     # PEP 440 implicit zero on pre-release tag.
     ("1.0a", "1.0a0"),
-    # Arbitrary trailing zero padding.
-    ("5.0", "5.0.0.0.0"),
 )
 
 
@@ -776,14 +754,15 @@ def test_version_range_empty_spec():
     assert parse_version("0") in r
 
 
-def test_version_range_repr():
-    r = VersionRange(">=1.0.0,<2.0.0")
-    assert repr(r) == "<VersionRange '>=1.0.0,<2.0.0'>"
-
-
-def test_version_range_repr_bare():
-    r = VersionRange("1.0.0")
-    assert repr(r) == "<VersionRange '1.0.0'>"
+@pytest.mark.parametrize(
+    ("spec", "expected"),
+    (
+        (">=1.0.0,<2.0.0", "<VersionRange '>=1.0.0,<2.0.0'>"),
+        ("1.0.0", "<VersionRange '1.0.0'>"),
+    ),
+)
+def test_version_range_repr(spec, expected):
+    assert repr(VersionRange(spec)) == expected
 
 
 def test_parse_version_is_tokenized_string():

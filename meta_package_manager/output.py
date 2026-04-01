@@ -65,8 +65,13 @@ class SortableField(StrEnum):
 
 
 def colored_diff(a, b, style_common=None, style_a=None, style_b=None):
-    """Highlight the most common left part between ``a`` and ``b`` strings and their
+    """Highlight the common left part between ``a`` and ``b`` strings and their
     trailing differences.
+
+    The split point snaps back to the nearest separator boundary so that the
+    entire differing token and its preceding separator are highlighted. For
+    ``2.1.1774638290`` vs ``2.1.1774896198``, the common part is ``2.1`` and
+    the diff includes ``.1774638290`` / ``.1774896198``.
 
     Always returns 2 strings.
 
@@ -90,6 +95,18 @@ def colored_diff(a, b, style_common=None, style_a=None, style_b=None):
             common_size
         ]:
             common_size += 1
+
+    # Snap the split point back to a separator boundary so the highlighted
+    # diff includes the full diverging token and its preceding separator.
+    if common_size and (common_size < len(a) or common_size < len(b)):
+        snap = common_size
+        # Walk back past the partial alnum token.
+        while snap > 0 and a[snap - 1].isalnum():
+            snap -= 1
+        # Walk back past the separator itself.
+        while snap > 0 and not a[snap - 1].isalnum():
+            snap -= 1
+        common_size = snap
 
     # Styling of common and different parts.
     colored_a = ""

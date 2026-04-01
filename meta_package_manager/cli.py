@@ -64,10 +64,10 @@ from .output import (
     BarPluginRenderer,
     SortableField,
     SortedTableFormatOption,
-    colored_diff,
     print_json,
     print_stats,
 )
+from .version import diff_versions
 from .pool import pool
 from .sbom import SBOM, SPDX, CycloneDX, ExportFormat
 from .specifier import VERSION_SEP, Solver, Specifier
@@ -741,7 +741,7 @@ def outdated(ctx, plugin_output):
     table = []
     for manager_id, outdated_pkg in outdated_data.items():
         for info in outdated_pkg["packages"]:
-            installed_version, latest_version = colored_diff(
+            installed_version, latest_version = diff_versions(
                 info["installed_version"] if info["installed_version"] else "?",
                 info["latest_version"],
             )

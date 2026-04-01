@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import copy
 import operator
+import re
 from random import shuffle
 
 import pytest
@@ -26,6 +27,7 @@ from meta_package_manager.version import (
     Token,
     TokenizedString,
     VersionRange,
+    diff_versions,
     is_version,
     parse_version,
 )
@@ -771,6 +773,59 @@ def test_parse_version_is_tokenized_string():
     v = parse_version("1.2.3")
     assert isinstance(v, TokenizedString)
     assert v == TokenizedString("1.2.3")
+
+
+def _strip_ansi(s: str) -> str:
+    """Remove ANSI escape codes, returning plain text."""
+    return re.sub(r"\x1b\[[0-9;]*m", "", s)
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "expected_common", "expected_old", "expected_new"),
+    (
+        # Token boundary: diff includes separator + full diverging token.
+        ("2.1.1774638290", "2.1.1774896198", "2.1", ".1774638290", ".1774896198"),
+        # Patch bump.
+        ("1.2.3", "1.2.4", "1.2", ".3", ".4"),
+        # Minor bump.
+        ("1.2.3", "1.3.0", "1", ".2.3", ".3.0"),
+        # Major bump: no separator before first token.
+        ("1.2.3", "2.0.0", "", "1.2.3", "2.0.0"),
+        # Pre-release tag change.
+        ("1.0.0-alpha", "1.0.0-beta", "1.0.0", "-alpha", "-beta"),
+        # Year-based: first token differs, no common separator.
+        ("2013.0523", "2024.0010", "", "2013.0523", "2024.0010"),
+        # No common prefix at all.
+        ("abc", "def", "", "abc", "def"),
+        # No separators in either string.
+        ("12345", "12399", "", "12345", "12399"),
+        # Identical versions: everything is common.
+        ("1.2.3", "1.2.3", "1.2.3", "", ""),
+        # One side empty.
+        ("", "1.0", "", "", "1.0"),
+        ("1.0", "", "", "1.0", ""),
+        # Both empty.
+        ("", "", "", "", ""),
+        # Alpha bump within pre-release.
+        ("3.12.0a4", "3.12.0a5", "3.12", ".0a4", ".0a5"),
+        # TokenizedString inputs.
+        (TokenizedString("1.2.3"), TokenizedString("1.2.4"), "1.2", ".3", ".4"),
+    ),
+)
+def test_diff_versions(old, new, expected_common, expected_old, expected_new):
+    styled_old, styled_new = diff_versions(old, new)
+
+    # Plain text must equal the full original string.
+    assert _strip_ansi(styled_old) == (str(old) if old else "")
+    assert _strip_ansi(styled_new) == (str(new) if new else "")
+
+    # Verify the split point.
+    full_old = str(old) if old else ""
+    full_new = str(new) if new else ""
+    assert full_old[: len(expected_common)] == expected_common
+    assert full_old[len(expected_common) :] == expected_old
+    assert full_new[: len(expected_common)] == expected_common
+    assert full_new[len(expected_common) :] == expected_new
 
 
 # --- Known limitations ---

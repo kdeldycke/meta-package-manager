@@ -64,62 +64,6 @@ class SortableField(StrEnum):
     VERSION = "version"
 
 
-def colored_diff(a, b, style_common=None, style_a=None, style_b=None):
-    """Highlight the common left part between ``a`` and ``b`` strings and their
-    trailing differences.
-
-    The split point snaps back to the nearest separator boundary so that the
-    entire differing token and its preceding separator are highlighted. For
-    ``2.1.1774638290`` vs ``2.1.1774896198``, the common part is ``2.1`` and
-    the diff includes ``.1774638290`` / ``.1774896198``.
-
-    Always returns 2 strings.
-
-    ..todo::
-
-        Contribute back to click-extra.
-    """
-    # Set defaults styling methods.
-    style_common = partial(style, fg="bright_black")
-    style_a = partial(style, fg="red")
-    style_b = partial(style, fg="green")
-
-    if isinstance(a, TokenizedString):
-        a = str(a)
-    if isinstance(b, TokenizedString):
-        b = str(b)
-
-    common_size = 0
-    if a and b:
-        while (min(len(a), len(b)) - 1) >= common_size and a[common_size] == b[
-            common_size
-        ]:
-            common_size += 1
-
-    # Snap the split point back to a separator boundary so the highlighted
-    # diff includes the full diverging token and its preceding separator.
-    if common_size and (common_size < len(a) or common_size < len(b)):
-        snap = common_size
-        # Walk back past the partial alnum token.
-        while snap > 0 and a[snap - 1].isalnum():
-            snap -= 1
-        # Walk back past the separator itself.
-        while snap > 0 and not a[snap - 1].isalnum():
-            snap -= 1
-        common_size = snap
-
-    # Styling of common and different parts.
-    colored_a = ""
-    colored_b = ""
-    if common_size:
-        colored_a = colored_b = style_common(a[:common_size])
-    if a:
-        colored_a += style_a(a[common_size:])
-    if b:
-        colored_b += style_b(b[common_size:])
-
-    return colored_a, colored_b
-
 
 def print_json(data):
     """Pretty-print Python data to JSON and output results to ``<stdout>``.

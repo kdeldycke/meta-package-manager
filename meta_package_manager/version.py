@@ -628,3 +628,44 @@ def is_version(string: str) -> bool:
 
     # There is only one non-integer token.
     return len(version.tokens) == 1
+
+
+def diff_versions(
+    old: str | TokenizedString,
+    new: str | TokenizedString,
+) -> tuple[str, str]:
+    """Color the common prefix gray, the old suffix red, the new suffix green.
+
+    The split point snaps to the nearest separator boundary so the full
+    diverging token and its preceding separator are highlighted. For
+    ``2.1.1774638290`` vs ``2.1.1774896198``, the common part is ``2.1``
+    and the diff includes ``.1774638290`` / ``.1774896198``.
+    """
+    from click_extra import style
+
+    old = str(old)
+    new = str(new)
+
+    # Longest common character prefix.
+    common = 0
+    for a, b in zip(old, new):
+        if a != b:
+            break
+        common += 1
+
+    # Snap back to a separator boundary when the strings actually differ.
+    if common and common < max(len(old), len(new)):
+        snap = common
+        # Walk back past the partial alnum token.
+        while snap > 0 and old[snap - 1].isalnum():
+            snap -= 1
+        # Walk back past the separator itself.
+        while snap > 0 and not old[snap - 1].isalnum():
+            snap -= 1
+        common = snap
+
+    prefix = style(old[:common], fg="bright_black") if common else ""
+    return (
+        prefix + style(old[common:], fg="red") if old else "",
+        prefix + style(new[common:], fg="green") if new else "",
+    )

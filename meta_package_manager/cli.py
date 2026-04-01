@@ -24,7 +24,6 @@ from configparser import RawConfigParser
 from datetime import datetime, timezone
 from functools import partial
 from io import TextIOWrapper
-from operator import attrgetter
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import patch
@@ -1154,7 +1153,7 @@ def upgrade(ctx, all, packages_specs):
             )
             # Find all the managers that have the package installed.
             for manager in sourcing_managers:
-                if package_id in map(attrgetter("id"), manager.installed):
+                if package_id in manager.installed_ids:
                     logging.info(
                         f"{package_id} has been installed "
                         f"with {theme.invoked_command(manager.id)}.",
@@ -1226,7 +1225,7 @@ def remove(ctx, packages_specs):
             )
             # Find all the managers that have the package installed.
             for manager in sourcing_managers:
-                if package_id in map(attrgetter("id"), manager.installed):
+                if package_id in manager.installed_ids:
                     logging.info(
                         f"{package_id} has been installed "
                         f"with {theme.invoked_command(manager.id)}.",

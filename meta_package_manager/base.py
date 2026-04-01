@@ -911,6 +911,11 @@ class PackageManager(metaclass=MetaPackageManager):
         """
         raise NotImplementedError
 
+    @cached_property
+    def installed_ids(self) -> frozenset[str]:
+        """Installed package IDs, materialized once from :py:meth:`installed`."""
+        return frozenset(pkg.id for pkg in self.installed)
+
     @property
     def outdated(self) -> Iterator[Package]:
         """List installed packages with available upgrades.

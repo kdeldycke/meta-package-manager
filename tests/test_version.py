@@ -142,6 +142,80 @@ def test_token_hash():
 
 
 @pytest.mark.parametrize(
+    ("value", "expected"),
+    (
+        (0, "0"),
+        (123, "123"),
+        ("abc", "abc"),
+        ("ABC", "ABC"),
+        ("0042", "0042"),
+    ),
+)
+def test_token_str(value, expected):
+    assert str(Token(value)) == expected
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    (
+        (0, 1),
+        (123, 3),
+        ("abc", 3),
+        ("0042", 4),
+        ("a", 1),
+    ),
+)
+def test_token_len(value, expected):
+    assert len(Token(value)) == expected
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    (
+        (0, 0),
+        (123, 123),
+        ("42", 42),
+        ("0042", 42),
+    ),
+)
+def test_token_int(value, expected):
+    assert int(Token(value)) == expected
+
+
+@pytest.mark.parametrize("value", ("abc", "ABC", "123abc"))
+def test_token_int_none_for_non_integers(value):
+    """``Token.integer`` is ``None`` for non-integer tokens."""
+    assert Token(value).integer is None
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    (
+        (0, True),
+        (123, True),
+        ("42", True),
+        ("0042", True),
+        ("abc", False),
+        ("ABC", False),
+        ("123abc", False),
+    ),
+)
+def test_token_isint(value, expected):
+    assert Token(value).isint is expected
+
+
+def test_token_repr():
+    r = repr(Token(42))
+    assert "Token" in r
+    assert "42" in r
+
+
+def test_token_format():
+    assert f"{Token('abc'):>10}" == "       abc"
+    assert f"{Token(42):>10}" == "        42"
+
+
+@pytest.mark.parametrize(
     "value",
     (None, 0, 123, -1, "0", "1.2.3", "abc", "A-B-C", "123   a bc \n"),
 )
@@ -164,9 +238,9 @@ def test_tokenized_string_hash():
     assert hash(TokenizedString("9999")) == hash(TokenizedString(9999))
     assert hash(TokenizedString("09999")) != hash(TokenizedString("9999"))
     assert hash(TokenizedString("09999")) != hash(TokenizedString(9999))
-    assert hash(TokenizedString("1.2.3", separator=".")) != hash(
-        TokenizedString("1.2.3", separator="_"),
-    )
+    # Different separators produce different hashes.
+    assert hash(TokenizedString("1.2.3")) != hash(TokenizedString("1-2-3"))
+    assert hash(TokenizedString("1.2.3")) != hash(TokenizedString("1_2_3"))
 
 
 def test_tokenized_string_noop_instantiation():
@@ -187,6 +261,150 @@ def test_tokenized_string_deepcopy():
     assert tok1 is not tok2
     assert hash(tok1) == hash(tok2)
     assert tok1 == tok2
+
+
+def test_tokenized_string_deepcopy_preserves_separators():
+    tok1 = TokenizedString("4.2.1-5666.3")
+    tok2 = copy.deepcopy(tok1)
+    assert tok1 is not tok2
+    assert tok1.separators == tok2.separators
+    assert tok1.pretty_print() == tok2.pretty_print()
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    (
+        ("1.2.3", "1.2.3"),
+        (" 1.2.3 ", "1.2.3"),
+        (42, "42"),
+        ("latest", "latest"),
+    ),
+)
+def test_tokenized_string_str(value, expected):
+    assert str(TokenizedString(value)) == expected
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    (
+        ("1.2.3", 5),
+        ("latest", 6),
+        (42, 2),
+        ("", 0),
+    ),
+)
+def test_tokenized_string_len(value, expected):
+    assert len(TokenizedString(value)) == expected
+
+
+def test_tokenized_string_repr():
+    r = repr(TokenizedString("1.2.3"))
+    assert "TokenizedString" in r
+    assert "1.2.3" in r
+
+
+def test_tokenized_string_format():
+    assert f"{TokenizedString('1.2.3'):>10}" == "     1.2.3"
+
+
+def test_tokenized_string_iter():
+    tokens = list(TokenizedString("1.2.3"))
+    assert len(tokens) == 3
+    assert all(isinstance(t, Token) for t in tokens)
+    assert [str(t) for t in tokens] == ["1", "2", "3"]
+
+
+def test_tokenized_string_from_integer():
+    t = TokenizedString(42)
+    assert t.tokens == (Token(42),)
+    assert t.separators == ()
+    assert str(t) == "42"
+
+
+@pytest.mark.parametrize("value", ("", "...", "---", "___"))
+def test_tokenized_string_empty_tokens(value):
+    t = TokenizedString(value)
+    assert t.tokens == ()
+    assert t.separators == ()
+
+
+def test_tokenized_string_comparisons_with_none():
+    v = TokenizedString("1.0")
+    assert v > None
+    assert v >= None
+    assert not (v < None)
+    assert not (v <= None)
+    assert v.__eq__(None) is False
+    assert v.__ne__(None) is True
+
+
+def test_tokenized_string_equality_ignores_separators():
+    """Comparison is token-based: same tokens with different separators are equal."""
+    assert TokenizedString("1.2.3") == TokenizedString("1-2-3")
+    assert TokenizedString("1.2.3") == TokenizedString("1_2_3")
+    assert not (TokenizedString("1.2.3") != TokenizedString("1-2-3"))
+
+
+@pytest.mark.parametrize(
+    ("v_string", "expected_seps"),
+    (
+        # Single token: no separators.
+        ("latest", ()),
+        ("42", ()),
+        # Dot-separated.
+        ("1.2.3", (".", ".")),
+        ("0.0.0", (".", ".")),
+        # Dash-separated.
+        ("1-2-3", ("-", "-")),
+        # Underscore-separated.
+        ("1_2_3", ("_", "_")),
+        # Mixed separators.
+        ("4.2.1-5666.3", (".", ".", "-", ".")),
+        ("1.3_1", (".", "_")),
+        # Implicit separators at digit-letter boundaries.
+        ("1.2beta5", (".", "", "")),
+        ("r2917_1", ("", "_")),
+        ("20190718-r0", ("-", "")),
+        ("v0.9.4.3", ("", ".", ".", ".")),
+        # Double/adjacent separators stored verbatim.
+        ("4.2.1-5666..3", (".", ".", "-", "..")),
+        ("4.2.1--5666.3", (".", ".", "--", ".")),
+        # Plus separator (Gentoo/OpenWrt epochs).
+        ("4.6.0+git+20160126-2", (".", ".", "+", "+", "-")),
+        # Colon separator (Debian epochs).
+        ("1:5.25-2ubuntu1", (":", ".", "-", "", "")),
+        # Space separator.
+        ("1 2 3", (" ", " ")),
+        # Leading zeros preserved in pretty_print tokens.
+        ("2020.03.24", (".", ".")),
+        ("2.40.20161221.0239", (".", ".", ".")),
+        # Empty string.
+        ("", ()),
+    ),
+)
+def test_tokenized_string_separators_and_pretty_print(v_string, expected_seps):
+    t = TokenizedString(v_string)
+    assert t.separators == expected_seps
+    assert t.pretty_print() == v_string
+
+
+@pytest.mark.parametrize(
+    ("v_string", "expected_seps", "expected_pp"),
+    (
+        # Case normalization: uppercase becomes lowercase.
+        ("4.2.1-ABC-5666.3", (".", ".", "-", "-", "."), "4.2.1-abc-5666.3"),
+        # Leading separator is prefix in split, not stored.
+        (".4.2.1", (".", "."), "4.2.1"),
+        # Trailing separator is suffix in split, not stored.
+        ("4.2.1.", (".", "."), "4.2.1"),
+    ),
+)
+def test_tokenized_string_separators_and_lossy_pretty_print(
+    v_string, expected_seps, expected_pp
+):
+    t = TokenizedString(v_string)
+    assert t.separators == expected_seps
+    assert t.pretty_print() == expected_pp
 
 
 version_list = (
@@ -229,6 +447,37 @@ version_list = (
         (13, 0, 2, 8, "d", 4173, "c", 853231432, "f", 1, "e", 99, "d", 882),
     ),
     ("1.01+20150706hgc3698e0+dfsg-2", (1, 1, 20150706, "hgc", 3698, "e", 0, "dfsg", 2)),
+    # PEP 440 pre-release tags.
+    ("1.0a1", (1, 0, "a", 1)),
+    ("1.0rc1", (1, 0, "rc", 1)),
+    ("1.0.post1", (1, 0, "post", 1)),
+    ("1.0.dev456", (1, 0, "dev", 456)),
+    # Calendar versioning.
+    ("2024.1.15", (2024, 1, 15)),
+    ("24.04", (24, 4)),
+    # Long version chain.
+    ("1.2.3.4.5.6.7.8.9.10", (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)),
+    # Single digit.
+    ("0", (0,)),
+    ("9", (9,)),
+    # Java build metadata.
+    ("21.0.2+13", (21, 0, 2, 13)),
+    # Linux kernel style.
+    ("6.5.0-44-generic", (6, 5, 0, 44, "generic")),
+    # Windows four-part version.
+    ("10.0.19045.4529", (10, 0, 19045, 4529)),
+    # Debian tilde separator.
+    ("1.2.3~beta1", (1, 2, 3, "beta", 1)),
+    # Git describe output.
+    ("v2.42.0-rc2-3-gabcdef1", ("v", 2, 42, 0, "rc", 2, 3, "gabcdef", 1)),
+    # Large single number.
+    ("99999999999999999", (99999999999999999,)),
+    # Node.js semver.
+    ("18.17.1", (18, 17, 1)),
+    # Arch Linux pkgrel.
+    ("5.15.90.1-2", (5, 15, 90, 1, 2)),
+    # Snap revision style.
+    ("2.60.4+git2.e7f88a7", (2, 60, 4, "git", 2, "e", 7, "f", 88, "a", 7)),
 )
 
 
@@ -245,6 +494,9 @@ def test_version_tokenizer(v_string, v_tuple):
         # Not recognized as versions.
         ("left-pad", False),
         ("@eslint/json", False),
+        ("my-package-name", False),
+        ("foo_bar_baz", False),
+        ("some-lib", False),
     ),
 )
 def test_is_version(v_string, expected):
@@ -272,6 +524,22 @@ compared_gt = (
     ("2020.03.24", "2019.11.28"),
     # ("14.0.1,7:664493ef4a6946b186ff29eb326336a2",
     #  "14,36:076bab302c7b4508975440c56f6cc26a"),
+    # Major version dominates even when minor/patch are larger.
+    ("10.0.0", "9.99.99"),
+    # Long version chain with trailing difference.
+    ("1.0.0.0.0.1", "1.0.0.0.0.0"),
+    # Single-segment integer comparison, not lexicographic.
+    ("10", "9"),
+    # Integer input.
+    (20240101, 20231231),
+    # Semver patch bump.
+    ("1.0.1", "1.0.0"),
+    # Calendar versioning.
+    ("2024.1.15", "2023.12.31"),
+    # Pre-release with higher base version.
+    ("3.12.1", "3.12.0a4"),
+    # Linux kernel versions.
+    ("6.5.0", "5.15.90"),
 )
 
 
@@ -285,6 +553,31 @@ def test_version_comparison_gt(ver1, ver2):
 def test_version_comparison_lt(ver1, ver2):
     assert TokenizedString(ver1) < TokenizedString(ver2)
     assert parse_version(ver1) < parse_version(ver2)
+
+
+compared_eq = (
+    # Identical strings.
+    ("1.2.3", "1.2.3"),
+    ("0", "0"),
+    ("latest", "latest"),
+    # Leading zeros: tokens compare as integers.
+    ("01.02.03", "1.2.3"),
+    ("2020.03.24", "2020.3.24"),
+    # Different separators: comparison is token-based.
+    ("1.2.3", "1-2-3"),
+    ("1.2.3", "1_2_3"),
+    ("4.2.1", "4-2-1"),
+)
+
+
+@pytest.mark.parametrize(("ver1", "ver2"), compared_eq)
+def test_version_comparison_eq(ver1, ver2):
+    assert TokenizedString(ver1) == TokenizedString(ver2)
+    assert not (TokenizedString(ver1) != TokenizedString(ver2))
+    assert TokenizedString(ver1) >= TokenizedString(ver2)
+    assert TokenizedString(ver1) <= TokenizedString(ver2)
+    assert not (TokenizedString(ver1) > TokenizedString(ver2))
+    assert not (TokenizedString(ver1) < TokenizedString(ver2))
 
 
 @pytest.mark.parametrize(
@@ -303,6 +596,27 @@ def test_version_comparison_lt(ver1, ver2):
             "r02920_1",
             "r02920_20",
             "r02920_021",
+        ],
+        # Semver progression.
+        [
+            None,
+            "0.1.0",
+            "0.2.0",
+            "0.10.0",
+            "1.0.0",
+            "1.0.1",
+            "1.1.0",
+            "1.10.0",
+            "2.0.0",
+            "10.0.0",
+        ],
+        # Calendar versioning progression.
+        [
+            None,
+            "2019.11.28",
+            "2020.03.24",
+            "2020.12.01",
+            "2024.1.15",
         ],
     ),
 )
@@ -350,12 +664,45 @@ def test_version_sorting(sequence):
         # Range with spaces around constraints.
         (">=1.0.0 , <3.0.0", "2.0.0", True),
         (">=1.0.0 , <3.0.0", "0.5.0", False),
+        # Empty constraint parts are silently ignored.
+        (",1.0.0,", "1.0.0", True),
+        (",1.0.0,", "0.9.0", False),
+        # Three constraints (range with exclusion).
+        (">=1.0.0,<3.0.0,!=2.0.0", "1.5.0", True),
+        (">=1.0.0,<3.0.0,!=2.0.0", "2.0.0", False),
+        (">=1.0.0,<3.0.0,!=2.0.0", "0.5.0", False),
+        # Tight pinning: lower == upper.
+        (">=1.5.0,<=1.5.0", "1.5.0", True),
+        (">=1.5.0,<=1.5.0", "1.5.1", False),
+        # Single > boundary.
+        (">0", "0.0.1", True),
+        (">0", "0", False),
     ),
 )
 def test_version_range(spec, version, expected):
     assert (parse_version(version) in VersionRange(spec)) is expected
 
 
+def test_version_range_empty_spec():
+    """Empty spec has no constraints, so any version satisfies it."""
+    r = VersionRange("")
+    assert parse_version("1.0.0") in r
+    assert parse_version("0") in r
+
+
 def test_version_range_repr():
     r = VersionRange(">=1.0.0,<2.0.0")
     assert repr(r) == "<VersionRange '>=1.0.0,<2.0.0'>"
+
+
+def test_version_range_repr_bare():
+    r = VersionRange("1.0.0")
+    assert repr(r) == "<VersionRange '1.0.0'>"
+
+
+def test_parse_version_is_tokenized_string():
+    """``parse_version`` is an alias for ``TokenizedString``."""
+    assert parse_version is TokenizedString
+    v = parse_version("1.2.3")
+    assert isinstance(v, TokenizedString)
+    assert v == TokenizedString("1.2.3")

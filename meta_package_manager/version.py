@@ -26,7 +26,6 @@ from __future__ import annotations
 import operator
 import re
 from copy import deepcopy
-from functools import partial
 
 from boltons import strutils
 
@@ -166,14 +165,14 @@ class TokenizedString:
         Make it a dataclass.
     """
 
-    separator: str = ""
     string: str
     tokens: tuple[Token, ...] = ()
+    separators: tuple[str, ...] = ()
 
     def __hash__(self):
         """A ``TokenizedString`` is made unique by its original string and tuple of
         parsed tokens."""
-        return hash((self.string, self.separator, self.tokens))
+        return hash((self.string, self.separators, self.tokens))
 
     def __new__(cls, value, *args, **kwargs):
         """Return same object if a ``TokenizedString`` parameter is used at
@@ -198,7 +197,7 @@ class TokenizedString:
         # after that.
         return super().__new__(cls)
 
-    def __init__(self, value: str | int, separator: str = "-") -> None:
+    def __init__(self, value: str | int) -> None:
         """Parse and tokenize the provided raw ``value``."""
         if isinstance(value, TokenizedString):
             # Skip initialization for instance of the class, as this __init__() gets
@@ -213,8 +212,7 @@ class TokenizedString:
         else:
             msg = f"{type(value)} not supported"  # type: ignore[unreachable]
             raise TypeError(msg)
-        self.tokens = tuple(self.tokenize(self.string))
-        self.separator = separator
+        self.tokens, self.separators = self.tokenize(self.string)
 
     def __deepcopy__(self, memo):
         """Generic recursive deep copy of the current instance.
@@ -251,19 +249,34 @@ class TokenizedString:
         return self.string.__format__(format_spec)
 
     def pretty_print(self) -> str:
-        return self.separator.join(map(str, self.tokens))
+        """Reconstruct the tokenized string using the original separators."""
+        parts: list[str] = []
+        for i, token in enumerate(self.tokens):
+            parts.append(str(token))
+            if i < len(self.separators):
+                parts.append(self.separators[i])
+        return "".join(parts)
 
-    @classmethod
-    def tokenize(cls, string: str) -> Iterator[Token]:
+    @staticmethod
+    def tokenize(string: str) -> tuple[tuple[Token, ...], tuple[str, ...]]:
         """Tokenize a string: ignore case and split at each non-alphanumeric characters.
 
-        Returns a list of ``Token`` instances.
+        Returns a tuple of ``Token`` instances and a tuple of separator strings found
+        between consecutive tokens.
+
+        ``re.split()`` with a capturing group alternates non-matching segments (even
+        indices) and captured matches (odd indices)::
+
+            ALNUM_EXTRACTOR.split("4.2.1-5666.3")
+            ['', '4', '.', '2', '.', '1', '-', '5666', '.', '3', '']
+             pre   m   sep   m   sep   m   sep    m     sep   m   suf
         """
         normalized_str = strutils.asciify(string).lower().decode()
+        parts = ALNUM_EXTRACTOR.split(normalized_str)
 
-        for segment in ALNUM_EXTRACTOR.split(normalized_str):
-            if segment.isalnum():
-                yield Token(segment)
+        tokens = tuple(Token(parts[i]) for i in range(1, len(parts), 2))
+        separators = tuple(parts[i] for i in range(2, len(parts) - 1, 2))
+        return tokens, separators
 
     """ ``TokenizedString`` can be compared as tuples as-is.
 
@@ -330,12 +343,8 @@ class TokenizedString:
         return super().__le__(other)
 
 
-parse_version = partial(TokenizedString, separator=".")
-"""Utility method tweaking ``TokenizedString`` for dot-based serialization.
-
-..todo::
-    Enforce splitting of token along separator.
-"""
+parse_version = TokenizedString
+"""Alias for ``TokenizedString`` used in version-comparison contexts."""
 
 
 RANGE_OPERATOR = re.compile(r"(?P<op>[><=!]=?|!=)\s*(?P<version>.+)")

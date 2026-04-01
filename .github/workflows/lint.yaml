@@ -13,6 +13,6 @@ name: 🧹 Lint
 jobs:
 
   lint:
-    uses: kdeldycke/repomatic/.github/workflows/lint.yaml@9314ce774915f19449393a0151c8d44a254f29ca # v6.9.1.dev0
+    uses: kdeldycke/repomatic/.github/workflows/lint.yaml@09b06a00c592eef7f7a3623563e73a443016b3e2 # v6.9.1.dev0
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}

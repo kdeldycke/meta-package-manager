@@ -9,6 +9,6 @@ name: 🪄 Autofix
 jobs:
 
   autofix:
-    uses: kdeldycke/repomatic/.github/workflows/autofix.yaml@204a868c5345477f62a29715d2838ac1c6daa3ee # v6.9.0
+    uses: kdeldycke/repomatic/.github/workflows/autofix.yaml@9314ce774915f19449393a0151c8d44a254f29ca # v6.9.1.dev0
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}

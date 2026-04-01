@@ -15,10 +15,88 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """Helpers and utilities to parse and compare version numbers.
 
-Version comparison is a tricky business, see:
-- https://www.python.org/dev/peps/pep-0440/
-- https://github.com/xenoterracide/falsehoods/blob/master/versions.md
-- https://wiki.gentoo.org/wiki/Project:Perl/Version-Scheme
+``mpm`` wraps dozens of package managers, each with its own versioning
+scheme: semver, PEP 440, calendar versioning, Debian epochs, Gentoo
+suffixes, and others. Rather than implementing format-specific parsers,
+this module provides a universal tokenizer that produces good-enough
+ordering across all of them.
+
+Design
+------
+
+The tokenizer splits version strings into alternating **digit** and
+**letter** tokens at every digit/letter boundary and every
+non-alphanumeric separator. Tokens that parse as integers are compared
+numerically; the rest are compared as lowercase strings. This gives
+natural sort order where ``(2019, 0, 1) > (9, 3)`` — something neither
+pure-string nor pure-numeric comparison achieves.
+
+Key rules:
+
+- **Integers outrank strings.** A numeric token always sorts higher than
+  a string token at the same position. This makes ``3.12.0 > 3.12.0a4``
+  (release beats alpha) and ``0.1 > 0.beta2`` work without
+  understanding PEP 440 or semver pre-release semantics.
+
+- **Trailing zeros are padding.** ``6.2`` and ``6.2.0`` compare equal.
+  When one token tuple is a prefix of the other and all extra tokens are
+  zero integers, the versions are equivalent.
+
+- **Pre-release suffixes lose.** When a release version is a prefix of a
+  longer version whose first significant extra token is a string (e.g.,
+  ``"alpha"``, ``"git"``), the shorter release is considered greater.
+
+- **Hex hashes stay whole.** A contiguous run of 7+ hex characters with
+  interleaved digits and letters (at least one letter-then-digit and one
+  digit-then-letter adjacency) is kept as a single opaque token.
+  Without this, ``g6cd4c31`` would shatter into
+  ``("g", 6, "cd", 4, "c", 31)``. The interleaving requirement rejects
+  coincidental hex strings like asciified Unicode (``eeaccee231``), that
+  have only one transition direction.
+
+- **Digit/letter splitting is essential.** Splitting ``ubuntu1`` into
+  ``("ubuntu", 1)`` enables natural numeric ordering of embedded version
+  numbers: ``a4 < a10`` compares correctly because ``4`` and ``10``
+  become integer tokens. Without this split, ``"a4" > "a10"``
+  lexicographically.
+
+Limitations
+-----------
+
+This is a heuristic comparator, not a format-specific parser.
+
+- **PEP 440 ordering** is richer than what we implement. Epochs
+  (``1!``), ``.devN`` ordering relative to pre-releases, and
+  post-release semantics are not handled. Use ``packaging.version`` for
+  strict PEP 440 compliance.
+
+- **Perl floating-point versions** (``1.1 == 1.10``) are treated as
+  ``(1, 1)`` vs ``(1, 10)`` — not equal. The Gentoo three-digit-group
+  conversion scheme is not implemented.
+
+- **Format-specific separators** like Debian epochs (``:``), Java build
+  metadata (``,``), or Perl-style floats (``.``) are treated as plain
+  delimiters, which can produce wrong comparison results when the
+  separator carries structural meaning.
+
+References
+----------
+
+- `PEP 440 <https://peps.python.org/pep-0440/>`_ — Python's version
+  identification spec. Defines ``a``/``b``/``rc`` suffix ordering that
+  our integer-outranks-string rule approximates.
+
+- `Falsehoods about versions
+  <https://github.com/xenoterracide/falsehoods/blob/master/versions.md>`_
+  — 25 assumptions that break in practice. Validates our approach of not
+  assuming any single format (falsehoods 4, 8, 13) and handling mixed
+  numeric/string tokens (falsehoods 2, 3).
+
+- `Gentoo Perl version scheme
+  <https://wiki.gentoo.org/wiki/Project:Perl/Version-Scheme>`_ —
+  illustrates how two incompatible formats (dotted-decimal and
+  floating-point) require careful mapping. A reminder that version
+  comparison cannot be reduced to "split on dots, compare integers."
 """
 
 from __future__ import annotations
@@ -34,9 +112,39 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
 
 
-ALNUM_EXTRACTOR = re.compile("(\\d+ | [a-z]+)", re.VERBOSE)
+ALNUM_EXTRACTOR = re.compile(
+    r"""(
+        (?= [0-9a-f]* [a-f] [0-9] )
+        (?= [0-9a-f]* [0-9] [a-f] )
+        [0-9a-f]{7,}
+        | \d+
+        | [a-z]+
+    )""",
+    re.VERBOSE,
+)
+"""Tokenizer regex with three alternatives tried left-to-right:
 
-ALNUM_EXTRACTOR_CI = re.compile("(\\d+ | [a-z]+)", re.VERBOSE | re.IGNORECASE)
+1. Hex hash (7+ hex chars with interleaved digits and letters) — kept as one token.
+2. Digit sequence.
+3. Letter sequence.
+
+The hex alternative requires both a letter-then-digit adjacency and a digit-then-letter
+adjacency, ensuring at least two transitions. This keeps real hashes
+(``c79e264``, ``d4173c...``) whole while still splitting version qualifiers
+(``ubuntu1``, ``beta5``) and rejecting coincidental hex strings (``eeaccee231``)
+that have only one transition.
+"""
+
+ALNUM_EXTRACTOR_CI = re.compile(
+    r"""(
+        (?= [0-9a-f]* [a-f] [0-9] )
+        (?= [0-9a-f]* [0-9] [a-f] )
+        [0-9a-f]{7,}
+        | \d+
+        | [a-z]+
+    )""",
+    re.VERBOSE | re.IGNORECASE,
+)
 """Case-insensitive variant used to split the original string and preserve case."""
 
 

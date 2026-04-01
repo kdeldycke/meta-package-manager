@@ -108,22 +108,20 @@ import re
 from copy import deepcopy
 
 from boltons import strutils
+from click_extra import style
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
 
 
-ALNUM_EXTRACTOR = re.compile(
-    r"""(
-        (?= [0-9a-f]* [a-f] [0-9] )
-        (?= [0-9a-f]* [0-9] [a-f] )
-        [0-9a-f]{7,}
-        | \d+
-        | [a-z]+
-    )""",
-    re.VERBOSE,
-)
+_ALNUM_PATTERN = r"""(
+    (?= [0-9a-f]* [a-f] [0-9] )
+    (?= [0-9a-f]* [0-9] [a-f] )
+    [0-9a-f]{7,}
+    | \d+
+    | [a-z]+
+)"""
 """Tokenizer regex with three alternatives tried left-to-right:
 
 1. Hex hash (7+ hex chars with interleaved digits and letters) — kept
@@ -140,28 +138,17 @@ splitting version qualifiers (``ubuntu1``, ``beta5``) and rejecting
 coincidental hex strings (``eeaccee231``) that have only one transition.
 """
 
-ALNUM_EXTRACTOR_CI = re.compile(
-    r"""(
-        (?= [0-9a-f]* [a-f] [0-9] )
-        (?= [0-9a-f]* [0-9] [a-f] )
-        [0-9a-f]{7,}
-        | \d+
-        | [a-z]+
-    )""",
-    re.VERBOSE | re.IGNORECASE,
-)
+ALNUM_EXTRACTOR = re.compile(_ALNUM_PATTERN, re.VERBOSE)
+
+ALNUM_EXTRACTOR_CI = re.compile(_ALNUM_PATTERN, re.VERBOSE | re.IGNORECASE)
 """Case-insensitive variant used to split the original string and preserve case."""
 
 
 class Token:
-    """A token is a normalized word, persisting its lossless integer variant.
+    """A normalized word, persisting its lossless integer variant.
 
-    Support natural comparison with ``str`` and ``int`` types.
-
-    We mainly use them here to compare versions and package IDs.
-
-    ..todo::
-        Make it a dataclass.
+    Supports natural comparison with ``str`` and ``int`` types.
+    Used to compare versions and package IDs.
     """
 
     string: str
@@ -237,17 +224,11 @@ class Token:
         """Does the ``Token`` got an equivalent pure integer representation?"""
         return self.integer is not None
 
-    """ Compare the current ``Token`` instance to the other as integers if both can be
-    losslessly interpreted as pure integers.
-
-    If one at least is not an integer, we convert all of them to string to allow
-    comparison.
-
-    When one ``Token`` is an integer and the other is a pure string (i.e., comparing
-    across types between two ``Token`` instances), the integer always sorts higher.
-    This reflects the convention that numeric version segments outrank alphabetic
-    pre-release tags (e.g., ``1 > "beta"``).
-    """
+    # Compare as integers if both can be losslessly interpreted as pure
+    # integers. Otherwise fall back to string comparison. When one Token
+    # is an integer and the other a pure string, the integer always sorts
+    # higher: numeric version segments outrank alphabetic pre-release
+    # tags (e.g., ``1 > "beta"``).
 
     def _match_type(self, other):
         """Returns the safe type with which we can compare the two values."""
@@ -312,9 +293,6 @@ class TokenizedString:
     """Tokenize a string for user-friendly sorting.
 
     Essentially a wrapper around a list of ``Token`` instances.
-
-    ..todo::
-        Make it a dataclass.
     """
 
     string: str
@@ -452,22 +430,9 @@ class TokenizedString:
 
         return tokens, separators, orig_segments
 
-    """ ``TokenizedString`` can be compared as tuples as-is.
-
-    Thanks to the ``Token`` subobject we can compare a mix of strings and integers.
-    That way we get natural, user-friendly sorting of version numbers.
-
-    Something we cannot have with simple Python types to compare versions:
-
-    .. code-block:: python
-
-        >>> '2019.0.1' > '9.3'
-        False
-        >>> ('2019', '0', '1') > ('9', '3')
-        False
-        >>> (2019, 0, 1) > (9, 3)
-        True
-    """
+    # TokenizedString comparison delegates to Token tuples, giving natural
+    # sort order: (2019, 0, 1) > (9, 3) — something neither pure-string
+    # nor pure-integer tuple comparison achieves.
 
     def __iter__(self):
         """``TokenizedString`` are essentially a wrapper around a tuple of ``Token``
@@ -619,14 +584,10 @@ class VersionRange:
 
 
 def is_version(string: str) -> bool:
-    """Returns `True` if the string looks like a version.
+    """Returns ``True`` if the string looks like a version.
 
-    Heuristics used that qualify a version string:
-    - at least one of the token is an integer, or
-    - there is only one non-integer token.
-
-    ..todo::
-        Enforce splitting of token along separator.
+    Heuristics: at least one token is an integer, or there is only one
+    non-integer token.
     """
     version = parse_version(string)
 
@@ -649,8 +610,6 @@ def diff_versions(
     ``2.1.1774638290`` vs ``2.1.1774896198``, the common part is ``2.1``
     and the diff includes ``.1774638290`` / ``.1774896198``.
     """
-    from click_extra import style
-
     old = str(old)
     new = str(new)
 

@@ -9,7 +9,7 @@ name: 🚀 Build & release
 jobs:
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/release.yaml@v6.8.0
+    uses: kdeldycke/repomatic/.github/workflows/release.yaml@204a868c5345477f62a29715d2838ac1c6daa3ee # v6.9.0
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}

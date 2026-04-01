@@ -919,6 +919,21 @@ class PackageManager(metaclass=MetaPackageManager):
         """
         raise NotImplementedError
 
+    @property
+    def refiltered_outdated(self) -> Iterator[Package]:
+        """Wraps :py:meth:`outdated` with a version-equality filter.
+
+        Some package managers report packages as outdated when the version
+        strings differ at the character level but are numerically equal after
+        parsing (e.g., Perl floating-point versions ``2.0000`` vs
+        ``2.000000``). This filter drops those false positives.
+        """
+        for pkg in self.outdated:
+            if pkg.installed_version is None or pkg.latest_version is None:
+                yield pkg
+            elif pkg.installed_version != pkg.latest_version:
+                yield pkg
+
     @classmethod
     def query_parts(cls, query: str) -> set[str]:
         """Returns a set of all contiguous alphanumeric string segments.
@@ -1045,7 +1060,7 @@ class PackageManager(metaclass=MetaPackageManager):
                     "Call single upgrade operation on each package, one-by-one.",
                 )
                 logs = []
-                for package in self.outdated:
+                for package in self.refiltered_outdated:
                     output = self.upgrade(package.id)
                     if output:
                         logs.append(output)

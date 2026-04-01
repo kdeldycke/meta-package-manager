@@ -23,6 +23,7 @@
 - [mpm] Fix version comparison so integer tokens sort higher than string tokens (e.g., `3.12.0 > 3.12.0a4`) and trailing `.0` segments are treated as padding.
 - [mpm] Keep hex hashes (e.g., `c79e264`, `d4173c...`) as single tokens in version strings instead of splitting them at every digit/letter boundary.
 - [mpm] Snap version diff highlighting to separator boundaries so the full diverging token and its preceding separator are colored.
+- [mpm] Filter out false-positive outdated packages where installed and latest versions are equal after parsing. Fixes spurious results from Perl floating-point versioning and similar schemes.
 
 ## [`6.2.1` (2026-03-26)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.0...v6.2.1)
 

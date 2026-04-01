@@ -267,17 +267,8 @@ class Homebrew(PackageManager):
 
                 latest_version = parse_version(pkg_info["current_version"])
 
-                # Skip packages not offering upgradeable version.
-                package_id = pkg_info["name"]
-                if installed_version == latest_version:
-                    logging.debug(
-                        f"Ignore {package_id} upgrade "
-                        f"from {installed_version} to {latest_version}.",
-                    )
-                    continue
-
                 yield self.package(
-                    id=package_id,
+                    id=pkg_info["name"],
                     installed_version=installed_version,
                     latest_version=latest_version,
                 )

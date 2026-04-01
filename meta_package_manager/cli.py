@@ -714,7 +714,7 @@ def outdated(ctx, plugin_output):
     )
 
     for manager in ctx.obj.selected_managers(implements_operation=Operations.outdated):
-        packages = tuple(packages_asdict(manager.outdated, fields))
+        packages = tuple(packages_asdict(manager.refiltered_outdated, fields))
 
         outdated_data[manager.id] = {
             "id": manager.id,

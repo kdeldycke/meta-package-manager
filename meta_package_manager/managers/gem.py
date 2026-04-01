@@ -34,6 +34,13 @@ if TYPE_CHECKING:
 class Gem(PackageManager):
     """The RubyGems package manager.
 
+    .. note::
+
+        All operations target the default gem scope (controlled by ``GEM_HOME``).
+        On system Ruby this means system-level gems, which may require elevated
+        privileges for write operations. Per-scope targeting (system vs user gems)
+        is tracked in :issue:`1725`.
+
     ..tip::
 
         Installs require ``sudo`` on system ruby. I (@tresni) recommend doing something
@@ -184,7 +191,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            $ gem install --user-install --quiet markdown
+            $ gem install --quiet markdown
             Fetching kramdown-2.3.1.gem
             Fetching concurrent-ruby-1.1.9.gem
             (...)
@@ -203,7 +210,6 @@ class Gem(PackageManager):
         """
         return self.run_cli(
             "install",
-            "--user-install",
             *self.post_args,
             package_id,
             auto_post_args=False,
@@ -215,11 +221,10 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            $ gem update --user-install --quiet
+            $ gem update --quiet
         """
         return self.build_cli(
             "update",
-            "--user-install",
             *self.post_args,
             auto_post_args=False,
         )
@@ -235,11 +240,10 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            $ gem update --user-install --quiet markdown
+            $ gem update --quiet markdown
         """
         return self.build_cli(
             "update",
-            "--user-install",
             *self.post_args,
             package_id,
             auto_post_args=False,
@@ -250,7 +254,7 @@ class Gem(PackageManager):
 
         .. code-block:: shell-session
 
-            $ gem uninstall --user-install --quiet left-pad
+            $ gem uninstall left-pad
             Successfully uninstalled left-pad-1.1.0
         """
         return self.run_cli("uninstall", package_id)

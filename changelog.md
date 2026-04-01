@@ -24,6 +24,8 @@
 - [mpm] Keep hex hashes (e.g., `c79e264`, `d4173c...`) as single tokens in version strings instead of splitting them at every digit/letter boundary.
 - [mpm] Snap version diff highlighting to separator boundaries so the full diverging token and its preceding separator are colored.
 - [mpm] Filter out false-positive outdated packages where installed and latest versions are equal after parsing. Fixes spurious results from Perl floating-point versioning and similar schemes.
+- [gem] Remove `--user-install` flag from `install`, `upgrade`, and `update` commands so all operations target the same gem scope as `list` and `outdated`. Closes {issue}`389`.
+- [pip] Remove `--user` flag from `upgrade` command so upgrades target the same scope as `list` and `outdated`.
 - [mpm] Cache installed package IDs before the spec loop in `upgrade` and `remove` commands, avoiding redundant CLI calls per package specifier.
 
 ## [`6.2.1` (2026-03-26)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.0...v6.2.1)

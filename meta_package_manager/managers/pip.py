@@ -41,6 +41,13 @@ class Pip(PackageManager):
     This is a more robust way of managing packages: "if you're on Windows there
     is an added benefit to using `python -m pip` as it lets `pip` update itself."
     Source: https://snarky.ca/why-you-should-use-python-m-pip/
+
+    .. note::
+
+        All operations target the default pip scope (system site-packages, or the
+        active virtualenv). Per-scope targeting (system vs user vs venv) and
+        multi-binary discovery (e.g. multiple pythons via pyenv) are tracked in
+        :issue:`1725`.
     """
 
     homepage_url = "https://pip.pypa.io"
@@ -340,7 +347,7 @@ class Pip(PackageManager):
 
         .. code-block:: shell-session
 
-            $ python -m pip --no-color install --user --upgrade six
+            $ python -m pip --no-color install --upgrade six
             Collecting six
               Using cached six-1.15.0-py2.py3-none-any.whl (10 kB)
             Installing collected packages: six
@@ -357,7 +364,7 @@ class Pip(PackageManager):
 
             See: https://github.com/pypa/pip/issues/59
         """
-        return self.build_cli("install", "--user", "--upgrade", package_id)
+        return self.build_cli("install", "--upgrade", package_id)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.

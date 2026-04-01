@@ -34,7 +34,14 @@ if TYPE_CHECKING:
 
 
 class NPM(PackageManager):
-    """See command equivalences at: https://github.com/antfu-collective/ni?tab=readme-ov-file#ni."""
+    """See command equivalences at: https://github.com/antfu-collective/ni?tab=readme-ov-file#ni.
+
+    .. note::
+
+        All operations target the global scope via ``--global``. Per-scope targeting
+        and multi-binary discovery (e.g. multiple node versions via nvm) are tracked
+        in :issue:`1725`.
+    """
 
     name = "Node's npm"
 

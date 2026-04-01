@@ -31,6 +31,15 @@ if TYPE_CHECKING:
 
 
 class Flatpak(PackageManager):
+    """Flatpak package manager.
+
+    .. note::
+
+        All operations target the system-wide scope except ``cleanup`` which only
+        repairs the user installation. Per-scope targeting (system vs user) is
+        tracked in :issue:`1725`.
+    """
+
     homepage_url = "https://flatpak.org"
 
     platforms = UNIX_WITHOUT_MACOS

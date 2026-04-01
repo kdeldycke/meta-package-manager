@@ -143,6 +143,36 @@ ALNUM_EXTRACTOR = re.compile(_ALNUM_PATTERN, re.VERBOSE)
 ALNUM_EXTRACTOR_CI = re.compile(_ALNUM_PATTERN, re.VERBOSE | re.IGNORECASE)
 """Case-insensitive variant used to split the original string and preserve case."""
 
+TOKEN_ALIASES: dict[str, str] = {
+    "alpha": "a",
+    "beta": "b",
+    "c": "rc",
+    "preview": "rc",
+}
+"""Canonical short forms for pre-release tag spellings.
+
+PEP 440 defines ``alpha``/``a``, ``beta``/``b``, and ``c``/``rc``/``preview``
+as equivalent aliases. These appear across ecosystems: Debian uses ``~alpha``,
+npm uses ``-alpha``, Homebrew uses ``alpha``/``beta``. The long forms are
+always interchangeable with the short forms, so normalizing at tokenization
+time is safe. Normalization only affects comparison tokens, not the original
+string or ``pretty_print()`` output.
+"""
+
+POST_RELEASE_TAGS: frozenset[str] = frozenset({"patch", "post"})
+"""Suffixes that indicate a version *newer* than the base release.
+
+PEP 440 defines ``.postN`` as a post-release. ``patch`` carries the same
+semantics in some ecosystems (e.g., ``1.0-patch1``). Without this set,
+the prefix-comparison rule treats all string suffixes as pre-release
+indicators, which wrongly makes ``1.0 > 1.0.post1``.
+
+This set is deliberately small. Only tags with unambiguous "newer than
+release" semantics across multiple ecosystems belong here. Candidates like
+``rev`` or ``p`` are excluded because they can also mean "revision" (Gentoo
+``-r0``) or "pre-release patchlevel" (FreeBSD ``p1``), depending on context.
+"""
+
 
 class Token:
     """A normalized word, persisting its lossless integer variant.
@@ -411,7 +441,14 @@ class TokenizedString:
         normalized_str = strutils.asciify(string).lower().decode()
         parts = ALNUM_EXTRACTOR.split(normalized_str)
 
-        tokens = tuple(Token(parts[i]) for i in range(1, len(parts), 2))
+        # Normalize well-known pre-release aliases to their canonical short
+        # form so that ``1.0alpha1`` and ``1.0a1`` compare equal. The
+        # replacement happens on the lowered split parts, before Token
+        # creation. original_segments (used by pretty_print) are unaffected.
+        tokens = tuple(
+            Token(TOKEN_ALIASES.get(parts[i], parts[i]))
+            for i in range(1, len(parts), 2)
+        )
         separators = tuple(parts[i] for i in range(2, len(parts) - 1, 2))
 
         # Extract original-case segments for pretty_print(). When the input
@@ -440,6 +477,25 @@ class TokenizedString:
         return iter(self.tokens)
 
     @staticmethod
+    def _strip_v(tokens: tuple[Token, ...]) -> tuple[Token, ...]:
+        """Strip a cosmetic ``v`` prefix for comparison.
+
+        The ``v`` prefix is a universal convention (git tags, Go modules,
+        semver tooling) that carries no version semantics. A bare ``"v"``
+        token immediately followed by an integer token (e.g., ``v1.0``)
+        is always cosmetic. We only strip when the next token is an
+        integer to avoid touching strings like ``"voodoo"`` or a lone
+        ``"v"`` token.
+        """
+        if (
+            len(tokens) >= 2
+            and tokens[0].string == "v"
+            and tokens[1].isint
+        ):
+            return tokens[1:]
+        return tokens
+
+    @staticmethod
     def _compare_tuples(
         a: tuple[Token, ...],
         b: tuple[Token, ...],
@@ -451,10 +507,16 @@ class TokenizedString:
         When one tuple is a prefix of the other, the first *significant* (non-zero)
         extra token in the longer tuple decides the outcome:
 
-        - **String token** (pre-release tag): the shorter tuple (release) is greater.
+        - **Post-release tag** (``post``, ``patch``): the longer tuple is greater.
+        - **Other string token** (pre-release tag): the shorter tuple is greater.
         - **Integer token** (additional version component): the longer tuple is greater.
         - **All trailing zeros**: the tuples are equal (trailing ``.0`` is padding).
         """
+        # Strip cosmetic ``v`` prefix before comparison so that
+        # ``v1.0`` and ``1.0`` compare equal.
+        a = TokenizedString._strip_v(a)
+        b = TokenizedString._strip_v(b)
+
         for ta, tb in zip(a, b):
             if ta > tb:
                 return 1
@@ -476,9 +538,20 @@ class TokenizedString:
         if first_significant is None:
             return 0
 
-        # String token means pre-release suffix → shorter (release) wins.
-        # Integer token means additional version component → longer wins.
-        longer_wins = 1 if first_significant.isint else -1
+        if first_significant.isint:
+            # Additional numeric component: longer version is greater.
+            longer_wins = 1
+        elif first_significant.string in POST_RELEASE_TAGS:
+            # Post-release suffix (e.g., ``post``, ``patch``): the
+            # longer version is a post-release of the shorter, so
+            # longer is greater. Without this, all string suffixes
+            # would be treated as pre-release indicators.
+            longer_wins = 1
+        else:
+            # Pre-release suffix (e.g., ``alpha``, ``beta``, ``rc``,
+            # ``dev``, ``git``): the shorter version is the actual
+            # release, so shorter is greater.
+            longer_wins = -1
         return -longer_wins if len(a) < len(b) else longer_wins
 
     def __eq__(self, other):

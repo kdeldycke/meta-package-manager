@@ -445,7 +445,7 @@ version_list = (
     ("1.3_1", (1, 3, 1)),
     ("2.40.20161221.0239", (2, 40, 20161221, 239)),
     ("latest", ("latest",)),
-    ("1.2beta5", (1, 2, "beta", 5)),
+    ("1.2beta5", (1, 2, "b", 5)),
     ("2.8.18-x86_64", (2, 8, 18, "x", 86, 64)),
     ("1.8.0_112-b16", (1, 8, 0, 112, "b", 16)),
     ("3.6.9_build_4685", (3, 6, 9, "build", 4685)),
@@ -484,7 +484,7 @@ version_list = (
     # Windows four-part version.
     ("10.0.19045.4529", (10, 0, 19045, 4529)),
     # Debian tilde separator.
-    ("1.2.3~beta1", (1, 2, 3, "beta", 1)),
+    ("1.2.3~beta1", (1, 2, 3, "b", 1)),
     # Git describe output.
     ("v2.42.0-rc2-3-gabcdef1", ("v", 2, 42, 0, "rc", 2, 3, "gabcdef", 1)),
     # Large single number.
@@ -502,7 +502,7 @@ version_list = (
     # Semver build metadata — ``+`` is a plain separator.
     ("1.0.0+build.123", (1, 0, 0, "build", 123)),
     # Semver pre-release with mixed identifiers.
-    ("1.0.0-alpha.beta", (1, 0, 0, "alpha", "beta")),
+    ("1.0.0-alpha.beta", (1, 0, 0, "a", "b")),
     # RPM release tag.
     ("1.0-1.fc38", (1, 0, 1, "fc", 38)),
     # Go pseudo-version.
@@ -572,6 +572,8 @@ compared_gt = (
     ("3.12.1", "3.12.0a4"),
     # Linux kernel versions.
     ("6.5.0", "5.15.90"),
+    # PEP 440 post-release > release.
+    ("1.0.post1", "1.0"),
     # PEP 440 pre-release chain: alpha < beta < rc < release.
     ("1.0b1", "1.0a1"),
     ("1.0rc1", "1.0b1"),
@@ -621,6 +623,12 @@ compared_eq = (
     ("4.2.1", "4-2-1"),
     # PEP 440 implicit zero on pre-release tag.
     ("1.0a", "1.0a0"),
+    # Cosmetic ``v`` prefix ignored in comparison.
+    ("v1.0", "1.0"),
+    ("v0.9.4.3", "0.9.4.3"),
+    # PEP 440 alias normalization.
+    ("1.0alpha1", "1.0a1"),
+    ("1.0c1", "1.0rc1"),
 )
 
 
@@ -841,8 +849,6 @@ def test_diff_versions(old, new, expected_common, expected_old, expected_new):
     (
         # PEP 440: epoch outranks any base version.
         pytest.param("1!1.0", "2.0", id="pep440-epoch"),
-        # PEP 440: post-release > release.
-        pytest.param("1.0.post1", "1.0", id="pep440-post-release"),
         # Debian: epoch outranks any base version.
         pytest.param("2:1.0-1", "9.0", id="debian-epoch"),
         # Debian: revision (the part after the last ``-``) makes a version
@@ -850,7 +856,7 @@ def test_diff_versions(old, new, expected_common, expected_old, expected_new):
         pytest.param("6.0.1-0ubuntu1", "6.0.1", id="debian-revision"),
     ),
 )
-@pytest.mark.xfail(strict=True, reason="Epoch / post-release semantics.")
+@pytest.mark.xfail(strict=True, reason="Epoch semantics.")
 def test_version_comparison_gt_known_failures(ver1, ver2):
     assert TokenizedString(ver1) > TokenizedString(ver2)
 
@@ -878,12 +884,6 @@ def test_version_comparison_lt_known_failures(ver1, ver2):
 @pytest.mark.parametrize(
     ("ver1", "ver2"),
     (
-        # PEP 440: ``v`` prefix is cosmetic.
-        pytest.param("v1.0", "1.0", id="pep440-v-prefix"),
-        # PEP 440: ``alpha`` is an alias for ``a``.
-        pytest.param("1.0alpha1", "1.0a1", id="pep440-alpha-alias"),
-        # PEP 440: ``c`` is an alias for ``rc``.
-        pytest.param("1.0c1", "1.0rc1", id="pep440-c-rc-alias"),
         # PEP 440: local version equals base for ordering.
         pytest.param("1.0+local", "1.0", id="pep440-local-ignored"),
         # Semver: build metadata is ignored in precedence.

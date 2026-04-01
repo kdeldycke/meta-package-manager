@@ -50,9 +50,11 @@ Key rules:
   interleaved digits and letters (at least one letter-then-digit and one
   digit-then-letter adjacency) is kept as a single opaque token.
   Without this, ``g6cd4c31`` would shatter into
-  ``("g", 6, "cd", 4, "c", 31)``. The interleaving requirement rejects
-  coincidental hex strings like asciified Unicode (``eeaccee231``), that
-  have only one transition direction.
+  ``("g", 6, "cd", 4, "c", 31)``. The 7-character floor matches
+  ``git``'s default abbreviated hash length (``core.abbrev``, the de
+  facto standard on GitHub/GitLab/Bitbucket). The interleaving
+  requirement rejects coincidental hex strings like asciified Unicode
+  (``eeaccee231``), that have only one transition direction.
 
 - **Digit/letter splitting is essential.** Splitting ``ubuntu1`` into
   ``("ubuntu", 1)`` enables natural numeric ordering of embedded version
@@ -124,15 +126,18 @@ ALNUM_EXTRACTOR = re.compile(
 )
 """Tokenizer regex with three alternatives tried left-to-right:
 
-1. Hex hash (7+ hex chars with interleaved digits and letters) — kept as one token.
+1. Hex hash (7+ hex chars with interleaved digits and letters) — kept
+   as one token.
 2. Digit sequence.
 3. Letter sequence.
 
-The hex alternative requires both a letter-then-digit adjacency and a digit-then-letter
-adjacency, ensuring at least two transitions. This keeps real hashes
-(``c79e264``, ``d4173c...``) whole while still splitting version qualifiers
-(``ubuntu1``, ``beta5``) and rejecting coincidental hex strings (``eeaccee231``)
-that have only one transition.
+The 7-character floor matches ``git``'s default abbreviated hash length
+(``core.abbrev``), the de facto standard on GitHub, GitLab, and
+Bitbucket. The two lookaheads require both a letter-then-digit and a
+digit-then-letter adjacency, ensuring at least two transitions. This
+keeps real hashes (``c79e264``, ``d4173c...``) whole while still
+splitting version qualifiers (``ubuntu1``, ``beta5``) and rejecting
+coincidental hex strings (``eeaccee231``) that have only one transition.
 """
 
 ALNUM_EXTRACTOR_CI = re.compile(

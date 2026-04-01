@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import copy
+import operator
 from random import shuffle
 
 import pytest
@@ -40,7 +41,7 @@ def test_token_allowed_instantiation(value):
     Token(value)
 
 
-@pytest.mark.parametrize("value", [None, -1, "a-b-c", 1.0])
+@pytest.mark.parametrize("value", [None, -1, "a-b-c", 1.0, True, False])
 def test_token_unauthorized_instantiation(value):
     with pytest.raises(TypeError):
         Token(value)
@@ -226,6 +227,13 @@ def test_token_format():
     assert f"{Token(42):>10}" == "        42"
 
 
+def test_token_mixed_type_not_equal():
+    """Integer and string tokens are never equal, even if the string is
+    digit-like when compared cross-type."""
+    assert not (Token(0) == Token("a"))
+    assert not (Token("beta") == Token(1))
+
+
 @pytest.mark.parametrize(
     "value",
     (None, 0, 123, -1, "0", "1.2.3", "abc", "A-B-C", "123   a bc \n"),
@@ -347,6 +355,21 @@ def test_tokenized_string_comparisons_with_none():
     assert not (v <= None)
     assert v.__eq__(None) is False
     assert v.__ne__(None) is True
+
+
+def test_tokenized_string_comparison_with_unsupported_type():
+    """Comparing with an unsupported type falls through to ``object``
+    defaults."""
+    v = TokenizedString("1.0")
+    # __eq__ / __ne__ fall back to identity comparison.
+    assert not (v == "1.0")
+    assert v != "1.0"
+    assert not (v == 42)
+    assert v != 42
+    # Ordering operators raise TypeError for unsupported types.
+    for op in (operator.gt, operator.lt, operator.ge, operator.le):
+        with pytest.raises(TypeError):
+            op(v, "1.0")
 
 
 def test_tokenized_string_equality_ignores_separators():

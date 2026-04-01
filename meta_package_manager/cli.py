@@ -1554,7 +1554,12 @@ def sbom(ctx, spdx, export_format, overwrite, export_path):
 
     for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
         logging.info(f"Export packages from {theme.invoked_command(manager.id)}...")
-        for package in manager.installed:
-            sbom.add_package(manager, package)
+        try:
+            for package in manager.installed:
+                sbom.add_package(manager, package)
+        except CLIError:
+            logging.warning(
+                f"Could not export packages from {theme.invoked_command(manager.id)}."
+            )
 
     echo(sbom.export(), file=prep_path(export_path))

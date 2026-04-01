@@ -129,6 +129,7 @@ class SPDX(SBOM):
     """Document root ID."""
 
     document: Document
+    seen_ids: set[str]
 
     @classmethod
     def normalize_spdx_id(cls, str: str) -> str:
@@ -152,6 +153,7 @@ class SPDX(SBOM):
             ))
         )
 
+        self.seen_ids = set()
         self.document = Document(
             CreationInfo(
                 spdx_version="SPDX-2.3",
@@ -182,6 +184,11 @@ class SPDX(SBOM):
         # pURL string, by its virtue of containing all important metadata of a package,
         # makes perfect unique IDs.
         package_docid = self.normalize_spdx_id(f"SPDXRef-{package.purl}")
+        # Some managers (e.g. CPAN) list the same package multiple times.
+        if package_docid in self.seen_ids:
+            logging.debug(f"Skip duplicate package {package_docid}.")
+            return
+        self.seen_ids.add(package_docid)
         self.document.packages.append(
             SPDXPackage(
                 name=package.id,

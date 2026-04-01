@@ -19,6 +19,7 @@
 - [deb-get] Add deb-get package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support. Closes {issue}`1609`.
 - [cpan] Add CPAN package manager for Perl modules with `installed`, `outdated`, `install`, and `upgrade` support. Closes {issue}`602`.
 - [sdkman] Add SDKMAN! package manager with `installed`, `outdated`, `install`, `upgrade`, `sync`, and `cleanup` support. Closes {issue}`729`.
+- [mpm] Preserve original separators and case in version tokenization for lossless `pretty_print()` round-tripping.
 
 ## [`6.2.1` (2026-03-26)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.0...v6.2.1)
 

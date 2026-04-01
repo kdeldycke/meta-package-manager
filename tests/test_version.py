@@ -380,6 +380,9 @@ def test_tokenized_string_equality_ignores_separators():
         ("2.40.20161221.0239", (".", ".", ".")),
         # Empty string.
         ("", ()),
+        # Original case preserved in pretty_print.
+        ("4.2.1-ABC-5666.3", (".", ".", "-", "-", ".")),
+        ("V0.9.4.3", ("", ".", ".", ".")),
     ),
 )
 def test_tokenized_string_separators_and_pretty_print(v_string, expected_seps):
@@ -391,8 +394,6 @@ def test_tokenized_string_separators_and_pretty_print(v_string, expected_seps):
 @pytest.mark.parametrize(
     ("v_string", "expected_seps", "expected_pp"),
     (
-        # Case normalization: uppercase becomes lowercase.
-        ("4.2.1-ABC-5666.3", (".", ".", "-", "-", "."), "4.2.1-abc-5666.3"),
         # Leading separator is prefix in split, not stored.
         (".4.2.1", (".", "."), "4.2.1"),
         # Trailing separator is suffix in split, not stored.

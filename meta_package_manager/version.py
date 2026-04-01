@@ -36,6 +36,9 @@ if TYPE_CHECKING:
 
 ALNUM_EXTRACTOR = re.compile("(\\d+ | [a-z]+)", re.VERBOSE)
 
+ALNUM_EXTRACTOR_CI = re.compile("(\\d+ | [a-z]+)", re.VERBOSE | re.IGNORECASE)
+"""Case-insensitive variant used to split the original string and preserve case."""
+
 
 class Token:
     """A token is a normalized word, persisting its lossless integer variant.
@@ -168,6 +171,8 @@ class TokenizedString:
     string: str
     tokens: tuple[Token, ...] = ()
     separators: tuple[str, ...] = ()
+    original_segments: tuple[str, ...] = ()
+    """Original-case token strings for lossless ``pretty_print()``."""
 
     def __hash__(self):
         """A ``TokenizedString`` is made unique by its original string and tuple of
@@ -212,7 +217,9 @@ class TokenizedString:
         else:
             msg = f"{type(value)} not supported"  # type: ignore[unreachable]
             raise TypeError(msg)
-        self.tokens, self.separators = self.tokenize(self.string)
+        self.tokens, self.separators, self.original_segments = self.tokenize(
+            self.string,
+        )
 
     def __deepcopy__(self, memo):
         """Generic recursive deep copy of the current instance.
@@ -249,20 +256,23 @@ class TokenizedString:
         return self.string.__format__(format_spec)
 
     def pretty_print(self) -> str:
-        """Reconstruct the tokenized string using the original separators."""
+        """Reconstruct the tokenized string using original-case segments and
+        separators."""
         parts: list[str] = []
-        for i, token in enumerate(self.tokens):
-            parts.append(str(token))
+        for i, segment in enumerate(self.original_segments):
+            parts.append(segment)
             if i < len(self.separators):
                 parts.append(self.separators[i])
         return "".join(parts)
 
     @staticmethod
-    def tokenize(string: str) -> tuple[tuple[Token, ...], tuple[str, ...]]:
+    def tokenize(
+        string: str,
+    ) -> tuple[tuple[Token, ...], tuple[str, ...], tuple[str, ...]]:
         """Tokenize a string: ignore case and split at each non-alphanumeric characters.
 
-        Returns a tuple of ``Token`` instances and a tuple of separator strings found
-        between consecutive tokens.
+        Returns a tuple of ``Token`` instances, separator strings between consecutive
+        tokens, and original-case segment strings for lossless display.
 
         ``re.split()`` with a capturing group alternates non-matching segments (even
         indices) and captured matches (odd indices)::
@@ -276,7 +286,17 @@ class TokenizedString:
 
         tokens = tuple(Token(parts[i]) for i in range(1, len(parts), 2))
         separators = tuple(parts[i] for i in range(2, len(parts) - 1, 2))
-        return tokens, separators
+
+        # Split the original string with a case-insensitive regex to preserve
+        # case in pretty_print(). When asciify changes the split structure
+        # (e.g., accented chars become ASCII alnum), fall back to normalized
+        # segments.
+        orig_parts = ALNUM_EXTRACTOR_CI.split(string)
+        orig_segments = tuple(orig_parts[i] for i in range(1, len(orig_parts), 2))
+        if len(orig_segments) != len(tokens):
+            orig_segments = tuple(str(t) for t in tokens)
+
+        return tokens, separators, orig_segments
 
     """ ``TokenizedString`` can be compared as tuples as-is.
 

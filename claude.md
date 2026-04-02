@@ -286,6 +286,26 @@ This project supports Python 3.10+. Be aware of syntax features **not** availabl
 - Place imports at the top of the file, unless avoiding circular imports. **Never use local imports inside functions** — move them to the module level. Local imports hide dependencies, bypass ruff's import sorting, and make it harder to see what a module depends on.
 - **Version-dependent imports** (e.g., `tomllib` fallback for Python 3.10) should be placed **after all normal imports** but **before the `TYPE_CHECKING` block**. This allows ruff to freely sort and organize the normal imports above without interference.
 
+### Workflow file naming
+
+Related workflows share a prefix for visual grouping in the file listing: `tests.yaml` (unit/integration test suite) and `tests-install.yaml` (distributor installability tests). Apply the same pattern when adding new workflow files.
+
+### Workflow source URLs
+
+Each job that tests a third-party distributor must have a comment above it with the precise URL(s) to verify the package's status on that platform. Use the public-facing package page first (e.g., `formulae.brew.sh`), followed by the source definition (e.g., the GitHub-hosted formula `.rb` or manifest `.json`).
+
+### Distributor sync
+
+`docs/install.md` (the "Installation methods" tab-set) and `.github/workflows/tests-install.yaml` must stay in sync. Both files contain cross-reference comments. When adding or removing a distributor, update both.
+
+### Schedule-only workflows
+
+Jobs that test *released* artifacts from external distributors (PyPI, Homebrew, Scoop, etc.) must not run on every push. They test the published version, not the code being pushed, so they belong on a schedule or manual dispatch only.
+
+### Non-interactive CI
+
+When a third-party tool prompts interactively (path selection, asset selection), pre-create its config files and resolve inputs via `gh` or other CLI tools rather than piping stdin. This is more robust across platforms, especially Windows where stdin redirection often fails with "Incorrect function."
+
 ### YAML workflows
 
 For single-line commands that fit on one line, use plain inline `run:` without any block scalar indicator:

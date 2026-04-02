@@ -23,6 +23,15 @@ concurrency:
 
 jobs:
 
+  # https://aur.archlinux.org/packages/meta-package-manager
+  aur:
+    runs-on: ubuntu-slim
+    container:
+      image: greyltc/archlinux-aur:yay
+    steps:
+      - run: aur-install meta-package-manager
+      - run: mpm --version
+
   # https://formulae.brew.sh/formula/meta-package-manager
   # https://github.com/Homebrew/homebrew-core/blob/main/Formula/m/meta-package-manager.rb
   brew:

@@ -36,8 +36,14 @@ jobs:
     # https://aur.archlinux.org/packages/python-beartype#comment-1065661
     # https://github.com/beartype/beartype/issues/631
     continue-on-error: true
+    strategy:
+      matrix:
+        # pacaur is not available in greyltc/archlinux-aur images.
+        helper:
+          - paru
+          - yay
     container:
-      image: greyltc/archlinux-aur:yay
+      image: greyltc/archlinux-aur:${{ matrix.helper }}
     steps:
       - name: Refresh mirrors
         # Arch mirrors can be flaky; refresh the keyring and mirrorlist first.

@@ -76,6 +76,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 ## Installation methods
 
 <!-- Keep in sync with .github/workflows/tests-install.yaml -->
+<!-- Tabs are sorted by popularity: uv first, then by estimated user base. -->
 
 `mpm` is available on several popular package managers:
 
@@ -103,14 +104,6 @@ $ uv add meta-package-manager
 ```
 ````
 
-````{tab-item} pipx
-[`pipx`](https://pipx.pypa.io/stable/installation/) is a great way to install Python applications globally:
-
-```{code-block} shell-session
-$ pipx install meta-package-manager
-```
-````
-
 ````{tab-item} pip
 You can install the latest stable release and its dependencies with a simple `pip` call:
 
@@ -132,6 +125,14 @@ If you have difficulties to use `pip`, see
 [`pip`'s own installation instructions](https://pip.pypa.io/en/stable/installation/).
 ````
 
+````{tab-item} pipx
+[`pipx`](https://pipx.pypa.io/stable/installation/) is a great way to install Python applications globally:
+
+```{code-block} shell-session
+$ pipx install meta-package-manager
+```
+````
+
 ````{tab-item} brew
 Meta Package Manager is [available as an Homebrew formula](https://formulae.brew.sh/formula/meta-package-manager), so you just need to:
 
@@ -148,11 +149,19 @@ Meta Package Manager is available in the `main` repository of [Scoop](https://sc
 ```
 ````
 
-````{tab-item} ZeroBrew
-[ZeroBrew](https://github.com/lucasgelfond/zerobrew) is a fast, Homebrew-compatible package manager written in Rust:
+````{tab-item} Arch Linux
+An `mpm` package is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager) and can be installed with any AUR helper:
 
 ```{code-block} shell-session
-$ zb install meta-package-manager
+$ yay -S meta-package-manager
+```
+
+```{code-block} shell-session
+$ paru -S meta-package-manager
+```
+
+```{code-block} shell-session
+$ pacaur -S meta-package-manager
 ```
 ````
 
@@ -164,24 +173,13 @@ $ stew install kdeldycke/meta-package-manager
 ```
 ````
 
-````{tab-item} Arch Linux
-An `mpm` package is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager) and can be installed with any AUR helper:
+````{tab-item} ZeroBrew
+[ZeroBrew](https://github.com/lucasgelfond/zerobrew) is a fast, Homebrew-compatible package manager written in Rust:
 
 ```{code-block} shell-session
-$ pacaur -S meta-package-manager
+$ zb install meta-package-manager
 ```
-
-```{code-block} shell-session
-$ pacman -S meta-package-manager
-```
-
-```{code-block} shell-session
-$ paru -S meta-package-manager
-```
-
-```{code-block} shell-session
-$ yay -S meta-package-manager
-```
+````
 ````
 `````
 

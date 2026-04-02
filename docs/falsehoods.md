@@ -1,4 +1,4 @@
-# {octicon}`alert` Falsehoods programmers believe about package managers
+# {octicon}`unverified` Falsehoods programmers believe about package managers
 
 Implementing `mpm` exposed me to many edge-cases and pitfalls of package management. Here is a list of falsehoods programmers believe about them.
 

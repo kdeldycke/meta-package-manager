@@ -25,7 +25,8 @@ jobs:
 
   # https://aur.archlinux.org/packages/meta-package-manager
   aur:
-    runs-on: ubuntu-slim
+    # Container jobs require Docker, which ubuntu-slim does not provide.
+    runs-on: ubuntu-24.04
     container:
       image: greyltc/archlinux-aur:yay
     steps:

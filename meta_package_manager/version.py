@@ -575,28 +575,28 @@ class TokenizedString:
             return True
         if isinstance(other, TokenizedString):
             return self._compare_tuples(self.tokens, other.tokens) > 0
-        return super().__gt__(other)
+        return NotImplemented
 
     def __lt__(self, other):
         if other is None:
             return False
         if isinstance(other, TokenizedString):
             return self._compare_tuples(self.tokens, other.tokens) < 0
-        return super().__lt__(other)
+        return NotImplemented
 
     def __ge__(self, other):
         if other is None:
             return True
         if isinstance(other, TokenizedString):
             return self._compare_tuples(self.tokens, other.tokens) >= 0
-        return super().__ge__(other)
+        return NotImplemented
 
     def __le__(self, other):
         if other is None:
             return False
         if isinstance(other, TokenizedString):
             return self._compare_tuples(self.tokens, other.tokens) <= 0
-        return super().__le__(other)
+        return NotImplemented
 
 
 parse_version = TokenizedString

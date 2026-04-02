@@ -630,7 +630,7 @@ def installed(ctx, duplicates):
     # Filters out non-duplicate packages.
     if duplicates:
         # Re-group packages by their IDs.
-        package_sources = {}
+        package_sources: dict[str, set[str]] = {}
         for manager_id, installed_pkg in installed_data.items():
             for package in installed_pkg["packages"]:
                 package_sources.setdefault(package["id"], set()).add(manager_id)
@@ -873,7 +873,7 @@ def search(ctx, extended, exact, refilter, query):
             table.append(line)
 
     # Sort and print table.
-    headers = [
+    headers: list[tuple[str, SortableField | None]] = [
         ("Package ID", SortableField.PACKAGE_ID),
         ("Name", SortableField.PACKAGE_NAME),
         ("Manager", SortableField.MANAGER_ID),
@@ -924,7 +924,10 @@ def which(ctx, cli_names):
             # Resolve symlinks and highlight the CLI name.
             symlink = ""
             if found_cli.is_symlink():
-                symlink = "→ " + highlight_cli_name(found_cli.resolve(), cli_names)
+                # resolve() always returns a Path, so highlight_cli_name won't return None.
+                resolved = highlight_cli_name(found_cli.resolve(), cli_names)
+                assert resolved is not None
+                symlink = f"→ {resolved}"
             table.append(
                 (
                     manager.id,
@@ -1008,7 +1011,7 @@ def install(ctx, packages_specs):
                 continue
             echo(output)
 
-    unmatched_packages = packages_per_managers.get(None, [])
+    unmatched_packages = packages_per_managers.get(None, set())
     for spec in unmatched_packages:
         for manager in selected_managers:
             logging.info(
@@ -1541,6 +1544,7 @@ def sbom(ctx, spdx, export_format, overwrite, export_path):
                 )
                 ctx.exit(2)
 
+    sbom_class: type[SBOM]
     if spdx:
         sbom_class = SPDX
     else:

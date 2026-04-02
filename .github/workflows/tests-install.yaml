@@ -27,6 +27,10 @@ jobs:
   aur:
     # Container jobs require Docker, which ubuntu-slim does not provide.
     runs-on: ubuntu-24.04
+    # AUR builds from source with full test suites. Upstream PKGBUILD check()
+    # failures in transitive dependencies (beartype, boltons, etc.) cause
+    # cascading build errors that are not fixable from this project.
+    continue-on-error: true
     container:
       image: greyltc/archlinux-aur:yay
     steps:
@@ -214,6 +218,9 @@ jobs:
   # https://github.com/lucasgelfond/zerobrew
   # Known Linux failures: https://github.com/lucasgelfond/zerobrew/issues/336
   zerobrew:
+    # ZeroBrew has upstream packaging issues on Linux
+    # (https://github.com/lucasgelfond/zerobrew/issues/336).
+    continue-on-error: true
     strategy:
       matrix:
         include:

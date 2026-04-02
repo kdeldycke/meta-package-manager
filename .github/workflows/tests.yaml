@@ -546,10 +546,13 @@ jobs:
     if: github.event_name != 'pull_request'
     strategy:
       matrix:
-        os:
-          - ubuntu-slim  # x86
-          - macos-26     # arm64
-          - windows-2025 # x86
+        include:
+          - os: ubuntu-slim
+            asset_pattern: mpm-.*-linux-x64\.bin
+          - os: macos-26
+            asset_pattern: mpm-.*-macos-arm64\.bin
+          - os: windows-2025
+            asset_pattern: mpm-.*-windows-x64\.exe
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
@@ -558,9 +561,37 @@ jobs:
           go-version: stable
       - name: Install Stew
         run: go install github.com/marwanhawari/stew@v0.6.0
+      - name: Pre-create Stew config
+        # Stew prompts interactively for its data directory on first run, which
+        # fails in CI. Pre-creating the config and directory structure skips it.
+        shell: bash
+        run: |
+          stew_path="$HOME/.stew"
+          mkdir -p "$stew_path/bin" "$stew_path/pkg"
+          config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/stew"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            config_dir="$LOCALAPPDATA/stew/Config"
+          fi
+          mkdir -p "$config_dir"
+          printf '{"stewPath":"%s","stewBinPath":"%s/bin","excludedFromUpgradeAll":[]}\n' \
+            "$stew_path" "$stew_path" > "$config_dir/stew.config.json"
       - name: Add Stew bin to PATH
         shell: bash
         run: echo "$HOME/.stew/bin" >> "$GITHUB_PATH"
       # https://github.com/marwanhawari/stew
-      - run: stew install kdeldycke/meta-package-manager
+      # Stew has no non-interactive mode. The repo publishes both "mpm-*" and
+      # "meta-package-manager-*" binaries, causing ambiguous asset selection
+      # that stew cannot resolve without a terminal. Resolve the download URL
+      # with gh and pass it directly to stew.
+      - name: Resolve latest release asset URL
+        id: asset
+        shell: bash
+        run: |
+          url=$(gh release view --repo kdeldycke/meta-package-manager --json assets \
+            --jq '.assets[] | select(.name | test("${{ matrix.asset_pattern }}")) | .url')
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Install mpm via Stew
+        run: stew install "${{ steps.asset.outputs.url }}"
       - run: mpm --version

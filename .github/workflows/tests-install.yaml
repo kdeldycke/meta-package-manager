@@ -117,17 +117,17 @@ jobs:
       matrix:
         include:
           - os: ubuntu-24.04-arm
-            asset_pattern: mpm-.*-linux-arm64\.bin
+            asset_pattern: mpm-.*-linux-arm64[.]bin
           - os: ubuntu-slim
-            asset_pattern: mpm-.*-linux-x64\.bin
+            asset_pattern: mpm-.*-linux-x64[.]bin
           - os: macos-15-intel
-            asset_pattern: mpm-.*-macos-x64\.bin
+            asset_pattern: mpm-.*-macos-x64[.]bin
           - os: macos-26
-            asset_pattern: mpm-.*-macos-arm64\.bin
+            asset_pattern: mpm-.*-macos-arm64[.]bin
           - os: windows-11-arm
-            asset_pattern: mpm-.*-windows-arm64\.exe
+            asset_pattern: mpm-.*-windows-arm64[.]exe
           - os: windows-2025
-            asset_pattern: mpm-.*-windows-x64\.exe
+            asset_pattern: mpm-.*-windows-x64[.]exe
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
@@ -244,5 +244,6 @@ jobs:
           zb init
           echo "$HOME/.zerobrew/bin" >> "$GITHUB_PATH"
           echo "$HOME/.local/share/zerobrew/prefix/bin" >> "$GITHUB_PATH"
+          echo "/opt/zerobrew/bin" >> "$GITHUB_PATH"
       - run: zb install meta-package-manager
       - run: mpm --version

@@ -26,8 +26,10 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-slim  # x86
-          - macos-26     # arm64
+          - ubuntu-24.04-arm
+          - ubuntu-slim
+          - macos-15-intel
+          - macos-26
     runs-on: ${{ matrix.os }}
     steps:
       - if: runner.os == 'Linux'
@@ -39,7 +41,16 @@ jobs:
 
   # https://pip.pypa.io/en/stable/
   pip:
-    runs-on: ubuntu-slim
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04-arm
+          - ubuntu-slim
+          - macos-15-intel
+          - macos-26
+          - windows-11-arm
+          - windows-2025
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
       - name: Install Python
@@ -52,7 +63,16 @@ jobs:
 
   # https://pipx.pypa.io/
   pipx:
-    runs-on: ubuntu-slim
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04-arm
+          - ubuntu-slim
+          - macos-15-intel
+          - macos-26
+          - windows-11-arm
+          - windows-2025
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
       - name: Install Python
@@ -96,14 +116,18 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-26
-            asset_pattern: mpm-.*-macos-arm64\.bin
+          - os: ubuntu-24.04-arm
+            asset_pattern: mpm-.*-linux-arm64\.bin
           - os: ubuntu-slim
             asset_pattern: mpm-.*-linux-x64\.bin
-          - os: windows-2025
-            asset_pattern: mpm-.*-windows-x64\.exe
+          - os: macos-15-intel
+            asset_pattern: mpm-.*-macos-x64\.bin
+          - os: macos-26
+            asset_pattern: mpm-.*-macos-arm64\.bin
           - os: windows-11-arm
             asset_pattern: mpm-.*-windows-arm64\.exe
+          - os: windows-2025
+            asset_pattern: mpm-.*-windows-x64\.exe
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
@@ -148,7 +172,16 @@ jobs:
 
   # https://docs.astral.sh/uv/
   uv:
-    runs-on: ubuntu-slim
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04-arm
+          - ubuntu-slim
+          - macos-15-intel
+          - macos-26
+          - windows-11-arm
+          - windows-2025
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
       - name: Install Python
@@ -186,8 +219,12 @@ jobs:
     strategy:
       matrix:
         include:
+          - os: ubuntu-24.04-arm
+            asset: zb-linux-arm64
           - os: ubuntu-slim
             asset: zb-linux-x64
+          - os: macos-15-intel
+            asset: zb-darwin-x64
           - os: macos-26
             asset: zb-darwin-arm64
     runs-on: ${{ matrix.os }}

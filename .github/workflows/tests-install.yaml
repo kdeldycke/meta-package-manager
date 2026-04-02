@@ -24,23 +24,30 @@ concurrency:
 jobs:
 
   # https://aur.archlinux.org/packages/meta-package-manager
+  # https://aur.archlinux.org/packages/meta-package-manager-bin
   aur:
     # Container jobs require Docker, which ubuntu-slim does not provide.
     runs-on: ubuntu-24.04
     # AUR builds from source with full test suites. Upstream PKGBUILD check()
     # failures in transitive dependencies (beartype, boltons, etc.) cause
-    # cascading build errors that are not fixable from this project.
-    # See https://github.com/beartype/beartype/issues/631
+    # cascading build errors that are not fixable from this project. See:
+    # https://aur.archlinux.org/packages/meta-package-manager#comment-1065663
+    # https://aur.archlinux.org/packages/python-boltons#comment-1065664
+    # https://aur.archlinux.org/packages/python-beartype#comment-1065661
+    # https://github.com/beartype/beartype/issues/631
     continue-on-error: true
     container:
       image: greyltc/archlinux-aur:yay
     steps:
-      - name: Refresh mirrors and install mpm
+      - name: Refresh mirrors
         # Arch mirrors can be flaky; refresh the keyring and mirrorlist first.
         run: |
           pacman-key --init
           pacman --noconfirm -Sy archlinux-keyring
-          aur-install meta-package-manager
+      - name: Install mpm from AUR (source)
+        run: aur-install meta-package-manager
+      - name: Install mpm from AUR (binary)
+        run: aur-install meta-package-manager-bin
       - run: mpm --version
 
   # https://formulae.brew.sh/formula/meta-package-manager

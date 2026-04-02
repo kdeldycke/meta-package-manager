@@ -311,6 +311,10 @@ $ mpm --pip  install meta-package-manager
 $ mpm --pipx install meta-package-manager
 ```
 
+```{code-block} pwsh-session
+> mpm --scoop install meta-package-manager
+```
+
 ```{code-block} shell-session
 $ mpm --stew install kdeldycke/meta-package-manager
 ```

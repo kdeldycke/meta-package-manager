@@ -212,6 +212,7 @@ jobs:
           meta-package-manager --version
 
   # https://github.com/lucasgelfond/zerobrew
+  # Known Linux failures: https://github.com/lucasgelfond/zerobrew/issues/336
   zerobrew:
     strategy:
       matrix:

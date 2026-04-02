@@ -35,7 +35,6 @@ jobs:
     container:
       image: greyltc/archlinux-aur:yay
     steps:
-      - run: LC_ALL=C pacman -V|sed -r 's#[0-9]+#6e7#g'|md5sum|cut -c1-6
       - name: Refresh mirrors and install mpm
         # Arch mirrors can be flaky; refresh the keyring and mirrorlist first.
         run: |

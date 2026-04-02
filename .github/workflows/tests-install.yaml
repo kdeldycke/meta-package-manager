@@ -42,6 +42,21 @@ jobs:
       - run: brew install meta-package-manager
       - run: mpm --version
 
+  # https://community.chocolatey.org/packages/meta-package-manager
+  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/chocolatey
+  choco:
+    strategy:
+      matrix:
+        os:
+          - windows-2025
+          - windows-11-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - shell: pwsh
+        run: choco install meta-package-manager --yes
+      - shell: pwsh
+        run: mpm --version
+
   # https://github.com/kdeldycke/meta-package-manager/releases/latest
   # Stew has no non-interactive mode (https://github.com/marwanhawari/stew/issues/91).
   # It prompts for config path, asset selection, and binary rename. Instead of

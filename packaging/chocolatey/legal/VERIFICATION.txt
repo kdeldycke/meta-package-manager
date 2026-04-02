@@ -1,0 +1,24 @@
+VERIFICATION
+
+Verification is intended to assist the Chocolatey moderators and community
+in verifying that this package's contents are trustworthy.
+
+The software is downloaded at install time from the official GitHub releases at:
+https://github.com/kdeldycke/meta-package-manager/releases
+
+To verify the downloaded binaries:
+
+1. Download the appropriate binary for your architecture:
+   x64:   https://github.com/kdeldycke/meta-package-manager/releases/download/v6.2.1/mpm-windows-x64.exe
+   ARM64: https://github.com/kdeldycke/meta-package-manager/releases/download/v6.2.1/mpm-windows-arm64.exe
+
+2. Compute the SHA256 checksum using one of:
+   - PowerShell: Get-FileHash -Algorithm SHA256 <file>
+   - Chocolatey utility: checksum.exe -t sha256 -f <file>
+
+3. The checksums should match:
+   x64 checksum:   0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5
+   ARM64 checksum: 0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5
+
+File 'LICENSE.txt' is obtained from:
+https://github.com/kdeldycke/meta-package-manager/blob/main/license

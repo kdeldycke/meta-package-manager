@@ -1,0 +1,34 @@
+---
+# Temporary workflow to publish the Chocolatey package.
+# Delete this file after the initial publish succeeds.
+name: 🍫 Publish Chocolatey package
+"on":
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  publish:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - name: Ensure UTF-8 BOM on PowerShell scripts
+        shell: pwsh
+        working-directory: packaging/chocolatey
+        run: |
+          Get-ChildItem -Path tools -Filter *.ps1 | ForEach-Object {
+            $content = Get-Content $_.FullName -Raw
+            $utf8Bom = New-Object System.Text.UTF8Encoding $true
+            [System.IO.File]::WriteAllText($_.FullName, $content, $utf8Bom)
+          }
+      - name: Pack
+        shell: pwsh
+        working-directory: packaging/chocolatey
+        run: choco pack --output-directory .
+      - name: Push
+        shell: pwsh
+        working-directory: packaging/chocolatey
+        run: >
+          choco push meta-package-manager.6.2.1.nupkg
+          --source https://push.chocolatey.org/
+          --api-key ${{ secrets.CHOCOLATEY_API_KEY }}

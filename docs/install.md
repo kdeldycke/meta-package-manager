@@ -149,6 +149,14 @@ Meta Package Manager is available in the `main` repository of [Scoop](https://sc
 ```
 ````
 
+````{tab-item} Chocolatey
+Meta Package Manager is [available on Chocolatey](https://community.chocolatey.org/packages/meta-package-manager), so you just need to:
+
+```{code-block} pwsh-session
+> choco install meta-package-manager
+```
+````
+
 ````{tab-item} Arch Linux
 An `mpm` package is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager) and can be installed with any AUR helper:
 
@@ -301,6 +309,10 @@ $ mpm --pacman install meta-package-manager
 
 ```{code-block} shell-session
 $ mpm --paru install meta-package-manager
+```
+
+```{code-block} pwsh-session
+> mpm --choco install meta-package-manager
 ```
 
 ```{code-block} shell-session

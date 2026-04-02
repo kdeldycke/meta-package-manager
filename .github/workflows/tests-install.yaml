@@ -23,39 +23,6 @@ concurrency:
 
 jobs:
 
-  # https://aur.archlinux.org/packages/meta-package-manager
-  # https://aur.archlinux.org/packages/meta-package-manager-bin
-  aur:
-    # Container jobs require Docker, which ubuntu-slim does not provide.
-    runs-on: ubuntu-24.04
-    # AUR builds from source with full test suites. Upstream PKGBUILD check()
-    # failures in transitive dependencies (beartype, boltons, etc.) cause
-    # cascading build errors that are not fixable from this project. See:
-    # https://aur.archlinux.org/packages/meta-package-manager#comment-1065663
-    # https://aur.archlinux.org/packages/python-boltons#comment-1065664
-    # https://aur.archlinux.org/packages/python-beartype#comment-1065661
-    # https://github.com/beartype/beartype/issues/631
-    continue-on-error: true
-    strategy:
-      matrix:
-        # pacaur is not available in greyltc/archlinux-aur images.
-        helper:
-          - paru
-          - yay
-    container:
-      image: greyltc/archlinux-aur:${{ matrix.helper }}
-    steps:
-      - name: Refresh mirrors
-        # Arch mirrors can be flaky; refresh the keyring and mirrorlist first.
-        run: |
-          pacman-key --init
-          pacman --noconfirm -Sy archlinux-keyring
-      - name: Install mpm from AUR (source)
-        run: aur-install meta-package-manager
-      - name: Install mpm from AUR (binary)
-        run: aur-install meta-package-manager-bin
-      - run: mpm --version
-
   # https://formulae.brew.sh/formula/meta-package-manager
   # https://github.com/Homebrew/homebrew-core/blob/main/Formula/m/meta-package-manager.rb
   brew:
@@ -112,6 +79,49 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x mpm
       - run: ./mpm --version
+
+  # AUR builds from source with full test suites. Upstream PKGBUILD check()
+  # failures in transitive dependencies (beartype, boltons, etc.) cause
+  # cascading build errors that are not fixable from this project. See:
+  # https://aur.archlinux.org/packages/meta-package-manager#comment-1065663
+  # https://aur.archlinux.org/packages/python-boltons#comment-1065664
+  # https://aur.archlinux.org/packages/python-beartype#comment-1065661
+  # https://github.com/beartype/beartype/issues/631
+
+  # https://aur.archlinux.org/packages/meta-package-manager
+  # https://aur.archlinux.org/packages/meta-package-manager-bin
+  pacaur:
+    # Container jobs require Docker, which ubuntu-slim does not provide.
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    container:
+      image: greyltc/archlinux-aur:yay
+    steps:
+      - name: Refresh mirrors
+        run: |
+          pacman-key --init
+          pacman --noconfirm -Sy archlinux-keyring
+      - name: Install pacaur
+        run: aur-install pacaur
+      - run: pacaur --noconfirm -S meta-package-manager
+      - run: pacaur --noconfirm -S meta-package-manager-bin
+      - run: mpm --version
+
+  # https://aur.archlinux.org/packages/meta-package-manager
+  # https://aur.archlinux.org/packages/meta-package-manager-bin
+  paru:
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    container:
+      image: greyltc/archlinux-aur:paru
+    steps:
+      - name: Refresh mirrors
+        run: |
+          pacman-key --init
+          pacman --noconfirm -Sy archlinux-keyring
+      - run: paru --noconfirm -S meta-package-manager
+      - run: paru --noconfirm -S meta-package-manager-bin
+      - run: mpm --version
 
   # https://pip.pypa.io/en/stable/
   pip:
@@ -228,6 +238,22 @@ jobs:
           uv --no-progress tool install git+https://github.com/kdeldycke/meta-package-manager
           mpm                  --version
           meta-package-manager --version
+
+  # https://aur.archlinux.org/packages/meta-package-manager
+  # https://aur.archlinux.org/packages/meta-package-manager-bin
+  yay:
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    container:
+      image: greyltc/archlinux-aur:yay
+    steps:
+      - name: Refresh mirrors
+        run: |
+          pacman-key --init
+          pacman --noconfirm -Sy archlinux-keyring
+      - run: yay --noconfirm -S meta-package-manager
+      - run: yay --noconfirm -S meta-package-manager-bin
+      - run: mpm --version
 
   # https://github.com/lucasgelfond/zerobrew
   # Known Linux failures: https://github.com/lucasgelfond/zerobrew/issues/336

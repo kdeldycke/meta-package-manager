@@ -75,6 +75,8 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 ## Installation methods
 
+<!-- Keep in sync with .github/workflows/tests-install.yaml -->
+
 `mpm` is available on several popular package managers:
 
 ![Yo dawg, I herd you like package managers...](assets/yo-dawg-meta-package-manager.jpg){align=center}

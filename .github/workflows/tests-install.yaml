@@ -1,6 +1,9 @@
 ---
 name: 🏪 Test distributors
 "on":
+  push:
+    paths:
+      - .github/workflows/tests-install.yaml
   workflow_dispatch:
   schedule:
     # Run weekly to catch regressions from packaging or distribution changes.

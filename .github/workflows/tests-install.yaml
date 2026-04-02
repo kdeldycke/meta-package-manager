@@ -20,7 +20,8 @@ concurrency:
 
 jobs:
 
-  # https://github.com/Homebrew/homebrew-core/blob/master/Formula/meta-package-manager.rb
+  # https://formulae.brew.sh/formula/meta-package-manager
+  # https://github.com/Homebrew/homebrew-core/blob/main/Formula/m/meta-package-manager.rb
   brew:
     strategy:
       matrix:
@@ -36,77 +37,40 @@ jobs:
       - run: brew install meta-package-manager
       - run: mpm --version
 
-  # https://github.com/kdeldycke/meta-package-manager
-  github:
-    name: GitHub
+  # https://pip.pypa.io/en/stable/
+  pip:
     runs-on: ubuntu-slim
     steps:
       - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
       - name: Install Python
         run: uv --no-progress venv --python 3.14
-
-      - name: Run dev CLI
-        run: |
-          uvx    --from git+https://github.com/kdeldycke/meta-package-manager        -- mpm                  --version
-          uvx    --from git+https://github.com/kdeldycke/meta-package-manager        -- meta-package-manager --version
-          uv run --with git+https://github.com/kdeldycke/meta-package-manager        -- mpm                  --version
-          uv run --with git+https://github.com/kdeldycke/meta-package-manager        -- meta-package-manager --version
-          uv run --with git+https://github.com/kdeldycke/meta-package-manager        -m meta_package_manager --version
-          uv run --with git+https://github.com/kdeldycke/meta-package-manager python -m meta_package_manager --version
-
-      - name: Run dev CLI via uv tool
-        run: |
-          uv --no-progress tool install git+https://github.com/kdeldycke/meta-package-manager
-          mpm                  --version
-          meta-package-manager --version
-          uv --no-progress tool uninstall meta-package-manager
-
-      - name: Run dev CLI via pipx
-        run: |
-          uv --no-progress tool install pipx
-          pipx run --spec git+https://github.com/kdeldycke/meta-package-manager mpm                  --version
-          pipx run --spec git+https://github.com/kdeldycke/meta-package-manager meta-package-manager --version
-          uv --no-progress tool uninstall pipx
-
-  # https://pypi.org/project/meta-package-manager
-  pypi:
-    name: PyPI
-    runs-on: ubuntu-slim
-    steps:
-      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
-      - name: Install Python
-        run: uv --no-progress venv --python 3.14
-
-      - name: Run stable CLI
-        run: |
-          uvx           meta-package-manager                                --version
-          uvx    --from meta-package-manager        -- mpm                  --version
-          uv run --with meta-package-manager        -- mpm                  --version
-          uv run --with meta-package-manager        -- meta-package-manager --version
-          uv run --with meta-package-manager        -m meta_package_manager --version
-          uv run --with meta-package-manager python -m meta_package_manager --version
-
-      - name: Run stable CLI via uv tool
-        run: |
-          uv --no-progress tool install meta-package-manager
-          mpm                  --version
-          meta-package-manager --version
-          uv --no-progress tool uninstall meta-package-manager
-
-      - name: Run CLI via pipx
-        run: |
-          uv --no-progress tool install pipx
-          pipx run                             meta-package-manager --version
-          pipx run --spec meta-package-manager mpm                  --version
-          pipx run --spec meta-package-manager meta-package-manager --version
-          uv --no-progress tool uninstall pipx
-
       - name: Run CLI via pip
         run: |
           pip install meta-package-manager
           mpm                  --version
           meta-package-manager --version
 
+  # https://pipx.pypa.io/
+  pipx:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      - name: Install Python
+        run: uv --no-progress venv --python 3.14
+      - name: Run stable CLI via pipx
+        run: |
+          uv --no-progress tool install pipx
+          pipx run                             meta-package-manager --version
+          pipx run --spec meta-package-manager mpm                  --version
+          pipx run --spec meta-package-manager meta-package-manager --version
+          uv --no-progress tool uninstall pipx
+      - name: Run dev CLI via pipx
+        run: |
+          uv --no-progress tool install pipx
+          pipx run --spec git+https://github.com/kdeldycke/meta-package-manager mpm                  --version
+          pipx run --spec git+https://github.com/kdeldycke/meta-package-manager meta-package-manager --version
+
+  # https://scoop.sh/#/apps?q=meta-package-manager
   # https://github.com/ScoopInstaller/Main/blob/master/bucket/meta-package-manager.json
   scoop:
     strategy:
@@ -127,7 +91,7 @@ jobs:
       - shell: pwsh
         run: mpm --version
 
-  # https://github.com/marwanhawari/stew
+  # https://github.com/kdeldycke/meta-package-manager/releases/latest
   stew:
     strategy:
       matrix:
@@ -181,6 +145,41 @@ jobs:
       - name: Install mpm via Stew
         run: stew install "${{ steps.asset.outputs.url }}"
       - run: mpm --version
+
+  # https://docs.astral.sh/uv/
+  uv:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      - name: Install Python
+        run: uv --no-progress venv --python 3.14
+      - name: Run stable CLI
+        run: |
+          uvx           meta-package-manager                                --version
+          uvx    --from meta-package-manager        -- mpm                  --version
+          uv run --with meta-package-manager        -- mpm                  --version
+          uv run --with meta-package-manager        -- meta-package-manager --version
+          uv run --with meta-package-manager        -m meta_package_manager --version
+          uv run --with meta-package-manager python -m meta_package_manager --version
+      - name: Run stable CLI via uv tool
+        run: |
+          uv --no-progress tool install meta-package-manager
+          mpm                  --version
+          meta-package-manager --version
+          uv --no-progress tool uninstall meta-package-manager
+      - name: Run dev CLI
+        run: |
+          uvx    --from git+https://github.com/kdeldycke/meta-package-manager        -- mpm                  --version
+          uvx    --from git+https://github.com/kdeldycke/meta-package-manager        -- meta-package-manager --version
+          uv run --with git+https://github.com/kdeldycke/meta-package-manager        -- mpm                  --version
+          uv run --with git+https://github.com/kdeldycke/meta-package-manager        -- meta-package-manager --version
+          uv run --with git+https://github.com/kdeldycke/meta-package-manager        -m meta_package_manager --version
+          uv run --with git+https://github.com/kdeldycke/meta-package-manager python -m meta_package_manager --version
+      - name: Run dev CLI via uv tool
+        run: |
+          uv --no-progress tool install git+https://github.com/kdeldycke/meta-package-manager
+          mpm                  --version
+          meta-package-manager --version
 
   # https://github.com/lucasgelfond/zerobrew
   zerobrew:

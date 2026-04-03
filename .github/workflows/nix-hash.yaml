@@ -1,0 +1,29 @@
+---
+name: Nix hash
+"on":
+  workflow_dispatch:
+
+jobs:
+
+  nix-hash:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: cachix/install-nix-action@v31
+      - name: click-extra v7.10.0
+        run: >
+          nix hash convert
+          --hash-algo sha256
+          --to sri
+          $(nix-prefetch-url
+          --unpack
+          --type sha256
+          "https://github.com/kdeldycke/click-extra/archive/refs/tags/v7.10.0.tar.gz")
+      - name: extra-platforms v11.0.4
+        run: >
+          nix hash convert
+          --hash-algo sha256
+          --to sri
+          $(nix-prefetch-url
+          --unpack
+          --type sha256
+          "https://github.com/kdeldycke/extra-platforms/archive/refs/tags/v11.0.4.tar.gz")

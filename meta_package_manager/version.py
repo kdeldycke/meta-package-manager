@@ -458,9 +458,7 @@ class TokenizedString:
             orig_segments = tuple(parts[i] for i in range(1, len(parts), 2))
         else:
             orig_parts = ALNUM_EXTRACTOR_CI.split(string)
-            orig_segments = tuple(
-                orig_parts[i] for i in range(1, len(orig_parts), 2)
-            )
+            orig_segments = tuple(orig_parts[i] for i in range(1, len(orig_parts), 2))
             # Asciify changed the split structure: fall back to normalized.
             if len(orig_segments) != len(tokens):
                 orig_segments = tuple(str(t) for t in tokens)
@@ -487,11 +485,7 @@ class TokenizedString:
         integer to avoid touching strings like ``"voodoo"`` or a lone
         ``"v"`` token.
         """
-        if (
-            len(tokens) >= 2
-            and tokens[0].string == "v"
-            and tokens[1].isint
-        ):
+        if len(tokens) >= 2 and tokens[0].string == "v" and tokens[1].isint:
             return tokens[1:]
         return tokens
 
@@ -632,7 +626,9 @@ class VersionRange:
     @staticmethod
     def _parse(
         spec: str,
-    ) -> Iterator[tuple[Callable[[TokenizedString, TokenizedString], bool], TokenizedString]]:
+    ) -> Iterator[
+        tuple[Callable[[TokenizedString, TokenizedString], bool], TokenizedString]
+    ]:
         """Yield ``(operator, version)`` pairs from a comma-separated specifier."""
         for part in spec.split(","):
             part = part.strip()

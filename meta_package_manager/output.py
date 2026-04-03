@@ -64,7 +64,6 @@ class SortableField(StrEnum):
     VERSION = "version"
 
 
-
 def print_json(data):
     """Pretty-print Python data to JSON and output results to ``<stdout>``.
 

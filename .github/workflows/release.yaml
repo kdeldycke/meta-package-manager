@@ -13,3 +13,60 @@ jobs:
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
+
+  # Publish to Chocolatey after the release job. Unlike Homebrew, Scoop, NixOS, and AUR,
+  # the Chocolatey package is maintained in this repo (see packaging/chocolatey/).
+  # Requires the CHOCOLATEY_API_KEY secret to be set in the repository settings.
+  chocolatey:
+    needs: release
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Check for new release
+        id: check
+        shell: pwsh
+        run: |
+          $release = Invoke-RestMethod 'https://api.github.com/repos/kdeldycke/meta-package-manager/releases/latest'
+          $latest = $release.tag_name.TrimStart('v')
+          [xml]$nuspec = Get-Content packaging/chocolatey/meta-package-manager.nuspec
+          $current = $nuspec.package.metadata.version
+          if ($latest -eq $current) {
+            Write-Host "Latest release $latest already matches nuspec. Skipping."
+            "skip=true" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "New release found: $latest (nuspec has $current)."
+            "skip=false" >> $env:GITHUB_OUTPUT
+            "version=$latest" >> $env:GITHUB_OUTPUT
+          }
+      - name: Install Chocolatey-AU
+        if: steps.check.outputs.skip != 'true'
+        shell: pwsh
+        run: Install-Module Chocolatey-AU -Force -Scope CurrentUser
+      - name: Update package to latest release
+        if: steps.check.outputs.skip != 'true'
+        shell: pwsh
+        working-directory: packaging/chocolatey
+        run: ./update.ps1
+      - name: Ensure UTF-8 BOM on PowerShell scripts
+        if: steps.check.outputs.skip != 'true'
+        shell: pwsh
+        working-directory: packaging/chocolatey
+        run: |
+          Get-ChildItem -Path tools -Filter *.ps1 | ForEach-Object {
+            $content = Get-Content $_.FullName -Raw
+            $utf8Bom = New-Object System.Text.UTF8Encoding $true
+            [System.IO.File]::WriteAllText($_.FullName, $content, $utf8Bom)
+          }
+      - name: Pack
+        if: steps.check.outputs.skip != 'true'
+        shell: pwsh
+        working-directory: packaging/chocolatey
+        run: choco pack --output-directory .
+      - name: Push
+        if: steps.check.outputs.skip != 'true'
+        shell: pwsh
+        working-directory: packaging/chocolatey
+        run: >
+          choco push meta-package-manager.${{ steps.check.outputs.version }}.nupkg
+          --source https://push.chocolatey.org/
+          --api-key ${{ secrets.CHOCOLATEY_API_KEY }}

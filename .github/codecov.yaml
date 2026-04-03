@@ -1,0 +1,6 @@
+---
+comment:
+  # Only post PR comments when coverage drops or the diff introduces uncovered
+  # lines. Suppresses noise on PRs that only touch data files, configs, or docs.
+  require_changes: "coverage_drop OR uncovered_patch"
+  require_base: true

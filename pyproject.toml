@@ -362,7 +362,8 @@ commits = [
 ]
 
 [tool.repomatic]
-exclude = [ "labels", "skills/awesome-triage" ]
+exclude = [ "labels" ]
+include = [ "skills" ]
 # Source paths for workflow trigger filters.
 workflow.source-paths = [ "meta_package_manager" ]
 # Tests install system packages (apt, brew, etc.) and need a full runner image.

@@ -21,9 +21,8 @@ name: 🔬 Tests
       - uv.lock
       - .github/workflows/tests.yaml
   schedule:
-    # Run tests weekly to catch regressions from dependency or environment changes.
-    # Installability tests run on the same schedule in tests-install.yaml.
-    - cron: "17 9 * * 1"
+    # Run tests monthly to catch regressions from dependency or environment changes.
+    - cron: "17 9 1 * *"
 
 permissions: {}
 

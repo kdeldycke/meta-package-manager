@@ -76,6 +76,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 ## Installation methods
 
 <!-- Keep in sync with .github/workflows/tests-install.yaml -->
+
 <!-- Tabs are sorted by popularity: uv first, then by estimated user base. -->
 
 `mpm` is available on several popular package managers:
@@ -504,10 +505,9 @@ This is a graph of the default, main dependencies of the Python package:
 
 By default, `mpm` supports TOML [configuration files](configuration.md) and all standard [table formats](https://kdeldycke.github.io/click-extra/table.html#table-formats). Optional extras unlock additional configuration file formats and table output formats:
 
-``````{list-table}
+````{list-table}
 :header-rows: 1
 :widths: 10 40 50
-
 * - Extra
   - Install command
   - Unlocks
@@ -544,7 +544,7 @@ By default, `mpm` supports TOML [configuration files](configuration.md) and all 
     ```
   - - [YAML](https://kdeldycke.github.io/click-extra/config.html#yaml) config files: `--config mpm.yaml`
     - [`yaml` table format](https://kdeldycke.github.io/click-extra/table.html#table-formats): `--table-format yaml`
-``````
+````
 
 ````{tip}
 Install all extras at once with:

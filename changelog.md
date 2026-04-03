@@ -1,9 +1,6 @@
 # Changelog
 
-## [`6.3.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.1...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`6.3.0` (2026-04-03)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.1...v6.3.0)
 
 - [nix] Add Nix package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
 - [stew] Add Stew package manager for installing pre-compiled binaries from GitHub Releases. Closes {issue}`1680`.

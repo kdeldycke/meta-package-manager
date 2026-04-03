@@ -91,6 +91,7 @@ Meta Package Manager,flatpak,1
 Meta Package Manager,fwupd,1
 Meta Package Manager,gem,1
 Meta Package Manager,mas,1
+Meta Package Manager,nix,1
 Meta Package Manager,npm,1
 Meta Package Manager,opkg,1
 Meta Package Manager,pacaur,1
@@ -144,6 +145,7 @@ Meta Package Manager,zypper,1
 | [`fwupd`](https://fwupd.org)                                                            | >=1.9.5         |           |      🐧       |       |             |         |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |          |   ✓    |           |
 | [`gem`](https://rubygems.org)                                                           | >=2.5.0         |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`mas`](https://github.com/argon/mas)                                                   | >=1.8.7         |           |               |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
+| [`nix`](https://nixos.org)                                                              | >=2.0.0         |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`npm`](https://www.npmjs.com)                                                          | >=4.0.0         |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`opkg`](https://git.yoctoproject.org/cgit/cgit.cgi/opkg/)                              | >=0.2.0         |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |           |
 | [`pacaur`](https://github.com/E5ten/pacaur)                                             | >=4.0.0         |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |

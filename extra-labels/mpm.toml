@@ -69,6 +69,11 @@ color = "bfdadc"
 description = "mpm"
 
 [[profiles.default.labels]]
+name = "📦 manager: nix"
+color = "bfdadc"
+description = "nix"
+
+[[profiles.default.labels]]
 name = "📦 manager: npm-based"
 color = "bfdadc"
 description = "npm, yarn, yarn-berry"

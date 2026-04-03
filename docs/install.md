@@ -157,6 +157,26 @@ Meta Package Manager is [available on Chocolatey](https://community.chocolatey.o
 ```
 ````
 
+````{tab-item} Nix
+Meta Package Manager is [available in nixpkgs](https://search.nixos.org/packages?query=meta-package-manager), so you can install it with:
+
+```{code-block} shell-session
+$ nix-env --install --attr nixpkgs.meta-package-manager
+```
+
+Or try it without installing:
+
+```{code-block} shell-session
+$ nix-shell -p meta-package-manager --run "mpm --version"
+```
+
+On flake-enabled systems:
+
+```{code-block} shell-session
+$ nix run nixpkgs#meta-package-manager -- --version
+```
+````
+
 ````{tab-item} Arch Linux
 An `mpm` package is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager) and can be installed with any AUR helper:
 

@@ -95,6 +95,20 @@ jobs:
         run: chmod +x mpm
       - run: ./mpm --version
 
+  # https://search.nixos.org/packages?query=meta-package-manager
+  # https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/me/meta-package-manager/package.nix
+  nix:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-slim
+          - macos-26
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: cachix/install-nix-action@v31
+      - run: nix-env --install --attr nixpkgs.meta-package-manager
+      - run: mpm --version
+
   # AUR builds from source with full test suites. Upstream PKGBUILD check()
   # failures in transitive dependencies (beartype, boltons, etc.) cause
   # cascading build errors that are not fixable from this project. See:

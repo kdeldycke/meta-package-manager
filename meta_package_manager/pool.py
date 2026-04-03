@@ -40,6 +40,7 @@ from .managers.fwupd import FWUPD
 from .managers.gem import Gem
 from .managers.homebrew import Brew, Cask
 from .managers.mas import MAS
+from .managers.nix import Nix
 from .managers.npm import NPM
 from .managers.opkg import OPKG
 from .managers.pacman import Pacaur, Pacman, Paru, Yay
@@ -86,6 +87,7 @@ manager_classes = (
     FWUPD,
     Gem,
     MAS,
+    Nix,
     NPM,
     OPKG,
     Pacaur,

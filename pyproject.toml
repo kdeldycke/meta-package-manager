@@ -36,6 +36,8 @@ keywords = [
   "macos",
   "mas",
   "meta-package-manager",
+  "nix",
+  "nixpkgs",
   "node",
   "npm",
   "opkg",
@@ -465,6 +467,12 @@ labels.extra-file-rules = """"🔌 bar-plugin":
     - any-glob-to-any-file:
       - meta_package_manager/*
 
+"📦 manager: nix":
+  - changed-files:
+    - any-glob-to-any-file:
+      - meta_package_manager/managers/nix*
+      - tests/*nix*
+
 "📦 manager: npm-based":
   - changed-files:
     - any-glob-to-any-file:
@@ -629,6 +637,11 @@ labels.extra-content-rules = """"🔌 bar-plugin":
   - "mas"
   - "app store"
   - "app-store"
+
+"📦 manager: nix":
+  - "nix"
+  - "nixpkgs"
+  - "nixos"
 
 "📦 manager: npm-based":
   - "npm"

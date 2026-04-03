@@ -173,6 +173,7 @@ PACKAGE_IDS = {
     "fwupd": "f95c9218acd12697af946874bfe4239587209232",
     "gem": "markdown",
     "mas": "747648890",  # Telegram
+    "nix": "hello",
     "npm": "raven",
     "opkg": "enigma2-hotplug",
     "pacaur": "manjaro-hello",

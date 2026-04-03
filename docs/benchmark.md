@@ -118,7 +118,7 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `myrepos`               |       |       ✓        |               |              |              |
 | `nala`                  |       |       ✓        |               |              |              |
 | `neobundle`             |       |       ✓        |               |              |              |
-| `nix`                   |       |       ✓        |               |              |      ✓       |
+| `nix`                   |   ✓   |       ✓        |               |              |      ✓       |
 | `npm`                   |   ✓   |       ✓        |               |              |      ✓       |
 | `oh-my-zsh`             |       |       ✓        |               |              |              |
 | `opam`                  |       |       ✓        |               |              |              |

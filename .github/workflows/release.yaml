@@ -18,6 +18,7 @@ jobs:
   # the Chocolatey package is maintained in this repo (see packaging/chocolatey/).
   # Requires the CHOCOLATEY_API_KEY secret to be set in the repository settings.
   chocolatey:
+    name: 🍫 Chocolatey
     needs: release
     runs-on: windows-2025
     steps:

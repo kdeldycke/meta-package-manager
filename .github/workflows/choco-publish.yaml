@@ -1,6 +1,11 @@
 ---
-# Temporary workflow to publish the Chocolatey package.
-# Delete this file after the initial publish succeeds.
+# Publish a new version of the Chocolatey package. Unlike Homebrew, Scoop, NixOS, and AUR,
+# the Chocolatey package is maintained in this repo (see packaging/chocolatey/).
+#
+# On new mpm release: trigger this workflow manually. It fetches the latest GitHub release,
+# updates URLs and checksums, packs the .nupkg, and pushes to Chocolatey.
+#
+# Requires the CHOCOLATEY_API_KEY secret to be set in the repository settings.
 name: 🍫 Publish Chocolatey package
 "on":
   workflow_dispatch:
@@ -11,7 +16,21 @@ jobs:
   publish:
     runs-on: windows-2025
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Verify API key is set
+        shell: pwsh
+        run: |
+          if (-not "${{ secrets.CHOCOLATEY_API_KEY }}") {
+            Write-Error "CHOCOLATEY_API_KEY secret is not set. Configure it in repository settings."
+            exit 1
+          }
+      - name: Install Chocolatey-AU
+        shell: pwsh
+        run: Install-Module Chocolatey-AU -Force -Scope CurrentUser
+      - name: Update package to latest release
+        shell: pwsh
+        working-directory: packaging/chocolatey
+        run: ./update.ps1
       - name: Ensure UTF-8 BOM on PowerShell scripts
         shell: pwsh
         working-directory: packaging/chocolatey
@@ -21,6 +40,14 @@ jobs:
             $utf8Bom = New-Object System.Text.UTF8Encoding $true
             [System.IO.File]::WriteAllText($_.FullName, $content, $utf8Bom)
           }
+      - name: Get version from nuspec
+        id: version
+        shell: pwsh
+        working-directory: packaging/chocolatey
+        run: |
+          [xml]$nuspec = Get-Content meta-package-manager.nuspec
+          $version = $nuspec.package.metadata.version
+          "version=$version" >> $env:GITHUB_OUTPUT
       - name: Pack
         shell: pwsh
         working-directory: packaging/chocolatey
@@ -29,6 +56,6 @@ jobs:
         shell: pwsh
         working-directory: packaging/chocolatey
         run: >
-          choco push meta-package-manager.6.2.1.nupkg
+          choco push meta-package-manager.${{ steps.version.outputs.version }}.nupkg
           --source https://push.chocolatey.org/
           --api-key ${{ secrets.CHOCOLATEY_API_KEY }}

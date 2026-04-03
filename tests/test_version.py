@@ -232,8 +232,8 @@ def test_token_format():
 def test_token_mixed_type_not_equal():
     """Integer and string tokens are never equal, even if the string is
     digit-like when compared cross-type."""
-    assert not (Token(0) == Token("a"))
-    assert not (Token("beta") == Token(1))
+    assert Token(0) != Token("a")
+    assert Token("beta") != Token(1)
 
 
 @pytest.mark.parametrize(
@@ -354,9 +354,9 @@ def test_tokenized_string_comparison_edge_cases():
     assert v.__eq__(None) is False
     assert v.__ne__(None) is True
     # Unsupported types: __eq__/__ne__ fall back to identity.
-    assert not (v == "1.0")
     assert v != "1.0"
-    assert not (v == 42)
+    assert v != "1.0"
+    assert v != 42
     assert v != 42
     # Ordering operators raise TypeError for unsupported types.
     for op in (operator.gt, operator.lt, operator.ge, operator.le):
@@ -462,7 +462,10 @@ version_list = (
     ("1.18.4ubuntu1.1", (1, 18, 4, "ubuntu", 1, 1)),
     ("20160104ubuntu1", (20160104, "ubuntu", 1)),
     ("3.113+nmu3ubuntu4", (3, 113, "nmu", 3, "ubuntu", 4)),
-    ("13.0.2,8:d4173c853231432f001e99d882", (13, 0, 2, 8, "d4173c853231432f001e99d882")),
+    (
+        "13.0.2,8:d4173c853231432f001e99d882",
+        (13, 0, 2, 8, "d4173c853231432f001e99d882"),
+    ),
     ("1.01+20150706hgc3698e0+dfsg-2", (1, 1, 20150706, "hgc", 3698, "e", 0, "dfsg", 2)),
     # PEP 440 pre-release tags.
     ("1.0a1", (1, 0, "a", 1)),
@@ -635,7 +638,7 @@ compared_eq = (
 @pytest.mark.parametrize(("ver1", "ver2"), compared_eq)
 def test_version_comparison_eq(ver1, ver2):
     assert TokenizedString(ver1) == TokenizedString(ver2)
-    assert not (TokenizedString(ver1) != TokenizedString(ver2))
+    assert TokenizedString(ver1) == TokenizedString(ver2)
     assert TokenizedString(ver1) >= TokenizedString(ver2)
     assert TokenizedString(ver1) <= TokenizedString(ver2)
     assert not (TokenizedString(ver1) > TokenizedString(ver2))

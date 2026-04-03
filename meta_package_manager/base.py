@@ -934,9 +934,11 @@ class PackageManager(metaclass=MetaPackageManager):
         ``2.000000``). This filter drops those false positives.
         """
         for pkg in self.outdated:
-            if pkg.installed_version is None or pkg.latest_version is None:
-                yield pkg
-            elif pkg.installed_version != pkg.latest_version:
+            if (
+                pkg.installed_version is None
+                or pkg.latest_version is None
+                or pkg.installed_version != pkg.latest_version
+            ):
                 yield pkg
 
     @classmethod

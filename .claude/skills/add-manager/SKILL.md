@@ -12,13 +12,13 @@ Implement support for a new package manager in `mpm`. If adding a manager reques
 
 Pick an existing manager with a similar CLI as your starting point. Read the template file in full before starting.
 
-| Pattern | Example | When to use |
-|---|---|---|
-| Simple regex parsing | `snap.py`, `flatpak.py` | CLI outputs fixed-width or whitespace-delimited text |
-| JSON output | `npm.py`, `homebrew.py` | CLI supports `--json` or structured output |
-| Multiple compiled regexes | `gem.py`, `dnf.py` | Complex text output requiring several capture patterns |
-| Shell function wrapper | `sdkman.py` | Manager is a shell function, not a standalone binary |
-| Sibling binaries | `nix.py` | Different operations use different CLI binaries in the same directory |
+| Pattern                      | Example                          | When to use                                                                         |
+| ---------------------------- | -------------------------------- | ----------------------------------------------------------------------------------- |
+| Simple regex parsing         | `snap.py`, `flatpak.py`          | CLI outputs fixed-width or whitespace-delimited text                                |
+| JSON output                  | `npm.py`, `homebrew.py`          | CLI supports `--json` or structured output                                          |
+| Multiple compiled regexes    | `gem.py`, `dnf.py`               | Complex text output requiring several capture patterns                              |
+| Shell function wrapper       | `sdkman.py`                      | Manager is a shell function, not a standalone binary                                |
+| Sibling binaries             | `nix.py`                         | Different operations use different CLI binaries in the same directory               |
 | Subclass of existing manager | `yay.py`, `paru.py`, `pacaur.py` | Manager is a drop-in replacement or wrapper for another manager already implemented |
 
 Subclassing is the lightest option: `yay.py` is only 39 lines because it inherits almost everything from `pacman.py`. If the new manager shares the same CLI interface as an existing one, subclass it and override only what differs.
@@ -50,17 +50,17 @@ Common optional:
 
 Each operation maps to one of these methods. Implement as many as the manager supports. Unimplemented operations are automatically skipped by `mpm`.
 
-| Operation | Method signature | Returns | Notes |
-|---|---|---|---|
-| Installed | `installed` (property) | `Iterator[Package]` | Yield packages with `id` and `installed_version`. |
-| Outdated | `outdated` (property) | `Iterator[Package]` | Yield packages with `id`, `installed_version`, and `latest_version`. |
-| Search | `search(query, extended, exact)` | `Iterator[Package]` | Decorate with `@search_capabilities(extended_support=..., exact_support=...)`. Yield with `id`, `latest_version`, optionally `description`. |
-| Install | `install(package_id, version=None)` | `str` | Decorate with `@version_not_implemented` if version pinning is unsupported. |
-| Upgrade all | `upgrade_all_cli()` | `tuple[str, ...]` | Return `self.build_cli(...)`, not `self.run_cli(...)`. |
-| Upgrade one | `upgrade_one_cli(package_id, version=None)` | `tuple[str, ...]` | Same as above. Decorate with `@version_not_implemented` if needed. |
-| Remove | `remove(package_id)` | `str` | Optional. |
-| Sync | `sync()` | `None` | Optional. For refreshing package metadata from remote sources. |
-| Cleanup | `cleanup()` | `None` | Optional. For garbage collection, cache clearing, orphan removal. |
+| Operation   | Method signature                            | Returns             | Notes                                                                                                                                       |
+| ----------- | ------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Installed   | `installed` (property)                      | `Iterator[Package]` | Yield packages with `id` and `installed_version`.                                                                                           |
+| Outdated    | `outdated` (property)                       | `Iterator[Package]` | Yield packages with `id`, `installed_version`, and `latest_version`.                                                                        |
+| Search      | `search(query, extended, exact)`            | `Iterator[Package]` | Decorate with `@search_capabilities(extended_support=..., exact_support=...)`. Yield with `id`, `latest_version`, optionally `description`. |
+| Install     | `install(package_id, version=None)`         | `str`               | Decorate with `@version_not_implemented` if version pinning is unsupported.                                                                 |
+| Upgrade all | `upgrade_all_cli()`                         | `tuple[str, ...]`   | Return `self.build_cli(...)`, not `self.run_cli(...)`.                                                                                      |
+| Upgrade one | `upgrade_one_cli(package_id, version=None)` | `tuple[str, ...]`   | Same as above. Decorate with `@version_not_implemented` if needed.                                                                          |
+| Remove      | `remove(package_id)`                        | `str`               | Optional.                                                                                                                                   |
+| Sync        | `sync()`                                    | `None`              | Optional. For refreshing package metadata from remote sources.                                                                              |
+| Cleanup     | `cleanup()`                                 | `None`              | Optional. For garbage collection, cache clearing, orphan removal.                                                                           |
 
 Key helpers from the base class:
 
@@ -83,28 +83,28 @@ Every new manager touches the same set of files. This list is derived from all 3
 
 ### Always required
 
-| File | Change |
-|---|---|
-| `meta_package_manager/managers/<name>.py` | The new manager implementation. |
-| `meta_package_manager/pool.py` | Add import (sorted by module name) and class to `manager_classes` tuple (sorted case-insensitively by class name). |
-| `tests/conftest.py` | Add `"<manager_id>": "<package_name>"` to `PACKAGE_IDS`. Choose a small, low-impact package for destructive tests. |
-| `tests/test_pool.py` | Increment both count assertions in `test_manager_count()`. |
-| `changelog.md` | Add `- [<manager_id>] Add <Name> package manager with <operations> support.` under the current unreleased version. |
+| File                                      | Change                                                                                                             |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `meta_package_manager/managers/<name>.py` | The new manager implementation.                                                                                    |
+| `meta_package_manager/pool.py`            | Add import (sorted by module name) and class to `manager_classes` tuple (sorted case-insensitively by class name). |
+| `tests/conftest.py`                       | Add `"<manager_id>": "<package_name>"` to `PACKAGE_IDS`. Choose a small, low-impact package for destructive tests. |
+| `tests/test_pool.py`                      | Increment both count assertions in `test_manager_count()`.                                                         |
+| `changelog.md`                            | Add `- [<manager_id>] Add <Name> package manager with <operations> support.` under the current unreleased version. |
 
 ### Almost always required
 
-| File | Change |
-|---|---|
-| `pyproject.toml` | Add manager name (and ecosystem name if different) to `keywords`. Add `"📦 manager: <name>"` entries to both `labels.extra-file-rules` and `labels.extra-content-rules`. |
-| `readme.md` + `extra-labels/mpm.toml` | Regenerated automatically. Run `uv run -- python docs/docs_update.py`. |
+| File                                  | Change                                                                                                                                                                   |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pyproject.toml`                      | Add manager name (and ecosystem name if different) to `keywords`. Add `"📦 manager: <name>"` entries to both `labels.extra-file-rules` and `labels.extra-content-rules`. |
+| `readme.md` + `extra-labels/mpm.toml` | Regenerated automatically. Run `uv run -- python docs/docs_update.py`.                                                                                                   |
 
 ### When applicable
 
-| File | When | Change |
-|---|---|---|
-| `meta_package_manager/labels.py` | Manager belongs to an existing ecosystem (e.g., adding an AUR helper to the pacman-based group, or a pip wrapper to the pip-based group). | Add the manager ID to the appropriate frozenset in `MANAGER_LABEL_GROUPS`. |
-| `docs/benchmark.md` | Manager already appears in the comparison table. | Add `✓` in the `mpm` column. |
-| `.github/workflows/tests-install.yaml` + `docs/install.md` | Manager is a *distributor of mpm itself* (like Homebrew, Scoop, Nix, or an AUR helper). Most managers are not. | Add a CI job testing `mpm` installation via the new channel, and a matching tab in the install docs. |
+| File                                                       | When                                                                                                                                      | Change                                                                                               |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `meta_package_manager/labels.py`                           | Manager belongs to an existing ecosystem (e.g., adding an AUR helper to the pacman-based group, or a pip wrapper to the pip-based group). | Add the manager ID to the appropriate frozenset in `MANAGER_LABEL_GROUPS`.                           |
+| `docs/benchmark.md`                                        | Manager already appears in the comparison table.                                                                                          | Add `✓` in the `mpm` column.                                                                         |
+| `.github/workflows/tests-install.yaml` + `docs/install.md` | Manager is a *distributor of mpm itself* (like Homebrew, Scoop, Nix, or an AUR helper). Most managers are not.                            | Add a CI job testing `mpm` installation via the new channel, and a matching tab in the install docs. |
 
 ## Validate
 

@@ -141,7 +141,9 @@ class UV(UVBase):
               }
             ]
         """
-        output = self.run_cli("pip", "list", "--outdated", "--format=json", must_succeed=True)
+        output = self.run_cli(
+            "pip", "list", "--outdated", "--format=json", must_succeed=True
+        )
 
         if output:
             for package in json.loads(output):

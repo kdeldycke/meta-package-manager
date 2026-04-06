@@ -127,7 +127,9 @@ class YarnClassic(Yarn):
                - awesome-lint
             ✨  Done in 0.13s.
         """
-        output = self.run_cli("global", "--json", "list", "--depth", "0", must_succeed=True)
+        output = self.run_cli(
+            "global", "--json", "list", "--depth", "0", must_succeed=True
+        )
 
         for package_id, version in self._INSTALLED_REGEXP.findall(output):
             yield self.package(id=package_id, installed_version=version)
@@ -196,7 +198,9 @@ class YarnClassic(Yarn):
             markdown 0.4.0   0.4.0  0.5.0  dependencies git://github.com/.../md-js.git
             ✨  Done in 0.95s.
         """
-        output = self.run_cli("--json", "outdated", "--cwd", self.global_dir, must_succeed=True)
+        output = self.run_cli(
+            "--json", "outdated", "--cwd", self.global_dir, must_succeed=True
+        )
         if output:
             for line in output.splitlines():
                 if not line:

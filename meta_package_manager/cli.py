@@ -66,10 +66,10 @@ from .output import (
     print_json,
     print_stats,
 )
-from .version import diff_versions
 from .pool import pool
 from .sbom import SBOM, SPDX, CycloneDX, ExportFormat
 from .specifier import VERSION_SEP, Solver, Specifier
+from .version import diff_versions
 
 if sys.version_info >= (3, 11):
     import tomllib

@@ -141,7 +141,9 @@ class Scoop(PackageManager):
         """
         output = self.run_cli("list")
 
-        for package_id, version in self._LIST_REGEXP.findall(self.remove_headers(output)):
+        for package_id, version in self._LIST_REGEXP.findall(
+            self.remove_headers(output)
+        ):
             yield self.package(id=package_id, installed_version=version)
 
     @property
@@ -160,7 +162,11 @@ class Scoop(PackageManager):
         """
         output = self.run_cli("scoop", "status")
 
-        for package_id, installed_version, latest_version in self._OUTDATED_REGEXP.findall(
+        for (
+            package_id,
+            installed_version,
+            latest_version,
+        ) in self._OUTDATED_REGEXP.findall(
             self.remove_headers(output),
         ):
             yield self.package(

@@ -247,6 +247,29 @@ $ file ./mpm*
 ```
 ````
 
+## Release verification
+
+All release artifacts (Python packages and compiled binaries) are signed with [GitHub Artifact Attestations](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds) providing [SLSA v1 provenance](https://slsa.dev/spec/v1.0/). You can verify any downloaded artifact with the [GitHub CLI](https://cli.github.com):
+
+```{code-block} shell-session
+$ gh attestation verify ./mpm-macos-arm64.bin --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
+Loaded digest sha256:... for file://mpm-macos-arm64.bin
+Loaded 1 attestation from GitHub API
+✓ Verification succeeded!
+```
+
+```{important}
+The `--signer-repo kdeldycke/repomatic` flag is required because the release workflow runs as a [reusable workflow](https://docs.github.com/en/actions/sharing-automations/reusing-workflows) from [`kdeldycke/repomatic`](https://github.com/kdeldycke/repomatic). The signing certificate references that repository, not `kdeldycke/meta-package-manager`. Without this flag, verification fails.
+```
+
+For Python packages from PyPI:
+
+```{code-block} shell-session
+$ gh attestation verify ./meta_package_manager-6.2.1-py3-none-any.whl --repo kdeldycke/meta-package-manager --signer-repo kdeldycke/repomatic
+```
+
+Attestation bundles are also attached to each [GitHub release](https://github.com/kdeldycke/meta-package-manager/releases) for offline verification.
+
 ## Self-bootstrapping
 
 In a funny twist, `mpm` can be installed with itself.

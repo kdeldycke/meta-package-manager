@@ -79,7 +79,7 @@ Use this format for each category:
 Group by:
 
 1. Bug fixes (stale deps, missing declared deps, broken links)
-2. Structural alignment (toctree, page naming, conf.py settings)
+2. Structural alignment (toctree, page naming, `conf.py` settings)
 3. Content improvements (install.md sections, extra-deps tables, badges)
 
 ### Implement

@@ -9,10 +9,11 @@ name: 🚀 Build & release
 jobs:
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/release.yaml@ac35a90ce5322a4e4593ae0db7cf348cec80952f # v6.10.0
+    uses: kdeldycke/repomatic/.github/workflows/release.yaml@0a4d6470fbbb69496f742e7fe14a706b3ebc2060 # v6.11.0
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
+      VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
 
   # Publish to Chocolatey after the release job. Unlike Homebrew, Scoop, NixOS, and AUR,
   # the Chocolatey package is maintained in this repo (see packaging/chocolatey/).

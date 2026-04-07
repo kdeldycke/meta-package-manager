@@ -85,8 +85,8 @@ Typical light/dark color pairs (Tailwind Slate palette):
 
 Use `rsvg-convert` (from librsvg):
 
-```
-rsvg-convert -o output.png input.svg
+```shell-session
+$ rsvg-convert -o output.png input.svg
 ```
 
 If `rsvg-convert` is unavailable, fall back to `inkscape --export-type=png --export-filename=output.png input.svg`.

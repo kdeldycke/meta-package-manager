@@ -322,7 +322,7 @@ then reinstall them on your new distribution.
    $ mpm backup packages.toml
    ```
 
-1. On your brand new Linux distribution, restore all packages with:
+2. On your brand new Linux distribution, restore all packages with:
 
    ```shell-session
    $ mpm restore packages.toml

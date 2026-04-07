@@ -216,7 +216,6 @@ typing = [
 exclude-newer = "1 week"
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
-exclude-newer-package = {pygments = "0 day", requests = "0 day"}
 
 [tool.nuitka]
 product-name = "Meta Package Manager"

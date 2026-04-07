@@ -20,6 +20,7 @@ import logging
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 from contextlib import nullcontext
@@ -524,6 +525,18 @@ class PackageManager(metaclass=MetaPackageManager):
 
             for filename in search_filenames:
                 file = search_path / filename
+                # On Windows, check for reparse points (e.g., Windows App Execution Aliases like winget).
+                # These return False for is_file() and 0 for getsize(), so we detect them separately.
+                if sys.platform == "win32":
+                    try:
+                        file_stat = file.lstat()
+                        if file_stat.st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT:
+                            logging.debug(f"CLI found at {highlight_cli_name(file, cli_names)} (reparse point)")
+                            yield file
+                            continue
+                    except OSError:
+                        # Permission denied or file doesn't exist; fall through to normal checks.
+                        pass
                 if not file.is_file() or not os.path.getsize(file):
                     continue
                 logging.debug(f"CLI found at {highlight_cli_name(file, cli_names)}")

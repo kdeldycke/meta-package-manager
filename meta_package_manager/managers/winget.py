@@ -16,6 +16,8 @@
 
 from __future__ import annotations
 
+import re
+
 from extra_platforms import WINDOWS
 
 from ..base import PackageManager
@@ -57,13 +59,85 @@ class WinGet(PackageManager):
         - https://github.com/microsoft/winget-cli/issues/3494#issuecomment-3921618377
     """
 
-    version_regexes = (r"v\s+(?P<version>\S+)",)
+    version_regexes = (r"v\s*(?P<version>\S+)",)
     """
     .. code-block:: pwsh-session
 
         PS C:\\Users\\kev> winget --version
-        v1.7.11261
+        Windows Package Manager v1.28.220
     """
+
+    def _parse_details(
+        self, output: str, filter_by_source: bool = False
+    ) -> Iterator[tuple[str, str, str, str | None]]:
+        """Parse --details output from winget list or upgrade-available commands.
+
+        Each package is formatted as:
+            (N/M) <Name> [<Id>]
+            Version: <current_version>
+            Publisher: <publisher>
+            Origin Source: winget
+            ...
+            [Available Upgrades:]
+            [  winget [<latest_version>]]
+
+        If filter_by_source=True, only packages with Origin Source: winget are returned.
+        """
+        # Split on block markers like "(1/232) Package Name [Id]"
+        blocks = re.split(r'(?=^\(\d+/\d+\) )', output, flags=re.MULTILINE)
+
+        for block in blocks:
+            if not block.strip():
+                continue
+
+            lines = block.strip().splitlines()
+            if not lines:
+                continue
+
+            # Parse the header line: (N/M) <Name> [<Id>]
+            header = lines[0]
+            header_match = re.match(
+                r'^\(\d+/\d+\)\s+(.+)\s+\[([^\]]+)\]$',
+                header,
+            )
+            if not header_match:
+                continue
+
+            name = header_match.group(1).strip()
+            package_id = header_match.group(2).strip()
+            version = None
+            origin_source = None
+
+            # Look for version on the next line or in key:value format
+            latest_version = None
+            for i, line in enumerate(lines[1:], 1):
+                line_stripped = line.strip()
+                # Extract version from "Version: X.Y.Z" line
+                if line_stripped.startswith('Version:'):
+                    version = line_stripped.split(':', 1)[1].strip()
+                # Track Origin Source
+                elif line_stripped.startswith('Origin Source:'):
+                    origin_source = line_stripped.split(':', 1)[1].strip()
+                # Look for available upgrades
+                elif line_stripped == 'Available Upgrades:':
+                    # Next non-empty line should have the version.
+                    for future_line in lines[i + 1:]:
+                        future_line = future_line.strip()
+                        if future_line:
+                            # Format: "winget [X.Y.Z]"
+                            upgrade_match = re.search(r'\[([^\]]+)\]', future_line)
+                            if upgrade_match:
+                                latest_version = upgrade_match.group(1)
+                            break
+                    break
+
+            # Only yield if we found a version
+            if version:
+                # Filter by source if requested (only include winget packages)
+                if filter_by_source and origin_source != 'winget':
+                    continue
+
+                yield (name, package_id, version, latest_version)
 
     def _parse_table(self, output: str) -> Iterator[Generator[str, None, None]]:
         """Parse a table from the output of a winget command and returns a generator of cells."""
@@ -113,31 +187,34 @@ class WinGet(PackageManager):
 
         .. code-block:: pwsh-session
 
-            PS C:\\Users\\kev> winget list --accept-source-agreements --disable-interactivity
-            The 'msstore' source requires that you view the following agreements before using.
-            Terms of Transaction: https://aka.ms/microsoft-store-terms-of-transaction
-            The source requires the current machine's 2-letter geographic region to be sent to the backend service to function properly (ex. "US").
+            PS C:\\Users\\kev> winget list --details --accept-source-agreements --disable-interactivity
+            (1/7) CCleaner [CCleaner] Version: 6.08
+            Publisher: Piriform Software Ltd
+            Local Identifier: ARP\\Machine\\X64\\CCleaner
+            Product Code: CCleaner
+            Installer Category: exe
+            Installed Scope: Machine
+            Installed Architecture: X64
+            Installed Locale: en-US
+            Origin Source: winget
+            Available Upgrades:
 
-            Name                          Id                           Version        Available     Source
-            ----------------------------------------------------------------------------------------------
-            CCleaner                      CCleaner                     6.08
-            Git                           Git.Git                      2.37.3         2.45.1        winget
-            Microsoft Edge                Microsoft.Edge               109.0.1518.70  125.0.2535.51 winget
-            Microsoft Edge Update         Microsoft Edge Update        1.3.187.37
-            App Installer                 Microsoft.AppInstaller       1.21.3482.0                  winget
-            Microsoft.UI.Xaml.2.7         Microsoft.UI.Xaml.2.7        7.2208.15002.0               winget
-            Python Launcher               Python.Launchez              < 3.12.0       3.12.0        winget
-            Microsoft Visual C++ (x86)... Microsoft.VCRedist.2015+.X86 14.34.31931.0  14.38.33135.0 winget
+            (2/7) Git [Git.Git] Version: 2.37.3
+            Publisher: The Git Development Community
+            ...
+
+        Only returns packages with Origin Source: winget to exclude packages
+        installed via other sources (e.g., sideload, portable).
         """
-        output = self.run_cli("list")
+        output = self.run_cli("list", "--details")
 
-        for name, package_id, installed_version, _, _ in self._parse_table(output):
-            # Strip the "<" comparison operator from the version.
-            if " " in installed_version:
-                installed_version = installed_version.split()[1]
-
+        for name, package_id, installed_version, _ in self._parse_details(
+            output, filter_by_source=True
+        ):
             yield self.package(
-                id=package_id, name=name, installed_version=installed_version
+                id=package_id,
+                name=name,
+                installed_version=installed_version,
             )
 
     @property
@@ -146,26 +223,27 @@ class WinGet(PackageManager):
 
         .. code-block:: pwsh-session
 
-            PS C:\\Users\\kev> winget list --upgrade-available --accept-source-agreements --disable-interactivity
-            Name                          Id                           Version       Available     Source
-            ---------------------------------------------------------------------------------------------
-            Git                           Git.Git                      2.37.3        2.45.1        winget
-            Microsoft Edge                Microsoft.Edge               109.0.1518.70 125.0.2535.51 winget
-            Python Launcher               Python.Launchez              < 3.12.0      3.12.0        winget
-            Microsoft Visual C++ (x86)... Microsoft.VCRedist.2015+.X86 14.34.31931.0 14.38.33135.0 winget
-            4 upgrades available.
+            PS C:\\Users\\kev> winget list --upgrade-available --details --accept-source-agreements --disable-interactivity
+            (1/4) Git [Git.Git] Version: 2.37.3
+            Publisher: The Git Development Community
+            ...
+            Available Upgrades:
+              winget [2.45.1]
+
+            (2/4) Microsoft Edge [Microsoft.Edge] Version: 109.0.1518.70
+            Publisher: Microsoft
+            ...
+            Available Upgrades:
+              winget [125.0.2535.51]
+
+        Only returns packages with Origin Source: winget to exclude packages
+        installed via other sources (e.g., sideload, portable).
         """
-        output = self.run_cli("list", "--upgrade-available").strip()
-        if output.endswith(" upgrades available."):
-            output = "\n".join(output.splitlines()[:-1])
+        output = self.run_cli("list", "--upgrade-available", "--details")
 
-        for name, package_id, installed_version, latest_version, _ in self._parse_table(
-            output
+        for name, package_id, installed_version, latest_version in self._parse_details(
+            output, filter_by_source=True
         ):
-            # Strip the "<" comparison operator from the version.
-            if " " in installed_version:
-                installed_version = installed_version.split()[1]
-
             yield self.package(
                 id=package_id,
                 name=name,

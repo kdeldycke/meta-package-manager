@@ -23,7 +23,5 @@ If you’re a Python developer, see the {doc}`/add-new-manager` guide for the fu
 ## `claude.md` file
 
 ```{include} ../claude.md
----
-start-line: 2
----
+:start-line: 2
 ```

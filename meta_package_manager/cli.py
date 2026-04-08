@@ -614,7 +614,14 @@ def installed(ctx, duplicates):
     )
 
     for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
-        packages = tuple(packages_asdict(manager.installed, fields))
+        try:
+            packages = tuple(packages_asdict(manager.installed, fields))
+        except CLIError:
+            logging.warning(
+                f"Could not list installed packages "
+                f"from {theme.invoked_command(manager.id)}."
+            )
+            packages = ()
 
         installed_data[manager.id] = {
             "id": manager.id,
@@ -713,7 +720,14 @@ def outdated(ctx, plugin_output):
     )
 
     for manager in ctx.obj.selected_managers(implements_operation=Operations.outdated):
-        packages = tuple(packages_asdict(manager.refiltered_outdated, fields))
+        try:
+            packages = tuple(packages_asdict(manager.refiltered_outdated, fields))
+        except CLIError:
+            logging.warning(
+                f"Could not list outdated packages "
+                f"from {theme.invoked_command(manager.id)}."
+            )
+            packages = ()
 
         outdated_data[manager.id] = {
             "id": manager.id,
@@ -820,12 +834,19 @@ def search(ctx, extended, exact, refilter, query):
 
     search_method = "refiltered_search" if refilter else "search"
     for manager in ctx.obj.selected_managers(implements_operation=Operations.search):
-        packages = tuple(
-            packages_asdict(
-                getattr(manager, search_method)(query, extended, exact),
-                fields,
-            ),
-        )
+        try:
+            packages = tuple(
+                packages_asdict(
+                    getattr(manager, search_method)(query, extended, exact),
+                    fields,
+                ),
+            )
+        except CLIError:
+            logging.warning(
+                f"Could not search packages "
+                f"from {theme.invoked_command(manager.id)}."
+            )
+            packages = ()
 
         matches[manager.id] = {
             "id": manager.id,

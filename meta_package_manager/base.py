@@ -82,7 +82,7 @@ Each operation has its own CLI subcommand.
 class CLIError(Exception):
     """An error occurred when running package manager CLI."""
 
-    def __init__(self, code: int, output: str, error: str) -> None:
+    def __init__(self, code: int | None, output: str, error: str) -> None:
         """The exception internally keeps the result of CLI execution."""
         super().__init__()
         self.code = code
@@ -723,14 +723,23 @@ class PackageManager(metaclass=MetaPackageManager):
             logging.warning(f"Dry-run: {cli_msg}")
         else:
             logging.debug(cli_msg)
-            result = subprocess.run(
-                clean_args,
-                capture_output=True,
-                timeout=self.timeout,
-                encoding="utf-8",
-                env=cast("subprocess._ENV", env_copy(extra_env)),
-                check=False,
-            )
+            try:
+                result = subprocess.run(
+                    clean_args,
+                    capture_output=True,
+                    timeout=self.timeout,
+                    encoding="utf-8",
+                    env=cast("subprocess._ENV", env_copy(extra_env)),
+                    check=False,
+                )
+            except subprocess.TimeoutExpired:
+                msg = f"Timed out after {self.timeout}s."
+                logging.warning(msg)
+                exception = CLIError(None, "", msg)
+                if must_succeed or self.stop_on_error:
+                    raise exception
+                self.cli_errors.append(exception)
+                return ""
             code = result.returncode
             output = result.stdout
             error = result.stderr

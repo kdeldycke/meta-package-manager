@@ -108,7 +108,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
             Test is skipped on GitHub Actions as ``mas`` does not have access there
             to a registered account on the App Store. So the search returns no results.
         """
-        result = invoke("--mas", "search", "钉")
+        result = invoke("--color", "--mas", "search", "钉")
         assert result.exit_code == 0
         assert "钉钉" in result.stdout
         assert " \x1b[32m\x1b[1m钉钉\x1b[0m " in result.stdout
@@ -198,7 +198,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         The search on the small ``co`` string is producing all variations of multiple
         ``co`` substring matches and highlights.
         """
-        result = invoke("--cargo", "search", "co")
+        result = invoke("--color", "--cargo", "search", "co")
         assert result.exit_code == 0
         # Check that the highlight ANSI sequence for "co" appears in the output.
         # Cargo search results change over time, so we only verify that

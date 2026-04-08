@@ -34,7 +34,7 @@ class WinGet(PackageManager):
 
     platforms = WINDOWS
 
-    requirement = ">=1.7"
+    requirement = ">=1.28.190"
 
     post_args = ("--accept-source-agreements", "--disable-interactivity")
     """
@@ -59,12 +59,12 @@ class WinGet(PackageManager):
         - https://github.com/microsoft/winget-cli/issues/3494#issuecomment-3921618377
     """
 
-    version_regexes = (r"v\s*(?P<version>\S+)",)
+    version_regexes = (r"v(?P<version>\S+)",)
     """
     .. code-block:: pwsh-session
 
         PS C:\\Users\\kev> winget --version
-        Windows Package Manager v1.28.220
+        v1.28.220
     """
 
     def _parse_details(

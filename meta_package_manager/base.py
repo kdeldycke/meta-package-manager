@@ -530,8 +530,13 @@ class PackageManager(metaclass=MetaPackageManager):
                 if is_any_windows():
                     try:
                         file_stat = file.lstat()
-                        if file_stat.st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT:
-                            logging.debug(f"CLI found at {highlight_cli_name(file, cli_names)} (reparse point)")
+                        if (
+                            file_stat.st_file_attributes
+                            & stat.FILE_ATTRIBUTE_REPARSE_POINT
+                        ):
+                            logging.debug(
+                                f"CLI found at {highlight_cli_name(file, cli_names)} (reparse point)"
+                            )
                             yield file
                             continue
                     except OSError:

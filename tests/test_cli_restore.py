@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import pytest
 
+from meta_package_manager.base import Operations
 from meta_package_manager.pool import pool
 
 from .conftest import default_manager_ids
@@ -42,6 +43,7 @@ class TestRestore(CLISubCommandTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (
+            f"warning: {mid} does not implement {Operations.install}." in stderr,
             # Warning message for restore command.
             f"warning: No [{mid}] section found." in stderr,
             # Restoring message.

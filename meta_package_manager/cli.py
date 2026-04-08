@@ -1058,6 +1058,12 @@ def install(ctx, packages_specs):
                     f"{spec.package_id} existence unconfirmed, "
                     "try to directly install it...",
                 )
+            except CLIError:
+                logging.warning(
+                    f"Could not search for {spec.package_id} "
+                    f"with {theme.invoked_command(manager.id)}.",
+                )
+                continue
             else:
                 if not matches:
                     logging.warning(

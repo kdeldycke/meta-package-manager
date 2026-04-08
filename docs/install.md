@@ -209,7 +209,6 @@ $ stew install kdeldycke/meta-package-manager
 $ zb install meta-package-manager
 ```
 ````
-````
 `````
 
 ## Binaries

@@ -5,30 +5,30 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [cpan] Add CPAN package manager for Perl modules with `installed`, `outdated`, `install`, and `upgrade` support. Closes {issue}`602`.
+- [deb-get] Add deb-get package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support. Closes {issue}`1609`.
 - [nix] Add Nix package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
+- [pacstall] Add Pacstall package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, and `sync` support. Closes {issue}`1610`.
+- [sdkman] Add SDKMAN! package manager with `installed`, `outdated`, `install`, `upgrade`, `sync`, and `cleanup` support. Closes {issue}`729`.
 - [stew] Add Stew package manager for installing pre-compiled binaries from GitHub Releases. Closes {issue}`1680`.
-- [pip] Only report top-level packages as outdated, skipping transitive dependencies. Closes {issue}`1214`.
+- [zerobrew] Add ZeroBrew manager with `installed`, `outdated`, `install`, and `remove` support. Closes {issue}`1681`.
 - [uvx] Implement `outdated` operation. Bump minimal requirement to `0.10.10`. Closes {pr}`1704`.
-- [mpm] Support version range specifiers (e.g. `>=1.20.0,<2.0.0`) in manager `requirement` field. Refs {issue}`1548`.
 - [yarn] Split into Yarn Classic and Yarn Berry managers. Restrict Classic to `<2.0.0`. Closes {issue}`1548`.
 - [yarn-berry] Add Yarn Berry (2.x+) manager with `search` and `cleanup` support.
+- [winget] Switch `installed` and `outdated` to `winget list --details` structured output; filter to `Origin Source: winget` packages only, excluding sideloaded and portable entries. Bump minimum required version to `>=1.28.190`.
+- [pip] Only report top-level packages as outdated, skipping transitive dependencies. Closes {issue}`1214`.
+- [mpm] Support version range specifiers (e.g. `>=1.20.0,<2.0.0`) in manager `requirement` field. Refs {issue}`1548`.
 - [mpm] Add `must_succeed` parameter to `run_cli` for structured-output calls, preventing silent data loss on CLI failures. Refs {issue}`1703`.
-- [mpm] Reduce CI jobs on pull requests by skipping release builds, experimental Python versions, redundant architecture variants, and install verification tests. Full matrix still runs on push to main.
-- [mpm] Declare `windows-11-arm` exclusion in `[tool.repomatic.test-matrix]` config instead of hardcoding the test matrix inline.
-- [pacstall] Add Pacstall package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, and `sync` support. Closes {issue}`1610`.
-- [zerobrew] Add ZeroBrew manager with `installed`, `outdated`, `install`, and `remove` support. Closes {issue}`1681`.
-- [deb-get] Add deb-get package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support. Closes {issue}`1609`.
-- [cpan] Add CPAN package manager for Perl modules with `installed`, `outdated`, `install`, and `upgrade` support. Closes {issue}`602`.
-- [sdkman] Add SDKMAN! package manager with `installed`, `outdated`, `install`, `upgrade`, `sync`, and `cleanup` support. Closes {issue}`729`.
-- [mpm] Preserve original separators and case in version tokenization for lossless `pretty_print()` round-tripping.
-- [mpm] Fix version comparison so integer tokens sort higher than string tokens (e.g., `3.12.0 > 3.12.0a4`) and trailing `.0` segments are treated as padding.
-- [mpm] Keep hex hashes (e.g., `c79e264`, `d4173c...`) as single tokens in version strings instead of splitting them at every digit/letter boundary.
+- [mpm] Add Chocolatey as a supported Windows installation method; automate package publishing on release.
+- [mpm] Overhaul version tokenization: preserve original separators and case, keep hex hashes as single tokens, normalize pre-release aliases (`alpha`/`a`, `beta`/`b`, `c`/`rc`), and recognize `post`/`patch` as post-release tags.
+- [mpm] Fix version comparison accuracy: integer tokens now rank above string tokens (e.g., `3.12.0 > 3.12.0a4`), trailing `.0` segments are treated as padding, the cosmetic `v` prefix is stripped, and false-positive outdated entries where parsed versions compare equal are filtered.
 - [mpm] Snap version diff highlighting to separator boundaries so the full diverging token and its preceding separator are colored.
-- [mpm] Filter out false-positive outdated packages where installed and latest versions are equal after parsing. Fixes spurious results from Perl floating-point versioning and similar schemes.
-- [mpm] Normalize pre-release aliases (`alpha`/`a`, `beta`/`b`, `c`/`rc`) during tokenization, recognize `post`/`patch` as post-release tags, and strip cosmetic `v` prefix in version comparison.
+- [mpm] Detect Windows App Execution Aliases (reparse points) when resolving CLI paths, fixing detection of `winget` and similar tools installed via the Microsoft Store.
 - [gem] Remove `--user-install` flag from `install`, `upgrade`, and `update` commands so all operations target the same gem scope as `list` and `outdated`. Closes {issue}`389`.
 - [pip] Remove `--user` flag from `upgrade` command so upgrades target the same scope as `list` and `outdated`.
+- [pip] Prepend the current Python executable to the list of candidates when searching for pip binaries, so the active environment is always checked first.
 - [mpm] Cache installed package IDs before the spec loop in `upgrade` and `remove` commands, avoiding redundant CLI calls per package specifier.
+- [mpm] Reduce CI matrix on pull requests: skip release builds, experimental Python versions, redundant architecture variants, and install tests. Declare `windows-11-arm` exclusion in `[tool.repomatic.test-matrix]` config instead of hardcoding it.
 
 ## [`6.2.1` (2026-03-26)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.0...v6.2.1)
 

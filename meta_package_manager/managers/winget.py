@@ -67,77 +67,78 @@ class WinGet(PackageManager):
         v1.28.220
     """
 
+    # Header line pattern. The ``(N/M)`` prefix is present only when multiple
+    # packages are listed; a single result omits it.
+    _header_re = re.compile(
+        r"^(?:\(\d+/\d+\)\s+)?(.+)\s+\[([^\]]+)\]\s*$",
+    )
+
     def _parse_details(
         self, output: str, filter_by_source: bool = False
     ) -> Iterator[tuple[str, str, str, str | None]]:
-        """Parse --details output from winget list or upgrade-available commands.
+        """Parse ``--details`` output from ``winget list``.
 
-        Each package is formatted as:
+        Each package block starts with a header line and is followed by
+        ``Key: Value`` metadata lines:
+
+        .. code-block:: text
+
             (N/M) <Name> [<Id>]
-            Version: <current_version>
+            Version: <version>
             Publisher: <publisher>
             Origin Source: winget
-            ...
-            [Available Upgrades:]
-            [  winget [<latest_version>]]
+            Available Upgrades:
+              winget [<latest_version>]
 
-        If filter_by_source=True, only packages with Origin Source: winget are returned.
+        :param filter_by_source: If ``True``, only yield packages whose
+            ``Origin Source`` is ``winget``.
         """
-        # Split on block markers like "(1/232) Package Name [Id]"
-        blocks = re.split(r'(?=^\(\d+/\d+\) )', output, flags=re.MULTILINE)
+        # Split output into per-package blocks on the header line.
+        blocks = re.split(
+            r"(?=^(?:\(\d+/\d+\)\s+)?.+\[[^\]]+\]\s*$)",
+            output,
+            flags=re.MULTILINE,
+        )
 
         for block in blocks:
-            if not block.strip():
+            block = block.strip()
+            if not block:
                 continue
 
-            lines = block.strip().splitlines()
-            if not lines:
-                continue
-
-            # Parse the header line: (N/M) <Name> [<Id>]
-            header = lines[0]
-            header_match = re.match(
-                r'^\(\d+/\d+\)\s+(.+)\s+\[([^\]]+)\]$',
-                header,
-            )
+            lines = block.splitlines()
+            header_match = self._header_re.match(lines[0])
             if not header_match:
                 continue
 
             name = header_match.group(1).strip()
             package_id = header_match.group(2).strip()
-            version = None
-            origin_source = None
 
-            # Look for version on the next line or in key:value format
+            # Collect key:value fields from the remaining lines.
+            fields: dict[str, str] = {}
+            for line in lines[1:]:
+                if ":" in line:
+                    key, _, value = line.partition(":")
+                    fields[key.strip()] = value.strip()
+
+            version = fields.get("Version")
+            if not version:
+                continue
+
+            if filter_by_source and fields.get("Origin Source") != "winget":
+                continue
+
+            # Extract latest version from the "Available Upgrades" section.
+            # The upgrade line looks like ``  winget [1.2.3]``.
             latest_version = None
-            for i, line in enumerate(lines[1:], 1):
-                line_stripped = line.strip()
-                # Extract version from "Version: X.Y.Z" line
-                if line_stripped.startswith('Version:'):
-                    version = line_stripped.split(':', 1)[1].strip()
-                # Track Origin Source
-                elif line_stripped.startswith('Origin Source:'):
-                    origin_source = line_stripped.split(':', 1)[1].strip()
-                # Look for available upgrades
-                elif line_stripped == 'Available Upgrades:':
-                    # Next non-empty line should have the version.
-                    for future_line in lines[i + 1:]:
-                        future_line = future_line.strip()
-                        if future_line:
-                            # Format: "winget [X.Y.Z]"
-                            upgrade_match = re.search(r'\[([^\]]+)\]', future_line)
-                            if upgrade_match:
-                                latest_version = upgrade_match.group(1)
-                            break
-                    break
+            upgrade_match = re.search(
+                r"^Available Upgrades:\s*\n\s+\S+\s+\[([^\]]+)\]",
+                block,
+                flags=re.MULTILINE,
+            )
+            if upgrade_match:
+                latest_version = upgrade_match.group(1)
 
-            # Only yield if we found a version
-            if version:
-                # Filter by source if requested (only include winget packages)
-                if filter_by_source and origin_source != 'winget':
-                    continue
-
-                yield (name, package_id, version, latest_version)
+            yield name, package_id, version, latest_version
 
     def _parse_table(self, output: str) -> Iterator[Generator[str, None, None]]:
         """Parse a table from the output of a winget command and returns a generator of cells."""
@@ -188,7 +189,8 @@ class WinGet(PackageManager):
         .. code-block:: pwsh-session
 
             PS C:\\Users\\kev> winget list --details --accept-source-agreements --disable-interactivity
-            (1/7) CCleaner [CCleaner] Version: 6.08
+            (1/7) CCleaner [CCleaner]
+            Version: 6.08
             Publisher: Piriform Software Ltd
             Local Identifier: ARP\\Machine\\X64\\CCleaner
             Product Code: CCleaner
@@ -199,7 +201,8 @@ class WinGet(PackageManager):
             Origin Source: winget
             Available Upgrades:
 
-            (2/7) Git [Git.Git] Version: 2.37.3
+            (2/7) Git [Git.Git]
+            Version: 2.37.3
             Publisher: The Git Development Community
             ...
 
@@ -224,13 +227,15 @@ class WinGet(PackageManager):
         .. code-block:: pwsh-session
 
             PS C:\\Users\\kev> winget list --upgrade-available --details --accept-source-agreements --disable-interactivity
-            (1/4) Git [Git.Git] Version: 2.37.3
+            (1/4) Git [Git.Git]
+            Version: 2.37.3
             Publisher: The Git Development Community
             ...
             Available Upgrades:
               winget [2.45.1]
 
-            (2/4) Microsoft Edge [Microsoft.Edge] Version: 109.0.1518.70
+            (2/4) Microsoft Edge [Microsoft.Edge]
+            Version: 109.0.1518.70
             Publisher: Microsoft
             ...
             Available Upgrades:

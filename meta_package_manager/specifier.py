@@ -372,6 +372,19 @@ class Solver:
         if len(collection) == 1:
             return collection.pop()
 
+        # Multiple specs with equivalent parsed versions but different raw strings
+        # (e.g. "99.00" vs "99"). Keep the most precise version: the one with the
+        # most tokens (segments). This distinguishes "99.00" (2 tokens) from "99"
+        # (1 token) while still rejecting ambiguous pairs like "99.00" vs "0099.00"
+        # (both 2 tokens).
+        max_tokens = max(len(s.parsed_version.tokens) for s in collection)
+        collection = {
+            s for s in collection if len(s.parsed_version.tokens) == max_tokens
+        }
+
+        if len(collection) == 1:
+            return collection.pop()
+
         # Still too much constraints.
         msg = (
             f"Cannot reduce {collection} any further. More heuristics must be "

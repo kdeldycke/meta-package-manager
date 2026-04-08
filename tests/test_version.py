@@ -19,7 +19,6 @@ from __future__ import annotations
 import copy
 import operator
 import re
-from random import shuffle
 
 import pytest
 
@@ -699,10 +698,9 @@ def test_version_comparison_eq(ver1, ver2):
 )
 def test_version_sorting(sequence):
     sorted_version = list(map(TokenizedString, sequence))
-    random_order = sorted_version.copy()
-    shuffle(random_order)
-    assert random_order != sorted_version
-    assert sorted(random_order) == sorted_version
+    # Reverse to guarantee a different order from sorted (deterministic, no flakiness).
+    reversed_order = list(reversed(sorted_version))
+    assert sorted(reversed_order) == sorted_version
 
 
 @pytest.mark.parametrize(

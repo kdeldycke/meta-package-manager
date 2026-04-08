@@ -193,7 +193,7 @@ def test_token_len(value, expected):
     ),
 )
 def test_token_int(value, expected):
-    assert int(Token(value)) == expected  # type: ignore[arg-type]
+    assert int(Token(value)) == expected  # type: ignore[call-overload]
 
 
 @pytest.mark.parametrize("value", ("abc", "ABC", "123abc"))

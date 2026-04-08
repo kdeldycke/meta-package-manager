@@ -20,7 +20,7 @@ import json
 import re
 import subprocess
 import sys
-from collections.abc import Collection, Iterable
+from collections.abc import Collection, Iterable, Iterator
 from textwrap import dedent
 
 import pytest

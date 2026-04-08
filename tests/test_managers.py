@@ -212,11 +212,12 @@ def collect_props_ref():
             manager_class = n
             break
 
+    assert manager_class is not None
     for node in manager_class.body:
         if isinstance(node, ast.AnnAssign):
-            yield node.target.id
+            yield node.target.id  # type: ignore[union-attr]
         if isinstance(node, ast.Assign):
-            yield from [t.id for t in node.targets]
+            yield from [t.id for t in node.targets]  # type: ignore[attr-defined]
         if isinstance(node, ast.FunctionDef):
             yield node.name
 
@@ -253,7 +254,7 @@ def test_content_order(manager_class):
     klass_tree = ast.parse(inspect.getsource(manager_class))
     for node in klass_tree.body:
         if isinstance(node, ast.Assign):
-            collected_props.extend([t.id for t in node.targets])
+            collected_props.extend([t.id for t in node.targets])  # type: ignore[attr-defined]
         if isinstance(node, ast.FunctionDef):
             collected_props.append(node.name)
 

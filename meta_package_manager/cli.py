@@ -873,7 +873,7 @@ def search(ctx, extended, exact, refilter, query):
             table.append(line)
 
     # Sort and print table.
-    headers: list[tuple[str, SortableField | None]] = [
+    headers: list[tuple[str, str | None]] = [
         ("Package ID", SortableField.PACKAGE_ID),
         ("Name", SortableField.PACKAGE_NAME),
         ("Manager", SortableField.MANAGER_ID),

@@ -20,7 +20,7 @@ import json
 import re
 import subprocess
 import sys
-from collections.abc import Collection, Iterator
+from collections.abc import Collection, Iterable
 from textwrap import dedent
 
 import pytest
@@ -68,7 +68,7 @@ class InspectCLIOutput:
     def check_manager_selection(
         self,
         result,
-        selected: Iterator[str] | tuple[str, ...] = pool.default_manager_ids,
+        selected: Iterable[str] = pool.default_manager_ids,
         reference_set: Collection[str] = pool.default_manager_ids,
         strict_selection_match: bool = True,
     ):

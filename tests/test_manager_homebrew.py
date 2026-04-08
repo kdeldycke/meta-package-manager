@@ -146,7 +146,7 @@ def install_cask():
             capture_output=True,
             encoding="utf-8",
             check=True,
-            env=env_copy(
+            env=env_copy(  # type: ignore[arg-type]
                 {
                     # Do not let brew use its live API to fetch the latest version.
                     # This variable forces brew to use the local repository instead:

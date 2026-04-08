@@ -193,7 +193,7 @@ def test_token_len(value, expected):
     ),
 )
 def test_token_int(value, expected):
-    assert int(Token(value)) == expected
+    assert int(Token(value)) == expected  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize("value", ("abc", "ABC", "123abc"))
@@ -265,12 +265,12 @@ def test_tokenized_string_hash():
 
 
 def test_tokenized_string_noop_instantiation():
-    assert TokenizedString(None) is None
+    assert TokenizedString(None) is None  # type: ignore[arg-type]
 
 
 def test_tokenized_string_idempotent_instantiation():
     tok1 = TokenizedString("1.2.3")
-    tok2 = TokenizedString(tok1)
+    tok2 = TokenizedString(tok1)  # type: ignore[arg-type]
     assert tok1 is tok2
     assert hash(tok1) == hash(tok2)
     assert tok1 == tok2

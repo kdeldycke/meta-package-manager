@@ -49,9 +49,11 @@ def test_purl_map():
     # Check that each manager whose ID is also a pURL type is registered with itself.
     for manager_id in pool.all_manager_ids:
         if manager_id in PURL_MAP:
-            assert manager_id in PURL_MAP[manager_id], (
-                f"Manager ID '{manager_id}' is not registered with itself in PURL_MAP."
-            )
+            purl_managers = PURL_MAP[manager_id]
+            if purl_managers is not None:
+                assert manager_id in purl_managers, (
+                    f"Manager ID '{manager_id}' is not registered with itself in PURL_MAP."
+                )
 
 
 def props(spec: Specifier):

@@ -90,7 +90,7 @@ def print_json(data):
 
 
 def print_sorted_table(
-    header_defs: list[tuple[str, SortableField | None]],
+    header_defs: list[tuple[str, str | None]],
     rows: Iterable[Sequence[str | TokenizedString]],
     sort_key: SortableField | None = None,
     table_format: TableFormat | None = None,

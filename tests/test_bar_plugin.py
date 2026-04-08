@@ -235,7 +235,7 @@ class TestBarPlugin:
     @pytest.mark.parametrize("submenu_layout", (True, False, None))
     @pytest.mark.parametrize("table_rendering", (True, False, None))
     def test_rendering(self, submenu_layout, table_rendering):
-        extra_checks = []
+        extra_checks: list[str] = []
         # XXX Package upgrade line is not required, as it may be skipped in the
         # final rendering of the plugin if no outdated packages are found:
         #     📦✓ ⚠️1 | dropdown=false

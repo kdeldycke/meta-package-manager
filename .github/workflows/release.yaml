@@ -68,7 +68,9 @@ jobs:
         if: steps.check.outputs.skip != 'true'
         shell: pwsh
         working-directory: packaging/chocolatey
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
         run: >
-          choco push meta-package-manager.${{ steps.check.outputs.version }}.nupkg
+          choco push "meta-package-manager.${env:VERSION}.nupkg"
           --source https://push.chocolatey.org/
           --api-key ${{ secrets.CHOCOLATEY_API_KEY }}

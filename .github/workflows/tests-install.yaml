@@ -318,8 +318,10 @@ jobs:
       - name: Initialize ZeroBrew
         run: |
           zb init
-          echo "$HOME/.zerobrew/bin" >> "$GITHUB_PATH"
-          echo "$HOME/.local/share/zerobrew/prefix/bin" >> "$GITHUB_PATH"
-          echo "/opt/zerobrew/bin" >> "$GITHUB_PATH"
+          {
+            echo "$HOME/.zerobrew/bin"
+            echo "$HOME/.local/share/zerobrew/prefix/bin"
+            echo "/opt/zerobrew/bin"
+          } >> "$GITHUB_PATH"
       - run: zb install meta-package-manager
       - run: mpm --version

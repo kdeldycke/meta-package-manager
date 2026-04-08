@@ -193,7 +193,9 @@ class TestSBOM(CLISubCommandTests):
             elif export_format == ExportFormat.XML:
                 xml_content = ElementTree.fromstring(content)
                 if standard_name == "SPDX":
-                    assert xml_content.find("spdxVersion").text == "SPDX-2.3"
+                    spdx_elem = xml_content.find("spdxVersion")
+                    assert spdx_elem is not None
+                    assert spdx_elem.text == "SPDX-2.3"
                 else:
                     assert xml_content.tag == "{http://cyclonedx.org/schema/bom/1.6}bom"
 
@@ -209,13 +211,9 @@ class TestSBOM(CLISubCommandTests):
                 ]
 
             elif export_format == ExportFormat.RDF_XML:
-                assert (
-                    ElementTree
-                    .fromstring(content)
-                    .find(
-                        "spdx:SpdxDocument/spdx:specVersion",
-                        {"spdx": "http://spdx.org/rdf/terms#"},
-                    )
-                    .text
-                    == "SPDX-2.3"
+                rdf_elem = ElementTree.fromstring(content).find(
+                    "spdx:SpdxDocument/spdx:specVersion",
+                    {"spdx": "http://spdx.org/rdf/terms#"},
                 )
+                assert rdf_elem is not None
+                assert rdf_elem.text == "SPDX-2.3"

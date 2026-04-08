@@ -22,7 +22,6 @@ import re
 import shutil
 import stat
 import subprocess
-import sys
 from contextlib import nullcontext
 from dataclasses import asdict, dataclass
 from enum import Enum
@@ -43,6 +42,7 @@ from extra_platforms import (
     Platform,
     current_platform,
     extract_members,
+    is_any_windows,
 )
 from packageurl import PackageURL
 
@@ -481,7 +481,7 @@ class PackageManager(metaclass=MetaPackageManager):
         # variation of the CLI name with any of these suffixes.
         # Code below is inspired by the original implementation of ``shutil.which()``:
         # https://github.com/python/cpython/blob/8d46c7e/Lib/shutil.py#L1478-L1491
-        if sys.platform == "win32":
+        if is_any_windows():
             pathext_source = os.getenv("PATHEXT") or shutil._WIN_DEFAULT_PATHEXT
             pathext = unique(ext for ext in pathext_source.split(os.pathsep) if ext)
             search_filenames = []
@@ -527,7 +527,7 @@ class PackageManager(metaclass=MetaPackageManager):
                 file = search_path / filename
                 # On Windows, check for reparse points (e.g., Windows App Execution Aliases like winget).
                 # These return False for is_file() and 0 for getsize(), so we detect them separately.
-                if sys.platform == "win32":
+                if is_any_windows():
                     try:
                         file_stat = file.lstat()
                         if file_stat.st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT:

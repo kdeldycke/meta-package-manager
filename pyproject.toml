@@ -75,13 +75,13 @@ keywords = [
   "winget",
   "xbar",
   "xbar-plugin",
+  "pacstall",
   "yarn",
   "yarn-berry",
-  "pacstall",
   "yay",
+  "yum",
   "zb",
   "zerobrew",
-  "yum",
   "zypper",
 ]
 license = "GPL-2.0-or-later"
@@ -135,7 +135,7 @@ dependencies = [
   # boltons 25.0.0 is the first version to support Python 3.13.
   "boltons>=25",
   # click-extra 7.7.0 strips ANSI codes from markup table formats (CSV, HTML, etc.).
-  "click-extra>=7.7.0",
+  "click-extra>=7.7",
   # cyclonedx-python-lib 11.2.0 is the first to support Python 3.14.
   "cyclonedx-python-lib[validation]>=11.2",
   # extra-platforms 10.0.0 drops the distro dependency.
@@ -349,16 +349,6 @@ exclude = [
   "^https://doi.org/.+/zenodo.*$",
   # Allow redirects to the official pip documentation.
   "^https://pip.pypa.io/.*$",
-]
-
-[tool.gitleaks.allowlist]
-description = "False positives"
-commits = [
-    # Old Travis CI HOMEBREW_GITHUB_API_TOKEN (revoked).
-    "ee7613d49366694877177d82e207e870afb3cc1f",
-    # Example brew cask output containing API_KEY="abcdef123456".
-    "745247e5c74122de9ec2dd95cbd3b8510fe224d5",
-    "e31111be719406940519f52c9d4406e97fb368a3",
 ]
 
 [tool.repomatic]
@@ -724,3 +714,13 @@ labels.extra-content-rules = """"🔌 bar-plugin":
   - "c:"
   - "microsoft"
 """
+
+[tool.gitleaks]
+allowlist.description = "False positives"
+allowlist.commits = [
+  # Old Travis CI HOMEBREW_GITHUB_API_TOKEN (revoked).
+  "ee7613d49366694877177d82e207e870afb3cc1f",
+  # Example brew cask output containing API_KEY="abcdef123456".
+  "745247e5c74122de9ec2dd95cbd3b8510fe224d5",
+  "e31111be719406940519f52c9d4406e97fb368a3",
+]

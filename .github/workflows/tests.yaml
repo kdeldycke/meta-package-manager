@@ -43,9 +43,7 @@ jobs:
       - name: Run repomatic metadata
         id: metadata
         run: >
-          uvx --no-progress
-          --from 'repomatic @ git+https://github.com/kdeldycke/repomatic@09b06a00c592eef7f7a3623563e73a443016b3e2'
-          repomatic metadata
+          uvx --no-progress 'repomatic==6.11.2' metadata
           --format github-json --output "$GITHUB_OUTPUT"
           test_matrix test_matrix_pr
 

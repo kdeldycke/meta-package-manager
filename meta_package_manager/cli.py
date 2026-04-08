@@ -1406,7 +1406,14 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
     for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
         logging.info(f"Dumping packages from {theme.invoked_command(manager.id)}...")
 
-        packages = tuple(packages_asdict(manager.installed, fields))
+        try:
+            packages = tuple(packages_asdict(manager.installed, fields))
+        except CLIError:
+            logging.warning(
+                f"Could not list installed packages "
+                f"from {theme.invoked_command(manager.id)}."
+            )
+            packages = ()
 
         for pkg in packages:
             # Only update version in that mode if the package is already referenced

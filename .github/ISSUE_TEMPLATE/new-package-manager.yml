@@ -54,7 +54,7 @@ body:
             Kali Linux, KVM for IBM z Systems, Linux Mint, Mageia, Mandriva Linux, Manjaro Linux, Nobara, openSUSE,
             OpenWrt, Oracle Linux, Parallels, Pidora, Raspbian, RedHat Enterprise Linux, Rocky Linux, Scientific Linux,
             Slackware, SUSE Linux Enterprise Server, openSUSE Tumbleweed, Tuxedo OS, Ubuntu, Ultramarine,
-            Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer)
+            Void Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer)
         - label: 🍎 macOS
         - label: ⨂ Unix (IBM AIX, Cygwin, Haiku, GNU/Hurd, illumos, Solaris)
         - label: 🪟 Windows

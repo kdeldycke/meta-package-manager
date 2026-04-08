@@ -8,7 +8,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-04-01T11:09:21.958393751Z"
+exclude-newer = "2026-04-01T15:57:27.917331595Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -1060,7 +1060,7 @@ typing = [
 requires-dist = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'", specifier = ">=1.3" },
     { name = "boltons", specifier = ">=25" },
-    { name = "click-extra", specifier = ">=7.7.0" },
+    { name = "click-extra", specifier = ">=7.7" },
     { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'" },
     { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'" },
     { name = "click-extra", extras = ["jsonc"], marker = "extra == 'jsonc'" },

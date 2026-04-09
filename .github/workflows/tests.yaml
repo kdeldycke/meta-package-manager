@@ -248,9 +248,17 @@ jobs:
           brew install --cask visual-studio-code
       - name: VSCode - Linux install
         # XXX VS Code snap is only available for amd64, not arm64.
+        # The snap store is intermittently flaky on Ubuntu 24.04 runners, so retry a few times before giving up.
         if: runner.os == 'Linux' && runner.arch == 'X64'
         run: |
-          sudo snap install --classic code
+          for attempt in 1 2 3; do
+              if sudo snap install --classic code; then
+                  exit 0
+              fi
+              echo "snap install code failed (attempt ${attempt}/3), retrying in 10s..."
+              sleep 10
+          done
+          exit 1
       - name: VSCode - Windows install
         if: runner.os == 'Windows'
         run: |

@@ -145,11 +145,17 @@
     - git,,brew,\S+\n
 
 # Check some common packages are reported as installed in CSV format (Windows).
+# XXX We cannot rely on `chocolatey` self-listing via `choco list` on the
+# windows-2025 runner: `choco` is detected as available (version check passes)
+# but `choco list --limit-output` returns an empty package list, causing
+# `choco: 0` in the pool summary with no error logged. Until that environment
+# issue is diagnosed, match `click` instead: it is an mpm dependency and is
+# guaranteed to be present in the workflow's `uv` environment.
 - cli_parameters: --output-format csv installed
   only_platforms: windows
   exit_code: 0
   stdout_regex_matches:
-    - chocolatey,,choco,\S+\n
+    - click,,uv,\S+\n
 
 - cli_parameters: managers
   skip_platforms: windows

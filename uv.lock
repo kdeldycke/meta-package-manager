@@ -8,7 +8,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-04-01T15:57:27.917331595Z"
+exclude-newer = "2026-04-02T05:46:40.779007759Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -2089,11 +2089,11 @@ wheels = [
 
 [[package]]
 name = "types-boltons"
-version = "25.0.0.20250919"
+version = "25.0.0.20260402"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/85/fe/c6f225c2c25cd42c5ea2ec3b1af9f033088602c0f0b7dc3d74a0f53bc237/types_boltons-25.0.0.20250919.tar.gz", hash = "sha256:be94cf6c9a96fb02220123f50cdad65a12cfe3d770463e782402b9d911f880f0", size = 21737, upload-time = "2025-09-19T02:54:47.006Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f5/42/148b213d45c5f8ded83186c9e1cbc45cb0574e7690dd9d31abddff491944/types_boltons-25.0.0.20260402.tar.gz", hash = "sha256:d47111338d9fe6656a033b3a315c47ca961610564a3400629c232a1008b6402b", size = 21719, upload-time = "2026-04-02T04:18:56.783Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8c/1d/df20f629f470211e84af53d2ec31cd9dd2bd4014a6c6164931122ecc405e/types_boltons-25.0.0.20250919-py3-none-any.whl", hash = "sha256:1b1cb1463c71a40eb2bf633eb524d5e738fd828821b23ac5d097beffcf6d0f98", size = 28326, upload-time = "2025-09-19T02:54:46.081Z" },
+    { url = "https://files.pythonhosted.org/packages/cc/02/93c4f66067845a44bf8f9f927261fc5dc467f5401b8140ba0a29707c13b5/types_boltons-25.0.0.20260402-py3-none-any.whl", hash = "sha256:6bd69d8ceb53c7ab35482609471444a979a9ca4dea27853c68b624d72fa90d5a", size = 28277, upload-time = "2026-04-02T04:18:55.938Z" },
 ]
 
 [[package]]

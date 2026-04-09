@@ -843,8 +843,7 @@ def search(ctx, extended, exact, refilter, query):
             )
         except CLIError:
             logging.warning(
-                f"Could not search packages "
-                f"from {theme.invoked_command(manager.id)}."
+                f"Could not search packages from {theme.invoked_command(manager.id)}."
             )
             packages = ()
 

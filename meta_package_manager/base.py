@@ -482,7 +482,8 @@ class PackageManager(metaclass=MetaPackageManager):
         # Code below is inspired by the original implementation of ``shutil.which()``:
         # https://github.com/python/cpython/blob/8d46c7e/Lib/shutil.py#L1478-L1491
         if is_any_windows():
-            pathext_source = os.getenv("PATHEXT") or shutil._WIN_DEFAULT_PATHEXT  # type: ignore[attr-defined]
+            win_pathext = shutil._WIN_DEFAULT_PATHEXT  # type: ignore[attr-defined]
+            pathext_source = os.getenv("PATHEXT") or win_pathext
             pathext = unique(ext for ext in pathext_source.split(os.pathsep) if ext)
             search_filenames = []
             for cli_name in cli_names:

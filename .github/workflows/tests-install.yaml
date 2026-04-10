@@ -45,7 +45,7 @@ jobs:
       - run: mpm --version
 
   # https://community.chocolatey.org/packages/meta-package-manager
-  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/chocolatey
+  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/meta-package-manager
   choco:
     strategy:
       matrix:

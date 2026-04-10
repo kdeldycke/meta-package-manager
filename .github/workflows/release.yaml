@@ -16,7 +16,7 @@ jobs:
       VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
 
   # Publish to Chocolatey after the release job. Unlike Homebrew, Scoop, NixOS, and AUR,
-  # the Chocolatey package is maintained in this repo (see packaging/chocolatey/).
+  # the Chocolatey package is maintained in this repo (see packaging/meta-package-manager/).
   # Requires the CHOCOLATEY_API_KEY secret to be set in the repository settings.
   chocolatey:
     name: 🍫 Chocolatey
@@ -30,7 +30,7 @@ jobs:
         run: |
           $release = Invoke-RestMethod 'https://api.github.com/repos/kdeldycke/meta-package-manager/releases/latest'
           $latest = $release.tag_name.TrimStart('v')
-          [xml]$nuspec = Get-Content packaging/chocolatey/meta-package-manager.nuspec
+          [xml]$nuspec = Get-Content packaging/meta-package-manager/meta-package-manager.nuspec
           $current = $nuspec.package.metadata.version
           if ($latest -eq $current) {
             Write-Host "Latest release $latest already matches nuspec. Skipping."
@@ -47,12 +47,12 @@ jobs:
       - name: Update package to latest release
         if: steps.check.outputs.skip != 'true'
         shell: pwsh
-        working-directory: packaging/chocolatey
+        working-directory: packaging/meta-package-manager
         run: ./update.ps1
       - name: Ensure UTF-8 BOM on PowerShell scripts
         if: steps.check.outputs.skip != 'true'
         shell: pwsh
-        working-directory: packaging/chocolatey
+        working-directory: packaging/meta-package-manager
         run: |
           Get-ChildItem -Path tools -Filter *.ps1 | ForEach-Object {
             $content = Get-Content $_.FullName -Raw
@@ -62,12 +62,12 @@ jobs:
       - name: Pack
         if: steps.check.outputs.skip != 'true'
         shell: pwsh
-        working-directory: packaging/chocolatey
+        working-directory: packaging/meta-package-manager
         run: choco pack --output-directory .
       - name: Push
         if: steps.check.outputs.skip != 'true'
         shell: pwsh
-        working-directory: packaging/chocolatey
+        working-directory: packaging/meta-package-manager
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >

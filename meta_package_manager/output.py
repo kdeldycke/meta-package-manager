@@ -13,18 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Helpers and utilities to render and print content.
-
-.. todo::
-
-    Some of these are good candidates for upstream contribution to ``click.extra``.
-"""
+"""Helpers and utilities to render and print content."""
 
 from __future__ import annotations
 
 import builtins
 import contextlib
-import json
 import logging
 import sys
 from functools import cached_property, partial
@@ -63,103 +57,6 @@ class SortableField(StrEnum):
     PACKAGE_NAME = "package_name"
     VERSION = "version"
 
-
-def _sanitize_data(data, *, strip_none=False):
-    """Recursively convert :py:class:`~pathlib.Path` and
-    :py:class:`~meta_package_manager.version.TokenizedString` to strings.
-
-    If ``strip_none`` is ``True``, drop ``None`` values from dicts (needed for TOML
-    which has no null type).
-    """
-    if isinstance(data, dict):
-        return {
-            k: _sanitize_data(v, strip_none=strip_none)
-            for k, v in data.items()
-            if not (strip_none and v is None)
-        }
-    if isinstance(data, (list, tuple)):
-        return [_sanitize_data(v, strip_none=strip_none) for v in data]
-    if isinstance(data, (TokenizedString, Path)):
-        return str(data)
-    return data
-
-
-_FORMAT_EXTRAS: dict[str, str] = {
-    "hjson": "hjson",
-    "yaml": "yaml",
-    "xml": "xml",
-}
-"""Map format name to the ``pip install meta-package-manager[extra]`` extra."""
-
-
-def print_serialized(data, table_format: TableFormat = TableFormat.JSON) -> None:
-    """Serialize Python data to the requested structured format and print to
-    ``<stdout>``.
-
-    Supports all formats in :py:data:`click_extra.table.SERIALIZATION_FORMATS`: JSON,
-    JSON5, JSONC, HJSON, TOML, YAML, and XML.
-    """
-    try:
-        output = _serialize(data, table_format)
-    except ImportError:
-        extra = _FORMAT_EXTRAS.get(table_format.value, table_format.value)
-        msg = (
-            f"{table_format.value} output requires an optional dependency."
-            f" Install it with: pip install meta-package-manager[{extra}]"
-        )
-        raise SystemExit(f"Error: {msg}") from None
-
-    echo(output, color=False)
-
-
-def _serialize(data, table_format: TableFormat) -> str:
-    """Dispatch serialization to the appropriate format handler."""
-    if table_format in (TableFormat.JSON, TableFormat.JSON5, TableFormat.JSONC):
-        clean = _sanitize_data(data)
-        return json.dumps(
-            clean,
-            sort_keys=True,
-            indent=4,
-            separators=(",", ": "),
-        )
-
-    if table_format == TableFormat.HJSON:
-        import hjson
-
-        clean = _sanitize_data(data)
-        return hjson.dumps(clean, ensure_ascii=False)
-
-    if table_format == TableFormat.TOML:
-        import tomli_w
-
-        clean = _sanitize_data(data, strip_none=True)
-        # TOML requires a top-level table. Wrap lists under a "record" key.
-        if isinstance(clean, list):
-            clean = {"record": clean}
-        return tomli_w.dumps(clean)
-
-    if table_format == TableFormat.YAML:
-        import yaml
-
-        clean = _sanitize_data(data)
-        return yaml.dump(clean, allow_unicode=True, default_flow_style=False)
-
-    if table_format == TableFormat.XML:
-        import xmltodict
-
-        clean = _sanitize_data(data, strip_none=True)
-        # xmltodict requires a single root element. Wrap lists under a "record" key.
-        if isinstance(clean, list):
-            clean = {"record": clean}
-        return xmltodict.unparse(
-            {"mpm": clean},
-            pretty=True,
-            encoding="unicode",
-            full_document=False,
-        )
-
-    msg = f"Unsupported serialization format: {table_format}"
-    raise ValueError(msg)
 
 
 def print_sorted_table(

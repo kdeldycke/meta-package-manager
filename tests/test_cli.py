@@ -370,7 +370,7 @@ class CLITableTests:
 
     @pytest.mark.parametrize("mode", TableFormat)
     def test_all_table_rendering(self, invoke, mode):
-        result = invoke("--output-format", mode, "installed")
+        result = invoke("--table-format", mode, "installed")
         assert result.exit_code == 0
 
     def test_json_output(self, invoke, subcmd):
@@ -379,7 +379,7 @@ class CLITableTests:
         Debug level messages are redirected to <stderr> and are not supposed to interfere
         with this behavior.
         """
-        result = invoke("--output-format", "json", "--verbosity", "DEBUG", subcmd)
+        result = invoke("--table-format", "json", "--verbosity", "DEBUG", subcmd)
         assert result.exit_code == 0
         assert "debug" in result.stderr
         json.loads(result.stdout)
@@ -398,7 +398,12 @@ class CLITableTests:
         """All serialization formats produce parseable output on ``<stdout>``.
 
         Debug messages go to ``<stderr>`` and must not leak into the structured output.
+        Formats whose optional dependency is not installed are skipped.
         """
-        result = invoke("--output-format", fmt, "--verbosity", "DEBUG", subcmd)
+        result = invoke("--table-format", fmt, "--verbosity", "DEBUG", subcmd)
+        if result.exit_code == 1 and "requires an optional dependency" in str(
+            result.exception
+        ):
+            pytest.skip(f"{fmt.value} extra not installed")
         assert result.exit_code == 0
         assert "debug" in result.stderr

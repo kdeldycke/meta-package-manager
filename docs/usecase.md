@@ -179,7 +179,7 @@ Add arguments to `installed` command, or an `--installed` boolean flag to `searc
 You can export the list of installed packages in JSON:
 
 ```shell-session
-$ mpm --output-format json installed > installed_package.json
+$ mpm --table-format json installed > installed_package.json
 ```
 
 ```shell-session
@@ -233,7 +233,7 @@ $ jq installed_package.json
 Or in CSV:
 
 ```shell-session
-$ mpm --output-format csv installed > installed_package.csv
+$ mpm --table-format csv installed > installed_package.csv
 ```
 
 ```shell-session

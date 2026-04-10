@@ -46,12 +46,11 @@ from click_extra import (
     pass_context,
 )
 from click_extra.colorize import KO, OK, default_theme as theme, highlight
-from click_extra.commands import default_extra_params
 from click_extra.table import (
     SERIALIZATION_FORMATS,
     TableFormat,
-    TableFormatOption,
     print_data,
+    print_sorted_table,
 )
 from extra_platforms import reduce
 
@@ -64,12 +63,7 @@ from .base import (
     packages_asdict,
 )
 from .inventory import MAIN_PLATFORMS
-from .output import (
-    BarPluginRenderer,
-    SortableField,
-    SortedTableFormatOption,
-    print_stats,
-)
+from .output import BarPluginRenderer, SortableField, print_stats
 from .pool import pool
 from .sbom import SBOM, SPDX, CycloneDX, ExportFormat
 from .specifier import VERSION_SEP, Solver, Specifier
@@ -272,27 +266,9 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 #                        jobs. Defaults to the system CPU count.
 
 
-def custom_extra_params() -> list[Parameter]:
-    """Replace the default ``TableFormatOption`` with our ``SortedTableFormatOption``."""
-    params: list[Parameter] = []
-    for param in default_extra_params():
-        if isinstance(param, TableFormatOption):
-            params.append(
-                SortedTableFormatOption(
-                    param_decls=("-o", "--output-format"),
-                    type=EnumChoice(TableFormat),
-                    help="Rendering format of the output.",
-                )
-            )
-        else:
-            params.append(param)
-    return params
-
-
 @group(
     # XXX Default verbosity has been changed in Click Extra 4.0.0 from INFO to WARNING.
     context_settings={"default_map": {"verbosity": "INFO"}},
-    params=custom_extra_params(),
 )
 @option_group(
     "Package manager selection",
@@ -499,6 +475,12 @@ def mpm(
             stats,
         ),
     )()
+
+    # Override ctx.print_table with the upstream sorted variant.
+    ctx.print_table = partial(  # type: ignore[attr-defined]
+        print_sorted_table,
+        table_format=ctx.meta["click_extra.table_format"],
+    )
 
 
 @mpm.command(

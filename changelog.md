@@ -5,8 +5,9 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
-- [mpm] Extend `--output-format` structured output to TOML, YAML, XML, JSON5, JSONC, and HJSON for all subcommands that produce machine-readable data (`managers`, `installed`, `outdated`, `search`, `locate`).
+- [mpm] Extend `--table-format` structured output to TOML, YAML, XML, JSON5, JSONC, and HJSON for all subcommands that produce machine-readable data (`managers`, `installed`, `outdated`, `search`, `locate`).
 - [mpm] Change JSON output indentation from 4 to 2 spaces and stop sorting keys, aligning with click-extra defaults.
+- [mpm] Rename `--output-format` / `-o` back to `--table-format`, aligning with the upstream click-extra default.
 
 ## [`6.3.0` (2026-04-09)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.1...v6.3.0)
 

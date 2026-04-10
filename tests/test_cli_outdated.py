@@ -49,7 +49,7 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
         )
 
     def test_json_parsing(self, invoke, subcmd):
-        result = invoke("--output-format", "json", subcmd)
+        result = invoke("--table-format", "json", subcmd)
         assert result.exit_code == 0
         data = json.loads(result.stdout)
 

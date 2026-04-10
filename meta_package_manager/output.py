@@ -31,7 +31,7 @@ from boltons.iterutils import flatten
 from boltons.strutils import strip_ansi
 from click_extra import echo, style
 from click_extra.colorize import default_theme as theme
-from click_extra.table import TableFormat, TableFormatOption, print_table, render_table
+from click_extra.table import TableFormat, render_table
 
 from .bar_plugin import MPMPlugin
 from .pool import pool
@@ -45,7 +45,6 @@ else:
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections import Counter
-    from collections.abc import Iterable, Sequence
 
 
 class SortableField(StrEnum):
@@ -56,96 +55,6 @@ class SortableField(StrEnum):
     PACKAGE_ID = "package_id"
     PACKAGE_NAME = "package_name"
     VERSION = "version"
-
-
-
-def print_sorted_table(
-    header_defs: list[tuple[str, str | None]],
-    rows: Iterable[Sequence[str | TokenizedString]],
-    sort_key: SortableField | None = None,
-    table_format: TableFormat | None = None,
-    **kwargs,
-) -> None:
-    """Augment :py:func:`click_extra.context.ClickContext.print_table` with sorting
-    capabilities.
-
-    ``header_defs`` parameter is an ordered list of tuple whose first item is the
-    column's label and the second the column's ID used for sorting. For columns that
-    should not be used for sorting, set the column ID to ``None``.
-
-    .. code-block:: python
-
-        [
-            ("Package manager", SortableField.MANAGER_NAME),
-            ("Column 1", None),
-            ("User's name", None),
-            ("Package ID", SortableField.PACKAGE_ID),
-            ...,
-        ]
-
-    Rows can be sorted by providing the ``sort_key`` parameter. If ``None``, the table
-    will be sorted in the natural order sets by ``header_defs``.
-    """
-    # Do not print anything, not even table headers if no rows.
-    if not rows:
-        return
-
-    header_labels = tuple(style(label, bold=True) for label, _ in header_defs)
-
-    # Check there is no duplicate column IDs.
-    header_ids = [col_id for _, col_id in header_defs if col_id]
-    assert len(header_ids) == len(set(header_ids))
-
-    # Default sorting follows the order of headers.
-    sort_order = list(range(len(header_defs)))
-
-    # Move the sorting key's index in the front of priority.
-    if sort_key and sort_key in header_ids:
-        # Build an index of column id's position.
-        col_index = {col_id: i for i, (_, col_id) in enumerate(header_defs) if col_id}
-        sort_column_index = col_index[sort_key]
-        sort_order.remove(sort_column_index)
-        sort_order.insert(0, sort_column_index)
-
-    def sort_method(line):
-        """Serialize line's content for natural sorting.
-
-        1. Extract each cell value in the order provided by `sort_order`;
-        2. Strip terminal color formatting;
-        3. Then tokenize each cell's content for user-friendly natural sorting.
-        """
-        sorting_key = []
-        for cell in itemgetter(*sort_order)(line):
-            if isinstance(cell, TokenizedString):
-                key = cell
-            elif not cell:
-                key = None
-            else:
-                key = TokenizedString(strip_ansi(cell))
-            sorting_key.append(key)
-        return tuple(sorting_key)
-
-    # Sort and convert rows to list of strings for print_table
-    sorted_rows: list[Sequence[str | None]] = [
-        tuple(str(cell) if cell is not None else None for cell in row)
-        for row in sorted(rows, key=sort_method)
-    ]
-
-    print_table(
-        table_data=sorted_rows,
-        headers=header_labels,
-        table_format=table_format,
-        **kwargs,
-    )
-
-
-class SortedTableFormatOption(TableFormatOption):
-    """Custom ``--table-format`` with support of table sorting."""
-
-    def init_formatter(self, ctx, param, table_format) -> None:
-        """Replace the original ``print_table`` by ``print_sorted_table``."""
-        super().init_formatter(ctx, param, table_format)
-        ctx.print_table = partial(print_sorted_table, table_format=table_format)
 
 
 def print_stats(manager_stats: Counter) -> None:

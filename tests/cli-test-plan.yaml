@@ -66,7 +66,7 @@
 #     return codecs.charmap_encode(input,self.errors,encoding_table)[0]
 #            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # UnicodeEncodeError: 'charmap' codec can't encode character '\u25ba' in position 0: character maps to <undefined>
-- cli_parameters: --color --output-format csv --all-managers managers
+- cli_parameters: --color --table-format csv --all-managers managers
   skip_platforms: windows
   exit_code: 0
   strip_ansi: true
@@ -121,7 +121,7 @@
 #     return codecs.charmap_encode(input,self.errors,encoding_table)[0]
 #            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # UnicodeEncodeError: 'charmap' codec can't encode character '\u25ba' in position 0: character maps to <undefined>
-- cli_parameters: --no-color --output-format csv --all-managers managers
+- cli_parameters: --no-color --table-format csv --all-managers managers
   skip_platforms: windows
   exit_code: 0
   # XXX --no-color does not apply to CSV export: https://github.com/kdeldycke/meta-package-manager/issues/1004
@@ -131,14 +131,14 @@
     - cargo,Rust's cargo,✓,✓ \S+,✓,✓ \S+\n
 
 # Check some common packages are reported as installed in CSV format (Linux).
-- cli_parameters: --output-format csv installed
+- cli_parameters: --table-format csv installed
   only_platforms: linux
   exit_code: 0
   stdout_regex_matches:
     - tzdata,,(apt|uv),\S+\n
 
 # Check some common packages are reported as installed in CSV format (macOS).
-- cli_parameters: --output-format csv installed
+- cli_parameters: --table-format csv installed
   only_platforms: macos
   exit_code: 0
   stdout_regex_matches:
@@ -151,7 +151,7 @@
 # `choco: 0` in the pool summary with no error logged. Until that environment
 # issue is diagnosed, match `click` instead: it is an mpm dependency and is
 # guaranteed to be present in the workflow's `uv` environment.
-- cli_parameters: --output-format csv installed
+- cli_parameters: --table-format csv installed
   only_platforms: windows
   exit_code: 0
   stdout_regex_matches:

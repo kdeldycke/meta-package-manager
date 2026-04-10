@@ -8,7 +8,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-04-03T12:25:02.191182Z"
+exclude-newer = "2026-04-03T14:47:39.539762Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -250,7 +250,7 @@ wheels = [
 [[package]]
 name = "click-extra"
 version = "7.11.0.dev0"
-source = { git = "https://github.com/kdeldycke/click-extra.git?branch=main#27d319ca764a62e456b6051c8918a89f7241c346" }
+source = { git = "https://github.com/kdeldycke/click-extra.git?branch=main#9b35962ec67f042426e1ac710d5757e754c167af" }
 dependencies = [
     { name = "boltons" },
     { name = "click" },

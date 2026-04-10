@@ -28,6 +28,7 @@ contributing
 add-new-manager
 API <meta_package_manager>
 tests
+releasing
 genindex
 modindex
 changelog

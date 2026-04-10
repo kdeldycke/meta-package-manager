@@ -255,16 +255,6 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     ctx.exit()
 
 
-# XXX Why is Sphinx skipping Click methods in documentation?
-
-# Add a help subcommand:
-# npm help <term>    search for help on <term>
-# npm help npm       more involved overview
-
-
-#    -j N, --jobs=N      Specify the allowed number of parallel C compiler
-#                        jobs. Defaults to the system CPU count.
-
 
 @group(
     # XXX Default verbosity has been changed in Click Extra 4.0.0 from INFO to WARNING.

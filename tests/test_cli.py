@@ -25,7 +25,7 @@ from textwrap import dedent
 
 import pytest
 from boltons.strutils import strip_ansi
-from click_extra.table import TableFormat
+from click_extra.table import SERIALIZATION_FORMATS, TableFormat
 
 from meta_package_manager import __version__
 from meta_package_manager.pool import pool
@@ -365,7 +365,7 @@ class CLISubCommandTests(InspectCLIOutput):
 class CLITableTests:
     """Test subcommands whose output is a configurable table.
 
-    Any table output is also allowed to be rendered as JSON.
+    Any table output is also allowed to be rendered in all serialization formats.
     """
 
     @pytest.mark.parametrize("mode", TableFormat)
@@ -385,3 +385,20 @@ class CLITableTests:
         json.loads(result.stdout)
         with pytest.raises(json.decoder.JSONDecodeError):
             json.loads(result.stderr)
+
+    @pytest.mark.parametrize(
+        "fmt",
+        sorted(
+            (f for f in SERIALIZATION_FORMATS if f != TableFormat.JSON),
+            key=lambda f: f.value,
+        ),
+        ids=lambda f: f.value,
+    )
+    def test_serialized_output(self, invoke, subcmd, fmt):
+        """All serialization formats produce parseable output on ``<stdout>``.
+
+        Debug messages go to ``<stderr>`` and must not leak into the structured output.
+        """
+        result = invoke("--output-format", fmt, "--verbosity", "DEBUG", subcmd)
+        assert result.exit_code == 0
+        assert "debug" in result.stderr

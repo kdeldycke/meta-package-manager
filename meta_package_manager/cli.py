@@ -47,7 +47,7 @@ from click_extra import (
 )
 from click_extra.colorize import KO, OK, default_theme as theme, highlight
 from click_extra.commands import default_extra_params
-from click_extra.table import TableFormat, TableFormatOption
+from click_extra.table import SERIALIZATION_FORMATS, TableFormat, TableFormatOption
 from extra_platforms import reduce
 
 from . import __version__, bar_plugin
@@ -63,7 +63,7 @@ from .output import (
     BarPluginRenderer,
     SortableField,
     SortedTableFormatOption,
-    print_json,
+    print_serialized,
     print_stats,
 )
 from .pool import pool
@@ -424,9 +424,9 @@ def mpm(
     stats,
 ):
     """CLI options shared by all subcommands."""
-    # Silence all log messages for JSON rendering unless in debug mode.
+    # Silence all log messages for serialization rendering unless in debug mode.
     if (
-        ctx.meta["click_extra.table_format"] == TableFormat.JSON
+        ctx.meta["click_extra.table_format"] in SERIALIZATION_FORMATS
         and ctx.meta["click_extra.verbosity"] != "DEBUG"
     ):
         logging.disable()
@@ -512,7 +512,8 @@ def managers(ctx):
     }
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == TableFormat.JSON:
+    table_format = ctx.meta["click_extra.table_format"]
+    if table_format in SERIALIZATION_FORMATS:
         manager_data = {}
         # Build up the data structure of manager metadata.
         fields = (
@@ -532,7 +533,7 @@ def managers(ctx):
                 {expt.error for expt in manager.cli_errors},
             )
 
-        print_json(manager_data)
+        print_serialized(manager_data, table_format)
         ctx.exit()
 
     # Human-friendly content rendering.
@@ -657,8 +658,9 @@ def installed(ctx, duplicates):
             manager_data["packages"] = duplicate_packages
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == TableFormat.JSON:
-        print_json(installed_data)
+    table_format = ctx.meta["click_extra.table_format"]
+    if table_format in SERIALIZATION_FORMATS:
+        print_serialized(installed_data, table_format)
         ctx.exit()
 
     # Human-friendly content rendering.
@@ -741,8 +743,9 @@ def outdated(ctx, plugin_output):
         )
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == TableFormat.JSON:
-        print_json(outdated_data)
+    table_format = ctx.meta["click_extra.table_format"]
+    if table_format in SERIALIZATION_FORMATS:
+        print_serialized(outdated_data, table_format)
         ctx.exit()
 
     # Xbar/SwiftBar-friendly plugin rendering.
@@ -859,8 +862,9 @@ def search(ctx, extended, exact, refilter, query):
         )
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == TableFormat.JSON:
-        print_json(matches)
+    table_format = ctx.meta["click_extra.table_format"]
+    if table_format in SERIALIZATION_FORMATS:
+        print_serialized(matches, table_format)
         ctx.exit()
 
     # Prepare highlighting helpers.
@@ -926,7 +930,8 @@ def which(ctx, cli_names):
         logging.warning("Ignore --sort-by option for which command.")
 
     # Machine-friendly data rendering.
-    if ctx.meta["click_extra.table_format"] == TableFormat.JSON:
+    table_format = ctx.meta["click_extra.table_format"]
+    if table_format in SERIALIZATION_FORMATS:
         cli_data = [
             {
                 "manager_id": manager.id,
@@ -934,7 +939,7 @@ def which(ctx, cli_names):
             }
             for manager in ctx.obj.selected_managers()
         ]
-        print_json(cli_data)
+        print_serialized(cli_data, table_format)
         ctx.exit()
 
     # Print table.

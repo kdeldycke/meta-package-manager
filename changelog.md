@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Extend `--output-format` structured output to TOML, YAML, XML, JSON5, JSONC, and HJSON for all subcommands that produce machine-readable data (`managers`, `installed`, `outdated`, `search`, `locate`). JSON output is unchanged.
+
 ## [`6.3.0` (2026-04-09)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.1...v6.3.0)
 
 - [cpan] Add CPAN package manager for Perl modules with `installed`, `outdated`, `install`, and `upgrade` support. Closes {issue}`602`.

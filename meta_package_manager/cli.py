@@ -188,15 +188,13 @@ def single_manager_selectors():
     single_flags = []
     single_no_flags = []
     for manager_id, manager in pool.items():
-        # Parameters do not have a deprecated flag.
-        # See: https://github.com/pallets/click/issues/2263
-        deprecated_msg = "(Deprecated) " if manager.deprecated else ""
         single_flags.append(
             option(
                 f"--{manager_id}",
                 flag_value=manager_id,
                 default=None,
-                help=f"{deprecated_msg}Select {manager.name}.",
+                help=f"Select {manager.name}.",
+                deprecated=manager.deprecated,
                 expose_value=False,
                 callback=update_manager_selection,
             )
@@ -206,7 +204,8 @@ def single_manager_selectors():
                 f"--no-{manager_id}",
                 flag_value=manager_id,
                 default=None,
-                help=f"{deprecated_msg}Deselect {manager.name}.",
+                help=f"Deselect {manager.name}.",
+                deprecated=manager.deprecated,
                 expose_value=False,
                 callback=update_manager_selection,
             )
@@ -305,7 +304,8 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         expose_value=False,
         hidden=True,
         callback=update_manager_selection,
-        help="(Deprecated) Use --<manager-id> single selector instead.",
+        deprecated="Use --<manager-id> single selector instead.",
+        help="Select a manager.",
     ),
     option(
         "-e",
@@ -316,7 +316,8 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         expose_value=False,
         hidden=True,
         callback=update_manager_selection,
-        help="(Deprecated) Use --no-<manager-id> single selector instead.",
+        deprecated="Use --no-<manager-id> single selector instead.",
+        help="Exclude a manager.",
     ),
 )
 @option_group(

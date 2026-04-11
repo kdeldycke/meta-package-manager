@@ -578,7 +578,7 @@ def managers(ctx):
     is_flag=True,
     default=False,
     help="Only list installed packages sharing the same ID. Implies "
-    "`--sort_by package_id` to make duplicates easier to compare between themselves.",
+    "`--sort-by package_id` to make duplicates easier to compare between themselves.",
 )
 @pass_context
 def installed(ctx, duplicates):

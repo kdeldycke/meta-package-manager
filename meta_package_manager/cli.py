@@ -45,7 +45,13 @@ from click_extra import (
     option_group,
     pass_context,
 )
-from click_extra.colorize import KO, OK, default_theme as theme, highlight
+from click_extra.colorize import (
+    KO,
+    OK,
+    HelpKeywords,
+    default_theme as theme,
+    highlight,
+)
 from click_extra.table import (
     SERIALIZATION_FORMATS,
     TableFormat,
@@ -472,6 +478,12 @@ def mpm(
         print_sorted_table,
         table_format=ctx.meta["click_extra.table_format"],
     )
+
+
+# Highlight placeholder option names that appear in the help text prose.
+mpm.extra_keywords = HelpKeywords(
+    long_options={"--<manager-id>", "--no-<manager-id>"},
+)
 
 
 @mpm.command(

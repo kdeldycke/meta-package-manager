@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import logging
+import platform
 import sys
 from collections import Counter, namedtuple
 from collections.abc import Iterable
@@ -303,6 +304,12 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     # XXX Default verbosity has been changed in Click Extra 4.0.0 from INFO to WARNING.
     context_settings={"default_map": {"verbosity": "INFO"}},
     config_schema=MpmConfig,
+    version_fields={
+        "env_info": (
+            f"Python {platform.python_version()}, "
+            f"{platform.system()} {platform.machine()}"
+        ),
+    },
 )
 @option_group(
     "Package manager selection",
@@ -518,6 +525,12 @@ def mpm(
         table_format=ctx.meta["click_extra.table_format"],
     )
 
+
+# Extend --version output with Python and platform metadata.
+for _param in mpm.params:
+    if _param.name == "version" and hasattr(_param, "message"):
+        _param.message = "{prog_name}, version {version}\n{env_info}"
+        break
 
 # Highlight placeholder option names that appear in the help text prose.
 mpm.extra_keywords = HelpKeywords(

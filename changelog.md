@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Add Python version and platform to `--version` output.
 - [mpm] Add typed `config_schema` to the CLI group for configuration file validation.
 - [mpm] Document `pyproject.toml` auto-discovery for per-project `[tool.mpm]` configuration.
 - [mpm] Extend `--table-format` structured output to TOML, YAML, XML, JSON5, JSONC, and HJSON for all subcommands that produce machine-readable data (`managers`, `installed`, `outdated`, `search`, `locate`).

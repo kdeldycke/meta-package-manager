@@ -18,7 +18,23 @@ Create a well-structured bug report for filing against an external project. The 
 
 Before writing anything, exhaustively search for every piece of guidance the maintainers publish about how they want contributions. Do not skip any of these checks: each one can reveal requirements that, if missed, make the report look careless.
 
-#### 1a. Contribution guidelines
+#### 1a. Organization-level community health files
+
+GitHub allows organizations to define default community health files in a `.github` repository. These files (CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, SUPPORT.md, issue templates, PR templates) are inherited by every repo in the organization that does not provide its own copy. Resolution is per-file: a repo can override one file while inheriting all others.
+
+Check for the org-level `.github` repo early, since its files set the baseline that subsequent per-repo checks may override:
+
+```shell-session
+$ gh api repos/<org>/.github/contents/ --jq '.[].name'
+```
+
+If the repo belongs to an organization (extract `<org>` from `<owner/repo>`), fetch and read every community health file found. Common files: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `SUPPORT.md`, `FUNDING.yml`. Some org repos also contain a readme with links to external contribution guides (as with the Pallets project linking to `palletsprojects.com/contributing`): follow those links.
+
+If the org has no `.github` repo or the request returns 404, skip this step. If the repo owner is a user account rather than an organization, skip this step.
+
+When the repo-level checks in subsequent steps find a file that also exists at the org level, the repo-level file takes precedence. When no repo-level file exists, the org-level file is authoritative.
+
+#### 1b. Contribution guidelines
 
 GitHub recognizes contribution guidelines in the repo root, `.github/`, and `docs/`, but owners do not always follow GitHub's conventions. File names vary in casing, extension, and placement. Do not assume any single path: check all plausible variations.
 
@@ -57,7 +73,7 @@ $ gh api repos/<owner/repo> --jq '.has_wiki'
 
 If the wiki is enabled, note this for the user: the wiki may contain additional contribution norms that cannot be fetched via the API. Suggest the user check `https://github.com/<owner/repo>/wiki` for pages like "Contributing", "How to file a bug", etc.
 
-#### 1b. Code of conduct
+#### 1c. Code of conduct
 
 Check for a code of conduct (it sometimes contains issue-filing etiquette):
 
@@ -67,7 +83,7 @@ $ gh api repos/<owner/repo>/contents/.github/CODE_OF_CONDUCT.md --jq '.download_
 $ gh api repos/<owner/repo>/community/code_of_conduct --jq '.body'
 ```
 
-#### 1c. Issue templates and forms
+#### 1d. Issue templates and forms
 
 List all issue templates. Repos may use classic markdown templates, YAML issue forms, or both:
 
@@ -96,7 +112,7 @@ $ gh api repos/<owner/repo>/contents/.github/ISSUE_TEMPLATE/config.yml --jq '.co
 
 This file may disable blank issues (`blank_issues_enabled: false`) or add links that redirect users to discussions, forums, or other channels. Respect these preferences.
 
-#### 1d. Security policy
+#### 1e. Security policy
 
 If the bug has security implications, check for a security policy first:
 
@@ -107,7 +123,7 @@ $ gh api repos/<owner/repo>/contents/.github/SECURITY.md --jq '.download_url'
 
 If a security policy exists and the bug is a vulnerability, warn the user that it should be reported through the security channel (often a private advisory or email), not a public issue. Stop and report this to the user.
 
-#### 1e. Discussions preference
+#### 1f. Discussions preference
 
 Some maintainers require opening a discussion before filing an issue. Check for signals:
 
@@ -119,7 +135,7 @@ If discussions are enabled, search for patterns in the contribution guidelines t
 
 If the maintainers prefer discussions first, warn the user and suggest opening a discussion instead. Write the report in a tone appropriate for a discussion (same factual content, but framed as "I encountered this, is this a known issue?" rather than a direct bug report).
 
-#### 1f. PR and issue cross-reference conventions
+#### 1g. PR and issue cross-reference conventions
 
 While reading contribution guidelines, note any rules about:
 
@@ -164,7 +180,7 @@ Ask yourself: "Can the maintainer click a link and immediately see what I'm desc
 
 ### 4. Select the right template
 
-Based on step 1c, pick the correct template:
+Based on step 1d, pick the correct template:
 
 - **Bug report template/form found**: use it. Fill in every required field. Preserve the exact field names, order, and structure.
 - **Multiple templates exist but none is a clear bug report match**: report this to the user and ask which template to use.

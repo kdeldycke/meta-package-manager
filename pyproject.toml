@@ -212,13 +212,11 @@ typing = [
 ]
 
 [tool.uv]
+sources.click-extra = { git = "https://github.com/kdeldycke/click-extra.git", branch = "main" }
 # Cooldown period.
 exclude-newer = "1 week"
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
-
-[tool.uv.sources]
-click-extra = { git = "https://github.com/kdeldycke/click-extra.git", branch = "main" }
 
 [tool.nuitka]
 product-name = "Meta Package Manager"

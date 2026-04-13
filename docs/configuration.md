@@ -57,18 +57,18 @@ Every CLI option on the root `mpm` group and its subcommands can be set in the c
 
 These go under `[mpm]` (or `[tool.mpm]` in `pyproject.toml`):
 
-| Key | Type | Default | Description |
-| :-- | :--- | :------ | :---------- |
-| `verbosity` | string | `"INFO"` | Logging level: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, or `DEBUG`. |
-| `timeout` | integer | `500` | Maximum duration in seconds for each manager CLI call. |
-| `ignore_auto_updates` | boolean | `true` | Exclude auto-updating packages from outdated/upgrade results. |
-| `stop_on_error` | boolean | `false` | Stop on first manager CLI error instead of continuing. |
-| `dry_run` | boolean | `false` | Simulate CLI calls without performing any action. |
-| `all_managers` | boolean | `false` | Force evaluation of all managers, including unsupported and deprecated. |
-| `description` | boolean | `false` | Show package description in results. |
-| `sort_by` | string | `"manager_id"` | Sort results by: `manager_id`, `manager_name`, `package_id`, `package_name`, or `version`. |
-| `stats` | boolean | `true` | Print per-manager package statistics. |
-| `table_format` | string | `"rounded-outline"` | Table rendering style (see `mpm --help` for all choices). |
+| Key                   | Type    | Default             | Description                                                                                |
+| :-------------------- | :------ | :------------------ | :----------------------------------------------------------------------------------------- |
+| `verbosity`           | string  | `"INFO"`            | Logging level: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, or `DEBUG`.                         |
+| `timeout`             | integer | `500`               | Maximum duration in seconds for each manager CLI call.                                     |
+| `ignore_auto_updates` | boolean | `true`              | Exclude auto-updating packages from outdated/upgrade results.                              |
+| `stop_on_error`       | boolean | `false`             | Stop on first manager CLI error instead of continuing.                                     |
+| `dry_run`             | boolean | `false`             | Simulate CLI calls without performing any action.                                          |
+| `all_managers`        | boolean | `false`             | Force evaluation of all managers, including unsupported and deprecated.                    |
+| `description`         | boolean | `false`             | Show package description in results.                                                       |
+| `sort_by`             | string  | `"manager_id"`      | Sort results by: `manager_id`, `manager_name`, `package_id`, `package_name`, or `version`. |
+| `stats`               | boolean | `true`              | Print per-manager package statistics.                                                      |
+| `table_format`        | string  | `"rounded-outline"` | Table rendering style (see `mpm --help` for all choices).                                  |
 
 ### Subcommand options
 
@@ -76,43 +76,43 @@ These go under `[mpm.<subcommand>]` (or `[tool.mpm.<subcommand>]`):
 
 **`[mpm.search]`**
 
-| Key | Type | Default | Description |
-| :-- | :--- | :------ | :---------- |
-| `exact` | boolean | `false` | Only return exact matches instead of fuzzy search. |
-| `extended` | boolean | `false` | Extend search to description and other package attributes. |
-| `refilter` | boolean | `true` | Re-filter results locally when the manager's search is too loose. |
+| Key        | Type    | Default | Description                                                       |
+| :--------- | :------ | :------ | :---------------------------------------------------------------- |
+| `exact`    | boolean | `false` | Only return exact matches instead of fuzzy search.                |
+| `extended` | boolean | `false` | Extend search to description and other package attributes.        |
+| `refilter` | boolean | `true`  | Re-filter results locally when the manager's search is too loose. |
 
 **`[mpm.installed]`**
 
-| Key | Type | Default | Description |
-| :-- | :--- | :------ | :---------- |
+| Key          | Type    | Default | Description                                            |
+| :----------- | :------ | :------ | :----------------------------------------------------- |
 | `duplicates` | boolean | `false` | Only list packages installed by more than one manager. |
 
 **`[mpm.outdated]`**
 
-| Key | Type | Default | Description |
-| :-- | :--- | :------ | :---------- |
+| Key             | Type    | Default | Description                                         |
+| :-------------- | :------ | :------ | :-------------------------------------------------- |
 | `plugin_output` | boolean | `false` | Render output for Xbar/SwiftBar plugin consumption. |
 
 **`[mpm.upgrade]`**
 
-| Key | Type | Default | Description |
-| :-- | :--- | :------ | :---------- |
+| Key   | Type    | Default | Description                                               |
+| :---- | :------ | :------ | :-------------------------------------------------------- |
 | `all` | boolean | `false` | Upgrade all outdated packages (not just those specified). |
 
 **`[mpm.backup]`**
 
-| Key | Type | Default | Description |
-| :-- | :--- | :------ | :---------- |
-| `overwrite` | boolean | `false` | Allow overwriting an existing backup file. |
-| `merge` | boolean | `false` | Merge new packages into an existing backup file. |
+| Key              | Type    | Default | Description                                            |
+| :--------------- | :------ | :------ | :----------------------------------------------------- |
+| `overwrite`      | boolean | `false` | Allow overwriting an existing backup file.             |
+| `merge`          | boolean | `false` | Merge new packages into an existing backup file.       |
 | `update_version` | boolean | `false` | Update version of packages already in the backup file. |
 
 **`[mpm.sbom]`**
 
-| Key | Type | Default | Description |
-| :-- | :--- | :------ | :---------- |
-| `spdx` | boolean | `true` | Use SPDX format (`false` for CycloneDX). |
+| Key         | Type    | Default | Description                              |
+| :---------- | :------ | :------ | :--------------------------------------- |
+| `spdx`      | boolean | `true`  | Use SPDX format (`false` for CycloneDX). |
 | `overwrite` | boolean | `false` | Allow overwriting an existing SBOM file. |
 
 ## Full example

@@ -482,6 +482,8 @@ def mpm(
 mpm.extra_keywords = HelpKeywords(
     long_options={"--<manager-id>", "--no-<manager-id>"},
 )
+# "version" is a --sort-by choice but too common a word in help text.
+mpm.excluded_keywords = HelpKeywords(choices={"version"})
 
 
 @mpm.command(

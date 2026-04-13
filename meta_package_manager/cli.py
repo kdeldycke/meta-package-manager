@@ -21,6 +21,7 @@ import sys
 from collections import Counter, namedtuple
 from collections.abc import Iterable
 from configparser import RawConfigParser
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from functools import partial
 from io import TextIOWrapper
@@ -99,6 +100,45 @@ XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
 
 See the corresponding :issue:`implementation rationale in issue #10 <10>`.
 """
+
+
+@dataclass
+class MpmConfig:
+    """Schema for ``mpm`` configuration files.
+
+    Defines the recognized options for the ``[mpm]`` (or ``[tool.mpm]``)
+    configuration section.  Each field corresponds to a CLI option on the root
+    ``mpm`` group.
+
+    .. note::
+        Dynamic manager selectors (``brew = true``, ``pip = false``, etc.) and
+        click-extra built-in options (``verbosity``, ``table_format``) are handled
+        by the ``default_map`` pipeline and do not appear here.
+    """
+
+    all_managers: bool = False
+    """Force evaluation of all managers, including unsupported and deprecated."""
+
+    ignore_auto_updates: bool = True
+    """Exclude auto-updating packages from outdated/upgrade results."""
+
+    stop_on_error: bool = False
+    """Stop on first manager CLI error instead of continuing."""
+
+    dry_run: bool = False
+    """Simulate CLI calls without performing any action."""
+
+    timeout: int = 500
+    """Maximum duration in seconds for each manager CLI call."""
+
+    description: bool = False
+    """Show package description in results."""
+
+    sort_by: str = "manager_id"
+    """Default field to sort results by."""
+
+    stats: bool = True
+    """Print per-manager package statistics."""
 
 
 def is_stdout(filepath: Path) -> bool:
@@ -262,6 +302,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 @group(
     # XXX Default verbosity has been changed in Click Extra 4.0.0 from INFO to WARNING.
     context_settings={"default_map": {"verbosity": "INFO"}},
+    config_schema=MpmConfig,
 )
 @option_group(
     "Package manager selection",

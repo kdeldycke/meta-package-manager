@@ -135,7 +135,7 @@ dependencies = [
   # boltons 25.0.0 is the first version to support Python 3.13.
   "boltons>=25",
   # click-extra 7.11.0 adds serialize_data/print_data for structured output.
-  "click-extra>=7.11.0.dev0",
+  "click-extra>=7.11.0",
   # cyclonedx-python-lib 11.2.0 is the first to support Python 3.14.
   "cyclonedx-python-lib[validation]>=11.2",
   # extra-platforms 10.0.0 drops the distro dependency.
@@ -212,9 +212,9 @@ typing = [
 ]
 
 [tool.uv]
-sources.click-extra = { git = "https://github.com/kdeldycke/click-extra.git", branch = "main" }
 # Cooldown period.
 exclude-newer = "1 week"
+exclude-newer-package = { click-extra = false }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 

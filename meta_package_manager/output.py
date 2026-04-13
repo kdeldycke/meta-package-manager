@@ -23,19 +23,16 @@ import logging
 import sys
 from functools import cached_property, partial
 from io import StringIO
-from operator import itemgetter
 from pathlib import Path
 from unittest.mock import patch
 
 from boltons.iterutils import flatten
-from boltons.strutils import strip_ansi
-from click_extra import echo, style
+from click_extra import echo
 from click_extra.colorize import default_theme as theme
 from click_extra.table import TableFormat, render_table
 
 from .bar_plugin import MPMPlugin
 from .pool import pool
-from .version import TokenizedString
 
 if sys.version_info >= (3, 11):
     from enum import StrEnum

@@ -8,7 +8,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-04-04T09:53:11.507058Z"
+exclude-newer = "2026-04-06T11:11:43.010600476Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -250,7 +250,7 @@ wheels = [
 [[package]]
 name = "click-extra"
 version = "7.11.0.dev0"
-source = { git = "https://github.com/kdeldycke/click-extra.git?branch=main#c0db985b2c3540ea3091b2ea14a519e93d3fdc7d" }
+source = { git = "https://github.com/kdeldycke/click-extra.git?branch=main#28d6f32fc4df41299606165b41230665f612def0" }
 dependencies = [
     { name = "boltons" },
     { name = "click" },
@@ -297,15 +297,15 @@ yaml = [
 
 [[package]]
 name = "cloup"
-version = "3.0.8"
+version = "3.0.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/46/cf/09a31f0f51b5c8ef2343baf37c35a5feb4f6dfdcbd0592a014baf837f2e4/cloup-3.0.8.tar.gz", hash = "sha256:f91c080a725196ddf74feabd6250266f466e97fc16dfe21a762cf6bc6beb3ecb", size = 229657, upload-time = "2025-08-05T02:25:02.83Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f9/64/7f0a66021ff81d51859c66adc13f3c71f0306c2f8dfb9877a0694cbada05/cloup-3.0.9.tar.gz", hash = "sha256:519f524d3c64040e49a0866b5fc0bfd6af3eac0d3d6a4b2b50b33ab0247db2d7", size = 229896, upload-time = "2026-04-04T03:53:54.182Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/45/0a/494a923f90cd97cdf4fb989cfd06ac0c6745f6dfb8adcef1b7f99d3c7834/cloup-3.0.8-py2.py3-none-any.whl", hash = "sha256:6fe9474dc44fa06f8870e9c797f005de1e3ef891ddc1a9612d9b58598a038323", size = 54647, upload-time = "2025-08-05T02:25:01.536Z" },
+    { url = "https://files.pythonhosted.org/packages/77/15/435bb5a24e3a2dc8c26afedab0c6f0cf4291c66fb99509c168c38eb81135/cloup-3.0.9-py2.py3-none-any.whl", hash = "sha256:c761ef4e975454335d50c0e1eb83595a932735aac06e8955b3ced774bc62ae7b", size = 54724, upload-time = "2026-04-04T03:53:52.909Z" },
 ]
 
 [[package]]
@@ -524,11 +524,11 @@ wheels = [
 
 [[package]]
 name = "extra-platforms"
-version = "11.0.4"
+version = "11.0.5"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8c/3d/28f6523feeae961d5927d91f99a3626c8a1f8dcd426a78f353bd889a3ea4/extra_platforms-11.0.4.tar.gz", hash = "sha256:9f9471bb8063fcd49caef9b97625f9e2405c678f0ffe809e4442160dcb80c188", size = 68727, upload-time = "2026-03-30T20:47:24.392Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f7/ab/757eb1e8b77757651dd0c69d18d118b22608be551dfc06e3f3962f6bb474/extra_platforms-11.0.5.tar.gz", hash = "sha256:89ae7971ba79193a256af16b44f3b9ab1c16dc4ba671f80e6110fa421679a82e", size = 68848, upload-time = "2026-04-03T09:46:30.122Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/d8/cb7bad907a90dd61d681fa497da2c0c0f6e142c3bc913aaf6fc8831daac5/extra_platforms-11.0.4-py3-none-any.whl", hash = "sha256:1981c3afcf6628a941f71d7fa6b25aeb0e9232e20dd708f8114fe8b5b2f9132a", size = 72308, upload-time = "2026-03-30T20:47:25.475Z" },
+    { url = "https://files.pythonhosted.org/packages/09/07/f1644d0288f5ce4ad8b6c888dd46bced2eae3480265f2253cefd7f694a68/extra_platforms-11.0.5-py3-none-any.whl", hash = "sha256:b081d5b1159af6462793517ad8073f85bd4c31aa398dfb8acb7f49ff54f8b7cc", size = 72395, upload-time = "2026-04-03T09:46:31.413Z" },
 ]
 
 [[package]]
@@ -2121,11 +2121,11 @@ wheels = [
 
 [[package]]
 name = "tzdata"
-version = "2025.3"
+version = "2026.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/5e/a7/c202b344c5ca7daf398f3b8a477eeb205cf3b6f32e7ec3a6bac0629ca975/tzdata-2025.3.tar.gz", hash = "sha256:de39c2ca5dc7b0344f2eba86f49d614019d29f060fc4ebc8a417896a620b56a7", size = 196772, upload-time = "2025-12-13T17:45:35.667Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/19/f5/cd531b2d15a671a40c0f66cf06bc3570a12cd56eef98960068ebbad1bf5a/tzdata-2026.1.tar.gz", hash = "sha256:67658a1903c75917309e753fdc349ac0efd8c27db7a0cb406a25be4840f87f98", size = 197639, upload-time = "2026-04-03T11:25:22.002Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c7/b0/003792df09decd6849a5e39c28b513c06e84436a54440380862b5aeff25d/tzdata-2025.3-py2.py3-none-any.whl", hash = "sha256:06a47e5700f3081aab02b2e513160914ff0694bce9947d6b76ebd6bf57cfc5d1", size = 348521, upload-time = "2025-12-13T17:45:33.889Z" },
+    { url = "https://files.pythonhosted.org/packages/b0/70/d460bd685a170790ec89317e9bd33047988e4bce507b831f5db771e142de/tzdata-2026.1-py2.py3-none-any.whl", hash = "sha256:4b1d2be7ac37ceafd7327b961aa3a54e467efbdb563a23655fbfe0d39cfc42a9", size = 348952, upload-time = "2026-04-03T11:25:20.313Z" },
 ]
 
 [[package]]

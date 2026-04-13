@@ -27,6 +27,7 @@ Nuitka `--onefile` Windows x64 binaries are systematically flagged by antivirus 
 Nuitka `--onefile` creates a self-extracting archive that decompresses an embedded Python runtime to a temporary directory and executes it at launch. This "drop and execute from temp" pattern is behaviorally identical to trojan droppers, which triggers heuristic and ML-based detections.
 
 Additional factors:
+
 - Nuitka is popular with malware authors for source code protection, which poisons AV heuristics for all Nuitka-compiled binaries.
 - `mpm` invokes external system commands (package managers), triggering behavioral rules for command-and-control activity.
 - Microsoft has gone as far as [suspending an Artifact Signing account](https://github.com/Nuitka/Nuitka/issues/3842) over Nuitka onefile binaries.
@@ -35,15 +36,15 @@ Additional factors:
 
 Based on the `v6.2.1` release (scanned 2026-04-10):
 
-| Platform | Detection rate | VT reports | Notes |
-|---|---|---|---|
-| Linux x64 | 0/62 | | Clean |
-| Linux ARM64 | 0/60 | | Clean |
-| macOS x64 | 0-1/63 | | Occasional ML false positive |
-| macOS ARM64 | 2/55-60 | [`meta-package-manager`](https://www.virustotal.com/gui/file/61c7a27f13b3c5a1f6cd079362c51880af9f1a945b6e3ec59ee3e5951efae1b0), [`mpm`](https://www.virustotal.com/gui/file/3369b48aed98d4ddedcf3e414f4fbf2e4fd8560ec1195b8c0ff5f41765e4bbd5) | Cynet, Microsoft ML, Avast/AVG |
-| Windows ARM64 | 1/68-70 | [`meta-package-manager`](https://www.virustotal.com/gui/file/ebd0e35a09da7b496127aeca5669c2c5b1ab1e74c4f529ae050672850e8f627f), [`mpm`](https://www.virustotal.com/gui/file/136d9410d3887b1023e30f9e31f6e3d054d117ebd08cf50d7d8f83f87a3c6b39) | Fewer ARM64 heuristics in AV engines |
-| **Windows x64** | **33-35/70** | [**`meta-package-manager`**](https://www.virustotal.com/gui/file/5435366a1bdd6790074caacd1c5b4a9d22d28e996671d0a432b399d06762707e), [**`mpm`**](https://www.virustotal.com/gui/file/3edbaf472a6a154db6c2f9f33f935737eeead50a8a7159612ebe0ba930d3a47f) | Heavily flagged by heuristic/ML engines |
-| `.whl` / `.tar.gz` | 0/56-63 | | Clean (Python source, no Nuitka) |
+| Platform           | Detection rate | VT reports                                                                                                                                                                                                                                            | Notes                                   |
+| ------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Linux x64          | 0/62           |                                                                                                                                                                                                                                                       | Clean                                   |
+| Linux ARM64        | 0/60           |                                                                                                                                                                                                                                                       | Clean                                   |
+| macOS x64          | 0-1/63         |                                                                                                                                                                                                                                                       | Occasional ML false positive            |
+| macOS ARM64        | 2/55-60        | [`meta-package-manager`](https://www.virustotal.com/gui/file/61c7a27f13b3c5a1f6cd079362c51880af9f1a945b6e3ec59ee3e5951efae1b0), [`mpm`](https://www.virustotal.com/gui/file/3369b48aed98d4ddedcf3e414f4fbf2e4fd8560ec1195b8c0ff5f41765e4bbd5)         | Cynet, Microsoft ML, Avast/AVG          |
+| Windows ARM64      | 1/68-70        | [`meta-package-manager`](https://www.virustotal.com/gui/file/ebd0e35a09da7b496127aeca5669c2c5b1ab1e74c4f529ae050672850e8f627f), [`mpm`](https://www.virustotal.com/gui/file/136d9410d3887b1023e30f9e31f6e3d054d117ebd08cf50d7d8f83f87a3c6b39)         | Fewer ARM64 heuristics in AV engines    |
+| **Windows x64**    | **33-35/70**   | [**`meta-package-manager`**](https://www.virustotal.com/gui/file/5435366a1bdd6790074caacd1c5b4a9d22d28e996671d0a432b399d06762707e), [**`mpm`**](https://www.virustotal.com/gui/file/3edbaf472a6a154db6c2f9f33f935737eeead50a8a7159612ebe0ba930d3a47f) | Heavily flagged by heuristic/ML engines |
+| `.whl` / `.tar.gz` | 0/56-63        |                                                                                                                                                                                                                                                       | Clean (Python source, no Nuitka)        |
 
 The Windows x64 detections come from generic signatures like `Gen:Variant.Application.tedy` (BitDefender family), [`Trojan:Win32/Sabsik`](https://www.microsoft.com/en-us/wdsi/threats/malware-encyclopedia-description?Name=Trojan:Win32/Sabsik.EN.A!ml&threatId=-2147156305) (Microsoft), `Python/Packed.Nuitka.AL` (ESET), and various ML-based classifiers.
 

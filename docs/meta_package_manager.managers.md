@@ -9,7 +9,7 @@
 
 ## Submodules
 
-## meta\_package\_manager.managers.apm module
+## meta_package_manager.managers.apm module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.apm
@@ -18,7 +18,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.apt module
+## meta_package_manager.managers.apt module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.apt
@@ -27,7 +27,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.cargo module
+## meta_package_manager.managers.cargo module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.cargo
@@ -36,7 +36,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.chocolatey module
+## meta_package_manager.managers.chocolatey module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.chocolatey
@@ -45,7 +45,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.composer module
+## meta_package_manager.managers.composer module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.composer
@@ -54,7 +54,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.cpan module
+## meta_package_manager.managers.cpan module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.cpan
@@ -63,7 +63,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.dnf module
+## meta_package_manager.managers.dnf module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.dnf
@@ -72,7 +72,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.emerge module
+## meta_package_manager.managers.emerge module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.emerge
@@ -81,7 +81,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.eopkg module
+## meta_package_manager.managers.eopkg module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.eopkg
@@ -90,7 +90,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.flatpak module
+## meta_package_manager.managers.flatpak module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.flatpak
@@ -99,7 +99,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.fwupd module
+## meta_package_manager.managers.fwupd module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.fwupd
@@ -108,7 +108,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.gem module
+## meta_package_manager.managers.gem module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.gem
@@ -117,7 +117,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.homebrew module
+## meta_package_manager.managers.homebrew module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.homebrew
@@ -126,7 +126,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.mas module
+## meta_package_manager.managers.mas module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.mas
@@ -135,7 +135,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.npm module
+## meta_package_manager.managers.npm module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.npm
@@ -144,7 +144,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.opkg module
+## meta_package_manager.managers.opkg module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.opkg
@@ -153,7 +153,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.pacman module
+## meta_package_manager.managers.pacman module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.pacman
@@ -162,7 +162,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.pip module
+## meta_package_manager.managers.pip module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.pip
@@ -171,7 +171,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.pipx module
+## meta_package_manager.managers.pipx module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.pipx
@@ -180,7 +180,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.pkg module
+## meta_package_manager.managers.pkg module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.pkg
@@ -189,7 +189,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.scoop module
+## meta_package_manager.managers.scoop module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.scoop
@@ -198,7 +198,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.snap module
+## meta_package_manager.managers.snap module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.snap
@@ -207,7 +207,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.steamcmd module
+## meta_package_manager.managers.steamcmd module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.steamcmd
@@ -216,7 +216,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.uv module
+## meta_package_manager.managers.uv module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.uv
@@ -225,7 +225,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.vscode module
+## meta_package_manager.managers.vscode module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.vscode
@@ -234,7 +234,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.winget module
+## meta_package_manager.managers.winget module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.winget
@@ -243,7 +243,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.yarn module
+## meta_package_manager.managers.yarn module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.yarn
@@ -252,7 +252,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.managers.zypper module
+## meta_package_manager.managers.zypper module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.managers.zypper

@@ -18,7 +18,7 @@
 
 ## Submodules
 
-## meta\_package\_manager.bar\_plugin module
+## meta_package_manager.bar_plugin module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.bar_plugin
@@ -27,7 +27,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.base module
+## meta_package_manager.base module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.base
@@ -36,7 +36,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.capabilities module
+## meta_package_manager.capabilities module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.capabilities
@@ -45,7 +45,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.cli module
+## meta_package_manager.cli module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.cli
@@ -54,7 +54,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.inventory module
+## meta_package_manager.inventory module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.inventory
@@ -63,7 +63,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.labels module
+## meta_package_manager.labels module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.labels
@@ -72,7 +72,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.output module
+## meta_package_manager.output module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.output
@@ -81,7 +81,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.pool module
+## meta_package_manager.pool module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.pool
@@ -90,7 +90,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.sbom module
+## meta_package_manager.sbom module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.sbom
@@ -99,7 +99,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.specifier module
+## meta_package_manager.specifier module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.specifier
@@ -108,7 +108,7 @@
    :undoc-members:
 ```
 
-## meta\_package\_manager.version module
+## meta_package_manager.version module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.version

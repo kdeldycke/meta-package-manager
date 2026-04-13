@@ -54,7 +54,6 @@ from click_extra.colorize import (
 )
 from click_extra.table import (
     SERIALIZATION_FORMATS,
-    TableFormat,
     print_data,
     print_sorted_table,
 )
@@ -258,7 +257,6 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         bar_path = shorten_bar_path
     echo(bar_path)
     ctx.exit()
-
 
 
 @group(
@@ -522,7 +520,12 @@ def managers(ctx):
                 {expt.error for expt in manager.cli_errors},
             )
 
-        print_data(manager_data, table_format, root_element="mpm", package="meta-package-manager")
+        print_data(
+            manager_data,
+            table_format,
+            root_element="mpm",
+            package="meta-package-manager",
+        )
         ctx.exit()
 
     # Human-friendly content rendering.
@@ -649,7 +652,12 @@ def installed(ctx, duplicates):
     # Machine-friendly data rendering.
     table_format = ctx.meta["click_extra.table_format"]
     if table_format in SERIALIZATION_FORMATS:
-        print_data(installed_data, table_format, root_element="mpm", package="meta-package-manager")
+        print_data(
+            installed_data,
+            table_format,
+            root_element="mpm",
+            package="meta-package-manager",
+        )
         ctx.exit()
 
     # Human-friendly content rendering.
@@ -734,7 +742,12 @@ def outdated(ctx, plugin_output):
     # Machine-friendly data rendering.
     table_format = ctx.meta["click_extra.table_format"]
     if table_format in SERIALIZATION_FORMATS:
-        print_data(outdated_data, table_format, root_element="mpm", package="meta-package-manager")
+        print_data(
+            outdated_data,
+            table_format,
+            root_element="mpm",
+            package="meta-package-manager",
+        )
         ctx.exit()
 
     # Xbar/SwiftBar-friendly plugin rendering.
@@ -853,7 +866,9 @@ def search(ctx, extended, exact, refilter, query):
     # Machine-friendly data rendering.
     table_format = ctx.meta["click_extra.table_format"]
     if table_format in SERIALIZATION_FORMATS:
-        print_data(matches, table_format, root_element="mpm", package="meta-package-manager")
+        print_data(
+            matches, table_format, root_element="mpm", package="meta-package-manager"
+        )
         ctx.exit()
 
     # Prepare highlighting helpers.
@@ -928,7 +943,9 @@ def which(ctx, cli_names):
             }
             for manager in ctx.obj.selected_managers()
         ]
-        print_data(cli_data, table_format, root_element="mpm", package="meta-package-manager")
+        print_data(
+            cli_data, table_format, root_element="mpm", package="meta-package-manager"
+        )
         ctx.exit()
 
     # Print table.

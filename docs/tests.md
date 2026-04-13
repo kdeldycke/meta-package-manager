@@ -18,7 +18,7 @@
    :undoc-members:
 ```
 
-## tests.test\_bar\_plugin module
+## tests.test_bar_plugin module
 
 ```{eval-rst}
 .. automodule:: tests.test_bar_plugin
@@ -27,7 +27,7 @@
    :undoc-members:
 ```
 
-## tests.test\_cli module
+## tests.test_cli module
 
 ```{eval-rst}
 .. automodule:: tests.test_cli
@@ -36,7 +36,7 @@
    :undoc-members:
 ```
 
-## tests.test\_cli\_backup module
+## tests.test_cli_backup module
 
 ```{eval-rst}
 .. automodule:: tests.test_cli_backup
@@ -45,7 +45,7 @@
    :undoc-members:
 ```
 
-## tests.test\_cli\_cleanup module
+## tests.test_cli_cleanup module
 
 ```{eval-rst}
 .. automodule:: tests.test_cli_cleanup
@@ -54,7 +54,7 @@
    :undoc-members:
 ```
 
-## tests.test\_cli\_install\_remove module
+## tests.test_cli_install_remove module
 
 ```{eval-rst}
 .. automodule:: tests.test_cli_install_remove
@@ -63,7 +63,7 @@
    :undoc-members:
 ```
 
-## tests.test\_cli\_installed module
+## tests.test_cli_installed module
 
 ```{eval-rst}
 .. automodule:: tests.test_cli_installed
@@ -72,7 +72,7 @@
    :undoc-members:
 ```
 
-## tests.test\_cli\_managers module
+## tests.test_cli_managers module
 
 ```{eval-rst}
 .. automodule:: tests.test_cli_managers
@@ -81,7 +81,7 @@
    :undoc-members:
 ```
 
-## tests.test\_cli\_outdated module
+## tests.test_cli_outdated module
 
 ```{eval-rst}
 .. automodule:: tests.test_cli_outdated
@@ -90,7 +90,7 @@
    :undoc-members:
 ```
 
-## tests.test\_cli\_restore module
+## tests.test_cli_restore module
 
 ```{eval-rst}
 .. automodule:: tests.test_cli_restore
@@ -99,7 +99,7 @@
    :undoc-members:
 ```
 
-## tests.test\_cli\_sbom module
+## tests.test_cli_sbom module
 
 ```{eval-rst}
 .. automodule:: tests.test_cli_sbom
@@ -108,7 +108,7 @@
    :undoc-members:
 ```
 
-## tests.test\_cli\_search module
+## tests.test_cli_search module
 
 ```{eval-rst}
 .. automodule:: tests.test_cli_search
@@ -117,7 +117,7 @@
    :undoc-members:
 ```
 
-## tests.test\_cli\_sync module
+## tests.test_cli_sync module
 
 ```{eval-rst}
 .. automodule:: tests.test_cli_sync
@@ -126,7 +126,7 @@
    :undoc-members:
 ```
 
-## tests.test\_cli\_upgrade module
+## tests.test_cli_upgrade module
 
 ```{eval-rst}
 .. automodule:: tests.test_cli_upgrade
@@ -135,7 +135,7 @@
    :undoc-members:
 ```
 
-## tests.test\_cli\_which module
+## tests.test_cli_which module
 
 ```{eval-rst}
 .. automodule:: tests.test_cli_which
@@ -144,7 +144,7 @@
    :undoc-members:
 ```
 
-## tests.test\_docs module
+## tests.test_docs module
 
 ```{eval-rst}
 .. automodule:: tests.test_docs
@@ -153,7 +153,7 @@
    :undoc-members:
 ```
 
-## tests.test\_manager\_apt module
+## tests.test_manager_apt module
 
 ```{eval-rst}
 .. automodule:: tests.test_manager_apt
@@ -162,7 +162,7 @@
    :undoc-members:
 ```
 
-## tests.test\_manager\_homebrew module
+## tests.test_manager_homebrew module
 
 ```{eval-rst}
 .. automodule:: tests.test_manager_homebrew
@@ -171,7 +171,7 @@
    :undoc-members:
 ```
 
-## tests.test\_managers module
+## tests.test_managers module
 
 ```{eval-rst}
 .. automodule:: tests.test_managers
@@ -180,7 +180,7 @@
    :undoc-members:
 ```
 
-## tests.test\_pool module
+## tests.test_pool module
 
 ```{eval-rst}
 .. automodule:: tests.test_pool
@@ -189,7 +189,7 @@
    :undoc-members:
 ```
 
-## tests.test\_specifier module
+## tests.test_specifier module
 
 ```{eval-rst}
 .. automodule:: tests.test_specifier
@@ -198,7 +198,7 @@
    :undoc-members:
 ```
 
-## tests.test\_version module
+## tests.test_version module
 
 ```{eval-rst}
 .. automodule:: tests.test_version

@@ -724,7 +724,7 @@ def installed(ctx, duplicates):
                 info["id"],
                 info["name"],
                 manager_id,
-                info["installed_version"] if info["installed_version"] else "?",
+                str(info["installed_version"]) if info["installed_version"] else "?",
             )
             for info in installed_pkg["packages"]
         ]
@@ -946,7 +946,7 @@ def search(ctx, extended, exact, refilter, query):
                 highlight_query(pkg["id"]) if pkg["id"] else "",
                 highlight_query(pkg["name"]) if pkg["name"] else "",
                 manager_id,
-                pkg["latest_version"] if pkg["latest_version"] else "?",
+                str(pkg["latest_version"]) if pkg["latest_version"] else "?",
             ]
             if show_description:
                 line.append(

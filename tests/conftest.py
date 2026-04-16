@@ -184,6 +184,7 @@ PACKAGE_IDS = {
     "pkg": "dmg2img",
     "scoop": "main/wget",
     "sdkman": "java",
+    "sfsu": "main/wget",
     "snap": "standard-notes",
     "steamcmd": "740",
     "stew": "marwanhawari/piu",

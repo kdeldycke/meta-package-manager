@@ -101,7 +101,7 @@ description = "dnf, dnf5, yum, zypper"
 [[profiles.default.labels]]
 name = "📦 manager: scoop"
 color = "bfdadc"
-description = "scoop"
+description = "scoop, sfsu"
 
 [[profiles.default.labels]]
 name = "📦 manager: sdkman"

@@ -19,10 +19,6 @@ slow Scoop operations.
 It leverages the same Scoop package ecosystem but provides native JSON output
 and significantly faster execution for listing, searching, and status checks.
 Install and upgrade operations are delegated to Scoop.
-
-.. seealso::
-
-    `sfsu GitHub repository <https://github.com/winpax/sfsu>`_.
 """
 
 from __future__ import annotations
@@ -49,8 +45,6 @@ class SFSU(PackageManager):
     structured output. Mutating operations (install, upgrade, remove) delegate
     to ``scoop`` because sfsu does not implement them.
     """
-
-    name = "sfsu"
 
     homepage_url = "https://github.com/winpax/sfsu"
 

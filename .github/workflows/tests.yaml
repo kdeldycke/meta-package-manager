@@ -211,6 +211,7 @@ jobs:
         run: |
           iwr get.scoop.sh -outfile 'install.ps1'
           .\install.ps1 -RunAsAdmin
+          "$HOME\scoop\shims" | Out-File -Append -FilePath $env:GITHUB_PATH
 
       # SFSU
       - name: SFSU - Windows install

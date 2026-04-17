@@ -135,7 +135,7 @@ dependencies = [
   # boltons 25.0.0 is the first version to support Python 3.13.
   "boltons>=25",
   # click-extra 7.11.0 adds serialize_data/print_data for structured output.
-  "click-extra>=7.11.0",
+  "click-extra>=7.11",
   # cyclonedx-python-lib 11.2.0 is the first to support Python 3.14.
   "cyclonedx-python-lib[validation]>=11.2",
   # extra-platforms 10.0.0 drops the distro dependency.

@@ -8,12 +8,11 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-04-08T10:28:03.821583592Z"
+exclude-newer = "2026-04-10T06:43:56.989266547Z"
 exclude-newer-span = "P1W"
 
 [options.exclude-newer-package]
 click-extra = false
-pytest = { timestamp = "2026-04-15T10:28:03.820285332Z", span = "PT0S" }
 
 [[package]]
 name = "accessible-pygments"
@@ -987,7 +986,7 @@ wheels = [
 
 [[package]]
 name = "meta-package-manager"
-version = "6.3.1.dev0"
+version = "6.4.0.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'" },

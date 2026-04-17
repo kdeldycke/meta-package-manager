@@ -247,6 +247,10 @@ $ file ./mpm*
 ```
 ````
 
+```{important} Antivirus false positives
+The binaries are compiled with [Nuitka](https://nuitka.net), which produces self-extracting executables with an embedded Python runtime. This packaging pattern is sometimes flagged by ML-based antivirus engines (like Symantec's `ML.Attribute.HighConfidence`). These are false positives. If your antivirus quarantines an `mpm` binary, you can verify its authenticity with the [attestation procedure below](#release-verification), then report the false positive to your antivirus vendor. This will help the project a lot.
+```
+
 ## Release verification
 
 All release artifacts (Python packages and compiled binaries) are signed with [GitHub Artifact Attestations](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds) providing [SLSA v1 provenance](https://slsa.dev/spec/v1.0/). You can verify any downloaded artifact with the [GitHub CLI](https://cli.github.com):

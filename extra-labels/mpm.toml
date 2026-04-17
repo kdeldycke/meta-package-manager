@@ -99,7 +99,7 @@ color = "bfdadc"
 description = "dnf, dnf5, yum, zypper"
 
 [[profiles.default.labels]]
-name = "📦 manager: scoop"
+name = "📦 manager: scoop-based"
 color = "bfdadc"
 description = "scoop, sfsu"
 

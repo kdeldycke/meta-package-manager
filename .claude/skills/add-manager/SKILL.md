@@ -6,7 +6,19 @@ disable-model-invocation: true
 
 # Add a new package manager
 
-Implement support for a new package manager in `mpm`. If adding a manager requested via a GitHub issue, extract CLI output samples from the issue body to guide the implementation.
+Implement support for a new package manager in `mpm`, or complete an incomplete integration. If adding a manager requested via a GitHub issue, extract CLI output samples from the issue body to guide the implementation.
+
+## Completing an incomplete integration
+
+External contributors often submit a working manager module (`managers/<name>.py`, `pool.py`, `conftest.py`) but skip the documentation and metadata files. See [kdeldycke/meta-package-manager#1758](https://github.com/kdeldycke/meta-package-manager/pull/1758) for a typical example.
+
+When asked to "integrate further", "fill gaps", or "finish" a manager that already has code:
+
+1. Read the existing manager module to understand supported operations and platforms.
+2. Walk the **file checklist** below and check each file for the manager's presence.
+3. Verify the `requirement` version specifier by researching when the features the code depends on (like `--json` output) were actually introduced upstream. Contributors often default to `>=1.0.0` without checking.
+4. If the manager wraps or complements another (like sfsu wraps Scoop), merge their label rules under a single `📦 manager:` label rather than creating a separate one.
+5. Fetch the upstream repository (README, releases, changelog) to verify CLI output formats match the parsing code.
 
 ## Choose a template
 
@@ -38,7 +50,7 @@ Required:
 
 Common optional:
 
-- `requirement`: minimum version specifier (e.g., `">=2.0.0"`).
+- `requirement`: minimum version specifier (e.g., `">=2.0.0"`). Set this to the earliest version that supports all features the implementation depends on. If the code parses `--json` output, check the upstream release history to find when that flag was introduced. Do not default to `>=1.0.0` without verification.
 - `cli_names`: tuple of binary names to search for. Defaults to `(lowercase_class_name,)`. Set explicitly when the binary name differs from the class name (e.g., `cli_names = ("nix-env",)` for class `Nix`).
 - `version_regexes`: tuple of regex strings with a `(?P<version>...)` named group.
 - `version_cli_options`: tuple of args to get version. Defaults to `("--version",)`.
@@ -83,28 +95,25 @@ Every new manager touches the same set of files. This list is derived from all 3
 
 ### Always required
 
-| File                                      | Change                                                                                                             |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `meta_package_manager/managers/<name>.py` | The new manager implementation.                                                                                    |
-| `meta_package_manager/pool.py`            | Add import (sorted by module name) and class to `manager_classes` tuple (sorted case-insensitively by class name). |
-| `tests/conftest.py`                       | Add `"<manager_id>": "<package_name>"` to `PACKAGE_IDS`. Choose a small, low-impact package for destructive tests. |
-| `tests/test_pool.py`                      | Increment both count assertions in `test_manager_count()`.                                                         |
-| `changelog.md`                            | Add `- [<manager_id>] Add <Name> package manager with <operations> support.` under the current unreleased version. |
-
-### Almost always required
-
-| File                                  | Change                                                                                                                                                                   |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `pyproject.toml`                      | Add manager name (and ecosystem name if different) to `keywords`. Add `"📦 manager: <name>"` entries to both `labels.extra-file-rules` and `labels.extra-content-rules`. |
-| `readme.md` + `extra-labels/mpm.toml` | Regenerated automatically. Run `uv run -- python docs/docs_update.py`.                                                                                                   |
+| File                                         | Change                                                                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `meta_package_manager/managers/<name>.py`    | The new manager implementation.                                                                                    |
+| `meta_package_manager/pool.py`               | Add import (sorted by module name) and class to `manager_classes` tuple (sorted case-insensitively by class name). |
+| `tests/conftest.py`                          | Add `"<manager_id>": "<package_name>"` to `PACKAGE_IDS`. Choose a small, low-impact package for destructive tests. |
+| `tests/test_pool.py`                         | Increment both count assertions in `test_manager_count()`.                                                         |
+| `changelog.md`                               | Add `- [<manager_id>] Add <Name> package manager with <operations> support.` under the current unreleased version. |
+| `readme.md`                                  | Add entry to the Sankey diagram (alphabetical) and a row to the operations matrix with correct platform and operation flags. |
+| `docs/meta_package_manager.managers.md`      | Add `automodule` section for `meta_package_manager.managers.<name>` in alphabetical order.                         |
+| `pyproject.toml`                             | Add manager name (and ecosystem name if different) to `keywords`. Add `"📦 manager: <name>"` entries to both `labels.extra-file-rules` and `labels.extra-content-rules`. If the manager wraps another (like sfsu wraps Scoop), merge into the existing manager's label instead of creating a separate one. |
 
 ### When applicable
 
-| File                                                       | When                                                                                                                                      | Change                                                                                               |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `meta_package_manager/labels.py`                           | Manager belongs to an existing ecosystem (e.g., adding an AUR helper to the pacman-based group, or a pip wrapper to the pip-based group). | Add the manager ID to the appropriate frozenset in `MANAGER_LABEL_GROUPS`.                           |
-| `docs/benchmark.md`                                        | Manager already appears in the comparison table.                                                                                          | Add `✓` in the `mpm` column.                                                                         |
-| `.github/workflows/tests-install.yaml` + `docs/install.md` | Manager is a *distributor of mpm itself* (like Homebrew, Scoop, Nix, or an AUR helper). Most managers are not.                            | Add a CI job testing `mpm` installation via the new channel, and a matching tab in the install docs. |
+| File                                                        | When                                                                                                                                      | Change                                                                                               |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `.github/workflows/tests.yaml`                              | Manager can be installed on CI runners. Check if it's available via an existing package manager (like Scoop, apt, brew) on the target OS.  | Add an install step in the manager setup section, near related managers.                             |
+| `meta_package_manager/labels.py`                            | Manager belongs to an existing ecosystem (e.g., adding an AUR helper to the pacman-based group, or a pip wrapper to the pip-based group). | Add the manager ID to the appropriate frozenset in `MANAGER_LABEL_GROUPS`.                           |
+| `docs/benchmark.md`                                         | Manager already appears in the comparison table.                                                                                          | Add `✓` in the `mpm` column.                                                                         |
+| `.github/workflows/tests-install.yaml` + `docs/install.md`  | Manager is a *distributor of mpm itself* (like Homebrew, Scoop, Nix, or an AUR helper). Most managers are not.                            | Add a CI job testing `mpm` installation via the new channel, and a matching tab in the install docs. |
 
 ## Validate
 

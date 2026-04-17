@@ -103,6 +103,7 @@ Meta Package Manager,pipx,1
 Meta Package Manager,pkg,1
 Meta Package Manager,scoop,1
 Meta Package Manager,sdkman,1
+Meta Package Manager,sfsu,1
 Meta Package Manager,snap,1
 Meta Package Manager,steamcmd,1
 Meta Package Manager,stew,1
@@ -157,6 +158,7 @@ Meta Package Manager,zypper,1
 | [`pkg`](https://github.com/freebsd/pkg)                                                 | >=1.11           |    🅱️     |      🐧       |  🍎   |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`scoop`](https://scoop.sh)                                                             | >=0.2.4          |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`sdkman`](https://sdkman.io)                                                           | >=5.0.0          |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
+| [`sfsu`](https://github.com/winpax/sfsu)                                                | >=1.16.0         |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`snap`](https://snapcraft.io)                                                          | >=2.0.0          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
 | [`steamcmd`](https://developer.valvesoftware.com/wiki/SteamCMD)                         |                  |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |             |            |          |     ✓     |           |               |          |        |           |
 | [`stew`](https://github.com/marwanhawari/stew)                                          | >=0.3.0          |           |      🐧       |  🍎   |             |   🪟    |      ✓      |            |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |

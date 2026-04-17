@@ -62,6 +62,7 @@ keywords = [
   "sbom",
   "scoop",
   "sdkman",
+  "sfsu",
   "snap",
   "spdx",
   "steamcmd",
@@ -505,7 +506,9 @@ labels.extra-file-rules = """"🔌 bar-plugin":
   - changed-files:
     - any-glob-to-any-file:
       - meta_package_manager/managers/scoop*
+      - meta_package_manager/managers/sfsu*
       - tests/*scoop*
+      - tests/*sfsu*
 
 "📦 manager: sdkman":
   - changed-files:
@@ -658,6 +661,7 @@ labels.extra-content-rules = """"🔌 bar-plugin":
 
 "📦 manager: scoop":
   - "scoop"
+  - "sfsu"
 
 "📦 manager: sdkman":
   - "sdkman"

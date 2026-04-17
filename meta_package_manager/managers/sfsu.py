@@ -52,12 +52,11 @@ class SFSU(PackageManager):
 
     name = "sfsu"
 
-    # https://github.com/winpax/sfsu
     homepage_url = "https://github.com/winpax/sfsu"
 
     platforms = WINDOWS
 
-    requirement = ">=1.0.0"
+    requirement = ">=1.16.0"
 
     version_regexes = (r"sfsu\s+(?P<version>\S+)",)
     """

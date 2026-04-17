@@ -212,6 +212,12 @@ jobs:
           iwr get.scoop.sh -outfile 'install.ps1'
           .\install.ps1 -RunAsAdmin
 
+      # SFSU
+      - name: SFSU - Windows install
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: scoop install main/sfsu
+
       # WinGet
       - name: WinGet - Windows install
         if: runner.os == 'Windows'

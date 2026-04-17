@@ -144,9 +144,8 @@ class WinGet(PackageManager):
         """Parse a table from the output of a winget command and returns a generator of cells."""
         # Extract table.
         table_start = "Name "
-        assert table_start in output, (
-            f"Cannot find table starting with {table_start!r} in:\n{output}"
-        )
+        if table_start not in output:
+            return
         assert output.count(table_start) == 1, (
             f"{table_start!r} not unique in:\n{output}"
         )

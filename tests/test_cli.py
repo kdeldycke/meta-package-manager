@@ -151,9 +151,12 @@ class TestCommonCLI:
         assert not process.stderr
         # click_extra appends ``+<git_short_hash>`` to ``.dev`` versions at
         # runtime, so accept the optional local version identifier suffix.
+        # Newer versions of click_extra also append a Python version/platform
+        # line, so match that optional trailing line too.
         assert re.fullmatch(
             rf"\x1b\[97mmpm\x1b\[0m, version "
-            rf"\x1b\[32m{re.escape(__version__)}(\+[0-9a-f]+)?\x1b\[0m\n",
+            rf"\x1b\[32m{re.escape(__version__)}(\+[0-9a-f]+)?\x1b\[0m\n"
+            rf"(\x1b\[90mPython [^\n]+\x1b\[0m\n)?",
             process.stdout,
         )
 
@@ -390,7 +393,7 @@ class CLITableTests:
         "fmt",
         sorted(
             [f for f in SERIALIZATION_FORMATS if f != TableFormat.JSON],
-            key=lambda f: f.value,
+            key=lambda f: f.value,  # type: ignore[attr-defined]
         ),
         ids=lambda f: f.value,
     )

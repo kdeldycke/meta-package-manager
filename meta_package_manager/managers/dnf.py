@@ -190,6 +190,16 @@ class DNF(PackageManager):
         """
         return self.build_cli("upgrade", package_id, sudo=True)
 
+    def remove(self, package_id: str) -> str:
+        """Remove one package and one only.
+
+        .. code-block:: shell-session
+
+            $ sudo dnf --color=never --assumeyes autoremove package_id
+        """
+
+        return self.run_cli("--assumeyes", "autoremove", package_id, sudo=True)
+
     def sync(self) -> None:
         """Sync package metadata.
 
@@ -209,16 +219,6 @@ class DNF(PackageManager):
         """
         self.run_cli("--assumeyes", "autoremove", sudo=True)
         self.run_cli("clean", "all")
-
-    def remove(self, package_id: str) -> str:
-        """Remove one package and one only.
-
-        .. code-block:: shell-session
-
-            $ sudo dnf --color=never --assumeyes autoremove package_id
-        """
-
-        return self.run_cli("--assumeyes", "autoremove", package_id, sudo=True)
 
 
 class DNF5(DNF):

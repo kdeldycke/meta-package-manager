@@ -210,14 +210,14 @@ class UVX(UVBase):
     Like ``pipx``, but uses ``uv tool`` commands.
     """
 
-    cli_names = ("uv",)
-
     homepage_url = "https://docs.astral.sh/uv/guides/tools/"
 
     requirement = ">=0.10.10"
     """`0.10.10 <https://github.com/astral-sh/uv/releases/tag/0.10.10>`_ is the first
     version to introduce ``tool list --outdated`` command.
     """
+
+    cli_names = ("uv",)
 
     _INSTALLED_REGEXP = re.compile(r"^(?P<package_id>\S+)\s+v(?P<version>\S+)$")
     _OUTDATED_REGEXP = re.compile(
@@ -277,6 +277,17 @@ class UVX(UVBase):
         package_specs = self._build_package_spec(package_id, version)
         return self.run_cli("tool", "install", package_specs)
 
+    def upgrade_all_cli(self) -> tuple[str, ...]:
+        """Generates the CLI to upgrade all packages.
+
+        .. code-block:: shell-session
+
+            $ uv --color never --no-progress tool upgrade --all
+            Updated pycowsay v0.0.0.1 -> v0.0.0.2
+                - pycowsay
+        """
+        return self.build_cli("tool", "upgrade", "--all")
+
     def upgrade_one_cli(
         self,
         package_id: str,
@@ -290,17 +301,6 @@ class UVX(UVBase):
         """
         package_specs = self._build_package_spec(package_id, version)
         return self.build_cli("tool", "upgrade", package_specs)
-
-    def upgrade_all_cli(self) -> tuple[str, ...]:
-        """Generates the CLI to upgrade all packages.
-
-        .. code-block:: shell-session
-
-            $ uv --color never --no-progress tool upgrade --all
-            Updated pycowsay v0.0.0.1 -> v0.0.0.2
-                - pycowsay
-        """
-        return self.build_cli("tool", "upgrade", "--all")
 
     def remove(self, package_id: str) -> str:
         """Remove one package.

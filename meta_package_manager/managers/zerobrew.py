@@ -47,12 +47,12 @@ class ZeroBrew(PackageManager):
 
     homepage_url = "https://github.com/lucasgelfond/zerobrew"
 
-    cli_names = ("zb",)
-
     platforms = LINUX_LIKE, MACOS
 
     requirement = ">=0.2.0"
     """Minimum version required for ``outdated`` and ``--json`` support."""
+
+    cli_names = ("zb",)
 
     cli_search_path = ("/opt/zerobrew/bin",)
     """Default macOS install location."""

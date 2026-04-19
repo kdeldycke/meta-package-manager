@@ -73,6 +73,21 @@ class Pip(PackageManager):
     # default `python` CLI tied to the Python 2.x ecosystem.
     cli_names = ("python3", "python")
 
+    pre_args = (
+        "-m",
+        "pip",  # Canonical call to Python's pip module.
+        "--no-color",  # Suppress colored output.
+    )
+
+    version_cli_options = (*pre_args, "--version")
+    version_regexes = (r"pip\s+(?P<version>\S+)",)
+    """
+    .. code-block:: shell-session
+
+        $ python -m pip --no-color --version
+        pip 2.0.2 from /usr/local/lib/python/site-packages/pip (python 3.7)
+    """
+
     def search_all_cli(
         self,
         cli_names: Iterable[str],
@@ -97,21 +112,6 @@ class Pip(PackageManager):
             # Do not yield the current Python executable twice.
             if current_python and py_path != current_python:
                 yield py_path
-
-    pre_args = (
-        "-m",
-        "pip",  # Canonical call to Python's pip module.
-        "--no-color",  # Suppress colored output.
-    )
-
-    version_cli_options = (*pre_args, "--version")
-    version_regexes = (r"pip\s+(?P<version>\S+)",)
-    """
-    .. code-block:: shell-session
-
-        $ python -m pip --no-color --version
-        pip 2.0.2 from /usr/local/lib/python/site-packages/pip (python 3.7)
-    """
 
     @cached_property
     def version(self) -> TokenizedString | None:

@@ -61,6 +61,12 @@ class SDKMAN(PackageManager):
 
     cli_search_path = (str(Path(_SDKMAN_DIR) / "bin"),)
 
+    extra_env = {  # noqa: RUF012
+        "sdkman_colour_enable": "false",
+        "sdkman_auto_answer": "true",
+    }
+    """Disable ANSI colors and auto-accept interactive prompts."""
+
     version_cli_options = ("version",)
 
     version_regexes = (r"script:\s+(?P<version>\S+)",)
@@ -72,12 +78,6 @@ class SDKMAN(PackageManager):
         script: 5.18.2
         native: 0.4.6
     """
-
-    extra_env = {  # noqa: RUF012
-        "sdkman_colour_enable": "false",
-        "sdkman_auto_answer": "true",
-    }
-    """Disable ANSI colors and auto-accept interactive prompts."""
 
     _INSTALLED_REGEXP = re.compile(
         r"^(?P<package_id>\w[\w-]*):\s+(?P<installed_version>\S+)$",

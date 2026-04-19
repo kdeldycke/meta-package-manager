@@ -10,15 +10,17 @@ Implement support for a new package manager in `mpm`, or complete an incomplete 
 
 ## Completing an incomplete integration
 
-External contributors often submit a working manager module (`managers/<name>.py`, `pool.py`, `conftest.py`) but skip the documentation and metadata files. See [kdeldycke/meta-package-manager#1758](https://github.com/kdeldycke/meta-package-manager/pull/1758) for a typical example.
+External contributors often submit a working manager module (`managers/<name>.py`, `pool.py`, `conftest.py`) but skip the documentation and metadata files. See [kdeldycke/meta-package-manager#1758](https://github.com/kdeldycke/meta-package-manager/pull/1758) for a typical example: the PR added code and tests but was missing 10+ files.
 
 When asked to "integrate further", "fill gaps", or "finish" a manager that already has code:
 
 1. Read the existing manager module to understand supported operations and platforms.
-2. Walk the **file checklist** below and check each file for the manager's presence.
-3. Verify the `requirement` version specifier by researching when the features the code depends on (like `--json` output) were actually introduced upstream. Contributors often default to `>=1.0.0` without checking.
-4. If the manager wraps or complements another (like sfsu wraps Scoop), merge their label rules under a single `📦 manager:` label rather than creating a separate one.
+2. Walk the **file checklist** below and check **every** file for the manager's presence. The most commonly missed files are: `readme.md` (Sankey + operations matrix), `docs/meta_package_manager.managers.md`, `extra-labels/mpm.toml`, `labels.py`, `test_pool.py` (manager count), and `changelog.md`.
+3. Verify the `requirement` version specifier by fetching the upstream release history. Check when the features the code depends on (like `--json` output) were actually introduced. Contributors often default to `>=1.0.0` without checking.
+4. If the manager wraps or complements another (like sfsu wraps Scoop), merge their label rules under a single `📦 manager:` label. Use the `-based` suffix convention for the group name in `labels.py` (like `scoop-based`) to avoid colliding with the manager ID itself.
 5. Fetch the upstream repository (README, releases, changelog) to verify CLI output formats match the parsing code.
+6. Check class attribute ordering against the base class. The `test_content_order` test enforces that class-level attributes and methods follow the canonical order defined in `PackageManager`. Common mistakes: `version_regexes` before `post_args`, or `name` after `homepage_url`.
+7. If the manager delegates operations to another manager's CLI, use the `Delegate` descriptor from `capabilities.py` instead of repeating `override_cli_path` boilerplate. See the **Delegating operations** section below.
 
 ## Choose a template
 
@@ -32,14 +34,19 @@ Pick an existing manager with a similar CLI as your starting point. Read the tem
 | Shell function wrapper       | `sdkman.py`                      | Manager is a shell function, not a standalone binary                                |
 | Sibling binaries             | `nix.py`                         | Different operations use different CLI binaries in the same directory               |
 | Subclass of existing manager | `yay.py`, `paru.py`, `pacaur.py` | Manager is a drop-in replacement or wrapper for another manager already implemented |
+| Delegate to another manager  | `sfsu.py`                        | Manager has its own CLI for read operations but delegates mutating operations (install, upgrade, remove) to another manager's binary |
 
 Subclassing is the lightest option: `yay.py` is only 39 lines because it inherits almost everything from `pacman.py`. If the new manager shares the same CLI interface as an existing one, subclass it and override only what differs.
+
+Delegation via `Delegate` is for managers that share the same package ecosystem but have different CLI interfaces. Unlike subclassing, the read operations (list, search, outdated) have completely different implementations, but mutating operations reuse the other manager's methods verbatim.
 
 Typical manager modules range from 140 to 260 lines. Larger implementations (350-570 lines) tend to involve managers with unusual output formats or many edge cases like `fwupd.py`, `winget.py`, or `pkg.py`.
 
 ## Implementation
 
 Create `meta_package_manager/managers/<name>.py`. Follow the import pattern, class structure, and `TYPE_CHECKING` block from your template exactly.
+
+Class-level attributes and methods must follow the canonical order defined in `PackageManager` (enforced by `test_content_order`). The order is: `homepage_url`, `platforms`, `requirement`, `cli_names`, `cli_search_path`, `extra_env`, `pre_cmds`, `pre_args`, `post_args`, `version_cli_options`, `version_regexes`, then operations (`installed`, `outdated`, `search`, `install`, `upgrade_all_cli`, `upgrade_one_cli`, `remove`, `sync`, `cleanup`).
 
 ### Class attributes
 
@@ -80,6 +87,36 @@ Key helpers from the base class:
 - `self.build_cli(*args)` builds a command tuple without executing it (used by `upgrade_all_cli` and `upgrade_one_cli`).
 - `self.package(id=..., ...)` creates a `Package` with `manager_id` pre-filled.
 - `self.cli_path` resolves to the discovered binary path. Use `.parent` to find sibling binaries for operations that use a different CLI (see `nix.py` for `sync` and `cleanup`).
+
+### Delegating operations to another manager
+
+When a manager uses its own CLI for read operations but delegates mutating operations to another manager's binary, use the `Delegate` descriptor from `capabilities.py`:
+
+```python
+from ..capabilities import Delegate
+from .scoop import Scoop
+
+class SFSU(PackageManager):
+    _scoop = Delegate(Scoop)
+
+    # Read operations use sfsu's own CLI with JSON output.
+    @property
+    def installed(self) -> Iterator[Package]:
+        output = self.run_cli("list", "--json")
+        ...
+
+    # Mutating operations delegate to scoop.
+    install = _scoop.install
+    upgrade_all_cli = _scoop.upgrade_all_cli
+    upgrade_one_cli = _scoop.upgrade_one_cli
+    remove = _scoop.remove
+```
+
+The `Delegate` factory resolves the target manager's CLI binary via `self.which()` and temporarily sets `_delegate_cli_path` on the instance so that `build_cli` routes the command through the target binary. The host manager's `post_args` are automatically suppressed during delegation.
+
+Place `_scoop = Delegate(Scoop)` at the top of the class body (before `homepage_url`). Place individual delegation assignments (`install = _scoop.install`) in the canonical operation order, interspersed with the other operations.
+
+Do **not** subclass when the two managers have completely different output formats for read operations. Subclassing is for managers that share the same CLI interface. Delegation is for managers that share the same package ecosystem but have different CLIs.
 
 ### CLI output guidelines
 
@@ -123,4 +160,10 @@ $ uv run -- pytest tests/test_pool.py tests/test_managers.py -x -q
 $ uv run --group typing mypy meta_package_manager/managers/<name>.py
 ```
 
-The test suite enforces: valid ID format, homepage URL, platform declarations, version regexes, no duplicate IDs, correct pool count, and alphabetical ordering.
+The test suite enforces: valid ID format, homepage URL, platform declarations, version regexes, no duplicate IDs, correct pool count, canonical attribute ordering (`test_content_order`), and label group disjointness.
+
+Common validation failures after adding a manager:
+
+- **`test_manager_count`**: forgot to increment the count in `test_pool.py`.
+- **`test_content_order`**: class attributes are not in the canonical order (like `version_regexes` before `post_args`).
+- **Label group collision**: the group name in `labels.py` collides with a manager ID. Use the `-based` suffix (like `scoop-based`, `pip-based`).

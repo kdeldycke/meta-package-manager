@@ -389,7 +389,7 @@ class CLITableTests:
     @pytest.mark.parametrize(
         "fmt",
         sorted(
-            (f for f in SERIALIZATION_FORMATS if f != TableFormat.JSON),
+            [f for f in SERIALIZATION_FORMATS if f != TableFormat.JSON],
             key=lambda f: f.value,
         ),
         ids=lambda f: f.value,

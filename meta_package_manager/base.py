@@ -827,6 +827,12 @@ class PackageManager(metaclass=MetaPackageManager):
         ``override_pre_cmds`` parameter is not allowed to be set and the
         ``auto_pre_cmds`` parameter is forced to ``False``.
         """
+        # Apply delegation overrides if set by a DelegatedMethod descriptor.
+        delegate_path = getattr(self, "_delegate_cli_path", None)
+        if delegate_path is not None:
+            override_cli_path = override_cli_path or delegate_path
+            auto_post_args = False
+
         params: list[TArg | TNestedArgs] = []
 
         # Sudo replaces any pre-command, be it overridden or automatic.

@@ -520,7 +520,7 @@ def mpm(
     )()
 
     # Override ctx.print_table with the upstream sorted variant.
-    ctx.print_table = partial(  # type: ignore[attr-defined]
+    ctx.print_table = partial(
         print_sorted_table,
         table_format=ctx.meta["click_extra.table_format"],
     )
@@ -533,11 +533,11 @@ for _param in mpm.params:
         break
 
 # Highlight placeholder option names that appear in the help text prose.
-mpm.extra_keywords = HelpKeywords(
+mpm.extra_keywords = HelpKeywords(  # type: ignore[attr-defined]
     long_options={"--<manager-id>", "--no-<manager-id>"},
 )
 # "version" is a --sort-by choice but too common a word in help text.
-mpm.excluded_keywords = HelpKeywords(choices={"version"})
+mpm.excluded_keywords = HelpKeywords(choices={"version"})  # type: ignore[attr-defined]
 
 
 @mpm.command(

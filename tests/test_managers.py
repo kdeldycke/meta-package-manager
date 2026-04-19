@@ -252,7 +252,9 @@ def test_content_order(manager_class):
     collected_props = []
 
     klass_tree = ast.parse(inspect.getsource(manager_class))
-    for node in klass_tree.body:
+    class_node = klass_tree.body[0]
+    assert isinstance(class_node, ast.ClassDef)
+    for node in class_node.body:
         if isinstance(node, ast.Assign):
             collected_props.extend([t.id for t in node.targets])  # type: ignore[attr-defined]
         if isinstance(node, ast.FunctionDef):

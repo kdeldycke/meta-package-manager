@@ -112,4 +112,5 @@ jobs:
           git add --update packaging/meta-package-manager/
           git commit --message "Update Chocolatey package to v$env:VERSION"
           git push --set-upstream origin $branch
-          gh pr create --title "Update Chocolatey package to v$env:VERSION" --body "Update nuspec and packaging files to match Chocolatey push."
+          gh pr create --title "Update Chocolatey package to v$env:VERSION" `
+            --body "Update nuspec and packaging files to match Chocolatey push."

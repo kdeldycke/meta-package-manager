@@ -1,10 +1,10 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 $toolsDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$urlX64 = 'https://github.com/kdeldycke/meta-package-manager/releases/download/v6.2.1/mpm-6.2.1-windows-x64.exe'
-$checksumX64 = '3edbaf472a6a154db6c2f9f33f935737eeead50a8a7159612ebe0ba930d3a47f'
-$urlArm64 = 'https://github.com/kdeldycke/meta-package-manager/releases/download/v6.2.1/mpm-6.2.1-windows-arm64.exe'
-$checksumArm64 = '136d9410d3887b1023e30f9e31f6e3d054d117ebd08cf50d7d8f83f87a3c6b39'
+$urlX64 = 'https://github.com/kdeldycke/meta-package-manager/releases/download/v6.3.0/mpm-6.3.0-windows-x64.exe'
+$checksumX64 = 'B32584E572DDA6302D89BF3F76C85480E39330BF4BE3296EA0412FFD1A72C731'
+$urlArm64 = 'https://github.com/kdeldycke/meta-package-manager/releases/download/v6.3.0/mpm-6.3.0-windows-arm64.exe'
+$checksumArm64 = 'CA800D389DC84EA8A2D66E069B8D6EB65E9DFA9ED47B779E4AFA8FC909CB5521'
 
 if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') {
     $url = $urlArm64

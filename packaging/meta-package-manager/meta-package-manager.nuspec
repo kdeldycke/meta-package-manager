@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>meta-package-manager</id>
-    <version>6.2.1</version>
+    <version>6.3.0</version>
     <title>Meta Package Manager</title>
     <authors>Kevin Deldycke</authors>
     <owners>denim924</owners>
@@ -34,7 +34,7 @@ Full documentation at https://kdeldycke.github.io/meta-package-manager/
     <licenseUrl>https://github.com/kdeldycke/meta-package-manager/blob/main/license</licenseUrl>
     <iconUrl>https://cdn.jsdelivr.net/gh/kdeldycke/meta-package-manager@v6.2.1/docs/assets/icon.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <releaseNotes>https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.2.1</releaseNotes>
+    <releaseNotes>https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.3.0</releaseNotes>
     <copyright>Kevin Deldycke and contributors</copyright>
     <tags>package-manager cli mpm foss oss</tags>
   </metadata>

@@ -144,5 +144,5 @@ class Delegate:
         method = getattr(self.source_class, name)
         if not callable(method):
             msg = f"{self.source_class.__name__}.{name} is not callable."
-            raise AttributeError(msg)
+            raise TypeError(msg)
         return DelegatedMethod(method, self.cli_name)

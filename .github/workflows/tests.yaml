@@ -217,7 +217,9 @@ jobs:
       - name: SFSU - Windows install
         if: runner.os == 'Windows'
         shell: pwsh
-        run: scoop install main/sfsu
+        run: |
+          scoop bucket add extras
+          scoop install sfsu
 
       # WinGet
       - name: WinGet - Windows install

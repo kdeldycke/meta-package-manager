@@ -28,6 +28,7 @@ jobs:
   # https://formulae.brew.sh/formula/meta-package-manager
   # https://github.com/Homebrew/homebrew-core/blob/main/Formula/m/meta-package-manager.rb
   brew:
+    name: "✅ brew (${{ matrix.os }})"
     strategy:
       matrix:
         os:
@@ -47,6 +48,9 @@ jobs:
   # https://community.chocolatey.org/packages/meta-package-manager
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/meta-package-manager
   choco:
+    name: "⁉️ choco (${{ matrix.os }})"
+    # Not yet accepted on Chocolatey community repository.
+    continue-on-error: true
     strategy:
       matrix:
         os:
@@ -65,6 +69,7 @@ jobs:
   # fighting three interactive prompts, download the released binary directly
   # with gh and verify it runs. This validates the same artifact stew would install.
   github-release:
+    name: "✅ github-release (${{ matrix.os }})"
     strategy:
       matrix:
         include:
@@ -100,6 +105,9 @@ jobs:
   # https://search.nixos.org/packages?query=meta-package-manager
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/me/meta-package-manager/package.nix
   nix:
+    name: "⁉️ nix (${{ matrix.os }})"
+    # Not yet accepted in nixpkgs.
+    continue-on-error: true
     strategy:
       matrix:
         os:
@@ -123,41 +131,37 @@ jobs:
 
   # https://aur.archlinux.org/packages/meta-package-manager
   # https://aur.archlinux.org/packages/meta-package-manager-bin
-  pacaur:
+  aur:
+    name: "⁉️ ${{ matrix.helper }}"
     # Container jobs require Docker, which ubuntu-slim does not provide.
     runs-on: ubuntu-24.04
     continue-on-error: true
+    strategy:
+      matrix:
+        include:
+          - helper: pacaur
+            image_tag: yay
+          - helper: paru
+            image_tag: paru
+          - helper: yay
+            image_tag: yay
     container:
-      image: greyltc/archlinux-aur:yay
+      image: greyltc/archlinux-aur:${{ matrix.image_tag }}
     steps:
       - name: Refresh mirrors
         run: |
           pacman-key --init
           pacman --noconfirm -Syu
       - name: Install pacaur
+        if: matrix.helper == 'pacaur'
         run: aur-install pacaur
-      - run: runuser -u ab -- pacaur --noconfirm -S meta-package-manager
-      - run: runuser -u ab -- pacaur --noconfirm -S meta-package-manager-bin
-      - run: mpm --version
-
-  # https://aur.archlinux.org/packages/meta-package-manager
-  # https://aur.archlinux.org/packages/meta-package-manager-bin
-  paru:
-    runs-on: ubuntu-24.04
-    continue-on-error: true
-    container:
-      image: greyltc/archlinux-aur:paru
-    steps:
-      - name: Refresh mirrors
-        run: |
-          pacman-key --init
-          pacman --noconfirm -Syu
-      - run: runuser -u ab -- paru --noconfirm -S meta-package-manager
-      - run: runuser -u ab -- paru --noconfirm -S meta-package-manager-bin
+      - run: runuser -u ab -- ${{ matrix.helper }} --noconfirm -S meta-package-manager
+      - run: runuser -u ab -- ${{ matrix.helper }} --noconfirm -S meta-package-manager-bin
       - run: mpm --version
 
   # https://pip.pypa.io/en/stable/
   pip:
+    name: "✅ pip (${{ matrix.os }})"
     strategy:
       matrix:
         os:
@@ -180,6 +184,7 @@ jobs:
 
   # https://pipx.pypa.io/
   pipx:
+    name: "✅ pipx (${{ matrix.os }})"
     strategy:
       matrix:
         os:
@@ -210,6 +215,7 @@ jobs:
   # https://scoop.sh/#/apps?q=meta-package-manager
   # https://github.com/ScoopInstaller/Main/blob/master/bucket/meta-package-manager.json
   scoop:
+    name: "✅ scoop (${{ matrix.os }})"
     strategy:
       matrix:
         os:
@@ -230,6 +236,7 @@ jobs:
 
   # https://docs.astral.sh/uv/
   uv:
+    name: "✅ uv (${{ matrix.os }})"
     strategy:
       matrix:
         os:
@@ -272,25 +279,10 @@ jobs:
           mpm                  --version
           meta-package-manager --version
 
-  # https://aur.archlinux.org/packages/meta-package-manager
-  # https://aur.archlinux.org/packages/meta-package-manager-bin
-  yay:
-    runs-on: ubuntu-24.04
-    continue-on-error: true
-    container:
-      image: greyltc/archlinux-aur:yay
-    steps:
-      - name: Refresh mirrors
-        run: |
-          pacman-key --init
-          pacman --noconfirm -Syu
-      - run: runuser -u ab -- yay --noconfirm -S meta-package-manager
-      - run: runuser -u ab -- yay --noconfirm -S meta-package-manager-bin
-      - run: mpm --version
-
   # https://github.com/lucasgelfond/zerobrew
   # Known Linux failures: https://github.com/lucasgelfond/zerobrew/issues/336
   zerobrew:
+    name: "⁉️ zerobrew (${{ matrix.os }}, ${{ matrix.asset }})"
     # ZeroBrew has upstream packaging issues on Linux
     # (https://github.com/lucasgelfond/zerobrew/issues/336).
     continue-on-error: true

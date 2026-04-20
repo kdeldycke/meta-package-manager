@@ -26,14 +26,14 @@ When asked to "integrate further", "fill gaps", or "finish" a manager that alrea
 
 Pick an existing manager with a similar CLI as your starting point. Read the template file in full before starting.
 
-| Pattern                      | Example                          | When to use                                                                         |
-| ---------------------------- | -------------------------------- | ----------------------------------------------------------------------------------- |
-| Simple regex parsing         | `snap.py`, `flatpak.py`          | CLI outputs fixed-width or whitespace-delimited text                                |
-| JSON output                  | `npm.py`, `homebrew.py`          | CLI supports `--json` or structured output                                          |
-| Multiple compiled regexes    | `gem.py`, `dnf.py`               | Complex text output requiring several capture patterns                              |
-| Shell function wrapper       | `sdkman.py`                      | Manager is a shell function, not a standalone binary                                |
-| Sibling binaries             | `nix.py`                         | Different operations use different CLI binaries in the same directory               |
-| Subclass of existing manager | `yay.py`, `paru.py`, `pacaur.py` | Manager is a drop-in replacement or wrapper for another manager already implemented |
+| Pattern                      | Example                          | When to use                                                                                                                          |
+| ---------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Simple regex parsing         | `snap.py`, `flatpak.py`          | CLI outputs fixed-width or whitespace-delimited text                                                                                 |
+| JSON output                  | `npm.py`, `homebrew.py`          | CLI supports `--json` or structured output                                                                                           |
+| Multiple compiled regexes    | `gem.py`, `dnf.py`               | Complex text output requiring several capture patterns                                                                               |
+| Shell function wrapper       | `sdkman.py`                      | Manager is a shell function, not a standalone binary                                                                                 |
+| Sibling binaries             | `nix.py`                         | Different operations use different CLI binaries in the same directory                                                                |
+| Subclass of existing manager | `yay.py`, `paru.py`, `pacaur.py` | Manager is a drop-in replacement or wrapper for another manager already implemented                                                  |
 | Delegate to another manager  | `sfsu.py`                        | Manager has its own CLI for read operations but delegates mutating operations (install, upgrade, remove) to another manager's binary |
 
 Subclassing is the lightest option: `yay.py` is only 39 lines because it inherits almost everything from `pacman.py`. If the new manager shares the same CLI interface as an existing one, subclass it and override only what differs.
@@ -96,6 +96,7 @@ When a manager uses its own CLI for read operations but delegates mutating opera
 from ..capabilities import Delegate
 from .scoop import Scoop
 
+
 class SFSU(PackageManager):
     _scoop = Delegate(Scoop)
 
@@ -132,26 +133,26 @@ Every new manager touches the same set of files. This list is derived from all 3
 
 ### Always required
 
-| File                                         | Change                                                                                                             |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `meta_package_manager/managers/<name>.py`    | The new manager implementation.                                                                                    |
-| `meta_package_manager/pool.py`               | Add import (sorted by module name) and class to `manager_classes` tuple (sorted case-insensitively by class name). |
-| `tests/conftest.py`                          | Add `"<manager_id>": "<package_name>"` to `PACKAGE_IDS`. Choose a small, low-impact package for destructive tests. |
-| `tests/test_pool.py`                         | Increment both count assertions in `test_manager_count()`.                                                         |
-| `changelog.md`                               | Add `- [<manager_id>] Add <Name> package manager with <operations> support.` under the current unreleased version. |
-| `readme.md`                                  | Add entry to the Sankey diagram (alphabetical) and a row to the operations matrix with correct platform and operation flags. |
-| `docs/meta_package_manager.managers.md`      | Add `automodule` section for `meta_package_manager.managers.<name>` in alphabetical order.                         |
-| `pyproject.toml`                             | Add manager name (and ecosystem name if different) to `keywords`. Add `"📦 manager: <name>"` entries to both `labels.extra-file-rules` and `labels.extra-content-rules`. If the manager wraps another (like sfsu wraps Scoop), merge into the existing manager's label instead of creating a separate one. |
-| `extra-labels/mpm.toml`                      | Add a `[[profiles.default.labels]]` entry with the label name, color `"bfdadc"`, and description. If the manager belongs to an existing ecosystem group, update that group's description instead of creating a new entry. |
-| `meta_package_manager/labels.py`             | If the manager belongs to an ecosystem group, add it to the appropriate frozenset in `MANAGER_LABEL_GROUPS`. If the manager creates a new group (standalone manager now gaining a wrapper), add a new group entry. |
+| File                                      | Change                                                                                                                                                                                                                                                                                                     |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `meta_package_manager/managers/<name>.py` | The new manager implementation.                                                                                                                                                                                                                                                                            |
+| `meta_package_manager/pool.py`            | Add import (sorted by module name) and class to `manager_classes` tuple (sorted case-insensitively by class name).                                                                                                                                                                                         |
+| `tests/conftest.py`                       | Add `"<manager_id>": "<package_name>"` to `PACKAGE_IDS`. Choose a small, low-impact package for destructive tests.                                                                                                                                                                                         |
+| `tests/test_pool.py`                      | Increment both count assertions in `test_manager_count()`.                                                                                                                                                                                                                                                 |
+| `changelog.md`                            | Add `- [<manager_id>] Add <Name> package manager with <operations> support.` under the current unreleased version.                                                                                                                                                                                         |
+| `readme.md`                               | Add entry to the Sankey diagram (alphabetical) and a row to the operations matrix with correct platform and operation flags.                                                                                                                                                                               |
+| `docs/meta_package_manager.managers.md`   | Add `automodule` section for `meta_package_manager.managers.<name>` in alphabetical order.                                                                                                                                                                                                                 |
+| `pyproject.toml`                          | Add manager name (and ecosystem name if different) to `keywords`. Add `"📦 manager: <name>"` entries to both `labels.extra-file-rules` and `labels.extra-content-rules`. If the manager wraps another (like sfsu wraps Scoop), merge into the existing manager's label instead of creating a separate one. |
+| `extra-labels/mpm.toml`                   | Add a `[[profiles.default.labels]]` entry with the label name, color `"bfdadc"`, and description. If the manager belongs to an existing ecosystem group, update that group's description instead of creating a new entry.                                                                                  |
+| `meta_package_manager/labels.py`          | If the manager belongs to an ecosystem group, add it to the appropriate frozenset in `MANAGER_LABEL_GROUPS`. If the manager creates a new group (standalone manager now gaining a wrapper), add a new group entry.                                                                                         |
 
 ### When applicable
 
-| File                                                        | When                                                                                                                                      | Change                                                                                               |
-| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `.github/workflows/tests.yaml`                              | Manager can be installed on CI runners. Check if it's available via an existing package manager (like Scoop, apt, brew) on the target OS.  | Add an install step in the manager setup section, near related managers.                             |
-| `docs/benchmark.md`                                         | Manager already appears in the comparison table.                                                                                          | Add `✓` in the `mpm` column.                                                                         |
-| `.github/workflows/tests-install.yaml` + `docs/install.md`  | Manager is a *distributor of mpm itself* (like Homebrew, Scoop, Nix, or an AUR helper). Most managers are not.                            | Add a CI job testing `mpm` installation via the new channel, and a matching tab in the install docs. |
+| File                                                       | When                                                                                                                                      | Change                                                                                               |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `.github/workflows/tests.yaml`                             | Manager can be installed on CI runners. Check if it's available via an existing package manager (like Scoop, apt, brew) on the target OS. | Add an install step in the manager setup section, near related managers.                             |
+| `docs/benchmark.md`                                        | Manager already appears in the comparison table.                                                                                          | Add `✓` in the `mpm` column.                                                                         |
+| `.github/workflows/tests-install.yaml` + `docs/install.md` | Manager is a *distributor of mpm itself* (like Homebrew, Scoop, Nix, or an AUR helper). Most managers are not.                            | Add a CI job testing `mpm` installation via the new channel, and a matching tab in the install docs. |
 
 ## Validate
 

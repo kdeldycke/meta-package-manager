@@ -85,6 +85,8 @@ jobs:
           }
       - name: Push
         if: steps.check.outputs.skip != 'true' && steps.choco-check.outputs.exists != 'true'
+        # Will 403 until the package is approved on Chocolatey community repository.
+        continue-on-error: true
         shell: pwsh
         working-directory: packaging/meta-package-manager
         env:

@@ -22,6 +22,9 @@ jobs:
     name: 🍫 Chocolatey
     needs: release
     runs-on: windows-2025
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Check for new release
@@ -64,8 +67,24 @@ jobs:
         shell: pwsh
         working-directory: packaging/meta-package-manager
         run: choco pack --output-directory .
-      - name: Push
+      - name: Check if version exists on Chocolatey
         if: steps.check.outputs.skip != 'true'
+        id: choco-check
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+        run: |
+          $url = "https://community.chocolatey.org/api/v2/package/meta-package-manager/$env:VERSION"
+          $response = Invoke-WebRequest $url -Method Head -SkipHttpErrorCheck
+          if ($response.StatusCode -lt 400) {
+            Write-Host "Version $env:VERSION already exists on Chocolatey."
+            "exists=true" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "Version $env:VERSION not found on Chocolatey."
+            "exists=false" >> $env:GITHUB_OUTPUT
+          }
+      - name: Push
+        if: steps.check.outputs.skip != 'true' && steps.choco-check.outputs.exists != 'true'
         shell: pwsh
         working-directory: packaging/meta-package-manager
         env:
@@ -74,3 +93,23 @@ jobs:
           choco push "meta-package-manager.${env:VERSION}.nupkg"
           --source https://push.chocolatey.org/
           --api-key ${{ secrets.CHOCOLATEY_API_KEY }}
+      - name: Open PR with updated packaging files
+        if: steps.check.outputs.skip != 'true'
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $branch = "choco/v$env:VERSION"
+          $remoteBranch = git ls-remote --heads origin $branch
+          if ($remoteBranch) {
+            Write-Host "Branch $branch already exists. PR was likely already created."
+            exit 0
+          }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b $branch
+          git add --update packaging/meta-package-manager/
+          git commit --message "Update Chocolatey package to v$env:VERSION"
+          git push --set-upstream origin $branch
+          gh pr create --title "Update Chocolatey package to v$env:VERSION" --body "Update nuspec and packaging files to match Chocolatey push."

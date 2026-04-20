@@ -13,6 +13,7 @@
 - [mpm] Extend `--table-format` structured output to TOML, YAML, XML, JSON5, JSONC, and HJSON for all subcommands that produce machine-readable data (`managers`, `installed`, `outdated`, `search`, `locate`).
 - [mpm] Change JSON output indentation from 4 to 2 spaces and stop sorting keys, aligning with click-extra defaults.
 - [mpm] Rename `--output-format` / `-o` back to `--table-format`, aligning with the upstream click-extra default.
+- [mpm] Make Chocolatey release job idempotent: check if version already exists on Chocolatey before pushing, and open a PR to update the nuspec after a successful publish.
 
 ## [`6.3.0` (2026-04-09)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.1...v6.3.0)
 

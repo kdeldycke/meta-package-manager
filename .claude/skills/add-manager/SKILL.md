@@ -96,6 +96,7 @@ When a manager uses its own CLI for read operations but delegates mutating opera
 from ..capabilities import Delegate
 from .scoop import Scoop
 
+
 class SFSU(PackageManager):
     _scoop = Delegate(Scoop)
 

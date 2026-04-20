@@ -109,8 +109,7 @@ class DelegatedMethod:
         def wrapper(*args, **kwargs):
             cli_path = obj.which(cli_name)
             logging.debug(
-                f"Delegating {obj.id}.{self.attr_name} to {cli_name} "
-                f"at {cli_path}.",
+                f"Delegating {obj.id}.{self.attr_name} to {cli_name} at {cli_path}.",
             )
             obj._delegate_cli_path = cli_path  # type: ignore[attr-defined]
             try:

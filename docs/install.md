@@ -156,6 +156,17 @@ Meta Package Manager is [available on Chocolatey](https://community.chocolatey.o
 ```{code-block} pwsh-session
 > choco install meta-package-manager
 ```
+
+:::{tip}
+New releases may take a few days to pass Chocolatey's community review. To install the latest version immediately, you can build and install the package from [the specs maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/meta-package-manager):
+
+```{code-block} pwsh-session
+> git clone https://github.com/kdeldycke/meta-package-manager.git
+> cd meta-package-manager\packaging\meta-package-manager
+> choco pack
+> choco install meta-package-manager --source .
+```
+:::
 ````
 
 ````{tab-item} Nix

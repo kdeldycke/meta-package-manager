@@ -282,21 +282,27 @@ jobs:
   # https://github.com/lucasgelfond/zerobrew
   # Known Linux failures: https://github.com/lucasgelfond/zerobrew/issues/336
   zerobrew:
-    name: "⁉️ zerobrew (${{ matrix.os }}, ${{ matrix.asset }})"
+    name: >-
+      ${{ matrix.state == 'stable' && '✅' || '⁉️' }}
+      zerobrew (${{ matrix.os }}, ${{ matrix.asset }})
     # ZeroBrew has upstream packaging issues on Linux
     # (https://github.com/lucasgelfond/zerobrew/issues/336).
-    continue-on-error: true
+    continue-on-error: ${{ matrix.state == 'unstable' }}
     strategy:
       matrix:
         include:
           - os: ubuntu-24.04-arm
             asset: zb-linux-arm64
+            state: unstable
           - os: ubuntu-slim
             asset: zb-linux-x64
+            state: unstable
           - os: macos-15-intel
             asset: zb-darwin-x64
+            state: stable
           - os: macos-26
             asset: zb-darwin-arm64
+            state: stable
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install ZeroBrew

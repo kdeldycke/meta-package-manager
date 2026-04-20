@@ -133,11 +133,11 @@ jobs:
       - name: Refresh mirrors
         run: |
           pacman-key --init
-          pacman --noconfirm -Sy archlinux-keyring
+          pacman --noconfirm -Syu
       - name: Install pacaur
         run: aur-install pacaur
-      - run: pacaur --noconfirm -S meta-package-manager
-      - run: pacaur --noconfirm -S meta-package-manager-bin
+      - run: runuser -u ab -- pacaur --noconfirm -S meta-package-manager
+      - run: runuser -u ab -- pacaur --noconfirm -S meta-package-manager-bin
       - run: mpm --version
 
   # https://aur.archlinux.org/packages/meta-package-manager
@@ -151,9 +151,9 @@ jobs:
       - name: Refresh mirrors
         run: |
           pacman-key --init
-          pacman --noconfirm -Sy archlinux-keyring
-      - run: paru --noconfirm -S meta-package-manager
-      - run: paru --noconfirm -S meta-package-manager-bin
+          pacman --noconfirm -Syu
+      - run: runuser -u ab -- paru --noconfirm -S meta-package-manager
+      - run: runuser -u ab -- paru --noconfirm -S meta-package-manager-bin
       - run: mpm --version
 
   # https://pip.pypa.io/en/stable/
@@ -283,9 +283,9 @@ jobs:
       - name: Refresh mirrors
         run: |
           pacman-key --init
-          pacman --noconfirm -Sy archlinux-keyring
-      - run: yay --noconfirm -S meta-package-manager
-      - run: yay --noconfirm -S meta-package-manager-bin
+          pacman --noconfirm -Syu
+      - run: runuser -u ab -- yay --noconfirm -S meta-package-manager
+      - run: runuser -u ab -- yay --noconfirm -S meta-package-manager-bin
       - run: mpm --version
 
   # https://github.com/lucasgelfond/zerobrew

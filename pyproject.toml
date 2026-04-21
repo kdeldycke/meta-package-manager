@@ -218,7 +218,6 @@ typing = [
 [tool.uv]
 # Cooldown period.
 exclude-newer = "1 week"
-exclude-newer-package = { click-extra = false }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 

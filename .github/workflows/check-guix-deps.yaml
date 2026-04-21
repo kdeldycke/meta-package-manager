@@ -25,7 +25,8 @@ jobs:
           git clone --depth=50 --branch=mpm-and-dependencies
           https://codeberg.org/tutu967/guix.git /tmp/guix-repo
       - name: Lint all new packages
-        working-directory: /tmp/guix-repo
+        env:
+          GUIX_PACKAGE_PATH: /tmp/guix-repo/gnu/packages
         run: |
           packages=(
             python-bracex
@@ -45,7 +46,7 @@ jobs:
           failed=0
           for pkg in "${packages[@]}"; do
             echo "--- Linting ${pkg} ---"
-            if ./pre-inst-env guix lint "${pkg}" > /tmp/lint-output 2>&1; then
+            if guix lint "${pkg}" > /tmp/lint-output 2>&1; then
               echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
             else
               echo "- ❌ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
@@ -63,7 +64,8 @@ jobs:
           echo "**${failed} failed** out of ${#packages[@]} packages." >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Build all new packages
-        working-directory: /tmp/guix-repo
+        env:
+          GUIX_PACKAGE_PATH: /tmp/guix-repo/gnu/packages
         run: |
           packages=(
             python-bracex
@@ -84,7 +86,7 @@ jobs:
           failed=0
           for pkg in "${packages[@]}"; do
             echo "--- Building ${pkg} ---"
-            if ./pre-inst-env guix build --verbosity=0 "${pkg}" 2>&1 | tail --lines=5; then
+            if guix build --verbosity=0 "${pkg}" 2>&1 | tail --lines=5; then
               echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
             else
               echo "- ❌ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
@@ -96,7 +98,8 @@ jobs:
           echo "**${failed} failed** out of ${#packages[@]} packages." >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Report closure sizes
-        working-directory: /tmp/guix-repo
+        env:
+          GUIX_PACKAGE_PATH: /tmp/guix-repo/gnu/packages
         run: |
           packages=(
             python-bracex
@@ -117,6 +120,6 @@ jobs:
           echo '|---|---|' >> "${GITHUB_STEP_SUMMARY}"
 
           for pkg in "${packages[@]}"; do
-            size=$(./pre-inst-env guix size "${pkg}" 2>/dev/null | tail --lines=1 || echo "n/a")
+            size=$(guix size "${pkg}" 2>/dev/null | tail --lines=1 || echo "n/a")
             echo "| \`${pkg}\` | ${size} |" >> "${GITHUB_STEP_SUMMARY}"
           done

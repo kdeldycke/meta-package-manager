@@ -1,0 +1,87 @@
+---
+name: 🧪 Check Guix dependencies
+"on":
+  workflow_dispatch:
+
+# Temporary workflow to check which mpm dependencies already exist in Guix.
+# Delete after submitting the Guix package upstream.
+
+permissions: {}
+
+jobs:
+
+  check-deps:
+    name: Check Guix package availability
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Clone Guix repository
+        run: git clone --depth=1 https://codeberg.org/guix/guix.git /tmp/guix-repo
+      - name: Check mpm dependencies
+        run: |
+          deps=(
+            python-boltons
+            python-click-extra
+            python-cyclonedx-python-lib
+            python-extra-platforms
+            python-more-itertools
+            python-packageurl-python
+            python-spdx-tools
+            python-tomli-w
+            python-uv-build
+            python-xmltodict
+          )
+
+          echo "## mpm direct dependencies" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+
+          missing=0
+          for dep in "${deps[@]}"; do
+            # Match the exact define-public form followed by whitespace.
+            match=$(grep --recursive --include="*.scm" --perl-regexp \
+              "\(define-public ${dep}\s" /tmp/guix-repo/gnu/packages/ || true)
+            if [ -n "${match}" ]; then
+              file=$(echo "${match}" | head --lines=1 | cut --delimiter=: --fields=1)
+              echo "✅ ${dep} (${file##*/tmp/guix-repo/})"
+              echo "- ✅ \`${dep}\` — found in \`${file##*/tmp/guix-repo/}\`" >> "${GITHUB_STEP_SUMMARY}"
+            else
+              echo "❌ ${dep} — missing"
+              echo "- ❌ \`${dep}\` — **missing**" >> "${GITHUB_STEP_SUMMARY}"
+              missing=$((missing + 1))
+            fi
+          done
+
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "**${missing} missing** out of ${#deps[@]} dependencies." >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Check click-extra transitive dependencies
+        run: |
+          deps=(
+            python-click
+            python-cloup
+            python-deepmerge
+            python-requests
+            python-tabulate
+            python-wcmatch
+          )
+
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "## click-extra transitive dependencies" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+
+          missing=0
+          for dep in "${deps[@]}"; do
+            match=$(grep --recursive --include="*.scm" --perl-regexp \
+              "\(define-public ${dep}\s" /tmp/guix-repo/gnu/packages/ || true)
+            if [ -n "${match}" ]; then
+              file=$(echo "${match}" | head --lines=1 | cut --delimiter=: --fields=1)
+              echo "✅ ${dep} (${file##*/tmp/guix-repo/})"
+              echo "- ✅ \`${dep}\` — found in \`${file##*/tmp/guix-repo/}\`" >> "${GITHUB_STEP_SUMMARY}"
+            else
+              echo "❌ ${dep} — missing"
+              echo "- ❌ \`${dep}\` — **missing**" >> "${GITHUB_STEP_SUMMARY}"
+              missing=$((missing + 1))
+            fi
+          done
+
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "**${missing} missing** out of ${#deps[@]} transitive dependencies." >> "${GITHUB_STEP_SUMMARY}"

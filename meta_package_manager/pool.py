@@ -38,6 +38,7 @@ from .managers.eopkg import EOPKG
 from .managers.flatpak import Flatpak
 from .managers.fwupd import FWUPD
 from .managers.gem import Gem
+from .managers.guix import Guix
 from .managers.homebrew import Brew, Cask
 from .managers.macports import MacPorts
 from .managers.mas import MAS
@@ -88,6 +89,7 @@ manager_classes = (
     Flatpak,
     FWUPD,
     Gem,
+    Guix,
     MacPorts,
     MAS,
     Nix,

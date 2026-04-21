@@ -54,6 +54,11 @@ color = "bfdadc"
 description = "gem"
 
 [[profiles.default.labels]]
+name = "📦 manager: guix"
+color = "bfdadc"
+description = "guix"
+
+[[profiles.default.labels]]
 name = "📦 manager: homebrew"
 color = "bfdadc"
 description = "brew, cask, zerobrew"

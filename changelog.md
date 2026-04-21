@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [guix] Add GNU Guix package manager with `installed`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
 - [macports] Add MacPorts package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
 - [sfsu] Add sfsu (Scoop alternative) package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support. Mutating operations delegate to Scoop via the new `Delegate` descriptor.
 - [mpm] Add `Delegate` descriptor to `capabilities.py` for declarative cross-manager method delegation. A manager can now reuse another manager's operations with `install = _scoop.install` instead of repeating `override_cli_path` boilerplate.

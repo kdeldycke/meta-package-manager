@@ -31,6 +31,8 @@ keywords = [
   "flatpak",
   "fwupd",
   "gem",
+  "gnu guix",
+  "guix",
   "homebrew",
   "mac app store",
   "macos",
@@ -443,6 +445,12 @@ labels.extra-file-rules = """"🔌 bar-plugin":
       - meta_package_manager/managers/gem*
       - tests/*gem*
 
+"📦 manager: guix":
+  - changed-files:
+    - any-glob-to-any-file:
+      - meta_package_manager/managers/guix*
+      - tests/*guix*
+
 "📦 manager: homebrew":
   - changed-files:
     - any-glob-to-any-file:
@@ -626,6 +634,10 @@ labels.extra-content-rules = """"🔌 bar-plugin":
 "📦 manager: gem":
   - "gem"
   - "ruby"
+
+"📦 manager: guix":
+  - "guix"
+  - "gnu guix"
 
 "📦 manager: homebrew":
   - "brew"

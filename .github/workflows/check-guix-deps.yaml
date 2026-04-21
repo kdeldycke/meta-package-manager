@@ -37,8 +37,8 @@ jobs:
           missing=0
           for dep in "${deps[@]}"; do
             # Match the exact define-public form followed by whitespace.
-            match=$(grep --recursive --include="*.scm" --perl-regexp \
-              "\(define-public ${dep}\s" /tmp/guix-repo/gnu/packages/ || true)
+            match=$(grep --recursive --include="*.scm" \
+              "(define-public ${dep}$" /tmp/guix-repo/gnu/packages/ || true)
             if [ -n "${match}" ]; then
               file=$(echo "${match}" | head --lines=1 | cut --delimiter=: --fields=1)
               echo "✅ ${dep} (${file##*/tmp/guix-repo/})"
@@ -70,8 +70,8 @@ jobs:
 
           missing=0
           for dep in "${deps[@]}"; do
-            match=$(grep --recursive --include="*.scm" --perl-regexp \
-              "\(define-public ${dep}\s" /tmp/guix-repo/gnu/packages/ || true)
+            match=$(grep --recursive --include="*.scm" \
+              "(define-public ${dep}$" /tmp/guix-repo/gnu/packages/ || true)
             if [ -n "${match}" ]; then
               file=$(echo "${match}" | head --lines=1 | cut --delimiter=: --fields=1)
               echo "✅ ${dep} (${file##*/tmp/guix-repo/})"

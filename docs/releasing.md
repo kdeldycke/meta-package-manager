@@ -8,6 +8,7 @@ The release process is automated via reusable workflows from [`kdeldycke/repomat
 - Nuitka-compiled standalone binaries for Linux, macOS, and Windows (x64 and ARM64) attached to [GitHub Releases](https://github.com/kdeldycke/meta-package-manager/releases)
 - A [Chocolatey package](https://community.chocolatey.org/packages/meta-package-manager) for Windows
 - A [Guix package definition](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix) for GNU Guix
+- A [Nix package definition](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix) for NixOS/Nix
 
 All release artifacts are signed with [GitHub Artifact Attestations](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds) providing [SLSA v1 provenance](https://slsa.dev/spec/v1.0/).
 
@@ -22,6 +23,12 @@ Chocolatey moderation then validates the package, which includes automated virus
 ## Guix
 
 The Guix package definition is maintained in-tree at `packaging/guix/`. The `guix` job in `release.yaml` runs after the main release, fetches the PyPI sdist SHA256, converts it to Nix-style base32, and updates the `.scm` file. Since Guix packages live on [Codeberg](https://codeberg.org/guix/guix) and require reviewed PRs, the job only opens a PR to this repository with the updated definition, which can then be submitted upstream.
+
+## Nix
+
+The Nix package definition is maintained in-tree at `packaging/nix/` while [NixOS/nixpkgs#506145](https://github.com/NixOS/nixpkgs/pull/506145) is pending review. The `nix` job in `release.yaml` runs after the main release, computes the SRI hash of the GitHub source tarball using `nix-prefetch-url`, and updates `package.nix`. The job opens a PR to this repository with the updated definition, which can then be pushed to the nixpkgs PR branch.
+
+Two dependencies (`click-extra` and `extra-platforms`) are also bundled in `packaging/nix/` since they are not yet in nixpkgs. A `default.nix` wrapper overlays them into the Python package set, and a `flake.nix` provides flake-based access. Once the nixpkgs PR lands, the overlay and bundled dependencies become unnecessary.
 
 ## Antivirus false positives on Windows binaries
 

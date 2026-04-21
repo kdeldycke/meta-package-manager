@@ -102,8 +102,14 @@ jobs:
         run: chmod +x mpm
       - run: ./mpm --version
 
+  # The Guix package definition is maintained locally (packaging/guix/) but has
+  # not been submitted upstream yet. Many Python dependencies also need packaging
+  # in Guix before the definition can build. No CI test until the package is
+  # accepted into a Guix channel.
+
   # https://search.nixos.org/packages?query=meta-package-manager
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/me/meta-package-manager/package.nix
+  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix
   nix:
     name: "⁉️ nix (${{ matrix.os }})"
     # Not yet accepted in nixpkgs.

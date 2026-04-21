@@ -174,3 +174,63 @@ jobs:
           gh pr create \
             --title "Update Guix package definition to v${VERSION}" \
             --body "Update Guix package definition to match the latest PyPI release."
+
+  # Prepare a Nix package definition after the release job. Unlike Homebrew, Scoop,
+  # and AUR, the Nix definition is maintained in this repo (see packaging/nix/) while
+  # NixOS/nixpkgs#506145 is pending review. This job only updates the local definition
+  # and opens a PR.
+  nix:
+    name: ❄️ Nix
+    needs: release
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: cachix/install-nix-action@v31
+      - name: Check for new release
+        id: check
+        run: |
+          latest=$(
+            curl --silent --fail \
+              https://api.github.com/repos/kdeldycke/meta-package-manager/releases/latest \
+            | python3 -c "import json, sys; print(json.load(sys.stdin)['tag_name'].lstrip('v'))"
+          )
+          current=$(
+            grep --only-matching --perl-regexp 'version = "\K[^"]+' \
+              packaging/nix/package.nix \
+            | head --lines=1
+          )
+          if [ "${latest}" = "${current}" ]; then
+            echo "Latest release ${latest} already matches definition. Skipping."
+            echo "skip=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "New release found: ${latest} (definition has ${current})."
+            echo "skip=false" >> "${GITHUB_OUTPUT}"
+            echo "version=${latest}" >> "${GITHUB_OUTPUT}"
+          fi
+      - name: Update package definition to latest release
+        if: steps.check.outputs.skip != 'true'
+        run: python3 packaging/nix/update.py
+      - name: Open PR with updated packaging files
+        if: steps.check.outputs.skip != 'true'
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch="nix/v${VERSION}"
+          remote_branch=$(git ls-remote --heads origin "${branch}")
+          if [ -n "${remote_branch}" ]; then
+            echo "Branch ${branch} already exists. PR was likely already created."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "${branch}"
+          git add --update packaging/nix/
+          git commit --message "Update Nix package definition to v${VERSION}"
+          git push --set-upstream origin "${branch}"
+          gh pr create \
+            --title "Update Nix package definition to v${VERSION}" \
+            --body "Update Nix package definition to match the latest GitHub release."

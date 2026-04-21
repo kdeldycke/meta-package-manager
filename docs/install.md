@@ -158,11 +158,11 @@ Meta Package Manager is [available on Chocolatey](https://community.chocolatey.o
 ```
 
 :::{tip}
-New releases may take a few days to pass Chocolatey's community review. To install the latest version immediately, you can build and install the package from [the specs maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco):
+The Chocolatey package is [pending community review](https://community.chocolatey.org/packages/meta-package-manager). You can help speed up moderation by showing your support on the package page. In the meantime, you can build and install from [the specs maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco):
 
 ```{code-block} pwsh-session
 > git clone https://github.com/kdeldycke/meta-package-manager.git
-> cd meta-package-manager\packaging\meta-package-manager
+> cd meta-package-manager\packaging\choco
 > choco pack
 > choco install meta-package-manager --source .
 ```
@@ -187,6 +187,21 @@ On flake-enabled systems:
 ```{code-block} shell-session
 $ nix run nixpkgs#meta-package-manager -- --version
 ```
+
+:::{tip}
+The nixpkgs package is pending review at [NixOS/nixpkgs#506145](https://github.com/NixOS/nixpkgs/pull/506145). You can help move it forward by showing your support on the pull request. In the meantime, you can build and install from [the definition maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix):
+
+```{code-block} shell-session
+$ git clone https://github.com/kdeldycke/meta-package-manager.git
+$ nix-env -f ./meta-package-manager/packaging/nix -i
+```
+
+On flake-enabled systems:
+
+```{code-block} shell-session
+$ nix run github:kdeldycke/meta-package-manager?dir=packaging/nix -- --version
+```
+:::
 ````
 
 ````{tab-item} Guix

@@ -1,87 +1,119 @@
 ---
-name: 🧪 Check Guix dependencies
+name: 🧪 Validate Guix packages
 "on":
   workflow_dispatch:
 
-# Temporary workflow to check which mpm dependencies already exist in Guix.
-# Delete after submitting the Guix package upstream.
+# Temporary workflow to validate the Guix package definitions submitted at
+# https://codeberg.org/guix/guix/pulls/8047
+# Delete after the PR is merged upstream.
 
 permissions: {}
 
 jobs:
 
-  check-deps:
-    name: Check Guix package availability
+  validate:
+    name: Build and lint Guix packages
     runs-on: ubuntu-24.04
     steps:
-      - name: Clone Guix repository
-        run: git clone --depth=1 https://codeberg.org/guix/guix.git /tmp/guix-repo
-      - name: Check mpm dependencies
+      - name: Install Guix
         run: |
-          deps=(
-            python-boltons
+          sudo apt-get update
+          sudo apt-get install --yes guix
+          sudo guix pull
+      - name: Clone Guix with mpm branch
+        run: >
+          git clone --depth=50 --branch=mpm-and-dependencies
+          https://codeberg.org/tutu967/guix.git /tmp/guix-repo
+      - name: Lint all new packages
+        working-directory: /tmp/guix-repo
+        run: |
+          packages=(
+            python-bracex
             python-click-extra
             python-cyclonedx-python-lib
             python-extra-platforms
-            python-more-itertools
             python-packageurl-python
+            python-py-serializable
             python-spdx-tools
-            python-tomli-w
-            python-uv-build
-            python-xmltodict
-          )
-
-          echo "## mpm direct dependencies" >> "${GITHUB_STEP_SUMMARY}"
-          echo "" >> "${GITHUB_STEP_SUMMARY}"
-
-          missing=0
-          for dep in "${deps[@]}"; do
-            # Match the exact define-public form followed by whitespace.
-            match=$(grep --recursive --include="*.scm" \
-              "(define-public ${dep}$" /tmp/guix-repo/gnu/packages/ || true)
-            if [ -n "${match}" ]; then
-              file=$(echo "${match}" | head --lines=1 | cut --delimiter=: --fields=1)
-              echo "✅ ${dep} (${file##*/tmp/guix-repo/})"
-              echo "- ✅ \`${dep}\` — found in \`${file##*/tmp/guix-repo/}\`" >> "${GITHUB_STEP_SUMMARY}"
-            else
-              echo "❌ ${dep} — missing"
-              echo "- ❌ \`${dep}\` — **missing**" >> "${GITHUB_STEP_SUMMARY}"
-              missing=$((missing + 1))
-            fi
-          done
-
-          echo "" >> "${GITHUB_STEP_SUMMARY}"
-          echo "**${missing} missing** out of ${#deps[@]} dependencies." >> "${GITHUB_STEP_SUMMARY}"
-
-      - name: Check click-extra transitive dependencies
-        run: |
-          deps=(
-            python-click
-            python-cloup
-            python-deepmerge
-            python-requests
-            python-tabulate
             python-wcmatch
+            meta-package-manager
+          )
+
+          echo "## guix lint" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+
+          failed=0
+          for pkg in "${packages[@]}"; do
+            echo "--- Linting ${pkg} ---"
+            if ./pre-inst-env guix lint "${pkg}" 2>&1 | tee /tmp/lint-output; then
+              echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
+            else
+              echo "- ❌ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
+              failed=$((failed + 1))
+            fi
+            echo '```' >> "${GITHUB_STEP_SUMMARY}"
+            cat /tmp/lint-output >> "${GITHUB_STEP_SUMMARY}"
+            echo '```' >> "${GITHUB_STEP_SUMMARY}"
+            echo "" >> "${GITHUB_STEP_SUMMARY}"
+          done
+
+          echo "**${failed} failed** out of ${#packages[@]} packages." >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Build all new packages
+        working-directory: /tmp/guix-repo
+        run: |
+          packages=(
+            python-bracex
+            python-click-extra
+            python-cyclonedx-python-lib
+            python-extra-platforms
+            python-packageurl-python
+            python-py-serializable
+            python-spdx-tools
+            python-wcmatch
+            meta-package-manager
           )
 
           echo "" >> "${GITHUB_STEP_SUMMARY}"
-          echo "## click-extra transitive dependencies" >> "${GITHUB_STEP_SUMMARY}"
+          echo "## guix build" >> "${GITHUB_STEP_SUMMARY}"
           echo "" >> "${GITHUB_STEP_SUMMARY}"
 
-          missing=0
-          for dep in "${deps[@]}"; do
-            match=$(grep --recursive --include="*.scm" \
-              "(define-public ${dep}$" /tmp/guix-repo/gnu/packages/ || true)
-            if [ -n "${match}" ]; then
-              file=$(echo "${match}" | head --lines=1 | cut --delimiter=: --fields=1)
-              echo "✅ ${dep} (${file##*/tmp/guix-repo/})"
-              echo "- ✅ \`${dep}\` — found in \`${file##*/tmp/guix-repo/}\`" >> "${GITHUB_STEP_SUMMARY}"
+          failed=0
+          for pkg in "${packages[@]}"; do
+            echo "--- Building ${pkg} ---"
+            if ./pre-inst-env guix build "${pkg}" 2>&1 | tail --lines=5; then
+              echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
             else
-              echo "❌ ${dep} — missing"
-              echo "- ❌ \`${dep}\` — **missing**" >> "${GITHUB_STEP_SUMMARY}"
-              missing=$((missing + 1))
+              echo "- ❌ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
+              failed=$((failed + 1))
             fi
           done
 
           echo "" >> "${GITHUB_STEP_SUMMARY}"
-          echo "**${missing} missing** out of ${#deps[@]} transitive dependencies." >> "${GITHUB_STEP_SUMMARY}"
+          echo "**${failed} failed** out of ${#packages[@]} packages." >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Report closure sizes
+        working-directory: /tmp/guix-repo
+        run: |
+          packages=(
+            python-bracex
+            python-click-extra
+            python-cyclonedx-python-lib
+            python-extra-platforms
+            python-packageurl-python
+            python-py-serializable
+            python-spdx-tools
+            python-wcmatch
+            meta-package-manager
+          )
+
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "## guix size" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo '| Package | Closure size |' >> "${GITHUB_STEP_SUMMARY}"
+          echo '|---|---|' >> "${GITHUB_STEP_SUMMARY}"
+
+          for pkg in "${packages[@]}"; do
+            size=$(./pre-inst-env guix size "${pkg}" 2>/dev/null | tail --lines=1 || echo "n/a")
+            echo "| \`${pkg}\` | ${size} |" >> "${GITHUB_STEP_SUMMARY}"
+          done

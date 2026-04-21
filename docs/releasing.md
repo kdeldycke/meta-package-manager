@@ -22,7 +22,7 @@ Chocolatey moderation then validates the package, which includes automated virus
 
 ## Guix
 
-The Guix package definition is maintained in-tree at `packaging/guix/`. The `guix` job in `release.yaml` runs after the main release, fetches the PyPI sdist SHA256, converts it to Nix-style base32, and updates the `.scm` file. Since Guix packages live on [Codeberg](https://codeberg.org/guix/guix) and require reviewed PRs, the job only opens a PR to this repository with the updated definition, which can then be submitted upstream.
+The Guix package definition is maintained in-tree at `packaging/guix/`. The `guix` job in `release.yaml` runs after the main release, fetches the PyPI sdist SHA256, converts it to Nix-style base32, and updates the `.scm` file. Since Guix packages live on [Codeberg](https://codeberg.org/guix/guix) and require reviewed PRs, the job only opens a PR to this repository with the updated definition, which can then be pushed to the upstream PR at [guix/guix#8047](https://codeberg.org/guix/guix/pulls/8047).
 
 ## Nix
 

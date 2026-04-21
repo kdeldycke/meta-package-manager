@@ -211,6 +211,10 @@ A Guix package definition is [maintained in the repository](https://github.com/k
 $ git clone https://github.com/kdeldycke/meta-package-manager.git
 $ guix install --load-path=./meta-package-manager/packaging/guix python-meta-package-manager
 ```
+
+:::{tip}
+The Guix package is pending review at [guix/guix#8047](https://codeberg.org/guix/guix/pulls/8047). You can help move it forward by showing your support on the pull request.
+:::
 ````
 
 ````{tab-item} Arch Linux

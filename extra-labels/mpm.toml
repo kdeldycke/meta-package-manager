@@ -59,6 +59,11 @@ color = "bfdadc"
 description = "brew, cask, zerobrew"
 
 [[profiles.default.labels]]
+name = "📦 manager: macports"
+color = "bfdadc"
+description = "macports"
+
+[[profiles.default.labels]]
 name = "📦 manager: mas"
 color = "bfdadc"
 description = "mas"

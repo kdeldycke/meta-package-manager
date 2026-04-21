@@ -39,6 +39,7 @@ from .managers.flatpak import Flatpak
 from .managers.fwupd import FWUPD
 from .managers.gem import Gem
 from .managers.homebrew import Brew, Cask
+from .managers.macports import MacPorts
 from .managers.mas import MAS
 from .managers.nix import Nix
 from .managers.npm import NPM
@@ -87,6 +88,7 @@ manager_classes = (
     Flatpak,
     FWUPD,
     Gem,
+    MacPorts,
     MAS,
     Nix,
     NPM,

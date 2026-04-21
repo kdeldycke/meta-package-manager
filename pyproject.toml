@@ -34,6 +34,7 @@ keywords = [
   "homebrew",
   "mac app store",
   "macos",
+  "macports",
   "mas",
   "meta-package-manager",
   "nix",
@@ -448,6 +449,12 @@ labels.extra-file-rules = """"🔌 bar-plugin":
       - meta_package_manager/managers/homebrew*
       - tests/*homebrew*
 
+"📦 manager: macports":
+  - changed-files:
+    - any-glob-to-any-file:
+      - meta_package_manager/managers/macports*
+      - tests/*macports*
+
 "📦 manager: mas":
   - changed-files:
     - any-glob-to-any-file:
@@ -626,6 +633,10 @@ labels.extra-content-rules = """"🔌 bar-plugin":
   - "homebrew"
   - "tap"
   - "formula"
+
+"📦 manager: macports":
+  - "macports"
+  - "port"
 
 "📦 manager: mas":
   - "mas"

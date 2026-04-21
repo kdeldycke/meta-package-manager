@@ -172,6 +172,7 @@ PACKAGE_IDS = {
     "flatpak": "org.gnome.Dictionary",
     "fwupd": "f95c9218acd12697af946874bfe4239587209232",
     "gem": "markdown",
+    "macports": "wget",
     "mas": "747648890",  # Telegram
     "nix": "hello",
     "npm": "raven",

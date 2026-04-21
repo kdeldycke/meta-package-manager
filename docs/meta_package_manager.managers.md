@@ -126,6 +126,15 @@
    :undoc-members:
 ```
 
+## meta_package_manager.managers.macports module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.macports
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.managers.mas module
 
 ```{eval-rst}

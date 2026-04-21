@@ -129,6 +129,9 @@ class Package:
     """
 
     name: str | None = None
+    """Optional human-readable display name. Falls back to ``id`` in output rendering,
+    so only set this when the manager provides a name that differs from the package ID.
+    """
 
     description: str | None = None
 

@@ -158,7 +158,7 @@ Meta Package Manager is [available on Chocolatey](https://community.chocolatey.o
 ```
 
 :::{tip}
-New releases may take a few days to pass Chocolatey's community review. To install the latest version immediately, you can build and install the package from [the specs maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/meta-package-manager):
+New releases may take a few days to pass Chocolatey's community review. To install the latest version immediately, you can build and install the package from [the specs maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco):
 
 ```{code-block} pwsh-session
 > git clone https://github.com/kdeldycke/meta-package-manager.git
@@ -186,6 +186,15 @@ On flake-enabled systems:
 
 ```{code-block} shell-session
 $ nix run nixpkgs#meta-package-manager -- --version
+```
+````
+
+````{tab-item} Guix
+A Guix package definition is [maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix) and can be installed from a local checkout:
+
+```{code-block} shell-session
+$ git clone https://github.com/kdeldycke/meta-package-manager.git
+$ guix install --load-path=./meta-package-manager/packaging/guix python-meta-package-manager
 ```
 ````
 

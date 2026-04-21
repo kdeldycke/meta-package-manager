@@ -16,7 +16,7 @@ jobs:
       VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
 
   # Publish to Chocolatey after the release job. Unlike Homebrew, Scoop, NixOS, and AUR,
-  # the Chocolatey package is maintained in this repo (see packaging/meta-package-manager/).
+  # the Chocolatey package is maintained in this repo (see packaging/choco/).
   # Requires the CHOCOLATEY_API_KEY secret to be set in the repository settings.
   chocolatey:
     name: 🍫 Chocolatey
@@ -33,7 +33,7 @@ jobs:
         run: |
           $release = Invoke-RestMethod 'https://api.github.com/repos/kdeldycke/meta-package-manager/releases/latest'
           $latest = $release.tag_name.TrimStart('v')
-          [xml]$nuspec = Get-Content packaging/meta-package-manager/meta-package-manager.nuspec
+          [xml]$nuspec = Get-Content packaging/choco/meta-package-manager.nuspec
           $current = $nuspec.package.metadata.version
           if ($latest -eq $current) {
             Write-Host "Latest release $latest already matches nuspec. Skipping."
@@ -50,12 +50,12 @@ jobs:
       - name: Update package to latest release
         if: steps.check.outputs.skip != 'true'
         shell: pwsh
-        working-directory: packaging/meta-package-manager
+        working-directory: packaging/choco
         run: ./update.ps1
       - name: Ensure UTF-8 BOM on PowerShell scripts
         if: steps.check.outputs.skip != 'true'
         shell: pwsh
-        working-directory: packaging/meta-package-manager
+        working-directory: packaging/choco
         run: |
           Get-ChildItem -Path tools -Filter *.ps1 | ForEach-Object {
             $content = Get-Content $_.FullName -Raw
@@ -65,7 +65,7 @@ jobs:
       - name: Pack
         if: steps.check.outputs.skip != 'true'
         shell: pwsh
-        working-directory: packaging/meta-package-manager
+        working-directory: packaging/choco
         run: choco pack --output-directory .
       - name: Check if version exists on Chocolatey
         if: steps.check.outputs.skip != 'true'
@@ -88,7 +88,7 @@ jobs:
         # Will 403 until the package is approved on Chocolatey community repository.
         continue-on-error: true
         shell: pwsh
-        working-directory: packaging/meta-package-manager
+        working-directory: packaging/choco
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
@@ -111,8 +111,66 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b $branch
-          git add --update packaging/meta-package-manager/
+          git add --update packaging/choco/
           git commit --message "Update Chocolatey package to v$env:VERSION"
           git push --set-upstream origin $branch
           gh pr create --title "Update Chocolatey package to v$env:VERSION" `
             --body "Update nuspec and packaging files to match Chocolatey push."
+
+  # Prepare a Guix package definition after the release job. Unlike Homebrew, Scoop,
+  # NixOS, and AUR, the Guix definition is maintained in this repo (see packaging/guix/).
+  # Guix packages live on Codeberg and require reviewed PRs, so this job only updates the
+  # local definition and opens a PR.
+  guix:
+    name: 🐂 Guix
+    needs: release
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Check for new release
+        id: check
+        run: |
+          latest=$(
+            curl --silent --fail \
+              https://api.github.com/repos/kdeldycke/meta-package-manager/releases/latest \
+            | python3 -c "import json, sys; print(json.load(sys.stdin)['tag_name'].lstrip('v'))"
+          )
+          current=$(
+            grep --only-matching --perl-regexp '\(version "\K[^"]+' \
+              packaging/guix/meta-package-manager.scm
+          )
+          if [ "${latest}" = "${current}" ]; then
+            echo "Latest release ${latest} already matches definition. Skipping."
+            echo "skip=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "New release found: ${latest} (definition has ${current})."
+            echo "skip=false" >> "${GITHUB_OUTPUT}"
+            echo "version=${latest}" >> "${GITHUB_OUTPUT}"
+          fi
+      - name: Update package definition to latest release
+        if: steps.check.outputs.skip != 'true'
+        run: python3 packaging/guix/update.py
+      - name: Open PR with updated packaging files
+        if: steps.check.outputs.skip != 'true'
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch="guix/v${VERSION}"
+          remote_branch=$(git ls-remote --heads origin "${branch}")
+          if [ -n "${remote_branch}" ]; then
+            echo "Branch ${branch} already exists. PR was likely already created."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "${branch}"
+          git add --update packaging/guix/
+          git commit --message "Update Guix package definition to v${VERSION}"
+          git push --set-upstream origin "${branch}"
+          gh pr create \
+            --title "Update Guix package definition to v${VERSION}" \
+            --body "Update Guix package definition to match the latest PyPI release."

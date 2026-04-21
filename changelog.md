@@ -16,6 +16,8 @@
 - [mpm] Change JSON output indentation from 4 to 2 spaces and stop sorting keys, aligning with click-extra defaults.
 - [mpm] Rename `--output-format` / `-o` back to `--table-format`, aligning with the upstream click-extra default.
 - [mpm] Make Chocolatey release job idempotent: check if version already exists on Chocolatey before pushing, and open a PR to update the nuspec after a successful publish.
+- [mpm] Add Guix package definition with automated update job on release.
+- [mpm] Reorganize `packaging/` directory into `packaging/choco/` and `packaging/guix/` subdirectories.
 
 ## [`6.3.0` (2026-04-09)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.1...v6.3.0)
 

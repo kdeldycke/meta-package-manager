@@ -7,6 +7,7 @@ The release process is automated via reusable workflows from [`kdeldycke/repomat
 - Python source distributions (`.whl`, `.tar.gz`) uploaded to [PyPI](https://pypi.org/project/meta-package-manager/)
 - Nuitka-compiled standalone binaries for Linux, macOS, and Windows (x64 and ARM64) attached to [GitHub Releases](https://github.com/kdeldycke/meta-package-manager/releases)
 - A [Chocolatey package](https://community.chocolatey.org/packages/meta-package-manager) for Windows
+- A [Guix package definition](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix) for GNU Guix
 
 All release artifacts are signed with [GitHub Artifact Attestations](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds) providing [SLSA v1 provenance](https://slsa.dev/spec/v1.0/).
 
@@ -14,9 +15,13 @@ The release PR must be merged via "Rebase and merge" (never squash). See the `re
 
 ## Chocolatey
 
-The Chocolatey package is maintained in-tree at `packaging/meta-package-manager/`, unlike Homebrew, Scoop, NixOS, and AUR which are maintained externally. The `chocolatey` job in `release.yaml` runs after the main release, downloads the Windows binaries, computes SHA256 checksums, and pushes the `.nupkg` to https://push.chocolatey.org/.
+The Chocolatey package is maintained in-tree at `packaging/choco/`, unlike Homebrew, Scoop, NixOS, and AUR which are maintained externally. The `chocolatey` job in `release.yaml` runs after the main release, downloads the Windows binaries, computes SHA256 checksums, and pushes the `.nupkg` to https://push.chocolatey.org/.
 
 Chocolatey moderation then validates the package, which includes automated virus scanning (see below).
+
+## Guix
+
+The Guix package definition is maintained in-tree at `packaging/guix/`. The `guix` job in `release.yaml` runs after the main release, fetches the PyPI sdist SHA256, converts it to Nix-style base32, and updates the `.scm` file. Since Guix packages live on [Codeberg](https://codeberg.org/guix/guix) and require reviewed PRs, the job only opens a PR to this repository with the updated definition, which can then be submitted upstream.
 
 ## Antivirus false positives on Windows binaries
 

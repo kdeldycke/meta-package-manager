@@ -9,4 +9,4 @@ name: 📚 Docs
 jobs:
 
   docs:
-    uses: kdeldycke/repomatic/.github/workflows/docs.yaml@44d6f69616d5c0c125ce1c35c95b82f4fb6e76e1 # v6.13.0
+    uses: kdeldycke/repomatic/.github/workflows/docs.yaml@f600fefb41f28a11f550f43d8145b96438e46b84 # v6.14.0

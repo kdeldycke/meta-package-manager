@@ -105,9 +105,11 @@ class MacPorts(PackageManager):
         """
         output = self.run_cli("-q", "outdated")
 
-        for package_id, installed_version, latest_version in (
-            self._OUTDATED_REGEXP.findall(output)
-        ):
+        for (
+            package_id,
+            installed_version,
+            latest_version,
+        ) in self._OUTDATED_REGEXP.findall(output):
             yield self.package(
                 id=package_id,
                 installed_version=installed_version,

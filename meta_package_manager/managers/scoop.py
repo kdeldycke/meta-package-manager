@@ -160,7 +160,7 @@ class Scoop(PackageManager):
             Teracopy-np
             yuzu-pineapple EA-2804           EA-2830
         """
-        output = self.run_cli("scoop", "status")
+        output = self.run_cli("status")
 
         for (
             package_id,

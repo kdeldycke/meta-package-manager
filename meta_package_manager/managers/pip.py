@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import importlib.metadata
 import json
 import re
 import sys
@@ -189,6 +190,71 @@ class Pip(PackageManager):
                     installed_version=package["version"],
                 )
 
+    @staticmethod
+    def _own_dependency_names() -> frozenset[str]:
+        """Collect :pep:`503`-normalized names of all packages in
+        ``meta-package-manager``'s dependency tree.
+
+        ``pip list --not-required`` is supposed to filter transitive
+        dependencies, but it relies on ``Requires-Dist`` metadata in each
+        installed distribution to reconstruct the dependency graph. Homebrew's
+        Python formula packaging breaks this assumption: each dependency is
+        declared as an independent ``resource`` block in the formula and
+        ``pip install``-ed individually into the formula's virtualenv. Because
+        each resource is installed in isolation, pip never sees that (for
+        example) ``lxml`` is required by ``jsonschema[format-nongpl]`` which is
+        required by ``cyclonedx-python-lib[validation]`` which is required by
+        ``meta-package-manager``. From pip's perspective every resource looks
+        like a top-level package, so ``--not-required`` lets them through and
+        they all appear as outdated.
+
+        When ``meta-package-manager`` is installed via ``uv`` or ``pip``
+        directly the metadata is intact and ``--not-required`` filters
+        correctly. The tree walk is gated on the ``INSTALLER`` dist-info
+        record: only installations attributed to ``pip`` (which includes
+        Homebrew's internal pip) trigger the walk. Modern installers like
+        ``uv`` write their own installer tag, so the walk is skipped entirely
+        in those environments.
+
+        The walk starts at ``meta-package-manager`` and recursively collects
+        every reachable dependency name via ``importlib.metadata``. If the
+        distribution is not found (running from source without installing),
+        the method returns an empty set and the filter is skipped.
+
+        See :issue:`1767`.
+        """
+        # Only Homebrew-style pip installations break --not-required metadata.
+        # Modern installers (uv, poetry, etc.) preserve Requires-Dist and are
+        # identified by their INSTALLER tag, so we skip the walk for them.
+        try:
+            mpm_dist = importlib.metadata.distribution("meta-package-manager")
+        except importlib.metadata.PackageNotFoundError:
+            return frozenset()
+        installer = (mpm_dist.read_text("INSTALLER") or "").strip().lower()
+        if installer != "pip":
+            return frozenset()
+
+        seen: set[str] = set()
+        queue = ["meta-package-manager"]
+        while queue:
+            raw_name = queue.pop()
+            # PEP 503 normalization: lowercase, collapse separator runs.
+            normalized = re.sub(r"[-_.]+", "-", raw_name).lower()
+            if normalized in seen:
+                continue
+            seen.add(normalized)
+            try:
+                dist = importlib.metadata.distribution(raw_name)
+            except importlib.metadata.PackageNotFoundError:
+                continue
+            for req_str in dist.requires or []:
+                match = re.match(r"[A-Za-z0-9][-A-Za-z0-9_.]*", req_str)
+                if match:
+                    queue.append(match.group())
+        # Keep only dependencies; mpm itself should still appear if outdated.
+        seen.discard("meta-package-manager")
+        return frozenset(seen)
+
     @property
     def outdated(self) -> Iterator[Package]:
         """Fetch outdated packages.
@@ -199,6 +265,13 @@ class Pip(PackageManager):
             restricting results to top-level packages only. Upgrading transitive
             dependencies can break version constraints of their parent packages.
             See :issue:`1214`.
+
+        .. caution::
+
+            Results are additionally filtered against ``meta-package-manager``'s
+            own dependency tree to suppress false positives caused by Homebrew's
+            per-resource installation layout. See
+            :py:meth:`_own_dependency_names` and :issue:`1767`.
 
         .. code-block:: shell-session
 
@@ -268,9 +341,14 @@ class Pip(PackageManager):
         )
 
         if output:
+            own_deps = self._own_dependency_names()
             for package in json.loads(output):
+                pkg_name = package["name"]
+                # Skip packages that belong to mpm's own dependency tree.
+                if re.sub(r"[-_.]+", "-", pkg_name).lower() in own_deps:
+                    continue
                 yield self.package(
-                    id=package["name"],
+                    id=pkg_name,
                     installed_version=package["version"],
                     latest_version=package["latest_version"],
                 )

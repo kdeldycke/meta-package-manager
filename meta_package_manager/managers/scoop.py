@@ -144,7 +144,7 @@ class Scoop(PackageManager):
         for package_id, version in self._LIST_REGEXP.findall(
             self.remove_headers(output)
         ):
-            yield self.package(id=package_id, name=package_id, installed_version=version)
+            yield self.package(id=package_id, installed_version=version)
 
     @property
     def outdated(self) -> Iterator[Package]:
@@ -160,7 +160,7 @@ class Scoop(PackageManager):
             Teracopy-np
             yuzu-pineapple EA-2804           EA-2830
         """
-        output = self.run_cli("scoop", "status")
+        output = self.run_cli("status")
 
         for (
             package_id,
@@ -171,7 +171,6 @@ class Scoop(PackageManager):
         ):
             yield self.package(
                 id=package_id,
-                name=package_id,
                 latest_version=latest_version,
                 installed_version=installed_version,
             )
@@ -208,7 +207,7 @@ class Scoop(PackageManager):
         for package_id, version in self._SEARCH_REGEXP.findall(
             self.remove_headers(output),
         ):
-            yield self.package(id=package_id, name=package_id, latest_version=version)
+            yield self.package(id=package_id, latest_version=version)
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

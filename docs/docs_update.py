@@ -102,7 +102,7 @@ def operation_matrix() -> tuple[str, str]:
         line = [
             f"[`{mid}`]({m.homepage_url})"
             + ("" if not m.deprecated else f" [⚠️]({m.deprecation_url})"),
-            m.requirement or "",
+            (m.requirement or "").replace("<", r"\<"),
         ]
         line.extend(
             p_obj.icon if m.platforms.issuperset(extract_members(p_obj)) else ""

@@ -218,9 +218,9 @@ typing = [
 [tool.uv]
 # Cooldown period.
 exclude-newer = "1 week"
+exclude-newer-package = { lxml = "0 day" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
-exclude-newer-package = { lxml = "0 day" }
 
 [tool.nuitka]
 product-name = "Meta Package Manager"

@@ -19,14 +19,19 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes --quiet guix
-          sudo guix pull --verbosity=0
-      - name: Clone Guix with mpm branch
-        run: >
-          git clone --depth=50 --branch=mpm-and-dependencies
-          https://codeberg.org/tutu967/guix.git /tmp/guix-repo
+
+      - name: Pull Guix from fork channel
+        run: |
+          cat > /tmp/channels.scm << 'CHANNELS'
+          (list
+            (channel
+              (name 'guix)
+              (url "https://codeberg.org/tutu967/guix.git")
+              (branch "mpm-and-dependencies")))
+          CHANNELS
+          sudo guix pull --channels=/tmp/channels.scm --disable-authentication --verbosity=0
+
       - name: Lint all new packages
-        env:
-          GUIX_PACKAGE_PATH: /tmp/guix-repo/gnu/packages
         run: |
           packages=(
             python-bracex
@@ -46,27 +51,30 @@ jobs:
           failed=0
           for pkg in "${packages[@]}"; do
             echo "--- Linting ${pkg} ---"
-            if guix lint "${pkg}" > /tmp/lint-output 2>&1; then
-              echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
-            else
-              echo "- ❌ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
+            lint_output=$(guix lint "${pkg}" 2>&1) || true
+            if [ -n "${lint_output}" ]; then
+              echo "${lint_output}"
+              echo "- ⚠️ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
+              echo '```' >> "${GITHUB_STEP_SUMMARY}"
+              echo "${lint_output}" >> "${GITHUB_STEP_SUMMARY}"
+              echo '```' >> "${GITHUB_STEP_SUMMARY}"
               failed=$((failed + 1))
-            fi
-            # Only include lint output in summary when non-empty.
-            if [ -s /tmp/lint-output ]; then
-              echo '```' >> "${GITHUB_STEP_SUMMARY}"
-              cat /tmp/lint-output >> "${GITHUB_STEP_SUMMARY}"
-              echo '```' >> "${GITHUB_STEP_SUMMARY}"
+            else
+              echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
             fi
             echo "" >> "${GITHUB_STEP_SUMMARY}"
           done
 
           echo "**${failed} failed** out of ${#packages[@]} packages." >> "${GITHUB_STEP_SUMMARY}"
 
+          if [ "${failed}" -gt 0 ]; then
+            exit 1
+          fi
+
       - name: Build all new packages
-        env:
-          GUIX_PACKAGE_PATH: /tmp/guix-repo/gnu/packages
         run: |
+          set -o pipefail
+
           packages=(
             python-bracex
             python-click-extra
@@ -86,7 +94,7 @@ jobs:
           failed=0
           for pkg in "${packages[@]}"; do
             echo "--- Building ${pkg} ---"
-            if guix build --verbosity=0 "${pkg}" 2>&1 | tail --lines=5; then
+            if guix build "${pkg}" 2>&1 | tail --lines=20; then
               echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
             else
               echo "- ❌ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
@@ -97,9 +105,11 @@ jobs:
           echo "" >> "${GITHUB_STEP_SUMMARY}"
           echo "**${failed} failed** out of ${#packages[@]} packages." >> "${GITHUB_STEP_SUMMARY}"
 
+          if [ "${failed}" -gt 0 ]; then
+            exit 1
+          fi
+
       - name: Report closure sizes
-        env:
-          GUIX_PACKAGE_PATH: /tmp/guix-repo/gnu/packages
         run: |
           packages=(
             python-bracex

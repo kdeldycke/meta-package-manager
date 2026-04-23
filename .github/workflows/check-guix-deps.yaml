@@ -29,7 +29,7 @@ jobs:
               (url "https://codeberg.org/tutu967/guix.git")
               (branch "mpm-and-dependencies")))
           CHANNELS
-          sudo guix pull --channels=/tmp/channels.scm --disable-authentication --verbosity=0
+          guix pull --channels=/tmp/channels.scm --disable-authentication --verbosity=0
 
       - name: Lint all new packages
         run: |

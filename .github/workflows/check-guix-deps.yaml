@@ -53,7 +53,7 @@ jobs:
           for pkg in "${packages[@]}"; do
             echo "--- Linting ${pkg} ---"
             lint_output=$(guix lint "${pkg}" 2>&1 \
-              | grep -v -E "^fetching CVE database|scheduled Software Heritage archival") || true
+              | grep -v -E "^fetching CVE database|Software Heritage") || true
             if [ -n "${lint_output}" ]; then
               echo "${lint_output}"
               echo "- ⚠️ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"

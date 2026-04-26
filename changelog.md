@@ -11,9 +11,9 @@
 - [ports] Add FreeBSD ports tree manager with `installed`, `outdated`, `install`, `upgrade`, `upgrade_all`, `remove`, `sync`, and `cleanup` support. Drives `make`-based source builds out of `/usr/ports`, delegates registry queries to `pkg`, and uses `git` for tree updates.
 - [sfsu] Add sfsu (Scoop alternative) package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support. Mutating operations delegate to Scoop.
 - [xbps] Add XBPS (Void Linux) package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
-- [apm, apt, chocolatey, composer, emerge, flatpak, opkg, sdkman, snap, zypper] Add `remove` operation. Closes {issue}`1775`.
-- [apm, npm, pip] Add `cleanup` operation.
-- [gem, winget] Add `sync` operation.
+- [apm,apt,choco,composer,emerge,flatpak,opkg,sdkman,snap,zypper] Add `remove` operation. Closes {issue}`1775`.
+- [apm,npm,pip] Add `cleanup` operation.
+- [gem,winget] Add `sync` operation.
 - [mpm] Add `Delegate` descriptor to `capabilities.py` for declarative cross-manager method delegation.
 - [mpm] Add Python version and platform to `--version` output.
 - [mpm] Add typed `config_schema` to the CLI group for configuration file validation.

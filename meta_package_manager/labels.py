@@ -107,6 +107,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     "npm-based": frozenset({"npm", "yarn", "yarn-berry"}),
     "pacman-based": frozenset({"pacman", "pacaur", "paru", "yay"}),
     "pip-based": frozenset({"pip", "pipx"}),
+    "pkg-based": frozenset({"pkg", "ports"}),
     "scoop-based": frozenset({"scoop", "sfsu"}),
     "uv-based": frozenset({"uv", "uvx"}),
     "vscode-based": frozenset({"vscode", "vscodium"}),

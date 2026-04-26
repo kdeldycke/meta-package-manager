@@ -59,6 +59,7 @@ from .managers.stew import Stew
 from .managers.uv import UV, UVX
 from .managers.vscode import VSCode, VSCodium
 from .managers.winget import WinGet
+from .managers.xbps import XBPS
 from .managers.yarn import YarnBerry, YarnClassic
 from .managers.zerobrew import ZeroBrew
 from .managers.zypper import Zypper
@@ -113,6 +114,7 @@ manager_classes = (
     VSCode,
     VSCodium,
     WinGet,
+    XBPS,
     YarnBerry,
     YarnClassic,
     Yay,

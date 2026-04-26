@@ -114,6 +114,7 @@ Meta Package Manager,uvx,1
 Meta Package Manager,vscode,1
 Meta Package Manager,vscodium,1
 Meta Package Manager,winget,1
+Meta Package Manager,xbps,1
 Meta Package Manager,yarn,1
 Meta Package Manager,yarn-berry,1
 Meta Package Manager,yay,1
@@ -171,6 +172,7 @@ Meta Package Manager,zypper,1
 | [`vscode`](https://code.visualstudio.com)                                               | >=1.60.0         |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |            |          |     ✓     |           |               |    ✓     |        |           |
 | [`vscodium`](https://vscodium.com)                                                      | >=1.60.0         |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |            |          |     ✓     |           |               |    ✓     |        |           |
 | [`winget`](https://github.com/microsoft/winget-cli)                                     | >=1.28.190       |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
+| [`xbps`](https://github.com/void-linux/xbps)                                            | >=0.59           |           |      🐧       |       |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`yarn`](https://yarnpkg.com)                                                           | >=1.20.0,\<2.0.0 |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`yarn-berry`](https://yarnpkg.com)                                                     | >=2.0.0          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |             |            |    ✓     |           |           |               |          |        |     ✓     |
 | [`yay`](https://github.com/Jguer/yay)                                                   | >=11.0.0         |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |

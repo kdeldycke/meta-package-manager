@@ -149,6 +149,11 @@ color = "bfdadc"
 description = "winget"
 
 [[profiles.default.labels]]
+name = "📦 manager: xbps"
+color = "bfdadc"
+description = "xbps"
+
+[[profiles.default.labels]]
 name = "🔌 bar-plugin"
 color = "fef2c0"
 description = "Xbar/SwiftBar plugin code, documentation and features"

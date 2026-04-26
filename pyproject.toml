@@ -75,11 +75,13 @@ keywords = [
   "uv",
   "uvx",
   "visual studio code",
+  "void linux",
   "vscode",
   "vscodium",
   "winget",
   "xbar",
   "xbar-plugin",
+  "xbps",
   "yarn",
   "yarn-berry",
   "yay",
@@ -568,6 +570,12 @@ labels.extra-file-rules = """"🔌 bar-plugin":
       - meta_package_manager/managers/winget*
       - tests/*winget*
 
+"📦 manager: xbps":
+  - changed-files:
+    - any-glob-to-any-file:
+      - meta_package_manager/managers/xbps*
+      - tests/*xbps*
+
 "📦 manager: zerobrew":
   - changed-files:
     - any-glob-to-any-file:
@@ -717,6 +725,11 @@ labels.extra-content-rules = """"🔌 bar-plugin":
 
 "📦 manager: winget":
   - "winget"
+
+"📦 manager: xbps":
+  - "xbps"
+  - "void linux"
+  - "void"
 
 "📦 manager: zerobrew":
   - "zerobrew"

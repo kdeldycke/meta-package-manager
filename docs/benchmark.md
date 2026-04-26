@@ -176,7 +176,7 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | `vundle`                |       |       ✓        |               |              |              |
 | `winget`                |   ✓   |       ✓        |               |              |              |
 | `wsl`                   |       |       ✓        |               |              |              |
-| `xbps`                  |       |                |       ✓       |      ✓       |      ✓       |
+| `xbps`                  |   ✓   |                |       ✓       |      ✓       |      ✓       |
 | `yadm`                  |       |       ✓        |               |              |              |
 | `yarn`                  |   ✓   |       ✓        |               |              |              |
 | `yarn-berry`            |   ✓   |       ✓        |               |              |              |

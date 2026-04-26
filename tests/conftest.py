@@ -195,6 +195,7 @@ PACKAGE_IDS = {
     "vscode": "tamasfe.even-better-toml",
     "vscodium": "tamasfe.even-better-toml",
     "winget": "Microsoft.PowerToys",
+    "xbps": "wget",
     "yarn": "awesome-lint",
     "yarn-berry": "left-pad",
     "pacstall": "neofetch",

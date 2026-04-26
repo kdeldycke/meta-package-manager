@@ -8,11 +8,8 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-04-15T12:45:19.708299898Z"
+exclude-newer = "2026-04-19T17:26:00.882204442Z"
 exclude-newer-span = "P1W"
-
-[options.exclude-newer-package]
-lxml = { timestamp = "2026-04-22T12:45:19.708308544Z", span = "PT0S" }
 
 [[package]]
 name = "accessible-pygments"
@@ -252,7 +249,7 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "7.11.0"
+version = "7.13.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
@@ -265,9 +262,9 @@ dependencies = [
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "wcmatch" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/27/ad/19d0f515efe5acb3ef123633336dac0532d7c83c1dc91931633f57c988d4/click_extra-7.11.0.tar.gz", hash = "sha256:2d0e29bdde869ac906b59fc5b4fb30388a0b7fba7a136c0f6984c51f152d81ef", size = 126049, upload-time = "2026-04-13T21:00:34.87Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fc/3b/61fab1784a949eec5337cfd45ceb12f87d12757d0cffac850b50cafc269e/click_extra-7.13.0.tar.gz", hash = "sha256:52b27d746e8254c93320cc463750f376aea45aa61bd0de9a45412f471e54f63e", size = 138062, upload-time = "2026-04-16T16:09:40.328Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/71/3e/dea5985478609aa07dc86c33f35c500e6e6c608a045df5300899cd51a312/click_extra-7.11.0-py3-none-any.whl", hash = "sha256:beb68eb2d41f287fdd38269aa87b295027605edac17961ff8de60ce3d8746f8d", size = 138046, upload-time = "2026-04-13T21:00:33.516Z" },
+    { url = "https://files.pythonhosted.org/packages/a8/0b/af0f24dfd34ddb2f77c8164ba47b1a8f4a3e6a84ce8d41a414145ca7502d/click_extra-7.13.0-py3-none-any.whl", hash = "sha256:a7abe62dd3c045e4299692e2fe77a274244d46a2b327980b543e45b3dd540e9e", size = 151712, upload-time = "2026-04-16T16:09:38.712Z" },
 ]
 
 [package.optional-dependencies]
@@ -287,7 +284,6 @@ sphinx = [
     { name = "docutils", version = "0.21.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "docutils", version = "0.22.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "pygments" },
-    { name = "pygments-ansi-color" },
     { name = "sphinx", version = "8.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "sphinx", version = "9.0.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
     { name = "sphinx", version = "9.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
@@ -1027,7 +1023,7 @@ docs = [
     { name = "sphinx", version = "9.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "sphinx-autodoc-typehints", version = "3.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "sphinx-autodoc-typehints", version = "3.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
-    { name = "sphinx-autodoc-typehints", version = "3.10.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "sphinx-autodoc-typehints", version = "3.10.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "sphinx-click" },
     { name = "sphinx-copybutton" },
     { name = "sphinx-design", version = "0.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -1241,18 +1237,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz", hash = "sha256:6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f", size = 4955991, upload-time = "2026-03-29T13:29:33.898Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f4/7e/a72dd26f3b0f4f2bf1dd8923c85f7ceb43172af56d63c7383eb62b332364/pygments-2.20.0-py3-none-any.whl", hash = "sha256:81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176", size = 1231151, upload-time = "2026-03-29T13:29:30.038Z" },
-]
-
-[[package]]
-name = "pygments-ansi-color"
-version = "0.3.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pygments" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/50/f9/7f417aaee98a74b4f757f2b72971245181fcf25d824d2e7a190345669eaf/pygments-ansi-color-0.3.0.tar.gz", hash = "sha256:7018954cf5b11d1e734383a1bafab5af613213f246109417fee3f76da26d5431", size = 7317, upload-time = "2023-05-18T22:44:35.792Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/e6/17/8306a0bcd8c88d7761c2e73e831b0be026cd6873ce1f12beb3b4c9a03ffa/pygments_ansi_color-0.3.0-py3-none-any.whl", hash = "sha256:7eb063feaecadad9d4d1fd3474cbfeadf3486b64f760a8f2a00fc25392180aba", size = 10242, upload-time = "2023-05-18T22:44:34.287Z" },
 ]
 
 [[package]]
@@ -1810,7 +1794,7 @@ wheels = [
 
 [[package]]
 name = "sphinx-autodoc-typehints"
-version = "3.10.1"
+version = "3.10.2"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.12'",
@@ -1818,9 +1802,9 @@ resolution-markers = [
 dependencies = [
     { name = "sphinx", version = "9.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/92/71/f9375ce1ef3548c3b1fe42ed0706d8a86a96f34cd04de0507eda05488a9b/sphinx_autodoc_typehints-3.10.1.tar.gz", hash = "sha256:2c750dcab949098eb46e17171abbdf3a19bd2581709efa091b4590da99e68346", size = 73190, upload-time = "2026-04-13T16:05:39.985Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/75/75/9a5695b3d3b848a43cfe91c7d7d3c5ab543eb3bc5c2a12ffaf5003a2a4f6/sphinx_autodoc_typehints-3.10.2.tar.gz", hash = "sha256:34db651eb14343ba16bd9c03e0f5093971f9bbd3cc6b0a1470adecd578940b9c", size = 74241, upload-time = "2026-04-15T22:09:48.87Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/65/f9/eddd31fa106c022645dbd238959844c9db820781fd513754ecadde1e90ef/sphinx_autodoc_typehints-3.10.1-py3-none-any.whl", hash = "sha256:0ac4ee9e1f264517b7e163cf7beabf5a3c55dbd6c6fe25c0b12f3707f3d3eb95", size = 38839, upload-time = "2026-04-13T16:05:38.511Z" },
+    { url = "https://files.pythonhosted.org/packages/bf/0f/f1c2e2592f995d301bc06901fbb2e947cbe4889397a418309710ccc3a1db/sphinx_autodoc_typehints-3.10.2-py3-none-any.whl", hash = "sha256:2d1bcac8f62b8d0d210f6ca44b8e016e314d07cc8c30d0512cf6986a0b042b26", size = 39231, upload-time = "2026-04-15T22:09:47.413Z" },
 ]
 
 [[package]]

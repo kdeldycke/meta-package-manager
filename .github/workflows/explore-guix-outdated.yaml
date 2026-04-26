@@ -1,0 +1,112 @@
+---
+name: 🔬 Explore Guix outdated detection
+"on":
+  workflow_dispatch:
+
+# Temporary workflow to capture the output of various Guix commands so I can
+# design a parser for the missing `outdated` operation in the Guix manager.
+# See: meta_package_manager/managers/guix.py
+# Delete after the parser is implemented.
+
+permissions: {}
+
+jobs:
+
+  explore:
+    name: Capture command outputs
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install Guix
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --quiet guix
+
+      - name: Pull recent channel revision
+        run: >
+          guix pull
+          --disable-authentication
+          --verbosity=0
+
+      - name: Add user-installed binaries to PATH
+        run: echo "$HOME/.config/guix/current/bin" >> "$GITHUB_PATH"
+
+      - name: Show Guix version
+        run: guix --version
+
+      - name: Install a deliberately old version of hello
+        run: >
+          guix time-machine
+          --commit=2023-01-01
+          --disable-authentication
+          --verbosity=0
+          --
+          install hello
+
+      - name: Install another older package
+        run: >
+          guix time-machine
+          --commit=2023-01-01
+          --disable-authentication
+          --verbosity=0
+          --
+          install sed
+
+      - name: List installed packages
+        run: |
+          {
+            echo "## guix package --list-installed"
+            echo
+            echo '```'
+            guix package --list-installed 2>&1 || true
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Dry-run an upgrade (default form)
+        run: |
+          {
+            echo "## guix upgrade --dry-run"
+            echo
+            echo '```'
+            guix upgrade --dry-run 2>&1 || true
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Dry-run via guix package --upgrade
+        run: |
+          {
+            echo "## guix package --upgrade=. --dry-run"
+            echo
+            echo '```'
+            guix package --upgrade=. --dry-run 2>&1 || true
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Dry-run with verbose flag
+        run: |
+          {
+            echo "## guix upgrade --dry-run --verbosity=2"
+            echo
+            echo '```'
+            guix upgrade --dry-run --verbosity=2 2>&1 || true
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Search latest version for one installed package
+        run: |
+          {
+            echo "## guix search ^hello$"
+            echo
+            echo '```'
+            guix search '^hello$' 2>&1 | head --lines=20 || true
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Inspect package metadata via show
+        run: |
+          {
+            echo "## guix show hello"
+            echo
+            echo '```'
+            guix show hello 2>&1 | head --lines=20 || true
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"

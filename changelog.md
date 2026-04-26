@@ -6,14 +6,15 @@
 > This version is **not released yet** and is under active development.
 
 - [apk] Add Alpine Linux's `apk` package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
+- [guix] Add GNU Guix package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
+- [macports] Add MacPorts package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
+- [ports] Add FreeBSD ports tree manager with `installed`, `outdated`, `install`, `upgrade`, `upgrade_all`, `remove`, `sync`, and `cleanup` support. Drives `make`-based source builds out of `/usr/ports`, delegates registry queries to `pkg`, and uses `git` for tree updates.
+- [sfsu] Add sfsu (Scoop alternative) package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support. Mutating operations delegate to Scoop.
+- [xbps] Add XBPS (Void Linux) package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
 - [apm, apt, chocolatey, composer, emerge, flatpak, opkg, sdkman, snap, zypper] Add `remove` operation. Closes {issue}`1775`.
 - [apm, npm, pip] Add `cleanup` operation.
 - [gem, winget] Add `sync` operation.
-- [guix] Add GNU Guix package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
-- [macports] Add MacPorts package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
-- [sfsu] Add sfsu (Scoop alternative) package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support. Mutating operations delegate to Scoop via the new `Delegate` descriptor.
-- [xbps] Add XBPS (Void Linux) package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
-- [mpm] Add `Delegate` descriptor to `capabilities.py` for declarative cross-manager method delegation. A manager can now reuse another manager's operations with `install = _scoop.install` instead of repeating `override_cli_path` boilerplate.
+- [mpm] Add `Delegate` descriptor to `capabilities.py` for declarative cross-manager method delegation.
 - [mpm] Add Python version and platform to `--version` output.
 - [mpm] Add typed `config_schema` to the CLI group for configuration file validation.
 - [mpm] Document `pyproject.toml` auto-discovery for per-project `[tool.mpm]` configuration.
@@ -21,11 +22,10 @@
 - [mpm] Change JSON output indentation from 4 to 2 spaces and stop sorting keys, aligning with click-extra defaults.
 - [mpm] Rename `--output-format` / `-o` back to `--table-format`, aligning with the upstream click-extra default.
 - [mpm] Make Chocolatey release job idempotent: check if version already exists on Chocolatey before pushing, and open a PR to update the nuspec after a successful publish.
-- [mpm] Add Guix package definition with automated update job on release.
-- [mpm] Add Nix package definition with flake support and automated update job on release.
-- [mpm] Reorganize `packaging/` directory into `packaging/choco/`, `packaging/guix/`, and `packaging/nix/` subdirectories.
+- [mpm] Add Guix and Nix package definitions with automated update jobs on release; reorganize `packaging/` directory into `packaging/choco/`, `packaging/guix/`, and `packaging/nix/` subdirectories.
 - [pip] Filter mpm's own dependency tree from `outdated` results to fix false positives in Homebrew-installed environments. Closes {issue}`1767`.
-- [ports] Add FreeBSD ports tree manager with `installed`, `outdated`, `install`, `upgrade`, `upgrade_all`, `remove`, `sync`, and `cleanup` support. Drives `make`-based source builds out of `/usr/ports`, delegates registry queries to `pkg`, and uses `git` for tree updates.
+- [scoop] Fix CLI invocation in `outdated` operation.
+- [winget] Fix `search` crash when no results are returned.
 
 ## [`6.3.0` (2026-04-09)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.1...v6.3.0)
 

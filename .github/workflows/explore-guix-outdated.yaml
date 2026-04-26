@@ -7,6 +7,11 @@ name: 🔬 Explore Guix outdated detection
 # design a parser for the missing `outdated` operation in the Guix manager.
 # See: meta_package_manager/managers/guix.py
 # Delete after the parser is implemented.
+#
+# Strategy to manufacture outdated state: install packages via the stale Ubuntu
+# system Guix first, then run `guix pull` to fetch the current channel. The
+# packages remain pinned to the old derivations until upgraded, so dry-run
+# commands should report them as outdated.
 
 permissions: {}
 
@@ -21,6 +26,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes --quiet guix
 
+      - name: Show stale system Guix version
+        run: guix --version
+
+      - name: Install packages with stale system Guix
+        run: |
+          guix install hello
+          guix install sed
+
       - name: Pull recent channel revision
         run: >
           guix pull
@@ -30,24 +43,8 @@ jobs:
       - name: Add user-installed binaries to PATH
         run: echo "$HOME/.config/guix/current/bin" >> "$GITHUB_PATH"
 
-      - name: Show Guix version
+      - name: Show updated Guix version
         run: guix --version
-
-      - name: Install a deliberately old version of hello
-        run: >
-          guix time-machine
-          --commit=2023-01-01
-          --disable-authentication
-          --
-          install hello
-
-      - name: Install another older package
-        run: >
-          guix time-machine
-          --commit=2023-01-01
-          --disable-authentication
-          --
-          install sed
 
       - name: List installed packages
         run: |

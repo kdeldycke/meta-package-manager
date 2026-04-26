@@ -217,19 +217,24 @@ typing = [
   "types-xmltodict>=1.0.1.20250920",
 ]
 
+[tool.setuptools]
+# Distributors like Guix (https://codeberg.org/guix/guix/pulls/8047) that lack uv-build usually fall back to
+
+# setuptools. Without explicit package discovery configuration, setuptools sees tests/, docs/, packaging/, and other
+
+# top-level directories as packages and fails with "multiple top-level packages discovered" error. uv-build on the
+
+# other hand ignores this section completely (it relies on [tool.uv].build-backend.module-root instead), so this is
+
+# purely a compatibility shim for setuptools-based builds.
+
+packages.find.include = [ "meta_package_manager*" ]
+
 [tool.uv]
 # Cooldown period.
 exclude-newer = "1 week"
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
-
-# Distributors like Guix (https://codeberg.org/guix/guix/pulls/8047) that lack uv-build usually fall back to
-# setuptools. Without explicit package discovery configuration, setuptools sees tests/, docs/, packaging/, and other
-# top-level directories as packages and fails with "multiple top-level packages discovered" error. uv-build on the
-# other hand ignores this section completely (it relies on [tool.uv].build-backend.module-root instead), so this is
-# purely a compatibility shim for setuptools-based builds.
-[tool.setuptools.packages.find]
-include = ["meta_package_manager*"]
 
 [tool.nuitka]
 product-name = "Meta Package Manager"

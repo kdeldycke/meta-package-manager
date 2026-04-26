@@ -9,6 +9,8 @@ version = "6.4.0.dev0"
 description = "🎁 wraps all package managers with a unifying CLI"
 readme = "readme.md"
 keywords = [
+  "alpine linux",
+  "apk",
   "apm",
   "apt",
   "apt-mint",
@@ -384,6 +386,12 @@ labels.extra-file-rules = """"🔌 bar-plugin":
       - meta_package_manager/bar_plugin/*
       - tests/*bar_plugin*
 
+"📦 manager: apk":
+  - changed-files:
+    - any-glob-to-any-file:
+      - meta_package_manager/managers/apk*
+      - tests/*apk*
+
 "📦 manager: apm":
   - changed-files:
     - any-glob-to-any-file:
@@ -592,6 +600,11 @@ labels.extra-content-rules = """"🔌 bar-plugin":
   - "xbar"
   - "swiftbar"
   - "plugin"
+
+"📦 manager: apk":
+  - "apk"
+  - "alpine"
+  - "alpine linux"
 
 "📦 manager: apm":
   - "apm"

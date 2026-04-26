@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [apk] Add Alpine Linux's `apk` package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
 - [apm, apt, chocolatey, composer, emerge, flatpak, opkg, sdkman, snap, zypper] Add `remove` operation. Closes {issue}`1775`.
 - [apm, npm, pip] Add `cleanup` operation.
 - [gem, winget] Add `sync` operation.

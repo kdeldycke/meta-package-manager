@@ -1,4 +1,9 @@
 [[profiles.default.labels]]
+name = "📦 manager: apk"
+color = "bfdadc"
+description = "apk"
+
+[[profiles.default.labels]]
 name = "📦 manager: apm"
 color = "bfdadc"
 description = "apm"

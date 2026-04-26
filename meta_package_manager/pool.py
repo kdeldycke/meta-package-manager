@@ -25,6 +25,7 @@ from click_extra import get_current_context
 from click_extra.colorize import default_theme as theme
 from more_itertools import peekable
 
+from .managers.apk import APK
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
 from .managers.cargo import Cargo
@@ -73,6 +74,7 @@ if TYPE_CHECKING:
 
 
 manager_classes = (
+    APK,
     APM,
     APT,
     APT_Mint,

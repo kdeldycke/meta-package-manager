@@ -73,6 +73,7 @@ config: {"sankey": {"showValues": false, "width": 800, "height": 400}}
 ---
 sankey-beta
 
+Meta Package Manager,apk,1
 Meta Package Manager,apm,1
 Meta Package Manager,apt,1
 Meta Package Manager,apt-mint,1
@@ -131,6 +132,7 @@ Meta Package Manager,zypper,1
 
 | Package manager                                                                         | Version          | BSD[^bsd] | Linux[^linux] | macOS | Unix[^unix] | Windows | `installed` | `outdated` | `search` | `install` | `upgrade` | `upgrade_all` | `remove` | `sync` | `cleanup` |
 | :-------------------------------------------------------------------------------------- | :--------------- | :-------: | :-----------: | :---: | :---------: | :-----: | :---------: | :--------: | :------: | :-------: | :-------: | :-----------: | :------: | :----: | :-------: |
+| [`apk`](https://gitlab.alpinelinux.org/alpine/apk-tools)                                | >=2.10.0         |           |      🐧       |       |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`apm`](https://atom.io/packages) [⚠️](https://github.blog/2022-06-08-sunsetting-atom/) | >=1.0.0          |    🅱️     |      🐧       |  🍎   |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |        |           |
 | [`apt`](https://wiki.debian.org/AptCLI)                                                 | >=1.0.0          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |
 | [`apt-mint`](https://github.com/kdeldycke/meta-package-manager/issues/52)               | >=1.0.0          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |          |   ✓    |     ✓     |

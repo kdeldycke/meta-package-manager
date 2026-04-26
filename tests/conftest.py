@@ -155,6 +155,7 @@ def subcmd():
 
 
 PACKAGE_IDS = {
+    "apk": "wget",
     "apm": "markdown-pdf",
     "apt": "wget",
     "apt-mint": "exiftool",

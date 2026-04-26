@@ -6,6 +6,8 @@
 > This version is **not released yet** and is under active development.
 
 - [apm, apt, chocolatey, composer, emerge, flatpak, opkg, sdkman, snap, zypper] Add `remove` operation. Closes {issue}`1775`.
+- [apm, npm, pip] Add `cleanup` operation.
+- [gem, winget] Add `sync` operation.
 - [guix] Add GNU Guix package manager with `installed`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
 - [macports] Add MacPorts package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
 - [sfsu] Add sfsu (Scoop alternative) package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support. Mutating operations delegate to Scoop via the new `Delegate` descriptor.

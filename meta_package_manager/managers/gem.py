@@ -259,6 +259,15 @@ class Gem(PackageManager):
         """
         return self.run_cli("uninstall", package_id)
 
+    def sync(self) -> None:
+        """Sync package metadata.
+
+        .. code-block:: shell-session
+
+            $ gem sources --update
+        """
+        self.run_cli("sources", "--update")
+
     def cleanup(self) -> None:
         """Removes things we don't need anymore.
 

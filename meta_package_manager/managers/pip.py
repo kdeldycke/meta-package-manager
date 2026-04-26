@@ -454,3 +454,12 @@ class Pip(PackageManager):
             $ python -m pip --no-color uninstall --yes arrow
         """
         return self.run_cli("uninstall", "--yes", package_id)
+
+    def cleanup(self) -> None:
+        """Removes things we don't need anymore.
+
+        .. code-block:: shell-session
+
+            $ python -m pip --no-color cache purge
+        """
+        self.run_cli("cache", "purge")

@@ -482,3 +482,12 @@ class APM(PackageManager):
             $ apm uninstall image-view
         """
         return self.run_cli("uninstall", package_id)
+
+    def cleanup(self) -> None:
+        """Removes things we don't need anymore.
+
+        .. code-block:: shell-session
+
+            $ apm clean
+        """
+        self.run_cli("clean")

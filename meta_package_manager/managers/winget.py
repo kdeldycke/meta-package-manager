@@ -437,3 +437,12 @@ class WinGet(PackageManager):
             Successfully uninstalled
         """
         return self.run_cli("uninstall", "--id", package_id, "--source", "winget")
+
+    def sync(self) -> None:
+        """Sync package metadata from remote sources.
+
+        .. code-block:: pwsh-session
+
+            PS C:\\Users\\kev> winget source update --accept-source-agreements --disable-interactivity
+        """
+        self.run_cli("source", "update")

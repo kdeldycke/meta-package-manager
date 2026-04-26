@@ -333,3 +333,13 @@ class NPM(PackageManager):
                 uninstall raven
         """
         return self.run_cli("uninstall", package_id)
+
+    def cleanup(self) -> None:
+        """Removes things we don't need anymore.
+
+        .. code-block:: shell-session
+
+            $ npm --global --no-progress --no-update-notifier --no-fund --no-audit \
+                cache clean --force
+        """
+        self.run_cli("cache", "clean", "--force")

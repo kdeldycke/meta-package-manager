@@ -57,6 +57,19 @@ class Guix(PackageManager):
     )
     """Match a single recutils field line (``name: value``)."""
 
+    _OUTDATED_REGEXP = re.compile(
+        r"^\s+(?P<package_id>\S+)\s+(?P<installed_version>\S+)\s+→\s+(?P<latest_version>\S+)\s*$",
+        re.MULTILINE,
+    )
+    """Match an upgrade line from ``guix upgrade --dry-run``.
+
+    Sample output::
+
+        The following packages would be upgraded:
+           hello 2.12.1 → 2.12.3
+           sed   4.8 → 4.9
+    """
+
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
@@ -78,6 +91,29 @@ class Guix(PackageManager):
                     id=parts[0],
                     installed_version=parts[1],
                 )
+
+    @property
+    def outdated(self) -> Iterator[Package]:
+        """Fetch outdated packages.
+
+        Relies on ``guix upgrade --dry-run`` which lists every package that
+        would be upgraded without modifying the user profile.
+
+        .. code-block:: shell-session
+
+            $ guix upgrade --dry-run
+            The following packages would be upgraded:
+               hello 2.12.1 → 2.12.3
+               sed   4.8 → 4.9
+        """
+        output = self.run_cli("upgrade", "--dry-run")
+
+        for match in self._OUTDATED_REGEXP.finditer(output):
+            yield self.package(
+                id=match.group("package_id"),
+                installed_version=match.group("installed_version"),
+                latest_version=match.group("latest_version"),
+            )
 
     @search_capabilities(extended_support=False, exact_support=False)
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:

@@ -185,6 +185,7 @@ PACKAGE_IDS = {
     "pip": "pytz",
     "pipx": "pytz",
     "pkg": "dmg2img",
+    "ports": "ftp/curl",
     "scoop": "main/wget",
     "sdkman": "java",
     "sfsu": "main/wget",

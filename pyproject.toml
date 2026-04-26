@@ -60,6 +60,7 @@ keywords = [
   "pkg",
   "plugin",
   "portage",
+  "ports",
   "purl",
   "ruby",
   "ruby-gem",
@@ -529,10 +530,12 @@ labels.extra-file-rules = """"🔌 bar-plugin":
       - meta_package_manager/managers/pip*
       - tests/*pip*
 
-"📦 manager: pkg":
+"📦 manager: pkg-based":
   - changed-files:
     - any-glob-to-any-file:
       - meta_package_manager/managers/pkg*
+      - tests/*pkg*
+      - tests/*ports*
 
 "📦 manager: scoop":
   - changed-files:
@@ -707,8 +710,11 @@ labels.extra-content-rules = """"🔌 bar-plugin":
   - "pip"
   - "pipx"
 
-"📦 manager: pkg":
+"📦 manager: pkg-based":
   - "pkg"
+  - "ports"
+  - "freebsd"
+  - "freebsd ports"
 
 "📦 manager: scoop":
   - "scoop"

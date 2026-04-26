@@ -25,6 +25,7 @@
 - [mpm] Add Nix package definition with flake support and automated update job on release.
 - [mpm] Reorganize `packaging/` directory into `packaging/choco/`, `packaging/guix/`, and `packaging/nix/` subdirectories.
 - [pip] Filter mpm's own dependency tree from `outdated` results to fix false positives in Homebrew-installed environments. Closes {issue}`1767`.
+- [ports] Add FreeBSD ports tree manager with `installed`, `outdated`, `install`, `upgrade`, `upgrade_all`, `remove`, `sync`, and `cleanup` support. Drives `make`-based source builds out of `/usr/ports`, delegates registry queries to `pkg`, and uses `git` for tree updates.
 
 ## [`6.3.0` (2026-04-09)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.1...v6.3.0)
 

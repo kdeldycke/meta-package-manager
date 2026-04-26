@@ -104,9 +104,9 @@ color = "bfdadc"
 description = "pip, pipx"
 
 [[profiles.default.labels]]
-name = "📦 manager: pkg"
+name = "📦 manager: pkg-based"
 color = "bfdadc"
-description = "pkg"
+description = "pkg, ports"
 
 [[profiles.default.labels]]
 name = "📦 manager: rpm-based"

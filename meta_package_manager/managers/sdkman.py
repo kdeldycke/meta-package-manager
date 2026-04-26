@@ -191,6 +191,22 @@ class SDKMAN(PackageManager):
         """
         return self.build_cli("upgrade", package_id)
 
+    def remove(self, package_id: str) -> str:
+        """Remove one package.
+
+        SDKMAN's ``uninstall`` command requires both the candidate and a specific
+        version. The currently installed version is looked up from
+        :py:meth:`installed` and passed to the CLI.
+
+        .. code-block:: shell-session
+
+            $ sdk uninstall java 21.0.4-tem
+        """
+        for pkg in self.installed:
+            if pkg.id == package_id:
+                return self.run_cli("uninstall", package_id, str(pkg.installed_version))
+        raise ValueError(f"{package_id} is not installed")
+
     def sync(self) -> None:
         """Sync package metadata.
 

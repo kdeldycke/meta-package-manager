@@ -278,6 +278,15 @@ class Emerge(PackageManager):
             sudo=True,
         )
 
+    def remove(self, package_id: str) -> str:
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            $ sudo emerge --unmerge --color n --nospinner dev-vcs/git
+        """
+        return self.run_cli("--unmerge", package_id, sudo=True)
+
     def sync(self) -> None:
         """Sync package metadata.
 

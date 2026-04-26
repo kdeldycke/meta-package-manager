@@ -223,6 +223,15 @@ class Composer(PackageManager):
         """
         return self.build_cli("update", package_id)
 
+    def remove(self, package_id: str) -> str:
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            $ composer global remove illuminate/contracts
+        """
+        return self.run_cli("remove", package_id)
+
     def cleanup(self) -> None:
         """Removes things we don't need anymore.
 

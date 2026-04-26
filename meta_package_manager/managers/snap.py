@@ -166,3 +166,12 @@ class Snap(PackageManager):
             $ snap refresh standard-notes --color=never
         """
         return self.build_cli("refresh", package_id)
+
+    def remove(self, package_id: str) -> str:
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            $ snap remove standard-notes --color=never
+        """
+        return self.run_cli("remove", package_id)

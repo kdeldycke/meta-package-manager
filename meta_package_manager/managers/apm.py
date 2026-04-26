@@ -473,3 +473,12 @@ class APM(PackageManager):
             $ apm update --no-confirm image-view
         """
         return self.build_cli("update", "--no-confirm", package_id)
+
+    def remove(self, package_id: str) -> str:
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            $ apm uninstall image-view
+        """
+        return self.run_cli("uninstall", package_id)

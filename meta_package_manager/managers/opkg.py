@@ -177,6 +177,15 @@ class OPKG(PackageManager):
         """
         return self.build_cli("upgrade", package_id)
 
+    def remove(self, package_id: str) -> str:
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            $ opkg remove enigma2-hotplug
+        """
+        return self.run_cli("remove", package_id)
+
     def sync(self) -> None:
         """Sync package metadata.
 

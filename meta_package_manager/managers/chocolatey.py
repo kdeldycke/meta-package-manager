@@ -186,3 +186,12 @@ class Choco(PackageManager):
             > choco upgrade ccleaner --yes --limit-output --no-progress --no-color --retry-count=3
         """
         return self.build_cli("upgrade", package_id, "--yes", "--limit-output")
+
+    def remove(self, package_id: str) -> str:
+        """Remove one package.
+
+        .. code-block:: pwsh-session
+
+            > choco uninstall ccleaner --yes --limit-output
+        """
+        return self.run_cli("uninstall", package_id, "--yes", "--limit-output")

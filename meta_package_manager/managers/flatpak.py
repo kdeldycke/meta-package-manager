@@ -214,6 +214,15 @@ class Flatpak(PackageManager):
         """
         return self.build_cli("update", "--noninteractive", package_id)
 
+    def remove(self, package_id: str) -> str:
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            $ flatpak uninstall --noninteractive org.gnome.Dictionary
+        """
+        return self.run_cli("uninstall", "--noninteractive", package_id)
+
     def cleanup(self) -> None:
         """Removes things we don't need anymore.
 

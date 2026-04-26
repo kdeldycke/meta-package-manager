@@ -297,6 +297,16 @@ class Zypper(PackageManager):
         """
         return self.build_cli("update", package_id, sudo=True)
 
+    def remove(self, package_id: str) -> str:
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            $ sudo zypper --no-color --no-abbrev --non-interactive --no-cd \
+                --no-refresh remove kopete
+        """
+        return self.run_cli("remove", package_id, sudo=True)
+
     def sync(self) -> None:
         """Sync package metadata.
 

@@ -1,6 +1,9 @@
 ---
 name: 🔬 Explore Guix outdated detection
 "on":
+  push:
+    paths:
+      - .github/workflows/explore-guix-outdated.yaml
   workflow_dispatch:
 
 # Temporary workflow to capture the output of various Guix commands so I can

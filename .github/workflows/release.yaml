@@ -86,6 +86,8 @@ jobs:
       - name: Push
         if: steps.check.outputs.skip != 'true' && steps.choco-check.outputs.exists != 'true'
         # Will 403 until the package is approved on Chocolatey community repository.
+        # Approval can stall on VirusTotal false positives from Nuitka-compiled binaries:
+        # see https://github.com/chocolatey/home/issues/395.
         continue-on-error: true
         shell: pwsh
         working-directory: packaging/choco

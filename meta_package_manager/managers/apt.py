@@ -248,6 +248,15 @@ class APT(PackageManager):
             sudo=True,
         )
 
+    def remove(self, package_id: str) -> str:
+        """Remove one package.
+
+        .. code-block:: shell-session
+
+            $ sudo apt --quiet --yes remove git
+        """
+        return self.run_cli("--yes", "remove", package_id, sudo=True)
+
     def sync(self) -> None:
         """Sync package metadata.
 

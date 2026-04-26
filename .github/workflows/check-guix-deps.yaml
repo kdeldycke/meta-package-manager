@@ -48,8 +48,10 @@ jobs:
             meta-package-manager
           )
 
-          echo "## guix lint" >> "${GITHUB_STEP_SUMMARY}"
-          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          {
+            echo "## guix lint"
+            echo ""
+          } >> "${GITHUB_STEP_SUMMARY}"
 
           failed=0
           for pkg in "${packages[@]}"; do
@@ -65,10 +67,12 @@ jobs:
               | sed '/^$/d') || true
             if [ -n "${lint_output}" ]; then
               echo "${lint_output}"
-              echo "- ⚠️ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
-              echo '```' >> "${GITHUB_STEP_SUMMARY}"
-              echo "${lint_output}" >> "${GITHUB_STEP_SUMMARY}"
-              echo '```' >> "${GITHUB_STEP_SUMMARY}"
+              {
+                echo "- ⚠️ \`${pkg}\`"
+                echo '```'
+                echo "${lint_output}"
+                echo '```'
+              } >> "${GITHUB_STEP_SUMMARY}"
               failed=$((failed + 1))
             else
               echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
@@ -99,9 +103,11 @@ jobs:
             meta-package-manager
           )
 
-          echo "" >> "${GITHUB_STEP_SUMMARY}"
-          echo "## guix build" >> "${GITHUB_STEP_SUMMARY}"
-          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          {
+            echo ""
+            echo "## guix build"
+            echo ""
+          } >> "${GITHUB_STEP_SUMMARY}"
 
           failed=0
           for pkg in "${packages[@]}"; do
@@ -136,11 +142,13 @@ jobs:
             meta-package-manager
           )
 
-          echo "" >> "${GITHUB_STEP_SUMMARY}"
-          echo "## guix size" >> "${GITHUB_STEP_SUMMARY}"
-          echo "" >> "${GITHUB_STEP_SUMMARY}"
-          echo '| Package | Closure size |' >> "${GITHUB_STEP_SUMMARY}"
-          echo '|---|---|' >> "${GITHUB_STEP_SUMMARY}"
+          {
+            echo ""
+            echo "## guix size"
+            echo ""
+            echo '| Package | Closure size |'
+            echo '|---|---|'
+          } >> "${GITHUB_STEP_SUMMARY}"
 
           for pkg in "${packages[@]}"; do
             size=$(guix size "${pkg}" 2>/dev/null | tail --lines=1 || echo "n/a")

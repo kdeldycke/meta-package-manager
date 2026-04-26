@@ -12,6 +12,7 @@ import re
 import sys
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 # Nix uses a custom base32 alphabet (missing e, m, o, t, u).
 NIX_BASE32_CHARS = "0123456789abcdfghijklmnpqrsvwxyz"
@@ -44,17 +45,19 @@ def hex_to_nix_base32(hex_str: str) -> str:
     return nix_base32(bytes.fromhex(hex_str))
 
 
-def fetch_json(url: str) -> dict:
+def fetch_json(url: str) -> dict[str, Any]:
     """Fetch JSON from a URL."""
     request = urllib.request.Request(url, headers={"Accept": "application/json"})
     with urllib.request.urlopen(request) as response:
-        return json.loads(response.read())
+        result: dict[str, Any] = json.loads(response.read())
+        return result
 
 
 def get_latest_version() -> str:
     """Get the latest release version from GitHub."""
     data = fetch_json(GITHUB_API)
-    return data["tag_name"].lstrip("v")
+    tag_name: str = data["tag_name"]
+    return tag_name.lstrip("v")
 
 
 def get_sdist_sha256(version: str) -> str:
@@ -62,7 +65,8 @@ def get_sdist_sha256(version: str) -> str:
     data = fetch_json(PYPI_API.format(version=version))
     for url_info in data["urls"]:
         if url_info["packagetype"] == "sdist":
-            return url_info["digests"]["sha256"]
+            sha256: str = url_info["digests"]["sha256"]
+            return sha256
     msg = f"No sdist found on PyPI for version {version}"
     raise RuntimeError(msg)
 

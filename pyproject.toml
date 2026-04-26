@@ -347,6 +347,7 @@ replace = "date-released: {utcnow:%Y-%m-%d}"
 
 [tool.mypy]
 check_untyped_defs = true
+explicit_package_bases = true
 warn_unused_configs = true
 warn_redundant_casts = true
 warn_unused_ignores = true

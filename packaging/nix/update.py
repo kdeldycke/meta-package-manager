@@ -16,6 +16,7 @@ import subprocess
 import sys
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 GITHUB_API = (
     "https://api.github.com/repos/kdeldycke/meta-package-manager/releases/latest"
@@ -27,17 +28,19 @@ GITHUB_TARBALL = (
 PACKAGE_NIX = Path(__file__).parent / "package.nix"
 
 
-def fetch_json(url: str) -> dict:
+def fetch_json(url: str) -> dict[str, Any]:
     """Fetch JSON from a URL."""
     request = urllib.request.Request(url, headers={"Accept": "application/json"})
     with urllib.request.urlopen(request) as response:
-        return json.loads(response.read())
+        result: dict[str, Any] = json.loads(response.read())
+        return result
 
 
 def get_latest_version() -> str:
     """Get the latest release version from GitHub."""
     data = fetch_json(GITHUB_API)
-    return data["tag_name"].lstrip("v")
+    tag_name: str = data["tag_name"]
+    return tag_name.lstrip("v")
 
 
 def get_current_version(nix_path: Path) -> str:

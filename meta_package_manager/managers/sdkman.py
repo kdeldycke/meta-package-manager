@@ -20,6 +20,7 @@ import os
 import re
 import shlex
 from pathlib import Path
+from typing import ClassVar
 
 from click_extra.testing import args_cleanup
 from extra_platforms import LINUX_LIKE, MACOS
@@ -61,7 +62,7 @@ class SDKMAN(PackageManager):
 
     cli_search_path = (str(Path(_SDKMAN_DIR) / "bin"),)
 
-    extra_env = {  # noqa: RUF012
+    extra_env: ClassVar = {
         "sdkman_colour_enable": "false",
         "sdkman_auto_answer": "true",
     }

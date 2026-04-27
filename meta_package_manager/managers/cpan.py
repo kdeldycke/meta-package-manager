@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -58,7 +59,7 @@ class CPAN(PackageManager):
         >(info): /usr/bin/cpan script version 1.676, CPAN.pm version 2.28
     """
 
-    extra_env = {"PERL_MM_USE_DEFAULT": "1"}  # noqa: RUF012
+    extra_env: ClassVar = {"PERL_MM_USE_DEFAULT": "1"}
     """Suppress interactive prompts during install and configuration."""
 
     version_cli_options = ("-v",)

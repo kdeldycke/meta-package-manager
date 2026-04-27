@@ -28,7 +28,7 @@ from enum import Enum
 from functools import cached_property
 from pathlib import Path
 from textwrap import dedent, indent, shorten
-from typing import cast
+from typing import ClassVar, cast
 from unittest.mock import patch
 
 from boltons.iterutils import unique
@@ -320,7 +320,7 @@ class PackageManager(metaclass=MetaPackageManager):
     platforms.
     """
 
-    extra_env: TEnvVars | None = None
+    extra_env: ClassVar[TEnvVars | None] = None
     """Additional environment variables to add to the current context.
 
     Automatically applied on each

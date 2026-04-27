@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import re
+from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE, MACOS
 
@@ -58,7 +59,7 @@ class ZeroBrew(PackageManager):
     """Default macOS install location."""
 
     # Suppress terminal styling from the ``console`` Rust crate.
-    extra_env = {"NO_COLOR": "1"}  # noqa: RUF012
+    extra_env: ClassVar = {"NO_COLOR": "1"}
 
     version_regexes = (r"zb\s+(?P<version>\S+)",)
     """

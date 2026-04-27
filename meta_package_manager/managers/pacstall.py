@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE
 
@@ -45,7 +46,7 @@ class Pacstall(PackageManager):
 
     requirement = ">=6.0.0"
 
-    extra_env = {"NO_COLOR": "1", "DISABLE_PROMPTS": "1"}  # noqa: RUF012
+    extra_env: ClassVar = {"NO_COLOR": "1", "DISABLE_PROMPTS": "1"}
     """Suppress ANSI colors and disable interactive prompts."""
 
     version_regexes = (r"(?P<version>\d+\.\d+\.\d+)",)

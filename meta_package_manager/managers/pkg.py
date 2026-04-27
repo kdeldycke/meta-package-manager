@@ -37,6 +37,7 @@ import json
 import re
 from functools import cached_property
 from pathlib import Path
+from typing import ClassVar
 
 from extra_platforms import FREEBSD
 
@@ -519,7 +520,7 @@ class Ports(PackageManager):
     targets are invoked directly.
     """
 
-    extra_env = {"BATCH": "yes"}
+    extra_env: ClassVar = {"BATCH": "yes"}
     """Force non-interactive builds.
 
     Many ports prompt for build option dialogs by default. ``BATCH=yes``

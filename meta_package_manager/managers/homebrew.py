@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import re
 from operator import methodcaller
+from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE, MACOS
 
@@ -53,7 +54,7 @@ class Homebrew(PackageManager):
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     virtual = True
 
-    extra_env = {  # noqa: RUF012
+    extra_env: ClassVar = {
         # Disable analytics.
         "HOMEBREW_NO_ANALYTICS": "1",
         # Disable configuration hints to reduce verbosity.

@@ -112,12 +112,20 @@ jobs:
           failed=0
           for pkg in "${packages[@]}"; do
             echo "--- Building ${pkg} ---"
-            if guix build "${pkg}" 2>&1 | tail --lines=20; then
+            log=$(mktemp)
+            if guix build "${pkg}" >"${log}" 2>&1; then
+              tail --lines=20 "${log}"
               echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
             else
+              # Show every FAILED line plus the surrounding 200 lines for
+              # diagnosis instead of just the tail.
+              grep -E "^FAILED|^ERROR|short test summary|^=+ .* in [0-9]" "${log}" || true
+              echo "--- last 200 lines ---"
+              tail --lines=200 "${log}"
               echo "- ❌ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
               failed=$((failed + 1))
             fi
+            rm -f "${log}"
           done
 
           echo "" >> "${GITHUB_STEP_SUMMARY}"

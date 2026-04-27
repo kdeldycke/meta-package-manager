@@ -88,7 +88,6 @@ flowchart LR
         accessible_pygments(["`accessible-pygments`"])
         mdit_py_plugins(["`mdit-py-plugins`"])
         packaging(["`packaging`"])
-        pygments_ansi_color(["`pygments-ansi-color`"])
         sphinx_autodoc_typehints{{"`sphinx-autodoc-typehints >=2.4`"}}
         sphinx_basic_ng(["`sphinx-basic-ng`"])
         sphinx_copybutton{{"`sphinx-copybutton >=0.5.2`"}}
@@ -132,7 +131,7 @@ flowchart LR
         types_xmltodict{{"`types-xmltodict >=1.0.1.20250920`"}}
     end
 
-    meta_package_manager ==>|" >=7.7 "| click_extra
+    meta_package_manager ==>|" >=7.11 "| click_extra
     meta_package_manager ==>|" >=0.8.2 "| spdx_tools
     meta_package_manager ==>|" >=11.2 "| cyclonedx_python_lib
     meta_package_manager ==>|" >=6 "| pyyaml
@@ -144,8 +143,8 @@ flowchart LR
     meta_package_manager ==>|" >=1.3 "| backports_strenum
     meta_package_manager ==>|" >=10.8 "| more_itertools
     meta_package_manager ==>|" >=1.1 "| tomli_w
-    sphinx --> pygments
     sphinx --> requests
+    sphinx --> pygments
     sphinx ==> tomli
     sphinx --> docutils
     sphinx --> jinja2
@@ -164,9 +163,9 @@ flowchart LR
     sphinx --> sphinxcontrib_serializinghtml
     click_extra ==> sphinx
     click_extra ==> pytest
-    click_extra --> pygments
     click_extra --> requests
     click_extra --> click_0
+    click_extra --> pygments
     click_extra ==> pyyaml
     click_extra ==> tomli
     click_extra --> docutils
@@ -177,7 +176,6 @@ flowchart LR
     click_extra --> hjson
     click_extra --> json_with_comments
     click_extra --> json5
-    click_extra --> pygments_ansi_color
     click_extra --> tabulate
     click_extra --> wcmatch
     click_extra --> deepmerge
@@ -271,7 +269,6 @@ flowchart LR
     exceptiongroup --> typing_extensions
     mdit_py_plugins --> markdown_it_py
     py_serializable --> defusedxml
-    pygments_ansi_color --> pygments
     sphinx_basic_ng ==> sphinx
     tabulate --> wcwidth
     wcmatch --> bracex
@@ -345,7 +342,6 @@ flowchart LR
     click psutil "https://pypi.org/project/psutil/" _blank
     click py_serializable "https://pypi.org/project/py-serializable/" _blank
     click pygments "https://pypi.org/project/pygments/" _blank
-    click pygments_ansi_color "https://pypi.org/project/pygments-ansi-color/" _blank
     click pyparsing "https://pypi.org/project/pyparsing/" _blank
     click pytest "https://pypi.org/project/pytest/" _blank
     click pytest_cov "https://pypi.org/project/pytest-cov/" _blank

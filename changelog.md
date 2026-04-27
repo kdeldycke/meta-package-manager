@@ -12,6 +12,7 @@
 - [sfsu] Add sfsu (Scoop alternative) package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support. Mutating operations delegate to Scoop.
 - [xbps] Add XBPS (Void Linux) package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
 - [apm,apt,choco,composer,emerge,flatpak,opkg,sdkman,snap,zypper] Add `remove` operation. Closes {issue}`1775`.
+- [composer] Fix `install` operation: use `composer global require` instead of `composer global install`.
 - [apm,npm,pip] Add `cleanup` operation.
 - [gem,winget] Add `sync` operation.
 - [mpm] Add `Delegate` descriptor to `capabilities.py` for declarative cross-manager method delegation.

@@ -194,9 +194,9 @@ class Composer(PackageManager):
 
         .. code-block:: shell-session
 
-            $ composer global install illuminate/contracts
+            $ composer global require illuminate/contracts
         """
-        return self.run_cli("install", package_id)
+        return self.run_cli("require", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:
         """Generates the CLI to upgrade all packages (default) or only the one provided

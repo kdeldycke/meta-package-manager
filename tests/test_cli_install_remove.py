@@ -16,10 +16,10 @@
 
 from __future__ import annotations
 
-import platform
 import re
 
 import pytest
+from extra_platforms import is_linux
 
 from meta_package_manager.pool import pool
 
@@ -117,7 +117,7 @@ class TestInstallRemove(CLISubCommandTests):
         #   error: cannot open Packages index using sqlite - Operation not
         #   permitted (1)
         #   error: cannot open Packages database in /var/lib/rpm
-        if manager_id == "zypper" and platform.system() == "Linux":
+        if manager_id == "zypper" and is_linux():
             pytest.skip("zypper RPM database not accessible on Linux runners.")
 
         for command in ("install", "remove"):

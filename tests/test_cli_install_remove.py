@@ -108,16 +108,17 @@ class TestInstallRemove(CLISubCommandTests):
         if manager_id == "mas":
             pytest.skip("mas timeout on GitHub Actions.")
 
-        # XXX Skip zypper on ARM: the RPM database at /var/lib/rpm is
-        # inaccessible even with sudo on ubuntu-arm CI runners, causing:
+        # XXX Skip zypper on Linux: the RPM database at /var/lib/rpm is
+        # inaccessible even with sudo on ubuntu CI runners (both x86_64 and
+        # aarch64), causing:
         #
         #   error: Unable to open sqlite database /var/lib/rpm/rpmdb.sqlite:
         #   unable to open database file
         #   error: cannot open Packages index using sqlite - Operation not
         #   permitted (1)
         #   error: cannot open Packages database in /var/lib/rpm
-        if manager_id == "zypper" and platform.machine() == "aarch64":
-            pytest.skip("zypper RPM database not accessible on ARM runners.")
+        if manager_id == "zypper" and platform.system() == "Linux":
+            pytest.skip("zypper RPM database not accessible on Linux runners.")
 
         for command in ("install", "remove"):
             result = invoke(f"--{manager_id}", command, package_id)

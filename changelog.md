@@ -27,6 +27,7 @@
 - [pip] Filter mpm's own dependency tree from `outdated` results to fix false positives in Homebrew-installed environments. Closes {issue}`1767`.
 - [scoop] Fix CLI invocation in `outdated` operation.
 - [winget] Fix `search` crash when no results are returned.
+- [zypper] Skip install and remove tests on Linux CI runners: the RPM database at `/var/lib/rpm` is inaccessible on Ubuntu-based runners.
 
 ## [`6.3.0` (2026-04-09)](https://github.com/kdeldycke/meta-package-manager/compare/v6.2.1...v6.3.0)
 

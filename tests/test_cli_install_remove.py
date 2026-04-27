@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import platform
 import re
 
 import pytest
@@ -106,6 +107,17 @@ class TestInstallRemove(CLISubCommandTests):
         # '747648890')' timed out after 500 seconds
         if manager_id == "mas":
             pytest.skip("mas timeout on GitHub Actions.")
+
+        # XXX Skip zypper on ARM: the RPM database at /var/lib/rpm is
+        # inaccessible even with sudo on ubuntu-arm CI runners, causing:
+        #
+        #   error: Unable to open sqlite database /var/lib/rpm/rpmdb.sqlite:
+        #   unable to open database file
+        #   error: cannot open Packages index using sqlite - Operation not
+        #   permitted (1)
+        #   error: cannot open Packages database in /var/lib/rpm
+        if manager_id == "zypper" and platform.machine() == "aarch64":
+            pytest.skip("zypper RPM database not accessible on ARM runners.")
 
         for command in ("install", "remove"):
             result = invoke(f"--{manager_id}", command, package_id)

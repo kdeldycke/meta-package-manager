@@ -58,6 +58,7 @@ jobs:
             echo "--- Linting ${pkg} ---"
             lint_output=$(guix lint "${pkg}" 2>&1 \
               | grep -v -E "^fetching CVE database|Software Heritage" \
+              | grep -v -E "^guix lint: warning: failed to get list of CVE vulnerabilities" \
               | grep -v -E "^guix lint: warning: GitHub rate limit exceeded" \
               | grep -v -E "^hint: You can raise the rate limit" \
               | grep -v -E "^variable to a token obtained from" \

@@ -276,8 +276,6 @@ addopts = [
   # Source: https://github.com/pytest-dev/pytest-xdist/issues/855#issuecomment-1344986156
   "--maxschedchunk=1",
   "--durations=10",
-  "--cov",
-  "--cov-report=term",
   # XXX --run-non-destructiveis not required as this is the default behavior.
   # We would love to add it to the command line to make sure pytest is properly recognizing it and loads our
   # customization from ``./tests/conftest.py``. But because of issue

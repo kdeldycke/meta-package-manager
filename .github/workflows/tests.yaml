@@ -370,6 +370,8 @@ jobs:
         run: >
           uv --no-progress run --frozen --
           pytest --exitfirst
+          --cov
+          --cov-report=term
           --cov-report=xml
           --junitxml=junit.xml
           --override-ini=junit_family=legacy
@@ -382,6 +384,8 @@ jobs:
         run: >
           uv --no-progress run --frozen --
           pytest --exitfirst
+          --cov
+          --cov-report=term
           --cov-report=xml
           --junitxml=junit.xml
           --override-ini=junit_family=legacy
@@ -393,6 +397,8 @@ jobs:
         run: >
           uv --no-progress run --frozen --
           pytest --exitfirst
+          --cov
+          --cov-report=term
           --cov-report=xml
           --junitxml=junit.xml
           --override-ini=junit_family=legacy

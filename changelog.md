@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- Move `--cov` and `--cov-report=term` from `pyproject.toml` `[tool.pytest].addopts` into the CI workflow. Removes `pytest-cov` as an unconditional test-time dependency for downstream packagers.
+
 ## [`6.4.0` (2026-04-27)](https://github.com/kdeldycke/meta-package-manager/compare/v6.3.0...v6.4.0)
 
 - [apk] Add Alpine Linux's `apk` package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.

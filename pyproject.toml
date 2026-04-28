@@ -149,12 +149,6 @@ dependencies = [
   "cyclonedx-python-lib[validation]>=11.2",
   # extra-platforms 10.0.0 drops the distro dependency.
   "extra-platforms>=10",
-  # peekable() (used in pool.py) has been stable since more-itertools 2.6.
-  # 10.6 keeps us aligned with downstream distributions that haven't shipped
-  # 10.8 yet (Guix, Debian stable). Bumped to 10.8 on Python 3.14 since that
-  # is the first version with 3.14 support.
-  "more-itertools>=10.6",
-  "more-itertools>=10.8; python_version>='3.14'",
   # packageurl-python 0.16.0 is the first to support Python 3.13.
   "packageurl-python>=0.16",
   # spdx-tools 0.8.2 is the first version we used to implement SPDX support.

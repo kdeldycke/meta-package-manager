@@ -8,7 +8,7 @@
 - Move `--cov` and `--cov-report=term` from `pyproject.toml` `[tool.pytest].addopts` into the CI workflow. Removes `pytest-cov` as an unconditional test-time dependency for downstream packagers.
 - Move `--numprocesses=auto`, `--dist=loadgroup`, and `--maxschedchunk=1` from `pyproject.toml` `[tool.pytest].addopts` into the CI workflow. Removes `pytest-xdist` as an unconditional test-time dependency for downstream packagers.
 - Loosen `xmltodict` floor from `>=1` to `>=0.12`. The `parse()` API I rely on in `managers/zypper.py` has been stable since 0.12, so the bump to 1.0 was cosmetic and forced downstream packagers to ship a newer release than necessary.
-- Loosen `more-itertools` floor from `>=10.8` to `>=10.6`, with `>=10.8` only on Python 3.14. `peekable` (the only API used) has been stable for years; the 10.8 floor existed solely for Python 3.14 support.
+- [mpm] Drop `more-itertools` dependency. The single `peekable` use site in `pool.py` is replaced with a `next(iterator, None)` empty-check using stdlib only. Removes one transitive dependency for downstream packagers.
 
 ## [`6.4.0` (2026-04-27)](https://github.com/kdeldycke/meta-package-manager/compare/v6.3.0...v6.4.0)
 

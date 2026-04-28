@@ -23,7 +23,6 @@ from functools import cached_property
 from boltons.iterutils import unique
 from click_extra import get_current_context
 from click_extra.colorize import default_theme as theme
-from more_itertools import peekable
 
 from .managers.apk import APK
 from .managers.apm import APM
@@ -301,12 +300,12 @@ class ManagerPool:
 
     def select_managers(self, *args, **kwargs) -> Iterator[PackageManager]:
         """Wraps ``_select_managers()`` to stop CLI execution if no manager are selected."""
-        managers = peekable(self._select_managers(*args, **kwargs))
-        try:
-            managers.peek()
-        except StopIteration:
+        managers = self._select_managers(*args, **kwargs)
+        first = next(managers, None)
+        if first is None:
             logging.critical("No manager selected.")
             get_current_context().exit(2)
+        yield first
         yield from managers
 
 

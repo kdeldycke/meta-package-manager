@@ -12,6 +12,9 @@
 
 ## [`6.4.0` (2026-04-27)](https://github.com/kdeldycke/meta-package-manager/compare/v6.3.0...v6.4.0)
 
+> [!NOTE]
+> `6.4.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/6.4.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.4.0).
+
 - [apk] Add Alpine Linux's `apk` package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
 - [guix] Add GNU Guix package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.
 - [macports] Add MacPorts package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `sync`, and `cleanup` support.

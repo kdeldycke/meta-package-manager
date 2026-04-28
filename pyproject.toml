@@ -149,8 +149,12 @@ dependencies = [
   "cyclonedx-python-lib[validation]>=11.2",
   # extra-platforms 10.0.0 drops the distro dependency.
   "extra-platforms>=10",
-  # more-itertools 10.8.0 is the first to support Python 3.14.
-  "more-itertools>=10.8",
+  # peekable() (used in pool.py) has been stable since more-itertools 2.6.
+  # 10.6 keeps us aligned with downstream distributions that haven't shipped
+  # 10.8 yet (Guix, Debian stable). Bumped to 10.8 on Python 3.14 since that
+  # is the first version with 3.14 support.
+  "more-itertools>=10.6",
+  "more-itertools>=10.8; python_version>='3.14'",
   # packageurl-python 0.16.0 is the first to support Python 3.13.
   "packageurl-python>=0.16",
   # spdx-tools 0.8.2 is the first version we used to implement SPDX support.
@@ -159,8 +163,11 @@ dependencies = [
   "tomli>=2.3; python_version<'3.11'",
   # tomli_w 1.1.0 is the first to remove Python 3.8 support.
   "tomli-w>=1.1",
-  # xmltodict 1.0.0 is just the first major release.
-  "xmltodict>=1",
+  # xmltodict 0.12 stabilized the parse()/unparse() API we rely on in
+  # managers/zypper.py. 1.0.0 was a stability bump with no functional change.
+  # Keeping the floor low avoids forcing downstream packagers (Guix, Debian
+  # stable) to ship a newer xmltodict than they otherwise need.
+  "xmltodict>=0.12",
 ]
 
 # Package referenced above and also featured in [project.optional-dependencies] or [dependency-groups]
@@ -269,12 +276,6 @@ default.extend-ignore-identifiers-re = [
 [tool.pytest]
 # https://docs.pytest.org/en/latest/customize.html#pyproject-toml
 addopts = [
-  "--numprocesses=auto",
-  "--dist=loadgroup",
-  # Limit size of the chunks of consecutive tests that xdist submits to workers.
-  # Setting it to 1 will effectively mean "round-robin distribution".
-  # Source: https://github.com/pytest-dev/pytest-xdist/issues/855#issuecomment-1344986156
-  "--maxschedchunk=1",
   "--durations=10",
   # XXX --run-non-destructiveis not required as this is the default behavior.
   # We would love to add it to the command line to make sure pytest is properly recognizing it and loads our

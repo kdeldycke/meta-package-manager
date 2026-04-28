@@ -113,6 +113,20 @@ $ uv run pytest --numprocesses=0 --skip-non-destructive --run-destructive
 
 Sequential order is recommended as most package managers don't support concurrency.
 
+### Note for downstream packagers
+
+The mpm test suite is integration-oriented and is **not designed to run inside build sandboxes**. Tests invoke real package managers (`apt`, `brew`, `pip`, `npm`, and ~30 others), make network calls, and assume a writable `$HOME`. None of this is reproducible inside a hermetic builder (Guix, Nixpkgs, Debian buildd, RPM mock, etc.).
+
+Distributors should disable the test suite at package-build time:
+
+- **Guix**: `#:tests? #f` (see [`gnu/packages/package-management.scm` in the upstream Guix tree](https://codeberg.org/guix/guix/pulls/8047))
+- **Nixpkgs**: `doCheck = false`
+- **Debian**: `nocheck` in `debian/rules`
+
+The `sanity-check` phase (or its equivalent) is sufficient to validate that the package imports cleanly and its declared dependencies resolve. Functional verification is covered by [the project's own GitHub Actions CI](https://github.com/kdeldycke/meta-package-manager/actions), where the appropriate package managers are pre-installed.
+
+The `--skip-destructive` and `pytest -m "not destructive"` markers exist for *developer* environments where some package managers are present but mutating them would be undesirable. They do not make the suite hermetic.
+
 ### Type checking
 
 ```shell-session

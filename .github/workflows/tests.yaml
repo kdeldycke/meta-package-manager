@@ -375,7 +375,8 @@ jobs:
           --cov-report=xml
           --junitxml=junit.xml
           --override-ini=junit_family=legacy
-          --numprocesses=auto --run-non-destructive --skip-destructive
+          --numprocesses=auto --dist=loadgroup --maxschedchunk=1
+          --run-non-destructive --skip-destructive
           --ignore=./tests/test_bar_plugin.py
 
       # Bar plugin calls way too many external commands to be run in parallel.

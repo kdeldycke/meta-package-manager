@@ -156,7 +156,7 @@ class WinGet(PackageManager):
         assert output.count(table_start) == 1, (
             f"{table_start!r} not unique in:\n{output}"
         )
-        table = output[output.index(table_start):]
+        table = output[output.index(table_start) :]
 
         # Check table format.
         lines = table.splitlines()

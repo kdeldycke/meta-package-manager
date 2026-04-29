@@ -67,6 +67,10 @@ class WinGet(PackageManager):
         v1.28.220
     """
 
+    # Microsoft Store IDs are either 12-char product IDs or 14-char extension
+    # IDs prefixed with ``XP`` (like ``XP99BNH2JZBBQR``).
+    _store_id_re = re.compile(r"^(?:[0-9A-Z]{12}|XP[0-9A-Z]{12})$")
+
     # Header line pattern. The ``(N/M)`` prefix is present only when multiple
     # packages are listed; a single result omits it.
     _header_re = re.compile(
@@ -94,8 +98,11 @@ class WinGet(PackageManager):
             ``Origin Source`` is ``winget``.
         """
         # Split output into per-package blocks on the header line.
+        # The \S anchor after the optional (N/M) prefix prevents the split from
+        # firing on indented upgrade lines like ``  winget [1.2.3]``, which also
+        # end with a bracketed token but are not package headers.
         blocks = re.split(
-            r"(?=^(?:\(\d+/\d+\)\s+)?.+\[[^\]]+\]\s*$)",
+            r"(?=^(?:\(\d+/\d+\)\s+)?\S.+\[[^\]]+\]\s*$)",
             output,
             flags=re.MULTILINE,
         )
@@ -149,14 +156,17 @@ class WinGet(PackageManager):
         assert output.count(table_start) == 1, (
             f"{table_start!r} not unique in:\n{output}"
         )
-        table = output.split(table_start, 1)[1]
+        table = output[output.index(table_start):]
 
         # Check table format.
         lines = table.splitlines()
-        table_width = len(lines[0])
-        assert lines[1] == "-" * table_width, (
+        assert re.match(r"^-+$", lines[1]), (
             f"Table headers not followed by expected separator:\n{table}"
         )
+        # Use the separator line as the authoritative table width; winget may
+        # omit trailing spaces from the header line, making it one character
+        # shorter than the dashes.
+        table_width = len(lines[1])
         assert all(len(line) <= table_width for line in lines[2:]), (
             f"Table lines with different width:\n{table}"
         )
@@ -180,6 +190,18 @@ class WinGet(PackageManager):
 
         for line in lines[2:]:
             yield (line[start:end].strip() for start, end in col_ranges)
+
+    def _build_package(self, name: str, package_id: str, version: str) -> Package:
+        """Build a :class:`Package` from a search result row.
+
+        Microsoft Store packages have their ``latest_version`` set to the
+        ``msstore`` sentinel because their real version cannot be queried via
+        ``winget``. The sentinel is later used by :meth:`search` to push Store
+        results below winget-native ones.
+        """
+        if self._store_id_re.match(package_id):
+            return self.package(id=package_id, name=name, latest_version="msstore")
+        return self.package(id=package_id, name=name, latest_version=version)
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -322,6 +344,8 @@ class WinGet(PackageManager):
             --------------------------------------------
             Codium Alex313031.Codium 1.86.2.24053 winget
         """
+        results: list[Package] = []
+
         # Default search is extended to all metadata: id, name, moniker and tag.
         if extended:
             args = ["search", "--query", query]
@@ -330,7 +354,7 @@ class WinGet(PackageManager):
                 args.append("--exact")
             output = self.run_cli(args)
             for name, package_id, version, _, _ in self._parse_table(output):
-                yield self.package(id=package_id, name=name, latest_version=version)
+                results.append(self._build_package(name, package_id, version))
 
         # For non-extended search, we need to perform 2 queries, one for id and
         # one for name.
@@ -340,7 +364,10 @@ class WinGet(PackageManager):
                     "search", field, query, "--exact" if exact else None
                 )
                 for name, package_id, version, _ in self._parse_table(output):
-                    yield self.package(id=package_id, name=name, latest_version=version)
+                    results.append(self._build_package(name, package_id, version))
+
+        # Yield winget-native packages first, Microsoft Store packages last.
+        yield from sorted(results, key=lambda p: bool(self._store_id_re.match(p.id)))
 
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.

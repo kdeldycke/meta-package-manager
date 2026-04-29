@@ -251,6 +251,14 @@ default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "Jav
 # Skip content between <!-- typos:off --> and <!-- typos:on --> markers.
 default.extend-ignore-re = [ "(?s)<!-- typos:off -->.*?<!-- typos:on -->" ]
 default.extend-ignore-identifiers-re = [
+  # error: `buildd` should be `build`, `builds`
+  #     ╭▸ ./claude.md:118
+  #     │
+  # 118 │ (..) inside a hermetic builder (Guix, Nixpkgs, Debian buildd, RPM mock, etc.).
+  #     ╰╴                                                       ━━━━━━
+  #
+  # `buildd` is the proper name of Debian's autobuilder daemon.
+  "buildd",
   # error: `certifi` should be `certify`, `certifies`, `certified`
   #   ╭▸ ./docs/assets/dependencies.mmd:7:5
   #   │

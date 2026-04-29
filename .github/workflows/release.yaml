@@ -16,7 +16,7 @@ jobs:
       VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
 
   # Publish to Chocolatey after the release job. Unlike Homebrew, Scoop, NixOS, and AUR,
-  # the Chocolatey package is maintained in this repo (see packaging/choco/).
+  # the Chocolatey package is maintained in this repo (see packaging/choco/meta-package-manager/).
   # Requires the CHOCOLATEY_API_KEY secret to be set in the repository settings.
   chocolatey:
     name: 🍫 Chocolatey
@@ -33,7 +33,7 @@ jobs:
         run: |
           $release = Invoke-RestMethod 'https://api.github.com/repos/kdeldycke/meta-package-manager/releases/latest'
           $latest = $release.tag_name.TrimStart('v')
-          [xml]$nuspec = Get-Content packaging/choco/meta-package-manager.nuspec
+          [xml]$nuspec = Get-Content packaging/choco/meta-package-manager/meta-package-manager.nuspec
           $current = $nuspec.package.metadata.version
           if ($latest -eq $current) {
             Write-Host "Latest release $latest already matches nuspec. Skipping."
@@ -50,12 +50,12 @@ jobs:
       - name: Update package to latest release
         if: steps.check.outputs.skip != 'true'
         shell: pwsh
-        working-directory: packaging/choco
+        working-directory: packaging/choco/meta-package-manager
         run: ./update.ps1
       - name: Ensure UTF-8 BOM on PowerShell scripts
         if: steps.check.outputs.skip != 'true'
         shell: pwsh
-        working-directory: packaging/choco
+        working-directory: packaging/choco/meta-package-manager
         run: |
           Get-ChildItem -Path tools -Filter *.ps1 | ForEach-Object {
             $content = Get-Content $_.FullName -Raw
@@ -65,7 +65,7 @@ jobs:
       - name: Pack
         if: steps.check.outputs.skip != 'true'
         shell: pwsh
-        working-directory: packaging/choco
+        working-directory: packaging/choco/meta-package-manager
         run: choco pack --output-directory .
       - name: Check if version exists on Chocolatey
         if: steps.check.outputs.skip != 'true'
@@ -90,7 +90,7 @@ jobs:
         # see https://github.com/chocolatey/home/issues/395.
         continue-on-error: true
         shell: pwsh
-        working-directory: packaging/choco
+        working-directory: packaging/choco/meta-package-manager
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >

@@ -27,7 +27,7 @@ mpm search python
 Full documentation at https://kdeldycke.github.io/meta-package-manager/
 ]]></description>
     <projectUrl>https://github.com/kdeldycke/meta-package-manager</projectUrl>
-    <packageSourceUrl>https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco</packageSourceUrl>
+    <packageSourceUrl>https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco/meta-package-manager</packageSourceUrl>
     <projectSourceUrl>https://github.com/kdeldycke/meta-package-manager</projectSourceUrl>
     <docsUrl>https://kdeldycke.github.io/meta-package-manager/</docsUrl>
     <bugTrackerUrl>https://github.com/kdeldycke/meta-package-manager/issues</bugTrackerUrl>

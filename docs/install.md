@@ -158,11 +158,11 @@ Meta Package Manager is [available on Chocolatey](https://community.chocolatey.o
 ```
 
 :::{tip}
-The Chocolatey package is [pending community review](https://community.chocolatey.org/packages/meta-package-manager). You can help speed up moderation by showing your support on the package page. In the meantime, you can build and install from [the specs maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco):
+The Chocolatey package is [pending community review](https://community.chocolatey.org/packages/meta-package-manager). You can help speed up moderation by showing your support on the package page. In the meantime, you can build and install from [the specs maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco/meta-package-manager):
 
 ```{code-block} pwsh-session
 > git clone https://github.com/kdeldycke/meta-package-manager.git
-> cd meta-package-manager\packaging\choco
+> cd meta-package-manager\packaging\choco\meta-package-manager
 > choco pack
 > choco install meta-package-manager --source .
 ```

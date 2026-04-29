@@ -46,7 +46,7 @@ jobs:
       - run: mpm --version
 
   # https://community.chocolatey.org/packages/meta-package-manager
-  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco
+  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco/meta-package-manager
   choco:
     name: "⁉️ choco (${{ matrix.os }})"
     # Not yet accepted on Chocolatey community repository.

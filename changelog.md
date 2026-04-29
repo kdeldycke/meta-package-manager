@@ -9,6 +9,7 @@
 - [mpm] Move `--numprocesses=auto`, `--dist=loadgroup`, and `--maxschedchunk=1` from `pyproject.toml` `[tool.pytest].addopts` into the CI workflow. Removes `pytest-xdist` as an unconditional test-time dependency for downstream packagers.
 - [zypper] Loosen `xmltodict` floor from `>=1` to `>=0.12`. The `parse()` API I rely on in `managers/zypper.py` has been stable since 0.12, so the bump to 1.0 was cosmetic and forced downstream packagers to ship a newer release than necessary.
 - [mpm] Drop `more-itertools` dependency. The single `peekable` use site in `pool.py` is replaced with a `next(iterator, None)` empty-check using stdlib only. Removes one transitive dependency for downstream packagers.
+- [choco] Move Chocolatey package files from `packaging/choco/` into `packaging/choco/meta-package-manager/` so the directory name matches the nuspec basename, as required by Chocolatey-AU's `Update-Package`. Fixes the `🍫 Chocolatey` release job that was failing with `No nuspec file found in the package directory`.
 
 ## [`6.4.0` (2026-04-27)](https://github.com/kdeldycke/meta-package-manager/compare/v6.3.0...v6.4.0)
 

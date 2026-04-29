@@ -16,7 +16,7 @@ The release PR must be merged via "Rebase and merge" (never squash). See the `re
 
 ## Chocolatey
 
-The Chocolatey package is maintained in-tree at `packaging/choco/`, unlike Homebrew, Scoop, NixOS, and AUR which are maintained externally. The `chocolatey` job in `release.yaml` runs after the main release, downloads the Windows binaries, computes SHA256 checksums, and pushes the `.nupkg` to https://push.chocolatey.org/.
+The Chocolatey package is maintained in-tree at `packaging/choco/meta-package-manager/`, unlike Homebrew, Scoop, NixOS, and AUR which are maintained externally. The package directory name must match the nuspec basename: this is enforced by [Chocolatey-AU's `AUPackage`](https://github.com/chocolatey-community/Chocolatey-AU/blob/main/src/Private/AUPackage.ps1), which derives the nuspec path from `Split-Path -Leaf $pwd`. The `chocolatey` job in `release.yaml` runs after the main release, downloads the Windows binaries, computes SHA256 checksums, and pushes the `.nupkg` to https://push.chocolatey.org/.
 
 Chocolatey moderation then validates the package, which includes automated virus scanning (see below).
 

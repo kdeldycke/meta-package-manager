@@ -1,5 +1,10 @@
 # Changelog
 
+## [`6.4.2.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.4.1...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`6.4.1` (2026-04-29)](https://github.com/kdeldycke/meta-package-manager/compare/v6.4.0...v6.4.1)
 
 - [mpm] Move `--cov` and `--cov-report=term` from `pyproject.toml` `[tool.pytest].addopts` into the CI workflow. Removes `pytest-cov` as an unconditional test-time dependency for downstream packagers.

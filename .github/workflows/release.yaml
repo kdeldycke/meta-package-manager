@@ -4,12 +4,11 @@ name: 🚀 Build & release
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/release.yaml@f600fefb41f28a11f550f43d8145b96438e46b84 # v6.14.0
+    uses: kdeldycke/repomatic/.github/workflows/release.yaml@7b003a95093db88752f32cbcc1c736081821720d # v6.16.0
     secrets:
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}

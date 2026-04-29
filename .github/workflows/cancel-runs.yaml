@@ -4,9 +4,8 @@ name: ✂️ Cancel runs
   pull_request:
     types:
       - closed
-  workflow_dispatch:
 
 jobs:
 
   cancel-runs:
-    uses: kdeldycke/repomatic/.github/workflows/cancel-runs.yaml@f600fefb41f28a11f550f43d8145b96438e46b84 # v6.14.0
+    uses: kdeldycke/repomatic/.github/workflows/cancel-runs.yaml@7b003a95093db88752f32cbcc1c736081821720d # v6.16.0

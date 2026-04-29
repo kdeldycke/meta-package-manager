@@ -6,6 +6,15 @@ name: 🏪 Test distributors
       - main
     paths:
       - .github/workflows/tests-install.yaml
+      - packaging/choco/**
+      - packaging/guix/**
+      - packaging/nix/**
+  pull_request:
+    paths:
+      - .github/workflows/tests-install.yaml
+      - packaging/choco/**
+      - packaging/guix/**
+      - packaging/nix/**
   workflow_dispatch:
   schedule:
     # Run weekly to catch regressions from packaging or distribution changes.
@@ -17,9 +26,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Test that the released version of mpm is installable from various package
-# managers and distribution channels. None of these jobs test the code being
-# pushed; they all install from PyPI, Homebrew, Scoop, GitHub Releases, etc.
+# Test that mpm is installable from each distribution channel. Most jobs
+# install the released artifact from external feeds (PyPI, Homebrew, Scoop,
+# GitHub Releases, etc.). The `*-source` jobs install from the in-repo
+# packaging specs (packaging/choco/, packaging/nix/, packaging/guix/) and
+# validate the build instructions documented in docs/install.md.
 #
 # Keep in sync with the "Installation methods" section in docs/install.md.
 
@@ -63,6 +74,30 @@ jobs:
       - shell: pwsh
         run: mpm --version
 
+  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco/meta-package-manager
+  # Build and install from the in-repo nuspec, mirroring the documented
+  # "build from the specs maintained in the repository" path.
+  choco-source:
+    name: "✅ choco-source (${{ matrix.os }})"
+    strategy:
+      matrix:
+        os:
+          - windows-2025
+          - windows-11-arm
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Pack
+        shell: pwsh
+        working-directory: packaging/choco/meta-package-manager
+        run: choco pack --output-directory .
+      - name: Install
+        shell: pwsh
+        working-directory: packaging/choco/meta-package-manager
+        run: choco install meta-package-manager --source . --yes
+      - shell: pwsh
+        run: mpm --version
+
   # https://github.com/kdeldycke/meta-package-manager/releases/latest
   # Stew has no non-interactive mode (https://github.com/marwanhawari/stew/issues/91).
   # It prompts for config path, asset selection, and binary rename. Instead of
@@ -102,13 +137,31 @@ jobs:
         run: chmod +x mpm
       - run: ./mpm --version
 
-  # The Guix package definition is maintained locally (packaging/guix/) and has
-  # been submitted upstream at https://codeberg.org/guix/guix/pulls/8047
-  # No CI test until the package is accepted into a Guix channel.
+  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix
+  # The Guix package definition is maintained locally and has been submitted
+  # upstream at https://codeberg.org/guix/guix/pulls/8047. Install from the
+  # in-repo definition to validate the documented build instructions.
+  # Guix is Linux-only and the official install script is heavyweight; mark
+  # as continue-on-error until the setup is proven stable.
+  guix-source:
+    name: ⁉️ guix-source
+    continue-on-error: true
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install Guix
+        run: >
+          wget --quiet --output-document=guix-install.sh
+          https://git.savannah.gnu.org/cgit/guix.git/plain/etc/guix-install.sh
+      - name: Run Guix installer
+        run: |
+          chmod +x guix-install.sh
+          yes | sudo ./guix-install.sh
+      - run: guix install --load-path=./packaging/guix python-meta-package-manager
+      - run: mpm --version
 
   # https://search.nixos.org/packages?query=meta-package-manager
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/me/meta-package-manager/package.nix
-  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix
   nix:
     name: "⁉️ nix (${{ matrix.os }})"
     # Not yet accepted in nixpkgs.
@@ -124,6 +177,25 @@ jobs:
     steps:
       - uses: cachix/install-nix-action@v31
       - run: nix-env --install --attr nixpkgs.meta-package-manager
+      - run: mpm --version
+
+  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix
+  # Install from the in-repo Nix definition, mirroring the documented build
+  # instructions while NixOS/nixpkgs#506145 is pending review.
+  nix-source:
+    name: "✅ nix-source (${{ matrix.os }})"
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04-arm
+          - ubuntu-slim
+          - macos-15-intel
+          - macos-26
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: cachix/install-nix-action@v31
+      - run: nix-env --file ./packaging/nix --install
       - run: mpm --version
 
   # AUR builds from source with full test suites. Upstream PKGBUILD check()

@@ -10,6 +10,7 @@
 - [zypper] Loosen `xmltodict` floor from `>=1` to `>=0.12`. The `parse()` API I rely on in `managers/zypper.py` has been stable since 0.12, so the bump to 1.0 was cosmetic and forced downstream packagers to ship a newer release than necessary.
 - [mpm] Drop `more-itertools` dependency. The single `peekable` use site in `pool.py` is replaced with a `next(iterator, None)` empty-check using stdlib only. Removes one transitive dependency for downstream packagers.
 - [choco] Move Chocolatey package files from `packaging/choco/` into `packaging/choco/meta-package-manager/` so the directory name matches the nuspec basename, as required by Chocolatey-AU's `Update-Package`. Fixes the `🍫 Chocolatey` release job that was failing with `No nuspec file found in the package directory`.
+- [mpm] Add `choco-source`, `nix-source`, and `guix-source` jobs to `tests-install.yaml` that build and install from the in-repo packaging specs (`packaging/choco/meta-package-manager/`, `packaging/nix/`, `packaging/guix/`). The workflow now also triggers on pushes and pull requests touching `packaging/{choco,nix,guix}/**`, so changes to in-repo specs are validated before merge.
 
 ## [`6.4.0` (2026-04-27)](https://github.com/kdeldycke/meta-package-manager/compare/v6.3.0...v6.4.0)
 

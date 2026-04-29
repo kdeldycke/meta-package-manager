@@ -1,7 +1,7 @@
 ---
 args: [channel, version, spec_path]
-title: "Update $channel package definition to v$version"
-commit_message: "Update $channel package definition to v$version"
+title: Update $channel package definition to v$version
+commit_message: Update $channel package definition to v$version
 footer: false
 ---
 

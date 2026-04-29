@@ -96,6 +96,20 @@ jobs:
           choco push "meta-package-manager.${env:VERSION}.nupkg"
           --source https://push.chocolatey.org/
           --api-key ${{ secrets.CHOCOLATEY_API_KEY }}
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        if: steps.check.outputs.skip != 'true'
+      - name: Render PR body
+        if: steps.check.outputs.skip != 'true'
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+        run: >
+          uvx --from "repomatic @ git+https://github.com/kdeldycke/repomatic" repomatic pr-body
+          --template-file .github/pr-templates/update-package-spec.md
+          --template-arg channel=Chocolatey
+          --template-arg version=$env:VERSION
+          --template-arg spec_path=packaging/choco/meta-package-manager/
+          --output body.md
       - name: Open PR with updated packaging files
         if: steps.check.outputs.skip != 'true'
         shell: pwsh
@@ -113,10 +127,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b $branch
           git add --update packaging/choco/
-          git commit --message "Update Chocolatey package to v$env:VERSION"
+          git commit --message "Update Chocolatey package definition to v$env:VERSION"
           git push --set-upstream origin $branch
-          gh pr create --title "Update Chocolatey package to v$env:VERSION" `
-            --body "Update nuspec and packaging files to match Chocolatey push."
+          gh pr create --title "Update Chocolatey package definition to v$env:VERSION" `
+            --body-file body.md
 
   # Prepare a Guix package definition after the release job. Unlike Homebrew, Scoop,
   # NixOS, and AUR, the Guix definition is maintained in this repo (see packaging/guix/).
@@ -154,6 +168,19 @@ jobs:
       - name: Update package definition to latest release
         if: steps.check.outputs.skip != 'true'
         run: python3 packaging/guix/update.py
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        if: steps.check.outputs.skip != 'true'
+      - name: Render PR body
+        if: steps.check.outputs.skip != 'true'
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+        run: >
+          uvx --from "repomatic @ git+https://github.com/kdeldycke/repomatic" repomatic pr-body
+          --template-file .github/pr-templates/update-package-spec.md
+          --template-arg channel=Guix
+          --template-arg version="${VERSION}"
+          --template-arg spec_path=packaging/guix/
+          --output body.md
       - name: Open PR with updated packaging files
         if: steps.check.outputs.skip != 'true'
         env:
@@ -174,7 +201,7 @@ jobs:
           git push --set-upstream origin "${branch}"
           gh pr create \
             --title "Update Guix package definition to v${VERSION}" \
-            --body "Update Guix package definition to match the latest PyPI release."
+            --body-file body.md
 
   # Prepare a Nix package definition after the release job. Unlike Homebrew, Scoop,
   # and AUR, the Nix definition is maintained in this repo (see packaging/nix/) while
@@ -214,6 +241,19 @@ jobs:
       - name: Update package definition to latest release
         if: steps.check.outputs.skip != 'true'
         run: python3 packaging/nix/update.py
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        if: steps.check.outputs.skip != 'true'
+      - name: Render PR body
+        if: steps.check.outputs.skip != 'true'
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+        run: >
+          uvx --from "repomatic @ git+https://github.com/kdeldycke/repomatic" repomatic pr-body
+          --template-file .github/pr-templates/update-package-spec.md
+          --template-arg channel=Nix
+          --template-arg version="${VERSION}"
+          --template-arg spec_path=packaging/nix/
+          --output body.md
       - name: Open PR with updated packaging files
         if: steps.check.outputs.skip != 'true'
         env:
@@ -234,4 +274,4 @@ jobs:
           git push --set-upstream origin "${branch}"
           gh pr create \
             --title "Update Nix package definition to v${VERSION}" \
-            --body "Update Nix package definition to match the latest GitHub release."
+            --body-file body.md

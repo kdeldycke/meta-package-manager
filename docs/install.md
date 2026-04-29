@@ -134,12 +134,20 @@ $ pipx install meta-package-manager
 ```
 ````
 
-````{tab-item} brew
-Meta Package Manager is [available as an Homebrew formula](https://formulae.brew.sh/formula/meta-package-manager), so you just need to:
+````{tab-item} Homebrew
+Meta Package Manager is [available as a Homebrew formula](https://formulae.brew.sh/formula/meta-package-manager), so you just need to:
 
 ```{code-block} shell-session
 $ brew install meta-package-manager
 ```
+
+:::{tip}
+[ZeroBrew](https://github.com/lucasgelfond/zerobrew) is a fast, Homebrew-compatible package manager written in Rust. It consumes the same formula and installs `mpm` with:
+
+```{code-block} shell-session
+$ zb install meta-package-manager
+```
+:::
 ````
 
 ````{tab-item} Scoop
@@ -254,13 +262,6 @@ $ stew install kdeldycke/meta-package-manager
 ```
 ````
 
-````{tab-item} ZeroBrew
-[ZeroBrew](https://github.com/lucasgelfond/zerobrew) is a fast, Homebrew-compatible package manager written in Rust:
-
-```{code-block} shell-session
-$ zb install meta-package-manager
-```
-````
 `````
 
 ## Binaries

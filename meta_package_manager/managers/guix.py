@@ -42,9 +42,25 @@ class Guix(PackageManager):
 
     platforms = LINUX_LIKE
 
-    requirement = ">=1.0.0"
-
-    version_regexes = (r"guix \(GNU Guix\) (?P<version>\S+)",)
+    # Guix is a rolling-release distribution: the only "version" it
+    # exposes for ``guix pull``-managed installs and in-tree dev wrappers
+    # (``./pre-inst-env guix``, ``./scripts/guix``) is a git commit hash.
+    # No upstream tag/semver is guaranteed to be reachable, so capturing
+    # whatever ``guix --version`` reports and *not* enforcing a
+    # ``requirement`` specifier is the only honest option: any working
+    # ``guix`` is fine.
+    version_regexes = (
+        # Stable release or ``git describe`` output:
+        #   ``guix (GNU Guix) 1.4.0``
+        #   ``guix (GNU Guix) 1.4.0-7-gabc1234``
+        r"guix \(GNU Guix\) (?P<version>\d[\w.\-+]*)",
+        # Bare git-hash output from an in-tree dev wrapper whose
+        # ``git describe`` had no nearby tag:
+        #   ``guix (GNU Guix) abc1234``
+        # Restrict to a 7–40 hex run so corrupted output isn't accepted
+        # as a "version".
+        r"guix \(GNU Guix\) (?P<version>[0-9a-f]{7,40})\b",
+    )
     """
     .. code-block:: shell-session
 

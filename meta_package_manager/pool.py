@@ -286,8 +286,10 @@ class ManagerPool:
 
             # Filters out managers whose CLI was not found.
             if drop_not_found and not manager.available:
+                reason = manager.unavailable_reason or "unavailable"
                 logging.info(
-                    f"Skip unavailable {theme.invoked_command(manager_id)} manager.",
+                    f"Skip {theme.invoked_command(manager_id)} manager: "
+                    f"{reason}.",
                 )
                 continue
 

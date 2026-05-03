@@ -686,6 +686,31 @@ class PackageManager(metaclass=MetaPackageManager):
         )
         return bool(self.supported and self.cli_path and self.executable and self.fresh)
 
+    @property
+    def unavailable_reason(self) -> str | None:
+        """Short, human-readable explanation of why :py:attr:`available` is
+        ``False``, or ``None`` if the manager is available.
+
+        Returned in priority order so the most actionable cause is reported
+        first: platform support, then CLI lookup, then executable bit, then
+        version requirement.
+        """
+        if self.supported is False:
+            return f"not supported on {os.uname().sysname!r}"
+        if not self.cli_path:
+            cli_names = ", ".join(self.cli_names) or self.id
+            return f"no executable named {cli_names!r} found in PATH"
+        if not self.executable:
+            return f"{self.cli_path!r} is not executable"
+        if not self.fresh:
+            if not self.version:
+                return f"could not parse version from {self.cli_path!r} output"
+            return (
+                f"version {self.version} does not satisfy "
+                f"{self.requirement!r} requirement"
+            )
+        return None
+
     def run(
         self,
         *args: TArg | TNestedArgs,

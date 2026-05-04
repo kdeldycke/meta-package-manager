@@ -117,20 +117,20 @@ jobs:
           VERSION: ${{ steps.check.outputs.version }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $branch = "choco/v$env:VERSION"
-          $remoteBranch = git ls-remote --heads origin $branch
-          if ($remoteBranch) {
-            Write-Host "Branch $branch already exists. PR was likely already created."
-            exit 0
-          }
+          $branch = "choco/release"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -b $branch
+          git checkout -B $branch
           git add --update packaging/choco/
           git commit --message "Update Chocolatey package definition to v$env:VERSION"
-          git push --set-upstream origin $branch
-          gh pr create --title "Update Chocolatey package definition to v$env:VERSION" `
-            --body-file body.md
+          git push --force --set-upstream origin $branch
+          $existing = gh pr list --head $branch --state open --json number --jq '.[0].number'
+          if ($existing) {
+            gh pr edit $existing --title "Update Chocolatey package definition to v$env:VERSION" --body-file body.md
+          } else {
+            gh pr create --title "Update Chocolatey package definition to v$env:VERSION" `
+              --body-file body.md
+          }
 
   # Prepare a Guix package definition after the release job. Unlike Homebrew, Scoop,
   # NixOS, and AUR, the Guix definition is maintained in this repo (see packaging/guix/).
@@ -187,21 +187,23 @@ jobs:
           VERSION: ${{ steps.check.outputs.version }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          branch="guix/v${VERSION}"
-          remote_branch=$(git ls-remote --heads origin "${branch}")
-          if [ -n "${remote_branch}" ]; then
-            echo "Branch ${branch} already exists. PR was likely already created."
-            exit 0
-          fi
+          branch="guix/release"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -b "${branch}"
+          git checkout -B "${branch}"
           git add --update packaging/guix/
           git commit --message "Update Guix package definition to v${VERSION}"
-          git push --set-upstream origin "${branch}"
-          gh pr create \
-            --title "Update Guix package definition to v${VERSION}" \
-            --body-file body.md
+          git push --force --set-upstream origin "${branch}"
+          existing=$(gh pr list --head "${branch}" --state open --json number --jq '.[0].number')
+          if [ -n "${existing}" ]; then
+            gh pr edit "${existing}" \
+              --title "Update Guix package definition to v${VERSION}" \
+              --body-file body.md
+          else
+            gh pr create \
+              --title "Update Guix package definition to v${VERSION}" \
+              --body-file body.md
+          fi
 
   # Prepare a Nix package definition after the release job. Unlike Homebrew, Scoop,
   # and AUR, the Nix definition is maintained in this repo (see packaging/nix/) while
@@ -260,18 +262,20 @@ jobs:
           VERSION: ${{ steps.check.outputs.version }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          branch="nix/v${VERSION}"
-          remote_branch=$(git ls-remote --heads origin "${branch}")
-          if [ -n "${remote_branch}" ]; then
-            echo "Branch ${branch} already exists. PR was likely already created."
-            exit 0
-          fi
+          branch="nix/release"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -b "${branch}"
+          git checkout -B "${branch}"
           git add --update packaging/nix/
           git commit --message "Update Nix package definition to v${VERSION}"
-          git push --set-upstream origin "${branch}"
-          gh pr create \
-            --title "Update Nix package definition to v${VERSION}" \
-            --body-file body.md
+          git push --force --set-upstream origin "${branch}"
+          existing=$(gh pr list --head "${branch}" --state open --json number --jq '.[0].number')
+          if [ -n "${existing}" ]; then
+            gh pr edit "${existing}" \
+              --title "Update Nix package definition to v${VERSION}" \
+              --body-file body.md
+          else
+            gh pr create \
+              --title "Update Nix package definition to v${VERSION}" \
+              --body-file body.md
+          fi

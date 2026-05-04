@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 import os
+import platform
 import re
 import shutil
 import stat
@@ -696,7 +697,7 @@ class PackageManager(metaclass=MetaPackageManager):
         version requirement.
         """
         if self.supported is False:
-            return f"not supported on {os.uname().sysname!r}"
+            return f"not supported on {platform.system()!r}"
         if not self.cli_path:
             cli_names = ", ".join(self.cli_names) or self.id
             return f"no executable named {cli_names!r} found in PATH"

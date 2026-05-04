@@ -113,32 +113,38 @@ def test_extra_option_allowlist():
 
 
 selection_cases = {
+    # Selection-logic cases pass ``drop_not_found=False`` so they test only
+    # how ``keep``/``drop`` plumbing handles ordering, deduplication and
+    # collection types, without depending on whether the named managers
+    # have a real binary on PATH.  Hermetic builders (Guix, Nixpkgs, etc.)
+    # otherwise see these cases return empty tuples because ``uv`` and
+    # ``gem`` are not installed.
     "single_selector": (
-        {"keep": ("uv",)},
+        {"keep": ("uv",), "drop_not_found": False},
         ("uv",),
     ),
     "list_input": (
-        {"keep": ["uv"]},
+        {"keep": ["uv"], "drop_not_found": False},
         ("uv",),
     ),
     "set_input": (
-        {"keep": {"uv"}},
+        {"keep": {"uv"}, "drop_not_found": False},
         ("uv",),
     ),
     "empty_selector": (
-        {"keep": ()},
+        {"keep": (), "drop_not_found": False},
         (),
     ),
     "duplicate_selectors": (
-        {"keep": ("uv", "uv")},
+        {"keep": ("uv", "uv"), "drop_not_found": False},
         ("uv",),
     ),
     "multiple_selectors": (
-        {"keep": ("uv", "gem")},
+        {"keep": ("uv", "gem"), "drop_not_found": False},
         ("uv", "gem"),
     ),
     "ordered_selectors": (
-        {"keep": ("gem", "uv")},
+        {"keep": ("gem", "uv"), "drop_not_found": False},
         ("gem", "uv"),
     ),
     "single_exclusion": (
@@ -166,11 +172,11 @@ selection_cases = {
         ),
     ),
     "selector_priority": (
-        {"keep": {"uv"}, "drop": {"gem"}},
+        {"keep": {"uv"}, "drop": {"gem"}, "drop_not_found": False},
         ("uv",),
     ),
     "exclusion_override": (
-        {"keep": {"uv"}, "drop": {"uv"}},
+        {"keep": {"uv"}, "drop": {"uv"}, "drop_not_found": False},
         (),
     ),
     "default_selection": (

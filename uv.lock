@@ -11,6 +11,9 @@ resolution-markers = [
 exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
 exclude-newer-span = "P1W"
 
+[options.exclude-newer-package]
+click-extra = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+
 [[package]]
 name = "accessible-pygments"
 version = "0.0.5"
@@ -249,7 +252,7 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "7.13.0"
+version = "7.15.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
@@ -262,9 +265,9 @@ dependencies = [
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "wcmatch" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fc/3b/61fab1784a949eec5337cfd45ceb12f87d12757d0cffac850b50cafc269e/click_extra-7.13.0.tar.gz", hash = "sha256:52b27d746e8254c93320cc463750f376aea45aa61bd0de9a45412f471e54f63e", size = 138062, upload-time = "2026-04-16T16:09:40.328Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/98/ee/a2bf0ca48304aff973e3d387364f4b60862be8d16247a6101a148cb9a637/click_extra-7.15.0.tar.gz", hash = "sha256:ca56ffd64c3afc5d302c68e894eb955a9457dc5dcb7be9e22d74d2073d1e56ac", size = 157774, upload-time = "2026-05-03T15:40:53.411Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/0b/af0f24dfd34ddb2f77c8164ba47b1a8f4a3e6a84ce8d41a414145ca7502d/click_extra-7.13.0-py3-none-any.whl", hash = "sha256:a7abe62dd3c045e4299692e2fe77a274244d46a2b327980b543e45b3dd540e9e", size = 151712, upload-time = "2026-04-16T16:09:38.712Z" },
+    { url = "https://files.pythonhosted.org/packages/0b/16/acc727830c736caf93d6ff5ed48454604d47a9541ef703497c408001c8cc/click_extra-7.15.0-py3-none-any.whl", hash = "sha256:71d0299adc92524409f36cee833cc2234aaf048882dd506e7c8172f02d3771e6", size = 176342, upload-time = "2026-05-03T15:40:51.764Z" },
 ]
 
 [package.optional-dependencies]
@@ -1052,7 +1055,7 @@ typing = [
 requires-dist = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'", specifier = ">=1.3" },
     { name = "boltons", specifier = ">=25" },
-    { name = "click-extra", specifier = ">=7.11" },
+    { name = "click-extra", specifier = ">=7.15" },
     { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'" },
     { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'" },
     { name = "click-extra", extras = ["jsonc"], marker = "extra == 'jsonc'" },

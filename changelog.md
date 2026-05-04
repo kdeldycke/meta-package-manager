@@ -1,9 +1,6 @@
 # Changelog
 
-## [`6.4.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.4.0...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`6.4.1` (2026-05-04)](https://github.com/kdeldycke/meta-package-manager/compare/v6.4.0...v6.4.1)
 
 - [guix] Drop the `>=1.0.0` version requirement and add a hex-hash regex variant. Guix is a rolling-release distribution: `guix pull`-managed installs and in-tree dev wrappers (`./pre-inst-env guix`, `./scripts/guix`) report a git commit hash as the "version", which the previous `>=1.0.0` specifier rejected as not satisfying the requirement and made `mpm` skip the manager. The new `version_regexes` chain accepts stable releases (`1.4.0`), `git describe`-style versions (`1.4.0-7-gabc1234`), and bare 7–40-char lowercase hex hashes, so any working `guix` registers as available.
 - [mpm] Add `PackageManager.unavailable_reason` and use it in the pool's "Skip" log line. When `mpm` drops a manager from selection, the message now spells out *why* it was dropped: `not supported on '<sysname>'`, `no executable named '<names>' found in PATH`, `'<path>' is not executable`, `could not parse version from '<path>' output`, or `version <X> does not satisfy '<spec>' requirement`. Replaces the previous opaque `Skip unavailable <id> manager.` line.

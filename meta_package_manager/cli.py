@@ -48,12 +48,12 @@ from click_extra import (
     pass_context,
 )
 from click_extra.colorize import HelpKeywords, highlight
-from click_extra.theme import KO, OK, default_theme as theme
 from click_extra.table import (
     SERIALIZATION_FORMATS,
     print_data,
     print_sorted_table,
 )
+from click_extra.theme import KO, OK, default_theme as theme
 from extra_platforms import reduce
 
 from . import __version__, bar_plugin

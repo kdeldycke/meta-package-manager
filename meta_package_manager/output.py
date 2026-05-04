@@ -28,8 +28,8 @@ from unittest.mock import patch
 
 from boltons.iterutils import flatten
 from click_extra import echo
-from click_extra.theme import default_theme as theme
 from click_extra.table import TableFormat, render_table
+from click_extra.theme import default_theme as theme
 
 from .bar_plugin import MPMPlugin
 from .pool import pool

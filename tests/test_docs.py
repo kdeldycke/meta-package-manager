@@ -195,7 +195,7 @@ def test_benchmark_yaml_well_formed():
     """Check ``docs/benchmark.yaml`` only encodes flags from the known
     competitor set."""
     yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
-    data = safe_load(yaml_path.read_text())
+    data = safe_load(yaml_path.read_text(encoding="utf-8"))
     assert set(data) == {"managers"}
 
     competitors = set(docs_update.BENCHMARK_COMPETITORS)
@@ -215,7 +215,7 @@ def test_benchmark_table_in_sync():
     Drift here means someone edited ``docs/benchmark.md`` between the markers
     by hand, or added a manager without re-running ``docs/docs_update.py``.
     """
-    benchmark = (PROJECT_ROOT / "docs" / "benchmark.md").read_text()
+    benchmark = (PROJECT_ROOT / "docs" / "benchmark.md").read_text(encoding="utf-8")
 
     start_tag = "<!-- benchmark-managers-start -->\n\n"
     end_tag = "\n\n<!-- benchmark-managers-end -->"

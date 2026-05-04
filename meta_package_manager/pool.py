@@ -22,7 +22,7 @@ from functools import cached_property
 
 from boltons.iterutils import unique
 from click_extra import get_current_context
-from click_extra.colorize import default_theme as theme
+from click_extra.theme import default_theme as theme
 
 from .managers.apk import APK
 from .managers.apm import APM

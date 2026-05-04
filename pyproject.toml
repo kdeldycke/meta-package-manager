@@ -143,8 +143,10 @@ dependencies = [
   "backports-strenum>=1.3; python_version<'3.11'",
   # boltons 25.0.0 is the first version to support Python 3.13.
   "boltons>=25",
-  # click-extra 7.11.0 adds serialize_data/print_data for structured output.
-  "click-extra>=7.11",
+  # click-extra 7.15.0 introduces the click_extra.theme module that hosts
+  # KO, OK and default_theme; the previous click_extra.colorize re-exports
+  # were dropped as a breaking change.
+  "click-extra>=7.15",
   # cyclonedx-python-lib 11.2.0 is the first to support Python 3.14.
   "cyclonedx-python-lib[validation]>=11.2",
   # extra-platforms 10.0.0 drops the distro dependency.
@@ -232,6 +234,9 @@ packages.find.include = [ "meta_package_manager*" ]
 [tool.uv]
 # Cooldown period.
 exclude-newer = "1 week"
+# Bypass the cooldown for click-extra: I maintain it and want new releases
+# (such as 7.15.0's click_extra.theme module) to resolve immediately.
+exclude-newer-package = { click-extra = "0 days" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 

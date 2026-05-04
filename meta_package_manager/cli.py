@@ -47,13 +47,8 @@ from click_extra import (
     option_group,
     pass_context,
 )
-from click_extra.colorize import (
-    KO,
-    OK,
-    HelpKeywords,
-    default_theme as theme,
-    highlight,
-)
+from click_extra.colorize import HelpKeywords, highlight
+from click_extra.theme import KO, OK, default_theme as theme
 from click_extra.table import (
     SERIALIZATION_FORMATS,
     print_data,

@@ -16,19 +16,39 @@
 
 from __future__ import annotations
 
+import importlib.util
 import re
 import sys
 from itertools import permutations
 from pathlib import Path
 
 from extra_platforms import Group, extract_members
-from yaml import Loader, load
+from yaml import Loader, load, safe_load
 
 from meta_package_manager.inventory import MAIN_PLATFORMS
 from meta_package_manager.labels import LABELS, MANAGER_PREFIX, PLATFORM_PREFIX
 from meta_package_manager.pool import pool
 
 from .conftest import all_managers
+
+
+def _load_docs_update():
+    """Load ``docs/docs_update.py`` as a module without requiring ``docs`` to
+    be a package.
+
+    The script lives next to the docs but is not part of any importable
+    package, so we resolve it by file path.
+    """
+    spec = importlib.util.spec_from_file_location(
+        "docs_update",
+        Path(__file__).parent.parent / "docs" / "docs_update.py",
+    )
+    module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+    spec.loader.exec_module(module)  # type: ignore[union-attr]
+    return module
+
+
+docs_update = _load_docs_update()
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -169,3 +189,38 @@ def test_extra_labels_toml():
     # TOML file matches the in-memory LABELS registry.
     registry_names = {name for name, _, _ in LABELS}
     assert canonical_labels == registry_names
+
+
+def test_benchmark_yaml_well_formed():
+    """Check ``docs/benchmark.yaml`` only encodes flags from the known
+    competitor set."""
+    yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
+    data = safe_load(yaml_path.read_text())
+    assert set(data) == {"managers"}
+
+    competitors = set(docs_update.BENCHMARK_COMPETITORS)
+    for mid, flags in data["managers"].items():
+        assert mid == mid.lower()
+        assert isinstance(flags, list)
+        # Flags are valid competitor names, unique, and sorted in column order.
+        assert set(flags).issubset(competitors)
+        assert len(flags) == len(set(flags))
+        assert flags == sorted(flags, key=docs_update.BENCHMARK_COMPETITORS.index)
+
+
+def test_benchmark_table_in_sync():
+    """Check the auto-generated ``Package manager support`` table matches the
+    current pool and YAML.
+
+    Drift here means someone edited ``docs/benchmark.md`` between the markers
+    by hand, or added a manager without re-running ``docs/docs_update.py``.
+    """
+    benchmark = (PROJECT_ROOT / "docs" / "benchmark.md").read_text()
+
+    start_tag = "<!-- benchmark-managers-start -->\n\n"
+    end_tag = "\n\n<!-- benchmark-managers-end -->"
+    assert start_tag in benchmark
+    assert end_tag in benchmark
+
+    on_disk = benchmark.split(start_tag, 1)[1].split(end_tag, 1)[0]
+    assert on_disk == docs_update.benchmark_managers_table()

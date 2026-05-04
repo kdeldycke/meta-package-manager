@@ -28,9 +28,11 @@ other dynamic content in ``readme.md``.
 
 from __future__ import annotations
 
+import inspect
 from pathlib import Path
 from textwrap import dedent
 
+import yaml
 from click_extra.table import TableFormat, render_table
 from extra_platforms import Group, extract_members
 
@@ -40,6 +42,16 @@ from meta_package_manager.labels import LABELS
 from meta_package_manager.pool import pool
 
 PROJECT_ROOT = Path(__file__).parent.parent
+
+BENCHMARK_COMPETITORS = ("topgrade", "pacaptr", "pacapt", "sysget", "whohas")
+"""Competing tools shown alongside ``mpm`` in the benchmark page, in column order."""
+
+GITHUB_BLOB_URL = "https://github.com/kdeldycke/meta-package-manager/blob/main"
+"""Base URL for linking to source files in the benchmark table.
+
+Pinned to the ``main`` branch so the generated artifact references the same
+revision the docs are built from.
+"""
 
 
 def managers_sankey() -> str:
@@ -127,6 +139,68 @@ def operation_matrix() -> tuple[str, str]:
     return rendered_table, "\n\n".join(footnotes)
 
 
+def manager_source_url(manager_id: str) -> str:
+    """Return a GitHub URL pointing to the class definition of a manager.
+
+    Resolves the manager class via :py:data:`meta_package_manager.pool.pool`,
+    then uses :py:mod:`inspect` to derive the source file and line number of
+    the class declaration. Used by the benchmark page to back each ``✓`` in
+    the ``mpm`` column with a link to its implementation.
+    """
+    cls = type(pool[manager_id])
+    src = Path(inspect.getsourcefile(cls)).resolve()  # type: ignore[arg-type]
+    rel = src.relative_to(PROJECT_ROOT)
+    _, lineno = inspect.getsourcelines(cls)
+    return f"{GITHUB_BLOB_URL}/{rel.as_posix()}#L{lineno}"
+
+
+def benchmark_managers_table() -> str:
+    """Produce the ``Package manager support`` table of the benchmark page.
+
+    The ``mpm`` column is auto-derived from the live pool: each implemented
+    manager renders as ``[✓](source_url)``, linking to the class definition
+    that proves the support. Competitor columns are filled from
+    ``docs/benchmark.yaml``, which only encodes what the *other* tools
+    support.
+
+    Manager rows are the sorted union of pool IDs and YAML keys, so a new
+    entry on either side appears in the table without manual edits.
+    """
+    yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
+    competitor_data: dict[str, list[str]] = yaml.safe_load(yaml_path.read_text())[
+        "managers"
+    ]
+
+    pool_ids = set(pool.all_manager_ids)
+    all_ids = sorted(pool_ids | competitor_data.keys())
+
+    headers = ["Manager", "`mpm`"]
+    headers.extend(
+        f"`{name}`[^{i}]" for i, name in enumerate(BENCHMARK_COMPETITORS, start=1)
+    )
+
+    table = []
+    for mid in all_ids:
+        row = [f"`{mid}`"]
+        if mid in pool_ids:
+            row.append(f"[✓]({manager_source_url(mid)})")
+        else:
+            row.append("")
+        flags = set(competitor_data.get(mid, []))
+        row.extend("✓" if name in flags else "" for name in BENCHMARK_COMPETITORS)
+        table.append(row)
+
+    alignments = ["left"] + ["center"] * (1 + len(BENCHMARK_COMPETITORS))
+
+    return render_table(
+        table,
+        headers=headers,
+        table_format=TableFormat.GITHUB,
+        colalign=alignments,
+        disable_numparse=True,
+    )
+
+
 def replace_content(
     filepath: Path,
     new_content: str,
@@ -212,6 +286,18 @@ def update_readme() -> None:
     )
 
 
+def update_benchmark() -> None:
+    """Refresh the auto-generated table in ``docs/benchmark.md``."""
+    benchmark = PROJECT_ROOT / "docs" / "benchmark.md"
+    replace_content(
+        benchmark,
+        benchmark_managers_table(),
+        "<!-- benchmark-managers-start -->\n\n",
+        "\n\n<!-- benchmark-managers-end -->",
+    )
+
+
 if __name__ == "__main__":
     write_labels()
     update_readme()
+    update_benchmark()

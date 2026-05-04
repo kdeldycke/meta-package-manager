@@ -57,136 +57,147 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 
 ## Package manager support
 
-| Manager                 | `mpm` | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] | `whohas`[^5] |
-| ----------------------- | :---: | :------------: | :-----------: | :----------: | :----------: | :----------: |
-| `0install`              |       |                |               |              |              |              |
-| `antibody`              |       |       ✓        |               |              |              |              |
-| `antigen`               |       |       ✓        |               |              |              |              |
-| `apk`                   |       |                |       ✓       |      ✓       |              |              |
-| `apm`                   |   ✓   |       ✓        |               |              |              |              |
-| `apt`                   |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |      ✓       |
-| `apt-cyg`               |       |                |               |      ✓       |              |      ✓       |
-| `apt-mint`              |   ✓   |                |               |              |              |              |
-| `asdf`                  |       |       ✓        |               |              |              |              |
-| `aura`                  |       |       ✓        |               |              |              |              |
-| `bin`                   |       |       ✓        |               |              |              |              |
-| `brew`                  |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |              |
-| `bun`                   |       |       ✓        |               |              |              |              |
-| `cargo`                 |   ✓   |       ✓        |               |              |              |              |
-| `cask`                  |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |              |
-| `cave`                  |       |                |               |      ✓       |              |              |
-| `chezmoi`               |       |       ✓        |               |              |              |              |
-| `chocolatey`            |   ✓   |       ✓        |       ✓       |              |              |              |
-| `choosenim`             |       |       ✓        |               |              |              |              |
-| `chromebrew`            |       |                |               |              |      ✓       |              |
-| `composer`              |   ✓   |       ✓        |               |              |              |              |
-| `conda`                 |       |       ✓        |       ✓       |      ✓       |              |              |
-| `containers`            |       |       ✓        |               |              |              |              |
-| `dein`                  |       |       ✓        |               |              |              |              |
-| `deno`                  |       |       ✓        |               |              |              |              |
-| `distrobox`             |       |       ✓        |               |              |              |              |
-| `dnf4`                  |   ✓   |                |       ✓       |              |      ✓       |      ✓       |
-| `dnf5`                  |   ✓   |                |               |              |              |              |
-| `dotnet`                |       |       ✓        |               |              |              |              |
-| `emacs`                 |       |       ✓        |               |              |              |              |
-| `emerge`                |   ✓   |       ✓        |       ✓       |      ✓       |      ✓       |      ✓       |
-| `eopkg`                 |   ✓   |       ✓        |               |              |      ✓       |              |
-| `etc-update`            |       |       ✓        |               |              |              |              |
-| `fisher`                |       |       ✓        |               |              |              |              |
-| `flatpak`               |   ✓   |       ✓        |               |              |      ✓       |              |
-| `flutter`               |       |       ✓        |               |              |              |              |
-| `fossil`                |       |       ✓        |               |              |              |              |
-| `fwupdmgr`              |   ✓   |       ✓        |               |              |              |              |
-| `gcloud`                |       |       ✓        |               |              |              |              |
-| `gem`                   |   ✓   |       ✓        |               |              |      ✓       |              |
-| `ghcup`                 |       |       ✓        |               |              |              |              |
-| `git`                   |       |       ✓        |               |              |              |              |
-| `github-cli-extensions` |       |       ✓        |               |              |              |              |
-| `gnome-shell`           |       |       ✓        |               |              |              |              |
-| `go`                    |       |       ✓        |               |              |              |              |
-| `guix`                  |       |       ✓        |               |              |      ✓       |              |
-| `haxelib`               |       |       ✓        |               |              |              |              |
-| `home-manager`          |       |       ✓        |               |              |              |              |
-| `jetpack`               |       |       ✓        |               |              |              |              |
-| `julia`                 |       |       ✓        |               |              |              |              |
-| `kakoune`               |       |       ✓        |               |              |              |              |
-| `krew`                  |       |       ✓        |               |              |              |              |
-| `macos`                 |       |       ✓        |               |              |              |              |
-| `macports`              |       |       ✓        |       ✓       |      ✓       |      ✓       |      ✓       |
-| `mas`                   |   ✓   |       ✓        |               |              |              |              |
-| `micro`                 |       |       ✓        |               |              |              |              |
-| `myrepos`               |       |       ✓        |               |              |              |              |
-| `nala`                  |       |       ✓        |               |              |              |              |
-| `neobundle`             |       |       ✓        |               |              |              |              |
-| `nix`                   |   ✓   |       ✓        |               |              |      ✓       |              |
-| `npm`                   |   ✓   |       ✓        |               |              |      ✓       |              |
-| `oh-my-zsh`             |       |       ✓        |               |              |              |              |
-| `opam`                  |       |       ✓        |               |              |              |              |
-| `opkg`                  |   ✓   |                |               |      ✓       |              |              |
-| `pacaur`                |   ✓   |                |               |              |              |              |
-| `pacman`                |   ✓   |       ✓        |               |      ✓       |      ✓       |      ✓       |
-| `pacstall`              |       |       ✓        |               |              |              |              |
-| `pamac`                 |       |       ✓        |               |              |              |              |
-| `paru`                  |   ✓   |       ✓        |               |              |              |              |
-| `pearl`                 |       |       ✓        |               |              |              |              |
-| `pihole`                |       |       ✓        |               |              |              |              |
-| `pikaur`                |       |       ✓        |               |              |              |              |
-| `pip`                   |   ✓   |       ✓        |       ✓       |              |      ✓       |              |
-| `pipx`                  |   ✓   |       ✓        |               |              |              |              |
-| `pkg`                   |   ✓   |       ✓        |               |              |      ✓       |      ✓       |
-| `pkg-mgr`               |       |                |               |              |      ✓       |              |
-| `pkg-tools`             |       |                |               |      ✓       |              |              |
-| `pkgin`                 |       |       ✓        |               |              |              |      ✓       |
-| `pkgng`                 |       |                |               |      ✓       |              |              |
-| `plug`                  |       |       ✓        |               |              |              |              |
-| `pnpm`                  |       |       ✓        |               |              |              |              |
-| `podman`                |       |       ✓        |               |              |              |              |
-| `powershell`            |       |       ✓        |               |              |              |              |
-| `protonup`              |       |       ✓        |               |              |              |              |
-| `raco`                  |       |       ✓        |               |              |              |              |
-| `rcm`                   |       |       ✓        |               |              |              |              |
-| `remotes`               |       |       ✓        |               |              |              |              |
-| `restarts`              |       |       ✓        |               |              |              |              |
-| `rtcl`                  |       |       ✓        |               |              |              |              |
-| `rustup`                |       |       ✓        |               |              |              |              |
-| `scoop`                 |   ✓   |       ✓        |       ✓       |              |      ✓       |              |
-| `sdkman`                |       |       ✓        |               |              |              |              |
-| `sheldon`               |       |       ✓        |               |              |              |              |
-| `slapt-get`             |       |                |               |              |      ✓       |      ✓       |
-| `snap`                  |   ✓   |       ✓        |               |              |      ✓       |              |
-| `spack`                 |       |                |               |              |              |              |
-| `sparkle`               |       |       ✓        |               |              |              |              |
-| `spicetify`             |       |       ✓        |               |              |              |              |
-| `stack`                 |       |       ✓        |               |              |              |              |
-| `steamcmd`              |   ✓   |                |               |              |              |              |
-| `sun-tools`             |       |                |               |      ✓       |              |              |
-| `swupd`                 |       |                |               |      ✓       |              |              |
-| `system`                |       |       ✓        |               |              |              |              |
-| `tazpkg`                |       |                |               |      ✓       |              |              |
-| `tldr`                  |       |       ✓        |               |              |              |              |
-| `tlmgr`                 |       |       ✓        |       ✓       |      ✓       |              |              |
-| `toolbx`                |       |       ✓        |               |              |              |              |
-| `trizen`                |       |       ✓        |               |              |              |              |
-| `uv`                    |   ✓   |                |               |              |              |              |
-| `vagrant`               |       |       ✓        |               |              |              |              |
-| `vcpkg`                 |       |       ✓        |               |              |              |              |
-| `voom`                  |       |       ✓        |               |              |              |              |
-| `vscode`                |   ✓   |                |               |              |              |              |
-| `vscodium`              |   ✓   |                |               |              |              |              |
-| `vundle`                |       |       ✓        |               |              |              |              |
-| `winget`                |   ✓   |       ✓        |               |              |              |              |
-| `wsl`                   |       |       ✓        |               |              |              |              |
-| `xbps`                  |   ✓   |                |       ✓       |      ✓       |      ✓       |              |
-| `yadm`                  |       |       ✓        |               |              |              |              |
-| `yarn`                  |   ✓   |       ✓        |               |              |              |              |
-| `yarn-berry`            |   ✓   |       ✓        |               |              |              |              |
-| `yay`                   |   ✓   |       ✓        |               |              |              |              |
-| `yum`                   |   ✓   |                |               |      ✓       |      ✓       |      ✓       |
-| `zim`                   |       |       ✓        |               |              |              |              |
-| `zinit`                 |       |       ✓        |               |              |              |              |
-| `zplug`                 |       |       ✓        |               |              |              |              |
-| `zr`                    |       |       ✓        |               |              |              |              |
-| `zypper`                |   ✓   |                |       ✓       |      ✓       |      ✓       |      ✓       |
+<!-- benchmark-managers-start -->
+
+| Manager                 |                                                      `mpm`                                                       | `topgrade`[^1] | `pacaptr`[^2] | `pacapt`[^3] | `sysget`[^4] | `whohas`[^5] |
+| :---------------------- | :--------------------------------------------------------------------------------------------------------------: | :------------: | :-----------: | :----------: | :----------: | :----------: |
+| `0install`              |                                                                                                                  |                |               |              |              |              |
+| `antibody`              |                                                                                                                  |       ✓        |               |              |              |              |
+| `antigen`               |                                                                                                                  |       ✓        |               |              |              |              |
+| `apk`                   |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/apk.py#L33)     |                |       ✓       |      ✓       |              |              |
+| `apm`                   |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/apm.py#L33)     |       ✓        |               |              |              |              |
+| `apt`                   |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/apt.py#L33)     |       ✓        |       ✓       |      ✓       |      ✓       |      ✓       |
+| `apt-cyg`               |                                                                                                                  |                |               |      ✓       |              |      ✓       |
+| `apt-mint`              |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/apt.py#L289)    |                |               |              |              |              |
+| `asdf`                  |                                                                                                                  |       ✓        |               |              |              |              |
+| `aura`                  |                                                                                                                  |       ✓        |               |              |              |              |
+| `bin`                   |                                                                                                                  |       ✓        |               |              |              |              |
+| `brew`                  | [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/homebrew.py#L551)  |       ✓        |       ✓       |      ✓       |      ✓       |              |
+| `bun`                   |                                                                                                                  |       ✓        |               |              |              |              |
+| `cargo`                 |   [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/cargo.py#L33)    |       ✓        |               |              |              |              |
+| `cask`                  | [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/homebrew.py#L561)  |       ✓        |       ✓       |      ✓       |      ✓       |              |
+| `cave`                  |                                                                                                                  |                |               |      ✓       |              |              |
+| `chezmoi`               |                                                                                                                  |       ✓        |               |              |              |              |
+| `choco`                 | [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/chocolatey.py#L33) |       ✓        |       ✓       |              |              |              |
+| `choosenim`             |                                                                                                                  |       ✓        |               |              |              |              |
+| `chromebrew`            |                                                                                                                  |                |               |              |      ✓       |              |
+| `composer`              |  [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/composer.py#L34)  |       ✓        |               |              |              |              |
+| `conda`                 |                                                                                                                  |       ✓        |       ✓       |      ✓       |              |              |
+| `containers`            |                                                                                                                  |       ✓        |               |              |              |              |
+| `cpan`                  |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/cpan.py#L34)    |                |               |              |              |              |
+| `deb-get`               |  [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/deb_get.py#L33)   |                |               |              |              |              |
+| `dein`                  |                                                                                                                  |       ✓        |               |              |              |              |
+| `deno`                  |                                                                                                                  |       ✓        |               |              |              |              |
+| `distrobox`             |                                                                                                                  |       ✓        |               |              |              |              |
+| `dnf`                   |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/dnf.py#L33)     |                |       ✓       |              |      ✓       |      ✓       |
+| `dnf5`                  |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/dnf.py#L224)    |                |               |              |              |              |
+| `dotnet`                |                                                                                                                  |       ✓        |               |              |              |              |
+| `emacs`                 |                                                                                                                  |       ✓        |               |              |              |              |
+| `emerge`                |   [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/emerge.py#L33)   |       ✓        |       ✓       |      ✓       |      ✓       |      ✓       |
+| `eopkg`                 |   [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/eopkg.py#L33)    |       ✓        |               |              |      ✓       |              |
+| `etc-update`            |                                                                                                                  |       ✓        |               |              |              |              |
+| `fisher`                |                                                                                                                  |       ✓        |               |              |              |              |
+| `flatpak`               |  [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/flatpak.py#L33)   |       ✓        |               |              |      ✓       |              |
+| `flutter`               |                                                                                                                  |       ✓        |               |              |              |              |
+| `fossil`                |                                                                                                                  |       ✓        |               |              |              |              |
+| `fwupd`                 |   [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/fwupd.py#L34)    |       ✓        |               |              |              |              |
+| `gcloud`                |                                                                                                                  |       ✓        |               |              |              |              |
+| `gem`                   |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/gem.py#L34)     |       ✓        |               |              |      ✓       |              |
+| `ghcup`                 |                                                                                                                  |       ✓        |               |              |              |              |
+| `git`                   |                                                                                                                  |       ✓        |               |              |              |              |
+| `github-cli-extensions` |                                                                                                                  |       ✓        |               |              |              |              |
+| `gnome-shell`           |                                                                                                                  |       ✓        |               |              |              |              |
+| `go`                    |                                                                                                                  |       ✓        |               |              |              |              |
+| `guix`                  |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/guix.py#L33)    |       ✓        |               |              |      ✓       |              |
+| `haxelib`               |                                                                                                                  |       ✓        |               |              |              |              |
+| `home-manager`          |                                                                                                                  |       ✓        |               |              |              |              |
+| `jetpack`               |                                                                                                                  |       ✓        |               |              |              |              |
+| `julia`                 |                                                                                                                  |       ✓        |               |              |              |              |
+| `kakoune`               |                                                                                                                  |       ✓        |               |              |              |              |
+| `krew`                  |                                                                                                                  |       ✓        |               |              |              |              |
+| `macos`                 |                                                                                                                  |       ✓        |               |              |              |              |
+| `macports`              |  [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/macports.py#L33)  |       ✓        |       ✓       |      ✓       |      ✓       |      ✓       |
+| `mas`                   |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/mas.py#L33)     |       ✓        |               |              |              |              |
+| `micro`                 |                                                                                                                  |       ✓        |               |              |              |              |
+| `myrepos`               |                                                                                                                  |       ✓        |               |              |              |              |
+| `nala`                  |                                                                                                                  |       ✓        |               |              |              |              |
+| `neobundle`             |                                                                                                                  |       ✓        |               |              |              |              |
+| `nix`                   |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/nix.py#L33)     |       ✓        |               |              |      ✓       |              |
+| `npm`                   |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/npm.py#L36)     |       ✓        |               |              |      ✓       |              |
+| `oh-my-zsh`             |                                                                                                                  |       ✓        |               |              |              |              |
+| `opam`                  |                                                                                                                  |       ✓        |               |              |              |              |
+| `opkg`                  |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/opkg.py#L33)    |                |               |      ✓       |              |              |
+| `pacaur`                |  [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/pacman.py#L212)   |                |               |              |              |              |
+| `pacman`                |   [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/pacman.py#L33)   |       ✓        |               |      ✓       |      ✓       |      ✓       |
+| `pacstall`              |  [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/pacstall.py#L34)  |       ✓        |               |              |              |              |
+| `pamac`                 |                                                                                                                  |       ✓        |               |              |              |              |
+| `paru`                  |  [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/pacman.py#L229)   |       ✓        |               |              |              |              |
+| `pearl`                 |                                                                                                                  |       ✓        |               |              |              |              |
+| `pihole`                |                                                                                                                  |       ✓        |               |              |              |              |
+| `pikaur`                |                                                                                                                  |       ✓        |               |              |              |              |
+| `pip`                   |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/pip.py#L39)     |       ✓        |       ✓       |              |      ✓       |              |
+| `pipx`                  |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/pipx.py#L34)    |       ✓        |               |              |              |              |
+| `pkg`                   |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/pkg.py#L62)     |       ✓        |               |              |      ✓       |      ✓       |
+| `pkg-mgr`               |                                                                                                                  |                |               |              |      ✓       |              |
+| `pkg-tools`             |                                                                                                                  |                |               |      ✓       |              |              |
+| `pkgin`                 |                                                                                                                  |       ✓        |               |              |              |      ✓       |
+| `pkgng`                 |                                                                                                                  |                |               |      ✓       |              |              |
+| `plug`                  |                                                                                                                  |       ✓        |               |              |              |              |
+| `pnpm`                  |                                                                                                                  |       ✓        |               |              |              |              |
+| `podman`                |                                                                                                                  |       ✓        |               |              |              |              |
+| `ports`                 |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/pkg.py#L487)    |                |               |              |              |              |
+| `powershell`            |                                                                                                                  |       ✓        |               |              |              |              |
+| `protonup`              |                                                                                                                  |       ✓        |               |              |              |              |
+| `raco`                  |                                                                                                                  |       ✓        |               |              |              |              |
+| `rcm`                   |                                                                                                                  |       ✓        |               |              |              |              |
+| `remotes`               |                                                                                                                  |       ✓        |               |              |              |              |
+| `restarts`              |                                                                                                                  |       ✓        |               |              |              |              |
+| `rtcl`                  |                                                                                                                  |       ✓        |               |              |              |              |
+| `rustup`                |                                                                                                                  |       ✓        |               |              |              |              |
+| `scoop`                 |   [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/scoop.py#L33)    |       ✓        |       ✓       |              |      ✓       |              |
+| `sdkman`                |   [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/sdkman.py#L41)   |       ✓        |               |              |              |              |
+| `sfsu`                  |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/sfsu.py#L41)    |                |               |              |              |              |
+| `sheldon`               |                                                                                                                  |       ✓        |               |              |              |              |
+| `slapt-get`             |                                                                                                                  |                |               |              |      ✓       |      ✓       |
+| `snap`                  |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/snap.py#L33)    |       ✓        |               |              |      ✓       |              |
+| `spack`                 |                                                                                                                  |                |               |              |              |              |
+| `sparkle`               |                                                                                                                  |       ✓        |               |              |              |              |
+| `spicetify`             |                                                                                                                  |       ✓        |               |              |              |              |
+| `stack`                 |                                                                                                                  |       ✓        |               |              |              |              |
+| `steamcmd`              |  [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/steamcmd.py#L25)  |                |               |              |              |              |
+| `stew`                  |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/stew.py#L33)    |                |               |              |              |              |
+| `sun-tools`             |                                                                                                                  |                |               |      ✓       |              |              |
+| `swupd`                 |                                                                                                                  |                |               |      ✓       |              |              |
+| `system`                |                                                                                                                  |       ✓        |               |              |              |              |
+| `tazpkg`                |                                                                                                                  |                |               |      ✓       |              |              |
+| `tldr`                  |                                                                                                                  |       ✓        |               |              |              |              |
+| `tlmgr`                 |                                                                                                                  |       ✓        |       ✓       |      ✓       |              |              |
+| `toolbx`                |                                                                                                                  |       ✓        |               |              |              |              |
+| `trizen`                |                                                                                                                  |       ✓        |               |              |              |              |
+| `uv`                    |     [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/uv.py#L86)     |                |               |              |              |              |
+| `uvx`                   |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/uv.py#L207)     |                |               |              |              |              |
+| `vagrant`               |                                                                                                                  |       ✓        |               |              |              |              |
+| `vcpkg`                 |                                                                                                                  |       ✓        |               |              |              |              |
+| `voom`                  |                                                                                                                  |       ✓        |               |              |              |              |
+| `vscode`                |   [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/vscode.py#L31)   |                |               |              |              |              |
+| `vscodium`              |   [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/vscode.py#L91)   |                |               |              |              |              |
+| `vundle`                |                                                                                                                  |       ✓        |               |              |              |              |
+| `winget`                |   [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/winget.py#L32)   |       ✓        |               |              |              |              |
+| `wsl`                   |                                                                                                                  |       ✓        |               |              |              |              |
+| `xbps`                  |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/xbps.py#L33)    |                |       ✓       |      ✓       |      ✓       |              |
+| `yadm`                  |                                                                                                                  |       ✓        |               |              |              |              |
+| `yarn`                  |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/yarn.py#L63)    |       ✓        |               |              |              |              |
+| `yarn-berry`            |   [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/yarn.py#L408)    |       ✓        |               |              |              |              |
+| `yay`                   |  [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/pacman.py#L247)   |       ✓        |               |              |              |              |
+| `yum`                   |    [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/dnf.py#L239)    |                |               |      ✓       |      ✓       |      ✓       |
+| `zerobrew`              |  [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/zerobrew.py#L35)  |                |               |              |              |              |
+| `zim`                   |                                                                                                                  |       ✓        |               |              |              |              |
+| `zinit`                 |                                                                                                                  |       ✓        |               |              |              |              |
+| `zplug`                 |                                                                                                                  |       ✓        |               |              |              |              |
+| `zr`                    |                                                                                                                  |       ✓        |               |              |              |              |
+| `zypper`                |   [✓](https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/managers/zypper.py#L42)   |                |       ✓       |      ✓       |      ✓       |      ✓       |
+
+<!-- benchmark-managers-end -->
 
 ## Operating system support
 

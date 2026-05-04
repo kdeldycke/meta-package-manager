@@ -39,7 +39,7 @@ class TestInstalled(CLISubCommandTests, CLITableTests):
     def evaluate_signals(mid, stdout, stderr):
         yield from (
             # Common "not found" message.
-            f"info: Skip unavailable {mid} manager." in stderr,
+            f"info: Skip {mid} manager:" in stderr,
             # Stats line at the end of output.
             f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
         )

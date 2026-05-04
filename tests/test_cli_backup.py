@@ -38,7 +38,7 @@ class TestBackup(CLISubCommandTests):
             f"Dumping packages from {mid}..." in stderr,
             f"warning: {mid} does not implement {Operations.installed}" in stderr,
             # Common "not found" message.
-            f"info: Skip unavailable {mid} manager." in stderr,
+            f"info: Skip {mid} manager:" in stderr,
         )
 
     def test_default_all_managers_output_to_console(self, invoke, subcmd):

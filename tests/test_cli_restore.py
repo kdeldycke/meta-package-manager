@@ -49,7 +49,7 @@ class TestRestore(CLISubCommandTests):
             # Restoring message.
             f"Restore {mid} packages..." in stderr,
             # Common "not found" message.
-            f"info: Skip unavailable {mid} manager." in stderr,
+            f"info: Skip {mid} manager:" in stderr,
         )
 
     @pytest.mark.destructive()

@@ -47,7 +47,7 @@ class TestUpgrade(CLISubCommandTests):
             f"Upgrade all outdated packages from {mid}..." in stderr,
             bool(re.search(rf"Upgrade \S+ with {mid}\.\.\.", stderr)),
             # Common "not found" message.
-            f"info: Skip unavailable {mid} manager." in stderr,
+            f"info: Skip {mid} manager:" in stderr,
         )
 
     @pytest.mark.parametrize("all_option", ("--all", None))

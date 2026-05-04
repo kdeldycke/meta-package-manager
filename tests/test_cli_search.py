@@ -43,7 +43,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         yield from (
             f"warning: {mid} does not implement {Operations.search}." in stderr,
             # Common "not found" message.
-            f"info: Skip unavailable {mid} manager." in stderr,
+            f"info: Skip {mid} manager:" in stderr,
             # Stats line at the end of output.
             f"{mid}: " in stderr.splitlines()[-1] if stderr else "",
         )

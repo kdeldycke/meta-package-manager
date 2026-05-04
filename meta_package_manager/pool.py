@@ -288,8 +288,7 @@ class ManagerPool:
             if drop_not_found and not manager.available:
                 reason = manager.unavailable_reason or "unavailable"
                 logging.info(
-                    f"Skip {theme.invoked_command(manager_id)} manager: "
-                    f"{reason}.",
+                    f"Skip {theme.invoked_command(manager_id)} manager: {reason}.",
                 )
                 continue
 

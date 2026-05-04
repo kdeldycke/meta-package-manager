@@ -126,10 +126,13 @@ jobs:
           git push --force --set-upstream origin $branch
           $existing = gh pr list --head $branch --state open --json number --jq '.[0].number'
           if ($existing) {
-            gh pr edit $existing --title "Update Chocolatey package definition to v$env:VERSION" --body-file body.md
+            gh pr edit $existing --title "Update Chocolatey package definition to v$env:VERSION" `
+              --body-file body.md `
+              --add-label "📦 manager: choco"
           } else {
             gh pr create --title "Update Chocolatey package definition to v$env:VERSION" `
-              --body-file body.md
+              --body-file body.md `
+              --label "📦 manager: choco"
           }
 
   # Prepare a Guix package definition after the release job. Unlike Homebrew, Scoop,
@@ -198,11 +201,13 @@ jobs:
           if [ -n "${existing}" ]; then
             gh pr edit "${existing}" \
               --title "Update Guix package definition to v${VERSION}" \
-              --body-file body.md
+              --body-file body.md \
+              --add-label "📦 manager: guix"
           else
             gh pr create \
               --title "Update Guix package definition to v${VERSION}" \
-              --body-file body.md
+              --body-file body.md \
+              --label "📦 manager: guix"
           fi
 
   # Prepare a Nix package definition after the release job. Unlike Homebrew, Scoop,
@@ -273,9 +278,11 @@ jobs:
           if [ -n "${existing}" ]; then
             gh pr edit "${existing}" \
               --title "Update Nix package definition to v${VERSION}" \
-              --body-file body.md
+              --body-file body.md \
+              --add-label "📦 manager: nix"
           else
             gh pr create \
               --title "Update Nix package definition to v${VERSION}" \
-              --body-file body.md
+              --body-file body.md \
+              --label "📦 manager: nix"
           fi

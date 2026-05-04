@@ -207,10 +207,13 @@ def replace_content(
     start_tag: str,
     end_tag: str | None = None,
 ) -> None:
-    """Replace in a file the content surrounded by the provided start and end tags.
+    """Replace in a file the content between start and end tags.
 
-    If no end tag is provided, the whole content found after the start tag will be
-    replaced.
+    The ``new_content`` payload is wrapped with a blank line on both sides so
+    the resulting region is format-stable through ``mdformat``. ``mdformat``
+    treats the surrounding ``<!-- ... -->`` markers as block-level HTML and
+    inserts blank lines around them on every pass: emitting them up front
+    avoids a generator/formatter ping-pong on every CI run.
     """
     filepath = filepath.resolve()
     assert filepath.exists(), f"File {filepath} does not exist."
@@ -218,8 +221,9 @@ def replace_content(
 
     orig_content = filepath.read_text()
 
-    assert start_tag, "Start tag must be empty."
-    assert start_tag in orig_content, f"Start tag {start_tag!r} not found in content."
+    assert start_tag in orig_content, (
+        f"Start tag {start_tag!r} not found in {filepath}."
+    )
     pre_content, table_start = orig_content.split(start_tag, 1)
 
     if end_tag:
@@ -228,8 +232,9 @@ def replace_content(
         end_tag = ""
         post_content = ""
 
+    wrapped = f"\n\n{new_content.strip()}\n\n" if new_content.strip() else "\n\n"
     filepath.write_text(
-        f"{pre_content}{start_tag}{new_content}{end_tag}{post_content}",
+        f"{pre_content}{start_tag}{wrapped}{end_tag}{post_content}",
     )
 
 
@@ -263,27 +268,29 @@ def update_readme() -> None:
     replace_content(
         readme,
         managers_sankey(),
-        "<!-- managers-sankey-start -->\n\n",
-        "\n\n<!-- managers-sankey-end -->",
+        "<!-- managers-sankey-start -->",
+        "<!-- managers-sankey-end -->",
     )
 
     matrix, footnotes = operation_matrix()
     replace_content(
         readme,
         matrix,
-        "<!-- operation-matrix-start -->\n\n",
-        "\n\n<!-- operation-matrix-end -->",
+        "<!-- operation-matrix-start -->",
+        "<!-- operation-matrix-end -->",
     )
-    replace_content(
-        readme,
-        footnotes,
-        "<!-- operation-footnotes-start -->\n\n",
-        # mdformat-footnote is stripping all HTML comments after footnotes:
-        # https://github.com/executablebooks/mdformat-footnote/issues/11
-        # So we protect the content to be replaced with an end tag that we put at the
-        # tail of the last footnote line, without any carriage return.
-        "<!-- operation-footnotes-end -->\n",
-    )
+    # mdformat-footnote strips HTML comments after footnote definitions
+    # (https://github.com/executablebooks/mdformat-footnote/issues/11), so the
+    # end tag has to be wedged against the tail of the last footnote line (no
+    # leading newline) to survive a format pass. That breaks the trailing-blank
+    # convention of replace_content(), so the footnote section is written
+    # inline.
+    start_tag = "<!-- operation-footnotes-start -->\n\n"
+    end_tag = "<!-- operation-footnotes-end -->\n"
+    orig_content = readme.read_text()
+    pre_content, rest = orig_content.split(start_tag, 1)
+    _, post_content = rest.split(end_tag, 1)
+    readme.write_text(f"{pre_content}{start_tag}{footnotes}{end_tag}{post_content}")
 
 
 def update_benchmark() -> None:
@@ -292,8 +299,8 @@ def update_benchmark() -> None:
     replace_content(
         benchmark,
         benchmark_managers_table(),
-        "<!-- benchmark-managers-start -->\n\n",
-        "\n\n<!-- benchmark-managers-end -->",
+        "<!-- benchmark-managers-start -->",
+        "<!-- benchmark-managers-end -->",
     )
 
 

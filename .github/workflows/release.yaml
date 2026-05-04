@@ -104,7 +104,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --from "repomatic @ git+https://github.com/kdeldycke/repomatic" repomatic pr-body
+          uvx --no-progress 'repomatic==6.17.0' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Chocolatey
           --template-arg version=$env:VERSION
@@ -175,7 +175,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --from "repomatic @ git+https://github.com/kdeldycke/repomatic" repomatic pr-body
+          uvx --no-progress 'repomatic==6.17.0' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Guix
           --template-arg version="${VERSION}"
@@ -248,7 +248,7 @@ jobs:
         env:
           VERSION: ${{ steps.check.outputs.version }}
         run: >
-          uvx --from "repomatic @ git+https://github.com/kdeldycke/repomatic" repomatic pr-body
+          uvx --no-progress 'repomatic==6.17.0' pr-body
           --template-file .github/pr-templates/update-package-spec.md
           --template-arg channel=Nix
           --template-arg version="${VERSION}"

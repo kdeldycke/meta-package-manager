@@ -140,7 +140,21 @@ def pytest_report_header(config: Config, start_path: Path) -> tuple[str, ...]:
 
 @fixture
 def invoke(extra_runner):  # noqa: F811
-    return partial(extra_runner.invoke, mpm)
+    """Invoke ``mpm`` with ``--keep-unavailable`` prepended.
+
+    The default selection drops managers whose CLI is missing or fails the
+    version requirement; in a hermetic test environment (the GitHub Actions
+    runner before any package manager is installed, distributor sandboxes
+    like Guix's, etc.) this leaves the pool empty and ``mpm`` exits with
+    ``UsageError`` (code 2) before the subcommand can run.
+
+    ``--keep-unavailable`` flips that filter off so the CLI tests exercise
+    real subcommand logic regardless of which package managers happen to be
+    on PATH.  Tests that specifically want to verify the
+    "no-manager-selected" behavior should call ``extra_runner.invoke``
+    directly without this wrapper.
+    """
+    return partial(extra_runner.invoke, mpm, "--keep-unavailable")
 
 
 @fixture(scope="class")

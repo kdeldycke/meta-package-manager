@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Compile `version_regexes` with `re.MULTILINE` only, dropping `re.VERBOSE`. Under `re.VERBOSE`, unescaped whitespace in the pattern is silently ignored, so patterns like `r"guix \(GNU Guix\) (?P<version>...)"` would never match `guix --version` output and the manager was reported as unavailable with `could not parse version from <path> output`. Affected `guix`, `nix`, and `stew`, all of which now correctly detect their installed version. `steamcmd`, which used `\ ` escapes to work around the same flag, is unaffected.
 - [mpm] Add `--keep-unavailable` flag (mirrored by `keep_unavailable` in `MpmConfig`). When set, the manager pool no longer drops managers whose CLI is missing from PATH, not executable, or fails the version requirement: instead they stay in the selection so the subcommand can run, with each unavailable manager logging a per-call warning when it actually tries to invoke its binary. Without the flag, the existing behavior is preserved: `pool.select_managers` exits 2 with `critical: No manager selected.` when nothing matches. The `tests/conftest.py::invoke` fixture now prepends the flag for every CLI test, which lets the suite exercise real subcommand logic in environments (CI runners before any package manager is installed, distributor build sandboxes) where no PM binaries are on PATH.
 
 ## [`6.4.1` (2026-05-04)](https://github.com/kdeldycke/meta-package-manager/compare/v6.4.0...v6.4.1)

@@ -369,6 +369,11 @@ class PackageManager(metaclass=MetaPackageManager):
     :py:func:`meta_package_manager.base.PackageManager.version`.
 
     By default match the first part that is space-separated.
+
+    .. caution::
+        These regexes are compiled with :py:data:`re.MULTILINE` only. They are
+        *not* compiled with :py:data:`re.VERBOSE`, so literal whitespace in the
+        pattern is significant and matches whitespace in the CLI output.
     """
 
     stop_on_error: bool = False
@@ -617,7 +622,7 @@ class PackageManager(metaclass=MetaPackageManager):
             # Try each regex to extract the version.
             for regex in self.version_regexes:
                 logging.debug(f"Use {regex!r} to extracting version.")
-                parts = re.compile(regex, re.MULTILINE | re.VERBOSE).search(output)
+                parts = re.compile(regex, re.MULTILINE).search(output)
                 if parts:
                     version_string = parts.groupdict().get("version")
                     logging.debug(f"Extracted version: {version_string!r}")

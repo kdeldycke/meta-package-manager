@@ -173,6 +173,38 @@ def test_version_regexes(manager):
         assert "version" in regex.groupindex
 
 
+@pytest.mark.parametrize(
+    ("manager_id", "sample_output", "expected_version"),
+    (
+        ("guix", "guix (GNU Guix) 1.4.0\nCopyright (C) 2026 the Guix authors\n", "1.4.0"),
+        (
+            "guix",
+            "guix (GNU Guix) 1.4.0-2563-gabc1234\nCopyright (C) 2026\n",
+            "1.4.0-2563-gabc1234",
+        ),
+        ("guix", "guix (GNU Guix) abc1234\nCopyright (C) 2026\n", "abc1234"),
+        ("nix", "nix-env (Nix) 2.18.1\n", "2.18.1"),
+        ("stew", "stew version v0.7.0\n", "0.7.0"),
+        ("steamcmd", "Valve Corporation - version 1234567890\n", "1234567890"),
+    ),
+)
+def test_version_regex_matches_sample(manager_id, sample_output, expected_version):
+    """Each manager's ``version_regexes`` parses the documented ``--version`` output.
+
+    Regression guard for the case where ``re.VERBOSE`` silently swallowed literal
+    spaces in patterns like ``guix \\(GNU Guix\\) ...``, leaving the manager
+    unable to detect its own version.
+    """
+    manager = pool[manager_id]
+    matched = None
+    for regex in manager.version_regexes:
+        match = re.compile(regex, re.MULTILINE).search(sample_output)
+        if match and match.group("version"):
+            matched = match.group("version")
+            break
+    assert matched == expected_version
+
+
 @all_managers
 def test_cli_path(manager):
     if manager.cli_path is not None:

@@ -115,10 +115,6 @@ class MpmConfig:
     all_managers: bool = False
     """Force evaluation of all managers, including unsupported and deprecated."""
 
-    keep_unavailable: bool = False
-    """Keep managers in the selection even when their CLI is missing or
-    fails the version requirement."""
-
     ignore_auto_updates: bool = True
     """Exclude auto-updating packages from outdated/upgrade results."""
 
@@ -337,12 +333,6 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         "by --<manager-id> / --no-<manager-id> options before calling the subcommand.",
     ),
     option(
-        "--keep-unavailable",
-        is_flag=True,
-        default=False,
-        help="Do not drop managers whose CLI is missing or fails the version check.",
-    ),
-    option(
         "-x",
         "--xkcd",
         is_flag=True,
@@ -443,7 +433,6 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 def mpm(
     ctx,
     all_managers,
-    keep_unavailable,
     ignore_auto_updates,
     stop_on_error,
     dry_run,
@@ -500,10 +489,6 @@ def mpm(
         keep=user_selection,
         drop=managers_to_remove,
         keep_deprecated=all_managers,
-        # ``--keep-unavailable`` flips ``drop_not_found`` so managers without
-        # an executable on PATH (or failing the version requirement) stay in
-        # the selection instead of getting filtered out.
-        drop_not_found=not keep_unavailable,
         # Should we include auto-update packages or not?
         ignore_auto_updates=ignore_auto_updates,
         # Does the manager should raise on error or not.

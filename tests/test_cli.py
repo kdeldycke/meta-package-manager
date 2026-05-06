@@ -160,7 +160,7 @@ class TestCommonCLI:
             process.stdout,
         )
 
-    def test_timeout(self, invoke):
+    def test_timeout(self, invoke, slow_fake_pool):
         """Check that timeout is handled gracefully: command exits 0 and logs a warning."""
         result = invoke("--timeout", "1", "outdated")
         assert result.exit_code == 0
@@ -171,7 +171,7 @@ class TestCommonCLI:
         ("stats_arg", "active_stats"),
         (("--stats", True), ("--no-stats", False), (None, True)),
     )
-    def test_stats(self, invoke, stats_arg, active_stats):
+    def test_stats(self, invoke, fake_pool, stats_arg, active_stats):
         """Test the result on all combinations of optional statistics options."""
         result = invoke(stats_arg, "installed")
         assert result.exit_code == 0

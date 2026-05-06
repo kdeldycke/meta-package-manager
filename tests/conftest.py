@@ -27,7 +27,9 @@ from click_extra.pytest import create_config, extra_runner  # noqa: F401
 from pytest import fixture, param
 
 from meta_package_manager.cli import mpm
-from meta_package_manager.pool import manager_classes, pool
+from meta_package_manager.pool import ManagerPool, manager_classes, pool
+
+from .fake_manager import FakeManager, TimingOutFakeManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -141,6 +143,47 @@ def pytest_report_header(config: Config, start_path: Path) -> tuple[str, ...]:
 @fixture
 def invoke(extra_runner):  # noqa: F811
     return partial(extra_runner.invoke, mpm)
+
+
+def _patch_pool_with(monkeypatch, fake):
+    """Replace ``pool.select_managers`` with a generator yielding ``fake``.
+
+    Mirrors the runtime knobs (timeout, stop_on_error, dry_run,
+    ignore_auto_updates) that
+    :py:meth:`meta_package_manager.pool.ManagerPool._select_managers` would
+    forward, so the CLI exercises the same code path it does against real
+    managers.
+    """
+
+    def fake_select_managers(*args, **kwargs):
+        for param in ManagerPool.ALLOWED_EXTRA_OPTION:
+            if param in kwargs:
+                setattr(fake, param, kwargs[param])
+        yield fake
+
+    monkeypatch.setattr(pool, "select_managers", fake_select_managers)
+    return fake
+
+
+@fixture
+def fake_pool(monkeypatch):
+    """Yield a single deterministic :class:`FakeManager` from the pool.
+
+    Use for CLI plumbing tests (stats lines, table rendering, exit codes)
+    that need a stable package set regardless of host PATH.
+    """
+    return _patch_pool_with(monkeypatch, FakeManager())
+
+
+@fixture
+def slow_fake_pool(monkeypatch):
+    """Yield a :class:`TimingOutFakeManager` whose ``outdated`` exceeds ``--timeout``.
+
+    Use only for tests that need to verify
+    :py:meth:`meta_package_manager.base.PackageManager.run` catches
+    :py:exc:`subprocess.TimeoutExpired` and logs the expected warning.
+    """
+    return _patch_pool_with(monkeypatch, TimingOutFakeManager())
 
 
 @fixture(scope="class")

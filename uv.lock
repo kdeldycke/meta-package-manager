@@ -2116,11 +2116,11 @@ wheels = [
 
 [[package]]
 name = "uritools"
-version = "6.0.2"
+version = "6.1.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/86/92/07bd0999768dc45ab2be5795d53065cabee3bd54db89e7499005e09a4a32/uritools-6.0.2.tar.gz", hash = "sha256:4d671c3b8ca230a5d47efa5f8a693f3d01531f38f4f523170299be734cc9851b", size = 23199, upload-time = "2026-04-22T20:17:08.26Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/97/508fa009ddc9c0d0e6e687eca0e3aa6ff09ac9836f98c28958a7eed936c1/uritools-6.1.0.tar.gz", hash = "sha256:be97e452528e7a42ef0a4df68364ddd77833e982c5bac5cdcfee15c81f65e96b", size = 24777, upload-time = "2026-04-30T21:12:37.463Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e6/85/89de28a9c7c94733e6525a39960f23bf557c1e072b1c53f787b6e5279ff1/uritools-6.0.2-py3-none-any.whl", hash = "sha256:6c1bc9a38810f38d5e6b2ea0eb3edb6c3311bd915a4d4f457ff0de565d0e614b", size = 10636, upload-time = "2026-04-22T20:17:06.719Z" },
+    { url = "https://files.pythonhosted.org/packages/fd/20/2870f2e63da2b74eda896053809065769b256646bb3f4b74e06d013ad590/uritools-6.1.0-py3-none-any.whl", hash = "sha256:f1b699052459711f1dd03721ca79341dc345054e6286f47313f8bce777782415", size = 12096, upload-time = "2026-04-30T21:12:36.094Z" },
 ]
 
 [[package]]

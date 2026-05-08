@@ -1,5 +1,10 @@
 # Changelog
 
+## [`6.4.3.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.4.2...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`6.4.2` (2026-05-08)](https://github.com/kdeldycke/meta-package-manager/compare/v6.4.1...v6.4.2)
 
 - [mpm] Compile `version_regexes` with `re.MULTILINE` only, dropping `re.VERBOSE`. Under `re.VERBOSE`, unescaped whitespace in the pattern is silently ignored, so patterns like `r"guix \(GNU Guix\) (?P<version>...)"` would never match `guix --version` output and the manager was reported as unavailable with `could not parse version from <path> output`. Affected `guix`, `nix`, and `stew`, all of which now correctly detect their installed version. `steamcmd`, which used `\ ` escapes to work around the same flag, is unaffected.

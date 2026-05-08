@@ -156,9 +156,9 @@ def _patch_pool_with(monkeypatch, fake):
     """
 
     def fake_select_managers(*args, **kwargs):
-        for param in ManagerPool.ALLOWED_EXTRA_OPTION:
-            if param in kwargs:
-                setattr(fake, param, kwargs[param])
+        for option in ManagerPool.ALLOWED_EXTRA_OPTION:
+            if option in kwargs:
+                setattr(fake, option, kwargs[option])
         yield fake
 
     monkeypatch.setattr(pool, "select_managers", fake_select_managers)

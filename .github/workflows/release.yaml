@@ -8,11 +8,24 @@ name: 🚀 Build & release
 jobs:
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/release.yaml@3c1df298482d99849c4390ef91587a946b9445cc # v6.17.0
+    uses: kdeldycke/repomatic/.github/workflows/release.yaml@bc1a04cee565d9ccdf32b167972799b66dfbf3a6 # v6.18.2
     secrets:
-      PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
       VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+
+  publish-pypi:
+    name: 🐍 Publish to PyPI (${{ matrix.short_sha }})
+    needs: release
+    if: needs.release.outputs.release_commits_matrix
+    strategy:
+      matrix: ${{ fromJSON(needs.release.outputs.release_commits_matrix) }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@bc1a04cee565d9ccdf32b167972799b66dfbf3a6 # v6.18.2
+        with:
+          artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
 
   # Publish to Chocolatey after the release job. Unlike Homebrew, Scoop, NixOS, and AUR,
   # the Chocolatey package is maintained in this repo (see packaging/choco/meta-package-manager/).

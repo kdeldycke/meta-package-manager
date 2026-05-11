@@ -204,6 +204,28 @@ jobs:
         run: |
           sudo apt --quiet --yes install flatpak
 
+      # PowerShell Gallery
+      - name: PowerShell Gallery - macOS install
+        if: runner.os == 'macOS'
+        # GitHub-hosted macOS images ship pwsh 7.x and PSResourceGet, but install both defensively in case the image
+        # has not been refreshed yet on a given runner.
+        run: |
+          brew install --cask powershell || true
+          pwsh -NoProfile -NonInteractive -Command "Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser"
+      - name: PowerShell Gallery - Linux install
+        if: runner.os == 'Linux'
+        # See: https://learn.microsoft.com/en-us/powershell/scripting/install/install-ubuntu
+        run: |
+          sudo snap install powershell --classic
+          pwsh -NoProfile -NonInteractive -Command "Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser"
+      - name: PowerShell Gallery - Windows bootstrap
+        if: runner.os == 'Windows'
+        shell: pwsh
+        # pwsh 7.4+ is pre-installed on windows-latest runners. Refresh PSResourceGet to the latest published version so
+        # the bundled copy does not lag behind the version mpm exercises in tests.
+        run: |
+          Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser
+
       # Scoop
       - name: Scoop - Windows install
         if: runner.os == 'Windows'

@@ -109,6 +109,11 @@ color = "bfdadc"
 description = "pkg, ports"
 
 [[profiles.default.labels]]
+name = "📦 manager: pwsh-gallery"
+color = "bfdadc"
+description = "pwsh-gallery"
+
+[[profiles.default.labels]]
 name = "📦 manager: rpm-based"
 color = "bfdadc"
 description = "dnf, dnf5, yum, zypper"

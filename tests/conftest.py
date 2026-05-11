@@ -229,6 +229,7 @@ PACKAGE_IDS = {
     "pipx": "pytz",
     "pkg": "dmg2img",
     "ports": "ftp/curl",
+    "pwsh-gallery": "PSReadLine",
     "scoop": "main/wget",
     "sdkman": "java",
     "sfsu": "main/wget",

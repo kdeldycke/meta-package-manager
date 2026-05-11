@@ -105,6 +105,7 @@ Meta Package Manager,pip,1
 Meta Package Manager,pipx,1
 Meta Package Manager,pkg,1
 Meta Package Manager,ports,1
+Meta Package Manager,pwsh-gallery,1
 Meta Package Manager,scoop,1
 Meta Package Manager,sdkman,1
 Meta Package Manager,sfsu,1
@@ -165,6 +166,7 @@ Meta Package Manager,zypper,1
 | [`pipx`](https://pipx.pypa.io)                                                          | >=1.0.0          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`pkg`](https://github.com/freebsd/pkg)                                                 | >=1.11           |           |               |       |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`ports`](https://www.freebsd.org/ports/)                                               |                  |           |               |       |             |         |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`pwsh-gallery`](https://www.powershellgallery.com)                                     | >=7.4.0          |           |      🐧       |  🍎   |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`scoop`](https://scoop.sh)                                                             | >=0.2.4          |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`sdkman`](https://sdkman.io)                                                           | >=5.0.0          |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`sfsu`](https://github.com/winpax/sfsu)                                                | >=1.16.0         |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |

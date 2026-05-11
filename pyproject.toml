@@ -61,7 +61,12 @@ keywords = [
   "plugin",
   "portage",
   "ports",
+  "powershell",
+  "powershell-gallery",
+  "psresourceget",
   "purl",
+  "pwsh",
+  "pwsh-gallery",
   "ruby",
   "ruby-gem",
   "rust",
@@ -541,6 +546,12 @@ labels.extra-file-rules = """"🔌 bar-plugin":
       - tests/*pkg*
       - tests/*ports*
 
+"📦 manager: pwsh-gallery":
+  - changed-files:
+    - any-glob-to-any-file:
+      - meta_package_manager/managers/pwsh_gallery*
+      - tests/*pwsh_gallery*
+
 "📦 manager: scoop":
   - changed-files:
     - any-glob-to-any-file:
@@ -719,6 +730,13 @@ labels.extra-content-rules = """"🔌 bar-plugin":
   - "ports"
   - "freebsd"
   - "freebsd ports"
+
+"📦 manager: pwsh-gallery":
+  - "powershell"
+  - "powershell gallery"
+  - "psgallery"
+  - "psresourceget"
+  - "pwsh"
 
 "📦 manager: scoop":
   - "scoop"

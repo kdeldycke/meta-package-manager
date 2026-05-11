@@ -50,6 +50,7 @@ from .managers.pacstall import Pacstall
 from .managers.pip import Pip
 from .managers.pipx import Pipx
 from .managers.pkg import PKG, Ports
+from .managers.pwsh_gallery import PWSH_Gallery
 from .managers.scoop import Scoop
 from .managers.sdkman import SDKMAN
 from .managers.sfsu import SFSU
@@ -105,6 +106,7 @@ manager_classes = (
     Pipx,
     PKG,
     Ports,
+    PWSH_Gallery,
     Scoop,
     SDKMAN,
     SFSU,

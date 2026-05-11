@@ -32,6 +32,14 @@ buildPythonPackage (finalAttrs: {
   # test_sphinx_crossrefs.py shells out to ``uv``, unavailable in the build sandbox.
   disabledTestPaths = [ "tests/test_sphinx_crossrefs.py" ];
 
+  # These tests assume the CI runner environment (the ``GITHUB_RUNNER_OS``
+  # env var, expected number of detected platform traits per runner image).
+  # Neither is available inside the Nix build sandbox.
+  disabledTests = [
+    "test_platform_detection"
+    "test_current_funcs"
+  ];
+
   pythonImportsCheck = [ "extra_platforms" ];
 
   meta = {

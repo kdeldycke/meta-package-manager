@@ -26,14 +26,11 @@ buildPythonPackage (finalAttrs: {
     requests
   ];
 
-  # Skip tests marked ``network`` (they fetch from PyPI) and
-  # tests/test_sphinx_crossrefs.py which shells out to ``uv``
-  # (not available in the build sandbox).
-  pytestFlagsArray = [
-    "-m"
-    "not network"
-    "--ignore=tests/test_sphinx_crossrefs.py"
-  ];
+  # Tests marked ``network`` fetch from PyPI.
+  disabledTestMarks = [ "network" ];
+
+  # test_sphinx_crossrefs.py shells out to ``uv``, unavailable in the build sandbox.
+  disabledTestPaths = [ "tests/test_sphinx_crossrefs.py" ];
 
   pythonImportsCheck = [ "extra_platforms" ];
 

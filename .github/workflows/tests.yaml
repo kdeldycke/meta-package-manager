@@ -211,13 +211,15 @@ jobs:
         # has not been refreshed yet on a given runner.
         run: |
           brew install --cask powershell || true
-          pwsh -NoProfile -NonInteractive -Command "Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser"
+          pwsh -NoProfile -NonInteractive \
+            -Command "Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser"
       - name: PowerShell Gallery - Linux install
         if: runner.os == 'Linux'
         # See: https://learn.microsoft.com/en-us/powershell/scripting/install/install-ubuntu
         run: |
           sudo snap install powershell --classic
-          pwsh -NoProfile -NonInteractive -Command "Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser"
+          pwsh -NoProfile -NonInteractive \
+            -Command "Install-Module -Name Microsoft.PowerShell.PSResourceGet -Force -AcceptLicense -Scope CurrentUser"
       - name: PowerShell Gallery - Windows bootstrap
         if: runner.os == 'Windows'
         shell: pwsh

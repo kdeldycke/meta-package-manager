@@ -3,24 +3,37 @@
   buildPythonPackage,
   fetchFromGitHub,
   pytestCheckHook,
+  requests,
   uv-build,
 }:
 
 buildPythonPackage (finalAttrs: {
   pname = "extra-platforms";
-  version = "11.1.0";
+  version = "12.0.3";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "kdeldycke";
     repo = "extra-platforms";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-2bPkus9Lk3VwB27/WKFgN/kxKE2jPDKdV9U5oYKmMPc=";
+    hash = "sha256-OJ5ch1dfAnblC+3UCJ9I9P9sw8taGp8yBg//ZraunRo=";
   };
 
   build-system = [ uv-build ];
 
-  nativeCheckInputs = [ pytestCheckHook ];
+  nativeCheckInputs = [
+    pytestCheckHook
+    requests
+  ];
+
+  # Skip tests marked ``network`` (they fetch from PyPI) and
+  # tests/test_sphinx_crossrefs.py which shells out to ``uv``
+  # (not available in the build sandbox).
+  pytestFlagsArray = [
+    "-m"
+    "not network"
+    "--ignore=tests/test_sphinx_crossrefs.py"
+  ];
 
   pythonImportsCheck = [ "extra_platforms" ];
 

@@ -169,10 +169,14 @@ class MAS(PackageManager):
     def remove(self, package_id: str) -> str:
         """Removes a package.
 
+        ``mas`` 4.1.0+ requests root privileges itself when not already
+        running as root, so we don't pre-wrap the call in ``sudo``. This
+        matches how ``install`` and ``upgrade`` are already invoked.
+
         .. code-block:: shell-session
 
-            $ sudo mas uninstall 1494051017
+            $ mas uninstall 1494051017
             Password:
-            Deleted '/Applications/SimpleLogin.app' to '/Users/kde/.Trash/SimpleLogin.app'
+            Uninstalled '/Applications/SimpleLogin.app' to '/Users/kde/.Trash/SimpleLogin.app'
         """
-        return self.run_cli("uninstall", package_id, sudo=True)
+        return self.run_cli("uninstall", package_id)

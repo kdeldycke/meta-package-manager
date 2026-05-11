@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [mas] Bump minimum required `mas` version from `1.8.7` to `7.0.0` and switch `installed`, `outdated`, and `search` to parse the new `--json` output instead of regex-matching the tabular format. JSON parsing avoids column-alignment ambiguities (app names containing parentheses or extra whitespace) and consumes the upstream-supported programmatic interface. Also updates `homepage_url` to `https://github.com/mas-cli/mas` (the project moved from `argon/mas`).
+- [mas] Drop the explicit `sudo` wrapper around `mas uninstall`. `mas` 4.1.0+ requests root privileges itself when not already running as root, so pre-wrapping is redundant. Aligns `remove()` with `install()` and `upgrade_*_cli()`, which already relied on `mas`'s internal escalation.
 
 ## [`6.4.3` (2026-05-11)](https://github.com/kdeldycke/meta-package-manager/compare/v6.4.2...v6.4.3)
 

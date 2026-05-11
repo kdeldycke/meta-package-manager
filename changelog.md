@@ -11,9 +11,21 @@
 
 ## [`6.4.3` (2026-05-11)](https://github.com/kdeldycke/meta-package-manager/compare/v6.4.2...v6.4.3)
 
+> [!NOTE]
+> `6.4.3` is available on [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.4.3).
+
+> [!WARNING]
+> `6.4.3` is **not available** on 🐍 PyPI.
+
 - [mpm] Re-release to fix PyPI upload issues.
 
 ## [`6.4.2` (2026-05-08)](https://github.com/kdeldycke/meta-package-manager/compare/v6.4.1...v6.4.2)
+
+> [!NOTE]
+> `6.4.2` is available on [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.4.2).
+
+> [!WARNING]
+> `6.4.2` is **not available** on 🐍 PyPI.
 
 - [mpm] Compile `version_regexes` with `re.MULTILINE` only, dropping `re.VERBOSE`. Under `re.VERBOSE`, unescaped whitespace in the pattern is silently ignored, so patterns like `r"guix \(GNU Guix\) (?P<version>...)"` would never match `guix --version` output and the manager was reported as unavailable with `could not parse version from <path> output`. Affected `guix`, `nix`, and `stew`, all of which now correctly detect their installed version. `steamcmd`, which used `\ ` escapes to work around the same flag, is unaffected.
 

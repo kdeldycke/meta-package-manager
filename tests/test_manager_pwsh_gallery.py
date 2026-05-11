@@ -72,8 +72,7 @@ def test_parse_json_array_single_entry(manager):
 
 def test_parse_json_array_multiple_entries(manager):
     output = (
-        '[{"Name":"PSReadLine","Version":"2.3.6"},'
-        '{"Name":"Pester","Version":"5.5.0"}]'
+        '[{"Name":"PSReadLine","Version":"2.3.6"},{"Name":"Pester","Version":"5.5.0"}]'
     )
     assert manager._parse_json_array(output) == [
         {"Name": "PSReadLine", "Version": "2.3.6"},
@@ -100,9 +99,7 @@ def test_installed_handles_empty_pipeline(manager, monkeypatch):
 
 
 def test_outdated_yields_only_upgrades(manager, monkeypatch):
-    output = (
-        '[{"Name":"PSReadLine","Installed":"2.3.4","Latest":"2.3.6"}]'
-    )
+    output = '[{"Name":"PSReadLine","Installed":"2.3.4","Latest":"2.3.6"}]'
     monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
     packages = list(manager.outdated)
     assert len(packages) == 1

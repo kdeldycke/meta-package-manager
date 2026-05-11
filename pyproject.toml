@@ -241,6 +241,7 @@ packages.find.include = [ "meta_package_manager*" ]
 exclude-newer = "1 week"
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
+exclude-newer-package = { urllib3 = "0 day" }
 
 [tool.nuitka]
 product-name = "Meta Package Manager"

@@ -1567,7 +1567,7 @@ def restore(ctx, toml_files):
                     raw_spec=f"pkg:{manager.id}:/{package_id}{VERSION_SEP}{package_id}",
                     package_id=package_id,
                     manager_id=manager.id,
-                    version=version,
+                    version=str(version),
                 )
                 logging.info(f"Install {spec}...")
                 output = manager.install(spec.package_id, version=spec.version)

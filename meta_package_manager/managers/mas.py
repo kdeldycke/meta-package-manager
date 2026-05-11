@@ -16,7 +16,7 @@
 
 from __future__ import annotations
 
-import re
+import json
 
 from extra_platforms import MACOS
 
@@ -33,41 +33,17 @@ if TYPE_CHECKING:
 class MAS(PackageManager):
     name = "Mac AppStore"
 
-    homepage_url = "https://github.com/argon/mas"
+    homepage_url = "https://github.com/mas-cli/mas"
 
     platforms = MACOS
 
-    _INSTALLED_REGEXP = re.compile(
-        r"""
-        (?P<package_id>\d+)
-        \s+
-        (?P<package_name>.+?)
-        \s+
-        \(
-            (?P<version>\S+)
-        \)
-        """,
-        re.MULTILINE | re.VERBOSE,
-    )
-
-    _OUTDATED_REGEXP = re.compile(
-        r"""
-        (?P<package_id>\d+)
-        \s+
-        (?P<package_name>.+?)
-        \s+
-        \(
-            (?P<installed_version>\S+)
-            \s+->\s+
-            (?P<latest_version>\S+)
-        \)
-        """,
-        re.MULTILINE | re.VERBOSE,
-    )
-
-    requirement = ">=1.8.7"
-    """`1.8.7 <https://github.com/mas-cli/mas/releases/tag/v1.8.7>`_ is fixing the
-    ``mas search`` command.
+    requirement = ">=7.0.0"
+    """`7.0.0 <https://github.com/mas-cli/mas/releases/tag/v7.0.0>`_ introduces
+    the ``--json`` flag on ``config``, ``list``, ``lookup``/``info``,
+    ``outdated`` & ``search``. Parsing structured JSON output is the supported
+    programmatic interface: it sidesteps the column-alignment ambiguities of
+    the tabular output (app names containing parentheses or extra whitespace
+    would break the previous regex-based parser).
     """
 
     version_cli_options = ("version",)
@@ -75,8 +51,17 @@ class MAS(PackageManager):
     .. code-block:: shell-session
 
         $ mas version
-        1.8.3
+        7.0.0
     """
+
+    @staticmethod
+    def _parse_json_stream(output: str) -> Iterator[dict]:
+        """Parse mas ``--json`` output as a stream of newline-delimited JSON
+        objects, one per app.
+        """
+        for line in output.splitlines():
+            if line.strip():
+                yield json.loads(line)
 
     @property
     def installed(self) -> Iterator[Package]:
@@ -84,20 +69,18 @@ class MAS(PackageManager):
 
         .. code-block:: shell-session
 
-            $ mas list
-            1569813296  1Password for Safari                 (2.3.5)
-            1295203466  Microsoft Remote Desktop             (10.7.6)
-            409183694   Keynote                              (12.0)
-            1408727408  com.adriangranados.wifiexplorerlite  (1.5.5)
-            409203825   Numbers                              (12.0)
+            $ mas list --json
+            {"adamID":1569813296,"bundleID":"com.1password.1password-safari","name":"1Password for Safari","version":"2.3.5",...}
+            {"adamID":1295203466,"bundleID":"com.microsoft.rdc.macos","name":"Microsoft Remote Desktop","version":"10.7.6",...}
+            {"adamID":409183694,"bundleID":"com.apple.iWork.Keynote","name":"Keynote","version":"12.0",...}
         """
-        output = self.run_cli("list")
+        output = self.run_cli("list", "--json")
 
-        for package_id, package_name, version in self._INSTALLED_REGEXP.findall(output):
+        for app in self._parse_json_stream(output):
             yield self.package(
-                id=package_id,
-                name=package_name,
-                installed_version=version,
+                id=str(app["adamID"]),
+                name=app["name"],
+                installed_version=app["version"],
             )
 
     @property
@@ -106,23 +89,18 @@ class MAS(PackageManager):
 
         .. code-block:: shell-session
 
-            $ mas outdated
-            409183694  Keynote (11.0 -> 12.0)
-            1176895641 Spark   (2.11.20 -> 2.11.21)
+            $ mas outdated --json
+            {"adamID":409183694,"name":"Keynote","newVersion":"12.0","version":"11.0",...}
+            {"adamID":1176895641,"name":"Spark","newVersion":"2.11.21","version":"2.11.20",...}
         """
-        output = self.run_cli("outdated")
+        output = self.run_cli("outdated", "--json")
 
-        for (
-            package_id,
-            package_name,
-            installed_version,
-            latest_version,
-        ) in self._OUTDATED_REGEXP.findall(output):
+        for app in self._parse_json_stream(output):
             yield self.package(
-                id=package_id,
-                name=package_name,
-                installed_version=installed_version,
-                latest_version=latest_version,
+                id=str(app["adamID"]),
+                name=app["name"],
+                installed_version=app["version"],
+                latest_version=app["newVersion"],
             )
 
     @search_capabilities(extended_support=False, exact_support=False)
@@ -137,17 +115,21 @@ class MAS(PackageManager):
 
         .. code-block:: shell-session
 
-            $ mas search python
-               689176796  Python Runner   (1.3)
-               630736088  Learning Python (1.0)
-               945397020  Run Python      (1.0)
-              1164498373  PythonGames     (1.0)
-              1400050251  Pythonic        (1.0.0)
+            $ mas search python --json
+            {"adamID":689176796,"name":"Python Runner","version":"1.3",...}
+            {"adamID":630736088,"name":"Learning Python","version":"1.0",...}
+            {"adamID":945397020,"name":"Run Python","version":"1.0",...}
+            {"adamID":1164498373,"name":"PythonGames","version":"1.0",...}
+            {"adamID":1400050251,"name":"Pythonic","version":"1.0.0",...}
         """
-        output = self.run_cli("search", query)
+        output = self.run_cli("search", query, "--json")
 
-        for package_id, package_name, version in self._INSTALLED_REGEXP.findall(output):
-            yield self.package(id=package_id, name=package_name, latest_version=version)
+        for app in self._parse_json_stream(output):
+            yield self.package(
+                id=str(app["adamID"]),
+                name=app["name"],
+                latest_version=app["version"],
+            )
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

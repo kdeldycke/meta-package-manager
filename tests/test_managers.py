@@ -176,7 +176,11 @@ def test_version_regexes(manager):
 @pytest.mark.parametrize(
     ("manager_id", "sample_output", "expected_version"),
     (
-        ("guix", "guix (GNU Guix) 1.4.0\nCopyright (C) 2026 the Guix authors\n", "1.4.0"),
+        (
+            "guix",
+            "guix (GNU Guix) 1.4.0\nCopyright (C) 2026 the Guix authors\n",
+            "1.4.0",
+        ),
         (
             "guix",
             "guix (GNU Guix) 1.4.0-2563-gabc1234\nCopyright (C) 2026\n",

@@ -234,9 +234,6 @@ packages.find.include = [ "meta_package_manager*" ]
 [tool.uv]
 # Cooldown period.
 exclude-newer = "1 week"
-# Bypass the cooldown for click-extra: I maintain it and want new releases
-# (such as 7.15.0's click_extra.theme module) to resolve immediately.
-exclude-newer-package = { click-extra = "0 days" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 

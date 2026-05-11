@@ -1,5 +1,10 @@
 # Changelog
 
+## [`6.4.4.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.4.3...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`6.4.3` (2026-05-11)](https://github.com/kdeldycke/meta-package-manager/compare/v6.4.2...v6.4.3)
 
 - [mpm] Re-release to fix PyPI upload issues.

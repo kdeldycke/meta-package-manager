@@ -9,16 +9,16 @@ https://github.com/kdeldycke/meta-package-manager/releases
 To verify the downloaded binaries:
 
 1. Download the appropriate binary for your architecture:
-   x64:   https://github.com/kdeldycke/meta-package-manager/releases/download/v6.4.1/mpm-6.4.1-windows-x64.exe
-   ARM64: https://github.com/kdeldycke/meta-package-manager/releases/download/v6.4.1/mpm-6.4.1-windows-arm64.exe
+   x64:   https://github.com/kdeldycke/meta-package-manager/releases/download/v6.4.2/mpm-6.4.2-windows-x64.exe
+   ARM64: https://github.com/kdeldycke/meta-package-manager/releases/download/v6.4.2/mpm-6.4.2-windows-arm64.exe
 
 2. Compute the SHA256 checksum using one of:
    - PowerShell: Get-FileHash -Algorithm SHA256 <file>
    - Chocolatey utility: checksum.exe -t sha256 -f <file>
 
 3. The checksums should match:
-   x64 checksum:   98C041E6A551F306558E12599583CE5F2A793012A14EEAB1D88EC94BDE9EC5BC
-   ARM64 checksum: 4A540F9E5C78E2A24AD125171A26198183180D5002269FD367D9DB900E53FBDA
+   x64 checksum:   E475388A2EE78C73061BAE4BE54994581E03172F5D4D66D7A37B98E91C64299C
+   ARM64 checksum: BF502E1C5D7E6BF457E113C9109E0DA68E3841D7278FA78001DFB12290E9BBC7
 
 File 'LICENSE.txt' is obtained from:
 https://github.com/kdeldycke/meta-package-manager/blob/main/license

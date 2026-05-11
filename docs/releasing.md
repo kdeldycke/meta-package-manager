@@ -6,7 +6,6 @@ The release process is automated via reusable workflows from [`kdeldycke/repomat
 
 - Python source distributions (`.whl`, `.tar.gz`) uploaded to [PyPI](https://pypi.org/project/meta-package-manager/)
 - Nuitka-compiled standalone binaries for Linux, macOS, and Windows (x64 and ARM64) attached to [GitHub Releases](https://github.com/kdeldycke/meta-package-manager/releases)
-- A [Chocolatey package](https://community.chocolatey.org/packages/meta-package-manager) for Windows
 - A [Guix package definition](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix) for GNU Guix
 - A [Nix package definition](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix) for NixOS/Nix
 
@@ -16,9 +15,9 @@ The release PR must be merged via "Rebase and merge" (never squash). See the `re
 
 ## Chocolatey
 
-The Chocolatey package is maintained in-tree at `packaging/choco/meta-package-manager/`, unlike Homebrew, Scoop, NixOS, and AUR which are maintained externally. The package directory name must match the nuspec basename: this is enforced by [Chocolatey-AU's `AUPackage`](https://github.com/chocolatey-community/Chocolatey-AU/blob/main/src/Private/AUPackage.ps1), which derives the nuspec path from `Split-Path -Leaf $pwd`. The `chocolatey` job in `release.yaml` runs after the main release, downloads the Windows binaries, computes SHA256 checksums, and pushes the `.nupkg` to https://push.chocolatey.org/.
+The Chocolatey package definition is maintained in-tree at `packaging/choco/meta-package-manager/`, but is no longer pushed to the [Chocolatey community repository](https://community.chocolatey.org/packages/meta-package-manager) (see [Impact on Chocolatey](#impact-on-chocolatey) for the rejection rationale). The automated `chocolatey` job has been removed from `release.yaml`; only the in-tree nuspec remains, so users can build and install locally (see [`install.md`](install.md)) and the `choco-source` job in `tests-install.yaml` keeps the build instructions exercised.
 
-Chocolatey moderation then validates the package, which includes automated virus scanning (see below).
+The package directory name must match the nuspec basename: this is enforced by [Chocolatey-AU's `AUPackage`](https://github.com/chocolatey-community/Chocolatey-AU/blob/main/src/Private/AUPackage.ps1), which derives the nuspec path from `Split-Path -Leaf $pwd`.
 
 ## Guix
 
@@ -75,7 +74,7 @@ A complete list of vendor FP contacts is maintained by [VirusTotal](https://docs
 
 ### Impact on Chocolatey
 
-Chocolatey's moderation pipeline includes automated virus scanning. A high VirusTotal detection count on the Windows binaries can block package validation. Reducing the count via FP submissions (or waiting for vendors to update their signatures) may be necessary before Chocolatey validation passes.
+Chocolatey's moderation pipeline rejects any package flagged by more than 10 antivirus engines on VirusTotal ([chocolatey/home#395](https://github.com/chocolatey/home/issues/395#issuecomment-4378555157)). The Windows x64 binary sits at 33-35/70 detections, well above that threshold, so [submission `6.4.2`](https://community.chocolatey.org/packages/meta-package-manager/6.4.2) was rejected and automated publishing to the community repository has been removed from `release.yaml`. Reaching the cutoff would require either lowering the detection count through false-positive submissions (a moving target) or applying one of the [long-term mitigations](#long-term-mitigations) below.
 
 ### Long-term mitigations
 

@@ -56,27 +56,13 @@ jobs:
       - run: brew install meta-package-manager
       - run: mpm --version
 
-  # https://community.chocolatey.org/packages/meta-package-manager
-  # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco/meta-package-manager
-  choco:
-    name: "⁉️ choco (${{ matrix.os }})"
-    # Not yet accepted on Chocolatey community repository.
-    continue-on-error: true
-    strategy:
-      matrix:
-        os:
-          - windows-2025
-          - windows-11-arm
-    runs-on: ${{ matrix.os }}
-    steps:
-      - shell: pwsh
-        run: choco install meta-package-manager --yes
-      - shell: pwsh
-        run: mpm --version
-
   # https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco/meta-package-manager
   # Build and install from the in-repo nuspec, mirroring the documented
-  # "build from the specs maintained in the repository" path.
+  # "build from the specs maintained in the repository" path. The package is
+  # no longer published to the Chocolatey community repository (submission 6.4.2
+  # was rejected at https://github.com/chocolatey/home/issues/395#issuecomment-4378555157
+  # over Nuitka antivirus false positives), so the in-repo nuspec is the only
+  # supported install route.
   choco-source:
     name: "✅ choco-source (${{ matrix.os }})"
     strategy:

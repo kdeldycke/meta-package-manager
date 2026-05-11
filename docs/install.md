@@ -168,15 +168,9 @@ Build and install from [the specs maintained in the repository](https://github.c
 > choco install meta-package-manager --source .
 ```
 
-:::{admonition} Help land it in the community repository
-:class: important
-The Chocolatey package is [pending community review](https://community.chocolatey.org/packages/meta-package-manager). Once approved, installation will be a one-liner:
-
-```{code-block} pwsh-session
-> choco install meta-package-manager
-```
-
-You can help speed up moderation by showing your support on [the package page](https://community.chocolatey.org/packages/meta-package-manager).
+:::{admonition} Not available on the Chocolatey community repository
+:class: warning
+[Submission `6.4.2`](https://community.chocolatey.org/packages/meta-package-manager/6.4.2) was rejected: the Windows x64 binary trips too many antivirus engines on VirusTotal for community-repository moderation to clear it. See [Antivirus false positives](#antivirus-false-positives) below for the full background, and please [report the detection to your antivirus vendor](#antivirus-false-positives) if it affects you: enough reports may eventually bring the detection count back under Chocolatey's cutoff.
 :::
 ````
 
@@ -300,8 +294,17 @@ $ file ./mpm*
 ```
 ````
 
+(antivirus-false-positives)=
+
 ```{important} Antivirus false positives
-The binaries are compiled with [Nuitka](https://nuitka.net), which produces self-extracting executables with an embedded Python runtime. This packaging pattern is sometimes flagged by ML-based antivirus engines (like Symantec's `ML.Attribute.HighConfidence`). These are false positives. If your antivirus quarantines an `mpm` binary, you can verify its authenticity with the [attestation procedure below](#release-verification), then report the false positive to your antivirus vendor. This will help the project a lot.
+The Windows binaries (and to a lesser extent the macOS ARM64 ones, plus anything downstream that bundles them like the Chocolatey package) are flagged by heuristic and ML-based antivirus engines. These are false positives caused by the [Nuitka](https://nuitka.net) `--onefile` packaging pattern, not by anything `mpm` does. Engineering background, detection profile, and long-term mitigations are documented in [`releasing.md`](releasing.md#antivirus-false-positives-on-windows-binaries).
+
+**If your antivirus quarantines an `mpm` binary:**
+
+1. Verify the binary you downloaded with the [attestation procedure below](#release-verification). It cryptographically proves the artifact came from this repository's release pipeline.
+2. Submit a false-positive report to your antivirus vendor with the verified binary. The [priority vendor list in `releasing.md`](releasing.md#submitting-false-positive-reports) covers the engines responsible for most detections, and [VirusTotal's vendor directory](https://docs.virustotal.com/docs/false-positive-contacts) covers the rest.
+
+The more independent reports a vendor receives, the more likely a detection gets reclassified, and that is the only practical path back to a working Chocolatey community-repository submission.
 ```
 
 ## Release verification

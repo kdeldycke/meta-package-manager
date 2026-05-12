@@ -1,0 +1,176 @@
+---
+name: 🧪 Validate Void Linux packages
+"on":
+  workflow_dispatch:
+
+# Temporary workflow to validate the Void Linux packaging hypothesis for
+# meta-package-manager. The load-bearing question: can the `uv-build` package
+# shipped by Void (as a sub-package of `uv`) be used to build mpm's wheel from
+# source? If yes, packaging mpm for Void reduces to writing srcpkg templates
+# for the few runtime deps that Void does not yet ship.
+#
+# Delete after the upstream PR to void-linux/void-packages is merged.
+
+permissions: {}
+
+jobs:
+
+  validate:
+    name: Build mpm inside Void glibc
+    runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/void-linux/void-glibc-full:latest
+      options: --privileged
+    steps:
+      - name: Sync xbps and install build tooling
+        run: |
+          xbps-install --sync --yes xbps
+          xbps-install --yes \
+            base-devel \
+            git \
+            python3 \
+            python3-pip \
+            uv \
+            uv-build \
+            xtools
+
+      - name: Checkout mpm
+        uses: actions/checkout@v5
+
+      - name: Record Void package versions
+        run: |
+          {
+            echo "## Void environment"
+            echo ""
+            echo '| Package | Version |'
+            echo '|---|---|'
+            for pkg in uv uv-build python3 python3-pip xtools; do
+              ver=$(xbps-query --property=pkgver "${pkg}" 2>/dev/null || echo "n/a")
+              echo "| \`${pkg}\` | \`${ver}\` |"
+            done
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Audit mpm runtime deps against Void srcpkgs
+        run: |
+          # Deps are duplicated from pyproject.toml. Update both together.
+          available=(
+            python3-boltons
+            python3-tomli-w
+            python3-xmltodict
+          )
+          missing_direct=(
+            python3-click-extra
+            python3-cyclonedx-python-lib
+            python3-extra-platforms
+            python3-packageurl-python
+            python3-spdx-tools
+          )
+          missing_transitive=(
+            python3-mergedeep
+            python3-cachecontrol
+            python3-py-serializable
+            python3-semantic_version
+            python3-beartype
+          )
+
+          {
+            echo ""
+            echo "## Dependency coverage"
+            echo ""
+            echo "### Available in Void"
+            echo ""
+            for pkg in "${available[@]}"; do
+              ver=$(xbps-query --regex --repository --search "^${pkg}-[0-9]" 2>/dev/null | head --lines=1 || true)
+              if [ -n "${ver}" ]; then
+                echo "- ✅ \`${pkg}\` — \`${ver}\`"
+              else
+                echo "- ⚠️ \`${pkg}\` — listed as available but not found via xbps-query"
+              fi
+            done
+            echo ""
+            echo "### Direct deps missing from Void"
+            echo ""
+            for pkg in "${missing_direct[@]}"; do
+              echo "- ❌ \`${pkg}\`"
+            done
+            echo ""
+            echo "### Transitive deps missing from Void"
+            echo ""
+            for pkg in "${missing_transitive[@]}"; do
+              echo "- ❌ \`${pkg}\`"
+            done
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Build mpm wheel with Void's uv-build
+        id: build_wheel
+        run: |
+          # `--no-build-isolation` forces pip to use the system-installed
+          # `uv-build` (from Void) instead of fetching one from PyPI. This is
+          # what proves the build-backend hypothesis.
+          mkdir --parents /tmp/wheels
+          python3 -m pip wheel \
+            --no-build-isolation \
+            --no-deps \
+            --wheel-dir /tmp/wheels \
+            .
+          wheel_path=$(ls /tmp/wheels/meta_package_manager-*.whl | head --lines=1)
+          echo "wheel_path=${wheel_path}" >> "${GITHUB_OUTPUT}"
+          {
+            echo ""
+            echo "## Wheel build"
+            echo ""
+            echo "- ✅ Built \`$(basename "${wheel_path}")\` with system \`uv-build\`"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Install mpm into a venv with PyPI fallback for missing deps
+        run: |
+          python3 -m venv /tmp/mpm-venv
+          # Install Void-available deps first (no PyPI fetch), then let pip
+          # resolve the missing ones from PyPI. This mirrors what end users
+          # would experience once all missing deps land in Void.
+          /tmp/mpm-venv/bin/pip install --upgrade pip
+          /tmp/mpm-venv/bin/pip install "${{ steps.build_wheel.outputs.wheel_path }}"
+
+      - name: Smoke-test mpm
+        run: |
+          {
+            echo ""
+            echo "## Smoke tests"
+            echo ""
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          set +e
+          version_out=$(/tmp/mpm-venv/bin/mpm --version 2>&1)
+          version_rc=$?
+          managers_out=$(/tmp/mpm-venv/bin/mpm --table-format=json managers 2>&1 | head --lines=40)
+          managers_rc=$?
+          set -e
+
+          if [ "${version_rc}" -eq 0 ]; then
+            echo "- ✅ \`mpm --version\` → \`${version_out}\`" >> "${GITHUB_STEP_SUMMARY}"
+          else
+            {
+              echo "- ❌ \`mpm --version\` failed (rc=${version_rc})"
+              echo '```'
+              echo "${version_out}"
+              echo '```'
+            } >> "${GITHUB_STEP_SUMMARY}"
+          fi
+
+          if [ "${managers_rc}" -eq 0 ]; then
+            {
+              echo "- ✅ \`mpm managers\` returned"
+              echo '```'
+              echo "${managers_out}"
+              echo '```'
+            } >> "${GITHUB_STEP_SUMMARY}"
+          else
+            {
+              echo "- ❌ \`mpm managers\` failed (rc=${managers_rc})"
+              echo '```'
+              echo "${managers_out}"
+              echo '```'
+            } >> "${GITHUB_STEP_SUMMARY}"
+          fi
+
+          exit $(( version_rc + managers_rc ))

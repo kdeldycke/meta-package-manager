@@ -26,6 +26,17 @@
 # "this competitor supports the manager identified by this row", even if the
 # competitor internally calls it something else (like topgrade's
 # ``brew_formula`` for our ``brew``).
+#
+# ``coarse_support`` is a second mapping with the same shape as ``managers``.
+# Entries record ``(manager_id, competitor)`` pairs where the competitor can
+# only upgrade the manager as part of a coarser umbrella step, never in
+# isolation. Topgrade's ``Step::Shell`` and ``Step::Vim`` are the canonical
+# examples: ``--only shell`` runs *every* zsh/bash/fish plugin manager the
+# host has installed, so asking topgrade to upgrade just ``antibody`` (or
+# just ``vundle``) is impossible. Cells in the support table render as
+# ``≈[^coarse]`` instead of ``✓`` for these pairs. Every coarse entry must
+# also exist in ``managers`` (you cannot be coarse-only-supported without
+# being supported at all).
 
 managers:
   0install: []
@@ -336,3 +347,39 @@ homepages:
   zplug: https://github.com/zplug/zplug
   zr: https://github.com/jedahan/zr
   zvm: https://github.com/tristanisham/zvm
+
+coarse_support:
+  # Two clusters share this map, both topgrade-driven:
+  #   - Zsh/Bash/Fish plugin managers under `Step::Shell` (`antibody`,
+  #     `antidote`, `antigen`, `bash-it`, `fish-plug`, `fisher`, `fundle`,
+  #     `oh-my-bash`, `oh-my-fish`, `oh-my-zsh`, `zgenom`, `zim`, `zinit`,
+  #     `zplug`, `zr`). `topgrade --only shell` runs all of them.
+  #   - Vim/Neovim plugin managers under `Step::Vim` (`dein`, `lazy`,
+  #     `mason`, `neobundle`, `packer-nvim`, `paq`, `plug`, `voom`,
+  #     `vundle`). `topgrade --only vim` runs all of them.
+  # Keys are sorted alphabetically rather than grouped by cluster so the
+  # well-formedness test stays simple.
+  antibody: [topgrade]
+  antidote: [topgrade]
+  antigen: [topgrade]
+  bash-it: [topgrade]
+  dein: [topgrade]
+  fish-plug: [topgrade]
+  fisher: [topgrade]
+  fundle: [topgrade]
+  lazy: [topgrade]
+  mason: [topgrade]
+  neobundle: [topgrade]
+  oh-my-bash: [topgrade]
+  oh-my-fish: [topgrade]
+  oh-my-zsh: [topgrade]
+  packer-nvim: [topgrade]
+  paq: [topgrade]
+  plug: [topgrade]
+  voom: [topgrade]
+  vundle: [topgrade]
+  zgenom: [topgrade]
+  zim: [topgrade]
+  zinit: [topgrade]
+  zplug: [topgrade]
+  zr: [topgrade]

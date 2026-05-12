@@ -196,7 +196,7 @@ def test_benchmark_yaml_well_formed():
     competitor set and homepage URLs for non-pool managers."""
     yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
     data = safe_load(yaml_path.read_text(encoding="utf-8"))
-    assert set(data) == {"managers", "homepages"}
+    assert set(data) == {"managers", "homepages", "coarse_support"}
 
     competitors = set(docs_update.BENCHMARK_COMPETITORS)
     for mid, flags in data["managers"].items():
@@ -217,6 +217,30 @@ def test_benchmark_yaml_well_formed():
         assert mid == mid.lower()
         assert isinstance(url, str)
         assert url.startswith(("http://", "https://"))
+
+    # coarse_support: same shape and validation rules as managers, but every
+    # listed (mid, competitor) pair must also exist in managers (you cannot be
+    # coarse-only-supported without being supported at all).
+    coarse = data["coarse_support"]
+    assert list(coarse) == sorted(coarse), (
+        "coarse_support keys must be sorted alphabetically"
+    )
+    for mid, flags in coarse.items():
+        assert mid == mid.lower()
+        assert isinstance(flags, list)
+        assert flags, f"{mid!r} has an empty coarse_support list; omit the row"
+        assert set(flags).issubset(competitors)
+        assert len(flags) == len(set(flags))
+        assert flags == sorted(flags, key=docs_update.BENCHMARK_COMPETITORS.index)
+        # No-orphan invariant: the manager must be supported in the first place.
+        assert mid in data["managers"], (
+            f"coarse_support[{mid!r}] has no matching entry in managers"
+        )
+        missing = set(flags) - set(data["managers"][mid])
+        assert not missing, (
+            f"coarse_support[{mid!r}] flags competitors {sorted(missing)} that "
+            f"are not in managers[{mid!r}]"
+        )
 
 
 def test_benchmark_homepages_cover_non_pool_managers():

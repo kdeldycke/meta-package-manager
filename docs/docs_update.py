@@ -169,6 +169,12 @@ def benchmark_managers_table() -> str:
     competitor-only managers. IDs without any known URL render as plain
     ``\\`code\\```.
 
+    Support cells are normally ``✓``, but render as ``≈[^coarse]`` when the
+    ``(manager_id, competitor)`` pair is listed in the YAML's
+    ``coarse_support`` map. ``≈`` means the competitor can only reach this
+    manager through a coarser umbrella step (topgrade's ``--only shell`` or
+    ``--only vim``), never in isolation.
+
     Manager rows are the sorted union of pool IDs and YAML keys, so a new
     entry on either side appears in the table without manual edits.
     """
@@ -176,6 +182,7 @@ def benchmark_managers_table() -> str:
     data = yaml.safe_load(yaml_path.read_text())
     competitor_data: dict[str, list[str]] = data["managers"]
     homepages: dict[str, str] = data.get("homepages", {})
+    coarse_support: dict[str, list[str]] = data.get("coarse_support", {})
 
     pool_ids = set(pool.all_manager_ids)
     all_ids = sorted(pool_ids | competitor_data.keys())
@@ -198,7 +205,16 @@ def benchmark_managers_table() -> str:
         else:
             row.append("")
         flags = set(competitor_data.get(mid, []))
-        row.extend("✓" if name in flags else "" for name in BENCHMARK_COMPETITORS)
+        coarse_flags = set(coarse_support.get(mid, []))
+        cells: list[str] = []
+        for name in BENCHMARK_COMPETITORS:
+            if name not in flags:
+                cells.append("")
+            elif name in coarse_flags:
+                cells.append("≈[^coarse]")
+            else:
+                cells.append("✓")
+        row.extend(cells)
         table.append(row)
 
     alignments = ["left"] + ["center"] * (1 + len(BENCHMARK_COMPETITORS))

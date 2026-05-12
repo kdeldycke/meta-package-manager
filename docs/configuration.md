@@ -288,6 +288,19 @@ pre_args = ["--quiet", "--color", "never"]
 
 Unknown manager IDs and unknown field names are reported as warnings on `<stderr>` and skipped: a typo will not crash `mpm`. Type mismatches (e.g. passing a single string where a list is expected) raise an error so the offending value can be corrected.
 
+### Help improve detection upstream
+
+When an override targets a field that often points to an upstream detection bug, `mpm` prints a one-line invitation to file a bug report so the heuristics can be improved for everyone. The fields that trigger an invitation are: `cli_names`, `cli_search_path`, `requirement`, `version_cli_options`, and `version_regexes`. Overrides on preference fields like `timeout` or `ignore_auto_updates` never trigger an invitation.
+
+The invitation is a pre-filled GitHub new-issue URL targeting the `bug-report.yml` template. Clicking it opens the bug-report form with the manager ID, field, override value, and what `mpm` detected without the override already filled in. The user only has to add the diagnostic command outputs the form requests (`mpm --show-params`, `mpm --verbosity DEBUG --all-managers managers`) before submitting.
+
+To silence the invitation, pass `--no-suggest-contribs` on the command line, set the `MPM_SUGGEST_CONTRIBS` environment variable to `false`, or add to your config file:
+
+```toml
+[mpm]
+suggest_contribs = false
+```
+
 ## Precedence
 
 Options are resolved in this order, from highest to lowest priority:

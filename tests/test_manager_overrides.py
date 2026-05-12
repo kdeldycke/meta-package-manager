@@ -24,9 +24,14 @@ from textwrap import dedent
 import pytest
 
 from meta_package_manager.config import (
+    CONTRIBUTION_HINT_FIELDS,
     INVALIDATED_CACHED_PROPS,
+    MAX_ISSUE_URL_LENGTH,
     OVERRIDABLE_FIELDS,
+    ContributionHint,
+    _build_issue_url,
     apply_manager_overrides,
+    format_contribution_hints,
 )
 from meta_package_manager.pool import pool
 
@@ -286,3 +291,227 @@ def test_cli_warns_on_unknown_manager_in_config(invoke, create_config):
     result = invoke("--config", str(conf_path), "managers")
     assert result.exit_code == 0
     assert "fictional-manager" in result.stderr
+
+
+# Contribution-hint feature.
+
+
+def test_contribution_hint_fields_subset_of_overridable():
+    """The hint allowlist must only name real overridable fields."""
+    assert CONTRIBUTION_HINT_FIELDS.issubset(OVERRIDABLE_FIELDS)
+
+
+def test_apply_returns_hint_for_detection_field(reset_overrides):
+    hints = apply_manager_overrides(
+        pool, {OVERRIDE_TARGET: {"cli_search_path": ["/no/such/path"]}}
+    )
+    assert len(hints) == 1
+    hint = hints[0]
+    assert hint.manager_id == OVERRIDE_TARGET
+    assert hint.field == "cli_search_path"
+    assert hint.user_value == ("/no/such/path",)
+
+
+def test_apply_returns_no_hint_for_preference_field(reset_overrides):
+    """Overriding a preference field (timeout) must not generate a hint: it's not
+    a detection bug signal."""
+    hints = apply_manager_overrides(pool, {OVERRIDE_TARGET: {"timeout": 42}})
+    assert hints == []
+
+
+def test_apply_returns_no_hint_when_overrides_empty():
+    assert apply_manager_overrides(pool, None) == []
+    assert apply_manager_overrides(pool, {}) == []
+
+
+def test_apply_returns_no_hint_when_unknown_manager():
+    """Unknown manager IDs are skipped before any hint can be generated."""
+    hints = apply_manager_overrides(
+        pool, {"definitely-not-a-manager": {"cli_search_path": ["/x"]}}
+    )
+    assert hints == []
+
+
+def test_apply_returns_hints_for_each_detection_field(reset_overrides):
+    """Multiple detection-related overrides on the same manager produce one hint
+    per field."""
+    hints = apply_manager_overrides(
+        pool,
+        {
+            OVERRIDE_TARGET: {
+                "cli_search_path": ["/x"],
+                "requirement": ">=20.0",
+                "timeout": 42,
+            }
+        },
+    )
+    fields = {h.field for h in hints}
+    # Two detection-related, one preference (timeout) excluded.
+    assert fields == {"cli_search_path", "requirement"}
+
+
+def test_build_issue_url_targets_bug_template():
+    hint = ContributionHint(
+        manager_id="winget",
+        field="cli_search_path",
+        user_value=("C:\\Users\\foo\\bin",),
+        detected_cli_path=None,
+    )
+    url = _build_issue_url(hint)
+    assert url.startswith(
+        "https://github.com/kdeldycke/meta-package-manager/issues/new?"
+    )
+    # Pre-fills the bug-report template.
+    assert "template=bug-report.yml" in url
+    # Body field is named after the bug-report.yml `id: bug-description`.
+    assert "bug-description=" in url
+    # Stays under GitHub's URL length cap.
+    assert len(url) <= MAX_ISSUE_URL_LENGTH
+
+
+def test_build_issue_url_asserts_on_oversize_url():
+    """A pathological override value must trip the URL-length assertion rather
+    than silently producing a URL that GitHub would truncate."""
+    # 10 KiB of path entries is well past the 8 KiB cap.
+    pathological_value = tuple(f"/very/long/path/{i:05d}" for i in range(500))
+    hint = ContributionHint(
+        manager_id="winget",
+        field="cli_search_path",
+        user_value=pathological_value,
+        detected_cli_path=None,
+    )
+    with pytest.raises(AssertionError, match=r"exceeding the .*-character"):
+        _build_issue_url(hint)
+
+
+def test_build_issue_url_url_decodes_back_to_useful_body():
+    """Round-trip: the URL-encoded body must decode back to text mentioning the
+    manager id, the field, and the user's value."""
+    import urllib.parse
+
+    hint = ContributionHint(
+        manager_id="winget",
+        field="cli_names",
+        user_value=("winget.exe",),
+        detected_cli_path=None,
+    )
+    url = _build_issue_url(hint)
+    qs = urllib.parse.urlparse(url).query
+    params = dict(urllib.parse.parse_qsl(qs))
+    body = params["bug-description"]
+    assert "winget" in body
+    assert "cli_names" in body
+    assert "winget.exe" in body
+    assert "not found" in body  # detected_cli_path was None
+
+
+def test_build_issue_url_includes_detected_cli_path_when_available():
+    hint = ContributionHint(
+        manager_id="brew",
+        field="cli_search_path",
+        user_value=("/opt/custom",),
+        detected_cli_path="/opt/homebrew/bin/brew",
+    )
+    url = _build_issue_url(hint)
+    import urllib.parse
+
+    body = dict(urllib.parse.parse_qsl(urllib.parse.urlparse(url).query))[
+        "bug-description"
+    ]
+    assert "/opt/homebrew/bin/brew" in body
+
+
+def test_format_contribution_hints_empty_returns_empty_string():
+    assert format_contribution_hints([]) == ""
+
+
+def test_format_contribution_hints_lists_each_with_url():
+    hints = [
+        ContributionHint(
+            manager_id="winget",
+            field="cli_search_path",
+            user_value=("/x",),
+            detected_cli_path=None,
+        ),
+        ContributionHint(
+            manager_id="cargo",
+            field="version_regexes",
+            user_value=("foo",),
+            detected_cli_path="/usr/bin/cargo",
+        ),
+    ]
+    msg = format_contribution_hints(hints)
+    assert "winget" in msg
+    assert "cargo" in msg
+    assert msg.count("https://github.com/kdeldycke/meta-package-manager/issues/new") == 2
+    # Mentions the opt-out so the user knows how to silence.
+    assert "--no-suggest-contribs" in msg
+
+
+def test_cli_prints_contribution_hint(invoke, create_config, reset_overrides):
+    """End-to-end: a config with a detection-related override surfaces the hint."""
+    conf_path = create_config(
+        "conf.toml",
+        dedent("""\
+            [mpm.managers.pip]
+            cli_search_path = ["/no/such/path/for/test"]
+            """),
+    )
+    result = invoke("--config", str(conf_path), "managers")
+    assert result.exit_code == 0
+    assert "Detected user override" in result.stderr
+    assert "cli_search_path" in result.stderr
+    assert "issues/new" in result.stderr
+
+
+def test_cli_no_hint_for_preference_override(invoke, create_config, reset_overrides):
+    """Overriding only a preference field must not surface a hint."""
+    conf_path = create_config(
+        "conf.toml",
+        dedent("""\
+            [mpm.managers.pip]
+            timeout = 42
+            """),
+    )
+    result = invoke("--config", str(conf_path), "managers")
+    assert result.exit_code == 0
+    assert "Detected user override" not in result.stderr
+
+
+def test_cli_opt_out_suppresses_hint(invoke, create_config, reset_overrides):
+    """``--no-suggest-contribs`` silences the hint output."""
+    conf_path = create_config(
+        "conf.toml",
+        dedent("""\
+            [mpm.managers.pip]
+            cli_search_path = ["/no/such/path"]
+            """),
+    )
+    result = invoke(
+        "--config",
+        str(conf_path),
+        "--no-suggest-contribs",
+        "managers",
+    )
+    assert result.exit_code == 0
+    assert "Detected user override" not in result.stderr
+    assert "issues/new" not in result.stderr
+
+
+def test_cli_opt_out_via_config(invoke, create_config, reset_overrides):
+    """The ``[mpm] suggest_contribs = false`` config also silences
+    the hint."""
+    conf_path = create_config(
+        "conf.toml",
+        dedent("""\
+            [mpm]
+            suggest_contribs = false
+
+            [mpm.managers.pip]
+            cli_search_path = ["/no/such/path"]
+            """),
+    )
+    result = invoke("--config", str(conf_path), "managers")
+    assert result.exit_code == 0
+    assert "Detected user override" not in result.stderr
+    assert "issues/new" not in result.stderr

@@ -31,7 +31,12 @@ keeping all configuration policy out of :py:mod:`meta_package_manager.pool`.
 from __future__ import annotations
 
 import logging
+import urllib.parse
 from dataclasses import dataclass
+
+import tomli_w
+from click_extra import echo
+from click_extra.theme import default_theme as theme
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -80,6 +85,10 @@ class MpmConfig:
 
     stats: bool = True
     """Print per-manager package statistics."""
+
+    suggest_contribs: bool = True
+    """Print a contribution invitation when a user override targets a field that
+    likely indicates an upstream detection bug."""
 
 
 def _to_str(value: Any) -> str:
@@ -188,10 +197,169 @@ values. Safe to pop even if nothing was cached.
 """
 
 
+CONTRIBUTION_HINT_FIELDS: Final[frozenset[str]] = frozenset({
+    "cli_names",
+    "cli_search_path",
+    "requirement",
+    "version_cli_options",
+    "version_regexes",
+})
+"""Subset of :data:`OVERRIDABLE_FIELDS` whose override probably reflects a real
+upstream detection bug rather than a personal preference.
+
+When the user overrides one of these, mpm did not find the binary, used the wrong
+binary name, rejected a valid version, or failed to parse one. The other overridable
+fields (``timeout``, ``ignore_auto_updates``, ``pre_args``, etc.) are user
+preferences and do not warrant a contribution invitation.
+"""
+
+
+ISSUE_TRACKER_NEW_URL: Final[str] = (
+    "https://github.com/kdeldycke/meta-package-manager/issues/new"
+)
+"""Base URL of the upstream GitHub issue tracker's new-issue endpoint."""
+
+
+MAX_ISSUE_URL_LENGTH: Final[int] = 8192
+"""Practical upper bound on the length of a pre-filled GitHub new-issue URL.
+
+GitHub silently truncates very long URLs, which yields a broken issue form when
+the user clicks the invitation. Anything past 8 KiB is treated as a bug in the
+URL builder rather than a configuration we should tolerate."""
+
+
+@dataclass(frozen=True)
+class ContributionHint:
+    """A user override of a detection-related field, candidate for upstream
+    contribution.
+
+    Captured at override time by :py:func:`apply_manager_overrides` so the user can
+    later be invited to file an upstream issue with a pre-filled bug-report URL.
+    """
+
+    manager_id: str
+    """ID of the manager whose attribute was overridden."""
+
+    field: str
+    """Name of the overridden :py:class:`~meta_package_manager.base.PackageManager`
+    attribute."""
+
+    user_value: Any
+    """Value the user supplied in their config file, after type coercion."""
+
+    detected_cli_path: str | None
+    """The CLI path mpm resolved with the built-in defaults, before the override
+    took effect. ``None`` when mpm could not find the binary, which is itself a
+    strong signal that the upstream search heuristics need help."""
+
+
+def _build_issue_url(hint: ContributionHint) -> str:
+    """Build a GitHub new-issue URL targeting the bug-report template, with the
+    relevant fields pre-filled from ``hint``.
+
+    Returns the URL only: it's the caller's job to render and surface it. Length
+    stays well under GitHub's URL-length cap because the body summarizes the
+    override and asks the user to paste their full ``mpm --verbosity DEBUG``
+    output rather than embedding it.
+
+    A pathological override value could still blow past
+    :data:`MAX_ISSUE_URL_LENGTH`; the assertion below catches that in tests
+    rather than letting the user click a URL GitHub will truncate.
+    """
+    detected = (
+        f"`{hint.detected_cli_path}`"
+        if hint.detected_cli_path
+        else "**not found** (mpm could not resolve the binary on my system)"
+    )
+    # Render the override as valid TOML rather than Python repr so the user can
+    # paste the snippet straight into their config file (or back into the issue
+    # body) without translating tuples to TOML lists by hand.
+    override_toml = tomli_w.dumps(
+        {"mpm": {"managers": {hint.manager_id: {hint.field: hint.user_value}}}},
+    ).rstrip()
+    bug_description = (
+        f"While running `mpm`, I had to override the "
+        f"`{hint.field}` attribute on the `{hint.manager_id}` manager because "
+        f"the upstream defaults did not work for my setup.\n"
+        f"\n"
+        f"My override:\n"
+        f"\n"
+        f"```toml\n"
+        f"{override_toml}\n"
+        f"```\n"
+        f"\n"
+        f"What mpm detected without the override:\n"
+        f"\n"
+        f"- `cli_path`: {detected}\n"
+        f"\n"
+        f"This invitation was generated automatically by `mpm` to help improve "
+        f"the upstream detection heuristics. Please attach the diagnostic "
+        f"command outputs requested in the sections below before submitting."
+    )
+
+    params = urllib.parse.urlencode(
+        {
+            "template": "bug-report.yml",
+            "title": (
+                f"[detection] {hint.manager_id}: "
+                f"upstream defaults need adjustment for `{hint.field}`"
+            ),
+            "labels": "🐛 bug",
+            "bug-description": bug_description,
+        },
+        quote_via=urllib.parse.quote,
+    )
+    url = f"{ISSUE_TRACKER_NEW_URL}?{params}"
+    assert len(url) <= MAX_ISSUE_URL_LENGTH, (
+        f"Pre-filled GitHub issue URL is {len(url)} characters, exceeding the "
+        f"{MAX_ISSUE_URL_LENGTH}-character practical limit. GitHub would "
+        f"truncate this URL and the user would land on a broken issue form. "
+        f"Trim the bug-description template or fall back to a non-prefilled "
+        f"link for oversized overrides."
+    )
+    return url
+
+
+def format_contribution_hints(hints: list[ContributionHint]) -> str:
+    """Render a multi-line, human-readable batch message inviting the user to
+    contribute their overrides back upstream.
+
+    Returns an empty string for an empty list so the caller can branch on
+    truthiness without a length check.
+    """
+    if not hints:
+        return ""
+
+    arrow = theme.invoked_command("↗")
+    lines = [
+        f"{arrow} Detected user override(s) on fields that often indicate an "
+        f"upstream detection bug.",
+        "  Filing an issue helps improve mpm's detection heuristics for everyone:",
+        "",
+    ]
+    for hint in hints:
+        url = _build_issue_url(hint)
+        lines.extend(
+            (
+                f"  - {theme.invoked_command(hint.manager_id)}: "
+                f"override on `{hint.field}`",
+                f"    File a report: {url}",
+            )
+        )
+    lines.extend(
+        (
+            "",
+            f"  (Disable with `--no-suggest-contribs` or "
+            f"`[mpm] suggest_contribs = false`.)",
+        )
+    )
+    return "\n".join(lines)
+
+
 def apply_manager_overrides(
     pool: ManagerPool,
     overrides: Mapping[str, Mapping[str, Any]] | None,
-) -> None:
+) -> list[ContributionHint]:
     """Apply per-manager attribute overrides parsed from the user's config file.
 
     Expects ``overrides`` to be a mapping of manager ID to a mapping of attribute
@@ -215,16 +383,24 @@ def apply_manager_overrides(
     - After every accepted override, cached properties derived from the affected
       attributes (``cli_path``, ``version``, ``available``, etc.) are evicted from
       the instance ``__dict__`` so the next access recomputes them.
+
+    Returns a list of :class:`ContributionHint` entries, one for each accepted
+    override that targets a :data:`CONTRIBUTION_HINT_FIELDS` field. The caller
+    decides whether and how to surface them to the user. Each hint captures the
+    pre-override ``cli_path`` so the bug report can show what mpm would have
+    detected without the user's intervention.
     """
+    hints: list[ContributionHint] = []
+
     if not overrides:
-        return
+        return hints
 
     if not isinstance(overrides, dict):
         logging.warning(
             f"Ignoring [mpm.managers] section: expected a table, "
             f"got {type(overrides).__name__}.",
         )
-        return
+        return hints
 
     for manager_id, fields in overrides.items():
         if manager_id not in pool.register:
@@ -256,14 +432,41 @@ def apply_manager_overrides(
                 msg = f"[mpm.managers.{manager_id}].{field}: {ex}"
                 raise ValueError(msg) from ex
 
+            # Capture mpm's pre-override detection state for the hint, before the
+            # setattr below would change the binary search behavior. Reading
+            # cli_path triggers the cached_property, which is fine: the next loop
+            # iteration evicts it via INVALIDATED_CACHED_PROPS.
+            detected_cli_path: str | None = None
+            if field in CONTRIBUTION_HINT_FIELDS:
+                cli_path = manager.cli_path
+                detected_cli_path = str(cli_path) if cli_path else None
+
             setattr(manager, field, value)
             pool.overridden_fields.setdefault(manager_id, set()).add(field)
             logging.debug(
                 f"Applied override [mpm.managers.{manager_id}].{field} = {value!r}",
             )
 
+            if field in CONTRIBUTION_HINT_FIELDS:
+                hints.append(
+                    ContributionHint(
+                        manager_id=manager_id,
+                        field=field,
+                        user_value=value,
+                        detected_cli_path=detected_cli_path,
+                    )
+                )
+
         for prop in INVALIDATED_CACHED_PROPS:
             manager.__dict__.pop(prop, None)
+
+    return hints
+
+
+CTX_HINTS_KEY: Final[str] = "mpm.contribution_hints"
+"""``ctx.meta`` key under which collected :class:`ContributionHint` entries are
+accumulated between :py:func:`apply_manager_overrides_from_context` and
+:py:func:`print_contribution_hints`."""
 
 
 def apply_manager_overrides_from_context(
@@ -277,8 +480,29 @@ def apply_manager_overrides_from_context(
     :py:mod:`click_extra` after configuration discovery) and forwards the
     ``["mpm"]["managers"]`` subtree to :py:func:`apply_manager_overrides`. Returns
     silently when no configuration file was loaded or when the section is absent.
+
+    Any :class:`ContributionHint` returned by :py:func:`apply_manager_overrides` is
+    stashed under :data:`CTX_HINTS_KEY` for :py:func:`print_contribution_hints` to
+    surface at the end of the run.
     """
     conf_full = ctx.meta.get("click_extra.conf_full") or {}
     mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
     overrides = mpm_section.get("managers") if isinstance(mpm_section, dict) else None
-    apply_manager_overrides(pool, overrides)
+    hints = apply_manager_overrides(pool, overrides)
+    if hints:
+        ctx.meta.setdefault(CTX_HINTS_KEY, []).extend(hints)
+
+
+def print_contribution_hints(ctx: click.Context) -> None:
+    """Print the collected contribution hints to ``<stderr>``.
+
+    Reads from :data:`CTX_HINTS_KEY` and writes via :py:func:`click_extra.echo`
+    rather than the logging module, so the message survives ``--verbosity
+    CRITICAL`` and the ``logging.disable()`` block that suppresses log output for
+    serialization formats. Caller is expected to gate this on the user's
+    ``suggest_contribs`` preference.
+    """
+    hints = ctx.meta.get(CTX_HINTS_KEY) or []
+    message = format_contribution_hints(hints)
+    if message:
+        echo(message, err=True)

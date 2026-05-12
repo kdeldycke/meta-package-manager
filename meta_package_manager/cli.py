@@ -63,7 +63,11 @@ from .base import (
     highlight_cli_name,
     packages_asdict,
 )
-from .config import MpmConfig, apply_manager_overrides_from_context
+from .config import (
+    MpmConfig,
+    apply_manager_overrides_from_context,
+    print_contribution_hints,
+)
 from .inventory import MAIN_PLATFORMS
 from .output import BarPluginRenderer, SortableField, print_stats
 from .pool import pool
@@ -377,6 +381,14 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         default=True,
         help="Print per-manager package statistics.",
     ),
+    option(
+        "--suggest-contribs/--no-suggest-contribs",
+        default=True,
+        help="Print a contribution invitation when a user override targets a "
+        "field that likely indicates an upstream detection bug "
+        "(cli_names, cli_search_path, requirement, version_cli_options, "
+        "version_regexes).",
+    ),
 )
 @option_group(
     "Xbar/SwiftBar options",
@@ -401,6 +413,7 @@ def mpm(
     description,
     sort_by,
     stats,
+    suggest_contribs,
 ):
     """CLI options shared by all subcommands."""
     # Silence all log messages for serialization rendering unless in debug mode.
@@ -424,8 +437,11 @@ def mpm(
         ctx.call_on_close(remove_logging_override)
 
     # Apply per-manager attribute overrides from [mpm.managers.<id>] sections of
-    # the config file, before any subcommand observes the pool.
+    # the config file, before any subcommand observes the pool. Also collects any
+    # contribution-hint candidates onto ctx.meta for the close-time callback below.
     apply_manager_overrides_from_context(ctx, pool)
+    if suggest_contribs:
+        ctx.call_on_close(partial(print_contribution_hints, ctx))
 
     # Normalize to None if no manager selectors have been used. This prevent the
     # pool.select_managers() method to iterate over an empty population of managers to

@@ -193,10 +193,10 @@ def test_extra_labels_toml():
 
 def test_benchmark_yaml_well_formed():
     """Check ``docs/benchmark.yaml`` only encodes flags from the known
-    competitor set."""
+    competitor set and homepage URLs for non-pool managers."""
     yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
     data = safe_load(yaml_path.read_text(encoding="utf-8"))
-    assert set(data) == {"managers"}
+    assert set(data) == {"managers", "homepages"}
 
     competitors = set(docs_update.BENCHMARK_COMPETITORS)
     for mid, flags in data["managers"].items():
@@ -206,6 +206,60 @@ def test_benchmark_yaml_well_formed():
         assert set(flags).issubset(competitors)
         assert len(flags) == len(set(flags))
         assert flags == sorted(flags, key=docs_update.BENCHMARK_COMPETITORS.index)
+
+    # Homepages mapping: lowercase IDs pointing to HTTPS URLs, sorted
+    # alphabetically.
+    homepages = data["homepages"]
+    assert list(homepages) == sorted(homepages), (
+        "homepages keys must be sorted alphabetically"
+    )
+    for mid, url in homepages.items():
+        assert mid == mid.lower()
+        assert isinstance(url, str)
+        assert url.startswith(("http://", "https://"))
+
+
+def test_benchmark_homepages_cover_non_pool_managers():
+    """Every non-pool manager listed in ``benchmark.yaml`` must have a
+    matching ``homepages`` entry so the table can link the identifier.
+
+    Pool-implemented managers are excluded: their URL is sourced from the
+    class's ``homepage_url`` attribute, and a redundant entry in the YAML
+    would create two sources of truth.
+    """
+    yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
+    data = safe_load(yaml_path.read_text(encoding="utf-8"))
+
+    pool_ids = set(pool.all_manager_ids)
+    yaml_ids = set(data["managers"])
+    homepage_ids = set(data["homepages"])
+
+    # Every non-pool YAML manager must have a homepage URL.
+    missing = (yaml_ids - pool_ids) - homepage_ids
+    assert not missing, f"Missing homepage URLs in benchmark.yaml: {sorted(missing)}"
+
+    # Homepages must not duplicate pool managers (those come from the class).
+    overlap = homepage_ids & pool_ids
+    assert not overlap, (
+        f"Pool managers must not appear in homepages: {sorted(overlap)}"
+    )
+
+    # Homepages must not include unknown manager IDs.
+    extra = homepage_ids - yaml_ids
+    assert not extra, f"Unknown manager IDs in homepages: {sorted(extra)}"
+
+
+@all_managers
+def test_manager_homepage_url(manager):
+    """Every pool manager defines a non-empty homepage URL.
+
+    Sourced by the benchmark table generator to link each manager identifier
+    to its upstream documentation. An empty or malformed URL breaks the
+    rendered table.
+    """
+    assert manager.homepage_url
+    assert isinstance(manager.homepage_url, str)
+    assert manager.homepage_url.startswith(("http://", "https://"))
 
 
 def test_benchmark_table_in_sync():

@@ -1,14 +1,31 @@
-# Per-manager competitor support flags for the benchmark page.
+# Per-manager competitor support flags and homepage URLs for the benchmark
+# page.
 #
-# This file encodes which managers each *competing* tool supports.
-# The mpm column on the page is auto-derived from the live pool of
-# supported managers (see meta_package_manager/pool.py). When adding
-# a new manager to mpm, its row appears automatically; only competitor
-# data needs to be tracked here.
+# This file encodes which managers each *competing* tool supports. The mpm
+# column on the page is auto-derived from the live pool of supported managers
+# (see ``meta_package_manager/pool.py``). When adding a new manager to mpm,
+# its row appears automatically: only competitor data needs to be tracked
+# here.
 #
-# Keys must be lower-case manager identifiers. Each value is a list
-# (possibly empty) of competing tools that support that manager,
-# chosen from: topgrade, pacaptr, pacapt, sysget, whohas.
+# Schema:
+#
+#   managers:
+#     <manager-id>: [<competitor>, ...]
+#
+#   homepages:
+#     <manager-id>: <https-url>
+#
+# ``managers`` keys must be lower-case manager identifiers. Each value is a
+# list (possibly empty) of competing tools that support that manager, chosen
+# from: topgrade, pacaptr, pacapt, sysget, whohas.
+#
+# ``homepages`` only needs to contain URLs for managers that mpm does not
+# implement. For mpm-implemented managers the homepage is sourced from the
+# class's ``homepage_url`` attribute. Cross-tool naming differences are
+# resolved by using mpm's identifier as the canonical row key: a flag means
+# "this competitor supports the manager identified by this row", even if the
+# competitor internally calls it something else (like topgrade's
+# ``brew_formula`` for our ``brew``).
 
 managers:
   0install: []
@@ -85,11 +102,12 @@ managers:
   pikaur: [topgrade]
   pip: [topgrade, pacaptr, sysget]
   pipx: [topgrade]
-  pkg: [topgrade, sysget, whohas]
+  # ``pkgng`` is pacapt's name for FreeBSD's modern ``pkg``, so the pacapt
+  # flag is folded into the ``pkg`` row rather than tracked separately.
+  pkg: [topgrade, pacapt, sysget, whohas]
   pkg-mgr: [sysget]
   pkg-tools: [pacapt]
   pkgin: [topgrade, whohas]
-  pkgng: [pacapt]
   plug: [topgrade]
   pnpm: [topgrade]
   podman: [topgrade]
@@ -139,3 +157,89 @@ managers:
   zplug: [topgrade]
   zr: [topgrade]
   zypper: [pacaptr, pacapt, sysget, whohas]
+
+homepages:
+  0install: https://0install.net
+  antibody: https://getantibody.github.io
+  antigen: https://github.com/zsh-users/antigen
+  apt-cyg: https://github.com/transcode-open/apt-cyg
+  asdf: https://asdf-vm.com
+  aura: https://github.com/fosskers/aura
+  bin: https://github.com/marcosnils/bin
+  bun: https://bun.sh
+  cave: https://github.com/paludis/cave
+  chezmoi: https://www.chezmoi.io
+  choosenim: https://github.com/dom96/choosenim
+  chromebrew: https://chromebrew.github.io
+  conda: https://docs.conda.io
+  containers: https://github.com/containers/podman
+  dein: https://github.com/Shougo/dein.vim
+  deno: https://deno.com
+  distrobox: https://distrobox.it
+  dotnet: https://learn.microsoft.com/dotnet/core/tools/
+  emacs: https://www.gnu.org/software/emacs/
+  etc-update: https://wiki.gentoo.org/wiki/Etc-update
+  fisher: https://github.com/jorgebucaran/fisher
+  flutter: https://flutter.dev
+  fossil: https://fossil-scm.org
+  gcloud: https://cloud.google.com/sdk/gcloud
+  ghcup: https://www.haskell.org/ghcup/
+  git: https://git-scm.com
+  github-cli-extensions: https://cli.github.com/manual/gh_extension
+  gnome-shell: https://extensions.gnome.org
+  go: https://go.dev
+  haxelib: https://lib.haxe.org
+  home-manager: https://github.com/nix-community/home-manager
+  jetpack: https://github.com/3ofcoins/jetpack
+  julia: https://julialang.org
+  kakoune: https://kakoune.org
+  krew: https://krew.sigs.k8s.io
+  macos: https://www.apple.com/macos/
+  micro: https://micro-editor.github.io
+  myrepos: https://myrepos.branchable.com
+  nala: https://gitlab.com/volian/nala
+  neobundle: https://github.com/Shougo/neobundle.vim
+  oh-my-zsh: https://ohmyz.sh
+  opam: https://opam.ocaml.org
+  pamac: https://gitlab.manjaro.org/applications/pamac
+  pearl: https://github.com/pearl-core/pearl
+  pihole: https://pi-hole.net
+  pikaur: https://github.com/actionless/pikaur
+  pkg-mgr: https://man.openbsd.org/pkg_add
+  pkg-tools: http://www.slackware.com/config/packages.php
+  pkgin: https://pkgin.net
+  plug: https://github.com/junegunn/vim-plug
+  pnpm: https://pnpm.io
+  podman: https://podman.io
+  powershell: https://learn.microsoft.com/powershell/
+  protonup: https://github.com/AUNaseef/protonup
+  raco: https://docs.racket-lang.org/raco/
+  rcm: https://github.com/thoughtbot/rcm
+  remotes: https://github.com/topgrade-rs/topgrade
+  restarts: https://github.com/liske/needrestart
+  rtcl: https://github.com/topgrade-rs/topgrade
+  rustup: https://rustup.rs
+  sheldon: https://sheldon.cli.rs
+  slapt-get: https://software.jaos.org/git/slapt-get/
+  spack: https://spack.io
+  sparkle: https://sparkle-project.org
+  spicetify: https://spicetify.app
+  stack: https://docs.haskellstack.org
+  sun-tools: https://docs.oracle.com/cd/E36784_01/html/E36870/pkgadd-1m.html
+  swupd: https://github.com/clearlinux/swupd-client
+  system: https://github.com/topgrade-rs/topgrade
+  tazpkg: https://www.slitaz.org/en/doc/handbook/tazpkg.html
+  tldr: https://tldr.sh
+  tlmgr: https://www.tug.org/texlive/tlmgr.html
+  toolbx: https://containertoolbx.org
+  trizen: https://github.com/trizen/trizen
+  vagrant: https://www.vagrantup.com
+  vcpkg: https://vcpkg.io
+  voom: https://github.com/yegappan/voom
+  vundle: https://github.com/VundleVim/Vundle.vim
+  wsl: https://learn.microsoft.com/windows/wsl/
+  yadm: https://yadm.io
+  zim: https://zimfw.sh
+  zinit: https://github.com/zdharma-continuum/zinit
+  zplug: https://github.com/zplug/zplug
+  zr: https://github.com/jedahan/zr

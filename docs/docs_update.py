@@ -163,13 +163,19 @@ def benchmark_managers_table() -> str:
     ``docs/benchmark.yaml``, which only encodes what the *other* tools
     support.
 
+    Each manager identifier in the first column is rendered as a link to its
+    homepage when one is known: from the mpm class's ``homepage_url`` for
+    implemented managers, or from the YAML's ``homepages`` mapping for
+    competitor-only managers. IDs without any known URL render as plain
+    ``\\`code\\```.
+
     Manager rows are the sorted union of pool IDs and YAML keys, so a new
     entry on either side appears in the table without manual edits.
     """
     yaml_path = PROJECT_ROOT / "docs" / "benchmark.yaml"
-    competitor_data: dict[str, list[str]] = yaml.safe_load(yaml_path.read_text())[
-        "managers"
-    ]
+    data = yaml.safe_load(yaml_path.read_text())
+    competitor_data: dict[str, list[str]] = data["managers"]
+    homepages: dict[str, str] = data.get("homepages", {})
 
     pool_ids = set(pool.all_manager_ids)
     all_ids = sorted(pool_ids | competitor_data.keys())
@@ -181,7 +187,12 @@ def benchmark_managers_table() -> str:
 
     table = []
     for mid in all_ids:
-        row = [f"`{mid}`"]
+        if mid in pool_ids:
+            url: str | None = pool[mid].homepage_url
+        else:
+            url = homepages.get(mid)
+        label = f"[`{mid}`]({url})" if url else f"`{mid}`"
+        row = [label]
         if mid in pool_ids:
             row.append(f"[✓]({manager_source_url(mid)})")
         else:

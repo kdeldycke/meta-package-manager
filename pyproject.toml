@@ -240,11 +240,11 @@ packages.find.include = [ "meta_package_manager*" ]
 # Cooldown period.
 exclude-newer = "1 week"
 # Nuitka is pinned to a specific version in the release workflow, so the cooldown
-# would block fresh releases. Exempt it from the global cutoff.
-exclude-newer-package = { nuitka = false }
+# would block fresh releases. Exempt it from the global cutoff. urllib3 gets no
+# cooldown so security fixes land immediately.
+exclude-newer-package = { nuitka = false, urllib3 = "0 day" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
-exclude-newer-package = { urllib3 = "0 day" }
 
 [tool.nuitka]
 product-name = "Meta Package Manager"

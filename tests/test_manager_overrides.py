@@ -19,9 +19,11 @@
 
 from __future__ import annotations
 
+import sys
 from textwrap import dedent
 
 import pytest
+import tomli_w
 
 from meta_package_manager.config import (
     CONTRIBUTION_HINT_FIELDS,
@@ -31,9 +33,17 @@ from meta_package_manager.config import (
     ContributionHint,
     _build_issue_url,
     apply_manager_overrides,
+    dump_manager_overrides,
     format_contribution_hints,
 )
 from meta_package_manager.pool import pool
+
+from .conftest import all_manager_ids
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib  # type: ignore[import-not-found]
 
 OVERRIDE_TARGET = "pip"
 """Manager ID used as a fixture target for override tests.
@@ -515,3 +525,102 @@ def test_cli_opt_out_via_config(invoke, create_config, reset_overrides):
     assert result.exit_code == 0
     assert "Detected user override" not in result.stderr
     assert "issues/new" not in result.stderr
+
+
+# dump_manager_overrides + dump-toml subcommand.
+
+
+def test_dump_manager_overrides_skips_none_values():
+    """Attributes whose current value is ``None`` are omitted from the dump."""
+    manager = pool[OVERRIDE_TARGET]
+    # Force one overridable field to None to confirm it gets skipped.
+    manager.__dict__["requirement"] = None
+    try:
+        dumped = dump_manager_overrides(manager)
+        assert "requirement" not in dumped
+    finally:
+        manager.__dict__.pop("requirement", None)
+
+
+def test_dump_manager_overrides_converts_tuples_to_lists():
+    """Tuples are converted to lists so :py:mod:`tomli_w` can serialize them."""
+    manager = pool[OVERRIDE_TARGET]
+    dumped = dump_manager_overrides(manager)
+    # cli_names is always set (the metaclass populates it from the manager ID).
+    assert isinstance(dumped["cli_names"], list)
+    assert all(not isinstance(v, tuple) for v in dumped.values())
+
+
+def test_dump_manager_overrides_keys_are_alphabetical():
+    """The output is canonical: dict insertion order matches sorted field names."""
+    manager = pool[OVERRIDE_TARGET]
+    dumped = dump_manager_overrides(manager)
+    assert list(dumped) == sorted(dumped)
+
+
+@all_manager_ids
+def test_dump_toml_round_trips(manager_id):
+    """For every manager, dump → tomli_w → tomllib → converter yields the same
+    value. Catches schema drift between :data:`OVERRIDABLE_FIELDS` converters
+    and the live attribute types."""
+    manager = pool[manager_id]
+    dumped = dump_manager_overrides(manager)
+    serialized = tomli_w.dumps(dumped)
+    parsed = tomllib.loads(serialized)
+    for field, raw_value in parsed.items():
+        converter = OVERRIDABLE_FIELDS[field]
+        reparsed = converter(raw_value)
+        original = getattr(manager, field)
+        assert reparsed == original, (
+            f"{manager_id}.{field}: {reparsed!r} != {original!r}"
+        )
+
+
+def test_cli_dump_toml_one_manager(invoke):
+    """`mpm dump-toml <id>` produces a single parseable manager section."""
+    result = invoke("dump-toml", "winget")
+    assert result.exit_code == 0
+    parsed = tomllib.loads(result.stdout)
+    assert list(parsed["mpm"]["managers"]) == ["winget"]
+    winget = parsed["mpm"]["managers"]["winget"]
+    # Every key present must be an overridable field.
+    assert set(winget).issubset(OVERRIDABLE_FIELDS)
+
+
+def test_cli_dump_toml_multiple_managers(invoke):
+    """`mpm dump-toml <id1> <id2>` dumps each requested manager."""
+    result = invoke("dump-toml", "winget", "pip")
+    assert result.exit_code == 0
+    parsed = tomllib.loads(result.stdout)
+    assert set(parsed["mpm"]["managers"]) == {"winget", "pip"}
+
+
+def test_cli_dump_toml_no_args_dumps_all_maintained(invoke):
+    """With no positional args, every maintained manager appears."""
+    result = invoke("dump-toml")
+    assert result.exit_code == 0
+    parsed = tomllib.loads(result.stdout)
+    assert set(parsed["mpm"]["managers"]) == set(pool.maintained_manager_ids)
+
+
+def test_cli_dump_toml_unknown_manager_errors(invoke):
+    result = invoke("dump-toml", "definitely-not-a-manager")
+    assert result.exit_code != 0
+    assert "definitely-not-a-manager" in result.stderr
+
+
+def test_cli_dump_toml_output_is_applyable(invoke, reset_overrides):
+    """End-to-end: pipe `mpm dump-toml <id>` output back through
+    `apply_manager_overrides` and confirm the pool is unchanged."""
+    manager = pool[OVERRIDE_TARGET]
+    before = {field: getattr(manager, field) for field in OVERRIDABLE_FIELDS}
+
+    result = invoke("dump-toml", OVERRIDE_TARGET)
+    assert result.exit_code == 0
+    parsed = tomllib.loads(result.stdout)
+    apply_manager_overrides(pool, parsed["mpm"]["managers"])
+
+    for field, original in before.items():
+        assert getattr(manager, field) == original, (
+            f"{OVERRIDE_TARGET}.{field} changed after round-trip"
+        )

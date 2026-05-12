@@ -250,6 +250,17 @@ Each built-in manager exposes a small set of attributes that can be overridden f
 List-valued fields use **replace** semantics: an override fully supersedes the built-in default rather than merging with it. For example, setting `cli_search_path = ["/opt/bin"]` on a manager that ships with `cli_search_path = ("/usr/local/bin",)` results in `("/opt/bin",)`, not the union of both.
 ```
 
+### Discover the override template
+
+Run `mpm dump-toml` to print the current overridable attributes of every maintained manager as a ready-to-paste config block. Pass one or more manager IDs to narrow the output:
+
+```shell-session
+$ mpm dump-toml winget > my-overrides.toml
+$ mpm dump-toml brew pip cargo
+```
+
+The output lists every overridable field with its current value, so it doubles as the canonical reference for what each manager exposes. Prune the rows that don't apply and customize the rest. The output is valid TOML; redirect it directly into a config file or merge it into your existing `[mpm]` section.
+
 ### Example: bypass a Windows app-store placeholder
 
 Modern Windows ships placeholder executables under `%LOCALAPPDATA%\Microsoft\WindowsApps\` that, when invoked, open the Microsoft Store rather than running the real CLI. If you have installed the genuine `winget` somewhere else, point `cli_search_path` at that directory so `mpm` finds it first:

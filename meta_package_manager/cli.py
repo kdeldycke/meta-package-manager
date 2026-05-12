@@ -66,6 +66,7 @@ from .base import (
 from .config import (
     MpmConfig,
     apply_manager_overrides_from_context,
+    dump_manager_overrides,
     print_contribution_hints,
 )
 from .inventory import MAIN_PLATFORMS
@@ -1009,6 +1010,35 @@ def which(ctx, cli_names):
         table,
         ctx.obj.sort_by,
     )
+
+
+@mpm.command(
+    name="dump-toml",
+    short_help="Print per-manager overrides as a TOML config template.",
+    section=EXPLORE,
+)
+@argument(
+    "manager_ids",
+    type=Choice(pool.all_manager_ids, case_sensitive=False),
+    nargs=-1,
+)
+@pass_context
+def dump_toml(ctx, manager_ids):
+    """Print the overridable attributes of one or more managers as a TOML config
+    template.
+
+    Each block is a valid ``[mpm.managers.<id>]`` section ready to paste into a
+    standalone config file or a ``[tool.mpm]`` ``pyproject.toml`` block. The output
+    lists every overridable field with its current value so it doubles as the
+    canonical reference for what each manager exposes: prune the rows that don't
+    apply and customize the rest.
+
+    With no positional arguments, every maintained (non-deprecated) manager is
+    dumped. Pass one or more manager IDs to restrict the output.
+    """
+    target_ids = manager_ids or pool.maintained_manager_ids
+    overrides = {mid: dump_manager_overrides(pool[mid]) for mid in target_ids}
+    echo(tomli_w.dumps({"mpm": {"managers": overrides}}), nl=False)
 
 
 @mpm.command(short_help="Install a package.", section=MAINTENANCE)

@@ -45,6 +45,7 @@ if TYPE_CHECKING:
 
     import click
 
+    from .base import PackageManager
     from .pool import ManagerPool
 
 
@@ -461,6 +462,32 @@ def apply_manager_overrides(
             manager.__dict__.pop(prop, None)
 
     return hints
+
+
+def dump_manager_overrides(manager: PackageManager) -> dict[str, Any]:
+    """Return the current overridable attributes of ``manager`` as a TOML-ready
+    dict.
+
+    Walks :data:`OVERRIDABLE_FIELDS` in alphabetical order, reads each attribute
+    from the manager instance, and converts tuples to lists so :py:mod:`tomli_w`
+    can serialize the result without translation. Attributes whose value is
+    ``None`` are skipped: TOML cannot express ``None`` and the user cannot
+    override a field *to* ``None`` either, so emitting the key would be
+    misleading.
+
+    Every other overridable field is emitted, including ones still at the class
+    default. The output is meant to be a canonical override template: paste,
+    prune the rows that don't apply, and customize the rest.
+    """
+    result: dict[str, Any] = {}
+    for field in sorted(OVERRIDABLE_FIELDS):
+        value = getattr(manager, field)
+        if value is None:
+            continue
+        if isinstance(value, tuple):
+            value = list(value)
+        result[field] = value
+    return result
 
 
 CTX_HINTS_KEY: Final[str] = "mpm.contribution_hints"

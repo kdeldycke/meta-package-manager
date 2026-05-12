@@ -129,44 +129,33 @@ jobs:
 
       - name: Smoke-test mpm
         run: |
+          set -x
+          # Let stdout/stderr flow to the runner log so any traceback is
+          # visible. `set +e` lets us capture per-command exit codes
+          # without aborting the step until the final tee'd report.
+          set +e
+          /tmp/mpm-venv/bin/mpm --version | tee /tmp/mpm-version.log
+          version_rc=$?
+          /tmp/mpm-venv/bin/mpm --table-format=json managers \
+            | tee /tmp/mpm-managers.log \
+            | head --lines=40
+          managers_rc=$?
+          set -e
+
           {
             echo ""
             echo "## Smoke tests"
             echo ""
-          } >> "${GITHUB_STEP_SUMMARY}"
-
-          set +e
-          version_out=$(/tmp/mpm-venv/bin/mpm --version 2>&1)
-          version_rc=$?
-          managers_out=$(/tmp/mpm-venv/bin/mpm --table-format=json managers 2>&1 | head --lines=40)
-          managers_rc=$?
-          set -e
-
-          if [ "${version_rc}" -eq 0 ]; then
-            echo "- ✅ \`mpm --version\` → \`${version_out}\`" >> "${GITHUB_STEP_SUMMARY}"
-          else
-            {
+            if [ "${version_rc}" -eq 0 ]; then
+              echo "- ✅ \`mpm --version\` succeeded"
+            else
               echo "- ❌ \`mpm --version\` failed (rc=${version_rc})"
-              echo '```'
-              echo "${version_out}"
-              echo '```'
-            } >> "${GITHUB_STEP_SUMMARY}"
-          fi
-
-          if [ "${managers_rc}" -eq 0 ]; then
-            {
-              echo "- ✅ \`mpm managers\` returned"
-              echo '```'
-              echo "${managers_out}"
-              echo '```'
-            } >> "${GITHUB_STEP_SUMMARY}"
-          else
-            {
+            fi
+            if [ "${managers_rc}" -eq 0 ]; then
+              echo "- ✅ \`mpm managers\` succeeded"
+            else
               echo "- ❌ \`mpm managers\` failed (rc=${managers_rc})"
-              echo '```'
-              echo "${managers_out}"
-              echo '```'
-            } >> "${GITHUB_STEP_SUMMARY}"
-          fi
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
 
           exit $(( version_rc + managers_rc ))

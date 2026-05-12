@@ -23,16 +23,27 @@ jobs:
       options: --privileged
     steps:
       - name: Sync xbps and install build tooling
+        timeout-minutes: 10
         run: |
+          set -eux
+          # The default repo-default.voidlinux.org mirror throttles GitHub
+          # Actions runners to ~150 KB/s, which makes a 163MB install plan
+          # blow past any reasonable timeout. Switch to a faster regional
+          # mirror before fetching anything. List at
+          # https://docs.voidlinux.org/xbps/repositories/mirrors/index.html
+          mkdir --parents /etc/xbps.d
+          echo 'repository=https://repo-fastly.voidlinux.org/current' \
+            > /etc/xbps.d/00-repository-main.conf
+          cat /etc/xbps.d/*.conf
+          # Keep the package list minimal: the wheel-build test only needs
+          # a Python interpreter, pip, and Void's `uv-build` PEP 517 backend.
+          # Heavy meta-packages like `base-devel` and `xtools` are skipped.
           xbps-install --sync --yes xbps
-          xbps-install --yes \
-            base-devel \
+          xbps-install --yes --verbose \
             git \
             python3 \
             python3-pip \
-            uv \
-            uv-build \
-            xtools
+            uv-build
 
       - name: Checkout mpm
         uses: actions/checkout@v5
@@ -44,7 +55,7 @@ jobs:
             echo ""
             echo '| Package | Version |'
             echo '|---|---|'
-            for pkg in uv uv-build python3 python3-pip xtools; do
+            for pkg in uv-build python3 python3-pip; do
               ver=$(xbps-query --property=pkgver "${pkg}" 2>/dev/null || echo "n/a")
               echo "| \`${pkg}\` | \`${ver}\` |"
             done

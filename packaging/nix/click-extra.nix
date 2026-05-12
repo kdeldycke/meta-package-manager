@@ -46,7 +46,7 @@ buildPythonPackage (finalAttrs: {
   ]
   # click-extra's pyproject.toml pins ``tabulate[widechars]``; the ``widechars``
   # extra adds ``wcwidth`` for correct column padding around wide Unicode
-  # characters (e.g. emoji). Without it, ``tests/test_table.py`` rendering
+  # characters like emoji. Without it, ``tests/test_table.py`` rendering
   # assertions fail across most table formats.
   ++ tabulate.optional-dependencies.widechars;
 

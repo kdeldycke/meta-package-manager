@@ -229,22 +229,22 @@ Each built-in manager exposes a small set of attributes that can be overridden f
 
 ### Overridable fields
 
-| Field                 | Type                | Description                                                                                |
-| :-------------------- | :------------------ | :----------------------------------------------------------------------------------------- |
-| `cli_names`           | list of strings     | CLI binary names to look for, in order of priority.                                        |
-| `cli_search_path`     | list of strings     | Extra directories searched **before** `$PATH` for the binary.                              |
-| `deprecated`          | boolean             | Mark a manager as deprecated, hiding it from default selection.                            |
-| `dry_run`             | boolean             | Simulate CLI calls without performing any action, only for this manager.                   |
-| `extra_env`           | table of strings    | Additional environment variables passed to every CLI call.                                 |
-| `ignore_auto_updates` | boolean             | Exclude auto-updating packages from outdated/upgrade results, only for this manager.       |
-| `post_args`           | list of strings     | Arguments appended **after** every CLI invocation.                                         |
-| `pre_args`            | list of strings     | Arguments inserted **before** every CLI invocation.                                        |
-| `pre_cmds`            | list of strings     | Commands prepended to every CLI invocation (typically `sudo`).                             |
-| `requirement`         | string              | PEP 440-style version requirement the manager must satisfy to be considered available.     |
-| `stop_on_error`       | boolean             | Stop on the first CLI error from this manager instead of continuing.                       |
-| `timeout`             | integer             | Maximum duration in seconds for each CLI call from this manager.                           |
-| `version_cli_options` | list of strings     | CLI options used to extract the manager's reported version.                                |
-| `version_regexes`     | list of strings     | Regular expressions tried in order to extract the version from CLI output.                 |
+| Field                 | Type             | Description                                                                            |
+| :-------------------- | :--------------- | :------------------------------------------------------------------------------------- |
+| `cli_names`           | list of strings  | CLI binary names to look for, in order of priority.                                    |
+| `cli_search_path`     | list of strings  | Extra directories searched **before** `$PATH` for the binary.                          |
+| `deprecated`          | boolean          | Mark a manager as deprecated, hiding it from default selection.                        |
+| `dry_run`             | boolean          | Simulate CLI calls without performing any action, only for this manager.               |
+| `extra_env`           | table of strings | Additional environment variables passed to every CLI call.                             |
+| `ignore_auto_updates` | boolean          | Exclude auto-updating packages from outdated/upgrade results, only for this manager.   |
+| `post_args`           | list of strings  | Arguments appended **after** every CLI invocation.                                     |
+| `pre_args`            | list of strings  | Arguments inserted **before** every CLI invocation.                                    |
+| `pre_cmds`            | list of strings  | Commands prepended to every CLI invocation (typically `sudo`).                         |
+| `requirement`         | string           | PEP 440-style version requirement the manager must satisfy to be considered available. |
+| `stop_on_error`       | boolean          | Stop on the first CLI error from this manager instead of continuing.                   |
+| `timeout`             | integer          | Maximum duration in seconds for each CLI call from this manager.                       |
+| `version_cli_options` | list of strings  | CLI options used to extract the manager's reported version.                            |
+| `version_regexes`     | list of strings  | Regular expressions tried in order to extract the version from CLI output.             |
 
 ```{important}
 List-valued fields use **replace** semantics: an override fully supersedes the built-in default rather than merging with it. For example, setting `cli_search_path = ["/opt/bin"]` on a manager that ships with `cli_search_path = ("/usr/local/bin",)` results in `("/opt/bin",)`, not the union of both.

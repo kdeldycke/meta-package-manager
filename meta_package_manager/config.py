@@ -95,14 +95,14 @@ class MpmConfig:
 def _to_str(value: Any) -> str:
     """Validate that the value is a string."""
     if not isinstance(value, str):
-        raise ValueError(f"expected a string, got {type(value).__name__}: {value!r}")
+        raise TypeError(f"expected a string, got {type(value).__name__}: {value!r}")
     return value
 
 
 def _to_bool(value: Any) -> bool:
     """Validate that the value is a boolean."""
     if not isinstance(value, bool):
-        raise ValueError(f"expected a boolean, got {type(value).__name__}: {value!r}")
+        raise TypeError(f"expected a boolean, got {type(value).__name__}: {value!r}")
     return value
 
 
@@ -113,20 +113,20 @@ def _to_int(value: Any) -> int:
     in Python, but configuration intent is unambiguous: a boolean is never an
     acceptable integer.
     """
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise ValueError(f"expected an integer, got {type(value).__name__}: {value!r}")
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise TypeError(f"expected an integer, got {type(value).__name__}: {value!r}")
     return value
 
 
 def _to_str_tuple(value: Any) -> tuple[str, ...]:
     """Validate that the value is a list/tuple of strings, return a tuple."""
     if not isinstance(value, (list, tuple)):
-        raise ValueError(
+        raise TypeError(
             f"expected a list of strings, got {type(value).__name__}: {value!r}"
         )
     for item in value:
         if not isinstance(item, str):
-            raise ValueError(
+            raise TypeError(
                 f"expected all entries to be strings, "
                 f"got {type(item).__name__}: {item!r}"
             )
@@ -136,13 +136,13 @@ def _to_str_tuple(value: Any) -> tuple[str, ...]:
 def _to_str_dict(value: Any) -> dict[str, str]:
     """Validate that the value is a mapping of strings to strings."""
     if not isinstance(value, dict):
-        raise ValueError(
+        raise TypeError(
             f"expected a table of string-to-string, "
             f"got {type(value).__name__}: {value!r}"
         )
     for k, v in value.items():
         if not isinstance(k, str) or not isinstance(v, str):
-            raise ValueError(
+            raise TypeError(
                 f"expected a table of string-to-string entries, "
                 f"got {k!r} = {v!r}"
             )
@@ -350,8 +350,8 @@ def format_contribution_hints(hints: list[ContributionHint]) -> str:
     lines.extend(
         (
             "",
-            f"  (Disable with `--no-suggest-contribs` or "
-            f"`[mpm] suggest_contribs = false`.)",
+            "  (Disable with `--no-suggest-contribs` or "
+            "`[mpm] suggest_contribs = false`.)",
         )
     )
     return "\n".join(lines)
@@ -374,6 +374,7 @@ def apply_manager_overrides(
       skipped: a typo in the config file should not crash the CLI.
     - Recognized values are validated and coerced through
       :data:`OVERRIDABLE_FIELDS` converters. A type mismatch raises
+      :py:class:`TypeError` internally; the caller re-wraps it as
       :py:class:`ValueError` so the user is told to fix the config.
     - Each accepted override is applied as an instance attribute, shadowing the
       class default for the lifetime of the process. List-valued fields use
@@ -429,7 +430,7 @@ def apply_manager_overrides(
                 continue
             try:
                 value = converter(raw_value)
-            except ValueError as ex:
+            except TypeError as ex:
                 msg = f"[mpm.managers.{manager_id}].{field}: {ex}"
                 raise ValueError(msg) from ex
 

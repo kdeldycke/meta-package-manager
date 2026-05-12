@@ -64,25 +64,10 @@ jobs:
       - name: Audit mpm runtime deps against Void srcpkgs
         run: |
           # Deps are duplicated from pyproject.toml. Update both together.
-          available=(
-            python3-boltons
-            python3-tomli-w
-            python3-xmltodict
-          )
-          missing_direct=(
-            python3-click-extra
-            python3-cyclonedx-python-lib
-            python3-extra-platforms
-            python3-packageurl-python
-            python3-spdx-tools
-          )
-          missing_transitive=(
-            python3-mergedeep
-            python3-cachecontrol
-            python3-py-serializable
-            python3-semantic_version
-            python3-beartype
-          )
+          # The default container shell is POSIX `sh`, so no bash arrays.
+          available="python3-boltons python3-tomli-w python3-xmltodict"
+          missing_direct="python3-click-extra python3-cyclonedx-python-lib python3-extra-platforms python3-packageurl-python python3-spdx-tools"
+          missing_transitive="python3-mergedeep python3-cachecontrol python3-py-serializable python3-semantic_version python3-beartype"
 
           {
             echo ""
@@ -90,7 +75,7 @@ jobs:
             echo ""
             echo "### Available in Void"
             echo ""
-            for pkg in "${available[@]}"; do
+            for pkg in ${available}; do
               ver=$(xbps-query --regex --repository --search "^${pkg}-[0-9]" 2>/dev/null | head --lines=1 || true)
               if [ -n "${ver}" ]; then
                 echo "- ✅ \`${pkg}\` — \`${ver}\`"
@@ -101,13 +86,13 @@ jobs:
             echo ""
             echo "### Direct deps missing from Void"
             echo ""
-            for pkg in "${missing_direct[@]}"; do
+            for pkg in ${missing_direct}; do
               echo "- ❌ \`${pkg}\`"
             done
             echo ""
             echo "### Transitive deps missing from Void"
             echo ""
-            for pkg in "${missing_transitive[@]}"; do
+            for pkg in ${missing_transitive}; do
               echo "- ❌ \`${pkg}\`"
             done
           } >> "${GITHUB_STEP_SUMMARY}"

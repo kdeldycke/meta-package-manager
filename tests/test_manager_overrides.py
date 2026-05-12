@@ -609,7 +609,7 @@ def test_cli_dump_toml_unknown_manager_errors(invoke):
     assert "definitely-not-a-manager" in result.stderr
 
 
-def test_cli_dump_toml_output_is_applyable(invoke, reset_overrides):
+def test_cli_dump_toml_output_is_applicable(invoke, reset_overrides):
     """End-to-end: pipe `mpm dump-toml <id>` output back through
     `apply_manager_overrides` and confirm the pool is unchanged."""
     manager = pool[OVERRIDE_TARGET]

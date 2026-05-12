@@ -171,6 +171,9 @@ managers:
   tldr: [topgrade]
   tlmgr: [topgrade, pacaptr, pacapt]
   tmux: [topgrade]
+  # ``topgrade`` is now wrapped by ``mpm`` itself. ``topgrade`` updates its own
+  # binary through its ``self_update`` step, hence the self-referential flag.
+  topgrade: [topgrade]
   toolbx: [topgrade]
   trizen: [topgrade]
   typst: [topgrade]

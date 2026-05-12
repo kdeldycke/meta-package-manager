@@ -57,6 +57,7 @@ from .managers.sfsu import SFSU
 from .managers.snap import Snap
 from .managers.steamcmd import SteamCMD
 from .managers.stew import Stew
+from .managers.topgrade import Topgrade
 from .managers.uv import UV, UVX
 from .managers.vscode import VSCode, VSCodium
 from .managers.winget import WinGet
@@ -113,6 +114,7 @@ manager_classes = (
     Snap,
     SteamCMD,
     Stew,
+    Topgrade,
     UV,
     UVX,
     VSCode,

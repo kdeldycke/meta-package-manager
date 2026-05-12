@@ -112,6 +112,7 @@ Meta Package Manager,sfsu,1
 Meta Package Manager,snap,1
 Meta Package Manager,steamcmd,1
 Meta Package Manager,stew,1
+Meta Package Manager,topgrade,1
 Meta Package Manager,uv,1
 Meta Package Manager,uvx,1
 Meta Package Manager,vscode,1
@@ -173,6 +174,7 @@ Meta Package Manager,zypper,1
 | [`snap`](https://snapcraft.io)                                                          | >=2.0.0          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`steamcmd`](https://developer.valvesoftware.com/wiki/SteamCMD)                         |                  |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |             |            |          |     ✓     |           |               |          |        |           |
 | [`stew`](https://github.com/marwanhawari/stew)                                          | >=0.3.0          |           |      🐧       |  🍎   |             |   🪟    |      ✓      |            |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
+| [`topgrade`](https://github.com/topgrade-rs/topgrade)                                   | >=17.0.0         |    🅱️     |      🐧       |  🍎   |             |   🪟    |             |            |          |           |           |       ✓       |          |        |           |
 | [`uv`](https://docs.astral.sh/uv)                                                       | >=0.5.0          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`uvx`](https://docs.astral.sh/uv/guides/tools/)                                        | >=0.10.10        |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`vscode`](https://code.visualstudio.com)                                               | >=1.60.0         |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |            |          |     ✓     |           |               |    ✓     |        |           |

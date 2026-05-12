@@ -236,6 +236,7 @@ PACKAGE_IDS = {
     "snap": "standard-notes",
     "steamcmd": "740",
     "stew": "marwanhawari/piu",
+    "topgrade": "topgrade",
     "uv": "pytz",
     "uvx": "pycowsay",
     "vscode": "tamasfe.even-better-toml",

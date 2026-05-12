@@ -144,6 +144,11 @@ color = "bfdadc"
 description = "stew"
 
 [[profiles.default.labels]]
+name = "📦 manager: topgrade"
+color = "bfdadc"
+description = "topgrade"
+
+[[profiles.default.labels]]
 name = "📦 manager: uv-based"
 color = "bfdadc"
 description = "uv, uvx"

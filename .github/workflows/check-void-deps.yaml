@@ -3,21 +3,44 @@ name: 🧪 Validate Void Linux packages
 "on":
   workflow_dispatch:
 
-# Temporary workflow to validate the Void Linux packaging hypothesis for
-# meta-package-manager. The load-bearing question: can the `uv-build` package
-# shipped by Void (as a sub-package of `uv`) be used to build mpm's wheel from
-# source? If yes, packaging mpm for Void reduces to writing srcpkg templates
-# for the few runtime deps that Void does not yet ship.
+# Temporary workflow that builds the Void Linux templates for mpm and its
+# transitive dependencies from the `mpm` branch of kdeldycke/void-packages
+# using xbps-src inside the official Void glibc container. Each package is
+# built in dependency order; results are summarised per-package in the step
+# summary so failures surface independently.
 #
 # Delete after the upstream PR to void-linux/void-packages is merged.
 
 permissions: {}
 
+env:
+  VOID_FORK: kdeldycke/void-packages
+  VOID_BRANCH: mpm
+  # Build sequence, leaves first. Must match the commit order on the branch.
+  PACKAGES: >-
+    python3-beartype
+    python3-cloup
+    python3-deepmerge
+    python3-fqdn
+    python3-packageurl-python
+    python3-py-serializable
+    python3-rfc3987-syntax
+    python3-semantic_version
+    python3-uri-template
+    python3-webcolors
+    python3-isoduration
+    python3-extra-platforms
+    python3-spdx-tools
+    python3-click-extra
+    python3-cyclonedx-python-lib
+    mpm
+
 jobs:
 
-  validate:
-    name: Build mpm inside Void glibc
+  xbps-build:
+    name: xbps-src build cascade
     runs-on: ubuntu-24.04
+    timeout-minutes: 120
     container:
       image: ghcr.io/void-linux/void-glibc-full:latest
       options: --privileged
@@ -27,135 +50,133 @@ jobs:
         run: |
           set -eux
           # The default repo-default.voidlinux.org mirror throttles GitHub
-          # Actions runners to ~150 KB/s, which makes a 163MB install plan
-          # blow past any reasonable timeout. Switch to a faster regional
-          # mirror before fetching anything. List at
-          # https://docs.voidlinux.org/xbps/repositories/mirrors/index.html
+          # Actions runners. Switch to a Fastly CDN-backed mirror first.
           mkdir --parents /etc/xbps.d
           echo 'repository=https://repo-fastly.voidlinux.org/current' \
             > /etc/xbps.d/00-repository-main.conf
-          cat /etc/xbps.d/*.conf
-          # Keep the package list minimal: the wheel-build test only needs
-          # a Python interpreter, pip, and Void's `uv-build` PEP 517 backend.
-          # Heavy meta-packages like `base-devel` and `xtools` are skipped.
           xbps-install --sync --yes xbps
-          xbps-install --yes --verbose \
+          # xbps-src lives inside the void-packages tree itself; we only
+          # need git (to clone the branch) and the xbps-src host deps.
+          xbps-install --yes \
+            base-devel \
             git \
-            python3 \
-            python3-pip \
-            uv-build
+            xtools
 
-      - name: Checkout mpm
-        uses: actions/checkout@v5
+      - name: Clone fork branch
+        timeout-minutes: 5
+        run: |
+          set -eux
+          git clone \
+            --branch "${VOID_BRANCH}" \
+            --depth 1 \
+            "https://github.com/${VOID_FORK}" \
+            /void-packages
+          (cd /void-packages && git log --oneline -1)
 
-      - name: Record Void package versions
+      - name: Bootstrap xbps-src masterdir
+        timeout-minutes: 15
+        working-directory: /void-packages
+        run: |
+          set -eux
+          # Mirror the same Fastly choice inside the masterdir so package
+          # builds fetch their build-time deps over the CDN. The variable
+          # name is read by `xbps-src binary-bootstrap`.
+          mkdir --parents etc
+          echo 'XBPS_BINPKG_REPO=https://repo-fastly.voidlinux.org/current' \
+            > etc/conf
+          ./xbps-src binary-bootstrap
+
+      - name: Lint all new templates
+        working-directory: /void-packages
         run: |
           {
-            echo "## Void environment"
+            echo "## xlint"
             echo ""
-            echo '| Package | Version |'
-            echo '|---|---|'
-            for pkg in uv-build python3 python3-pip; do
-              ver=$(xbps-query --property=pkgver "${pkg}" 2>/dev/null || echo "n/a")
-              echo "| \`${pkg}\` | \`${ver}\` |"
-            done
           } >> "${GITHUB_STEP_SUMMARY}"
-
-      - name: Audit mpm runtime deps against Void srcpkgs
-        run: |
-          # Deps are duplicated from pyproject.toml. Update both together.
-          # The default container shell is POSIX `sh`, so no bash arrays.
-          available="python3-boltons python3-tomli-w python3-xmltodict"
-          missing_direct="python3-click-extra python3-cyclonedx-python-lib python3-extra-platforms python3-packageurl-python python3-spdx-tools"
-          missing_transitive="python3-mergedeep python3-cachecontrol python3-py-serializable python3-semantic_version python3-beartype"
-
-          {
-            echo ""
-            echo "## Dependency coverage"
-            echo ""
-            echo "### Available in Void"
-            echo ""
-            for pkg in ${available}; do
-              ver=$(xbps-query --regex --repository --search "^${pkg}-[0-9]" 2>/dev/null | head --lines=1 || true)
-              if [ -n "${ver}" ]; then
-                echo "- ✅ \`${pkg}\` — \`${ver}\`"
-              else
-                echo "- ⚠️ \`${pkg}\` — listed as available but not found via xbps-query"
-              fi
-            done
-            echo ""
-            echo "### Direct deps missing from Void"
-            echo ""
-            for pkg in ${missing_direct}; do
-              echo "- ❌ \`${pkg}\`"
-            done
-            echo ""
-            echo "### Transitive deps missing from Void"
-            echo ""
-            for pkg in ${missing_transitive}; do
-              echo "- ❌ \`${pkg}\`"
-            done
-          } >> "${GITHUB_STEP_SUMMARY}"
-
-      - name: Build mpm wheel with Void's uv-build
-        id: build_wheel
-        run: |
-          # `--no-build-isolation` forces pip to use the system-installed
-          # `uv-build` (from Void) instead of fetching one from PyPI. This is
-          # what proves the build-backend hypothesis.
-          mkdir --parents /tmp/wheels
-          python3 -m pip wheel \
-            --no-build-isolation \
-            --no-deps \
-            --wheel-dir /tmp/wheels \
-            .
-          wheel_path=$(ls /tmp/wheels/meta_package_manager-*.whl | head --lines=1)
-          echo "wheel_path=${wheel_path}" >> "${GITHUB_OUTPUT}"
-          {
-            echo ""
-            echo "## Wheel build"
-            echo ""
-            echo "- ✅ Built \`$(basename "${wheel_path}")\` with system \`uv-build\`"
-          } >> "${GITHUB_STEP_SUMMARY}"
-
-      - name: Install mpm into a venv with PyPI fallback for missing deps
-        run: |
-          python3 -m venv /tmp/mpm-venv
-          # Install Void-available deps first (no PyPI fetch), then let pip
-          # resolve the missing ones from PyPI. This mirrors what end users
-          # would experience once all missing deps land in Void.
-          /tmp/mpm-venv/bin/pip install --upgrade pip
-          /tmp/mpm-venv/bin/pip install "${{ steps.build_wheel.outputs.wheel_path }}"
-
-      - name: Smoke-test mpm
-        run: |
-          set -x
-          # Let stdout/stderr flow to the runner log so any traceback is
-          # visible. `set +e` lets us capture per-command exit codes
-          # without aborting the step until the final tee'd report.
-          set +e
-          /tmp/mpm-venv/bin/mpm --version | tee /tmp/mpm-version.log
-          version_rc=$?
-          /tmp/mpm-venv/bin/mpm --table-format=json managers \
-            | tee /tmp/mpm-managers.log \
-            | head --lines=40
-          managers_rc=$?
-          set -e
-
-          {
-            echo ""
-            echo "## Smoke tests"
-            echo ""
-            if [ "${version_rc}" -eq 0 ]; then
-              echo "- ✅ \`mpm --version\` succeeded"
+          failed=0
+          for pkg in ${PACKAGES}; do
+            out=$(xlint "srcpkgs/${pkg}/template" 2>&1 || true)
+            if [ -n "${out}" ]; then
+              {
+                echo "- ⚠️ \`${pkg}\`"
+                echo '```'
+                echo "${out}"
+                echo '```'
+              } >> "${GITHUB_STEP_SUMMARY}"
+              failed=$((failed + 1))
             else
-              echo "- ❌ \`mpm --version\` failed (rc=${version_rc})"
+              echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
             fi
-            if [ "${managers_rc}" -eq 0 ]; then
-              echo "- ✅ \`mpm managers\` succeeded"
-            else
-              echo "- ❌ \`mpm managers\` failed (rc=${managers_rc})"
-            fi
+          done
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "**${failed} lint warnings** across packages." \
+            >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Build all packages in dependency order
+        timeout-minutes: 90
+        working-directory: /void-packages
+        run: |
+          set -o pipefail
+          {
+            echo ""
+            echo "## xbps-src pkg"
+            echo ""
           } >> "${GITHUB_STEP_SUMMARY}"
 
-          exit $(( version_rc + managers_rc ))
+          failed=0
+          for pkg in ${PACKAGES}; do
+            echo "--- Building ${pkg} ---"
+            log=$(mktemp)
+            if ./xbps-src pkg "${pkg}" > "${log}" 2>&1; then
+              tail --lines=20 "${log}"
+              echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
+            else
+              # On failure, surface the last 200 lines plus any explicit
+              # FAILED/ERROR markers for fast diagnosis.
+              echo "=== FAILED markers ==="
+              grep -E "^FAILED|^ERROR|=> ERROR|short test summary" "${log}" \
+                || true
+              echo "=== last 200 lines ==="
+              tail --lines=200 "${log}"
+              {
+                echo "- ❌ \`${pkg}\`"
+                echo '```'
+                tail --lines=100 "${log}"
+                echo '```'
+              } >> "${GITHUB_STEP_SUMMARY}"
+              failed=$((failed + 1))
+            fi
+            rm --force "${log}"
+          done
+
+          total=0
+          for pkg in ${PACKAGES}; do
+            total=$((total + 1))
+          done
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "**${failed} failed** out of ${total} packages." \
+            >> "${GITHUB_STEP_SUMMARY}"
+
+          if [ "${failed}" -gt 0 ]; then
+            exit 1
+          fi
+
+      - name: Install and smoke-test mpm
+        if: success()
+        working-directory: /void-packages
+        run: |
+          set -eux
+          # Install all freshly-built packages from the local hostdir repo
+          # and confirm mpm runs end-to-end.
+          xbps-install --yes \
+            --repository=hostdir/binpkgs \
+            mpm
+          mpm --version
+          mpm --table-format=json managers | head --lines=40
+          {
+            echo ""
+            echo "## End-to-end smoke test"
+            echo ""
+            echo "- ✅ \`mpm\` installed from local hostdir/binpkgs"
+            echo "- ✅ \`mpm --version\` and \`mpm managers\` ran"
+          } >> "${GITHUB_STEP_SUMMARY}"

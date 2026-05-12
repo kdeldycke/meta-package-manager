@@ -34,7 +34,13 @@ from .test_cli import CLISubCommandTests, CLITableTests
 
 @pytest.fixture
 def subcmd():
-    return "search", "abc"
+    # "excel" deterministically surfaces an upstream `mas` record whose
+    # `description` carries an unescaped U+0010 byte and two U+2028 line
+    # separators (`PDF to Excel OCR Converter`, adamID 1316315027). Searching
+    # for it gives real-world coverage of the parser workaround in
+    # `meta_package_manager.managers.mas._parse_json_stream`. Upstream bug:
+    # https://github.com/mas-cli/mas/issues/1248
+    return "search", "excel"
 
 
 class TestSearch(CLISubCommandTests, CLITableTests):

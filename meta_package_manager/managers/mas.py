@@ -56,12 +56,30 @@ class MAS(PackageManager):
 
     @staticmethod
     def _parse_json_stream(output: str) -> Iterator[dict]:
-        """Parse mas ``--json`` output as a stream of newline-delimited JSON
-        objects, one per app.
+        """Parse mas ``--json`` output as a stream of concatenated JSON objects,
+        one per app.
+
+        .. note::
+            ``mas`` emits one JSON object per record but does not escape control
+            characters (``U+0000``-``U+001F``, ``U+2028``) inside string fields
+            like app names and descriptions, so splitting by lines breaks any
+            record whose fields contain a real ``\\n`` or ``U+2028``. Walking
+            the buffer with :py:meth:`json.JSONDecoder.raw_decode` instead lets
+            each object terminate at its own closing brace, and ``strict=False``
+            permits the embedded control characters that the upstream output
+            actually contains. Upstream bug:
+            https://github.com/mas-cli/mas/issues/1248
         """
-        for line in output.splitlines():
-            if line.strip():
-                yield json.loads(line)
+        decoder = json.JSONDecoder(strict=False)
+        idx = 0
+        end = len(output)
+        while idx < end:
+            while idx < end and output[idx].isspace():
+                idx += 1
+            if idx >= end:
+                break
+            obj, idx = decoder.raw_decode(output, idx)
+            yield obj
 
     @property
     def installed(self) -> Iterator[Package]:

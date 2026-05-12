@@ -159,6 +159,20 @@ class ManagerPool:
             register[manager.id] = manager
         return register  # type: ignore[return-value]
 
+    @cached_property
+    def overridden_fields(self) -> dict[str, set[str]]:
+        """Per-manager attribute names that the user explicitly overrode via
+        ``[mpm.managers.<id>]``.
+
+        Populated by :py:func:`meta_package_manager.config.apply_manager_overrides`.
+        Read by :py:meth:`_select_managers` to skip the global ``--<flag>`` defaults
+        for fields the user has explicitly set per manager. Tracked separately from
+        instance ``__dict__`` membership so the global defaults can still refresh
+        fields that were previously set by an earlier ``_select_managers`` call but
+        were never user-overridden.
+        """
+        return {}
+
     # Emulates some dict methods.
 
     def __len__(self) -> int:
@@ -294,9 +308,14 @@ class ManagerPool:
                 )
                 continue
 
-            # Apply manager-level options.
+            # Apply manager-level options. Skip a field that the user explicitly
+            # overrode via [mpm.managers.<id>] so the per-manager value keeps
+            # precedence over the global default.
+            user_overrides = self.overridden_fields.get(manager_id, set())
             for param, value in extra_options.items():
                 assert hasattr(manager, param)
+                if param in user_overrides:
+                    continue
                 setattr(manager, param, value)
 
             yield manager

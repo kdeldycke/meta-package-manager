@@ -223,6 +223,71 @@ pacman = false
 paru = false
 ```
 
+## Per-manager overrides
+
+Each built-in manager exposes a small set of attributes that can be overridden from the configuration file. Add a `[mpm.managers.<id>]` section (or `[tool.mpm.managers.<id>]` in `pyproject.toml`) for each manager you want to tune. Values from the file take precedence over the built-in defaults and over the matching global `[mpm]` settings or `--<flag>` command-line values when both apply to the same field.
+
+### Overridable fields
+
+| Field                 | Type                | Description                                                                                |
+| :-------------------- | :------------------ | :----------------------------------------------------------------------------------------- |
+| `cli_names`           | list of strings     | CLI binary names to look for, in order of priority.                                        |
+| `cli_search_path`     | list of strings     | Extra directories searched **before** `$PATH` for the binary.                              |
+| `deprecated`          | boolean             | Mark a manager as deprecated, hiding it from default selection.                            |
+| `dry_run`             | boolean             | Simulate CLI calls without performing any action, only for this manager.                   |
+| `extra_env`           | table of strings    | Additional environment variables passed to every CLI call.                                 |
+| `ignore_auto_updates` | boolean             | Exclude auto-updating packages from outdated/upgrade results, only for this manager.       |
+| `post_args`           | list of strings     | Arguments appended **after** every CLI invocation.                                         |
+| `pre_args`            | list of strings     | Arguments inserted **before** every CLI invocation.                                        |
+| `pre_cmds`            | list of strings     | Commands prepended to every CLI invocation (typically `sudo`).                             |
+| `requirement`         | string              | PEP 440-style version requirement the manager must satisfy to be considered available.     |
+| `stop_on_error`       | boolean             | Stop on the first CLI error from this manager instead of continuing.                       |
+| `timeout`             | integer             | Maximum duration in seconds for each CLI call from this manager.                           |
+| `version_cli_options` | list of strings     | CLI options used to extract the manager's reported version.                                |
+| `version_regexes`     | list of strings     | Regular expressions tried in order to extract the version from CLI output.                 |
+
+```{important}
+List-valued fields use **replace** semantics: an override fully supersedes the built-in default rather than merging with it. For example, setting `cli_search_path = ["/opt/bin"]` on a manager that ships with `cli_search_path = ("/usr/local/bin",)` results in `("/opt/bin",)`, not the union of both.
+```
+
+### Example: bypass a Windows app-store placeholder
+
+Modern Windows ships placeholder executables under `%LOCALAPPDATA%\Microsoft\WindowsApps\` that, when invoked, open the Microsoft Store rather than running the real CLI. If you have installed the genuine `winget` somewhere else, point `cli_search_path` at that directory so `mpm` finds it first:
+
+```toml
+[mpm.managers.winget]
+cli_search_path = [
+  "C:\\Program Files\\WindowsApps\\Microsoft.DesktopAppInstaller_1.27.0_x64",
+]
+```
+
+The override directories are searched before `$PATH`, so the real binary wins over the store placeholder.
+
+### Example: relax a version requirement
+
+A few managers gate themselves behind a minimum version. If you ship a custom build that reports an unconventional version string, override `requirement`:
+
+```toml
+[mpm.managers.guix]
+requirement = ">=0.0"
+```
+
+### Example: per-manager timeout and quiet mode
+
+Slow managers can be given a longer timeout without affecting the rest of the pool. Combine with `pre_args` to silence chatty output:
+
+```toml
+[mpm.managers.brew]
+timeout = 900
+
+[mpm.managers.cargo]
+pre_args = ["--quiet", "--color", "never"]
+```
+
+### Validation
+
+Unknown manager IDs and unknown field names are reported as warnings on `<stderr>` and skipped: a typo will not crash `mpm`. Type mismatches (e.g. passing a single string where a list is expected) raise an error so the offending value can be corrected.
+
 ## Precedence
 
 Options are resolved in this order, from highest to lowest priority:

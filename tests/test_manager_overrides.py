@@ -25,6 +25,8 @@ from textwrap import dedent
 import pytest
 import tomli_w
 
+from click_extra import ValidationError
+
 from meta_package_manager.config import (
     CONTRIBUTION_HINT_FIELDS,
     INVALIDATED_CACHED_PROPS,
@@ -35,6 +37,7 @@ from meta_package_manager.config import (
     apply_manager_overrides,
     dump_manager_overrides,
     format_contribution_hints,
+    validate_manager_overrides_section,
 )
 from meta_package_manager.pool import pool
 
@@ -94,33 +97,28 @@ def test_empty_is_noop():
     apply_manager_overrides(pool, {})
 
 
-def test_non_dict_top_level_warns_and_skips(caplog):
-    apply_manager_overrides(pool, "not a table")  # type: ignore[arg-type]
-    assert any("expected a table" in rec.message for rec in caplog.records)
+def test_non_dict_top_level_raises():
+    with pytest.raises(ValidationError, match=r"expected a table"):
+        apply_manager_overrides(pool, "not a table")  # type: ignore[arg-type]
 
 
-def test_unknown_manager_warns_and_skips(caplog):
-    apply_manager_overrides(pool, {"definitely-not-a-manager": {"timeout": 99}})
-    messages = [rec.message for rec in caplog.records]
-    assert any("definitely-not-a-manager" in m for m in messages)
-    assert any("unknown manager ID" in m for m in messages)
+def test_unknown_manager_raises():
+    with pytest.raises(ValidationError, match=r"unknown manager ID"):
+        apply_manager_overrides(pool, {"definitely-not-a-manager": {"timeout": 99}})
 
 
-def test_non_dict_manager_section_warns_and_skips(caplog):
-    apply_manager_overrides(pool, {OVERRIDE_TARGET: "not a table"})  # type: ignore[dict-item]
-    assert any(
-        f"[mpm.managers.{OVERRIDE_TARGET}]" in rec.message
-        and "expected a table" in rec.message
-        for rec in caplog.records
-    )
+def test_non_dict_manager_section_raises():
+    with pytest.raises(ValidationError, match=r"expected a table"):
+        apply_manager_overrides(
+            pool, {OVERRIDE_TARGET: "not a table"}  # type: ignore[dict-item]
+        )
 
 
-def test_unknown_field_warns_and_skips(caplog, reset_overrides):
-    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"made_up_field": 99}})
-    assert any(
-        "made_up_field" in rec.message and "unknown field" in rec.message
-        for rec in caplog.records
-    )
+def test_unknown_field_raises(reset_overrides):
+    with pytest.raises(ValidationError, match=r"unknown field"):
+        apply_manager_overrides(
+            pool, {OVERRIDE_TARGET: {"made_up_field": 99}}
+        )
 
 
 def test_str_tuple_override_replaces_default(reset_overrides):
@@ -139,14 +137,14 @@ def test_str_tuple_override_coerces_list_to_tuple(reset_overrides):
 
 
 def test_str_tuple_override_rejects_bare_string(reset_overrides):
-    with pytest.raises(ValueError, match=r"expected a list of strings"):
+    with pytest.raises(ValidationError, match=r"expected a list of strings"):
         apply_manager_overrides(pool,
             {OVERRIDE_TARGET: {"cli_search_path": "/single/path"}}
         )
 
 
 def test_str_tuple_override_rejects_non_string_entries(reset_overrides):
-    with pytest.raises(ValueError, match=r"expected all entries to be strings"):
+    with pytest.raises(ValidationError, match=r"expected all entries to be strings"):
         apply_manager_overrides(pool,
             {OVERRIDE_TARGET: {"cli_search_path": ["/ok", 42]}}
         )
@@ -158,7 +156,7 @@ def test_bool_override(reset_overrides):
 
 
 def test_bool_override_rejects_int(reset_overrides):
-    with pytest.raises(ValueError, match=r"expected a boolean"):
+    with pytest.raises(ValidationError, match=r"expected a boolean"):
         apply_manager_overrides(pool, {OVERRIDE_TARGET: {"ignore_auto_updates": 1}})
 
 
@@ -170,12 +168,12 @@ def test_int_override(reset_overrides):
 def test_int_override_rejects_bool(reset_overrides):
     """A boolean is not an acceptable integer override even though ``bool`` subclasses
     ``int`` in Python."""
-    with pytest.raises(ValueError, match=r"expected an integer"):
+    with pytest.raises(ValidationError, match=r"expected an integer"):
         apply_manager_overrides(pool, {OVERRIDE_TARGET: {"timeout": True}})
 
 
 def test_int_override_rejects_string(reset_overrides):
-    with pytest.raises(ValueError, match=r"expected an integer"):
+    with pytest.raises(ValidationError, match=r"expected an integer"):
         apply_manager_overrides(pool, {OVERRIDE_TARGET: {"timeout": "42"}})
 
 
@@ -185,7 +183,7 @@ def test_str_override(reset_overrides):
 
 
 def test_str_override_rejects_int(reset_overrides):
-    with pytest.raises(ValueError, match=r"expected a string"):
+    with pytest.raises(ValidationError, match=r"expected a string"):
         apply_manager_overrides(pool, {OVERRIDE_TARGET: {"requirement": 23}})
 
 
@@ -199,7 +197,7 @@ def test_dict_override(reset_overrides):
 
 
 def test_dict_override_rejects_non_string_value(reset_overrides):
-    with pytest.raises(ValueError, match=r"expected a table of string-to-string"):
+    with pytest.raises(ValidationError, match=r"expected a table of string-to-string"):
         apply_manager_overrides(pool, {OVERRIDE_TARGET: {"extra_env": {"K": 1}}})
 
 
@@ -290,7 +288,10 @@ def test_cli_loads_manager_overrides(invoke, create_config, reset_overrides):
     assert pool[OVERRIDE_TARGET].cli_search_path == ("/integration/test/path",)
 
 
-def test_cli_warns_on_unknown_manager_in_config(invoke, create_config):
+def test_cli_fails_on_unknown_manager_in_config(invoke, create_config):
+    """A typo'd manager ID in the config aborts the CLI with a precise dotted
+    path. Permissive warn-and-skip behavior was removed: the same validator
+    that powers ``--validate-config`` runs at normal load time."""
     conf_path = create_config(
         "conf.toml",
         dedent("""\
@@ -299,8 +300,9 @@ def test_cli_warns_on_unknown_manager_in_config(invoke, create_config):
             """),
     )
     result = invoke("--config", str(conf_path), "managers")
-    assert result.exit_code == 0
-    assert "fictional-manager" in result.stderr
+    assert result.exit_code != 0
+    assert "mpm.managers.fictional-manager" in result.stderr
+    assert "unknown manager ID" in result.stderr
 
 
 # Contribution-hint feature.
@@ -334,12 +336,13 @@ def test_apply_returns_no_hint_when_overrides_empty():
     assert apply_manager_overrides(pool, {}) == []
 
 
-def test_apply_returns_no_hint_when_unknown_manager():
-    """Unknown manager IDs are skipped before any hint can be generated."""
-    hints = apply_manager_overrides(
-        pool, {"definitely-not-a-manager": {"cli_search_path": ["/x"]}}
-    )
-    assert hints == []
+def test_apply_raises_on_unknown_manager_so_no_hint_emitted():
+    """Apply aborts on unknown manager IDs via the validator, so no hints leak.
+    The validator runs before any side effects, so the pool is unchanged."""
+    with pytest.raises(ValidationError, match=r"unknown manager ID"):
+        apply_manager_overrides(
+            pool, {"definitely-not-a-manager": {"cli_search_path": ["/x"]}}
+        )
 
 
 def test_apply_returns_hints_for_each_detection_field(reset_overrides):

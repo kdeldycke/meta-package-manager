@@ -32,10 +32,10 @@ from __future__ import annotations
 
 import logging
 import urllib.parse
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import tomli_w
-from click_extra import echo
+from click_extra import ConfigValidator, ValidationError, echo
 from click_extra.theme import default_theme as theme
 
 TYPE_CHECKING = False
@@ -90,6 +90,16 @@ class MpmConfig:
     suggest_contribs: bool = True
     """Print a contribution invitation when a user override targets a field that
     likely indicates an upstream detection bug."""
+
+    managers: dict[str, dict] = field(default_factory=dict)
+    """Per-manager attribute overrides keyed by manager ID.
+
+    Typed as ``dict[str, dict]`` so click-extra treats the sub-tree as opaque:
+    its keys are manager IDs (data, not flag names) and its leaf entries are
+    validated by :py:func:`validate_manager_overrides_section` registered as a
+    :class:`click_extra.ConfigValidator`. The field carries no CLI flag — it
+    only exists in the schema to declare opacity and to enable ``--validate-config``
+    coverage of the override block."""
 
 
 def _to_str(value: Any) -> str:
@@ -357,6 +367,66 @@ def format_contribution_hints(hints: list[ContributionHint]) -> str:
     return "\n".join(lines)
 
 
+def validate_manager_overrides_section(
+    section: Mapping[str, Any],
+    *,
+    pool: ManagerPool,
+) -> None:
+    """Strict validator for the ``[mpm.managers.<id>]`` configuration sub-tree.
+
+    Pure function: inspects ``section`` against the pool's registered managers
+    and :data:`OVERRIDABLE_FIELDS`, raises the first
+    :class:`click_extra.ValidationError` it encounters, never mutates the pool.
+    Suitable for registration as a :class:`click_extra.ConfigValidator` and for
+    direct invocation by :py:func:`apply_manager_overrides` so both the
+    ``--validate-config`` path and the runtime application path enforce the
+    same rules.
+
+    :raises click_extra.ValidationError: when ``section`` is not a mapping,
+        references an unknown manager ID, sets an unknown override field, or
+        provides a value of the wrong type for a known field. The ``path`` of
+        the raised error is relative to the ``[mpm.managers]`` section root
+        (e.g. ``"winget.cli_searchpath"``); click-extra prepends the app
+        prefix when surfacing the error.
+    """
+    if not section:
+        return
+    if not isinstance(section, dict):
+        raise ValidationError(
+            "", f"expected a table, got {type(section).__name__}"
+        )
+    for manager_id, fields in section.items():
+        if manager_id not in pool.register:
+            raise ValidationError(
+                manager_id,
+                f"unknown manager ID {manager_id!r}",
+                code="unknown_manager",
+            )
+        if not isinstance(fields, dict):
+            raise ValidationError(
+                manager_id,
+                f"expected a table, got {type(fields).__name__}",
+                code="invalid_type",
+            )
+        for field_name, raw_value in fields.items():
+            converter = OVERRIDABLE_FIELDS.get(field_name)
+            if converter is None:
+                raise ValidationError(
+                    f"{manager_id}.{field_name}",
+                    f"unknown field. "
+                    f"Allowed: {', '.join(sorted(OVERRIDABLE_FIELDS))}",
+                    code="unknown_field",
+                )
+            try:
+                converter(raw_value)
+            except TypeError as ex:
+                raise ValidationError(
+                    f"{manager_id}.{field_name}",
+                    str(ex),
+                    code="invalid_type",
+                ) from ex
+
+
 def apply_manager_overrides(
     pool: ManagerPool,
     overrides: Mapping[str, Mapping[str, Any]] | None,
@@ -364,96 +434,63 @@ def apply_manager_overrides(
     """Apply per-manager attribute overrides parsed from the user's config file.
 
     Expects ``overrides`` to be a mapping of manager ID to a mapping of attribute
-    name to its new value, as returned by ``conf["mpm"]["managers"]``. ``None`` and
-    empty mappings are accepted as no-op shortcuts so callers can unconditionally
-    forward whatever was parsed from the config file.
+    name to its new value, as returned by ``conf["mpm"]["managers"]``. ``None``
+    and empty mappings are accepted as no-op shortcuts so callers can
+    unconditionally forward whatever was parsed from the config file.
 
-    For each ``(manager_id, field, value)`` triple:
+    Validation is delegated to
+    :py:func:`validate_manager_overrides_section`, which raises
+    :class:`click_extra.ValidationError` on the first issue. Both the
+    runtime config-loading path and the explicit ``--validate-config`` path
+    enforce the same rules through that single validator, so a config that
+    survives one survives the other.
 
-    - Unknown manager IDs and unknown field names are logged at warning level and
-      skipped: a typo in the config file should not crash the CLI.
-    - Recognized values are validated and coerced through
-      :data:`OVERRIDABLE_FIELDS` converters. A type mismatch raises
-      :py:class:`TypeError` internally; the caller re-wraps it as
-      :py:class:`ValueError` so the user is told to fix the config.
-    - Each accepted override is applied as an instance attribute, shadowing the
-      class default for the lifetime of the process. List-valued fields use
-      *replace* semantics: the override fully supersedes the built-in default.
-    - Each accepted override is also recorded in ``pool.overridden_fields`` so
-      :py:meth:`meta_package_manager.pool.ManagerPool._select_managers` knows to
-      skip the matching global ``--<flag>`` defaults for this manager.
-    - After every accepted override, cached properties derived from the affected
-      attributes (``cli_path``, ``version``, ``available``, etc.) are evicted from
-      the instance ``__dict__`` so the next access recomputes them.
+    After validation succeeds, every override is applied as an instance
+    attribute (shadowing the class default for the lifetime of the process),
+    recorded in :py:attr:`ManagerPool.overridden_fields` so
+    :py:meth:`ManagerPool._select_managers` skips the matching global
+    ``--<flag>`` defaults for that manager, and the cached properties derived
+    from the affected attributes are evicted so the next access recomputes
+    them. List-valued fields use *replace* semantics: the override fully
+    supersedes the built-in default.
 
-    Returns a list of :class:`ContributionHint` entries, one for each accepted
-    override that targets a :data:`CONTRIBUTION_HINT_FIELDS` field. The caller
-    decides whether and how to surface them to the user. Each hint captures the
-    pre-override ``cli_path`` so the bug report can show what mpm would have
-    detected without the user's intervention.
+    Returns a list of :class:`ContributionHint` entries, one per accepted
+    override that targets a :data:`CONTRIBUTION_HINT_FIELDS` field. Each hint
+    captures the pre-override ``cli_path`` so the contribution invitation can
+    show what mpm would have detected without the user's intervention.
     """
-    hints: list[ContributionHint] = []
-
     if not overrides:
-        return hints
+        return []
 
-    if not isinstance(overrides, dict):
-        logging.warning(
-            f"Ignoring [mpm.managers] section: expected a table, "
-            f"got {type(overrides).__name__}.",
-        )
-        return hints
+    validate_manager_overrides_section(overrides, pool=pool)
 
+    hints: list[ContributionHint] = []
     for manager_id, fields in overrides.items():
-        if manager_id not in pool.register:
-            logging.warning(
-                f"Ignoring [mpm.managers.{manager_id}]: "
-                f"unknown manager ID {manager_id!r}.",
-            )
-            continue
-        if not isinstance(fields, dict):
-            logging.warning(
-                f"Ignoring [mpm.managers.{manager_id}]: "
-                f"expected a table, got {type(fields).__name__}.",
-            )
-            continue
-
         manager = pool.register[manager_id]
-        for field, raw_value in fields.items():
-            converter = OVERRIDABLE_FIELDS.get(field)
-            if converter is None:
-                logging.warning(
-                    f"Ignoring [mpm.managers.{manager_id}].{field}: "
-                    f"unknown field. "
-                    f"Allowed: {', '.join(sorted(OVERRIDABLE_FIELDS))}.",
-                )
-                continue
-            try:
-                value = converter(raw_value)
-            except TypeError as ex:
-                msg = f"[mpm.managers.{manager_id}].{field}: {ex}"
-                raise ValueError(msg) from ex
+        for field_name, raw_value in fields.items():
+            value = OVERRIDABLE_FIELDS[field_name](raw_value)
 
-            # Capture mpm's pre-override detection state for the hint, before the
-            # setattr below would change the binary search behavior. Reading
-            # cli_path triggers the cached_property, which is fine: the next loop
-            # iteration evicts it via INVALIDATED_CACHED_PROPS.
+            # Capture mpm's pre-override detection state for the hint, before
+            # the setattr below would change the binary search behavior. Reading
+            # cli_path triggers the cached_property, which is fine: the loop
+            # tail evicts it via INVALIDATED_CACHED_PROPS.
             detected_cli_path: str | None = None
-            if field in CONTRIBUTION_HINT_FIELDS:
+            if field_name in CONTRIBUTION_HINT_FIELDS:
                 cli_path = manager.cli_path
                 detected_cli_path = str(cli_path) if cli_path else None
 
-            setattr(manager, field, value)
-            pool.overridden_fields.setdefault(manager_id, set()).add(field)
+            setattr(manager, field_name, value)
+            pool.overridden_fields.setdefault(manager_id, set()).add(field_name)
             logging.debug(
-                f"Applied override [mpm.managers.{manager_id}].{field} = {value!r}",
+                f"Applied override [mpm.managers.{manager_id}].{field_name} "
+                f"= {value!r}",
             )
 
-            if field in CONTRIBUTION_HINT_FIELDS:
+            if field_name in CONTRIBUTION_HINT_FIELDS:
                 hints.append(
                     ContributionHint(
                         manager_id=manager_id,
-                        field=field,
+                        field=field_name,
                         user_value=value,
                         detected_cli_path=detected_cli_path,
                     )
@@ -463,6 +500,27 @@ def apply_manager_overrides(
             manager.__dict__.pop(prop, None)
 
     return hints
+
+
+def build_manager_overrides_validator(pool: ManagerPool) -> ConfigValidator:
+    """Construct a :class:`click_extra.ConfigValidator` for the
+    ``[mpm.managers]`` sub-tree, bound to a specific :class:`ManagerPool`.
+
+    Used by the CLI bootstrap (``@group`` decorator) to register a validator
+    against the live pool. Wrapping :py:func:`validate_manager_overrides_section`
+    in a closure satisfies the
+    :py:attr:`click_extra.ConfigValidator.validator` signature
+    (``Callable[[dict], None]``) while keeping the underlying validator pool-agnostic
+    and testable in isolation.
+    """
+    def _validator(section: dict[str, Any]) -> None:
+        validate_manager_overrides_section(section, pool=pool)
+
+    return ConfigValidator(
+        extension_path="managers",
+        validator=_validator,
+        description="Per-manager attribute overrides (see docs/configuration.md).",
+    )
 
 
 def dump_manager_overrides(manager: PackageManager) -> dict[str, Any]:

@@ -66,6 +66,7 @@ from .base import (
 from .config import (
     MpmConfig,
     apply_manager_overrides_from_context,
+    build_manager_overrides_validator,
     dump_manager_overrides,
     print_contribution_hints,
 )
@@ -265,6 +266,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     # XXX Default verbosity has been changed in Click Extra 4.0.0 from INFO to WARNING.
     context_settings={"default_map": {"verbosity": "INFO"}},
     config_schema=MpmConfig,
+    config_validators=(build_manager_overrides_validator(pool),),
     version_fields={
         "env_info": (
             f"Python {platform.python_version()}, "

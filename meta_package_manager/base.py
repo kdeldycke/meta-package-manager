@@ -592,32 +592,13 @@ class PackageManager(metaclass=MetaPackageManager):
         :py:class:`meta_package_manager.version.TokenizedString` instance.
         """
         if self.executable:
-            # Invoke the manager.
-            try:
-                output = self.run_cli(
-                    self.version_cli_options,
-                    auto_pre_cmds=False,
-                    auto_pre_args=False,
-                    auto_post_args=False,
-                    force_exec=True,
-                )
-            # Catch false-positive CLIs.
-            except OSError as ex:
-                # In the environment on Windows, extension of available executables are
-                # ignored as they're plenty: .EXE, .CMD, .BAT, ...
-                # See: https://github.com/kdeldycke/meta-package-manager/issues/542
-                # Check for "OSError: [WinError 193] %1 is not a valid Win32
-                # application" error.
-                if getattr(ex, "winerror", None) == 193:
-                    logging.debug(
-                        f"{theme.invoked_command(str(self.cli_path))} "
-                        "is not a valid Windows application.",
-                    )
-                    # Declare CLI as un-executable.
-                    self.executable = False
-                    return None
-                # Unidentified error: re-raise.
-                raise
+            output = self.run_cli(
+                self.version_cli_options,
+                auto_pre_cmds=False,
+                auto_pre_args=False,
+                auto_post_args=False,
+                force_exec=True,
+            )
 
             # Try each regex to extract the version.
             for regex in self.version_regexes:
@@ -775,6 +756,16 @@ class PackageManager(metaclass=MetaPackageManager):
                     raise exception
                 self.cli_errors.append(exception)
                 return ""
+            except OSError as ex:
+                # Windows shims trigger WinError 193 when spawned as a subprocess.
+                if getattr(ex, "winerror", None) == 193:
+                    logging.debug(
+                        f"{highlight_cli_name(self.cli_path, self.cli_names)} "
+                        "is not a valid Windows application.",
+                    )
+                    self.executable = False
+                    return ""
+                raise
             code = result.returncode
             output = result.stdout
             error = result.stderr

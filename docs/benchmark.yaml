@@ -29,21 +29,28 @@
 
 managers:
   0install: []
+  am: [topgrade]
   antibody: [topgrade]
+  antidote: [topgrade]
   antigen: [topgrade]
-  apk: [pacaptr, pacapt]
+  apk: [topgrade, pacaptr, pacapt]
   apm: [topgrade]
+  app-man: [topgrade]
   apt: [topgrade, pacaptr, pacapt, sysget, whohas]
   apt-cyg: [pacapt, whohas]
   apt-mint: []
+  aqua: [topgrade]
   asdf: [topgrade]
+  atuin: [topgrade]
   aura: [topgrade]
+  bash-it: [topgrade]
   bin: [topgrade]
   brew: [topgrade, pacaptr, pacapt, sysget]
   bun: [topgrade]
   cargo: [topgrade]
   cask: [topgrade, pacaptr, pacapt, sysget]
   cave: [pacapt]
+  certbot: [topgrade]
   chezmoi: [topgrade]
   choco: [topgrade, pacaptr]
   choosenim: [topgrade]
@@ -51,23 +58,28 @@ managers:
   composer: [topgrade]
   conda: [topgrade, pacaptr, pacapt]
   containers: [topgrade]
+  deb-get: [topgrade]
   dein: [topgrade]
   deno: [topgrade]
   distrobox: [topgrade]
-  dnf: [pacaptr, sysget, whohas]
+  dkp-pacman: [topgrade]
+  dnf: [topgrade, pacaptr, sysget, whohas]
   dnf5: []
   dotnet: [topgrade]
   emacs: [topgrade]
   emerge: [topgrade, pacaptr, pacapt, sysget, whohas]
   eopkg: [topgrade, sysget]
   etc-update: [topgrade]
+  fish-plug: [topgrade]
   fisher: [topgrade]
   flatpak: [topgrade, sysget]
   flutter: [topgrade]
   fossil: [topgrade]
+  fundle: [topgrade]
   fwupd: [topgrade]
   gcloud: [topgrade]
   gem: [topgrade, sysget]
+  getnf: [topgrade]
   ghcup: [topgrade]
   git: [topgrade]
   github-cli-extensions: [topgrade]
@@ -75,50 +87,72 @@ managers:
   go: [topgrade]
   guix: [topgrade, sysget]
   haxelib: [topgrade]
+  helm: [topgrade]
   home-manager: [topgrade]
   jetpack: [topgrade]
   julia: [topgrade]
+  juliaup: [topgrade]
   kakoune: [topgrade]
   krew: [topgrade]
+  lazy: [topgrade]
+  lure: [topgrade]
   macos: [topgrade]
   macports: [topgrade, pacaptr, pacapt, sysget, whohas]
+  mamba: [topgrade]
   mas: [topgrade]
+  mason: [topgrade]
   micro: [topgrade]
+  miktex: [topgrade]
+  mise: [topgrade]
   myrepos: [topgrade]
   nala: [topgrade]
   neobundle: [topgrade]
   nix: [topgrade, sysget]
   npm: [topgrade, sysget]
+  oh-my-bash: [topgrade]
+  oh-my-fish: [topgrade]
   oh-my-zsh: [topgrade]
+  ollama: [topgrade]
   opam: [topgrade]
   opkg: [pacapt]
   pacaur: []
+  pacdef: [topgrade]
+  packer-nvim: [topgrade]
   pacman: [topgrade, pacapt, sysget, whohas]
   pacstall: [topgrade]
   pamac: [topgrade]
+  paq: [topgrade]
   paru: [topgrade]
   pearl: [topgrade]
   pihole: [topgrade]
   pikaur: [topgrade]
   pip: [topgrade, pacaptr, sysget]
+  pip-review: [topgrade]
+  pipupgrade: [topgrade]
   pipx: [topgrade]
-  # ``pkgng`` is pacapt's name for FreeBSD's modern ``pkg``, so the pacapt
-  # flag is folded into the ``pkg`` row rather than tracked separately.
+  pipxu: [topgrade]
+  pixi: [topgrade]
   pkg: [topgrade, pacapt, sysget, whohas]
   pkg-mgr: [sysget]
   pkg-tools: [pacapt]
+  pkgfile: [topgrade]
   pkgin: [topgrade, whohas]
+  platformio-core: [topgrade]
   plug: [topgrade]
   pnpm: [topgrade]
   podman: [topgrade]
+  poetry: [topgrade]
   powershell: [topgrade]
+  protonplus: [topgrade]
   protonup: [topgrade]
+  pyenv: [topgrade]
   raco: [topgrade]
   rcm: [topgrade]
   remotes: [topgrade]
   restarts: [topgrade]
   rtcl: [topgrade]
   rustup: [topgrade]
+  rye: [topgrade]
   scoop: [topgrade, pacaptr, sysget]
   sdkman: [topgrade]
   sheldon: [topgrade]
@@ -129,45 +163,63 @@ managers:
   spicetify: [topgrade]
   stack: [topgrade]
   steamcmd: []
+  stew: [topgrade]
   sun-tools: [pacapt]
   swupd: [pacapt]
   system: [topgrade]
   tazpkg: [pacapt]
   tldr: [topgrade]
   tlmgr: [topgrade, pacaptr, pacapt]
+  tmux: [topgrade]
   toolbx: [topgrade]
   trizen: [topgrade]
-  uv: []
+  typst: [topgrade]
+  uv: [topgrade]
   vagrant: [topgrade]
   vcpkg: [topgrade]
+  vim: [topgrade]
+  volta-packages: [topgrade]
   voom: [topgrade]
-  vscode: []
-  vscodium: []
+  vscode: [topgrade]
+  vscodium: [topgrade]
   vundle: [topgrade]
+  waydroid: [topgrade]
   winget: [topgrade]
   wsl: [topgrade]
-  xbps: [pacaptr, pacapt, sysget]
+  xbps: [topgrade, pacaptr, pacapt, sysget]
+  xcodes: [topgrade]
   yadm: [topgrade]
   yarn: [topgrade]
   yarn-berry: [topgrade]
   yay: [topgrade]
-  yum: [pacapt, sysget, whohas]
+  yazi: [topgrade]
+  yum: [topgrade, pacapt, sysget, whohas]
+  zgenom: [topgrade]
+  zigup: [topgrade]
   zim: [topgrade]
   zinit: [topgrade]
   zplug: [topgrade]
   zr: [topgrade]
-  zypper: [pacaptr, pacapt, sysget, whohas]
+  zvm: [topgrade]
+  zypper: [topgrade, pacaptr, pacapt, sysget, whohas]
 
 homepages:
   0install: https://0install.net
+  am: https://github.com/ivan-hc/AM
   antibody: https://getantibody.github.io
+  antidote: https://getantidote.github.io
   antigen: https://github.com/zsh-users/antigen
+  app-man: https://github.com/ivan-hc/AppMan
   apt-cyg: https://github.com/transcode-open/apt-cyg
+  aqua: https://aquaproj.github.io
   asdf: https://asdf-vm.com
+  atuin: https://atuin.sh
   aura: https://github.com/fosskers/aura
+  bash-it: https://bash-it.readthedocs.io
   bin: https://github.com/marcosnils/bin
   bun: https://bun.sh
   cave: https://github.com/paludis/cave
+  certbot: https://certbot.eff.org
   chezmoi: https://www.chezmoi.io
   choosenim: https://github.com/dom96/choosenim
   chromebrew: https://chromebrew.github.io
@@ -176,49 +228,77 @@ homepages:
   dein: https://github.com/Shougo/dein.vim
   deno: https://deno.com
   distrobox: https://distrobox.it
+  dkp-pacman: https://devkitpro.org
   dotnet: https://learn.microsoft.com/dotnet/core/tools/
   emacs: https://www.gnu.org/software/emacs/
   etc-update: https://wiki.gentoo.org/wiki/Etc-update
+  fish-plug: https://github.com/kidonng/fish-plug
   fisher: https://github.com/jorgebucaran/fisher
   flutter: https://flutter.dev
   fossil: https://fossil-scm.org
+  fundle: https://github.com/danhper/fundle
   gcloud: https://cloud.google.com/sdk/gcloud
+  getnf: https://github.com/getnf/getnf
   ghcup: https://www.haskell.org/ghcup/
   git: https://git-scm.com
   github-cli-extensions: https://cli.github.com/manual/gh_extension
   gnome-shell: https://extensions.gnome.org
   go: https://go.dev
   haxelib: https://lib.haxe.org
+  helm: https://helm.sh
   home-manager: https://github.com/nix-community/home-manager
   jetpack: https://github.com/3ofcoins/jetpack
   julia: https://julialang.org
+  juliaup: https://github.com/JuliaLang/juliaup
   kakoune: https://kakoune.org
   krew: https://krew.sigs.k8s.io
+  lazy: https://github.com/folke/lazy.nvim
+  lure: https://lure.sh
   macos: https://www.apple.com/macos/
+  mamba: https://mamba.readthedocs.io
+  mason: https://github.com/williamboman/mason.nvim
   micro: https://micro-editor.github.io
+  miktex: https://miktex.org
+  mise: https://mise.jdx.dev
   myrepos: https://myrepos.branchable.com
   nala: https://gitlab.com/volian/nala
   neobundle: https://github.com/Shougo/neobundle.vim
+  oh-my-bash: https://ohmybash.nntoan.com
+  oh-my-fish: https://github.com/oh-my-fish/oh-my-fish
   oh-my-zsh: https://ohmyz.sh
+  ollama: https://ollama.com
   opam: https://opam.ocaml.org
+  pacdef: https://github.com/steven-omaha/pacdef
+  packer-nvim: https://github.com/wbthomason/packer.nvim
   pamac: https://gitlab.manjaro.org/applications/pamac
+  paq: https://github.com/savq/paq-nvim
   pearl: https://github.com/pearl-core/pearl
   pihole: https://pi-hole.net
   pikaur: https://github.com/actionless/pikaur
+  pip-review: https://github.com/jgonggrijp/pip-review
+  pipupgrade: https://github.com/achillesrasquinha/pipupgrade
+  pipxu: https://github.com/bulletmark/pipxu
+  pixi: https://pixi.sh
   pkg-mgr: https://man.openbsd.org/pkg_add
   pkg-tools: http://www.slackware.com/config/packages.php
+  pkgfile: https://github.com/falconindy/pkgfile
   pkgin: https://pkgin.net
+  platformio-core: https://platformio.org
   plug: https://github.com/junegunn/vim-plug
   pnpm: https://pnpm.io
   podman: https://podman.io
+  poetry: https://python-poetry.org
   powershell: https://learn.microsoft.com/powershell/
+  protonplus: https://github.com/Vysp3r/ProtonPlus
   protonup: https://github.com/AUNaseef/protonup
+  pyenv: https://github.com/pyenv/pyenv
   raco: https://docs.racket-lang.org/raco/
   rcm: https://github.com/thoughtbot/rcm
   remotes: https://github.com/topgrade-rs/topgrade
   restarts: https://github.com/liske/needrestart
   rtcl: https://github.com/topgrade-rs/topgrade
   rustup: https://rustup.rs
+  rye: https://rye.astral.sh
   sheldon: https://sheldon.cli.rs
   slapt-get: https://software.jaos.org/git/slapt-get/
   spack: https://spack.io
@@ -231,15 +311,25 @@ homepages:
   tazpkg: https://www.slitaz.org/en/doc/handbook/tazpkg.html
   tldr: https://tldr.sh
   tlmgr: https://www.tug.org/texlive/tlmgr.html
+  tmux: https://github.com/tmux-plugins/tpm
   toolbx: https://containertoolbx.org
   trizen: https://github.com/trizen/trizen
+  typst: https://typst.app
   vagrant: https://www.vagrantup.com
   vcpkg: https://vcpkg.io
+  vim: https://www.vim.org
+  volta-packages: https://volta.sh
   voom: https://github.com/yegappan/voom
   vundle: https://github.com/VundleVim/Vundle.vim
+  waydroid: https://waydro.id
   wsl: https://learn.microsoft.com/windows/wsl/
+  xcodes: https://github.com/XcodesOrg/xcodes
   yadm: https://yadm.io
+  yazi: https://yazi-rs.github.io
+  zgenom: https://github.com/jandamm/zgenom
+  zigup: https://github.com/marler8997/zigup
   zim: https://zimfw.sh
   zinit: https://github.com/zdharma-continuum/zinit
   zplug: https://github.com/zplug/zplug
   zr: https://github.com/jedahan/zr
+  zvm: https://github.com/tristanisham/zvm

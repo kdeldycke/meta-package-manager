@@ -140,7 +140,6 @@ jobs:
         timeout-minutes: 90
         working-directory: /void-packages
         run: |
-          set -o pipefail
           {
             echo ""
             echo "## xbps-src pkg"

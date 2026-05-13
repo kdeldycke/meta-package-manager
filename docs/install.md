@@ -232,6 +232,31 @@ You can help move it forward by showing your support on [the pull request](https
 :::
 ````
 
+````{tab-item} Void Linux
+While the package is pending upstream review, build and install it from my fork's [`mpm` branch](https://github.com/kdeldycke/void-packages/tree/mpm):
+
+```{code-block} shell-session
+$ git clone --depth 1 --branch mpm https://github.com/kdeldycke/void-packages.git
+$ cd ./void-packages
+$ ./xbps-src binary-bootstrap
+$ ./xbps-src pkg mpm
+$ sudo xbps-install --repository=./hostdir/binpkgs/mpm mpm
+```
+
+`./xbps-src pkg mpm` cascades through and builds the 16 dependency packages introduced by the fork (15 new Python packages plus an in-place bump of `python3-boltons` from `20.2.1` to `25.0.0` for Python 3.14 compatibility).
+
+:::{admonition} Help land it in void-packages
+:class: important
+The Void package is pending review at [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532). Once merged, installation will be a one-liner:
+
+```{code-block} shell-session
+$ xbps-install --sync mpm
+```
+
+You can help move it forward by showing your support on [the pull request](https://github.com/void-linux/void-packages/pull/60532).
+:::
+````
+
 ````{tab-item} Arch Linux
 An `mpm` package is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager) and can be installed with any AUR helper:
 

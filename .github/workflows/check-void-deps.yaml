@@ -88,7 +88,9 @@ jobs:
             "https://github.com/${VOID_FORK}" \
             /void-packages
           chown --recursive builder:builder /void-packages
-          (cd /void-packages && git log --oneline -1)
+          # Confirm the cloned commit. Must run as builder since the chown
+          # above would trigger git's "dubious ownership" check otherwise.
+          sudo -Eu builder git -C /void-packages log --oneline -1
 
       - name: Bootstrap xbps-src masterdir
         timeout-minutes: 20

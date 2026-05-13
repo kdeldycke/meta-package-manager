@@ -186,10 +186,12 @@ jobs:
         working-directory: /void-packages
         run: |
           set -eux
-          # Install all freshly-built packages from the local hostdir repo
-          # and confirm mpm runs end-to-end.
+          # Install the freshly-built mpm from the local hostdir repo and
+          # confirm it runs end-to-end. xbps-src writes git-branch builds
+          # to a sub-repo named after the branch (`hostdir/binpkgs/mpm`).
+          ls hostdir/binpkgs/
           xbps-install --yes \
-            --repository=hostdir/binpkgs \
+            --repository="hostdir/binpkgs/${VOID_BRANCH}" \
             mpm
           mpm --version
           mpm --table-format=json managers | head --lines=40

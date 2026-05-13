@@ -39,7 +39,10 @@ jobs:
 
   xbps-build:
     name: xbps-src build cascade
-    runs-on: ubuntu-24.04
+    # ubuntu-24.04 sets `kernel.apparmor_restrict_unprivileged_userns=1`
+    # which blocks xbps-src's uunshare chroot helper even from inside a
+    # `--privileged` container; ubuntu-22.04 does not have this restriction.
+    runs-on: ubuntu-22.04
     timeout-minutes: 120
     container:
       image: ghcr.io/void-linux/void-glibc-full:latest
@@ -99,14 +102,8 @@ jobs:
           set -eux
           # Mirror the same Fastly choice inside the masterdir so package
           # builds fetch their build-time deps over the CDN.
-          # XBPS_CHROOT_CMD=ethereal is the chroot style intended for
-          # disposable containers: it needs no user namespaces (which
-          # Ubuntu 24.04's apparmor profile blocks even for `--privileged`
-          # containers due to `kernel.apparmor_restrict_unprivileged_
-          # userns=1`) and no setuid helpers.
           sudo -Eu builder tee etc/conf > /dev/null <<'EOF'
           XBPS_BINPKG_REPO=https://repo-fastly.voidlinux.org/current
-          XBPS_CHROOT_CMD=ethereal
           EOF
           sudo -Eu builder ./xbps-src binary-bootstrap
 

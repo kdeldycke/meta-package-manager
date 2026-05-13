@@ -61,6 +61,7 @@ jobs:
           xbps-install --yes \
             base-devel \
             git \
+            proot \
             sudo \
             xtools
 
@@ -99,8 +100,14 @@ jobs:
           set -eux
           # Mirror the same Fastly choice inside the masterdir so package
           # builds fetch their build-time deps over the CDN.
+          # CHROOT_CMD=proot avoids xbps-uunshare's `/proc/self/uid_map`
+          # write, which Ubuntu 24.04's apparmor profile rejects even for
+          # `--privileged` containers (`kernel.apparmor_restrict_
+          # unprivileged_userns=1` by default). proot uses ptrace instead
+          # and works without kernel namespace privileges.
           sudo -Eu builder tee etc/conf > /dev/null <<'EOF'
           XBPS_BINPKG_REPO=https://repo-fastly.voidlinux.org/current
+          CHROOT_CMD=proot
           EOF
           sudo -Eu builder ./xbps-src binary-bootstrap
 

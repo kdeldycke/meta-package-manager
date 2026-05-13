@@ -15,7 +15,7 @@ permissions: {}
 
 env:
   VOID_FORK: kdeldycke/void-packages
-  VOID_BRANCH: mpm
+  VOID_BRANCH: mpm-clean
   # Build sequence, leaves first. Must match the commit order on the branch.
   # `python3-boltons` is an existing Void package being bumped (20.2.1 →
   # 25.0.0) for Python 3.14 compatibility; building it here ensures the

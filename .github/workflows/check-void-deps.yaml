@@ -17,7 +17,11 @@ env:
   VOID_FORK: kdeldycke/void-packages
   VOID_BRANCH: mpm
   # Build sequence, leaves first. Must match the commit order on the branch.
+  # `python3-boltons` is an existing Void package being bumped (20.2.1 →
+  # 25.0.0) for Python 3.14 compatibility; building it here ensures the
+  # local hostdir repo overrides Void's stale binary at smoke-test time.
   PACKAGES: >-
+    python3-boltons
     python3-beartype
     python3-cloup
     python3-deepmerge

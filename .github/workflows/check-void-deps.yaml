@@ -70,8 +70,11 @@ jobs:
           # Mirror void-packages' own CI: a non-root `builder` user that
           # owns the void-packages tree and runs all xbps-src invocations.
           # The xbuilder group is what xbps-src's chroot helpers consult.
-          groupadd --system xbuilder
-          useradd --no-create-home --groups xbuilder builder
+          # The Void glibc-full image already ships `xbuilder`, so create
+          # the group only if it is missing.
+          getent group xbuilder > /dev/null || groupadd --system xbuilder
+          getent passwd builder > /dev/null \
+            || useradd --no-create-home --groups xbuilder builder
           # Allow the runner step's `sudo -Eu builder ...` without prompts.
           echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
 

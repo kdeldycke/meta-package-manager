@@ -56,11 +56,24 @@ jobs:
             > /etc/xbps.d/00-repository-main.conf
           xbps-install --sync --yes xbps
           # xbps-src lives inside the void-packages tree itself; we only
-          # need git (to clone the branch) and the xbps-src host deps.
+          # need git (to clone the branch), sudo (to drop root for
+          # xbps-src, which refuses to run as root), and xtools.
           xbps-install --yes \
             base-devel \
             git \
+            sudo \
             xtools
+
+      - name: Provision builder user
+        run: |
+          set -eux
+          # Mirror void-packages' own CI: a non-root `builder` user that
+          # owns the void-packages tree and runs all xbps-src invocations.
+          # The xbuilder group is what xbps-src's chroot helpers consult.
+          groupadd --system xbuilder
+          useradd --no-create-home --groups xbuilder builder
+          # Allow the runner step's `sudo -Eu builder ...` without prompts.
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
 
       - name: Clone fork branch
         timeout-minutes: 5
@@ -71,20 +84,20 @@ jobs:
             --depth 1 \
             "https://github.com/${VOID_FORK}" \
             /void-packages
+          chown --recursive builder:builder /void-packages
           (cd /void-packages && git log --oneline -1)
 
       - name: Bootstrap xbps-src masterdir
-        timeout-minutes: 15
+        timeout-minutes: 20
         working-directory: /void-packages
         run: |
           set -eux
           # Mirror the same Fastly choice inside the masterdir so package
-          # builds fetch their build-time deps over the CDN. The variable
-          # name is read by `xbps-src binary-bootstrap`.
-          mkdir --parents etc
-          echo 'XBPS_BINPKG_REPO=https://repo-fastly.voidlinux.org/current' \
-            > etc/conf
-          ./xbps-src binary-bootstrap
+          # builds fetch their build-time deps over the CDN.
+          sudo -Eu builder tee etc/conf > /dev/null <<'EOF'
+          XBPS_BINPKG_REPO=https://repo-fastly.voidlinux.org/current
+          EOF
+          sudo -Eu builder ./xbps-src binary-bootstrap
 
       - name: Lint all new templates
         working-directory: /void-packages
@@ -127,7 +140,7 @@ jobs:
           for pkg in ${PACKAGES}; do
             echo "--- Building ${pkg} ---"
             log=$(mktemp)
-            if ./xbps-src pkg "${pkg}" > "${log}" 2>&1; then
+            if sudo -Eu builder ./xbps-src pkg "${pkg}" > "${log}" 2>&1; then
               tail --lines=20 "${log}"
               echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
             else

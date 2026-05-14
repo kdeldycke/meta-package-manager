@@ -52,7 +52,7 @@ from click_extra.table import (
     print_data,
     print_sorted_table,
 )
-from click_extra.theme import KO, OK, default_theme as theme
+from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
 from extra_platforms import reduce
 
 from . import __version__, bar_plugin
@@ -457,12 +457,12 @@ def mpm(
     selection_string = (
         " platform default"
         if not user_selection
-        else "> " + " > ".join(map(theme.invoked_command, user_selection))
+        else "> " + " > ".join(map(theme().invoked_command, user_selection))
     )
     deselection_string = (
         "None"
         if not managers_to_remove
-        else ", ".join(map(theme.invoked_command, sorted(managers_to_remove)))
+        else ", ".join(map(theme().invoked_command, sorted(managers_to_remove)))
     )
     logging.info(f"User selection of managers by priority:{selection_string}")
     logging.info(f"Managers dropped by user: {deselection_string}")
@@ -567,7 +567,11 @@ def managers(ctx):
     table = []
     for manager in ctx.obj.selected_managers(**select_params):
         # Build up the OS column content.
-        os_infos = OK if manager.supported else KO
+        os_infos = (
+            theme().success(OK_GLYPH)
+            if manager.supported
+            else theme().error(KO_GLYPH)
+        )
         if not manager.supported:
             os_infos += " {}".format(
                 ", ".join(
@@ -575,22 +579,26 @@ def managers(ctx):
                 ),
             )
         if manager.deprecated:
-            os_infos += f" {theme.warning('(deprecated)')}"
+            os_infos += f" {theme().warning('(deprecated)')}"
 
         # Build up the CLI path column content.
         cli_infos = "{} {}".format(
-            OK if manager.cli_path else KO,
+            theme().success(OK_GLYPH) if manager.cli_path else theme().error(KO_GLYPH),
             highlight_cli_name(manager.cli_path, manager.cli_names)
             if manager.cli_path
             else (
-                f"{', '.join(map(theme.invoked_command, manager.cli_names))} not found"
+                f"{', '.join(map(theme().invoked_command, manager.cli_names))} not found"
             ),
         )
 
         # Build up the version column content.
         version_infos = ""
         if manager.executable:
-            version_infos = OK if manager.fresh else KO
+            version_infos = (
+                theme().success(OK_GLYPH)
+                if manager.fresh
+                else theme().error(KO_GLYPH)
+            )
             if manager.version:
                 version_infos += f" {manager.version}"
                 if not manager.fresh:
@@ -598,11 +606,11 @@ def managers(ctx):
 
         table.append(
             (
-                getattr(theme, "success" if manager.fresh else "error")(manager.id),
+                getattr(theme(), "success" if manager.fresh else "error")(manager.id),
                 manager.name,
                 os_infos,
                 cli_infos,
-                OK if manager.executable else "",
+                theme().success(OK_GLYPH) if manager.executable else "",
                 version_infos,
             ),
         )
@@ -647,7 +655,7 @@ def installed(ctx, duplicates):
         except CLIError:
             logging.warning(
                 f"Could not list installed packages "
-                f"from {theme.invoked_command(manager.id)}."
+                f"from {theme().invoked_command(manager.id)}."
             )
             packages = ()
 
@@ -759,7 +767,7 @@ def outdated(ctx, plugin_output):
         except CLIError:
             logging.warning(
                 f"Could not list outdated packages "
-                f"from {theme.invoked_command(manager.id)}."
+                f"from {theme().invoked_command(manager.id)}."
             )
             packages = ()
 
@@ -883,7 +891,7 @@ def search(ctx, extended, exact, refilter, query):
             )
         except CLIError:
             logging.warning(
-                f"Could not search packages from {theme.invoked_command(manager.id)}."
+                f"Could not search packages from {theme().invoked_command(manager.id)}."
             )
             packages = ()
 
@@ -912,7 +920,7 @@ def search(ctx, extended, exact, refilter, query):
         partial(
             highlight,
             patterns=query_parts,
-            styling_func=theme.search,
+            styling_func=theme().search,
             ignore_case=True,
         ),
     )
@@ -1080,7 +1088,7 @@ def install(ctx, packages_specs):
     manager_ids = tuple(manager.id for manager in selected_managers)
     logging.info(
         "Installation priority: > "
-        f"{' > '.join(map(theme.invoked_command, manager_ids))}",
+        f"{' > '.join(map(theme().invoked_command, manager_ids))}",
     )
 
     solver = Solver(packages_specs, manager_priority=manager_ids)
@@ -1094,13 +1102,13 @@ def install(ctx, packages_specs):
             try:
                 logging.info(
                     f"Install {spec} package with "
-                    f"{theme.invoked_command(manager_id)}...",
+                    f"{theme().invoked_command(manager_id)}...",
                 )
                 manager = pool.get(manager_id)
                 output = manager.install(spec.package_id, version=spec.version)
             except NotImplementedError:
                 logging.warning(
-                    f"{theme.invoked_command(manager_id)} "
+                    f"{theme().invoked_command(manager_id)} "
                     "does not implement install operation.",
                 )
                 continue
@@ -1110,7 +1118,7 @@ def install(ctx, packages_specs):
     for spec in unmatched_packages:
         for manager in selected_managers:
             logging.info(
-                f"Try to install {spec} with {theme.invoked_command(manager.id)}.",
+                f"Try to install {spec} with {theme().invoked_command(manager.id)}.",
             )
 
             # Is the package available on this manager?
@@ -1125,7 +1133,7 @@ def install(ctx, packages_specs):
                 )
             except NotImplementedError:
                 logging.warning(
-                    f"{theme.invoked_command(manager.id)} "
+                    f"{theme().invoked_command(manager.id)} "
                     "does not implement search operation.",
                 )
                 logging.info(
@@ -1135,14 +1143,14 @@ def install(ctx, packages_specs):
             except CLIError:
                 logging.warning(
                     f"Could not search for {spec.package_id} "
-                    f"with {theme.invoked_command(manager.id)}.",
+                    f"with {theme().invoked_command(manager.id)}.",
                 )
                 continue
             else:
                 if not matches:
                     logging.warning(
                         f"No {spec.package_id} package found "
-                        f"on {theme.invoked_command(manager.id)}.",
+                        f"on {theme().invoked_command(manager.id)}.",
                     )
                     continue
                 # Prevents any incomplete or bad implementation of exact search.
@@ -1156,19 +1164,19 @@ def install(ctx, packages_specs):
                 try:
                     logging.info(
                         f"Install {spec} package "
-                        f"with {theme.invoked_command(manager.id)}...",
+                        f"with {theme().invoked_command(manager.id)}...",
                     )
                     output = manager.install(spec.package_id, version=spec.version)
                 except NotImplementedError:
                     logging.warning(
-                        f"{theme.invoked_command(manager.id)} "
+                        f"{theme().invoked_command(manager.id)} "
                         "does not implement install operation.",
                     )
                     continue
                 except CLIError:
                     logging.warning(
                         f"Could not install {spec} "
-                        f"with {theme.invoked_command(manager.id)}.",
+                        f"with {theme().invoked_command(manager.id)}.",
                     )
                     continue
 
@@ -1222,7 +1230,7 @@ def upgrade(ctx, all, packages_specs):
         ):
             logging.info(
                 "Upgrade all outdated packages "
-                f"from {theme.invoked_command(manager.id)}...",
+                f"from {theme().invoked_command(manager.id)}...",
             )
             output = manager.upgrade()
             if output:
@@ -1260,7 +1268,7 @@ def upgrade(ctx, all, packages_specs):
                 if package_id in manager.installed_ids:
                     logging.info(
                         f"{package_id} has been installed "
-                        f"with {theme.invoked_command(manager.id)}.",
+                        f"with {theme().invoked_command(manager.id)}.",
                     )
                     source_manager_ids.add(manager.id)
 
@@ -1273,7 +1281,7 @@ def upgrade(ctx, all, packages_specs):
 
         logging.info(
             f"Upgrade {package_id} "
-            f"with {', '.join(map(theme.invoked_command, sorted(source_manager_ids)))}",
+            f"with {', '.join(map(theme().invoked_command, sorted(source_manager_ids)))}",
         )
         for manager_id in source_manager_ids:
             manager = pool.get(manager_id)
@@ -1332,7 +1340,7 @@ def remove(ctx, packages_specs):
                 if package_id in manager.installed_ids:
                     logging.info(
                         f"{package_id} has been installed "
-                        f"with {theme.invoked_command(manager.id)}.",
+                        f"with {theme().invoked_command(manager.id)}.",
                     )
                     source_manager_ids.add(manager.id)
 
@@ -1345,7 +1353,7 @@ def remove(ctx, packages_specs):
 
         logging.info(
             f"Remove {package_id} "
-            f"with {', '.join(map(theme.invoked_command, sorted(source_manager_ids)))}",
+            f"with {', '.join(map(theme().invoked_command, sorted(source_manager_ids)))}",
         )
         for manager_id in source_manager_ids:
             manager = pool.get(manager_id)
@@ -1359,7 +1367,7 @@ def remove(ctx, packages_specs):
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
     for manager in ctx.obj.selected_managers(implements_operation=Operations.sync):
-        logging.info(f"Sync {theme.invoked_command(manager.id)} package info...")
+        logging.info(f"Sync {theme().invoked_command(manager.id)} package info...")
         manager.sync()
 
 
@@ -1368,7 +1376,7 @@ def sync(ctx):
 def cleanup(ctx):
     """Cleanup local data, temporary artifacts and removes orphaned dependencies."""
     for manager in ctx.obj.selected_managers(implements_operation=Operations.cleanup):
-        logging.info(f"Cleanup {theme.invoked_command(manager.id)}...")
+        logging.info(f"Cleanup {theme().invoked_command(manager.id)}...")
         manager.cleanup()
 
 
@@ -1484,14 +1492,14 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
     )
     # Create one section for each manager.
     for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
-        logging.info(f"Dumping packages from {theme.invoked_command(manager.id)}...")
+        logging.info(f"Dumping packages from {theme().invoked_command(manager.id)}...")
 
         try:
             packages = tuple(packages_asdict(manager.installed, fields))
         except CLIError:
             logging.warning(
                 f"Could not list installed packages "
-                f"from {theme.invoked_command(manager.id)}."
+                f"from {theme().invoked_command(manager.id)}."
             )
             packages = ()
 
@@ -1571,10 +1579,10 @@ def restore(ctx, toml_files):
         ):
             if manager.id not in doc:
                 logging.warning(
-                    f"No [{theme.invoked_command(manager.id)}] section found.",
+                    f"No [{theme().invoked_command(manager.id)}] section found.",
                 )
                 continue
-            logging.info(f"Restore {theme.invoked_command(manager.id)} packages...")
+            logging.info(f"Restore {theme().invoked_command(manager.id)} packages...")
             for package_id, version in doc[manager.id].items():
                 spec = Specifier(
                     raw_spec=f"pkg:{manager.id}:/{package_id}{VERSION_SEP}{package_id}",
@@ -1665,13 +1673,13 @@ def sbom(ctx, spdx, export_format, overwrite, export_path):
     sbom.init_doc()
 
     for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
-        logging.info(f"Export packages from {theme.invoked_command(manager.id)}...")
+        logging.info(f"Export packages from {theme().invoked_command(manager.id)}...")
         try:
             for package in manager.installed:
                 sbom.add_package(manager, package)
         except CLIError:
             logging.warning(
-                f"Could not export packages from {theme.invoked_command(manager.id)}."
+                f"Could not export packages from {theme().invoked_command(manager.id)}."
             )
 
     echo(sbom.export(), file=prep_path(export_path))

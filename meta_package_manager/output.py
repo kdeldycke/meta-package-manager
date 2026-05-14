@@ -29,7 +29,7 @@ from unittest.mock import patch
 from boltons.iterutils import flatten
 from click_extra import echo
 from click_extra.table import TableFormat, render_table
-from click_extra.theme import default_theme as theme
+from click_extra.theme import get_current_theme as theme
 
 from .bar_plugin import MPMPlugin
 from .pool import pool
@@ -261,7 +261,7 @@ class BarPluginRenderer(MPMPlugin):
                     # Fallback on mpm itself which is capable of simulating a full
                     # upgrade.
                     logging.warning(
-                        f"{theme.invoked_command(manager_id)} "
+                        f"{theme().invoked_command(manager_id)} "
                         "does not implement upgrade_all_cli.",
                     )
                     mpm_args, _runnable, _up_to_date, _version, _error = self.best_mpm

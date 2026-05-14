@@ -36,7 +36,7 @@ from dataclasses import dataclass, field
 
 import tomli_w
 from click_extra import ConfigValidator, ValidationError, echo
-from click_extra.theme import default_theme as theme
+from click_extra.theme import get_current_theme as theme
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -341,7 +341,7 @@ def format_contribution_hints(hints: list[ContributionHint]) -> str:
     if not hints:
         return ""
 
-    arrow = theme.invoked_command("↗")
+    arrow = theme().invoked_command("↗")
     lines = [
         f"{arrow} Detected user override(s) on fields that often indicate an "
         f"upstream detection bug.",
@@ -352,7 +352,7 @@ def format_contribution_hints(hints: list[ContributionHint]) -> str:
         url = _build_issue_url(hint)
         lines.extend(
             (
-                f"  - {theme.invoked_command(hint.manager_id)}: "
+                f"  - {theme().invoked_command(hint.manager_id)}: "
                 f"override on `{hint.field}`",
                 f"    File a report: {url}",
             )

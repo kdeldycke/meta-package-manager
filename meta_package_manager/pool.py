@@ -22,7 +22,7 @@ from functools import cached_property
 
 from boltons.iterutils import unique
 from click_extra import get_current_context
-from click_extra.theme import default_theme as theme
+from click_extra.theme import get_current_theme as theme
 
 from .managers.apk import APK
 from .managers.apm import APM
@@ -297,7 +297,7 @@ class ManagerPool:
             # saves one call to the package manager CLI.
             if implements_operation and not manager.implements(implements_operation):
                 logging.warning(
-                    f"{theme.invoked_command(manager_id)} "
+                    f"{theme().invoked_command(manager_id)} "
                     f"does not implement {implements_operation}.",
                 )
                 continue
@@ -306,7 +306,7 @@ class ManagerPool:
             if drop_not_found and not manager.available:
                 reason = manager.unavailable_reason or "unavailable"
                 logging.info(
-                    f"Skip {theme.invoked_command(manager_id)} manager: {reason}.",
+                    f"Skip {theme().invoked_command(manager_id)} manager: {reason}.",
                 )
                 continue
 

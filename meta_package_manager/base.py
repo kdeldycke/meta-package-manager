@@ -36,7 +36,7 @@ from boltons.iterutils import unique
 from boltons.strutils import strip_ansi
 from click_extra.envvar import env_copy
 from click_extra.testing import INDENT, args_cleanup, format_cli_prompt
-from click_extra.theme import default_theme as theme
+from click_extra.theme import get_current_theme as theme
 from extra_platforms import (
     UNIX,
     Group,
@@ -221,7 +221,7 @@ def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | N
     for ref_name in match_names:
         if os.path.normcase(ref_name).startswith(os.path.normcase(path.name)):
             highlighted_name = (
-                theme.invoked_command(path.name[: len(ref_name)])
+                theme().invoked_command(path.name[: len(ref_name)])
                 + path.name[len(ref_name) :]
             )
             break
@@ -524,7 +524,7 @@ class PackageManager(metaclass=MetaPackageManager):
 
         logging.debug(
             "Search for "
-            + ", ".join(theme.invoked_command(cli) for cli in search_filenames)
+            + ", ".join(theme().invoked_command(cli) for cli in search_filenames)
             + " in:\n"
             + "\n".join(str(p) for p in search_path_list)
         )
@@ -664,7 +664,7 @@ class PackageManager(metaclass=MetaPackageManager):
            <meta_package_manager.base.PackageManager.fresh>`.
         """
         logging.debug(
-            f"{theme.invoked_command(self.id)} is: "
+            f"{theme().invoked_command(self.id)} is: "
             f"deprecated? {self.deprecated}; "
             f"supported? {self.supported}; "
             f"found at: {highlight_cli_name(self.cli_path, self.cli_names)}; "

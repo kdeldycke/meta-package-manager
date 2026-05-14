@@ -49,9 +49,8 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     container:
-      # zizmor: ignore[image-pinner]
-      # Void Linux only publishes rolling `latest`; no immutable SHA tags are available.
-      image: ghcr.io/void-linux/void-glibc-full:latest
+      # Void Linux only publishes a rolling `latest`; no immutable SHA tags are available.
+      image: ghcr.io/void-linux/void-glibc-full:latest  # zizmor: ignore[image-pinner]
       options: --privileged
     steps:
       - name: Sync xbps and install build tooling

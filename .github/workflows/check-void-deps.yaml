@@ -49,6 +49,8 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     container:
+      # zizmor: ignore[image-pinner]
+      # Void Linux only publishes rolling `latest`; no immutable SHA tags are available.
       image: ghcr.io/void-linux/void-glibc-full:latest
       options: --privileged
     steps:
@@ -151,6 +153,8 @@ jobs:
           for pkg in ${PACKAGES}; do
             echo "--- Building ${pkg} ---"
             log=$(mktemp)
+            # shellcheck disable=SC2024
+            # log is a runner-owned mktemp file; the redirect is intentionally not under sudo.
             if sudo -Eu builder ./xbps-src pkg "${pkg}" > "${log}" 2>&1; then
               tail --lines=20 "${log}"
               echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"

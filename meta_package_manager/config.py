@@ -539,13 +539,13 @@ def dump_manager_overrides(manager: PackageManager) -> dict[str, Any]:
     prune the rows that don't apply, and customize the rest.
     """
     result: dict[str, Any] = {}
-    for field in sorted(OVERRIDABLE_FIELDS):
-        value = getattr(manager, field)
+    for field_name in sorted(OVERRIDABLE_FIELDS):
+        value = getattr(manager, field_name)
         if value is None:
             continue
         if isinstance(value, tuple):
             value = list(value)
-        result[field] = value
+        result[field_name] = value
     return result
 
 

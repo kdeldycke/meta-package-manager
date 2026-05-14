@@ -37,7 +37,6 @@ from meta_package_manager.config import (
     apply_manager_overrides,
     dump_manager_overrides,
     format_contribution_hints,
-    validate_manager_overrides_section,
 )
 from meta_package_manager.pool import pool
 

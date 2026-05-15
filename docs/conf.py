@@ -48,7 +48,8 @@ myst_enable_extensions = [
     "smartquotes",
     "strikethrough",
     "tasklist",
-    # Only enabled so we can support GitHub admonitions.
+    # Lets admonitions nest inside backtick-fenced directives (like `{tab-item}`
+    # in `install.md`) without escalating fence backtick counts.
     "colon_fence",
 ]
 # Allow ```mermaid``` directive to be used without curly braces (```{mermaid}```), see:

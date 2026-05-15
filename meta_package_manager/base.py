@@ -748,12 +748,19 @@ class PackageManager(metaclass=MetaPackageManager):
                     env=cast("subprocess._ENV", env_copy(extra_env)),
                     check=False,
                     # On Windows, some package manager installers (winget, chocolatey,
-                    # etc.) call GenerateConsoleCtrlEvent(0) during their operation,
-                    # broadcasting CTRL_C_EVENT to every process in the console group.
-                    # Spawning in a new process group isolates us: broadcasts from the
-                    # child target the child's own group, not the parent Python process.
-                    # On POSIX, creationflags=0 is a no-op (only 0 is accepted).
-                    creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0),
+                    # etc.) call GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0) during their
+                    # operation, broadcasting CTRL_C_EVENT to every process sharing the
+                    # caller's console (dwProcessGroupId=0 means all console members).
+                    # DETACHED_PROCESS removes the child from the console entirely, so
+                    # its broadcasts cannot reach uv or any other process in the parent's
+                    # console. CREATE_NEW_PROCESS_GROUP is insufficient: it prevents the
+                    # child from receiving CTRL+C from the parent, but the child still
+                    # inherits the parent's console, so GenerateConsoleCtrlEvent(0, 0)
+                    # from the child still reaches the whole console. capture_output=True
+                    # ensures stdout/stderr go through pipes regardless, so detaching
+                    # from the console does not break output capture.
+                    # On POSIX, getattr returns 0 which is accepted by subprocess.
+                    creationflags=getattr(subprocess, "DETACHED_PROCESS", 0),
                 )
             except subprocess.TimeoutExpired:
                 msg = f"Timed out after {self.timeout}s."

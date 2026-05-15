@@ -16,7 +16,7 @@
 
 from __future__ import annotations
 
-from extra_platforms import BSD, LINUX_LIKE, MACOS, ALL_WINDOWS
+from extra_platforms import ALL_WINDOWS, BSD, LINUX_LIKE, MACOS
 
 from ..base import PackageManager
 

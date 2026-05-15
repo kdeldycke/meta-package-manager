@@ -23,7 +23,6 @@ from operator import attrgetter
 import pytest
 
 # Pre-load invocation helpers to be used as pytest's fixture.
-from click_extra.config import ConfigOption
 from click_extra.pytest import create_config, extra_runner  # noqa: F401
 from pytest import fixture, param
 
@@ -141,21 +140,9 @@ def pytest_report_header(config: Config, start_path: Path) -> tuple[str, ...]:
     )
 
 
-_config_option = next(p for p in mpm.params if isinstance(p, ConfigOption))
-"""The :class:`~click_extra.config.ConfigOption` instance attached to ``mpm``.
-
-Pre-resolved here to avoid repeated iteration over ``mpm.params`` inside the
-``invoke`` fixture which fires for every test.
-"""
-
-
 @fixture
 def invoke(extra_runner):  # noqa: F811
     yield partial(extra_runner.invoke, mpm)
-    # click-extra's _recursive_update mutates ConfigOption.params_template in place
-    # with values from the loaded config. Pop the cached property so the next test
-    # rebuilds it fresh from params_objects (which is not mutated by config loading).
-    _config_option.__dict__.pop("params_template", None)
 
 
 def _patch_pool_with(monkeypatch, fake):

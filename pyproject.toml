@@ -244,12 +244,8 @@ packages.find.include = [ "meta_package_manager*" ]
 [tool.uv]
 # Cooldown period.
 exclude-newer = "1 week"
-# click-extra gets no cooldown: I maintain it and want fresh releases (like
-# 7.16.0's ConfigValidator) to resolve immediately. Nuitka is pinned to a
-# specific version in the release workflow, so the cooldown would block fresh
-# releases: exempt it from the global cutoff. urllib3 gets no cooldown so
-# security fixes land immediately.
-exclude-newer-package = { click-extra = "0 day", nuitka = "False" }
+# click-extra gets no cooldown: I maintain it and want fresh releases to resolve immediately.
+exclude-newer-package = { click-extra = "0 day" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 
@@ -262,6 +258,9 @@ product-version = "6.5.0.dev0"
 macos-app-icon = "docs/assets/icon.png"
 linux-icon = "docs/assets/icon.png"
 windows-icon-from-ico = "docs/assets/icon.png"
+# click-extra ships themes.toml as package data loaded via importlib.resources;
+# Nuitka does not auto-bundle non-Python data files so we must declare it here.
+include-package-data = ["click_extra"]
 
 [tool.typos]
 # Correct capitalization for proper nouns.

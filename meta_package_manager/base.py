@@ -743,13 +743,6 @@ class PackageManager(metaclass=MetaPackageManager):
                 result = subprocess.run(
                     clean_args,
                     capture_output=True,
-                    # On Windows, package manager installer sub-processes may
-                    # call GenerateConsoleCtrlEvent(0) to broadcast
-                    # CTRL_C_EVENT to all processes sharing the console, which
-                    # Python converts to KeyboardInterrupt. CREATE_NO_WINDOW
-                    # detaches the child from our console so those broadcasts
-                    # cannot reach this Python process.
-                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
                     timeout=self.timeout,
                     encoding="utf-8",
                     env=cast("subprocess._ENV", env_copy(extra_env)),
@@ -773,6 +766,19 @@ class PackageManager(metaclass=MetaPackageManager):
                     self.executable = False
                     return ""
                 raise
+            except KeyboardInterrupt:
+                # On Windows, package manager installer sub-processes (winget,
+                # chocolatey, etc.) may call GenerateConsoleCtrlEvent(0) to
+                # broadcast CTRL_C_EVENT to all processes sharing the console.
+                # Python converts this to KeyboardInterrupt which would
+                # otherwise propagate to Click and abort mpm. Treat it as a
+                # transient subprocess failure so mpm continues to the next
+                # manager.
+                msg = "Subprocess interrupted by a console signal."
+                logging.warning(msg)
+                exception = CLIError(None, "", msg)
+                self.cli_errors.append(exception)
+                return ""
             code = result.returncode
             output = result.stdout
             error = result.stderr

@@ -50,7 +50,7 @@ jobs:
     timeout-minutes: 120
     container:
       # Void Linux only publishes a rolling `latest`; no immutable SHA tags are available.
-      image: ghcr.io/void-linux/void-glibc-full:latest  # zizmor: ignore[image-pinner]
+      image: ghcr.io/void-linux/void-glibc-full:latest  # zizmor: ignore[unpinned-images]
       options: --privileged
     steps:
       - name: Sync xbps and install build tooling

@@ -260,7 +260,7 @@ linux-icon = "docs/assets/icon.png"
 windows-icon-from-ico = "docs/assets/icon.png"
 # click-extra ships themes.toml as package data loaded via importlib.resources;
 # Nuitka does not auto-bundle non-Python data files so we must declare it here.
-include-package-data = ["click_extra"]
+include-package-data = [ "click_extra" ]
 
 [tool.typos]
 # Correct capitalization for proper nouns.

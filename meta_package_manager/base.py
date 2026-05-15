@@ -747,6 +747,13 @@ class PackageManager(metaclass=MetaPackageManager):
                     encoding="utf-8",
                     env=cast("subprocess._ENV", env_copy(extra_env)),
                     check=False,
+                    # On Windows, some package manager installers (winget, chocolatey,
+                    # etc.) call GenerateConsoleCtrlEvent(0) during their operation,
+                    # broadcasting CTRL_C_EVENT to every process in the console group.
+                    # Spawning in a new process group isolates us: broadcasts from the
+                    # child target the child's own group, not the parent Python process.
+                    # On POSIX, creationflags=0 is a no-op (only 0 is accepted).
+                    creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0),
                 )
             except subprocess.TimeoutExpired:
                 msg = f"Timed out after {self.timeout}s."
@@ -767,13 +774,9 @@ class PackageManager(metaclass=MetaPackageManager):
                     return ""
                 raise
             except KeyboardInterrupt:
-                # On Windows, package manager installer sub-processes (winget,
-                # chocolatey, etc.) may call GenerateConsoleCtrlEvent(0) to
-                # broadcast CTRL_C_EVENT to all processes sharing the console.
-                # Python converts this to KeyboardInterrupt which would
-                # otherwise propagate to Click and abort mpm. Treat it as a
-                # transient subprocess failure so mpm continues to the next
-                # manager.
+                # Safety net: if a CTRL_C_EVENT still reaches Python despite the new
+                # process group isolation above, absorb it and continue to the next
+                # manager instead of aborting mpm.
                 msg = "Subprocess interrupted by a console signal."
                 logging.warning(msg)
                 exception = CLIError(None, "", msg)

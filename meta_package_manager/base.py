@@ -743,13 +743,13 @@ class PackageManager(metaclass=MetaPackageManager):
                 result = subprocess.run(
                     clean_args,
                     capture_output=True,
-                    # On Windows, isolate child process from console signals
-                    # (CTRL_C_EVENT, CTRL_BREAK_EVENT) that package installers
-                    # may broadcast to the console group, which would otherwise
-                    # reach this Python process as KeyboardInterrupt.
-                    creationflags=getattr(
-                        subprocess, "CREATE_NEW_PROCESS_GROUP", 0
-                    ),
+                    # On Windows, package manager installer sub-processes may
+                    # call GenerateConsoleCtrlEvent(0) to broadcast
+                    # CTRL_C_EVENT to all processes sharing the console, which
+                    # Python converts to KeyboardInterrupt. CREATE_NO_WINDOW
+                    # detaches the child from our console so those broadcasts
+                    # cannot reach this Python process.
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
                     timeout=self.timeout,
                     encoding="utf-8",
                     env=cast("subprocess._ENV", env_copy(extra_env)),

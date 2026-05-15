@@ -55,23 +55,32 @@ the pool is stable.
 """
 
 
-@pytest.fixture
-def reset_overrides():
-    """Restore the override target's instance state after each test.
-
-    The ``pool`` is a module-level singleton: any attribute we shadow on a manager
-    instance via ``apply_manager_overrides()`` would leak to the next test. This
-    fixture pops every overridable field and every cache-invalidated property from
-    the instance ``__dict__``, and clears the pool's overridden-fields tracking dict
-    so the next test starts from class defaults.
-    """
-    yield
+def _clean_override_target() -> None:
+    """Pop overridable fields and cached props from the override target."""
     manager = pool[OVERRIDE_TARGET]
     for field in OVERRIDABLE_FIELDS:
         manager.__dict__.pop(field, None)
     for prop in INVALIDATED_CACHED_PROPS:
         manager.__dict__.pop(prop, None)
     pool.overridden_fields.pop(OVERRIDE_TARGET, None)
+
+
+@pytest.fixture
+def reset_overrides():
+    """Restore the override target's instance state before and after each test.
+
+    The ``pool`` is a module-level singleton: any attribute we shadow on a manager
+    instance via ``apply_manager_overrides()`` would leak to the next test. This
+    fixture pops every overridable field and every cache-invalidated property from
+    the instance ``__dict__``, and clears the pool's overridden-fields tracking dict
+    so the next test starts from class defaults.
+
+    Cleanup runs both before (in case a prior test in the same xdist worker left the
+    pool dirty) and after (to not pollute subsequent tests).
+    """
+    _clean_override_target()
+    yield
+    _clean_override_target()
 
 
 def test_overridable_fields_match_base_attributes():

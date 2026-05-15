@@ -249,7 +249,7 @@ exclude-newer = "1 week"
 # specific version in the release workflow, so the cooldown would block fresh
 # releases: exempt it from the global cutoff. urllib3 gets no cooldown so
 # security fixes land immediately.
-exclude-newer-package = { click-extra = "0 day", nuitka = false, urllib3 = "0 day" }
+exclude-newer-package = { click-extra = "0 day", nuitka = "False" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 

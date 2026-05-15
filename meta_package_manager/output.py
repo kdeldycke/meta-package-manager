@@ -130,12 +130,11 @@ class BarPluginRenderer(MPMPlugin):
     def print_cli_item(self, *args) -> None:
         """Print two CLI entries:
 
-        - one that is silent
-        - a second one that is the exact copy of the above but forces the execution
-          by the way of a visible terminal
+        - one that opens a visible terminal so the user can follow the execution
+        - a second one, reachable by holding the ``Option`` key, that runs silently
         """
-        self.pp(*args, "terminal=false")
-        self.pp(*args, "terminal=true", "alternate=true")
+        self.pp(*args, "terminal=true")
+        self.pp(*args, "terminal=false", "alternate=true")
 
     def print_upgrade_all_item(self, manager: dict, submenu: str = "") -> None:
         """Print the menu entry to upgrade all outdated package of a manager."""

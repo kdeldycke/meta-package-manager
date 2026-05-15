@@ -183,7 +183,7 @@ class TestBarPlugin:
         #     ...
         (
             r"(--)?🆙 Upgrade all \S+ packages? \| shell=\S+( param\d+=\S+)+ "
-            r"refresh=true terminal=(false|true alternate=true)$",
+            r"refresh=true terminal=(true|false alternate=true)$",
             False,
         ),
         # Error line. Optional.
@@ -252,7 +252,7 @@ class TestBarPlugin:
                     # Package upgrade line.
                     (
                         r"(--)?[\S ]+ \S+ → \S+ \| shell=\S+( param\d+=\S+)+ "
-                        r"refresh=true terminal=(false|true alternate=true)$",
+                        r"refresh=true terminal=(true|false alternate=true)$",
                         False,
                     ),
                 ),
@@ -267,7 +267,7 @@ class TestBarPlugin:
                     (
                         r"(--)?[\S ]+\s+\S+ → \S+\s+\| shell=\S+( param\d+=\S+)+ "
                         r"font=[Mm]enlo size=12 refresh=true "
-                        r"terminal=(false|true alternate=true)?$",
+                        r"terminal=(true|false alternate=true)?$",
                         False,
                     ),
                 ),

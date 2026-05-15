@@ -299,6 +299,10 @@ pre_args = ["--quiet", "--color", "never"]
 
 Unknown manager IDs and unknown field names are reported as warnings on `<stderr>` and skipped: a typo will not crash `mpm`. Type mismatches (e.g. passing a single string where a list is expected) raise an error so the offending value can be corrected.
 
+```{note}
+Per-manager overrides apply to existing built-in managers only. Defining brand-new managers from configuration is on the roadmap but not part of this release.
+```
+
 ### Help improve detection upstream
 
 When an override targets a field that often points to an upstream detection bug, `mpm` prints a one-line invitation to file a bug report so the heuristics can be improved for everyone. The fields that trigger an invitation are: `cli_names`, `cli_search_path`, `requirement`, `version_cli_options`, and `version_regexes`. Overrides on preference fields like `timeout` or `ignore_auto_updates` never trigger an invitation.

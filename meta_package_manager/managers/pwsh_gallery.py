@@ -21,7 +21,7 @@ from typing import cast
 
 from extra_platforms import LINUX_LIKE, MACOS, WINDOWS
 
-from ..base import PackageManager
+from ..base import CLIError, PackageManager
 from ..capabilities import search_capabilities
 
 TYPE_CHECKING = False
@@ -127,6 +127,7 @@ class PWSH_Gallery(PackageManager):
             "Get-InstalledPSResource"
             " | Select-Object Name, @{n='Version';e={$_.Version.ToString()}}"
             " | ConvertTo-Json -AsArray -Depth 2 -Compress",
+            must_succeed=True,
         )
         for entry in self._parse_json_array(output):
             yield self.package(
@@ -163,6 +164,7 @@ class PWSH_Gallery(PackageManager):
             " Latest = $l.Version.ToString()"
             " } }"
             " } | ConvertTo-Json -AsArray -Depth 2 -Compress",
+            must_succeed=True,
         )
         for entry in self._parse_json_array(output):
             yield self.package(
@@ -199,6 +201,7 @@ class PWSH_Gallery(PackageManager):
             " @{n='Version';e={$_.Version.ToString()}},"
             " Description"
             " | ConvertTo-Json -AsArray -Depth 2 -Compress",
+            must_succeed=True,
         )
         for entry in self._parse_json_array(output):
             yield self.package(
@@ -283,7 +286,15 @@ class PWSH_Gallery(PackageManager):
         one object would be serialised. The pipe still produces empty stdout
         when ``Get-InstalledPSResource`` returns nothing on a fresh install, so
         the empty-string guard is kept for safety.
+
+        Raises :py:class:`~meta_package_manager.base.CLIError` when the output
+        is non-empty but not valid JSON. This propagates through the caller's
+        generator so that :py:func:`~meta_package_manager.cli.installed` (and
+        similar) can catch it and skip the manager gracefully.
         """
         if not output.strip():
             return []
-        return cast("list[dict]", json.loads(output))
+        try:
+            return cast("list[dict]", json.loads(output))
+        except json.JSONDecodeError as ex:
+            raise CLIError(None, output, str(ex)) from ex

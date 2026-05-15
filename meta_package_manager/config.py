@@ -153,8 +153,7 @@ def _to_str_dict(value: Any) -> dict[str, str]:
     for k, v in value.items():
         if not isinstance(k, str) or not isinstance(v, str):
             raise TypeError(
-                f"expected a table of string-to-string entries, "
-                f"got {k!r} = {v!r}"
+                f"expected a table of string-to-string entries, got {k!r} = {v!r}"
             )
     return dict(value)
 
@@ -350,20 +349,15 @@ def format_contribution_hints(hints: list[ContributionHint]) -> str:
     ]
     for hint in hints:
         url = _build_issue_url(hint)
-        lines.extend(
-            (
-                f"  - {theme().invoked_command(hint.manager_id)}: "
-                f"override on `{hint.field}`",
-                f"    File a report: {url}",
-            )
-        )
-    lines.extend(
-        (
-            "",
-            "  (Disable with `--no-suggest-contribs` or "
-            "`[mpm] suggest_contribs = false`.)",
-        )
-    )
+        lines.extend((
+            f"  - {theme().invoked_command(hint.manager_id)}: "
+            f"override on `{hint.field}`",
+            f"    File a report: {url}",
+        ))
+    lines.extend((
+        "",
+        "  (Disable with `--no-suggest-contribs` or `[mpm] suggest_contribs = false`.)",
+    ))
     return "\n".join(lines)
 
 
@@ -392,9 +386,7 @@ def validate_manager_overrides_section(
     if not section:
         return
     if not isinstance(section, dict):
-        raise ValidationError(
-            "", f"expected a table, got {type(section).__name__}"
-        )
+        raise ValidationError("", f"expected a table, got {type(section).__name__}")
     for manager_id, fields in section.items():
         if manager_id not in pool.register:
             raise ValidationError(
@@ -413,8 +405,7 @@ def validate_manager_overrides_section(
             if converter is None:
                 raise ValidationError(
                     f"{manager_id}.{field_name}",
-                    f"unknown field. "
-                    f"Allowed: {', '.join(sorted(OVERRIDABLE_FIELDS))}",
+                    f"unknown field. Allowed: {', '.join(sorted(OVERRIDABLE_FIELDS))}",
                     code="unknown_field",
                 )
             try:
@@ -513,6 +504,7 @@ def build_manager_overrides_validator(pool: ManagerPool) -> ConfigValidator:
     (``Callable[[dict], None]``) while keeping the underlying validator pool-agnostic
     and testable in isolation.
     """
+
     def _validator(section: dict[str, Any]) -> None:
         validate_manager_overrides_section(section, pool=pool)
 

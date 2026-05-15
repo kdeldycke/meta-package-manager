@@ -568,9 +568,7 @@ def managers(ctx):
     for manager in ctx.obj.selected_managers(**select_params):
         # Build up the OS column content.
         os_infos = (
-            theme().success(OK_GLYPH)
-            if manager.supported
-            else theme().error(KO_GLYPH)
+            theme().success(OK_GLYPH) if manager.supported else theme().error(KO_GLYPH)
         )
         if not manager.supported:
             os_infos += " {}".format(
@@ -595,9 +593,7 @@ def managers(ctx):
         version_infos = ""
         if manager.executable:
             version_infos = (
-                theme().success(OK_GLYPH)
-                if manager.fresh
-                else theme().error(KO_GLYPH)
+                theme().success(OK_GLYPH) if manager.fresh else theme().error(KO_GLYPH)
             )
             if manager.version:
                 version_infos += f" {manager.version}"

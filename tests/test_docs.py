@@ -264,9 +264,7 @@ def test_benchmark_homepages_cover_non_pool_managers():
 
     # Homepages must not duplicate pool managers (those come from the class).
     overlap = homepage_ids & pool_ids
-    assert not overlap, (
-        f"Pool managers must not appear in homepages: {sorted(overlap)}"
-    )
+    assert not overlap, f"Pool managers must not appear in homepages: {sorted(overlap)}"
 
     # Homepages must not include unknown manager IDs.
     extra = homepage_ids - yaml_ids

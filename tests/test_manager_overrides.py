@@ -24,7 +24,6 @@ from textwrap import dedent
 
 import pytest
 import tomli_w
-
 from click_extra import ValidationError
 
 from meta_package_manager.config import (
@@ -118,27 +117,28 @@ def test_unknown_manager_raises():
 def test_non_dict_manager_section_raises():
     with pytest.raises(ValidationError, match=r"expected a table"):
         apply_manager_overrides(
-            pool, {OVERRIDE_TARGET: "not a table"}  # type: ignore[dict-item]
+            pool,
+            {OVERRIDE_TARGET: "not a table"},  # type: ignore[dict-item]
         )
 
 
 def test_unknown_field_raises(reset_overrides):
     with pytest.raises(ValidationError, match=r"unknown field"):
-        apply_manager_overrides(
-            pool, {OVERRIDE_TARGET: {"made_up_field": 99}}
-        )
+        apply_manager_overrides(pool, {OVERRIDE_TARGET: {"made_up_field": 99}})
 
 
 def test_str_tuple_override_replaces_default(reset_overrides):
     new_path = ("/opt/custom/bin", "/usr/local/special")
-    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"cli_search_path": list(new_path)}})
+    apply_manager_overrides(
+        pool, {OVERRIDE_TARGET: {"cli_search_path": list(new_path)}}
+    )
     assert pool[OVERRIDE_TARGET].cli_search_path == new_path
     assert "cli_search_path" in pool[OVERRIDE_TARGET].__dict__
 
 
 def test_str_tuple_override_coerces_list_to_tuple(reset_overrides):
-    apply_manager_overrides(pool,
-        {OVERRIDE_TARGET: {"cli_names": ["pip3", "pip", "pip2"]}}
+    apply_manager_overrides(
+        pool, {OVERRIDE_TARGET: {"cli_names": ["pip3", "pip", "pip2"]}}
     )
     assert pool[OVERRIDE_TARGET].cli_names == ("pip3", "pip", "pip2")
     assert isinstance(pool[OVERRIDE_TARGET].cli_names, tuple)
@@ -146,15 +146,15 @@ def test_str_tuple_override_coerces_list_to_tuple(reset_overrides):
 
 def test_str_tuple_override_rejects_bare_string(reset_overrides):
     with pytest.raises(ValidationError, match=r"expected a list of strings"):
-        apply_manager_overrides(pool,
-            {OVERRIDE_TARGET: {"cli_search_path": "/single/path"}}
+        apply_manager_overrides(
+            pool, {OVERRIDE_TARGET: {"cli_search_path": "/single/path"}}
         )
 
 
 def test_str_tuple_override_rejects_non_string_entries(reset_overrides):
     with pytest.raises(ValidationError, match=r"expected all entries to be strings"):
-        apply_manager_overrides(pool,
-            {OVERRIDE_TARGET: {"cli_search_path": ["/ok", 42]}}
+        apply_manager_overrides(
+            pool, {OVERRIDE_TARGET: {"cli_search_path": ["/ok", 42]}}
         )
 
 
@@ -196,12 +196,11 @@ def test_str_override_rejects_int(reset_overrides):
 
 
 def test_dict_override(reset_overrides):
-    apply_manager_overrides(pool,
-        {OVERRIDE_TARGET: {"extra_env": {"PIP_INDEX_URL": "https://example.test"}}}
+    apply_manager_overrides(
+        pool,
+        {OVERRIDE_TARGET: {"extra_env": {"PIP_INDEX_URL": "https://example.test"}}},
     )
-    assert pool[OVERRIDE_TARGET].extra_env == {
-        "PIP_INDEX_URL": "https://example.test"
-    }
+    assert pool[OVERRIDE_TARGET].extra_env == {"PIP_INDEX_URL": "https://example.test"}
 
 
 def test_dict_override_rejects_non_string_value(reset_overrides):
@@ -210,14 +209,15 @@ def test_dict_override_rejects_non_string_value(reset_overrides):
 
 
 def test_multiple_fields_in_one_call(reset_overrides):
-    apply_manager_overrides(pool,
+    apply_manager_overrides(
+        pool,
         {
             OVERRIDE_TARGET: {
                 "cli_search_path": ["/x"],
                 "timeout": 60,
                 "ignore_auto_updates": False,
             }
-        }
+        },
     )
     manager = pool[OVERRIDE_TARGET]
     assert manager.cli_search_path == ("/x",)
@@ -232,7 +232,9 @@ def test_cached_property_evicted_on_override(reset_overrides):
     _ = manager.cli_path
     # `cli_path` may or may not have been resolved on this host; what matters is that
     # if it WAS computed, the cache entry is cleared so a follow-up access recomputes.
-    apply_manager_overrides(pool, {OVERRIDE_TARGET: {"cli_search_path": ["/elsewhere"]}})
+    apply_manager_overrides(
+        pool, {OVERRIDE_TARGET: {"cli_search_path": ["/elsewhere"]}}
+    )
     assert "cli_path" not in manager.__dict__
 
 
@@ -464,7 +466,9 @@ def test_format_contribution_hints_lists_each_with_url():
     msg = format_contribution_hints(hints)
     assert "winget" in msg
     assert "cargo" in msg
-    assert msg.count("https://github.com/kdeldycke/meta-package-manager/issues/new") == 2
+    assert (
+        msg.count("https://github.com/kdeldycke/meta-package-manager/issues/new") == 2
+    )
     # Mentions the opt-out so the user knows how to silence.
     assert "--no-suggest-contribs" in msg
 

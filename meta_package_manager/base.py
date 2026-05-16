@@ -739,6 +739,22 @@ class PackageManager(metaclass=MetaPackageManager):
             logging.warning(f"Dry-run: {cli_msg}")
         else:
             logging.debug(cli_msg)
+            # On Windows, give each child its own console (CREATE_NEW_CONSOLE) so that
+            # GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0) broadcasts from child processes
+            # target the child's isolated console, not the parent's. This protects uv
+            # and pytest from spurious Ctrl+C signals issued by package-manager
+            # installers like winget and Chocolatey. DETACHED_PROCESS achieves the same
+            # isolation but breaks Chocolatey shims: they detect no console and redirect
+            # output away from pipes, causing commands like cargo --version to produce
+            # empty output. CREATE_NEW_CONSOLE gives the child a real console while
+            # keeping it isolated. SW_HIDE suppresses the console window. STARTUPINFO
+            # must be created per call because subprocess overwrites its hStd* fields.
+            # On POSIX, both creationflags=0 and startupinfo=None are no-ops.
+            _si = getattr(subprocess, "STARTUPINFO", None)
+            if _si is not None:
+                _si = _si()
+                _si.dwFlags = getattr(subprocess, "STARTF_USESHOWWINDOW", 0)
+                _si.wShowWindow = 0  # SW_HIDE
             try:
                 result = subprocess.run(
                     clean_args,
@@ -747,20 +763,8 @@ class PackageManager(metaclass=MetaPackageManager):
                     encoding="utf-8",
                     env=cast("subprocess._ENV", env_copy(extra_env)),
                     check=False,
-                    # On Windows, some package manager installers (winget, chocolatey,
-                    # etc.) call GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0) during their
-                    # operation, broadcasting CTRL_C_EVENT to every process sharing the
-                    # caller's console (dwProcessGroupId=0 means all console members).
-                    # DETACHED_PROCESS removes the child from the console entirely, so
-                    # its broadcasts cannot reach uv or any other process in the parent's
-                    # console. CREATE_NEW_PROCESS_GROUP is insufficient: it prevents the
-                    # child from receiving CTRL+C from the parent, but the child still
-                    # inherits the parent's console, so GenerateConsoleCtrlEvent(0, 0)
-                    # from the child still reaches the whole console. capture_output=True
-                    # ensures stdout/stderr go through pipes regardless, so detaching
-                    # from the console does not break output capture.
-                    # On POSIX, getattr returns 0 which is accepted by subprocess.
-                    creationflags=getattr(subprocess, "DETACHED_PROCESS", 0),
+                    creationflags=getattr(subprocess, "CREATE_NEW_CONSOLE", 0),
+                    startupinfo=_si,
                 )
             except subprocess.TimeoutExpired:
                 msg = f"Timed out after {self.timeout}s."
@@ -781,9 +785,9 @@ class PackageManager(metaclass=MetaPackageManager):
                     return ""
                 raise
             except KeyboardInterrupt:
-                # Safety net: if a CTRL_C_EVENT still reaches Python despite the new
-                # process group isolation above, absorb it and continue to the next
-                # manager instead of aborting mpm.
+                # Safety net: if a CTRL_C_EVENT still reaches Python despite console
+                # isolation above (e.g., user-initiated Ctrl+C), absorb it and continue
+                # to the next manager instead of aborting mpm.
                 msg = "Subprocess interrupted by a console signal."
                 logging.warning(msg)
                 exception = CLIError(None, "", msg)

@@ -761,6 +761,7 @@ class PackageManager(metaclass=MetaPackageManager):
                     capture_output=True,
                     timeout=self.timeout,
                     encoding="utf-8",
+                    errors="replace",
                     env=cast("subprocess._ENV", env_copy(extra_env)),
                     check=False,
                     creationflags=getattr(subprocess, "CREATE_NEW_CONSOLE", 0),
@@ -794,8 +795,8 @@ class PackageManager(metaclass=MetaPackageManager):
                 self.cli_errors.append(exception)
                 return ""
             code = result.returncode
-            output = result.stdout
-            error = result.stderr
+            output = result.stdout or ""
+            error = result.stderr or ""
 
         # Normalize messages.
         if error:

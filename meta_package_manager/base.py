@@ -739,15 +739,14 @@ class PackageManager(metaclass=MetaPackageManager):
             logging.warning(f"Dry-run: {cli_msg}")
         else:
             logging.debug(cli_msg)
-            # On Windows, give each child its own console (CREATE_NEW_CONSOLE) so that
-            # GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0) broadcasts from child processes
-            # target the child's isolated console, not the parent's. This protects uv
-            # and pytest from spurious Ctrl+C signals issued by package-manager
-            # installers like winget and Chocolatey. DETACHED_PROCESS achieves the same
-            # isolation but breaks Chocolatey shims: they detect no console and redirect
-            # output away from pipes, causing commands like cargo --version to produce
-            # empty output. CREATE_NEW_CONSOLE gives the child a real console while
-            # keeping it isolated. SW_HIDE suppresses the console window. STARTUPINFO
+            # On Windows, place each child in a new process group
+            # (CREATE_NEW_PROCESS_GROUP) so that CTRL_C is disabled for that group by
+            # default. This prevents child processes like winget and Chocolatey from
+            # broadcasting CTRL_C signals that would reach pytest and abort the test
+            # run. Unlike DETACHED_PROCESS or CREATE_NO_WINDOW, the child still
+            # inherits the parent's console, so Chocolatey shims detect a console
+            # and route their stdout to the pipes rather than discarding it.
+            # SW_HIDE suppresses any console window the child might open. STARTUPINFO
             # must be created per call because subprocess overwrites its hStd* fields.
             # On POSIX, both creationflags=0 and startupinfo=None are no-ops.
             _si = getattr(subprocess, "STARTUPINFO", None)
@@ -764,7 +763,7 @@ class PackageManager(metaclass=MetaPackageManager):
                     errors="replace",
                     env=cast("subprocess._ENV", env_copy(extra_env)),
                     check=False,
-                    creationflags=getattr(subprocess, "CREATE_NEW_CONSOLE", 0),
+                    creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0),
                     startupinfo=_si,
                 )
             except subprocess.TimeoutExpired:

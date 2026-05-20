@@ -217,7 +217,6 @@ docs = [
   "furo>=2025.9.25",
   "myst-parser>=4",
   "sphinx",
-  # sphinx-autodoc-typehints 2.4.0 is the first version that is aligned to our Python >= 3.10 requirement.
   "sphinx-autodoc-typehints>=2.4",
   # sphinx-click 6.1.0 is the first version to drop Python 3.9.
   "sphinx-click>=6.1",

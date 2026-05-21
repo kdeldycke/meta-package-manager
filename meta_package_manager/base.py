@@ -759,26 +759,17 @@ class PackageManager(metaclass=MetaPackageManager):
                 _si.dwFlags = getattr(subprocess, "STARTF_USESHOWWINDOW", 0)
                 _si.wShowWindow = 0  # SW_HIDE
             try:
-                result = subprocess.run(
+                proc = subprocess.Popen(
                     clean_args,
                     stdin=subprocess.DEVNULL,
-                    capture_output=True,
-                    timeout=self.timeout,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
                     encoding="utf-8",
                     errors="replace",
                     env=cast("subprocess._ENV", env_copy(extra_env)),
-                    check=False,
                     creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0),
                     startupinfo=_si,
                 )
-            except subprocess.TimeoutExpired:
-                msg = f"Timed out after {self.timeout}s."
-                logging.warning(msg)
-                exception = CLIError(None, "", msg)
-                if must_succeed or self.stop_on_error:
-                    raise exception
-                self.cli_errors.append(exception)
-                return ""
             except OSError as ex:
                 winerror = getattr(ex, "winerror", None)
                 # Windows shims trigger WinError 193 when spawned as a subprocess.
@@ -800,18 +791,70 @@ class PackageManager(metaclass=MetaPackageManager):
                     self.executable = False
                     return ""
                 raise
+            logging.debug(f"Spawned PID {proc.pid}: {clean_args[0]}.")
+            try:
+                logging.debug(
+                    f"Waiting for PID {proc.pid} (timeout={self.timeout}s)."
+                )
+                stdout, stderr = proc.communicate(timeout=self.timeout)
+                logging.debug(
+                    f"PID {proc.pid} exited {proc.returncode}; "
+                    f"stdout {len(stdout)} chars, stderr {len(stderr)} chars."
+                )
+            except subprocess.TimeoutExpired:
+                logging.debug(f"PID {proc.pid} timed out; sending kill.")
+                proc.kill()
+                stdout, stderr = proc.communicate()
+                logging.debug(f"PID {proc.pid} killed; exit {proc.returncode}.")
+                msg = f"Timed out after {self.timeout}s."
+                logging.warning(msg)
+                exception = CLIError(None, "", msg)
+                if must_succeed or self.stop_on_error:
+                    raise exception
+                self.cli_errors.append(exception)
+                return ""
             except KeyboardInterrupt:
                 # Safety net: if a CTRL_C_EVENT still reaches Python despite console
                 # isolation above (e.g., user-initiated Ctrl+C), absorb it and continue
                 # to the next manager instead of aborting mpm.
+                logging.debug(f"PID {proc.pid} interrupted; sending kill.")
+                proc.kill()
+                proc.communicate()
                 msg = "Subprocess interrupted by a console signal."
                 logging.warning(msg)
                 exception = CLIError(None, "", msg)
                 self.cli_errors.append(exception)
                 return ""
-            code = result.returncode
-            output = result.stdout or ""
-            error = result.stderr or ""
+            finally:
+                # On Windows, reap the process tree rooted at proc. Package managers
+                # like winget and Chocolatey spawn grandchild helpers that outlive the
+                # direct child. Those orphans can broadcast CTRL_C_EVENT during Python
+                # shutdown, causing pytest to exit with code 1 after all tests pass.
+                # taskkill /F /T walks the process snapshot by parent PID, so it finds
+                # orphaned grandchildren even after the direct child has already exited.
+                if is_any_windows():
+                    logging.warning(
+                        f"Windows tree cleanup: taskkill /F /T /PID {proc.pid}."
+                    )
+                    try:
+                        tk = subprocess.run(
+                            ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                            capture_output=True,
+                            timeout=10,
+                        )
+                        tk_out = tk.stdout.decode("utf-8", errors="replace").strip()
+                        tk_err = tk.stderr.decode("utf-8", errors="replace").strip()
+                        parts = [f"taskkill /PID {proc.pid} exit {tk.returncode}"]
+                        if tk_out:
+                            parts.append(tk_out)
+                        if tk_err:
+                            parts.append(f"err: {tk_err}")
+                        logging.warning(" | ".join(parts))
+                    except Exception as tk_ex:
+                        logging.warning(f"taskkill /PID {proc.pid} raised: {tk_ex}")
+            code = proc.returncode
+            output = stdout or ""
+            error = stderr or ""
 
         # Normalize messages.
         if error:

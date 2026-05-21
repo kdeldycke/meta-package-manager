@@ -812,9 +812,7 @@ class PackageManager(metaclass=MetaPackageManager):
                 raise
             logging.debug(f"Spawned PID {proc.pid}: {clean_args[0]}.")
             try:
-                logging.debug(
-                    f"Waiting for PID {proc.pid} (timeout={self.timeout}s)."
-                )
+                logging.debug(f"Waiting for PID {proc.pid} (timeout={self.timeout}s).")
                 stdout, stderr = proc.communicate(timeout=self.timeout)
                 logging.debug(
                     f"PID {proc.pid} exited {proc.returncode}; "

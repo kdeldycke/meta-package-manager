@@ -389,6 +389,18 @@ class PackageManager(metaclass=MetaPackageManager):
     timeout: int | None = None
     """Maximum number of seconds to wait for a CLI call to complete."""
 
+    windows_processes_to_cleanup: tuple[str, ...] = ()
+    """Windows process image names to forcibly terminate after each CLI call.
+
+    When a package manager spawns grandchild processes that outlive the direct
+    subprocess (like winget's ``WindowsPackageManagerServer.exe`` COM server),
+    those orphans can broadcast console events during their own exit and cause
+    the test runner to exit with code 1. List the image names here so they are
+    killed after ``communicate()`` returns, before Python's shutdown sequence.
+
+    No-op on non-Windows platforms.
+    """
+
     cli_errors: list[CLIError]
     """Accumulate all CLI errors encountered by the package manager."""
 
@@ -739,16 +751,13 @@ class PackageManager(metaclass=MetaPackageManager):
             logging.warning(f"Dry-run: {cli_msg}")
         else:
             logging.debug(cli_msg)
-            # On Windows, CREATE_NO_WINDOW detaches the child and its entire
-            # descendant tree from the parent's console. This prevents orphaned
-            # grandchildren (like winget's COM server, WindowsPackageManagerServer.exe)
-            # from broadcasting console events (CTRL_CLOSE_EVENT) that reach uv's Rust
-            # runtime and cause it to exit with code 1 after all tests pass.
-            # stdout/stderr are still captured via the explicit PIPE handles — console
-            # attachment is irrelevant when both streams are redirected.
+            # On Windows, CREATE_NO_WINDOW suppresses any console window the
+            # child might open, while still capturing stdout/stderr via the
+            # explicit PIPE handles.
             # stdin=DEVNULL prevents child processes from blocking on stdin reads.
-            # SW_HIDE suppresses any console window the child might open. STARTUPINFO
-            # must be created per call because subprocess overwrites its hStd* fields.
+            # SW_HIDE is a belt-and-suspenders suppression of console windows.
+            # STARTUPINFO must be created per call because subprocess overwrites
+            # its hStd* fields.
             # On POSIX, both creationflags=0 and startupinfo=None are no-ops.
             _si = getattr(subprocess, "STARTUPINFO", None)
             if _si is not None:
@@ -798,6 +807,13 @@ class PackageManager(metaclass=MetaPackageManager):
                     f"PID {proc.pid} exited {proc.returncode}; "
                     f"stdout {len(stdout)} chars, stderr {len(stderr)} chars."
                 )
+                if is_any_windows():
+                    for proc_name in self.windows_processes_to_cleanup:
+                        subprocess.run(
+                            ("taskkill", "/F", "/IM", proc_name),
+                            capture_output=True,
+                            timeout=5,
+                        )
             except subprocess.TimeoutExpired:
                 logging.debug(f"PID {proc.pid} timed out; sending kill.")
                 proc.kill()

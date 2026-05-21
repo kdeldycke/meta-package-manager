@@ -67,6 +67,19 @@ class WinGet(PackageManager):
         v1.28.220
     """
 
+    windows_processes_to_cleanup = ("WindowsPackageManagerServer.exe",)
+    """Kill winget's COM server after each call.
+
+    ``WindowsPackageManagerServer.exe`` is activated by the Windows COM
+    infrastructure when winget runs, not as a direct child process. It
+    therefore does not inherit our pipe handles and is not reaped by
+    ``communicate()``. It exits 1-2 seconds after winget and calls
+    ``GenerateConsoleCtrlEvent(0)`` during its own shutdown, which broadcasts
+    a ``CTRL_C_EVENT`` to all processes sharing the same console and causes
+    Python to exit with code 1 after all tests have already passed. Killing it
+    by image name before Python's shutdown sequence prevents the broadcast.
+    """
+
     # Microsoft Store IDs are either 12-char product IDs or 14-char extension
     # IDs prefixed with ``XP`` (like ``XP99BNH2JZBBQR``).
     _store_id_re = re.compile(r"^(?:[0-9A-Z]{12}|XP[0-9A-Z]{12})$")

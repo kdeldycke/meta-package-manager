@@ -746,6 +746,10 @@ class PackageManager(metaclass=MetaPackageManager):
             # run. Unlike DETACHED_PROCESS or CREATE_NO_WINDOW, the child still
             # inherits the parent's console, so Chocolatey shims detect a console
             # and route their stdout to the pipes rather than discarding it.
+            # stdin=DEVNULL prevents child processes from blocking on stdin reads:
+            # CREATE_NEW_PROCESS_GROUP inherits the parent's stdin, and some package
+            # managers prompt for confirmation when stdin is a live pipe. Closing it
+            # immediately sends EOF so those prompts fail fast rather than hanging.
             # SW_HIDE suppresses any console window the child might open. STARTUPINFO
             # must be created per call because subprocess overwrites its hStd* fields.
             # On POSIX, both creationflags=0 and startupinfo=None are no-ops.
@@ -757,6 +761,7 @@ class PackageManager(metaclass=MetaPackageManager):
             try:
                 result = subprocess.run(
                     clean_args,
+                    stdin=subprocess.DEVNULL,
                     capture_output=True,
                     timeout=self.timeout,
                     encoding="utf-8",
@@ -775,11 +780,22 @@ class PackageManager(metaclass=MetaPackageManager):
                 self.cli_errors.append(exception)
                 return ""
             except OSError as ex:
+                winerror = getattr(ex, "winerror", None)
                 # Windows shims trigger WinError 193 when spawned as a subprocess.
-                if getattr(ex, "winerror", None) == 193:
+                if winerror == 193:
                     logging.debug(
                         f"{highlight_cli_name(self.cli_path, self.cli_names)} "
                         "is not a valid Windows application.",
+                    )
+                    self.executable = False
+                    return ""
+                # The binary disappeared between the availability check and
+                # execution (e.g. only a .bat wrapper found on Windows while
+                # the underlying binary is absent).
+                if isinstance(ex, FileNotFoundError):
+                    logging.debug(
+                        f"{highlight_cli_name(self.cli_path, self.cli_names)} "
+                        "executable not found.",
                     )
                     self.executable = False
                     return ""

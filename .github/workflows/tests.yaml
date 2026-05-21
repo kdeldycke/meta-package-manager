@@ -13,6 +13,13 @@ name: 🔬 Tests
       - .github/workflows/tests.yaml
   pull_request:
     branches-ignore:
+      # This filter matches the PR's *base* branch (always `main`), not its
+      # head, so it does not actually exclude these PRs — see
+      # https://github.com/actions/runner/issues/1591. The real skip is the
+      # `github.head_ref` check in the `metadata` job's `if:` below. Kept
+      # here as documentation of intent.
+      - major-version-increment
+      - minor-version-increment
       - prepare-release
     paths:
       - meta_package_manager/**

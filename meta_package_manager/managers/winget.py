@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+import subprocess
 
 from extra_platforms import WINDOWS
 
@@ -67,17 +68,32 @@ class WinGet(PackageManager):
         v1.28.220
     """
 
+    windows_creation_flags = getattr(subprocess, "DETACHED_PROCESS", 0)
+    """Detach winget from the calling process's console.
+
+    When winget runs, the Windows COM infrastructure activates
+    ``WindowsPackageManagerServer.exe`` as a separate process. Installer EXEs
+    launched by ``winget upgrade`` or ``winget install`` are also spawned as
+    grandchildren. Both the COM server and any installer EXEs call
+    ``GenerateConsoleCtrlEvent(0)`` during their own shutdown, which broadcasts
+    a ``CTRL_C_EVENT`` to every process sharing the same console — including the
+    Python test runner — causing it to exit with code 1 even after all tests
+    pass.
+
+    ``DETACHED_PROCESS`` breaks the shared-console link: winget has no console,
+    so neither the COM server nor any installer EXE can broadcast console events
+    that reach us. Output is still captured because stdout and stderr are
+    redirected to pipes, which are independent of console attachment.
+    """
+
     windows_processes_to_cleanup = ("WindowsPackageManagerServer.exe",)
     """Kill winget's COM server after each call.
 
     ``WindowsPackageManagerServer.exe`` is activated by the Windows COM
-    infrastructure when winget runs, not as a direct child process. It
-    therefore does not inherit our pipe handles and is not reaped by
-    ``communicate()``. It exits 1-2 seconds after winget and calls
-    ``GenerateConsoleCtrlEvent(0)`` during its own shutdown, which broadcasts
-    a ``CTRL_C_EVENT`` to all processes sharing the same console and causes
-    Python to exit with code 1 after all tests have already passed. Killing it
-    by image name before Python's shutdown sequence prevents the broadcast.
+    infrastructure when winget runs, not as a direct child process. It therefore
+    does not inherit our pipe handles and is not reaped by ``communicate()``.
+    Kill it by image name after each call to avoid accumulating orphan COM
+    server processes.
     """
 
     # Microsoft Store IDs are either 12-char product IDs or 14-char extension

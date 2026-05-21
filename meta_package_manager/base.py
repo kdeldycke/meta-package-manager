@@ -389,14 +389,26 @@ class PackageManager(metaclass=MetaPackageManager):
     timeout: int | None = None
     """Maximum number of seconds to wait for a CLI call to complete."""
 
+    windows_creation_flags: int = 0
+    """Additional Windows process creation flags OR-ed with ``CREATE_NO_WINDOW``.
+
+    Use this on individual managers to control how their subprocess is attached
+    to the calling process's console. For example, setting this to
+    ``subprocess.DETACHED_PROCESS`` (``0x8``) fully detaches the child from the
+    parent's console. Any grandchild process (like a COM server or installer EXE)
+    that calls ``GenerateConsoleCtrlEvent(0)`` on exit will then fail silently
+    because there is no console to broadcast to.
+
+    No-op on non-Windows platforms (``getattr`` returns ``0`` for Windows-only flags).
+    """
+
     windows_processes_to_cleanup: tuple[str, ...] = ()
     """Windows process image names to forcibly terminate after each CLI call.
 
     When a package manager spawns grandchild processes that outlive the direct
     subprocess (like winget's ``WindowsPackageManagerServer.exe`` COM server),
-    those orphans can broadcast console events during their own exit and cause
-    the test runner to exit with code 1. List the image names here so they are
-    killed after ``communicate()`` returns, before Python's shutdown sequence.
+    those orphans can linger and consume resources. List the image names here so
+    they are killed after ``communicate()`` returns.
 
     No-op on non-Windows platforms.
     """
@@ -773,7 +785,8 @@ class PackageManager(metaclass=MetaPackageManager):
                     encoding="utf-8",
                     errors="replace",
                     env=cast("subprocess._ENV", env_copy(extra_env)),
-                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)
+                    | self.windows_creation_flags,
                     startupinfo=_si,
                 )
             except OSError as ex:

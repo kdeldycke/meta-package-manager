@@ -739,17 +739,14 @@ class PackageManager(metaclass=MetaPackageManager):
             logging.warning(f"Dry-run: {cli_msg}")
         else:
             logging.debug(cli_msg)
-            # On Windows, place each child in a new process group
-            # (CREATE_NEW_PROCESS_GROUP) so that CTRL_C is disabled for that group by
-            # default. This prevents child processes like winget and Chocolatey from
-            # broadcasting CTRL_C signals that would reach pytest and abort the test
-            # run. Unlike DETACHED_PROCESS or CREATE_NO_WINDOW, the child still
-            # inherits the parent's console, so Chocolatey shims detect a console
-            # and route their stdout to the pipes rather than discarding it.
-            # stdin=DEVNULL prevents child processes from blocking on stdin reads:
-            # CREATE_NEW_PROCESS_GROUP inherits the parent's stdin, and some package
-            # managers prompt for confirmation when stdin is a live pipe. Closing it
-            # immediately sends EOF so those prompts fail fast rather than hanging.
+            # On Windows, CREATE_NO_WINDOW detaches the child and its entire
+            # descendant tree from the parent's console. This prevents orphaned
+            # grandchildren (like winget's COM server, WindowsPackageManagerServer.exe)
+            # from broadcasting console events (CTRL_CLOSE_EVENT) that reach uv's Rust
+            # runtime and cause it to exit with code 1 after all tests pass.
+            # stdout/stderr are still captured via the explicit PIPE handles — console
+            # attachment is irrelevant when both streams are redirected.
+            # stdin=DEVNULL prevents child processes from blocking on stdin reads.
             # SW_HIDE suppresses any console window the child might open. STARTUPINFO
             # must be created per call because subprocess overwrites its hStd* fields.
             # On POSIX, both creationflags=0 and startupinfo=None are no-ops.
@@ -767,7 +764,7 @@ class PackageManager(metaclass=MetaPackageManager):
                     encoding="utf-8",
                     errors="replace",
                     env=cast("subprocess._ENV", env_copy(extra_env)),
-                    creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0),
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
                     startupinfo=_si,
                 )
             except OSError as ex:
@@ -814,9 +811,6 @@ class PackageManager(metaclass=MetaPackageManager):
                 self.cli_errors.append(exception)
                 return ""
             except KeyboardInterrupt:
-                # Safety net: if a CTRL_C_EVENT still reaches Python despite console
-                # isolation above (e.g., user-initiated Ctrl+C), absorb it and continue
-                # to the next manager instead of aborting mpm.
                 logging.debug(f"PID {proc.pid} interrupted; sending kill.")
                 proc.kill()
                 proc.communicate()
@@ -825,33 +819,6 @@ class PackageManager(metaclass=MetaPackageManager):
                 exception = CLIError(None, "", msg)
                 self.cli_errors.append(exception)
                 return ""
-            finally:
-                # On Windows, reap the process tree rooted at proc. Package managers
-                # like winget and Chocolatey spawn grandchild helpers that outlive the
-                # direct child. Those orphans can broadcast CTRL_C_EVENT during Python
-                # shutdown, causing pytest to exit with code 1 after all tests pass.
-                # taskkill /F /T walks the process snapshot by parent PID, so it finds
-                # orphaned grandchildren even after the direct child has already exited.
-                if is_any_windows():
-                    logging.warning(
-                        f"Windows tree cleanup: taskkill /F /T /PID {proc.pid}."
-                    )
-                    try:
-                        tk = subprocess.run(
-                            ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
-                            capture_output=True,
-                            timeout=10,
-                        )
-                        tk_out = tk.stdout.decode("utf-8", errors="replace").strip()
-                        tk_err = tk.stderr.decode("utf-8", errors="replace").strip()
-                        parts = [f"taskkill /PID {proc.pid} exit {tk.returncode}"]
-                        if tk_out:
-                            parts.append(tk_out)
-                        if tk_err:
-                            parts.append(f"err: {tk_err}")
-                        logging.warning(" | ".join(parts))
-                    except Exception as tk_ex:
-                        logging.warning(f"taskkill /PID {proc.pid} raised: {tk_ex}")
             code = proc.returncode
             output = stdout or ""
             error = stderr or ""

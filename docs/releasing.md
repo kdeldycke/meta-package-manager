@@ -17,7 +17,7 @@ The release PR must be merged via "Rebase and merge" (never squash). See the `re
 
 The Chocolatey package definition is maintained in-tree at `packaging/choco/meta-package-manager/`, but is no longer pushed to the [Chocolatey community repository](https://community.chocolatey.org/packages/meta-package-manager) (see [Impact on Chocolatey](#impact-on-chocolatey) for the rejection rationale). The automated `chocolatey` job has been removed from `release.yaml`; only the in-tree nuspec remains, so users can build and install locally (see [`install.md`](install.md)) and the `choco-source` job in `tests-install.yaml` keeps the build instructions exercised.
 
-The package directory name must match the nuspec basename: this is enforced by [Chocolatey-AU's `AUPackage`](https://github.com/chocolatey-community/Chocolatey-AU/blob/main/src/Private/AUPackage.ps1), which derives the nuspec path from `Split-Path -Leaf $pwd`.
+The package directory name must match the nuspec basename: this is enforced by [Chocolatey-AU's `AUPackage`](https://github.com/chocolatey-community/Chocolatey-AU/blob/develop/src/Private/AUPackage.ps1), which derives the nuspec path from `Split-Path -Leaf $pwd`.
 
 ## Guix
 

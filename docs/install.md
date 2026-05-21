@@ -127,7 +127,7 @@ If you have difficulties to use `pip`, see
 ````
 
 ````{tab-item} pipx
-[`pipx`](https://pipx.pypa.io/stable/installation/) is a great way to install Python applications globally:
+[`pipx`](https://pipx.pypa.io/latest/install-pipx/) is a great way to install Python applications globally:
 
 ```{code-block} shell-session
 $ pipx install meta-package-manager

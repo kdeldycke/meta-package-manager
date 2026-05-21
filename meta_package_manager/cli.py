@@ -225,7 +225,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     """Print the location of the :doc:`Xbar/SwiftBar plugin <bar-plugin>`.
 
     Returns the normalized path of the standalone `bar_plugin.py
-    <https://github.com/kdeldycke/meta-package-manager/meta_package_manager/bar_plugin.py>`_
+    <https://github.com/kdeldycke/meta-package-manager/blob/main/meta_package_manager/bar_plugin.py>`_
     script that is distributed with this Python module. This
     is made available under the :option:`mpm --bar-plugin-path` option.
 

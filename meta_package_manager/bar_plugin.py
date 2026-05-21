@@ -90,7 +90,7 @@ class MPMPlugin:
 
         Relies on ``configparser.RawConfigParser.BOOLEAN_STATES`` to translate strings
         into boolean. See:
-        https://github.com/python/cpython/blob/89192c4/Lib/configparser.py#L597-L599
+        https://github.com/python/cpython/blob/3c298e2e385fc6f462abaada2fd680deb1a2b58e/Lib/configparser.py#L596-L597
         """
         value = MPMPlugin.getenv_str(var)
         if value is None:

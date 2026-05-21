@@ -301,7 +301,7 @@ class Emerge(PackageManager):
 
         An update is forced before calling the clean commands, as `pointed to by the
         emerge documentation
-        <https://wiki.gentoo.org/wiki/Gentoo_Cheat_Sheet#Recommended_method>`_:
+        <https://wiki.gentoo.org/wiki/Gentoo_Cheat_Sheet>`_:
 
         > As a safety measure, depclean will not remove any packages unless *all*
         > required dependencies have been resolved. As a consequence, it is often

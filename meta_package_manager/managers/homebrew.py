@@ -339,7 +339,7 @@ class Homebrew(PackageManager):
             not-tetris: (Not Tetris) [no description]
             tetrio: (TETR.IO) Free-to-play Tetris clone
 
-        More doc at: https://docs.brew.sh/Manpage#search--s-options-textregex-
+        More doc at: https://docs.brew.sh/Manpage#search
         """
         # Keep track of package IDs already matched by the first extended search pass.
         matched_ids = set()
@@ -519,7 +519,7 @@ class Homebrew(PackageManager):
             Removing: ~/Library/Logs/Homebrew/libfido2... (64B)
             Removing: ~/Library/Logs/Homebrew/libcbor... (64B)
 
-        More doc at: https://docs.brew.sh/Manpage#cleanup-options-formulacask
+        More doc at: https://docs.brew.sh/Manpage#cleanup
 
         .. code-block:: shell-session
 

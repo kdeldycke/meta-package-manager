@@ -232,7 +232,7 @@ homepages:
   bash-it: https://bash-it.readthedocs.io
   bin: https://github.com/marcosnils/bin
   bun: https://bun.sh
-  cave: https://github.com/paludis/cave
+  cave: https://exherbo.org
   certbot: https://certbot.eff.org
   chezmoi: https://www.chezmoi.io
   choosenim: https://github.com/dom96/choosenim
@@ -319,10 +319,10 @@ homepages:
   sparkle: https://sparkle-project.org
   spicetify: https://spicetify.app
   stack: https://docs.haskellstack.org
-  sun-tools: https://docs.oracle.com/cd/E36784_01/html/E36870/pkgadd-1m.html
+  sun-tools: https://docs.oracle.com/cd/E88353_01/html/E72487/pkgadd-8.html
   swupd: https://github.com/clearlinux/swupd-client
   system: https://github.com/topgrade-rs/topgrade
-  tazpkg: https://www.slitaz.org/en/doc/handbook/tazpkg.html
+  tazpkg: https://slitaz.org
   tldr: https://tldr.sh
   tlmgr: https://www.tug.org/texlive/tlmgr.html
   tmux: https://github.com/tmux-plugins/tpm
@@ -333,7 +333,7 @@ homepages:
   vcpkg: https://vcpkg.io
   vim: https://www.vim.org
   volta-packages: https://volta.sh
-  voom: https://github.com/yegappan/voom
+  voom: https://www.vim.org/scripts/script.php?script_id=2657
   vundle: https://github.com/VundleVim/Vundle.vim
   waydroid: https://waydro.id
   wsl: https://learn.microsoft.com/windows/wsl/

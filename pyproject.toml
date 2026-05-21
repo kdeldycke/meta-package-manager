@@ -378,12 +378,37 @@ overrides = [ { ignore_missing_imports = true, module = [ "packageurl.*" ] } ]
 exclude = [
   # GitHub renders issue comments with JavaScript, so the linkcheck builder cannot find them.
   "^https://github.com/.+#issuecomment-\\d+$",
+  # GitHub renders commit-diff anchors client-side; the static HTML has no #diff-<hash> targets.
+  "^https://github.com/.+/commit/[0-9a-f]+#diff-[0-9a-f]+$",
+  # GitHub README tab fragments are rendered client-side.
+  "^https://github\\.com/.+\\?tab=readme-ov-file#",
   # Skip suggesting redirecting generic download links to their binary artefact.
   "^https://github.com/.+/releases/.+/download/.*$",
   # Allow redirects of generic DOI URLs to their specific Zenodo release page.
   "^https://doi.org/.+/zenodo.*$",
   # Allow redirects to the official pip documentation.
   "^https://pip.pypa.io/.*$",
+  # Sites that respond 403/418/timeout to lychee but are valid in a browser.
+  "^https://claude\\.ai/.*$",
+  "^https://devkitpro\\.org/?$",
+  "^https://docs\\.chocolatey\\.org/.*$",
+  "^https://en\\.opensuse\\.org/.*$",
+  "^https://git\\.yoctoproject\\.org/.*$",
+  "^https://gitlab\\.alpinelinux\\.org/.*$",
+  "^https://gitlab\\.manjaro\\.org/.*$",
+  "^https://liberapay\\.com/?$",
+  "^https://medium\\.com/.*$",
+  "^https://ohmybash\\.nntoan\\.com/?$",
+  "^http://www\\.slackware\\.com/.*$",
+  "^https://www\\.bitdefender\\.com/.*$",
+  "^https://www\\.gnu\\.org/software/.*$",
+  "^https://www\\.npmjs\\.com/?$",
+  "^https://(www\\.)?patreon\\.com/?$",
+  "^https://www\\.tug\\.org/.*$",
+  # star-history.com renders chart fragments client-side; lychee can't see them.
+  "^https://star-history\\.com/.*$",
+  # openclipart.org intermittently returns 500 for valid asset detail pages.
+  "^https://openclipart\\.org/.*$",
 ]
 
 [tool.repomatic]

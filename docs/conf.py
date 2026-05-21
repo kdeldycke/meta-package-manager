@@ -113,19 +113,53 @@ html_theme_options = {
     ),
 }
 
-# GitHub renders issue comments, README tab anchors and blob line anchors with
-# JavaScript, so the linkcheck builder cannot find them in the static HTML.
+# GitHub renders issue comments, README tab anchors, blob line anchors and
+# commit-diff anchors with JavaScript, so the linkcheck builder cannot find
+# them in the static HTML.
 linkcheck_anchors_ignore = [
     r"issuecomment-\d+",
     r"readme",
     r"L\d+",
+    r"diff-[0-9a-f]+",
+]
+
+# GitHub markdown READMEs and CONTRIBUTING files render their heading anchors
+# client-side, so linkcheck can't validate any fragment on github.com pages.
+linkcheck_anchors_ignore_for_url = [
+    r"https://github\.com/.+",
 ]
 
 linkcheck_ignore = [
-    # These sites return 403 to bots but are valid.
+    # These sites return 403/418/429/timeout to bots but are valid.
+    r"https://claude\.ai/",
+    r"https://devkitpro\.org",
+    r"https://docs\.chocolatey\.org/",
+    r"https://en\.opensuse\.org/",
+    r"https://git\.yoctoproject\.org/",
+    r"https://gitlab\.alpinelinux\.org/",
+    r"https://gitlab\.manjaro\.org/",
     r"https://guix\.gnu\.org",
+    r"https://liberapay\.com",
+    r"https://medium\.com/",
+    r"https://ohmybash\.nntoan\.com",
+    r"https://openclipart\.org/",
+    r"http://www\.slackware\.com/",
+    r"https://www\.bitdefender\.com/",
+    r"https://www\.gnu\.org/software/",
+    r"https://www\.npmjs\.com",
+    r"https://(www\.)?patreon\.com",
+    r"https://www\.tug\.org/",
+    # star-history.com renders chart fragments client-side.
+    r"https://star-history\.com/",
     # GitHub fragment anchors are rendered client-side and not visible to linkcheck.
     r"https://github\.com/kdeldycke/click-extra#",
+    # GitHub README tab fragments are rendered client-side.
+    r"https://github\.com/.+\?tab=readme-ov-file#",
+    # The unversioned `releases/latest/download/<file>` URLs in the Executables
+    # table 404 until the release workflow publishes unversioned aliases. The
+    # versioned `mpm-<version>-<platform>-<arch>.<ext>` artifacts do exist on
+    # every release.
+    r"https://github\.com/kdeldycke/meta-package-manager/releases/latest/download/.*",
 ]
 
 # Footer content.

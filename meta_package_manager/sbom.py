@@ -265,7 +265,7 @@ class CycloneDX(SBOM):
     def init_doc(self) -> None:
         """
         `CycloneDX document metadata specifications
-        <https://cyclonedx.org/docs/1.5/json/#metadata/>`_.
+        <https://cyclonedx.org/docs/1.5/json/#metadata>`_.
         """
         gh_url = "https://github.com/kdeldycke/meta-package-manager"
         doc_url = "https://kdeldycke.github.io/meta-package-manager"

@@ -39,20 +39,20 @@ $ uvx meta-package-manager
 
 <img align="right" width="30%" height="30%" src="https://raw.githubusercontent.com/kdeldycke/meta-package-manager/main/docs/assets/mpm-managers-cli.png"/>
 
-- Inventory and list all [package managers](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#managers) available on the system.
+- Inventory and list all [package managers](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-managers) available on the system.
 - Supports macOS, Linux and Windows.
 - [Standalone executables](#executables) for Linux, macOS and Windows.
-- [List installed packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#installed).
-- [List duplicate installed packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#duplicates).
-- [Search for packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#search).
-- [Install a package](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#install).
-- [Remove a package](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#remove).
-- [List outdated packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#outdated).
-- [Sync local package infos](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#sync).
-- [Upgrade all outdated packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#upgrade).
-- [Backup list of installed packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#backup) to TOML file.
-- [Restore/install list of packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#restore) from TOML files.
-- [Software Bill of Materials](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#sbom): export installed packages to [SPDX](https://spdx.dev) and [CycloneDX](https://cyclonedx.org) SBOM files.
+- [List installed packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-installed).
+- [List duplicate installed packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#cmdoption-mpm-installed-d).
+- [Search for packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-search).
+- [Install a package](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-install).
+- [Remove a package](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-remove).
+- [List outdated packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-outdated).
+- [Sync local package infos](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-sync).
+- [Upgrade all outdated packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-upgrade).
+- [Backup list of installed packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-backup) to TOML file.
+- [Restore/install list of packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-restore) from TOML files.
+- [Software Bill of Materials](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-sbom): export installed packages to [SPDX](https://spdx.dev) and [CycloneDX](https://cyclonedx.org) SBOM files.
 - Pin-point commands to a [subset of package managers](https://kdeldycke.github.io/meta-package-manager/usecase.html) (include/exclude selectors).
 - Support plain, versioned and [purl](https://github.com/package-url/purl-spec) package specifiers.
 - Export output to [JSON or user-friendly tables](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm).

@@ -302,15 +302,17 @@ class YarnClassic(Yarn):
         output = self.run_cli("--json", "info", query, must_succeed=True)
 
         if output:
-            result = json.loads(output)
-
-            if result["type"] == "inspect":
-                package = result["data"]
-                yield self.package(
-                    id=package["name"],
-                    description=package["description"],
-                    latest_version=package["version"],
-                )
+            for line in output.splitlines():
+                if not line:
+                    continue
+                result = json.loads(line)
+                if result["type"] == "inspect":
+                    package = result["data"]
+                    yield self.package(
+                        id=package["name"],
+                        description=package["description"],
+                        latest_version=package["version"],
+                    )
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

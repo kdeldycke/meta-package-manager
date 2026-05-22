@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import re
+import subprocess
 
 import pytest
 from extra_platforms import is_linux
@@ -119,6 +120,32 @@ class TestInstallRemove(CLISubCommandTests):
         #   error: cannot open Packages database in /var/lib/rpm
         if manager_id == "zypper" and is_linux():
             pytest.skip("zypper RPM database not accessible on Linux runners.")
+
+        # XXX Skip pwsh-gallery when PowerShell cannot load the PSResourceGet
+        # module. This can happen when the CI runner has .NET 10 installed: the
+        # assembly binding for System.Collections.Specialized resolves to
+        # Version=10.0.0.0, which is incompatible with PowerShell 7.x's .NET 8
+        # runtime. The crash manifests as:
+        #
+        #   System.IO.FileLoadException: The given assembly name was invalid.
+        #   File name: 'System.Collections.Specialized, Version=10.0.0.0'
+        if manager_id == "pwsh-gallery":
+            probe = subprocess.run(
+                [
+                    "pwsh",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-Command",
+                    "Get-Command Install-PSResource -ErrorAction Stop",
+                ],
+                capture_output=True,
+                timeout=30,
+            )
+            if probe.returncode != 0:
+                pytest.skip(
+                    "pwsh cannot load PSResourceGet: "
+                    + probe.stderr.decode(errors="replace").strip()
+                )
 
         for command in ("install", "remove"):
             result = invoke(f"--{manager_id}", command, package_id)

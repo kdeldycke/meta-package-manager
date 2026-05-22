@@ -821,7 +821,7 @@ class PackageManager(metaclass=MetaPackageManager):
                 if is_any_windows():
                     for proc_name in self.windows_processes_to_cleanup:
                         subprocess.run(
-                            ("taskkill", "/F", "/IM", proc_name),
+                            ("taskkill", "/F", "/T", "/IM", proc_name),
                             capture_output=True,
                             timeout=5,
                         )
@@ -833,7 +833,10 @@ class PackageManager(metaclass=MetaPackageManager):
                     # processes (spawned by e.g. winget) inherit pipe handles
                     # and keep them open even after proc.kill(), so
                     # proc.communicate() would block until every grandchild
-                    # exits on its own.
+                    # exits on its own.  Use /T on both the direct PID and
+                    # any named cleanup processes so their children (e.g.
+                    # installer EXEs spawned by WindowsPackageManagerServer)
+                    # are also killed.
                     subprocess.run(
                         ("taskkill", "/F", "/T", "/PID", str(proc.pid)),
                         capture_output=True,
@@ -841,12 +844,19 @@ class PackageManager(metaclass=MetaPackageManager):
                     )
                     for proc_name in self.windows_processes_to_cleanup:
                         subprocess.run(
-                            ("taskkill", "/F", "/IM", proc_name),
+                            ("taskkill", "/F", "/T", "/IM", proc_name),
                             capture_output=True,
                             timeout=5,
                         )
                 proc.kill()
-                stdout, stderr = proc.communicate()
+                try:
+                    stdout, stderr = proc.communicate(timeout=30)
+                except subprocess.TimeoutExpired:
+                    # Some grandchildren still hold pipe handles after the
+                    # tree-kill.  Give up waiting and discard any remaining
+                    # output — the subprocess was killed anyway.
+                    stdout, stderr = b"", b""
+                    proc.wait()
                 logging.debug(f"PID {proc.pid} killed; exit {proc.returncode}.")
                 msg = f"Timed out after {self.timeout}s."
                 logging.warning(msg)

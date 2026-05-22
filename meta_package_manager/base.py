@@ -827,6 +827,24 @@ class PackageManager(metaclass=MetaPackageManager):
                         )
             except subprocess.TimeoutExpired:
                 logging.debug(f"PID {proc.pid} timed out; sending kill.")
+                if is_any_windows():
+                    # Kill the entire process tree before proc.communicate() to
+                    # avoid blocking indefinitely: grandchild installer
+                    # processes (spawned by e.g. winget) inherit pipe handles
+                    # and keep them open even after proc.kill(), so
+                    # proc.communicate() would block until every grandchild
+                    # exits on its own.
+                    subprocess.run(
+                        ("taskkill", "/F", "/T", "/PID", str(proc.pid)),
+                        capture_output=True,
+                        timeout=10,
+                    )
+                    for proc_name in self.windows_processes_to_cleanup:
+                        subprocess.run(
+                            ("taskkill", "/F", "/IM", proc_name),
+                            capture_output=True,
+                            timeout=5,
+                        )
                 proc.kill()
                 stdout, stderr = proc.communicate()
                 logging.debug(f"PID {proc.pid} killed; exit {proc.returncode}.")

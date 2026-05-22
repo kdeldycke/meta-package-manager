@@ -849,14 +849,24 @@ class PackageManager(metaclass=MetaPackageManager):
                             timeout=5,
                         )
                 proc.kill()
-                try:
-                    stdout, stderr = proc.communicate(timeout=30)
-                except subprocess.TimeoutExpired:
-                    # Some grandchildren still hold pipe handles after the
-                    # tree-kill.  Give up waiting and discard any remaining
-                    # output — the subprocess was killed anyway.
-                    stdout, stderr = b"", b""
+                if is_any_windows():
+                    # On Windows, proc.communicate() joins the reader threads
+                    # that were started by the first communicate() call above.
+                    # Those threads block on fh.read() until all write-side
+                    # handles to the pipe are closed.  Grandchildren that
+                    # inherited the handles keep them open even after the
+                    # tree-kill, so communicate() would still block.  The
+                    # timeout= argument applies only to proc.wait(), which
+                    # returns immediately (the direct child is already dead),
+                    # not to the thread join — so communicate(timeout=30) does
+                    # not prevent the block.  Use wait() instead: it returns
+                    # immediately, and the reader threads run as daemon threads
+                    # that eventually drain when the grandchildren do exit.
+                    # Output is discarded — we return "" anyway.
                     proc.wait()
+                    stdout, stderr = b"", b""
+                else:
+                    stdout, stderr = proc.communicate()
                 logging.debug(f"PID {proc.pid} killed; exit {proc.returncode}.")
                 msg = f"Timed out after {self.timeout}s."
                 logging.warning(msg)

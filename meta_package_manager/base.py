@@ -850,20 +850,23 @@ class PackageManager(metaclass=MetaPackageManager):
                         )
                 proc.kill()
                 if is_any_windows():
-                    # On Windows, proc.communicate() joins the reader threads
-                    # that were started by the first communicate() call above.
-                    # Those threads block on fh.read() until all write-side
-                    # handles to the pipe are closed.  Grandchildren that
-                    # inherited the handles keep them open even after the
-                    # tree-kill, so communicate() would still block.  The
-                    # timeout= argument applies only to proc.wait(), which
-                    # returns immediately (the direct child is already dead),
-                    # not to the thread join — so communicate(timeout=30) does
-                    # not prevent the block.  Use wait() instead: it returns
-                    # immediately, and the reader threads run as daemon threads
-                    # that eventually drain when the grandchildren do exit.
-                    # Output is discarded — we return "" anyway.
+                    # Use wait() instead of communicate() to avoid blocking:
+                    # communicate() joins the reader threads from the first
+                    # call, which block on ReadFile() as long as any process
+                    # that inherited the pipe write handles is still alive.
+                    # taskkill /F /T above closes those handles by killing the
+                    # entire tree, so the threads should exit via EOF within
+                    # milliseconds.  Join them explicitly before returning so
+                    # that proc.__del__() does not race to close proc.stdout /
+                    # proc.stderr while a thread is still reading from the same
+                    # handle — that race raises OSError in the thread and
+                    # triggers pytest's threading.excepthook, causing exit
+                    # code 1 despite zero test failures.
                     proc.wait()
+                    for _attr in ("stdout_thread", "stderr_thread"):
+                        _t = getattr(proc, _attr, None)
+                        if _t is not None and _t.is_alive():
+                            _t.join(timeout=5)
                     stdout, stderr = b"", b""
                 else:
                     stdout, stderr = proc.communicate()

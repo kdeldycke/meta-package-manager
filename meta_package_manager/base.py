@@ -856,17 +856,23 @@ class PackageManager(metaclass=MetaPackageManager):
                     # that inherited the pipe write handles is still alive.
                     # taskkill /F /T above closes those handles by killing the
                     # entire tree, so the threads should exit via EOF within
-                    # milliseconds.  Join them explicitly before returning so
-                    # that proc.__del__() does not race to close proc.stdout /
-                    # proc.stderr while a thread is still reading from the same
-                    # handle — that race raises OSError in the thread and
-                    # triggers pytest's threading.excepthook, causing exit
-                    # code 1 despite zero test failures.
+                    # milliseconds.
                     proc.wait()
                     for _attr in ("stdout_thread", "stderr_thread"):
                         _t = getattr(proc, _attr, None)
                         if _t is not None and _t.is_alive():
                             _t.join(timeout=5)
+                    # Detach the pipe file objects from proc so that
+                    # proc.__del__() cannot close them while a reader thread
+                    # is still draining the pipe buffer.  The thread holds its
+                    # own local reference (the fh argument passed at creation)
+                    # and calls fh.close() when it finishes, so no handle is
+                    # permanently leaked.  Without this, __del__() racing with
+                    # a slow drain raises OSError in the thread, which triggers
+                    # pytest's threading.excepthook and produces exit code 1
+                    # despite zero test failures.
+                    proc.stdout = None
+                    proc.stderr = None
                     stdout, stderr = b"", b""
                 else:
                     stdout, stderr = proc.communicate()

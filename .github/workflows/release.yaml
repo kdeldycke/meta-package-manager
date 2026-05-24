@@ -1,6 +1,7 @@
 ---
 name: 🚀 Build & release
 "on":
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -8,7 +9,7 @@ name: 🚀 Build & release
 jobs:
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/release.yaml@c6defb901773fe1f8f2f5d04d22facfb8f795c4d # v6.19.0
+    uses: kdeldycke/repomatic/.github/workflows/release.yaml@f185b237deb05defc94f8dff02a82a2d9bd579d8 # v6.20.0
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
       VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
@@ -23,7 +24,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@c6defb901773fe1f8f2f5d04d22facfb8f795c4d # v6.19.0
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@f185b237deb05defc94f8dff02a82a2d9bd579d8 # v6.20.0
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
 

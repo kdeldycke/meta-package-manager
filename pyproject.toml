@@ -246,6 +246,17 @@ exclude-newer = "1 week"
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 
+[tool.nuitka]
+product-name = "Meta Package Manager"
+file-description = "🎁 wraps all package managers with a unifying CLI"
+copyright = "Kevin Deldycke <kevin@deldycke.com> and contributors. Distributed under GPL-2.0-or-later license."
+file-version = "6.5.0"
+product-version = "6.5.0"
+macos-app-icon = "docs/assets/icon.png"
+linux-icon = "docs/assets/icon.png"
+windows-icon-from-ico = "docs/assets/icon.png"
+include-package-data = [ "click_extra" ]
+
 [tool.typos]
 # Correct capitalization for proper nouns.
 default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "JavaScript", MacOS = "macOS", PyPi = "PyPI", Typescript = "TypeScript" }
@@ -317,9 +328,14 @@ glob = "./**/__init__.py"
 ignore_missing_version = true
 
 [[tool.bumpversion.files]]
-# Update version in [project] section.
+# Update version in [project] section. Anchored to a line start (regex) so it
+# does not also match version-suffixed keys like file-version/product-version
+# under [tool.nuitka], which contain `version = "X"` as a substring (their
+# values collide with the package version on release commits, where the .devN
+# suffix is absent).
 filename = "./pyproject.toml"
-search = 'version = "{current_version}"'
+regex = true
+search = '(?m)^version = "{current_version}"'
 replace = 'version = "{new_version}"'
 
 [[tool.bumpversion.files]]
@@ -329,13 +345,15 @@ search = "releases/tag/v{current_version}"
 replace = "releases/tag/v{new_version}"
 
 [[tool.bumpversion.files]]
-# Update the numeric --file-version/--product-version in the Nuitka build flags
-# (in [tool.repomatic]). Nuitka rejects PEP 440 suffixes, so the file-specific
-# serialize strips the .devN part; the "-version=" prefix matches both flags.
+# Keep the numeric file-version/product-version under [tool.nuitka] in sync,
+# when present. Nuitka rejects PEP 440 .devN suffixes, so the file-specific
+# serialize strips them; the `-version = "` prefix matches both keys at once.
+# ignore_missing_version makes this a no-op in projects without [tool.nuitka].
 filename = "./pyproject.toml"
+ignore_missing_version = true
 serialize = [ "{major}.{minor}.{patch}" ]
-search = "-version={current_version}"
-replace = "-version={new_version}"
+search = '-version = "{current_version}"'
+replace = '-version = "{new_version}"'
 
 [[tool.bumpversion.files]]
 # Update the version in Markdown changelog.
@@ -417,22 +435,6 @@ test-matrix.remove.os = [ "windows-11-arm" ]
 test-matrix.exclude = [ { python-version = "3.15t" } ]
 # Test plan for binary testing.
 test-plan.file = "./tests/cli-test-plan.yaml"
-# Nuitka flags for the onefile binary, passed verbatim on the command line.
-# Only space-free values belong here: repomatic space-joins this list and the
-# release workflow expands it unquoted, so flags whose value contains spaces
-# (--product-name, --file-description, --copyright) are set as nuitka-project
-# comments in meta_package_manager/__main__.py instead. The --*-version values
-# stay numeric (Nuitka rejects PEP 440 suffixes) and are bumped by the
-# [tool.bumpversion] rule below. --include-package-data bundles click-extra's
-# themes.toml (loaded via importlib.resources; Nuitka does not auto-detect it).
-nuitka.extra-args = [
-  "--file-version=6.5.0",
-  "--product-version=6.5.0",
-  "--macos-app-icon=docs/assets/icon.png",
-  "--linux-icon=docs/assets/icon.png",
-  "--windows-icon-from-ico=docs/assets/icon.png",
-  "--include-package-data=click_extra",
-]
 # Extra label rules appended to repomatic's default labeller configurations.
 labels.extra-file-rules = """"🔌 bar-plugin":
   - changed-files:

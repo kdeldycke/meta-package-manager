@@ -20,14 +20,6 @@
     $ python -m meta_package_manager
 """
 
-# Binary metadata for the Nuitka onefile build. These values contain spaces, so
-# they cannot pass through repomatic's space-joined, unquoted nuitka.extra-args
-# (in pyproject.toml, where the space-free Nuitka flags live). Values with
-# spaces must be quoted in nuitka-project comments.
-# nuitka-project: --product-name="Meta Package Manager"
-# nuitka-project: --file-description="🎁 wraps all package managers with a unifying CLI"
-# nuitka-project: --copyright="Kevin Deldycke <kevin@deldycke.com> and contributors. Distributed under GPL-2.0-or-later license."
-
 from __future__ import annotations
 
 

@@ -246,19 +246,6 @@ exclude-newer = "1 week"
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 
-[tool.nuitka]
-product-name = "Meta Package Manager"
-file-description = "🎁 wraps all package managers with a unifying CLI"
-copyright = "Kevin Deldycke <kevin@deldycke.com> and contributors. Distributed under GPL-2.0-or-later license."
-file-version = "6.5.0.dev0"
-product-version = "6.5.0.dev0"
-macos-app-icon = "docs/assets/icon.png"
-linux-icon = "docs/assets/icon.png"
-windows-icon-from-ico = "docs/assets/icon.png"
-# click-extra ships themes.toml as package data loaded via importlib.resources;
-# Nuitka does not auto-bundle non-Python data files so we must declare it here.
-include-package-data = [ "click_extra" ]
-
 [tool.typos]
 # Correct capitalization for proper nouns.
 default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "JavaScript", MacOS = "macOS", PyPi = "PyPI", Typescript = "TypeScript" }
@@ -342,6 +329,15 @@ search = "releases/tag/v{current_version}"
 replace = "releases/tag/v{new_version}"
 
 [[tool.bumpversion.files]]
+# Update the numeric --file-version/--product-version in the Nuitka build flags
+# (in [tool.repomatic]). Nuitka rejects PEP 440 suffixes, so the file-specific
+# serialize strips the .devN part; the "-version=" prefix matches both flags.
+filename = "./pyproject.toml"
+serialize = [ "{major}.{minor}.{patch}" ]
+search = "-version={current_version}"
+replace = "-version={new_version}"
+
+[[tool.bumpversion.files]]
 # Update the version in Markdown changelog.
 filename = "./changelog.md"
 search = "## [`{current_version}` (unreleased)]("
@@ -421,6 +417,22 @@ test-matrix.remove.os = [ "windows-11-arm" ]
 test-matrix.exclude = [ { python-version = "3.15t" } ]
 # Test plan for binary testing.
 test-plan.file = "./tests/cli-test-plan.yaml"
+# Nuitka flags for the onefile binary, passed verbatim on the command line.
+# Only space-free values belong here: repomatic space-joins this list and the
+# release workflow expands it unquoted, so flags whose value contains spaces
+# (--product-name, --file-description, --copyright) are set as nuitka-project
+# comments in meta_package_manager/__main__.py instead. The --*-version values
+# stay numeric (Nuitka rejects PEP 440 suffixes) and are bumped by the
+# [tool.bumpversion] rule below. --include-package-data bundles click-extra's
+# themes.toml (loaded via importlib.resources; Nuitka does not auto-detect it).
+nuitka.extra-args = [
+  "--file-version=6.5.0",
+  "--product-version=6.5.0",
+  "--macos-app-icon=docs/assets/icon.png",
+  "--linux-icon=docs/assets/icon.png",
+  "--windows-icon-from-ico=docs/assets/icon.png",
+  "--include-package-data=click_extra",
+]
 # Extra label rules appended to repomatic's default labeller configurations.
 labels.extra-file-rules = """"🔌 bar-plugin":
   - changed-files:

@@ -140,6 +140,7 @@ class TestInstallRemove(CLISubCommandTests):
                 ],
                 capture_output=True,
                 timeout=30,
+                check=False,
             )
             if probe.returncode != 0:
                 pytest.skip(

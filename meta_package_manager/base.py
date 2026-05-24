@@ -824,6 +824,7 @@ class PackageManager(metaclass=MetaPackageManager):
                             ("taskkill", "/F", "/T", "/IM", proc_name),
                             capture_output=True,
                             timeout=5,
+                            check=False,
                         )
             except subprocess.TimeoutExpired:
                 logging.debug(f"PID {proc.pid} timed out; sending kill.")
@@ -838,12 +839,14 @@ class PackageManager(metaclass=MetaPackageManager):
                         ("taskkill", "/F", "/T", "/PID", str(proc.pid)),
                         capture_output=True,
                         timeout=10,
+                        check=False,
                     )
                     for proc_name in self.windows_processes_to_cleanup:
                         subprocess.run(
                             ("taskkill", "/F", "/T", "/IM", proc_name),
                             capture_output=True,
                             timeout=5,
+                            check=False,
                         )
                 proc.kill()
                 stdout, stderr = proc.communicate()

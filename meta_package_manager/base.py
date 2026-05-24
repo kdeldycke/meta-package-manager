@@ -828,15 +828,12 @@ class PackageManager(metaclass=MetaPackageManager):
             except subprocess.TimeoutExpired:
                 logging.debug(f"PID {proc.pid} timed out; sending kill.")
                 if is_any_windows():
-                    # Kill the entire process tree before proc.communicate() to
-                    # avoid blocking indefinitely: grandchild installer
-                    # processes (spawned by e.g. winget) inherit pipe handles
-                    # and keep them open even after proc.kill(), so
-                    # proc.communicate() would block until every grandchild
-                    # exits on its own.  Use /T on both the direct PID and
-                    # any named cleanup processes so their children (e.g.
-                    # installer EXEs spawned by WindowsPackageManagerServer)
-                    # are also killed.
+                    # Grandchild processes (e.g. installer EXEs spawned by
+                    # winget's COM server) inherit the pipe write handles and
+                    # keep them open after proc.kill(), which would cause
+                    # communicate() to block until every grandchild exits.
+                    # taskkill /F /T kills the entire process tree, closing
+                    # all inherited handles so communicate() returns promptly.
                     subprocess.run(
                         ("taskkill", "/F", "/T", "/PID", str(proc.pid)),
                         capture_output=True,
@@ -849,10 +846,6 @@ class PackageManager(metaclass=MetaPackageManager):
                             timeout=5,
                         )
                 proc.kill()
-                # taskkill /F /T above has already killed the whole process
-                # tree, so all inherited pipe write handles are closed.
-                # communicate() can now drain the reader threads quickly and
-                # return without blocking.
                 stdout, stderr = proc.communicate()
                 logging.debug(f"PID {proc.pid} killed; exit {proc.returncode}.")
                 msg = f"Timed out after {self.timeout}s."

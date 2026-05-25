@@ -252,9 +252,14 @@ file-description = "🎁 wraps all package managers with a unifying CLI"
 copyright = "Kevin Deldycke <kevin@deldycke.com> and contributors. Distributed under GPL-2.0-or-later license."
 file-version = "6.5.0"
 product-version = "6.5.0"
-macos-app-icon = "docs/assets/icon.png"
+# Each platform needs its native icon format (all rendered from icon.svg):
+# .icns for macOS, .ico for Windows, .png for Linux. Passing a non-native
+# image (like a PNG to --windows-icon-from-ico) makes Nuitka require the
+# imageio package to convert it, which fails the build. Per-OS flags not
+# matching the build host are ignored.
+macos-app-icon = "docs/assets/icon.icns"
 linux-icon = "docs/assets/icon.png"
-windows-icon-from-ico = "docs/assets/icon.png"
+windows-icon-from-ico = "docs/assets/icon.ico"
 include-package-data = [ "click_extra" ]
 
 [tool.typos]

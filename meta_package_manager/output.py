@@ -44,6 +44,23 @@ if TYPE_CHECKING:
     from collections import Counter
 
 
+OK_GLYPH = "✓"
+"""Check-mark glyph for success indicators.
+
+Kept as a raw, unstyled string so the call site can render it under whichever
+theme is currently active, via the theme's ``success`` slot:
+``theme().success(OK_GLYPH)``.
+"""
+
+KO_GLYPH = "✘"
+"""Heavy-ballot-X glyph for failure indicators.
+
+Styled at the call site with the active theme's ``error`` slot:
+``theme().error(KO_GLYPH)``. See :data:`OK_GLYPH` for why the glyph is kept
+unstyled.
+"""
+
+
 class SortableField(StrEnum):
     """Fields IDs allowed to be sorted."""
 

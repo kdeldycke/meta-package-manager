@@ -52,7 +52,7 @@ from click_extra.table import (
     print_data,
     print_sorted_table,
 )
-from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
+from click_extra.theme import get_current_theme as theme
 from extra_platforms import reduce
 
 from . import __version__, bar_plugin
@@ -71,7 +71,7 @@ from .config import (
     print_contribution_hints,
 )
 from .inventory import MAIN_PLATFORMS
-from .output import BarPluginRenderer, SortableField, print_stats
+from .output import KO_GLYPH, OK_GLYPH, BarPluginRenderer, SortableField, print_stats
 from .pool import pool
 from .sbom import SBOM, SPDX, CycloneDX, ExportFormat
 from .specifier import VERSION_SEP, Solver, Specifier

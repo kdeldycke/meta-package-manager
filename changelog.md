@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Define `mpm`'s own `OK_GLYPH` (`✓`) and `KO_GLYPH` (`✘`) constants in `meta_package_manager.output` instead of importing them from `click-extra`.
+
 ## [`6.5.0` (2026-05-25)](https://github.com/kdeldycke/meta-package-manager/compare/v6.4.3...v6.5.0)
 
 - [pwsh-gallery] Add PowerShell Gallery package manager with `installed`, `outdated`, `search`, `install`, `upgrade`, and `remove` support. Drives `Microsoft.PowerShell.PSResourceGet` (bundled with PowerShell 7.4+) through `pwsh -NoProfile -NonInteractive -Command`, parses JSON via `ConvertTo-Json -AsArray`, and targets `-Scope CurrentUser` for installs so no elevation is required. Cross-platform on Linux, macOS, and Windows. Non-zero `pwsh` exits raise `CLIError` immediately via `must_succeed=True` on all `run_cli()` calls; `json.loads()` is guarded with a `JSONDecodeError` catch as a second layer, so mpm logs a warning and skips the manager instead of crashing. Closes {issue}`1760`.

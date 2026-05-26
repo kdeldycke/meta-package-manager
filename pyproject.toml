@@ -151,8 +151,7 @@ dependencies = [
   "boltons>=25",
   # click-extra 7.16.0 introduces the ConfigValidator / ValidationError
   # public types used by meta_package_manager.config to validate
-  # [mpm.managers.<id>] override sub-trees, plus the OK_GLYPH / KO_GLYPH
-  # raw-string replacements for the removed OK / KO pre-rendered constants.
+  # [mpm.managers.<id>] override sub-trees.
   # click-extra 7.16.1 fixes ConfigOption.params_template being mutated in place
   # by merge_default_map, which caused test isolation failures when a config
   # file was loaded in one test and affected subsequent tests.

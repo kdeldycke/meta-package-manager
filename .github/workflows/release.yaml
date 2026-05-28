@@ -8,50 +8,54 @@ name: 🚀 Build & release
 
 jobs:
 
-  release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@9d29583b0b0ca24db08a04e7fe03aa7990e045b5 # v6.23.0
-    secrets:
-      REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
-      VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+  build:
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@ea6835e39a5977a617e7d5c0309b9a6fdd2e9386 # v6.24.0
 
   publish-pypi:
     name: 🐍 Publish to PyPI (${{ matrix.short_sha }})
-    needs: release
+    needs: build
     # Gate decoupled from the run's overall result: always() lets this job run even when an unrelated job (like binary
-    # tests) failed the run, and package_built confirms the wheel actually built, so a cleanly-built wheel still
-    # publishes. package_built comes from the release job (the engine call).
+    # tests in the engine lane) failed the run, and package_built confirms the wheel actually built, so a cleanly-built
+    # wheel still publishes. Both signals come from the build lane (_release-build.yaml).
     if: >-
       always()
-      && needs.release.outputs.package_built == 'true'
-      && needs.release.outputs.release_commits_matrix
+      && needs.build.outputs.package_built == 'true'
+      && needs.build.outputs.release_commits_matrix
     strategy:
       # GitHub evaluates `strategy.matrix` during job setup even when `if:` will skip the job. On a non-release push
-      # the engine emits an empty string for `release_commits_matrix` (not "null": see the engine's output
-      # description for why). A bare `fromJSON('')` aborts the whole run with "Unexpected value ''", so we fall back
-      # to an empty `{"include":[]}` matrix, which expands the job to zero runs and skips it cleanly.
-      matrix: ${{ fromJSON(needs.release.outputs.release_commits_matrix || '{"include":[]}') }}
+      # the build lane emits an empty string for `release_commits_matrix` (not "null": see its output description for
+      # why). A bare `fromJSON('')` aborts the whole run with "Unexpected value ''", so we fall back to an empty
+      # `{"include":[]}` matrix, which expands the job to zero runs and skips it cleanly.
+      matrix: ${{ fromJSON(needs.build.outputs.release_commits_matrix || '{"include":[]}') }}
     runs-on: ubuntu-slim
     permissions:
       id-token: write
       # Lets the admonition step below edit the published release notes.
       contents: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@9d29583b0b0ca24db08a04e7fe03aa7990e045b5 # v6.23.0
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@ea6835e39a5977a617e7d5c0309b9a6fdd2e9386 # v6.24.0
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
       # Backfill the "available on PyPI" admonition onto the release notes after a successful OIDC upload. The engine
-      # publishes the GitHub release without it (it cannot yet know the PyPI outcome). continue-on-error keeps a
+      # lane publishes the GitHub release without it (it cannot yet know the PyPI outcome). continue-on-error keeps a
       # notes-edit hiccup from failing an upload that already succeeded.
       - name: Add PyPI admonition to release notes
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.REPOMATIC_PAT || github.token }}
           CURRENT_VERSION: ${{ matrix.current_version }}
-          RELEASE_NOTES: ${{ needs.release.outputs.release_notes_with_admonition }}
+          RELEASE_NOTES: ${{ needs.build.outputs.release_notes_with_admonition }}
         run: >
           gh release edit "v${CURRENT_VERSION}"
           --notes-file -
           --repo "${{ github.repository }}" <<< "${RELEASE_NOTES}"
+
+  release:
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@ea6835e39a5977a617e7d5c0309b9a6fdd2e9386 # v6.24.0
+    needs: build
+    secrets:
+      REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
+      VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
 
   # Prepare a Guix package definition after the release job. Unlike Homebrew, Scoop,
   # NixOS, and AUR, the Guix definition is maintained in this repo (see packaging/guix/).

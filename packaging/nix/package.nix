@@ -6,7 +6,7 @@
 
 python3Packages.buildPythonApplication (finalAttrs: {
   pname = "meta-package-manager";
-  version = "6.4.3";
+  version = "6.5.0";
   pyproject = true;
   __structuredAttrs = true;
 
@@ -14,7 +14,7 @@ python3Packages.buildPythonApplication (finalAttrs: {
     owner = "kdeldycke";
     repo = "meta-package-manager";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-c02i2tUtTvjS6Mjc3CEWJITLULVhpJNeO+AxHRoNpNQ=";
+    hash = "sha256-4uVS/x7pqzhDwK9sInTYe2BBzTcF6VVKWm42dEE4zCc=";
   };
 
   build-system = with python3Packages; [ uv-build ];

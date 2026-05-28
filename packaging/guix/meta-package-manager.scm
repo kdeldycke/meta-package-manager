@@ -19,13 +19,13 @@
 (define-public python-meta-package-manager
   (package
     (name "python-meta-package-manager")
-    (version "6.5.0")
+    (version "6.5.1")
     (source
      (origin
        (method url-fetch)
        (uri (pypi-uri "meta_package_manager" version))
        (sha256
-        (base32 "091hmk767b450b933ml9klhw1x5c6zzrbh3yp8268ipdmsljvhvd"))))
+        (base32 "0gkqs2x0qs63kb2f6kzlllxglvv4yz4idxbbsbrrrcjskq40x537"))))
     (build-system pyproject-build-system)
     ;; Some propagated inputs may not yet exist in Guix and will need packaging
     ;; before this definition can be submitted upstream.

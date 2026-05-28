@@ -1,6 +1,6 @@
 # Changelog
 
-## [`6.5.2.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.5.1...main)
+## [`6.6.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.5.1...main)
 
 > [!WARNING]
 > This version is **not released yet** and is under active development.

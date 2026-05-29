@@ -13,8 +13,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Utilities and helper to organize, inspect and audit the capabilities of mpm and
-package managers."""
+"""Declaration and inspection of the operations each package manager supports.
+
+A concrete manager advertises what it can do by implementing operation methods and
+annotating them with the helpers defined here:
+
+- :py:func:`meta_package_manager.capabilities.search_capabilities` and
+  :py:func:`meta_package_manager.capabilities.version_not_implemented` flag the
+  refinements an operation does *not* natively support, letting the framework
+  compensate (refiltering search results, warning about ignored version pins).
+- :py:class:`meta_package_manager.capabilities.Delegate` and
+  :py:class:`meta_package_manager.capabilities.DelegatedMethod` let a manager reuse
+  another manager's CLI for an operation instead of reimplementing it.
+
+Together they expose a uniform capability surface that
+:py:meth:`meta_package_manager.manager.PackageManager.implements` introspects and the
+CLI uses to route each command only to the managers that support it.
+"""
 
 from __future__ import annotations
 

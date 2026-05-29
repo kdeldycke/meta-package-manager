@@ -13,7 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Expose package-wide elements."""
+"""Meta Package Manager: a unified CLI wrapping many package managers.
+
+Root package. Holds the canonical :py:data:`__version__`; the :command:`mpm` entry
+point lives in :py:mod:`meta_package_manager.cli`.
+"""
 
 from __future__ import annotations
 

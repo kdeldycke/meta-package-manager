@@ -13,6 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+"""Export the installed-package inventory as Software Bill of Materials documents.
+
+Defines the :py:class:`meta_package_manager.sbom.SBOM` base and its
+:py:class:`meta_package_manager.sbom.SPDX` and
+:py:class:`meta_package_manager.sbom.CycloneDX` implementations, which serialize the
+:py:class:`meta_package_manager.package.Package` objects collected from the managers
+into the two dominant standardized SBOM formats.
+"""
 
 from __future__ import annotations
 

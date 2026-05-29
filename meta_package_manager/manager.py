@@ -13,6 +13,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+"""Abstract base class and shared engine for every package manager definition.
+
+Defines :py:class:`meta_package_manager.manager.PackageManager`, the class each concrete
+manager in :py:mod:`meta_package_manager.managers` inherits from, together with its
+:py:class:`meta_package_manager.manager.MetaPackageManager` metaclass, the
+:py:class:`meta_package_manager.manager.Operations` vocabulary of actions, the
+:py:class:`meta_package_manager.manager.ManagerScope` classification, and the
+:py:class:`meta_package_manager.manager.CLIError` exception.
+
+A subclass declares its metadata (supported platforms, version requirement, CLI names)
+and implements the operations it supports. This module owns the cross-manager engine:
+locating the CLI on the system, running it, parsing its version, and reporting
+availability. The package objects these operations yield live in
+:py:mod:`meta_package_manager.package`.
+"""
 
 from __future__ import annotations
 

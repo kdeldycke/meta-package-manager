@@ -13,6 +13,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+"""Manager-agnostic :py:class:`meta_package_manager.package.Package` data model.
+
+Defines the lightweight representation of a package (ID, name, installed and latest
+versions, architecture) that every manager operation yields, plus
+:py:func:`meta_package_manager.package.packages_asdict` to serialize a subset of its
+fields for output.
+
+Kept deliberately free of manager logic, so it can be imported without pulling in the
+manager engine (:py:mod:`meta_package_manager.manager`).
+"""
 
 from __future__ import annotations
 

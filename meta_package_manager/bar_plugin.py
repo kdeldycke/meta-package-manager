@@ -13,7 +13,7 @@
 # <!--xbar.var>string(VAR_DEFAULT_FONT=""): Font parameters for regular text.</xbar.var-->
 # <!--xbar.var>string(VAR_MONOSPACE_FONT="font=Menlo size=12"): Font parameters for monospace text. Used for table rendering and error messages.</xbar.var-->
 # <swiftbar.environment>[VAR_SUBMENU_LAYOUT: false, VAR_TABLE_RENDERING: true, VAR_DEFAULT_FONT: , VAR_MONOSPACE_FONT: font=Menlo size=12]</swiftbar.environment>
-"""Xbar and SwiftBar plugin for Meta Package Manager (i.e. the :command:`mpm` CLI).
+"""Xbar and SwiftBar plugin for Meta Package Manager (the :command:`mpm` CLI).
 
 Default update cycle should be set to several hours so we have a chance to get
 user's attention once a day. Higher frequency might ruin the system as all

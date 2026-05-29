@@ -13,7 +13,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Helpers and utilities to render and print content."""
+"""Rendering and presentation helpers for :command:`mpm` output.
+
+Holds the building blocks for how results reach the user: status glyphs
+(:py:data:`meta_package_manager.output.OK_GLYPH`,
+:py:data:`meta_package_manager.output.KO_GLYPH`), the
+:py:class:`meta_package_manager.output.SortableField` enumeration of sortable output
+columns, summary-statistics printing
+(:py:func:`meta_package_manager.output.print_stats`), and the
+:py:class:`meta_package_manager.output.BarPluginRenderer` that formats output for the
+Xbar/SwiftBar menu-bar plugin.
+"""
 
 from __future__ import annotations
 

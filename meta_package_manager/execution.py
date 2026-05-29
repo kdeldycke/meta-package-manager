@@ -38,6 +38,7 @@ import shutil
 import stat
 import subprocess
 from contextlib import nullcontext
+from datetime import datetime, timezone
 from functools import cached_property
 from pathlib import Path
 from textwrap import dedent, indent, shorten
@@ -58,6 +59,7 @@ if TYPE_CHECKING:
     from collections.abc import Generator, Iterable
 
     from contextlib import AbstractContextManager
+    from datetime import timedelta
 
     from click_extra._types import TArg, TEnvVars, TNestedArgs
 
@@ -220,6 +222,37 @@ class CLIExecutor:
     timeout: int | None = None
     """Maximum number of seconds to wait for a CLI call to complete."""
 
+    cooldown: timedelta | None = None
+    """Minimum age a release must have before it can be installed or upgraded.
+
+    When set, the manager refuses to bring in any package version published more
+    recently than ``cooldown`` ago. This is a mitigation against supply-chain
+    attacks: a malicious release is typically detected and pulled within days of
+    publication, so a waiting period keeps freshly-published (and potentially
+    compromised) versions out of the system. ``None`` disables the gate.
+
+    Only managers able to natively enforce a release-age limit honor this; see
+    :py:attr:`cooldown_env_var` and :py:attr:`supports_cooldown`.
+    """
+
+    allow_no_cooldown: bool = False
+    """Let install/upgrade proceed on managers that cannot enforce a :py:attr:`cooldown`.
+
+    By default (fail-closed), when a :py:attr:`cooldown` is requested, install and
+    upgrade operations are skipped for managers lacking native release-age support,
+    so nothing slips in unguarded. Setting this to ``True`` opts into running those
+    operations anyway, without the safeguard.
+    """
+
+    cooldown_env_var: ClassVar[str | None] = None
+    """Environment variable this manager reads to honor a :py:attr:`cooldown`.
+
+    ``None`` (the default) means the manager has no native release-age mechanism and
+    cannot honor a cooldown. A subclass that sets this string advertises support (see
+    :py:attr:`supports_cooldown`); the value produced by :py:meth:`cooldown_env_value`
+    is then injected into the environment of every CLI call.
+    """
+
     windows_creation_flags: int = 0
     """Additional Windows process creation flags OR-ed with ``CREATE_NO_WINDOW``.
 
@@ -250,6 +283,33 @@ class CLIExecutor:
     def __init__(self) -> None:
         """Initialize ``cli_errors`` list."""
         self.cli_errors = []
+
+    @property
+    def supports_cooldown(self) -> bool:
+        """Whether this manager can natively enforce a release-age :py:attr:`cooldown`."""
+        return self.cooldown_env_var is not None
+
+    def cooldown_env_value(self) -> str:
+        """Render :py:attr:`cooldown` as the value of :py:attr:`cooldown_env_var`.
+
+        Defaults to the RFC 3339 timestamp of the most recent release date still
+        allowed, i.e. now minus the cooldown. Managers whose environment variable
+        expects another format (a number of minutes, a bare day count, ...) override
+        this.
+        """
+        assert self.cooldown is not None
+        cutoff = datetime.now(tz=timezone.utc) - self.cooldown
+        return cutoff.isoformat()
+
+    def cooldown_env(self) -> TEnvVars:
+        """Environment fragment enforcing the :py:attr:`cooldown`, empty when inactive.
+
+        Returns an empty mapping unless a :py:attr:`cooldown` is set *and* the manager
+        supports it. Merged into the environment of every :py:meth:`run` call.
+        """
+        if self.cooldown is None or self.cooldown_env_var is None:
+            return {}
+        return {self.cooldown_env_var: self.cooldown_env_value()}
 
     def search_all_cli(
         self,
@@ -468,6 +528,12 @@ class CLIExecutor:
         """
         # Casting to string helps serialize Path and Version objects.
         clean_args = args_cleanup(*args)
+        # Enforce the release-age cooldown by injecting the manager's dedicated
+        # environment variable into every call (harmless for operations that ignore
+        # it, like removal or cache cleanup).
+        cooldown_env = self.cooldown_env()
+        if cooldown_env:
+            extra_env = {**(extra_env or {}), **cooldown_env}
         cli_msg = format_cli_prompt(clean_args, extra_env)
 
         code = 0

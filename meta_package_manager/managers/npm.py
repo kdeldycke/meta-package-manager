@@ -51,6 +51,28 @@ class NPM(PackageManager):
 
     requirement = ">=4.0.0"
 
+    cooldown_env_var = "npm_config_before"
+    """npm honors a release-age cooldown through its ``before`` resolver option.
+
+    npm maps any ``npm_config_<key>`` environment variable to a config setting, so
+    ``npm_config_before`` sets ``before`` without touching the user's ``.npmrc``.
+    With ``before`` set, npm resolves dependencies as they stood at that instant and
+    ignores any version published afterwards, which covers ``install`` and ``update``.
+    npm parses the RFC 3339 timestamp produced by the default
+    :py:meth:`cooldown_env_value`.
+
+    ``before`` is preferred over the newer ``min-release-age`` setting because it has
+    shipped for far longer and needs no unit conversion.
+
+    .. caution::
+        On npm 11.x releases predating `npm/cli#9368
+        <https://github.com/npm/cli/pull/9368>`_, combining ``before`` with a
+        ``min-release-age`` entry already present in the user's ``.npmrc`` raises an
+        error. The two coexist on newer npm.
+
+    See https://docs.npmjs.com/cli/using-npm/config#before.
+    """
+
     pre_args = (
         # Operates in "global" mode, so that packages are installed into the
         # prefix folder instead of the current working directory.

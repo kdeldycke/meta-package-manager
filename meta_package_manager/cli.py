@@ -26,11 +26,12 @@ from __future__ import annotations
 
 import logging
 import platform
+import re
 import sys
 from collections import Counter, namedtuple
 from collections.abc import Iterable
 from configparser import RawConfigParser
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from functools import partial
 from io import TextIOWrapper
 from pathlib import Path
@@ -45,6 +46,7 @@ from click_extra import (
     EnumChoice,
     File,
     IntRange,
+    ParamType,
     Section,
     argument,
     echo,
@@ -107,6 +109,71 @@ XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
 
 See the corresponding :issue:`implementation rationale in issue #10 <10>`.
 """
+
+
+class Duration(ParamType):
+    """Parse a human-friendly duration into a :py:class:`datetime.timedelta`.
+
+    Accepts a number followed by an optional unit, like ``7 days``, ``1 week``,
+    ``12h`` or ``30m``. A bare number is interpreted as a count of days. A zero
+    duration parses to ``None``, which disables the cooldown (handy to override a
+    value set in the configuration file).
+    """
+
+    name = "duration"
+
+    _UNIT_SECONDS = {
+        "": 86400,
+        "s": 1,
+        "sec": 1,
+        "secs": 1,
+        "second": 1,
+        "seconds": 1,
+        "m": 60,
+        "min": 60,
+        "mins": 60,
+        "minute": 60,
+        "minutes": 60,
+        "h": 3600,
+        "hr": 3600,
+        "hrs": 3600,
+        "hour": 3600,
+        "hours": 3600,
+        "d": 86400,
+        "day": 86400,
+        "days": 86400,
+        "w": 604800,
+        "week": 604800,
+        "weeks": 604800,
+    }
+    """Number of seconds each recognized unit represents (empty unit means days)."""
+
+    _PATTERN = re.compile(r"(?P<value>\d+(?:\.\d+)?)\s*(?P<unit>[a-z]*)")
+
+    def convert(
+        self,
+        value: object,
+        param: Parameter | None,
+        ctx: Context | None,
+    ) -> timedelta | None:
+        """Coerce ``value`` to a :py:class:`datetime.timedelta` (or ``None``)."""
+        if value is None or isinstance(value, timedelta):
+            return value
+        text = str(value).strip().lower()
+        if not text:
+            return None
+        match = self._PATTERN.fullmatch(text)
+        if match and match["unit"] in self._UNIT_SECONDS:
+            seconds = float(match["value"]) * self._UNIT_SECONDS[match["unit"]]
+            if seconds == 0:
+                return None
+            return timedelta(seconds=seconds)
+        self.fail(
+            f"{value!r} is not a valid duration "
+            "(examples: '7 days', '1 week', '12h', '30m').",
+            param,
+            ctx,
+        )
 
 
 def is_stdout(filepath: Path) -> bool:
@@ -367,6 +434,25 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         default=500,
         help="Set maximum duration in seconds for each CLI call.",
     ),
+    option(
+        "--cooldown",
+        type=Duration(),
+        default="",
+        metavar="DURATION",
+        help="Refuse to install or upgrade any package version published more "
+        "recently than this duration (like '7 days' or '1 week'), as a mitigation "
+        "against supply-chain attacks. Only honored by managers with native "
+        "release-age support (uv, npm); the others are skipped unless "
+        "--allow-no-cooldown is set.",
+    ),
+    option(
+        "--allow-no-cooldown",
+        is_flag=True,
+        default=False,
+        help="When --cooldown is set, still run install and upgrade on managers that "
+        "cannot enforce it, instead of skipping them. Trades the supply-chain "
+        "safeguard for broader manager coverage.",
+    ),
 )
 @option_group(
     "Output options",
@@ -418,6 +504,8 @@ def mpm(
     stop_on_error,
     dry_run,
     timeout,
+    cooldown,
+    allow_no_cooldown,
     description,
     sort_by,
     stats,
@@ -484,6 +572,9 @@ def mpm(
         stop_on_error=stop_on_error,
         dry_run=dry_run,
         timeout=timeout,
+        # Minimum release age gate and its fail-open escape hatch.
+        cooldown=cooldown,
+        allow_no_cooldown=allow_no_cooldown,
     )
 
     # Load up current and new global options to the context for subcommand consumption.
@@ -1052,6 +1143,30 @@ def dump_toml(ctx, manager_ids):
     echo(tomli_w.dumps({"mpm": {"managers": overrides}}), nl=False)
 
 
+def cooldown_permits(manager: PackageManager) -> bool:
+    """Decide whether a release-introducing operation may run on ``manager``.
+
+    Returns ``True`` when no cooldown is active, when the manager can enforce it
+    natively, or when the user opted into running unguarded managers with
+    ``--allow-no-cooldown``. Returns ``False`` (after logging the skip) when an active
+    cooldown cannot be enforced and the user did not opt in, so the caller leaves the
+    manager alone rather than letting a freshly-published version slip in.
+    """
+    if manager.cooldown is None or manager.supports_cooldown:
+        return True
+    if manager.allow_no_cooldown:
+        logging.warning(
+            f"{theme().invoked_command(manager.id)} cannot enforce the release-age "
+            "cooldown; running it without the supply-chain safeguard.",
+        )
+        return True
+    logging.warning(
+        f"Skip {theme().invoked_command(manager.id)}: it cannot enforce the "
+        "release-age cooldown. Use --allow-no-cooldown to run it anyway.",
+    )
+    return False
+
+
 @mpm.command(short_help="Install a package.", section=MAINTENANCE)
 @argument(
     "packages_specs",
@@ -1099,13 +1214,15 @@ def install(ctx, packages_specs):
     for manager_id, package_specs in packages_per_managers.items():
         if not manager_id:
             continue
+        manager = pool.get(manager_id)
+        if not cooldown_permits(manager):
+            continue
         for spec in package_specs:
             try:
                 logging.info(
                     f"Install {spec} package with "
                     f"{theme().invoked_command(manager_id)}...",
                 )
-                manager = pool.get(manager_id)
                 output = manager.install(spec.package_id, version=spec.version)
             except NotImplementedError:
                 logging.warning(
@@ -1116,8 +1233,12 @@ def install(ctx, packages_specs):
             echo(output)
 
     unmatched_packages = packages_per_managers.get(None, set())
+    # Drop managers that cannot honor an active cooldown (once, not per package).
+    eligible_managers = selected_managers
+    if unmatched_packages:
+        eligible_managers = tuple(m for m in selected_managers if cooldown_permits(m))
     for spec in unmatched_packages:
-        for manager in selected_managers:
+        for manager in eligible_managers:
             logging.info(
                 f"Try to install {spec} with {theme().invoked_command(manager.id)}.",
             )
@@ -1229,6 +1350,8 @@ def upgrade(ctx, all, packages_specs):
         for manager in ctx.obj.selected_managers(
             implements_operation=Operations.upgrade_all,
         ):
+            if not cooldown_permits(manager):
+                continue
             logging.info(
                 "Upgrade all outdated packages "
                 f"from {theme().invoked_command(manager.id)}...",
@@ -1286,6 +1409,8 @@ def upgrade(ctx, all, packages_specs):
         )
         for manager_id in source_manager_ids:
             manager = pool.get(manager_id)
+            if not cooldown_permits(manager):
+                continue
             output = manager.upgrade(package_id, version=spec.version)
             if output:
                 logging.info(output)

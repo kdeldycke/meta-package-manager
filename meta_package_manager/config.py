@@ -78,6 +78,14 @@ class MpmConfig:
     timeout: int = 500
     """Maximum duration in seconds for each manager CLI call."""
 
+    cooldown: str = ""
+    """Minimum release age (like ``7 days`` or ``1 week``) a package version must
+    reach before it can be installed or upgraded. Empty disables the gate."""
+
+    allow_no_cooldown: bool = False
+    """Let managers without native cooldown support run install/upgrade anyway,
+    instead of skipping them when a cooldown is requested."""
+
     description: bool = False
     """Show package description in results."""
 

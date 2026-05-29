@@ -51,6 +51,18 @@ class UVBase(PackageManager):
     # Declare this manager as virtual, i.e. not tied to a real CLI.
     virtual = True
 
+    cooldown_env_var = "UV_EXCLUDE_NEWER"
+    """uv honors a release-age cooldown through its ``exclude-newer`` resolver option.
+
+    ``UV_EXCLUDE_NEWER`` mirrors the ``--exclude-newer`` flag and is read by every
+    resolving subcommand (``pip install``, ``pip list --outdated``, ``tool install``,
+    ``tool upgrade``), so a single environment variable covers install, upgrade and
+    outdated at once. uv accepts an RFC 3339 timestamp, which is exactly what the
+    default :py:meth:`cooldown_env_value` produces.
+
+    See https://docs.astral.sh/uv/reference/settings/#exclude-newer.
+    """
+
     pre_args = ("--color", "never", "--no-progress")
     """
     - ``--color color-choice``

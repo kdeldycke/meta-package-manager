@@ -148,7 +148,14 @@ class ManagerPool:
     """A dict-like register, instantiating all supported package managers."""
 
     ALLOWED_EXTRA_OPTION: Final = frozenset(
-        {"ignore_auto_updates", "stop_on_error", "dry_run", "timeout"},
+        {
+            "allow_no_cooldown",
+            "cooldown",
+            "dry_run",
+            "ignore_auto_updates",
+            "stop_on_error",
+            "timeout",
+        },
     )
     """List of extra options that are allowed to be set on managers during the use of
     the :py:func:`meta_package_manager.pool.ManagerPool.select_managers` helper

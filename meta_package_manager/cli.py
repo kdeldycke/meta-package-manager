@@ -64,8 +64,7 @@ from click_extra.theme import get_current_theme as theme
 from extra_platforms import reduce
 
 from . import __version__, bar_plugin
-from .manager import CLIError, Operations, PackageManager, highlight_cli_name
-from .package import packages_asdict
+from .capabilities import Operations
 from .config import (
     MpmConfig,
     apply_manager_overrides_from_context,
@@ -74,7 +73,9 @@ from .config import (
     print_contribution_hints,
 )
 from .inventory import MAIN_PLATFORMS
+from .manager import CLIError, PackageManager, highlight_cli_name
 from .output import KO_GLYPH, OK_GLYPH, BarPluginRenderer, SortableField, print_stats
+from .package import packages_asdict
 from .pool import pool
 from .sbom import SBOM, SPDX, CycloneDX, ExportFormat
 from .specifier import VERSION_SEP, Solver, Specifier

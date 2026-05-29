@@ -18,8 +18,8 @@ from __future__ import annotations
 
 from extra_platforms import ALL_PLATFORMS
 
-from ..manager import PackageManager
 from ..capabilities import version_not_implemented
+from ..manager import PackageManager
 
 
 class SteamCMD(PackageManager):

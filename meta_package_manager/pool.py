@@ -24,6 +24,7 @@ from boltons.iterutils import unique
 from click_extra import get_current_context
 from click_extra.theme import get_current_theme as theme
 
+from .capabilities import implements
 from .managers.apk import APK
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
@@ -71,7 +72,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
     from typing import Final
 
-    from .manager import Operations, PackageManager
+    from .capabilities import Operations
+    from .manager import PackageManager
 
 
 manager_classes = (
@@ -295,7 +297,7 @@ class ManagerPool:
 
             # Check if operation is not implemented before calling `.available`. It
             # saves one call to the package manager CLI.
-            if implements_operation and not manager.implements(implements_operation):
+            if implements_operation and not implements(manager, implements_operation):
                 logging.warning(
                     f"{theme().invoked_command(manager_id)} "
                     f"does not implement {implements_operation}.",

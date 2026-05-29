@@ -27,25 +27,91 @@ annotating them with the helpers defined here:
   another manager's CLI for an operation instead of reimplementing it.
 
 Together they expose a uniform capability surface that
-:py:meth:`meta_package_manager.manager.PackageManager.implements` introspects and the
-CLI uses to route each command only to the managers that support it.
+:py:func:`meta_package_manager.capabilities.implements` introspects and the CLI uses to
+route each command only to the managers that support it. The
+:py:class:`meta_package_manager.capabilities.Operations` enum is the vocabulary of those
+routable actions.
 """
 
 from __future__ import annotations
 
 import logging
+from enum import Enum
 from functools import wraps
+
+from .manager import PackageManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
     from typing import ParamSpec, TypeVar
 
-    from .manager import PackageManager
     from .package import Package
 
     P = ParamSpec("P")
     T = TypeVar("T")
+
+
+Operations = Enum(
+    "Operations",
+    (
+        "installed",
+        "outdated",
+        "search",
+        "install",
+        "upgrade",
+        "upgrade_all",
+        "remove",
+        "sync",
+        "cleanup",
+    ),
+)
+"""Recognized operation IDs that are implemented by package manager with their specific
+CLI invocation.
+
+Each operation has its own CLI subcommand.
+"""
+
+
+def implements(manager: PackageManager | type[PackageManager], op: Operations) -> bool:
+    """Inspect a manager's implementation to check for proper support of an operation.
+
+    Accepts either a manager instance or its class; support is determined from the
+    class hierarchy.
+    """
+    cls = manager if isinstance(manager, type) else type(manager)
+    logging.debug(f"Does {cls} implements {op}?")
+
+    # General case: the operation and the method implementing it shares the same ID.
+    method_deps: tuple[set[str], ...] = ({op.name},)
+
+    # Special case for single-package `upgrade`: we depends on `upgrade_one_cli()`.
+    if op == Operations.upgrade:
+        method_deps = ({"installed", "upgrade_one_cli"},)
+
+    # For `upgrade_all`: we depends on eother `upgrade_all_cli()`, or we can
+    # simulate the latter with a combination of `outdated()` and
+    # `upgrade_one_cli()`.
+    elif op == Operations.upgrade_all:
+        method_deps = ({"upgrade_all_cli"}, {"outdated", "upgrade_one_cli"})
+
+    # If none of the classes in the inheritance hierarchy up to the base one
+    # implements the operation, then we can be certain the manager doesn't implement
+    # the operation at all.
+    for klass in cls.mro():
+        if klass is PackageManager:
+            return False
+        # Presence of the operation function is not enough to rules out proper
+        # implementation, as it can be a method that raises NotImplemented error
+        # anyway. See for instance the upgrade_all_cli in pip.py:
+        # https://github.com/kdeldycke/meta-package-manager/blob/4acc003/meta_package_manager/managers/pip.py#L271-L279
+        for method_ids in method_deps:
+            all_deps_found = method_ids.issubset(klass.__dict__)
+            if all_deps_found:
+                return True
+
+    msg = f"Can't guess {cls} implementation of {op}."
+    raise NotImplementedError(msg)
 
 
 def search_capabilities(extended_support: bool = True, exact_support: bool = True):

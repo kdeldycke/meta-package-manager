@@ -50,10 +50,12 @@ from spdx_tools.spdx.model import (
     Document,
     ExternalPackageRef,
     ExternalPackageRefCategory,
-    Package as SPDXPackage,
     PackagePurpose,
     Relationship,
     RelationshipType,
+)
+from spdx_tools.spdx.model import (
+    Package as SPDXPackage,
 )
 from spdx_tools.spdx.validation.document_validator import validate_full_spdx_document
 from spdx_tools.spdx.writer.json import json_writer

@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import pytest
 
-from meta_package_manager.manager import Operations
+from meta_package_manager.capabilities import Operations
 from meta_package_manager.pool import pool
 
 from .conftest import default_manager_ids

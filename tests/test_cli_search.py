@@ -26,7 +26,7 @@ import pytest
 from boltons.iterutils import same
 from extra_platforms.pytest import skip_github_ci, unless_macos
 
-from meta_package_manager.manager import Operations
+from meta_package_manager.capabilities import Operations
 from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
 

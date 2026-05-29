@@ -20,8 +20,8 @@ import re
 
 from extra_platforms import UNIX_WITHOUT_MACOS
 
-from ..manager import PackageManager
 from ..capabilities import version_not_implemented
+from ..manager import PackageManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

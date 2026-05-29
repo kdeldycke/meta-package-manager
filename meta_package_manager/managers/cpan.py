@@ -21,8 +21,8 @@ from typing import ClassVar
 
 from extra_platforms import ALL_PLATFORMS
 
-from ..manager import PackageManager
 from ..capabilities import version_not_implemented
+from ..manager import PackageManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

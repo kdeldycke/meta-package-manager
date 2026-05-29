@@ -20,8 +20,8 @@ import json
 
 from extra_platforms import LINUX_LIKE
 
-from ..manager import PackageManager
 from ..capabilities import version_not_implemented
+from ..manager import PackageManager
 from ..version import parse_version
 
 TYPE_CHECKING = False

@@ -22,8 +22,8 @@ from operator import itemgetter
 import xmltodict
 from extra_platforms import UNIX_WITHOUT_MACOS
 
-from ..manager import PackageManager
 from ..capabilities import version_not_implemented
+from ..manager import PackageManager
 from ..version import parse_version
 
 TYPE_CHECKING = False

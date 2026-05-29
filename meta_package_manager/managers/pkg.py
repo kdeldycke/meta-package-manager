@@ -41,8 +41,8 @@ from typing import ClassVar
 
 from extra_platforms import FREEBSD
 
-from ..manager import PackageManager
 from ..capabilities import Delegate, version_not_implemented
+from ..manager import PackageManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

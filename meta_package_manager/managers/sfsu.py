@@ -27,8 +27,8 @@ import json
 
 from extra_platforms import WINDOWS
 
-from ..manager import PackageManager
 from ..capabilities import Delegate, search_capabilities
+from ..manager import PackageManager
 from .scoop import Scoop
 
 TYPE_CHECKING = False

@@ -22,8 +22,8 @@ from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE, MACOS
 
-from ..manager import PackageManager
 from ..capabilities import version_not_implemented
+from ..manager import PackageManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

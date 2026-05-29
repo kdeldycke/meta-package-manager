@@ -21,8 +21,8 @@ from typing import cast
 
 from extra_platforms import LINUX_LIKE, MACOS, WINDOWS
 
-from ..manager import CLIError, PackageManager
 from ..capabilities import search_capabilities
+from ..manager import CLIError, PackageManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

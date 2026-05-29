@@ -36,7 +36,7 @@ import yaml
 from click_extra.table import TableFormat, render_table
 from extra_platforms import Group, extract_members
 
-from meta_package_manager.manager import Operations
+from meta_package_manager.capabilities import Operations, implements
 from meta_package_manager.inventory import MAIN_PLATFORMS
 from meta_package_manager.labels import LABELS
 from meta_package_manager.pool import pool
@@ -120,7 +120,7 @@ def operation_matrix() -> tuple[str, str]:
             p_obj.icon if m.platforms.issuperset(extract_members(p_obj)) else ""
             for p_obj in MAIN_PLATFORMS
         )
-        line.extend("✓" if m.implements(op) else "" for op in Operations)
+        line.extend("✓" if implements(m, op) else "" for op in Operations)
         table.append(line)
 
     # Set each column alignment.

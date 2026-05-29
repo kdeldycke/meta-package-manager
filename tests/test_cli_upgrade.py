@@ -20,7 +20,7 @@ import re
 
 import pytest
 
-from meta_package_manager.manager import Operations
+from meta_package_manager.capabilities import Operations
 
 from .conftest import default_manager_ids
 from .test_cli import CLISubCommandTests

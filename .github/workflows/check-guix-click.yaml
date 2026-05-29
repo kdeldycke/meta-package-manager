@@ -36,7 +36,17 @@ jobs:
               (url "https://codeberg.org/tutu967/guix.git")
               (branch "python-click-8.4.1")))
           CHANNELS
-          guix pull --channels=/tmp/channels.scm --disable-authentication --fallback --verbosity=0
+          # guix pull intermittently fails on transient substitute or git/SSL
+          # errors; retry a few times before giving up.
+          for attempt in 1 2 3; do
+            echo "guix pull attempt ${attempt}..."
+            if guix pull --channels=/tmp/channels.scm --disable-authentication --fallback --verbosity=0; then
+              break
+            fi
+            [ "${attempt}" -eq 3 ] && { echo "guix pull failed after 3 attempts"; exit 1; }
+            echo "retrying in 30s..."
+            sleep 30
+          done
           echo "$HOME/.config/guix/current/bin" >> "$GITHUB_PATH"
 
       - name: Report rebuild scope

@@ -72,8 +72,9 @@ from .config import (
     dump_manager_overrides,
     print_contribution_hints,
 )
+from .execution import CLIError, highlight_cli_name
 from .inventory import MAIN_PLATFORMS
-from .manager import CLIError, PackageManager, highlight_cli_name
+from .manager import PackageManager
 from .output import KO_GLYPH, OK_GLYPH, BarPluginRenderer, SortableField, print_stats
 from .package import packages_asdict
 from .pool import pool

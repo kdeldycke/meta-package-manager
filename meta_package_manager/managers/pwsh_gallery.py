@@ -22,7 +22,8 @@ from typing import cast
 from extra_platforms import LINUX_LIKE, MACOS, WINDOWS
 
 from ..capabilities import search_capabilities
-from ..manager import CLIError, PackageManager
+from ..execution import CLIError
+from ..manager import PackageManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

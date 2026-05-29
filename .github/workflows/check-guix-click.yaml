@@ -5,8 +5,11 @@ name: 🧪 Validate Guix python-click
 
 # Temporary workflow to validate the python-click 8.4.1 bump proposed at
 # https://codeberg.org/guix/guix/pulls/8928
-# It builds python-click and a sample of its dependents to surface breakage
-# from the click 8.4 API changes, without attempting a full world rebuild.
+# It prints the full rebuild scope (guix refresh --list-dependent python-click),
+# then builds python-click and a sample of high-signal dependents with
+# --keep-going, recording each resulting /gnu/store hash. Reviewers can use a
+# run to see every affected package and to reproduce and compare the hashes.
+# It does not attempt a full world rebuild.
 # Delete after the PR is merged upstream.
 
 permissions: {}
@@ -38,11 +41,14 @@ jobs:
 
       - name: Report rebuild scope
         run: |
+          # Full list of affected packages, to the log (searchable) and summary.
+          echo "Packages depending on python-click (full rebuild scope):"
+          guix refresh --list-dependent python-click 2>&1 | tee /tmp/dependents.txt || true
           {
-            echo "## guix refresh --list-dependent python-click"
+            echo "## Rebuild scope (guix refresh --list-dependent python-click)"
             echo ""
             echo '```'
-            guix refresh --list-dependent python-click 2>&1 | head --lines=3 || true
+            cat /tmp/dependents.txt
             echo '```'
           } >> "${GITHUB_STEP_SUMMARY}"
 
@@ -107,9 +113,13 @@ jobs:
           for pkg in "${packages[@]}"; do
             echo "--- Building ${pkg} ---"
             log=$(mktemp)
-            if guix build "${pkg}" >"${log}" 2>&1; then
-              tail --lines=20 "${log}"
-              echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
+            # Capture the /gnu/store output path (stdout) for the hash, keep the
+            # build log (stderr) for diagnosis.  --keep-going matches the
+            # reviewer's ``guix build -k`` and surfaces every failure.
+            if out=$(guix build --keep-going "${pkg}" 2>"${log}"); then
+              echo "${out}"
+              hash=$(printf '%s\n' "${out}" | head --lines=1)
+              echo "- ✅ \`${pkg}\`: \`${hash}\`" >> "${GITHUB_STEP_SUMMARY}"
             else
               # Show every FAILED line plus the last 200 lines for diagnosis.
               grep -E "^FAILED|^ERROR|short test summary|^=+ .* in [0-9]" "${log}" || true

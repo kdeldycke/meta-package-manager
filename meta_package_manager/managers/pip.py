@@ -202,8 +202,8 @@ class Pip(PackageManager):
         declared as an independent ``resource`` block in the formula and
         ``pip install``-ed individually into the formula's virtualenv. Because
         each resource is installed in isolation, pip never sees that (for
-        example) ``lxml`` is required by ``jsonschema[format-nongpl]`` which is
-        required by ``cyclonedx-python-lib[validation]`` which is required by
+        example) ``defusedxml`` is required by ``py-serializable`` which is
+        required by ``cyclonedx-python-lib`` which is required by
         ``meta-package-manager``. From pip's perspective every resource looks
         like a top-level package, so ``--not-required`` lets them through and
         they all appear as outdated.

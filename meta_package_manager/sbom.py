@@ -39,8 +39,6 @@ from cyclonedx.model.lifecycle import LifecyclePhase, PredefinedLifecycle
 from cyclonedx.output import make_outputter
 from cyclonedx.output.json import JsonV1Dot5
 from cyclonedx.schema import OutputFormat, SchemaVersion
-from cyclonedx.validation import BaseSchemabasedValidator, make_schemabased_validator
-from cyclonedx.validation.json import JsonStrictValidator
 from extra_platforms import current_platform
 from packageurl import PackageURL
 from spdx_tools.spdx.model import (
@@ -390,25 +388,23 @@ class CycloneDX(SBOM):
         )
 
     def export(self) -> str:
-        validator: BaseSchemabasedValidator
+        """Serialize the document to its string representation.
+
+        .. note::
+
+            Unlike :py:meth:`SPDX.export`, the generated document is not
+            validated against its schema here. CycloneDX schema validation
+            relies on ``cyclonedx-python-lib``'s ``[validation]`` extra, which
+            pulls in ``jsonschema`` and, transitively, ``rfc3987-syntax``,
+            ``lark``, and ``lxml``. To keep that stack out of ``mpm``'s runtime
+            dependencies, the validation runs in the test suite instead. See
+            ``tests/test_cli_sbom.py``.
+        """
         if self.export_format == ExportFormat.JSON:
-            content = JsonV1Dot5(self.document).output_as_string(indent=2)
-            validator = JsonStrictValidator(SchemaVersion.V1_5)
+            return JsonV1Dot5(self.document).output_as_string(indent=2)
 
-        elif self.export_format == ExportFormat.XML:
+        if self.export_format == ExportFormat.XML:
             writer = make_outputter(self.document, OutputFormat.XML, SchemaVersion.V1_6)
-            content = writer.output_as_string(indent=2)
-            validator = make_schemabased_validator(
-                writer.output_format, writer.schema_version
-            )
+            return writer.output_as_string(indent=2)
 
-        else:
-            raise ValueError(f"{self.export_format} not supported.")
-
-        logging.debug("Validate document...")
-        errors = validator.validate_str(content)
-        if errors:
-            logging.debug(content)
-            raise ValueError(f"Document is not valid. Errors: {errors}")
-
-        return content
+        raise ValueError(f"{self.export_format} not supported.")

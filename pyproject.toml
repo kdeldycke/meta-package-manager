@@ -156,8 +156,11 @@ dependencies = [
   # by merge_default_map, which caused test isolation failures when a config
   # file was loaded in one test and affected subsequent tests.
   "click-extra>=7.16.1",
-  # cyclonedx-python-lib 11.2.0 is the first to support Python 3.14.
-  "cyclonedx-python-lib[validation]>=11.2",
+  # cyclonedx-python-lib 11.2.0 is the first to support Python 3.14. The [validation]
+  # extra is intentionally omitted: CycloneDX schema validation runs in the test suite
+  # (see tests/test_cli_sbom.py), which keeps jsonschema, rfc3987-syntax, lark, and lxml
+  # out of the runtime install.
+  "cyclonedx-python-lib>=11.2",
   # extra-platforms 10.0.0 drops the distro dependency.
   "extra-platforms>=10",
   # packageurl-python 0.16.0 is the first to support Python 3.13.
@@ -203,6 +206,10 @@ test = [
   "click-extra[pytest]",
   "click-extra[toml]",
   "coverage[toml]>=7.12",
+  # The [validation] extra provides the jsonschema-based validators used to assert
+  # generated CycloneDX SBOMs are schema-valid. Kept test-only (not a runtime dep) so
+  # the heavy validation stack stays out of the install. See tests/test_cli_sbom.py.
+  "cyclonedx-python-lib[validation]",
   "extra-platforms",
   "pytest>=9.0.1",
   "pytest-cov>=7",

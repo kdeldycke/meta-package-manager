@@ -8,6 +8,7 @@
 - [mpm] Fix `pkg:cpan/…`, `pkg:guix/…`, and `pkg:nix/…` pURL specifiers raising `Unrecognized pURL type` even though those managers are implemented. The `cpan`, `guix`, and `nix` entries in `PURL_MAP` were set to `None`, which shadowed the manager-id fallback in `Specifier.parse_purl()`; they now map to their respective managers.
 - [mpm] Add a `scope` attribute (`ManagerScope.SYSTEM` or `ManagerScope.PROJECT`) to `PackageManager` to distinguish system-wide installers from project-local dependency managers, plus a `discover_projects()` extension point reserved for the latter. All maintained managers are system-scoped; project scope is not supported yet.
 - [zerobrew] Add `upgrade` and `upgrade_all` support by wrapping the `zb upgrade` command introduced in zerobrew `0.3.0`, and bump the minimum required `zb` version from `0.2.0` to `0.3.0`. `0.3.0` also fixes the Linux Python install failures reported in https://github.com/lucasgelfond/zerobrew/issues/336, so the `zerobrew` install tests now run as stable on both x86 and ARM Linux.
+- [mpm] Drop the `[validation]` extra from the `cyclonedx-python-lib` runtime dependency, removing `jsonschema`, `rfc3987-syntax`, `lark`, and `lxml` from `mpm`'s install footprint. CycloneDX SBOM schema validation now runs in the test suite instead of inside `CycloneDX.export()`.
 
 ## [`6.5.1` (2026-05-28)](https://github.com/kdeldycke/meta-package-manager/compare/v6.5.0...v6.5.1)
 

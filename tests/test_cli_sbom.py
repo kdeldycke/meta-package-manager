@@ -22,12 +22,32 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 import pytest
+from cyclonedx.schema import OutputFormat, SchemaVersion
+from cyclonedx.validation import make_schemabased_validator
+from cyclonedx.validation.json import JsonStrictValidator
 from yaml import Loader, load
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.sbom import SBOM, SPDX, ExportFormat
 
 from .test_cli import CLISubCommandTests
+
+
+def assert_valid_cyclonedx(content: str, export_format: ExportFormat) -> None:
+    """Assert a CycloneDX export validates against its schema.
+
+    This guarantee used to live in
+    :py:meth:`meta_package_manager.sbom.CycloneDX.export` at runtime. It moved
+    here so the ``jsonschema``-based validation stack (``rfc3987-syntax``,
+    ``lark``, ``lxml``) stays out of ``mpm``'s runtime dependencies. See
+    :py:mod:`meta_package_manager.sbom`.
+    """
+    if export_format == ExportFormat.JSON:
+        validator = JsonStrictValidator(SchemaVersion.V1_5)
+    else:
+        validator = make_schemabased_validator(OutputFormat.XML, SchemaVersion.V1_6)
+    errors = validator.validate_str(content)
+    assert not errors, f"Invalid CycloneDX {export_format} export: {errors}"
 
 
 @pytest.fixture
@@ -181,6 +201,12 @@ class TestSBOM(CLISubCommandTests):
 
             assert result.exit_code == 0
             self.check_manager_selection(result)
+
+            if standard_name == "CycloneDX" and export_format in (
+                ExportFormat.JSON,
+                ExportFormat.XML,
+            ):
+                assert_valid_cyclonedx(content, export_format)
 
             if export_format == ExportFormat.JSON:
                 json_content = json.loads(content)

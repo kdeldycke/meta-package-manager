@@ -5,6 +5,8 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- [mpm] Fix `pkg:cpan/…`, `pkg:guix/…`, and `pkg:nix/…` pURL specifiers raising `Unrecognized pURL type` even though those managers are implemented. The `cpan`, `guix`, and `nix` entries in `PURL_MAP` were set to `None`, which shadowed the manager-id fallback in `Specifier.parse_purl()`; they now map to their respective managers.
+
 ## [`6.5.1` (2026-05-28)](https://github.com/kdeldycke/meta-package-manager/compare/v6.5.0...v6.5.1)
 
 - [mpm] Define `mpm`'s own `OK_GLYPH` (`✓`) and `KO_GLYPH` (`✘`) constants in `meta_package_manager.output` instead of importing them from `click-extra`.

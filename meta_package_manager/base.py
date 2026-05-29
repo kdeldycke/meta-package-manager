@@ -80,6 +80,23 @@ Each operation has its own CLI subcommand.
 """
 
 
+class ManagerScope(Enum):
+    """Filesystem scope a package manager operates within."""
+
+    SYSTEM = "system"
+    """Manages software installed globally, machine-wide.
+
+    All currently-maintained managers are system-scoped.
+    """
+
+    PROJECT = "project"
+    """Manages dependencies confined to a project's working tree.
+
+    Not supported yet. See
+    :py:meth:`meta_package_manager.base.PackageManager.discover_projects`.
+    """
+
+
 class CLIError(Exception):
     """An error occurred when running package manager CLI."""
 
@@ -231,6 +248,16 @@ def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | N
 
 class PackageManager(metaclass=MetaPackageManager):
     """Base class from which all package manager definitions inherits."""
+
+    scope: ClassVar[ManagerScope] = ManagerScope.SYSTEM
+    """Whether the manager operates on globally-installed software or project-local
+    dependencies.
+
+    Defaults to :py:attr:`ManagerScope.SYSTEM`, which covers every manager maintained
+    today: they install and query software machine-wide. Project-scoped managers (Poetry,
+    Bundler, Maven, ...) resolve dependencies confined to a working tree and are not
+    supported yet.
+    """
 
     deprecated: bool = False
     """A manager marked as deprecated will be hidden from all package selection by
@@ -1253,5 +1280,18 @@ class PackageManager(metaclass=MetaPackageManager):
         """Prune left-overs, remove orphaned dependencies and clear caches.
 
         Optional. Will be simply skipped by :program:`mpm` if not implemented.
+        """
+        raise NotImplementedError
+
+    def discover_projects(self) -> Iterator[Path]:
+        """Locate project trees this manager governs by scanning the filesystem.
+
+        Extension point reserved for :py:attr:`ManagerScope.PROJECT` managers: detecting
+        virtual environments, lockfiles, or project manifests scattered across the
+        filesystem.
+
+        .. caution::
+            Not implemented for any manager yet. System-scoped managers (the default) own
+            no project trees to discover.
         """
         raise NotImplementedError

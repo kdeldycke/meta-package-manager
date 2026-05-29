@@ -33,7 +33,7 @@ jobs:
               (url "https://codeberg.org/tutu967/guix.git")
               (branch "python-click-8.4.1")))
           CHANNELS
-          guix pull --channels=/tmp/channels.scm --disable-authentication --verbosity=0
+          guix pull --channels=/tmp/channels.scm --disable-authentication --fallback --verbosity=0
           echo "$HOME/.config/guix/current/bin" >> "$GITHUB_PATH"
 
       - name: Report rebuild scope

@@ -1,0 +1,129 @@
+---
+name: 🧪 Validate Guix python-click
+"on":
+  workflow_dispatch:
+
+# Temporary workflow to validate the python-click 8.4.1 bump proposed at
+# https://codeberg.org/guix/guix/pulls/8928
+# It builds python-click and a sample of its dependents to surface breakage
+# from the click 8.4 API changes, without attempting a full world rebuild.
+# Delete after the PR is merged upstream.
+
+permissions: {}
+
+jobs:
+
+  validate:
+    name: Build python-click and dependents
+    runs-on: ubuntu-24.04
+    env:
+      GUIX_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Install Guix
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --quiet guix
+
+      - name: Pull Guix from fork channel
+        run: |
+          cat > /tmp/channels.scm << 'CHANNELS'
+          (list
+            (channel
+              (name 'guix)
+              (url "https://codeberg.org/tutu967/guix.git")
+              (branch "python-click-8.4.1")))
+          CHANNELS
+          guix pull --channels=/tmp/channels.scm --disable-authentication --verbosity=0
+          echo "$HOME/.config/guix/current/bin" >> "$GITHUB_PATH"
+
+      - name: Report rebuild scope
+        run: |
+          {
+            echo "## guix refresh --list-dependent python-click"
+            echo ""
+            echo '```'
+            guix refresh --list-dependent python-click 2>&1 | head --lines=3 || true
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Lint python-click
+        run: |
+          {
+            echo "## guix lint"
+            echo ""
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          lint_output=$(guix lint python-click 2>&1 \
+            | grep -v -E "^fetching CVE database|Software Heritage" \
+            | grep -v -E "^guix lint: warning: failed to get list of CVE vulnerabilities" \
+            | grep -v -E "^guix lint: warning: GitHub rate limit exceeded" \
+            | grep -v -E "^hint: You can raise the rate limit" \
+            | grep -v -E "^variable to a token obtained from" \
+            | grep -v -E "^your GitHub account\." \
+            | grep -v -E "^Alternatively, you can wait until" \
+            | grep -v -E "^\`generic-git' updater instead\." \
+            | grep -v -E ": can be upgraded to .*[-.]?(rc|alpha|beta|dev|a|b)[0-9]*\.?[0-9]*$" \
+            | sed '/^$/d') || true
+          if [ -n "${lint_output}" ]; then
+            echo "${lint_output}"
+            {
+              echo "- ⚠️ \`python-click\`"
+              echo '```'
+              echo "${lint_output}"
+              echo '```'
+            } >> "${GITHUB_STEP_SUMMARY}"
+            exit 1
+          else
+            echo "- ✅ \`python-click\`" >> "${GITHUB_STEP_SUMMARY}"
+          fi
+
+      - name: Build python-click and dependents
+        if: always()
+        run: |
+          set -o pipefail
+
+          # python-click first (the bumped package, runs its own test suite),
+          # then a sample of high-signal click consumers present in python-team.
+          packages=(
+            python-click
+            python-cloup
+            python-black
+            python-flask
+            python-rich-click
+            python-typer
+            python-celery
+            python-dask
+            python-uvicorn
+            python-mkdocs
+          )
+
+          {
+            echo ""
+            echo "## guix build"
+            echo ""
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          failed=0
+          for pkg in "${packages[@]}"; do
+            echo "--- Building ${pkg} ---"
+            log=$(mktemp)
+            if guix build "${pkg}" >"${log}" 2>&1; then
+              tail --lines=20 "${log}"
+              echo "- ✅ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
+            else
+              # Show every FAILED line plus the last 200 lines for diagnosis.
+              grep -E "^FAILED|^ERROR|short test summary|^=+ .* in [0-9]" "${log}" || true
+              echo "--- last 200 lines ---"
+              tail --lines=200 "${log}"
+              echo "- ❌ \`${pkg}\`" >> "${GITHUB_STEP_SUMMARY}"
+              failed=$((failed + 1))
+            fi
+            rm -f "${log}"
+          done
+
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "**${failed} failed** out of ${#packages[@]} packages." >> "${GITHUB_STEP_SUMMARY}"
+
+          if [ "${failed}" -gt 0 ]; then
+            exit 1
+          fi

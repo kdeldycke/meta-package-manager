@@ -35,14 +35,14 @@ from pathlib import Path
 
 from extra_platforms import ALL_PLATFORMS
 
-from meta_package_manager.base import PackageManager
+from meta_package_manager.manager import PackageManager
 from meta_package_manager.version import parse_version
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from meta_package_manager.base import Package
+    from meta_package_manager.package import Package
     from meta_package_manager.version import TokenizedString
 
 
@@ -105,7 +105,7 @@ class TimingOutFakeManager(FakeManager):
 
     Used by :func:`tests.test_cli.test_timeout` to exercise the
     :py:exc:`subprocess.TimeoutExpired` branch in
-    :py:meth:`meta_package_manager.base.PackageManager.run`. The Python
+    :py:meth:`meta_package_manager.manager.PackageManager.run`. The Python
     interpreter is invoked as the manager's CLI so the test stays
     cross-platform; the sleep duration is derived from
     :py:attr:`timeout` so the call is guaranteed to overshoot.

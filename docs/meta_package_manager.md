@@ -27,15 +27,6 @@
    :undoc-members:
 ```
 
-## meta_package_manager.base module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.base
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
 ## meta_package_manager.capabilities module
 
 ```{eval-rst}
@@ -72,10 +63,28 @@
    :undoc-members:
 ```
 
+## meta_package_manager.manager module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.manager
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.output module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.output
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.package module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.package
    :members:
    :show-inheritance:
    :undoc-members:

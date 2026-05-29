@@ -21,13 +21,13 @@ import re
 
 from extra_platforms import ALL_PLATFORMS
 
-from ..base import Package, PackageManager
+from ..manager import PackageManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from ..base import Package
+    from ..package import Package
 
 
 class UVBase(PackageManager):

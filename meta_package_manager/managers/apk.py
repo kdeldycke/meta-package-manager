@@ -20,14 +20,14 @@ import re
 
 from extra_platforms import LINUX_LIKE
 
-from ..base import PackageManager
+from ..manager import PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from ..base import Package
+    from ..package import Package
 
 
 class APK(PackageManager):
@@ -145,7 +145,7 @@ class APK(PackageManager):
             ``apk search`` matches package names with case-insensitive
             substring globbing. Exact matching is not supported and is
             handled by
-            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search`.
+            :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`.
             Extended search adds the ``--description`` flag so the query is
             also matched against package descriptions.
 

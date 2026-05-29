@@ -36,7 +36,7 @@ import yaml
 from click_extra.table import TableFormat, render_table
 from extra_platforms import Group, extract_members
 
-from meta_package_manager.base import Operations
+from meta_package_manager.manager import Operations
 from meta_package_manager.inventory import MAIN_PLATFORMS
 from meta_package_manager.labels import LABELS
 from meta_package_manager.pool import pool

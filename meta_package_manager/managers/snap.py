@@ -20,14 +20,14 @@ import re
 
 from extra_platforms import UNIX_WITHOUT_MACOS
 
-from ..base import PackageManager
+from ..manager import PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from ..base import Package
+    from ..package import Package
 
 
 class Snap(PackageManager):
@@ -104,7 +104,7 @@ class Snap(PackageManager):
 
         .. caution::
             Search is extended by default. So we returns the best subset of results and
-            let :py:meth:`meta_package_manager.base.PackageManager.refiltered_search`
+            let :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`
             refine them.
 
         .. code-block:: shell-session

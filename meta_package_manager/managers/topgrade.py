@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from extra_platforms import ALL_WINDOWS, BSD, LINUX_LIKE, MACOS
 
-from ..base import PackageManager
+from ..manager import PackageManager
 
 
 class Topgrade(PackageManager):

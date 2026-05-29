@@ -23,7 +23,7 @@ from pathlib import Path
 import pytest
 
 import meta_package_manager
-from meta_package_manager.base import PackageManager
+from meta_package_manager.manager import PackageManager
 from meta_package_manager.cli import mpm
 from meta_package_manager.pool import manager_classes, pool
 

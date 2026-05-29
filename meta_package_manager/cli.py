@@ -56,13 +56,8 @@ from click_extra.theme import get_current_theme as theme
 from extra_platforms import reduce
 
 from . import __version__, bar_plugin
-from .base import (
-    CLIError,
-    Operations,
-    PackageManager,
-    highlight_cli_name,
-    packages_asdict,
-)
+from .manager import CLIError, Operations, PackageManager, highlight_cli_name
+from .package import packages_asdict
 from .config import (
     MpmConfig,
     apply_manager_overrides_from_context,

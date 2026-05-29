@@ -23,7 +23,7 @@ import json
 import pytest
 from boltons.iterutils import same
 
-from meta_package_manager.base import Package
+from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
 
 from .test_cli import CLISubCommandTests, CLITableTests

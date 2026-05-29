@@ -20,7 +20,7 @@ import json
 
 from extra_platforms import ALL_PLATFORMS
 
-from ..base import PackageManager
+from ..manager import PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
 
 TYPE_CHECKING = False
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
     from click_extra._types import TArg, TNestedArgs
 
-    from ..base import Package
+    from ..package import Package
 
 
 class NPM(PackageManager):

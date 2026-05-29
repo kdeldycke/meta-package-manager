@@ -67,7 +67,8 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any
 
-    from .base import Package, PackageManager
+    from .manager import PackageManager
+    from .package import Package
 
 
 class ExportFormat(StrEnum):

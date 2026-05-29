@@ -25,13 +25,13 @@ from typing import ClassVar
 from click_extra.testing import args_cleanup
 from extra_platforms import LINUX_LIKE, MACOS
 
-from ..base import PackageManager
+from ..manager import PackageManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from ..base import Package
+    from ..package import Package
 
 
 _SDKMAN_DIR = os.environ.get("SDKMAN_DIR", str(Path.home() / ".sdkman"))

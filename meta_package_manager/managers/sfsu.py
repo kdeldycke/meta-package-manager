@@ -27,7 +27,7 @@ import json
 
 from extra_platforms import WINDOWS
 
-from ..base import PackageManager
+from ..manager import PackageManager
 from ..capabilities import Delegate, search_capabilities
 from .scoop import Scoop
 
@@ -35,7 +35,7 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from ..base import Package
+    from ..package import Package
 
 
 class SFSU(PackageManager):
@@ -135,7 +135,7 @@ class SFSU(PackageManager):
         .. caution::
             Search does not support extended or exact matching. Results are
             refiltered by
-            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search`.
+            :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`.
 
         .. code-block:: pwsh-session
 

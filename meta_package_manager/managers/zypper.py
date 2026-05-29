@@ -22,7 +22,7 @@ from operator import itemgetter
 import xmltodict
 from extra_platforms import UNIX_WITHOUT_MACOS
 
-from ..base import PackageManager
+from ..manager import PackageManager
 from ..capabilities import version_not_implemented
 from ..version import parse_version
 
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
     from typing import TypedDict
 
-    from ..base import Package
+    from ..package import Package
     from ..version import TokenizedString
 
     class SearchResult(TypedDict):

@@ -26,7 +26,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
     from typing import ParamSpec, TypeVar
 
-    from .base import Package, PackageManager
+    from .manager import PackageManager
+    from .package import Package
 
     P = ParamSpec("P")
     T = TypeVar("T")

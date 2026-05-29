@@ -20,14 +20,14 @@ import re
 
 from extra_platforms import LINUX_LIKE
 
-from ..base import PackageManager
+from ..manager import PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from ..base import Package
+    from ..package import Package
 
 
 class XBPS(PackageManager):
@@ -39,7 +39,7 @@ class XBPS(PackageManager):
         upgrades, and ``xbps-remove`` for uninstalls and cache cleanup.
         ``mpm`` resolves the siblings from the same directory as
         :py:attr:`cli_path
-        <meta_package_manager.base.PackageManager.cli_path>`.
+        <meta_package_manager.manager.PackageManager.cli_path>`.
     """
 
     homepage_url = "https://github.com/void-linux/xbps"
@@ -59,7 +59,7 @@ class XBPS(PackageManager):
     The other XBPS binaries (``xbps-query``, ``xbps-remove``) are looked up
     in the same directory as ``xbps-install`` via
     :py:attr:`cli_path
-    <meta_package_manager.base.PackageManager.cli_path>`.
+    <meta_package_manager.manager.PackageManager.cli_path>`.
     """
 
     _NAME_VERSION_REGEXP = re.compile(r"^(?P<package_id>.+)-(?P<version>\d\S*)$")
@@ -165,7 +165,7 @@ class XBPS(PackageManager):
             ``short_desc`` properties at the same time. Extended and exact
             matching are not supported, so the best subset of results is
             returned and refined later by
-            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search`.
+            :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`.
 
         .. code-block:: shell-session
 

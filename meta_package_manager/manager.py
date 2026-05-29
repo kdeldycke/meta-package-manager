@@ -24,7 +24,6 @@ import shutil
 import stat
 import subprocess
 from contextlib import nullcontext
-from dataclasses import asdict, dataclass
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
@@ -45,8 +44,8 @@ from extra_platforms import (
     extract_members,
     is_any_windows,
 )
-from packageurl import PackageURL
 
+from .package import Package
 from .version import VersionRange, parse_version
 
 TYPE_CHECKING = False
@@ -93,7 +92,7 @@ class ManagerScope(Enum):
     """Manages dependencies confined to a project's working tree.
 
     Not supported yet. See
-    :py:meth:`meta_package_manager.base.PackageManager.discover_projects`.
+    :py:meth:`meta_package_manager.manager.PackageManager.discover_projects`.
     """
 
 
@@ -130,67 +129,6 @@ class CLIError(Exception):
             placeholder="(...)",
         )
         return f"<{self.__class__.__name__}({self.code}, {error_excerpt!r})>"
-
-
-@dataclass
-class Package:
-    """Lightweight representation of a package and its metadata."""
-
-    id: str
-    """ID is required and is the primary key used by the manager."""
-
-    manager_id: str
-    """Handy to backtrack whose manager this package belongs to.
-
-    The manager ID is good enough and allows for no coupling with the parent manager
-    object.
-    """
-
-    name: str | None = None
-    """Optional human-readable display name. Falls back to ``id`` in output rendering,
-    so only set this when the manager provides a name that differs from the package ID.
-    """
-
-    description: str | None = None
-
-    installed_version: TokenizedString | str | None = None
-    latest_version: TokenizedString | str | None = None
-    """Installed and latest versions are optional: they're not always provided by the
-    package manager.
-
-    ``installed_version`` and ``latest_version`` are allowed to temporarily be strings
-    between ``__init__`` and ``__post_init__``. Once they reach the later, they're
-    parsed and normalized into either ``TokenizedString`` or `None`. They can't be
-    strings beyond that point, i.e. after the Package instance has been fully
-    instantiated. We don't know how to declare this transient state with type hints,
-    so we're just going to allow string type.
-    """
-
-    arch: str | None = None
-
-    def __post_init__(self) -> None:
-        # Make sure version strings are parsed into proper objects.
-        self.installed_version = parse_version(self.installed_version)  # type: ignore[arg-type]
-        self.latest_version = parse_version(self.latest_version)  # type: ignore[arg-type]
-
-    @cached_property
-    def purl(self) -> PackageURL:
-        """Returns the package's pURL object."""
-        qualifiers = {}
-        if self.arch:
-            qualifiers["arch"] = self.arch
-        return PackageURL(
-            type=self.manager_id,
-            name=self.id,
-            version=str(self.installed_version),
-            qualifiers=qualifiers,
-        )
-
-
-def packages_asdict(packages: Iterator[Package], keep_fields: tuple[str, ...]):
-    """Returns a list of packages casted to a ``dict`` with only a subset of its
-    fields."""
-    return ({k: v for k, v in asdict(p).items() if k in keep_fields} for p in packages)
 
 
 class MetaPackageManager(type):
@@ -344,7 +282,7 @@ class PackageManager(metaclass=MetaPackageManager):
     Must be a list of strings whose order dictates the search sequence.
 
     Most of the time unnecessary:
-    :py:func:`meta_package_manager.base.PackageManager.cli_path` works well on all
+    :py:func:`meta_package_manager.manager.PackageManager.cli_path` works well on all
     platforms.
     """
 
@@ -352,14 +290,14 @@ class PackageManager(metaclass=MetaPackageManager):
     """Additional environment variables to add to the current context.
 
     Automatically applied on each
-    :py:func:`meta_package_manager.base.PackageManager.run_cli` calls.
+    :py:func:`meta_package_manager.manager.PackageManager.run_cli` calls.
     """
 
     pre_cmds: tuple[str, ...] = ()
     """Global list of pre-commands to add before before invoked CLI.
 
     Automatically added to each
-    :py:func:`meta_package_manager.base.PackageManager.run_cli` call.
+    :py:func:`meta_package_manager.manager.PackageManager.run_cli` call.
 
     Used to prepend `sudo <https://www.sudo.ws>`_ or other system utilities.
     """
@@ -369,7 +307,7 @@ class PackageManager(metaclass=MetaPackageManager):
     """Global list of options used before and after the invoked package manager CLI.
 
     Automatically added to each
-    :py:func:`meta_package_manager.base.PackageManager.run_cli` call.
+    :py:func:`meta_package_manager.manager.PackageManager.run_cli` call.
 
     Essentially used to force silencing, low verbosity or no-color output.
     """
@@ -378,7 +316,7 @@ class PackageManager(metaclass=MetaPackageManager):
     """CLI options used to produce the version of the package manager.
 
     The raw output produced by the package manager CLI will be parsed with the
-    :py:attr:`version_regexes <meta_package_manager.base.PackageManager.version_regexes>`
+    :py:attr:`version_regexes <meta_package_manager.manager.PackageManager.version_regexes>`
     below to extract the version number.
     """
 
@@ -393,7 +331,7 @@ class PackageManager(metaclass=MetaPackageManager):
     group will be used as the version string of the package manager.
 
     That version string will then be sanitized and normalized by
-    :py:func:`meta_package_manager.base.PackageManager.version`.
+    :py:func:`meta_package_manager.manager.PackageManager.version`.
 
     By default match the first part that is space-separated.
 
@@ -508,7 +446,7 @@ class PackageManager(metaclass=MetaPackageManager):
         Returns all files matching any ``cli_names``, by iterating over all folders in
         this order:
           * folders provided by :py:attr:`cli_search_path
-            <meta_package_manager.base.PackageManager.cli_search_path>`,
+            <meta_package_manager.manager.PackageManager.cli_search_path>`,
           * then in all the default places specified by the environment variable (i.e.
             ``os.getenv("PATH")``).
 
@@ -622,13 +560,13 @@ class PackageManager(metaclass=MetaPackageManager):
         """Fully qualified path to the canonical package manager binary.
 
         Try each CLI names provided by :py:attr:`cli_names
-        <meta_package_manager.base.PackageManager.cli_names>`, in each system path
+        <meta_package_manager.manager.PackageManager.cli_names>`, in each system path
         provided by :py:attr:`cli_search_path
-        <meta_package_manager.base.PackageManager.cli_search_path>`. In that order.
+        <meta_package_manager.manager.PackageManager.cli_search_path>`. In that order.
         Then returns the first match.
 
         Executability of the CLI will be separately assessed later by the
-        :py:func:`meta_package_manager.base.PackageManager.executable` method below.
+        :py:func:`meta_package_manager.manager.PackageManager.executable` method below.
         """
         if self.cli_names is not None:
             for cli_path in self.search_all_cli(self.cli_names):
@@ -706,13 +644,13 @@ class PackageManager(metaclass=MetaPackageManager):
         Returns ``True`` only if the main CLI:
 
         1. is :py:attr:`supported on the current platform
-           <meta_package_manager.base.PackageManager.supported>`,
+           <meta_package_manager.manager.PackageManager.supported>`,
         2. was :py:attr:`found on the system
-           <meta_package_manager.base.PackageManager.cli_path>`,
+           <meta_package_manager.manager.PackageManager.cli_path>`,
         3. is :py:attr:`executable
-           <meta_package_manager.base.PackageManager.executable>`, and
+           <meta_package_manager.manager.PackageManager.executable>`, and
         4. :py:attr:`match the version requirement
-           <meta_package_manager.base.PackageManager.fresh>`.
+           <meta_package_manager.manager.PackageManager.fresh>`.
         """
         logging.debug(
             f"{theme().invoked_command(self.id)} is: "
@@ -771,7 +709,7 @@ class PackageManager(metaclass=MetaPackageManager):
             expected effect on execution
 
         :param must_succeed: if ``True``, raise
-            :py:class:`meta_package_manager.base.CLIError` on non-zero exit code
+            :py:class:`meta_package_manager.manager.CLIError` on non-zero exit code
             regardless of :py:attr:`stop_on_error`. Use for calls whose output is
             parsed (JSON, XML, regex) and where a silent failure would be
             indistinguishable from empty results. Unlike ``stop_on_error`` (a
@@ -948,25 +886,25 @@ class PackageManager(metaclass=MetaPackageManager):
 
             $ [<pre_cmds>|sudo] <cli_path> <pre_args> <*args> <post_args>
 
-        * :py:attr:`self.pre_cmds <meta_package_manager.base.PackageManager.pre_cmds>`
+        * :py:attr:`self.pre_cmds <meta_package_manager.manager.PackageManager.pre_cmds>`
           is added before the CLI path.
 
-        * :py:attr:`self.cli_path <meta_package_manager.base.PackageManager.cli_path>`
+        * :py:attr:`self.cli_path <meta_package_manager.manager.PackageManager.cli_path>`
           is used as the main binary to execute.
 
-        * :py:attr:`self.pre_args <meta_package_manager.base.PackageManager.pre_args>`
+        * :py:attr:`self.pre_args <meta_package_manager.manager.PackageManager.pre_args>`
           and :py:attr:`self.post_args
-          <meta_package_manager.base.PackageManager.post_args>`  globals are added
+          <meta_package_manager.manager.PackageManager.post_args>`  globals are added
           before and after the provided ``*args``.
 
         Each additional set of elements can be disabled with their respective flag:
 
         * ``auto_pre_cmds=False``  to skip the automatic addition of
-          :py:attr:`self.pre_cmds <meta_package_manager.base.PackageManager.pre_cmds>`
+          :py:attr:`self.pre_cmds <meta_package_manager.manager.PackageManager.pre_cmds>`
         * ``auto_pre_args=False``  to skip the automatic addition of
-          :py:attr:`self.pre_args <meta_package_manager.base.PackageManager.pre_args>`
+          :py:attr:`self.pre_args <meta_package_manager.manager.PackageManager.pre_args>`
         * ``auto_post_args=False`` to skip the automatic addition of
-          :py:attr:`self.post_args <meta_package_manager.base.PackageManager.post_args>`
+          :py:attr:`self.post_args <meta_package_manager.manager.PackageManager.post_args>`
 
         Each global set of elements can be locally overridden with:
 
@@ -1044,16 +982,16 @@ class PackageManager(metaclass=MetaPackageManager):
         the package manager's global parameters.
 
         After the CLI is built with the
-        :py:meth:`meta_package_manager.base.PackageManager.build_cli` method, it is
-        executed with the :py:meth:`meta_package_manager.base.PackageManager.run`
+        :py:meth:`meta_package_manager.manager.PackageManager.build_cli` method, it is
+        executed with the :py:meth:`meta_package_manager.manager.PackageManager.run`
         method, augmented with environment variables from :py:attr:`self.extra_env
-        <meta_package_manager.base.PackageManager.extra_env>`.
+        <meta_package_manager.manager.PackageManager.extra_env>`.
 
         All parameters are the same as
-        :py:meth:`meta_package_manager.base.PackageManager.build_cli`, plus:
+        :py:meth:`meta_package_manager.manager.PackageManager.build_cli`, plus:
 
         * ``auto_extra_env=False`` to skip the automatic addition of
-          :py:attr:`self.extra_env <meta_package_manager.base.PackageManager.extra_env>`
+          :py:attr:`self.extra_env <meta_package_manager.manager.PackageManager.extra_env>`
         * ``override_extra_env=dict()`` to locally overrides the later
         * ``force_exec`` ignores the :option:`mpm --dry-run` and :option:`mpm
           --stop-on-error` options to force the execution and completion of the command.
@@ -1144,7 +1082,7 @@ class PackageManager(metaclass=MetaPackageManager):
         ``exact`` parameters. If the package manager is not supporting these kind of
         options out of the box, just returns the closest subset of matching package you
         can come up with. Finer refiltering will happens in the
-        :py:meth:`meta_package_manager.base.PackageManager.refiltered_search` method
+        :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search` method
         below.
 
         Optional. Will be simply skipped by :program:`mpm` if not implemented.
@@ -1162,11 +1100,11 @@ class PackageManager(metaclass=MetaPackageManager):
 
         Some package managers returns unbounded results, and/or don't support fine
         search criterions. In which case we use this method to manually refilters
-        :py:meth:`meta_package_manager.base.PackageManager.search` results to either
+        :py:meth:`meta_package_manager.manager.PackageManager.search` results to either
         exclude non-extended or non-exact matches.
 
         Returns a generator producing the same data as the
-        :py:meth:`meta_package_manager.base.PackageManager.search` method above.
+        :py:meth:`meta_package_manager.manager.PackageManager.search` method above.
 
         .. tip::
 
@@ -1174,7 +1112,7 @@ class PackageManager(metaclass=MetaPackageManager):
             filter CLI results. Let this method do this job.
 
             Instead, just implement the core
-            :py:meth:`meta_package_manager.base.PackageManager.search` method above and
+            :py:meth:`meta_package_manager.manager.PackageManager.search` method above and
             try to produce results as precise as possible using the native filtering
             capabilities of the package manager CLI.
         """
@@ -1229,15 +1167,15 @@ class PackageManager(metaclass=MetaPackageManager):
         """Perform an upgrade of either all or one package.
 
         Executes the CLI provided by either
-        :py:meth:`meta_package_manager.base.PackageManager.upgrade_all_cli` or
-        :py:meth:`meta_package_manager.base.PackageManager.upgrade_one_cli`.
+        :py:meth:`meta_package_manager.manager.PackageManager.upgrade_all_cli` or
+        :py:meth:`meta_package_manager.manager.PackageManager.upgrade_one_cli`.
 
         If the manager doesn't provides a full upgrade one-liner (i.e. if
-        :py:meth:`meta_package_manager.base.PackageManager.upgrade_all_cli` raises
+        :py:meth:`meta_package_manager.manager.PackageManager.upgrade_all_cli` raises
         :py:exc:`NotImplementedError`), then the list of all outdated packages will be
-        fetched (via :py:meth:`meta_package_manager.base.PackageManager.outdated`) and
+        fetched (via :py:meth:`meta_package_manager.manager.PackageManager.outdated`) and
         each package will be updated one by one by calling
-        :py:meth:`meta_package_manager.base.PackageManager.upgrade_one_cli`.
+        :py:meth:`meta_package_manager.manager.PackageManager.upgrade_one_cli`.
 
         See for example the case of
         :py:meth:`meta_package_manager.managers.pip.Pip.upgrade_one_cli`.

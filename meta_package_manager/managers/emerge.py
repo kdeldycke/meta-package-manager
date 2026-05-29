@@ -20,14 +20,14 @@ import re
 
 from extra_platforms import UNIX_WITHOUT_MACOS
 
-from ..base import PackageManager
+from ..manager import PackageManager
 from ..capabilities import version_not_implemented
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from ..base import Package
+    from ..package import Package
 
 
 class Emerge(PackageManager):
@@ -112,7 +112,7 @@ class Emerge(PackageManager):
             This suppose the ``qlist`` binary is available and present on the system. We
             do not search for it or try to resolves its canonical path with
             :py:attr:`PackageManager.cli_path
-            <meta_package_manager.base.PackageManager.cli_path>`, as we do for the
+            <meta_package_manager.manager.PackageManager.cli_path>`, as we do for the
             reference ``emerge`` binary.
 
         .. code-block:: shell-session
@@ -311,7 +311,7 @@ class Emerge(PackageManager):
             This suppose the ``eclean`` binary is available and present on the system.
             We do not search for it or try to resolves its canonical path with
             :py:attr:`PackageManager.cli_path
-            <meta_package_manager.base.PackageManager.cli_path>`, as we do for the
+            <meta_package_manager.manager.PackageManager.cli_path>`, as we do for the
             reference ``emerge`` binary.
 
         .. code-block:: shell-session

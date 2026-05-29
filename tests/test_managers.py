@@ -30,7 +30,7 @@ from boltons.urlutils import URL
 from extra_platforms import ALL_PLATFORMS, Platform, is_windows
 
 from meta_package_manager import cli
-from meta_package_manager.base import Operations, PackageManager
+from meta_package_manager.manager import Operations, PackageManager
 from meta_package_manager.cli import XKCD_MANAGER_ORDER
 from meta_package_manager.pool import pool
 from meta_package_manager.version import TokenizedString

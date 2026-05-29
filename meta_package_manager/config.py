@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 
     import click
 
-    from .base import PackageManager
+    from .manager import PackageManager
     from .pool import ManagerPool
 
 
@@ -177,7 +177,7 @@ OVERRIDABLE_FIELDS: Final[Mapping[str, Callable[[Any], Any]]] = {
 """Per-manager attributes a user is allowed to override from the ``[mpm.managers.<id>]``
 configuration section.
 
-Each entry maps a :py:class:`meta_package_manager.base.PackageManager` attribute name
+Each entry maps a :py:class:`meta_package_manager.manager.PackageManager` attribute name
 to a converter that validates the raw TOML value and returns the value as the
 attribute's expected runtime type. Lists are coerced into tuples to match the
 attributes' tuple types.
@@ -198,7 +198,7 @@ INVALIDATED_CACHED_PROPS: Final[tuple[str, ...]] = (
     "supported",
     "version",
 )
-"""Cached properties on :py:class:`meta_package_manager.base.PackageManager` that may
+"""Cached properties on :py:class:`meta_package_manager.manager.PackageManager` that may
 have been computed from attributes covered by :data:`OVERRIDABLE_FIELDS`.
 
 Any pre-computed values are popped from the manager instance's ``__dict__`` after an
@@ -251,7 +251,7 @@ class ContributionHint:
     """ID of the manager whose attribute was overridden."""
 
     field: str
-    """Name of the overridden :py:class:`~meta_package_manager.base.PackageManager`
+    """Name of the overridden :py:class:`~meta_package_manager.manager.PackageManager`
     attribute."""
 
     user_value: Any

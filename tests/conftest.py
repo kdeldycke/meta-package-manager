@@ -180,7 +180,7 @@ def slow_fake_pool(monkeypatch):
     """Yield a :class:`TimingOutFakeManager` whose ``outdated`` exceeds ``--timeout``.
 
     Use only for tests that need to verify
-    :py:meth:`meta_package_manager.base.PackageManager.run` catches
+    :py:meth:`meta_package_manager.manager.PackageManager.run` catches
     :py:exc:`subprocess.TimeoutExpired` and logs the expected warning.
     """
     return _patch_pool_with(monkeypatch, TimingOutFakeManager())

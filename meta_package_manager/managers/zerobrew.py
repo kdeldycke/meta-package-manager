@@ -22,14 +22,14 @@ from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE, MACOS
 
-from ..base import PackageManager
+from ..manager import PackageManager
 from ..capabilities import version_not_implemented
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from ..base import Package
+    from ..package import Package
 
 
 class ZeroBrew(PackageManager):

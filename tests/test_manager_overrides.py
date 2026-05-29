@@ -88,7 +88,7 @@ def test_overridable_fields_match_base_attributes():
     Drift between :data:`OVERRIDABLE_FIELDS` and the base class is silent at runtime
     (``setattr`` happily creates new attributes) so this test acts as the safety net.
     """
-    from meta_package_manager.base import PackageManager
+    from meta_package_manager.manager import PackageManager
 
     for field in OVERRIDABLE_FIELDS:
         assert hasattr(PackageManager, field), (

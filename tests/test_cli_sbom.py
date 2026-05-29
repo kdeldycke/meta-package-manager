@@ -24,7 +24,7 @@ from xml.etree import ElementTree
 import pytest
 from yaml import Loader, load
 
-from meta_package_manager.base import Operations
+from meta_package_manager.manager import Operations
 from meta_package_manager.sbom import SBOM, SPDX, ExportFormat
 
 from .test_cli import CLISubCommandTests

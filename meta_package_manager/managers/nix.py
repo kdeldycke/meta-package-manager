@@ -20,14 +20,14 @@ import re
 
 from extra_platforms import LINUX_LIKE, MACOS
 
-from ..base import PackageManager
+from ..manager import PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from ..base import Package
+    from ..package import Package
 
 
 class Nix(PackageManager):
@@ -123,7 +123,7 @@ class Nix(PackageManager):
         .. caution::
             Search does not support extended or exact matching. So we return
             the best subset of results and let
-            :py:meth:`meta_package_manager.base.PackageManager.refiltered_search`
+            :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`
             refine them.
 
         .. caution::

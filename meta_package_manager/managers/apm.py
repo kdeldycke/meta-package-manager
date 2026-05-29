@@ -20,14 +20,14 @@ import json
 
 from extra_platforms import BSD, LINUX_LIKE, MACOS, WINDOWS
 
-from ..base import PackageManager
+from ..manager import PackageManager
 from ..capabilities import search_capabilities, version_not_implemented
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from ..base import Package
+    from ..package import Package
 
 
 class APM(PackageManager):

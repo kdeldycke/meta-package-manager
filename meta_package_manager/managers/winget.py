@@ -21,13 +21,13 @@ import subprocess
 
 from extra_platforms import WINDOWS
 
-from ..base import PackageManager
+from ..manager import PackageManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterator
 
-    from ..base import Package
+    from ..package import Package
 
 
 class WinGet(PackageManager):

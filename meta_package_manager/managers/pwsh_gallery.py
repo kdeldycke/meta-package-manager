@@ -21,14 +21,14 @@ from typing import cast
 
 from extra_platforms import LINUX_LIKE, MACOS, WINDOWS
 
-from ..base import CLIError, PackageManager
+from ..manager import CLIError, PackageManager
 from ..capabilities import search_capabilities
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from ..base import Package
+    from ..package import Package
 
 
 def _pwsh_quote(value: str) -> str:
@@ -90,7 +90,7 @@ class PWSH_Gallery(PackageManager):
 
     .. note::
         Version detection (``pwsh --version``) skips ``pre_args`` because
-        :py:func:`meta_package_manager.base.PackageManager.version` calls
+        :py:func:`meta_package_manager.manager.PackageManager.version` calls
         ``run_cli`` with ``auto_pre_args=False``.
     """
 
@@ -287,7 +287,7 @@ class PWSH_Gallery(PackageManager):
         when ``Get-InstalledPSResource`` returns nothing on a fresh install, so
         the empty-string guard is kept for safety.
 
-        Raises :py:class:`~meta_package_manager.base.CLIError` when the output
+        Raises :py:class:`~meta_package_manager.manager.CLIError` when the output
         is non-empty but not valid JSON. This propagates through the caller's
         generator so that :py:func:`~meta_package_manager.cli.installed` (and
         similar) can catch it and skip the manager gracefully.

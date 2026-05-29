@@ -18,14 +18,14 @@ from __future__ import annotations
 
 from extra_platforms import ALL_PLATFORMS
 
-from ..base import PackageManager
+from ..manager import PackageManager
 from ..capabilities import version_not_implemented
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from ..base import Package
+    from ..package import Package
 
 
 class VSCode(PackageManager):

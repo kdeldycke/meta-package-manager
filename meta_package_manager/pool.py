@@ -71,7 +71,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
     from typing import Final
 
-    from .base import Operations, PackageManager
+    from .manager import Operations, PackageManager
 
 
 manager_classes = (
@@ -134,9 +134,9 @@ Is considered valid package manager, definitions classes which:
 
 #. are located in the :py:prop:`meta_package_manager.pool.ManagerPool.manager_subfolder`
     subfolder, and
-#. are sub-classes of :py:class:`meta_package_manager.base.PackageManager`, and
-#. are not :py:prop:`meta_package_manager.base.PackageManager.virtual` (i.e. have a
-    non-null :py:prop:`meta_package_manager.base.PackageManager.cli_names` property).
+#. are sub-classes of :py:class:`meta_package_manager.manager.PackageManager`, and
+#. are not :py:prop:`meta_package_manager.manager.PackageManager.virtual` (i.e. have a
+    non-null :py:prop:`meta_package_manager.manager.PackageManager.cli_names` property).
 
 These properties are checked and enforced in unittests.
 """

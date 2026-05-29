@@ -6,6 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - [mpm] Fix `pkg:cpan/…`, `pkg:guix/…`, and `pkg:nix/…` pURL specifiers raising `Unrecognized pURL type` even though those managers are implemented. The `cpan`, `guix`, and `nix` entries in `PURL_MAP` were set to `None`, which shadowed the manager-id fallback in `Specifier.parse_purl()`; they now map to their respective managers.
+- [zerobrew] Add `upgrade` and `upgrade_all` support by wrapping the `zb upgrade` command introduced in zerobrew `0.3.0`, and bump the minimum required `zb` version from `0.2.0` to `0.3.0`. `0.3.0` also fixes the Linux Python install failures reported in https://github.com/lucasgelfond/zerobrew/issues/336, so the `zerobrew` install tests now run as stable on both x86 and ARM Linux.
 
 ## [`6.5.1` (2026-05-28)](https://github.com/kdeldycke/meta-package-manager/compare/v6.5.0...v6.5.1)
 

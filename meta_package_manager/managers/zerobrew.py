@@ -50,8 +50,12 @@ class ZeroBrew(PackageManager):
 
     platforms = LINUX_LIKE, MACOS
 
-    requirement = ">=0.2.0"
-    """Minimum version required for ``outdated`` and ``--json`` support."""
+    requirement = ">=0.3.0"
+    """Minimum version required for ``upgrade`` support.
+
+    ``zb upgrade`` was added in ``0.3.0``. The ``outdated`` command and its
+    ``--json`` output were already available in ``0.2.0``.
+    """
 
     cli_names = ("zb",)
 
@@ -66,7 +70,7 @@ class ZeroBrew(PackageManager):
     .. code-block:: shell-session
 
         $ zb --version
-        zb 0.2.1
+        zb 0.3.0
     """
 
     _INSTALLED_REGEXP = re.compile(
@@ -130,6 +134,32 @@ class ZeroBrew(PackageManager):
             $ zb install jq
         """
         return self.run_cli("install", package_id)
+
+    def upgrade_all_cli(self) -> tuple[str, ...]:
+        """Generate the CLI to upgrade all packages.
+
+        Called with no argument, ``zb upgrade`` upgrades every package that
+        ``zb outdated`` would list.
+
+        .. code-block:: shell-session
+
+            $ zb upgrade
+        """
+        return self.build_cli("upgrade")
+
+    @version_not_implemented
+    def upgrade_one_cli(
+        self,
+        package_id: str,
+        version: str | None = None,
+    ) -> tuple[str, ...]:
+        """Generate the CLI to upgrade one package.
+
+        .. code-block:: shell-session
+
+            $ zb upgrade jq
+        """
+        return self.build_cli("upgrade", package_id)
 
     def remove(self, package_id: str) -> str:
         """Remove one package.

@@ -31,11 +31,15 @@ jobs:
               (url "https://codeberg.org/tutu967/guix.git")
               (branch "mpm-and-dependencies")))
           CHANNELS
-          # guix pull intermittently fails on transient substitute or git/SSL
-          # errors; retry a few times before giving up.
+          # guix pull intermittently fails on transient git/SSL errors; retry a
+          # few times to absorb those blips.  Deliberately no --fallback: a
+          # sustained Guix substitute outage should fail fast here rather than
+          # silently switch to building guile/guix from source for hours and
+          # exhausting the 6h GHA job limit.  Rerun later when substitutes
+          # recover.
           for attempt in 1 2 3; do
             echo "guix pull attempt ${attempt}..."
-            if guix pull --channels=/tmp/channels.scm --disable-authentication --fallback --verbosity=0; then
+            if guix pull --channels=/tmp/channels.scm --disable-authentication --verbosity=0; then
               break
             fi
             [ "${attempt}" -eq 3 ] && { echo "guix pull failed after 3 attempts"; exit 1; }

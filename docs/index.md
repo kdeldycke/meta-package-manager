@@ -12,6 +12,7 @@ install
 usecase
 cli-parameters
 configuration
+cooldown
 bar-plugin
 falsehoods
 benchmark

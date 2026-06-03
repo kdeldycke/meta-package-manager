@@ -55,7 +55,27 @@ class Pip(PackageManager):
 
     platforms = ALL_PLATFORMS
 
-    requirement = ">=10.0.0"
+    requirement = ">=26.1.0"
+    """`26.1 <https://github.com/pypa/pip/releases/tag/26.1>`_ is the first version to
+    ship ``--uploaded-prior-to``, the release-age gate mpm uses for the supply-chain
+    cooldown (see :py:attr:`cooldown_env_var`). Older pip releases silently ignore
+    ``PIP_UPLOADED_PRIOR_TO``, so the floor avoids advertising a gate that does
+    nothing.
+    """
+
+    cooldown_env_var = "PIP_UPLOADED_PRIOR_TO"
+    """pip honors a release-age cooldown through its ``--uploaded-prior-to`` resolver
+    option.
+
+    pip maps any ``PIP_<UPPER_SNAKE>`` environment variable to a config setting, so
+    ``PIP_UPLOADED_PRIOR_TO`` sets the option without touching the user's ``pip.conf``.
+    The flag excludes from resolution any distribution uploaded after the given
+    instant, which covers ``install`` and ``upgrade`` (with transitive dependencies).
+    pip parses the RFC 3339 timestamp produced by the default
+    :py:meth:`cooldown_env_value`.
+
+    See https://github.com/pypa/pip/issues/13674.
+    """
 
     _SEARCH_REGEXP = re.compile(
         r"""

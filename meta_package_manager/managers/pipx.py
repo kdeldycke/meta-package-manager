@@ -44,6 +44,23 @@ class Pipx(PackageManager):
         1.0.0
     """
 
+    cooldown_env_var = "PIP_UPLOADED_PRIOR_TO"
+    """pipx defers resolution to pip, so it honors pip's ``--uploaded-prior-to``
+    gate through the same environment variable.
+
+    Setting ``PIP_UPLOADED_PRIOR_TO`` on a pipx invocation propagates to the pip
+    subprocess pipx spawns to install the application and its dependencies, so the
+    cutoff applies to the whole resolution. mpm injects the RFC 3339 timestamp from
+    the default :py:meth:`cooldown_env_value`.
+
+    .. caution::
+        Same caveat as :py:class:`meta_package_manager.managers.pip.Pip`: the
+        underlying pip must be at least ``26.1`` for the gate to take effect. Older
+        pip releases silently ignore the env var.
+
+    See https://github.com/pypa/pipx/issues/1811.
+    """
+
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.

@@ -26,6 +26,8 @@ from meta_package_manager.cli import Duration, cooldown_permits
 from meta_package_manager.managers.cargo import Cargo
 from meta_package_manager.managers.homebrew import Homebrew
 from meta_package_manager.managers.npm import NPM
+from meta_package_manager.managers.pip import Pip
+from meta_package_manager.managers.pipx import Pipx
 from meta_package_manager.managers.uv import UV, UVX
 
 """Test the supply-chain release-age cooldown feature."""
@@ -74,9 +76,11 @@ def test_duration_invalid(value):
 @pytest.mark.parametrize(
     ("manager_class", "env_var"),
     (
+        (NPM, "npm_config_before"),
+        (Pip, "PIP_UPLOADED_PRIOR_TO"),
+        (Pipx, "PIP_UPLOADED_PRIOR_TO"),
         (UV, "UV_EXCLUDE_NEWER"),
         (UVX, "UV_EXCLUDE_NEWER"),
-        (NPM, "npm_config_before"),
     ),
 )
 def test_supported_managers_advertise_cooldown(manager_class, env_var):
@@ -95,7 +99,7 @@ def test_unsupported_managers_lack_cooldown(manager_class):
     assert manager.cooldown_env() == {}
 
 
-@pytest.mark.parametrize("manager_class", (UV, UVX, NPM))
+@pytest.mark.parametrize("manager_class", (NPM, Pip, Pipx, UV, UVX))
 def test_supported_managers_inject_cutoff_env(manager_class):
     manager = manager_class()
     # No cooldown means no injection.

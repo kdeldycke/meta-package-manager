@@ -50,7 +50,7 @@ $ uvx meta-package-manager
 - [List outdated packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-outdated).
 - [Sync local package infos](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-sync).
 - [Upgrade all outdated packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-upgrade).
-- [Mitigate supply-chain attacks](https://kdeldycke.github.io/meta-package-manager/configuration.html#release-age-cooldown) with a release-age cooldown that refuses too-recent versions: `mpm --cooldown "7 days" upgrade --all`.
+- [Mitigate supply-chain attacks](https://kdeldycke.github.io/meta-package-manager/cooldown.html) with a release-age cooldown that refuses too-recent versions: `mpm --cooldown "7 days" upgrade --all`.
 - [Backup list of installed packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-backup) to TOML file.
 - [Restore/install list of packages](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-restore) from TOML files.
 - [Software Bill of Materials](https://kdeldycke.github.io/meta-package-manager/cli-parameters.html#mpm-sbom): export installed packages to [SPDX](https://spdx.dev) and [CycloneDX](https://cyclonedx.org) SBOM files.

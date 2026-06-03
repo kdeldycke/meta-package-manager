@@ -1,0 +1,132 @@
+# {octicon}`shield-check` Release-age cooldown
+
+`mpm` can refuse to install or upgrade any package version younger than a chosen release age. This is a supply-chain safeguard: malicious releases (compromised credentials, dependency confusion, account takeover) are typically detected and pulled from registries within days of publication, so a short waiting period keeps the most recent and most likely compromised versions off the system.
+
+Recent examples include the [XZ Utils backdoor](https://en.wikipedia.org/wiki/XZ_Utils_backdoor) and recurring [vulnerabilities in the VS Code extension marketplace](https://www.wiz.io/blog/supply-chain-risk-in-vscode-extension-marketplaces). A delay of even a few days would have given the community time to react.
+
+## Quick start
+
+The cooldown applies to every install and upgrade `mpm` performs:
+
+```{code-block} shell-session
+$ mpm --cooldown "7 days" upgrade --all
+$ mpm --cooldown "1 week" install some-package
+$ mpm --cooldown 12h --allow-no-cooldown upgrade --all   # let unsupported managers run too
+```
+
+It accepts a human-readable duration like `7 days`, `1 week`, `12h`, `30m`, a bare number of days, or `0` / empty to disable. The value is also settable as the `cooldown` key in any `mpm` configuration file (see {doc}`configuration` for the full schema) or as the `MPM_COOLDOWN` environment variable.
+
+## How it works
+
+When `cooldown` is set, `mpm`:
+
+1. Computes a UTC cutoff timestamp equal to `now - cooldown`.
+2. For each manager that natively enforces a release-age gate (see the support table below), injects the manager's dedicated environment variable carrying that cutoff into every CLI call. The manager's own resolver then excludes every version published after the cutoff, including transitive dependencies.
+3. For each manager without a native gate, **skips** install / upgrade with a warning (fail-closed). Pass `--allow-no-cooldown` (or set `allow_no_cooldown = true` in the config file) to run those managers anyway, without the safeguard.
+4. Leaves read-only operations (`outdated`, `installed`, `search`) untouched: information is never blocked, only mutations are.
+
+The choice to delegate to each manager's own resolver rather than reimplement the gate inside `mpm` is deliberate: only the resolver can apply the cutoff to the whole dependency closure (see [Limitations](#limitations) below).
+
+## Supported managers
+
+The table below is the source of truth for which managers `mpm` can gate today and the state of the upstream effort everywhere else. Statuses:
+
+- **Enforced**: `mpm` actively injects a cooldown environment variable on every CLI call. Listed in the [`cooldown_env_var`](#how-it-works) framework.
+- **Shipped upstream**: the manager ships a release-age gate but `mpm` does not (yet) plug into it.
+- **Proposed**: an open pull request, RFC, or issue is on file upstream.
+- **None**: no public proposal found.
+- **N/A**: the concept does not apply (distro-curated repositories with their own staging, archived projects, meta-upgraders, ...). A structural equivalent is noted when relevant.
+
+| `mpm` id | Status | Mechanism | Reference |
+| :--- | :--- | :--- | :--- |
+| `apk` | None | — | — |
+| `apm` | N/A (archived June 2022) | — | [atom/apm](https://github.com/atom/apm) |
+| `apt` | N/A (Debian's `unstable` → `testing` → `stable` migration is functionally similar) | — | [Nesbitt, *Package managers need to cool down*](https://nesbitt.io/2026/03/04/package-managers-need-to-cool-down.html) |
+| `apt-mint` | N/A (follows `apt`) | — | — |
+| `brew` | Proposed (closed as not planned for users; merged for internal bottle resource resolution) | (internal) `--min-release-age=1`, `--uploaded-prior-to` | [Homebrew/brew#21129](https://github.com/Homebrew/brew/issues/21129) |
+| `cargo` | Proposed (RFC 3923 merged, nightly implementation) | `-Zmin-publish-age` | [rust-lang/cargo#17009](https://github.com/rust-lang/cargo/issues/17009) |
+| `cask` | Same as `brew` (inherits) | — | [Homebrew/brew#21129](https://github.com/Homebrew/brew/issues/21129) |
+| `choco` | None | — | — |
+| `composer` | Proposed | open PR adds `cooldown` | [composer/composer#12692](https://github.com/composer/composer/pull/12692) |
+| `cpan` | None | — | — |
+| `deb-get` | None | — | — |
+| `dnf` | None (effort focused on `dnf5`) | — | — |
+| `dnf5` | Proposed | `minimum_package_age` (open issue) | [rpm-software-management/dnf5#2743](https://github.com/rpm-software-management/dnf5/issues/2743) |
+| `emerge` | None | — | — |
+| `eopkg` | None | — | — |
+| `flatpak` | None | — | — |
+| `fwupd` | N/A (LVFS staged deployment) | — | [LVFS news](https://lvfs.readthedocs.io/en/latest/news.html) |
+| `gem` | Proposed (Bundler PR open) | `--cooldown` / `BUNDLE_COOLDOWN` / per-source `cooldown:` | [ruby/rubygems#9576](https://github.com/ruby/rubygems/pull/9576) |
+| `guix` | None | — | — |
+| `macports` | None | — | — |
+| `mas` | None | — | — |
+| `nix` | None | — | — |
+| **`npm`** | **Enforced** | `before` env `npm_config_before`; the newer `min-release-age` (npm ≥ 11.10) is the same idea spelled relative | [npm docs](https://docs.npmjs.com/cli/v11/using-npm/config#before) |
+| `opkg` | None | — | — |
+| `pacaur` | None (Arch AUR helper) | — | — |
+| `pacman` | None | — | — |
+| `pacstall` | None | — | — |
+| `paru` | None (Arch AUR helper) | — | — |
+| **`pip`** | **Enforced** (pip ≥ 26.1) | `--uploaded-prior-to` env `PIP_UPLOADED_PRIOR_TO` | [pypa/pip#13674](https://github.com/pypa/pip/issues/13674) |
+| **`pipx`** | **Enforced** (via pip's env var; needs the underlying pip ≥ 26.1) | inherits `PIP_UPLOADED_PRIOR_TO` | [pypa/pipx#1811](https://github.com/pypa/pipx/issues/1811) |
+| `pkg` | None | — | — |
+| `ports` | None (FreeBSD ports) | — | — |
+| `pwsh-gallery` | None | — | — |
+| `scoop` | Proposed | open feature request | [ScoopInstaller/Scoop#6513](https://github.com/ScoopInstaller/Scoop/issues/6513) |
+| `sdkman` | None | — | — |
+| `sfsu` | Inherits from `scoop` | — | — |
+| `snap` | N/A (risk channels `stable`/`candidate`/`beta`/`edge`, plus `snap refresh --hold` up to 90 days) | `snap refresh --hold` | [Snap docs](https://snapcraft.io/docs/how-to-guides/manage-snaps/manage-updates/) |
+| `steamcmd` | None | — | — |
+| `stew` | None | — | — |
+| `topgrade` | N/A (meta-upgrader; delegates to each underlying manager) | — | — |
+| **`uv`**, **`uvx`** | **Enforced** | `exclude-newer` env `UV_EXCLUDE_NEWER` | [uv docs](https://docs.astral.sh/uv/reference/settings/#exclude-newer) |
+| `vscode`, `vscodium` | Proposed | proposed enterprise policy | [microsoft/vscode#316867](https://github.com/microsoft/vscode/issues/316867) |
+| `winget` | Proposed | open feature request | [microsoft/winget-cli#6178](https://github.com/microsoft/winget-cli/issues/6178) |
+| `xbps` | None | — | — |
+| `yarn` (Classic v1) | None (project in maintenance mode) | — | [yarnpkg/yarn](https://github.com/yarnpkg/yarn) |
+| `yarn-berry` | Shipped upstream (Berry ≥ 4.10) but unreachable through `mpm` (the `yarn-berry` handler does not implement `install` / `upgrade` because Yarn Berry removed global installs) | `npmMinimalAgeGate` | [Yarn settings](https://yarnpkg.com/configuration/yarnrc#npmMinimalAgeGate) |
+| `yay` | None (Arch AUR helper) | — | — |
+| `yum` | N/A (deprecated alias for `dnf` on RHEL-family) | — | — |
+| `zerobrew` | None | — | — |
+| `zypper` | None | — | — |
+
+### Notes
+
+- **`brew`** ships an internal release-age gate inside Homebrew's bottle resource-resolution pipeline (merged in [`Homebrew/brew#21919`](https://github.com/Homebrew/brew/pull/21919)) so formulae built from upstream resources get a 24-hour delay automatically. There is **no** user-facing knob; the issue requesting one was closed as not planned.
+- **`pip`** silently no-ops on releases older than `26.1`: the `PIP_UPLOADED_PRIOR_TO` env variable is unrecognized and ignored. Treat the gate as "best effort" until `mpm` learns to refuse injection on a stale pip (see future directions).
+- **`yarn-berry`**: the gate works in Berry `≥ 4.10`, but Yarn Berry removed `yarn global`, so `mpm`'s `yarn-berry` handler only implements `search`. Onboarding `npmMinimalAgeGate` would not change anything reachable through `mpm`.
+- **`apt`, `snap`, `fwupd`** all have *structural* delays (Debian's migration windows, Snap risk channels, LVFS staged deployment) rather than per-version age gates. They're marked N/A because the underlying ecosystem solves the problem in a different shape.
+- **The Arch AUR helpers (`pacaur`, `paru`, `yay`)** and most distro front-ends inherit whatever delay the underlying repository / AUR provides; none of them ship a dedicated cooldown setting.
+
+## Limitations
+
+### The transitive-dependency gap
+
+`mpm`'s cooldown is exactly as good as the underlying resolver's. For managers that install with a real dependency resolver (PyPI, npm, ...), the native mechanism applies the cutoff to the whole tree, including transitive dependencies. For managers without a native mechanism, `mpm` cannot retrofit one without reimplementing the resolver: pinning only the top-level package would leave transitive dependencies fresh, which is precisely the most common attack vector. That is why unsupported managers are fail-closed rather than fail-open.
+
+### Coverage limits
+
+Distro and system managers (`apt`, `dnf`, `pacman`, `brew`, ...) generally have no per-upstream publish date attached to a package version: their version string is the distro maintainer's package build, not the upstream release, and the threat model differs (curated repositories with their own staging and review). The concept does not cleanly map. These managers are listed in the support table as N/A.
+
+### npm and `min-release-age` coexistence
+
+`mpm` enforces the cooldown for `npm` by injecting `npm_config_before`. On `npm` 11.x releases predating [`npm/cli#9368`](https://github.com/npm/cli/pull/9368), combining `before` with a `min-release-age` setting already present in the user's `.npmrc` raises an error. Either upgrade `npm` or pick one of the two mechanisms.
+
+### Read-only consistency
+
+The `outdated` report is not filtered by the cooldown on unsupported managers, so it may list versions that the subsequent `upgrade` would skip. For supported managers the same environment variable also affects `outdated`, so the report and the upgrade stay consistent.
+
+## Possible future directions
+
+- **Detect the underlying `pip` version at runtime.** Today `mpm` injects `PIP_UPLOADED_PRIOR_TO` unconditionally; older pip releases silently ignore it and the gate becomes a no-op, which is the worst failure mode for a security control. Probing `python -m pip --version` and refusing injection below `26.1` (or bumping the manager's `requirement` outright) closes the false-security window.
+- **Route stale pip through `uv pip`.** For users stuck on pip `<26.1`, `mpm` could borrow `uv`'s resolver (`uv pip install --exclude-newer`) when `uv` is present, giving sound transitive-correct enforcement without reimplementing one.
+- **Onboard mechanisms as they ship upstream.** Several managers have active work that would slot into the [`cooldown_env_var`](#how-it-works) framework as a one-line addition once released: Composer ([#12692](https://github.com/composer/composer/pull/12692)), Bundler / RubyGems ([#9576](https://github.com/ruby/rubygems/pull/9576)), Cargo (stabilization of `-Zmin-publish-age`, [#17009](https://github.com/rust-lang/cargo/issues/17009)), dnf5 ([#2743](https://github.com/rpm-software-management/dnf5/issues/2743)), Scoop ([#6513](https://github.com/ScoopInstaller/Scoop/issues/6513)), winget ([#6178](https://github.com/microsoft/winget-cli/issues/6178)), VS Code ([#316867](https://github.com/microsoft/vscode/issues/316867)).
+- **Advisory mode for `outdated` on unsupported managers.** `mpm` could query each package registry directly (PyPI, RubyGems, crates.io, ...) to annotate `outdated` with a "safe latest" column: purely informational, no install-side enforcement. This avoids the transitive-resolution trap while still being useful. It requires a new HTTP client surface and a state directory for date caching, neither of which `mpm` has today.
+- **Block-mode for bundled-artifact managers** (`snap`, `flatpak`, `vscode`, `mas`). These install self-contained artifacts with no separate transitive resolution at install time, so a "refuse if fresher than the cutoff" check would be sound without a resolver. The bottleneck is per-store API support for per-version publish dates.
+
+## Prior art
+
+- [uv `exclude-newer`](https://docs.astral.sh/uv/reference/settings/#exclude-newer) — the model for the Python ecosystem.
+- [npm `before`](https://docs.npmjs.com/cli/v11/using-npm/config#before) and its newer companion `min-release-age` (shipped in `npm` 11.10).
+- [Renovate `minimumReleaseAge`](https://docs.renovatebot.com/configuration-options/#minimumreleaseage) — delays dependency PRs by a configurable period.
+- William Woodruff, [*We should all be using dependency cooldowns*](https://blog.yossarian.net/2025/11/21/We-should-all-be-using-dependency-cooldowns).

@@ -15,6 +15,9 @@
 
 ## [`6.5.1` (2026-05-28)](https://github.com/kdeldycke/meta-package-manager/compare/v6.5.0...v6.5.1)
 
+> [!NOTE]
+> `6.5.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/6.5.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.5.1).
+
 - [mpm] Define `mpm`'s own `OK_GLYPH` (`✓`) and `KO_GLYPH` (`✘`) constants in `meta_package_manager.output` instead of importing them from `click-extra`.
 
 ## [`6.5.0` (2026-05-25)](https://github.com/kdeldycke/meta-package-manager/compare/v6.4.3...v6.5.0)

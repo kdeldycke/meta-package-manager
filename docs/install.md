@@ -610,7 +610,7 @@ This is a graph of the default, main dependencies of the Python package:
 
 ## Extra dependencies
 
-By default, `mpm` supports TOML [configuration files](configuration.md) and all standard [table formats](https://kdeldycke.github.io/click-extra/table.html#table-formats). Optional extras unlock additional configuration file formats and table output formats:
+By default, `mpm` supports TOML [configuration files](configuration.md) and all standard [table formats](https://kdeldycke.github.io/click-extra/table.html#table-formats). Optional extras unlock additional configuration file formats, table output formats, and SBOM generation:
 
 ````{list-table}
 :header-rows: 1
@@ -634,6 +634,11 @@ By default, `mpm` supports TOML [configuration files](configuration.md) and all 
     $ uv pip install meta-package-manager[jsonc]
     ```
   - - [JSONC](https://kdeldycke.github.io/click-extra/config.html#jsonc) config files: `--config mpm.jsonc`
+* - `sbom`
+  - ```{code-block} shell-session
+    $ uv pip install meta-package-manager[sbom]
+    ```
+  - - CycloneDX and SPDX SBOM generation: `mpm sbom`
 * - `toml`
   - ```{code-block} shell-session
     $ uv pip install meta-package-manager[toml]
@@ -657,6 +662,6 @@ By default, `mpm` supports TOML [configuration files](configuration.md) and all 
 Install all extras at once with:
 
 ```{code-block} shell-session
-$ uv pip install meta-package-manager[hjson,json5,jsonc,toml,xml,yaml]
+$ uv pip install meta-package-manager[hjson,json5,jsonc,sbom,toml,xml,yaml]
 ```
 ````

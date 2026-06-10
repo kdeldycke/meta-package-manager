@@ -48,6 +48,7 @@ from click_extra import (
     IntRange,
     ParamType,
     Section,
+    UsageError,
     argument,
     echo,
     file_path,
@@ -80,7 +81,14 @@ from .manager import PackageManager
 from .output import KO_GLYPH, OK_GLYPH, BarPluginRenderer, SortableField, print_stats
 from .package import packages_asdict
 from .pool import pool
-from .sbom import SBOM, SPDX, CycloneDX, ExportFormat
+from .sbom import (
+    SBOM,
+    SPDX,
+    CycloneDX,
+    ExportFormat,
+    cyclonedx_support,
+    spdx_support,
+)
 from .specifier import VERSION_SEP, Solver, Specifier
 from .version import diff_versions
 
@@ -1788,8 +1796,18 @@ def sbom(ctx, spdx, export_format, overwrite, export_path):
 
     sbom_class: type[SBOM]
     if spdx:
+        if not spdx_support:
+            raise UsageError(
+                "SPDX SBOM generation requires the [sbom] extra. "
+                "Install with: pip install meta-package-manager[sbom]",
+            )
         sbom_class = SPDX
     else:
+        if not cyclonedx_support:
+            raise UsageError(
+                "CycloneDX SBOM generation requires the [sbom] extra. "
+                "Install with: pip install meta-package-manager[sbom]",
+            )
         if export_format not in (ExportFormat.JSON, ExportFormat.XML):
             logging.critical(f"{standard} does not support {export_format} format.")
             ctx.exit(2)

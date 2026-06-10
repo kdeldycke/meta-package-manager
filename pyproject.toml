@@ -156,17 +156,12 @@ dependencies = [
   # by merge_default_map, which caused test isolation failures when a config
   # file was loaded in one test and affected subsequent tests.
   "click-extra>=7.16.1",
-  # cyclonedx-python-lib 11.2.0 is the first to support Python 3.14. The [validation]
-  # extra is intentionally omitted: CycloneDX schema validation runs in the test suite
-  # (see tests/test_cli_sbom.py), which keeps jsonschema, rfc3987-syntax, lark, and lxml
-  # out of the runtime install.
-  "cyclonedx-python-lib>=11.2",
   # extra-platforms 10.0.0 drops the distro dependency.
   "extra-platforms>=10",
-  # packageurl-python 0.16.0 is the first to support Python 3.13.
+  # packageurl-python 0.16.0 is the first to support Python 3.13. Required at
+  # runtime by meta_package_manager.package and meta_package_manager.specifier
+  # for cross-manager package identification, independent of SBOM features.
   "packageurl-python>=0.16",
-  # spdx-tools 0.8.2 is the first version we used to implement SPDX support.
-  "spdx-tools>=0.8.2",
   # tomllib is not part of the standard library before Python 3.11. Version 2.3.0 is the first to support Python 3.14.
   "tomli>=2.3; python_version<'3.11'",
   # tomli_w 1.1.0 is the first to remove Python 3.8 support.
@@ -187,6 +182,14 @@ json5 = [ "click-extra[json5]" ]
 jsonc = [ "click-extra[jsonc]" ]
 hjson = [ "click-extra[hjson]" ]
 xml = [ "click-extra[xml]" ]
+# SBOM generation (`mpm sbom`) needs the CycloneDX and SPDX libraries.  The
+# cyclonedx [validation] extra is intentionally omitted: schema validation
+# runs in the test suite (see tests/test_cli_sbom.py), which keeps
+# jsonschema, rfc3987-syntax, lark, and lxml out of the runtime install even
+# with `mpm[sbom]`.  cyclonedx-python-lib 11.2.0 is the first to support
+# Python 3.14; spdx-tools 0.8.2 is the first version we used to implement
+# SPDX support.
+sbom = [ "cyclonedx-python-lib>=11.2", "spdx-tools>=0.8.2" ]
 
 [project.scripts]
 mpm = "meta_package_manager.__main__:main"
@@ -217,6 +220,10 @@ test = [
   "pytest-randomly>=4.0.1",
   "pytest-xdist[psutil]>=3.8",
   "pyyaml>=6",
+  # SPDX SBOM generation is now gated behind the [sbom] extra (see
+  # [project.optional-dependencies]); re-add spdx-tools at test time so the
+  # SPDX-format tests in tests/test_cli_sbom.py still import.
+  "spdx-tools",
 ]
 docs = [
   "click-extra[sphinx]",

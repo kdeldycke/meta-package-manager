@@ -31,39 +31,58 @@ import sys
 from datetime import datetime, timezone
 
 from boltons.ecoutils import get_profile
-from cyclonedx.model import ExternalReference, ExternalReferenceType, XsUri
-from cyclonedx.model.bom import Bom
-from cyclonedx.model.component import Component, ComponentType
-from cyclonedx.model.contact import OrganizationalEntity
-from cyclonedx.model.lifecycle import LifecyclePhase, PredefinedLifecycle
-from cyclonedx.output import make_outputter
-from cyclonedx.output.json import JsonV1Dot5
-from cyclonedx.schema import OutputFormat, SchemaVersion
 from extra_platforms import current_platform
 from packageurl import PackageURL
-from spdx_tools.spdx.model import (
-    Actor,
-    ActorType,
-    CreationInfo,
-    Document,
-    ExternalPackageRef,
-    ExternalPackageRefCategory,
-    PackagePurpose,
-    Relationship,
-    RelationshipType,
-)
-from spdx_tools.spdx.model import (
-    Package as SPDXPackage,
-)
-from spdx_tools.spdx.validation.document_validator import validate_full_spdx_document
-from spdx_tools.spdx.writer.json import json_writer
-from spdx_tools.spdx.writer.rdf import rdf_writer
-from spdx_tools.spdx.writer.tagvalue import tagvalue_writer
-from spdx_tools.spdx.writer.write_utils import convert
-from spdx_tools.spdx.writer.xml import xml_writer
-from spdx_tools.spdx.writer.yaml import yaml_writer
 
 from . import __version__
+
+cyclonedx_support = True
+try:
+    from cyclonedx.model import ExternalReference, ExternalReferenceType, XsUri
+    from cyclonedx.model.bom import Bom
+    from cyclonedx.model.component import Component, ComponentType
+    from cyclonedx.model.contact import OrganizationalEntity
+    from cyclonedx.model.lifecycle import LifecyclePhase, PredefinedLifecycle
+    from cyclonedx.output import make_outputter
+    from cyclonedx.output.json import JsonV1Dot5
+    from cyclonedx.schema import OutputFormat, SchemaVersion
+except ImportError:
+    cyclonedx_support = False
+    logging.getLogger("meta_package_manager").debug(
+        "CycloneDX support disabled: "
+        "install meta-package-manager[sbom] to enable it.",
+    )
+
+spdx_support = True
+try:
+    from spdx_tools.spdx.model import (
+        Actor,
+        ActorType,
+        CreationInfo,
+        Document,
+        ExternalPackageRef,
+        ExternalPackageRefCategory,
+        PackagePurpose,
+        Relationship,
+        RelationshipType,
+    )
+    from spdx_tools.spdx.model import (
+        Package as SPDXPackage,
+    )
+    from spdx_tools.spdx.validation.document_validator import (
+        validate_full_spdx_document,
+    )
+    from spdx_tools.spdx.writer.json import json_writer
+    from spdx_tools.spdx.writer.rdf import rdf_writer
+    from spdx_tools.spdx.writer.tagvalue import tagvalue_writer
+    from spdx_tools.spdx.writer.write_utils import convert
+    from spdx_tools.spdx.writer.xml import xml_writer
+    from spdx_tools.spdx.writer.yaml import yaml_writer
+except ImportError:
+    spdx_support = False
+    logging.getLogger("meta_package_manager").debug(
+        "SPDX support disabled: install meta-package-manager[sbom] to enable it.",
+    )
 
 if sys.version_info >= (3, 11):
     from enum import StrEnum

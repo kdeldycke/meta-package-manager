@@ -31,64 +31,64 @@ The choice to delegate to each manager's own resolver rather than reimplement th
 
 The table below is the source of truth for which managers `mpm` can gate today and the state of the upstream effort everywhere else. Statuses:
 
-- **Enforced**: `mpm` actively injects a cooldown environment variable on every CLI call. Listed in the [`cooldown_env_var`](#how-it-works) framework.
-- **Shipped upstream**: the manager ships a release-age gate but `mpm` does not (yet) plug into it.
-- **Proposed**: an open pull request, RFC, or issue is on file upstream.
-- **None**: no public proposal found.
-- **N/A**: the concept does not apply (distro-curated repositories with their own staging, archived projects, meta-upgraders, ...). A structural equivalent is noted when relevant.
+- ✅ **Enforced**: `mpm` actively injects a cooldown environment variable on every CLI call. Listed in the [`cooldown_env_var`](#how-it-works) framework.
+- 🟡 **Shipped upstream**: the manager ships a release-age gate but `mpm` does not (yet) plug into it.
+- 🚧 **Proposed**: an open pull request, RFC, or issue is on file upstream.
+- ❌ **None**: no public proposal found.
+- ➖ **N/A**: the concept does not apply (distro-curated repositories with their own staging, archived projects, meta-upgraders, ...). A structural equivalent is noted when relevant.
 
 | `mpm` id | Status | Mechanism | Reference |
 | :--- | :--- | :--- | :--- |
-| `apk` | None | — | — |
-| `apm` | N/A (archived June 2022) | — | [atom/apm](https://github.com/atom/apm) |
-| `apt` | N/A (Debian's `unstable` → `testing` → `stable` migration is functionally similar) | — | [Nesbitt, *Package managers need to cool down*](https://nesbitt.io/2026/03/04/package-managers-need-to-cool-down.html) |
-| `apt-mint` | N/A (follows `apt`) | — | — |
-| `brew` | Proposed (closed as not planned for users; merged for internal bottle resource resolution) | (internal) `--min-release-age=1`, `--uploaded-prior-to` | [Homebrew/brew#21129](https://github.com/Homebrew/brew/issues/21129) |
-| `cargo` | Proposed (RFC 3923 merged, nightly implementation) | `-Zmin-publish-age` | [rust-lang/cargo#17009](https://github.com/rust-lang/cargo/issues/17009) |
-| `cask` | Same as `brew` (inherits) | — | [Homebrew/brew#21129](https://github.com/Homebrew/brew/issues/21129) |
-| `choco` | None | — | — |
-| `composer` | Proposed | open PR adds `cooldown` | [composer/composer#12692](https://github.com/composer/composer/pull/12692) |
-| `cpan` | None | — | — |
-| `deb-get` | None | — | — |
-| `dnf` | None (effort focused on `dnf5`) | — | — |
-| `dnf5` | Proposed | `minimum_package_age` (open issue) | [rpm-software-management/dnf5#2743](https://github.com/rpm-software-management/dnf5/issues/2743) |
-| `emerge` | None | — | — |
-| `eopkg` | None | — | — |
-| `flatpak` | None | — | — |
-| `fwupd` | N/A (LVFS staged deployment) | — | [LVFS news](https://lvfs.readthedocs.io/en/latest/news.html) |
-| `gem` | Proposed (Bundler PR open) | `--cooldown` / `BUNDLE_COOLDOWN` / per-source `cooldown:` | [ruby/rubygems#9576](https://github.com/ruby/rubygems/pull/9576) |
-| `guix` | None | — | — |
-| `macports` | None | — | — |
-| `mas` | None | — | — |
-| `nix` | None | — | — |
-| **`npm`** | **Enforced** (npm ≥ 11.10) | `min-release-age` env `npm_config_min-release-age` (integer days) | [npm docs](https://docs.npmjs.com/cli/v11/using-npm/config#min-release-age) |
-| `opkg` | None | — | — |
-| `pacaur` | None (Arch AUR helper) | — | — |
-| `pacman` | None | — | — |
-| `pacstall` | None | — | — |
-| `paru` | None (Arch AUR helper) | — | — |
-| **`pip`** | **Enforced** (pip ≥ 26.1) | `--uploaded-prior-to` env `PIP_UPLOADED_PRIOR_TO` | [pypa/pip#13674](https://github.com/pypa/pip/issues/13674) |
-| **`pipx`** | **Enforced** (via pip's env var; needs the underlying pip ≥ 26.1) | inherits `PIP_UPLOADED_PRIOR_TO` | [pypa/pipx#1811](https://github.com/pypa/pipx/issues/1811) |
-| `pkg` | None | — | — |
-| `ports` | None (FreeBSD ports) | — | — |
-| `pwsh-gallery` | None | — | — |
-| `scoop` | Proposed | open feature request | [ScoopInstaller/Scoop#6513](https://github.com/ScoopInstaller/Scoop/issues/6513) |
-| `sdkman` | None | — | — |
-| `sfsu` | Inherits from `scoop` | — | — |
-| `snap` | N/A (risk channels `stable`/`candidate`/`beta`/`edge`, plus `snap refresh --hold` up to 90 days) | `snap refresh --hold` | [Snap docs](https://snapcraft.io/docs/how-to-guides/manage-snaps/manage-updates/) |
-| `steamcmd` | None | — | — |
-| `stew` | None | — | — |
-| `topgrade` | N/A (meta-upgrader; delegates to each underlying manager) | — | — |
-| **`uv`**, **`uvx`** | **Enforced** | `exclude-newer` env `UV_EXCLUDE_NEWER` | [uv docs](https://docs.astral.sh/uv/reference/settings/#exclude-newer) |
-| `vscode`, `vscodium` | Proposed | proposed enterprise policy | [microsoft/vscode#316867](https://github.com/microsoft/vscode/issues/316867) |
-| `winget` | Proposed | open feature request | [microsoft/winget-cli#6178](https://github.com/microsoft/winget-cli/issues/6178) |
-| `xbps` | None | — | — |
-| `yarn` (Classic v1) | None (project in maintenance mode) | — | [yarnpkg/yarn](https://github.com/yarnpkg/yarn) |
-| `yarn-berry` | Shipped upstream (Berry ≥ 4.10) but unreachable through `mpm` (the `yarn-berry` handler does not implement `install` / `upgrade` because Yarn Berry removed global installs) | `npmMinimalAgeGate` | [Yarn settings](https://yarnpkg.com/configuration/yarnrc#npmMinimalAgeGate) |
-| `yay` | None (Arch AUR helper) | — | — |
-| `yum` | N/A (deprecated alias for `dnf` on RHEL-family) | — | — |
-| `zerobrew` | None | — | — |
-| `zypper` | None | — | — |
+| `apk` | ❌ None | — | — |
+| `apm` | ➖ N/A (archived June 2022) | — | [atom/apm](https://github.com/atom/apm) |
+| `apt` | ➖ N/A (Debian's `unstable` → `testing` → `stable` migration is functionally similar) | — | [Nesbitt, *Package managers need to cool down*](https://nesbitt.io/2026/03/04/package-managers-need-to-cool-down.html) |
+| `apt-mint` | ➖ N/A (follows `apt`) | — | — |
+| `brew` | 🚧 Proposed (closed as not planned for users; merged for internal bottle resource resolution) | (internal) `--min-release-age=1`, `--uploaded-prior-to` | [Homebrew/brew#21129](https://github.com/Homebrew/brew/issues/21129) |
+| `cargo` | 🚧 Proposed (RFC 3923 merged, nightly implementation) | `-Zmin-publish-age` | [rust-lang/cargo#17009](https://github.com/rust-lang/cargo/issues/17009) |
+| `cask` | 🚧 Same as `brew` (inherits) | — | [Homebrew/brew#21129](https://github.com/Homebrew/brew/issues/21129) |
+| `choco` | ❌ None | — | — |
+| `composer` | 🚧 Proposed | open PR adds `cooldown` | [composer/composer#12692](https://github.com/composer/composer/pull/12692) |
+| `cpan` | ❌ None | — | — |
+| `deb-get` | ❌ None | — | — |
+| `dnf` | ❌ None (effort focused on `dnf5`) | — | — |
+| `dnf5` | 🚧 Proposed | `minimum_package_age` (open issue) | [rpm-software-management/dnf5#2743](https://github.com/rpm-software-management/dnf5/issues/2743) |
+| `emerge` | ❌ None | — | — |
+| `eopkg` | ❌ None | — | — |
+| `flatpak` | ❌ None | — | — |
+| `fwupd` | ➖ N/A (LVFS staged deployment) | — | [LVFS news](https://lvfs.readthedocs.io/en/latest/news.html) |
+| `gem` | 🚧 Proposed (Bundler PR open) | `--cooldown` / `BUNDLE_COOLDOWN` / per-source `cooldown:` | [ruby/rubygems#9576](https://github.com/ruby/rubygems/pull/9576) |
+| `guix` | ❌ None | — | — |
+| `macports` | ❌ None | — | — |
+| `mas` | ❌ None | — | — |
+| `nix` | ❌ None | — | — |
+| **`npm`** | ✅ **Enforced** (npm ≥ 11.10) | `min-release-age` env `npm_config_min-release-age` (integer days) | [npm docs](https://docs.npmjs.com/cli/v11/using-npm/config#min-release-age) |
+| `opkg` | ❌ None | — | — |
+| `pacaur` | ❌ None (Arch AUR helper) | — | — |
+| `pacman` | ❌ None | — | — |
+| `pacstall` | ❌ None | — | — |
+| `paru` | ❌ None (Arch AUR helper) | — | — |
+| **`pip`** | ✅ **Enforced** (pip ≥ 26.1) | `--uploaded-prior-to` env `PIP_UPLOADED_PRIOR_TO` | [pypa/pip#13674](https://github.com/pypa/pip/issues/13674) |
+| **`pipx`** | ✅ **Enforced** (via pip's env var; needs the underlying pip ≥ 26.1) | inherits `PIP_UPLOADED_PRIOR_TO` | [pypa/pipx#1811](https://github.com/pypa/pipx/issues/1811) |
+| `pkg` | ❌ None | — | — |
+| `ports` | ❌ None (FreeBSD ports) | — | — |
+| `pwsh-gallery` | ❌ None | — | — |
+| `scoop` | 🚧 Proposed | open feature request | [ScoopInstaller/Scoop#6513](https://github.com/ScoopInstaller/Scoop/issues/6513) |
+| `sdkman` | ❌ None | — | — |
+| `sfsu` | 🚧 Inherits from `scoop` | — | — |
+| `snap` | ➖ N/A (risk channels `stable`/`candidate`/`beta`/`edge`, plus `snap refresh --hold` up to 90 days) | `snap refresh --hold` | [Snap docs](https://snapcraft.io/docs/how-to-guides/manage-snaps/manage-updates/) |
+| `steamcmd` | ❌ None | — | — |
+| `stew` | ❌ None | — | — |
+| `topgrade` | ➖ N/A (meta-upgrader; delegates to each underlying manager) | — | — |
+| **`uv`**, **`uvx`** | ✅ **Enforced** | `exclude-newer` env `UV_EXCLUDE_NEWER` | [uv docs](https://docs.astral.sh/uv/reference/settings/#exclude-newer) |
+| `vscode`, `vscodium` | 🚧 Proposed | proposed enterprise policy | [microsoft/vscode#316867](https://github.com/microsoft/vscode/issues/316867) |
+| `winget` | 🚧 Proposed | open feature request | [microsoft/winget-cli#6178](https://github.com/microsoft/winget-cli/issues/6178) |
+| `xbps` | ❌ None | — | — |
+| `yarn` (Classic v1) | ❌ None (project in maintenance mode) | — | [yarnpkg/yarn](https://github.com/yarnpkg/yarn) |
+| `yarn-berry` | 🟡 Shipped upstream (Berry ≥ 4.10) but unreachable through `mpm` (the `yarn-berry` handler does not implement `install` / `upgrade` because Yarn Berry removed global installs) | `npmMinimalAgeGate` | [Yarn settings](https://yarnpkg.com/configuration/yarnrc#npmMinimalAgeGate) |
+| `yay` | ❌ None (Arch AUR helper) | — | — |
+| `yum` | ➖ N/A (deprecated alias for `dnf` on RHEL-family) | — | — |
+| `zerobrew` | ❌ None | — | — |
+| `zypper` | ❌ None | — | — |
 
 ### Notes
 

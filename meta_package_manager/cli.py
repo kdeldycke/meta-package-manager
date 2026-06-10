@@ -120,12 +120,26 @@ See the corresponding :issue:`implementation rationale in issue #10 <10>`.
 
 
 class Duration(ParamType):
-    """Parse a human-friendly duration into a :py:class:`datetime.timedelta`.
+    """Parse a cooldown spec into a :py:class:`datetime.timedelta`.
 
-    Accepts a number followed by an optional unit, like ``7 days``, ``1 week``,
-    ``12h`` or ``30m``. A bare number is interpreted as a count of days. A zero
-    duration parses to ``None``, which disables the cooldown (handy to override a
-    value set in the configuration file).
+    Accepts three input shapes:
+
+    - **Friendly duration**: ``7 days``, ``1 week``, ``12h``, ``30m``, ``45s``,
+      or a bare number of days like ``7``.
+    - **ISO 8601 duration**: ``P7D``, ``PT12H``, ``P1WT6H``. Case-insensitive.
+    - **RFC 3339 absolute timestamp**: ``2024-05-01T00:00:00Z`` or with an
+      offset like ``+02:00``. Converted at parse time to ``now - timestamp``;
+      a timestamp in the future disables the cooldown.
+
+    A zero duration or empty input parses to ``None``, which disables the cooldown
+    (handy to override a value set in the configuration file).
+
+    .. note::
+       Durations resolve to a fixed number of seconds, assuming a day is 24
+       hours. The local time zone, DST transitions, and calendar boundaries are
+       ignored. Calendar units (months, years) are rejected for the same
+       reason: 28-31 days and 365-366 days make them unsuitable for a precise
+       release-age cutoff. Use ``days`` or ``weeks`` instead.
     """
 
     name = "duration"
@@ -156,7 +170,35 @@ class Duration(ParamType):
     }
     """Number of seconds each recognized unit represents (empty unit means days)."""
 
-    _PATTERN = re.compile(r"(?P<value>\d+(?:\.\d+)?)\s*(?P<unit>[a-z]*)")
+    _CALENDAR_UNITS = frozenset({
+        "mo", "mon", "month", "months",
+        "y", "yr", "yrs", "year", "years",
+    })
+    """Calendar units rejected for ambiguity: months span 28-31 days, years 365-366."""
+
+    _FRIENDLY_PATTERN = re.compile(r"(?P<value>\d+(?:\.\d+)?)\s*(?P<unit>[a-z]*)")
+    _ISO8601_PATTERN = re.compile(
+        r"P"
+        r"(?:(?P<years>\d+(?:\.\d+)?)Y)?"
+        r"(?:(?P<months>\d+(?:\.\d+)?)M)?"
+        r"(?:(?P<weeks>\d+(?:\.\d+)?)W)?"
+        r"(?:(?P<days>\d+(?:\.\d+)?)D)?"
+        r"(?:T"
+        r"(?:(?P<hours>\d+(?:\.\d+)?)H)?"
+        r"(?:(?P<minutes>\d+(?:\.\d+)?)M)?"
+        r"(?:(?P<seconds>\d+(?:\.\d+)?)S)?"
+        r")?",
+    )
+
+    _EXAMPLES = (
+        "'7 days', '1 week', '12h', '30m', 'P7D', 'PT12H', "
+        "or an RFC 3339 timestamp like '2024-05-01T00:00:00Z'"
+    )
+    _CALENDAR_REJECT = (
+        "calendar units (months, years) are rejected because their length is "
+        "ambiguous: months span 28-31 days, years 365-366. Use days or weeks "
+        "instead, like '30 days' or '4 weeks'."
+    )
 
     def convert(
         self,
@@ -167,18 +209,89 @@ class Duration(ParamType):
         """Coerce ``value`` to a :py:class:`datetime.timedelta` (or ``None``)."""
         if value is None or isinstance(value, timedelta):
             return value
-        text = str(value).strip().lower()
+        text = str(value).strip()
         if not text:
             return None
-        match = self._PATTERN.fullmatch(text)
-        if match and match["unit"] in self._UNIT_SECONDS:
-            seconds = float(match["value"]) * self._UNIT_SECONDS[match["unit"]]
-            if seconds == 0:
-                return None
-            return timedelta(seconds=seconds)
+        # RFC 3339 absolute timestamp: starts with a 4-digit year and a dash.
+        if len(text) >= 5 and text[:4].isdigit() and text[4] == "-":
+            return self._parse_timestamp(text, value, param, ctx)
+        # ISO 8601 duration: starts with 'P' (case-insensitive).
+        if text[:1] in ("P", "p"):
+            return self._parse_iso8601(text.upper(), value, param, ctx)
+        # Friendly duration.
+        return self._parse_friendly(text.lower(), value, param, ctx)
+
+    def _parse_timestamp(
+        self,
+        text: str,
+        value: object,
+        param: Parameter | None,
+        ctx: Context | None,
+    ) -> timedelta | None:
+        normalized = text.upper().replace("Z", "+00:00")
+        try:
+            ts = datetime.fromisoformat(normalized)
+        except ValueError:
+            self.fail(
+                f"{value!r} looks like an RFC 3339 timestamp but cannot be "
+                f"parsed. Accepted: {self._EXAMPLES}.",
+                param,
+                ctx,
+            )
+        if ts.tzinfo is None:
+            self.fail(
+                f"{value!r} is missing a time zone. Use a fully qualified "
+                "RFC 3339 timestamp with 'Z' or an offset like '+00:00'.",
+                param,
+                ctx,
+            )
+        delta = datetime.now(tz=timezone.utc) - ts.astimezone(timezone.utc)
+        return delta if delta.total_seconds() > 0 else None
+
+    def _parse_iso8601(
+        self,
+        text: str,
+        value: object,
+        param: Parameter | None,
+        ctx: Context | None,
+    ) -> timedelta | None:
+        match = self._ISO8601_PATTERN.fullmatch(text)
+        if not match or not any(match.groups()):
+            self.fail(
+                f"{value!r} is not a valid ISO 8601 duration "
+                f"(examples: 'P7D', 'PT12H', 'P1WT6H'). Accepted: {self._EXAMPLES}.",
+                param,
+                ctx,
+            )
+        groups = match.groupdict()
+        if groups["years"] or groups["months"]:
+            self.fail(f"{value!r}: {self._CALENDAR_REJECT}", param, ctx)
+        seconds = (
+            float(groups["weeks"] or 0) * 604800
+            + float(groups["days"] or 0) * 86400
+            + float(groups["hours"] or 0) * 3600
+            + float(groups["minutes"] or 0) * 60
+            + float(groups["seconds"] or 0)
+        )
+        return timedelta(seconds=seconds) if seconds else None
+
+    def _parse_friendly(
+        self,
+        text: str,
+        value: object,
+        param: Parameter | None,
+        ctx: Context | None,
+    ) -> timedelta | None:
+        match = self._FRIENDLY_PATTERN.fullmatch(text)
+        if match:
+            unit = match["unit"]
+            if unit in self._CALENDAR_UNITS:
+                self.fail(f"{value!r}: {self._CALENDAR_REJECT}", param, ctx)
+            if unit in self._UNIT_SECONDS:
+                seconds = float(match["value"]) * self._UNIT_SECONDS[unit]
+                return timedelta(seconds=seconds) if seconds else None
         self.fail(
-            f"{value!r} is not a valid duration "
-            "(examples: '7 days', '1 week', '12h', '30m').",
+            f"{value!r} is not a valid duration (examples: {self._EXAMPLES}).",
             param,
             ctx,
         )
@@ -448,10 +561,12 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         default="",
         metavar="DURATION",
         help="Refuse to install or upgrade any package version published more "
-        "recently than this duration (like '7 days' or '1 week'), as a mitigation "
-        "against supply-chain attacks. Only honored by managers with native "
-        "release-age support (uv, npm); the others are skipped unless "
-        "--allow-no-cooldown is set.",
+        "recently than this duration, as a mitigation against supply-chain "
+        "attacks. Accepts a friendly duration ('7 days', '1 week', '12h'), an "
+        "ISO 8601 duration ('P7D', 'PT12H'), or an RFC 3339 absolute timestamp "
+        "('2024-05-01T00:00:00Z'). Only honored by managers with native "
+        "release-age support (uv, npm, pip, pipx); the others are skipped "
+        "unless --allow-no-cooldown is set.",
     ),
     option(
         "--allow-no-cooldown",

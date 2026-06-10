@@ -36,6 +36,7 @@ from meta_package_manager.managers.uv import UV, UVX
 @pytest.mark.parametrize(
     ("value", "expected"),
     (
+        # Friendly durations.
         ("7 days", timedelta(days=7)),
         ("1 week", timedelta(weeks=1)),
         ("2 weeks", timedelta(weeks=2)),
@@ -48,9 +49,21 @@ from meta_package_manager.managers.uv import UV, UVX
         ("7", timedelta(days=7)),
         # Spacing and case are irrelevant.
         ("  6   HOURS  ", timedelta(hours=6)),
+        # ISO 8601 durations.
+        ("P7D", timedelta(days=7)),
+        ("P1W", timedelta(weeks=1)),
+        ("PT12H", timedelta(hours=12)),
+        ("PT30M", timedelta(minutes=30)),
+        ("PT45S", timedelta(seconds=45)),
+        ("P1WT6H", timedelta(weeks=1, hours=6)),
+        ("P2DT3H30M", timedelta(days=2, hours=3, minutes=30)),
+        # ISO 8601 is case-insensitive.
+        ("p7d", timedelta(days=7)),
+        ("pt12h", timedelta(hours=12)),
         # Zero and empty values disable the gate.
         ("0", None),
         ("0 days", None),
+        ("PT0H", None),
         ("", None),
         (None, None),
     ),
@@ -66,11 +79,106 @@ def test_duration_passthrough_timedelta():
 
 
 @pytest.mark.parametrize(
-    "value", ("bogus", "2 fortnights", "abc", "7 years", "tomorrow", "-3d")
+    "value",
+    (
+        "bogus",
+        "2 fortnights",
+        "abc",
+        "tomorrow",
+        "-3d",
+        # Bare ISO 8601 prefix with no components.
+        "P",
+        # Unknown ISO 8601 unit.
+        "P3X",
+        # Date without a time zone.
+        "2024-05-01",
+        "2024-05-01T00:00:00",
+        # Malformed RFC 3339 timestamp.
+        "2024-99-99T00:00:00Z",
+    ),
 )
 def test_duration_invalid(value):
     with pytest.raises(BadParameter):
         Duration().convert(value, None, None)
+
+
+@pytest.mark.parametrize(
+    "value",
+    (
+        # Friendly form.
+        "7 months",
+        "1 year",
+        "3 months",
+        "2 years",
+        # ISO 8601 form (M before T = months, Y = years).
+        "P3M",
+        "P1Y",
+        "P1Y6M",
+    ),
+)
+def test_duration_rejects_calendar_units(value):
+    """Months and years are explicitly rejected because their length is ambiguous."""
+    with pytest.raises(BadParameter) as exc_info:
+        Duration().convert(value, None, None)
+    assert "calendar units" in str(exc_info.value)
+    assert "ambiguous" in str(exc_info.value)
+
+
+@pytest.mark.parametrize(
+    "value",
+    (
+        # Z suffix.
+        "2024-05-01T00:00:00Z",
+        # Explicit UTC offset.
+        "2024-05-01T00:00:00+00:00",
+        # Non-UTC offset.
+        "2024-05-01T02:00:00+02:00",
+        # Lowercase T and Z accepted.
+        "2024-05-01t00:00:00z",
+    ),
+)
+def test_duration_absolute_timestamp(value):
+    """An RFC 3339 timestamp is converted to ``now - timestamp`` at parse time."""
+    result = Duration().convert(value, None, None)
+    expected = datetime.now(tz=timezone.utc) - datetime(
+        2024, 5, 1, tzinfo=timezone.utc
+    )
+    assert isinstance(result, timedelta)
+    assert abs(result - expected) < timedelta(seconds=5)
+
+
+def test_duration_future_timestamp_disables_gate():
+    """A timestamp in the future is treated as 'no cooldown' (returns None)."""
+    assert Duration().convert("2999-01-01T00:00:00Z", None, None) is None
+
+
+@pytest.mark.parametrize(
+    ("cooldown_input", "release_iso", "should_pass"),
+    (
+        # idna 3.6 was published 2023-11-25.
+        # idna 3.7 was published 2024-04-11.
+        # Anchor cooldown=P7D against a fake "today" of 2024-04-15:
+        # cutoff = 2024-04-08, so 3.6 (older) passes but 3.7 (Apr 11) is blocked.
+        # We assert the cutoff math directly since it does not depend on a real
+        # registry call.
+        ("P7D", "2023-11-25T00:00:00Z", True),  # idna 3.6: older than cutoff.
+        ("P7D", "2024-04-11T00:00:00Z", False),  # idna 3.7: newer than cutoff.
+    ),
+)
+def test_release_anchored_cutoff_math(
+    cooldown_input, release_iso, should_pass, monkeypatch
+):
+    """Verify the cooldown cutoff blocks fresh releases and lets older ones pass.
+
+    Pattern borrowed from astral-sh/uv#19475: anchor against real upstream
+    release timestamps (idna 3.6 / 3.7 on PyPI) and a frozen 'today' so the
+    arithmetic stays deterministic.
+    """
+    fake_now = datetime(2024, 4, 15, tzinfo=timezone.utc)
+    cooldown = Duration().convert(cooldown_input, None, None)
+    cutoff = fake_now - cooldown
+    release_time = datetime.fromisoformat(release_iso.replace("Z", "+00:00"))
+    assert (release_time <= cutoff) is should_pass
 
 
 @pytest.mark.parametrize(

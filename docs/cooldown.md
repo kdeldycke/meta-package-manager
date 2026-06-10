@@ -14,7 +14,17 @@ $ mpm --cooldown "1 week" install some-package
 $ mpm --cooldown 12h --allow-no-cooldown upgrade --all   # let unsupported managers run too
 ```
 
-It accepts a human-readable duration like `7 days`, `1 week`, `12h`, `30m`, a bare number of days, or `0` / empty to disable. The value is also settable as the `cooldown` key in any `mpm` configuration file (see {doc}`configuration` for the full schema) or as the `MPM_COOLDOWN` environment variable.
+`--cooldown` accepts three input shapes:
+
+- **Friendly duration**: `7 days`, `1 week`, `12h`, `30m`, `45s`, a bare number of days (`7`), or `0` / empty to disable the gate.
+- **ISO 8601 duration**: `P7D`, `PT12H`, `P1WT6H`. Case-insensitive.
+- **RFC 3339 absolute timestamp**: `2024-05-01T00:00:00Z` or with an offset like `+02:00`. Converted at parse time to `now - timestamp`; a timestamp in the future disables the gate.
+
+The same value is settable as the `cooldown` key in any `mpm` configuration file (see {doc}`configuration` for the full schema) or as the `MPM_COOLDOWN` environment variable.
+
+:::{note}
+Durations resolve to a fixed number of seconds, assuming a day is 24 hours. The local time zone, DST transitions, and calendar boundaries are ignored. Calendar units (months, years) are rejected for the same reason: 28-31 days and 365-366 days make them unsuitable for a precise release-age cutoff. Use `days` or `weeks` instead.
+:::
 
 ## How it works
 

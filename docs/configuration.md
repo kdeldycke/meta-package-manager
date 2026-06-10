@@ -64,8 +64,8 @@ These go under `[mpm]` (or `[tool.mpm]` in `pyproject.toml`):
 | `ignore_auto_updates` | boolean | `true`              | Exclude auto-updating packages from outdated/upgrade results.                              |
 | `stop_on_error`       | boolean | `false`             | Stop on first manager CLI error instead of continuing.                                     |
 | `dry_run`             | boolean | `false`             | Simulate CLI calls without performing any action.                                          |
-| `cooldown`            | string  | `""`                | Minimum release age before a version may be installed or upgraded; empty disables it.       |
-| `allow_no_cooldown`   | boolean | `false`             | Run install/upgrade on managers without native cooldown support instead of skipping them.   |
+| `cooldown`            | string  | `""`                | Minimum release age before a version may be installed or upgraded; empty disables it.      |
+| `allow_no_cooldown`   | boolean | `false`             | Run install/upgrade on managers without native cooldown support instead of skipping them.  |
 | `all_managers`        | boolean | `false`             | Force evaluation of all managers, including unsupported and deprecated.                    |
 | `description`         | boolean | `false`             | Show package description in results.                                                       |
 | `sort_by`             | string  | `"manager_id"`      | Sort results by: `manager_id`, `manager_name`, `package_id`, `package_name`, or `version`. |

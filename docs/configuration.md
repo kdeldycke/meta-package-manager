@@ -86,6 +86,20 @@ The value is a duration like `7 days`, `1 week`, `12h` or `30m`; a bare number i
 cooldown = "1 week"
 ```
 
+### Accessibility
+
+The `--accessible` flag (or the `ACCESSIBLE=1` environment variable) is a shortcut for `--no-color --table-format plain`: it strips ANSI codes and replaces Unicode box-drawing characters with plain ASCII, so the output is friendly to screen readers and braille displays.
+
+```{code-block} shell-session
+$ mpm --accessible managers
+```
+
+An explicit `--color` / `--no-color` or `--table-format` setting (on the command line, in an environment variable, or in this configuration file) keeps precedence over `--accessible`, so you can toggle a single dimension back on:
+
+```{code-block} shell-session
+$ mpm --accessible --table-format rounded-outline managers
+```
+
 ### Subcommand options
 
 These go under `[mpm.<subcommand>]` (or `[tool.mpm.<subcommand>]`):

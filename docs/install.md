@@ -600,6 +600,31 @@ _MPM_COMPLETE=fish_source mpm > ~/.config/fish/completions/mpm.fish
 
 `````
 
+## Man pages
+
+`mpm` exposes a `--man` option on every (sub)command that prints the corresponding roff page to stdout. Pipe it through `man --local-file -` to render it:
+
+```{code-block} shell-session
+$ mpm --man | man --local-file -
+```
+
+```{code-block} shell-session
+$ mpm install --man | man --local-file -
+```
+
+The full command tree is also pre-rendered as static `.1` files:
+
+- Bundled as `mpm-manpages.tar.gz` on every [GitHub release](https://github.com/kdeldycke/meta-package-manager/releases). Download, extract, and copy to `${MANPATH%%:*}/man1/` (typically `/usr/local/share/man/man1/`).
+- Rendered alongside the HTML docs at <https://kdeldycke.github.io/meta-package-manager/man/>.
+
+Downstream packagers can regenerate them from source as part of their build phase:
+
+```{code-block} shell-session
+$ python packaging/build_manpages.py /tmp/mpm-manpages/
+```
+
+The generator honors `SOURCE_DATE_EPOCH` for reproducible builds.
+
 ## Default dependencies
 
 This is a graph of the default, main dependencies of the Python package:

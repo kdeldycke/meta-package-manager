@@ -28,7 +28,7 @@ jobs:
           (list
             (channel
               (name 'guix)
-              (url "https://codeberg.org/tutu967/guix.git")
+              (url "https://codeberg.org/kdeldycke/guix.git")
               (branch "mpm-and-dependencies")))
           CHANNELS
           # guix pull intermittently fails on transient git/SSL errors; retry a

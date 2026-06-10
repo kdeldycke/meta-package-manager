@@ -61,7 +61,7 @@ The table below is the source of truth for which managers `mpm` can gate today a
 | `macports` | None | — | — |
 | `mas` | None | — | — |
 | `nix` | None | — | — |
-| **`npm`** | **Enforced** | `before` env `npm_config_before`; the newer `min-release-age` (npm ≥ 11.10) is the same idea spelled relative | [npm docs](https://docs.npmjs.com/cli/v11/using-npm/config#before) |
+| **`npm`** | **Enforced** (npm ≥ 11.10) | `min-release-age` env `npm_config_min-release-age` (integer days) | [npm docs](https://docs.npmjs.com/cli/v11/using-npm/config#min-release-age) |
 | `opkg` | None | — | — |
 | `pacaur` | None (Arch AUR helper) | — | — |
 | `pacman` | None | — | — |
@@ -93,7 +93,7 @@ The table below is the source of truth for which managers `mpm` can gate today a
 ### Notes
 
 - **`brew`** ships an internal release-age gate inside Homebrew's bottle resource-resolution pipeline (merged in [`Homebrew/brew#21919`](https://github.com/Homebrew/brew/pull/21919)) so formulae built from upstream resources get a 24-hour delay automatically. There is **no** user-facing knob; the issue requesting one was closed as not planned.
-- **`pip`** silently no-ops on releases older than `26.1`: the `PIP_UPLOADED_PRIOR_TO` env variable is unrecognized and ignored. Treat the gate as "best effort" until `mpm` learns to refuse injection on a stale pip (see future directions).
+- **`pipx`** delegates to whichever pip lives inside its managed virtualenvs. If that pip predates `26.1` (or pipx routes resolution through `uv` instead), `PIP_UPLOADED_PRIOR_TO` is silently ignored. `mpm` has no clean way to inspect pipx's internal resolver, so treat the pipx gate as best-effort.
 - **`yarn-berry`**: the gate works in Berry `≥ 4.10`, but Yarn Berry removed `yarn global`, so `mpm`'s `yarn-berry` handler only implements `search`. Onboarding `npmMinimalAgeGate` would not change anything reachable through `mpm`.
 - **`apt`, `snap`, `fwupd`** all have *structural* delays (Debian's migration windows, Snap risk channels, LVFS staged deployment) rather than per-version age gates. They're marked N/A because the underlying ecosystem solves the problem in a different shape.
 - **The Arch AUR helpers (`pacaur`, `paru`, `yay`)** and most distro front-ends inherit whatever delay the underlying repository / AUR provides; none of them ship a dedicated cooldown setting.
@@ -108,18 +108,13 @@ The table below is the source of truth for which managers `mpm` can gate today a
 
 Distro and system managers (`apt`, `dnf`, `pacman`, `brew`, ...) generally have no per-upstream publish date attached to a package version: their version string is the distro maintainer's package build, not the upstream release, and the threat model differs (curated repositories with their own staging and review). The concept does not cleanly map. These managers are listed in the support table as N/A.
 
-### npm and `min-release-age` coexistence
-
-`mpm` enforces the cooldown for `npm` by injecting `npm_config_before`. On `npm` 11.x releases predating [`npm/cli#9368`](https://github.com/npm/cli/pull/9368), combining `before` with a `min-release-age` setting already present in the user's `.npmrc` raises an error. Either upgrade `npm` or pick one of the two mechanisms.
-
 ### Read-only consistency
 
 The `outdated` report is not filtered by the cooldown on unsupported managers, so it may list versions that the subsequent `upgrade` would skip. For supported managers the same environment variable also affects `outdated`, so the report and the upgrade stay consistent.
 
 ## Possible future directions
 
-- **Detect the underlying `pip` version at runtime.** Today `mpm` injects `PIP_UPLOADED_PRIOR_TO` unconditionally; older pip releases silently ignore it and the gate becomes a no-op, which is the worst failure mode for a security control. Probing `python -m pip --version` and refusing injection below `26.1` (or bumping the manager's `requirement` outright) closes the false-security window.
-- **Route stale pip through `uv pip`.** For users stuck on pip `<26.1`, `mpm` could borrow `uv`'s resolver (`uv pip install --exclude-newer`) when `uv` is present, giving sound transitive-correct enforcement without reimplementing one.
+- **Detect `pipx`'s internal pip (or uv) at runtime.** `mpm`'s `pip` manager has a hard `>=26.1.0` floor, but `pipx` maintains its own virtualenvs whose pip may be older or whose resolution may be routed through `uv` (where the right env var is `UV_EXCLUDE_NEWER` instead of `PIP_UPLOADED_PRIOR_TO`). Probing the resolver per venv would let `mpm` refuse to advertise enforcement when the underlying pip is stale.
 - **Onboard mechanisms as they ship upstream.** Several managers have active work that would slot into the [`cooldown_env_var`](#how-it-works) framework as a one-line addition once released: Composer ([#12692](https://github.com/composer/composer/pull/12692)), Bundler / RubyGems ([#9576](https://github.com/ruby/rubygems/pull/9576)), Cargo (stabilization of `-Zmin-publish-age`, [#17009](https://github.com/rust-lang/cargo/issues/17009)), dnf5 ([#2743](https://github.com/rpm-software-management/dnf5/issues/2743)), Scoop ([#6513](https://github.com/ScoopInstaller/Scoop/issues/6513)), winget ([#6178](https://github.com/microsoft/winget-cli/issues/6178)), VS Code ([#316867](https://github.com/microsoft/vscode/issues/316867)).
 - **Advisory mode for `outdated` on unsupported managers.** `mpm` could query each package registry directly (PyPI, RubyGems, crates.io, ...) to annotate `outdated` with a "safe latest" column: purely informational, no install-side enforcement. This avoids the transitive-resolution trap while still being useful. It requires a new HTTP client surface and a state directory for date caching, neither of which `mpm` has today.
 - **Block-mode for bundled-artifact managers** (`snap`, `flatpak`, `vscode`, `mas`). These install self-contained artifacts with no separate transitive resolution at install time, so a "refuse if fresher than the cutoff" check would be sound without a resolver. The bottleneck is per-store API support for per-version publish dates.
@@ -127,6 +122,6 @@ The `outdated` report is not filtered by the cooldown on unsupported managers, s
 ## Prior art
 
 - [uv `exclude-newer`](https://docs.astral.sh/uv/reference/settings/#exclude-newer) — the model for the Python ecosystem.
-- [npm `before`](https://docs.npmjs.com/cli/v11/using-npm/config#before) and its newer companion `min-release-age` (shipped in `npm` 11.10).
+- [npm `min-release-age`](https://docs.npmjs.com/cli/v11/using-npm/config#min-release-age), shipped in `npm` 11.10.
 - [Renovate `minimumReleaseAge`](https://docs.renovatebot.com/configuration-options/#minimumreleaseage) — delays dependency PRs by a configurable period.
 - William Woodruff, [*We should all be using dependency cooldowns*](https://blog.yossarian.net/2025/11/21/We-should-all-be-using-dependency-cooldowns).

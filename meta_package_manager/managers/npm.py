@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import json
+import math
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -49,29 +50,41 @@ class NPM(PackageManager):
 
     platforms = ALL_PLATFORMS
 
-    requirement = ">=4.0.0"
+    requirement = ">=11.10.0"
+    """`11.10.0 <https://github.com/npm/cli/releases/tag/v11.10.0>`_ is the first
+    version to ship ``min-release-age``, the purpose-built release-age gate mpm uses
+    for the supply-chain cooldown (see :py:attr:`cooldown_env_var`). Older npm
+    releases silently ignore the env var, so the floor avoids advertising a gate that
+    does nothing.
+    """
 
-    cooldown_env_var = "npm_config_before"
-    """npm honors a release-age cooldown through its ``before`` resolver option.
+    cooldown_env_var = "npm_config_min-release-age"
+    """npm honors a release-age cooldown through its ``min-release-age`` resolver
+    option.
 
     npm maps any ``npm_config_<key>`` environment variable to a config setting, so
-    ``npm_config_before`` sets ``before`` without touching the user's ``.npmrc``.
-    With ``before`` set, npm resolves dependencies as they stood at that instant and
-    ignores any version published afterwards, which covers ``install`` and ``update``.
-    npm parses the RFC 3339 timestamp produced by the default
-    :py:meth:`cooldown_env_value`.
+    ``npm_config_min-release-age`` sets ``min-release-age`` without touching the
+    user's ``.npmrc``. Once set, npm refuses to resolve any package version younger
+    than the configured age, which covers ``install`` and ``update`` along with their
+    transitive dependencies. The hyphenated env var passes cleanly through Python's
+    :py:func:`subprocess.Popen` ``env=`` mapping (shells that reject ``export
+    foo-bar=baz`` are not involved).
 
-    ``before`` is preferred over the newer ``min-release-age`` setting because it has
-    shipped for far longer and needs no unit conversion.
+    :py:meth:`cooldown_env_value` is overridden below to emit an integer number of
+    days, the unit ``min-release-age`` expects.
 
-    .. caution::
-        On npm 11.x releases predating `npm/cli#9368
-        <https://github.com/npm/cli/pull/9368>`_, combining ``before`` with a
-        ``min-release-age`` entry already present in the user's ``.npmrc`` raises an
-        error. The two coexist on newer npm.
-
-    See https://docs.npmjs.com/cli/using-npm/config#before.
+    See https://docs.npmjs.com/cli/v11/using-npm/config#min-release-age.
     """
+
+    def cooldown_env_value(self) -> str:
+        """Render :py:attr:`cooldown` as an integer day count for npm's
+        ``min-release-age``.
+
+        Sub-day cooldowns round up so the gate over-protects rather than silently
+        collapses to ``0`` (the "no cooldown" sentinel).
+        """
+        assert self.cooldown is not None
+        return str(math.ceil(self.cooldown.total_seconds() / 86400))
 
     pre_args = (
         # Operates in "global" mode, so that packages are installed into the

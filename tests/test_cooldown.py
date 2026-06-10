@@ -76,7 +76,7 @@ def test_duration_invalid(value):
 @pytest.mark.parametrize(
     ("manager_class", "env_var"),
     (
-        (NPM, "npm_config_before"),
+        (NPM, "npm_config_min-release-age"),
         (Pip, "PIP_UPLOADED_PRIOR_TO"),
         (Pipx, "PIP_UPLOADED_PRIOR_TO"),
         (UV, "UV_EXCLUDE_NEWER"),
@@ -99,8 +99,9 @@ def test_unsupported_managers_lack_cooldown(manager_class):
     assert manager.cooldown_env() == {}
 
 
-@pytest.mark.parametrize("manager_class", (NPM, Pip, Pipx, UV, UVX))
-def test_supported_managers_inject_cutoff_env(manager_class):
+@pytest.mark.parametrize("manager_class", (Pip, Pipx, UV, UVX))
+def test_timestamp_based_managers_inject_cutoff(manager_class):
+    """Managers whose env var expects an RFC 3339 cutoff timestamp."""
     manager = manager_class()
     # No cooldown means no injection.
     assert manager.cooldown_env() == {}
@@ -112,6 +113,26 @@ def test_supported_managers_inject_cutoff_env(manager_class):
     now = datetime.now(tz=timezone.utc)
     # The cutoff sits roughly one cooldown in the past (a minute of slack).
     assert abs((now - cutoff) - timedelta(days=7)) < timedelta(minutes=1)
+
+
+@pytest.mark.parametrize(
+    ("cooldown", "expected_days"),
+    (
+        (timedelta(days=7), "7"),
+        (timedelta(weeks=2), "14"),
+        (timedelta(days=1), "1"),
+        # Sub-day durations round up to avoid silently disabling the gate.
+        (timedelta(hours=12), "1"),
+        (timedelta(hours=25), "2"),
+        (timedelta(seconds=1), "1"),
+    ),
+)
+def test_npm_injects_integer_days(cooldown, expected_days):
+    """npm's ``min-release-age`` expects an integer count of days, not a timestamp."""
+    manager = NPM()
+    assert manager.cooldown_env() == {}
+    manager.cooldown = cooldown
+    assert manager.cooldown_env() == {"npm_config_min-release-age": expected_days}
 
 
 def test_cooldown_permits_without_cooldown():

@@ -84,6 +84,7 @@ def operation_matrix() -> tuple[str, str]:
     headers = [
         "Package manager",
         "Version",
+        "Cooldown",
     ]
 
     # Footnotes are used to details the OSes covered by each platform group.
@@ -115,6 +116,7 @@ def operation_matrix() -> tuple[str, str]:
             f"[`{mid}`]({m.homepage_url})"
             + ("" if not m.deprecated else f" [⚠️]({m.deprecation_url})"),
             (m.requirement or "").replace("<", r"\<"),
+            "✓" if m.supports_cooldown else "",
         ]
         line.extend(
             p_obj.icon if m.platforms.issuperset(extract_members(p_obj)) else ""
@@ -124,7 +126,7 @@ def operation_matrix() -> tuple[str, str]:
         table.append(line)
 
     # Set each column alignment.
-    alignments = ["left", "left"]
+    alignments = ["left", "left", "center"]
     alignments.extend(["center"] * len(MAIN_PLATFORMS))
     alignments.extend(["center"] * len(Operations))
 

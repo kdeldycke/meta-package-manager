@@ -26,6 +26,7 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | Non-interactive                                          |   ✓   |       ✓        |       ✓       |              |              |      ✓       |
 | Dry-run                                                  |   ✓   |       ✓        |       ✓       |              |              |              |
 | Sudo elevation                                           |   ✓   |       ✓        |       ✓       |              |              |              |
+| Supply-chain cooldown                                    |   ✓   |                |               |              |              |              |
 | Desktop notifications                                    |       |       ✓        |               |              |              |              |
 | Bash auto-completion                                     |   ✓   |                |               |              |              |              |
 | Zsh auto-completion                                      |   ✓   |                |               |              |              |              |

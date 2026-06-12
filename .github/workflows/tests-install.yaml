@@ -38,6 +38,15 @@ jobs:
 
   # https://formulae.brew.sh/formula/meta-package-manager
   # https://github.com/Homebrew/homebrew-core/blob/main/Formula/m/meta-package-manager.rb
+  #
+  # OS matrix tracks brew's own support floor, set by the
+  # `6.0.0 <https://brew.sh/2026/06/11/homebrew-6.0.0/>`_ release:
+  # - Linux: Ubuntu 24.04+ (`brew/pull/21761`). 22.04 is no longer supported
+  #   upstream and the matrix carries no 22.04 entry.
+  # - macOS: 15+. ``macos-26`` is the current latest GitHub runner; add
+  #   ``macos-27`` (Golden Gate) once GitHub ships a runner image.
+  # - Intel: ``macos-15-intel`` is the last Intel macOS runner. brew has
+  #   announced upcoming Intel deprecation; drop this row when brew flips.
   brew:
     name: "✅ brew (${{ matrix.os }})"
     strategy:

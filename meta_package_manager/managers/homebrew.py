@@ -249,6 +249,19 @@ class Homebrew(PackageManager):
                 }
               ]
             }
+
+        .. note::
+
+            Both the formula and cask payloads also carry ``pinned`` and
+            ``pinned_version`` fields. The formula payload has always emitted them;
+            the cask payload has emitted them since at least ``5.1.15`` but they only
+            became meaningful with Homebrew
+            `6.0.0 <https://brew.sh/2026/06/11/homebrew-6.0.0/>`_, which added
+            `brew pin <cask> <https://github.com/Homebrew/brew/pull/22276>`_ so casks
+            can now actually be pinned. ``mpm`` discards both fields today: pinned
+            packages still appear in ``mpm outdated`` output, and ``brew upgrade``
+            silently skips them at upgrade time. Track this gap if a future ``mpm``
+            release wants to surface or filter on pin state.
         """
         # Build up the list of CLI options.
         options = ["--json=v2"]

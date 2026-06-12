@@ -376,9 +376,40 @@ class Homebrew(PackageManager):
             if package_id not in matched_ids:
                 yield self.package(id=package_id)
 
+    def trust_tap(self, package_id: str) -> None:
+        """Trust the tap a third-party ``package_id`` belongs to.
+
+        Homebrew `6.0.0 <https://brew.sh/2026/06/11/homebrew-6.0.0/>`_ rejects code
+        from third-party taps until the tap (or each formula or cask) has been
+        explicitly trusted. Vanilla ``brew install`` would otherwise abort with a
+        ``tap trust is required`` warning when the snapshot pins a
+        ``user/tap/name`` package.
+
+        Only fully-qualified package IDs (``user/tap/name``) need this step:
+        core formulae and casks live on the trusted ``homebrew/core`` and
+        ``homebrew/cask`` taps. The tap itself is registered first (idempotent
+        if already tapped) so ``brew trust`` can resolve the formula or cask.
+        The ``--formula`` and ``--cask`` flag is supplied by the subclass's
+        :py:attr:`post_args`.
+
+        .. code-block:: shell-session
+
+            $ brew tap gromgit/fuse
+            $ brew trust gromgit/fuse/ntfs-3g-mac --formula
+        """
+        if package_id.count("/") != 2:
+            return
+        user, tap, _ = package_id.split("/", 2)
+        self.run_cli("tap", f"{user}/{tap}", auto_post_args=False)
+        self.run_cli("trust", package_id)
+
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package.
+
+        Tap-qualified IDs (``user/tap/name``) are routed through
+        :py:meth:`trust_tap` first so the install isn't rejected by Homebrew
+        6.0.0's tap-trust gate.
 
         .. code-block:: shell-session
 
@@ -400,6 +431,7 @@ class Homebrew(PackageManager):
             ==> Moving App 'Pngyu.app' to '/Applications/Pngyu.app'
             🍺  pngyu was successfully installed!
         """
+        self.trust_tap(package_id)
         return self.run_cli("install", "--quiet", package_id)
 
     def upgrade_all_cli(self) -> tuple[str, ...]:

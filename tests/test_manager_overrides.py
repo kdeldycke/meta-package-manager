@@ -542,7 +542,7 @@ def test_cli_opt_out_via_config(invoke, create_config, reset_overrides):
     assert "issues/new" not in result.stderr
 
 
-# dump_manager_overrides + dump-toml subcommand.
+# dump_manager_overrides + config-template subcommand.
 
 
 def test_dump_manager_overrides_skips_none_values():
@@ -574,7 +574,7 @@ def test_dump_manager_overrides_keys_are_alphabetical():
 
 
 @all_manager_ids
-def test_dump_toml_round_trips(manager_id):
+def test_config_template_round_trips(manager_id):
     """For every manager, dump → tomli_w → tomllib → converter yields the same
     value. Catches schema drift between :data:`OVERRIDABLE_FIELDS` converters
     and the live attribute types."""
@@ -591,9 +591,9 @@ def test_dump_toml_round_trips(manager_id):
         )
 
 
-def test_cli_dump_toml_one_manager(invoke):
-    """`mpm dump-toml <id>` produces a single parseable manager section."""
-    result = invoke("dump-toml", "winget")
+def test_cli_config_template_one_manager(invoke):
+    """`mpm config-template <id>` produces a single parseable manager section."""
+    result = invoke("config-template", "winget")
     assert result.exit_code == 0
     parsed = tomllib.loads(result.stdout)
     assert list(parsed["mpm"]["managers"]) == ["winget"]
@@ -602,35 +602,35 @@ def test_cli_dump_toml_one_manager(invoke):
     assert set(winget).issubset(OVERRIDABLE_FIELDS)
 
 
-def test_cli_dump_toml_multiple_managers(invoke):
-    """`mpm dump-toml <id1> <id2>` dumps each requested manager."""
-    result = invoke("dump-toml", "winget", "pip")
+def test_cli_config_template_multiple_managers(invoke):
+    """`mpm config-template <id1> <id2>` dumps each requested manager."""
+    result = invoke("config-template", "winget", "pip")
     assert result.exit_code == 0
     parsed = tomllib.loads(result.stdout)
     assert set(parsed["mpm"]["managers"]) == {"winget", "pip"}
 
 
-def test_cli_dump_toml_no_args_dumps_all_maintained(invoke):
+def test_cli_config_template_no_args_dumps_all_maintained(invoke):
     """With no positional args, every maintained manager appears."""
-    result = invoke("dump-toml")
+    result = invoke("config-template")
     assert result.exit_code == 0
     parsed = tomllib.loads(result.stdout)
     assert set(parsed["mpm"]["managers"]) == set(pool.maintained_manager_ids)
 
 
-def test_cli_dump_toml_unknown_manager_errors(invoke):
-    result = invoke("dump-toml", "definitely-not-a-manager")
+def test_cli_config_template_unknown_manager_errors(invoke):
+    result = invoke("config-template", "definitely-not-a-manager")
     assert result.exit_code != 0
     assert "definitely-not-a-manager" in result.stderr
 
 
-def test_cli_dump_toml_output_is_applicable(invoke, reset_overrides):
-    """End-to-end: pipe `mpm dump-toml <id>` output back through
+def test_cli_config_template_output_is_applicable(invoke, reset_overrides):
+    """End-to-end: pipe `mpm config-template <id>` output back through
     `apply_manager_overrides` and confirm the pool is unchanged."""
     manager = pool[OVERRIDE_TARGET]
     before = {field: getattr(manager, field) for field in OVERRIDABLE_FIELDS}
 
-    result = invoke("dump-toml", OVERRIDE_TARGET)
+    result = invoke("config-template", OVERRIDE_TARGET)
     assert result.exit_code == 0
     parsed = tomllib.loads(result.stdout)
     apply_manager_overrides(pool, parsed["mpm"]["managers"])

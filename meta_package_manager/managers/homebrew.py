@@ -613,6 +613,8 @@ class Brew(Homebrew):
 
     post_args = ("--formula",)
 
+    brewfile_entry_type = "brew"
+
 
 class Cask(Homebrew):
     name = "Homebrew Cask"
@@ -625,3 +627,5 @@ class Cask(Homebrew):
     cli_names = ("brew",)
 
     post_args = ("--cask",)
+
+    brewfile_entry_type = "cask"

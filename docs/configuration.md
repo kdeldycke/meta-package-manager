@@ -282,11 +282,11 @@ List-valued fields use **replace** semantics: an override fully supersedes the b
 
 ### Discover the override template
 
-Run `mpm dump-toml` to print the current overridable attributes of every maintained manager as a ready-to-paste config block. Pass one or more manager IDs to narrow the output:
+Run `mpm config-template` to print the current overridable attributes of every maintained manager as a ready-to-paste config block. Pass one or more manager IDs to narrow the output:
 
 ```shell-session
-$ mpm dump-toml winget > my-overrides.toml
-$ mpm dump-toml brew pip cargo
+$ mpm config-template winget > my-overrides.toml
+$ mpm config-template brew pip cargo
 ```
 
 The output lists every overridable field with its current value, so it doubles as the canonical reference for what each manager exposes. Prune the rows that don't apply and customize the rest. The output is valid TOML; redirect it directly into a config file or merge it into your existing `[mpm]` section.

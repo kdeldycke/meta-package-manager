@@ -152,6 +152,24 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     homepage_url: str | None = None
     """Home page of the project, only used in documentation for reference."""
 
+    brewfile_entry_type: ClassVar[str | None] = None
+    """Name of the Brewfile DSL entry type this manager maps to, or ``None`` if the
+    manager has no Brewfile equivalent.
+
+    Set by the subset of managers covered by Homebrew Bundle's DSL (``brew``, ``cask``,
+    ``mas``, ``vscode``, ``npm``, ``cargo``, ``uv``, ``winget``, ``flatpak``). Consumed
+    by :py:mod:`meta_package_manager.brewfile` when rendering the output of
+    ``mpm dump --brewfile``.
+    """
+
+    brewfile_skip_warning: ClassVar[str | None] = None
+    """Optional stderr warning emitted when this manager's installed packages are
+    excluded from a Brewfile dump.
+
+    Set on managers where silently dropping the entries would mislead the user. The
+    string supports a single ``{count}`` placeholder for the installed-package count.
+    """
+
     platforms: frozenset[Platform] | Group | Platform | Iterable[Platform | Group] = (
         frozenset()
     )
@@ -190,6 +208,20 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """
         kwargs.setdefault("manager_id", self.id)
         return Package(**kwargs)
+
+    def brewfile_entry(
+        self, package: Package
+    ) -> tuple[str, dict[str, object] | None] | None:
+        """Return ``(entry_name, entry_options)`` for a Brewfile line, or ``None``
+        to skip the package.
+
+        Default: emit :py:attr:`Package.id` as the entry name with no options.
+        Override on managers whose Brewfile DSL counterpart expects a different
+        shape: ``mas`` uses the app name with ``id: ADAM_ID``, ``flatpak`` adds
+        ``with: ["remote"]``. Only called when :py:attr:`brewfile_entry_type` is
+        set.
+        """
+        return package.id, None
 
     @cached_property
     def supported(self) -> bool:

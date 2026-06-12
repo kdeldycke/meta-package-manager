@@ -38,6 +38,8 @@ class VSCode(PackageManager):
     requirement = ">=1.60.0"
 
     cli_names = ("code",)
+
+    brewfile_entry_type = "vscode"
     """
     .. code-block:: shell-session
 
@@ -91,3 +93,13 @@ class VSCode(PackageManager):
 class VSCodium(VSCode):
     homepage_url = "https://vscodium.com"
     cli_names = ("codium",)
+
+    # Brewfile's `vscode` extension installs to VS Code only. Emitting VSCodium
+    # extensions under that entry type would silently misroute them; skip and
+    # warn the user via :py:attr:`brewfile_skip_warning`.
+    brewfile_entry_type = None
+    brewfile_skip_warning = (
+        "Skipping {count} VSCodium extension(s) in Brewfile output: brew "
+        "bundle has no `vscodium` entry type, and emitting them as `vscode` "
+        "would install them to VS Code instead of VSCodium."
+    )

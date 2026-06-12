@@ -54,6 +54,23 @@ class MAS(PackageManager):
         7.0.0
     """
 
+    brewfile_entry_type = "mas"
+
+    def brewfile_entry(self, package):
+        """Brewfile ``mas`` entries take the app's display name as the positional
+        argument and the Mac App Store numeric ID as the ``id:`` keyword.
+
+        Returns ``None`` (silently skip) for any package whose ID is not a numeric
+        adamID: that shape is impossible to round-trip through ``brew bundle``
+        without the ID, and a half-broken ``mas "Name"`` line would error at
+        install time.
+        """
+        try:
+            adam_id = int(package.id)
+        except (TypeError, ValueError):
+            return None
+        return package.name or package.id, {"id": adam_id}
+
     @staticmethod
     def _parse_json_stream(output: str) -> Iterator[dict]:
         """Parse mas ``--json`` output as a stream of concatenated JSON objects,

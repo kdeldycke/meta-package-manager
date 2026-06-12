@@ -64,9 +64,10 @@ from click_extra.table import (
     print_sorted_table,
 )
 from click_extra.theme import get_current_theme as theme
-from extra_platforms import reduce
+from extra_platforms import current_platform, reduce
 
 from . import __version__, bar_plugin
+from .brewfile import build_brewfile
 from .capabilities import Operations
 from .config import (
     MpmConfig,
@@ -1238,7 +1239,7 @@ def which(ctx, cli_names):
 
 
 @mpm.command(
-    name="dump-toml",
+    name="config-template",
     short_help="Print per-manager overrides as a TOML config template.",
     section=EXPLORE,
 )
@@ -1248,7 +1249,7 @@ def which(ctx, cli_names):
     nargs=-1,
 )
 @pass_context
-def dump_toml(ctx, manager_ids):
+def config_template(ctx, manager_ids):
     """Print the overridable attributes of one or more managers as a TOML config
     template.
 
@@ -1630,9 +1631,27 @@ def cleanup(ctx):
 
 
 @mpm.command(
-    aliases=["lock", "freeze", "snapshot"],
-    short_help="Save installed packages to a TOML file.",
+    aliases=["backup", "lock", "freeze", "snapshot"],
+    short_help="Snapshot installed packages to a TOML manifest or a Brewfile.",
     section=SNAPSHOTS,
+)
+@option(
+    "--toml",
+    "output_format",
+    flag_value="toml",
+    default=True,
+    help="Emit a TOML manifest with one section per manager. Default.",
+)
+@option(
+    "--brewfile",
+    "output_format",
+    flag_value="brewfile",
+    help=(
+        "Emit a Brewfile that `brew bundle install` can consume. Only managers "
+        "natively supported by brew bundle are included (brew, cask, mas, vscode, "
+        "npm, cargo, uv, winget, flatpak). Other managers are tallied in the "
+        "header and excluded from the output."
+    ),
 )
 @option(
     "--overwrite",
@@ -1640,73 +1659,103 @@ def cleanup(ctx):
     "--replace",
     is_flag=True,
     default=False,
-    help="Allow the provided TOML file to be silently wiped out if it already exists.",
+    help="Allow the output file to be silently wiped out if it already exists.",
+)
+@option(
+    "--header/--no-header",
+    "include_header",
+    default=True,
+    help="Include a metadata + warning comment block at the top of the output.",
 )
 @option(
     "--merge",
     is_flag=True,
     default=False,
-    help="Read the provided TOML file and update each entry with the version currently "
-    "installed on the system. Requires the [TOML_PATH] argument.",
+    help="TOML only. Read the provided file and add each new entry to it. "
+    "Requires the [OUTPUT_PATH] argument.",
 )
 @option(
     "--update-version",
     is_flag=True,
     default=False,
-    help="Read the provided TOML file and update each existing entry with the version "
-    "currently installed on the system. Requires the [TOML_PATH] argument.",
+    help="TOML only. Read the provided file and update each existing entry with "
+    "the version currently installed on the system. Requires the [OUTPUT_PATH] "
+    "argument.",
 )
 @argument(
-    "toml_path",
+    "output_path",
     type=file_path(writable=True, resolve_path=True, allow_dash=True),
     default="-",
 )
 @pass_context
-def backup(ctx, overwrite, merge, update_version, toml_path):
-    """Dump the list of installed packages to a TOML file.
+def dump(ctx, output_format, overwrite, include_header, merge, update_version, output_path):
+    """Dump installed packages to a TOML manifest or a Brewfile.
 
-    By default the generated TOML content is displayed directly in the console output.
-    So `mpm backup` is the same as a call to `mpm backup -`. To have the result written
-    in a file on disk, specify the output file like so: `mpm backup packages.toml`.
+    By default emits TOML, one section per manager (one entry per package, keyed
+    by package ID, with the installed version as the value). Pass ``--brewfile``
+    to emit a Brewfile compatible with ``brew bundle install``.
 
-    Files produced by this subcommand can be safely consumed by `mpm restore`.
+    With no [OUTPUT_PATH] argument, writes to stdout. TOML files are readable by
+    ``mpm restore``.
 
-    Sections of the TOML file will be named after the manager ID. Sections are ordered in
-    the same order as the manager selection priority. Each section will contain a list of
-    package IDs and their installed version.
+    ``--merge`` and ``--update-version`` operate on an existing TOML file; both
+    require the [OUTPUT_PATH] argument and neither is valid with ``--brewfile``.
     """
-    if is_stdout(toml_path):
+    # --merge / --update-version are TOML-only.
+    if output_format == "brewfile" and (merge or update_version):
+        logging.critical(
+            "--merge / --update-version cannot be combined with --brewfile.",
+        )
+        ctx.exit(2)
+    if merge and update_version:
+        logging.critical("--merge and --update-version are mutually exclusive.")
+        ctx.exit(2)
+
+    if output_format == "brewfile":
+        if is_stdout(output_path):
+            if overwrite:
+                logging.warning("Ignore the --overwrite/--force/--replace option.")
+            logging.info(f"Print Brewfile to {sys.stdout.name}")
+        else:
+            logging.info(f"Dump installed packages as a Brewfile into {output_path}")
+            if output_path.exists():
+                if overwrite:
+                    logging.warning("Target file exist and will be overwritten.")
+                else:
+                    logging.critical("Target file exist and will be overwritten.")
+                    ctx.exit(2)
+        _dump_brewfile(ctx, output_path, include_header=include_header)
+        return
+
+    # TOML path: preserve the existing `mpm backup` flag-validation flow so that
+    # scripts piping the log lines through INFO-level filtering keep working.
+    if is_stdout(output_path):
         if merge:
             logging.critical(
-                "--merge requires the [TOML_PATH] argument to point to a file.",
+                "--merge requires the [OUTPUT_PATH] argument to point to a file.",
             )
             ctx.exit(2)
         if update_version:
             logging.critical(
-                "--update-version requires the [TOML_PATH] argument to point to a "
-                "file.",
+                "--update-version requires the [OUTPUT_PATH] argument to point "
+                "to a file.",
             )
             ctx.exit(2)
         if overwrite:
             logging.warning("Ignore the --overwrite/--force/--replace option.")
         logging.info(f"Print installed package list to {sys.stdout.name}")
-
     else:
-        if merge and update_version:
-            logging.critical("--merge and --update-version are mutually exclusive.")
-            ctx.exit(2)
-
         if merge:
-            logging.info(f"Merge all installed packages into {toml_path}")
+            logging.info(f"Merge all installed packages into {output_path}")
         elif update_version:
             logging.info(
                 f"Update in-place all versions of installed packages "
-                f"found in {toml_path}",
+                f"found in {output_path}",
             )
         else:
-            logging.info(f"Dump all installed packages into {toml_path}")
+            logging.info(f"Dump all installed packages into {output_path}")
 
-        if toml_path.exists():
+        if output_path.exists():
             if overwrite:
                 logging.warning("Target file exist and will be overwritten.")
             else:
@@ -1722,73 +1771,135 @@ def backup(ctx, overwrite, merge, update_version, toml_path):
             logging.critical("--update-version requires an existing file.")
             ctx.exit(2)
 
-        if toml_path.suffix.lower() != ".toml":
+        if output_path.suffix.lower() != ".toml":
             logging.critical("Target file is not a TOML file.")
             ctx.exit(2)
 
-    installed_data = {}
-    fields = (
-        "id",
-        "installed_version",
+    _dump_toml(
+        ctx,
+        output_path,
+        include_header=include_header,
+        merge=merge,
+        update_version=update_version,
     )
+
+
+def _dump_toml(
+    ctx,
+    output_path,
+    *,
+    include_header: bool,
+    merge: bool = False,
+    update_version: bool = False,
+) -> None:
+    """Render the installed inventory as a TOML manifest.
+
+    Supports the same three modes the historical ``mpm backup`` exposed: a
+    one-shot dump, ``--merge`` (add new entries to an existing file), and
+    ``--update-version`` (refresh the version of entries already in the file).
+    Callers are expected to have validated flag combinations and output-path
+    constraints upstream.
+    """
+    installed_data: dict[str, dict[str, str]] = {}
+    fields = ("id", "installed_version")
+
     if merge or update_version:
-        installed_data = tomllib.loads(toml_path.read_text(encoding="utf-8"))
+        installed_data = tomllib.loads(output_path.read_text(encoding="utf-8"))
 
-    # Leave some metadata as comment.
-    content = (
-        f"# Generated by mpm v{__version__}.\n"
-        f"# Timestamp: {datetime.now(tz=timezone.utc).isoformat()}.\n\n"
-    )
-    # Create one section for each manager.
+    content = ""
+    if include_header:
+        content = (
+            f"# Generated by mpm v{__version__}.\n"
+            f"# Timestamp: {datetime.now(tz=timezone.utc).isoformat()}.\n\n"
+        )
+
     for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
-        logging.info(f"Dumping packages from {theme().invoked_command(manager.id)}...")
-
+        logging.info(
+            f"Dumping packages from {theme().invoked_command(manager.id)}...",
+        )
         try:
             packages = tuple(packages_asdict(manager.installed, fields))
         except CLIError:
             logging.warning(
-                f"Could not list installed packages "
-                f"from {theme().invoked_command(manager.id)}."
+                f"Could not list installed packages from "
+                f"{theme().invoked_command(manager.id)}.",
             )
             packages = ()
-
         for pkg in packages:
-            # Only update version in that mode if the package is already referenced
-            # into original TOML file.
             if update_version:
                 if pkg["id"] in installed_data.get(manager.id, {}):
                     installed_data[manager.id][pkg["id"]] = str(
                         pkg["installed_version"],
                     )
-            # Insert installed package in data structure for standard dump and merge
-            # mode.
             else:
                 installed_data.setdefault(manager.id, {})[pkg["id"]] = str(
                     pkg["installed_version"],
                 )
-
-        # Re-sort package list.
         if installed_data.get(manager.id):
             installed_data[manager.id] = dict(
                 sorted(
                     installed_data[manager.id].items(),
-                    # Case-insensitive lexicographical sort on keys.
                     key=lambda i: (i[0].lower(), i[0]),
                 ),
             )
 
-    # Write each section separated by an empty line for readability.
     content += "\n".join(
-        (
-            tomli_w.dumps({manager_id: packages})
-            for manager_id, packages in installed_data.items()
-        )
+        tomli_w.dumps({manager_id: packages})
+        for manager_id, packages in installed_data.items()
     )
 
-    echo(content, file=prep_path(toml_path))
+    echo(content, file=prep_path(output_path))
 
     if ctx.obj.stats:
         print_stats(Counter({k: len(v) for k, v in installed_data.items()}))
+
+
+def _dump_brewfile(ctx, output_path, *, include_header: bool) -> None:
+    """Render the installed inventory as a Brewfile.
+
+    Filters selected managers down to those with a configured
+    :py:attr:`PackageManager.brewfile_entry_type`. Counts packages from skipped
+    managers so the header can show what was dropped, and emits a stderr
+    warning for any skipped manager that defines :py:attr:`brewfile_skip_warning`
+    (used by ``vscodium`` to flag the silent-misinstall risk).
+    """
+    mappable_managers = []
+    skipped_counts: Counter[str] = Counter()
+    for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
+        if manager.brewfile_entry_type is None:
+            try:
+                installed_count = sum(1 for _ in manager.installed)
+            except CLIError:
+                logging.warning(
+                    f"Could not list installed packages from "
+                    f"{theme().invoked_command(manager.id)}.",
+                )
+                continue
+            skipped_counts[manager.id] = installed_count
+            if installed_count and manager.brewfile_skip_warning:
+                logging.warning(
+                    manager.brewfile_skip_warning.format(count=installed_count),
+                )
+            continue
+        mappable_managers.append(manager)
+
+    content = build_brewfile(
+        mappable_managers,
+        include_header=include_header,
+        skipped_counts=skipped_counts,
+        platform=current_platform().name,
+    )
+
+    echo(content, file=prep_path(output_path), nl=False)
+
+    if ctx.obj.stats:
+        section_counts: Counter[str] = Counter()
+        for line in content.splitlines():
+            if not line or line.startswith("#"):
+                continue
+            entry_type = line.split(" ", 1)[0]
+            section_counts[entry_type] += 1
+        print_stats(section_counts)
 
 
 @mpm.command(

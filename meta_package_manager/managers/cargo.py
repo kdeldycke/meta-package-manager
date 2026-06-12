@@ -45,6 +45,8 @@ class Cargo(PackageManager):
         "--quiet",  # Do not print cargo log messages.
     )
 
+    brewfile_entry_type = "cargo"
+
     _INSTALLED_REGEXP = re.compile(
         r"^(?P<package_id>\S+)\s+v(?P<package_version>\S+):$",
     )

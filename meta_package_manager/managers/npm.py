@@ -58,6 +58,8 @@ class NPM(PackageManager):
     does nothing.
     """
 
+    brewfile_entry_type = "npm"
+
     cooldown_env_var = "npm_config_min-release-age"
     """npm honors a release-age cooldown through its ``min-release-age`` resolver
     option.

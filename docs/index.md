@@ -10,6 +10,8 @@ hide-toc: true
 :hidden:
 install
 usecase
+dump
+sbom
 cli-parameters
 configuration
 cooldown

@@ -37,6 +37,8 @@ class WinGet(PackageManager):
 
     requirement = ">=1.28.190"
 
+    brewfile_entry_type = "winget"
+
     post_args = ("--accept-source-agreements", "--disable-interactivity")
     """
     ``--accept-source-agreements``:

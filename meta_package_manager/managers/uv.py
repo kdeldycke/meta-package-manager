@@ -231,6 +231,14 @@ class UVX(UVBase):
 
     cli_names = ("uv",)
 
+    brewfile_entry_type = "uv"
+    """``uv`` is mapped to Homebrew Bundle's ``uv`` entry type, which installs via
+    ``uv tool install`` — the same mechanism :py:class:`UVX` wraps. The
+    pip-style :py:class:`UV` manager intentionally has no Brewfile mapping: its
+    packages live inside a Python environment, not as top-level tools, so the
+    semantics do not round-trip through ``brew bundle``.
+    """
+
     _INSTALLED_REGEXP = re.compile(r"^(?P<package_id>\S+)\s+v(?P<version>\S+)$")
     _OUTDATED_REGEXP = re.compile(
         r"^(?P<package_id>\S+)\s+v(?P<version>\S+)\s+\[latest:\s+(?P<latest>\S+)\]$",

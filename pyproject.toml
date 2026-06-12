@@ -155,7 +155,14 @@ dependencies = [
   # click-extra 7.16.1 fixes ConfigOption.params_template being mutated in place
   # by merge_default_map, which caused test isolation failures when a config
   # file was loaded in one test and affected subsequent tests.
-  "click-extra>=7.16.1",
+  # click-extra 7.18.0 introduces click_extra.man_page.write_manpages() and
+  # click_extra.wrap.resolve_target_command(), used by repomatic's release
+  # engine to produce the .1 tarball bundled with each GitHub release.
+  # click-extra 7.19.0 adds the `click_extra_manpages` Sphinx config (with
+  # `render_html` HTML siblings via mandoc/groff) and the
+  # `{click-extra-manpages}` directive that powers the live man-page index
+  # in docs/cli-parameters.md, plus the `manpages_url` cross-linking target.
+  "click-extra>=7.19",
   # extra-platforms 10.0.0 drops the distro dependency.
   "extra-platforms>=10",
   # packageurl-python 0.16.0 is the first to support Python 3.13. Required at
@@ -453,6 +460,17 @@ test-matrix.remove.os = [ "windows-11-arm" ]
 test-matrix.exclude = [ { python-version = "3.15t" } ]
 # Test plan for binary testing.
 test-plan.file = "./tests/cli-test-plan.yaml"
+# Render the mpm Click command tree as roff `.1` files and attach them as
+# `mpm-manpages.tar.gz` to every GitHub release (handled by the `manpages` job
+# in repomatic's `_release-engine.yaml`). The `module:function` form bypasses
+# the `mpm` console-script entry point, which dispatches through
+# `__main__:main` and lazy-imports the Click command beyond click-extra's
+# resolver reach.
+manpages.script = "meta_package_manager.cli:mpm"
+# Keep the asset short: defaults to `<package-name>-manpages.tar.gz` (i.e.
+# `meta-package-manager-manpages.tar.gz`) when omitted; `mpm-manpages.tar.gz`
+# matches the CLI name and shortens the asset URL on every release.
+manpages.asset-name = "mpm-manpages"
 # Extra label rules appended to repomatic's default labeller configurations.
 labels.extra-file-rules = """"🔌 bar-plugin":
   - changed-files:

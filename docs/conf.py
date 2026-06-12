@@ -169,3 +169,17 @@ html_show_sphinx = False
 
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
+
+# Render the mpm Click command tree as roff .1 pages alongside the HTML build.
+# Picked up by click_extra.sphinx, which writes one page per (sub)command into
+# <outdir>/man/, and (when mandoc or groff is on PATH) a browser-viewable
+# .html sibling next to each .1. See
+# https://kdeldycke.github.io/meta-package-manager/man/.
+click_extra_manpages = [
+    {"script": "meta_package_manager.cli:mpm", "prog_name": "mpm"},
+]
+
+# Wire Sphinx's standard :manpage: role to the HTML siblings generated above.
+# Lets docstrings reference subcommands as ``:manpage:`mpm-install(1)``` and
+# render them as proper hyperlinks in the docs.
+manpages_url = "man/{page}.{section}.html"

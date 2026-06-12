@@ -137,5 +137,5 @@ Brewfile's `flatpak` entry accepts a `with: ["remote_name"]` keyword for non-def
 ## See also
 
 - {doc}`sbom` &mdash; SPDX and CycloneDX SBOM exports for supply-chain inventory work.
-- {doc}`configuration` &mdash; per-manager `[mpm.managers.<id>]` config blocks and how to generate them with `mpm config-template`.
+- {doc}`overrides` &mdash; per-manager `[mpm.managers.<id>]` config blocks and how to generate them with `mpm config-template`.
 - {doc}`cooldown` &mdash; release-age gates that complement the snapshot workflow on the install side.

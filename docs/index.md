@@ -10,10 +10,13 @@ hide-toc: true
 :hidden:
 install
 usecase
+duplicates
+output-formats
 dump
 sbom
 cli-parameters
 configuration
+overrides
 cooldown
 bar-plugin
 falsehoods

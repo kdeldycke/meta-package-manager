@@ -44,11 +44,16 @@ class Homebrew(PackageManager):
     """Homebrew core is now compatible with `Linux and Windows Subsystem for Linux (WSL)
     2 <https://docs.brew.sh/Homebrew-on-Linux>`_."""
 
-    requirement = ">=2.7.0"
+    requirement = ">=6.0.0"
     """Vanilla ``brew`` and ``cask`` CLIs now shares the same version.
 
-    `2.7.0 <https://github.com/Homebrew/brew/releases/tag/2.7.0>`_ is the first release
+    `2.7.0 <https://github.com/Homebrew/brew/releases/tag/2.7.0>`_ was the first release
     to enforce the use of ``--cask`` option.
+
+    `6.0.0 <https://github.com/Homebrew/brew/releases/tag/6.0.0>`_ is the first
+    release in which ask mode is the default for ``brew install`` and ``brew upgrade``,
+    and the first to ship the ``--yes`` opt-out flag that mpm relies on for
+    non-interactive upgrades.
     """
 
     # Declare this manager as virtual, i.e. not tied to a real CLI.
@@ -449,8 +454,11 @@ class Homebrew(PackageManager):
             ==> Moving Screen Saver to '/Users/kde/Library/Screen Savers/Aerial.saver'.
             ==> Purging files for version 2.0.7 of Cask aerial
             🍺  aerial was successfully upgraded!
+
+        ``--yes`` skips the interactive confirmation prompt that ``brew`` shows by
+        default since ask mode became the default behaviour.
         """
-        return self.build_cli("upgrade", "--quiet")
+        return self.build_cli("upgrade", "--quiet", "--yes")
 
     @version_not_implemented
     def upgrade_one_cli(
@@ -477,8 +485,11 @@ class Homebrew(PackageManager):
             ==> Moving App 'dupeguru.app' to '/Applications/dupeguru.app'
             ==> Purging files for version 4.2.0 of Cask dupeguru
             🍺  dupeguru was successfully upgraded!
+
+        ``--yes`` skips the interactive confirmation prompt that ``brew`` shows by
+        default since ask mode became the default behaviour.
         """
-        return self.build_cli("upgrade", "--quiet", package_id)
+        return self.build_cli("upgrade", "--quiet", "--yes", package_id)
 
     def remove(self, package_id: str) -> str:
         """Removes a package.

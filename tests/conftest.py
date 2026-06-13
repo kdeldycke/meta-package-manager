@@ -219,6 +219,7 @@ PACKAGE_IDS = {
     "guix": "hello",
     "macports": "wget",
     "mas": "747648890",  # Telegram
+    "mise": "jq",
     "nix": "hello",
     "npm": "raven",
     "opkg": "enigma2-hotplug",

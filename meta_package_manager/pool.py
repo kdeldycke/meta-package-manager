@@ -43,6 +43,7 @@ from .managers.guix import Guix
 from .managers.homebrew import Brew, Cask
 from .managers.macports import MacPorts
 from .managers.mas import MAS
+from .managers.mise import Mise
 from .managers.nix import Nix
 from .managers.npm import NPM
 from .managers.opkg import OPKG
@@ -98,6 +99,7 @@ manager_classes = (
     Guix,
     MacPorts,
     MAS,
+    Mise,
     Nix,
     NPM,
     OPKG,

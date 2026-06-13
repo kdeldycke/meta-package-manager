@@ -188,6 +188,7 @@ def test_version_regexes(manager):
             "1.4.0-2563-gabc1234",
         ),
         ("guix", "guix (GNU Guix) abc1234\nCopyright (C) 2026\n", "abc1234"),
+        ("mise", "2026.6.3 macos-arm64 (2026-06-13)\n", "2026.6.3"),
         ("nix", "nix-env (Nix) 2.18.1\n", "2.18.1"),
         ("stew", "stew version v0.7.0\n", "0.7.0"),
         ("steamcmd", "Valve Corporation - version 1234567890\n", "1234567890"),

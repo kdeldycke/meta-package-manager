@@ -36,6 +36,15 @@
    :undoc-members:
 ```
 
+## meta_package_manager.managers.asdf module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.managers.asdf
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.managers.cargo module
 
 ```{eval-rst}

@@ -14,6 +14,7 @@ keywords = [
   "apm",
   "apt",
   "apt-mint",
+  "asdf",
   "atom",
   "brew",
   "cargo",
@@ -494,6 +495,12 @@ labels.extra-file-rules = """"🔌 bar-plugin":
       - meta_package_manager/managers/apm*
       - tests/*apm*
 
+"📦 manager: asdf":
+  - changed-files:
+    - any-glob-to-any-file:
+      - meta_package_manager/managers/asdf*
+      - tests/*asdf*
+
 "📦 manager: cargo":
   - changed-files:
     - any-glob-to-any-file:
@@ -713,6 +720,11 @@ labels.extra-content-rules = """"🔌 bar-plugin":
 "📦 manager: apm":
   - "apm"
   - "atom"
+
+"📦 manager: asdf":
+  - "asdf"
+  - "asdf-vm"
+  - "version manager"
 
 "📦 manager: cargo":
   - "cargo"

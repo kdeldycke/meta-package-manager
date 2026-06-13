@@ -9,6 +9,11 @@ color = "bfdadc"
 description = "apm"
 
 [[profiles.default.labels]]
+name = "📦 manager: asdf"
+color = "bfdadc"
+description = "asdf"
+
+[[profiles.default.labels]]
 name = "📦 manager: cargo"
 color = "bfdadc"
 description = "cargo"
@@ -77,6 +82,11 @@ description = "macports"
 name = "📦 manager: mas"
 color = "bfdadc"
 description = "mas"
+
+[[profiles.default.labels]]
+name = "📦 manager: mise"
+color = "bfdadc"
+description = "mise"
 
 [[profiles.default.labels]]
 name = "📦 manager: mpm"
@@ -191,7 +201,7 @@ description = "macOS"
 [[profiles.default.labels]]
 name = "🖥 platform: Unix"
 color = "bfd4f2"
-description = "Cygwin, GNU/Hurd, Haiku, IBM AIX, illumos, Solaris"
+description = "Cygwin, GNU/Hurd, Haiku, IBM AIX, IBM i, illumos, Solaris"
 
 [[profiles.default.labels]]
 name = "🖥 platform: Windows"

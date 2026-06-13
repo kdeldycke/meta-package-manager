@@ -78,6 +78,7 @@ Meta Package Manager,apk,1
 Meta Package Manager,apm,1
 Meta Package Manager,apt,1
 Meta Package Manager,apt-mint,1
+Meta Package Manager,asdf,1
 Meta Package Manager,brew,1
 Meta Package Manager,cargo,1
 Meta Package Manager,cask,1
@@ -95,6 +96,7 @@ Meta Package Manager,gem,1
 Meta Package Manager,guix,1
 Meta Package Manager,macports,1
 Meta Package Manager,mas,1
+Meta Package Manager,mise,1
 Meta Package Manager,nix,1
 Meta Package Manager,npm,1
 Meta Package Manager,opkg,1
@@ -140,9 +142,10 @@ Meta Package Manager,zypper,1
 | [`apm`](https://atom.io/packages) [⚠️](https://github.blog/2022-06-08-sunsetting-atom/) | >=1.0.0          |          |    🅱️     |      🐧       |  🍎   |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`apt`](https://wiki.debian.org/AptCLI)                                                 | >=1.0.0          |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`apt-mint`](https://github.com/kdeldycke/meta-package-manager/issues/52)               | >=1.0.0          |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
-| [`brew`](https://brew.sh)                                                               | >=2.7.0          |          |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`asdf`](https://asdf-vm.com)                                                           | >=0.16.0         |          |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |
+| [`brew`](https://brew.sh)                                                               | >=6.0.0          |          |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`cargo`](https://doc.rust-lang.org/cargo/)                                             | >=1.0.0          |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |            |    ✓     |     ✓     |           |               |    ✓     |        |           |
-| [`cask`](https://github.com/Homebrew/homebrew-cask)                                     | >=2.7.0          |          |           |               |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`cask`](https://github.com/Homebrew/homebrew-cask)                                     | >=6.0.0          |          |           |               |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`choco`](https://chocolatey.org)                                                       | >=2.0.0          |          |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`composer`](https://getcomposer.org)                                                   | >=1.4.0          |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`cpan`](https://www.cpan.org)                                                          | >=1.64           |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |          |        |           |
@@ -157,6 +160,7 @@ Meta Package Manager,zypper,1
 | [`guix`](https://guix.gnu.org)                                                          |                  |          |           |      🐧       |       |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`macports`](https://www.macports.org)                                                  | >=2.0.0          |          |           |               |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`mas`](https://github.com/mas-cli/mas)                                                 | >=7.0.0          |          |           |               |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
+| [`mise`](https://mise.jdx.dev)                                                          | >=2025.5.10      |          |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`nix`](https://nixos.org)                                                              | >=2.0.0          |          |           |      🐧       |  🍎   |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`npm`](https://www.npmjs.com)                                                          | >=11.10.0        |    ✓     |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`opkg`](https://git.yoctoproject.org/cgit/cgit.cgi/opkg/)                              | >=0.2.0          |          |    🅱️     |      🐧       |       |      ⨂      |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |           |
@@ -345,4 +349,4 @@ Other subcommands and options are documented in:
 
 [^linux]: Linux: Alpine Linux, ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, CloudLinux OS, Debian, Exherbo Linux, Fedora, Generic Linux, Gentoo Linux, Guix System, IBM PowerKVM, Kali Linux, KVM for IBM z Systems, Linux Mint, Mageia, Mandriva Linux, Manjaro Linux, NixOS, Nobara, openSUSE, openSUSE Tumbleweed, OpenWrt, Oracle Linux, Parallels, Pidora, Raspbian, RedHat Enterprise Linux, Rocky Linux, Scientific Linux, Slackware, SUSE Linux Enterprise Server, Tuxedo OS, Ubuntu, Ultramarine, Void Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer.
 
-[^unix]: Unix: Cygwin, GNU/Hurd, Haiku, IBM AIX, illumos, Solaris.<!-- operation-footnotes-end -->
+[^unix]: Unix: Cygwin, GNU/Hurd, Haiku, IBM AIX, IBM i, illumos, Solaris.<!-- operation-footnotes-end -->

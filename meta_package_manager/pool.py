@@ -28,6 +28,7 @@ from .capabilities import implements
 from .managers.apk import APK
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
+from .managers.asdf import ASDF
 from .managers.cargo import Cargo
 from .managers.chocolatey import Choco
 from .managers.composer import Composer
@@ -82,6 +83,7 @@ manager_classes = (
     APM,
     APT,
     APT_Mint,
+    ASDF,
     Brew,
     Cargo,
     Cask,

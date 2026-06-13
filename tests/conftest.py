@@ -202,6 +202,7 @@ PACKAGE_IDS = {
     "apm": "markdown-pdf",
     "apt": "wget",
     "apt-mint": "exiftool",
+    "asdf": "nodejs",
     "brew": "wget",
     "cargo": "colorous",
     "cask": "pngyu",

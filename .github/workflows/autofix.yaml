@@ -9,7 +9,7 @@ name: 🪄 Autofix
 jobs:
 
   autofix:
-    uses: kdeldycke/repomatic/.github/workflows/autofix.yaml@ea6835e39a5977a617e7d5c0309b9a6fdd2e9386 # v6.24.0
+    uses: kdeldycke/repomatic/.github/workflows/autofix.yaml@86620138002b34a18678953b6eb63d09cdc22ce6 # v6.25.1
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
       VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}

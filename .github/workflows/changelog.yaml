@@ -12,6 +12,8 @@ name: 🆙 Changelog & versions
       - "**/pyproject.toml"
       - ".github/workflows/*.yaml"
       - uv.lock
+      - "**/*.py"
+      - "docs/**"
   workflow_run:
     workflows:
       - "Build & release"
@@ -23,6 +25,6 @@ name: 🆙 Changelog & versions
 jobs:
 
   changelog:
-    uses: kdeldycke/repomatic/.github/workflows/changelog.yaml@ea6835e39a5977a617e7d5c0309b9a6fdd2e9386 # v6.24.0
+    uses: kdeldycke/repomatic/.github/workflows/changelog.yaml@86620138002b34a18678953b6eb63d09cdc22ce6 # v6.25.1
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}

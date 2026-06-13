@@ -41,16 +41,31 @@ jobs:
 
   metadata:
     name: 🧬 Project metadata
+    # Skipping this job propagates to every `needs: metadata` job below.
+    # The `pull_request.branches-ignore` filter above matches the PR's base
+    # branch (always `main`), not its head branch (see
+    # https://github.com/actions/runner/issues/1591), so the version-bump
+    # PRs slip through it and must be filtered here via `github.head_ref`.
+    #
+    # The `[changelog] Post-release bump ` commit prefix is intentionally
+    # *not* in this list: that push also carries the release commit, and
+    # the post-release-bump head commit is our only post-merge test of the
+    # release-frozen tree.
+    if: >
+      !contains(fromJSON('["major-version-increment","minor-version-increment","prepare-release"]'),
+      github.head_ref)
+      && !startsWith(github.event.head_commit.message || '', 'Bump major version to ')
+      && !startsWith(github.event.head_commit.message || '', 'Bump minor version to ')
     runs-on: ubuntu-slim
     outputs:
       metadata: ${{ steps.metadata.outputs.metadata }}
     steps:
-      - uses: actions/checkout@v6.0.2
-      - uses: astral-sh/setup-uv@v7.4.0
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
       - name: Run repomatic metadata
         id: metadata
         run: >
-          uvx --no-progress 'repomatic==6.11.2' metadata
+          uvx --no-progress 'repomatic==6.25.1' metadata
           --format github-json --output "$GITHUB_OUTPUT"
           test_matrix test_matrix_pr
 
@@ -82,7 +97,9 @@ jobs:
       # See: meta_package_manager/test_manager_homebrew.py::TestCask test.
       HOMEBREW_NO_INSTALL_FROM_API: "1"
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-tags: true
 
       ### Install or upgrade package managers on each platform, and made them
       ### ready to use for mpm.
@@ -354,7 +371,7 @@ jobs:
           choco install steamcmd --no-progress --yes --retry-count=3
 
       - name: Install UV
-        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
       - name: Force native ARM64 Python on Windows ARM64
         # Workaround for https://github.com/astral-sh/uv/issues/12906: uv defaults to x86_64 Python on ARM64 Windows,
         # relying on transparent emulation. Native extensions with Rust (e.g., test-results-parser from codecov-cli)

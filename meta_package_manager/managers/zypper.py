@@ -50,6 +50,8 @@ class Zypper(PackageManager):
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
     """
 
+    name = "openSUSE Zypper"
+
     homepage_url = "https://en.opensuse.org/Portal:Zypper"
 
     platforms = UNIX_WITHOUT_MACOS

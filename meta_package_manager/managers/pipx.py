@@ -32,6 +32,8 @@ if TYPE_CHECKING:
 
 
 class Pipx(PackageManager):
+    name = "Python pipx"
+
     homepage_url = "https://pipx.pypa.io"
 
     platforms = ALL_PLATFORMS

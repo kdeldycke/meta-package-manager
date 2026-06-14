@@ -42,6 +42,8 @@ class XBPS(PackageManager):
         <meta_package_manager.manager.PackageManager.cli_path>`.
     """
 
+    name = "Void XBPS"
+
     homepage_url = "https://github.com/void-linux/xbps"
 
     platforms = LINUX_LIKE

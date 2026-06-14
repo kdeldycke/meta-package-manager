@@ -38,6 +38,8 @@ class Guix(PackageManager):
         system configuration (Guix System ``config.scm``) is not covered.
     """
 
+    name = "GNU Guix"
+
     homepage_url = "https://guix.gnu.org"
 
     platforms = LINUX_LIKE

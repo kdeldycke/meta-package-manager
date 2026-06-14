@@ -76,7 +76,7 @@ def test_ascii_id(manager):
 def test_name(manager):
     """Check all managers have a name."""
     assert manager.name
-    assert set(manager.name).issubset(ascii_letters + digits + "' ")
+    assert set(manager.name).issubset(ascii_letters + digits + " '-")
 
 
 def test_unique_names():

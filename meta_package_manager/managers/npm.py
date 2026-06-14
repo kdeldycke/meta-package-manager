@@ -44,7 +44,7 @@ class NPM(PackageManager):
         in :issue:`1725`.
     """
 
-    name = "Node's npm"
+    name = "Node npm"
 
     homepage_url = "https://www.npmjs.com"
 

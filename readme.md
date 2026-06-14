@@ -293,36 +293,36 @@ $ mpm --all-managers managers
 ╭────────────┬────────────────────┬────────────────┬──────────────────────────────┬────────────┬───────────╮
 │ Manager ID │ Name               │ Supported      │ CLI                          │ Executable │ Version   │
 ├────────────┼────────────────────┼────────────────┼──────────────────────────────┼────────────┼───────────┤
-│ apm        │ Atom's apm         │ ✓              │ ✘ apm not found              │            │           │
-│ apt        │ APT                │ ✘ Linux only   │ ✓ /usr/bin/apt               │ ✓          │ ✘         │
-│ apt-mint   │ Linux Mint's apt   │ ✘ Linux only   │ ✓ /usr/bin/apt               │ ✓          │ ✘         │
+│ apm        │ Atom apm           │ ✓              │ ✘ apm not found              │            │           │
+│ apt        │ Debian apt         │ ✘ Linux only   │ ✓ /usr/bin/apt               │ ✓          │ ✘         │
+│ apt-mint   │ Linux Mint apt     │ ✘ Linux only   │ ✓ /usr/bin/apt               │ ✓          │ ✘         │
 │ brew       │ Homebrew Formulae  │ ✓              │ ✓ /opt/homebrew/bin/brew     │ ✓          │ ✓ 3.6.3   │
-│ cargo      │ Rust's cargo       │ ✓              │ ✓ /opt/homebrew/bin/cargo    │ ✓          │ ✓ 1.64.0  │
+│ cargo      │ Rust cargo         │ ✓              │ ✓ /opt/homebrew/bin/cargo    │ ✓          │ ✓ 1.64.0  │
 │ cask       │ Homebrew Cask      │ ✓              │ ✓ /opt/homebrew/bin/brew     │ ✓          │ ✓ 3.6.3   │
 │ choco      │ Chocolatey         │ ✘ Windows only │ ✘ choco not found            │            │           │
-│ composer   │ PHP's Composer     │ ✓              │ ✓ /opt/homebrew/bin/composer │ ✓          │ ✓ 2.4.2   │
-│ dnf        │ DNF                │ ✘ Linux only   │ ✘ dnf not found              │            │           │
-│ emerge     │ Emerge             │ ✘ Linux only   │ ✘ emerge not found           │            │           │
+│ composer   │ PHP Composer       │ ✓              │ ✓ /opt/homebrew/bin/composer │ ✓          │ ✓ 2.4.2   │
+│ dnf        │ Fedora DNF         │ ✘ Linux only   │ ✘ dnf not found              │            │           │
+│ emerge     │ Gentoo emerge      │ ✘ Linux only   │ ✘ emerge not found           │            │           │
 │ flatpak    │ Flatpak            │ ✘ Linux only   │ ✘ flatpak not found          │            │           │
-│ gem        │ Ruby Gems          │ ✓              │ ✓ /usr/bin/gem               │ ✓          │ ✓ 3.0.3.1 │
-│ mas        │ Mac AppStore       │ ✓              │ ✓ /opt/homebrew/bin/mas      │ ✓          │ ✓ 1.8.6   │
-│ npm        │ Node's npm         │ ✓              │ ✓ /opt/homebrew/bin/npm      │ ✓          │ ✓ 8.19.2  │
-│ opkg       │ OPKG               │ ✘ Linux only   │ ✘ opkg not found             │            │           │
-│ pacman     │ Pacman             │ ✘ Linux only   │ ✘ pacman not found           │            │           │
+│ gem        │ RubyGems           │ ✓              │ ✓ /usr/bin/gem               │ ✓          │ ✓ 3.0.3.1 │
+│ mas        │ Mac App Store      │ ✓              │ ✓ /opt/homebrew/bin/mas      │ ✓          │ ✓ 1.8.6   │
+│ npm        │ Node npm           │ ✓              │ ✓ /opt/homebrew/bin/npm      │ ✓          │ ✓ 8.19.2  │
+│ opkg       │ opkg               │ ✘ Linux only   │ ✘ opkg not found             │            │           │
+│ pacman     │ Arch Linux pacman  │ ✘ Linux only   │ ✘ pacman not found           │            │           │
 │ pacstall   │ Pacstall           │ ✘ Linux only   │ ✘ pacstall not found         │            │           │
-│ paru       │ Paru               │ ✘ Linux only   │ ✘ paru not found             │            │           │
-│ pip        │ Pip                │ ✓              │ ✓ ~/.pyenv/shims/python3     │ ✓          │ ✓ 22.2.2  │
-│ pipx       │ Pipx               │ ✓              │ ✓ /opt/homebrew/bin/pipx     │ ✓          │ ✓ 1.1.0   │
+│ paru       │ Arch Linux paru    │ ✘ Linux only   │ ✘ paru not found             │            │           │
+│ pip        │ Python pip         │ ✓              │ ✓ ~/.pyenv/shims/python3     │ ✓          │ ✓ 22.2.2  │
+│ pipx       │ Python pipx        │ ✓              │ ✓ /opt/homebrew/bin/pipx     │ ✓          │ ✓ 1.1.0   │
 │ scoop      │ Scoop              │ ✘ Windows only │ ✘ scoop not found            │            │           │
 │ sdkman     │ SDKMAN             │ ✓              │ ✘ sdkman-init.sh not found   │            │           │
 │ snap       │ Snap               │ ✘ Linux only   │ ✘ snap not found             │            │           │
-│ steamcmd   │ Valve Steam        │ ✓              │ ✘ steamcmd not found         │            │           │
+│ steamcmd   │ Valve SteamCMD     │ ✓              │ ✘ steamcmd not found         │            │           │
 │ vscode     │ Visual Studio Code │ ✓              │ ✓ /opt/homebrew/bin/code     │ ✓          │ ✓ 1.71.2  │
 │ yarn       │ Yarn Classic       │ ✓              │ ✓ /opt/homebrew/bin/yarn     │ ✓          │ ✓ 1.22.19 │
 │ yarn-berry │ Yarn Berry         │ ✓              │ ✓ /opt/homebrew/bin/yarn     │ ✓          │ ✗ 1.22.19 │
-│ yay        │ Yay                │ ✘ Linux only   │ ✘ yay not found              │            │           │
-│ yum        │ YUM                │ ✘ Linux only   │ ✘ yum not found              │            │           │
-│ zypper     │ Zypper             │ ✘ Linux only   │ ✘ zypper not found           │            │           │
+│ yay        │ Arch Linux yay     │ ✘ Linux only   │ ✘ yay not found              │            │           │
+│ yum        │ Fedora YUM         │ ✘ Linux only   │ ✘ yum not found              │            │           │
+│ zypper     │ openSUSE Zypper    │ ✘ Linux only   │ ✘ zypper not found           │            │           │
 ╰────────────┴────────────────────┴────────────────┴──────────────────────────────┴────────────┴───────────╯
 ```
 

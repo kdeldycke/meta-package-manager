@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 
 class FWUPD(PackageManager):
-    name = "Linux Vendor Firmware Service"
+    name = "Linux fwupd"
 
     homepage_url = "https://fwupd.org"
 

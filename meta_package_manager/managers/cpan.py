@@ -45,7 +45,7 @@ class CPAN(PackageManager):
         suppressed by the ``PERL_MM_USE_DEFAULT`` environment variable.
     """
 
-    name = "Perl's CPAN"
+    name = "Perl CPAN"
 
     homepage_url = "https://www.cpan.org"
 

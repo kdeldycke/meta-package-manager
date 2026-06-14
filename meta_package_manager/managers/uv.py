@@ -98,6 +98,8 @@ class UVBase(PackageManager):
 class UV(UVBase):
     """Python package manager using uv pip commands."""
 
+    name = "Python uv"
+
     @property
     def installed(self) -> Iterator[Package]:
         """Fetch installed packages.
@@ -221,6 +223,8 @@ class UVX(UVBase):
 
     Like ``pipx``, but uses ``uv tool`` commands.
     """
+
+    name = "Python uvx"
 
     homepage_url = "https://docs.astral.sh/uv/guides/tools/"
 

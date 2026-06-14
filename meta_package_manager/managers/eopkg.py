@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 
 class EOPKG(PackageManager):
-    name = "Solus package manager"
+    name = "Solus eopkg"
 
     homepage_url = "https://github.com/getsolus/eopkg/"
 

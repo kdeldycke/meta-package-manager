@@ -53,6 +53,8 @@ class ASDF(PackageManager):
         through a ``.tool-versions`` file does not surface as outdated.
     """
 
+    name = "asdf"
+
     homepage_url = "https://asdf-vm.com"
 
     platforms = LINUX_LIKE, MACOS

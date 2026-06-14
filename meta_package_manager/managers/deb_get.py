@@ -39,7 +39,7 @@ class Deb_Get(PackageManager):
         and removal, so all operations that modify the system require ``sudo``.
     """
 
-    name = "Deb Get"
+    name = "deb-get"
 
     homepage_url = "https://github.com/wimpysworld/deb-get"
 

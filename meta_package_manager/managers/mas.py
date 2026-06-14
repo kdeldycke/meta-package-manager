@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 
 class MAS(PackageManager):
-    name = "Mac AppStore"
+    name = "Mac App Store"
 
     homepage_url = "https://github.com/mas-cli/mas"
 

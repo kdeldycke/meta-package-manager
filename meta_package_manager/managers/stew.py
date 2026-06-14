@@ -42,6 +42,8 @@ class Stew(PackageManager):
         uses ``owner/repo`` format for install.
     """
 
+    name = "stew"
+
     homepage_url = "https://github.com/marwanhawari/stew"
 
     platforms = LINUX_LIKE, MACOS, ALL_WINDOWS

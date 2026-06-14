@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 
 class Cargo(PackageManager):
-    name = "Rust's cargo"
+    name = "Rust cargo"
 
     homepage_url = "https://doc.rust-lang.org/cargo/"
 

@@ -40,6 +40,8 @@ class Emerge(PackageManager):
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
     """
 
+    name = "Gentoo emerge"
+
     homepage_url = "https://wiki.gentoo.org/wiki/Portage#emerge"
 
     platforms = UNIX_WITHOUT_MACOS

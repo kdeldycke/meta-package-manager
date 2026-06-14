@@ -60,7 +60,7 @@ it, but every tool and consumer in the wild assumes this default.
 
 
 class PKG(PackageManager):
-    name = "FreeBSD System Manager"
+    name = "FreeBSD pkg"
 
     homepage_url = "https://github.com/freebsd/pkg"
 
@@ -507,7 +507,7 @@ class Ports(PackageManager):
     # Removal goes through the shared install database, identical to PKG.
     _pkg = Delegate(PKG)
 
-    name = "FreeBSD Ports Tree"
+    name = "FreeBSD Ports Collection"
 
     homepage_url = "https://www.freebsd.org/ports/"
 

@@ -34,7 +34,7 @@ class SteamCMD(PackageManager):
     <https://github.com/dgibbs64/SteamCMD-Commands-List/blob/master/steamcmd_commands.txt>`_
     """
 
-    name = "Valve Steam"
+    name = "Valve SteamCMD"
 
     homepage_url = "https://developer.valvesoftware.com/wiki/SteamCMD"
 

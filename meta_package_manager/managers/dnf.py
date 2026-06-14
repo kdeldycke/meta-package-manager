@@ -36,6 +36,8 @@ class DNF(PackageManager):
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
     """
 
+    name = "Fedora DNF"
+
     homepage_url = "https://github.com/rpm-software-management/dnf"
 
     platforms = UNIX_WITHOUT_MACOS
@@ -222,6 +224,8 @@ class DNF(PackageManager):
 
 
 class DNF5(DNF):
+    name = "Fedora DNF5"
+
     homepage_url = "https://github.com/rpm-software-management/dnf5"
 
     requirement = ">=5.0.0"
@@ -238,6 +242,8 @@ class DNF5(DNF):
 
 class YUM(DNF):
     """Yum is dnf is yum."""
+
+    name = "Fedora YUM"
 
     homepage_url = "http://yum.baseurl.org"
 

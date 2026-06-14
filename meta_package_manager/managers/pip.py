@@ -51,6 +51,8 @@ class Pip(PackageManager):
         :issue:`1725`.
     """
 
+    name = "Python pip"
+
     homepage_url = "https://pip.pypa.io"
 
     platforms = ALL_PLATFORMS

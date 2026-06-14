@@ -64,14 +64,14 @@ packages:
   filesAnalyzed: false
   name: bundler
   primaryPackagePurpose: INSTALL
-  supplier: 'Organization: Ruby Gems'
+  supplier: 'Organization: RubyGems'
   versionInfo: 2.4.22
 - SPDXID: SPDXRef-Package-gem-libxml-ruby
   downloadLocation: https://www.example.com
   filesAnalyzed: false
   name: libxml-ruby
   primaryPackagePurpose: INSTALL
-  supplier: 'Organization: Ruby Gems'
+  supplier: 'Organization: RubyGems'
   versionInfo: 4.1.2
 (...)
 relationships:

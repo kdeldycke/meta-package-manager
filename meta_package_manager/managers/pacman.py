@@ -33,6 +33,8 @@ if TYPE_CHECKING:
 class Pacman(PackageManager):
     """See command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta."""
 
+    name = "Arch Linux pacman"
+
     homepage_url = "https://wiki.archlinux.org/title/pacman"
 
     platforms = UNIX_WITHOUT_MACOS
@@ -212,6 +214,8 @@ class Pacman(PackageManager):
 class Pacaur(Pacman):
     """``Pacaur`` wraps ``pacman`` and shadows its options."""
 
+    name = "Arch Linux pacaur"
+
     homepage_url = "https://github.com/E5ten/pacaur"
 
     requirement = ">=4.0.0"
@@ -228,6 +232,8 @@ class Pacaur(Pacman):
 
 class Paru(Pacman):
     """``paru`` wraps ``pacman`` and shadows its options."""
+
+    name = "Arch Linux paru"
 
     homepage_url = "https://github.com/Morganamilo/paru"
 
@@ -246,6 +252,8 @@ class Paru(Pacman):
 
 class Yay(Pacman):
     """``yay`` wraps ``pacman`` and shadows its options."""
+
+    name = "Arch Linux yay"
 
     homepage_url = "https://github.com/Jguer/yay"
 

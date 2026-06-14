@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 
 class Composer(PackageManager):
-    name = "PHP's Composer"
+    name = "PHP Composer"
 
     homepage_url = "https://getcomposer.org"
 

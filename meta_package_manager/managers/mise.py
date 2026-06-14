@@ -56,6 +56,8 @@ class Mise(PackageManager):
         those entries.
     """
 
+    name = "mise"
+
     homepage_url = "https://mise.jdx.dev"
 
     platforms = ALL_PLATFORMS

@@ -73,7 +73,7 @@
   exit_code: 0
   strip_ansi: true
   stdout_regex_matches: >-
-    cargo,Rust's cargo,✓,✓ \S+,✓,✓ \S+\n
+    cargo,Rust cargo,✓,✓ \S+,✓,✓ \S+\n
 
 # Same as above, but without colors.
 # XXX Windows has issues with ANSI colors, so we skip this test on Windows:
@@ -130,7 +130,7 @@
   # So we force the ANSI stripping.
   strip_ansi: true
   stdout_regex_matches:
-    - cargo,Rust's cargo,✓,✓ \S+,✓,✓ \S+\n
+    - cargo,Rust cargo,✓,✓ \S+,✓,✓ \S+\n
 
 # Check some common packages are reported as installed in CSV format (Linux).
 - cli_parameters: --table-format csv installed

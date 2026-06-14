@@ -31,6 +31,8 @@ if TYPE_CHECKING:
 
 
 class OPKG(PackageManager):
+    name = "opkg"
+
     homepage_url = "https://git.yoctoproject.org/cgit/cgit.cgi/opkg/"
 
     platforms = UNIX_WITHOUT_MACOS

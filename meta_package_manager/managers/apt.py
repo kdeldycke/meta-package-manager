@@ -40,6 +40,8 @@ class APT(PackageManager):
     See other command equivalences at: https://wiki.archlinux.org/title/Pacman/Rosetta
     """
 
+    name = "Debian apt"
+
     homepage_url = "https://wiki.debian.org/AptCLI"
 
     platforms = UNIX_WITHOUT_MACOS
@@ -292,7 +294,7 @@ class APT_Mint(APT):
     Exactly the same as its parent but implement specific version extraction.
     """
 
-    name = "Linux Mint's apt"
+    name = "Linux Mint apt"
 
     homepage_url = "https://github.com/kdeldycke/meta-package-manager/issues/52"
 

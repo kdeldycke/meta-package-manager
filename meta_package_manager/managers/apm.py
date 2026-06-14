@@ -43,7 +43,7 @@ class APM(PackageManager):
     manager as deprecated.
     """
 
-    name = "Atom's apm"
+    name = "Atom apm"
 
     homepage_url = "https://atom.io/packages"
 

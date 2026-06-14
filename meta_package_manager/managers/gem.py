@@ -54,7 +54,7 @@ class Gem(PackageManager):
         uncomment it and save.
     """
 
-    name = "Ruby Gems"
+    name = "RubyGems"
 
     homepage_url = "https://rubygems.org"
 

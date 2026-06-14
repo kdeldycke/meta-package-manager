@@ -49,6 +49,8 @@ class SFSU(PackageManager):
     # Mutating operations delegate to the Scoop CLI.
     _scoop = Delegate(Scoop)
 
+    name = "Scoop sfsu"
+
     homepage_url = "https://github.com/winpax/sfsu"
 
     platforms = WINDOWS

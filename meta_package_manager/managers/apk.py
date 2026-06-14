@@ -36,6 +36,8 @@ class APK(PackageManager):
     Documentation: https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper
     """
 
+    name = "Alpine apk"
+
     homepage_url = "https://gitlab.alpinelinux.org/alpine/apk-tools"
 
     platforms = LINUX_LIKE

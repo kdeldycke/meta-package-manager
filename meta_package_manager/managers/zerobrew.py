@@ -44,7 +44,7 @@ class ZeroBrew(PackageManager):
         Homebrew formula repository instead.
     """
 
-    name = "ZeroBrew"
+    name = "zerobrew"
 
     homepage_url = "https://github.com/lucasgelfond/zerobrew"
 

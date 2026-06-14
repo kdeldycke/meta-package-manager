@@ -169,6 +169,28 @@ class TestSBOM(CLISubCommandTests):
         assert json_content
         assert json_content["spdxVersion"] == "SPDX-2.3"
 
+    def test_unrecognized_extension_without_format(self, invoke, subcmd):
+        """A target path with no recognized extension must fail before any
+        package collection happens, with an actionable message pointing at
+        ``--format``.
+        """
+        result = invoke(subcmd, "help")
+        assert result.exit_code == 2
+        assert "Cannot guess export format from 'help'" in result.stderr
+        assert "Use --format to pick one of: json, xml, yaml, tag, rdf." in result.stderr
+        # The collection loop must not have run.
+        assert "Export packages from" not in result.stderr
+
+    def test_unrecognized_extension_with_explicit_format(self, invoke, subcmd, tmp_path):
+        """An explicit ``--format`` overrides extension auto-detection, even when
+        the filename carries no recognizable suffix.
+        """
+        target = tmp_path / "help"
+        result = invoke(subcmd, "--format", "json", str(target))
+        assert result.exit_code == 0
+        json_content = json.loads(target.read_text(encoding="utf-8"))
+        assert json_content["spdxVersion"] == "SPDX-2.3"
+
     @pytest.mark.parametrize("export_format", (None, *ExportFormat))
     @pytest.mark.parametrize("standard_name", ("SPDX", "CycloneDX"))
     def test_output_to_file(self, invoke, subcmd, export_format, standard_name):

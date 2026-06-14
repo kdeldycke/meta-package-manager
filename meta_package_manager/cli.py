@@ -2046,13 +2046,17 @@ def sbom(ctx, spdx, export_format, overwrite, export_path):
     else:
         guessed_format = SBOM.autodetect_export_format(export_path)
         if not export_format:
-            export_format = guessed_format
-        else:
-            if export_format != guessed_format:
+            if not guessed_format:
+                supported = ", ".join(f.value for f in ExportFormat)
                 logging.critical(
-                    f"Selected {export_format} does not match file extension."
+                    f"Cannot guess export format from {export_path.name!r}. "
+                    f"Use --format to pick one of: {supported}."
                 )
                 ctx.exit(2)
+            export_format = guessed_format
+        elif guessed_format and export_format != guessed_format:
+            logging.critical(f"Selected {export_format} does not match file extension.")
+            ctx.exit(2)
 
     sbom_class: type[SBOM]
     if spdx:

@@ -663,6 +663,44 @@ def mpm(
     if suggest_contribs:
         ctx.call_on_close(partial(print_contribution_hints, ctx))
 
+    # Snapshot per-manager error counts so the close-time summary below only
+    # reports errors that accumulated during *this* invocation. The pool is a
+    # module-level singleton and survives across calls (e.g. in test runs that
+    # exercise multiple invocations in the same process), so a naive non-empty
+    # check would warn about errors from prior runs.
+    initial_error_counts = {mid: len(m.cli_errors) for mid, m in pool.register.items()}
+
+    def summarize_cli_errors():
+        """End-of-run hint when underlying CLIs reported errors.
+
+        Captured stderr is logged at DEBUG (see
+        :py:func:`CLIExecutor.run_cli`) so a default-verbosity run no longer
+        floods the table with gem extension warnings, mas Spotlight chatter,
+        etc. This summary preserves the "something went sideways" signal in
+        one line, without replicating the noise.
+
+        Skipped at DEBUG verbosity (the stderr already appeared inline) and
+        in serialization formats (logging is disabled and ``cli_errors``
+        ships in the structured payload anyway).
+        """
+        if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
+            return
+        failed = sorted(
+            mid
+            for mid, manager in pool.register.items()
+            if len(manager.cli_errors) > initial_error_counts.get(mid, 0)
+        )
+        if not failed:
+            return
+        ids = ", ".join(map(theme().invoked_command, failed))
+        plural = "managers" if len(failed) > 1 else "manager"
+        logging.warning(
+            f"{len(failed)} {plural} reported errors during this run "
+            f"({ids}); re-run with --verbosity DEBUG for details.",
+        )
+
+    ctx.call_on_close(summarize_cli_errors)
+
     # Normalize to None if no manager selectors have been used. This prevent the
     # pool.select_managers() method to iterate over an empty population of managers to
     # choose from.

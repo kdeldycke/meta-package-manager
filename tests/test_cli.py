@@ -230,6 +230,82 @@ class TestManagerSelection(InspectCLIOutput):
         assert result.exit_code == 0
         self.check_manager_selection(result, {manager_id})
 
+    @pytest.mark.skip(reason="Generated config file is not isolated from other tests.")
+    def test_conf_file_overrides_defaults(self, invoke, create_config):
+        conf_path = create_config("conf.toml", TEST_CONF_FILE)
+        result = invoke("--config", str(conf_path), "managers", color=False)
+        assert result.exit_code == 0
+        self.check_manager_selection(result, ("uv", "npm", "gem"))
+        assert "debug: " in result.stderr
+
+    @pytest.mark.skip(reason="Generated config file is not isolated from other tests.")
+    def test_conf_file_cli_override(self, invoke, create_config):
+        conf_path = create_config("conf.toml", TEST_CONF_FILE)
+        result = invoke(
+            "--config",
+            str(conf_path),
+            "--verbosity",
+            "CRITICAL",
+            "managers",
+            color=False,
+        )
+        assert result.exit_code == 0
+        self.check_manager_selection(result, ("uv", "npm", "gem"))
+        assert "error: " not in result.stderr
+        assert "warning: " not in result.stderr
+        assert "info: " not in result.stderr
+        assert "debug: " not in result.stderr
+
+    @pytest.mark.skip(reason="Generated config file is not isolated from other tests.")
+    def test_conf_and_parameter_mix_keep_order(self, invoke, create_config):
+        conf_path = create_config(
+            "conf.toml",
+            dedent("""\
+                [mpm]
+                npm = true
+                flatpak = false
+                manager = ["gem"]
+                cargo = false
+                pipx = true
+                """),
+        )
+        result = invoke(
+            "--uv", "--no-pip", "--config", str(conf_path), "managers", color=False
+        )
+        assert result.exit_code == 0
+        self.check_manager_selection(result, ("uv", "npm", "gem", "pipx"))
+
+
+class TestSelectorPrecedence(InspectCLIOutput):
+    """Verify how ``-m``/``--<id>`` (keep) and ``-x``/``--no-<id>`` (drop) compose
+    and override each other for operational subcommands.
+
+    Uses ``installed --dry-run`` as the stub: it is read-only, fast (the per-
+    manager list invocation is replaced by a printed command line), works on
+    every platform, and crucially still honors both keep and drop selectors.
+    The ``managers`` subcommand intentionally ignores drops for the diagnostic
+    inventory view, so it cannot stand in for general selection-precedence
+    tests anymore.
+    """
+
+    @staticmethod
+    def evaluate_signals(mid: str, stdout: str, stderr: str) -> Iterator[bool]:
+        """Detect whether ``mpm`` reached a manager during the invocation.
+
+        Available managers appear in the ``N package total (brew: 0, ...)``
+        stats line; the manager id is matched by its ``<mid>: <count>`` slice
+        instead of by tailing the stream because at ``--verbosity DEBUG`` a
+        few ``Reset <logger> to WARNING`` lines trail the stats line.
+        Unavailable ones surface as ``Skip <mid> manager: ...``: that message
+        is demoted to DEBUG for implicit selection, so test invocations pass
+        ``--verbosity DEBUG`` to keep both signals visible.
+        """
+        yield from (
+            bool(re.search(rf"\b{re.escape(mid)}: \d+", stderr)),
+            f"Skip {mid} manager:" in stderr,
+            f"{mid} does not implement " in stderr,
+        )
+
     @pytest.mark.parametrize(
         ("args", "expected"),
         (
@@ -299,62 +375,19 @@ class TestManagerSelection(InspectCLIOutput):
             ),
         ),
     )
-    def test_manager_selection(self, invoke, args, expected):
-        result = invoke(*args, "managers")
+    def test_selector_precedence(self, invoke, args, expected):
+        result = invoke("--verbosity", "DEBUG", *args, "--dry-run", "installed")
         if expected is None:
             assert result.exit_code == 2
             assert not result.stdout
-            assert result.stderr.endswith(
-                "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
-            )
+            # ``critical: No manager selected.`` is checked anywhere in the
+            # stream, not at the end: ``--verbosity DEBUG`` makes click_extra
+            # append a couple of ``Reset <logger>`` trailing lines. ANSI codes
+            # are stripped because color presence depends on the runner.
+            assert "critical: No manager selected." in strip_ansi(result.stderr)
         else:
             assert result.exit_code == 0
             self.check_manager_selection(result, expected)
-
-    @pytest.mark.skip(reason="Generated config file is not isolated from other tests.")
-    def test_conf_file_overrides_defaults(self, invoke, create_config):
-        conf_path = create_config("conf.toml", TEST_CONF_FILE)
-        result = invoke("--config", str(conf_path), "managers", color=False)
-        assert result.exit_code == 0
-        self.check_manager_selection(result, ("uv", "npm", "gem"))
-        assert "debug: " in result.stderr
-
-    @pytest.mark.skip(reason="Generated config file is not isolated from other tests.")
-    def test_conf_file_cli_override(self, invoke, create_config):
-        conf_path = create_config("conf.toml", TEST_CONF_FILE)
-        result = invoke(
-            "--config",
-            str(conf_path),
-            "--verbosity",
-            "CRITICAL",
-            "managers",
-            color=False,
-        )
-        assert result.exit_code == 0
-        self.check_manager_selection(result, ("uv", "npm", "gem"))
-        assert "error: " not in result.stderr
-        assert "warning: " not in result.stderr
-        assert "info: " not in result.stderr
-        assert "debug: " not in result.stderr
-
-    @pytest.mark.skip(reason="Generated config file is not isolated from other tests.")
-    def test_conf_and_parameter_mix_keep_order(self, invoke, create_config):
-        conf_path = create_config(
-            "conf.toml",
-            dedent("""\
-                [mpm]
-                npm = true
-                flatpak = false
-                manager = ["gem"]
-                cargo = false
-                pipx = true
-                """),
-        )
-        result = invoke(
-            "--uv", "--no-pip", "--config", str(conf_path), "managers", color=False
-        )
-        assert result.exit_code == 0
-        self.check_manager_selection(result, ("uv", "npm", "gem", "pipx"))
 
 
 class CLISubCommandTests(InspectCLIOutput):

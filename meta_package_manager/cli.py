@@ -671,46 +671,63 @@ def mpm(
     if ctx.obj:
         user_selection = ctx.obj.get("managers_to_add", None)
         managers_to_remove = ctx.obj.get("managers_to_remove", None)
-    selection_string = (
-        " platform default"
-        if not user_selection
-        else "> " + " > ".join(map(theme().invoked_command, user_selection))
-    )
-    deselection_string = (
-        "None"
-        if not managers_to_remove
-        else ", ".join(map(theme().invoked_command, sorted(managers_to_remove)))
-    )
-    logging.info(f"User selection of managers by priority:{selection_string}")
-    logging.info(f"Managers dropped by user: {deselection_string}")
 
-    # Select the subset of manager to target, and apply manager-level options.
-    selected_managers = partial(
-        pool.select_managers,
-        keep=user_selection,
-        drop=managers_to_remove,
-        keep_deprecated=all_managers,
-        # Should we include auto-update packages or not?
-        ignore_auto_updates=ignore_auto_updates,
-        # Does the manager should raise on error or not.
-        stop_on_error=stop_on_error,
-        dry_run=dry_run,
-        timeout=timeout,
-        # Minimum release age gate and its fail-open escape hatch.
-        cooldown=cooldown,
-        allow_no_cooldown=allow_no_cooldown,
-    )
+    # Sentinel to print the selection summary on the first call only.
+    selection_logged = False
+
+    def selected_managers(**kwargs):
+        """Select the subset of managers to target, and apply manager-level options.
+
+        The selection summary is logged on the first call only, so subcommands that
+        never resolve the pool (like ``--help``) stay silent.
+        """
+        nonlocal selection_logged
+        if not selection_logged:
+            if user_selection:
+                selected = " > ".join(map(theme().invoked_command, user_selection))
+                logging.info(f"Selected managers (by priority): {selected}.")
+            else:
+                logging.info("Selected managers: platform defaults.")
+            if managers_to_remove:
+                dropped = ", ".join(
+                    map(theme().invoked_command, sorted(managers_to_remove))
+                )
+                logging.info(f"Dropped managers: {dropped}.")
+            else:
+                logging.info("Dropped managers: none.")
+            selection_logged = True
+        return pool.select_managers(
+            keep=user_selection,
+            drop=managers_to_remove,
+            keep_deprecated=all_managers,
+            # Should we include auto-update packages or not?
+            ignore_auto_updates=ignore_auto_updates,
+            # Does the manager should raise on error or not.
+            stop_on_error=stop_on_error,
+            dry_run=dry_run,
+            timeout=timeout,
+            # Minimum release age gate and its fail-open escape hatch.
+            cooldown=cooldown,
+            allow_no_cooldown=allow_no_cooldown,
+            **kwargs,
+        )
 
     # Load up current and new global options to the context for subcommand consumption.
     ctx.obj = namedtuple(
         "GlobalOptions",
         (
+            "all_managers",
+            "user_selection",
+            "user_drops",
             "selected_managers",
             "description",
             "sort_by",
             "stats",
         ),
         defaults=(
+            all_managers,
+            user_selection,
+            managers_to_remove,
             selected_managers,
             description,
             sort_by,
@@ -740,18 +757,35 @@ mpm.excluded_keywords = HelpKeywords(choices={"version"})  # type: ignore[attr-d
 
 
 @mpm.command(
-    short_help="List supported package managers and their location.",
+    short_help="List every registered package manager and check its presence "
+    "on the system.",
     section=EXPLORE,
 )
 @pass_context
 def managers(ctx):
-    """List all supported package managers and autodetect their presence on the
-    system."""
-    select_params = {
-        # Do not drop managers whose CLI was not found. Keep them to show off how
-        # mpm is reacting to the local platform.
-        "drop_not_found": False,
-    }
+    """List every package manager detected on the system.
+
+    Only reports by default all managers supported on the current platform. To include
+    unsupported and deprecated managers in the report, use the :option:`--all-managers`
+    flag.
+
+    User's own selection configuration are intentionally ignored, so a manager dropped
+    from regular operations is still visible here for troubleshooting. To narrow down the
+    report to a subset of managers, pass the same selectors as for other subcommands (e.g.
+    :option:`--pip` or :option:`--no-apt`).
+    """
+    if ctx.obj.user_drops:
+        dropped = ", ".join(map(theme().invoked_command, sorted(ctx.obj.user_drops)))
+        logging.info(f"Ignoring user exclusion of {dropped}.")
+    inventory = partial(
+        pool.select_managers,
+        keep=ctx.obj.user_selection,
+        drop=None,
+        keep_deprecated=ctx.obj.all_managers,
+        # Keep managers whose CLI was not found, to show how mpm reacts to the
+        # local platform.
+        drop_not_found=False,
+    )
 
     # Machine-friendly data rendering.
     table_format = ctx.meta["click_extra.table_format"]
@@ -768,7 +802,7 @@ def managers(ctx):
             "fresh",
             "available",
         )
-        for manager in ctx.obj.selected_managers(**select_params):
+        for manager in inventory():
             manager_data[manager.id] = {fid: getattr(manager, fid) for fid in fields}
             # Serialize errors at the last minute to gather all we encountered.
             manager_data[manager.id]["errors"] = list(
@@ -785,7 +819,7 @@ def managers(ctx):
 
     # Human-friendly content rendering.
     table = []
-    for manager in ctx.obj.selected_managers(**select_params):
+    for manager in inventory():
         # Build up the OS column content.
         os_infos = (
             theme().success(OK_GLYPH) if manager.supported else theme().error(KO_GLYPH)

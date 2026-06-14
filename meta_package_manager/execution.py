@@ -460,7 +460,16 @@ class CLIExecutor:
 
         Returns a parsed and normalized version in the form of a
         :py:class:`meta_package_manager.version.TokenizedString` instance.
+
+        Skipped on platforms where the manager is not supported, even if
+        :py:attr:`cli_path` resolved to an executable: that binary almost
+        certainly belongs to a different tool that happens to share the
+        same name (e.g. GNU ``make`` on macOS getting matched by the
+        FreeBSD ``ports`` manager), so probing it would either misreport
+        the version or surface confusing error output.
         """
+        if not self.supported:
+            return None
         if self.executable:
             output = self.run_cli(
                 self.version_cli_options,

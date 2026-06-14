@@ -42,17 +42,22 @@ class TestUpgrade(CLISubCommandTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (
-            f"warning: {mid} does not implement upgrade_all_cli." in stderr,
-            f"warning: {mid} does not implement {Operations.upgrade_all}." in stderr,
+            # Log-level prefix is omitted because Skip/does-not-implement are
+            # demoted to DEBUG for implicit selection and stay at WARNING/INFO
+            # for explicit ones (``mpm --<mid> upgrade``).
+            f"{mid} does not implement upgrade_all_cli." in stderr,
+            f"{mid} does not implement {Operations.upgrade_all}." in stderr,
             f"Upgrade all outdated packages from {mid}..." in stderr,
             bool(re.search(rf"Upgrade \S+ with {mid}\.\.\.", stderr)),
-            # Common "not found" message.
-            f"info: Skip {mid} manager:" in stderr,
+            f"Skip {mid} manager:" in stderr,
         )
 
     @pytest.mark.parametrize("all_option", ("--all", None))
     def test_all_managers_dry_run_upgrade_all(self, invoke, all_option):
-        result = invoke("--dry-run", "upgrade", all_option)
+        # ``--verbosity DEBUG`` makes the per-manager skip/does-not-implement
+        # messages reach stderr: at default verbosity they stay quiet because
+        # this invocation makes no explicit ``--<id>`` selection.
+        result = invoke("--verbosity", "DEBUG", "--dry-run", "upgrade", all_option)
         assert result.exit_code == 0
         if not all_option:
             assert "assume -A/--all option" in result.stderr
@@ -61,7 +66,7 @@ class TestUpgrade(CLISubCommandTests):
     @pytest.mark.destructive()
     @pytest.mark.parametrize("all_option", ("--all", None))
     def test_all_managers_upgrade_all(self, invoke, all_option):
-        result = invoke("upgrade", all_option)
+        result = invoke("--verbosity", "DEBUG", "upgrade", all_option)
         # Accept exit code 1: end-to-end destructive upgrades depend on the
         # health of every installed third-party manager, and CI runners
         # regularly surface transient backend failures (missing project files,

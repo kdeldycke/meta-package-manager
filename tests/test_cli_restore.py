@@ -43,13 +43,13 @@ class TestRestore(CLISubCommandTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (
-            f"warning: {mid} does not implement {Operations.install}." in stderr,
-            # Warning message for restore command.
+            # Log-level prefix is omitted because Skip/does-not-implement are
+            # demoted to DEBUG for implicit selection and stay at WARNING/INFO
+            # for explicit ones (``mpm --<mid> restore``).
+            f"{mid} does not implement {Operations.install}." in stderr,
             f"warning: No [{mid}] section found." in stderr,
-            # Restoring message.
             f"Restore {mid} packages..." in stderr,
-            # Common "not found" message.
-            f"info: Skip {mid} manager:" in stderr,
+            f"Skip {mid} manager:" in stderr,
         )
 
     @pytest.mark.destructive()
@@ -65,7 +65,9 @@ class TestRestore(CLISubCommandTests):
             ),
         )
 
-        result = invoke("--verbosity", "INFO", "restore", str(toml_path))
+        # ``--verbosity DEBUG`` surfaces the skip/does-not-implement messages
+        # for managers covered by the config but absent from the system.
+        result = invoke("--verbosity", "DEBUG", "restore", str(toml_path))
         assert result.exit_code == 0
         assert "all-managers.toml" in result.stderr
         self.check_manager_selection(result)

@@ -668,12 +668,18 @@ class CLIExecutor:
             output = dedent(strip_ansi(output).strip())
 
         # Log <stdout> and <stderr> output.
+        #
+        # Both streams capture the raw output of an external CLI, not mpm's
+        # own messages, so they go to DEBUG: callers running ``mpm outdated``
+        # do not want gem extension warnings, mas Spotlight chatter or yarn's
+        # missing-node error flooding the table they came to see. Failures
+        # still propagate either as a raised :py:class:`CLIError` (when
+        # ``must_succeed`` or ``stop_on_error`` is set) or via
+        # :py:attr:`cli_errors` for end-of-run summaries.
         if output:
             logging.debug(indent(output, INDENT))
         if error:
-            # Non-fatal error messages are logged as warnings.
-            log_func = logging.error if code else logging.warning
-            log_func(indent(error, INDENT))
+            logging.debug(indent(error, INDENT))
 
         # Non-successful run.
         if code and error:

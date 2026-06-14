@@ -282,6 +282,13 @@ class ManagerPool:
 
         Returns a generator producing a manager instance one after the other.
         """
+        # Track whether the caller passed an explicit keep list so we can pick
+        # informative log levels for downstream skip messages: explicit picks
+        # the user made (``--<id>`` flags) get loud levels; implicit defaults
+        # (``mpm outdated`` with no flags) get demoted to DEBUG to avoid
+        # flooding the output with one line per platform-default manager.
+        explicit_selection = keep is not None
+
         # Produce the default set of managers to consider if none have been
         # provided by the ``keep`` parameter.
         if keep is None:
@@ -309,7 +316,8 @@ class ManagerPool:
             # Check if operation is not implemented before calling `.available`. It
             # saves one call to the package manager CLI.
             if implements_operation and not implements(manager, implements_operation):
-                logging.warning(
+                logging.log(
+                    logging.WARNING if explicit_selection else logging.DEBUG,
                     f"{theme().invoked_command(manager_id)} "
                     f"does not implement {implements_operation}.",
                 )
@@ -318,7 +326,8 @@ class ManagerPool:
             # Filters out managers whose CLI was not found.
             if drop_not_found and not manager.available:
                 reason = manager.unavailable_reason or "unavailable"
-                logging.info(
+                logging.log(
+                    logging.INFO if explicit_selection else logging.DEBUG,
                     f"Skip {theme().invoked_command(manager_id)} manager: {reason}.",
                 )
                 continue

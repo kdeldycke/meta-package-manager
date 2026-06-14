@@ -1067,7 +1067,7 @@ requires-dist = [
     { name = "click-extra", extras = ["toml"], marker = "extra == 'toml'" },
     { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'" },
     { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
-    { name = "cyclonedx-python-lib", marker = "extra == 'sbom'", specifier = ">=11.2" },
+    { name = "cyclonedx-python-lib", marker = "extra == 'sbom'", specifier = ">=11.4" },
     { name = "extra-platforms", specifier = ">=10" },
     { name = "packageurl-python", specifier = ">=0.16" },
     { name = "spdx-tools", marker = "extra == 'sbom'", specifier = ">=0.8.2" },

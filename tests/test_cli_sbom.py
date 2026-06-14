@@ -43,9 +43,9 @@ def assert_valid_cyclonedx(content: str, export_format: ExportFormat) -> None:
     :py:mod:`meta_package_manager.sbom`.
     """
     if export_format == ExportFormat.JSON:
-        validator = JsonStrictValidator(SchemaVersion.V1_5)
+        validator = JsonStrictValidator(SchemaVersion.V1_7)
     else:
-        validator = make_schemabased_validator(OutputFormat.XML, SchemaVersion.V1_6)
+        validator = make_schemabased_validator(OutputFormat.XML, SchemaVersion.V1_7)
     errors = validator.validate_str(content)
     assert not errors, f"Invalid CycloneDX {export_format} export: {errors}"
 
@@ -223,7 +223,7 @@ class TestSBOM(CLISubCommandTests):
                     assert spdx_elem is not None
                     assert spdx_elem.text == "SPDX-2.3"
                 else:
-                    assert xml_content.tag == "{http://cyclonedx.org/schema/bom/1.6}bom"
+                    assert xml_content.tag == "{http://cyclonedx.org/schema/bom/1.7}bom"
 
             elif export_format == ExportFormat.YAML:
                 yaml_content = load(content, Loader=Loader)

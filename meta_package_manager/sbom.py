@@ -44,7 +44,7 @@ try:
     from cyclonedx.model.contact import OrganizationalEntity
     from cyclonedx.model.lifecycle import LifecyclePhase, PredefinedLifecycle
     from cyclonedx.output import make_outputter
-    from cyclonedx.output.json import JsonV1Dot5
+    from cyclonedx.output.json import JsonV1Dot7
     from cyclonedx.schema import OutputFormat, SchemaVersion
 except ImportError:
     cyclonedx_support = False
@@ -287,7 +287,7 @@ class SPDX(SBOM):
 class CycloneDX(SBOM):
     """Generates a CycloneDX document from a list of packages.
 
-    `CycloneDX 1.5 specifications <https://cyclonedx.org/docs/1.5>`_.
+    `CycloneDX 1.7 specifications <https://cyclonedx.org/docs/1.7>`_.
     """
 
     document: Bom
@@ -295,7 +295,7 @@ class CycloneDX(SBOM):
     def init_doc(self) -> None:
         """
         `CycloneDX document metadata specifications
-        <https://cyclonedx.org/docs/1.5/json/#metadata>`_.
+        <https://cyclonedx.org/docs/1.7/json/#metadata>`_.
         """
         gh_url = "https://github.com/kdeldycke/meta-package-manager"
         doc_url = "https://kdeldycke.github.io/meta-package-manager"
@@ -389,7 +389,7 @@ class CycloneDX(SBOM):
     def add_package(self, manager: PackageManager, package: Package) -> None:
         """
         `CycloneDX package metadata specifications
-        <https://cyclonedx.org/docs/1.5/json/#components>`_.
+        <https://cyclonedx.org/docs/1.7/json/#components>`_.
         """
         data = Component(
             name=package.id,
@@ -422,10 +422,10 @@ class CycloneDX(SBOM):
             ``tests/test_cli_sbom.py``.
         """
         if self.export_format == ExportFormat.JSON:
-            return JsonV1Dot5(self.document).output_as_string(indent=2)
+            return JsonV1Dot7(self.document).output_as_string(indent=2)
 
         if self.export_format == ExportFormat.XML:
-            writer = make_outputter(self.document, OutputFormat.XML, SchemaVersion.V1_6)
+            writer = make_outputter(self.document, OutputFormat.XML, SchemaVersion.V1_7)
             return writer.output_as_string(indent=2)
 
         raise ValueError(f"{self.export_format} not supported.")

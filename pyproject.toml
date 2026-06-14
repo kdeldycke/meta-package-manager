@@ -194,10 +194,12 @@ xml = [ "click-extra[xml]" ]
 # cyclonedx [validation] extra is intentionally omitted: schema validation
 # runs in the test suite (see tests/test_cli_sbom.py), which keeps
 # jsonschema, rfc3987-syntax, lark, and lxml out of the runtime install even
-# with `mpm[sbom]`.  cyclonedx-python-lib 11.2.0 is the first to support
-# Python 3.14; spdx-tools 0.8.2 is the first version we used to implement
-# SPDX support.
-sbom = [ "cyclonedx-python-lib>=11.2", "spdx-tools>=0.8.2" ]
+# with `mpm[sbom]`.  cyclonedx-python-lib 11.4.0 is the first to expose the
+# CycloneDX 1.7 schema (`JsonV1Dot7`, `SchemaVersion.V1_7`) that
+# `meta_package_manager.sbom.CycloneDX` targets, and is also new enough to
+# support Python 3.14; spdx-tools 0.8.2 is the first version we used to
+# implement SPDX support.
+sbom = [ "cyclonedx-python-lib>=11.4", "spdx-tools>=0.8.2" ]
 
 [project.scripts]
 mpm = "meta_package_manager.__main__:main"

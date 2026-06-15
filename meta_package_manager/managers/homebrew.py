@@ -221,9 +221,7 @@ class Homebrew(PackageManager):
             return
 
         try:
-            output = self.run_cli(
-                "info", "--json=v2", "--installed", must_succeed=True
-            )
+            output = self.run_cli("info", "--json=v2", "--installed", must_succeed=True)
         except Exception as exc:
             # If the bulk query fails, fall back to empty metadata for
             # every package; the renderer will emit minimal entries.
@@ -298,11 +296,15 @@ class Homebrew(PackageManager):
 
         checksums: list[Checksum] = []
         # The bottle entry for the current platform carries a SHA256.
-        bottle_files = (
-            ((formula.get("bottle") or {}).get("stable") or {}).get("files") or {}
-        )
+        bottle_files = ((formula.get("bottle") or {}).get("stable") or {}).get(
+            "files"
+        ) or {}
         for platform_payload in bottle_files.values():
-            sha = platform_payload.get("sha256") if isinstance(platform_payload, dict) else None
+            sha = (
+                platform_payload.get("sha256")
+                if isinstance(platform_payload, dict)
+                else None
+            )
             if sha:
                 checksums.append(Checksum(ChecksumAlgorithm.SHA256, sha))
                 break
@@ -316,7 +318,8 @@ class Homebrew(PackageManager):
             download_url = stable_url
 
         external_sbom_path = self._sbom_path_for_formula(
-            formula.get("name"), installed.get("version") or formula.get("versions", {}).get("stable")
+            formula.get("name"),
+            installed.get("version") or formula.get("versions", {}).get("stable"),
         )
 
         tap = formula.get("tap")
@@ -383,7 +386,9 @@ class Homebrew(PackageManager):
                 url="https://github.com/Homebrew/homebrew-cask",
             ),
             description=cask.get("desc"),
-            summary=cask.get("name", [None])[0] if isinstance(cask.get("name"), list) else cask.get("name"),
+            summary=cask.get("name", [None])[0]
+            if isinstance(cask.get("name"), list)
+            else cask.get("name"),
             dependencies=tuple(deps),
             checksums=tuple(checksums),
             extras=extras,

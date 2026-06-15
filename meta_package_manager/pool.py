@@ -180,7 +180,7 @@ class ManagerPool:
         ``[mpm.managers.<id>]``.
 
         Populated by :py:func:`meta_package_manager.config.apply_manager_overrides`.
-        Read by :py:meth:`_select_managers` to skip the global ``--<flag>`` defaults
+        Read by ``_select_managers`` to skip the global ``--<flag>`` defaults
         for fields the user has explicitly set per manager. Tracked separately from
         instance ``__dict__`` membership so the global defaults can still refresh
         fields that were previously set by an earlier ``_select_managers`` call but

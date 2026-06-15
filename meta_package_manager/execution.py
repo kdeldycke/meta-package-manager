@@ -468,7 +468,9 @@ class CLIExecutor:
         FreeBSD ``ports`` manager), so probing it would either misreport
         the version or surface confusing error output.
         """
-        if not self.supported:
+        # ``supported`` is declared on the ``PackageManager`` subclass, not on
+        # this mixin: mypy does not see it, but every concrete instance does.
+        if not self.supported:  # type: ignore[attr-defined]
             return None
         if self.executable:
             output = self.run_cli(

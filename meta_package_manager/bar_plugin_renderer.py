@@ -211,7 +211,7 @@ class BarPluginRenderer(MPMPlugin):
                 self.print_error(error_msg, submenu)
 
     def render(self, outdated_data) -> str:
-        """Wraps the :py:meth:`_render` function above to capture all ``print``
+        """Wraps the ``_render()`` method above to capture all ``print``
         statements."""
         capture = StringIO()
         print_capture = partial(print, file=capture)

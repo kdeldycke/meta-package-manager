@@ -16,12 +16,14 @@
 
 from __future__ import annotations
 
+import email.message
 import importlib.metadata
 import json
 import re
 import sys
 from functools import cached_property
 from pathlib import Path
+from typing import cast
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -44,7 +46,9 @@ if TYPE_CHECKING:
     from ..version import TokenizedString
 
 
-_DEP_SPEC_SPLIT_REGEX = re.compile(r"^(?P<name>[A-Za-z0-9_.\-]+)(?P<extras>\[[^\]]+\])?(?P<rest>.*)$")
+_DEP_SPEC_SPLIT_REGEX = re.compile(
+    r"^(?P<name>[A-Za-z0-9_.\-]+)(?P<extras>\[[^\]]+\])?(?P<rest>.*)$"
+)
 
 
 def _split_dep_spec(spec: str) -> tuple[str, str, str]:
@@ -99,7 +103,7 @@ class Pip(PackageManager):
     The flag excludes from resolution any distribution uploaded after the given
     instant, which covers ``install`` and ``upgrade`` (with transitive dependencies).
     pip parses the RFC 3339 timestamp produced by the default
-    :py:meth:`cooldown_env_value`.
+    :py:meth:`meta_package_manager.execution.CLIExecutor.cooldown_env_value`.
 
     See https://github.com/pypa/pip/issues/13674.
     """
@@ -252,9 +256,9 @@ class Pip(PackageManager):
 
         Maps ``Home-page`` / ``Project-URL`` lines into the portable
         ``homepage`` / ``vcs_url`` / ``issue_tracker_url`` slots, walks
-        ``Requires-Dist`` into typed :py:class:`Dependency` edges, and
-        promotes the upstream author or maintainer to
-        :py:class:`Originator`.
+        ``Requires-Dist`` into typed :py:class:`meta_package_manager.package.Dependency`
+        edges, and promotes the upstream author or maintainer to
+        :py:class:`meta_package_manager.package.Originator`.
         """
         package_list = list(packages)
         if not package_list:
@@ -278,7 +282,10 @@ class Pip(PackageManager):
         """Translate an ``importlib.metadata.Distribution`` into
         :py:class:`PackageMetadata`.
         """
-        meta = dist.metadata
+        # ``Distribution.metadata`` returns an ``email.message.Message`` at
+        # runtime, but the typeshed protocol omits ``.get()`` on the older
+        # Python versions we still support.
+        meta = cast("email.message.Message", dist.metadata)
 
         homepage = meta.get("Home-page") or None
         vcs_url = None
@@ -458,8 +465,8 @@ class Pip(PackageManager):
 
             Results are additionally filtered against ``meta-package-manager``'s
             own dependency tree to suppress false positives caused by Homebrew's
-            per-resource installation layout. See
-            :py:meth:`_own_dependency_names` and :issue:`1767`.
+            per-resource installation layout. See ``_own_dependency_names()``
+            and :issue:`1767`.
 
         .. code-block:: shell-session
 

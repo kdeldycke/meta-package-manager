@@ -19,6 +19,7 @@ from __future__ import annotations
 import shutil
 import subprocess
 from dataclasses import dataclass
+from typing import cast
 
 import pytest
 
@@ -30,6 +31,8 @@ from meta_package_manager.brewfile import (
     quote,
     tap_from_package_id,
 )
+from meta_package_manager.manager import PackageManager
+from meta_package_manager.managers.mas import MAS
 from meta_package_manager.package import Package
 
 
@@ -54,9 +57,23 @@ class _StubManager:
         return package.id, None
 
 
+def _as_managers(*stubs: _StubManager) -> list[PackageManager]:
+    """Cast a list of duck-typed stubs to satisfy ``build_brewfile``'s typed signature.
+
+    The stubs implement the subset of the :py:class:`PackageManager` API
+    ``build_brewfile`` actually exercises (``id``, ``brewfile_entry_type``,
+    ``installed``, ``brewfile_entry``). The cast keeps the test surface concise
+    without weakening :py:func:`build_brewfile`'s signature.
+    """
+    return cast("list[PackageManager]", list(stubs))
+
+
 def _pkg(manager_id: str, package_id: str, name: str | None = None) -> Package:
     return Package(
-        id=package_id, manager_id=manager_id, name=name, installed_version="1.0.0",
+        id=package_id,
+        manager_id=manager_id,
+        name=name,
+        installed_version="1.0.0",
     )
 
 
@@ -80,8 +97,7 @@ def test_format_entry_bare():
 
 def test_format_entry_with_scalar_int():
     assert (
-        format_entry("mas", "Xcode", {"id": 497799835})
-        == 'mas "Xcode", id: 497799835'
+        format_entry("mas", "Xcode", {"id": 497799835}) == 'mas "Xcode", id: 497799835'
     )
 
 
@@ -151,7 +167,7 @@ def test_build_brewfile_brew_cask_sorted_alphabetically():
         brewfile_entry_type="cask",
         installed_packages=(_pkg("cask", "rectangle"), _pkg("cask", "iterm2")),
     )
-    output = build_brewfile([brew_mgr, cask_mgr], include_header=False)
+    output = build_brewfile(_as_managers(brew_mgr, cask_mgr), include_header=False)
     lines = [ln for ln in output.splitlines() if ln.strip()]
     assert lines == [
         'brew "ack"',
@@ -170,7 +186,7 @@ def test_build_brewfile_emits_tap_lines_for_third_party_taps():
             _pkg("brew", "gromgit/fuse/ntfs-3g-mac"),
         ),
     )
-    output = build_brewfile([brew_mgr], include_header=False)
+    output = build_brewfile(_as_managers(brew_mgr), include_header=False)
     lines = [ln for ln in output.splitlines() if ln.strip()]
     assert 'tap "gromgit/fuse"' in lines
     # No tap line for the implicit homebrew/core.
@@ -183,7 +199,7 @@ def test_build_brewfile_skips_managers_without_entry_type():
         brewfile_entry_type=None,
         installed_packages=(_pkg("apt", "vim"),),
     )
-    output = build_brewfile([skipped], include_header=False)
+    output = build_brewfile(_as_managers(skipped), include_header=False)
     assert output.strip() == ""
 
 
@@ -194,7 +210,7 @@ def test_build_brewfile_header_records_skipped_counts():
         installed_packages=(_pkg("brew", "git"),),
     )
     output = build_brewfile(
-        [brew_mgr],
+        _as_managers(brew_mgr),
         include_header=True,
         skipped_counts={"apt": 841, "pip": 12},
         platform="macOS",
@@ -206,42 +222,36 @@ def test_build_brewfile_header_records_skipped_counts():
 
 def test_mas_brewfile_entry_uses_name_and_numeric_id():
     """``mas`` Brewfile entries take the app display name + ``id:`` keyword."""
-    from meta_package_manager.managers.mas import MAS
-
     package = Package(
         id="497799835",
         manager_id="mas",
         name="Xcode",
         installed_version="15.4",
     )
-    name, options = MAS.brewfile_entry(MAS, package)
+    name, options = MAS().brewfile_entry(package)
     assert name == "Xcode"
     assert options == {"id": 497799835}
 
 
 def test_mas_brewfile_entry_skips_non_numeric_id():
     """A mas Package without a numeric adamID cannot round-trip; skip it."""
-    from meta_package_manager.managers.mas import MAS
-
     package = Package(
         id="not-a-number",
         manager_id="mas",
         name="Mystery App",
         installed_version="1.0",
     )
-    assert MAS.brewfile_entry(MAS, package) is None
+    assert MAS().brewfile_entry(package) is None
 
 
 def test_mas_brewfile_entry_falls_back_to_id_when_name_missing():
     """A mas Package with no display name uses the adamID string as the entry."""
-    from meta_package_manager.managers.mas import MAS
-
     package = Package(
         id="497799835",
         manager_id="mas",
         installed_version="15.4",
     )
-    name, options = MAS.brewfile_entry(MAS, package)
+    name, options = MAS().brewfile_entry(package)
     assert name == "497799835"
     assert options == {"id": 497799835}
 
@@ -301,7 +311,7 @@ def test_build_brewfile_round_trip_format_is_parseable_by_ruby_inspect():
             _pkg("brew", "gromgit/fuse/ntfs-3g-mac"),
         ),
     )
-    output = build_brewfile([brew_mgr], include_header=False)
+    output = build_brewfile(_as_managers(brew_mgr), include_header=False)
     # Every non-empty data line must start with a known entry type followed by
     # a double-quoted string.
     for line in output.splitlines():
@@ -331,7 +341,7 @@ def test_brew_bundle_check_parses_generated_brewfile(tmp_path):
         installed_packages=(_pkg("brew", "git"),),
     )
     target = tmp_path / "Brewfile.test"
-    target.write_text(build_brewfile([brew_mgr], include_header=True))
+    target.write_text(build_brewfile(_as_managers(brew_mgr), include_header=True))
 
     completed = subprocess.run(
         ["brew", "bundle", "check", "--file", str(target), "--no-upgrade"],

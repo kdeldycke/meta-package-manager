@@ -69,14 +69,16 @@ These go under `[mpm]` (or `[tool.mpm]` in `pyproject.toml`):
 | `all_managers`        | boolean | `false`             | Force evaluation of all managers, including unsupported and deprecated.                    |
 | `description`         | boolean | `false`             | Show package description in results.                                                       |
 | `sort_by`             | string  | `"manager_id"`      | Sort results by: `manager_id`, `manager_name`, `package_id`, `package_name`, or `version`. |
-| `stats`               | boolean | `true`              | Print per-manager package statistics.                                                      |
+| `summary`             | boolean | `true`              | Print an end-of-run summary on stderr with per-manager package totals.                     |
 | `table_format`        | string  | `"rounded-outline"` | Table rendering style (see `mpm --help` for all choices).                                  |
 
 ### Release-age cooldown
 
 `cooldown` is a supply-chain safeguard: it refuses to install or upgrade any package version published more recently than the given age, giving a freshly-published (and possibly compromised) release time to be caught and pulled before it reaches the system.
 
-mpm enforces the cooldown through each manager's own release-age mechanism, so only managers that ship one are covered: `uv` and `uvx` (via `exclude-newer`) and `npm` (via `before`). Managers without native support cannot honor the gate. By default they are skipped during install and upgrade (fail-closed), so nothing slips in unguarded. Pass `--allow-no-cooldown` (or set `allow_no_cooldown = true`) to run them anyway, without the safeguard. Read-only operations (`outdated`, `installed`, `search`) are never blocked.
+mpm enforces the cooldown through each manager's own release-age mechanism, so only managers that ship one are covered: `uv` and `uvx` (via `exclude-newer`), `npm` (via `min-release-age`), `pip` (via `--uploaded-prior-to`), and `pipx` (which inherits the pip setting). Managers without native support cannot honor the gate. By default they are skipped during install and upgrade (fail-closed), so nothing slips in unguarded. Pass `--allow-no-cooldown` (or set `allow_no_cooldown = true`) to run them anyway, without the safeguard. Read-only operations (`outdated`, `installed`, `search`) are never blocked.
+
+See {doc}`cooldown` for the full support matrix and the rationale.
 
 The value is a duration like `7 days`, `1 week`, `12h` or `30m`; a bare number is read as a count of days, and `0` (or an empty string) disables the gate.
 
@@ -130,20 +132,24 @@ These go under `[mpm.<subcommand>]` (or `[tool.mpm.<subcommand>]`):
 | :---- | :------ | :------ | :-------------------------------------------------------- |
 | `all` | boolean | `false` | Upgrade all outdated packages (not just those specified). |
 
-**`[mpm.backup]`**
+**`[mpm.dump]`** (also reachable as `[mpm.backup]`, `[mpm.lock]`, `[mpm.freeze]`, `[mpm.snapshot]`)
 
-| Key              | Type    | Default | Description                                            |
-| :--------------- | :------ | :------ | :----------------------------------------------------- |
-| `overwrite`      | boolean | `false` | Allow overwriting an existing backup file.             |
-| `merge`          | boolean | `false` | Merge new packages into an existing backup file.       |
-| `update_version` | boolean | `false` | Update version of packages already in the backup file. |
+| Key              | Type    | Default | Description                                                                                |
+| :--------------- | :------ | :------ | :----------------------------------------------------------------------------------------- |
+| `toml`           | boolean | `true`  | Emit a TOML manifest with one section per manager.                                         |
+| `brewfile`       | boolean | `false` | Emit a Brewfile instead of a TOML manifest (managers supported by `brew bundle` only).     |
+| `header`         | boolean | `true`  | Include a metadata + warning comment block at the top of the output.                       |
+| `overwrite`      | boolean | `false` | Allow overwriting an existing output file.                                                 |
+| `merge`          | boolean | `false` | TOML only. Add each new entry to an existing file.                                         |
+| `update_version` | boolean | `false` | TOML only. Update each existing entry with the version currently installed on the system.  |
 
 **`[mpm.sbom]`**
 
-| Key         | Type    | Default | Description                              |
-| :---------- | :------ | :------ | :--------------------------------------- |
-| `spdx`      | boolean | `true`  | Use SPDX format (`false` for CycloneDX). |
-| `overwrite` | boolean | `false` | Allow overwriting an existing SBOM file. |
+| Key         | Type    | Default    | Description                                                                                                  |
+| :---------- | :------ | :--------- | :----------------------------------------------------------------------------------------------------------- |
+| `spdx`      | boolean | `true`     | Use SPDX format (`false` for CycloneDX).                                                                     |
+| `bundled`   | boolean | `true`     | Bundled mode: query each manager for richer metadata and merge per-package upstream SBOMs into the aggregate. Set `false` for fast inventory snapshots (name, version, purl only). |
+| `overwrite` | boolean | `false`    | Allow overwriting an existing SBOM file.                                                                     |
 
 ## Full example
 
@@ -171,8 +177,8 @@ table_format = "json"
 # Use exact matching.
 exact = true
 
-[mpm.backup]
-# Merge into existing backup files by default.
+[mpm.dump]
+# Merge into existing snapshot files by default.
 merge = true
 ```
 

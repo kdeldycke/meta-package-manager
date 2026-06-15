@@ -16,6 +16,8 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from extra_platforms import ALL_PLATFORMS
 
 from ..capabilities import version_not_implemented
@@ -39,7 +41,9 @@ class VSCode(PackageManager):
 
     cli_names = ("code",)
 
-    brewfile_entry_type = "vscode"
+    # Explicit annotation widens the inferred ``str`` literal so the
+    # :py:class:`VSCodium` subclass below can opt out by re-setting to ``None``.
+    brewfile_entry_type: ClassVar[str | None] = "vscode"
     """
     .. code-block:: shell-session
 

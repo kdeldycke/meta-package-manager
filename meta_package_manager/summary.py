@@ -56,6 +56,7 @@ summary-domain logic.
 from __future__ import annotations
 
 from collections import Counter
+from typing import cast
 
 from click_extra import echo
 
@@ -100,9 +101,7 @@ def print_summary(
     """
     per_category = ""
     if counts:
-        per_category = (
-            f" ({', '.join(f'{k}: {v}' for k, v in counts.most_common())})"
-        )
+        per_category = f" ({', '.join(f'{k}: {v}' for k, v in counts.most_common())})"
     total = counts.total()
     plural = "s" if total > 1 else ""
     echo(f"{total} package{plural} total{per_category}.", err=True)
@@ -146,12 +145,18 @@ def sbom_summary(sbom: SBOM, bundled: bool) -> tuple[Counter, list[str]]:
     other. Summary-domain glue, not SBOM-domain logic.
     """
     stats = sbom.stats()
-    counts: Counter[str] = Counter(stats.get("packages_per_manager") or {})
+    packages_per_manager = cast(
+        "dict[str, int]", stats.get("packages_per_manager") or {}
+    )
+    counts: Counter[str] = Counter(packages_per_manager)
 
     notes: list[str] = []
     total_packages = counts.total()
     if bundled and total_packages:
-        total_enriched = sum((stats.get("enriched_per_manager") or {}).values())
+        enriched_per_manager = cast(
+            "dict[str, int]", stats.get("enriched_per_manager") or {}
+        )
+        total_enriched = sum(enriched_per_manager.values())
         notes.append(
             f"{total_enriched}/{total_packages} packages enriched with metadata."
         )
@@ -169,9 +174,7 @@ def sbom_summary(sbom: SBOM, bundled: bool) -> tuple[Counter, list[str]]:
 
     bom_refs = stats.get("external_bom_references") or 0
     if bom_refs:
-        notes.append(
-            f"{bom_refs} per-package upstream SBOMs attached by reference."
-        )
+        notes.append(f"{bom_refs} per-package upstream SBOMs attached by reference.")
 
     dep_relationships = stats.get("dependency_relationships") or 0
     if dep_relationships:

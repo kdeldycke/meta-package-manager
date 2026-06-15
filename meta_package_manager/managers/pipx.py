@@ -53,7 +53,7 @@ class Pipx(PackageManager):
     Setting ``PIP_UPLOADED_PRIOR_TO`` on a pipx invocation propagates to the pip
     subprocess pipx spawns to install the application and its dependencies, so the
     cutoff applies to the whole resolution. mpm injects the RFC 3339 timestamp from
-    the default :py:meth:`cooldown_env_value`.
+    the default :py:meth:`meta_package_manager.execution.CLIExecutor.cooldown_env_value`.
 
     .. caution::
         Same caveat as :py:class:`meta_package_manager.managers.pip.Pip`: the

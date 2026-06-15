@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from typing import Any, cast
 from xml.etree import ElementTree
 
 import pytest
@@ -28,6 +29,7 @@ from cyclonedx.validation.json import JsonStrictValidator
 from yaml import Loader, load
 
 from meta_package_manager.capabilities import Operations
+from meta_package_manager.manager import PackageManager
 from meta_package_manager.package import (
     EMPTY_METADATA,
     Checksum,
@@ -55,13 +57,21 @@ class _StubManager:
         self.name = name
 
 
+def _as_manager(stub: _StubManager) -> PackageManager:
+    """Cast a duck-typed stub to the typed :py:class:`PackageManager` API.
+
+    The SBOM renderers only read ``id`` and ``name`` from the manager, which is
+    why instantiating real concrete managers (with CLI discovery, version
+    parsing) is sidestepped here.
+    """
+    return cast("PackageManager", stub)
+
+
 def _make_package(manager_id: str, package_id: str, version: str) -> Package:
-    return Package(
-        id=package_id, manager_id=manager_id, installed_version=version
-    )
+    return Package(id=package_id, manager_id=manager_id, installed_version=version)
 
 
-def assert_valid_cyclonedx(content: str, export_format: ExportFormat) -> None:
+def assert_valid_cyclonedx(content: str, export_format: ExportFormat | str) -> None:
     """Assert a CycloneDX export validates against its schema.
 
     This guarantee used to live in
@@ -70,6 +80,7 @@ def assert_valid_cyclonedx(content: str, export_format: ExportFormat) -> None:
     ``lark``, ``lxml``) stays out of ``mpm``'s runtime dependencies. See
     :py:mod:`meta_package_manager.sbom`.
     """
+    validator: Any
     if export_format == ExportFormat.JSON:
         validator = JsonStrictValidator(SchemaVersion.V1_7)
     else:
@@ -210,11 +221,15 @@ class TestSBOM(CLISubCommandTests):
         result = invoke(subcmd, "help")
         assert result.exit_code == 2
         assert "Cannot guess export format from 'help'" in result.stderr
-        assert "Use --format to pick one of: json, xml, yaml, tag, rdf." in result.stderr
+        assert (
+            "Use --format to pick one of: json, xml, yaml, tag, rdf." in result.stderr
+        )
         # The collection loop must not have run.
         assert "Export packages from" not in result.stderr
 
-    def test_unrecognized_extension_with_explicit_format(self, invoke, subcmd, tmp_path):
+    def test_unrecognized_extension_with_explicit_format(
+        self, invoke, subcmd, tmp_path
+    ):
         """An explicit ``--format`` overrides extension auto-detection, even when
         the filename carries no recognizable suffix.
         """
@@ -328,7 +343,7 @@ def test_minimal_mode_emits_bare_spdx_payload():
     s = SPDX()
     s.init_doc()
     s.set_scan_completeness(bundled=False)
-    manager = _StubManager("brew", "Homebrew Formulae")
+    manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
     pkg = _make_package("brew", "curl", "8.9.0")
     s.add_package(manager, pkg)  # No metadata, simulating minimal mode.
     s.finalize()
@@ -337,9 +352,7 @@ def test_minimal_mode_emits_bare_spdx_payload():
     assert package["name"] == "curl"
     assert package["downloadLocation"] == "NOASSERTION"
     assert "licenseDeclared" not in package
-    assert all(
-        r["relationshipType"] == "DESCRIBES" for r in doc["relationships"]
-    )
+    assert all(r["relationshipType"] == "DESCRIBES" for r in doc["relationships"])
 
 
 def test_bundled_mode_spdx_populates_rich_fields():
@@ -350,7 +363,7 @@ def test_bundled_mode_spdx_populates_rich_fields():
     s = SPDX()
     s.init_doc()
     s.set_scan_completeness(bundled=True)
-    manager = _StubManager("brew", "Homebrew Formulae")
+    manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
     curl = _make_package("brew", "curl", "8.9.0")
     openssl = _make_package("brew", "openssl", "3.3.1")
     s.add_package(manager, curl, _rich_metadata())
@@ -374,7 +387,7 @@ def test_bundled_mode_cyclonedx_populates_rich_fields():
     c = CycloneDX()
     c.init_doc()
     c.set_scan_completeness(bundled=True)
-    manager = _StubManager("brew", "Homebrew Formulae")
+    manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
     curl = _make_package("brew", "curl", "8.9.0")
     openssl = _make_package("brew", "openssl", "3.3.1")
     c.add_package(manager, curl, _rich_metadata())
@@ -421,7 +434,11 @@ def test_spdx_license_normalization(declared, expected_present):
     s.init_doc()
     s.set_scan_completeness(bundled=True)
     md = PackageMetadata(license_declared=declared)
-    s.add_package(_StubManager("brew", "Homebrew Formulae"), _make_package("brew", "curl", "8.9.0"), md)
+    s.add_package(
+        _as_manager(_StubManager("brew", "Homebrew Formulae")),
+        _make_package("brew", "curl", "8.9.0"),
+        md,
+    )
     s.finalize()
     doc = json.loads(s.export())  # exporting also validates the doc.
     pkg = doc["packages"][0]
@@ -475,7 +492,7 @@ def test_spdx_merges_external_per_package_sbom(tmp_path):
     s.init_doc()
     s.set_scan_completeness(bundled=True)
     s.add_package(
-        _StubManager("brew", "Homebrew Formulae"),
+        _as_manager(_StubManager("brew", "Homebrew Formulae")),
         _make_package("brew", "curl", "8.9.0"),
         md,
     )
@@ -529,7 +546,7 @@ def test_stats_track_per_manager_and_merge_counts(tmp_path):
     s = SPDX()
     s.init_doc()
     s.set_scan_completeness(bundled=True)
-    manager = _StubManager("brew", "Homebrew Formulae")
+    manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
     s.add_package(
         manager,
         _make_package("brew", "curl", "8.9.0"),
@@ -561,7 +578,7 @@ def test_cyclonedx_stats_count_external_bom_refs(tmp_path):
     c = CycloneDX()
     c.init_doc()
     c.set_scan_completeness(bundled=True)
-    manager = _StubManager("brew", "Homebrew Formulae")
+    manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
     c.add_package(
         manager,
         _make_package("brew", "curl", "8.9.0"),
@@ -580,7 +597,7 @@ def test_cyclonedx_stats_count_external_bom_refs(tmp_path):
     stats = c.stats()
     assert stats["packages_total"] == 2
     assert stats["external_bom_references"] == 1
-    assert stats["dependency_edges"] >= 1
+    assert cast("int", stats["dependency_edges"]) >= 1
 
 
 def test_minimal_mode_skips_metadata_extractor(invoke):

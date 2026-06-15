@@ -16,7 +16,7 @@
 """CycloneDX 1.7 writer.
 
 Heavy ``cyclonedx-python-lib`` imports are guarded behind a ``try/except``
-block; :py:data:`cyclonedx_support` reports whether the
+block; ``cyclonedx_support`` reports whether the
 :py:class:`CycloneDX` class can actually be used.
 
 The license-normalization helper is shared with :py:mod:`.spdx` and is
@@ -61,17 +61,21 @@ try:
 except ImportError:
     cyclonedx_support = False
     logging.getLogger("meta_package_manager").debug(
-        "CycloneDX support disabled: "
-        "install meta-package-manager[sbom] to enable it.",
+        "CycloneDX support disabled: install meta-package-manager[sbom] to enable it.",
     )
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
+    from typing import Any
+
     from ..manager import PackageManager
     from ..package import Package
 
 
-_CYCLONEDX_HASH_MAP: dict[str, object] = {}
+# ``Any``-valued map to avoid cascading mypy errors at every call site: the
+# values are typed ``HashAlgorithm`` instances but the conditional
+# ``try/except`` import above hides that fact from the type checker.
+_CYCLONEDX_HASH_MAP: dict[str, Any] = {}
 if cyclonedx_support:
     _CYCLONEDX_HASH_MAP = {
         ChecksumAlgorithm.MD5.value: HashAlgorithm.MD5,
@@ -229,7 +233,10 @@ class CycloneDX(SBOM):
         ``DisjunctiveLicense`` for free-text strings the SPDX parser
         rejects.
         """
-        out = []
+        # ``list[Any]`` because the function appends two different concrete
+        # license-object types (``DisjunctiveLicense`` and ``LicenseExpression``)
+        # whose common ancestor is not exposed in CycloneDX's public API.
+        out: list[Any] = []
         candidate = metadata.license_concluded or metadata.license_declared
         if not candidate:
             return out
@@ -359,8 +366,9 @@ class CycloneDX(SBOM):
     def finalize(self) -> None:
         """Resolve queued dependency edges between Components.
 
-        Mirrors :py:meth:`SPDX.finalize`. Dangling references (the
-        dependency target is not in the inventory) are dropped silently.
+        Mirrors :py:meth:`meta_package_manager.sbom.spdx.SPDX.finalize`.
+        Dangling references (the dependency target is not in the inventory)
+        are dropped silently.
         """
         for source, manager_id, target_id in self.pending_dependencies:
             target = self.component_index.get((manager_id, target_id))
@@ -402,7 +410,7 @@ class CycloneDX(SBOM):
 
         .. note::
 
-            Unlike :py:meth:`SPDX.export`, the generated document is not
+            Unlike :py:meth:`meta_package_manager.sbom.spdx.SPDX.export`, the generated document is not
             validated against its schema here. CycloneDX schema validation
             relies on ``cyclonedx-python-lib``'s ``[validation]`` extra, which
             pulls in ``jsonschema`` and, transitively, ``rfc3987-syntax``,

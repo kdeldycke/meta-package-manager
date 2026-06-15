@@ -20,8 +20,8 @@ existence mirrors the optional ``[sbom]`` install extra defined in
 ``pyproject.toml``: a default ``pip install meta-package-manager`` does not
 pull ``cyclonedx-python-lib`` or ``spdx-tools``, so the modules below guard
 their heavy imports with ``try/except`` and expose
-:py:data:`spdx_support` / :py:data:`cyclonedx_support` flags that callers
-check before instantiating the rendering classes.
+``spdx_support`` / ``cyclonedx_support`` flags that callers check before
+instantiating the rendering classes.
 
 Modules:
 

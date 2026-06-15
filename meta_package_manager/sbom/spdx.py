@@ -17,7 +17,7 @@
 
 Heavy ``spdx_tools`` imports are guarded behind a ``try/except`` block so
 this module is importable even when the optional ``[sbom]`` extra is not
-installed; in that case :py:data:`spdx_support` is ``False`` and the
+installed; in that case ``spdx_support`` is ``False`` and the
 :py:class:`SPDX` class is still defined for type-hint compatibility but
 will not function (every public method depends on the missing imports).
 
@@ -35,6 +35,7 @@ import json
 import logging
 import re
 from datetime import datetime, timezone
+from typing import cast
 
 from boltons.ecoutils import get_profile
 from extra_platforms import current_platform
@@ -50,7 +51,7 @@ from .base import SBOM, ExportFormat
 
 spdx_support = True
 try:
-    from spdx_tools.common.spdx_licensing import spdx_licensing
+    from spdx_tools.common.spdx_licensing import spdx_licensing  # type: ignore[import-untyped]
     from spdx_tools.spdx.model import (
         Actor,
         ActorType,
@@ -97,8 +98,11 @@ if TYPE_CHECKING:
     from ..package import Package
 
 
-_SPDX_CHECKSUM_MAP: dict[str, object] = {}
-_SPDX_RELATIONSHIP_MAP: dict[str, object] = {}
+# ``Any``-valued maps to dodge cascading mypy errors at every call site: the
+# values are typed instances of ``spdx_tools`` enums but the conditional
+# ``try/except`` import above hides that fact from the type checker.
+_SPDX_CHECKSUM_MAP: dict[str, Any] = {}
+_SPDX_RELATIONSHIP_MAP: dict[str, Any] = {}
 if spdx_support:
     _SPDX_CHECKSUM_MAP = {
         ChecksumAlgorithm.MD5.value: SPDXChecksumAlgorithm.MD5,
@@ -184,7 +188,9 @@ class SPDX(SBOM):
     document: Document
     seen_ids: set[str]
     name_index: dict[tuple[str, str], str]
-    pending_relationships: list[tuple[str, str, str, object]]
+    # 4th tuple slot is a ``RelationshipType`` instance; typed as ``Any``
+    # because that enum is only importable when the ``[sbom]`` extra is.
+    pending_relationships: list[tuple[str, str, str, Any]]
     merged_docs: dict[str, str]
 
     @classmethod
@@ -250,14 +256,16 @@ class SPDX(SBOM):
             )
         )
 
-    def _supplier_for(
-        self, manager: PackageManager, metadata: PackageMetadata
-    ) -> object:
+    def _supplier_for(self, manager: PackageManager, metadata: PackageMetadata) -> Any:
         """Build the SPDX supplier ``Actor``.
 
         The manager name is the fallback (Homebrew, PyPI, ...). If the
         metadata extractor surfaces a more specific supplier (a tap, a
         downstream redistributor) it wins.
+
+        Returns ``Any`` rather than ``Actor`` because ``Actor`` is conditionally
+        imported behind the ``[sbom]`` extra: annotating with it would make this
+        module fail type-checking when the extra is not installed.
         """
         if metadata.supplier:
             return Actor(ActorType.ORGANIZATION, metadata.supplier.name)
@@ -470,14 +478,10 @@ class SPDX(SBOM):
         digest = hashlib.sha1(data).hexdigest()
         upstream = json.loads(data)
 
-        doc_ref_id = self.normalize_spdx_id(
-            f"DocumentRef-{manager_id}-{package.id}"
-        )
+        doc_ref_id = self.normalize_spdx_id(f"DocumentRef-{manager_id}-{package.id}")
         # SPDX IDs are matched textually. Keep the prefix terse but
         # collision-free across formulae sharing common dep names.
-        local_prefix = self.normalize_spdx_id(
-            f"SPDXRef-{manager_id}-{package.id}"
-        )
+        local_prefix = self.normalize_spdx_id(f"SPDXRef-{manager_id}-{package.id}")
         upstream_packages = upstream.get("packages") or []
         upstream_relationships = upstream.get("relationships") or []
 
@@ -564,8 +568,7 @@ class SPDX(SBOM):
         self.document.creation_info.external_document_refs.append(
             ExternalDocumentRef(
                 document_ref_id=doc_ref_id,
-                document_uri=upstream.get("documentNamespace")
-                or f"file://{sbom_path}",
+                document_uri=upstream.get("documentNamespace") or f"file://{sbom_path}",
                 checksum=SPDXChecksum(SPDXChecksumAlgorithm.SHA1, digest),
             )
         )
@@ -599,7 +602,7 @@ class SPDX(SBOM):
         after merge, which is what consumers of the file actually see.
         """
         base = super().stats()
-        inventory_count = base["packages_total"]
+        inventory_count = cast("int", base["packages_total"])
         in_doc = len(self.document.packages)
         dependency_count = sum(
             1

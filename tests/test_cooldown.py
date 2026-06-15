@@ -140,9 +140,7 @@ def test_duration_rejects_calendar_units(value):
 def test_duration_absolute_timestamp(value):
     """An RFC 3339 timestamp is converted to ``now - timestamp`` at parse time."""
     result = Duration().convert(value, None, None)
-    expected = datetime.now(tz=timezone.utc) - datetime(
-        2024, 5, 1, tzinfo=timezone.utc
-    )
+    expected = datetime.now(tz=timezone.utc) - datetime(2024, 5, 1, tzinfo=timezone.utc)
     assert isinstance(result, timedelta)
     assert abs(result - expected) < timedelta(seconds=5)
 
@@ -176,6 +174,7 @@ def test_release_anchored_cutoff_math(
     """
     fake_now = datetime(2024, 4, 15, tzinfo=timezone.utc)
     cooldown = Duration().convert(cooldown_input, None, None)
+    assert cooldown is not None
     cutoff = fake_now - cooldown
     release_time = datetime.fromisoformat(release_iso.replace("Z", "+00:00"))
     assert (release_time <= cutoff) is should_pass

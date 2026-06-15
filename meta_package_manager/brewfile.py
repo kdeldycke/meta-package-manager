@@ -63,10 +63,12 @@ so that any third-party tap a downstream ``brew`` or ``cask`` entry references i
 registered before the install step runs.
 """
 
-DEFAULT_TAPS: frozenset[tuple[str, str]] = frozenset({
-    ("homebrew", "core"),
-    ("homebrew", "cask"),
-})
+DEFAULT_TAPS: frozenset[tuple[str, str]] = frozenset(
+    {
+        ("homebrew", "core"),
+        ("homebrew", "cask"),
+    }
+)
 """Taps that ``brew`` enables by default. Never emitted as explicit ``tap`` lines."""
 
 
@@ -219,5 +221,3 @@ def build_brewfile(
         section = "\n".join(format_entry(et, name, opts) for name, opts in buckets[et])
         sections.append(section)
     return "\n\n".join(sections) + "\n"
-
-

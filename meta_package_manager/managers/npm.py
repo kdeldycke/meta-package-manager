@@ -69,18 +69,18 @@ class NPM(PackageManager):
     user's ``.npmrc``. Once set, npm refuses to resolve any package version younger
     than the configured age, which covers ``install`` and ``update`` along with their
     transitive dependencies. The hyphenated env var passes cleanly through Python's
-    :py:func:`subprocess.Popen` ``env=`` mapping (shells that reject ``export
+    :py:class:`subprocess.Popen` ``env=`` mapping (shells that reject ``export
     foo-bar=baz`` are not involved).
 
-    :py:meth:`cooldown_env_value` is overridden below to emit an integer number of
+    The ``cooldown_env_value()`` method below is overridden to emit an integer number of
     days, the unit ``min-release-age`` expects.
 
     See https://docs.npmjs.com/cli/v11/using-npm/config#min-release-age.
     """
 
     def cooldown_env_value(self) -> str:
-        """Render :py:attr:`cooldown` as an integer day count for npm's
-        ``min-release-age``.
+        """Render :py:attr:`meta_package_manager.execution.CLIExecutor.cooldown` as an
+        integer day count for npm's ``min-release-age``.
 
         Sub-day cooldowns round up so the gate over-protects rather than silently
         collapses to ``0`` (the "no cooldown" sentinel).

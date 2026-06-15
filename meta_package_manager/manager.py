@@ -215,7 +215,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         """Return ``(entry_name, entry_options)`` for a Brewfile line, or ``None``
         to skip the package.
 
-        Default: emit :py:attr:`Package.id` as the entry name with no options.
+        Default: emit :py:attr:`meta_package_manager.package.Package.id` as the entry name with no options.
         Override on managers whose Brewfile DSL counterpart expects a different
         shape: ``mas`` uses the app name with ``id: ADAM_ID``, ``flatpak`` adds
         ``with: ["remote"]``. Only called when :py:attr:`brewfile_entry_type` is
@@ -253,9 +253,9 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         1. is :py:attr:`supported on the current platform
            <meta_package_manager.manager.PackageManager.supported>`,
         2. was :py:attr:`found on the system
-           <meta_package_manager.manager.PackageManager.cli_path>`,
+           <meta_package_manager.execution.CLIExecutor.cli_path>`,
         3. is :py:attr:`executable
-           <meta_package_manager.manager.PackageManager.executable>`, and
+           <meta_package_manager.execution.CLIExecutor.executable>`, and
         4. :py:attr:`match the version requirement
            <meta_package_manager.manager.PackageManager.fresh>`.
         """
@@ -317,12 +317,13 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         Called by ``mpm sbom`` in ``--bundled`` mode to populate licenses,
         checksums, download URLs, supplier/originator, and the declared
         dependency graph. The base implementation yields
-        :py:data:`EMPTY_METADATA` for each package and stays compatible
+        :py:data:`meta_package_manager.package.EMPTY_METADATA` for each package and stays compatible
         with managers that do not (yet) expose richer metadata: their SBOM
         entries stay at the minimal ``Package`` level, matching the
         historical and ``--minimal`` modes.
 
         Manager subclasses override this with their native query path:
+
         - bulk shell-outs when the CLI accepts a package list
           (``brew info --json=v2 --installed``, ``dpkg-query -W``,
           ``apt-cache show``);
@@ -333,7 +334,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         The yielded pairs do not need to preserve the input order; the SBOM
         renderer matches by ``Package`` identity. Implementations are
         expected to swallow per-package extraction errors and yield
-        :py:data:`EMPTY_METADATA` for the affected packages rather than
+        :py:data:`meta_package_manager.package.EMPTY_METADATA` for the affected packages rather than
         failing the whole scan: a single misbehaving formula must not abort
         an enrichment pass spanning hundreds of packages.
 

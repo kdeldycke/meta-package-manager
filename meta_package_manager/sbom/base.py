@@ -126,16 +126,16 @@ class SBOM:
     def set_scan_completeness(self, bundled: bool) -> None:
         """Record whether the run was a bundled enrichment pass.
 
-        Called once by the CLI right after :py:meth:`init_doc` and before
-        the first :py:meth:`add_package`. The information flows into
+        Called once by the CLI right after ``init_doc()`` and before
+        the first ``add_package()``. The information flows into
         per-format completeness markers in the rendered document.
         """
         self.bundled_scan = bundled
 
     def finalize(self) -> None:
-        """Resolve any deferred state before :py:meth:`export`.
+        """Resolve any deferred state before ``export()``.
 
-        Some constructs cannot be emitted at :py:meth:`add_package` time
+        Some constructs cannot be emitted at ``add_package()`` time
         because they reference packages that may not have been added yet:
         a Homebrew formula's runtime dependency on another formula listed
         later in the scan, for example. Subclasses queue those during

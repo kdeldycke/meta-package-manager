@@ -70,8 +70,7 @@ def test_installed_yields_one_package_per_version(manager, monkeypatch):
 def test_installed_preserves_backend_prefix(manager, monkeypatch):
     """Backend-prefixed IDs like ``pipx:ruff`` round-trip without rewriting."""
     output = (
-        '{"pipx:ruff": [{"version": "0.6.9", '
-        '"install_path": "/x/pipx-ruff/0.6.9"}]}'
+        '{"pipx:ruff": [{"version": "0.6.9", "install_path": "/x/pipx-ruff/0.6.9"}]}'
     )
     monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
     packages = list(manager.installed)
@@ -80,9 +79,7 @@ def test_installed_preserves_backend_prefix(manager, monkeypatch):
 
 
 def test_outdated_yields_upgrades(manager, monkeypatch):
-    output = (
-        '{"node": {"requested": "20", "current": "20.0.0", "latest": "20.10.0"}}'
-    )
+    output = '{"node": {"requested": "20", "current": "20.0.0", "latest": "20.10.0"}}'
     monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
     packages = list(manager.outdated)
     assert len(packages) == 1
@@ -134,12 +131,13 @@ def test_search_keeps_descriptions_with_inner_spaces(manager, monkeypatch):
     ),
 )
 def test_install_builds_spec(manager, monkeypatch, version, expected_spec):
-    captured = []
-    monkeypatch.setattr(
-        manager,
-        "run_cli",
-        lambda *args, **kwargs: captured.append(args) or "",
-    )
+    captured: list = []
+
+    def _capture(*args, **kwargs):
+        captured.append(args)
+        return ""
+
+    monkeypatch.setattr(manager, "run_cli", _capture)
     manager.install("node", version=version)
     assert captured == [("install", expected_spec)]
 
@@ -167,33 +165,36 @@ def test_upgrade_one_cli_builds_spec(manager, version, expected_spec):
 def test_remove_uses_all_flag(manager, monkeypatch):
     """``--all`` matches mpm's "remove the package, full stop" contract even
     when ``mise`` has multiple versions of the same tool installed."""
-    captured = []
-    monkeypatch.setattr(
-        manager,
-        "run_cli",
-        lambda *args, **kwargs: captured.append(args) or "",
-    )
+    captured: list = []
+
+    def _capture(*args, **kwargs):
+        captured.append(args)
+        return ""
+
+    monkeypatch.setattr(manager, "run_cli", _capture)
     manager.remove("node")
     assert captured == [("uninstall", "--all", "node")]
 
 
 def test_sync_runs_plugins_update(manager, monkeypatch):
-    captured = []
-    monkeypatch.setattr(
-        manager,
-        "run_cli",
-        lambda *args, **kwargs: captured.append(args) or "",
-    )
+    captured: list = []
+
+    def _capture(*args, **kwargs):
+        captured.append(args)
+        return ""
+
+    monkeypatch.setattr(manager, "run_cli", _capture)
     manager.sync()
     assert captured == [("plugins", "update")]
 
 
 def test_cleanup_runs_cache_clear(manager, monkeypatch):
-    captured = []
-    monkeypatch.setattr(
-        manager,
-        "run_cli",
-        lambda *args, **kwargs: captured.append(args) or "",
-    )
+    captured: list = []
+
+    def _capture(*args, **kwargs):
+        captured.append(args)
+        return ""
+
+    monkeypatch.setattr(manager, "run_cli", _capture)
     manager.cleanup()
     assert captured == [("cache", "clear")]

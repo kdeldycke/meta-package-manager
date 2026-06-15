@@ -18,8 +18,8 @@
 Defines the Click command group and its subcommands. Each operation subcommand
 (``installed``, ``outdated``, ``install``, ``upgrade``, ``remove``, ...) selects the
 managers from :py:mod:`meta_package_manager.pool` that implement the matching
-:py:class:`meta_package_manager.manager.Operations` action, runs it across all of them,
-and renders the aggregated, multi-manager result.
+:py:class:`meta_package_manager.capabilities.Operations` action, runs it across all
+of them, and renders the aggregated, multi-manager result.
 """
 
 from __future__ import annotations
@@ -201,10 +201,19 @@ class Duration(ParamType):
     }
     """Number of seconds each recognized unit represents (empty unit means days)."""
 
-    _CALENDAR_UNITS = frozenset({
-        "mo", "mon", "month", "months",
-        "y", "yr", "yrs", "year", "years",
-    })
+    _CALENDAR_UNITS = frozenset(
+        {
+            "mo",
+            "mon",
+            "month",
+            "months",
+            "y",
+            "yr",
+            "yrs",
+            "year",
+            "years",
+        }
+    )
     """Calendar units rejected for ambiguity: months span 28-31 days, years 365-366."""
 
     _FRIENDLY_PATTERN = re.compile(r"(?P<value>\d+(?:\.\d+)?)\s*(?P<unit>[a-z]*)")
@@ -1795,7 +1804,9 @@ def cleanup(ctx):
     default="-",
 )
 @pass_context
-def dump(ctx, output_format, overwrite, include_header, merge, update_version, output_path):
+def dump(
+    ctx, output_format, overwrite, include_header, merge, update_version, output_path
+):
     """Dump installed packages to a TOML manifest or a Brewfile.
 
     By default emits TOML, one section per manager (one entry per package, keyed
@@ -2135,7 +2146,10 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, export_path):
         guessed_format = SBOM.autodetect_export_format(export_path)
         if not export_format:
             if not guessed_format:
-                supported = ", ".join(f.value for f in ExportFormat)
+                # On Python 3.10, ``ExportFormat`` extends ``backports.strenum.StrEnum``
+                # whose typeshed stub omits ``__iter__``; iteration is provided by the
+                # ``EnumMeta`` metaclass at runtime.
+                supported = ", ".join(f.value for f in ExportFormat)  # type: ignore[attr-defined]
                 logging.critical(
                     f"Cannot guess export format from {export_path.name!r}. "
                     f"Use --format to pick one of: {supported}."

@@ -58,7 +58,7 @@ class UVBase(PackageManager):
     resolving subcommand (``pip install``, ``pip list --outdated``, ``tool install``,
     ``tool upgrade``), so a single environment variable covers install, upgrade and
     outdated at once. uv accepts an RFC 3339 timestamp, which is exactly what the
-    default :py:meth:`cooldown_env_value` produces.
+    default :py:meth:`meta_package_manager.execution.CLIExecutor.cooldown_env_value` produces.
 
     See https://docs.astral.sh/uv/reference/settings/#exclude-newer.
     """

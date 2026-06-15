@@ -48,6 +48,8 @@ class NPM(PackageManager):
 
     homepage_url = "https://www.npmjs.com"
 
+    brewfile_entry_type = "npm"
+
     platforms = ALL_PLATFORMS
 
     requirement = ">=11.10.0"
@@ -57,8 +59,6 @@ class NPM(PackageManager):
     releases silently ignore the env var, so the floor avoids advertising a gate that
     does nothing.
     """
-
-    brewfile_entry_type = "npm"
 
     cooldown_env_var = "npm_config_min-release-age"
     """npm honors a release-age cooldown through its ``min-release-age`` resolver

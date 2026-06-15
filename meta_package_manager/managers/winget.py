@@ -33,11 +33,11 @@ if TYPE_CHECKING:
 class WinGet(PackageManager):
     homepage_url = "https://github.com/microsoft/winget-cli"
 
+    brewfile_entry_type = "winget"
+
     platforms = WINDOWS
 
     requirement = ">=1.28.190"
-
-    brewfile_entry_type = "winget"
 
     post_args = ("--accept-source-agreements", "--disable-interactivity")
     """

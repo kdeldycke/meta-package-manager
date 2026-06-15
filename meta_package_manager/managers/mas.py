@@ -35,6 +35,8 @@ class MAS(PackageManager):
 
     homepage_url = "https://github.com/mas-cli/mas"
 
+    brewfile_entry_type = "mas"
+
     platforms = MACOS
 
     requirement = ">=7.0.0"
@@ -53,8 +55,6 @@ class MAS(PackageManager):
         $ mas version
         7.0.0
     """
-
-    brewfile_entry_type = "mas"
 
     def brewfile_entry(self, package):
         """Brewfile ``mas`` entries take the app's display name as the positional

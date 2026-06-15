@@ -867,11 +867,11 @@ class Cask(Homebrew):
 
     homepage_url = "https://github.com/Homebrew/homebrew-cask"
 
+    brewfile_entry_type = "cask"
+
     platforms = MACOS  # type: ignore[assignment]
     """Casks are only available on macOS, not Linux or WSL."""
 
     cli_names = ("brew",)
 
     post_args = ("--cask",)
-
-    brewfile_entry_type = "cask"

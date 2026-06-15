@@ -228,13 +228,6 @@ class UVX(UVBase):
 
     homepage_url = "https://docs.astral.sh/uv/guides/tools/"
 
-    requirement = ">=0.10.10"
-    """`0.10.10 <https://github.com/astral-sh/uv/releases/tag/0.10.10>`_ is the first
-    version to introduce ``tool list --outdated`` command.
-    """
-
-    cli_names = ("uv",)
-
     brewfile_entry_type = "uv"
     """``uv`` is mapped to Homebrew Bundle's ``uv`` entry type, which installs via
     ``uv tool install`` — the same mechanism :py:class:`UVX` wraps. The
@@ -242,6 +235,13 @@ class UVX(UVBase):
     packages live inside a Python environment, not as top-level tools, so the
     semantics do not round-trip through ``brew bundle``.
     """
+
+    requirement = ">=0.10.10"
+    """`0.10.10 <https://github.com/astral-sh/uv/releases/tag/0.10.10>`_ is the first
+    version to introduce ``tool list --outdated`` command.
+    """
+
+    cli_names = ("uv",)
 
     _INSTALLED_REGEXP = re.compile(r"^(?P<package_id>\S+)\s+v(?P<version>\S+)$")
     _OUTDATED_REGEXP = re.compile(

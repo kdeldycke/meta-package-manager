@@ -42,10 +42,6 @@ class Flatpak(PackageManager):
 
     homepage_url = "https://flatpak.org"
 
-    platforms = UNIX_WITHOUT_MACOS
-
-    requirement = ">=1.2.0"
-
     brewfile_entry_type = "flatpak"
     """Mapped to Homebrew Bundle's ``flatpak`` extension.
 
@@ -55,6 +51,10 @@ class Flatpak(PackageManager):
     ``brew bundle install`` then resolves through the default ``flathub`` remote.
     Non-flathub flatpaks need to be edited in by hand after the dump.
     """
+
+    platforms = UNIX_WITHOUT_MACOS
+
+    requirement = ">=1.2.0"
 
     _LIST_REGEXP = re.compile(
         r"(?P<name>.+?)\t(?P<package_id>\S+)\t?(?P<latest_version>.*)",

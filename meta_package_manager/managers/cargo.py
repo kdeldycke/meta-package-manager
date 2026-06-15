@@ -35,6 +35,8 @@ class Cargo(PackageManager):
 
     homepage_url = "https://doc.rust-lang.org/cargo/"
 
+    brewfile_entry_type = "cargo"
+
     platforms = ALL_PLATFORMS
 
     requirement = ">=1.0.0"
@@ -44,8 +46,6 @@ class Cargo(PackageManager):
         "never",  # Suppress colored output.
         "--quiet",  # Do not print cargo log messages.
     )
-
-    brewfile_entry_type = "cargo"
 
     _INSTALLED_REGEXP = re.compile(
         r"^(?P<package_id>\S+)\s+v(?P<package_version>\S+):$",

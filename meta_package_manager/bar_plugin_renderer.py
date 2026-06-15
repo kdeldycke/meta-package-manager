@@ -13,21 +13,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Rendering and presentation helpers for :command:`mpm` output.
+"""mpm-side renderer that builds Xbar/SwiftBar plugin output.
 
-Holds the building blocks for how results reach the user: status glyphs
-(:py:data:`meta_package_manager.output.OK_GLYPH`,
-:py:data:`meta_package_manager.output.KO_GLYPH`), the
-:py:class:`meta_package_manager.output.SortableField` enumeration of
-sortable output columns, and the
-:py:class:`meta_package_manager.output.BarPluginRenderer` that formats
-output for the Xbar/SwiftBar menu-bar plugin.
+Lives in its own module rather than in
+:py:mod:`meta_package_manager.bar_plugin` because that module is
+intentionally stdlib-only: the
+:py:class:`meta_package_manager.bar_plugin.MPMPlugin` class is the
+script that gets installed as the user's actual bar plugin and must
+stay light on dependencies.
 
-End-of-run summary printing (the ``--summary``-gated count line and any
-subcommand-specific follow-up notes) lives in its own
-:py:mod:`meta_package_manager.summary` module: it grew enough surface
-area (adapters per subcommand, a structured stats type for SBOMs) to
-deserve a dedicated home.
+This module is the heavier mpm-side companion that augments the
+shippable plugin code with click_extra, boltons, the manager pool, and
+the theme system to produce the final rendered output from
+``mpm outdated --plugin-output``.
 """
 
 from __future__ import annotations
@@ -35,7 +33,6 @@ from __future__ import annotations
 import builtins
 import contextlib
 import logging
-import sys
 from functools import cached_property, partial
 from io import StringIO
 from pathlib import Path
@@ -48,40 +45,6 @@ from click_extra.theme import get_current_theme as theme
 
 from .bar_plugin import MPMPlugin
 from .pool import pool
-
-if sys.version_info >= (3, 11):
-    from enum import StrEnum
-else:
-    from backports.strenum import StrEnum  # type: ignore[import-not-found]
-
-TYPE_CHECKING = False
-
-
-OK_GLYPH = "✓"
-"""Check-mark glyph for success indicators.
-
-Kept as a raw, unstyled string so the call site can render it under whichever
-theme is currently active, via the theme's ``success`` slot:
-``theme().success(OK_GLYPH)``.
-"""
-
-KO_GLYPH = "✘"
-"""Heavy-ballot-X glyph for failure indicators.
-
-Styled at the call site with the active theme's ``error`` slot:
-``theme().error(KO_GLYPH)``. See :data:`OK_GLYPH` for why the glyph is kept
-unstyled.
-"""
-
-
-class SortableField(StrEnum):
-    """Fields IDs allowed to be sorted."""
-
-    MANAGER_ID = "manager_id"
-    MANAGER_NAME = "manager_name"
-    PACKAGE_ID = "package_id"
-    PACKAGE_NAME = "package_name"
-    VERSION = "version"
 
 
 class BarPluginRenderer(MPMPlugin):
@@ -248,8 +211,8 @@ class BarPluginRenderer(MPMPlugin):
                 self.print_error(error_msg, submenu)
 
     def render(self, outdated_data) -> str:
-        """Wraps the :py:meth:`meta_package_manager.output.BarPluginRenderer._render`
-        function above to capture all ``print`` statements."""
+        """Wraps the :py:meth:`_render` function above to capture all ``print``
+        statements."""
         capture = StringIO()
         print_capture = partial(print, file=capture)
         with patch.object(builtins, "print", new=print_capture):

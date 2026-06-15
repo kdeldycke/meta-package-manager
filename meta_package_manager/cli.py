@@ -67,6 +67,7 @@ from click_extra.theme import get_current_theme as theme
 from extra_platforms import current_platform, reduce
 
 from . import __version__, bar_plugin
+from .bar_plugin_renderer import BarPluginRenderer
 from .brewfile import build_brewfile
 from .capabilities import Operations
 from .config import (
@@ -79,7 +80,6 @@ from .config import (
 from .execution import CLIError, highlight_cli_name
 from .inventory import MAIN_PLATFORMS
 from .manager import PackageManager
-from .output import KO_GLYPH, OK_GLYPH, BarPluginRenderer, SortableField
 from .summary import package_counts, print_summary, sbom_summary
 from .package import packages_asdict
 from .pool import pool
@@ -96,8 +96,10 @@ from .version import diff_versions
 
 if sys.version_info >= (3, 11):
     import tomllib
+    from enum import StrEnum
 else:
     import tomli as tomllib  # type: ignore[import-not-found]
+    from backports.strenum import StrEnum  # type: ignore[import-not-found]
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -111,6 +113,33 @@ EXPLORE = Section("Explore subcommands")
 MAINTENANCE = Section("Maintenance subcommands")
 SNAPSHOTS = Section("Package snapshots subcommands")
 SBOM_SECTION = Section("SBOM subcommands")
+
+
+OK_GLYPH = "✓"
+"""Check-mark glyph for success indicators.
+
+Kept as a raw, unstyled string so the call site can render it under
+whichever theme is currently active, via the theme's ``success`` slot:
+``theme().success(OK_GLYPH)``.
+"""
+
+KO_GLYPH = "✘"
+"""Heavy-ballot-X glyph for failure indicators.
+
+Styled at the call site with the active theme's ``error`` slot:
+``theme().error(KO_GLYPH)``. See :data:`OK_GLYPH` for why the glyph is
+kept unstyled.
+"""
+
+
+class SortableField(StrEnum):
+    """Fields IDs allowed to be sorted."""
+
+    MANAGER_ID = "manager_id"
+    MANAGER_NAME = "manager_name"
+    PACKAGE_ID = "package_id"
+    PACKAGE_NAME = "package_name"
+    VERSION = "version"
 
 
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")

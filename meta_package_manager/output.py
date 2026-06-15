@@ -18,11 +18,16 @@
 Holds the building blocks for how results reach the user: status glyphs
 (:py:data:`meta_package_manager.output.OK_GLYPH`,
 :py:data:`meta_package_manager.output.KO_GLYPH`), the
-:py:class:`meta_package_manager.output.SortableField` enumeration of sortable output
-columns, summary-statistics printing
-(:py:func:`meta_package_manager.output.print_stats`), and the
-:py:class:`meta_package_manager.output.BarPluginRenderer` that formats output for the
-Xbar/SwiftBar menu-bar plugin.
+:py:class:`meta_package_manager.output.SortableField` enumeration of
+sortable output columns, and the
+:py:class:`meta_package_manager.output.BarPluginRenderer` that formats
+output for the Xbar/SwiftBar menu-bar plugin.
+
+End-of-run summary printing (the ``--summary``-gated count line and any
+subcommand-specific follow-up notes) lives in its own
+:py:mod:`meta_package_manager.summary` module: it grew enough surface
+area (adapters per subcommand, a structured stats type for SBOMs) to
+deserve a dedicated home.
 """
 
 from __future__ import annotations
@@ -50,9 +55,6 @@ else:
     from backports.strenum import StrEnum  # type: ignore[import-not-found]
 
 TYPE_CHECKING = False
-if TYPE_CHECKING:
-    from collections import Counter
-    from collections.abc import Iterable
 
 
 OK_GLYPH = "✓"
@@ -80,39 +82,6 @@ class SortableField(StrEnum):
     PACKAGE_ID = "package_id"
     PACKAGE_NAME = "package_name"
     VERSION = "version"
-
-
-def print_stats(
-    manager_stats: Counter,
-    extras: Iterable[str] = (),
-) -> None:
-    """Prints statistics to ``<stderr>``: total packages and a break down by package
-    manager.
-
-    Prints something like:
-
-    .. code-block:: text
-
-        10 packages total (brew: 2, pip: 2, gem: 2, vscode: 2, npm: 2, composer: 0).
-
-    ``extras`` is an optional iterable of follow-up lines printed
-    verbatim under the count line. ``mpm sbom`` uses it to surface
-    facts that don't fit the per-manager-Counter shape: number of
-    upstream SBOM documents merged into the aggregate, enrichment
-    ratios, dependency-graph edge counts. Each extra is its own line
-    so the count line stays the same across all subcommands that just
-    care about a manager-keyed total.
-    """
-    per_manager_totals = ""
-    if manager_stats:
-        per_manager_totals = (
-            f" ({', '.join(f'{k}: {v}' for k, v in manager_stats.most_common())})"
-        )
-    total = manager_stats.total()
-    plural = "s" if total > 1 else ""
-    echo(f"{total} package{plural} total{per_manager_totals}.", err=True)
-    for extra in extras:
-        echo(extra, err=True)
 
 
 class BarPluginRenderer(MPMPlugin):

@@ -168,19 +168,19 @@ class TestCommonCLI:
         assert "Timed out after 1s." in result.stderr
 
     @pytest.mark.parametrize(
-        ("stats_arg", "active_stats"),
-        (("--stats", True), ("--no-stats", False), (None, True)),
+        ("summary_arg", "active_summary"),
+        (("--summary", True), ("--no-summary", False), (None, True)),
     )
-    def test_stats(self, invoke, fake_pool, stats_arg, active_stats):
-        """Test the result on all combinations of optional statistics options."""
-        result = invoke(stats_arg, "installed")
+    def test_summary(self, invoke, fake_pool, summary_arg, active_summary):
+        """Test the result on all combinations of optional summary options."""
+        result = invoke(summary_arg, "installed")
         assert result.exit_code == 0
-        stats_match = re.match(
+        summary_match = re.match(
             r"\d+ packages total \((\w+: \d+(, )?)+\)\.",
             # Last line of stderr.
             result.stderr.splitlines()[-1],
         )
-        assert active_stats is bool(stats_match)
+        assert active_summary is bool(summary_match)
 
 
 class TestManagerSelection(InspectCLIOutput):

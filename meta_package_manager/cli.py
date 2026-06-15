@@ -79,7 +79,8 @@ from .config import (
 from .execution import CLIError, highlight_cli_name
 from .inventory import MAIN_PLATFORMS
 from .manager import PackageManager
-from .output import KO_GLYPH, OK_GLYPH, BarPluginRenderer, SortableField, print_stats
+from .output import KO_GLYPH, OK_GLYPH, BarPluginRenderer, SortableField
+from .summary import package_counts, print_summary, sbom_summary
 from .package import packages_asdict
 from .pool import pool
 from .sbom import (
@@ -595,9 +596,14 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     ),
     # option('--sort-asc/--sort-desc', default=True)
     option(
-        "--stats/--no-stats",
+        "--summary/--no-summary",
         default=True,
-        help="Print per-manager package statistics.",
+        help=(
+            "Print an end-of-run summary on stderr: a count line of "
+            "per-manager totals plus any subcommand-specific follow-up "
+            "notes (like SBOM enrichment and merge counts). Defaults on; "
+            "use --no-summary to silence."
+        ),
     ),
     option(
         "--suggest-contribs/--no-suggest-contribs",
@@ -632,7 +638,7 @@ def mpm(
     allow_no_cooldown,
     description,
     sort_by,
-    stats,
+    summary,
     suggest_contribs,
 ):
     """CLI options shared by all subcommands."""
@@ -760,7 +766,7 @@ def mpm(
             "selected_managers",
             "description",
             "sort_by",
-            "stats",
+            "summary",
         ),
         defaults=(
             all_managers,
@@ -769,7 +775,7 @@ def mpm(
             selected_managers,
             description,
             sort_by,
-            stats,
+            summary,
         ),
     )()
 
@@ -1024,8 +1030,8 @@ def installed(ctx, duplicates):
         sort_by,
     )
 
-    if ctx.obj.stats:
-        print_stats(Counter({k: len(v["packages"]) for k, v in installed_data.items()}))
+    if ctx.obj.summary:
+        print_summary(package_counts(installed_data))
 
 
 @mpm.command(short_help="List outdated packages.", section=EXPLORE)
@@ -1117,8 +1123,8 @@ def outdated(ctx, plugin_output):
         ctx.obj.sort_by,
     )
 
-    if ctx.obj.stats:
-        print_stats(Counter({k: len(v["packages"]) for k, v in outdated_data.items()}))
+    if ctx.obj.summary:
+        print_summary(package_counts(outdated_data))
 
 
 # TODO: make it a --search-strategy=[exact, fuzzy, extended]
@@ -1242,8 +1248,8 @@ def search(ctx, extended, exact, refilter, query):
         headers.append(("Description", None))
     ctx.find_root().print_table(headers, table, ctx.obj.sort_by)
 
-    if ctx.obj.stats:
-        print_stats(Counter({k: len(v["packages"]) for k, v in matches.items()}))
+    if ctx.obj.summary:
+        print_summary(package_counts(matches))
 
 
 @mpm.command(aliases=["locate"], short_help="Locate CLIs on system.", section=EXPLORE)
@@ -1922,8 +1928,8 @@ def _dump_toml(
 
     echo(content, file=prep_path(output_path))
 
-    if ctx.obj.stats:
-        print_stats(Counter({k: len(v) for k, v in installed_data.items()}))
+    if ctx.obj.summary:
+        print_summary(Counter({k: len(v) for k, v in installed_data.items()}))
 
 
 def _dump_brewfile(ctx, output_path, *, include_header: bool) -> None:
@@ -1964,14 +1970,14 @@ def _dump_brewfile(ctx, output_path, *, include_header: bool) -> None:
 
     echo(content, file=prep_path(output_path), nl=False)
 
-    if ctx.obj.stats:
+    if ctx.obj.summary:
         section_counts: Counter[str] = Counter()
         for line in content.splitlines():
             if not line or line.startswith("#"):
                 continue
             entry_type = line.split(" ", 1)[0]
             section_counts[entry_type] += 1
-        print_stats(section_counts)
+        print_summary(section_counts)
 
 
 @mpm.command(
@@ -2162,59 +2168,6 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, export_path):
                 sbom.add_package(manager, package)
 
     sbom.finalize()
-    if ctx.obj.stats:
-        print_stats(*_sbom_stats_for_print(sbom, bundled))
+    if ctx.obj.summary:
+        print_summary(*sbom_summary(sbom, bundled))
     echo(sbom.export(), file=prep_path(export_path))
-
-
-def _sbom_stats_for_print(sbom: SBOM, bundled: bool) -> tuple:
-    """Adapt :py:meth:`SBOM.stats` to the
-    :py:func:`meta_package_manager.output.print_stats` shape.
-
-    The shared ``print_stats`` helper takes a per-manager ``Counter`` plus
-    an iterable of follow-up lines. SBOM stats contain both: the
-    ``packages_per_manager`` mapping drives the count line; the
-    enrichment ratio, merged-documents count, and dependency-graph
-    counts each become a follow-up line conditional on what actually
-    happened in the run (so ``--minimal`` scans, formats without a
-    merge concept, and zero-dep manifests stay tidy).
-    """
-    stats = sbom.stats()
-    packages_per_manager = stats.get("packages_per_manager") or {}
-    enriched_per_manager = stats.get("enriched_per_manager") or {}
-    counter = Counter(packages_per_manager)
-
-    extras: list[str] = []
-    total_packages = counter.total()
-    if bundled and total_packages:
-        total_enriched = sum(enriched_per_manager.values())
-        extras.append(
-            f"{total_enriched}/{total_packages} packages enriched with metadata."
-        )
-
-    merged = stats.get("merged_documents") or 0
-    transitive = stats.get("transitive_packages_merged") or 0
-    if merged:
-        if transitive:
-            extras.append(
-                f"{merged} upstream SBOM documents merged, adding "
-                f"{transitive} transitive packages."
-            )
-        else:
-            extras.append(f"{merged} upstream SBOM documents merged.")
-
-    bom_refs = stats.get("external_bom_references") or 0
-    if bom_refs:
-        extras.append(
-            f"{bom_refs} per-package upstream SBOMs attached by reference."
-        )
-
-    dep_relationships = stats.get("dependency_relationships") or 0
-    if dep_relationships:
-        extras.append(f"{dep_relationships} dependency relationships emitted.")
-
-    dep_edges = stats.get("dependency_edges") or 0
-    if dep_edges:
-        extras.append(f"{dep_edges} dependency edges emitted.")
-
-    return counter, extras

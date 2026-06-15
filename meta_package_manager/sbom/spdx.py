@@ -144,7 +144,7 @@ def _parse_license_expression(expression: str):
         return None
     try:
         parsed = spdx_licensing.parse(expression)
-    except Exception:
+    except Exception:  # noqa: BLE001
         return None
     if parsed is None:
         return None
@@ -442,7 +442,7 @@ class SPDX(SBOM):
                     manager_id=manager.id,
                     sbom_path=metadata.external_sbom_path,
                 )
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logging.debug(
                     f"Failed to merge external SBOM {metadata.external_sbom_path}: "
                     f"{exc}",

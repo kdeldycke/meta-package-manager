@@ -244,9 +244,14 @@ class CycloneDX(SBOM):
         if parsed is not None and " " not in candidate:
             try:
                 out.append(DisjunctiveLicense(id=candidate))
-                return out
-            except Exception:
+            except Exception:  # noqa: BLE001, S110
+                # DisjunctiveLicense validation rejects some technically-valid
+                # SPDX IDs (case variants, deprecated identifiers). Falling
+                # through to the LicenseExpression path below is the right
+                # recovery; no logging needed.
                 pass
+            else:
+                return out
         if parsed is not None:
             out.append(LicenseExpression(value=candidate))
         else:

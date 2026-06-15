@@ -272,7 +272,7 @@ class Pip(PackageManager):
                 continue
             try:
                 yield package, self._distribution_metadata(dist)
-            except Exception:
+            except Exception:  # noqa: BLE001
                 yield package, EMPTY_METADATA
 
     @staticmethod

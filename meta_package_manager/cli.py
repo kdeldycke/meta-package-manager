@@ -36,6 +36,7 @@ from functools import partial
 from io import TextIOWrapper
 from pathlib import Path
 from textwrap import dedent
+from typing import ClassVar
 from unittest.mock import patch
 
 import tomli_w
@@ -175,7 +176,7 @@ class Duration(ParamType):
 
     name = "duration"
 
-    _UNIT_SECONDS = {
+    _UNIT_SECONDS: ClassVar[dict[str, int]] = {
         "": 86400,
         "s": 1,
         "sec": 1,
@@ -2202,7 +2203,7 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, export_path):
             enriched = manager.package_metadata_batch(installed_packages)
             for package, metadata in enriched:
                 sbom.add_package(manager, package, metadata)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logging.warning(
                 f"Falling back to minimal SBOM data for "
                 f"{theme().invoked_command(manager.id)}: {exc}"

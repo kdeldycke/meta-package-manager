@@ -193,7 +193,7 @@ class Homebrew(PackageManager):
                 auto_post_args=False,
                 must_succeed=True,
             )
-        except Exception:
+        except Exception:  # noqa: BLE001
             return None
         prefix = output.strip()
         return Path(prefix) if prefix else None
@@ -222,7 +222,7 @@ class Homebrew(PackageManager):
 
         try:
             output = self.run_cli("info", "--json=v2", "--installed", must_succeed=True)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             # If the bulk query fails, fall back to empty metadata for
             # every package; the renderer will emit minimal entries.
             logging_msg = f"brew info --json=v2 --installed failed: {exc}"

@@ -28,9 +28,37 @@ from cyclonedx.validation.json import JsonStrictValidator
 from yaml import Loader, load
 
 from meta_package_manager.capabilities import Operations
-from meta_package_manager.sbom import SBOM, SPDX, ExportFormat
+from meta_package_manager.package import Package
+from meta_package_manager.sbom import SBOM, SPDX, CycloneDX, ExportFormat
+from meta_package_manager.sbom_metadata import (
+    EMPTY_METADATA,
+    Checksum,
+    ChecksumAlgorithm,
+    Dependency,
+    DependencyScope,
+    Originator,
+    PackageMetadata,
+    Supplier,
+)
 
 from .test_cli import CLISubCommandTests
+
+
+class _StubManager:
+    """Lightweight stand-in for :py:class:`PackageManager`.
+
+    Tests only need the two attributes the renderer reads.
+    """
+
+    def __init__(self, manager_id: str, name: str) -> None:
+        self.id = manager_id
+        self.name = name
+
+
+def _make_package(manager_id: str, package_id: str, version: str) -> Package:
+    return Package(
+        id=package_id, manager_id=manager_id, installed_version=version
+    )
 
 
 def assert_valid_cyclonedx(content: str, export_format: ExportFormat) -> None:
@@ -273,3 +301,204 @@ class TestSBOM(CLISubCommandTests):
                 )
                 assert rdf_elem is not None
                 assert rdf_elem.text == "SPDX-2.3"
+
+
+def _rich_metadata() -> PackageMetadata:
+    """Realistic metadata used by the renderer-level tests below."""
+    return PackageMetadata(
+        download_url="https://curl.se/download/curl-8.9.0.tar.xz",
+        homepage="https://curl.se",
+        vcs_url="https://github.com/curl/curl",
+        license_declared="MIT",
+        license_concluded="MIT",
+        supplier=Supplier(name="Homebrew Formulae", url="https://brew.sh"),
+        originator=Originator(name="Daniel Stenberg", email="daniel@haxx.se"),
+        description="HTTP transfer library",
+        summary="HTTP transfer library",
+        checksums=(Checksum(ChecksumAlgorithm.SHA256, "a" * 64),),
+        dependencies=(Dependency(target_id="openssl", scope=DependencyScope.RUNTIME),),
+    )
+
+
+def test_minimal_mode_emits_bare_spdx_payload():
+    """Minimal mode must reproduce the legacy bare output: rich
+    metadata is ignored, no relationships beyond ``DESCRIBES`` are
+    emitted, and ``download_location`` falls back to ``NOASSERTION``.
+    """
+    s = SPDX()
+    s.init_doc()
+    s.set_scan_completeness(bundled=False)
+    manager = _StubManager("brew", "Homebrew Formulae")
+    pkg = _make_package("brew", "curl", "8.9.0")
+    s.add_package(manager, pkg)  # No metadata, simulating minimal mode.
+    s.finalize()
+    doc = json.loads(s.export())
+    package = doc["packages"][0]
+    assert package["name"] == "curl"
+    assert package["downloadLocation"] == "NOASSERTION"
+    assert "licenseDeclared" not in package
+    assert all(
+        r["relationshipType"] == "DESCRIBES" for r in doc["relationships"]
+    )
+
+
+def test_bundled_mode_spdx_populates_rich_fields():
+    """A populated :py:class:`PackageMetadata` flows into the SPDX
+    document: license, supplier override, originator, checksum, and a
+    dependency relationship resolved at :py:meth:`finalize` time.
+    """
+    s = SPDX()
+    s.init_doc()
+    s.set_scan_completeness(bundled=True)
+    manager = _StubManager("brew", "Homebrew Formulae")
+    curl = _make_package("brew", "curl", "8.9.0")
+    openssl = _make_package("brew", "openssl", "3.3.1")
+    s.add_package(manager, curl, _rich_metadata())
+    s.add_package(manager, openssl, EMPTY_METADATA)
+    s.finalize()
+    doc = json.loads(s.export())
+    curl_pkg = next(p for p in doc["packages"] if p["name"] == "curl")
+    assert curl_pkg["downloadLocation"].endswith("curl-8.9.0.tar.xz")
+    assert curl_pkg["homepage"] == "https://curl.se"
+    assert curl_pkg["licenseDeclared"] == "MIT"
+    assert curl_pkg["checksums"][0]["algorithm"] == "SHA256"
+    assert "Daniel Stenberg" in curl_pkg["originator"]
+    rels = [r["relationshipType"] for r in doc["relationships"]]
+    assert "RUNTIME_DEPENDENCY_OF" in rels
+
+
+def test_bundled_mode_cyclonedx_populates_rich_fields():
+    """CycloneDX renderer projects the same metadata into hashes,
+    licenses, supplier, external references, and dependency edges.
+    """
+    c = CycloneDX()
+    c.init_doc()
+    c.set_scan_completeness(bundled=True)
+    manager = _StubManager("brew", "Homebrew Formulae")
+    curl = _make_package("brew", "curl", "8.9.0")
+    openssl = _make_package("brew", "openssl", "3.3.1")
+    c.add_package(manager, curl, _rich_metadata())
+    c.add_package(manager, openssl, EMPTY_METADATA)
+    c.finalize()
+    doc = json.loads(c.export())
+    curl_comp = next(comp for comp in doc["components"] if comp["name"] == "curl")
+    assert curl_comp["hashes"][0]["alg"] == "SHA-256"
+    assert curl_comp["licenses"][0]["license"]["id"] == "MIT"
+    ref_types = {ref["type"] for ref in curl_comp["externalReferences"]}
+    assert "website" in ref_types
+    assert "vcs" in ref_types
+    deps_for_curl = next(
+        dep for dep in doc["dependencies"] if dep["ref"] == curl.purl.to_string()
+    )
+    assert openssl.purl.to_string() in deps_for_curl["dependsOn"]
+    assert_valid_cyclonedx(c.export(), ExportFormat.JSON)
+
+
+@pytest.mark.parametrize(
+    ("declared", "expected_present"),
+    (
+        # Plain SPDX IDs survive as-is.
+        ("MIT", True),
+        ("Apache-2.0", True),
+        # NOASSERTION sentinels collapse to the typed singleton.
+        ("NOASSERTION", False),
+        # Free-text licenses tend to fail strict parsing — they fall back
+        # to NOASSERTION rather than tripping the validator.
+        ("Some custom license text the parser will reject", False),
+        # LicenseRef-* without an extracted-license declaration is the
+        # exact failure mode that Homebrew's per-formula SBOMs exposed.
+        # It must also collapse to NOASSERTION to keep the doc valid.
+        ("LicenseRef-Homebrew-public-domain", False),
+        # Compound expressions stay if every symbol is known.
+        ("MIT AND Apache-2.0", True),
+    ),
+)
+def test_spdx_license_normalization(declared, expected_present):
+    """The SPDX renderer must produce a document that validates against
+    the SPDX schema for every input it accepts.
+    """
+    s = SPDX()
+    s.init_doc()
+    s.set_scan_completeness(bundled=True)
+    md = PackageMetadata(license_declared=declared)
+    s.add_package(_StubManager("brew", "Homebrew Formulae"), _make_package("brew", "curl", "8.9.0"), md)
+    s.finalize()
+    doc = json.loads(s.export())  # exporting also validates the doc.
+    pkg = doc["packages"][0]
+    if expected_present:
+        assert pkg["licenseDeclared"] == declared
+    else:
+        assert pkg.get("licenseDeclared") in (None, "NOASSERTION")
+
+
+def test_spdx_merges_external_per_package_sbom(tmp_path):
+    """The renderer adopts transitive deps from a per-package upstream
+    SPDX file and records the merge in ``externalDocumentRefs``.
+
+    The fixture mirrors the shape of Homebrew's
+    ``<prefix>/Cellar/<formula>/<version>/sbom.spdx.json``.
+    """
+    upstream = {
+        "SPDXID": "SPDXRef-DOCUMENT",
+        "spdxVersion": "SPDX-2.3",
+        "documentNamespace": "https://example.org/sbom/curl-8.9.0",
+        "documentDescribes": ["SPDXRef-Package-curl"],
+        "packages": [
+            {
+                "SPDXID": "SPDXRef-Package-curl",
+                "name": "curl",
+                "versionInfo": "8.9.0",
+                "downloadLocation": "https://curl.se/download/curl-8.9.0.tar.xz",
+                "licenseDeclared": "MIT",
+                "homepage": "https://curl.se",
+            },
+            {
+                "SPDXID": "SPDXRef-Package-zlib",
+                "name": "zlib",
+                "versionInfo": "1.3",
+                "downloadLocation": "https://zlib.net/zlib-1.3.tar.gz",
+                "licenseDeclared": "Zlib",
+            },
+        ],
+        "relationships": [
+            {
+                "spdxElementId": "SPDXRef-Package-curl",
+                "relationshipType": "DEPENDS_ON",
+                "relatedSpdxElement": "SPDXRef-Package-zlib",
+            }
+        ],
+    }
+    sbom_file = tmp_path / "sbom.spdx.json"
+    sbom_file.write_text(json.dumps(upstream))
+    md = PackageMetadata(external_sbom_path=sbom_file)
+    s = SPDX()
+    s.init_doc()
+    s.set_scan_completeness(bundled=True)
+    s.add_package(
+        _StubManager("brew", "Homebrew Formulae"),
+        _make_package("brew", "curl", "8.9.0"),
+        md,
+    )
+    s.finalize()
+    doc = json.loads(s.export())
+    names = sorted(p["name"] for p in doc["packages"])
+    assert names == ["curl", "zlib"]
+    edrs = doc.get("externalDocumentRefs") or []
+    assert len(edrs) == 1
+    assert edrs[0]["checksum"]["algorithm"] == "SHA1"
+
+
+def test_minimal_mode_skips_metadata_extractor(invoke):
+    """``--minimal`` must avoid the rich-metadata code path so the
+    export matches the historical bare shape even for managers that
+    implement an extractor (Homebrew, pip).
+    """
+    result = invoke("sbom", "--minimal")
+    assert result.exit_code == 0
+    if not result.stdout.lstrip().startswith("{"):
+        return
+    doc = json.loads(result.stdout)
+    for package in doc.get("packages", []):
+        assert package["downloadLocation"] == "NOASSERTION"
+        assert "licenseDeclared" not in package
+        assert "checksums" not in package

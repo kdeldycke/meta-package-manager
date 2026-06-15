@@ -27,6 +27,14 @@ from extra_platforms import ALL_PLATFORMS
 
 from ..capabilities import search_capabilities, version_not_implemented
 from ..manager import PackageManager
+from ..sbom_metadata import (
+    EMPTY_METADATA,
+    Dependency,
+    DependencyScope,
+    Originator,
+    PackageMetadata,
+    Supplier,
+)
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -34,6 +42,23 @@ if TYPE_CHECKING:
 
     from ..package import Package
     from ..version import TokenizedString
+
+
+_DEP_SPEC_SPLIT_REGEX = re.compile(r"^(?P<name>[A-Za-z0-9_.\-]+)(?P<extras>\[[^\]]+\])?(?P<rest>.*)$")
+
+
+def _split_dep_spec(spec: str) -> tuple[str, str, str]:
+    """Split a :pep:`508` requirement string into (name, extras, rest).
+
+    Example: ``"cryptography[ssh]>=42"`` → ``("cryptography", "[ssh]", ">=42")``.
+    Used by :py:meth:`Pip._distribution_metadata` to extract just the
+    dependency name for relationship resolution while preserving the
+    version constraint as portable metadata.
+    """
+    match = _DEP_SPEC_SPLIT_REGEX.match(spec.strip())
+    if not match:
+        return "", "", ""
+    return match["name"], match["extras"] or "", match["rest"].strip()
 
 
 class Pip(PackageManager):
@@ -211,6 +236,147 @@ class Pip(PackageManager):
                     id=package["name"],
                     installed_version=package["version"],
                 )
+
+    def package_metadata_batch(
+        self,
+        packages: Iterable[Package],
+    ) -> Iterator[tuple[Package, PackageMetadata]]:
+        """Enrich installed pip packages via :py:mod:`importlib.metadata`.
+
+        Each installed distribution exposes its ``METADATA`` file (the
+        ``Core Metadata`` from :pep:`621`) plus ``RECORD``, ``WHEEL``,
+        and ``INSTALLER`` files in its ``.dist-info`` directory. This
+        method reads them in-process: no shell-outs, no network, fast
+        enough to enumerate hundreds of distributions in a fraction of a
+        second.
+
+        Maps ``Home-page`` / ``Project-URL`` lines into the portable
+        ``homepage`` / ``vcs_url`` / ``issue_tracker_url`` slots, walks
+        ``Requires-Dist`` into typed :py:class:`Dependency` edges, and
+        promotes the upstream author or maintainer to
+        :py:class:`Originator`.
+        """
+        package_list = list(packages)
+        if not package_list:
+            return
+
+        for package in package_list:
+            try:
+                dist = importlib.metadata.distribution(package.id)
+            except importlib.metadata.PackageNotFoundError:
+                yield package, EMPTY_METADATA
+                continue
+            try:
+                yield package, self._distribution_metadata(dist)
+            except Exception:
+                yield package, EMPTY_METADATA
+
+    @staticmethod
+    def _distribution_metadata(
+        dist: importlib.metadata.Distribution,
+    ) -> PackageMetadata:
+        """Translate an ``importlib.metadata.Distribution`` into
+        :py:class:`PackageMetadata`.
+        """
+        meta = dist.metadata
+
+        homepage = meta.get("Home-page") or None
+        vcs_url = None
+        issue_tracker_url = None
+        # PEP 621 split the legacy Home-page header into the Project-URL
+        # multi-value field with a ``label, url`` payload. The exact
+        # labels vary across PyPI projects, so match on conventional
+        # substrings while staying case-insensitive.
+        for raw in meta.get_all("Project-URL") or ():
+            if "," not in raw:
+                continue
+            label, _, url = raw.partition(",")
+            label_key = label.strip().lower()
+            url = url.strip()
+            if not url:
+                continue
+            if not homepage and label_key in {"home", "homepage", "documentation"}:
+                homepage = url
+            if not vcs_url and label_key in {
+                "source",
+                "repository",
+                "source code",
+                "code",
+                "github",
+            }:
+                vcs_url = url
+            if not issue_tracker_url and label_key in {
+                "issues",
+                "issue tracker",
+                "bug tracker",
+                "tracker",
+                "bugs",
+            }:
+                issue_tracker_url = url
+
+        license_str = meta.get("License") or None
+        if license_str and "\n" in license_str:
+            # Some projects dump the full license text here. Truncate to
+            # the first line so the SPDX parser has a fighting chance.
+            license_str = license_str.splitlines()[0].strip()
+
+        author_name = meta.get("Author") or meta.get("Maintainer") or None
+        author_email = meta.get("Author-email") or meta.get("Maintainer-email") or None
+        originator = None
+        if author_name:
+            # ``Author-email`` can carry a ``"Name <email>"`` payload.
+            email_match = None
+            if author_email and "<" in author_email and ">" in author_email:
+                email_match = author_email.split("<", 1)[1].split(">", 1)[0].strip()
+            elif author_email:
+                email_match = author_email
+            originator = Originator(name=author_name, email=email_match)
+
+        # Requires-Dist lines look like ``cryptography>=42.0; python_version<'3.13'``.
+        # Strip environment markers and version constraints to land just
+        # the dependency name in ``target_id``; the version_constraint
+        # column carries the rest for any downstream consumer that wants
+        # it.
+        deps: list[Dependency] = []
+        for raw in meta.get_all("Requires-Dist") or ():
+            if ";" in raw:
+                spec, _, _marker = raw.partition(";")
+            else:
+                spec = raw
+            spec = spec.strip()
+            name, _, constraint = _split_dep_spec(spec)
+            if name:
+                deps.append(
+                    Dependency(
+                        target_id=name,
+                        scope=DependencyScope.RUNTIME,
+                        version_constraint=constraint or None,
+                    )
+                )
+
+        extras: dict[str, object] = {}
+        for keyword_header in ("Keywords",):
+            value = meta.get(keyword_header)
+            if value:
+                extras[f"pip.{keyword_header.lower()}"] = value
+        classifiers = meta.get_all("Classifier") or ()
+        if classifiers:
+            extras["pip.classifiers"] = list(classifiers)
+
+        return PackageMetadata(
+            download_url=meta.get("Download-URL") or None,
+            homepage=homepage,
+            vcs_url=vcs_url,
+            issue_tracker_url=issue_tracker_url,
+            license_declared=license_str,
+            license_concluded=license_str,
+            supplier=Supplier(name="PyPI", url="https://pypi.org"),
+            originator=originator,
+            summary=meta.get("Summary") or None,
+            description=meta.get("Summary") or None,
+            dependencies=tuple(deps),
+            extras=extras,
+        )
 
     @staticmethod
     def _own_dependency_names() -> frozenset[str]:

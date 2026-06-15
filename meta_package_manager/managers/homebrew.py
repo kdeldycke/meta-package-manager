@@ -18,18 +18,29 @@ from __future__ import annotations
 
 import json
 import re
+from functools import cached_property
 from operator import methodcaller
+from pathlib import Path
 from typing import ClassVar
 
 from extra_platforms import LINUX_LIKE, MACOS
 
 from ..capabilities import version_not_implemented
 from ..manager import PackageManager
+from ..sbom_metadata import (
+    EMPTY_METADATA,
+    Checksum,
+    ChecksumAlgorithm,
+    Dependency,
+    DependencyScope,
+    PackageMetadata,
+    Supplier,
+)
 from ..version import parse_version
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterable, Iterator
 
     from ..package import Package
 
@@ -165,6 +176,236 @@ class Homebrew(PackageManager):
             # Keep highest version found.
             version = max(map(parse_version, versions.split()))
             yield self.package(id=package_id, installed_version=version)
+
+    @cached_property
+    def _brew_prefix(self) -> Path | None:
+        """Resolve ``brew --prefix`` once.
+
+        Used to locate per-formula ``<prefix>/Cellar/<formula>/<version>``
+        directories where Homebrew writes ``sbom.spdx.json`` when
+        installed under ``HOMEBREW_SBOM=1``. Returns ``None`` if the
+        prefix cannot be determined, in which case the extractor falls
+        back to API-only metadata.
+        """
+        try:
+            output = self.run_cli(
+                "--prefix",
+                auto_post_args=False,
+                must_succeed=True,
+            )
+        except Exception:
+            return None
+        prefix = output.strip()
+        return Path(prefix) if prefix else None
+
+    def package_metadata_batch(
+        self,
+        packages: Iterable[Package],
+    ) -> Iterator[tuple[Package, PackageMetadata]]:
+        """Enrich installed packages with Homebrew's API + per-formula data.
+
+        Runs ``brew info --json=v2 --installed`` in a single shell-out and
+        joins the result back onto the inventory list by package ID. For
+        each formula that has ``<prefix>/Cellar/<name>/<version>/sbom.spdx.json``
+        on disk (the file Homebrew writes when installed under
+        ``HOMEBREW_SBOM=1``), the metadata's ``external_sbom_path`` points
+        at it so the SPDX renderer can splice the upstream document into
+        the aggregate.
+
+        Casks reuse the same JSON payload through the ``casks`` array but
+        do not get the SBOM-file treatment (Homebrew does not emit one
+        for casks).
+        """
+        package_list = list(packages)
+        if not package_list:
+            return
+
+        try:
+            output = self.run_cli(
+                "info", "--json=v2", "--installed", must_succeed=True
+            )
+        except Exception as exc:
+            # If the bulk query fails, fall back to empty metadata for
+            # every package; the renderer will emit minimal entries.
+            logging_msg = f"brew info --json=v2 --installed failed: {exc}"
+            self._log_extractor_failure(logging_msg)
+            for package in package_list:
+                yield package, EMPTY_METADATA
+            return
+
+        try:
+            payload = json.loads(output) if output else {}
+        except json.JSONDecodeError as exc:
+            self._log_extractor_failure(f"brew info JSON decode failed: {exc}")
+            for package in package_list:
+                yield package, EMPTY_METADATA
+            return
+
+        formulae_by_name: dict[str, dict] = {}
+        for formula in payload.get("formulae") or ():
+            formulae_by_name[formula.get("name", "")] = formula
+            for alias in formula.get("aliases") or ():
+                formulae_by_name.setdefault(alias, formula)
+            for old_name in formula.get("oldnames") or ():
+                formulae_by_name.setdefault(old_name, formula)
+            full_name = formula.get("full_name")
+            if full_name:
+                formulae_by_name.setdefault(full_name, formula)
+
+        casks_by_token: dict[str, dict] = {}
+        for cask in payload.get("casks") or ():
+            casks_by_token[cask.get("token", "")] = cask
+            full_token = cask.get("full_token")
+            if full_token:
+                casks_by_token.setdefault(full_token, cask)
+
+        for package in package_list:
+            formula = formulae_by_name.get(package.id)
+            cask = casks_by_token.get(package.id) if not formula else None
+            if formula:
+                yield package, self._formula_metadata(formula)
+            elif cask:
+                yield package, self._cask_metadata(cask)
+            else:
+                yield package, EMPTY_METADATA
+
+    def _log_extractor_failure(self, message: str) -> None:
+        """Centralized debug log so the various failure paths read the same."""
+        import logging
+
+        logging.getLogger("meta_package_manager").debug(message)
+
+    def _formula_metadata(self, formula: dict) -> PackageMetadata:
+        """Map one entry from ``brew info --json=v2``'s ``formulae`` array
+        into the portable :py:class:`PackageMetadata`.
+        """
+        installed_entries = formula.get("installed") or ()
+        installed = installed_entries[-1] if installed_entries else {}
+
+        deps: list[Dependency] = []
+        for dep_name in formula.get("dependencies") or ():
+            deps.append(Dependency(target_id=dep_name, scope=DependencyScope.RUNTIME))
+        for dep_name in formula.get("build_dependencies") or ():
+            deps.append(Dependency(target_id=dep_name, scope=DependencyScope.BUILD))
+        for dep_name in formula.get("test_dependencies") or ():
+            deps.append(Dependency(target_id=dep_name, scope=DependencyScope.TEST))
+        for dep_name in formula.get("optional_dependencies") or ():
+            deps.append(Dependency(target_id=dep_name, scope=DependencyScope.OPTIONAL))
+        for dep_name in formula.get("recommended_dependencies") or ():
+            deps.append(
+                Dependency(target_id=dep_name, scope=DependencyScope.RECOMMENDED),
+            )
+
+        checksums: list[Checksum] = []
+        # The bottle entry for the current platform carries a SHA256.
+        bottle_files = (
+            ((formula.get("bottle") or {}).get("stable") or {}).get("files") or {}
+        )
+        for platform_payload in bottle_files.values():
+            sha = platform_payload.get("sha256") if isinstance(platform_payload, dict) else None
+            if sha:
+                checksums.append(Checksum(ChecksumAlgorithm.SHA256, sha))
+                break
+
+        license_str = formula.get("license")
+
+        download_url = None
+        urls_payload = formula.get("urls") or {}
+        stable_url = (urls_payload.get("stable") or {}).get("url")
+        if stable_url:
+            download_url = stable_url
+
+        external_sbom_path = self._sbom_path_for_formula(
+            formula.get("name"), installed.get("version") or formula.get("versions", {}).get("stable")
+        )
+
+        tap = formula.get("tap")
+        extras: dict[str, object] = {}
+        if tap:
+            extras["brew.tap"] = tap
+        if installed.get("installed_on_request") is not None:
+            extras["brew.installed_on_request"] = installed["installed_on_request"]
+        if installed.get("poured_from_bottle") is not None:
+            extras["brew.poured_from_bottle"] = installed["poured_from_bottle"]
+        if formula.get("keg_only"):
+            extras["brew.keg_only"] = True
+            kor = formula.get("keg_only_reason") or {}
+            if kor.get("reason"):
+                extras["brew.keg_only_reason"] = kor["reason"]
+
+        return PackageMetadata(
+            download_url=download_url,
+            homepage=formula.get("homepage"),
+            license_declared=license_str,
+            license_concluded=license_str,
+            supplier=Supplier(name="Homebrew Formulae", url="https://brew.sh"),
+            description=formula.get("desc"),
+            summary=formula.get("desc"),
+            dependencies=tuple(deps),
+            checksums=tuple(checksums),
+            external_sbom_path=external_sbom_path,
+            extras=extras,
+        )
+
+    def _cask_metadata(self, cask: dict) -> PackageMetadata:
+        """Map one entry from ``brew info --json=v2``'s ``casks`` array.
+
+        Casks expose a leaner schema than formulae: no transitive
+        dependency closure, a single ``url`` and ``sha256`` for the
+        download, and a ``depends_on`` map limited to cross-cask edges.
+        """
+        deps: list[Dependency] = []
+        depends_on = cask.get("depends_on") or {}
+        for cask_dep in depends_on.get("cask") or ():
+            deps.append(Dependency(target_id=cask_dep, scope=DependencyScope.RUNTIME))
+        for formula_dep in depends_on.get("formula") or ():
+            deps.append(
+                Dependency(target_id=formula_dep, scope=DependencyScope.RUNTIME),
+            )
+
+        checksums: list[Checksum] = []
+        sha = cask.get("sha256")
+        if sha and sha != "no_check":
+            checksums.append(Checksum(ChecksumAlgorithm.SHA256, sha))
+
+        tap = cask.get("tap")
+        extras: dict[str, object] = {}
+        if tap:
+            extras["brew.tap"] = tap
+        if cask.get("auto_updates") is not None:
+            extras["brew.auto_updates"] = cask["auto_updates"]
+
+        return PackageMetadata(
+            download_url=cask.get("url"),
+            homepage=cask.get("homepage"),
+            supplier=Supplier(
+                name="Homebrew Cask",
+                url="https://github.com/Homebrew/homebrew-cask",
+            ),
+            description=cask.get("desc"),
+            summary=cask.get("name", [None])[0] if isinstance(cask.get("name"), list) else cask.get("name"),
+            dependencies=tuple(deps),
+            checksums=tuple(checksums),
+            extras=extras,
+        )
+
+    def _sbom_path_for_formula(
+        self, formula_name: str | None, version: str | None
+    ) -> Path | None:
+        """Locate ``<prefix>/Cellar/<formula>/<version>/sbom.spdx.json``.
+
+        Returns ``None`` if the brew prefix is unknown or the file does
+        not exist: that branch covers users who never set
+        ``HOMEBREW_SBOM=1`` at install time, formulae installed before
+        ``5.2.0`` introduced the flag, and casks.
+        """
+        if not formula_name or not version:
+            return None
+        prefix = self._brew_prefix
+        if not prefix:
+            return None
+        candidate = prefix / "Cellar" / formula_name / str(version) / "sbom.spdx.json"
+        return candidate if candidate.is_file() else None
 
     @property
     def outdated(self) -> Iterator[Package]:

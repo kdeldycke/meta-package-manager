@@ -95,6 +95,45 @@ relationships:
 spdxVersion: SPDX-2.3
 ```
 
+## Scan mode: `--bundled` vs `--minimal`
+
+`mpm sbom` defaults to **bundled mode**: every manager that knows how is queried for richer per-package metadata (license, supplier, homepage, declared dependencies, source URL, checksums), per-package upstream SBOM documents are merged into the aggregate, and the result lands in the rendered SPDX or CycloneDX document. Bundled mode is the default because the magic of `mpm sbom` is collapsing N different manager APIs into one self-contained file.
+
+When I only need a fast inventory pass, the `--minimal` flag short-circuits the metadata extractors and produces today's bare output (name, version, purl):
+
+```shell-session
+$ mpm --brew sbom --minimal > inventory.spdx.json
+```
+
+Use `--minimal` for snapshot-style runs (cron jobs, drift detection) and `--bundled` (the default) for compliance, supply-chain audit, and vulnerability-scanner ingestion.
+
+## Layered SBOMs: aggregate + per-package upstream
+
+Some package managers now publish their own per-package SBOM documents. Homebrew, for example, writes `<prefix>/Cellar/<formula>/<version>/sbom.spdx.json` when a formula is installed under `HOMEBREW_SBOM=1` (added in `5.2.0`). These are full SPDX 2.3 documents with the formula's complete dependency closure, real download URLs, and bottle checksums.
+
+`mpm sbom --bundled` discovers those files, **splices them into the aggregate document**, and records each one in `externalDocumentRefs` with its SHA1 so the merge is auditable. Transitive packages from the upstream document are renamed under a `SPDXRef-brew-<formula>-<dep>` namespace to avoid collisions across formulae that share dependencies.
+
+For the same data in CycloneDX, the per-formula file is attached to its component via an `externalReferences[type=bom]` entry.
+
+If `HOMEBREW_SBOM=1` was never set, the file does not exist and `mpm` falls back silently to `brew info --json=v2` for the same fields.
+
+To get the deepest data possible:
+
+```shell-session
+$ HOMEBREW_SBOM=1 brew reinstall <formula>
+$ mpm --brew sbom > deep.spdx.json
+```
+
+## Coverage matrix
+
+| Manager  | License | Homepage | Download URL | Checksums | Dependency graph | Per-package SBOM |
+| -------- | :-----: | :------: | :----------: | :-------: | :--------------: | :--------------: |
+| Homebrew |    ✓    |    ✓     |      ✓       |     ✓     |        ✓         |   ✓ (opt-in)     |
+| pip      |    ✓    |    ✓     |              |           |        ✓         |                  |
+| Others   |         |          |              |           |                  |                  |
+
+Coverage will expand: every manager exposes its metadata differently, and richer extractors land per manager over time.
+
 ## Installation
 
 SBOM export is an optional extra. `pip install meta-package-manager` does not pull the CycloneDX and SPDX dependencies; install the `[sbom]` extra to enable the `mpm sbom` subcommand:

@@ -48,6 +48,7 @@ from extra_platforms import (
 
 from .execution import CLIExecutor, highlight_cli_name
 from .package import Package
+from .sbom_metadata import EMPTY_METADATA, PackageMetadata
 from .version import VersionRange
 
 TYPE_CHECKING = False
@@ -306,6 +307,52 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def installed_ids(self) -> frozenset[str]:
         """Installed package IDs, materialized once from :py:meth:`installed`."""
         return frozenset(pkg.id for pkg in self.installed)
+
+    def package_metadata_batch(
+        self,
+        packages: Iterable[Package],
+    ) -> Iterator[tuple[Package, PackageMetadata]]:
+        """Yield ``(package, metadata)`` pairs enriched with whatever rich
+        per-package data this manager can surface.
+
+        Called by ``mpm sbom`` in ``--bundled`` mode to populate licenses,
+        checksums, download URLs, supplier/originator, and the declared
+        dependency graph. The base implementation yields
+        :py:data:`EMPTY_METADATA` for each package and stays compatible
+        with managers that do not (yet) expose richer metadata: their SBOM
+        entries stay at the minimal ``Package`` level, matching the
+        historical and ``--minimal`` modes.
+
+        Manager subclasses override this with their native query path:
+        - bulk shell-outs when the CLI accepts a package list
+          (``brew info --json=v2 --installed``, ``dpkg-query -W``,
+          ``apt-cache show``);
+        - on-disk parsing when the metadata already lives on the filesystem
+          (pip's ``.dist-info`` directories, Homebrew's per-formula
+          ``sbom.spdx.json``, dpkg's ``.md5sums``).
+
+        The yielded pairs do not need to preserve the input order; the SBOM
+        renderer matches by ``Package`` identity. Implementations are
+        expected to swallow per-package extraction errors and yield
+        :py:data:`EMPTY_METADATA` for the affected packages rather than
+        failing the whole scan: a single misbehaving formula must not abort
+        an enrichment pass spanning hundreds of packages.
+
+        .. todo::
+            Today every extractor is local-only (shell-outs to the
+            manager's CLI, plus on-disk reads). When extractors start
+            reaching for network resources (PyPI's JSON API, npm's
+            registry, crates.io, GitHub's security advisories) the
+            ``--bundled`` flag will no longer be a fine-grained enough
+            knob: some users will want enrichment but not network
+            traffic (offline scans, CI without egress). The natural
+            split is a future ``--network/--no-network`` flag layered
+            under ``--bundled`` to gate the network-touching code paths
+            specifically, leaving local enrichment always-on for
+            ``--bundled``.
+        """
+        for package in packages:
+            yield package, EMPTY_METADATA
 
     @property
     def outdated(self) -> Iterator[Package]:

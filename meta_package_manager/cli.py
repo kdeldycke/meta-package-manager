@@ -2051,13 +2051,28 @@ def restore(ctx, toml_files):
     default=False,
     help="Allow the target file to be silently wiped out if it already exists.",
 )
+@option(
+    "--bundled/--minimal",
+    default=True,
+    help=(
+        "Bundled mode (the default) queries each manager for richer "
+        "metadata (license, supplier, homepage, checksums, declared "
+        "dependencies) and merges per-package upstream SBOM documents into "
+        "the aggregate when the manager publishes them (like Homebrew's "
+        "HOMEBREW_SBOM=1 per-formula files). Minimal mode lists installed "
+        "packages with the bare inventory data (name, version, purl) and "
+        "skips the metadata extractors entirely. Bundled mode is slower "
+        "because it may shell out or read on-disk SBOM files per package; "
+        "pick --minimal for fast inventory snapshots."
+    ),
+)
 @argument(
     "export_path",
     type=file_path(writable=True, resolve_path=True, allow_dash=True),
     default="-",
 )
 @pass_context
-def sbom(ctx, spdx, export_format, overwrite, export_path):
+def sbom(ctx, spdx, export_format, overwrite, bundled, export_path):
     """Export list of installed packages to a SPDX or CycloneDX file."""
     standard = "SPDX" if spdx else "CycloneDX"
 
@@ -2117,15 +2132,34 @@ def sbom(ctx, spdx, export_format, overwrite, export_path):
 
     sbom = sbom_class(export_format)
     sbom.init_doc()
+    sbom.set_scan_completeness(bundled=bundled)
 
     for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
         logging.info(f"Export packages from {theme().invoked_command(manager.id)}...")
         try:
-            for package in manager.installed:
-                sbom.add_package(manager, package)
+            installed_packages = list(manager.installed)
         except CLIError:
             logging.warning(
                 f"Could not export packages from {theme().invoked_command(manager.id)}."
             )
+            continue
 
+        if not bundled:
+            for package in installed_packages:
+                sbom.add_package(manager, package)
+            continue
+
+        try:
+            enriched = manager.package_metadata_batch(installed_packages)
+            for package, metadata in enriched:
+                sbom.add_package(manager, package, metadata)
+        except Exception as exc:
+            logging.warning(
+                f"Falling back to minimal SBOM data for "
+                f"{theme().invoked_command(manager.id)}: {exc}"
+            )
+            for package in installed_packages:
+                sbom.add_package(manager, package)
+
+    sbom.finalize()
     echo(sbom.export(), file=prep_path(export_path))

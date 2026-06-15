@@ -27,7 +27,7 @@ from extra_platforms import ALL_PLATFORMS
 
 from ..capabilities import search_capabilities, version_not_implemented
 from ..manager import PackageManager
-from ..sbom_metadata import (
+from ..package import (
     EMPTY_METADATA,
     Dependency,
     DependencyScope,

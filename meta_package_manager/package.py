@@ -13,12 +13,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Manager-agnostic :py:class:`meta_package_manager.package.Package` data model.
+"""Manager-agnostic :py:class:`meta_package_manager.package.Package` data model
+and the :py:class:`meta_package_manager.package.PackageMetadata` companion
+that augments it with data pulled from sources outside the package manager
+itself.
 
 Defines the lightweight representation of a package (ID, name, installed and latest
 versions, architecture) that every manager operation yields, plus
 :py:func:`meta_package_manager.package.packages_asdict` to serialize a subset of its
 fields for output.
+
+:py:class:`Package` is the inventory plane: what the package manager itself
+reports through its native query commands. It backs every operation in
+:py:mod:`meta_package_manager.manager`.
+
+:py:class:`PackageMetadata` is the enrichment plane: licenses, supplier,
+checksums, declared dependency graph, on-disk per-package SBOMs, and other
+facts gathered through extra queries (CLI sub-commands, on-disk parsers,
+upstream registries). Populated by
+:py:meth:`meta_package_manager.manager.PackageManager.package_metadata_batch`,
+consumed by :py:mod:`meta_package_manager.sbom` today and reserved for any
+future caller that wants more than the bare inventory.
 
 Kept deliberately free of manager logic, so it can be imported without pulling in the
 manager engine (:py:mod:`meta_package_manager.manager`).
@@ -26,7 +41,8 @@ manager engine (:py:mod:`meta_package_manager.manager`).
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
+from enum import Enum
 from functools import cached_property
 
 from packageurl import PackageURL
@@ -36,6 +52,8 @@ from .version import parse_version
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterator
+    from datetime import datetime
+    from pathlib import Path
 
     from .version import TokenizedString
 
@@ -99,3 +117,198 @@ def packages_asdict(packages: Iterator[Package], keep_fields: tuple[str, ...]):
     """Returns a list of packages casted to a ``dict`` with only a subset of its
     fields."""
     return ({k: v for k, v in asdict(p).items() if k in keep_fields} for p in packages)
+
+
+class DependencyScope(str, Enum):
+    """Maps loosely onto SPDX ``RelationshipType`` variants.
+
+    SBOM renderers translate these into ``RUNTIME_DEPENDENCY_OF``,
+    ``BUILD_DEPENDENCY_OF``, etc.; CycloneDX collapses everything to its
+    flat ``dependencies`` graph. Future non-SBOM consumers can apply
+    their own mapping or just expose the raw scope label.
+    """
+
+    RUNTIME = "runtime"
+    BUILD = "build"
+    DEV = "dev"
+    OPTIONAL = "optional"
+    TEST = "test"
+    RECOMMENDED = "recommended"
+
+
+class ChecksumAlgorithm(str, Enum):
+    """Subset of algorithms shared by SPDX and CycloneDX schemas.
+
+    Used by :py:class:`Checksum` to identify a content hash without
+    coupling the data model to any specific SBOM library's enum.
+    """
+
+    MD5 = "MD5"
+    SHA1 = "SHA1"
+    SHA256 = "SHA256"
+    SHA512 = "SHA512"
+    SHA3_256 = "SHA3-256"
+    SHA3_512 = "SHA3-512"
+    BLAKE2B_256 = "BLAKE2b-256"
+    BLAKE2B_512 = "BLAKE2b-512"
+
+
+@dataclass(frozen=True)
+class Checksum:
+    """A single ``(algorithm, value)`` pair."""
+
+    algorithm: ChecksumAlgorithm
+    value: str
+
+
+@dataclass(frozen=True)
+class Supplier:
+    """Distributor of the package.
+
+    Distinct from the originator: the supplier is whoever served the bits
+    (Homebrew, Debian, PyPI), the originator is the upstream author.
+    """
+
+    name: str
+    url: str | None = None
+
+
+@dataclass(frozen=True)
+class Originator:
+    """Upstream author or organization that produced the package."""
+
+    name: str
+    email: str | None = None
+    is_organization: bool = False
+
+
+@dataclass(frozen=True)
+class Dependency:
+    """A single edge in the package's declared dependency graph.
+
+    ``target_id`` is the dependency's manager-native identifier (e.g.
+    ``openssl@3`` for Homebrew). Renderers match it against the inventory's
+    installed packages to decide whether to emit a relationship.
+    """
+
+    target_id: str
+    scope: DependencyScope = DependencyScope.RUNTIME
+    version_constraint: str | None = None
+
+
+@dataclass(frozen=True)
+class FileEntry:
+    """An installed file shipped by the package.
+
+    Only populated for managers that can cheaply enumerate file contents and
+    hashes (dpkg ``.md5sums``, pip ``RECORD``). Omitted otherwise; the SBOM
+    renderer leaves ``filesAnalyzed=False`` on the SPDX Package.
+    """
+
+    path: str
+    sha256: str | None = None
+    sha1: str | None = None
+    md5: str | None = None
+
+
+@dataclass
+class PackageMetadata:
+    """Maximalist metadata collected for a single installed package.
+
+    Distinct from :py:class:`Package` in scope: where ``Package`` carries
+    only what the package manager itself surfaces through its inventory
+    commands (id, name, version, arch), ``PackageMetadata`` carries the
+    augmentations gathered through extra queries (richer CLI sub-commands,
+    on-disk parsing of dist-info or per-package SBOMs, upstream registry
+    lookups). Today it powers the maximalist ``mpm sbom --bundled``
+    output; the structure is deliberately generic so a future search,
+    audit, or info display can reuse it.
+
+    All fields are optional. ``extras`` is the escape hatch for manager-
+    native fields that don't fit the portable model: a Homebrew tap, a pip
+    classifier list, an apt ``Section``. SBOM renderers consult known
+    keys and surface the rest as CycloneDX ``properties``.
+    """
+
+    download_url: str | None = None
+    homepage: str | None = None
+    vcs_url: str | None = None
+    issue_tracker_url: str | None = None
+    distribution_url: str | None = None
+
+    license_declared: str | None = None
+    license_concluded: str | None = None
+    copyright_text: str | None = None
+
+    supplier: Supplier | None = None
+    originator: Originator | None = None
+
+    description: str | None = None
+    summary: str | None = None
+    cpe: str | None = None
+
+    dependencies: tuple[Dependency, ...] = ()
+    checksums: tuple[Checksum, ...] = ()
+    files: tuple[FileEntry, ...] = ()
+    files_analyzed: bool = False
+
+    install_date: datetime | None = None
+    build_date: datetime | None = None
+    release_date: datetime | None = None
+
+    external_sbom_path: Path | None = None
+    """Path to an on-disk upstream SBOM document for this package.
+
+    Brew formulae installed with ``HOMEBREW_SBOM=1`` write a per-formula
+    SPDX 2.3 file at ``<prefix>/sbom.spdx.json``. The Homebrew extractor
+    sets this so the SBOM renderer can merge the upstream document into
+    the aggregate output (or attach it by reference).
+    """
+
+    extra_purls: tuple[PackageURL, ...] = ()
+    """Additional purls when the manager identifies the same package
+    through multiple coordinate systems (multi-arch, multi-origin)."""
+
+    extras: dict[str, object] = field(default_factory=dict)
+    """Manager-native metadata that does not map cleanly to portable
+    fields. SBOM renderers may surface entries as CycloneDX ``properties``.
+    """
+
+    def is_empty(self) -> bool:
+        """``True`` if the extractor produced no meaningful metadata.
+
+        Used by the SBOM renderers to short-circuit field-by-field gating
+        and by the CLI to log which managers contributed enrichment.
+        """
+        return (
+            not self.download_url
+            and not self.homepage
+            and not self.vcs_url
+            and not self.issue_tracker_url
+            and not self.distribution_url
+            and not self.license_declared
+            and not self.license_concluded
+            and not self.copyright_text
+            and self.supplier is None
+            and self.originator is None
+            and not self.description
+            and not self.summary
+            and not self.cpe
+            and not self.dependencies
+            and not self.checksums
+            and not self.files
+            and self.install_date is None
+            and self.build_date is None
+            and self.release_date is None
+            and self.external_sbom_path is None
+            and not self.extra_purls
+            and not self.extras
+        )
+
+
+EMPTY_METADATA = PackageMetadata()
+"""Sentinel returned by the default no-op extractor on the base
+:py:class:`meta_package_manager.manager.PackageManager`. Consumers (the SBOM
+renderers today) treat ``EMPTY_METADATA`` exactly like ``--minimal`` mode for
+the package: no enrichment, no placeholders.
+"""

@@ -27,7 +27,7 @@ from extra_platforms import LINUX_LIKE, MACOS
 
 from ..capabilities import version_not_implemented
 from ..manager import PackageManager
-from ..sbom_metadata import (
+from ..package import (
     EMPTY_METADATA,
     Checksum,
     ChecksumAlgorithm,

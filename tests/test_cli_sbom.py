@@ -28,18 +28,18 @@ from cyclonedx.validation.json import JsonStrictValidator
 from yaml import Loader, load
 
 from meta_package_manager.capabilities import Operations
-from meta_package_manager.package import Package
-from meta_package_manager.sbom import SBOM, SPDX, CycloneDX, ExportFormat
-from meta_package_manager.sbom_metadata import (
+from meta_package_manager.package import (
     EMPTY_METADATA,
     Checksum,
     ChecksumAlgorithm,
     Dependency,
     DependencyScope,
     Originator,
+    Package,
     PackageMetadata,
     Supplier,
 )
+from meta_package_manager.sbom import SBOM, SPDX, CycloneDX, ExportFormat
 
 from .test_cli import CLISubCommandTests
 

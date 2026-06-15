@@ -47,8 +47,7 @@ from extra_platforms import (
 )
 
 from .execution import CLIExecutor, highlight_cli_name
-from .package import Package
-from .sbom_metadata import EMPTY_METADATA, PackageMetadata
+from .package import EMPTY_METADATA, Package, PackageMetadata
 from .version import VersionRange
 
 TYPE_CHECKING = False

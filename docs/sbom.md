@@ -1,4 +1,4 @@
-# {octicon}`shield-lock` SBOM: Software Bill of Materials
+# {octicon}`verified` SBOM: Software Bill of Materials
 
 ```{admonition} Context
 The [Log4Shell vulnerability](https://en.wikipedia.org/wiki/Log4Shell) debacle was a wake-up call for the industry. This dependency was deeply embedded in the legacy stack of companies and administrations. They all had huge difficulty to identify its presence, writing custom detection scripts and scanning their software artifacts.

@@ -1,4 +1,4 @@
-# {octicon}`tools` Per-manager overrides
+# {octicon}`pin` Per-manager overrides
 
 Each built-in manager exposes a small set of attributes that can be overridden from the configuration file. Add a `[mpm.managers.<id>]` section (or `[tool.mpm.managers.<id>]` in `pyproject.toml`) for each manager you want to tune. Values from the file take precedence over the built-in defaults and over the matching global `[mpm]` settings or `--<flag>` command-line values when both apply to the same field.
 

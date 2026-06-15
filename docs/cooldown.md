@@ -1,4 +1,4 @@
-# {octicon}`shield-check` Cooldown
+# {octicon}`history` Cooldown
 
 `mpm` can refuse to install or upgrade any package version younger than a chosen release age. This is a supply-chain safeguard: malicious releases (compromised credentials, dependency confusion, account takeover) are typically detected and pulled from registries within days of publication, so a short waiting period keeps the most recent and most likely compromised versions off the system.
 

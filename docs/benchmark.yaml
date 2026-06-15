@@ -226,7 +226,6 @@ homepages:
   app-man: https://github.com/ivan-hc/AppMan
   apt-cyg: https://github.com/transcode-open/apt-cyg
   aqua: https://aquaproj.github.io
-  asdf: https://asdf-vm.com
   atuin: https://atuin.sh
   aura: https://github.com/fosskers/aura
   bash-it: https://bash-it.readthedocs.io
@@ -273,7 +272,6 @@ homepages:
   mason: https://github.com/williamboman/mason.nvim
   micro: https://micro-editor.github.io
   miktex: https://miktex.org
-  mise: https://mise.jdx.dev
   myrepos: https://myrepos.branchable.com
   nala: https://gitlab.com/volian/nala
   neobundle: https://github.com/Shougo/neobundle.vim

@@ -52,6 +52,7 @@ else:
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections import Counter
+    from collections.abc import Iterable
 
 
 OK_GLYPH = "✓"
@@ -81,7 +82,10 @@ class SortableField(StrEnum):
     VERSION = "version"
 
 
-def print_stats(manager_stats: Counter) -> None:
+def print_stats(
+    manager_stats: Counter,
+    extras: Iterable[str] = (),
+) -> None:
     """Prints statistics to ``<stderr>``: total packages and a break down by package
     manager.
 
@@ -90,6 +94,14 @@ def print_stats(manager_stats: Counter) -> None:
     .. code-block:: text
 
         10 packages total (brew: 2, pip: 2, gem: 2, vscode: 2, npm: 2, composer: 0).
+
+    ``extras`` is an optional iterable of follow-up lines printed
+    verbatim under the count line. ``mpm sbom`` uses it to surface
+    facts that don't fit the per-manager-Counter shape: number of
+    upstream SBOM documents merged into the aggregate, enrichment
+    ratios, dependency-graph edge counts. Each extra is its own line
+    so the count line stays the same across all subcommands that just
+    care about a manager-keyed total.
     """
     per_manager_totals = ""
     if manager_stats:
@@ -99,6 +111,8 @@ def print_stats(manager_stats: Counter) -> None:
     total = manager_stats.total()
     plural = "s" if total > 1 else ""
     echo(f"{total} package{plural} total{per_manager_totals}.", err=True)
+    for extra in extras:
+        echo(extra, err=True)
 
 
 class BarPluginRenderer(MPMPlugin):

@@ -488,6 +488,101 @@ def test_spdx_merges_external_per_package_sbom(tmp_path):
     assert edrs[0]["checksum"]["algorithm"] == "SHA1"
 
 
+def test_stats_track_per_manager_and_merge_counts(tmp_path):
+    """``SBOM.stats()`` must reflect what landed in the document.
+
+    Two packages from a single manager land normally; one of them
+    carries an external SBOM file containing one transitive dep, which
+    gets spliced in. The SPDX-specific stats then report:
+    inventory=2, in_document=3, merged_documents=1.
+    """
+    upstream = {
+        "SPDXID": "SPDXRef-DOCUMENT",
+        "spdxVersion": "SPDX-2.3",
+        "documentNamespace": "https://example.org/sbom/curl-8.9.0",
+        "documentDescribes": ["SPDXRef-Package-curl"],
+        "packages": [
+            {
+                "SPDXID": "SPDXRef-Package-curl",
+                "name": "curl",
+                "versionInfo": "8.9.0",
+                "downloadLocation": "NOASSERTION",
+            },
+            {
+                "SPDXID": "SPDXRef-Package-zlib",
+                "name": "zlib",
+                "versionInfo": "1.3",
+                "downloadLocation": "NOASSERTION",
+            },
+        ],
+        "relationships": [
+            {
+                "spdxElementId": "SPDXRef-Package-curl",
+                "relationshipType": "DEPENDS_ON",
+                "relatedSpdxElement": "SPDXRef-Package-zlib",
+            }
+        ],
+    }
+    sbom_file = tmp_path / "sbom.spdx.json"
+    sbom_file.write_text(json.dumps(upstream))
+
+    s = SPDX()
+    s.init_doc()
+    s.set_scan_completeness(bundled=True)
+    manager = _StubManager("brew", "Homebrew Formulae")
+    s.add_package(
+        manager,
+        _make_package("brew", "curl", "8.9.0"),
+        PackageMetadata(
+            external_sbom_path=sbom_file,
+            license_declared="MIT",
+        ),
+    )
+    s.add_package(
+        manager,
+        _make_package("brew", "openssl", "3.3.1"),
+        EMPTY_METADATA,
+    )
+    s.finalize()
+
+    stats = s.stats()
+    assert stats["packages_total"] == 2
+    assert stats["packages_per_manager"] == {"brew": 2}
+    assert stats["enriched_per_manager"] == {"brew": 1}
+    assert stats["packages_in_document"] == 3
+    assert stats["transitive_packages_merged"] == 1
+    assert stats["merged_documents"] == 1
+
+
+def test_cyclonedx_stats_count_external_bom_refs(tmp_path):
+    """CycloneDX stats report external BOM refs and dependency edges."""
+    sbom_file = tmp_path / "sbom.spdx.json"
+    sbom_file.write_text("{}")
+    c = CycloneDX()
+    c.init_doc()
+    c.set_scan_completeness(bundled=True)
+    manager = _StubManager("brew", "Homebrew Formulae")
+    c.add_package(
+        manager,
+        _make_package("brew", "curl", "8.9.0"),
+        PackageMetadata(
+            external_sbom_path=sbom_file,
+            dependencies=(Dependency(target_id="zlib"),),
+        ),
+    )
+    c.add_package(
+        manager,
+        _make_package("brew", "zlib", "1.3"),
+        EMPTY_METADATA,
+    )
+    c.finalize()
+
+    stats = c.stats()
+    assert stats["packages_total"] == 2
+    assert stats["external_bom_references"] == 1
+    assert stats["dependency_edges"] >= 1
+
+
 def test_minimal_mode_skips_metadata_extractor(invoke):
     """``--minimal`` must avoid the rich-metadata code path so the
     export matches the historical bare shape even for managers that

@@ -348,6 +348,7 @@ class CycloneDX(SBOM):
         )
         self.document.components.add(data)
         self.component_index[(manager.id, package.id)] = data
+        self._track_addition(manager.id, package.id, metadata)
         self.document.register_dependency(
             self.document.metadata.component,  # type:ignore[arg-type]
             [data],
@@ -366,6 +367,35 @@ class CycloneDX(SBOM):
             if target is None:
                 continue
             self.document.register_dependency(source, [target])
+
+    def stats(self) -> dict[str, object]:
+        """Extend the base stats with CycloneDX-specific counters.
+
+        CycloneDX has no merge-content equivalent: per-package upstream
+        SBOMs are linked through ``externalReferences[type=bom]`` rather
+        than spliced in. The merged-document count therefore reports the
+        number of components carrying a BOM external reference. The
+        dependency-edge total walks the registered dependency graph and
+        sums the ``dependsOn`` collection size across every entry.
+        """
+        base = super().stats()
+        components_with_bom = sum(
+            1
+            for component in self.document.components
+            for ref in component.external_references
+            if ref.type == ExternalReferenceType.BOM
+        )
+        dependency_edges = sum(
+            len(dep.dependencies) for dep in self.document.dependencies
+        )
+        base.update(
+            {
+                "components_in_document": len(self.document.components),
+                "external_bom_references": components_with_bom,
+                "dependency_edges": dependency_edges,
+            }
+        )
+        return base
 
     def export(self) -> str:
         """Serialize the document to its string representation.

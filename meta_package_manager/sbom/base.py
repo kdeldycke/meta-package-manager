@@ -70,6 +70,58 @@ class SBOM:
         """Defaults to JSON export format."""
         logging.debug(f"Set export format to {export_format}")
         self.export_format = export_format
+        # ``manager_id -> count`` of unique packages the renderer admitted
+        # into the document. Populated by :py:meth:`_track_addition` so
+        # subclasses' format-specific dedup is reflected here.
+        self.packages_per_manager: dict[str, int] = {}
+        # ``manager_id -> count`` of admitted packages whose metadata was
+        # non-empty (i.e. the manager's extractor produced something).
+        self.enriched_per_manager: dict[str, int] = {}
+        # Keys used to dedup ``_track_addition`` calls across subclasses
+        # that may invoke it more than once per (manager, package) pair.
+        self._tracked_additions: set[tuple[str, str]] = set()
+
+    def _track_addition(
+        self,
+        manager_id: str,
+        package_id: str,
+        metadata,
+    ) -> None:
+        """Record that one package entered the document.
+
+        Called by :py:meth:`add_package` subclass implementations after
+        their own dedup check so the renderer-level counters reflect
+        what actually got serialized, not the number of inbound calls.
+        Idempotent on ``(manager_id, package_id)`` to stay robust against
+        future refactors that might double-call.
+        """
+        key = (manager_id, package_id)
+        if key in self._tracked_additions:
+            return
+        self._tracked_additions.add(key)
+        self.packages_per_manager[manager_id] = (
+            self.packages_per_manager.get(manager_id, 0) + 1
+        )
+        if metadata is not None and not metadata.is_empty():
+            self.enriched_per_manager[manager_id] = (
+                self.enriched_per_manager.get(manager_id, 0) + 1
+            )
+
+    def stats(self) -> dict[str, object]:
+        """Return a summary of what landed in the document.
+
+        Format-agnostic counters live in the base implementation; SPDX and
+        CycloneDX subclasses extend the returned dict with their own
+        merged-documents, dependency-graph, and any other format-specific
+        counts. Surfaced by the CLI as a post-run INFO-level summary and
+        usable by tests or programmatic consumers without re-parsing the
+        rendered document.
+        """
+        return {
+            "packages_total": sum(self.packages_per_manager.values()),
+            "packages_per_manager": dict(self.packages_per_manager),
+            "enriched_per_manager": dict(self.enriched_per_manager),
+        }
 
     def set_scan_completeness(self, bundled: bool) -> None:
         """Record whether the run was a bundled enrichment pass.

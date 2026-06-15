@@ -367,6 +367,7 @@ class SPDX(SBOM):
             return
         self.seen_ids.add(package_docid)
         self.name_index[(manager.id, package.id)] = package_docid
+        self._track_addition(manager.id, package.id, metadata)
 
         download_location = metadata.download_url or SpdxNoAssertion()
         homepage = metadata.homepage or None
@@ -579,6 +580,36 @@ class SPDX(SBOM):
             self.document.relationships.append(
                 Relationship(target_docid, rel_type, source_docid)
             )
+
+    def stats(self) -> dict[str, object]:
+        """Extend the base stats with SPDX-specific counters.
+
+        Adds the number of upstream documents merged into the aggregate,
+        the count of transitive packages those upstream documents
+        contributed (over and above the inventory pass), and the total
+        relationship count partitioned into dependency vs descriptive
+        edges. ``packages_total`` from the base reports inventory
+        packages only; ``packages_in_document`` here is the full count
+        after merge, which is what consumers of the file actually see.
+        """
+        base = super().stats()
+        inventory_count = base["packages_total"]
+        in_doc = len(self.document.packages)
+        dependency_count = sum(
+            1
+            for rel in self.document.relationships
+            if "DEPENDENCY" in rel.relationship_type.name
+        )
+        base.update(
+            {
+                "packages_in_document": in_doc,
+                "transitive_packages_merged": in_doc - inventory_count,
+                "merged_documents": len(self.merged_docs),
+                "relationships_total": len(self.document.relationships),
+                "dependency_relationships": dependency_count,
+            }
+        )
+        return base
 
     def export(self) -> str:
         """Similar to ``spdx_tools.spdx.writer.write_anything.write_file`` but write

@@ -91,8 +91,12 @@ def assert_valid_cyclonedx(content: str, export_format: ExportFormat | str) -> N
 
 @pytest.fixture
 def subcmd():
-    # The details of operations are only logged at INFO level.
-    return "--verbosity", "INFO", "sbom"
+    # ``DEBUG`` level is required so that ``check_manager_selection`` can detect
+    # skip/does-not-implement signals for implicitly selected managers. Those
+    # messages are demoted to DEBUG when no explicit ``--<id>`` flag is passed
+    # (to avoid flooding the output). INFO messages are a subset of DEBUG, so
+    # everything logged at INFO still appears.
+    return "--verbosity", "DEBUG", "sbom"
 
 
 @pytest.mark.parametrize(

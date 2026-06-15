@@ -154,7 +154,10 @@ class TestCommonCLI:
         # Newer versions of click_extra also append a Python version/platform
         # line, so match that optional trailing line too.
         assert re.fullmatch(
-            rf"\x1b\[97mmpm\x1b\[0m, version "
+            # click_extra 7.19+ renders the program name with both bright (97m)
+            # and bold (1m) codes. The bold code is optional to remain compatible
+            # with older click_extra versions that only emitted the bright code.
+            rf"\x1b\[97m(\x1b\[1m)?mpm\x1b\[0m, version "
             rf"\x1b\[32m{re.escape(__version__)}(\+[0-9a-f]+)?\x1b\[0m\n"
             rf"(\x1b\[90mPython [^\n]+\x1b\[0m\n)?",
             process.stdout,

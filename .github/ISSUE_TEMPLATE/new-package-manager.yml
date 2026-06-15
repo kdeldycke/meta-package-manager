@@ -56,7 +56,7 @@ body:
             Scientific Linux, Slackware, SUSE Linux Enterprise Server, openSUSE Tumbleweed, Tuxedo OS, Ubuntu,
             Ultramarine, Void Linux, Windows Subsystem for Linux v1, Windows Subsystem for Linux v2, XenServer)
         - label: 🍎 macOS
-        - label: ⨂ Unix (IBM AIX, Cygwin, Haiku, GNU/Hurd, illumos, Solaris)
+        - label: ⨂ Unix (IBM AIX, Cygwin, Haiku, GNU/Hurd, illumos, IBM i, Solaris)
         - label: 🪟 Windows
 
   - type: textarea

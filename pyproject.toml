@@ -289,6 +289,13 @@ macos-app-icon = "docs/assets/icon.icns"
 linux-icon = "docs/assets/icon.png"
 windows-icon-from-ico = "docs/assets/icon.ico"
 include-package-data = [ "click_extra" ]
+# The cyclonedx and spdx_tools imports are guarded behind try/except blocks in
+# meta_package_manager.sbom so a default `pip install` (without the [sbom]
+# extra) still imports cleanly. Nuitka skips packages whose imports are gated
+# behind try/except, which would leave `mpm sbom --spdx` and `mpm sbom
+# --cyclonedx` failing on the binary distribution. The binary ships a complete
+# install (no extras to pick from), so force both packages in.
+include-package = [ "cyclonedx", "spdx_tools" ]
 
 [tool.typos]
 # Correct capitalization for proper nouns.

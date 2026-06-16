@@ -40,9 +40,11 @@ class TestBackup(CLISubCommandTests):
     def evaluate_signals(mid, stdout, stderr):
         yield from (
             f"Dumping packages from {mid}..." in stderr,
-            f"warning: {mid} does not implement {Operations.installed}" in stderr,
-            # Common "not found" message.
-            f"info: Skip {mid} manager:" in stderr,
+            # Log-level prefix is omitted because the message is demoted to
+            # DEBUG for implicit selection (``mpm backup``) but stays at
+            # WARNING/INFO for explicit ones (``mpm --<mid> backup``).
+            f"{mid} does not implement {Operations.installed}" in stderr,
+            f"Skip {mid} manager:" in stderr,
         )
 
     def test_default_all_managers_output_to_console(self, invoke, subcmd):

@@ -212,5 +212,7 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         # Check that the highlight ANSI sequence for "co" appears in the output.
         # Cargo search results change over time, so we only verify that
         # highlighting is applied, not which specific packages are returned.
-        highlight_pattern = "\x1b[32m\x1b[1mco\x1b[0m"
+        # click-extra 7.19 dropped the bold code from theme().search, leaving
+        # the green color as the only highlight style.
+        highlight_pattern = "\x1b[32mco\x1b[0m"
         assert highlight_pattern in result.stdout

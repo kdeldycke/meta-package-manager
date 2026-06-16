@@ -4,11 +4,14 @@
 # https://github.com/Homebrew/homebrew-core/blob/f0a4d69/Formula/meta-package-manager.rb#L401-L413
 
 # Check mpm is reporting the correct version of itself.
+# click_extra 7.19+ renders the program name with both bright (97m) and bold (1m)
+# codes. The bold code is optional to stay compatible with older click_extra
+# releases that only emit the bright code.
 - cli_parameters: --version
   exit_code: 0
-  stdout_contains: "\x1b[97mmpm\x1b[0m, version \x1b[32m"
+  stdout_contains: "mpm\x1b[0m, version \x1b[32m"
   stdout_regex_fullmatch: >-
-    \x1b\[97mmpm\x1b\[0m, version
+    \x1b\[97m(\x1b\[1m)?mpm\x1b\[0m, version
     \x1b\[32m[0-9]+\.[0-9]+\.[0-9]+(\.[a-z]+[0-9]+(\+[a-f0-9]+)?)?\x1b\[0m\n(\x1b\[90mPython
     [^\n]+\x1b\[0m\n)?
 
@@ -181,8 +184,14 @@
 - cli_parameters: backup
   exit_code: 0
 
+# SBOM generation requires the [sbom] extra (cyclonedx-python-lib and
+# spdx-tools). The binary distribution mirrors a default `pip install
+# meta-package-manager` without extras, so `mpm sbom` exits with code 2 and
+# tells the user to install with `pip install meta-package-manager[sbom]`.
 - cli_parameters: sbom --spdx
-  exit_code: 0
+  exit_code: 2
+  stderr_contains: "SPDX SBOM generation requires the [sbom] extra"
 
 - cli_parameters: sbom --cyclonedx
-  exit_code: 0
+  exit_code: 2
+  stderr_contains: "CycloneDX SBOM generation requires the [sbom] extra"

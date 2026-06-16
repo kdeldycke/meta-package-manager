@@ -280,19 +280,26 @@ class Homebrew(PackageManager):
         installed_entries = formula.get("installed") or ()
         installed = installed_entries[-1] if installed_entries else {}
 
-        deps: list[Dependency] = []
-        for dep_name in formula.get("dependencies") or ():
-            deps.append(Dependency(target_id=dep_name, scope=DependencyScope.RUNTIME))
-        for dep_name in formula.get("build_dependencies") or ():
-            deps.append(Dependency(target_id=dep_name, scope=DependencyScope.BUILD))
-        for dep_name in formula.get("test_dependencies") or ():
-            deps.append(Dependency(target_id=dep_name, scope=DependencyScope.TEST))
-        for dep_name in formula.get("optional_dependencies") or ():
-            deps.append(Dependency(target_id=dep_name, scope=DependencyScope.OPTIONAL))
-        for dep_name in formula.get("recommended_dependencies") or ():
-            deps.append(
-                Dependency(target_id=dep_name, scope=DependencyScope.RECOMMENDED),
-            )
+        deps: list[Dependency] = [
+            Dependency(target_id=dep_name, scope=DependencyScope.RUNTIME)
+            for dep_name in formula.get("dependencies") or ()
+        ]
+        deps.extend(
+            Dependency(target_id=dep_name, scope=DependencyScope.BUILD)
+            for dep_name in formula.get("build_dependencies") or ()
+        )
+        deps.extend(
+            Dependency(target_id=dep_name, scope=DependencyScope.TEST)
+            for dep_name in formula.get("test_dependencies") or ()
+        )
+        deps.extend(
+            Dependency(target_id=dep_name, scope=DependencyScope.OPTIONAL)
+            for dep_name in formula.get("optional_dependencies") or ()
+        )
+        deps.extend(
+            Dependency(target_id=dep_name, scope=DependencyScope.RECOMMENDED)
+            for dep_name in formula.get("recommended_dependencies") or ()
+        )
 
         checksums: list[Checksum] = []
         # The bottle entry for the current platform carries a SHA256.
@@ -357,14 +364,15 @@ class Homebrew(PackageManager):
         dependency closure, a single ``url`` and ``sha256`` for the
         download, and a ``depends_on`` map limited to cross-cask edges.
         """
-        deps: list[Dependency] = []
         depends_on = cask.get("depends_on") or {}
-        for cask_dep in depends_on.get("cask") or ():
-            deps.append(Dependency(target_id=cask_dep, scope=DependencyScope.RUNTIME))
-        for formula_dep in depends_on.get("formula") or ():
-            deps.append(
-                Dependency(target_id=formula_dep, scope=DependencyScope.RUNTIME),
-            )
+        deps: list[Dependency] = [
+            Dependency(target_id=cask_dep, scope=DependencyScope.RUNTIME)
+            for cask_dep in depends_on.get("cask") or ()
+        ]
+        deps.extend(
+            Dependency(target_id=formula_dep, scope=DependencyScope.RUNTIME)
+            for formula_dep in depends_on.get("formula") or ()
+        )
 
         checksums: list[Checksum] = []
         sha = cask.get("sha256")

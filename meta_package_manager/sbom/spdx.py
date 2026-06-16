@@ -51,29 +51,24 @@ from .base import SBOM, ExportFormat
 
 spdx_support = True
 try:
-    from spdx_tools.common.spdx_licensing import spdx_licensing  # type: ignore[import-untyped]
+    # type: ignore[import-untyped]
+    from spdx_tools.common.spdx_licensing import spdx_licensing
     from spdx_tools.spdx.model import (
         Actor,
         ActorType,
+        Checksum as SPDXChecksum,
+        ChecksumAlgorithm as SPDXChecksumAlgorithm,
         CreationInfo,
         Document,
         ExternalDocumentRef,
         ExternalPackageRef,
         ExternalPackageRefCategory,
+        Package as SPDXPackage,
         PackagePurpose,
         Relationship,
         RelationshipType,
         SpdxNoAssertion,
         SpdxNone,
-    )
-    from spdx_tools.spdx.model import (
-        Checksum as SPDXChecksum,
-    )
-    from spdx_tools.spdx.model import (
-        ChecksumAlgorithm as SPDXChecksumAlgorithm,
-    )
-    from spdx_tools.spdx.model import (
-        Package as SPDXPackage,
     )
     from spdx_tools.spdx.validation.document_validator import (
         validate_full_spdx_document,
@@ -152,7 +147,7 @@ def _parse_license_expression(expression: str):
         key = getattr(symbol, "key", None) or str(symbol)
         if key.startswith("LicenseRef-"):
             return None
-        if not spdx_licensing.validate(key).errors == []:
+        if spdx_licensing.validate(key).errors != []:
             return None
     return parsed
 
@@ -205,16 +200,14 @@ class SPDX(SBOM):
         """
         profile = get_profile()
         system_id = self.normalize_spdx_id(
-            "-".join(
-                (
-                    current_platform().name,
-                    profile["linux_dist_name"],
-                    profile["linux_dist_version"],
-                    profile["uname"]["system"],
-                    profile["uname"]["release"],
-                    profile["uname"]["machine"],
-                )
-            )
+            "-".join((
+                current_platform().name,
+                profile["linux_dist_name"],
+                profile["linux_dist_version"],
+                profile["uname"]["system"],
+                profile["uname"]["release"],
+                profile["uname"]["machine"],
+            ))
         )
 
         self.seen_ids = set()
@@ -338,14 +331,14 @@ class SPDX(SBOM):
                 package.purl.to_string(),
             )
         ]
-        for extra in metadata.extra_purls:
-            refs.append(
-                ExternalPackageRef(
-                    ExternalPackageRefCategory.PACKAGE_MANAGER,
-                    "purl",
-                    extra.to_string(),
-                )
+        refs.extend(
+            ExternalPackageRef(
+                ExternalPackageRefCategory.PACKAGE_MANAGER,
+                "purl",
+                extra.to_string(),
             )
+            for extra in metadata.extra_purls
+        )
         if metadata.cpe:
             refs.append(
                 ExternalPackageRef(
@@ -429,9 +422,12 @@ class SPDX(SBOM):
             rel_type = _SPDX_RELATIONSHIP_MAP.get(
                 dep.scope.value, RelationshipType.DEPENDS_ON
             )
-            self.pending_relationships.append(
-                (package_docid, manager.id, dep.target_id, rel_type)
-            )
+            self.pending_relationships.append((
+                package_docid,
+                manager.id,
+                dep.target_id,
+                rel_type,
+            ))
 
         # Pull rich data from an upstream per-package SBOM if present.
         if metadata.external_sbom_path is not None:
@@ -609,15 +605,13 @@ class SPDX(SBOM):
             for rel in self.document.relationships
             if "DEPENDENCY" in rel.relationship_type.name
         )
-        base.update(
-            {
-                "packages_in_document": in_doc,
-                "transitive_packages_merged": in_doc - inventory_count,
-                "merged_documents": len(self.merged_docs),
-                "relationships_total": len(self.document.relationships),
-                "dependency_relationships": dependency_count,
-            }
-        )
+        base.update({
+            "packages_in_document": in_doc,
+            "transitive_packages_merged": in_doc - inventory_count,
+            "merged_documents": len(self.merged_docs),
+            "relationships_total": len(self.document.relationships),
+            "dependency_relationships": dependency_count,
+        })
         return base
 
     def export(self) -> str:

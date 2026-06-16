@@ -81,7 +81,6 @@ from .config import (
 from .execution import CLIError, highlight_cli_name
 from .inventory import MAIN_PLATFORMS
 from .manager import PackageManager
-from .summary import package_counts, print_summary, sbom_summary
 from .package import packages_asdict
 from .pool import pool
 from .sbom import (
@@ -93,11 +92,13 @@ from .sbom import (
     spdx_support,
 )
 from .specifier import VERSION_SEP, Solver, Specifier
+from .summary import package_counts, print_summary, sbom_summary
 from .version import diff_versions
 
 if sys.version_info >= (3, 11):
-    import tomllib
     from enum import StrEnum
+
+    import tomllib
 else:
     import tomli as tomllib  # type: ignore[import-not-found]
     from backports.strenum import StrEnum  # type: ignore[import-not-found]
@@ -202,19 +203,17 @@ class Duration(ParamType):
     }
     """Number of seconds each recognized unit represents (empty unit means days)."""
 
-    _CALENDAR_UNITS = frozenset(
-        {
-            "mo",
-            "mon",
-            "month",
-            "months",
-            "y",
-            "yr",
-            "yrs",
-            "year",
-            "years",
-        }
-    )
+    _CALENDAR_UNITS = frozenset({
+        "mo",
+        "mon",
+        "month",
+        "months",
+        "y",
+        "yr",
+        "yrs",
+        "year",
+        "years",
+    })
     """Calendar units rejected for ambiguity: months span 28-31 days, years 365-366."""
 
     _FRIENDLY_PATTERN = re.compile(r"(?P<value>\d+(?:\.\d+)?)\s*(?P<unit>[a-z]*)")
@@ -2150,7 +2149,8 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, export_path):
                 # On Python 3.10, ``ExportFormat`` extends ``backports.strenum.StrEnum``
                 # whose typeshed stub omits ``__iter__``; iteration is provided by the
                 # ``EnumMeta`` metaclass at runtime.
-                supported = ", ".join(f.value for f in ExportFormat)  # type: ignore[attr-defined]
+                # type: ignore[attr-defined]
+                supported = ", ".join(f.value for f in ExportFormat)
                 logging.critical(
                     f"Cannot guess export format from {export_path.name!r}. "
                     f"Use --format to pick one of: {supported}."

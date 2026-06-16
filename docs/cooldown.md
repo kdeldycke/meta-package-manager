@@ -22,9 +22,9 @@ $ mpm --cooldown 12h --allow-no-cooldown upgrade --all   # let unsupported manag
 
 The same value is settable as the `cooldown` key in any `mpm` configuration file (see {doc}`configuration` for the full schema) or as the `MPM_COOLDOWN` environment variable.
 
-:::{note}
+```{note}
 Durations resolve to a fixed number of seconds, assuming a day is 24 hours. The local time zone, DST transitions, and calendar boundaries are ignored. Calendar units (months, years) are rejected for the same reason: 28-31 days and 365-366 days make them unsuitable for a precise release-age cutoff. Use `days` or `weeks` instead.
-:::
+```
 
 ## How it works
 

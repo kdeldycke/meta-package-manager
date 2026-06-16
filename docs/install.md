@@ -26,35 +26,35 @@ The **real package is named `meta-package-manager`**. Only the latter provides t
 
 You can try Meta Package Manager right now in your terminal, without installing any dependency or virtual env [thanks to `uvx`](https://docs.astral.sh/uv/guides/tools/):
 
-`````{tab-set}
-````{tab-item} Latest version
+``````{tab-set}
+`````{tab-item} Latest version
 ```shell-session
 $ uvx meta-package-manager
 Installed 21 packages in 42ms
 Usage: mpm [OPTIONS] COMMAND [ARGS]...
 ```
-````
+`````
 
-````{tab-item} Specific version
+`````{tab-item} Specific version
 ```shell-session
 $ uvx meta-package-manager@6.5.1
 Installed 21 packages in 42ms
 Usage: mpm [OPTIONS] COMMAND [ARGS]...
 ```
-````
+`````
 
-````{tab-item} Development version
+`````{tab-item} Development version
 ```shell-session
 $ uvx --from git+https://github.com/kdeldycke/meta-package-manager -- mpm
 ```
-````
+`````
 
-````{tab-item} Local version
+`````{tab-item} Local version
 ```shell-session
 $ uvx --from file:///Users/me/code/meta-package-manager -- mpm
 ```
-````
 `````
+``````
 
 This will download `meta-package-manager` (the package), and run `mpm`, the CLI included in the package.
 
@@ -83,9 +83,9 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 ![Yo dawg, I herd you like package managers...](assets/yo-dawg-meta-package-manager.jpg){align=center}
 
-`````{tab-set}
+``````{tab-set}
 
-````{tab-item} uv
+`````{tab-item} uv
 Easiest way is to [install `uv`](https://docs.astral.sh/uv/getting-started/installation/), then install `meta-package-manager` system-wide with the [`uv tool`](https://docs.astral.sh/uv/guides/tools/#installing-tools) command:
 
 ```{code-block} shell-session
@@ -103,9 +103,9 @@ To use `mpm` as a library in your project instead:
 ```{code-block} shell-session
 $ uv add meta-package-manager
 ```
-````
+`````
 
-````{tab-item} pip
+`````{tab-item} pip
 You can install the latest stable release and its dependencies with a simple `pip` call:
 
 ```{code-block} shell-session
@@ -124,41 +124,41 @@ $ pip3 install meta-package-manager
 
 If you have difficulties to use `pip`, see
 [`pip`'s own installation instructions](https://pip.pypa.io/en/stable/installation/).
-````
+`````
 
-````{tab-item} pipx
+`````{tab-item} pipx
 [`pipx`](https://pipx.pypa.io/latest/install-pipx/) is a great way to install Python applications globally:
 
 ```{code-block} shell-session
 $ pipx install meta-package-manager
 ```
-````
+`````
 
-````{tab-item} Homebrew
+`````{tab-item} Homebrew
 Meta Package Manager is [available as a Homebrew formula](https://formulae.brew.sh/formula/meta-package-manager), so you just need to:
 
 ```{code-block} shell-session
 $ brew install meta-package-manager
 ```
 
-:::{tip}
+````{tip}
 [ZeroBrew](https://github.com/lucasgelfond/zerobrew) is a fast, Homebrew-compatible package manager written in Rust. It consumes the same formula and installs `mpm` with:
 
 ```{code-block} shell-session
 $ zb install meta-package-manager
 ```
-:::
 ````
+`````
 
-````{tab-item} Scoop
+`````{tab-item} Scoop
 Meta Package Manager is available in the `main` repository of [Scoop](https://scoop.sh), so you just need to:
 
 ```{code-block} pwsh-session
 > scoop install main/meta-package-manager
 ```
-````
+`````
 
-````{tab-item} Chocolatey
+`````{tab-item} Chocolatey
 Build and install from [the specs maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/choco/meta-package-manager):
 
 ```{code-block} pwsh-session
@@ -168,13 +168,13 @@ Build and install from [the specs maintained in the repository](https://github.c
 > choco install meta-package-manager --source .
 ```
 
-:::{admonition} Not available on the Chocolatey community repository
+````{admonition} Not available on the Chocolatey community repository
 :class: warning
 [Submission `6.4.2`](https://community.chocolatey.org/packages/meta-package-manager/6.4.2) was rejected: the Windows x64 binary trips too many antivirus engines on VirusTotal for community-repository moderation to clear it. See [Antivirus false positives](#antivirus-false-positives) below for the full background, and please [report the detection to your antivirus vendor](#antivirus-false-positives) if it affects you: enough reports may eventually bring the detection count back under Chocolatey's cutoff.
-:::
 ````
+`````
 
-````{tab-item} Nix
+`````{tab-item} Nix
 Build and install from [the definition maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/nix):
 
 ```{code-block} shell-session
@@ -188,7 +188,7 @@ On flake-enabled systems:
 $ nix run github:kdeldycke/meta-package-manager?dir=packaging/nix -- --version
 ```
 
-:::{admonition} Help land it in nixpkgs
+````{admonition} Help land it in nixpkgs
 :class: important
 The nixpkgs package is pending review at [NixOS/nixpkgs#506145](https://github.com/NixOS/nixpkgs/pull/506145). Once merged, installation will be a one-liner:
 
@@ -209,10 +209,10 @@ $ nix run nixpkgs#meta-package-manager -- --version
 ```
 
 You can help move it forward by showing your support on [the pull request](https://github.com/NixOS/nixpkgs/pull/506145).
-:::
 ````
+`````
 
-````{tab-item} Guix
+`````{tab-item} Guix
 A Guix package definition is [maintained in the repository](https://github.com/kdeldycke/meta-package-manager/tree/main/packaging/guix) and can be installed from a local checkout:
 
 ```{code-block} shell-session
@@ -220,7 +220,7 @@ $ git clone https://github.com/kdeldycke/meta-package-manager.git
 $ guix install --load-path=./meta-package-manager/packaging/guix python-meta-package-manager
 ```
 
-:::{admonition} Help land it in the Guix channel
+````{admonition} Help land it in the Guix channel
 :class: important
 The Guix package is pending review at [guix/guix#8047](https://codeberg.org/guix/guix/pulls/8047). Once merged, installation will be a one-liner:
 
@@ -229,10 +229,10 @@ $ guix install python-meta-package-manager
 ```
 
 You can help move it forward by showing your support on [the pull request](https://codeberg.org/guix/guix/pulls/8047).
-:::
 ````
+`````
 
-````{tab-item} Void Linux
+`````{tab-item} Void Linux
 While the package is pending upstream review, build and install it from my fork's [`mpm` branch](https://github.com/kdeldycke/void-packages/tree/mpm):
 
 ```{code-block} shell-session
@@ -245,7 +245,7 @@ $ sudo xbps-install --repository=./hostdir/binpkgs/mpm mpm
 
 `./xbps-src pkg mpm` cascades through and builds the 16 dependency packages introduced by the fork (15 new Python packages plus an in-place bump of `python3-boltons` from `20.2.1` to `25.0.0` for Python 3.14 compatibility).
 
-:::{admonition} Help land it in void-packages
+````{admonition} Help land it in void-packages
 :class: important
 The Void package is pending review at [void-linux/void-packages#60532](https://github.com/void-linux/void-packages/pull/60532). Once merged, installation will be a one-liner:
 
@@ -254,10 +254,10 @@ $ xbps-install --sync mpm
 ```
 
 You can help move it forward by showing your support on [the pull request](https://github.com/void-linux/void-packages/pull/60532).
-:::
 ````
+`````
 
-````{tab-item} Arch Linux
+`````{tab-item} Arch Linux
 An `mpm` package is [available on AUR](https://aur.archlinux.org/packages/meta-package-manager) and can be installed with any AUR helper:
 
 ```{code-block} shell-session
@@ -271,17 +271,17 @@ $ paru -S meta-package-manager
 ```{code-block} shell-session
 $ pacaur -S meta-package-manager
 ```
-````
+`````
 
-````{tab-item} Stew
+`````{tab-item} Stew
 [Stew](https://github.com/marwanhawari/stew) installs pre-compiled binaries from GitHub Releases:
 
 ```{code-block} shell-session
 $ stew install kdeldycke/meta-package-manager
 ```
-````
-
 `````
+
+``````
 
 ## Binaries
 
@@ -529,43 +529,43 @@ $ sudo mpm upgrade
 
 Completion for popular shell [rely on Click feature](https://click.palletsprojects.com/en/stable/shell-completion/).
 
-`````{tab-set}
+``````{tab-set}
 
-````{tab-item} Bash
+`````{tab-item} Bash
 :sync: bash
 Add this to ``~/.bashrc``:
 
 ```{code-block} bash
 eval "$(_MPM_COMPLETE=bash_source mpm)"
 ```
-````
+`````
 
-````{tab-item} Zsh
+`````{tab-item} Zsh
 :sync: zsh
 Add this to ``~/.zshrc``:
 
 ```{code-block} zsh
 eval "$(_MPM_COMPLETE=zsh_source mpm)"
 ```
-````
+`````
 
-````{tab-item} Fish
+`````{tab-item} Fish
 :sync: fish
 Add this to ``~/.config/fish/completions/mpm.fish``:
 
 ```{code-block} zsh
 eval (env _MPM_COMPLETE=fish_source mpm)
 ```
-````
-
 `````
+
+``````
 
 Alternatively, export the generated completion code as a static script to be
 executed:
 
-`````{tab-set}
+``````{tab-set}
 
-````{tab-item} Bash
+`````{tab-item} Bash
 :sync: bash
 ```{code-block} shell-session
 $ _MPM_COMPLETE=bash_source mpm > ~/.mpm-complete.bash
@@ -576,9 +576,9 @@ Then source it from ``~/.bashrc``:
 ```{code-block} bash
 . ~/.mpm-complete.bash
 ```
-````
+`````
 
-````{tab-item} Zsh
+`````{tab-item} Zsh
 :sync: zsh
 ```{code-block} shell-session
 $ _MPM_COMPLETE=zsh_source mpm > ~/.mpm-complete.zsh
@@ -589,16 +589,16 @@ Then source it from ``~/.zshrc``:
 ```{code-block} zsh
 . ~/.mpm.zsh
 ```
-````
+`````
 
-````{tab-item} Fish
+`````{tab-item} Fish
 :sync: fish
 ```{code-block} fish
 _MPM_COMPLETE=fish_source mpm > ~/.config/fish/completions/mpm.fish
 ```
-````
-
 `````
+
+``````
 
 ## Man pages
 

@@ -145,10 +145,11 @@ class ASDF(PackageManager):
             nodejs    20.10.0    missing
             ruby      3.3.0      missing
         """
-        current_versions: dict[str, str] = {}
-        for plugin, version, is_current in self._parse_list():
-            if is_current:
-                current_versions[plugin] = version
+        current_versions: dict[str, str] = {
+            plugin: version
+            for plugin, version, is_current in self._parse_list()
+            if is_current
+        }
 
         latest_output = self.run_cli("latest", "--all")
         for match in self._LATEST_REGEXP.finditer(latest_output):

@@ -57,7 +57,6 @@ from .version import parse_version
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterable
-
     from contextlib import AbstractContextManager
     from datetime import timedelta
 

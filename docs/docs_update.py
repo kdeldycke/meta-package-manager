@@ -190,9 +190,7 @@ def benchmark_managers_table() -> str:
     all_ids = sorted(pool_ids | competitor_data.keys())
 
     headers = ["Manager", "`mpm`"]
-    headers.extend(
-        f"`{name}`[^{i}]" for i, name in enumerate(BENCHMARK_COMPETITORS, start=1)
-    )
+    headers.extend(f"`{name}`[^{name}]" for name in BENCHMARK_COMPETITORS)
 
     table = []
     for mid in all_ids:

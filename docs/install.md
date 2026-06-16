@@ -663,7 +663,7 @@ By default, `mpm` supports TOML [configuration files](configuration.md) and all 
   - ```{code-block} shell-session
     $ uv pip install meta-package-manager[sbom]
     ```
-  - - CycloneDX and SPDX SBOM generation: `mpm sbom`
+  - - CycloneDX and SPDX SBOM generation: {doc}`mpm sbom <sbom>`
 * - `toml`
   - ```{code-block} shell-session
     $ uv pip install meta-package-manager[toml]
@@ -688,5 +688,17 @@ Install all extras at once with:
 
 ```{code-block} shell-session
 $ uv pip install meta-package-manager[hjson,json5,jsonc,sbom,toml,xml,yaml]
+```
+
+Or with `pip`:
+
+```{code-block} shell-session
+$ pip install meta-package-manager[hjson,json5,jsonc,sbom,toml,xml,yaml]
+```
+
+When working from a cloned repository, [`uv sync`](https://docs.astral.sh/uv/reference/cli/#uv-sync) installs all runtime extras plus dev groups (`test`, `docs`, `typing`) in one shot:
+
+```{code-block} shell-session
+$ uv sync --all-extras --all-groups
 ```
 ````

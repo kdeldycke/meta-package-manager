@@ -351,6 +351,8 @@ Use literal block scalar (`|`) only when the command requires preserved newlines
       uv --no-progress venv --python "${{ matrix.python-version }}"
 ```
 
+YAML lines may run up to 120 characters (`yamllint` sets `line-length: max: 120`): don't carry Python's 88-character limit over to workflow comments or reflexively wrap them at 80.
+
 ### Command-line options
 
 Always prefer long-form options over short-form for readability when invoking commands in workflow files and scripts:
@@ -377,6 +379,8 @@ When invoking `uv` and `uvx` commands in GitHub Actions workflows:
 - Test coverage is tracked with `pytest-cov` and reported to Codecov.
 - Do not use classes for grouping tests. Write test functions as top-level module functions. Only use test classes when they provide shared fixtures, setup/teardown methods, or class-level state.
 - **`@pytest.mark.once` for run-once tests.** Define a custom `once` marker (in `[tool.pytest].markers`) to tag tests that only need to run once — not across the full CI matrix. Typical candidates: CLI entry point invocability, plugin registration, package metadata checks. The main test matrix filters them out with `pytest -m "not once"`, while a dedicated `once-tests` job runs them on a single runner.
+- **CI-only pytest flags belong in workflow steps, not `[tool.pytest].addopts`.** Flags that emit CI-only artifacts (`--cov-report=xml`, `--junitxml=junit.xml`) pollute local runs when placed in `addopts`: keep `addopts` for flags that apply everywhere and pass CI-specific ones in the workflow `run:` step. Coverage settings (`run.branch`, `run.source`, `report.precision`) belong in `[tool.coverage]`, not in `--cov-*` flags.
+- **Pass `encoding="UTF-8"` to `subprocess.run(..., text=True)` when output may contain non-ASCII bytes** (emoji in a workflow `name:`, accented author names, translated strings). `text=True` alone decodes with the platform default (`cp1252` on Windows), so such output raises `UnicodeDecodeError` only in Windows CI while passing on macOS and Linux. Test helpers shelling out to package managers or `git` are the usual offenders.
 
 ## Design principles
 

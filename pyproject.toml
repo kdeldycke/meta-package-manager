@@ -303,6 +303,9 @@ include-package = [ "cyclonedx", "hjson", "json5", "jsonc", "spdx_tools", "yaml"
 [tool.typos]
 # Correct capitalization for proper nouns.
 default.extend-identifiers = { Github = "GitHub", IOS = "iOS", Javascript = "JavaScript", MacOS = "macOS", PyPi = "PyPI", Typescript = "TypeScript" }
+# Non-typo words flagged by default: `astroid` (the Python AST library) and
+# `oject` (a "project" fragment surfaced when CLI-help output wraps a line).
+default.extend-words = { astroid = "astroid", oject = "oject" }
 # Skip content between <!-- typos:off --> and <!-- typos:on --> markers.
 default.extend-ignore-re = [ "(?s)<!-- typos:off -->.*?<!-- typos:on -->" ]
 default.extend-ignore-identifiers-re = [

@@ -30,7 +30,7 @@ body:
         under the hood. Try to run them manually in your terminal to see if they behave the same.
 
 
-        The issue you are trying to report night already be fixed upstream. Check your current version with `mpm
+        The issue you are trying to report might already be fixed upstream. Check your current version with `mpm
         --version` and compare it with [the
         changelog](https://kdeldycke.github.io/meta-package-manager/changelog.html).
 

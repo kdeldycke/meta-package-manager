@@ -49,24 +49,22 @@ jobs:
             echo "retrying in 30s..."
             sleep 30
           done
-          # Surface the real Guile error behind the opaque "build of
-          # compute-guix-derivation.drv failed".  Guix has no `guix log`; the
-          # daemon stores build logs (incl. failures) under /var/log/guix/drvs.
-          echo "=== guix pull failed; dumping channel-compile build log ==="
-          drv=$(grep -oE "/gnu/store/[a-z0-9]+-compute-guix-derivation\.drv" /tmp/guix-pull.log | tail -1)
-          echo "failed derivation: ${drv:-<not found>}"
-          logfile=$(find /var/log/guix/drvs -name '*compute-guix-derivation*' -type f 2>/dev/null | head -1)
-          echo "log file: ${logfile:-<none>}"
-          if [ -n "${logfile}" ]; then
-            case "${logfile}" in
-              *.gz)  gunzip -c "${logfile}" ;;
-              *.bz2) bunzip2 -c "${logfile}" ;;
-              *)     cat "${logfile}" ;;
-            esac | tail -250
-          else
-            echo "--- no stored build log; tail of pull output ---"
-            tail -250 /tmp/guix-pull.log
+          # "build of compute-guix-derivation.drv failed" is really a failed
+          # dependency: module-import-compiled.drv (the Guile compilation of the
+          # channel's modules).  guix prints "View build log at
+          # '/var/log/guix/drvs/...gz'" for each failure; dump those logs (they
+          # hold the real Unbound-variable / syntax error).  Logs are root-owned
+          # and gzipped, so read them with sudo + zcat.
+          echo "=== guix pull failed; dumping failing build log(s) ==="
+          paths=$(grep -oE "/var/log/guix/drvs/[A-Za-z0-9/_.+-]+\.(gz|bz2)" /tmp/guix-pull.log | sort -u)
+          if [ -z "${paths}" ]; then
+            paths=$(sudo find /var/log/guix/drvs -name '*.gz' -newermt '-10 min' 2>/dev/null)
           fi
+          echo "log files: ${paths:-<none>}"
+          for logf in ${paths}; do
+            echo "=================== ${logf} ==================="
+            { sudo zcat "${logf}" 2>/dev/null || sudo bzcat "${logf}" 2>/dev/null || zcat "${logf}" 2>/dev/null; } | tail -250
+          done
           exit 1
 
       - name: Lint all new packages

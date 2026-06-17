@@ -127,6 +127,31 @@ Do **not** subclass when the two managers have completely different output forma
 - Include at least one CLI output sample in each method's docstring as a `.. code-block:: shell-session` block. This helps future maintainers verify parsing without access to the actual manager.
 - Read {doc}`/falsehoods` to anticipate edge cases in package naming and versioning.
 
+## Choosing the destructive-test package (`PACKAGE_IDS`)
+
+The destructive suite runs `mpm --<id> install <pkg>` then `mpm --<id> remove <pkg>` against the real host, so `PACKAGE_IDS[<id>]` in `tests/conftest.py` must name a package that installs and uninstalls cleanly:
+
+- **Tiny and fast**: no dependency tree, no services/daemons, no `/etc` config, a single self-contained binary.
+- **Not relied upon**: avoid ubiquitous tools (`wget`, `curl`, `git`, `jq`, `openssl`). They are usually already installed (so the install step is a no-op) and removing them can break the host or the test runner.
+- **Self-contained**, ideally a Rust or Go binary.
+- **Verified to exist** in that manager's repo/registry, with the exact ID format the manager expects (a bare name, `category/name`, `bucket/name`, `Publisher.Package`, a numeric ID, ...). Check the real index before committing the choice: do not guess.
+
+Reuse the established picks for consistency instead of inventing new ones:
+
+| Ecosystem                                                            | Package                              | Notes                                                                              |
+| ------------------------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------- |
+| Linux distros, Homebrew, FreeBSD (apt, dnf, pacman, apk, brew, ...)  | `nyancat`                            | Single-file C binary in nearly every distro, Homebrew and FreeBSD; zero reverse-deps. |
+| Distros lacking `nyancat`                                            | `sl` (Solus, Void), `hello`, `lolcat` (OpenWrt) | Fall back only where `nyancat` is absent.                               |
+| Source-compiling managers (emerge, FreeBSD ports)                   | `games-misc/nyancat`, `net/nyancat`  | Compiles in seconds from one C file; use the `category/name` atom.                 |
+| Functional managers (Guix, Nix)                                     | `hello`                              | The canonical GNU demo package.                                                    |
+| Windows binary stores (choco, scoop, sfsu, winget) and `stew`       | `hyperfine`                          | One self-contained Rust binary; use the manager's ID format.                       |
+| npm, Yarn                                                           | `ms`                                 | Zero-dependency, ~7 KB.                                                             |
+| pip, uv                                                             | `pytz`                               | Pure-Python, zero-dependency.                                                      |
+| pipx, uvx                                                           | `pycowsay`                           | Must expose a console-script entry point (a library like `pytz` fails here).       |
+| gem, cpan, composer                                                | `paint`, `Try::Tiny`, `ralouphie/getallheaders` | Smallest inert zero-dependency package native to the language.          |
+
+Special cases: managers that only ship large artifacts use their lightest option (`sdkman` → `jbang`); managers with no real per-package install reference themselves (`deb-get`, `topgrade`); `fwupd` must never use an ID that flashes firmware on real hardware. Add a short inline comment for any non-obvious ID (numeric App Store/Steam IDs, firmware GUIDs).
+
 ## File checklist
 
 Every new manager touches the same set of files. This list is derived from all 30 manager-addition commits in the project history.
@@ -137,7 +162,7 @@ Every new manager touches the same set of files. This list is derived from all 3
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `meta_package_manager/managers/<name>.py` | The new manager implementation.                                                                                                                                                                                                                                                                                                           |
 | `meta_package_manager/pool.py`            | Add import (sorted by module name) and class to `manager_classes` tuple (sorted case-insensitively by class name).                                                                                                                                                                                                                        |
-| `tests/conftest.py`                       | Add `"<manager_id>": "<package_name>"` to `PACKAGE_IDS`. Choose a small, low-impact package for destructive tests.                                                                                                                                                                                                                        |
+| `tests/conftest.py`                       | Add `"<manager_id>": "<package_id>"` to `PACKAGE_IDS`. See [Choosing the destructive-test package](#choosing-the-destructive-test-package-package_ids) for the selection criteria and the canonical per-ecosystem picks.                                                                                                                   |
 | `tests/test_pool.py`                      | Increment both count assertions in `test_manager_count()`.                                                                                                                                                                                                                                                                                |
 | `changelog.md`                            | Add `- [<manager_id>] Add <Name> package manager with <operations> support.` under the current unreleased version.                                                                                                                                                                                                                        |
 | `readme.md`                               | Add entry to the Sankey diagram (alphabetical) and a row to the operations matrix with correct platform and operation flags.                                                                                                                                                                                                              |

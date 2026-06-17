@@ -198,65 +198,97 @@ def subcmd():
 
 
 PACKAGE_IDS = {
-    "apk": "wget",
+    "apk": "nyancat",
     "apm": "markdown-pdf",
-    "apt": "wget",
-    "apt-mint": "exiftool",
-    "asdf": "nodejs",
-    "brew": "wget",
-    "cargo": "colorous",
-    "cask": "pngyu",
-    "choco": "ccleaner",
-    "composer": "illuminate/contracts",
-    "cpan": "JSON",
+    "apt": "nyancat",
+    "apt-mint": "nyancat",
+    "asdf": "jq",
+    "brew": "nyancat",
+    "cargo": "fsays",
+    "cask": "itsycal",
+    "choco": "hyperfine",
+    "composer": "ralouphie/getallheaders",
+    "cpan": "Try::Tiny",
     "deb-get": "deb-get",
-    "dnf": "usd",
-    "dnf5": "usd",
-    "emerge": "dev-vcs/git",
-    "eopkg": "firefox",
-    "flatpak": "org.gnome.Dictionary",
-    "fwupd": "f95c9218acd12697af946874bfe4239587209232",
-    "gem": "markdown",
+    "dnf": "nyancat",
+    "dnf5": "nyancat",
+    "emerge": "games-misc/nyancat",
+    "eopkg": "sl",
+    "flatpak": "org.gnome.Calculator",
+    "fwupd": "f95c9218acd12697af946874bfe4239587209232",  # No-op without device.
+    "gem": "paint",
     "guix": "hello",
-    "macports": "wget",
-    "mas": "747648890",  # Telegram
+    "macports": "hello",
+    "mas": "747648890",  # Telegram (test is always skipped).
     "mise": "jq",
     "nix": "hello",
-    "npm": "raven",
-    "opkg": "enigma2-hotplug",
-    "pacaur": "manjaro-hello",
-    "pacman": "manjaro-hello",
-    "paru": "wget",
+    "npm": "ms",
+    "opkg": "lolcat",
+    "pacaur": "nyancat",
+    "pacman": "nyancat",
+    "paru": "nyancat",
     "pip": "pytz",
-    "pipx": "pytz",
-    "pkg": "dmg2img",
-    "ports": "ftp/curl",
-    "pwsh-gallery": "PSReadLine",
-    "scoop": "main/wget",
-    "sdkman": "java",
-    "sfsu": "main/wget",
-    "snap": "standard-notes",
-    "steamcmd": "740",
-    "stew": "marwanhawari/piu",
+    "pipx": "pycowsay",
+    "pkg": "nyancat",
+    "ports": "net/nyancat",
+    "pwsh-gallery": "Posh-Git",
+    "scoop": "main/hyperfine",
+    "sdkman": "jbang",
+    "sfsu": "main/hyperfine",
+    "snap": "hello-world",
+    "steamcmd": "1007",  # Steamworks SDK Redist.
+    "stew": "sharkdp/hyperfine",
     "topgrade": "topgrade",
     "uv": "pytz",
     "uvx": "pycowsay",
     "vscode": "tamasfe.even-better-toml",
     "vscodium": "tamasfe.even-better-toml",
-    "winget": "Microsoft.PowerToys",
-    "xbps": "wget",
-    "yarn": "awesome-lint",
-    "yarn-berry": "left-pad",
-    "pacstall": "neofetch",
-    "yay": "wget",
-    "yum": "usd",
-    "zerobrew": "jq",
-    "zypper": "git",
+    "winget": "sharkdp.hyperfine",
+    "xbps": "sl",
+    "yarn": "ms",
+    "yarn-berry": "ms",
+    "pacstall": "hello",
+    "yay": "nyancat",
+    "yum": "nyancat",
+    "zerobrew": "nyancat",
+    "zypper": "nyancat",
 }
-"""Package IDs to be used for install tests for each manager.
+"""Package IDs used by the destructive install/remove tests, one per manager.
 
-We manually selected these packages to ensure that they are not too large, and are
-low-impact software that does not interfere with the system they are installed on.
+Each entry is fed to ``mpm --<manager_id> install <package_id>`` immediately followed
+by ``mpm --<manager_id> remove <package_id>``, so the package is both added to and
+removed from the host running the test. Each ID is picked to keep that round-trip cheap
+and free of side effects:
+
+- Tiny and quick to install, with no dependency tree, no services or daemons, and no
+  ``/etc`` configuration: just a self-contained binary.
+- Not a tool the OS, the manager itself, or common scripts are likely to depend on.
+  Ubiquitous utilities (``wget``, ``curl``, ``git``, ``jq``, ...) are avoided: they are
+  usually already installed (so the install step is a no-op) and removing them can break
+  the host.
+- Preferably from the Rust or Go ecosystems, which rarely pull in extra dependencies.
+
+Wherever a manager exposes general-purpose binaries the same low-impact tools are reused
+for consistency: ``nyancat`` (a single-file C binary packaged by nearly every Linux
+distro, Homebrew and FreeBSD as ``net/nyancat``), GNU ``hello`` for the functional
+managers (Guix, Nix) and ``hyperfine`` for the Windows binary stores and ``stew``.
+Distros that lack ``nyancat`` fall back to ``sl`` (Solus, Void) or ``lolcat`` (OpenWrt).
+Language and application managers use the smallest inert package native to their
+ecosystem (``ms`` for npm and Yarn, ``pycowsay`` for the pipx-style installers that
+require a console-script entry point, ...).
+
+.. warning::
+
+    ``fwupd`` flashes real firmware. Its ID is a release with no matching device on CI
+    runners, where the install is therefore a no-op. Never run the destructive ``fwupd``
+    test on hardware that the ID actually targets.
+
+.. note::
+
+    A few managers cannot offer a small binary: ``sdkman`` only ships full SDKs
+    (``jbang`` is its lightest candidate), and ``mas`` needs a signed App Store app (its
+    test is skipped anyway). ``deb-get`` and ``topgrade`` have no real per-package
+    install, so they reference themselves.
 
 Only to be used for destructive tests.
 """

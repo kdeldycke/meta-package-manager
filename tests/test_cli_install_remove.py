@@ -76,6 +76,23 @@ class TestInstallRemove(CLISubCommandTests):
         assert not result.stdout
         assert "Error: Missing argument 'PACKAGES_SPECS...'." in result.stderr
 
+    def test_install_unresolved_exits_nonzero(self, invoke, fake_pool):
+        """install exits non-zero when no manager can provide the requested package.
+
+        Guards against a regression where a failed install was swallowed and the
+        command still exited ``0`` (see the ``install`` command in ``cli.py``).
+        """
+        result = invoke("install", "package-provided-by-no-manager")
+        assert result.exit_code == 1
+
+    def test_remove_absent_package_is_idempotent(self, invoke, fake_pool):
+        """Removing a package no manager has installed is a no-op, not a failure.
+
+        ``remove`` only fails when a manager that *has* the package fails to remove it.
+        """
+        result = invoke("remove", "package-installed-by-no-manager")
+        assert result.exit_code == 0
+
     @pytest.mark.destructive()
     @maintained_manager_ids_and_dummy_package
     def test_single_manager_install_and_remove(self, invoke, manager_id, package_id):
@@ -109,17 +126,27 @@ class TestInstallRemove(CLISubCommandTests):
         if manager_id == "mas":
             pytest.skip("mas timeout on GitHub Actions.")
 
-        # XXX Skip zypper on Linux: the RPM database at /var/lib/rpm is
-        # inaccessible even with sudo on ubuntu CI runners (both x86_64 and
-        # aarch64), causing:
+        # XXX Skip the RPM-family managers on Linux: the RPM stack has no usable
+        # repositories, and its database at /var/lib/rpm is inaccessible even with
+        # sudo on the Debian-based ubuntu CI runners (both x86_64 and aarch64),
+        # causing errors like:
         #
         #   error: Unable to open sqlite database /var/lib/rpm/rpmdb.sqlite:
         #   unable to open database file
         #   error: cannot open Packages index using sqlite - Operation not
         #   permitted (1)
         #   error: cannot open Packages database in /var/lib/rpm
-        if manager_id == "zypper" and is_linux():
-            pytest.skip("zypper RPM database not accessible on Linux runners.")
+        if manager_id in {"dnf", "dnf5", "yum", "zypper"} and is_linux():
+            pytest.skip(f"{manager_id} RPM stack not usable on Linux CI runners.")
+
+        # XXX Skip snap and flatpak on Linux: the unprivileged test process cannot
+        # drive them on CI runners. snap install requires root (mpm does not elevate),
+        # and flatpak has no remote configured to resolve apps from. Both used to
+        # appear to pass only because a failed install historically exited 0.
+        if manager_id in {"snap", "flatpak"} and is_linux():
+            pytest.skip(
+                f"{manager_id} cannot install in the unprivileged CI environment.",
+            )
 
         # XXX Skip pwsh-gallery when PowerShell cannot load the PSResourceGet
         # module. This can happen when the CI runner has .NET 10 installed: the

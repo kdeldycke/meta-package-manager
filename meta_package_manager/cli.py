@@ -1457,7 +1457,11 @@ def install(ctx, packages_specs):
     solver = Solver(packages_specs, manager_priority=manager_ids)
     packages_per_managers = solver.resolve_specs_group_by_managers()
 
-    # Install all packages deterministiccaly tied to a specific manager.
+    # Collect every requested spec that no manager could install, to raise a non-zero
+    # exit code at the end of the command.
+    unresolved_specs: list[Specifier] = []
+
+    # Install all packages deterministically tied to a specific manager.
     for manager_id, package_specs in packages_per_managers.items():
         if not manager_id:
             continue
@@ -1465,18 +1469,29 @@ def install(ctx, packages_specs):
         if not cooldown_permits(manager):
             continue
         for spec in package_specs:
-            try:
-                logging.info(
-                    f"Install {spec} package with "
-                    f"{theme().invoked_command(manager_id)}...",
-                )
-                output = manager.install(spec.package_id, version=spec.version)
-            except NotImplementedError:
-                logging.warning(
-                    f"{theme().invoked_command(manager_id)} "
-                    "does not implement install operation.",
-                )
-                continue
+            # Force the manager to raise on failure so the error is both reported and
+            # recorded as unresolved, instead of being silently swallowed.
+            with patch.object(manager, "stop_on_error", True):
+                try:
+                    logging.info(
+                        f"Install {spec} package with "
+                        f"{theme().invoked_command(manager_id)}...",
+                    )
+                    output = manager.install(spec.package_id, version=spec.version)
+                except NotImplementedError:
+                    logging.warning(
+                        f"{theme().invoked_command(manager_id)} "
+                        "does not implement install operation.",
+                    )
+                    unresolved_specs.append(spec)
+                    continue
+                except CLIError:
+                    logging.warning(
+                        f"Could not install {spec} "
+                        f"with {theme().invoked_command(manager_id)}.",
+                    )
+                    unresolved_specs.append(spec)
+                    continue
             echo(output)
 
     unmatched_packages = packages_per_managers.get(None, set())
@@ -1485,6 +1500,7 @@ def install(ctx, packages_specs):
     if unmatched_packages:
         eligible_managers = tuple(m for m in selected_managers if cooldown_permits(m))
     for spec in unmatched_packages:
+        installed = False
         for manager in eligible_managers:
             logging.info(
                 f"Try to install {spec} with {theme().invoked_command(manager.id)}.",
@@ -1550,7 +1566,22 @@ def install(ctx, packages_specs):
                     continue
 
             echo(output)
-            ctx.exit()
+            # Stop at the first (highest-priority) manager that provides the package.
+            installed = True
+            break
+
+        if not installed:
+            unresolved_specs.append(spec)
+
+    # Fail with a non-zero exit code if any requested package went uninstalled by every
+    # selected manager.
+    if unresolved_specs:
+        logging.critical(
+            "Could not install: "
+            + ", ".join(sorted(str(spec) for spec in unresolved_specs))
+            + ".",
+        )
+        ctx.exit(1)
 
 
 @mpm.command(aliases=["update"], short_help="Upgrade packages.", section=MAINTENANCE)
@@ -1688,6 +1719,10 @@ def remove(ctx, packages_specs):
     )
     manager_ids = tuple(manager.id for manager in selected_managers)
 
+    # Collect every package a selected manager failed to actually remove. Packages that
+    # are already absent are not failures: removal is idempotent.
+    remove_failures: list[str] = []
+
     # Get the subset of selected managers that are implementing the installed operation,
     # so we can query it and know if a package has been installed with it.
     sourcing_managers = tuple(
@@ -1730,9 +1765,35 @@ def remove(ctx, packages_specs):
         )
         for manager_id in source_manager_ids:
             manager = pool.get(manager_id)
-            output = manager.remove(package_id)
+            # Force the manager to raise on failure so a botched removal is reported and
+            # recorded, instead of being silently swallowed.
+            with patch.object(manager, "stop_on_error", True):
+                try:
+                    output = manager.remove(package_id)
+                except NotImplementedError:
+                    logging.warning(
+                        f"{theme().invoked_command(manager_id)} "
+                        "does not implement remove operation.",
+                    )
+                    remove_failures.append(package_id)
+                    continue
+                except CLIError:
+                    logging.warning(
+                        f"Could not remove {package_id} "
+                        f"with {theme().invoked_command(manager_id)}.",
+                    )
+                    remove_failures.append(package_id)
+                    continue
             if output:
                 logging.info(output)
+
+    # Fail with a non-zero exit code if any package could not be removed by a manager
+    # that had it installed.
+    if remove_failures:
+        logging.critical(
+            "Could not remove: " + ", ".join(sorted(set(remove_failures))) + ".",
+        )
+        ctx.exit(1)
 
 
 @mpm.command(short_help="Sync local package info.", section=MAINTENANCE)

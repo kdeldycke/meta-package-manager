@@ -18,9 +18,32 @@ jobs:
       GUIX_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Install Guix
+        # Ubuntu ships guix 1.4.0 (Guile 3.0.8), which cannot compile the
+        # current Guix channel: core modules call `spawn`, added in Guile 3.0.9.
+        # Install the latest nightly guix binary from the build farm instead of
+        # apt.  Mirrors the approach of PromyLOPh/guix-install-action.
         run: |
-          sudo apt-get update
-          sudo apt-get install --yes --quiet guix
+          set -euo pipefail
+          guix_url="https://ci.guix.gnu.org/search/latest/archive"
+          guix_query="query=spec:tarball+status:success+system:x86_64-linux+guix-binary.tar.xz"
+          wget -nv "${guix_url}?${guix_query}" -O /tmp/guix-binary.tar.xz
+          sudo tar --extract --file=/tmp/guix-binary.tar.xz -C / --no-overwrite-dir
+          sudo groupadd --system guixbuild
+          for i in $(seq -w 1 10); do
+            sudo useradd -g guixbuild -G guixbuild -d /var/empty -s "$(which nologin)" \
+              -c "Guix build user ${i}" --system "guixbuilder${i}"
+          done
+          guix_root=/var/guix/profiles/per-user/root/current-guix
+          sudo cp "${guix_root}/lib/systemd/system/gnu-store.mount" \
+                  "${guix_root}/lib/systemd/system/guix-daemon.service" \
+                  /etc/systemd/system/
+          sudo systemctl daemon-reload
+          sudo systemctl enable --now gnu-store.mount guix-daemon.service
+          echo "${guix_root}/bin" >> "${GITHUB_PATH}"
+          # Authorize the build farm so substitutes are usable.
+          for pub in "${guix_root}"/share/guix/*.pub; do
+            sudo "${guix_root}/bin/guix" archive --authorize < "${pub}"
+          done
 
       - name: Pull Guix from fork channel
         run: |

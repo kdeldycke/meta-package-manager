@@ -75,5 +75,5 @@ Add arguments to `installed` command, or an `--installed` boolean flag to `searc
 
 ## See also
 
-- {doc}`dump` &mdash; snapshot the resolved installation set after deduplication.
-- {doc}`configuration` &mdash; pin a preferred manager order so duplicates resolve consistently across runs.
+- {doc}`dump` — snapshot the resolved installation set after deduplication.
+- {doc}`configuration` — pin a preferred manager order so duplicates resolve consistently across runs.

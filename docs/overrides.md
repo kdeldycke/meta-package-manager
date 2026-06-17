@@ -93,5 +93,5 @@ suggest_contribs = false
 
 ## See also
 
-- {doc}`configuration` &mdash; global `[mpm]` settings and configuration-file precedence rules.
-- {doc}`add-new-manager` &mdash; for contributors who want to upstream a new manager rather than override an existing one.
+- {doc}`configuration` — global `[mpm]` settings and configuration-file precedence rules.
+- {doc}`add-new-manager` — for contributors who want to upstream a new manager rather than override an existing one.

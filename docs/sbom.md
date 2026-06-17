@@ -128,7 +128,7 @@ $ mpm --brew sbom > deep.spdx.json
 
 | Manager  | License | Homepage | Download URL | Checksums | Dependency graph | Per-package SBOM |
 | -------- | :-----: | :------: | :----------: | :-------: | :--------------: | :--------------: |
-| Homebrew |    ✓    |    ✓     |      ✓       |     ✓     |        ✓         |   ✓ (opt-in)     |
+| Homebrew |    ✓    |    ✓     |      ✓       |     ✓     |        ✓         |    ✓ (opt-in)    |
 | pip      |    ✓    |    ✓     |              |           |        ✓         |                  |
 | Others   |         |          |              |           |                  |                  |
 
@@ -152,5 +152,5 @@ Without the extra, `mpm sbom` exits with an explanatory error pointing at this i
 
 ## See also
 
-- {doc}`dump` &mdash; TOML manifest and Brewfile snapshots for re-installation workflows.
-- {doc}`cooldown` &mdash; release-age gates that complement the SBOM workflow on the install side.
+- {doc}`dump` — TOML manifest and Brewfile snapshots for re-installation workflows.
+- {doc}`cooldown` — release-age gates that complement the SBOM workflow on the install side.

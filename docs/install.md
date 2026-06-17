@@ -615,7 +615,7 @@ $ mpm install --man | man --local-file -
 The full command tree is also pre-rendered as static `.1` files:
 
 - Bundled as `mpm-manpages.tar.gz` on every [GitHub release](https://github.com/kdeldycke/meta-package-manager/releases). Download, extract, and copy to `${MANPATH%%:*}/man1/` (typically `/usr/local/share/man/man1/`).
-- Rendered next to the HTML docs at <https://kdeldycke.github.io/meta-package-manager/man/>, with browser-viewable HTML siblings ([live index](cli-parameters.md#man-pages)).
+- Rendered next to the HTML docs at [https://kdeldycke.github.io/meta-package-manager/man/](https://kdeldycke.github.io/meta-package-manager/man/), with browser-viewable HTML siblings ([live index](cli-parameters.md#man-pages)).
 
 Downstream packagers can regenerate them from source as part of their build phase:
 

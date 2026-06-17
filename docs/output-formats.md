@@ -85,5 +85,5 @@ For screen readers, pass `--accessible` (or set `ACCESSIBLE=1` in the environmen
 
 ## See also
 
-- {doc}`dump` &mdash; richer TOML and Brewfile snapshots that preserve manager structure for replay.
-- {doc}`sbom` &mdash; SPDX/CycloneDX exports targeted at supply-chain inventory work rather than ad-hoc piping.
+- {doc}`dump` — richer TOML and Brewfile snapshots that preserve manager structure for replay.
+- {doc}`sbom` — SPDX/CycloneDX exports targeted at supply-chain inventory work rather than ad-hoc piping.

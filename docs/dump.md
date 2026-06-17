@@ -79,7 +79,7 @@ You used to work on macOS. Now you'd like to move to Linux. To reduce friction d
    $ mpm dump packages.toml
    ```
 
-1. On your brand new Linux distribution, restore all packages with:
+2. On your brand new Linux distribution, restore all packages with:
 
    ```shell-session
    $ mpm restore packages.toml
@@ -136,6 +136,6 @@ Brewfile's `flatpak` entry accepts a `with: ["remote_name"]` keyword for non-def
 
 ## See also
 
-- {doc}`sbom` &mdash; SPDX and CycloneDX SBOM exports for supply-chain inventory work.
-- {doc}`overrides` &mdash; per-manager `[mpm.managers.<id>]` config blocks and how to generate them with `mpm config-template`.
-- {doc}`cooldown` &mdash; release-age gates that complement the snapshot workflow on the install side.
+- {doc}`sbom` — SPDX and CycloneDX SBOM exports for supply-chain inventory work.
+- {doc}`overrides` — per-manager `[mpm.managers.<id>]` config blocks and how to generate them with `mpm config-template`.
+- {doc}`cooldown` — release-age gates that complement the snapshot workflow on the install side.

@@ -292,13 +292,13 @@ macos-app-icon = "docs/assets/icon.icns"
 linux-icon = "docs/assets/icon.png"
 windows-icon-from-ico = "docs/assets/icon.ico"
 include-package-data = [ "click_extra" ]
-# The cyclonedx and spdx_tools imports are guarded behind try/except blocks in
-# meta_package_manager.sbom so a default `pip install` (without the [sbom]
-# extra) still imports cleanly. Nuitka skips packages whose imports are gated
-# behind try/except even when they are installed, so force-include them.
-# Pairs with `[tool.repomatic] nuitka.extras = ["sbom"]` which syncs the
-# packages into the build venv.
-include-package = [ "cyclonedx", "spdx_tools" ]
+# Packages whose imports are gated behind try/except in click-extra (config
+# loader) and meta_package_manager.sbom: Nuitka skips these even when they
+# are installed, so force-include them. Pairs with `[tool.repomatic]
+# nuitka.extras` which syncs the corresponding mpm extras into the build
+# venv. xmltodict is already an mpm runtime dep, so it does not need an
+# entry here (Nuitka picks it up via the eager import in zypper.py).
+include-package = [ "cyclonedx", "hjson", "json5", "jsonc", "spdx_tools", "yaml" ]
 
 [tool.typos]
 # Correct capitalization for proper nouns.
@@ -478,10 +478,15 @@ test-matrix.remove.os = [ "windows-11-arm" ]
 test-matrix.exclude = [ { python-version = "3.15t" } ]
 # Test plan for binary testing.
 test-plan.file = "./tests/cli-test-plan.yaml"
-# Sync the [sbom] extra into the build venv so the Nuitka binary can ship
-# `mpm sbom --spdx` / `mpm sbom --cyclonedx`. Paired with `include-package`
-# in [tool.nuitka] below to defeat Nuitka's try/except import skip.
-nuitka.extras = [ "sbom" ]
+# Sync optional-dependencies into the build venv so the Nuitka binary ships
+# every feature gated behind try/except imports in click-extra and mpm:
+#   - sbom: cyclonedx-python-lib + spdx-tools, for `mpm sbom --spdx` and
+#           `mpm sbom --cyclonedx`.
+#   - toml/yaml/json5/jsonc/hjson/xml: click-extra config-file readers, for
+#           `mpm --config <path>` and `mpm --table-format <fmt>` output.
+# Paired with `include-package` in [tool.nuitka] below to defeat Nuitka's
+# try/except import skip.
+nuitka.extras = [ "hjson", "json5", "jsonc", "sbom", "toml", "xml", "yaml" ]
 # Render the mpm Click command tree as roff `.1` files and attach them as
 # `mpm-manpages.tar.gz` to every GitHub release (handled by the `manpages` job
 # in repomatic's `_release-engine.yaml`). The `module:function` form bypasses

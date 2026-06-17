@@ -189,3 +189,117 @@
 
 - cli_parameters: sbom --cyclonedx
   exit_code: 0
+
+# Config-format coverage. Each fixture is a minimal valid `[mpm]` config; the
+# matching format reader is gated behind `try/except import <pkg>` in
+# click-extra, so a failing case here means the [pkg]-named extra is missing
+# from the binary (either not synced via [tool.repomatic] nuitka.extras or
+# not bundled via [tool.nuitka] include-package).
+- cli_parameters: --validate-config tests/cli-test-plan-config.toml
+  exit_code: 0
+  stderr_contains: "is valid."
+
+- cli_parameters: --validate-config tests/cli-test-plan-config.yaml
+  exit_code: 0
+  stderr_contains: "is valid."
+
+- cli_parameters: --validate-config tests/cli-test-plan-config.json
+  exit_code: 0
+  stderr_contains: "is valid."
+
+- cli_parameters: --validate-config tests/cli-test-plan-config.json5
+  exit_code: 0
+  stderr_contains: "is valid."
+
+- cli_parameters: --validate-config tests/cli-test-plan-config.jsonc
+  exit_code: 0
+  stderr_contains: "is valid."
+
+- cli_parameters: --validate-config tests/cli-test-plan-config.hjson
+  exit_code: 0
+  stderr_contains: "is valid."
+
+- cli_parameters: --validate-config tests/cli-test-plan-config.xml
+  exit_code: 0
+  stderr_contains: "is valid."
+
+# Table-format breadth. Each format is a separate tabulate renderer (toml,
+# yaml, json, xml). A regression here flags a missing tabulate/format
+# package data file in the bundled binary.
+- cli_parameters: --table-format json managers
+  skip_platforms: windows
+  exit_code: 0
+  stdout_contains: '"id": "cargo"'
+
+- cli_parameters: --table-format yaml managers
+  skip_platforms: windows
+  exit_code: 0
+  stdout_contains: "id: cargo"
+
+- cli_parameters: --table-format toml managers
+  skip_platforms: windows
+  exit_code: 0
+  stdout_contains: 'id = "cargo"'
+
+- cli_parameters: --table-format xml managers
+  skip_platforms: windows
+  exit_code: 0
+  stdout_contains: "<cargo>"
+
+# Globals introduced this cycle. `--man` exercises the roff renderer click-extra
+# 7.19 ships and its embedded data files; `--summary` replaces the old
+# `--stats`; `--accessible` swaps to the plain renderer; `--cooldown DURATION`
+# parses a duration string. The introspection flags `--show-params` and
+# `--man` print and exit 0 without contacting any package manager.
+- cli_parameters: --man
+  exit_code: 0
+  stdout_contains: ".TH \"MPM\""
+
+- cli_parameters: --show-params
+  skip_platforms: windows
+  exit_code: 0
+  strip_ansi: true
+  stdout_contains: mpm.accessible
+
+- cli_parameters: --accessible managers
+  skip_platforms: windows
+  exit_code: 0
+  stdout_contains: cargo
+
+- cli_parameters: --summary managers
+  skip_platforms: windows
+  exit_code: 0
+  stdout_contains: cargo
+
+- cli_parameters: --cooldown 30days managers
+  skip_platforms: windows
+  exit_code: 0
+  stdout_contains: cargo
+
+# Subcommands not exercised by the other tests. `config-template` prints a
+# per-manager TOML overrides skeleton, `help` dispatches click-extra's
+# command-help renderer, `search` exercises the search highlighting path
+# (click-extra theme).
+- cli_parameters: config-template
+  exit_code: 0
+  stdout_contains: "[mpm.managers.apk]"
+
+- cli_parameters: help managers
+  exit_code: 0
+  strip_ansi: true
+  stdout_contains: "Usage: mpm managers"
+
+- cli_parameters: search click
+  skip_platforms: windows
+  exit_code: 0
+
+# Negative cases: click-extra must surface usage errors with exit code 2 and
+# a "No such" message, not a Python traceback (which the onefile binary has
+# been known to print when an unexpected exception escapes click).
+- cli_parameters: bogus-subcommand
+  exit_code: 2
+  stderr_contains: "No such command 'bogus-subcommand'"
+
+- cli_parameters: --bogus-flag
+  exit_code: 2
+  stderr_contains: "No such option '--bogus-flag'"

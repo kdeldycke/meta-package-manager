@@ -53,11 +53,8 @@ jobs:
           packages=(
             python-bracex
             python-click-extra
-            python-cyclonedx-python-lib
             python-extra-platforms
             python-packageurl-python
-            python-py-serializable
-            python-spdx-tools
             python-wcmatch
             meta-package-manager
           )
@@ -110,11 +107,8 @@ jobs:
           packages=(
             python-bracex
             python-click-extra
-            python-cyclonedx-python-lib
             python-extra-platforms
             python-packageurl-python
-            python-py-serializable
-            python-spdx-tools
             python-wcmatch
             meta-package-manager
           )
@@ -157,11 +151,8 @@ jobs:
           packages=(
             python-bracex
             python-click-extra
-            python-cyclonedx-python-lib
             python-extra-platforms
             python-packageurl-python
-            python-py-serializable
-            python-spdx-tools
             python-wcmatch
             meta-package-manager
           )

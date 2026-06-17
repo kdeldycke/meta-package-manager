@@ -134,22 +134,22 @@ These go under `[mpm.<subcommand>]` (or `[tool.mpm.<subcommand>]`):
 
 **`[mpm.dump]`** (also reachable as `[mpm.backup]`, `[mpm.lock]`, `[mpm.freeze]`, `[mpm.snapshot]`)
 
-| Key              | Type    | Default | Description                                                                                |
-| :--------------- | :------ | :------ | :----------------------------------------------------------------------------------------- |
-| `toml`           | boolean | `true`  | Emit a TOML manifest with one section per manager.                                         |
-| `brewfile`       | boolean | `false` | Emit a Brewfile instead of a TOML manifest (managers supported by `brew bundle` only).     |
-| `header`         | boolean | `true`  | Include a metadata + warning comment block at the top of the output.                       |
-| `overwrite`      | boolean | `false` | Allow overwriting an existing output file.                                                 |
-| `merge`          | boolean | `false` | TOML only. Add each new entry to an existing file.                                         |
-| `update_version` | boolean | `false` | TOML only. Update each existing entry with the version currently installed on the system.  |
+| Key              | Type    | Default | Description                                                                               |
+| :--------------- | :------ | :------ | :---------------------------------------------------------------------------------------- |
+| `toml`           | boolean | `true`  | Emit a TOML manifest with one section per manager.                                        |
+| `brewfile`       | boolean | `false` | Emit a Brewfile instead of a TOML manifest (managers supported by `brew bundle` only).    |
+| `header`         | boolean | `true`  | Include a metadata + warning comment block at the top of the output.                      |
+| `overwrite`      | boolean | `false` | Allow overwriting an existing output file.                                                |
+| `merge`          | boolean | `false` | TOML only. Add each new entry to an existing file.                                        |
+| `update_version` | boolean | `false` | TOML only. Update each existing entry with the version currently installed on the system. |
 
 **`[mpm.sbom]`**
 
-| Key         | Type    | Default    | Description                                                                                                  |
-| :---------- | :------ | :--------- | :----------------------------------------------------------------------------------------------------------- |
-| `spdx`      | boolean | `true`     | Use SPDX format (`false` for CycloneDX).                                                                     |
-| `bundled`   | boolean | `true`     | Bundled mode: query each manager for richer metadata and merge per-package upstream SBOMs into the aggregate. Set `false` for fast inventory snapshots (name, version, purl only). |
-| `overwrite` | boolean | `false`    | Allow overwriting an existing SBOM file.                                                                     |
+| Key         | Type    | Default | Description                                                                                                                                                                        |
+| :---------- | :------ | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `spdx`      | boolean | `true`  | Use SPDX format (`false` for CycloneDX).                                                                                                                                           |
+| `bundled`   | boolean | `true`  | Bundled mode: query each manager for richer metadata and merge per-package upstream SBOMs into the aggregate. Set `false` for fast inventory snapshots (name, version, purl only). |
+| `overwrite` | boolean | `false` | Allow overwriting an existing SBOM file.                                                                                                                                           |
 
 ## Full example
 

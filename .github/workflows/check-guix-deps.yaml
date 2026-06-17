@@ -34,11 +34,35 @@ jobs:
               -c "Guix build user ${i}" --system "guixbuilder${i}"
           done
           guix_root=/var/guix/profiles/per-user/root/current-guix
-          sudo cp "${guix_root}/lib/systemd/system/gnu-store.mount" \
-                  "${guix_root}/lib/systemd/system/guix-daemon.service" \
-                  /etc/systemd/system/
+          sudo cp "${guix_root}/lib/systemd/system/gnu-store.mount" /etc/systemd/system/
+          # The bundled guix-daemon.service logs to syslog, which ubuntu-24.04
+          # runners lack (they use journald), so it fails to start.  Install a
+          # known-good unit logging to the journal instead.
+          sudo tee /etc/systemd/system/guix-daemon.service >/dev/null <<'UNIT'
+          [Unit]
+          Description=Build daemon for GNU Guix
+          After=gnu-store.mount
+          [Service]
+          ExecStart=/var/guix/profiles/per-user/root/current-guix/bin/guix-daemon --build-users-group=guixbuild
+          Environment=GUIX_LOCPATH=/var/guix/profiles/per-user/root/guix-profile/lib/locale LC_ALL=en_US.utf8
+          StandardOutput=journal
+          StandardError=journal
+          OOMPolicy=continue
+          Restart=always
+          TasksMax=8192
+          [Install]
+          WantedBy=multi-user.target
+          UNIT
           sudo systemctl daemon-reload
-          sudo systemctl enable --now gnu-store.mount guix-daemon.service
+          sudo systemctl enable --now gnu-store.mount guix-daemon.service || true
+          sleep 3
+          if ! sudo systemctl is-active --quiet guix-daemon.service; then
+            echo "=== guix-daemon failed to start ==="
+            sudo systemctl status guix-daemon.service --no-pager || true
+            sudo journalctl -xeu guix-daemon.service --no-pager | tail -60 || true
+            exit 1
+          fi
+          echo "guix-daemon active"
           echo "${guix_root}/bin" >> "${GITHUB_PATH}"
           # Authorize the build farm so substitutes are usable.
           for pub in "${guix_root}"/share/guix/*.pub; do

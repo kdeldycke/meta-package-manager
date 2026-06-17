@@ -82,9 +82,10 @@ class MpmConfig:
     """Minimum release age (like ``7 days`` or ``1 week``) a package version must
     reach before it can be installed or upgraded. Empty disables the gate."""
 
-    allow_no_cooldown: bool = False
-    """Let managers without native cooldown support run install/upgrade anyway,
-    instead of skipping them when a cooldown is requested."""
+    require_cooldown_support: bool = True
+    """Require managers to natively support a requested cooldown to run
+    install/upgrade: skip those that cannot (fail-closed). Set to ``False`` to run
+    them anyway, without the safeguard."""
 
     description: bool = False
     """Show package description in results."""

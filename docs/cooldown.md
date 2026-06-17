@@ -11,7 +11,7 @@ The cooldown applies to every install and upgrade `mpm` performs:
 ```{code-block} shell-session
 $ mpm --cooldown "7 days" upgrade --all
 $ mpm --cooldown "1 week" install some-package
-$ mpm --cooldown 12h --allow-no-cooldown upgrade --all   # let unsupported managers run too
+$ mpm --cooldown 12h --allow-unsupported-managers upgrade --all   # let unsupported managers run too
 ```
 
 `--cooldown` accepts three input shapes:
@@ -32,7 +32,7 @@ When `cooldown` is set, `mpm`:
 
 1. Computes a UTC cutoff timestamp equal to `now - cooldown`.
 2. For each manager that natively enforces a release-age gate (see the support table below), injects the manager's dedicated environment variable carrying that cutoff into every CLI call. The manager's own resolver then excludes every version published after the cutoff, including transitive dependencies.
-3. For each manager without a native gate, **skips** install / upgrade with a warning (fail-closed). Pass `--allow-no-cooldown` (or set `allow_no_cooldown = true` in the config file) to run those managers anyway, without the safeguard.
+3. For each manager without a native gate, **skips** install / upgrade with a warning (fail-closed). Pass `--allow-unsupported-managers` (or set `require_cooldown_support = false` in the config file) to run those managers anyway, without the safeguard.
 4. Leaves read-only operations (`outdated`, `installed`, `search`) untouched: information is never blocked, only mutations are.
 
 The choice to delegate to each manager's own resolver rather than reimplement the gate inside `mpm` is deliberate: only the resolver can apply the cutoff to the whole dependency closure (see [Limitations](#limitations) below).

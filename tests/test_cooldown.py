@@ -258,17 +258,17 @@ def test_cooldown_permits_blocks_unsupported(caplog):
     caplog.set_level(logging.WARNING)
     manager = Homebrew()
     manager.cooldown = timedelta(days=7)
-    manager.allow_no_cooldown = False
+    manager.require_cooldown_support = True
     assert cooldown_permits(manager) is False
     assert "cannot enforce" in caplog.text
-    assert "--allow-no-cooldown" in caplog.text
+    assert "--allow-unsupported-managers" in caplog.text
 
 
 def test_cooldown_permits_allows_unsupported_on_opt_in(caplog):
     caplog.set_level(logging.WARNING)
     manager = Homebrew()
     manager.cooldown = timedelta(days=7)
-    manager.allow_no_cooldown = True
+    manager.require_cooldown_support = False
     assert cooldown_permits(manager) is True
     assert "without the supply-chain safeguard" in caplog.text
 

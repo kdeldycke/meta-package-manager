@@ -606,15 +606,16 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         "ISO 8601 duration ('P7D', 'PT12H'), or an RFC 3339 absolute timestamp "
         "('2024-05-01T00:00:00Z'). Only honored by managers with native "
         "release-age support (uv, npm, pip, pipx); the others are skipped "
-        "unless --allow-no-cooldown is set.",
+        "unless --allow-unsupported-managers is set.",
     ),
     option(
-        "--allow-no-cooldown",
-        is_flag=True,
-        default=False,
-        help="When --cooldown is set, still run install and upgrade on managers that "
-        "cannot enforce it, instead of skipping them. Trades the supply-chain "
-        "safeguard for broader manager coverage.",
+        "--require-cooldown-support/--allow-unsupported-managers",
+        default=True,
+        help="When --cooldown is set, whether to require each manager to natively "
+        "enforce it. The default (--require-cooldown-support) skips managers that "
+        "cannot, so nothing slips in unguarded (fail-closed). "
+        "--allow-unsupported-managers runs install and upgrade on them anyway, "
+        "trading the supply-chain safeguard for broader manager coverage.",
     ),
 )
 @option_group(
@@ -673,7 +674,7 @@ def mpm(
     dry_run,
     timeout,
     cooldown,
-    allow_no_cooldown,
+    require_cooldown_support,
     description,
     sort_by,
     summary,
@@ -795,7 +796,7 @@ def mpm(
             timeout=timeout,
             # Minimum release age gate and its fail-open escape hatch.
             cooldown=cooldown,
-            allow_no_cooldown=allow_no_cooldown,
+            require_cooldown_support=require_cooldown_support,
             **kwargs,
         )
 
@@ -1392,14 +1393,15 @@ def cooldown_permits(manager: PackageManager) -> bool:
     """Decide whether a release-introducing operation may run on ``manager``.
 
     Returns ``True`` when no cooldown is active, when the manager can enforce it
-    natively, or when the user opted into running unguarded managers with
-    ``--allow-no-cooldown``. Returns ``False`` (after logging the skip) when an active
-    cooldown cannot be enforced and the user did not opt in, so the caller leaves the
-    manager alone rather than letting a freshly-published version slip in.
+    natively, or when the user opted out of the requirement with
+    ``--allow-unsupported-managers``. Returns ``False`` (after logging the skip)
+    when an active cooldown cannot be enforced and the requirement still holds, so
+    the caller leaves the manager alone rather than letting a freshly-published
+    version slip in.
     """
     if manager.cooldown is None or manager.supports_cooldown:
         return True
-    if manager.allow_no_cooldown:
+    if not manager.require_cooldown_support:
         logging.warning(
             f"{theme().invoked_command(manager.id)} cannot enforce the release-age "
             "cooldown; running it without the supply-chain safeguard.",
@@ -1407,7 +1409,7 @@ def cooldown_permits(manager: PackageManager) -> bool:
         return True
     logging.warning(
         f"Skip {theme().invoked_command(manager.id)}: it cannot enforce the "
-        "release-age cooldown. Use --allow-no-cooldown to run it anyway.",
+        "release-age cooldown. Use --allow-unsupported-managers to run it anyway.",
     )
     return False
 

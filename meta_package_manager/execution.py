@@ -234,13 +234,13 @@ class CLIExecutor:
     :py:attr:`cooldown_env_var` and :py:attr:`supports_cooldown`.
     """
 
-    allow_no_cooldown: bool = False
-    """Let install/upgrade proceed on managers that cannot enforce a :py:attr:`cooldown`.
+    require_cooldown_support: bool = True
+    """Require native :py:attr:`cooldown` support to run install/upgrade.
 
-    By default (fail-closed), when a :py:attr:`cooldown` is requested, install and
-    upgrade operations are skipped for managers lacking native release-age support,
-    so nothing slips in unguarded. Setting this to ``True`` opts into running those
-    operations anyway, without the safeguard.
+    By default (``True``, fail-closed), when a :py:attr:`cooldown` is requested,
+    install and upgrade operations are skipped for managers lacking native
+    release-age support, so nothing slips in unguarded. Setting this to ``False``
+    opts into running those operations anyway, without the safeguard.
     """
 
     cooldown_env_var: ClassVar[str | None] = None

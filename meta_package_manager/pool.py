@@ -153,10 +153,10 @@ class ManagerPool:
 
     ALLOWED_EXTRA_OPTION: Final = frozenset(
         {
-            "allow_no_cooldown",
             "cooldown",
             "dry_run",
             "ignore_auto_updates",
+            "require_cooldown_support",
             "stop_on_error",
             "timeout",
         },

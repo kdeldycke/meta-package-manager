@@ -5,6 +5,7 @@
 > [!WARNING]
 > This version is **not released yet** and is under active development.
 
+- **Breaking:** [mpm] Rename the `--allow-no-cooldown` flag (shipped in `6.6.0`) to the `--require-cooldown-support`/`--allow-unsupported-managers` boolean pair, and rename its `allow_no_cooldown` config to `require_cooldown_support` (default `true`). Pass `--allow-unsupported-managers` (or set `require_cooldown_support = false`) for the previous `--allow-no-cooldown` behavior.
 - [mpm] Bundle the click-extra config-format extras (`toml`, `yaml`, `json5`, `jsonc`, `hjson`, `xml`) into the standalone binary via `[tool.repomatic] nuitka.extras` plus matching `[tool.nuitka] include-package` entries, so the binary can read configs in all six formats (the source distribution already supported them as optional extras).
 - [mpm] Widen the binary smoke tests in `tests/cli-test-plan.yaml`: per-format `--validate-config` against a tiny fixture for each of the seven readers; `--table-format` rendering in JSON, YAML, TOML, and XML; the cycle's new `--man`, `--show-params`, `--accessible`, `--summary`, and `--cooldown` globals; the `config-template`, `help`, and `search` subcommands; and negative cases that assert click-extra's usage errors stay surfaced as exit code 2 instead of leaking a Python traceback from the onefile binary.
 

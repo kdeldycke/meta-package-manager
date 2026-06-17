@@ -1,6 +1,6 @@
 // Minimal mpm config in JSON-with-comments format.
 {
-  "mpm": {
-    "verbosity": "INFO"
-  }
+	"mpm": {
+		"verbosity": "INFO"
+	}
 }

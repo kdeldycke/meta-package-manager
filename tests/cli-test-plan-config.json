@@ -1,5 +1,5 @@
 {
-  "mpm": {
-    "verbosity": "INFO"
-  }
+	"mpm": {
+		"verbosity": "INFO"
+	}
 }

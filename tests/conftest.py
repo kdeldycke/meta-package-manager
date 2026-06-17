@@ -325,7 +325,3 @@ all_manager_ids_and_dummy_package = pytest.mark.parametrize(
     "manager_id,package_id",
     (param(*v, id=v[0]) for v in PACKAGE_IDS.items()),
 )
-available_managers_and_dummy_package = pytest.mark.parametrize(
-    "manager,package_id",
-    (param(m, PACKAGE_IDS[mid], id=mid) for mid, m in pool.items() if m.available),
-)

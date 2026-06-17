@@ -1,5 +1,10 @@
 # Changelog
 
+## [`6.6.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.6.0...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`6.6.0` (2026-06-17)](https://github.com/kdeldycke/meta-package-manager/compare/v6.5.1...v6.6.0)
 
 - **Breaking:** [mpm] Rename the global `--stats / --no-stats` flag to `--summary / --no-summary`. Scripts passing the old flag must update.

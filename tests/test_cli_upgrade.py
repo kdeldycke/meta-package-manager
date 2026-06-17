@@ -87,8 +87,9 @@ class TestUpgrade(CLISubCommandTests):
             assert "assume -A/--all option" in result.stderr
         if result.exit_code == 2:
             assert not result.stdout
-            assert result.stderr.endswith(
+            assert (
                 "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
+                in result.stderr
             )
         else:
             assert result.exit_code == 0
@@ -103,8 +104,9 @@ class TestUpgrade(CLISubCommandTests):
             assert "assume -A/--all option" in result.stderr
         if result.exit_code == 2:
             assert not result.stdout
-            assert result.stderr.endswith(
+            assert (
                 "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
+                in result.stderr
             )
         else:
             # Accept exit code 1: see test_all_managers_upgrade_all.

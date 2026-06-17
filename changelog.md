@@ -6,7 +6,7 @@
 > This version is **not released yet** and is under active development.
 
 - **Breaking:** [mpm] Rename the global `--stats / --no-stats` flag to `--summary / --no-summary`. Scripts passing the old flag must update.
-- **Breaking:** [mpm] Move `cyclonedx-python-lib` and `spdx-tools` into a new `[sbom]` extra: `mpm sbom` now requires `pip install meta-package-manager[sbom]`. `packageurl-python` stays in the runtime install.
+- **Breaking:** [mpm] Move `cyclonedx-python-lib` and `spdx-tools` into a new `[sbom]` extra: `mpm sbom` now requires `pip install meta-package-manager[sbom]`. `packageurl-python` stays in the runtime install. The standalone binary distribution keeps shipping SBOM support: `[tool.repomatic] nuitka.extras = ["sbom"]` syncs the extra into the build venv and `[tool.nuitka] include-package = ["cyclonedx", "spdx_tools"]` forces Nuitka to bundle the `try/except`-guarded imports.
 - [asdf] Add [asdf](https://asdf-vm.com) package manager (`installed`, `outdated`, `search`, `install`, `upgrade`, `upgrade_all`, `remove`, `sync`) on Linux and macOS; requires `asdf` `>=0.16.0`.
 - [mise] Add [mise](https://mise.jdx.dev) package manager (`installed`, `outdated`, `search`, `install`, `upgrade`, `upgrade_all`, `remove`, `sync`, `cleanup`), cross-platform; requires `mise` `>=2025.5.10`.
 - [mpm] Add the `--man` (roff man page) and `--accessible` (no ANSI or Unicode, for screen readers) global options from `click-extra`, and attach an `mpm-manpages.tar.gz` asset to each release.

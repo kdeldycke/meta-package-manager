@@ -184,14 +184,8 @@
 - cli_parameters: backup
   exit_code: 0
 
-# SBOM generation requires the [sbom] extra (cyclonedx-python-lib and
-# spdx-tools). The binary distribution mirrors a default `pip install
-# meta-package-manager` without extras, so `mpm sbom` exits with code 2 and
-# tells the user to install with `pip install meta-package-manager[sbom]`.
 - cli_parameters: sbom --spdx
-  exit_code: 2
-  stderr_contains: "SPDX SBOM generation requires the [sbom] extra"
+  exit_code: 0
 
 - cli_parameters: sbom --cyclonedx
-  exit_code: 2
-  stderr_contains: "CycloneDX SBOM generation requires the [sbom] extra"
+  exit_code: 0

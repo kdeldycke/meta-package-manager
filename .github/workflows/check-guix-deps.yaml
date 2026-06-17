@@ -39,14 +39,24 @@ jobs:
           # recover.
           for attempt in 1 2 3; do
             echo "guix pull attempt ${attempt}..."
-            if guix pull --channels=/tmp/channels.scm --disable-authentication --verbosity=0; then
-              break
+            if guix pull --channels=/tmp/channels.scm --disable-authentication --verbosity=0 > /tmp/guix-pull.log 2>&1; then
+              cat /tmp/guix-pull.log
+              echo "$HOME/.config/guix/current/bin" >> "$GITHUB_PATH"
+              exit 0
             fi
-            [ "${attempt}" -eq 3 ] && { echo "guix pull failed after 3 attempts"; exit 1; }
+            cat /tmp/guix-pull.log
+            [ "${attempt}" -eq 3 ] && break
             echo "retrying in 30s..."
             sleep 30
           done
-          echo "$HOME/.config/guix/current/bin" >> "$GITHUB_PATH"
+          # Surface the real Guile error behind the opaque "build of
+          # compute-guix-derivation.drv failed" so channel-compile failures are
+          # diagnosable from the log instead of guessed at.
+          echo "=== guix pull failed; dumping channel-compile build log ==="
+          drv=$(grep -oE "/gnu/store/[a-z0-9]+-compute-guix-derivation\.drv" /tmp/guix-pull.log | tail -1)
+          echo "failed derivation: ${drv:-<not found>}"
+          [ -n "${drv}" ] && guix log "${drv}" | tail -200
+          exit 1
 
       - name: Lint all new packages
         run: |

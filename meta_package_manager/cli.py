@@ -762,6 +762,10 @@ def mpm(
 
         The selection summary is logged on the first call only, so subcommands that
         never resolve the pool (like ``--help``) stay silent.
+
+        Callers may pass ``keep=<ids>`` to narrow the selection to a specific
+        subset (for example, the managers that implement a given operation).
+        When provided it overrides the global ``user_selection`` for that call.
         """
         nonlocal selection_logged
         if not selection_logged:
@@ -778,8 +782,9 @@ def mpm(
             else:
                 logging.info("Dropped managers: none.")
             selection_logged = True
+        keep = kwargs.pop("keep", user_selection)
         return pool.select_managers(
-            keep=user_selection,
+            keep=keep,
             drop=managers_to_remove,
             keep_deprecated=all_managers,
             # Should we include auto-update packages or not?

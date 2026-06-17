@@ -70,6 +70,7 @@ except ImportError:
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from typing import Any
 
     from ..manager import PackageManager
@@ -258,15 +259,13 @@ class CycloneDX(SBOM):
                 return out
         if parsed is not None:
             # Attach SPDX canonical URLs to each identifier inside the
-            # expression. ``parsed.symbols`` is the deduped symbol set
-            # produced by the ``license_expression`` parser; every
-            # ``LicenseRef-`` and unknown-symbol case has already been
-            # rejected by ``_parse_license_expression``. Sorting by key
-            # keeps the emitted ``details`` order deterministic across
-            # runs, independent of CycloneDX's internal ``SortedSet``.
-            identifiers = sorted(
-                {getattr(s, "key", None) or str(s) for s in parsed.symbols},
-            )
+            # expression. ``_parse_license_expression`` has already
+            # rejected every ``LicenseRef-`` and unknown-symbol case, so
+            # every leaf yielded here is a known SPDX identifier (license
+            # or exception). Sorting by key keeps the emitted ``details``
+            # order deterministic across runs, independent of CycloneDX's
+            # internal ``SortedSet``.
+            identifiers = sorted(set(CycloneDX._iter_spdx_identifiers(parsed)))
             details = tuple(
                 LicenseExpressionDetails(
                     license_identifier=ident,
@@ -278,6 +277,31 @@ class CycloneDX(SBOM):
         else:
             out.append(DisjunctiveLicense(name=candidate))
         return out
+
+    @staticmethod
+    def _iter_spdx_identifiers(node) -> Iterator[str]:
+        """Walk a ``license_expression`` AST and yield each leaf SPDX
+        identifier as a string.
+
+        ``parsed.symbols`` on the top-level expression collapses a
+        ``LicenseWithExceptionSymbol`` into a single symbol whose key is
+        the full ``"<license> WITH <exception>"`` string, which is not
+        the SPDX identifier of either component. Walk the AST instead:
+        ``LicenseWithExceptionSymbol`` exposes the license and exception
+        symbols separately; boolean nodes (``AND``/``OR``) expose
+        children via ``args``; bare ``LicenseSymbol`` instances expose
+        their identifier via ``key``. Duck-typed so this module does not
+        need an explicit import of ``license_expression``'s class
+        hierarchy.
+        """
+        if hasattr(node, "license_symbol") and hasattr(node, "exception_symbol"):
+            yield node.license_symbol.key
+            yield node.exception_symbol.key
+        elif hasattr(node, "key"):
+            yield node.key
+        else:
+            for arg in getattr(node, "args", ()):
+                yield from CycloneDX._iter_spdx_identifiers(arg)
 
     @staticmethod
     def _external_references_for(metadata: PackageMetadata) -> list:

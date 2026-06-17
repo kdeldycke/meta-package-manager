@@ -108,7 +108,9 @@ def test_changelog():
     content = PROJECT_ROOT.joinpath("changelog.md").read_text(encoding="utf-8")
     assert content.startswith("# Changelog\n")
 
-    entry_pattern = re.compile(r"^- \[(?P<category>[a-z0-9,\-]+)\] (?P<entry>.+)")
+    entry_pattern = re.compile(
+        r"^- (?:\*\*[A-Za-z]+:\*\* )?\[(?P<category>[a-z0-9,\-]+)\] (?P<entry>.+)"
+    )
 
     allowed_categories = {
         *pool.all_manager_ids,

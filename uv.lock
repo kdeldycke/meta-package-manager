@@ -12,7 +12,7 @@ exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for 
 exclude-newer-span = "P1W"
 
 [options.exclude-newer-package]
-click-extra = "2026-06-13T20:00:00Z"
+click-extra = "2026-06-14T00:00:00Z"
 
 [[package]]
 name = "accessible-pygments"
@@ -980,7 +980,7 @@ wheels = [
 
 [[package]]
 name = "meta-package-manager"
-version = "6.6.0.dev0"
+version = "6.6.1.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'" },

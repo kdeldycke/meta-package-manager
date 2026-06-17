@@ -1,9 +1,6 @@
 # Changelog
 
-## [`6.6.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.5.1...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`6.6.0` (2026-06-17)](https://github.com/kdeldycke/meta-package-manager/compare/v6.5.1...v6.6.0)
 
 - **Breaking:** [mpm] Rename the global `--stats / --no-stats` flag to `--summary / --no-summary`. Scripts passing the old flag must update.
 - **Breaking:** [mpm] Move `cyclonedx-python-lib` and `spdx-tools` into a new `[sbom]` extra: `mpm sbom` now requires `pip install meta-package-manager[sbom]`. `packageurl-python` stays in the runtime install. The standalone binary distribution keeps shipping SBOM support: `[tool.repomatic] nuitka.extras = ["sbom"]` syncs the extra into the build venv and `[tool.nuitka] include-package = ["cyclonedx", "spdx_tools"]` forces Nuitka to bundle the `try/except`-guarded imports.

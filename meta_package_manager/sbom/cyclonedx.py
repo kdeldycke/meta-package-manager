@@ -53,7 +53,11 @@ try:
     from cyclonedx.model.bom import Bom
     from cyclonedx.model.component import Component, ComponentType
     from cyclonedx.model.contact import OrganizationalContact, OrganizationalEntity
-    from cyclonedx.model.license import DisjunctiveLicense, LicenseExpression
+    from cyclonedx.model.license import (
+        DisjunctiveLicense,
+        LicenseExpression,
+        LicenseExpressionDetails,
+    )
     from cyclonedx.model.lifecycle import LifecyclePhase, PredefinedLifecycle
     from cyclonedx.output import make_outputter
     from cyclonedx.output.json import JsonV1Dot7
@@ -253,7 +257,24 @@ class CycloneDX(SBOM):
             else:
                 return out
         if parsed is not None:
-            out.append(LicenseExpression(value=candidate))
+            # Attach SPDX canonical URLs to each identifier inside the
+            # expression. ``parsed.symbols`` is the deduped symbol set
+            # produced by the ``license_expression`` parser; every
+            # ``LicenseRef-`` and unknown-symbol case has already been
+            # rejected by ``_parse_license_expression``. Sorting by key
+            # keeps the emitted ``details`` order deterministic across
+            # runs, independent of CycloneDX's internal ``SortedSet``.
+            identifiers = sorted(
+                {getattr(s, "key", None) or str(s) for s in parsed.symbols},
+            )
+            details = tuple(
+                LicenseExpressionDetails(
+                    license_identifier=ident,
+                    url=XsUri(f"https://spdx.org/licenses/{ident}.html"),
+                )
+                for ident in identifiers
+            )
+            out.append(LicenseExpression(value=candidate, details=details))
         else:
             out.append(DisjunctiveLicense(name=candidate))
         return out

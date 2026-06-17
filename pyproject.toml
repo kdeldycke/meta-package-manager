@@ -198,9 +198,12 @@ xml = [ "click-extra[xml]" ]
 # with `mpm[sbom]`.  cyclonedx-python-lib 11.4.0 is the first to expose the
 # CycloneDX 1.7 schema (`JsonV1Dot7`, `SchemaVersion.V1_7`) that
 # `meta_package_manager.sbom.CycloneDX` targets, and is also new enough to
-# support Python 3.14; spdx-tools 0.8.2 is the first version we used to
-# implement SPDX support.
-sbom = [ "cyclonedx-python-lib>=11.4", "spdx-tools>=0.8.2" ]
+# support Python 3.14; 11.9.0 introduced `LicenseExpression.details` for
+# per-identifier license-expression metadata (`LicenseExpressionDetails`),
+# which the renderer uses to attach canonical SPDX URLs to each identifier
+# inside a compound expression.  spdx-tools 0.8.2 is the first version we
+# used to implement SPDX support.
+sbom = [ "cyclonedx-python-lib>=11.9", "spdx-tools>=0.8.2" ]
 
 [project.scripts]
 mpm = "meta_package_manager.__main__:main"

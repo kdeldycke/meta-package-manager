@@ -412,6 +412,50 @@ def test_bundled_mode_cyclonedx_populates_rich_fields():
 
 
 @pytest.mark.parametrize(
+    ("expression", "expected_identifiers"),
+    (
+        # Two-license compound expression.
+        ("MIT AND Apache-2.0", ("Apache-2.0", "MIT")),
+        # License combined with an SPDX exception via WITH.
+        (
+            "MIT WITH Classpath-exception-2.0",
+            ("Classpath-exception-2.0", "MIT"),
+        ),
+        # Nested parenthesized expression with three identifiers.
+        (
+            "MIT OR (Apache-2.0 AND BSD-3-Clause)",
+            ("Apache-2.0", "BSD-3-Clause", "MIT"),
+        ),
+        # Duplicates in the source collapse to a single ``details`` entry.
+        ("MIT AND MIT", ("MIT",)),
+    ),
+)
+def test_cyclonedx_compound_license_expression_details(
+    expression, expected_identifiers
+):
+    """Compound expressions emit ``LicenseExpression.details`` with a
+    canonical SPDX URL per identifier, deduped and sorted by identifier.
+    """
+    c = CycloneDX()
+    c.init_doc()
+    c.set_scan_completeness(bundled=True)
+    manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
+    pkg = _make_package("brew", "curl", "8.9.0")
+    md = PackageMetadata(license_declared=expression, license_concluded=expression)
+    c.add_package(manager, pkg, md)
+    c.finalize()
+    doc = json.loads(c.export())
+    license_obj = doc["components"][0]["licenses"][0]
+    assert license_obj["expression"] == expression
+    details = license_obj["expressionDetails"]
+    assert tuple(d["licenseIdentifier"] for d in details) == expected_identifiers
+    assert tuple(d["url"] for d in details) == tuple(
+        f"https://spdx.org/licenses/{ident}.html" for ident in expected_identifiers
+    )
+    assert_valid_cyclonedx(c.export(), ExportFormat.JSON)
+
+
+@pytest.mark.parametrize(
     ("declared", "expected_present"),
     (
         # Plain SPDX IDs survive as-is.

@@ -443,7 +443,7 @@ toml = [
 
 [[package]]
 name = "cyclonedx-python-lib"
-version = "11.8.0"
+version = "11.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "license-expression" },
@@ -452,9 +452,9 @@ dependencies = [
     { name = "sortedcontainers" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/83/45/5ce2515e092656ada3959897681a24a7299f13638d4805de3d1fd9f91342/cyclonedx_python_lib-11.8.0.tar.gz", hash = "sha256:a8935b06dfe53d80efd47b5f6a202eb678cea00f2930e94e3710f2c1510166c9", size = 1422887, upload-time = "2026-06-04T10:38:27.885Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/33/86/3508db3dade17e1f8cfa289b7dd3df7c2f0401d8cf7ee186042bdb3ab003/cyclonedx_python_lib-11.9.0.tar.gz", hash = "sha256:5d3b54834bbdfa2538b0e7eeda243f43c136d0a324d175fd8d6ec8685ee81f3c", size = 1424867, upload-time = "2026-06-08T07:32:26.945Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/57/af/333ad82adec8121dae568f7d094a3b08ba485340cf19fe10674f2db14774/cyclonedx_python_lib-11.8.0-py3-none-any.whl", hash = "sha256:a326b575acbb3aa1040986307a4ae282ff27f99ffcbdfdaaf8de10ee85e97f01", size = 523911, upload-time = "2026-06-04T10:38:26.248Z" },
+    { url = "https://files.pythonhosted.org/packages/13/cd/8e671a62b18a946ea4923914030a68297cf3a50ac3bb169facc7b6c0d995/cyclonedx_python_lib-11.9.0-py3-none-any.whl", hash = "sha256:80620df4d11628458b7a17523b3f62be4663779babf51c82fe0ca7a32e3d0633", size = 524883, upload-time = "2026-06-08T07:32:25.094Z" },
 ]
 
 [package.optional-dependencies]
@@ -1067,7 +1067,7 @@ requires-dist = [
     { name = "click-extra", extras = ["toml"], marker = "extra == 'toml'" },
     { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'" },
     { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
-    { name = "cyclonedx-python-lib", marker = "extra == 'sbom'", specifier = ">=11.4" },
+    { name = "cyclonedx-python-lib", marker = "extra == 'sbom'", specifier = ">=11.9" },
     { name = "extra-platforms", specifier = ">=10" },
     { name = "packageurl-python", specifier = ">=0.16" },
     { name = "spdx-tools", marker = "extra == 'sbom'", specifier = ">=0.8.2" },

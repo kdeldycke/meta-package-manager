@@ -12,6 +12,9 @@
 
 ## [`6.6.0` (2026-06-17)](https://github.com/kdeldycke/meta-package-manager/compare/v6.5.1...v6.6.0)
 
+> [!NOTE]
+> `6.6.0` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/6.6.0/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v6.6.0).
+
 - **Breaking:** [mpm] Rename the global `--stats / --no-stats` flag to `--summary / --no-summary`. Scripts passing the old flag must update.
 - **Breaking:** [mpm] Move `cyclonedx-python-lib` and `spdx-tools` into a new `[sbom]` extra: `mpm sbom` now requires `pip install meta-package-manager[sbom]`. `packageurl-python` stays in the runtime install. The standalone binary distribution keeps shipping SBOM support: `[tool.repomatic] nuitka.extras = ["sbom"]` syncs the extra into the build venv and `[tool.nuitka] include-package = ["cyclonedx", "spdx_tools"]` forces Nuitka to bundle the `try/except`-guarded imports.
 - [asdf] Add [asdf](https://asdf-vm.com) package manager (`installed`, `outdated`, `search`, `install`, `upgrade`, `upgrade_all`, `remove`, `sync`) on Linux and macOS; requires `asdf` `>=0.16.0`.

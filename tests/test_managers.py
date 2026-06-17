@@ -52,11 +52,19 @@ def test_xkcd_set():
 
 @all_managers
 def test_deprecated(manager):
+    """A deprecated manager must document itself with a valid ``deprecation_url``.
+
+    Conversely, a ``deprecation_url`` is only meaningful on a deprecated manager.
+    """
+    if manager.deprecated:
+        assert manager.deprecation_url is not None, (
+            f"Deprecated manager {manager.id!r} must set a deprecation_url."
+        )
     if manager.deprecation_url is not None:
+        assert manager.deprecated is True
         location = URL(manager.deprecation_url)
         assert location
         assert location.scheme.lower() in ("http", "https")
-        assert manager.deprecated is True
 
 
 @all_managers

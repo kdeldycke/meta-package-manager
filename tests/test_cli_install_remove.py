@@ -24,7 +24,7 @@ from extra_platforms import is_linux
 
 from meta_package_manager.pool import pool
 
-from .conftest import all_manager_ids_and_dummy_package
+from .conftest import maintained_manager_ids_and_dummy_package
 from .test_cli import CLISubCommandTests
 
 
@@ -77,7 +77,7 @@ class TestInstallRemove(CLISubCommandTests):
         assert "Error: Missing argument 'PACKAGES_SPECS...'." in result.stderr
 
     @pytest.mark.destructive()
-    @all_manager_ids_and_dummy_package
+    @maintained_manager_ids_and_dummy_package
     def test_single_manager_install_and_remove(self, invoke, manager_id, package_id):
         """Test the installation and removal of a package with each manager.
 

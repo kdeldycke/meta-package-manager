@@ -115,23 +115,27 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     """
 
     deprecated: bool = False
-    """A manager marked as deprecated will be hidden from all package selection by
-    default.
+    """A manager marked as deprecated is hidden from package selection by default.
 
-    You can still use it but need to explicitly call for it on the command line.
+    You can still use it by explicitly calling for it on the command line.
 
-    Implementation of a deprecated manager will be kept within mpm source code, but some
-    of its features or total implementation are allowed to be scraped in the face of
-    maintenance pain and adversity.
+    A deprecated manager is exempt from the project stability policy: it may be dropped,
+    in part or in full, in any release and without notice, once keeping it working
+    becomes too burdensome. Every deprecation must be documented through
+    :py:attr:`deprecation_url`.
 
-    Integration tests and unittests for deprecated managers can be removed. We do not
-    care if a deprecated manager is not 100% reliable. A flakky deprecated manager
-    should not block a release due to flakky tests.
+    Deprecated managers are kept out of the functional and integration test matrices, so
+    an unreliable or flaky deprecated manager never blocks a release. The cheap static
+    invariants (ID format, attribute ordering, ...) still apply for as long as the
+    manager's code lives in the source tree, to keep that code valid.
     """
 
     deprecation_url: str | None = None
-    """Announcement from the official project or evidence of abandonment of
-    maintenance."""
+    """Announcement from the official project, or evidence of abandonment of maintenance.
+
+    Required for every manager whose :py:attr:`deprecated` flag is set, and only
+    meaningful on such managers. Enforced by ``test_deprecated``.
+    """
 
     id: str
     """Package manager's ID.

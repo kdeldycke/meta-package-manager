@@ -53,6 +53,14 @@ Which boils down to the following these rules of thumb regarding stability:
   Make no promises about backwards-compatibility. Any API change requires a new
   major release.
 
+- **Deprecated managers**: managers whose `deprecated` flag is set
+
+  Are exempt from the rules above. A deprecated manager may be removed, in part or in
+  full, in any release and without notice, once keeping it working becomes too
+  burdensome. Each deprecation is documented via the manager's `deprecation_url`, and
+  deprecated managers are kept out of the functional test matrices. See the `deprecated`
+  attribute in `meta_package_manager/manager.py` for the full policy.
+
 ## Build status
 
 [`main` branch](https://github.com/kdeldycke/meta-package-manager/tree/main):

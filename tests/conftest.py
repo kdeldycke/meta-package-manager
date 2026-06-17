@@ -321,7 +321,9 @@ manager_classes = pytest.mark.parametrize(  # type: ignore[assignment]
     ids=attrgetter("name"),
 )
 
-all_manager_ids_and_dummy_package = pytest.mark.parametrize(
+# Deprecated managers are excluded: their upstreams are unreliable or gone, so a real
+# install/remove would only contribute flakiness (see PackageManager.deprecated).
+maintained_manager_ids_and_dummy_package = pytest.mark.parametrize(
     "manager_id,package_id",
-    (param(*v, id=v[0]) for v in PACKAGE_IDS.items()),
+    (param(mid, PACKAGE_IDS[mid], id=mid) for mid in pool.maintained_manager_ids),
 )

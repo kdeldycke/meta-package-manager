@@ -51,8 +51,9 @@ from .base import SBOM, ExportFormat
 
 spdx_support = True
 try:
-    # type: ignore[import-untyped]
-    from spdx_tools.common.spdx_licensing import spdx_licensing
+    from spdx_tools.common.spdx_licensing import (  # type: ignore[import-untyped]
+        spdx_licensing,
+    )
     from spdx_tools.spdx.model import (
         Actor,
         ActorType,

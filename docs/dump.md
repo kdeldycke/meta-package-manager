@@ -128,11 +128,11 @@ Edit the file by hand to add VSCodium entries through a separate channel if you 
 
 ### `uv` mapping
 
-The Brewfile `uv` entry installs through `uv tool install`, the same path mpm's `uvx` manager wraps. `uvx` packages are included; the pip-style `uv` manager intentionally has no Brewfile mapping because its packages live inside a Python environment and would not round-trip through `brew bundle`.
+The Brewfile `uv` entry installs through `uv tool install`, the same path `mpm`'s `uvx` manager wraps. `uvx` packages are included; the pip-style `uv` manager intentionally has no Brewfile mapping because its packages live inside a Python environment and would not round-trip through `brew bundle`.
 
 ### Flatpak remote
 
-Brewfile's `flatpak` entry accepts a `with: ["remote_name"]` keyword for non-default remotes. mpm does not currently track the origin remote per installed flatpak, so the dump emits bare `flatpak "id"` lines; `brew bundle install` then resolves through `flathub`. Non-flathub flatpaks need to be edited in by hand after the dump.
+Brewfile's `flatpak` entry accepts a `with: ["remote_name"]` keyword for non-default remotes. `mpm` does not currently track the origin remote per installed flatpak, so the dump emits bare `flatpak "id"` lines; `brew bundle install` then resolves through `flathub`. Non-flathub flatpaks need to be edited in by hand after the dump.
 
 ## See also
 

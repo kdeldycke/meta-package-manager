@@ -12,7 +12,7 @@ exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for 
 exclude-newer-span = "P1W"
 
 [options.exclude-newer-package]
-click-extra = "2026-06-14T00:00:00Z"
+click-extra = "2026-06-13T20:00:00Z"
 
 [[package]]
 name = "accessible-pygments"

@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from functools import cached_property
 from operator import methodcaller
@@ -225,8 +226,7 @@ class Homebrew(PackageManager):
         except Exception as exc:  # noqa: BLE001
             # If the bulk query fails, fall back to empty metadata for
             # every package; the renderer will emit minimal entries.
-            logging_msg = f"brew info --json=v2 --installed failed: {exc}"
-            self._log_extractor_failure(logging_msg)
+            logging.debug(f"brew info --json=v2 --installed failed: {exc}")
             for package in package_list:
                 yield package, EMPTY_METADATA
             return
@@ -234,7 +234,7 @@ class Homebrew(PackageManager):
         try:
             payload = json.loads(output) if output else {}
         except json.JSONDecodeError as exc:
-            self._log_extractor_failure(f"brew info JSON decode failed: {exc}")
+            logging.debug(f"brew info JSON decode failed: {exc}")
             for package in package_list:
                 yield package, EMPTY_METADATA
             return
@@ -266,12 +266,6 @@ class Homebrew(PackageManager):
                 yield package, self._cask_metadata(cask)
             else:
                 yield package, EMPTY_METADATA
-
-    def _log_extractor_failure(self, message: str) -> None:
-        """Centralized debug log so the various failure paths read the same."""
-        import logging
-
-        logging.getLogger("meta_package_manager").debug(message)
 
     def _formula_metadata(self, formula: dict) -> PackageMetadata:
         """Map one entry from ``brew info --json=v2``'s ``formulae`` array
@@ -318,11 +312,7 @@ class Homebrew(PackageManager):
 
         license_str = formula.get("license")
 
-        download_url = None
-        urls_payload = formula.get("urls") or {}
-        stable_url = (urls_payload.get("stable") or {}).get("url")
-        if stable_url:
-            download_url = stable_url
+        download_url = ((formula.get("urls") or {}).get("stable") or {}).get("url")
 
         external_sbom_path = self._sbom_path_for_formula(
             formula.get("name"),

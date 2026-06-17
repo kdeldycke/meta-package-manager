@@ -14,6 +14,7 @@
    :maxdepth: 4
 
    meta_package_manager.managers
+   meta_package_manager.sbom
 ```
 
 ## Submodules
@@ -36,6 +37,15 @@
    :undoc-members:
 ```
 
+## meta_package_manager.brewfile module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.brewfile
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.capabilities module
 
 ```{eval-rst}
@@ -49,6 +59,24 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.cli
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.config module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.config
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.execution module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.execution
    :members:
    :show-inheritance:
    :undoc-members:
@@ -94,15 +122,6 @@
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.pool
-   :members:
-   :show-inheritance:
-   :undoc-members:
-```
-
-## meta_package_manager.sbom module
-
-```{eval-rst}
-.. automodule:: meta_package_manager.sbom
    :members:
    :show-inheritance:
    :undoc-members:

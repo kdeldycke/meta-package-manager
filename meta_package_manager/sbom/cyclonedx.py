@@ -467,10 +467,10 @@ class CycloneDX(SBOM):
             ``tests/test_cli_sbom.py``.
         """
         if self.export_format == ExportFormat.JSON:
-            return JsonV1Dot7(self.document).output_as_string(indent=2)
+            return str(JsonV1Dot7(self.document).output_as_string(indent=2))
 
         if self.export_format == ExportFormat.XML:
             writer = make_outputter(self.document, OutputFormat.XML, SchemaVersion.V1_7)
-            return writer.output_as_string(indent=2)
+            return str(writer.output_as_string(indent=2))
 
         raise ValueError(f"{self.export_format} not supported.")

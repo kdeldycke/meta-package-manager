@@ -76,7 +76,7 @@ These go under `[mpm]` (or `[tool.mpm]` in `pyproject.toml`):
 
 `cooldown` is a supply-chain safeguard: it refuses to install or upgrade any package version published more recently than the given age, giving a freshly-published (and possibly compromised) release time to be caught and pulled before it reaches the system.
 
-mpm enforces the cooldown through each manager's own release-age mechanism, so only managers that ship one are covered: `uv` and `uvx` (via `exclude-newer`), `npm` (via `min-release-age`), `pip` (via `--uploaded-prior-to`), and `pipx` (which inherits the pip setting). Managers without native support cannot honor the gate. By default they are skipped during install and upgrade (fail-closed), so nothing slips in unguarded. Pass `--allow-no-cooldown` (or set `allow_no_cooldown = true`) to run them anyway, without the safeguard. Read-only operations (`outdated`, `installed`, `search`) are never blocked.
+`mpm` enforces the cooldown through each manager's own release-age mechanism, so only managers that ship one are covered: `uv` and `uvx` (via `exclude-newer`), `npm` (via `min-release-age`), `pip` (via `--uploaded-prior-to`), and `pipx` (which inherits the pip setting). Managers without native support cannot honor the gate. By default they are skipped during install and upgrade (fail-closed), so nothing slips in unguarded. Pass `--allow-no-cooldown` (or set `allow_no_cooldown = true`) to run them anyway, without the safeguard. Read-only operations (`outdated`, `installed`, `search`) are never blocked.
 
 See {doc}`cooldown` for the full support matrix and the rationale.
 

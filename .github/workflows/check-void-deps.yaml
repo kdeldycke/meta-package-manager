@@ -22,6 +22,7 @@ env:
   # local hostdir repo overrides Void's stale binary at smoke-test time.
   PACKAGES: >-
     python3-boltons
+    python3-click
     python3-cloup
     python3-deepmerge
     python3-packageurl-python

@@ -32,6 +32,7 @@ import inspect
 from pathlib import Path
 from textwrap import dedent
 
+import tomlkit
 import yaml
 from click_extra.table import TableFormat, render_table
 from extra_platforms import Group, extract_members
@@ -265,27 +266,44 @@ def replace_content(
     )
 
 
-def write_labels() -> None:
-    """Write extra labels as a labelmaker TOML file for repomatic's ``sync-labels``."""
-    labels_dir = PROJECT_ROOT / "extra-labels"
-    labels_dir.mkdir(exist_ok=True)
-    toml_file = labels_dir / "mpm.toml"
+def update_labels() -> None:
+    """Sync the :data:`~meta_package_manager.labels.LABELS` registry into the
+    ``[tool.repomatic.labels.extra]`` block of ``pyproject.toml``.
 
-    entries = []
-    for label_name, color, description in LABELS:
-        # Strip leading '#' from color to match labelmaker/repomatic convention.
-        color = color.lstrip("#")
-        # Escape any backslashes and double-quotes in TOML strings.
-        name_escaped = label_name.replace("\\", "\\\\").replace('"', '\\"')
-        desc_escaped = description.replace("\\", "\\\\").replace('"', '\\"')
-        entries.append(
-            f"[[profiles.default.labels]]\n"
-            f'name = "{name_escaped}"\n'
-            f'color = "{color}"\n'
-            f'description = "{desc_escaped}"'
-        )
+    repomatic's ``sync-labels`` reads these inline definitions and applies them
+    to the GitHub repository at run time.
 
-    toml_file.write_text("\n\n".join(entries) + "\n")
+    .. note::
+        The edit is done with ``tomlkit`` round-trip so the rest of
+        ``pyproject.toml`` (comments, key order, formatting) is preserved: only
+        the ``extra`` array is regenerated. The per-entry layout matches what
+        ``pyproject-fmt`` emits, so the result survives the autofix formatting
+        pass without churn.
+    """
+    pyproject = PROJECT_ROOT / "pyproject.toml"
+    doc = tomlkit.parse(pyproject.read_text(encoding="UTF-8"))
+
+    extra = tomlkit.aot()
+    for name, color, description in LABELS:
+        entry = tomlkit.table()
+        entry["name"] = name
+        # labelmaker/repomatic expect the bare hex color, without leading '#'.
+        entry["color"] = color.lstrip("#")
+        entry["description"] = description
+        extra.append(entry)
+    doc["tool"]["repomatic"]["labels"]["extra"] = extra
+    # Separate the last entry from the following table with one blank line.
+    extra[-1]["description"].trivia.trail = "\n\n"
+
+    content = tomlkit.dumps(doc)
+    # tomlkit prefixes the inserted array-of-tables with two blank lines;
+    # collapse the section's leading separator to a single blank line.
+    content = content.replace(
+        "\n\n\n[[tool.repomatic.labels.extra]]",
+        "\n\n[[tool.repomatic.labels.extra]]",
+        1,
+    )
+    pyproject.write_text(content, encoding="UTF-8")
 
 
 def update_readme() -> None:
@@ -332,6 +350,6 @@ def update_benchmark() -> None:
 
 
 if __name__ == "__main__":
-    write_labels()
+    update_labels()
     update_readme()
     update_benchmark()

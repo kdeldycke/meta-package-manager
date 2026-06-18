@@ -252,6 +252,9 @@ docs = [
   "sphinx-issues>=5",
   "sphinxcontrib-mermaid>=1.2.3",
   "sphinxext-opengraph>=0.13",
+  # tomlkit round-trips pyproject.toml edits (preserving comments and layout)
+  # for the GitHub label sync in docs/docs_update.py.
+  "tomlkit>=0.13",
 ]
 typing = [
   "types-boltons>=25.0.0.20250919",
@@ -808,6 +811,216 @@ patterns = ["unix"]
 [[tool.repomatic.labels.content-rules]]
 label = "🖥 platform: Windows"
 patterns = ["windows", "c:", "microsoft"]
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: apk"
+color = "bfdadc"
+description = "apk"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: apm"
+color = "bfdadc"
+description = "apm"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: asdf"
+color = "bfdadc"
+description = "asdf"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: cargo"
+color = "bfdadc"
+description = "cargo"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: choco"
+color = "bfdadc"
+description = "choco"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: composer"
+color = "bfdadc"
+description = "composer"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: cpan"
+color = "bfdadc"
+description = "cpan"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: dpkg-based"
+color = "bfdadc"
+description = "apt, apt-mint, deb-get, opkg, pacstall"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: emerge"
+color = "bfdadc"
+description = "emerge"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: eopkg"
+color = "bfdadc"
+description = "eopkg"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: flatpak"
+color = "bfdadc"
+description = "flatpak"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: fwupd"
+color = "bfdadc"
+description = "fwupd"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: gem"
+color = "bfdadc"
+description = "gem"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: guix"
+color = "bfdadc"
+description = "guix"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: homebrew"
+color = "bfdadc"
+description = "brew, cask, zerobrew"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: macports"
+color = "bfdadc"
+description = "macports"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: mas"
+color = "bfdadc"
+description = "mas"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: mise"
+color = "bfdadc"
+description = "mise"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: mpm"
+color = "bfdadc"
+description = "mpm"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: nix"
+color = "bfdadc"
+description = "nix"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: npm-based"
+color = "bfdadc"
+description = "npm, yarn, yarn-berry"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: pacman-based"
+color = "bfdadc"
+description = "pacaur, pacman, paru, yay"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: pip-based"
+color = "bfdadc"
+description = "pip, pipx"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: pkg-based"
+color = "bfdadc"
+description = "pkg, ports"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: pwsh-gallery"
+color = "bfdadc"
+description = "pwsh-gallery"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: rpm-based"
+color = "bfdadc"
+description = "dnf, dnf5, yum, zypper"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: scoop-based"
+color = "bfdadc"
+description = "scoop, sfsu"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: sdkman"
+color = "bfdadc"
+description = "sdkman"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: snap"
+color = "bfdadc"
+description = "snap"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: steamcmd"
+color = "bfdadc"
+description = "steamcmd"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: stew"
+color = "bfdadc"
+description = "stew"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: topgrade"
+color = "bfdadc"
+description = "topgrade"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: uv-based"
+color = "bfdadc"
+description = "uv, uvx"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: vscode-based"
+color = "bfdadc"
+description = "vscode, vscodium"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: winget"
+color = "bfdadc"
+description = "winget"
+
+[[tool.repomatic.labels.extra]]
+name = "📦 manager: xbps"
+color = "bfdadc"
+description = "xbps"
+
+[[tool.repomatic.labels.extra]]
+name = "🔌 bar-plugin"
+color = "fef2c0"
+description = "Xbar/SwiftBar plugin code, documentation and features"
+
+[[tool.repomatic.labels.extra]]
+name = "🖥 platform: BSD"
+color = "bfd4f2"
+description = "DragonFly BSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD, SunOS"
+
+[[tool.repomatic.labels.extra]]
+name = "🖥 platform: Linux"
+color = "bfd4f2"
+description = "Alpine Linux, ALT Linux, Amazon Linux, Android, Arch Linux, Buildroot, CachyOS, CentOS, …"
+
+[[tool.repomatic.labels.extra]]
+name = "🖥 platform: macOS"
+color = "bfd4f2"
+description = "macOS"
+
+[[tool.repomatic.labels.extra]]
+name = "🖥 platform: Unix"
+color = "bfd4f2"
+description = "Cygwin, GNU/Hurd, Haiku, IBM AIX, IBM i, illumos, Solaris"
+
+[[tool.repomatic.labels.extra]]
+name = "🖥 platform: Windows"
+color = "bfd4f2"
+description = "Windows"
 
 [tool.gitleaks]
 allowlist.description = "False positives"

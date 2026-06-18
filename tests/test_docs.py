@@ -162,19 +162,18 @@ def test_new_package_manager_issue_template():
     assert template_platforms == reference_labels
 
 
-def test_extra_labels_toml():
-    """Check the generated extra-labels TOML file is consistent with LABELS registry."""
-    toml_path = PROJECT_ROOT / "extra-labels" / "mpm.toml"
-    content = toml_path.read_text(encoding="utf-8")
-    assert content
-
-    labels_data = tomllib.loads(content)
-    extra_labels = [lbl["name"] for lbl in labels_data["profiles"]["default"]["labels"]]
+def test_extra_labels_in_pyproject():
+    """Check the generated ``[tool.repomatic.labels.extra]`` block in
+    ``pyproject.toml`` is consistent with the ``LABELS`` registry."""
+    pyproject = PROJECT_ROOT / "pyproject.toml"
+    data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+    extra_labels = data["tool"]["repomatic"]["labels"]["extra"]
     assert extra_labels
 
+    names = [lbl["name"] for lbl in extra_labels]
     # Labels are unique.
-    assert len(extra_labels) == len(set(extra_labels))
-    canonical_labels = set(extra_labels)
+    assert len(names) == len(set(names))
+    canonical_labels = set(names)
 
     # Contains both manager and platform labels.
     canonical_managers = {
@@ -188,9 +187,13 @@ def test_extra_labels_toml():
     }
     assert canonical_platforms
 
-    # TOML file matches the in-memory LABELS registry.
-    registry_names = {name for name, _, _ in LABELS}
-    assert canonical_labels == registry_names
+    # The block matches the in-memory LABELS registry. Colors are stored
+    # without the leading '#', following the labelmaker/repomatic convention.
+    registry = {(name, color.lstrip("#"), desc) for name, color, desc in LABELS}
+    generated = {
+        (lbl["name"], lbl["color"], lbl["description"]) for lbl in extra_labels
+    }
+    assert generated == registry
 
 
 def test_benchmark_yaml_well_formed():

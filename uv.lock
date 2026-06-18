@@ -1036,6 +1036,7 @@ docs = [
     { name = "sphinx-issues" },
     { name = "sphinxcontrib-mermaid" },
     { name = "sphinxext-opengraph" },
+    { name = "tomlkit" },
 ]
 test = [
     { name = "click-extra", extra = ["pytest", "toml"] },
@@ -1090,6 +1091,7 @@ docs = [
     { name = "sphinx-issues", specifier = ">=5" },
     { name = "sphinxcontrib-mermaid", specifier = ">=1.2.3" },
     { name = "sphinxext-opengraph", specifier = ">=0.13" },
+    { name = "tomlkit", specifier = ">=0.13" },
 ]
 test = [
     { name = "click-extra", extras = ["pytest"] },

@@ -202,7 +202,7 @@ class TestSBOM(CLISubCommandTests):
             f"Export packages from {mid}..." in stderr,
             f"{mid} does not implement {Operations.installed}" in stderr,
             f"Skip {mid} manager:" in stderr,
-            f"Could not export packages from {mid}." in stderr,
+            f"Could not list installed packages from {mid}." in stderr,
         )
 
     def test_default_spdx_json_output_to_console(self, invoke, subcmd):

@@ -2,6 +2,8 @@
 
 The `installed`, `outdated`, and `search` subcommands render their results as a configurable table. The default is a Unicode-bordered box (`rounded`), but the `--table-format` global option lets you swap in any [serialization format supported by click-extra](https://kdeldycke.github.io/click-extra/table.html#table-formats), including JSON and CSV for downstream piping.
 
+`--table-format` is the ad-hoc piping corner of `mpm`'s data exports. For snapshotting the installed inventory in a re-installable shape, see {doc}`dump`; for a supply-chain inventory in SPDX or CycloneDX, see {doc}`sbom`.
+
 ## JSON
 
 ```shell-session

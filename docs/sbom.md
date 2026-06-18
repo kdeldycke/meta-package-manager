@@ -16,6 +16,8 @@ As a response to this crisis, [SBOM tools have now became a category of their ow
 | RDF XML   |            ✓             |                                    |
 | TAG VALUE |            ✓             |                                    |
 
+SBOM export is the compliance corner of `mpm`'s inventory exports: for re-installable snapshots see {doc}`dump`, and for ad-hoc JSON or CSV piping of a listing see {doc}`output-formats`.
+
 For example:
 
 ```shell-session
@@ -152,5 +154,6 @@ Without the extra, `mpm sbom` exits with an explanatory error pointing at this i
 
 ## See also
 
+- {doc}`output-formats` — JSON and CSV table exports for ad-hoc piping of `installed`, `outdated`, and `search` results.
 - {doc}`dump` — TOML manifest and Brewfile snapshots for re-installation workflows.
 - {doc}`cooldown` — release-age gates that complement the SBOM workflow on the install side.

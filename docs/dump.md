@@ -5,7 +5,7 @@
 - a **TOML manifest** that re-installs cleanly through {ref}`mpm restore <restore>`;
 - a **Brewfile** that [Homebrew Bundle](https://docs.brew.sh/Manpage#bundle-subcommand) can replay (a subset of managers only).
 
-Both flow from the same selected-manager set, so manager filters (`--brew`, `--cask`, `--apt`, ...) and the global `--manager` option apply uniformly. For supply-chain inventory work in [SPDX](https://spdx.dev) or [CycloneDX](https://cyclonedx.org) format, see {doc}`sbom`.
+Both flow from the same selected-manager set, so manager filters (`--brew`, `--cask`, `--apt`, ...) and the global `--manager` option apply uniformly. This is the re-install corner of `mpm`'s inventory exports: for ad-hoc JSON or CSV piping of a listing, see {doc}`output-formats`; for supply-chain inventory work in [SPDX](https://spdx.dev) or [CycloneDX](https://cyclonedx.org) format, see {doc}`sbom`.
 
 ## TOML manifest
 
@@ -136,6 +136,7 @@ Brewfile's `flatpak` entry accepts a `with: ["remote_name"]` keyword for non-def
 
 ## See also
 
+- {doc}`output-formats` — JSON and CSV table exports for ad-hoc piping of `installed`, `outdated`, and `search` results.
 - {doc}`sbom` — SPDX and CycloneDX SBOM exports for supply-chain inventory work.
 - {doc}`overrides` — per-manager `[mpm.managers.<id>]` config blocks and how to generate them with `mpm config-template`.
 - {doc}`cooldown` — release-age gates that complement the snapshot workflow on the install side.

@@ -46,7 +46,7 @@ from extra_platforms import (
     extract_members,
 )
 
-from .execution import CLIExecutor, highlight_cli_name
+from .execution import CLIError, CLIExecutor, highlight_cli_name
 from .package import EMPTY_METADATA, Package, PackageMetadata
 from .version import VersionRange
 
@@ -305,6 +305,25 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         Optional. Will be simply skipped by :program:`mpm` if not implemented.
         """
         raise NotImplementedError
+
+    def installed_or_empty(self) -> tuple[Package, ...]:
+        """Materialized :py:attr:`installed`, or an empty tuple on CLI failure.
+
+        Best-effort inventory snapshot for the ``installed``, ``dump`` and
+        ``sbom`` subcommands: each wants "give me what's installed, and just
+        skip this manager if its CLI blew up" rather than re-implementing the
+        same :py:class:`meta_package_manager.execution.CLIError` swallow. Logs
+        one canonical warning on error and returns ``()`` so the caller carries
+        on with the other managers.
+        """
+        try:
+            return tuple(self.installed)
+        except CLIError:
+            logging.warning(
+                f"Could not list installed packages "
+                f"from {theme().invoked_command(self.id)}.",
+            )
+            return ()
 
     @cached_property
     def installed_ids(self) -> frozenset[str]:

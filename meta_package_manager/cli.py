@@ -352,6 +352,38 @@ def prep_path(filepath: Path) -> IO | None:
     return filepath.open("w", encoding="UTF-8")
 
 
+def print_serialized_and_exit(ctx: Context, data: object) -> None:
+    """Render ``data`` in the active serialization format, then exit.
+
+    When the global ``--table-format`` resolves to one of the structured
+    serialization formats (JSON, YAML, TOML, XML, ...), serialize ``data`` under
+    the shared ``mpm`` root element and stop the program. Otherwise return, so
+    the caller falls through to its human-friendly table rendering.
+    """
+    table_format = ctx.meta["click_extra.table_format"]
+    if table_format in SERIALIZATION_FORMATS:
+        print_data(
+            data, table_format, root_element="mpm", package="meta-package-manager"
+        )
+        ctx.exit()
+
+
+def guard_existing_output(ctx: Context, output_path: Path, *, overwrite: bool) -> None:
+    """Block clobbering an existing output file unless ``overwrite`` is set.
+
+    Warns and exits with code 2 when ``output_path`` already exists and the user
+    did not pass ``--overwrite``/``--force``/``--replace``. No-op when the file
+    is absent. Callers handle the stdout case separately.
+    """
+    if output_path.exists():
+        msg = "Target file exist and will be overwritten."
+        if overwrite:
+            logging.warning(msg)
+        else:
+            logging.critical(msg)
+            ctx.exit(2)
+
+
 def update_manager_selection(
     ctx: Context, param: Parameter, value: str | Iterable[str] | bool | None
 ) -> None:
@@ -897,13 +929,7 @@ def managers(ctx):
                 {expt.error for expt in manager.cli_errors},
             )
 
-        print_data(
-            manager_data,
-            table_format,
-            root_element="mpm",
-            package="meta-package-manager",
-        )
-        ctx.exit()
+        print_serialized_and_exit(ctx, manager_data)
 
     # Human-friendly content rendering.
     table = []
@@ -988,14 +1014,7 @@ def installed(ctx, duplicates):
     )
 
     for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
-        try:
-            packages = tuple(packages_asdict(manager.installed, fields))
-        except CLIError:
-            logging.warning(
-                f"Could not list installed packages "
-                f"from {theme().invoked_command(manager.id)}."
-            )
-            packages = ()
+        packages = tuple(packages_asdict(manager.installed_or_empty(), fields))
 
         installed_data[manager.id] = {
             "id": manager.id,
@@ -1031,15 +1050,7 @@ def installed(ctx, duplicates):
             manager_data["packages"] = duplicate_packages
 
     # Machine-friendly data rendering.
-    table_format = ctx.meta["click_extra.table_format"]
-    if table_format in SERIALIZATION_FORMATS:
-        print_data(
-            installed_data,
-            table_format,
-            root_element="mpm",
-            package="meta-package-manager",
-        )
-        ctx.exit()
+    print_serialized_and_exit(ctx, installed_data)
 
     # Human-friendly content rendering.
     table = []
@@ -1121,15 +1132,7 @@ def outdated(ctx, plugin_output):
         )
 
     # Machine-friendly data rendering.
-    table_format = ctx.meta["click_extra.table_format"]
-    if table_format in SERIALIZATION_FORMATS:
-        print_data(
-            outdated_data,
-            table_format,
-            root_element="mpm",
-            package="meta-package-manager",
-        )
-        ctx.exit()
+    print_serialized_and_exit(ctx, outdated_data)
 
     # Xbar/SwiftBar-friendly plugin rendering.
     if plugin_output:
@@ -1245,12 +1248,7 @@ def search(ctx, extended, exact, refilter, query):
         )
 
     # Machine-friendly data rendering.
-    table_format = ctx.meta["click_extra.table_format"]
-    if table_format in SERIALIZATION_FORMATS:
-        print_data(
-            matches, table_format, root_element="mpm", package="meta-package-manager"
-        )
-        ctx.exit()
+    print_serialized_and_exit(ctx, matches)
 
     # Prepare highlighting helpers.
     query_parts = {query}.union(PackageManager.query_parts(query))
@@ -1324,10 +1322,7 @@ def which(ctx, cli_names):
             }
             for manager in ctx.obj.selected_managers()
         ]
-        print_data(
-            cli_data, table_format, root_element="mpm", package="meta-package-manager"
-        )
-        ctx.exit()
+        print_serialized_and_exit(ctx, cli_data)
 
     # Print table.
     table = []
@@ -1904,12 +1899,7 @@ def dump(
             logging.info(f"Print Brewfile to {sys.stdout.name}")
         else:
             logging.info(f"Dump installed packages as a Brewfile into {output_path}")
-            if output_path.exists():
-                if overwrite:
-                    logging.warning("Target file exist and will be overwritten.")
-                else:
-                    logging.critical("Target file exist and will be overwritten.")
-                    ctx.exit(2)
+            guard_existing_output(ctx, output_path, overwrite=overwrite)
         _dump_brewfile(ctx, output_path, include_header=include_header)
         return
 
@@ -2003,14 +1993,7 @@ def _dump_toml(
         logging.info(
             f"Dumping packages from {theme().invoked_command(manager.id)}...",
         )
-        try:
-            packages = tuple(packages_asdict(manager.installed, fields))
-        except CLIError:
-            logging.warning(
-                f"Could not list installed packages from "
-                f"{theme().invoked_command(manager.id)}.",
-            )
-            packages = ()
+        packages = tuple(packages_asdict(manager.installed_or_empty(), fields))
         for pkg in packages:
             if update_version:
                 if pkg["id"] in installed_data.get(manager.id, {}):
@@ -2197,13 +2180,7 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, export_path):
 
     else:
         logging.info(f"Export installed packages in {standard} to {export_path}")
-        if export_path.exists():
-            msg = "Target file exist and will be overwritten."
-            if overwrite:
-                logging.warning(msg)
-            else:
-                logging.critical(msg)
-                ctx.exit(2)
+        guard_existing_output(ctx, export_path, overwrite=overwrite)
 
     # <stdout> format defaults to JSON.
     if is_stdout(export_path):
@@ -2256,12 +2233,8 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, export_path):
 
     for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
         logging.info(f"Export packages from {theme().invoked_command(manager.id)}...")
-        try:
-            installed_packages = list(manager.installed)
-        except CLIError:
-            logging.warning(
-                f"Could not export packages from {theme().invoked_command(manager.id)}."
-            )
+        installed_packages = manager.installed_or_empty()
+        if not installed_packages:
             continue
 
         if not bundled:

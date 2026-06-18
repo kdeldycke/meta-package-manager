@@ -24,6 +24,7 @@ import pytest
 
 # Pre-load invocation helpers to be used as pytest's fixture.
 from click_extra.pytest import create_config, extra_runner  # noqa: F401
+from extra_platforms.pytest import skip_guix_build
 from pytest import fixture, param
 
 from meta_package_manager.cli import mpm
@@ -105,7 +106,8 @@ def solve_destructive_options(config: Config) -> tuple[bool, bool]:
 
 
 def pytest_collection_modifyitems(config, items):
-    """Either skip or run destructive tests based on command line options."""
+    """Apply collection-time skips: destructive-test selection from the command
+    line, plus a Guix-build skip for the manager and CLI integration tests."""
     run_destructive, run_non_destructive = solve_destructive_options(config)
 
     # Skip destructive tests.
@@ -121,6 +123,15 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "destructive" not in item.keywords:
                 item.add_marker(skip_non_destructive)
+
+    # Integration tests drive real package managers (``test_manager_*``) or the
+    # ``mpm`` CLI end-to-end (``test_cli*``), neither of which exists in a
+    # hermetic build sandbox. Mark them to skip inside a Guix build (detected by
+    # ``extra_platforms`` via ``HOME=/homeless-shelter``) so downstream
+    # packagers can run the whole suite instead of ignoring entire modules.
+    for item in items:
+        if item.path.name.startswith(("test_manager_", "test_cli")):
+            item.add_marker(skip_guix_build)
 
 
 def pytest_report_header(config: Config, start_path: Path) -> tuple[str, ...]:

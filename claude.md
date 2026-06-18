@@ -123,15 +123,16 @@ Sequential order is recommended as most package managers don't support concurren
 
 ### Note for downstream packagers
 
-The mpm test suite is integration-oriented and is **not designed to run inside build sandboxes**. Tests invoke real package managers (`apt`, `brew`, `pip`, `npm`, and ~30 others), make network calls, and assume a writable `$HOME`. None of this is reproducible inside a hermetic builder (Guix, Nixpkgs, Debian buildd, RPM mock, etc.).
+The mpm test suite has two layers:
 
-Distributors should disable the test suite at package-build time:
+- A **hermetic unit layer** (`test_cooldown`, `test_docs`, `test_managers`, `test_output`, `test_pool`, `test_specifier`, `test_version`) that needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox; its only extra build dependency is `pyyaml`, imported by `tests/test_docs.py`.
+- An **integration layer** (`tests/test_manager_*.py`, `tests/test_cli*.py`) that drives the ~30 real package managers (`apt`, `brew`, `pip`, `npm`, and more) and the `mpm` CLI end-to-end. These cannot run in a hermetic builder.
 
-- **Guix**: `#:tests? #f` (see [`gnu/packages/package-management.scm` in the upstream Guix tree](https://codeberg.org/guix/guix/pulls/8047))
-- **Nixpkgs**: `doCheck = false`
-- **Debian**: `nocheck` in `debian/rules`
+As of mpm > `6.6.0`, the integration layer **auto-skips when `$HOME` is `/homeless-shelter`** — the build-sandbox convention shared by Guix and Nix — via `extra_platforms.pytest.skip_guix_build` (wired up in `tests/conftest.py`). Those distributors can therefore run the whole `pytest` suite unmodified: just make `pyyaml` available and **do not override `$HOME`** in the package definition, or the auto-skip stops firing and the integration tests fail.
 
-The `sanity-check` phase (or its equivalent) is sufficient to validate that the package imports cleanly and its declared dependencies resolve. Functional verification is covered by [the project's own GitHub Actions CI](https://github.com/kdeldycke/meta-package-manager/actions), where the appropriate package managers are pre-installed.
+Builders that keep a writable `$HOME` (Debian buildd, RPM mock, etc.) must either disable the suite (`nocheck`, `doCheck = false`, and similar) or ignore the integration modules with `pytest --ignore-glob='tests/test_manager_*.py' --ignore-glob='tests/test_cli*.py'`.
+
+Running only the `sanity-check` phase (or its equivalent) stays a valid minimal option: it confirms the package imports cleanly and its declared dependencies resolve. Full functional verification of the integration layer is covered by [the project's own GitHub Actions CI](https://github.com/kdeldycke/meta-package-manager/actions), where the package managers are pre-installed.
 
 The `--skip-destructive` and `pytest -m "not destructive"` markers exist for *developer* environments where some package managers are present but mutating them would be undesirable. They do not make the suite hermetic.
 

@@ -663,6 +663,13 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         help="Show package description in results.",
     ),
     option(
+        "--progress/--no-progress",
+        default=True,
+        help="Show a progress spinner on stderr while a manager CLI call runs. "
+        "Automatically suppressed for serialized output, at DEBUG verbosity, "
+        "without colors, and when stderr is not a terminal.",
+    ),
+    option(
         "-s",
         "--sort-by",
         type=EnumChoice(SortableField),
@@ -712,6 +719,7 @@ def mpm(
     cooldown,
     require_cooldown_support,
     description,
+    progress,
     sort_by,
     summary,
     suggest_contribs,
@@ -736,6 +744,18 @@ def mpm(
             logging.disable(logging.NOTSET)
 
         ctx.call_on_close(remove_logging_override)
+
+    # Allow a progress spinner during long CLI calls only when --progress is on
+    # (the default) and the run is interactive and human-facing: never in serialized
+    # output, at DEBUG verbosity (logs already narrate), or when color/ANSI is off
+    # (which also covers --accessible). The TTY check itself is left to the spinner
+    # (see CLIExecutor._make_spinner).
+    show_progress = (
+        progress
+        and ctx.color is not False
+        and ctx.meta["click_extra.table_format"] not in SERIALIZATION_FORMATS
+        and ctx.meta["click_extra.verbosity"] != "DEBUG"
+    )
 
     # Apply per-manager attribute overrides from [mpm.managers.<id>] sections of
     # the config file, before any subcommand observes the pool. Also collects any
@@ -830,6 +850,7 @@ def mpm(
             stop_on_error=stop_on_error,
             dry_run=dry_run,
             timeout=timeout,
+            progress=show_progress,
             # Minimum release age gate and its fail-open escape hatch.
             cooldown=cooldown,
             require_cooldown_support=require_cooldown_support,

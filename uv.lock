@@ -252,8 +252,8 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "7.19.0"
-source = { registry = "https://pypi.org/simple" }
+version = "7.21.0.dev0"
+source = { git = "https://github.com/kdeldycke/click-extra.git?branch=main#fe63be6b4e1a28b2154e5beca06847652068828b" }
 dependencies = [
     { name = "boltons" },
     { name = "click" },
@@ -264,10 +264,6 @@ dependencies = [
     { name = "tabulate", extra = ["widechars"] },
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "wcmatch" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/a6/83/ebc4b72d81720be9fb21c21158d6d9bcfd4927155fd203c9a16bba55ea2b/click_extra-7.19.0.tar.gz", hash = "sha256:886eeb46979749214ef776a52886dbbac8b3fd43d2698709581c4180d5ef2f44", size = 212376, upload-time = "2026-06-12T10:25:25.485Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/8f/2e/7f59b0274af9ce0357cee5c9a50f73cf12e078507f7b24c96573c58277e1/click_extra-7.19.0-py3-none-any.whl", hash = "sha256:2829462a4faf6ffa7122634ae26d5af0fc233b8a5dc47b869b09f8f4dbcda273", size = 232233, upload-time = "2026-06-12T10:25:23.671Z" },
 ]
 
 [package.optional-dependencies]
@@ -1061,13 +1057,13 @@ typing = [
 requires-dist = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'", specifier = ">=1.3" },
     { name = "boltons", specifier = ">=25" },
-    { name = "click-extra", specifier = ">=7.19" },
-    { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'" },
-    { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'" },
-    { name = "click-extra", extras = ["jsonc"], marker = "extra == 'jsonc'" },
-    { name = "click-extra", extras = ["toml"], marker = "extra == 'toml'" },
-    { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'" },
-    { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
+    { name = "click-extra", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["jsonc"], marker = "extra == 'jsonc'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["toml"], marker = "extra == 'toml'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
     { name = "cyclonedx-python-lib", marker = "extra == 'sbom'", specifier = ">=11.9" },
     { name = "extra-platforms", specifier = ">=10" },
     { name = "packageurl-python", specifier = ">=0.16" },
@@ -1080,7 +1076,7 @@ provides-extras = ["toml", "yaml", "json5", "jsonc", "hjson", "xml", "sbom"]
 
 [package.metadata.requires-dev]
 docs = [
-    { name = "click-extra", extras = ["sphinx"] },
+    { name = "click-extra", extras = ["sphinx"], git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
     { name = "furo", specifier = ">=2025.9.25" },
     { name = "myst-parser", specifier = ">=4" },
     { name = "sphinx" },
@@ -1094,8 +1090,8 @@ docs = [
     { name = "tomlkit", specifier = ">=0.13" },
 ]
 test = [
-    { name = "click-extra", extras = ["pytest"] },
-    { name = "click-extra", extras = ["toml"] },
+    { name = "click-extra", extras = ["pytest"], git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["toml"], git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
     { name = "coverage", extras = ["toml"], specifier = ">=7.12" },
     { name = "cyclonedx-python-lib", extras = ["validation"] },
     { name = "extra-platforms" },

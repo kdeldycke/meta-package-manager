@@ -164,6 +164,10 @@ dependencies = [
   # `render_html` HTML siblings via mandoc/groff) and the
   # `{click-extra-manpages}` directive that powers the live man-page index
   # in docs/cli-parameters.md, plus the `manpages_url` cross-linking target.
+  # meta_package_manager.execution uses click_extra.Spinner (added on click-extra
+  # main after 7.19.0, shipping in the next release) for the progress spinner
+  # during long CLI calls. Until that release the [tool.uv.sources] git pin below
+  # supplies it; bump this floor to the releasing version and drop the pin then.
   "click-extra>=7.19",
   # extra-platforms 10.0.0 drops the distro dependency.
   "extra-platforms>=10",
@@ -279,6 +283,13 @@ exclude-newer = "1 week"
 exclude-newer-package = { click-extra = "2026-06-13" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
+
+[tool.uv.sources]
+# Track click-extra main for the unreleased Spinner widget (see the click-extra
+# entry in [project.dependencies]). Drop once a release ships it. This is dev-only
+# metadata: it is stripped from the published sdist/wheel, which keeps the plain
+# `click-extra` version constraint for downstream packagers.
+click-extra = { git = "https://github.com/kdeldycke/click-extra.git", branch = "main" }
 
 [tool.nuitka]
 product-name = "Meta Package Manager"

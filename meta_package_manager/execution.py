@@ -48,6 +48,7 @@ from unittest.mock import patch
 from boltons.iterutils import unique
 from boltons.strutils import strip_ansi
 from click_extra.envvar import env_copy
+from click_extra.spinner import Spinner
 from click_extra.testing import INDENT, args_cleanup, format_cli_prompt
 from click_extra.theme import get_current_theme as theme
 from extra_platforms import UNIX, current_platform, is_any_windows
@@ -170,6 +171,14 @@ plus the special ``"version"`` detection probe. The keys are validated against t
 absent from this map resolves to :py:data:`DEFAULT_TIMEOUT`.
 """
 
+SPINNER_DELAY: Final = 1.0
+"""Seconds a CLI call must run before its progress spinner appears.
+
+Short calls (most version probes and metadata queries) finish before this delay,
+so the spinner stays silent and only surfaces once an operation is genuinely slow:
+the long ``guix search`` and source builds that motivated it.
+"""
+
 
 class CLIExecutor:
     """Locate a manager's CLI on the system and run it.
@@ -281,6 +290,15 @@ class CLIExecutor:
     just before the manager is handed to a subcommand, and by the :py:attr:`version`
     probe. Consumed by :py:meth:`_resolve_timeout` to pick a per-operation default.
     ``None`` (no known operation) falls back to :py:data:`DEFAULT_TIMEOUT`.
+    """
+
+    progress: bool = False
+    """Whether CLI calls may show a progress spinner while they block.
+
+    Set by the CLI to an interactive, human-facing run only (a TTY, no serialized
+    output, not at DEBUG verbosity). Even when ``True`` the spinner still
+    self-suppresses off a TTY: see :py:meth:`_make_spinner`. Defaults to ``False``
+    so programmatic use stays silent.
     """
 
     cooldown: timedelta | None = None
@@ -592,6 +610,24 @@ class CLIExecutor:
             return DEFAULT_TIMEOUT
         return OPERATION_TIMEOUTS.get(self._active_operation, DEFAULT_TIMEOUT)
 
+    def _make_spinner(self) -> Spinner:
+        """Build a (not-yet-started) progress spinner for the current CLI call.
+
+        The label combines the manager ID and the active operation, so a slow call
+        reads like the command it runs (``guix search``, ``brew install``). The
+        spinner is disabled unless :py:attr:`progress` is set; even then it only
+        animates on a TTY (see :py:class:`click_extra.Spinner`), so it stays silent
+        when output is piped or captured.
+        """
+        manager_id = self.id  # type: ignore[attr-defined]
+        operation = self._active_operation
+        label = f"{manager_id} {operation}" if operation else str(manager_id)
+        return Spinner(
+            label,
+            delay=SPINNER_DELAY,
+            enabled=None if self.progress else False,
+        )
+
     def run(
         self,
         *args: TArg | TNestedArgs,
@@ -688,6 +724,8 @@ class CLIExecutor:
                 raise
             logging.debug(f"Spawned PID {proc.pid}: {clean_args[0]}.")
             effective_timeout = self._resolve_timeout()
+            spinner = self._make_spinner()
+            spinner.start()
             try:
                 logging.debug(
                     f"Waiting for PID {proc.pid} (timeout={effective_timeout}s).",
@@ -706,6 +744,8 @@ class CLIExecutor:
                             check=False,
                         )
             except subprocess.TimeoutExpired:
+                # Erase the spinner before the timeout warning is logged.
+                spinner.stop()
                 logging.debug(f"PID {proc.pid} timed out; sending kill.")
                 if is_any_windows():
                     # Grandchild processes (e.g. installer EXEs spawned by
@@ -738,6 +778,8 @@ class CLIExecutor:
                 self.cli_errors.append(exception)
                 return ""
             except KeyboardInterrupt:
+                # Erase the spinner before the interrupt warning is logged.
+                spinner.stop()
                 logging.debug(f"PID {proc.pid} interrupted; sending kill.")
                 proc.kill()
                 proc.communicate()
@@ -746,6 +788,9 @@ class CLIExecutor:
                 exception = CLIError(None, "", msg)
                 self.cli_errors.append(exception)
                 return ""
+            finally:
+                # Safety net: stop on the success path and on any other exit.
+                spinner.stop()
             code = proc.returncode
             output = stdout or ""
             error = stderr or ""

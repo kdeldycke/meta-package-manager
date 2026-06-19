@@ -24,6 +24,7 @@ from meta_package_manager.execution import (
     MUTATING_TIMEOUT,
     OPERATION_TIMEOUTS,
     READ_ONLY_TIMEOUT,
+    SPINNER_DELAY,
 )
 
 from .fake_manager import FakeManager
@@ -82,3 +83,35 @@ def test_resolve_timeout_unknown_operation_falls_back_to_default():
     manager.timeout = None
     manager._active_operation = None
     assert manager._resolve_timeout() == DEFAULT_TIMEOUT
+
+
+def test_make_spinner_disabled_without_progress():
+    """Without the progress opt-in, the spinner is forced off."""
+    manager = FakeManager()
+    manager.progress = False
+    assert manager._make_spinner().enabled is False
+
+
+def test_make_spinner_defers_to_tty_with_progress():
+    """With progress on, the spinner is left to auto-detect a TTY at runtime."""
+    manager = FakeManager()
+    manager.progress = True
+    assert manager._make_spinner().enabled is None
+
+
+def test_make_spinner_label_includes_manager_and_operation():
+    manager = FakeManager()
+    manager._active_operation = "search"
+    label = manager._make_spinner().label
+    assert manager.id in label
+    assert "search" in label
+
+
+def test_make_spinner_label_without_operation():
+    manager = FakeManager()
+    manager._active_operation = None
+    assert manager._make_spinner().label == str(manager.id)
+
+
+def test_make_spinner_uses_configured_delay():
+    assert FakeManager()._make_spinner().delay == SPINNER_DELAY

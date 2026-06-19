@@ -9,7 +9,7 @@ name: 🚀 Build & release
 jobs:
 
   build:
-    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@9b9fa8a1d838c1f28bb9d0bb82fa67084b8a2ca7 # v6.26.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@a6458162963b57814a69421fed1f969cbbe1d2b6 # v6.28.0
 
   publish-pypi:
     name: 🐍 Publish to PyPI (${{ matrix.short_sha }})
@@ -33,7 +33,7 @@ jobs:
       # Lets the admonition step below edit the published release notes.
       contents: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@9b9fa8a1d838c1f28bb9d0bb82fa67084b8a2ca7 # v6.26.0
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@a6458162963b57814a69421fed1f969cbbe1d2b6 # v6.28.0
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
       # Backfill the "available on PyPI" admonition onto the release notes after a successful OIDC upload. The engine
@@ -51,7 +51,7 @@ jobs:
           --repo "${{ github.repository }}" <<< "${RELEASE_NOTES}"
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@9b9fa8a1d838c1f28bb9d0bb82fa67084b8a2ca7 # v6.26.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@a6458162963b57814a69421fed1f969cbbe1d2b6 # v6.28.0
     needs: build
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}

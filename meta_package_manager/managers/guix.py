@@ -143,6 +143,18 @@ class Guix(PackageManager):
             :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`
             refine them.
 
+        .. caution::
+            ``guix search`` loads and evaluates every package definition to
+            match the query against each package's name, synopsis, and
+            description, so it is inherently slow: its cost scales with the
+            size of the package set, not the number of results. A single
+            search runs for tens of seconds on a freshly pulled Guix, and far
+            longer from an in-tree dev checkout that recompiles modules on the
+            fly. The call is bounded by :option:`mpm --timeout`; when that is
+            unset, ``search`` uses the 120s read-only default, past which the
+            process is killed and no results are returned, so a slow search can
+            look like a hang.
+
         Results are printed in recutils format with records separated by blank
         lines.
 

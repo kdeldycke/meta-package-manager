@@ -170,6 +170,10 @@ def _patch_pool_with(monkeypatch, fake):
         for option in ManagerPool.ALLOWED_EXTRA_OPTION:
             if option in kwargs:
                 setattr(fake, option, kwargs[option])
+        # Mirror the per-operation stamping done by the real _select_managers so
+        # CLI tests resolve timeouts the same way production does.
+        op = kwargs.get("implements_operation")
+        fake._active_operation = op.name if op else None
         yield fake
 
     monkeypatch.setattr(pool, "select_managers", fake_select_managers)

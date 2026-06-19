@@ -342,6 +342,14 @@ class ManagerPool:
                     continue
                 setattr(manager, param, value)
 
+            # Tag the operation this manager is about to perform so its CLI calls
+            # can resolve a per-operation timeout when the user set no explicit one
+            # (see CLIExecutor._resolve_timeout). The matching subcommand runs right
+            # after the manager is yielded.
+            manager._active_operation = (
+                implements_operation.name if implements_operation else None
+            )
+
             yield manager
 
     def select_managers(self, *args, **kwargs) -> Iterator[PackageManager]:

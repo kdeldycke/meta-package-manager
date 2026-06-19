@@ -624,8 +624,12 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         "-t",
         "--timeout",
         type=IntRange(min=0),
-        default=500,
-        help="Set maximum duration in seconds for each CLI call.",
+        default=None,
+        help="Maximum duration in seconds for each CLI call. Applies to every "
+        "manager and operation. When unset, a per-operation default is used "
+        "instead: a short cap for read-only queries (installed, outdated, search) "
+        "and a longer one for state-changing operations (install, upgrade, remove, "
+        "sync, cleanup).",
     ),
     option(
         "--cooldown",

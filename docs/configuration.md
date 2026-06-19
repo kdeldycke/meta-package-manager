@@ -60,7 +60,7 @@ These go under `[mpm]` (or `[tool.mpm]` in `pyproject.toml`):
 | Key                        | Type    | Default             | Description                                                                                                         |
 | :------------------------- | :------ | :------------------ | :------------------------------------------------------------------------------------------------------------------ |
 | `verbosity`                | string  | `"INFO"`            | Logging level: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, or `DEBUG`.                                                  |
-| `timeout`                  | integer | `500`               | Maximum duration in seconds for each manager CLI call.                                                              |
+| `timeout`                  | integer | per-operation       | Maximum duration in seconds for each manager CLI call. When unset, a per-operation default applies: `120` for read-only queries (`installed`, `outdated`, `search`) and `500` for state-changing operations (`install`, `upgrade`, `remove`, `sync`, `cleanup`). A set value overrides every operation. |
 | `ignore_auto_updates`      | boolean | `true`              | Exclude auto-updating packages from outdated/upgrade results.                                                       |
 | `stop_on_error`            | boolean | `false`             | Stop on first manager CLI error instead of continuing.                                                              |
 | `dry_run`                  | boolean | `false`             | Simulate CLI calls without performing any action.                                                                   |

@@ -42,7 +42,7 @@ from datetime import datetime, timezone
 from functools import cached_property
 from pathlib import Path
 from textwrap import dedent, indent, shorten
-from typing import ClassVar, cast
+from typing import ClassVar, Final, cast
 from unittest.mock import patch
 
 from boltons.iterutils import unique
@@ -122,6 +122,53 @@ def highlight_cli_name(path: Path | None, match_names: Iterable[str]) -> str | N
             break
 
     return f"{path.parent}{os.path.sep}{highlighted_name}"
+
+
+READ_ONLY_TIMEOUT: Final = 120
+"""Default timeout (seconds) for read-only probes and queries.
+
+These operations only inspect state, so a short cap lets a wedged binary fail fast
+instead of stalling the whole run. The value is generous enough for legitimately
+slow scans (a freshly-pulled ``guix search`` walking every package's metadata)
+while still being far below :py:data:`MUTATING_TIMEOUT`.
+"""
+
+MUTATING_TIMEOUT: Final = 500
+"""Default timeout (seconds) for operations that change system state.
+
+Installs, upgrades, removals, channel syncs and cleanups routinely build from
+source, download large archives or pull entire channels, so they need a long cap.
+Kept identical to the historical global default so these operations behave exactly
+as before when no explicit ``--timeout`` is given.
+"""
+
+DEFAULT_TIMEOUT: Final = MUTATING_TIMEOUT
+"""Fallback timeout (seconds) for a CLI call whose operation is unknown.
+
+Defaults to the conservative :py:data:`MUTATING_TIMEOUT`: when in doubt, wait
+rather than risk killing a legitimate long-running command.
+"""
+
+OPERATION_TIMEOUTS: Final[dict[str, int]] = {
+    "version": READ_ONLY_TIMEOUT,
+    "installed": READ_ONLY_TIMEOUT,
+    "outdated": READ_ONLY_TIMEOUT,
+    "search": READ_ONLY_TIMEOUT,
+    "install": MUTATING_TIMEOUT,
+    "upgrade": MUTATING_TIMEOUT,
+    "upgrade_all": MUTATING_TIMEOUT,
+    "remove": MUTATING_TIMEOUT,
+    "sync": MUTATING_TIMEOUT,
+    "cleanup": MUTATING_TIMEOUT,
+}
+"""Per-operation timeout defaults, applied only when the user has set no explicit
+``--timeout`` (or per-manager ``timeout`` override).
+
+Keyed by the :py:class:`meta_package_manager.capabilities.Operations` member name,
+plus the special ``"version"`` detection probe. The keys are validated against the
+``Operations`` enum by the test suite so the two never drift apart. An operation
+absent from this map resolves to :py:data:`DEFAULT_TIMEOUT`.
+"""
 
 
 class CLIExecutor:
@@ -219,7 +266,22 @@ class CLIExecutor:
     """Do not actually perform any action, just simulate CLI calls."""
 
     timeout: int | None = None
-    """Maximum number of seconds to wait for a CLI call to complete."""
+    """Maximum number of seconds to wait for a CLI call to complete.
+
+    ``None`` means the user expressed no explicit preference: the effective cap is
+    then resolved per-operation by :py:meth:`_resolve_timeout` from
+    :py:data:`OPERATION_TIMEOUTS`. A non-``None`` value (the ``--timeout`` flag or a
+    per-manager override) wins for every operation.
+    """
+
+    _active_operation: str | None = None
+    """Name of the operation this manager is currently performing.
+
+    Stamped by :py:meth:`meta_package_manager.pool.ManagerPool._select_managers`
+    just before the manager is handed to a subcommand, and by the :py:attr:`version`
+    probe. Consumed by :py:meth:`_resolve_timeout` to pick a per-operation default.
+    ``None`` (no known operation) falls back to :py:data:`DEFAULT_TIMEOUT`.
+    """
 
     cooldown: timedelta | None = None
     """Minimum age a release must have before it can be installed or upgraded.
@@ -472,6 +534,12 @@ class CLIExecutor:
         if not self.supported:  # type: ignore[attr-defined]
             return None
         if self.executable:
+            # Version detection is a fast liveness probe, so tag it as a read-only
+            # operation: a wedged binary then trips the short timeout instead of the
+            # long mutating one. Safe to leave set: ``_select_managers`` re-stamps the
+            # real operation before any subcommand runs, and an explicit ``--timeout``
+            # still wins inside ``_resolve_timeout``.
+            self._active_operation = "version"
             output = self.run_cli(
                 self.version_cli_options,
                 auto_pre_cmds=False,
@@ -506,6 +574,23 @@ class CLIExecutor:
             )
             return False
         return True
+
+    def _resolve_timeout(self) -> int:
+        """Resolve the timeout (in seconds) for the current CLI call.
+
+        Precedence, most specific first:
+
+        1. An explicit :py:attr:`timeout` (the user's ``--timeout`` flag or a
+           per-manager ``timeout`` override) wins for every operation.
+        2. Otherwise the per-operation default keyed on :py:attr:`_active_operation`
+           (see :py:data:`OPERATION_TIMEOUTS`).
+        3. An unknown operation falls back to :py:data:`DEFAULT_TIMEOUT`.
+        """
+        if self.timeout is not None:
+            return self.timeout
+        if self._active_operation is None:
+            return DEFAULT_TIMEOUT
+        return OPERATION_TIMEOUTS.get(self._active_operation, DEFAULT_TIMEOUT)
 
     def run(
         self,
@@ -602,9 +687,12 @@ class CLIExecutor:
                     return ""
                 raise
             logging.debug(f"Spawned PID {proc.pid}: {clean_args[0]}.")
+            effective_timeout = self._resolve_timeout()
             try:
-                logging.debug(f"Waiting for PID {proc.pid} (timeout={self.timeout}s).")
-                stdout, stderr = proc.communicate(timeout=self.timeout)
+                logging.debug(
+                    f"Waiting for PID {proc.pid} (timeout={effective_timeout}s).",
+                )
+                stdout, stderr = proc.communicate(timeout=effective_timeout)
                 logging.debug(
                     f"PID {proc.pid} exited {proc.returncode}; "
                     f"stdout {len(stdout)} chars, stderr {len(stderr)} chars."
@@ -642,7 +730,7 @@ class CLIExecutor:
                 proc.kill()
                 stdout, stderr = proc.communicate()
                 logging.debug(f"PID {proc.pid} killed; exit {proc.returncode}.")
-                msg = f"Timed out after {self.timeout}s."
+                msg = f"Timed out after {effective_timeout}s."
                 logging.warning(msg)
                 exception = CLIError(None, "", msg)
                 if must_succeed or self.stop_on_error:

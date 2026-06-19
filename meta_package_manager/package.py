@@ -51,7 +51,7 @@ from .version import parse_version
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterable
     from datetime import datetime
     from pathlib import Path
 
@@ -113,7 +113,7 @@ class Package:
         )
 
 
-def packages_asdict(packages: Iterator[Package], keep_fields: tuple[str, ...]):
+def packages_asdict(packages: Iterable[Package], keep_fields: tuple[str, ...]):
     """Returns a list of packages casted to a ``dict`` with only a subset of its
     fields."""
     return ({k: v for k, v in asdict(p).items() if k in keep_fields} for p in packages)

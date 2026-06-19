@@ -29,7 +29,8 @@ import platform
 import re
 import sys
 from collections import Counter, namedtuple
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from configparser import RawConfigParser
 from datetime import datetime, timedelta, timezone
 from functools import partial
@@ -44,11 +45,14 @@ from boltons.cacheutils import LRI, cached
 from click_extra import (
     STRING,
     Choice,
+    Context,
     EnumChoice,
     File,
     IntRange,
+    JobsOption,
     ParamType,
     Section,
+    Spinner,
     UsageError,
     argument,
     echo,
@@ -78,7 +82,7 @@ from .config import (
     dump_manager_overrides,
     print_contribution_hints,
 )
-from .execution import CLIError, highlight_cli_name
+from .execution import CLIError, SPINNER_DELAY, highlight_cli_name
 from .inventory import MAIN_PLATFORMS
 from .manager import PackageManager
 from .package import packages_asdict
@@ -632,6 +636,15 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         "sync, cleanup).",
     ),
     option(
+        "-j",
+        "--jobs",
+        cls=JobsOption,
+        help="Number of managers queried in parallel for read-only operations "
+        "(installed, outdated, search). Defaults to one less than the CPU count; "
+        "set 1 to run sequentially. State-changing operations always run one "
+        "manager at a time.",
+    ),
+    option(
         "--cooldown",
         type=Duration(),
         default="",
@@ -1009,6 +1022,64 @@ def managers(ctx):
     )
 
 
+def collect_from_managers(
+    ctx: Context,
+    label: str,
+    managers: list[PackageManager],
+    work: Callable[[PackageManager], tuple[str, dict]],
+) -> list[tuple[str, dict]]:
+    """Run ``work(manager)`` for every manager and return the results in order.
+
+    Read-only operations query each manager independently, so they run
+    concurrently across a thread pool sized by :option:`mpm --jobs`. The work is
+    subprocess I/O, during which the GIL is released, so threads parallelize it
+    fully: a slow ``guix search`` no longer blocks the fast managers while it runs.
+
+    Execution falls back to sequential when :option:`mpm --jobs` is ``1``, when a
+    single manager is selected, or at DEBUG verbosity (where interleaved
+    per-manager logs would be unreadable).
+
+    In concurrent mode the per-manager spinners would garble each other on stderr,
+    so they are suppressed in favor of a single aggregate spinner for the batch.
+
+    :param label: present-tense verb shown in the aggregate spinner ("Searching").
+    :param managers: the already-selected managers, materialized so their version
+        probes and per-manager option stamping happen up front, in this thread.
+    :param work: returns this manager's ``(id, data)`` result; it must handle its
+        own :py:class:`meta_package_manager.execution.CLIError` (each manager owns
+        its subprocess and error list, so the call is thread-safe per manager).
+    """
+    # Coherent debug narration trumps the speed-up: stay sequential at DEBUG.
+    jobs = (
+        1
+        if ctx.meta["click_extra.verbosity"] == "DEBUG"
+        else ctx.meta["click_extra.jobs"]
+    )
+    if jobs <= 1 or len(managers) <= 1:
+        return [work(manager) for manager in managers]
+
+    # Suppress the per-manager spinners (which would collide on stderr) and show a
+    # single aggregate spinner for the whole concurrent batch instead.
+    spinner_enabled = None if any(manager.progress for manager in managers) else False
+    for manager in managers:
+        manager.progress = False
+
+    results: list[tuple[str, dict]] = [("", {})] * len(managers)
+    with Spinner(
+        f"{label} {len(managers)} managers",
+        delay=SPINNER_DELAY,
+        enabled=spinner_enabled,
+    ):
+        with ThreadPoolExecutor(max_workers=jobs) as executor:
+            future_to_index = {
+                executor.submit(work, manager): index
+                for index, manager in enumerate(managers)
+            }
+            for future in as_completed(future_to_index):
+                results[future_to_index[future]] = future.result()
+    return results
+
+
 @mpm.command(aliases=["list"], short_help="List installed packages.", section=EXPLORE)
 @option(
     "-d",
@@ -1029,19 +1100,22 @@ def installed(ctx, duplicates):
         "installed_version",
     )
 
-    for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
-        packages = tuple(packages_asdict(manager.installed_or_empty(), fields))
+    managers = list(
+        ctx.obj.selected_managers(implements_operation=Operations.installed),
+    )
 
-        installed_data[manager.id] = {
+    def fetch(manager: PackageManager) -> tuple[str, dict]:
+        packages = tuple(packages_asdict(manager.installed_or_empty(), fields))
+        return manager.id, {
             "id": manager.id,
             "name": manager.name,
             "packages": packages,
+            # Serialize errors at the last minute to gather all we encountered.
+            "errors": list({expt.error for expt in manager.cli_errors}),
         }
 
-        # Serialize errors at the last minute to gather all we encountered.
-        installed_data[manager.id]["errors"] = list(
-            {expt.error for expt in manager.cli_errors},
-        )
+    for manager_id, data in collect_from_managers(ctx, "Listing", managers, fetch):
+        installed_data[manager_id] = data
 
     # Filters out non-duplicate packages.
     if duplicates:
@@ -1126,7 +1200,11 @@ def outdated(ctx, plugin_output):
         "latest_version",
     )
 
-    for manager in ctx.obj.selected_managers(implements_operation=Operations.outdated):
+    managers = list(
+        ctx.obj.selected_managers(implements_operation=Operations.outdated),
+    )
+
+    def fetch(manager: PackageManager) -> tuple[str, dict]:
         try:
             packages = tuple(packages_asdict(manager.refiltered_outdated, fields))
         except CLIError:
@@ -1135,17 +1213,16 @@ def outdated(ctx, plugin_output):
                 f"from {theme().invoked_command(manager.id)}."
             )
             packages = ()
-
-        outdated_data[manager.id] = {
+        return manager.id, {
             "id": manager.id,
             "name": manager.name,
             "packages": packages,
+            # Serialize errors at the last minute to gather all we encountered.
+            "errors": list({expt.error for expt in manager.cli_errors}),
         }
 
-        # Serialize errors at the last minute to gather all we encountered.
-        outdated_data[manager.id]["errors"] = list(
-            {expt.error for expt in manager.cli_errors},
-        )
+    for manager_id, data in collect_from_managers(ctx, "Checking", managers, fetch):
+        outdated_data[manager_id] = data
 
     # Machine-friendly data rendering.
     print_serialized_and_exit(ctx, outdated_data)
@@ -1238,7 +1315,11 @@ def search(ctx, extended, exact, refilter, query):
     )
 
     search_method = "refiltered_search" if refilter else "search"
-    for manager in ctx.obj.selected_managers(implements_operation=Operations.search):
+    managers = list(
+        ctx.obj.selected_managers(implements_operation=Operations.search),
+    )
+
+    def fetch(manager: PackageManager) -> tuple[str, dict]:
         try:
             packages = tuple(
                 packages_asdict(
@@ -1251,17 +1332,16 @@ def search(ctx, extended, exact, refilter, query):
                 f"Could not search packages from {theme().invoked_command(manager.id)}."
             )
             packages = ()
-
-        matches[manager.id] = {
+        return manager.id, {
             "id": manager.id,
             "name": manager.name,
             "packages": packages,
+            # Serialize errors at the last minute to gather all we encountered.
+            "errors": list({expt.error for expt in manager.cli_errors}),
         }
 
-        # Serialize errors at the last minute to gather all we encountered.
-        matches[manager.id]["errors"] = list(
-            {expt.error for expt in manager.cli_errors},
-        )
+    for manager_id, data in collect_from_managers(ctx, "Searching", managers, fetch):
+        matches[manager_id] = data
 
     # Machine-friendly data rendering.
     print_serialized_and_exit(ctx, matches)

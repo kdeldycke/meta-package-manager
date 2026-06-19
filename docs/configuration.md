@@ -68,7 +68,7 @@ These go under `[mpm]` (or `[tool.mpm]` in `pyproject.toml`):
 | `require_cooldown_support` | boolean | `true`              | Require native cooldown support to run install/upgrade; skip managers that lack it. Set `false` to run them anyway. |
 | `all_managers`             | boolean | `false`             | Force evaluation of all managers, including unsupported and deprecated.                                             |
 | `description`              | boolean | `false`             | Show package description in results.                                                                                |
-| `progress`                 | boolean | `true`              | Show a progress spinner on stderr during long manager CLI calls. Auto-suppressed for serialized output, at DEBUG verbosity, without colors, and when stderr is not a terminal. |
+| `progress`                 | boolean | `true`              | Show a progress spinner on stderr during long manager CLI calls (click-extra's default option). Self-disabled off a terminal (pipes, `TERM=dumb`, CI) and by `--accessible`; mpm also suppresses it for serialized output and at DEBUG verbosity. |
 | `sort_by`                  | string  | `"manager_id"`      | Sort results by: `manager_id`, `manager_name`, `package_id`, `package_name`, or `version`.                          |
 | `summary`                  | boolean | `true`              | Print an end-of-run summary on stderr with per-manager package totals.                                              |
 | `table_format`             | string  | `"rounded-outline"` | Table rendering style (see `mpm --help` for all choices).                                                           |

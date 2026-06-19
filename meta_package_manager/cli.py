@@ -663,13 +663,6 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         help="Show package description in results.",
     ),
     option(
-        "--progress/--no-progress",
-        default=True,
-        help="Show a progress spinner on stderr while a manager CLI call runs. "
-        "Automatically suppressed for serialized output, at DEBUG verbosity, "
-        "without colors, and when stderr is not a terminal.",
-    ),
-    option(
         "-s",
         "--sort-by",
         type=EnumChoice(SortableField),
@@ -719,7 +712,6 @@ def mpm(
     cooldown,
     require_cooldown_support,
     description,
-    progress,
     sort_by,
     summary,
     suggest_contribs,
@@ -745,14 +737,13 @@ def mpm(
 
         ctx.call_on_close(remove_logging_override)
 
-    # Allow a progress spinner during long CLI calls only when --progress is on
-    # (the default) and the run is interactive and human-facing: never in serialized
-    # output, at DEBUG verbosity (logs already narrate), or when color/ANSI is off
-    # (which also covers --accessible). The TTY check itself is left to the spinner
-    # (see CLIExecutor._make_spinner).
+    # click-extra's default --progress/--no-progress option resolves the user's
+    # intent (lowered by --accessible) into ctx.meta["click_extra.progress"],
+    # decoupled from color. mpm layers on its own output-mode gating: no spinner in
+    # serialized output or at DEBUG verbosity (where logs already narrate). The TTY
+    # and TERM=dumb checks are left to the spinner widget (see _make_spinner).
     show_progress = (
-        progress
-        and ctx.color is not False
+        ctx.meta["click_extra.progress"]
         and ctx.meta["click_extra.table_format"] not in SERIALIZATION_FORMATS
         and ctx.meta["click_extra.verbosity"] != "DEBUG"
     )

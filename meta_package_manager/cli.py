@@ -1024,6 +1024,7 @@ def managers(ctx):
 def collect_from_managers(
     ctx: Context,
     label: str,
+    done_label: str,
     managers: list[PackageManager],
     work: Callable[[PackageManager], tuple[str, dict]],
 ) -> list[tuple[str, dict]]:
@@ -1039,9 +1040,13 @@ def collect_from_managers(
     per-manager logs would be unreadable).
 
     In concurrent mode the per-manager spinners would garble each other on stderr,
-    so they are suppressed in favor of a single aggregate spinner for the batch.
+    so they are suppressed in favor of a single aggregate spinner for the batch. If
+    that spinner was actually shown (a slow batch on a terminal), it is left on
+    screen as a persistent ``✓ Searched N managers (Ns)`` line; fast, piped, or
+    serialized runs get nothing.
 
-    :param label: present-tense verb shown in the aggregate spinner ("Searching").
+    :param label: present-tense verb shown in the running spinner ("Searching").
+    :param done_label: past-tense verb for the persistent finisher ("Searched").
     :param managers: the already-selected managers, materialized so their version
         probes and per-manager option stamping happen up front, in this thread.
     :param work: returns this manager's ``(id, data)`` result; it must handle its
@@ -1069,7 +1074,7 @@ def collect_from_managers(
         delay=SPINNER_DELAY,
         enabled=spinner_enabled,
         timer=True,
-    ):
+    ) as spinner:
         with ThreadPoolExecutor(max_workers=jobs) as executor:
             future_to_index = {
                 executor.submit(work, manager): index
@@ -1077,6 +1082,13 @@ def collect_from_managers(
             }
             for future in as_completed(future_to_index):
                 results[future_to_index[future]] = future.result()
+        # Leave a persistent "✓ Searched N managers (Ns)" line, but only when the
+        # spinner was actually shown (a slow batch on a terminal). ``shown`` is
+        # False for fast, disabled, piped or serialized runs, where ``ok()`` would
+        # otherwise still emit the line and pollute the output.
+        if spinner.shown:
+            spinner.label = f"{done_label} {len(managers)} managers"
+            spinner.ok()
     return results
 
 
@@ -1114,7 +1126,9 @@ def installed(ctx, duplicates):
             "errors": list({expt.error for expt in manager.cli_errors}),
         }
 
-    for manager_id, data in collect_from_managers(ctx, "Listing", managers, fetch):
+    for manager_id, data in collect_from_managers(
+        ctx, "Listing", "Listed", managers, fetch
+    ):
         installed_data[manager_id] = data
 
     # Filters out non-duplicate packages.
@@ -1221,7 +1235,9 @@ def outdated(ctx, plugin_output):
             "errors": list({expt.error for expt in manager.cli_errors}),
         }
 
-    for manager_id, data in collect_from_managers(ctx, "Checking", managers, fetch):
+    for manager_id, data in collect_from_managers(
+        ctx, "Checking", "Checked", managers, fetch
+    ):
         outdated_data[manager_id] = data
 
     # Machine-friendly data rendering.
@@ -1340,7 +1356,9 @@ def search(ctx, extended, exact, refilter, query):
             "errors": list({expt.error for expt in manager.cli_errors}),
         }
 
-    for manager_id, data in collect_from_managers(ctx, "Searching", managers, fetch):
+    for manager_id, data in collect_from_managers(
+        ctx, "Searching", "Searched", managers, fetch
+    ):
         matches[manager_id] = data
 
     # Machine-friendly data rendering.

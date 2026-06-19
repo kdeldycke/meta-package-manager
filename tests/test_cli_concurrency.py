@@ -23,11 +23,13 @@ they need no real package managers and stay hermetic.
 
 from __future__ import annotations
 
+import io
 import threading
 import time
 
 import pytest
 
+import meta_package_manager.cli
 from meta_package_manager.cli import collect_from_managers
 
 
@@ -47,6 +49,13 @@ class FakeManager:
     def __init__(self, manager_id: str, progress: bool = False) -> None:
         self.id = manager_id
         self.progress = progress
+
+
+class TTYStringIO(io.StringIO):
+    """An in-memory text buffer that claims to be an interactive terminal."""
+
+    def isatty(self) -> bool:
+        return True
 
 
 def _record_thread(threads, lock):
@@ -73,7 +82,7 @@ def test_runs_sequentially_in_main_thread(jobs, verbosity, manager_count):
     managers = [FakeManager(f"m{i}") for i in range(manager_count)]
     threads: list = []
     collect_from_managers(
-        ctx, "Testing", managers, _record_thread(threads, threading.Lock())
+        ctx, "Testing", "Tested", managers, _record_thread(threads, threading.Lock())
     )
     assert threads, "work was never called"
     assert all(thread is threading.main_thread() for thread in threads)
@@ -84,7 +93,7 @@ def test_runs_concurrently_off_the_main_thread():
     managers = [FakeManager(f"m{i}") for i in range(4)]
     threads: list = []
     collect_from_managers(
-        ctx, "Testing", managers, _record_thread(threads, threading.Lock())
+        ctx, "Testing", "Tested", managers, _record_thread(threads, threading.Lock())
     )
     assert len(threads) == 4
     assert all(thread is not threading.main_thread() for thread in threads)
@@ -101,7 +110,7 @@ def test_preserves_input_order_despite_completion_order():
         time.sleep(0.01 * (len(managers) - index))
         return manager.id, {"index": index}
 
-    results = collect_from_managers(ctx, "Testing", managers, work)
+    results = collect_from_managers(ctx, "Testing", "Tested", managers, work)
     assert [manager_id for manager_id, _ in results] == [f"m{i}" for i in range(8)]
 
 
@@ -109,7 +118,9 @@ def test_suppresses_per_manager_spinners_when_concurrent():
     """Concurrent mode mutes per-manager spinners (one aggregate stands in)."""
     ctx = FakeContext(jobs=4)
     managers = [FakeManager(f"m{i}", progress=True) for i in range(4)]
-    collect_from_managers(ctx, "Testing", managers, lambda manager: (manager.id, {}))
+    collect_from_managers(
+        ctx, "Testing", "Tested", managers, lambda manager: (manager.id, {})
+    )
     assert all(manager.progress is False for manager in managers)
 
 
@@ -117,13 +128,49 @@ def test_keeps_per_manager_spinners_when_sequential():
     """Sequential mode leaves the per-manager spinner gate untouched."""
     ctx = FakeContext(jobs=1)
     managers = [FakeManager(f"m{i}", progress=True) for i in range(3)]
-    collect_from_managers(ctx, "Testing", managers, lambda manager: (manager.id, {}))
+    collect_from_managers(
+        ctx, "Testing", "Tested", managers, lambda manager: (manager.id, {})
+    )
     assert all(manager.progress is True for manager in managers)
 
 
 def test_empty_manager_list_returns_empty():
     ctx = FakeContext(jobs=4)
     assert (
-        collect_from_managers(ctx, "Testing", [], lambda manager: (manager.id, {}))
+        collect_from_managers(
+            ctx, "Testing", "Tested", [], lambda manager: (manager.id, {})
+        )
         == []
     )
+
+
+def test_no_finisher_line_off_terminal(capsys):
+    """Off a terminal the aggregate spinner never draws, so no finisher leaks.
+
+    ``Spinner.ok()`` emits its line unconditionally, so the gate must keep it out
+    of pipes, captured output and serialized runs.
+    """
+    ctx = FakeContext(jobs=4)
+    managers = [FakeManager(f"m{i}", progress=True) for i in range(4)]
+    collect_from_managers(
+        ctx, "Searching", "Searched", managers, lambda manager: (manager.id, {})
+    )
+    assert "Searched" not in capsys.readouterr().err
+
+
+def test_finisher_line_when_spinner_shown(monkeypatch):
+    """A slow batch on a terminal leaves a persistent past-tense finisher line."""
+    # Zero the show-delay so the spinner draws at once, and point it at a fake TTY.
+    monkeypatch.setattr(meta_package_manager.cli, "SPINNER_DELAY", 0.0)
+    tty = TTYStringIO()
+    monkeypatch.setattr("sys.stderr", tty)
+
+    ctx = FakeContext(jobs=4)
+    managers = [FakeManager(f"m{i}", progress=True) for i in range(4)]
+
+    def slow_work(manager):
+        time.sleep(0.1)  # Outlast the zeroed delay so the spinner draws a frame.
+        return manager.id, {}
+
+    collect_from_managers(ctx, "Searching", "Searched", managers, slow_work)
+    assert "Searched 4 managers" in tty.getvalue()

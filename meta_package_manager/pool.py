@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from functools import cached_property
 
 from boltons.iterutils import unique
@@ -253,6 +254,35 @@ class ManagerPool:
             if mid not in self.default_manager_ids
         )
 
+    def _warm_availability(self, managers: Iterable[PackageManager]) -> None:
+        """Probe several managers' ``available`` concurrently.
+
+        Reading ``available`` forces a manager's ``--version`` detection, whose
+        result (and the ``cli_path`` / ``executable`` / ``version`` it depends on)
+        is cached on the instance. Warming the candidate set up front turns the
+        sequential string of probes into a single round bounded by the slowest one.
+
+        Each manager is a distinct instance with its own cached attributes and
+        subprocess, so the probes are independent and thread-safe; the GIL is
+        released while each waits. The executor barrier publishes every cached
+        value before the sequential filter loop reads it back.
+
+        Sized by :option:`mpm --jobs`. Falls back to the loop's lazy, sequential
+        probing when there is no active CLI context, at DEBUG verbosity (so the
+        per-probe debug logs stay readable), for a single candidate, or at
+        ``--jobs 1``.
+        """
+        ctx = get_current_context(silent=True)
+        if ctx is None or ctx.meta.get("click_extra.verbosity") == "DEBUG":
+            return
+        jobs = ctx.meta.get("click_extra.jobs", 1)
+        candidates = list(managers)
+        if jobs <= 1 or len(candidates) <= 1:
+            return
+        with ThreadPoolExecutor(max_workers=jobs) as executor:
+            # Reading `available` forces and caches the probe inside each worker.
+            list(executor.map(lambda manager: manager.available, candidates))
+
     def _select_managers(
         self,
         keep: Iterable[str] | None = None,
@@ -307,7 +337,20 @@ class ManagerPool:
         assert self.ALLOWED_EXTRA_OPTION.issuperset(extra_options)
 
         # Reduce the set to the user's constraints.
-        selected_ids = (mid for mid in unique(keep) if mid not in drop)
+        selected_ids = [mid for mid in unique(keep) if mid not in drop]
+
+        # Probe every candidate's availability (its --version detection) up front
+        # and in parallel, so the sequential string of probes below becomes a single
+        # round capped at the slowest manager. This shaves startup latency off any
+        # command that touches many managers; the filter loop stays sequential, so
+        # its skip / "does not implement" logging keeps its order.
+        if drop_not_found:
+            self._warm_availability(
+                self.register[manager_id]
+                for manager_id in selected_ids
+                if not implements_operation
+                or implements(self.register[manager_id], implements_operation)
+            )
 
         # Deduplicate managers IDs while preserving order, then remove excluded
         # managers.

@@ -17,9 +17,11 @@
 from __future__ import annotations
 
 import inspect
+import threading
 from importlib import import_module
 from pathlib import Path
 
+import click
 import pytest
 
 import meta_package_manager
@@ -250,3 +252,55 @@ def test_select_managers(kwargs, expected):
     original order."""
     selection = pool._select_managers(**kwargs)
     assert tuple(m.id for m in selection) == expected
+
+
+class _RecordingManager:
+    """Stand-in whose ``available`` probe records the thread it ran on."""
+
+    def __init__(self, log: list) -> None:
+        self._log = log
+
+    @property
+    def available(self) -> bool:
+        self._log.append(threading.current_thread())
+        return True
+
+
+def _jobs_context(jobs: int, verbosity: str = "INFO") -> click.Context:
+    ctx = click.Context(click.Command("mpm"))
+    ctx.meta["click_extra.jobs"] = jobs
+    ctx.meta["click_extra.verbosity"] = verbosity
+    return ctx
+
+
+def test_warm_availability_skips_without_context():
+    """No active CLI context: leave probing to the lazy, sequential filter loop."""
+    accessed: list = []
+    pool._warm_availability([_RecordingManager(accessed), _RecordingManager(accessed)])
+    assert accessed == []
+
+
+@pytest.mark.parametrize(
+    ("jobs", "verbosity", "count"),
+    (
+        (1, "INFO", 4),  # --jobs 1 leaves probing to the sequential loop.
+        (4, "DEBUG", 4),  # DEBUG keeps the interleaved probe logs readable.
+        (4, "INFO", 1),  # A single candidate has nothing to parallelize.
+    ),
+)
+def test_warm_availability_skips_when_not_concurrent(jobs, verbosity, count):
+    accessed: list = []
+    managers = [_RecordingManager(accessed) for _ in range(count)]
+    with _jobs_context(jobs, verbosity):
+        pool._warm_availability(managers)
+    assert accessed == []
+
+
+def test_warm_availability_probes_concurrently():
+    """With --jobs > 1 and several candidates, probes run off the main thread."""
+    threads: list = []
+    managers = [_RecordingManager(threads) for _ in range(4)]
+    with _jobs_context(jobs=4):
+        pool._warm_availability(managers)
+    assert len(threads) == 4
+    assert all(thread is not threading.main_thread() for thread in threads)

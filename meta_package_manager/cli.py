@@ -49,7 +49,6 @@ from click_extra import (
     EnumChoice,
     File,
     IntRange,
-    JobsOption,
     ParamType,
     Section,
     Spinner,
@@ -58,6 +57,7 @@ from click_extra import (
     echo,
     file_path,
     group,
+    jobs_option,
     option,
     option_group,
     pass_context,
@@ -635,10 +635,9 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         "and a longer one for state-changing operations (install, upgrade, remove, "
         "sync, cleanup).",
     ),
-    option(
+    jobs_option(
         "-j",
         "--jobs",
-        cls=JobsOption,
         help="Number of managers queried in parallel for read-only operations "
         "(installed, outdated, search). Defaults to one less than the CPU count; "
         "set 1 to run sequentially. State-changing operations always run one "
@@ -1069,6 +1068,7 @@ def collect_from_managers(
         f"{label} {len(managers)} managers",
         delay=SPINNER_DELAY,
         enabled=spinner_enabled,
+        timer=True,
     ):
         with ThreadPoolExecutor(max_workers=jobs) as executor:
             future_to_index = {

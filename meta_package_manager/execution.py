@@ -622,10 +622,13 @@ class CLIExecutor:
         manager_id = self.id  # type: ignore[attr-defined]
         operation = self._active_operation
         label = f"{manager_id} {operation}" if operation else str(manager_id)
+        # Append the elapsed time so a long call (a slow ``guix search``) reads as
+        # "⠙ guix search (12.3s)" rather than looking stuck.
         return Spinner(
             label,
             delay=SPINNER_DELAY,
             enabled=None if self.progress else False,
+            timer=True,
         )
 
     def run(

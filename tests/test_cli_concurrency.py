@@ -16,7 +16,7 @@
 
 """Unit tests for the concurrent read-only operation dispatch helper.
 
-These exercise :func:`meta_package_manager.cli.collect_from_managers` in
+These exercise :func:`meta_package_manager.pool.collect_from_managers` in
 isolation, with lightweight stand-ins for the click context and managers, so
 they need no real package managers and stay hermetic.
 """
@@ -28,9 +28,11 @@ import threading
 import time
 
 import pytest
+from click_extra.context import JOBS, VERBOSITY
+from click_extra.theme import KO_GLYPH, OK_GLYPH
 
-import meta_package_manager.cli
-from meta_package_manager.cli import collect_from_managers
+import meta_package_manager.pool
+from meta_package_manager.pool import collect_from_managers
 
 
 class FakeContext:
@@ -38,8 +40,8 @@ class FakeContext:
 
     def __init__(self, jobs: int, verbosity: str = "INFO") -> None:
         self.meta = {
-            "click_extra.jobs": jobs,
-            "click_extra.verbosity": verbosity,
+            JOBS: jobs,
+            VERBOSITY: verbosity,
         }
 
 
@@ -159,9 +161,9 @@ def test_no_finisher_line_off_terminal(capsys):
 
 
 def test_finisher_line_when_spinner_shown(monkeypatch):
-    """A slow batch on a terminal leaves a persistent past-tense finisher line."""
+    """A slow batch on a terminal shows the running count, a ✓ trail and a finisher."""
     # Zero the show-delay so the spinner draws at once, and point it at a fake TTY.
-    monkeypatch.setattr(meta_package_manager.cli, "SPINNER_DELAY", 0.0)
+    monkeypatch.setattr(meta_package_manager.pool, "SPINNER_DELAY", 0.0)
     tty = TTYStringIO()
     monkeypatch.setattr("sys.stderr", tty)
 
@@ -173,4 +175,62 @@ def test_finisher_line_when_spinner_shown(monkeypatch):
         return manager.id, {}
 
     collect_from_managers(ctx, "Searching", "Searched", managers, slow_work)
-    assert "Searched 4 managers" in tty.getvalue()
+    output = tty.getvalue()
+    # The spinner draws its seeded running count before any manager lands...
+    assert "Searching 0/4 managers" in output
+    # ...leaves a ✓ trail line naming every manager as it completes (no errors)...
+    assert all(f"m{i}" in output for i in range(4))
+    assert OK_GLYPH in output
+    # ...then settles on the persistent past-tense finisher once all have.
+    assert "Searched 4 managers" in output
+
+
+def test_failure_trail_marks_errored_managers(monkeypatch):
+    """A manager whose result carries errors gets a ✗ trail line; others get ✓."""
+    monkeypatch.setattr(meta_package_manager.pool, "SPINNER_DELAY", 0.0)
+    tty = TTYStringIO()
+    monkeypatch.setattr("sys.stderr", tty)
+
+    ctx = FakeContext(jobs=4)
+    managers = [FakeManager(f"m{i}", progress=True) for i in range(4)]
+
+    def work(manager):
+        time.sleep(0.1)  # Outlast the zeroed delay so the spinner draws a frame.
+        # A non-empty "errors" list marks a manager as failed in the trail.
+        errors = ["boom"] if manager.id == "m2" else []
+        return manager.id, {"errors": errors}
+
+    collect_from_managers(ctx, "Searching", "Searched", managers, work)
+    output = tty.getvalue()
+    assert KO_GLYPH in output  # The failure glyph, for m2.
+    assert OK_GLYPH in output  # The success glyph, for the other managers.
+
+
+def test_trail_includes_managers_that_finish_before_the_spinner_shows(monkeypatch):
+    """Managers that complete within the show delay still get a trail line.
+
+    Regression: the per-manager echo was gated on the live ``shown`` state, so a
+    manager that finished before the spinner first drew was dropped from the trail
+    (a 6-manager batch where the quick ones beat the 1s delay showed only the 3
+    slow ones, above a "Checked 6 managers" finisher). Outcomes are now buffered
+    and flushed once the spinner appears, so the ledger stays complete.
+    """
+    # A show delay the fast managers beat but the slow ones outlast (so the spinner
+    # still draws and the trail surfaces at all).
+    monkeypatch.setattr(meta_package_manager.pool, "SPINNER_DELAY", 0.2)
+    tty = TTYStringIO()
+    monkeypatch.setattr("sys.stderr", tty)
+
+    ctx = FakeContext(jobs=6)
+    managers = [FakeManager(f"m{i}", progress=True) for i in range(6)]
+
+    def work(manager):
+        # m0, m1, m2 finish before the show delay; m3, m4, m5 finish after it.
+        time.sleep(0.03 if int(manager.id[1:]) < 3 else 0.4)
+        return manager.id, {}
+
+    collect_from_managers(ctx, "Checking", "Checked", managers, work)
+    output = tty.getvalue()
+    # Every manager — fast and slow alike — appears, not just the slow three.
+    assert all(f"m{i}" in output for i in range(6))
+    assert "Checked 6 managers" in output

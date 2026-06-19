@@ -18,14 +18,16 @@
 from __future__ import annotations
 
 import logging
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import cached_property
 
 from boltons.iterutils import unique
-from click_extra import get_current_context
-from click_extra.theme import get_current_theme as theme
+from click_extra import Spinner, get_current_context
+from click_extra.context import JOBS, VERBOSITY
+from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
 
 from .capabilities import implements
+from .execution import SPINNER_DELAY
 from .managers.apk import APK
 from .managers.apm import APM
 from .managers.apt import APT, APT_Mint
@@ -72,8 +74,10 @@ from .managers.zypper import Zypper
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
+    from collections.abc import Callable, Iterable, Iterator
     from typing import Final
+
+    from click_extra import Context
 
     from .capabilities import Operations
     from .manager import PackageManager
@@ -147,6 +151,167 @@ Is considered valid package manager, definitions classes which:
 
 These properties are checked and enforced in unittests.
 """
+
+
+# Concurrent dispatch
+#
+# Read-only operations query each manager independently, so they parallelize
+# cleanly across a thread pool. These free functions own that policy: the
+# sequential-fallback decision (:func:`effective_jobs`), the up-front availability
+# warming used during selection (:func:`warm_availability`), and the spinner-wrapped
+# batch runner the CLI's read-only subcommands drive (:func:`collect_from_managers`).
+
+
+def effective_jobs(ctx: Context | None, count: int) -> int:
+    """Resolve how many worker threads to use for a batch of ``count`` items.
+
+    Returns the number of managers to process in parallel; ``1`` means run
+    sequentially in the calling thread. Collapses to sequential when:
+
+    - there is no active CLI context (programmatic or test use),
+    - a single item leaves nothing to parallelize,
+    - the user passed :option:`mpm --jobs` ``1``, or
+    - verbosity is ``DEBUG``, where coherent per-manager log narration matters
+      more than the speed-up (interleaved threads would scramble it).
+
+    Otherwise the :option:`mpm --jobs` value wins, capped at ``count``: there is
+    no point spinning up more workers than there are items.
+    """
+    if ctx is None or count <= 1:
+        return 1
+    if ctx.meta.get(VERBOSITY) == "DEBUG":
+        return 1
+    jobs = ctx.meta.get(JOBS, 1)
+    return min(jobs, count) if jobs > 1 else 1
+
+
+def warm_availability(managers: Iterable[PackageManager]) -> None:
+    """Probe several managers' ``available`` concurrently.
+
+    Reading ``available`` forces a manager's ``--version`` detection, whose
+    result (and the ``cli_path`` / ``executable`` / ``version`` it depends on) is
+    cached on the instance. Warming the candidate set up front turns the
+    sequential string of probes into a single round bounded by the slowest one,
+    shaving startup latency off any command that touches many managers.
+
+    Each manager is a distinct instance with its own cached attributes and
+    subprocess, so the probes are independent and thread-safe; the GIL is released
+    while each waits. The executor barrier publishes every cached value before the
+    caller reads it back.
+
+    Sized by :func:`effective_jobs`: a no-op (leaving the probes to lazy,
+    sequential evaluation) without an active context, at ``DEBUG`` verbosity, for a
+    single candidate, or at :option:`mpm --jobs` ``1``.
+    """
+    candidates = list(managers)
+    jobs = effective_jobs(get_current_context(silent=True), len(candidates))
+    if jobs <= 1:
+        return
+    with ThreadPoolExecutor(max_workers=jobs) as executor:
+        # Reading `available` forces and caches the probe inside each worker.
+        list(executor.map(lambda manager: manager.available, candidates))
+
+
+def collect_from_managers(
+    ctx: Context,
+    label: str,
+    done_label: str,
+    managers: list[PackageManager],
+    work: Callable[[PackageManager], tuple[str, dict]],
+) -> list[tuple[str, dict]]:
+    """Run ``work(manager)`` for every manager and return the results in order.
+
+    Read-only operations query each manager independently, so they run
+    concurrently across a thread pool sized by :func:`effective_jobs` (itself
+    driven by :option:`mpm --jobs`). The work is subprocess I/O, during which the
+    GIL is released, so threads parallelize it fully: a slow ``guix search`` no
+    longer blocks the fast managers while it runs.
+
+    Execution falls back to sequential when :func:`effective_jobs` returns ``1``
+    (a single manager, :option:`mpm --jobs` ``1``, or ``DEBUG`` verbosity, where
+    interleaved per-manager logs would be unreadable).
+
+    In concurrent mode the per-manager spinners would garble each other on stderr,
+    so they are suppressed in favor of a single aggregate spinner. While the batch
+    runs it shows a live ``done/total`` count, and once it is actually drawing (a
+    slow batch on a terminal) it leaves a ``✓``/``✗`` trail of each manager as it
+    lands plus a persistent ``✓ Searched N managers (Ns)`` finisher. Fast, piped or
+    serialized runs get none of this: :py:meth:`click_extra.Spinner.echo` and
+    :py:meth:`click_extra.Spinner.ok` both write unconditionally, so every such
+    call is gated on the spinner having been shown.
+
+    :param label: present-tense verb shown in the running spinner ("Searching").
+    :param done_label: past-tense verb for the persistent finisher ("Searched").
+    :param managers: the already-selected managers, materialized so their version
+        probes and per-manager option stamping happen up front, in this thread.
+    :param work: returns this manager's ``(id, data)`` result; it must handle its
+        own :py:class:`meta_package_manager.execution.CLIError` (each manager owns
+        its subprocess and error list, so the call is thread-safe per manager). A
+        truthy ``data["errors"]`` marks that manager's trail line with ``✗``.
+    """
+    jobs = effective_jobs(ctx, len(managers))
+    if jobs <= 1:
+        return [work(manager) for manager in managers]
+
+    # Suppress the per-manager spinners (which would collide on stderr) and show a
+    # single aggregate spinner for the whole concurrent batch instead.
+    spinner_enabled = None if any(manager.progress for manager in managers) else False
+    for manager in managers:
+        manager.progress = False
+
+    total = len(managers)
+    results: list[tuple[str, dict]] = [("", {})] * total
+    with Spinner(
+        f"{label} 0/{total} managers",
+        delay=SPINNER_DELAY,
+        enabled=spinner_enabled,
+        timer=True,
+    ) as spinner:
+        # Leave a ✓/✗ trail naming each manager (and whether it erred) as it lands,
+        # so a slow batch shows which managers finished rather than a static total.
+        # The trail only makes sense once the spinner is visible (a slow batch on a
+        # terminal): echo() writes unconditionally, so a fast, piped or disabled run
+        # must stay silent. But the spinner only appears after the show delay, by
+        # which point the quickest managers have already finished — so buffer every
+        # outcome and flush the backlog the moment the spinner first draws, then
+        # stream the rest live. This keeps the ledger complete instead of dropping
+        # whichever managers beat the delay.
+        trail: list[tuple[str, dict]] = []
+
+        def flush_trail() -> None:
+            if not spinner.shown:
+                return
+            for manager_id, data in trail:
+                glyph = (
+                    theme().error(KO_GLYPH)
+                    if data.get("errors")
+                    else theme().success(OK_GLYPH)
+                )
+                spinner.echo(f"{glyph} {theme().invoked_command(manager_id)}")
+            trail.clear()
+
+        with ThreadPoolExecutor(max_workers=jobs) as executor:
+            future_to_index = {
+                executor.submit(work, manager): index
+                for index, manager in enumerate(managers)
+            }
+            for done, future in enumerate(as_completed(future_to_index), 1):
+                index = future_to_index[future]
+                manager_id, data = future.result()
+                results[index] = (manager_id, data)
+                trail.append((manager_id, data))
+                flush_trail()  # No-op until the spinner first draws.
+                # `label` is safe to reassign while the spinner thread reads it.
+                spinner.label = f"{label} {done}/{total} managers"
+        # Drain any outcomes still buffered (the spinner may have first drawn only
+        # after the last completion was checked), then leave a persistent
+        # "✓ Searched N managers (Ns)" finisher. Both are gated on `shown`: ok()
+        # writes unconditionally, so a fast, piped or serialized run gets neither.
+        flush_trail()
+        if spinner.shown:
+            spinner.label = f"{done_label} {total} managers"
+            spinner.ok()
+    return results
 
 
 class ManagerPool:
@@ -254,35 +419,6 @@ class ManagerPool:
             if mid not in self.default_manager_ids
         )
 
-    def _warm_availability(self, managers: Iterable[PackageManager]) -> None:
-        """Probe several managers' ``available`` concurrently.
-
-        Reading ``available`` forces a manager's ``--version`` detection, whose
-        result (and the ``cli_path`` / ``executable`` / ``version`` it depends on)
-        is cached on the instance. Warming the candidate set up front turns the
-        sequential string of probes into a single round bounded by the slowest one.
-
-        Each manager is a distinct instance with its own cached attributes and
-        subprocess, so the probes are independent and thread-safe; the GIL is
-        released while each waits. The executor barrier publishes every cached
-        value before the sequential filter loop reads it back.
-
-        Sized by :option:`mpm --jobs`. Falls back to the loop's lazy, sequential
-        probing when there is no active CLI context, at DEBUG verbosity (so the
-        per-probe debug logs stay readable), for a single candidate, or at
-        ``--jobs 1``.
-        """
-        ctx = get_current_context(silent=True)
-        if ctx is None or ctx.meta.get("click_extra.verbosity") == "DEBUG":
-            return
-        jobs = ctx.meta.get("click_extra.jobs", 1)
-        candidates = list(managers)
-        if jobs <= 1 or len(candidates) <= 1:
-            return
-        with ThreadPoolExecutor(max_workers=jobs) as executor:
-            # Reading `available` forces and caches the probe inside each worker.
-            list(executor.map(lambda manager: manager.available, candidates))
-
     def _select_managers(
         self,
         keep: Iterable[str] | None = None,
@@ -345,7 +481,7 @@ class ManagerPool:
         # command that touches many managers; the filter loop stays sequential, so
         # its skip / "does not implement" logging keeps its order.
         if drop_not_found:
-            self._warm_availability(
+            warm_availability(
                 self.register[manager_id]
                 for manager_id in selected_ids
                 if not implements_operation

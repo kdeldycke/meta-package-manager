@@ -23,11 +23,12 @@ from pathlib import Path
 
 import click
 import pytest
+from click_extra.context import JOBS, VERBOSITY
 
 import meta_package_manager
 from meta_package_manager.cli import mpm
 from meta_package_manager.manager import PackageManager
-from meta_package_manager.pool import manager_classes, pool
+from meta_package_manager.pool import manager_classes, pool, warm_availability
 
 from .conftest import (
     default_manager_ids,
@@ -268,15 +269,15 @@ class _RecordingManager:
 
 def _jobs_context(jobs: int, verbosity: str = "INFO") -> click.Context:
     ctx = click.Context(click.Command("mpm"))
-    ctx.meta["click_extra.jobs"] = jobs
-    ctx.meta["click_extra.verbosity"] = verbosity
+    ctx.meta[JOBS] = jobs
+    ctx.meta[VERBOSITY] = verbosity
     return ctx
 
 
 def test_warm_availability_skips_without_context():
     """No active CLI context: leave probing to the lazy, sequential filter loop."""
     accessed: list = []
-    pool._warm_availability([_RecordingManager(accessed), _RecordingManager(accessed)])
+    warm_availability([_RecordingManager(accessed), _RecordingManager(accessed)])
     assert accessed == []
 
 
@@ -292,7 +293,7 @@ def test_warm_availability_skips_when_not_concurrent(jobs, verbosity, count):
     accessed: list = []
     managers = [_RecordingManager(accessed) for _ in range(count)]
     with _jobs_context(jobs, verbosity):
-        pool._warm_availability(managers)
+        warm_availability(managers)
     assert accessed == []
 
 
@@ -301,6 +302,6 @@ def test_warm_availability_probes_concurrently():
     threads: list = []
     managers = [_RecordingManager(threads) for _ in range(4)]
     with _jobs_context(jobs=4):
-        pool._warm_availability(managers)
+        warm_availability(managers)
     assert len(threads) == 4
     assert all(thread is not threading.main_thread() for thread in threads)

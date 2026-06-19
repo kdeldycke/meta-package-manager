@@ -29,8 +29,7 @@ import platform
 import re
 import sys
 from collections import Counter, namedtuple
-from collections.abc import Callable, Iterable
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from collections.abc import Iterable
 from configparser import RawConfigParser
 from datetime import datetime, timedelta, timezone
 from functools import partial
@@ -51,7 +50,6 @@ from click_extra import (
     IntRange,
     ParamType,
     Section,
-    Spinner,
     UsageError,
     argument,
     echo,
@@ -63,6 +61,7 @@ from click_extra import (
     pass_context,
 )
 from click_extra.colorize import HelpKeywords, highlight
+from click_extra.context import PROGRESS, TABLE_FORMAT, VERBOSITY
 from click_extra.table import (
     SERIALIZATION_FORMATS,
     print_data,
@@ -82,11 +81,11 @@ from .config import (
     dump_manager_overrides,
     print_contribution_hints,
 )
-from .execution import CLIError, SPINNER_DELAY, highlight_cli_name
+from .execution import CLIError, highlight_cli_name
 from .inventory import MAIN_PLATFORMS
 from .manager import PackageManager
 from .package import packages_asdict
-from .pool import pool
+from .pool import collect_from_managers, pool
 from .sbom import (
     SBOM,
     SPDX,
@@ -109,9 +108,12 @@ else:
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from typing import IO
 
     from click_extra import Context, Parameter
+
+    from .package import Package
 
 
 # Subcommand sections.
@@ -364,7 +366,7 @@ def print_serialized_and_exit(ctx: Context, data: object) -> None:
     the shared ``mpm`` root element and stop the program. Otherwise return, so
     the caller falls through to its human-friendly table rendering.
     """
-    table_format = ctx.meta["click_extra.table_format"]
+    table_format = ctx.meta[TABLE_FORMAT]
     if table_format in SERIALIZATION_FORMATS:
         print_data(
             data, table_format, root_element="mpm", package="meta-package-manager"
@@ -731,8 +733,8 @@ def mpm(
     """CLI options shared by all subcommands."""
     # Silence all log messages for serialization rendering unless in debug mode.
     if (
-        ctx.meta["click_extra.table_format"] in SERIALIZATION_FORMATS
-        and ctx.meta["click_extra.verbosity"] != "DEBUG"
+        ctx.meta[TABLE_FORMAT] in SERIALIZATION_FORMATS
+        and ctx.meta[VERBOSITY] != "DEBUG"
     ):
         logging.disable()
 
@@ -750,14 +752,14 @@ def mpm(
         ctx.call_on_close(remove_logging_override)
 
     # click-extra's default --progress/--no-progress option resolves the user's
-    # intent (lowered by --accessible) into ctx.meta["click_extra.progress"],
+    # intent (lowered by --accessible) into ctx.meta[PROGRESS],
     # decoupled from color. mpm layers on its own output-mode gating: no spinner in
     # serialized output or at DEBUG verbosity (where logs already narrate). The TTY
     # and TERM=dumb checks are left to the spinner widget (see _make_spinner).
     show_progress = (
-        ctx.meta["click_extra.progress"]
-        and ctx.meta["click_extra.table_format"] not in SERIALIZATION_FORMATS
-        and ctx.meta["click_extra.verbosity"] != "DEBUG"
+        ctx.meta[PROGRESS]
+        and ctx.meta[TABLE_FORMAT] not in SERIALIZATION_FORMATS
+        and ctx.meta[VERBOSITY] != "DEBUG"
     )
 
     # Apply per-manager attribute overrides from [mpm.managers.<id>] sections of
@@ -886,7 +888,7 @@ def mpm(
     # Override ctx.print_table with the upstream sorted variant.
     ctx.print_table = partial(
         print_sorted_table,
-        table_format=ctx.meta["click_extra.table_format"],
+        table_format=ctx.meta[TABLE_FORMAT],
     )
 
 
@@ -936,7 +938,7 @@ def managers(ctx):
     )
 
     # Machine-friendly data rendering.
-    table_format = ctx.meta["click_extra.table_format"]
+    table_format = ctx.meta[TABLE_FORMAT]
     if table_format in SERIALIZATION_FORMATS:
         manager_data = {}
         # Build up the data structure of manager metadata.
@@ -1021,75 +1023,46 @@ def managers(ctx):
     )
 
 
-def collect_from_managers(
-    ctx: Context,
-    label: str,
-    done_label: str,
-    managers: list[PackageManager],
-    work: Callable[[PackageManager], tuple[str, dict]],
-) -> list[tuple[str, dict]]:
-    """Run ``work(manager)`` for every manager and return the results in order.
+def _manager_result(
+    manager: PackageManager, packages: tuple[dict, ...]
+) -> tuple[str, dict]:
+    """Build the standard ``(id, payload)`` result for a read-only manager query.
 
-    Read-only operations query each manager independently, so they run
-    concurrently across a thread pool sized by :option:`mpm --jobs`. The work is
-    subprocess I/O, during which the GIL is released, so threads parallelize it
-    fully: a slow ``guix search`` no longer blocks the fast managers while it runs.
-
-    Execution falls back to sequential when :option:`mpm --jobs` is ``1``, when a
-    single manager is selected, or at DEBUG verbosity (where interleaved
-    per-manager logs would be unreadable).
-
-    In concurrent mode the per-manager spinners would garble each other on stderr,
-    so they are suppressed in favor of a single aggregate spinner for the batch. If
-    that spinner was actually shown (a slow batch on a terminal), it is left on
-    screen as a persistent ``✓ Searched N managers (Ns)`` line; fast, piped, or
-    serialized runs get nothing.
-
-    :param label: present-tense verb shown in the running spinner ("Searching").
-    :param done_label: past-tense verb for the persistent finisher ("Searched").
-    :param managers: the already-selected managers, materialized so their version
-        probes and per-manager option stamping happen up front, in this thread.
-    :param work: returns this manager's ``(id, data)`` result; it must handle its
-        own :py:class:`meta_package_manager.execution.CLIError` (each manager owns
-        its subprocess and error list, so the call is thread-safe per manager).
+    The payload shape — ``id``, ``name``, ``packages``, ``errors`` — is shared by
+    the ``installed``, ``outdated`` and ``search`` subcommands, their serialized
+    output and their table rendering. ``errors`` is collected at the last minute so
+    it gathers every distinct CLI error the manager accumulated during the query; a
+    non-empty list also marks the manager's ``✗`` in the concurrent spinner trail
+    (see :py:func:`meta_package_manager.pool.collect_from_managers`).
     """
-    # Coherent debug narration trumps the speed-up: stay sequential at DEBUG.
-    jobs = (
-        1
-        if ctx.meta["click_extra.verbosity"] == "DEBUG"
-        else ctx.meta["click_extra.jobs"]
-    )
-    if jobs <= 1 or len(managers) <= 1:
-        return [work(manager) for manager in managers]
+    return manager.id, {
+        "id": manager.id,
+        "name": manager.name,
+        "packages": packages,
+        # Serialize errors at the last minute to gather all we encountered.
+        "errors": list({expt.error for expt in manager.cli_errors}),
+    }
 
-    # Suppress the per-manager spinners (which would collide on stderr) and show a
-    # single aggregate spinner for the whole concurrent batch instead.
-    spinner_enabled = None if any(manager.progress for manager in managers) else False
-    for manager in managers:
-        manager.progress = False
 
-    results: list[tuple[str, dict]] = [("", {})] * len(managers)
-    with Spinner(
-        f"{label} {len(managers)} managers",
-        delay=SPINNER_DELAY,
-        enabled=spinner_enabled,
-        timer=True,
-    ) as spinner:
-        with ThreadPoolExecutor(max_workers=jobs) as executor:
-            future_to_index = {
-                executor.submit(work, manager): index
-                for index, manager in enumerate(managers)
-            }
-            for future in as_completed(future_to_index):
-                results[future_to_index[future]] = future.result()
-        # Leave a persistent "✓ Searched N managers (Ns)" line, but only when the
-        # spinner was actually shown (a slow batch on a terminal). ``shown`` is
-        # False for fast, disabled, piped or serialized runs, where ``ok()`` would
-        # otherwise still emit the line and pollute the output.
-        if spinner.shown:
-            spinner.label = f"{done_label} {len(managers)} managers"
-            spinner.ok()
-    return results
+def _safe_packages(
+    manager: PackageManager,
+    source: Callable[[], Iterable[Package]],
+    fields: tuple[str, ...],
+    action: str,
+) -> tuple[dict, ...]:
+    """Materialize ``source()`` into package dicts, tolerating a CLI failure.
+
+    On :py:class:`meta_package_manager.execution.CLIError` (the manager's query
+    subprocess failed), log a one-line ``"Could not {action} from {manager}"``
+    warning and return no packages, so one broken manager never aborts the batch.
+    """
+    try:
+        return tuple(packages_asdict(source(), fields))
+    except CLIError:
+        logging.warning(
+            f"Could not {action} from {theme().invoked_command(manager.id)}."
+        )
+        return ()
 
 
 @mpm.command(aliases=["list"], short_help="List installed packages.", section=EXPLORE)
@@ -1117,14 +1090,10 @@ def installed(ctx, duplicates):
     )
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
+        # installed_or_empty() never raises (it swallows errors into an empty
+        # result), so no CLIError guard is needed here.
         packages = tuple(packages_asdict(manager.installed_or_empty(), fields))
-        return manager.id, {
-            "id": manager.id,
-            "name": manager.name,
-            "packages": packages,
-            # Serialize errors at the last minute to gather all we encountered.
-            "errors": list({expt.error for expt in manager.cli_errors}),
-        }
+        return _manager_result(manager, packages)
 
     for manager_id, data in collect_from_managers(
         ctx, "Listing", "Listed", managers, fetch
@@ -1219,21 +1188,13 @@ def outdated(ctx, plugin_output):
     )
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
-        try:
-            packages = tuple(packages_asdict(manager.refiltered_outdated, fields))
-        except CLIError:
-            logging.warning(
-                f"Could not list outdated packages "
-                f"from {theme().invoked_command(manager.id)}."
-            )
-            packages = ()
-        return manager.id, {
-            "id": manager.id,
-            "name": manager.name,
-            "packages": packages,
-            # Serialize errors at the last minute to gather all we encountered.
-            "errors": list({expt.error for expt in manager.cli_errors}),
-        }
+        packages = _safe_packages(
+            manager,
+            lambda: manager.refiltered_outdated,
+            fields,
+            "list outdated packages",
+        )
+        return _manager_result(manager, packages)
 
     for manager_id, data in collect_from_managers(
         ctx, "Checking", "Checked", managers, fetch
@@ -1336,25 +1297,13 @@ def search(ctx, extended, exact, refilter, query):
     )
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
-        try:
-            packages = tuple(
-                packages_asdict(
-                    getattr(manager, search_method)(query, extended, exact),
-                    fields,
-                ),
-            )
-        except CLIError:
-            logging.warning(
-                f"Could not search packages from {theme().invoked_command(manager.id)}."
-            )
-            packages = ()
-        return manager.id, {
-            "id": manager.id,
-            "name": manager.name,
-            "packages": packages,
-            # Serialize errors at the last minute to gather all we encountered.
-            "errors": list({expt.error for expt in manager.cli_errors}),
-        }
+        packages = _safe_packages(
+            manager,
+            lambda: getattr(manager, search_method)(query, extended, exact),
+            fields,
+            "search packages",
+        )
+        return _manager_result(manager, packages)
 
     for manager_id, data in collect_from_managers(
         ctx, "Searching", "Searched", managers, fetch
@@ -1427,7 +1376,7 @@ def which(ctx, cli_names):
         logging.warning("Ignore --sort-by option for which command.")
 
     # Machine-friendly data rendering.
-    table_format = ctx.meta["click_extra.table_format"]
+    table_format = ctx.meta[TABLE_FORMAT]
     if table_format in SERIALIZATION_FORMATS:
         cli_data = [
             {

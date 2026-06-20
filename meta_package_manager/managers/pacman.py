@@ -251,7 +251,17 @@ class Paru(Pacman):
 
 
 class Yay(Pacman):
-    """``yay`` wraps ``pacman`` and shadows its options."""
+    """``yay`` wraps ``pacman`` and shadows its options.
+
+    .. note::
+        ``yay`` does not honor mpm's release-age
+        :py:attr:`cooldown <meta_package_manager.execution.CLIExecutor.cooldown>`.
+        Since ``v13`` a user-authored ``UpgradeSelect`` Lua hook can express one, but
+        it loads only from the fixed ``~/.config/yay/init.lua`` and fires only on
+        ``yay -Syu``, so mpm can neither inject a per-run policy nor cover ``yay -S``
+        installs. An env-var/flag injection point is requested upstream at
+        https://github.com/Jguer/yay/issues/2883.
+    """
 
     name = "Arch Linux yay"
 

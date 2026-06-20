@@ -84,7 +84,11 @@ def test_runs_sequentially_in_main_thread(jobs, verbosity, manager_count):
     managers = [FakeManager(f"m{i}") for i in range(manager_count)]
     threads: list = []
     collect_from_managers(
-        ctx, "Testing", "Tested", managers, _record_thread(threads, threading.Lock())
+        ctx,  # type: ignore[arg-type]
+        "Testing",
+        "Tested",
+        managers,  # type: ignore[arg-type]
+        _record_thread(threads, threading.Lock()),
     )
     assert threads, "work was never called"
     assert all(thread is threading.main_thread() for thread in threads)
@@ -95,7 +99,11 @@ def test_runs_concurrently_off_the_main_thread():
     managers = [FakeManager(f"m{i}") for i in range(4)]
     threads: list = []
     collect_from_managers(
-        ctx, "Testing", "Tested", managers, _record_thread(threads, threading.Lock())
+        ctx,  # type: ignore[arg-type]
+        "Testing",
+        "Tested",
+        managers,  # type: ignore[arg-type]
+        _record_thread(threads, threading.Lock()),
     )
     assert len(threads) == 4
     assert all(thread is not threading.main_thread() for thread in threads)
@@ -112,7 +120,13 @@ def test_preserves_input_order_despite_completion_order():
         time.sleep(0.01 * (len(managers) - index))
         return manager.id, {"index": index}
 
-    results = collect_from_managers(ctx, "Testing", "Tested", managers, work)
+    results = collect_from_managers(
+        ctx,  # type: ignore[arg-type]
+        "Testing",
+        "Tested",
+        managers,  # type: ignore[arg-type]
+        work,
+    )
     assert [manager_id for manager_id, _ in results] == [f"m{i}" for i in range(8)]
 
 
@@ -121,7 +135,11 @@ def test_suppresses_per_manager_spinners_when_concurrent():
     ctx = FakeContext(jobs=4)
     managers = [FakeManager(f"m{i}", progress=True) for i in range(4)]
     collect_from_managers(
-        ctx, "Testing", "Tested", managers, lambda manager: (manager.id, {})
+        ctx,  # type: ignore[arg-type]
+        "Testing",
+        "Tested",
+        managers,  # type: ignore[arg-type]
+        lambda manager: (manager.id, {}),
     )
     assert all(manager.progress is False for manager in managers)
 
@@ -131,7 +149,11 @@ def test_keeps_per_manager_spinners_when_sequential():
     ctx = FakeContext(jobs=1)
     managers = [FakeManager(f"m{i}", progress=True) for i in range(3)]
     collect_from_managers(
-        ctx, "Testing", "Tested", managers, lambda manager: (manager.id, {})
+        ctx,  # type: ignore[arg-type]
+        "Testing",
+        "Tested",
+        managers,  # type: ignore[arg-type]
+        lambda manager: (manager.id, {}),
     )
     assert all(manager.progress is True for manager in managers)
 
@@ -140,7 +162,11 @@ def test_empty_manager_list_returns_empty():
     ctx = FakeContext(jobs=4)
     assert (
         collect_from_managers(
-            ctx, "Testing", "Tested", [], lambda manager: (manager.id, {})
+            ctx,  # type: ignore[arg-type]
+            "Testing",
+            "Tested",
+            [],
+            lambda manager: (manager.id, {}),
         )
         == []
     )
@@ -155,7 +181,11 @@ def test_no_finisher_line_off_terminal(capsys):
     ctx = FakeContext(jobs=4)
     managers = [FakeManager(f"m{i}", progress=True) for i in range(4)]
     collect_from_managers(
-        ctx, "Searching", "Searched", managers, lambda manager: (manager.id, {})
+        ctx,  # type: ignore[arg-type]
+        "Searching",
+        "Searched",
+        managers,  # type: ignore[arg-type]
+        lambda manager: (manager.id, {}),
     )
     assert "Searched" not in capsys.readouterr().err
 
@@ -174,7 +204,13 @@ def test_finisher_line_when_spinner_shown(monkeypatch):
         time.sleep(0.1)  # Outlast the zeroed delay so the spinner draws a frame.
         return manager.id, {}
 
-    collect_from_managers(ctx, "Searching", "Searched", managers, slow_work)
+    collect_from_managers(
+        ctx,  # type: ignore[arg-type]
+        "Searching",
+        "Searched",
+        managers,  # type: ignore[arg-type]
+        slow_work,
+    )
     output = tty.getvalue()
     # The spinner draws its seeded running count before any manager lands...
     assert "Searching 0/4 managers" in output
@@ -200,7 +236,13 @@ def test_failure_trail_marks_errored_managers(monkeypatch):
         errors = ["boom"] if manager.id == "m2" else []
         return manager.id, {"errors": errors}
 
-    collect_from_managers(ctx, "Searching", "Searched", managers, work)
+    collect_from_managers(
+        ctx,  # type: ignore[arg-type]
+        "Searching",
+        "Searched",
+        managers,  # type: ignore[arg-type]
+        work,
+    )
     output = tty.getvalue()
     assert KO_GLYPH in output  # The failure glyph, for m2.
     assert OK_GLYPH in output  # The success glyph, for the other managers.
@@ -229,7 +271,13 @@ def test_trail_includes_managers_that_finish_before_the_spinner_shows(monkeypatc
         time.sleep(0.03 if int(manager.id[1:]) < 3 else 0.4)
         return manager.id, {}
 
-    collect_from_managers(ctx, "Checking", "Checked", managers, work)
+    collect_from_managers(
+        ctx,  # type: ignore[arg-type]
+        "Checking",
+        "Checked",
+        managers,  # type: ignore[arg-type]
+        work,
+    )
     output = tty.getvalue()
     # Every manager — fast and slow alike — appears, not just the slow three.
     assert all(f"m{i}" in output for i in range(6))

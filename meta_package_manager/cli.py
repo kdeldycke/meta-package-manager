@@ -44,7 +44,6 @@ from boltons.cacheutils import LRI, cached
 from click_extra import (
     STRING,
     Choice,
-    Context,
     EnumChoice,
     File,
     IntRange,
@@ -155,6 +154,17 @@ XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
 <https://xkcd.com/1654/>`_.
 
 See the corresponding :issue:`implementation rationale in issue #10 <10>`.
+"""
+
+COOLDOWN_SUPPORTED_MANAGERS = tuple(
+    sorted(mid for mid, manager in pool.items() if manager.supports_cooldown)
+)
+"""IDs of the managers that natively enforce a release-age :option:`mpm --cooldown`.
+
+Derived from the pool so the ``--cooldown`` help text never drifts from the set of
+managers that actually carry a :py:attr:`cooldown_env_var
+<meta_package_manager.execution.CLIExecutor.cooldown_env_var>`: adding cooldown
+support to a manager surfaces it here automatically.
 """
 
 
@@ -655,8 +665,8 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         "attacks. Accepts a friendly duration ('7 days', '1 week', '12h'), an "
         "ISO 8601 duration ('P7D', 'PT12H'), or an RFC 3339 absolute timestamp "
         "('2024-05-01T00:00:00Z'). Only honored by managers with native "
-        "release-age support (uv, npm, pip, pipx); the others are skipped "
-        "unless --allow-unsupported-managers is set.",
+        "release-age support (" + ", ".join(COOLDOWN_SUPPORTED_MANAGERS) + "); the "
+        "others are skipped unless --allow-unsupported-managers is set.",
     ),
     option(
         "--require-cooldown-support/--allow-unsupported-managers",

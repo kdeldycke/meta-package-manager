@@ -278,7 +278,7 @@ class CLIExecutor:
     """Maximum number of seconds to wait for a CLI call to complete.
 
     ``None`` means the user expressed no explicit preference: the effective cap is
-    then resolved per-operation by :py:meth:`_resolve_timeout` from
+    then resolved per-operation by ``_resolve_timeout()`` from
     :py:data:`OPERATION_TIMEOUTS`. A non-``None`` value (the ``--timeout`` flag or a
     per-manager override) wins for every operation.
     """
@@ -297,8 +297,8 @@ class CLIExecutor:
 
     Set by the CLI to an interactive, human-facing run only (a TTY, no serialized
     output, not at DEBUG verbosity). Even when ``True`` the spinner still
-    self-suppresses off a TTY: see :py:meth:`_make_spinner`. Defaults to ``False``
-    so programmatic use stays silent.
+    self-suppresses off a TTY: see ``_make_spinner()``. Defaults to ``False`` so
+    programmatic use stays silent.
     """
 
     cooldown: timedelta | None = None

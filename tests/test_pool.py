@@ -277,7 +277,8 @@ def _jobs_context(jobs: int, verbosity: str = "INFO") -> click.Context:
 def test_warm_availability_skips_without_context():
     """No active CLI context: leave probing to the lazy, sequential filter loop."""
     accessed: list = []
-    warm_availability([_RecordingManager(accessed), _RecordingManager(accessed)])
+    managers = [_RecordingManager(accessed), _RecordingManager(accessed)]
+    warm_availability(managers)  # type: ignore[arg-type]
     assert accessed == []
 
 
@@ -293,7 +294,7 @@ def test_warm_availability_skips_when_not_concurrent(jobs, verbosity, count):
     accessed: list = []
     managers = [_RecordingManager(accessed) for _ in range(count)]
     with _jobs_context(jobs, verbosity):
-        warm_availability(managers)
+        warm_availability(managers)  # type: ignore[arg-type]
     assert accessed == []
 
 
@@ -302,6 +303,6 @@ def test_warm_availability_probes_concurrently():
     threads: list = []
     managers = [_RecordingManager(threads) for _ in range(4)]
     with _jobs_context(jobs=4):
-        warm_availability(managers)
+        warm_availability(managers)  # type: ignore[arg-type]
     assert len(threads) == 4
     assert all(thread is not threading.main_thread() for thread in threads)

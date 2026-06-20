@@ -66,6 +66,10 @@ jobs:
           echo "${guix_root}/bin" >> "${GITHUB_PATH}"
           # Authorize the build farm so substitutes are usable.
           for pub in "${guix_root}"/share/guix/*.pub; do
+            # The *.pub keys are world-readable, so reading them via the input
+            # redirect works as the unprivileged user; only the ACL write that
+            # `guix archive --authorize` performs needs root, hence sudo.
+            # shellcheck disable=SC2024
             sudo "${guix_root}/bin/guix" archive --authorize < "${pub}"
           done
 
@@ -110,7 +114,11 @@ jobs:
           echo "log files: ${paths:-<none>}"
           for logf in ${paths}; do
             echo "=================== ${logf} ==================="
-            { sudo zcat "${logf}" 2>/dev/null || sudo bzcat "${logf}" 2>/dev/null || zcat "${logf}" 2>/dev/null; } | tail -250
+            {
+              sudo zcat "${logf}" 2>/dev/null \
+                || sudo bzcat "${logf}" 2>/dev/null \
+                || zcat "${logf}" 2>/dev/null
+            } | tail -250
           done
           exit 1
 

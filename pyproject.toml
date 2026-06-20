@@ -492,7 +492,23 @@ test-matrix.replace.os = { "ubuntu-slim" = "ubuntu-24.04" }
 # lxml cannot compile on Windows ARM64.
 # See: https://bugs.launchpad.net/lxml/+bug/2004481
 test-matrix.remove.os = [ "windows-11-arm" ]
-test-matrix.exclude = [ { python-version = "3.15t" } ]
+# Free-threaded 3.14t and prerelease 3.15 exercise interpreter-level
+# compatibility, which is OS-independent: the shipped-config slice (3.10,
+# 3.14) already covers every OS, so these two only need the single fastest
+# runner (ubuntu-24.04-arm), not the full spread. 3.14t runs stable (3.14's
+# free-threaded build is supported); 3.15 keeps repomatic's built-in
+# prerelease `unstable` flag. Excludes name post-replace OS values, since
+# replace runs before exclude. See repomatic's test-matrix guide.
+test-matrix.exclude = [
+  { os = "ubuntu-24.04", python-version = "3.14t" },
+  { os = "macos-26", python-version = "3.14t" },
+  { os = "macos-26-intel", python-version = "3.14t" },
+  { os = "windows-2025", python-version = "3.14t" },
+  { os = "ubuntu-24.04", python-version = "3.15" },
+  { os = "macos-26", python-version = "3.15" },
+  { os = "macos-26-intel", python-version = "3.15" },
+  { os = "windows-2025", python-version = "3.15" },
+]
 # Test plan for binary testing.
 test-plan.file = "./tests/cli-test-plan.yaml"
 # Sync optional-dependencies into the build venv so the Nuitka binary ships

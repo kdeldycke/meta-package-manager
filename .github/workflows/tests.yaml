@@ -184,6 +184,12 @@ jobs:
         run: |
           npm install --global npm
 
+      # pnpm
+      # Installed through npm, which the steps above set up on every OS (Node itself is
+      # pre-installed on all GitHub-hosted runners), so one cross-platform step suffices.
+      - name: pnpm - install
+        run: npm install --global pnpm
+
       # Cargo
       - name: Cargo - macOS install
         if: runner.os == 'macOS'

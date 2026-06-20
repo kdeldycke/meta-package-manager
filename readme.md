@@ -107,6 +107,7 @@ Meta Package Manager,paru,1
 Meta Package Manager,pip,1
 Meta Package Manager,pipx,1
 Meta Package Manager,pkg,1
+Meta Package Manager,pnpm,1
 Meta Package Manager,ports,1
 Meta Package Manager,pwsh-gallery,1
 Meta Package Manager,scoop,1
@@ -171,6 +172,7 @@ Meta Package Manager,zypper,1
 | [`pip`](https://pip.pypa.io)                                                            | >=26.1.0         |    ✓     |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`pipx`](https://pipx.pypa.io)                                                          | >=1.0.0          |    ✓     |    🅱️     |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`pkg`](https://github.com/freebsd/pkg)                                                 | >=1.11           |          |           |               |       |             |         |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
+| [`pnpm`](https://pnpm.io)                                                               | >=11.0.0         |    ✓     |           |      🐧       |  🍎   |      ⨂      |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |     ✓     |
 | [`ports`](https://www.freebsd.org/ports/)                                               |                  |          |           |               |       |             |         |      ✓      |     ✓      |          |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |
 | [`pwsh-gallery`](https://www.powershellgallery.com)                                     | >=7.4.0          |          |           |      🐧       |  🍎   |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |        |           |
 | [`scoop`](https://scoop.sh)                                                             | >=0.2.4          |          |           |               |       |             |   🪟    |      ✓      |     ✓      |    ✓     |     ✓     |     ✓     |       ✓       |    ✓     |   ✓    |     ✓     |

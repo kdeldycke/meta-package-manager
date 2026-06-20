@@ -61,6 +61,7 @@ keywords = [
   "pipx",
   "pkg",
   "plugin",
+  "pnpm",
   "portage",
   "ports",
   "powershell",
@@ -615,7 +616,7 @@ any-glob-to-any-file = ["meta_package_manager/managers/nix*", "tests/*nix*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: npm-based"
-any-glob-to-any-file = ["meta_package_manager/managers/npm*", "meta_package_manager/managers/yarn*", "tests/*npm*", "tests/*yarn*"]
+any-glob-to-any-file = ["meta_package_manager/managers/npm*", "meta_package_manager/managers/pnpm*", "meta_package_manager/managers/yarn*", "tests/*npm*", "tests/*pnpm*", "tests/*yarn*"]
 
 [[tool.repomatic.labels.file-rules]]
 label = "📦 manager: pacman-based"
@@ -757,7 +758,7 @@ patterns = ["nix", "nixpkgs", "nixos"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: npm-based"
-patterns = ["npm", "node", "yarn"]
+patterns = ["npm", "node", "pnpm", "yarn"]
 
 [[tool.repomatic.labels.content-rules]]
 label = "📦 manager: pacman-based"
@@ -942,7 +943,7 @@ description = "nix"
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: npm-based"
 color = "bfdadc"
-description = "npm, yarn, yarn-berry"
+description = "npm, pnpm, yarn, yarn-berry"
 
 [[tool.repomatic.labels.extra]]
 name = "📦 manager: pacman-based"

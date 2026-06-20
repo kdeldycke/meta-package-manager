@@ -245,6 +245,7 @@ PACKAGE_IDS = {
     "pip": "pytz",
     "pipx": "pycowsay",
     "pkg": "nyancat",
+    "pnpm": "ms",
     "ports": "net/nyancat",
     "pwsh-gallery": "Posh-Git",
     "scoop": "main/hyperfine",

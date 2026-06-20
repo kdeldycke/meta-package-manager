@@ -104,7 +104,7 @@ MANAGER_LABEL_GROUPS: TLabelGroup = {
     "rpm-based": frozenset({"dnf", "dnf5", "yum", "zypper"}),
     "dpkg-based": frozenset({"apt", "apt-mint", "deb-get", "opkg", "pacstall"}),
     "homebrew": frozenset({"brew", "cask", "zerobrew"}),
-    "npm-based": frozenset({"npm", "yarn", "yarn-berry"}),
+    "npm-based": frozenset({"npm", "pnpm", "yarn", "yarn-berry"}),
     "pacman-based": frozenset({"pacman", "pacaur", "paru", "yay"}),
     "pip-based": frozenset({"pip", "pipx"}),
     "pkg-based": frozenset({"pkg", "ports"}),

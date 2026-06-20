@@ -154,18 +154,6 @@ $ uv run -- sphinx-build -b html ./docs ./docs/html
 The generation of API documentation is
 [covered by a dedicated workflow](https://github.com/kdeldycke/meta-package-manager/blob/main/.github/workflows/docs.yaml).
 
-## Screenshots
-
-Project screenshots found in the documentation and the `readme.md` file needs
-to be refreshed by hand once in a while.
-
-To produce clean and fancy terminals screenshots, use either:
-
-- [Graphite Shot](https://graphite-shot.now.sh)
-- [Carbon](https://github.com/carbon-app/carbon)
-- [CodeKeep](https://codekeep.io/screenshot)
-- [chalk.ist](https://chalk.ist)
-
 ## Documentation requirements
 
 ### Scope of `CLAUDE.md` vs `readme.md`

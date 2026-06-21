@@ -588,12 +588,16 @@ compared_gt = (
     ("1.0.0-alpha.1", "1.0.0-alpha"),
     # RPM release bump.
     ("1.0-2.fc38", "1.0-1.fc38"),
-    # Debian/pacman epoch bump with an identical base: correct because the
-    # epoch is the leading token and sorts numerically (1 < 2), even though
-    # ``:`` is just a delimiter to the tokenizer. Contrast the ``debian-epoch``
-    # xfail below, where an epoch must override a *higher* base version.
+    # Epochs dominate: a leading ``N:`` (Debian, RPM, pacman) or ``N!`` (PEP
+    # 440) outranks the rest of the version, and an absent epoch counts as 0.
+    ("1!1.0", "2.0"),
+    ("2:1.0-1", "9.0"),
+    ("1:1.0", "1.0"),
+    # Higher epoch wins even over a much higher base version.
+    ("2:1.0-1", "1:9.0-1"),
+    # Epoch bump with an identical base.
     ("2:1.0-1", "1:1.0-1"),
-    # Same epoch, Debian revision (pkgrel) bump.
+    # Same epoch: fall through to a normal release comparison.
     ("1:1.0-2", "1:1.0-1"),
     # Git describe commit count.
     ("1.8.6-125-g6cd4c31", "1.8.6-124-g6cd4c31"),
@@ -638,6 +642,9 @@ compared_eq = (
     # PEP 440 alias normalization.
     ("1.0alpha1", "1.0a1"),
     ("1.0c1", "1.0rc1"),
+    # Epoch: an explicit ``0:`` equals an absent epoch; padding still applies.
+    ("0:1.0", "1.0"),
+    ("1:1.0", "1:1.0.0"),
 )
 
 
@@ -700,6 +707,14 @@ def test_version_comparison_eq(ver1, ver2):
             "2020.03.24",
             "2020.12.01",
             "2024.1.15",
+        ],
+        # Epoch dominance progression: a higher epoch outranks the base version.
+        [
+            None,
+            "9.0",
+            "1:1.0",
+            "1:2.0",
+            "2:0.1",
         ],
     ),
 )
@@ -855,16 +870,15 @@ def test_diff_versions(old, new, expected_common, expected_old, expected_new):
 @pytest.mark.parametrize(
     ("ver1", "ver2"),
     (
-        # PEP 440: epoch outranks any base version.
-        pytest.param("1!1.0", "2.0", id="pep440-epoch"),
-        # Debian: epoch outranks any base version.
-        pytest.param("2:1.0-1", "9.0", id="debian-epoch"),
-        # Debian: revision (the part after the last ``-``) makes a version
-        # newer, but the tokenizer treats string suffixes as pre-release.
+        # Debian: the revision (after the last ``-``) makes a version newer,
+        # but ``-`` also introduces a semver pre-release, which makes a version
+        # older. A format-agnostic comparator cannot tell the two apart and
+        # treats the string suffix as a pre-release. Unlike epochs, this
+        # separator is genuinely ambiguous, so it stays unhandled.
         pytest.param("6.0.1-0ubuntu1", "6.0.1", id="debian-revision"),
     ),
 )
-@pytest.mark.xfail(strict=True, reason="Epoch semantics.")
+@pytest.mark.xfail(strict=True, reason="Debian revision vs semver pre-release.")
 def test_version_comparison_gt_known_failures(ver1, ver2):
     assert TokenizedString(ver1) > TokenizedString(ver2)
 

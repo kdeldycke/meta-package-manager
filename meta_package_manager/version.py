@@ -33,6 +33,12 @@ pure-string nor pure-numeric comparison achieves.
 
 Key rules:
 
+- **Epochs dominate.** A leading integer joined by ``:`` (Debian, RPM,
+  pacman) or ``!`` (PEP 440) is an *epoch*: a version-space reset that
+  outranks the rest of the string. ``2:1.0 > 9.0`` and ``1!1.0 > 2.0``
+  because epoch ``2``/``1`` beats the implicit epoch ``0``. Versions
+  without an epoch default to ``0``, so they compare unchanged.
+
 - **Integers outrank strings.** A numeric token always sorts higher than
   a string token at the same position. This makes ``3.12.0 > 3.12.0a4``
   (release beats alpha) and ``0.1 > 0.beta2`` work without
@@ -67,19 +73,19 @@ Limitations
 
 This is a heuristic comparator, not a format-specific parser.
 
-- **PEP 440 ordering** is richer than what we implement. Epochs
-  (``1!``), ``.devN`` ordering relative to pre-releases, and
-  post-release semantics are not handled. Use ``packaging.version`` for
-  strict PEP 440 compliance.
+- **PEP 440 ordering** is richer than what we implement. ``.devN``
+  ordering relative to pre-releases is not handled. Use
+  ``packaging.version`` for strict PEP 440 compliance. Epochs (``1!``)
+  *are* handled — see the epoch rule above.
 
 - **Perl floating-point versions** (``1.1 == 1.10``) are treated as
   ``(1, 1)`` vs ``(1, 10)`` — not equal. The Gentoo three-digit-group
   conversion scheme is not implemented.
 
-- **Format-specific separators** like Debian epochs (``:``), Java build
-  metadata (``,``), or Perl-style floats (``.``) are treated as plain
-  delimiters, which can produce wrong comparison results when the
-  separator carries structural meaning.
+- **Format-specific separators** like Java build metadata (``,``) or
+  Perl-style floats (``.``) are treated as plain delimiters, which can
+  produce wrong comparison results when the separator carries structural
+  meaning. The epoch separators ``:`` and ``!`` *are* recognized.
 
 References
 ----------
@@ -330,6 +336,10 @@ class TokenizedString:
     separators: tuple[str, ...] = ()
     original_segments: tuple[str, ...] = ()
     """Original-case token strings for lossless ``pretty_print()``."""
+    epoch: int = 0
+    """Leading epoch (``N:`` or ``N!``); dominates comparison, ``0`` when absent."""
+    release: tuple[Token, ...] = ()
+    """Comparison tokens with the epoch removed. See ``_split_epoch()``."""
 
     def __hash__(self):
         """A ``TokenizedString`` is made unique by its original string and tuple of
@@ -377,6 +387,7 @@ class TokenizedString:
         self.tokens, self.separators, self.original_segments = self.tokenize(
             self.string,
         )
+        self.epoch, self.release = self._split_epoch(self.tokens, self.separators)
 
     def __deepcopy__(self, memo):
         """Generic recursive deep copy of the current instance.
@@ -490,6 +501,34 @@ class TokenizedString:
         return tokens
 
     @staticmethod
+    def _split_epoch(
+        tokens: tuple[Token, ...],
+        separators: tuple[str, ...],
+    ) -> tuple[int, tuple[Token, ...]]:
+        """Split a leading epoch from the comparison tokens.
+
+        An *epoch* is a leading integer joined to the rest of the version by
+        ``:`` (Debian, RPM, pacman) or ``!`` (PEP 440). It encodes a deliberate
+        version-space reset and therefore outranks every component after it.
+
+        This is the one format-specific separator safe to special-case in an
+        otherwise format-agnostic comparator: a leading ``<int>:`` or
+        ``<int>!`` means an epoch in every scheme that uses it, and schemes
+        that don't never start that way. Contrast the ``-`` revision, whose
+        meaning flips between schemes (Debian revision makes a version *newer*,
+        a semver pre-release makes it *older*) and so cannot be resolved here.
+
+        Returns the epoch value (``0`` when absent) and the remaining tokens.
+        The epoch token is stripped from the release so that an explicit
+        ``0:`` compares equal to an absent epoch.
+        """
+        if tokens and separators and separators[0] in {":", "!"}:
+            epoch = tokens[0].integer
+            if epoch is not None:
+                return epoch, tokens[1:]
+        return 0, tokens
+
+    @staticmethod
     def _compare_tuples(
         a: tuple[Token, ...],
         b: tuple[Token, ...],
@@ -548,11 +587,25 @@ class TokenizedString:
             longer_wins = -1
         return -longer_wins if len(a) < len(b) else longer_wins
 
+    def _cmp(self, other: TokenizedString) -> int:
+        """Three-way comparison with epoch dominance.
+
+        Returns ``-1``, ``0``, or ``1``.
+
+        The ``epoch`` is compared first: a higher epoch always wins, regardless
+        of the rest of the version. Only when epochs are equal does the
+        comparison fall through to the epoch-stripped ``release`` tokens via
+        ``_compare_tuples()``.
+        """
+        if self.epoch != other.epoch:
+            return -1 if self.epoch < other.epoch else 1
+        return self._compare_tuples(self.release, other.release)
+
     def __eq__(self, other):
         if other is None:
             return False
         if isinstance(other, TokenizedString):
-            return self._compare_tuples(self.tokens, other.tokens) == 0
+            return self._cmp(other) == 0
         if isinstance(other, tuple):
             return tuple(self) == tuple(other)
         return super().__eq__(other)
@@ -561,35 +614,35 @@ class TokenizedString:
         if other is None:
             return True
         if isinstance(other, TokenizedString):
-            return self._compare_tuples(self.tokens, other.tokens) != 0
+            return self._cmp(other) != 0
         return super().__ne__(other)
 
     def __gt__(self, other):
         if other is None:
             return True
         if isinstance(other, TokenizedString):
-            return self._compare_tuples(self.tokens, other.tokens) > 0
+            return self._cmp(other) > 0
         return NotImplemented
 
     def __lt__(self, other):
         if other is None:
             return False
         if isinstance(other, TokenizedString):
-            return self._compare_tuples(self.tokens, other.tokens) < 0
+            return self._cmp(other) < 0
         return NotImplemented
 
     def __ge__(self, other):
         if other is None:
             return True
         if isinstance(other, TokenizedString):
-            return self._compare_tuples(self.tokens, other.tokens) >= 0
+            return self._cmp(other) >= 0
         return NotImplemented
 
     def __le__(self, other):
         if other is None:
             return False
         if isinstance(other, TokenizedString):
-            return self._compare_tuples(self.tokens, other.tokens) <= 0
+            return self._cmp(other) <= 0
         return NotImplemented
 
 

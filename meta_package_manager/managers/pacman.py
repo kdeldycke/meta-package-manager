@@ -98,6 +98,26 @@ class Pacman(PackageManager):
             $ pacman --noconfirm --query --upgrades
             linux 4.19.1.arch1-1 -> 4.19.2.arch1-1
             linux-headers 4.19.1.arch1-1 -> 4.19.2.arch1-1
+
+        .. note::
+            ``pacman --query --upgrades`` (``-Qu``) only reports updates for
+            packages tracked in a sync database (official repos, plus any
+            local repo configured in ``pacman.conf``). Foreign packages, those
+            installed with ``pacman -U`` as most AUR helpers do, are invisible
+            to ``-Qu`` and surface only under ``-Qm``.
+
+            The ``Pacaur``, ``Paru`` and ``Yay`` subclasses inherit this method
+            verbatim, yet still see AUR updates because their own binary's
+            ``-Qu`` additionally queries the AUR RPC for foreign packages. The
+            per-subclass binary override is therefore load-bearing: routing
+            these helpers through ``pacman`` directly would silently drop every
+            AUR update from the results.
+
+            .. caution::
+                This follows upstream ``-Qu`` semantics but has not been
+                confirmed on a live Arch box. Before relying on it, verify that
+                ``yay --query --upgrades`` invoked through mpm actually surfaces
+                a pending AUR update.
         """
         output = self.run_cli("--query", "--upgrades")
 

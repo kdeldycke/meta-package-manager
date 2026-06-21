@@ -151,6 +151,37 @@ def pytest_report_header(config: Config, start_path: Path) -> tuple[str, ...]:
     )
 
 
+@fixture(autouse=True)
+def isolate_user_config(monkeypatch, tmp_path):
+    """Hide the developer's real ``mpm`` configuration from the test suite.
+
+    click-extra derives the default ``--config`` search pattern from
+    :func:`click.get_app_dir`, which resolves to the *host* configuration folder
+    (``~/Library/Application Support/mpm`` on macOS, ``~/.config/mpm`` on Unix).
+    Any ``config.toml`` living there bleeds into every in-process CLI
+    invocation: a local ``cpan = false``, for instance, silently drops the
+    manager from the default selection, so ``check_manager_selection`` assertions
+    that expect the full default set fail locally while passing in CI, which has
+    no such file.
+
+    Repointing ``get_app_dir`` at a fresh empty directory makes the suite
+    hermetic with respect to the host configuration. Tests that exercise config
+    loading pass ``--config <path>`` explicitly, which overrides this default and
+    is therefore left untouched.
+
+    .. note::
+        Only the in-process config discovery is redirected. ``HOME`` is left
+        intact so the integration layer keeps detecting the real package
+        managers, and the override does not propagate to subprocesses.
+    """
+    app_dir = tmp_path / "app-dir"
+    app_dir.mkdir()
+    monkeypatch.setattr(
+        "click_extra.config.get_app_dir",
+        lambda *args, **kwargs: str(app_dir),
+    )
+
+
 @fixture
 def invoke(extra_runner):  # noqa: F811
     yield partial(extra_runner.invoke, mpm)

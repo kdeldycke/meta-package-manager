@@ -61,12 +61,6 @@ class TestInstallRemove(CLISubCommandTests):
                     stderr,
                 ),
             ),
-            bool(
-                re.search(
-                    rf"has been installed with {mid}\.",
-                    stderr,
-                ),
-            ),
         )
 
     @pytest.mark.parametrize("operation", ("install", "remove"))

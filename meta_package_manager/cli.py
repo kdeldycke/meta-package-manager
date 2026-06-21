@@ -1488,6 +1488,54 @@ def cooldown_permits(manager: PackageManager) -> bool:
     return False
 
 
+def package_label(spec: Specifier) -> str:
+    """Render a spec as ``package_id`` or ``package_id@version`` for trail output."""
+    if spec.version:
+        return f"{spec.package_id}{VERSION_SEP}{spec.version}"
+    return spec.package_id
+
+
+class OperationTrail:
+    """A sequential ``✓``/``✗`` ledger and finisher for a state-changing command run.
+
+    Read-only commands get their trail from
+    :func:`meta_package_manager.pool.collect_from_managers`, which runs managers
+    concurrently behind a single aggregate spinner. State-changing commands must stay
+    sequential and keep their per-call spinners, so they drive this lighter helper
+    instead: it prints each outcome between calls (where no spinner animates) and a
+    closing summary. Both are gated on an interactive stderr, the surface the spinner
+    draws on, so piped, serialized and ``DEBUG`` runs stay clean.
+
+    Callers build their own command-specific phrasing (``installed with brew``,
+    ``removed from pip``, …) and hand it to :meth:`mark` and :meth:`finish`.
+    """
+
+    def __init__(self, managers: tuple[PackageManager, ...]) -> None:
+        # Mirror the spinner's own gating: progress enabled (--progress, not
+        # serialized, not DEBUG, all folded into each manager's `progress`) plus an
+        # interactive stderr.
+        self.show = (
+            bool(managers)
+            and any(manager.progress for manager in managers)
+            and sys.stderr.isatty()
+        )
+        self.start = time.monotonic()
+
+    def mark(self, ok: bool, message: str) -> None:
+        """Print one ``✓``/``✗`` ledger line for a single attempt."""
+        if not self.show:
+            return
+        glyph = theme().success(OK_GLYPH) if ok else theme().error(KO_GLYPH)
+        echo(f"{glyph} {message}", err=True)
+
+    def finish(self, ok: bool, summary: str) -> None:
+        """Print the persistent ``✓``/``✗`` ``{summary} (Ns)`` finisher."""
+        if not self.show:
+            return
+        glyph = theme().success(OK_GLYPH) if ok else theme().error(KO_GLYPH)
+        echo(f"{glyph} {summary} ({time.monotonic() - self.start:.1f}s)", err=True)
+
+
 @mpm.command(short_help="Install a package.", section=MAINTENANCE)
 @argument(
     "packages_specs",
@@ -1535,36 +1583,18 @@ def install(ctx, packages_specs):
     # exit code at the end of the command.
     unresolved_specs: list[Specifier] = []
 
-    # Leave a per-package ✓/✗ ledger plus a persistent finisher, mirroring the
-    # read-ops trail (see collect_from_managers) but keyed by package and its
-    # resolving manager. install is sequential and keeps its per-call spinners,
-    # which erase themselves before any echoed output or warning; the ledger thus
-    # prints between calls, where nothing animates, instead of through one aggregate
-    # spinner those writes would garble. It is gated on an interactive stderr, the
-    # surface the spinner draws on, so piped and serialized runs stay clean.
+    # Leave a per-package ✓/✗ ledger plus a persistent finisher (see OperationTrail),
+    # keyed by package and its resolving manager.
     total = sum(len(specs) for specs in packages_per_managers.values())
-    show_trail = bool(
-        total
-        and any(manager.progress for manager in selected_managers)
-        and sys.stderr.isatty()
-    )
+    op = OperationTrail(selected_managers)
     installed_count = 0
-    start_time = time.monotonic()
-
-    def package_label(spec: Specifier) -> str:
-        """Render a spec as ``package_id`` or ``package_id@version`` for the ledger."""
-        if spec.version:
-            return f"{spec.package_id}{VERSION_SEP}{spec.version}"
-        return spec.package_id
 
     def trail(spec: Specifier, manager_id: str, status: str) -> None:
-        """Print one ✓/✗ ledger line for a package/manager attempt, on a TTY stderr.
+        """Map an install attempt to a ``✓``/``✗`` ledger line through ``op``.
 
-        ``status`` selects the glyph and phrasing: ``installed`` succeeds (✓), while
-        ``not_found``, ``failed`` and ``cooldown`` each explain a ✗ outcome.
+        ``status`` is ``installed`` (✓), or ``not_found`` / ``failed`` / ``cooldown``
+        (✗).
         """
-        if not show_trail:
-            return
         mgr = theme().invoked_command(manager_id)
         reason = {
             "installed": f"installed with {mgr}",
@@ -1572,10 +1602,7 @@ def install(ctx, packages_specs):
             "failed": f"failed to install with {mgr}",
             "cooldown": f"skipped in {mgr} (cooldown)",
         }[status]
-        glyph = theme().success(OK_GLYPH)
-        if status != "installed":
-            glyph = theme().error(KO_GLYPH)
-        echo(f"{glyph} {package_label(spec)} {reason}", err=True)
+        op.mark(status == "installed", f"{package_label(spec)} {reason}")
 
     # Install all packages deterministically tied to a specific manager.
     for manager_id, package_specs in packages_per_managers.items():
@@ -1695,18 +1722,7 @@ def install(ctx, packages_specs):
         if not installed:
             unresolved_specs.append(spec)
 
-    # Leave a persistent finisher summarizing the run, matching the read-ops trail.
-    if show_trail:
-        glyph = (
-            theme().success(OK_GLYPH)
-            if installed_count == total
-            else theme().error(KO_GLYPH)
-        )
-        elapsed = time.monotonic() - start_time
-        echo(
-            f"{glyph} Installed {installed_count}/{total} packages ({elapsed:.1f}s)",
-            err=True,
-        )
+    op.finish(installed_count == total, f"Installed {installed_count}/{total} packages")
 
     # Fail with a non-zero exit code if any requested package went uninstalled by every
     # selected manager.
@@ -1752,7 +1768,8 @@ def upgrade(ctx, all, packages_specs):
         logging.info("No package provided, assume -A/--all option.")
         all = True
 
-    # Full upgrade.
+    # Full upgrade: one ✓/✗ ledger line per manager plus a finisher (see
+    # OperationTrail). A manager fails its line if it grows cli_errors while running.
     if all:
         if packages_specs:
             # Deduplicate and sort specifiers for terseness.
@@ -1760,18 +1777,33 @@ def upgrade(ctx, all, packages_specs):
                 f"Ignore {', '.join(sorted(set(packages_specs)))} specifiers "
                 "and proceed to a full upgrade...",
             )
-        for manager in ctx.obj.selected_managers(
-            implements_operation=Operations.upgrade_all,
-        ):
+        managers = tuple(
+            ctx.obj.selected_managers(implements_operation=Operations.upgrade_all),
+        )
+        op = OperationTrail(managers)
+        # Explicit --<id> picks announce loudly; an implicit "upgrade everything" stays
+        # at DEBUG so the default run shows only the trail (matching the explicit /
+        # implicit levels select_managers already uses for its skip messages).
+        announce = logging.INFO if ctx.obj.user_selection else logging.DEBUG
+        upgraded = 0
+        for manager in managers:
+            mgr = theme().invoked_command(manager.id)
             if not cooldown_permits(manager):
+                op.mark(False, f"{mgr} skipped (cooldown)")
                 continue
-            logging.info(
-                "Upgrade all outdated packages "
-                f"from {theme().invoked_command(manager.id)}...",
-            )
+            logging.log(announce, f"Upgrade all outdated packages from {mgr}...")
+            before = len(manager.cli_errors)
             output = manager.upgrade()
             if output:
                 logging.info(output)
+            ok = len(manager.cli_errors) == before
+            if ok:
+                upgraded += 1
+            op.mark(ok, mgr)
+        op.finish(
+            upgraded == len(managers),
+            f"Upgraded {upgraded}/{len(managers)} managers",
+        )
         ctx.exit()
 
     # Cast generator to tuple because of reuse.
@@ -1789,6 +1821,21 @@ def upgrade(ctx, all, packages_specs):
         ),
     )
 
+    # Per-package ✓/✗ ledger plus a finisher (see OperationTrail), keyed by package
+    # and the manager that upgrades it.
+    op = OperationTrail(selected_managers)
+    total = 0
+    upgraded_count = 0
+    # Collect every package a manager that had it installed failed to upgrade, to raise
+    # a non-zero exit code at the end (matching install and remove).
+    upgrade_failures: list[str] = []
+
+    def trail(spec: Specifier, manager_id: str, upgraded: bool) -> None:
+        """Map an upgrade attempt to a ``✓``/``✗`` ledger line through ``op``."""
+        mgr = theme().invoked_command(manager_id)
+        phrase = f"upgraded with {mgr}" if upgraded else f"failed to upgrade with {mgr}"
+        op.mark(upgraded, f"{package_label(spec)} {phrase}")
+
     solver = Solver(packages_specs, manager_priority=manager_ids)
     for package_id, spec in solver.resolve_package_specs():
         source_manager_ids = set()
@@ -1797,13 +1844,13 @@ def upgrade(ctx, all, packages_specs):
             source_manager_ids.add(spec.manager_id)
         # Package is not bound to a manager by the user's specifiers.
         else:
-            logging.info(
+            logging.debug(
                 f"{spec} not tied to a manager. Search all managers recognizing it.",
             )
             # Find all the managers that have the package installed.
             for manager in sourcing_managers:
                 if package_id in manager.installed_ids:
-                    logging.info(
+                    logging.debug(
                         f"{package_id} has been installed "
                         f"with {theme().invoked_command(manager.id)}.",
                     )
@@ -1816,17 +1863,55 @@ def upgrade(ctx, all, packages_specs):
             )
             continue
 
+        # Announce the managers we will upgrade with (also the non-TTY signal).
         logging.info(
             f"Upgrade {package_id} "
             f"with {', '.join(map(theme().invoked_command, sorted(source_manager_ids)))}",
         )
-        for manager_id in source_manager_ids:
+        total += 1
+        package_failed = False
+        for manager_id in sorted(source_manager_ids):
             manager = pool.get(manager_id)
             if not cooldown_permits(manager):
                 continue
-            output = manager.upgrade(package_id, version=spec.version)
+            # Force the manager to raise on failure so a botched upgrade is reported
+            # and recorded. The detail drops to DEBUG: the ✗ trail line and the closing
+            # critical already surface it on screen.
+            with patch.object(manager, "stop_on_error", True):
+                try:
+                    output = manager.upgrade(package_id, version=spec.version)
+                except NotImplementedError:
+                    logging.debug(
+                        f"{theme().invoked_command(manager_id)} "
+                        "does not implement upgrade operation.",
+                    )
+                    upgrade_failures.append(package_id)
+                    trail(spec, manager_id, False)
+                    package_failed = True
+                    continue
+                except CLIError:
+                    logging.debug(
+                        f"Could not upgrade {package_id} "
+                        f"with {theme().invoked_command(manager_id)}.",
+                    )
+                    upgrade_failures.append(package_id)
+                    trail(spec, manager_id, False)
+                    package_failed = True
+                    continue
             if output:
                 logging.info(output)
+            trail(spec, manager_id, True)
+        if not package_failed:
+            upgraded_count += 1
+
+    if total:
+        op.finish(not upgrade_failures, f"Upgraded {upgraded_count}/{total} packages")
+
+    if upgrade_failures:
+        logging.critical(
+            "Could not upgrade: " + ", ".join(sorted(set(upgrade_failures))) + ".",
+        )
+        ctx.exit(1)
 
 
 @mpm.command(aliases=["uninstall"], short_help="Remove a package.", section=MAINTENANCE)
@@ -1867,6 +1952,18 @@ def remove(ctx, packages_specs):
         ),
     )
 
+    # Per-package ✓/✗ ledger plus a finisher (see OperationTrail), keyed by package
+    # and the manager it is removed from.
+    op = OperationTrail(selected_managers)
+    total = 0
+    removed_count = 0
+
+    def trail(spec: Specifier, manager_id: str, removed: bool) -> None:
+        """Map a remove attempt to a ``✓``/``✗`` ledger line through ``op``."""
+        mgr = theme().invoked_command(manager_id)
+        phrase = f"removed from {mgr}" if removed else f"failed to remove from {mgr}"
+        op.mark(removed, f"{package_label(spec)} {phrase}")
+
     solver = Solver(packages_specs, manager_priority=manager_ids)
     for package_id, spec in solver.resolve_package_specs():
         source_manager_ids = set()
@@ -1875,13 +1972,13 @@ def remove(ctx, packages_specs):
             source_manager_ids.add(spec.manager_id)
         # Package is not bound to a manager by the user's specifiers.
         else:
-            logging.info(
+            logging.debug(
                 f"{spec} not tied to a manager. Search all managers recognizing it.",
             )
             # Find all the managers that have the package installed.
             for manager in sourcing_managers:
                 if package_id in manager.installed_ids:
-                    logging.info(
+                    logging.debug(
                         f"{package_id} has been installed "
                         f"with {theme().invoked_command(manager.id)}.",
                     )
@@ -1894,33 +1991,47 @@ def remove(ctx, packages_specs):
             )
             continue
 
+        # Announce the managers we will remove from (also the non-TTY signal).
         logging.info(
             f"Remove {package_id} "
             f"with {', '.join(map(theme().invoked_command, sorted(source_manager_ids)))}",
         )
-        for manager_id in source_manager_ids:
+        total += 1
+        package_failed = False
+        for manager_id in sorted(source_manager_ids):
             manager = pool.get(manager_id)
             # Force the manager to raise on failure so a botched removal is reported and
-            # recorded, instead of being silently swallowed.
+            # recorded. The detail drops to DEBUG: the ✗ trail line and the closing
+            # critical already surface it on screen.
             with patch.object(manager, "stop_on_error", True):
                 try:
                     output = manager.remove(package_id)
                 except NotImplementedError:
-                    logging.warning(
+                    logging.debug(
                         f"{theme().invoked_command(manager_id)} "
                         "does not implement remove operation.",
                     )
                     remove_failures.append(package_id)
+                    trail(spec, manager_id, False)
+                    package_failed = True
                     continue
                 except CLIError:
-                    logging.warning(
+                    logging.debug(
                         f"Could not remove {package_id} "
                         f"with {theme().invoked_command(manager_id)}.",
                     )
                     remove_failures.append(package_id)
+                    trail(spec, manager_id, False)
+                    package_failed = True
                     continue
             if output:
                 logging.info(output)
+            trail(spec, manager_id, True)
+        if not package_failed:
+            removed_count += 1
+
+    if total:
+        op.finish(not remove_failures, f"Removed {removed_count}/{total} packages")
 
     # Fail with a non-zero exit code if any package could not be removed by a manager
     # that had it installed.
@@ -1935,18 +2046,44 @@ def remove(ctx, packages_specs):
 @pass_context
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
-    for manager in ctx.obj.selected_managers(implements_operation=Operations.sync):
-        logging.info(f"Sync {theme().invoked_command(manager.id)} package info...")
+    managers = tuple(ctx.obj.selected_managers(implements_operation=Operations.sync))
+    # One ✓/✗ ledger line per manager plus a finisher (see OperationTrail); a manager
+    # fails the line if it grows its cli_errors during the sync.
+    op = OperationTrail(managers)
+    announce = logging.INFO if ctx.obj.user_selection else logging.DEBUG
+    synced = 0
+    for manager in managers:
+        logging.log(
+            announce, f"Sync {theme().invoked_command(manager.id)} package info..."
+        )
+        before = len(manager.cli_errors)
         manager.sync()
+        ok = len(manager.cli_errors) == before
+        if ok:
+            synced += 1
+        op.mark(ok, theme().invoked_command(manager.id))
+    op.finish(synced == len(managers), f"Synced {synced}/{len(managers)} managers")
 
 
 @mpm.command(short_help="Cleanup local data.", section=MAINTENANCE)
 @pass_context
 def cleanup(ctx):
     """Cleanup local data, temporary artifacts and removes orphaned dependencies."""
-    for manager in ctx.obj.selected_managers(implements_operation=Operations.cleanup):
-        logging.info(f"Cleanup {theme().invoked_command(manager.id)}...")
+    managers = tuple(ctx.obj.selected_managers(implements_operation=Operations.cleanup))
+    # One ✓/✗ ledger line per manager plus a finisher (see OperationTrail); a manager
+    # fails the line if it grows its cli_errors during the cleanup.
+    op = OperationTrail(managers)
+    announce = logging.INFO if ctx.obj.user_selection else logging.DEBUG
+    cleaned = 0
+    for manager in managers:
+        logging.log(announce, f"Cleanup {theme().invoked_command(manager.id)}...")
+        before = len(manager.cli_errors)
         manager.cleanup()
+        ok = len(manager.cli_errors) == before
+        if ok:
+            cleaned += 1
+        op.mark(ok, theme().invoked_command(manager.id))
+    op.finish(cleaned == len(managers), f"Cleaned {cleaned}/{len(managers)} managers")
 
 
 @mpm.command(
@@ -2221,6 +2358,26 @@ def restore(ctx, toml_files):
     """Read TOML files then install or upgrade each package referenced in them."""
     # TODO: add an artificial order for managers, so that the [cask] section can install
     # mas CLI first then have [mas] section work in one-go. Use-case: my dotfiles.
+    # Cast generator to tuple because of reuse across TOML files and the trail.
+    selected_managers = tuple(
+        ctx.obj.selected_managers(implements_operation=Operations.install),
+    )
+
+    # Per-package ✓/✗ ledger plus a finisher (see OperationTrail), keyed by package
+    # and the manager it is restored with. restore is best-effort: a failed package
+    # marks its line ✗ (detected via a cli_errors delta) but does not fail the run.
+    op = OperationTrail(selected_managers)
+    total = 0
+    restored_count = 0
+
+    def trail(spec: Specifier, manager_id: str, restored: bool) -> None:
+        """Map a restore install attempt to a ``✓``/``✗`` ledger line through ``op``."""
+        mgr = theme().invoked_command(manager_id)
+        phrase = (
+            f"installed with {mgr}" if restored else f"failed to install with {mgr}"
+        )
+        op.mark(restored, f"{package_label(spec)} {phrase}")
+
     for toml_input in toml_files:
         is_stdin = isinstance(toml_input, TextIOWrapper)
         if is_stdin:
@@ -2243,9 +2400,7 @@ def restore(ctx, toml_files):
             sections = ", ".join(ignored_sections)
             logging.info(f"Ignore {sections} section{plural}.")
 
-        for manager in ctx.obj.selected_managers(
-            implements_operation=Operations.install,
-        ):
+        for manager in selected_managers:
             if manager.id not in doc:
                 logging.warning(
                     f"No [{theme().invoked_command(manager.id)}] section found.",
@@ -2259,9 +2414,21 @@ def restore(ctx, toml_files):
                     manager_id=manager.id,
                     version=str(version),
                 )
-                logging.info(f"Install {spec}...")
+                total += 1
+                before = len(manager.cli_errors)
                 output = manager.install(spec.package_id, version=spec.version)
-                echo(output)
+                if output:
+                    echo(output)
+                restored = len(manager.cli_errors) == before
+                if restored:
+                    restored_count += 1
+                trail(spec, manager.id, restored)
+
+    if total:
+        op.finish(
+            restored_count == total,
+            f"Restored {restored_count}/{total} packages",
+        )
 
 
 @mpm.command(

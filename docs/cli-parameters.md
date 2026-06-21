@@ -22,3 +22,12 @@ The directive below renders a live index of every man page emitted by `click_ext
 
 ```{click-extra-manpages}
 ```
+
+## `meta_package_manager.cli` API
+
+```{eval-rst}
+.. automodule:: meta_package_manager.cli
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```

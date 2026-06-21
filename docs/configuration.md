@@ -293,3 +293,12 @@ You can easily debug the way `mpm` sources its configuration with `--show-params
 from meta_package_manager.cli import mpm
 invoke(mpm, args=["--table-format", "vertical", "--show-params"])
 ```
+
+## `meta_package_manager.config` API
+
+```{eval-rst}
+.. automodule:: meta_package_manager.config
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```

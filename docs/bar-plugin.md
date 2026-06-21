@@ -175,3 +175,21 @@ under the name `meta_package_manager.7h.py`, to the
 
 7. [Create a pull-request](https://help.github.com/articles/creating-a-pull-request/)
    in the original repository.
+
+## `meta_package_manager.bar_plugin` API
+
+```{eval-rst}
+.. automodule:: meta_package_manager.bar_plugin
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## `meta_package_manager.bar_plugin_renderer` API
+
+```{eval-rst}
+.. automodule:: meta_package_manager.bar_plugin_renderer
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```

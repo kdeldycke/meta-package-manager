@@ -183,3 +183,22 @@ Without the extra, `mpm sbom` exits with an explanatory error pointing at this i
 - {doc}`output-formats` — JSON and CSV table exports for ad-hoc piping of `installed`, `outdated`, and `search` results.
 - {doc}`dump` — TOML manifest and Brewfile snapshots for re-installation workflows.
 - {doc}`cooldown` — release-age gates that complement the SBOM workflow on the install side.
+
+## `meta_package_manager.sbom` API
+
+```{eval-rst}
+.. automodule:: meta_package_manager.sbom.base
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+.. automodule:: meta_package_manager.sbom.cyclonedx
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+.. automodule:: meta_package_manager.sbom.spdx
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```

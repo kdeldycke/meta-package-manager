@@ -158,6 +158,8 @@ a way to fund all those.
 Homebrew is already featuring
 [some commands in that direction](https://github.com/Homebrew/brew/pull/7900).
 
+The [LibreSelery](https://github.com/protontypes/LibreSelery) project (archived since 2023) implemented a version of this: continuous distribution of funding to a project's contributors and dependencies, wired into GitHub Actions.
+
 And also see this article in which [someone algorithmically donated $5000+ to Open Source via GitHub Sponsors and PyPI data](https://kvinogradov.com/algo-sponsors/).
 
 This is being discussed at {issue}`501`.

@@ -545,8 +545,11 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 
 
 @group(
-    # XXX Default verbosity has been changed in Click Extra 4.0.0 from INFO to WARNING.
-    context_settings={"default_map": {"verbosity": "INFO"}},
+    # Default to WARNING: the ✓/✗ trail and finisher print via echo (not logging) and
+    # survive, so the default run shows just those plus real warnings and criticals.
+    # Per-operation narration (priority, announcements, skip reasons) sits at INFO, one
+    # --verbosity INFO away. Matches Click Extra's own default since 4.0.0.
+    context_settings={"default_map": {"verbosity": "WARNING"}},
     config_schema=MpmConfig,
     config_validators=(build_manager_overrides_validator(pool),),
     version_fields={
@@ -1868,12 +1871,13 @@ def upgrade(ctx, all, packages_specs):
             f"Upgrade {package_id} "
             f"with {', '.join(map(theme().invoked_command, sorted(source_manager_ids)))}",
         )
-        total += 1
-        package_failed = False
         for manager_id in sorted(source_manager_ids):
             manager = pool.get(manager_id)
             if not cooldown_permits(manager):
                 continue
+            # Count and report each (package, manager) upgrade, so a package upgraded
+            # with two managers tallies as two.
+            total += 1
             # Force the manager to raise on failure so a botched upgrade is reported
             # and recorded. The detail drops to DEBUG: the ✗ trail line and the closing
             # critical already surface it on screen.
@@ -1887,7 +1891,6 @@ def upgrade(ctx, all, packages_specs):
                     )
                     upgrade_failures.append(package_id)
                     trail(spec, manager_id, False)
-                    package_failed = True
                     continue
                 except CLIError:
                     logging.debug(
@@ -1896,13 +1899,11 @@ def upgrade(ctx, all, packages_specs):
                     )
                     upgrade_failures.append(package_id)
                     trail(spec, manager_id, False)
-                    package_failed = True
                     continue
             if output:
                 logging.info(output)
-            trail(spec, manager_id, True)
-        if not package_failed:
             upgraded_count += 1
+            trail(spec, manager_id, True)
 
     if total:
         op.finish(not upgrade_failures, f"Upgraded {upgraded_count}/{total} packages")
@@ -1996,10 +1997,11 @@ def remove(ctx, packages_specs):
             f"Remove {package_id} "
             f"with {', '.join(map(theme().invoked_command, sorted(source_manager_ids)))}",
         )
-        total += 1
-        package_failed = False
         for manager_id in sorted(source_manager_ids):
             manager = pool.get(manager_id)
+            # Count and report each (package, manager) removal, so a package removed
+            # from two managers tallies as two.
+            total += 1
             # Force the manager to raise on failure so a botched removal is reported and
             # recorded. The detail drops to DEBUG: the ✗ trail line and the closing
             # critical already surface it on screen.
@@ -2013,7 +2015,6 @@ def remove(ctx, packages_specs):
                     )
                     remove_failures.append(package_id)
                     trail(spec, manager_id, False)
-                    package_failed = True
                     continue
                 except CLIError:
                     logging.debug(
@@ -2022,13 +2023,11 @@ def remove(ctx, packages_specs):
                     )
                     remove_failures.append(package_id)
                     trail(spec, manager_id, False)
-                    package_failed = True
                     continue
             if output:
                 logging.info(output)
-            trail(spec, manager_id, True)
-        if not package_failed:
             removed_count += 1
+            trail(spec, manager_id, True)
 
     if total:
         op.finish(not remove_failures, f"Removed {removed_count}/{total} packages")

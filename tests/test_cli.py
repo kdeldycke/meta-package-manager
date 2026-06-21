@@ -178,10 +178,13 @@ class TestCommonCLI:
         """Test the result on all combinations of optional summary options."""
         result = invoke(summary_arg, "installed")
         assert result.exit_code == 0
-        summary_match = re.match(
+        # With --no-summary at the default WARNING verbosity stderr can be empty, so
+        # guard the last-line lookup instead of indexing into a possibly-empty list.
+        lines = result.stderr.splitlines()
+        summary_match = lines and re.match(
             r"\d+ packages total \((\w+: \d+(, )?)+\)\.",
             # Last line of stderr.
-            result.stderr.splitlines()[-1],
+            lines[-1],
         )
         assert active_summary is bool(summary_match)
 

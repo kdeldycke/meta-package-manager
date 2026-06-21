@@ -498,8 +498,10 @@ class ManagerPool:
             # Check if operation is not implemented before calling `.available`. It
             # saves one call to the package manager CLI.
             if implements_operation and not implements(manager, implements_operation):
+                # An unsupported operation is narration, not a problem: keep it at INFO
+                # (matching the not-available skip below), hidden by the WARNING default.
                 logging.log(
-                    logging.WARNING if explicit_selection else logging.DEBUG,
+                    logging.INFO if explicit_selection else logging.DEBUG,
                     f"{theme().invoked_command(manager_id)} "
                     f"does not implement {implements_operation}.",
                 )

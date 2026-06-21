@@ -324,10 +324,11 @@ class Solver:
         managed to reduce the constraints to one ``Specifier``, we returns it.
 
         Filtering steps:
+
         1. We remove all constraints tied to all by the top priority manager if
-            provided.
+           provided.
         2. If no manager priority is provided, we discard constraints not tied to a
-            manager.
+           manager.
         3. We discard constraints not tied to a version.
         4. We only keep constraints tied to the highest version.
 

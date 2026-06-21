@@ -2,10 +2,9 @@
 
 ## Help screen
 
-```{eval-rst}
-.. click:run::
-    from meta_package_manager.cli import mpm
-    invoke(mpm, args=["--help"])
+```{click:run}
+from meta_package_manager.cli import mpm
+invoke(mpm, args=["--help"])
 ```
 
 ## Options

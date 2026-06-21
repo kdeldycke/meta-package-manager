@@ -145,11 +145,11 @@ manager_classes = (
 
 Is considered valid package manager, definitions classes which:
 
-#. are located in the :py:prop:`meta_package_manager.pool.ManagerPool.manager_subfolder`
+#. are located in the :py:attr:`meta_package_manager.pool.ManagerPool.manager_subfolder`
     subfolder, and
 #. are sub-classes of :py:class:`meta_package_manager.manager.PackageManager`, and
-#. are not :py:prop:`meta_package_manager.manager.PackageManager.virtual` (i.e. have a
-    non-null :py:prop:`meta_package_manager.manager.PackageManager.cli_names` property).
+#. are not :py:attr:`meta_package_manager.manager.PackageManager.virtual` (i.e. have a
+    non-null :py:attr:`meta_package_manager.manager.PackageManager.cli_names` property).
 
 These properties are checked and enforced in unittests.
 """
@@ -402,7 +402,7 @@ class ManagerPool:
         """All manager IDs supported on the current platform and not deprecated.
 
         Must keep the same order defined by
-        :py:prop:`meta_package_manager.pool.ManagerPool.all_manager_ids`.
+        :py:attr:`meta_package_manager.pool.ManagerPool.all_manager_ids`.
         """
         return tuple(
             mid for mid in self.maintained_manager_ids if self.register[mid].supported

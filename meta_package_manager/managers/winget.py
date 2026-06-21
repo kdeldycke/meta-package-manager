@@ -45,6 +45,7 @@ class WinGet(PackageManager):
         Used to accept the source license agreement, and avoid the following prompt:
 
         .. code-block:: pwsh-session
+
             PS C:\\Users\\kev> winget list
             The "msstore' source requires that you view the following agreements before using.
             Terms of Transaction: https://aka.ms/microsoft-store-terms-of-transaction

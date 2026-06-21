@@ -407,10 +407,11 @@ class CLIExecutor:
 
         Returns all files matching any ``cli_names``, by iterating over all folders in
         this order:
-          * folders provided by :py:attr:`cli_search_path
-            <meta_package_manager.manager.PackageManager.cli_search_path>`,
-          * then in all the default places specified by the environment variable (i.e.
-            ``os.getenv("PATH")``).
+
+        * folders provided by :py:attr:`cli_search_path
+          <meta_package_manager.manager.PackageManager.cli_search_path>`,
+        * then in all the default places specified by the environment variable (i.e.
+          ``os.getenv("PATH")``).
 
         Only returns files that exists and are not empty.
 

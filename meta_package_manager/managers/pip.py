@@ -174,9 +174,10 @@ class Pip(PackageManager):
 
         Runs:
 
-            .. code-block:: shell-session
-                $ python --version --version
-                Python 3.10.10 (Feb  8 2023, 05:34) [Clang 14.0.0 (clang-1400.0.29.202)]
+        .. code-block:: shell-session
+
+            $ python --version --version
+            Python 3.10.10 (Feb  8 2023, 05:34) [Clang 14.0.0 (clang-1400.0.29.202)]
         """
         if self.executable:
             self.run_cli(

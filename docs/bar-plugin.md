@@ -114,7 +114,7 @@ xcode-select: note: no developer tools were found at '/Applications/Xcode.app', 
 ```
 ````
 
-[^1] Source: https://ihaveahax.net/wiki/Python_version_information#Xcode_(macOS)
+[^1]: Source: <https://ihaveahax.net/wiki/Python_version_information#Xcode_(macOS)>
 
 ## Development workflow
 

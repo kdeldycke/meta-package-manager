@@ -69,6 +69,14 @@ class ManagerScope(Enum):
 
     Not supported yet. See
     :py:meth:`meta_package_manager.manager.PackageManager.discover_projects`.
+
+    .. seealso::
+        Microsoft's `Python Environment Tools (PET)
+        <https://github.com/microsoft/python-environment-tools>`_ is a Rust tool
+        that locates Python environments (venv, conda, pyenv, pipenv, Poetry, uv,
+        ...) across a machine. It only discovers environments and does not
+        inventory their packages, but is a useful reference and benchmark for
+        implementing Python project-scope discovery.
     """
 
 

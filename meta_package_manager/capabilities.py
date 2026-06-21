@@ -129,16 +129,16 @@ def search_capabilities(extended_support: bool = True, exact_support: bool = Tru
             refilter = False
             if exact and not exact_support:
                 refilter = True
-                logging.warning(
+                logging.debug(
                     f"{self.id} does not implement exact search operation.",
                 )
             if extended and not extended_support:
                 refilter = True
-                logging.warning(
+                logging.debug(
                     f"{self.id} does not implement extended search operation.",
                 )
             if refilter:
-                logging.warning("Refiltering of raw results has been activated.")
+                logging.debug("Refiltering of raw results has been activated.")
 
             return function(self, query, extended, exact)  # type: ignore
 

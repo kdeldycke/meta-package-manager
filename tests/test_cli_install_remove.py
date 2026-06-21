@@ -47,23 +47,23 @@ class TestInstallRemove(CLISubCommandTests):
     @staticmethod
     def evaluate_signals(mid, stdout, stderr):
         yield from (
-            # Install messages.
+            # install announces the managers it will try, in priority order.
             bool(
                 re.search(
-                    rf"Install \S+ package with {mid}\.\.\.",
+                    rf"Installation priority:.*\b{mid}\b",
+                    stderr,
+                ),
+            ),
+            # remove dispatches to each manager that has the package installed.
+            bool(
+                re.search(
+                    rf"Remove \S+ with\b.*\b{mid}\b",
                     stderr,
                 ),
             ),
             bool(
                 re.search(
-                    rf"warning: No \S+ package found on {mid}\.",
-                    stderr,
-                ),
-            ),
-            # Remove messages.
-            bool(
-                re.search(
-                    rf"Remove \S+ package with {mid}\.\.\.",
+                    rf"has been installed with {mid}\.",
                     stderr,
                 ),
             ),
@@ -113,7 +113,7 @@ class TestInstallRemove(CLISubCommandTests):
         # $ mpm --mas install 747648890
         # <output> stream:
         #   (...)
-        #   info: Install 747648890 package with mas...
+        #   info: Installation priority: > mas
         #
         # <exit_code>: 1
         #

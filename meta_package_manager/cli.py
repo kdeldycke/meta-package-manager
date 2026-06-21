@@ -28,6 +28,7 @@ import logging
 import platform
 import re
 import sys
+import time
 from collections import Counter, namedtuple
 from collections.abc import Iterable
 from configparser import RawConfigParser
@@ -1534,38 +1535,86 @@ def install(ctx, packages_specs):
     # exit code at the end of the command.
     unresolved_specs: list[Specifier] = []
 
+    # Leave a per-package ✓/✗ ledger plus a persistent finisher, mirroring the
+    # read-ops trail (see collect_from_managers) but keyed by package and its
+    # resolving manager. install is sequential and keeps its per-call spinners,
+    # which erase themselves before any echoed output or warning; the ledger thus
+    # prints between calls, where nothing animates, instead of through one aggregate
+    # spinner those writes would garble. It is gated on an interactive stderr, the
+    # surface the spinner draws on, so piped and serialized runs stay clean.
+    total = sum(len(specs) for specs in packages_per_managers.values())
+    show_trail = bool(
+        total
+        and any(manager.progress for manager in selected_managers)
+        and sys.stderr.isatty()
+    )
+    installed_count = 0
+    start_time = time.monotonic()
+
+    def package_label(spec: Specifier) -> str:
+        """Render a spec as ``package_id`` or ``package_id@version`` for the ledger."""
+        if spec.version:
+            return f"{spec.package_id}{VERSION_SEP}{spec.version}"
+        return spec.package_id
+
+    def trail(spec: Specifier, manager_id: str, status: str) -> None:
+        """Print one ✓/✗ ledger line for a package/manager attempt, on a TTY stderr.
+
+        ``status`` selects the glyph and phrasing: ``installed`` succeeds (✓), while
+        ``not_found``, ``failed`` and ``cooldown`` each explain a ✗ outcome.
+        """
+        if not show_trail:
+            return
+        mgr = theme().invoked_command(manager_id)
+        reason = {
+            "installed": f"installed with {mgr}",
+            "not_found": f"not found in {mgr}",
+            "failed": f"failed to install with {mgr}",
+            "cooldown": f"skipped in {mgr} (cooldown)",
+        }[status]
+        glyph = theme().success(OK_GLYPH)
+        if status != "installed":
+            glyph = theme().error(KO_GLYPH)
+        echo(f"{glyph} {package_label(spec)} {reason}", err=True)
+
     # Install all packages deterministically tied to a specific manager.
     for manager_id, package_specs in packages_per_managers.items():
         if not manager_id:
             continue
         manager = pool.get(manager_id)
         if not cooldown_permits(manager):
+            # cooldown_permits() already logged why; mark the tied packages dropped.
+            for spec in package_specs:
+                trail(spec, manager_id, "cooldown")
             continue
         for spec in package_specs:
             # Force the manager to raise on failure so the error is both reported and
-            # recorded as unresolved, instead of being silently swallowed.
+            # recorded as unresolved, instead of being silently swallowed. The detail
+            # drops to DEBUG: the ✗ trail line and the closing critical already name
+            # the failure on screen.
             with patch.object(manager, "stop_on_error", True):
                 try:
-                    logging.info(
-                        f"Install {spec} package with "
-                        f"{theme().invoked_command(manager_id)}...",
-                    )
                     output = manager.install(spec.package_id, version=spec.version)
                 except NotImplementedError:
-                    logging.warning(
+                    logging.debug(
                         f"{theme().invoked_command(manager_id)} "
                         "does not implement install operation.",
                     )
                     unresolved_specs.append(spec)
+                    trail(spec, manager_id, "failed")
                     continue
                 except CLIError:
-                    logging.warning(
+                    logging.debug(
                         f"Could not install {spec} "
                         f"with {theme().invoked_command(manager_id)}.",
                     )
                     unresolved_specs.append(spec)
+                    trail(spec, manager_id, "failed")
                     continue
-            echo(output)
+            if output:
+                echo(output)
+            installed_count += 1
+            trail(spec, manager_id, "installed")
 
     unmatched_packages = packages_per_managers.get(None, set())
     # Drop managers that cannot honor an active cooldown (once, not per package).
@@ -1575,11 +1624,8 @@ def install(ctx, packages_specs):
     for spec in unmatched_packages:
         installed = False
         for manager in eligible_managers:
-            logging.info(
-                f"Try to install {spec} with {theme().invoked_command(manager.id)}.",
-            )
-
-            # Is the package available on this manager?
+            # Is the package available on this manager? The per-attempt detail drops
+            # to DEBUG: the ✗ trail line below already names the manager that missed.
             matches = None
             try:
                 matches = tuple(
@@ -1590,26 +1636,28 @@ def install(ctx, packages_specs):
                     ),
                 )
             except NotImplementedError:
-                logging.warning(
+                logging.debug(
                     f"{theme().invoked_command(manager.id)} "
                     "does not implement search operation.",
                 )
-                logging.info(
+                logging.debug(
                     f"{spec.package_id} existence unconfirmed, "
                     "try to directly install it...",
                 )
             except CLIError:
-                logging.warning(
+                logging.debug(
                     f"Could not search for {spec.package_id} "
                     f"with {theme().invoked_command(manager.id)}.",
                 )
+                trail(spec, manager.id, "not_found")
                 continue
             else:
                 if not matches:
-                    logging.warning(
+                    logging.debug(
                         f"No {spec.package_id} package found "
                         f"on {theme().invoked_command(manager.id)}.",
                     )
+                    trail(spec, manager.id, "not_found")
                     continue
                 # Prevents any incomplete or bad implementation of exact search.
                 if len(matches) != 1:
@@ -1620,31 +1668,45 @@ def install(ctx, packages_specs):
             # CLIError exception and print a comprehensive message.
             with patch.object(manager, "stop_on_error", True):
                 try:
-                    logging.info(
-                        f"Install {spec} package "
-                        f"with {theme().invoked_command(manager.id)}...",
-                    )
                     output = manager.install(spec.package_id, version=spec.version)
                 except NotImplementedError:
-                    logging.warning(
+                    logging.debug(
                         f"{theme().invoked_command(manager.id)} "
                         "does not implement install operation.",
                     )
+                    trail(spec, manager.id, "failed")
                     continue
                 except CLIError:
-                    logging.warning(
+                    logging.debug(
                         f"Could not install {spec} "
                         f"with {theme().invoked_command(manager.id)}.",
                     )
+                    trail(spec, manager.id, "failed")
                     continue
 
-            echo(output)
+            if output:
+                echo(output)
             # Stop at the first (highest-priority) manager that provides the package.
             installed = True
+            installed_count += 1
+            trail(spec, manager.id, "installed")
             break
 
         if not installed:
             unresolved_specs.append(spec)
+
+    # Leave a persistent finisher summarizing the run, matching the read-ops trail.
+    if show_trail:
+        glyph = (
+            theme().success(OK_GLYPH)
+            if installed_count == total
+            else theme().error(KO_GLYPH)
+        )
+        elapsed = time.monotonic() - start_time
+        echo(
+            f"{glyph} Installed {installed_count}/{total} packages ({elapsed:.1f}s)",
+            err=True,
+        )
 
     # Fail with a non-zero exit code if any requested package went uninstalled by every
     # selected manager.

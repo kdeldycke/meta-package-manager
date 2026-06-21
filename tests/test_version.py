@@ -588,6 +588,13 @@ compared_gt = (
     ("1.0.0-alpha.1", "1.0.0-alpha"),
     # RPM release bump.
     ("1.0-2.fc38", "1.0-1.fc38"),
+    # Debian/pacman epoch bump with an identical base: correct because the
+    # epoch is the leading token and sorts numerically (1 < 2), even though
+    # ``:`` is just a delimiter to the tokenizer. Contrast the ``debian-epoch``
+    # xfail below, where an epoch must override a *higher* base version.
+    ("2:1.0-1", "1:1.0-1"),
+    # Same epoch, Debian revision (pkgrel) bump.
+    ("1:1.0-2", "1:1.0-1"),
     # Git describe commit count.
     ("1.8.6-125-g6cd4c31", "1.8.6-124-g6cd4c31"),
     # Go pseudo-version date comparison.

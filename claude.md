@@ -368,6 +368,34 @@ When invoking `uv` and `uvx` commands in GitHub Actions workflows:
 - **Exceptions:** Omit `--frozen` for `uvx` with pinned versions, `uv tool install`, CLI invocability tests, and local development examples.
 - **Prefer explicit flags over environment variables** (`UV_NO_PROGRESS`, `UV_FROZEN`). Flags are self-documenting, visible in logs, avoid conflicts (e.g., `UV_FROZEN` vs `--locked`), and align with the long-form option principle.
 
+## CLI output and logging
+
+`mpm` keeps two output channels distinct: the **state** of an operation (printed with `echo`) and **log messages** (`logging`, gated by `--verbosity`).
+
+### Verbosity tiers
+
+The CLI defaults to `WARNING` (set in the root `@group` `context_settings`, overriding click-extra's default). Classify every `logging` call into one tier:
+
+- **`WARNING` (default view):** genuine problems only, such as failures with no other on-screen signal, safety notices (cooldown safeguard skipped, a file about to be overwritten), the end-of-run "N managers reported errors" summary, and timeouts. Plus `critical` for fatal conditions. Keep it sparse.
+- **`INFO` (narration):** the operational story, like the selection summary, install/dispatch priority, per-manager announcements, discovery (`X has been installed with Y`), capability skips (`X does not implement Y`), and "ignoring option ..." no-ops.
+- **`DEBUG` (technical):** raw CLI invocations, result refiltering, manager-selection parsing, internal data dumps.
+
+Heuristic for a new line: if it narrates a decision or step it is `INFO`; a raw mechanism or command is `DEBUG`; something genuinely wrong **and** not already shown by the ✓/✗ trail is `WARNING`. "Your option had no effect here" is `INFO`, not `WARNING`.
+
+An enum surfaced in any message must render as its bare member name: give it `__str__`/`__format__` returning `self.name`. A functional `Enum("Operations", (...))` otherwise leaks the `Operations.outdated` repr where the message wanted `outdated`.
+
+### Operation state: the ✓/✗ trail
+
+Fan-out operations report state with a per-item `✓`/`✗` trail plus a persistent finisher, printed via `echo` to stderr, never `logging`. `echo` survives the `WARNING` default and is instead gated on an interactive terminal plus `--progress`, so pipes, CI and serialized runs stay clean. Two implementations: `meta_package_manager.pool.collect_from_managers` (read-only commands, concurrent) and `OperationTrail` in `cli.py` (state-changing commands, which stay sequential and print the trail between their per-call spinners).
+
+- Two shapes: **package-keyed** (`✓ foo installed with brew`, for `install`/`remove`/`upgrade <packages>`/`restore`) and **manager-keyed** (`✓ brew`, `✓ Synced N/M managers`, for `sync`/`cleanup`/`upgrade --all`).
+- The finisher counts **per (package, manager) attempt**, matching the trail lines: a package acted on by two managers is `2/2`, not `1/1`.
+- A `✗` line is TTY-only, so failures also emit a `critical: Could not ...` (shown everywhere) as the durable record and the non-zero-exit rationale. Keep both despite the overlap on a TTY.
+
+### Exit codes
+
+Action commands (`install`, `remove`, `upgrade <packages>`, `restore`) collect per-package failures and exit non-zero with a `critical:` summary. Maintenance commands (`sync`, `cleanup`, `upgrade --all`) are best-effort: they mark a failed manager `✗` but stay exit-`0`.
+
 ## Testing guidelines
 
 - Use `@pytest.mark.parametrize` when testing the same logic for multiple inputs. Prefer parametrize over copy-pasted test functions that differ only in their data — it deduplicates test logic, improves readability, and makes it trivial to add new cases.
@@ -378,6 +406,8 @@ When invoking `uv` and `uvx` commands in GitHub Actions workflows:
 - **`@pytest.mark.once` for run-once tests.** Define a custom `once` marker (in `[tool.pytest].markers`) to tag tests that only need to run once — not across the full CI matrix. Typical candidates: CLI entry point invocability, plugin registration, package metadata checks. The main test matrix filters them out with `pytest -m "not once"`, while a dedicated `once-tests` job runs them on a single runner.
 - **CI-only pytest flags belong in workflow steps, not `[tool.pytest].addopts`.** Flags that emit CI-only artifacts (`--cov-report=xml`, `--junitxml=junit.xml`) pollute local runs when placed in `addopts`: keep `addopts` for flags that apply everywhere and pass CI-specific ones in the workflow `run:` step. Coverage settings (`run.branch`, `run.source`, `report.precision`) belong in `[tool.coverage]`, not in `--cov-*` flags.
 - **Pass `encoding="UTF-8"` to `subprocess.run(..., text=True)` when output may contain non-ASCII bytes** (emoji in a workflow `name:`, accented author names, translated strings). `text=True` alone decodes with the platform default (`cp1252` on Windows), so such output raises `UnicodeDecodeError` only in Windows CI while passing on macOS and Linux. Test helpers shelling out to package managers or `git` are the usual offenders.
+- **TTY-gated output needs a pseudo-terminal to test.** The `✓`/`✗` trail, finishers and spinners only render on an interactive terminal, so click-extra's `CliRunner` (non-TTY) never emits them — drive the CLI under `pty.openpty()` to exercise them. Most CLI tests instead assert on the stdout table, exit code, or an explicit `--verbosity`, none of which are TTY-gated.
+- **`--dry-run` simulates read CLIs too.** It dry-runs *every* manager invocation, including the installed-package lookup that `remove`/`upgrade` use to find their source managers — so a dry-run of those reports "not recognized" and cannot exercise their multi-manager path. Reach for purls (which carry the manager and bypass the lookup) or unit fixtures instead.
 
 ## Design principles
 

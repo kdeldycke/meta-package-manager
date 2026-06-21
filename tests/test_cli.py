@@ -236,7 +236,6 @@ class TestManagerSelection(InspectCLIOutput):
         assert result.exit_code == 0
         self.check_manager_selection(result, {manager_id})
 
-    @pytest.mark.skip(reason="Generated config file is not isolated from other tests.")
     def test_conf_file_overrides_defaults(self, invoke, create_config):
         conf_path = create_config("conf.toml", TEST_CONF_FILE)
         result = invoke("--config", str(conf_path), "managers", color=False)
@@ -244,7 +243,6 @@ class TestManagerSelection(InspectCLIOutput):
         self.check_manager_selection(result, ("uv", "npm", "gem"))
         assert "debug: " in result.stderr
 
-    @pytest.mark.skip(reason="Generated config file is not isolated from other tests.")
     def test_conf_file_cli_override(self, invoke, create_config):
         conf_path = create_config("conf.toml", TEST_CONF_FILE)
         result = invoke(
@@ -262,7 +260,6 @@ class TestManagerSelection(InspectCLIOutput):
         assert "info: " not in result.stderr
         assert "debug: " not in result.stderr
 
-    @pytest.mark.skip(reason="Generated config file is not isolated from other tests.")
     def test_conf_and_parameter_mix_keep_order(self, invoke, create_config):
         conf_path = create_config(
             "conf.toml",

@@ -67,8 +67,6 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | Cleanup: orphans                               |   ✓   |           ✓           |          ✓          |         ✓         |         ✓         |                   |       ✓       |               |               |
 | Backup / Lock / Freeze                         |   ✓   |                       |                     |                   |                   |                   |       ✓       |       ✓       |       ✓       |
 | Restore                                        |   ✓   |                       |                     |                   |                   |                   |       ✓       |       ✓       |       ✓       |
-| [SPDX](https://spdx.dev) SBOM export           |   ✓   |                       |                     |                   |                   |                   |               |               |               |
-| [CycloneDX](https://cyclonedx.org) SBOM export |   ✓   |                       |                     |                   |                   |                   |               |               |               |
 | List leaves (top-level installs)               |       |                       |                     |                   |                   |                   |       ✓       |               |               |
 | Autoremove orphaned dependencies               |       |                       |                     |                   |                   |                   |       ✓       |               |               |
 | Pin / Unpin version                            |       |                       |                     |                   |                   |                   |       ✓       |       ✓       |       ✓       |
@@ -77,6 +75,8 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 | Doctor / diagnostics                           |       |                       |                     |                   |                   |                   |       ✓       |       ✓       |               |
 | Import from external tool                      |       |                       |                     |                   |                   |                   |               |       ✓       |       ≈       |
 | Services management                            |       |                       |                     |                   |                   |                   |       ✓       |               |               |
+
+`mpm`'s SBOM export sits in a different category from the package-manager front-ends benchmarked here. It is compared against dedicated SBOM and software-composition-analysis tools (Syft, Trivy, cdxgen, component-detection) in [the SBOM documentation](sbom.md).
 
 ## Package manager support
 

@@ -133,6 +133,8 @@ Take a look at: https://security.googleblog.com/2023/04/announcing-depsdev-api-c
 
 ```{todo}
 `mpm` doesn't collect dependencies yet. Once it does these dependencies can augment the SBOM export.
+
+The system managers `mpm` drives mostly expose flat installed lists, not dependency edges. Microsoft's [component-detection](https://github.com/microsoft/component-detection) is a useful reference here: it produces a graph-based dependency output across ~30 ecosystems, the shape `mpm` would need to enrich its SBOM relationships and to back a future per-package dependency view.
 ```
 
 ### Get rid of Docker for lambda?

@@ -575,5 +575,32 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         .. caution::
             Not implemented for any manager yet. System-scoped managers (the default) own
             no project trees to discover.
+
+        .. todo::
+            Candidate ecosystems for project-scope discovery. Listed with the
+            project files that signal each, grouped by whether ``mpm`` already
+            ships a system-scoped manager that could grow a project mode.
+
+            Already covered by a manager (``npm``, ``yarn``, ``pnpm``, ``pip``,
+            ``uv``, ``cargo``, ``gem``, ``composer``, ``cpan``):
+
+            - JavaScript: ``package.json``, ``package-lock.json``, ``yarn.lock``,
+              ``pnpm-lock.yaml``
+            - Python: ``requirements.txt``, ``pyproject.toml``, ``poetry.lock``,
+              ``uv.lock``
+            - Rust: ``Cargo.toml``, ``Cargo.lock``
+            - Ruby: ``Gemfile``, ``Gemfile.lock``
+            - PHP: ``composer.json``, ``composer.lock``
+            - Perl: ``cpanfile``
+
+            No manager yet:
+
+            - Java: ``pom.xml`` (Maven), ``build.gradle`` (Gradle), ``ivy.xml``
+            - Go: ``go.mod``, ``go.sum``
+            - .NET: ``*.csproj``, ``packages.config`` (NuGet)
+            - Swift: ``Package.swift``, ``Package.resolved``
+            - CocoaPods: ``Podfile``, ``Podfile.lock``
+            - C/C++: ``conanfile.txt`` (Conan), ``vcpkg.json`` (vcpkg)
+            - Conda: ``conda-lock.yml``
         """
         raise NotImplementedError

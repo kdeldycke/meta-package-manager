@@ -49,7 +49,15 @@ class ExportFormat(StrEnum):
 
 
 class SBOM:
-    """Utilities shared by all SBOM classes."""
+    """Utilities shared by all SBOM classes.
+
+    .. seealso::
+        Anchore's `Syft <https://github.com/anchore/syft>`_ and Microsoft's
+        `sbom-tool <https://github.com/microsoft/sbom-tool>`_ are mature SPDX
+        and CycloneDX emitters, useful references for field-population
+        conventions. Both inventory packages by parsing on-disk databases and
+        lockfiles, whereas ``mpm`` queries the live managers directly.
+    """
 
     bundled_scan: bool = True
     """Whether the scan was a ``--bundled`` enrichment pass.

@@ -17,6 +17,7 @@
 - [mpm] `--timeout` now defaults per-operation — 120s for read-only queries (`installed`, `outdated`, `search`) and 500s for state-changing operations — instead of a flat 500s; an explicit `--timeout` still overrides.
 - [mpm] `install` and `remove` now exit non-zero when no manager could fulfill a request (previously always `0`); `install` also installs every requested package, not just the first to succeed.
 - [mpm] Compare a leading version epoch (`1:2.0`, `1!2.0`) as a dominant component, so `2:1.0` sorts above `9.0` and epoch bumps order correctly across Debian, RPM, pacman, and PEP 440 schemes.
+- [mpm] Resolve `pkg:apk` purls to the `apk` manager and `pkg:npm` purls to `pnpm` (alongside `npm`, `yarn`, and `yarn-berry`); both were missing from the purl-to-manager map.
 
 ## [`6.6.0` (2026-06-17)](https://github.com/kdeldycke/meta-package-manager/compare/v6.5.1...v6.6.0)
 

@@ -136,6 +136,25 @@ $ mpm --brew sbom > deep.spdx.json
 
 Coverage will expand: every manager exposes its metadata differently, and richer extractors land per manager over time.
 
+## How `mpm` compares to other SBOM tools
+
+`mpm` is not the only tool that emits an SBOM. The widely-used ones each occupy a different spot in the supply-chain landscape:
+
+| Tool                                                                     | By              | Language   | License          | What it reads                                          |   SPDX    | CycloneDX | purl       |
+| :----------------------------------------------------------------------- | :-------------- | :--------- | :--------------- | :---------------------------------------------------- | :-------: | :-------: | :--------- |
+| [`mpm`](https://github.com/kdeldycke/meta-package-manager)               | this project    | Python     | GPL-2.0-or-later | the live package managers on a host, queried directly |    2.3    |    1.7    | ✓          |
+| [Syft](https://github.com/anchore/syft)                                  | Anchore         | Go         | Apache-2.0       | container images and filesystems (package DBs, lockfiles) | 2.2, 2.3 |    1.6    | ✓          |
+| [Trivy](https://github.com/aquasecurity/trivy)                           | Aqua Security   | Go         | Apache-2.0       | images, filesystems, repositories, VMs, clusters      |    2.3    |    1.5    | ✓          |
+| [cdxgen](https://github.com/CycloneDX/cdxgen)                            | OWASP CycloneDX | JavaScript | Apache-2.0       | project manifests and lockfiles; a live host via `obom` |    3.0    |  1.5-1.7  | ✓          |
+| [component-detection](https://github.com/microsoft/component-detection)  | Microsoft       | C#         | MIT              | source-tree manifests and lockfiles (~30 detectors)   | via sbom-tool |         | own schema |
+| [sbom-tool](https://github.com/microsoft/sbom-tool)                      | Microsoft       | C#         | MIT              | build output and source tree (wraps component-detection) | 2.2, 3.0 |         |            |
+
+`mpm` differs from these tools in its data source, not its output format. Syft and Trivy read packages at rest: they parse the package databases already written into a container image or filesystem (the `dpkg`, `apk`, or `rpm` database, or a committed lockfile). cdxgen, component-detection, and sbom-tool parse a project's declared manifests and lockfiles.
+
+`mpm` invokes the package managers' own command-line tools. It shells out to `brew`, `apt`, `pip`, `npm`, `cargo`, and the rest, and records what they report on the running host. That covers managers the file scanners do not model: Homebrew casks, `mas`, `flatpak`, `snap`, `mise`, and the others listed in {doc}`benchmark`. The trade-off is symmetric: `mpm` needs the managers installed and runnable, while Syft or Trivy can scan an image or directory the host never executed.
+
+The tools are complementary. Reach for Syft, Trivy, or cdxgen to inventory a build artifact, container, or source repository; reach for `mpm sbom` to inventory the software actually installed on a machine.
+
 ## Installation
 
 SBOM export is an optional extra. `pip install meta-package-manager` does not pull the CycloneDX and SPDX dependencies; install the `[sbom]` extra to enable the `mpm sbom` subcommand:

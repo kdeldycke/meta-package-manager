@@ -18,11 +18,13 @@
 from __future__ import annotations
 
 import logging
+import sys
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import cached_property
 
 from boltons.iterutils import unique
-from click_extra import Spinner, get_current_context
+from click_extra import Spinner, echo, get_current_context
 from click_extra.context import JOBS, VERBOSITY
 from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
 
@@ -214,32 +216,120 @@ def warm_availability(managers: Iterable[PackageManager]) -> None:
         list(executor.map(lambda manager: manager.available, candidates))
 
 
+def _state_failed(data: dict) -> bool:
+    """Whether a manager's result fails its ``✓``/``✗`` trail line.
+
+    A non-empty ``data["errors"]`` (CLI errors, or a read query's error list) or an
+    explicit ``data["failed"]`` flag (``upgrade --all``'s cooldown skips, which run
+    no CLI of their own) both mark the line ``✗``.
+    """
+    return bool(data.get("errors") or data.get("failed"))
+
+
+def _state_trail_line(manager_id: str, data: dict) -> str:
+    """Format one ``✓``/``✗`` trail line for a manager's result.
+
+    ``data["label"]`` overrides the text (``upgrade --all`` uses it for its cooldown
+    skips); otherwise the manager's themed invocation name is shown.
+    """
+    if _state_failed(data):
+        glyph = theme().error(KO_GLYPH)
+    else:
+        glyph = theme().success(OK_GLYPH)
+    text = data.get("label") or theme().invoked_command(manager_id)
+    return f"{glyph} {text}"
+
+
+def _sequential_state_report(
+    managers: list[PackageManager],
+    done_label: str,
+    work: Callable[[PackageManager], tuple[str, dict]],
+) -> list[tuple[str, dict]]:
+    """Run ``work`` sequentially, narrating a ``✓``/``✗`` trail and finisher.
+
+    The sequential counterpart of the maintenance branch of
+    :func:`collect_from_managers` (reached for a single manager, at
+    :option:`mpm --jobs` ``1`` or at ``DEBUG`` verbosity). It keeps each manager's
+    own per-call spinner (no aggregate spinner) and prints one trail line plus a
+    success-count finisher between calls, where no spinner animates. Gated on an
+    interactive stderr and ``--progress`` (folded into each manager's ``progress``),
+    mirroring the spinner so piped, serialized and ``DEBUG`` runs stay silent.
+    """
+    show = (
+        bool(managers)
+        and any(manager.progress for manager in managers)
+        and sys.stderr.isatty()
+    )
+    start = time.monotonic()
+    results = []
+    ok_count = 0
+    for manager in managers:
+        manager_id, data = work(manager)
+        results.append((manager_id, data))
+        if not _state_failed(data):
+            ok_count += 1
+        if show:
+            echo(_state_trail_line(manager_id, data), err=True)
+    if show:
+        total = len(managers)
+        if ok_count == total:
+            glyph = theme().success(OK_GLYPH)
+        else:
+            glyph = theme().error(KO_GLYPH)
+        echo(
+            f"{glyph} {done_label} {ok_count}/{total} managers "
+            f"({time.monotonic() - start:.1f}s)",
+            err=True,
+        )
+    return results
+
+
 def collect_from_managers(
     ctx: Context,
     label: str,
     done_label: str,
     managers: list[PackageManager],
     work: Callable[[PackageManager], tuple[str, dict]],
+    *,
+    report_state: bool = False,
 ) -> list[tuple[str, dict]]:
     """Run ``work(manager)`` for every manager and return the results in order.
 
-    Read-only operations query each manager independently, so they run
-    concurrently across a thread pool sized by :func:`effective_jobs` (itself
-    driven by :option:`mpm --jobs`). The work is subprocess I/O, during which the
-    GIL is released, so threads parallelize it fully: a slow ``guix search`` no
-    longer blocks the fast managers while it runs.
+    Managers act on their own state independently, with no cross-manager ordering,
+    so they run concurrently across a thread pool sized by :func:`effective_jobs`
+    (itself driven by :option:`mpm --jobs`). The work is subprocess I/O, during
+    which the GIL is released, so threads parallelize it fully: a slow ``guix
+    search`` no longer blocks the fast managers while it runs.
+
+    This is the single fan-out primitive for both the read-only commands
+    (``installed``/``outdated``/``search``) and the independent maintenance commands
+    (``sync``/``cleanup``/``upgrade --all``). The ordering-sensitive state changers
+    (``install``/``remove``/``upgrade <packages>``/``restore``) cannot use it: they
+    chain managers by priority (a hit in the first manager skips the rest), so they
+    stay sequential and drive :class:`meta_package_manager.cli.OperationTrail`.
 
     Execution falls back to sequential when :func:`effective_jobs` returns ``1``
     (a single manager, :option:`mpm --jobs` ``1``, or ``DEBUG`` verbosity, where
     interleaved per-manager logs would be unreadable).
 
+    .. note::
+        Concurrency is per *manager*, and managers own disjoint state, so the
+        fan-out is safe in the general case. The one caveat is the maintenance
+        callers (``report_state=True``) on a host carrying two managers that share
+        an OS-level package lock (``apt`` and ``deb_get`` over dpkg, or ``pacman``
+        and ``pacstall``): a concurrent ``upgrade --all`` (or ``cleanup``) can
+        briefly contend that lock. It is non-corrupting (the OS serializes access),
+        best-effort (the loser is marked ``✗`` yet the run still exits ``0``) and
+        self-heals on re-run; :option:`mpm --jobs` ``1`` restores fully sequential
+        behavior for anyone who hits it.
+
     In concurrent mode the per-manager spinners would garble each other on stderr,
     so they are suppressed in favor of a single aggregate spinner. While the batch
     runs it shows a live ``done/total`` count, and once it is actually drawing (a
     slow batch on a terminal) it leaves a ``✓``/``✗`` trail of each manager as it
-    lands plus a persistent ``✓ Searched N managers (Ns)`` finisher. Fast, piped or
-    serialized runs get none of this: :py:meth:`click_extra.Spinner.echo` and
-    :py:meth:`click_extra.Spinner.ok` both write unconditionally, so every such
+    lands plus a persistent finisher. Fast, piped or serialized runs get none of
+    this: :py:meth:`click_extra.Spinner.echo`, :py:meth:`click_extra.Spinner.ok`
+    and :py:meth:`click_extra.Spinner.fail` all write unconditionally, so every such
     call is gated on the spinner having been shown.
 
     :param label: present-tense verb shown in the running spinner ("Searching").
@@ -249,10 +339,21 @@ def collect_from_managers(
     :param work: returns this manager's ``(id, data)`` result; it must handle its
         own :py:class:`meta_package_manager.execution.CLIError` (each manager owns
         its subprocess and error list, so the call is thread-safe per manager). A
-        truthy ``data["errors"]`` marks that manager's trail line with ``✗``.
+        truthy ``data["errors"]`` (or ``data["failed"]``) marks that manager's
+        trail line with ``✗``; an optional ``data["label"]`` overrides the trail
+        text, used by ``upgrade --all`` for its cooldown skips.
+    :param report_state: set by the maintenance commands, whose only output *is*
+        the trail (they render no result table). It makes the finisher report the
+        success count (``{done_label} N/M managers``, ``✗`` when any manager
+        failed) and keeps the trail and finisher in the sequential fallback too
+        (see :func:`_sequential_state_report`). Read commands leave it ``False``:
+        their table is the output, so the sequential fallback stays silent and the
+        finisher reports coverage (``{done_label} N managers``, always ``✓``).
     """
     jobs = effective_jobs(ctx, len(managers))
     if jobs <= 1:
+        if report_state:
+            return _sequential_state_report(managers, done_label, work)
         return [work(manager) for manager in managers]
 
     # Suppress the per-manager spinners (which would collide on stderr) and show a
@@ -284,12 +385,7 @@ def collect_from_managers(
             if not spinner.shown:
                 return
             for manager_id, data in trail:
-                glyph = (
-                    theme().error(KO_GLYPH)
-                    if data.get("errors")
-                    else theme().success(OK_GLYPH)
-                )
-                spinner.echo(f"{glyph} {theme().invoked_command(manager_id)}")
+                spinner.echo(_state_trail_line(manager_id, data))
             trail.clear()
 
         with ThreadPoolExecutor(max_workers=jobs) as executor:
@@ -306,13 +402,20 @@ def collect_from_managers(
                 # `label` is safe to reassign while the spinner thread reads it.
                 spinner.label = f"{label} {done}/{total} managers"
         # Drain any outcomes still buffered (the spinner may have first drawn only
-        # after the last completion was checked), then leave a persistent
-        # "✓ Searched N managers (Ns)" finisher. Both are gated on `shown`: ok()
-        # writes unconditionally, so a fast, piped or serialized run gets neither.
+        # after the last completion was checked), then leave a persistent finisher.
+        # Both are gated on `shown`: ok()/fail() write unconditionally, so a fast,
+        # piped or serialized run gets neither.
         flush_trail()
         if spinner.shown:
-            spinner.label = f"{done_label} {total} managers"
-            spinner.ok()
+            if report_state:
+                # Maintenance has no result table: the finisher reports successes,
+                # and ✗ when any manager failed.
+                ok_count = sum(1 for _id, data in results if not _state_failed(data))
+                spinner.label = f"{done_label} {ok_count}/{total} managers"
+                (spinner.ok if ok_count == total else spinner.fail)()
+            else:
+                spinner.label = f"{done_label} {total} managers"
+                spinner.ok()
     return results
 
 

@@ -1499,18 +1499,24 @@ def package_label(spec: Specifier) -> str:
 
 
 class OperationTrail:
-    """A sequential ``✓``/``✗`` ledger and finisher for a state-changing command run.
+    """A sequential ``✓``/``✗`` ledger and finisher for an ordering-bound command.
 
-    Read-only commands get their trail from
+    The ordering-sensitive state changers (``install``/``remove``/``upgrade
+    <packages>``/``restore``) chain managers by priority: a package found in the
+    first manager skips the rest, so they cannot fan out. They run sequentially,
+    keep their per-call spinners, and drive this lighter helper, which prints each
+    outcome between calls (where no spinner animates) and a closing summary.
+
+    Everything else fans out through
     :func:`meta_package_manager.pool.collect_from_managers`, which runs managers
-    concurrently behind a single aggregate spinner. State-changing commands must stay
-    sequential and keep their per-call spinners, so they drive this lighter helper
-    instead: it prints each outcome between calls (where no spinner animates) and a
-    closing summary. Both are gated on an interactive stderr, the surface the spinner
-    draws on, so piped, serialized and ``DEBUG`` runs stay clean.
+    concurrently behind a single aggregate spinner: the read-only commands, and the
+    independent maintenance commands (``sync``/``cleanup``/``upgrade --all``) whose
+    per-manager work has no cross-manager ordering.
 
-    Callers build their own command-specific phrasing (``installed with brew``,
-    ``removed from pip``, …) and hand it to :meth:`mark` and :meth:`finish`.
+    Both surfaces are gated on an interactive stderr, the surface the spinner draws
+    on, so piped, serialized and ``DEBUG`` runs stay clean. Callers build their own
+    command-specific phrasing (``installed with brew``, ``removed from pip``, …) and
+    hand it to :meth:`mark` and :meth:`finish`.
     """
 
     def __init__(self, managers: tuple[PackageManager, ...]) -> None:
@@ -1780,32 +1786,34 @@ def upgrade(ctx, all, packages_specs):
                 f"Ignore {', '.join(sorted(set(packages_specs)))} specifiers "
                 "and proceed to a full upgrade...",
             )
-        managers = tuple(
+        managers = list(
             ctx.obj.selected_managers(implements_operation=Operations.upgrade_all),
         )
-        op = OperationTrail(managers)
         # Explicit --<id> picks announce loudly; an implicit "upgrade everything" stays
         # at DEBUG so the default run shows only the trail (matching the explicit /
         # implicit levels select_managers already uses for its skip messages).
         announce = logging.INFO if ctx.obj.user_selection else logging.DEBUG
-        upgraded = 0
-        for manager in managers:
+
+        def upgrade_all_work(manager: PackageManager) -> tuple[str, dict]:
             mgr = theme().invoked_command(manager.id)
+            # cooldown_permits() already logs the reason at WARNING when it blocks;
+            # mark the manager ✗ without running its CLI.
             if not cooldown_permits(manager):
-                op.mark(False, f"{mgr} skipped (cooldown)")
-                continue
+                return manager.id, {
+                    "failed": True,
+                    "label": f"{mgr} skipped (cooldown)",
+                }
             logging.log(announce, f"Upgrade all outdated packages from {mgr}...")
             before = len(manager.cli_errors)
             output = manager.upgrade()
             if output:
                 logging.info(output)
-            ok = len(manager.cli_errors) == before
-            if ok:
-                upgraded += 1
-            op.mark(ok, mgr)
-        op.finish(
-            upgraded == len(managers),
-            f"Upgraded {upgraded}/{len(managers)} managers",
+            return manager.id, {"errors": manager.cli_errors[before:]}
+
+        # Full upgrade is independent per manager, so fan out concurrently with a
+        # ✓/✗ trail and a success-count finisher (see collect_from_managers).
+        collect_from_managers(
+            ctx, "Upgrading", "Upgraded", managers, upgrade_all_work, report_state=True
         )
         ctx.exit()
 
@@ -2045,44 +2053,40 @@ def remove(ctx, packages_specs):
 @pass_context
 def sync(ctx):
     """Sync local package metadata and info from external sources."""
-    managers = tuple(ctx.obj.selected_managers(implements_operation=Operations.sync))
-    # One ✓/✗ ledger line per manager plus a finisher (see OperationTrail); a manager
-    # fails the line if it grows its cli_errors during the sync.
-    op = OperationTrail(managers)
+    managers = list(ctx.obj.selected_managers(implements_operation=Operations.sync))
     announce = logging.INFO if ctx.obj.user_selection else logging.DEBUG
-    synced = 0
-    for manager in managers:
+
+    def work(manager: PackageManager) -> tuple[str, dict]:
         logging.log(
             announce, f"Sync {theme().invoked_command(manager.id)} package info..."
         )
         before = len(manager.cli_errors)
         manager.sync()
-        ok = len(manager.cli_errors) == before
-        if ok:
-            synced += 1
-        op.mark(ok, theme().invoked_command(manager.id))
-    op.finish(synced == len(managers), f"Synced {synced}/{len(managers)} managers")
+        return manager.id, {"errors": manager.cli_errors[before:]}
+
+    # Sync is independent per manager, so fan out concurrently with a ✓/✗ trail and
+    # a success-count finisher (see collect_from_managers).
+    collect_from_managers(ctx, "Syncing", "Synced", managers, work, report_state=True)
 
 
 @mpm.command(short_help="Cleanup local data.", section=MAINTENANCE)
 @pass_context
 def cleanup(ctx):
     """Cleanup local data, temporary artifacts and removes orphaned dependencies."""
-    managers = tuple(ctx.obj.selected_managers(implements_operation=Operations.cleanup))
-    # One ✓/✗ ledger line per manager plus a finisher (see OperationTrail); a manager
-    # fails the line if it grows its cli_errors during the cleanup.
-    op = OperationTrail(managers)
+    managers = list(ctx.obj.selected_managers(implements_operation=Operations.cleanup))
     announce = logging.INFO if ctx.obj.user_selection else logging.DEBUG
-    cleaned = 0
-    for manager in managers:
+
+    def work(manager: PackageManager) -> tuple[str, dict]:
         logging.log(announce, f"Cleanup {theme().invoked_command(manager.id)}...")
         before = len(manager.cli_errors)
         manager.cleanup()
-        ok = len(manager.cli_errors) == before
-        if ok:
-            cleaned += 1
-        op.mark(ok, theme().invoked_command(manager.id))
-    op.finish(cleaned == len(managers), f"Cleaned {cleaned}/{len(managers)} managers")
+        return manager.id, {"errors": manager.cli_errors[before:]}
+
+    # Cleanup is independent per manager, so fan out concurrently with a ✓/✗ trail
+    # and a success-count finisher (see collect_from_managers).
+    collect_from_managers(
+        ctx, "Cleaning up", "Cleaned", managers, work, report_state=True
+    )
 
 
 @mpm.command(

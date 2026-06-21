@@ -447,7 +447,7 @@ class Solver:
             # Warn when specifiers were dropped or merged, but not for a clean fan-out
             # to several explicit managers, where nothing is lost.
             if len(specs) > len(reduced):
-                logging.warning(
+                logging.info(
                     f"{package_id} specifiers reduced from "
                     f"{', '.join(sorted(s.raw_spec for s in specs))} to "
                     f"{', '.join(sorted(str(s) for s in reduced))}",

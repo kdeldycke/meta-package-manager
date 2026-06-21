@@ -232,7 +232,7 @@ class BarPluginRenderer(MPMPlugin):
                 except NotImplementedError:
                     # Fallback on mpm itself which is capable of simulating a full
                     # upgrade.
-                    logging.warning(
+                    logging.info(
                         f"{theme().invoked_command(manager_id)} "
                         "does not implement upgrade_all_cli.",
                     )

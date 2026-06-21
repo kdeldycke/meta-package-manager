@@ -52,25 +52,30 @@ if TYPE_CHECKING:
     T = TypeVar("T")
 
 
-Operations = Enum(
-    "Operations",
-    (
-        "installed",
-        "outdated",
-        "search",
-        "install",
-        "upgrade",
-        "upgrade_all",
-        "remove",
-        "sync",
-        "cleanup",
-    ),
-)
-"""Recognized operation IDs that are implemented by package manager with their specific
-CLI invocation.
+class Operations(Enum):
+    """Recognized operation IDs that are implemented by package manager with their
+    specific CLI invocation.
 
-Each operation has its own CLI subcommand.
-"""
+    Each operation has its own CLI subcommand.
+    """
+
+    installed = "installed"
+    outdated = "outdated"
+    search = "search"
+    install = "install"
+    upgrade = "upgrade"
+    upgrade_all = "upgrade_all"
+    remove = "remove"
+    sync = "sync"
+    cleanup = "cleanup"
+
+    def __str__(self) -> str:
+        """Render as the bare operation name (``outdated``), not the enum repr."""
+        return self.name
+
+    def __format__(self, format_spec: str) -> str:
+        """Make f-strings use the bare name across all supported Python versions."""
+        return str(self)
 
 
 def implements(manager: PackageManager | type[PackageManager], op: Operations) -> bool:
@@ -129,12 +134,12 @@ def search_capabilities(extended_support: bool = True, exact_support: bool = Tru
             refilter = False
             if exact and not exact_support:
                 refilter = True
-                logging.debug(
+                logging.info(
                     f"{self.id} does not implement exact search operation.",
                 )
             if extended and not extended_support:
                 refilter = True
-                logging.debug(
+                logging.info(
                     f"{self.id} does not implement extended search operation.",
                 )
             if refilter:

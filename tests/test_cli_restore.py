@@ -47,7 +47,7 @@ class TestRestore(CLISubCommandTests):
             # demoted to DEBUG for implicit selection and stay at WARNING/INFO
             # for explicit ones (``mpm --<mid> restore``).
             f"{mid} does not implement {Operations.install}." in stderr,
-            f"warning: No [{mid}] section found." in stderr,
+            f"No [{mid}] section found." in stderr,
             f"Restore {mid} packages..." in stderr,
             f"Skip {mid} manager:" in stderr,
         )

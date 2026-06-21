@@ -852,16 +852,16 @@ def mpm(
         if not selection_logged:
             if user_selection:
                 selected = " > ".join(map(theme().invoked_command, user_selection))
-                logging.debug(f"Selected managers (by priority): {selected}.")
+                logging.info(f"Selected managers (by priority): {selected}.")
             else:
-                logging.debug("Selected managers: platform defaults.")
+                logging.info("Selected managers: platform defaults.")
             if managers_to_remove:
                 dropped = ", ".join(
                     map(theme().invoked_command, sorted(managers_to_remove))
                 )
-                logging.debug(f"Dropped managers: {dropped}.")
+                logging.info(f"Dropped managers: {dropped}.")
             else:
-                logging.debug("Dropped managers: none.")
+                logging.info("Dropped managers: none.")
             selection_logged = True
         keep = kwargs.pop("keep", user_selection)
         return pool.select_managers(
@@ -1392,7 +1392,7 @@ def which(ctx, cli_names):
     which takes precedence on other paths.
     """
     if ctx.obj.sort_by:
-        logging.warning("Ignore --sort-by option for which command.")
+        logging.info("Ignore --sort-by option for which command.")
 
     # Machine-friendly data rendering.
     table_format = ctx.meta[TABLE_FORMAT]
@@ -1619,14 +1619,14 @@ def install(ctx, packages_specs):
             continue
         for spec in package_specs:
             # Force the manager to raise on failure so the error is both reported and
-            # recorded as unresolved, instead of being silently swallowed. The detail
-            # drops to DEBUG: the ✗ trail line and the closing critical already name
-            # the failure on screen.
+            # recorded as unresolved, instead of being silently swallowed. The reason
+            # is INFO narration (hidden by the WARNING default); the ✗ trail and the
+            # closing critical name the failure at the default level.
             with patch.object(manager, "stop_on_error", True):
                 try:
                     output = manager.install(spec.package_id, version=spec.version)
                 except NotImplementedError:
-                    logging.debug(
+                    logging.info(
                         f"{theme().invoked_command(manager_id)} "
                         "does not implement install operation.",
                     )
@@ -1634,7 +1634,7 @@ def install(ctx, packages_specs):
                     trail(spec, manager_id, "failed")
                     continue
                 except CLIError:
-                    logging.debug(
+                    logging.info(
                         f"Could not install {spec} "
                         f"with {theme().invoked_command(manager_id)}.",
                     )
@@ -1654,8 +1654,8 @@ def install(ctx, packages_specs):
     for spec in unmatched_packages:
         installed = False
         for manager in eligible_managers:
-            # Is the package available on this manager? The per-attempt detail drops
-            # to DEBUG: the ✗ trail line below already names the manager that missed.
+            # Is the package available on this manager? The per-attempt reason is INFO
+            # narration; the ✗ trail line below names the manager that missed.
             matches = None
             try:
                 matches = tuple(
@@ -1666,16 +1666,16 @@ def install(ctx, packages_specs):
                     ),
                 )
             except NotImplementedError:
-                logging.debug(
+                logging.info(
                     f"{theme().invoked_command(manager.id)} "
                     "does not implement search operation.",
                 )
-                logging.debug(
+                logging.info(
                     f"{spec.package_id} existence unconfirmed, "
                     "try to directly install it...",
                 )
             except CLIError:
-                logging.debug(
+                logging.info(
                     f"Could not search for {spec.package_id} "
                     f"with {theme().invoked_command(manager.id)}.",
                 )
@@ -1683,7 +1683,7 @@ def install(ctx, packages_specs):
                 continue
             else:
                 if not matches:
-                    logging.debug(
+                    logging.info(
                         f"No {spec.package_id} package found "
                         f"on {theme().invoked_command(manager.id)}.",
                     )
@@ -1700,14 +1700,14 @@ def install(ctx, packages_specs):
                 try:
                     output = manager.install(spec.package_id, version=spec.version)
                 except NotImplementedError:
-                    logging.debug(
+                    logging.info(
                         f"{theme().invoked_command(manager.id)} "
                         "does not implement install operation.",
                     )
                     trail(spec, manager.id, "failed")
                     continue
                 except CLIError:
-                    logging.debug(
+                    logging.info(
                         f"Could not install {spec} "
                         f"with {theme().invoked_command(manager.id)}.",
                     )
@@ -1776,7 +1776,7 @@ def upgrade(ctx, all, packages_specs):
     if all:
         if packages_specs:
             # Deduplicate and sort specifiers for terseness.
-            logging.warning(
+            logging.info(
                 f"Ignore {', '.join(sorted(set(packages_specs)))} specifiers "
                 "and proceed to a full upgrade...",
             )
@@ -1847,13 +1847,13 @@ def upgrade(ctx, all, packages_specs):
             source_manager_ids.add(spec.manager_id)
         # Package is not bound to a manager by the user's specifiers.
         else:
-            logging.debug(
+            logging.info(
                 f"{spec} not tied to a manager. Search all managers recognizing it.",
             )
             # Find all the managers that have the package installed.
             for manager in sourcing_managers:
                 if package_id in manager.installed_ids:
-                    logging.debug(
+                    logging.info(
                         f"{package_id} has been installed "
                         f"with {theme().invoked_command(manager.id)}.",
                     )
@@ -1879,13 +1879,13 @@ def upgrade(ctx, all, packages_specs):
             # with two managers tallies as two.
             total += 1
             # Force the manager to raise on failure so a botched upgrade is reported
-            # and recorded. The detail drops to DEBUG: the ✗ trail line and the closing
-            # critical already surface it on screen.
+            # and recorded. The reason is INFO narration; the ✗ trail and the closing
+            # critical surface it at the default level.
             with patch.object(manager, "stop_on_error", True):
                 try:
                     output = manager.upgrade(package_id, version=spec.version)
                 except NotImplementedError:
-                    logging.debug(
+                    logging.info(
                         f"{theme().invoked_command(manager_id)} "
                         "does not implement upgrade operation.",
                     )
@@ -1893,7 +1893,7 @@ def upgrade(ctx, all, packages_specs):
                     trail(spec, manager_id, False)
                     continue
                 except CLIError:
-                    logging.debug(
+                    logging.info(
                         f"Could not upgrade {package_id} "
                         f"with {theme().invoked_command(manager_id)}.",
                     )
@@ -1973,13 +1973,13 @@ def remove(ctx, packages_specs):
             source_manager_ids.add(spec.manager_id)
         # Package is not bound to a manager by the user's specifiers.
         else:
-            logging.debug(
+            logging.info(
                 f"{spec} not tied to a manager. Search all managers recognizing it.",
             )
             # Find all the managers that have the package installed.
             for manager in sourcing_managers:
                 if package_id in manager.installed_ids:
-                    logging.debug(
+                    logging.info(
                         f"{package_id} has been installed "
                         f"with {theme().invoked_command(manager.id)}.",
                     )
@@ -2003,13 +2003,13 @@ def remove(ctx, packages_specs):
             # from two managers tallies as two.
             total += 1
             # Force the manager to raise on failure so a botched removal is reported and
-            # recorded. The detail drops to DEBUG: the ✗ trail line and the closing
-            # critical already surface it on screen.
+            # recorded. The reason is INFO narration; the ✗ trail and the closing
+            # critical surface it at the default level.
             with patch.object(manager, "stop_on_error", True):
                 try:
                     output = manager.remove(package_id)
                 except NotImplementedError:
-                    logging.debug(
+                    logging.info(
                         f"{theme().invoked_command(manager_id)} "
                         "does not implement remove operation.",
                     )
@@ -2017,7 +2017,7 @@ def remove(ctx, packages_specs):
                     trail(spec, manager_id, False)
                     continue
                 except CLIError:
-                    logging.debug(
+                    logging.info(
                         f"Could not remove {package_id} "
                         f"with {theme().invoked_command(manager_id)}.",
                     )
@@ -2171,7 +2171,7 @@ def dump(
     if output_format == "brewfile":
         if is_stdout(output_path):
             if overwrite:
-                logging.warning("Ignore the --overwrite/--force/--replace option.")
+                logging.info("Ignore the --overwrite/--force/--replace option.")
             logging.info(f"Print Brewfile to {sys.stdout.name}")
         else:
             logging.info(f"Dump installed packages as a Brewfile into {output_path}")
@@ -2194,7 +2194,7 @@ def dump(
             )
             ctx.exit(2)
         if overwrite:
-            logging.warning("Ignore the --overwrite/--force/--replace option.")
+            logging.info("Ignore the --overwrite/--force/--replace option.")
         logging.info(f"Print installed package list to {sys.stdout.name}")
     else:
         if merge:
@@ -2212,7 +2212,7 @@ def dump(
                 logging.warning("Target file exist and will be overwritten.")
             else:
                 if merge or update_version:
-                    logging.warning("Ignore the --overwrite/--force/--replace option.")
+                    logging.info("Ignore the --overwrite/--force/--replace option.")
                 else:
                     logging.critical("Target file exist and will be overwritten.")
                     ctx.exit(2)
@@ -2403,7 +2403,7 @@ def restore(ctx, toml_files):
 
         for manager in selected_managers:
             if manager.id not in doc:
-                logging.warning(
+                logging.info(
                     f"No [{theme().invoked_command(manager.id)}] section found.",
                 )
                 continue
@@ -2417,13 +2417,13 @@ def restore(ctx, toml_files):
                 )
                 total += 1
                 # Force the manager to raise on failure so a botched install is
-                # reported and recorded. The detail drops to DEBUG: the ✗ trail line
-                # and the closing critical already surface it on screen.
+                # reported and recorded. The reason is INFO narration; the ✗ trail and
+                # the closing critical surface it at the default level.
                 with patch.object(manager, "stop_on_error", True):
                     try:
                         output = manager.install(spec.package_id, version=spec.version)
                     except NotImplementedError:
-                        logging.debug(
+                        logging.info(
                             f"{theme().invoked_command(manager.id)} "
                             "does not implement install operation.",
                         )
@@ -2431,7 +2431,7 @@ def restore(ctx, toml_files):
                         trail(spec, manager.id, False)
                         continue
                     except CLIError:
-                        logging.debug(
+                        logging.info(
                             f"Could not install {spec} "
                             f"with {theme().invoked_command(manager.id)}.",
                         )
@@ -2508,7 +2508,7 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, export_path):
 
     if is_stdout(export_path):
         if overwrite:
-            logging.warning("Ignore the --overwrite/--force/--replace option.")
+            logging.info("Ignore the --overwrite/--force/--replace option.")
         logging.info(f"Print {standard} export to {sys.stdout.name}")
 
     else:
@@ -2580,7 +2580,7 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, export_path):
             for package, metadata in enriched:
                 sbom.add_package(manager, package, metadata)
         except Exception as exc:  # noqa: BLE001
-            logging.warning(
+            logging.info(
                 f"Falling back to minimal SBOM data for "
                 f"{theme().invoked_command(manager.id)}: {exc}"
             )

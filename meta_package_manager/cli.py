@@ -2364,11 +2364,13 @@ def restore(ctx, toml_files):
     )
 
     # Per-package ✓/✗ ledger plus a finisher (see OperationTrail), keyed by package
-    # and the manager it is restored with. restore is best-effort: a failed package
-    # marks its line ✗ (detected via a cli_errors delta) but does not fail the run.
+    # and the manager it is restored with.
     op = OperationTrail(selected_managers)
     total = 0
     restored_count = 0
+    # Collect every package a manager failed to install, to raise a non-zero exit code
+    # at the end (matching install, remove and upgrade).
+    restore_failures: list[str] = []
 
     def trail(spec: Specifier, manager_id: str, restored: bool) -> None:
         """Map a restore install attempt to a ``✓``/``✗`` ledger line through ``op``."""
@@ -2415,20 +2417,45 @@ def restore(ctx, toml_files):
                     version=str(version),
                 )
                 total += 1
-                before = len(manager.cli_errors)
-                output = manager.install(spec.package_id, version=spec.version)
+                # Force the manager to raise on failure so a botched install is
+                # reported and recorded. The detail drops to DEBUG: the ✗ trail line
+                # and the closing critical already surface it on screen.
+                with patch.object(manager, "stop_on_error", True):
+                    try:
+                        output = manager.install(spec.package_id, version=spec.version)
+                    except NotImplementedError:
+                        logging.debug(
+                            f"{theme().invoked_command(manager.id)} "
+                            "does not implement install operation.",
+                        )
+                        restore_failures.append(package_id)
+                        trail(spec, manager.id, False)
+                        continue
+                    except CLIError:
+                        logging.debug(
+                            f"Could not install {spec} "
+                            f"with {theme().invoked_command(manager.id)}.",
+                        )
+                        restore_failures.append(package_id)
+                        trail(spec, manager.id, False)
+                        continue
                 if output:
                     echo(output)
-                restored = len(manager.cli_errors) == before
-                if restored:
-                    restored_count += 1
-                trail(spec, manager.id, restored)
+                restored_count += 1
+                trail(spec, manager.id, True)
 
     if total:
         op.finish(
-            restored_count == total,
+            not restore_failures,
             f"Restored {restored_count}/{total} packages",
         )
+
+    # Fail with a non-zero exit code if any referenced package could not be installed.
+    if restore_failures:
+        logging.critical(
+            "Could not restore: " + ", ".join(sorted(set(restore_failures))) + ".",
+        )
+        ctx.exit(1)
 
 
 @mpm.command(

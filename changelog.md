@@ -8,7 +8,8 @@
 - **Breaking:** [mpm] Rename the `--allow-no-cooldown` flag to the `--require-cooldown-support`/`--allow-unsupported-managers` pair, and its `allow_no_cooldown` config to `require_cooldown_support` (default `true`).
 - [pnpm] Add the pnpm package manager (`installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `cleanup`), enforcing `--cooldown` via pnpm's native `minimumReleaseAge` gate.
 - [mpm] Read-only operations (`installed`, `outdated`, `search`) now query managers in parallel, as does the manager-availability probe, via a new `--jobs`/`-j` option (default: CPU count minus one); state-changing operations stay sequential. Refs {issue}`529`.
-- [mpm] Show a progress spinner with elapsed time on stderr for manager CLI calls running longer than a second, with a single aggregate spinner during parallel batches; toggle it with click-extra's `--progress`/`--no-progress`.
+- [mpm] Show a progress spinner with elapsed time on stderr while manager CLI calls run, with a single aggregate spinner during parallel batches; toggle it with click-extra's `--progress`/`--no-progress`.
+- [mpm] Log the `Selected managers` / `Dropped managers` selection summary at `DEBUG` instead of `INFO`, quieting default output.
 - [mpm] The standalone binary now reads configuration in all six formats (`toml`, `yaml`, `json5`, `jsonc`, `hjson`, `xml`), matching the source distribution.
 - [mpm] `--timeout` now defaults per-operation — 120s for read-only queries (`installed`, `outdated`, `search`) and 500s for state-changing operations — instead of a flat 500s; an explicit `--timeout` still overrides.
 - [mpm] `install` and `remove` now exit non-zero when no manager could fulfill a request (previously always `0`); `install` also installs every requested package, not just the first to succeed.

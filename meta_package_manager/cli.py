@@ -832,8 +832,13 @@ def mpm(
     def selected_managers(**kwargs):
         """Select the subset of managers to target, and apply manager-level options.
 
-        The selection summary is logged on the first call only, so subcommands that
-        never resolve the pool (like ``--help``) stay silent.
+        The selection summary is logged at ``DEBUG`` on the first call only. The
+        ``✓``-trailed spinner from
+        :py:func:`meta_package_manager.pool.collect_from_managers` already names every
+        manager that ran, so this summary is redundant at default verbosity for
+        read-only commands; it is kept for troubleshooting, where it also surfaces
+        config-driven drops that never appear in the trail. Logging on the first call
+        only keeps subcommands that never resolve the pool (like ``--help``) silent.
 
         Callers may pass ``keep=<ids>`` to narrow the selection to a specific
         subset (for example, the managers that implement a given operation).
@@ -843,16 +848,16 @@ def mpm(
         if not selection_logged:
             if user_selection:
                 selected = " > ".join(map(theme().invoked_command, user_selection))
-                logging.info(f"Selected managers (by priority): {selected}.")
+                logging.debug(f"Selected managers (by priority): {selected}.")
             else:
-                logging.info("Selected managers: platform defaults.")
+                logging.debug("Selected managers: platform defaults.")
             if managers_to_remove:
                 dropped = ", ".join(
                     map(theme().invoked_command, sorted(managers_to_remove))
                 )
-                logging.info(f"Dropped managers: {dropped}.")
+                logging.debug(f"Dropped managers: {dropped}.")
             else:
-                logging.info("Dropped managers: none.")
+                logging.debug("Dropped managers: none.")
             selection_logged = True
         keep = kwargs.pop("keep", user_selection)
         return pool.select_managers(

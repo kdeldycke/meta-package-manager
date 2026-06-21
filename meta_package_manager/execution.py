@@ -171,12 +171,14 @@ plus the special ``"version"`` detection probe. The keys are validated against t
 absent from this map resolves to :py:data:`DEFAULT_TIMEOUT`.
 """
 
-SPINNER_DELAY: Final = 1.0
+SPINNER_DELAY: Final = 0.1
 """Seconds a CLI call must run before its progress spinner appears.
 
-Short calls (most version probes and metadata queries) finish before this delay,
-so the spinner stays silent and only surfaces once an operation is genuinely slow:
-the long ``guix search`` and source builds that motivated it.
+Kept short so the spinner surfaces almost immediately on any call that is not
+instant: prompt feedback makes ``mpm`` feel responsive from the start rather than
+stalled during the first second. Only the quickest calls (cached version probes,
+trivial metadata queries) finish within this delay and stay silent; anything
+slower (a ``guix search``, a source build) shows the spinner right away.
 """
 
 

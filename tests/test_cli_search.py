@@ -103,8 +103,6 @@ class TestSearch(CLISubCommandTests, CLITableTests):
         .. code-block:: shell-session
 
             $ mpm --mas search 钉
-            info: Selected managers (by priority): mas.
-            info: Dropped managers: none.
             ╭────────────┬───────────────────┬─────────┬────────────────╮
             │ Package ID │ Name              │ Manager │ Latest version │
             ├────────────┼───────────────────┼─────────┼────────────────┤

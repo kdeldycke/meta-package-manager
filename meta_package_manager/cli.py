@@ -42,6 +42,7 @@ from unittest.mock import patch
 
 import tomli_w
 from boltons.cacheutils import LRI, cached
+from click import ParameterSource
 from click_extra import (
     STRING,
     Choice,
@@ -61,7 +62,7 @@ from click_extra import (
     pass_context,
 )
 from click_extra.colorize import HelpKeywords, highlight
-from click_extra.context import PROGRESS, TABLE_FORMAT, VERBOSITY
+from click_extra.context import JOBS, PROGRESS, TABLE_FORMAT, VERBOSITY
 from click_extra.table import (
     SERIALIZATION_FORMATS,
     print_data,
@@ -1498,6 +1499,30 @@ def package_label(spec: Specifier) -> str:
     return spec.package_id
 
 
+def warn_jobs_ignored(ctx: Context) -> None:
+    """Note that ``--jobs`` does not parallelize an ordering-bound command.
+
+    ``install``, ``remove``, ``upgrade <packages>`` and ``restore`` dispatch
+    managers sequentially by priority (a package handled by the first manager
+    skips the rest), so they cannot fan out the way the read-only and maintenance
+    commands do (see :func:`meta_package_manager.pool.collect_from_managers`).
+    When the user explicitly raised :option:`mpm --jobs` above ``1``, say so once
+    at ``INFO``: the request simply has no effect here, which is narration, not a
+    problem.
+    """
+    if ctx.meta.get(JOBS, 1) <= 1:
+        return
+    if ctx.find_root().get_parameter_source("jobs") not in (
+        ParameterSource.COMMANDLINE,
+        ParameterSource.ENVIRONMENT,
+    ):
+        return
+    logging.info(
+        "This command dispatches managers sequentially by priority; "
+        "--jobs does not parallelize it.",
+    )
+
+
 class OperationTrail:
     """A sequential ``✓``/``✗`` ledger and finisher for an ordering-bound command.
 
@@ -1575,6 +1600,8 @@ def install(ctx, packages_specs):
     we will skip the installation and try the next available managers in the order of
     their priority.
     """
+    warn_jobs_ignored(ctx)
+
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=Operations.install),
@@ -1817,6 +1844,8 @@ def upgrade(ctx, all, packages_specs):
         )
         ctx.exit()
 
+    warn_jobs_ignored(ctx)
+
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=Operations.upgrade),
@@ -1942,6 +1971,8 @@ def remove(ctx, packages_specs):
 
     Packages unrecognized by any selected manager will be skipped.
     """
+    warn_jobs_ignored(ctx)
+
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=Operations.remove),
@@ -2269,25 +2300,39 @@ def _dump_toml(
             f"# Timestamp: {datetime.now(tz=timezone.utc).isoformat()}.\n\n"
         )
 
-    for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
+    managers = list(
+        ctx.obj.selected_managers(implements_operation=Operations.installed)
+    )
+
+    def fetch(manager: PackageManager) -> tuple[str, dict]:
         logging.info(
             f"Dumping packages from {theme().invoked_command(manager.id)}...",
         )
         packages = tuple(packages_asdict(manager.installed_or_empty(), fields))
-        for pkg in packages:
+        return manager.id, {
+            "packages": packages,
+            "errors": list({e.error for e in manager.cli_errors}),
+        }
+
+    # Query each manager's installed packages concurrently, then assemble the
+    # manifest in manager order (see collect_from_managers).
+    for manager_id, data in collect_from_managers(
+        ctx, "Dumping", "Dumped", managers, fetch
+    ):
+        for pkg in data["packages"]:
             if update_version:
-                if pkg["id"] in installed_data.get(manager.id, {}):
-                    installed_data[manager.id][pkg["id"]] = str(
+                if pkg["id"] in installed_data.get(manager_id, {}):
+                    installed_data[manager_id][pkg["id"]] = str(
                         pkg["installed_version"],
                     )
             else:
-                installed_data.setdefault(manager.id, {})[pkg["id"]] = str(
+                installed_data.setdefault(manager_id, {})[pkg["id"]] = str(
                     pkg["installed_version"],
                 )
-        if installed_data.get(manager.id):
-            installed_data[manager.id] = dict(
+        if installed_data.get(manager_id):
+            installed_data[manager_id] = dict(
                 sorted(
-                    installed_data[manager.id].items(),
+                    installed_data[manager_id].items(),
                     key=lambda i: (i[0].lower(), i[0]),
                 ),
             )
@@ -2312,18 +2357,32 @@ def _dump_brewfile(ctx, output_path, *, include_header: bool) -> None:
     warning for any skipped manager that defines :py:attr:`brewfile_skip_warning`
     (used by ``vscodium`` to flag the silent-misinstall risk).
     """
+    managers = list(
+        ctx.obj.selected_managers(implements_operation=Operations.installed)
+    )
+
+    def fetch(manager: PackageManager) -> tuple[str, dict]:
+        packages = manager.installed_or_empty()
+        return manager.id, {
+            "packages": packages,
+            "errors": list({e.error for e in manager.cli_errors}),
+        }
+
+    # Query each manager's installed packages concurrently, then build the Brewfile
+    # from the gathered data (see collect_from_managers).
+    results = collect_from_managers(ctx, "Reading", "Read", managers, fetch)
+    packages_by_manager = {mid: data["packages"] for mid, data in results}
+    errored = {mid for mid, data in results if data["errors"]}
+
     mappable_managers = []
     skipped_counts: Counter[str] = Counter()
-    for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
+    for manager in managers:
         if manager.brewfile_entry_type is None:
-            try:
-                installed_count = sum(1 for _ in manager.installed)
-            except CLIError:
-                logging.warning(
-                    f"Could not list installed packages from "
-                    f"{theme().invoked_command(manager.id)}.",
-                )
+            # Drop managers whose CLI failed (installed_or_empty already warned),
+            # so they stay out of the header tally as before.
+            if manager.id in errored:
                 continue
+            installed_count = len(packages_by_manager.get(manager.id, ()))
             skipped_counts[manager.id] = installed_count
             if installed_count and manager.brewfile_skip_warning:
                 logging.warning(
@@ -2334,6 +2393,7 @@ def _dump_brewfile(ctx, output_path, *, include_header: bool) -> None:
 
     content = build_brewfile(
         mappable_managers,
+        packages_by_manager=packages_by_manager,
         include_header=include_header,
         skipped_counts=skipped_counts,
         platform=current_platform().name,
@@ -2361,6 +2421,8 @@ def restore(ctx, toml_files):
     """Read TOML files then install or upgrade each package referenced in them."""
     # TODO: add an artificial order for managers, so that the [cask] section can install
     # mas CLI first then have [mas] section work in one-go. Use-case: my dotfiles.
+    warn_jobs_ignored(ctx)
+
     # Cast generator to tuple because of reuse across TOML files and the trail.
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=Operations.install),
@@ -2568,26 +2630,44 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, export_path):
     sbom.init_doc()
     sbom.set_scan_completeness(bundled=bundled)
 
-    for manager in ctx.obj.selected_managers(implements_operation=Operations.installed):
+    managers = list(
+        ctx.obj.selected_managers(implements_operation=Operations.installed)
+    )
+    by_id = {manager.id: manager for manager in managers}
+
+    def fetch(manager: PackageManager) -> tuple[str, dict]:
         logging.info(f"Export packages from {theme().invoked_command(manager.id)}...")
         installed_packages = manager.installed_or_empty()
+        # In --bundled mode, enrich each package with its metadata here too, so the
+        # slow per-manager metadata fetch parallelizes alongside the listing.
+        enriched = None
+        if bundled and installed_packages:
+            try:
+                enriched = list(manager.package_metadata_batch(installed_packages))
+            except Exception as exc:  # noqa: BLE001
+                logging.info(
+                    f"Falling back to minimal SBOM data for "
+                    f"{theme().invoked_command(manager.id)}: {exc}"
+                )
+        return manager.id, {
+            "packages": installed_packages,
+            "enriched": enriched,
+            "errors": list({e.error for e in manager.cli_errors}),
+        }
+
+    # Query (and, for --bundled, enrich) each manager concurrently, then add the
+    # packages to the document in manager order (see collect_from_managers).
+    for manager_id, data in collect_from_managers(
+        ctx, "Exporting", "Exported", managers, fetch
+    ):
+        installed_packages = data["packages"]
         if not installed_packages:
             continue
-
-        if not bundled:
-            for package in installed_packages:
-                sbom.add_package(manager, package)
-            continue
-
-        try:
-            enriched = manager.package_metadata_batch(installed_packages)
-            for package, metadata in enriched:
+        manager = by_id[manager_id]
+        if data["enriched"] is not None:
+            for package, metadata in data["enriched"]:
                 sbom.add_package(manager, package, metadata)
-        except Exception as exc:  # noqa: BLE001
-            logging.info(
-                f"Falling back to minimal SBOM data for "
-                f"{theme().invoked_command(manager.id)}: {exc}"
-            )
+        else:
             for package in installed_packages:
                 sbom.add_package(manager, package)
 

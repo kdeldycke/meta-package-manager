@@ -160,6 +160,7 @@ def tap_from_package_id(package_id: str) -> str | None:
 def build_brewfile(
     managers: Iterable[PackageManager],
     *,
+    packages_by_manager: Mapping[str, tuple[Package, ...]] | None = None,
     include_header: bool = True,
     skipped_counts: Mapping[str, int] | None = None,
     platform: str = "",
@@ -170,6 +171,11 @@ def build_brewfile(
     is set contribute output; the caller is expected to have filtered the iterable
     accordingly, but managers without a configured entry type are silently skipped
     as a defensive measure.
+
+    ``packages_by_manager`` (keyed by manager id) supplies each manager's installed
+    packages so the caller can fetch them concurrently up front. When omitted, each
+    manager's :py:attr:`~meta_package_manager.manager.PackageManager.installed` is
+    queried inline instead (the path the unit tests exercise).
 
     ``skipped_counts`` is a per-manager-id tally of packages excluded because their
     manager has no Brewfile mapping; it is rendered in the header for visibility.
@@ -184,14 +190,17 @@ def build_brewfile(
         entry_type = manager.brewfile_entry_type
         if entry_type is None:
             continue
-        try:
-            packages: tuple[Package, ...] = tuple(manager.installed)
-        except Exception:  # noqa: BLE001
-            logging.warning(
-                "Could not list installed packages from %s.",
-                manager.id,
-            )
-            continue
+        if packages_by_manager is None:
+            try:
+                packages: tuple[Package, ...] = tuple(manager.installed)
+            except Exception:  # noqa: BLE001
+                logging.warning(
+                    "Could not list installed packages from %s.",
+                    manager.id,
+                )
+                continue
+        else:
+            packages = packages_by_manager.get(manager.id, ())
         for pkg in packages:
             entry = manager.brewfile_entry(pkg)
             if entry is None:

@@ -386,7 +386,14 @@ An enum surfaced in any message must render as its bare member name: give it `__
 
 ### Operation state: the ✓/✗ trail
 
-Fan-out operations report state with a per-item `✓`/`✗` trail plus a persistent finisher, printed via `echo` to stderr, never `logging`. `echo` survives the `WARNING` default and is instead gated on an interactive terminal plus `--progress`, so pipes, CI and serialized runs stay clean. Two implementations, split by cross-manager *ordering*, not by whether the command mutates state. `meta_package_manager.pool.collect_from_managers` runs the independent commands concurrently: the read-only ones (`installed`/`outdated`/`search`) and the maintenance ones (`sync`/`cleanup`/`upgrade --all`, which pass `report_state=True` since the trail is their only output). `OperationTrail` in `cli.py` keeps the ordering-bound state changers (`install`/`remove`/`upgrade <packages>`/`restore`) sequential, because each chains managers by priority and a hit in the first manager skips the rest.
+Fan-out operations report state with a per-item `✓`/`✗` trail plus a persistent finisher, printed via `echo` to stderr, never `logging`. `echo` survives the `WARNING` default and is instead gated on an interactive terminal plus `--progress`, so pipes, CI and serialized runs stay clean.
+
+Whether a command runs its managers concurrently is decided by cross-manager *ordering*, not by whether it mutates state:
+
+- **Concurrent**, fanned out through `meta_package_manager.pool.collect_from_managers` and bounded by `--jobs`: every command whose per-manager work is independent. The read-only queries (`installed`/`outdated`/`search`), the maintenance commands (`sync`/`cleanup`/`upgrade --all`), and the inventory exporters (`dump`/`backup`, `sbom`). The maintenance commands pass `report_state=True` because the trail is their only output; the exporters collect concurrently, then assemble their manifest/document in manager order.
+- **Sequential by design**, driven by `OperationTrail` in `cli.py`: the ordering-bound state changers `install`/`remove`/`upgrade <packages>`/`restore`. Each dispatches managers by priority (a package handled by the first manager skips the rest), so they cannot fan out without changing semantics. They keep their per-call spinners and print the trail between calls. `warn_jobs_ignored` notes at `INFO` when an explicit `--jobs` is therefore ignored.
+
+Trail conventions:
 
 - Two shapes: **package-keyed** (`✓ foo installed with brew`, for `install`/`remove`/`upgrade <packages>`/`restore`) and **manager-keyed** (`✓ brew`, `✓ Synced N/M managers`, for `sync`/`cleanup`/`upgrade --all`).
 - The finisher counts **per (package, manager) attempt**, matching the trail lines: a package acted on by two managers is `2/2`, not `1/1`.

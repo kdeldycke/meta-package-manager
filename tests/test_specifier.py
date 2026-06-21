@@ -309,3 +309,46 @@ def test_reduce_specs(spec_strings, target_managers, expected):
         expected = tuple(expected)
         assert len(expected) == 1
         assert props(reduced_spec) == props(expected[0])
+
+
+@pytest.mark.parametrize(
+    ("spec_strings", "manager_priority", "expected"),
+    (
+        pytest.param(
+            {"pkg:uv/rich", "pkg:brew/rich"},
+            ["uv", "brew"],
+            {"pkg:uv/rich", "pkg:brew/rich"},
+            id="distinct_explicit_managers_each_kept",
+        ),
+        pytest.param(
+            {"pkg:rpm/ping@1.0"},
+            ["dnf", "yum"],
+            {"pkg:dnf/ping@1.0"},
+            id="alias_purl_reduced_to_top_priority",
+        ),
+        pytest.param(
+            {"rich", "rich@1.0"},
+            None,
+            {"rich@1.0"},
+            id="version_constraints_merged",
+        ),
+        pytest.param(
+            {"pkg:gem/leftpad", "leftpad@77.10.0"},
+            None,
+            {"pkg:gem/leftpad"},
+            id="explicit_manager_wins_over_manager_less",
+        ),
+        pytest.param(
+            {"rich"},
+            None,
+            {"rich"},
+            id="single_manager_less",
+        ),
+    ),
+)
+def test_resolve_package_specs(spec_strings, manager_priority, expected):
+    """Distinct explicit managers each survive as their own target, while alias
+    pURLs, version constraints and manager-less specs still reduce to one."""
+    solver = Solver(spec_strings, manager_priority=manager_priority)
+    resolved = {str(spec) for _package_id, spec in solver.resolve_package_specs()}
+    assert resolved == expected

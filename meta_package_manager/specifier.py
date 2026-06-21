@@ -395,33 +395,66 @@ class Solver:
     def resolve_package_specs(self) -> Iterator[tuple[str, Specifier]]:
         """Regroup specs of the pool by package IDs, and solve their constraints.
 
-        Return each package ID with its single, reduced spec, or ``None`` if it ha no
-        constraints.
+        Each package ID yields one reduced spec *per distinct target manager*. A
+        package therefore produces several specs when the user explicitly names several
+        managers for it (``pkg:uv/rich pkg:brew/rich`` → one spec each). In contrast, a
+        single alias pURL that expands to several managers (``pkg:rpm/ping`` →
+        ``dnf``/``yum``/``zypper``) is a set of *alternatives*, reduced to the
+        top-priority one.
         """
-        # Regroup specs by package IDs. Has the nice side effect of deduplicating specs.
-        keyfunc = attrgetter("package_id")
-        for package_id, package_specs in groupby(
-            sorted(self.spec_pool, key=keyfunc),
-            key=keyfunc,
+
+        def manager_key(spec: Specifier) -> str:
+            """Group key tolerating the ``None`` manager (sorts it first)."""
+            return spec.manager_id or ""
+
+        # Collapse alias expansions first: specs sharing a single ``raw_spec`` that
+        # resolved to several managers are alternatives, reduced to the top-priority
+        # one. Distinct ``raw_spec`` strings stay distinct, so each explicitly-listed
+        # manager survives as its own target.
+        raw_key = attrgetter("raw_spec")
+        collapsed: list[Specifier] = []
+        for _raw_spec, raw_group in groupby(
+            sorted(self.spec_pool, key=raw_key),
+            key=raw_key,
         ):
-            # Serialize because of reuse in log message below.
-            specs = tuple(package_specs)
+            alternatives = tuple(raw_group)
+            if len({s.manager_id for s in alternatives}) > 1:
+                try:
+                    collapsed.append(self.reduce_specs(alternatives))
+                except EmptyReduction:
+                    logging.warning(f"Skip package {alternatives[0].package_id}.")
+            else:
+                collapsed.extend(alternatives)
 
-            # Reduce and cleanup each set of constraints.
-            try:
-                reduced_spec = self.reduce_specs(specs)
-            except EmptyReduction:
-                logging.warning(f"Skip package {package_id}.")
-                continue
+        # Regroup by package ID, then by target manager. An explicit manager takes
+        # precedence over a manager-less spec for the same package (the latter is
+        # dropped), and version constraints are reduced within each target.
+        pkg_key = attrgetter("package_id")
+        for package_id, package_group in groupby(
+            sorted(collapsed, key=pkg_key),
+            key=pkg_key,
+        ):
+            specs = tuple(package_group)
+            targets = tuple(s for s in specs if s.manager_id) or specs
+            reduced = [
+                self.reduce_specs(tuple(manager_group))
+                for _manager_id, manager_group in groupby(
+                    sorted(targets, key=manager_key),
+                    key=manager_key,
+                )
+            ]
 
-            # Print warning if specifiers were subject to a reduction.
-            if len(specs) > 1:
+            # Warn when specifiers were dropped or merged, but not for a clean fan-out
+            # to several explicit managers, where nothing is lost.
+            if len(specs) > len(reduced):
                 logging.warning(
                     f"{package_id} specifiers reduced from "
-                    f"{', '.join(sorted(s.raw_spec for s in specs))} to {reduced_spec}",
+                    f"{', '.join(sorted(s.raw_spec for s in specs))} to "
+                    f"{', '.join(sorted(str(s) for s in reduced))}",
                 )
 
-            yield package_id, reduced_spec
+            for spec in reduced:
+                yield package_id, spec
 
     def resolve_specs_group_by_managers(self) -> dict[str | None, set[Specifier]]:
         """Resolves package specs, and returns them grouped by managers."""

@@ -28,6 +28,7 @@ import logging
 import platform
 import re
 import sys
+import threading
 import time
 from collections import Counter, namedtuple
 from collections.abc import Iterable
@@ -86,7 +87,7 @@ from .execution import CLIError, highlight_cli_name
 from .inventory import MAIN_PLATFORMS
 from .manager import PackageManager
 from .package import packages_asdict
-from .pool import collect_from_managers, pool
+from .pool import collect_from_managers, collect_per_package, pool
 from .sbom import (
     SBOM,
     SPDX,
@@ -1500,15 +1501,16 @@ def package_label(spec: Specifier) -> str:
 
 
 def warn_jobs_ignored(ctx: Context) -> None:
-    """Note that ``--jobs`` does not parallelize an ordering-bound command.
+    """Note that ``--jobs`` does not parallelize this run.
 
-    ``install``, ``remove``, ``upgrade <packages>`` and ``restore`` dispatch
-    managers sequentially by priority (a package handled by the first manager
-    skips the rest), so they cannot fan out the way the read-only and maintenance
-    commands do (see :func:`meta_package_manager.pool.collect_from_managers`).
-    When the user explicitly raised :option:`mpm --jobs` above ``1``, say so once
-    at ``INFO``: the request simply has no effect here, which is narration, not a
-    problem.
+    Only ``install`` with at least one *untied* package reaches this: those packages
+    need a priority search (install with the first manager that has the package, skip
+    the rest), which is cross-manager-sequential, so the whole command runs serially.
+    The other state changers (``remove``, ``upgrade <packages>``, ``restore``, and
+    ``install`` of fully manager-tied specs) now fan out through
+    :func:`meta_package_manager.pool.collect_per_package`. When the user explicitly
+    raised :option:`mpm --jobs` above ``1``, say so once at ``INFO``: the request
+    simply has no effect on this run, which is narration, not a problem.
     """
     if ctx.meta.get(JOBS, 1) <= 1:
         return
@@ -1600,8 +1602,6 @@ def install(ctx, packages_specs):
     we will skip the installation and try the next available managers in the order of
     their priority.
     """
-    warn_jobs_ignored(ctx)
-
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=Operations.install),
@@ -1614,10 +1614,82 @@ def install(ctx, packages_specs):
 
     solver = Solver(packages_specs, manager_priority=manager_ids)
     packages_per_managers = solver.resolve_specs_group_by_managers()
+    unmatched_packages = packages_per_managers.get(None, set())
 
     # Collect every requested spec that no manager could install, to raise a non-zero
     # exit code at the end of the command.
     unresolved_specs: list[Specifier] = []
+
+    # Packages tied to a manager (purls, or a single-manager selection) install
+    # concurrently across managers, serial within each (see collect_per_package). An
+    # untied package needs a priority search (install with the first manager that has
+    # it, skip the rest), which is cross-manager-sequential; its presence drops the
+    # whole command onto the sequential path below.
+    if not unmatched_packages:
+        failures_lock = threading.Lock()
+
+        def make_install_task(manager, spec):
+            mgr = theme().invoked_command(manager.id)
+
+            def task() -> tuple[bool, str]:
+                # Force the manager to raise so the failure is recorded as unresolved,
+                # not swallowed. The reason is INFO narration; the ✗ trail and the
+                # closing critical name it at the default level.
+                with patch.object(manager, "stop_on_error", True):
+                    try:
+                        output = manager.install(spec.package_id, version=spec.version)
+                    except NotImplementedError:
+                        logging.info(f"{mgr} does not implement install operation.")
+                    except CLIError:
+                        logging.info(f"Could not install {spec} with {mgr}.")
+                    else:
+                        if output:
+                            logging.info(output)
+                        return True, f"{package_label(spec)} installed with {mgr}"
+                with failures_lock:
+                    unresolved_specs.append(spec)
+                return False, f"{package_label(spec)} failed to install with {mgr}"
+
+            return task
+
+        def make_cooldown_task(spec, mgr):
+            # cooldown_permits() already logged why; a skip is ✗ but not unresolved, so
+            # it never forces a non-zero exit.
+            def task() -> tuple[bool, str]:
+                return False, f"{package_label(spec)} skipped in {mgr} (cooldown)"
+
+            return task
+
+        tasks_by_manager: dict[PackageManager, list] = {}
+        for manager_id, package_specs in packages_per_managers.items():
+            if not manager_id:
+                continue
+            manager = pool.get(manager_id)
+            mgr = theme().invoked_command(manager_id)
+            if cooldown_permits(manager):
+                tasks_by_manager[manager] = [
+                    make_install_task(manager, spec) for spec in package_specs
+                ]
+            else:
+                tasks_by_manager[manager] = [
+                    make_cooldown_task(spec, mgr) for spec in package_specs
+                ]
+        collect_per_package(
+            ctx, "Installing", "Installed", list(tasks_by_manager.items())
+        )
+
+        if unresolved_specs:
+            logging.critical(
+                "Could not install: "
+                + ", ".join(sorted(str(spec) for spec in unresolved_specs))
+                + ".",
+            )
+            ctx.exit(1)
+        return
+
+    # Untied packages present: the priority search cannot fan out, so run sequentially
+    # (see warn_jobs_ignored).
+    warn_jobs_ignored(ctx)
 
     # Leave a per-package ✓/✗ ledger plus a persistent finisher (see OperationTrail),
     # keyed by package and its resolving manager.
@@ -1675,15 +1747,12 @@ def install(ctx, packages_specs):
                     trail(spec, manager_id, "failed")
                     continue
             if output:
-                echo(output)
+                logging.info(output)
             installed_count += 1
             trail(spec, manager_id, "installed")
 
-    unmatched_packages = packages_per_managers.get(None, set())
     # Drop managers that cannot honor an active cooldown (once, not per package).
-    eligible_managers = selected_managers
-    if unmatched_packages:
-        eligible_managers = tuple(m for m in selected_managers if cooldown_permits(m))
+    eligible_managers = tuple(m for m in selected_managers if cooldown_permits(m))
     for spec in unmatched_packages:
         installed = False
         for manager in eligible_managers:
@@ -1748,7 +1817,7 @@ def install(ctx, packages_specs):
                     continue
 
             if output:
-                echo(output)
+                logging.info(output)
             # Stop at the first (highest-priority) manager that provides the package.
             installed = True
             installed_count += 1
@@ -1844,8 +1913,6 @@ def upgrade(ctx, all, packages_specs):
         )
         ctx.exit()
 
-    warn_jobs_ignored(ctx)
-
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=Operations.upgrade),
@@ -1861,21 +1928,38 @@ def upgrade(ctx, all, packages_specs):
         ),
     )
 
-    # Per-package ✓/✗ ledger plus a finisher (see OperationTrail), keyed by package
-    # and the manager that upgrades it.
-    op = OperationTrail(selected_managers)
-    total = 0
-    upgraded_count = 0
     # Collect every package a manager that had it installed failed to upgrade, to raise
     # a non-zero exit code at the end (matching install and remove).
     upgrade_failures: list[str] = []
+    # Group every (package, manager) upgrade by manager: managers run in parallel while
+    # each manager's own packages upgrade one at a time (see collect_per_package).
+    failures_lock = threading.Lock()
 
-    def trail(spec: Specifier, manager_id: str, upgraded: bool) -> None:
-        """Map an upgrade attempt to a ``✓``/``✗`` ledger line through ``op``."""
-        mgr = theme().invoked_command(manager_id)
-        phrase = f"upgraded with {mgr}" if upgraded else f"failed to upgrade with {mgr}"
-        op.mark(upgraded, f"{package_label(spec)} {phrase}")
+    def make_upgrade_task(manager, spec):
+        mgr = theme().invoked_command(manager.id)
 
+        def task() -> tuple[bool, str]:
+            # Force the manager to raise on failure so a botched upgrade is reported
+            # and recorded. The reason is INFO narration; the ✗ trail and the closing
+            # critical surface it at the default level.
+            with patch.object(manager, "stop_on_error", True):
+                try:
+                    output = manager.upgrade(spec.package_id, version=spec.version)
+                except NotImplementedError:
+                    logging.info(f"{mgr} does not implement upgrade operation.")
+                except CLIError:
+                    logging.info(f"Could not upgrade {spec.package_id} with {mgr}.")
+                else:
+                    if output:
+                        logging.info(output)
+                    return True, f"{package_label(spec)} upgraded with {mgr}"
+            with failures_lock:
+                upgrade_failures.append(spec.package_id)
+            return False, f"{package_label(spec)} failed to upgrade with {mgr}"
+
+        return task
+
+    tasks_by_manager: dict[PackageManager, list] = {}
     solver = Solver(packages_specs, manager_priority=manager_ids)
     for package_id, spec in solver.resolve_package_specs():
         source_manager_ids = set()
@@ -1908,42 +1992,17 @@ def upgrade(ctx, all, packages_specs):
             f"Upgrade {package_id} "
             f"with {', '.join(map(theme().invoked_command, sorted(source_manager_ids)))}",
         )
+        # One task per (package, manager); skip a manager that cannot honor an active
+        # cooldown. A package upgraded with two managers tallies as two.
         for manager_id in sorted(source_manager_ids):
             manager = pool.get(manager_id)
             if not cooldown_permits(manager):
                 continue
-            # Count and report each (package, manager) upgrade, so a package upgraded
-            # with two managers tallies as two.
-            total += 1
-            # Force the manager to raise on failure so a botched upgrade is reported
-            # and recorded. The reason is INFO narration; the ✗ trail and the closing
-            # critical surface it at the default level.
-            with patch.object(manager, "stop_on_error", True):
-                try:
-                    output = manager.upgrade(package_id, version=spec.version)
-                except NotImplementedError:
-                    logging.info(
-                        f"{theme().invoked_command(manager_id)} "
-                        "does not implement upgrade operation.",
-                    )
-                    upgrade_failures.append(package_id)
-                    trail(spec, manager_id, False)
-                    continue
-                except CLIError:
-                    logging.info(
-                        f"Could not upgrade {package_id} "
-                        f"with {theme().invoked_command(manager_id)}.",
-                    )
-                    upgrade_failures.append(package_id)
-                    trail(spec, manager_id, False)
-                    continue
-            if output:
-                logging.info(output)
-            upgraded_count += 1
-            trail(spec, manager_id, True)
+            tasks_by_manager.setdefault(manager, []).append(
+                make_upgrade_task(manager, spec),
+            )
 
-    if total:
-        op.finish(not upgrade_failures, f"Upgraded {upgraded_count}/{total} packages")
+    collect_per_package(ctx, "Upgrading", "Upgraded", list(tasks_by_manager.items()))
 
     if upgrade_failures:
         logging.critical(
@@ -1971,8 +2030,6 @@ def remove(ctx, packages_specs):
 
     Packages unrecognized by any selected manager will be skipped.
     """
-    warn_jobs_ignored(ctx)
-
     # Cast generator to tuple because of reuse.
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=Operations.remove),
@@ -1992,18 +2049,35 @@ def remove(ctx, packages_specs):
         ),
     )
 
-    # Per-package ✓/✗ ledger plus a finisher (see OperationTrail), keyed by package
-    # and the manager it is removed from.
-    op = OperationTrail(selected_managers)
-    total = 0
-    removed_count = 0
+    # Group every (package, manager) removal by manager: managers run in parallel
+    # while each manager's own packages remove one at a time (see collect_per_package).
+    failures_lock = threading.Lock()
 
-    def trail(spec: Specifier, manager_id: str, removed: bool) -> None:
-        """Map a remove attempt to a ``✓``/``✗`` ledger line through ``op``."""
-        mgr = theme().invoked_command(manager_id)
-        phrase = f"removed from {mgr}" if removed else f"failed to remove from {mgr}"
-        op.mark(removed, f"{package_label(spec)} {phrase}")
+    def make_remove_task(manager, spec):
+        mgr = theme().invoked_command(manager.id)
 
+        def task() -> tuple[bool, str]:
+            # Force the manager to raise on failure so a botched removal is reported
+            # and recorded. The reason is INFO narration; the ✗ trail and the closing
+            # critical surface it at the default level.
+            with patch.object(manager, "stop_on_error", True):
+                try:
+                    output = manager.remove(spec.package_id)
+                except NotImplementedError:
+                    logging.info(f"{mgr} does not implement remove operation.")
+                except CLIError:
+                    logging.info(f"Could not remove {spec.package_id} with {mgr}.")
+                else:
+                    if output:
+                        logging.info(output)
+                    return True, f"{package_label(spec)} removed from {mgr}"
+            with failures_lock:
+                remove_failures.append(spec.package_id)
+            return False, f"{package_label(spec)} failed to remove from {mgr}"
+
+        return task
+
+    tasks_by_manager: dict[PackageManager, list] = {}
     solver = Solver(packages_specs, manager_priority=manager_ids)
     for package_id, spec in solver.resolve_package_specs():
         source_manager_ids = set()
@@ -2036,40 +2110,15 @@ def remove(ctx, packages_specs):
             f"Remove {package_id} "
             f"with {', '.join(map(theme().invoked_command, sorted(source_manager_ids)))}",
         )
+        # One task per (package, manager); a package removed from two managers tallies
+        # as two.
         for manager_id in sorted(source_manager_ids):
             manager = pool.get(manager_id)
-            # Count and report each (package, manager) removal, so a package removed
-            # from two managers tallies as two.
-            total += 1
-            # Force the manager to raise on failure so a botched removal is reported and
-            # recorded. The reason is INFO narration; the ✗ trail and the closing
-            # critical surface it at the default level.
-            with patch.object(manager, "stop_on_error", True):
-                try:
-                    output = manager.remove(package_id)
-                except NotImplementedError:
-                    logging.info(
-                        f"{theme().invoked_command(manager_id)} "
-                        "does not implement remove operation.",
-                    )
-                    remove_failures.append(package_id)
-                    trail(spec, manager_id, False)
-                    continue
-                except CLIError:
-                    logging.info(
-                        f"Could not remove {package_id} "
-                        f"with {theme().invoked_command(manager_id)}.",
-                    )
-                    remove_failures.append(package_id)
-                    trail(spec, manager_id, False)
-                    continue
-            if output:
-                logging.info(output)
-            removed_count += 1
-            trail(spec, manager_id, True)
+            tasks_by_manager.setdefault(manager, []).append(
+                make_remove_task(manager, spec),
+            )
 
-    if total:
-        op.finish(not remove_failures, f"Removed {removed_count}/{total} packages")
+    collect_per_package(ctx, "Removing", "Removed", list(tasks_by_manager.items()))
 
     # Fail with a non-zero exit code if any package could not be removed by a manager
     # that had it installed.
@@ -2419,32 +2468,49 @@ def _dump_brewfile(ctx, output_path, *, include_header: bool) -> None:
 @pass_context
 def restore(ctx, toml_files):
     """Read TOML files then install or upgrade each package referenced in them."""
-    # TODO: add an artificial order for managers, so that the [cask] section can install
-    # mas CLI first then have [mas] section work in one-go. Use-case: my dotfiles.
-    warn_jobs_ignored(ctx)
+    # The sections are independent (each ties its packages to one manager), so restore
+    # fans out across managers (see collect_per_package). The one ordering need is a
+    # not-yet-built feature: install cask's mas binary before the [mas] section runs
+    # (use-case: dotfiles). When it lands it must become parallel-within-dependency-
+    # levels rather than this flat fan-out.
 
     # Cast generator to tuple because of reuse across TOML files and the trail.
     selected_managers = tuple(
         ctx.obj.selected_managers(implements_operation=Operations.install),
     )
 
-    # Per-package ✓/✗ ledger plus a finisher (see OperationTrail), keyed by package
-    # and the manager it is restored with.
-    op = OperationTrail(selected_managers)
-    total = 0
-    restored_count = 0
     # Collect every package a manager failed to install, to raise a non-zero exit code
     # at the end (matching install, remove and upgrade).
     restore_failures: list[str] = []
+    failures_lock = threading.Lock()
 
-    def trail(spec: Specifier, manager_id: str, restored: bool) -> None:
-        """Map a restore install attempt to a ``✓``/``✗`` ledger line through ``op``."""
-        mgr = theme().invoked_command(manager_id)
-        phrase = (
-            f"installed with {mgr}" if restored else f"failed to install with {mgr}"
-        )
-        op.mark(restored, f"{package_label(spec)} {phrase}")
+    def make_restore_task(manager, spec):
+        mgr = theme().invoked_command(manager.id)
 
+        def task() -> tuple[bool, str]:
+            # Force the manager to raise on failure so a botched install is reported
+            # and recorded. The reason is INFO narration; the ✗ trail and the closing
+            # critical surface it at the default level.
+            with patch.object(manager, "stop_on_error", True):
+                try:
+                    output = manager.install(spec.package_id, version=spec.version)
+                except NotImplementedError:
+                    logging.info(f"{mgr} does not implement install operation.")
+                except CLIError:
+                    logging.info(f"Could not install {spec} with {mgr}.")
+                else:
+                    if output:
+                        logging.info(output)
+                    return True, f"{package_label(spec)} installed with {mgr}"
+            with failures_lock:
+                restore_failures.append(spec.package_id)
+            return False, f"{package_label(spec)} failed to install with {mgr}"
+
+        return task
+
+    # Gather one task per referenced (package, manager), grouped by manager across all
+    # the input files.
+    tasks_by_manager: dict[PackageManager, list] = {}
     for toml_input in toml_files:
         is_stdin = isinstance(toml_input, TextIOWrapper)
         if is_stdin:
@@ -2481,39 +2547,11 @@ def restore(ctx, toml_files):
                     manager_id=manager.id,
                     version=str(version),
                 )
-                total += 1
-                # Force the manager to raise on failure so a botched install is
-                # reported and recorded. The reason is INFO narration; the ✗ trail and
-                # the closing critical surface it at the default level.
-                with patch.object(manager, "stop_on_error", True):
-                    try:
-                        output = manager.install(spec.package_id, version=spec.version)
-                    except NotImplementedError:
-                        logging.info(
-                            f"{theme().invoked_command(manager.id)} "
-                            "does not implement install operation.",
-                        )
-                        restore_failures.append(package_id)
-                        trail(spec, manager.id, False)
-                        continue
-                    except CLIError:
-                        logging.info(
-                            f"Could not install {spec} "
-                            f"with {theme().invoked_command(manager.id)}.",
-                        )
-                        restore_failures.append(package_id)
-                        trail(spec, manager.id, False)
-                        continue
-                if output:
-                    echo(output)
-                restored_count += 1
-                trail(spec, manager.id, True)
+                tasks_by_manager.setdefault(manager, []).append(
+                    make_restore_task(manager, spec),
+                )
 
-    if total:
-        op.finish(
-            not restore_failures,
-            f"Restored {restored_count}/{total} packages",
-        )
+    collect_per_package(ctx, "Restoring", "Restored", list(tasks_by_manager.items()))
 
     # Fail with a non-zero exit code if any referenced package could not be installed.
     if restore_failures:

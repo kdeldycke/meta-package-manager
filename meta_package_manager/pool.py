@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import logging
 import sys
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import cached_property
@@ -84,6 +85,41 @@ if TYPE_CHECKING:
 
     from .capabilities import Operations
     from .manager import PackageManager
+
+
+SHARED_LOCK_FAMILIES: Final[tuple[frozenset[str], ...]] = (
+    frozenset({"apt", "apt-mint", "deb-get"}),
+    frozenset({"dnf", "dnf5", "yum", "zypper"}),
+    frozenset({"pacman", "pacstall"}),
+)
+"""Managers that contend for one shared OS-level package lock, grouped by backend.
+
+Observed while making operations concurrent (see :func:`collect_from_managers` and
+:func:`collect_per_package`). Different managers are otherwise independent processes
+over disjoint state, so running them in parallel is safe. The exception is a handful
+that drive a *shared* backend and serialize on its lock:
+
+- ``apt``, ``apt-mint`` and ``deb-get`` all reach :command:`dpkg`
+  (``/var/lib/dpkg/lock``).
+- ``dnf``, ``dnf5``, ``yum`` and ``zypper`` all reach the RPM database.
+- ``pacman`` and ``pacstall`` all reach the pacman database
+  (``/var/lib/pacman/db.lck``).
+
+Conclusion: concurrency is safe *across* families and unsafe *within* one, just as
+it is unsafe within a single manager (which is why :func:`collect_per_package` keeps
+one manager's own packages serial). When two members of a family are co-installed
+and run at once, the OS lock makes them *block or fail*, never corrupt: the read and
+maintenance commands are best-effort and self-heal on re-run, but the action
+commands (``install``/``remove``/``upgrade``) fail loud, so a lost race surfaces as
+an error. :option:`mpm --jobs` ``1`` serializes everything for anyone who hits it.
+
+.. note::
+    Not yet enforced. This is the seed for a future scheduler that would serialize
+    *within* a family while still parallelizing *across* families, instead of
+    leaning on the OS lock plus ``--jobs``. Re-verify membership and the exact lock
+    paths before wiring it in (a host rarely carries two members of the same
+    family, which is why the OS-lock fallback has sufficed so far).
+"""
 
 
 manager_classes = (
@@ -417,6 +453,123 @@ def collect_from_managers(
                 spinner.label = f"{done_label} {total} managers"
                 spinner.ok()
     return results
+
+
+def collect_per_package(
+    ctx: Context,
+    label: str,
+    done_label: str,
+    manager_tasks: list[tuple[PackageManager, list[Callable[[], tuple[bool, str]]]]],
+) -> None:
+    """Run per-package operations across managers concurrently, serial within each.
+
+    The fan-out primitive for the ordering-free state changers that act on many
+    (package, manager) pairs: ``remove``, ``upgrade <packages>``, ``restore`` and
+    the manager-tied specs of ``install``. Each ``(manager, tasks)`` pair is handled
+    by one worker; workers run in parallel because every manager owns its own
+    subprocess and lock, but the tasks inside a worker run *sequentially*, because a
+    package manager cannot safely run two of its own invocations at once (they
+    serialize on that manager's lock, see :data:`SHARED_LOCK_FAMILIES`).
+
+    Each task returns ``(ok, message)`` after doing its CLI call and recording its
+    own outcome (output to ``INFO``, failures into a caller-owned list). The helper
+    draws a ``✓``/``✗`` line per task as it lands, an aggregate spinner, and a
+    per-package finisher. It mirrors :func:`collect_from_managers` (one result per
+    manager) at package granularity (one result per package).
+
+    Sequential fallback (single manager, :option:`mpm --jobs` ``1``, or ``DEBUG``)
+    runs every task in order with the same per-package trail, keeping each manager's
+    own per-call spinner. The unmatched-package priority search of ``install`` is
+    *not* routed here: it has genuine cross-manager ordering (stop at the first
+    manager that has the package) and stays sequential on its own.
+    """
+    total = sum(len(tasks) for _manager, tasks in manager_tasks)
+    if not total:
+        return
+
+    def line(ok: bool, message: str) -> str:
+        glyph = theme().success(OK_GLYPH) if ok else theme().error(KO_GLYPH)
+        return f"{glyph} {message}"
+
+    jobs = effective_jobs(ctx, len(manager_tasks))
+    if jobs <= 1:
+        # Keep each manager's own per-call spinner and print the per-package trail
+        # between calls, gated on an interactive stderr + --progress.
+        show = (
+            any(manager.progress for manager, _ in manager_tasks)
+            and sys.stderr.isatty()
+        )
+        start = time.monotonic()
+        ok_count = 0
+        for _manager, tasks in manager_tasks:
+            for task in tasks:
+                ok, message = task()
+                if ok:
+                    ok_count += 1
+                if show:
+                    echo(line(ok, message), err=True)
+        if show:
+            glyph = (
+                theme().success(OK_GLYPH)
+                if ok_count == total
+                else theme().error(KO_GLYPH)
+            )
+            echo(
+                f"{glyph} {done_label} {ok_count}/{total} packages "
+                f"({time.monotonic() - start:.1f}s)",
+                err=True,
+            )
+        return
+
+    # Concurrent: suppress per-manager spinners and show one aggregate spinner, with
+    # per-package lines streaming above it as each task lands (thread-safe).
+    spinner_enabled = (
+        None if any(manager.progress for manager, _ in manager_tasks) else False
+    )
+    for manager, _ in manager_tasks:
+        manager.progress = False
+
+    lock = threading.Lock()
+    done = 0
+    ok_count = 0
+    buffered: list[str] = []
+    with Spinner(
+        f"{label} 0/{total} packages",
+        delay=SPINNER_DELAY,
+        enabled=spinner_enabled,
+        timer=True,
+    ) as spinner:
+
+        def flush() -> None:
+            # Caller holds ``lock``. Drain buffered lines once the spinner is drawing;
+            # before that, echo() would write unconditionally and leak into a pipe.
+            if not spinner.shown:
+                return
+            for text in buffered:
+                spinner.echo(text)
+            buffered.clear()
+
+        def worker(tasks: list[Callable[[], tuple[bool, str]]]) -> None:
+            nonlocal done, ok_count
+            for task in tasks:
+                ok, message = task()
+                with lock:
+                    done += 1
+                    if ok:
+                        ok_count += 1
+                    buffered.append(line(ok, message))
+                    spinner.label = f"{label} {done}/{total} packages"
+                    flush()
+
+        with ThreadPoolExecutor(max_workers=jobs) as executor:
+            futures = [executor.submit(worker, tasks) for _m, tasks in manager_tasks]
+            for future in as_completed(futures):
+                future.result()
+        with lock:
+            flush()
+        if spinner.shown:
+            spinner.label = f"{done_label} {ok_count}/{total} packages"
+            (spinner.ok if ok_count == total else spinner.fail)()
 
 
 class ManagerPool:

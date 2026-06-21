@@ -388,10 +388,13 @@ An enum surfaced in any message must render as its bare member name: give it `__
 
 Fan-out operations report state with a per-item `✓`/`✗` trail plus a persistent finisher, printed via `echo` to stderr, never `logging`. `echo` survives the `WARNING` default and is instead gated on an interactive terminal plus `--progress`, so pipes, CI and serialized runs stay clean.
 
-Whether a command runs its managers concurrently is decided by cross-manager *ordering*, not by whether it mutates state:
+Concurrency is decided by cross-manager *ordering*, not by whether a command mutates state. Three fan-out primitives, all bounded by `--jobs`:
 
-- **Concurrent**, fanned out through `meta_package_manager.pool.collect_from_managers` and bounded by `--jobs`: every command whose per-manager work is independent. The read-only queries (`installed`/`outdated`/`search`), the maintenance commands (`sync`/`cleanup`/`upgrade --all`), and the inventory exporters (`dump`/`backup`, `sbom`). The maintenance commands pass `report_state=True` because the trail is their only output; the exporters collect concurrently, then assemble their manifest/document in manager order.
-- **Sequential by design**, driven by `OperationTrail` in `cli.py`: the ordering-bound state changers `install`/`remove`/`upgrade <packages>`/`restore`. Each dispatches managers by priority (a package handled by the first manager skips the rest), so they cannot fan out without changing semantics. They keep their per-call spinners and print the trail between calls. `warn_jobs_ignored` notes at `INFO` when an explicit `--jobs` is therefore ignored.
+- **Per manager, concurrent** (`meta_package_manager.pool.collect_from_managers`, one result per manager): commands whose work is independent and reported per manager. The read-only queries (`installed`/`outdated`/`search`), the maintenance commands (`sync`/`cleanup`/`upgrade --all`, which pass `report_state=True` since the trail is their only output), and the inventory exporters (`dump`/`backup`, `sbom`, which collect concurrently then assemble in manager order).
+- **Per package, concurrent across managers and serial within each** (`meta_package_manager.pool.collect_per_package`, one result per (package, manager)): the ordering-free state changers `remove`, `upgrade <packages>`, `restore`, and the manager-tied specs of `install`. Managers run in parallel; one manager's own packages run one at a time, since a manager cannot safely run two of its own invocations at once (see `SHARED_LOCK_FAMILIES`).
+- **Sequential** (`OperationTrail` in `cli.py`): only `install` when a package is left untied to a manager. Such a package needs a priority search (install with the first manager that has it, skip the rest), which is genuinely cross-manager-sequential. `warn_jobs_ignored` notes at `INFO` when an explicit `--jobs` is therefore ignored.
+
+The shared-lock families that make within-family concurrency unsafe (`apt`/`deb-get` over dpkg, plus the RPM and pacman families) are catalogued in `pool.py`'s `SHARED_LOCK_FAMILIES`: a seed for a future scheduler that would serialize within a family while still parallelizing across families, instead of leaning on the OS lock plus `--jobs`.
 
 Trail conventions:
 

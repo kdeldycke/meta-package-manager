@@ -100,7 +100,7 @@ class TestUpgrade(CLISubCommandTests):
     @default_manager_ids
     @pytest.mark.parametrize("all_option", ("--all", None))
     def test_single_manager_upgrade_all(self, invoke, manager_id, all_option):
-        result = invoke(f"--{manager_id}", "upgrade", all_option)
+        result = invoke(f"--{manager_id}", "--verbosity", "INFO", "upgrade", all_option)
         if not all_option:
             assert "assume -A/--all option" in result.stderr
         if result.exit_code == 2:

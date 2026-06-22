@@ -120,6 +120,13 @@ class TestInstallRemove(CLISubCommandTests):
         if manager_id == "mas":
             pytest.skip("mas timeout on GitHub Actions.")
 
+        # XXX Skip steamcmd everywhere: installing a Steam app requires an
+        # authenticated account that owns the title, which the CI runners lack.
+        # The anonymous login steamcmd falls back to cannot install arbitrary
+        # apps, so mpm correctly reports the install as failed.
+        if manager_id == "steamcmd":
+            pytest.skip("steamcmd needs an authenticated Steam account on CI.")
+
         # XXX Skip the RPM-family managers on Linux: the RPM stack has no usable
         # repositories, and its database at /var/lib/rpm is inaccessible even with
         # sudo on the Debian-based ubuntu CI runners (both x86_64 and aarch64),
@@ -141,6 +148,25 @@ class TestInstallRemove(CLISubCommandTests):
             pytest.skip(
                 f"{manager_id} cannot install in the unprivileged CI environment.",
             )
+
+        # XXX Skip cpan on Linux: it installs modules into the system Perl tree,
+        # which the unelevated test process cannot write to on the Debian-based
+        # runners (mpm does not elevate). The same test passes on the macOS
+        # runners, whose Perl layout differs, so the skip is Linux-scoped.
+        if manager_id == "cpan" and is_linux():
+            pytest.skip("cpan cannot write the system Perl tree on Linux CI.")
+
+        # XXX Skip fwupd: it installs device firmware, and the CI VMs expose no
+        # upgradable hardware to flash, so mpm reports the install as failed.
+        if manager_id == "fwupd":
+            pytest.skip("fwupd has no flashable hardware on the CI VMs.")
+
+        # XXX Skip pwsh-gallery on Linux: even with -TrustRepository and
+        # -Scope CurrentUser, installing a PSGallery resource fails on the Linux
+        # runners (PSResourceGet's install path there is unreliable). The probe
+        # below additionally guards the Windows .NET 10 assembly-load crash.
+        if manager_id == "pwsh-gallery" and is_linux():
+            pytest.skip("PSGallery install is unreliable on Linux CI.")
 
         # XXX Skip pwsh-gallery when PowerShell cannot load the PSResourceGet
         # module. This can happen when the CI runner has .NET 10 installed: the
@@ -168,6 +194,12 @@ class TestInstallRemove(CLISubCommandTests):
                     "pwsh cannot load PSResourceGet: "
                     + probe.stderr.decode(errors="replace").strip()
                 )
+
+        # XXX Skip choco: it installs to an admin-only location
+        # (C:\ProgramData\chocolatey) that the unelevated CI process cannot
+        # write to. mpm passes --yes but does not elevate, so the install fails.
+        if manager_id == "choco":
+            pytest.skip("choco needs elevation the CI process lacks.")
 
         for command in ("install", "remove"):
             result = invoke(f"--{manager_id}", command, package_id)

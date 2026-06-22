@@ -1155,7 +1155,6 @@ def installed(ctx, exact, duplicates, query):
     ``--exact`` requires a verbatim match on the package ID or name.
     """
     # Build-up a global dict of installed packages per manager.
-    installed_data = {}
     fields = (
         "id",
         "name",
@@ -1177,10 +1176,12 @@ def installed(ctx, exact, duplicates, query):
         )
         return _manager_result(manager, packages)
 
-    for manager_id, data in collect_from_managers(
-        ctx, "Listing", "Listed", managers, fetch
-    ):
-        installed_data[manager_id] = data
+    installed_data = {
+        manager_id: data
+        for manager_id, data in collect_from_managers(
+            ctx, "Listing", "Listed", managers, fetch
+        )
+    }
 
     # Filters out non-duplicate packages.
     if duplicates:
@@ -1271,7 +1272,6 @@ def outdated(ctx, exact, plugin_output, query):
     ``--exact`` requires a verbatim match on the package ID or name.
     """
     # Build-up a global list of outdated packages per manager.
-    outdated_data = {}
     fields = (
         "id",
         "name",
@@ -1292,10 +1292,12 @@ def outdated(ctx, exact, plugin_output, query):
         )
         return _manager_result(manager, packages)
 
-    for manager_id, data in collect_from_managers(
-        ctx, "Checking", "Checked", managers, fetch
-    ):
-        outdated_data[manager_id] = data
+    outdated_data = {
+        manager_id: data
+        for manager_id, data in collect_from_managers(
+            ctx, "Checking", "Checked", managers, fetch
+        )
+    }
 
     # Machine-friendly data rendering.
     print_serialized_and_exit(ctx, outdated_data)
@@ -1380,7 +1382,6 @@ def search(ctx, extended, exact, refilter, query):
         show_description = True
 
     # Build-up a global list of package matches per manager.
-    matches = {}
     fields = (
         "id",
         "name",
@@ -1402,10 +1403,12 @@ def search(ctx, extended, exact, refilter, query):
         )
         return _manager_result(manager, packages)
 
-    for manager_id, data in collect_from_managers(
-        ctx, "Searching", "Searched", managers, fetch
-    ):
-        matches[manager_id] = data
+    matches = {
+        manager_id: data
+        for manager_id, data in collect_from_managers(
+            ctx, "Searching", "Searched", managers, fetch
+        )
+    }
 
     # Machine-friendly data rendering.
     print_serialized_and_exit(ctx, matches)

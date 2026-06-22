@@ -369,19 +369,19 @@ report.precision = 2
 
 [tool.bumpversion]
 current_version = "7.0.0.dev0"
-allow_dirty = true
-ignore_missing_files = true
 # Parse versions with an optional .devN suffix (PEP 440).
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\.dev(?P<dev>\\d+))?"
 serialize = [
   "{major}.{minor}.{patch}.dev{dev}",
   "{major}.{minor}.{patch}",
 ]
+ignore_missing_files = true
+allow_dirty = true
+parts.dev.optional_value = "release"
 # When dev is "release" (its optional value), the .devN suffix is omitted.
 # Bumping patch/minor/major resets dev to "0", producing X.Y.Z.dev0.
 # Bumping dev goes from "0" to "release", stripping the suffix for release.
 parts.dev.values = [ "0", "release" ]
-parts.dev.optional_value = "release"
 
 [[tool.bumpversion.files]]
 # Update Python package version in any __init__.py file.

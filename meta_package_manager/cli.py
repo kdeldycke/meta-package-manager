@@ -548,7 +548,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
 
 @group(
     # Default to WARNING: the ✓/✗ trail and finisher print via echo (not logging) and
-    # survive, so the default run shows just those plus real warnings and criticals.
+    # survive, so the default run shows just those plus real warnings and critical.
     # Per-operation narration (priority, announcements, skip reasons) sits at INFO, one
     # --verbosity INFO away. Matches Click Extra's own default since 4.0.0.
     context_settings={"default_map": {"verbosity": "WARNING"}},

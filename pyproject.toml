@@ -271,6 +271,7 @@ exclude-newer = "1 week"
 exclude-newer-package = { click-extra = "2026-06-23T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
+required-version = ">=0.11.23,<0.12"
 
 [tool.nuitka]
 product-name = "Meta Package Manager"

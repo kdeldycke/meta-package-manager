@@ -23,7 +23,8 @@ from pathlib import Path
 
 import click
 import pytest
-from click_extra.context import JOBS, VERBOSITY
+from click_extra.context import JOBS, VERBOSITY_LEVEL
+from click_extra.logging import LogLevel
 
 import meta_package_manager
 from meta_package_manager.cli import mpm
@@ -270,7 +271,7 @@ class _RecordingManager:
 def _jobs_context(jobs: int, verbosity: str = "INFO") -> click.Context:
     ctx = click.Context(click.Command("mpm"))
     ctx.meta[JOBS] = jobs
-    ctx.meta[VERBOSITY] = verbosity
+    ctx.meta[VERBOSITY_LEVEL] = LogLevel[verbosity]
     return ctx
 
 

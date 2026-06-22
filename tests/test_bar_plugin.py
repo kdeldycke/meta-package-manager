@@ -24,13 +24,16 @@ from typing import ClassVar, cast
 
 import pytest
 from boltons.iterutils import flatten
-from click_extra._types import TEnvVars
 from click_extra.envvar import env_copy
 from click_extra.testing import args_cleanup
 from extra_platforms.pytest import unless_macos
 
 from meta_package_manager import bar_plugin
 from meta_package_manager.version import parse_version
+
+TYPE_CHECKING = False
+if TYPE_CHECKING:
+    from click_extra.envvar import TEnvVars
 
 
 @pytest.mark.parametrize(

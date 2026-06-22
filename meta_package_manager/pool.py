@@ -26,7 +26,8 @@ from functools import cached_property
 
 from boltons.iterutils import unique
 from click_extra import Spinner, echo, get_current_context
-from click_extra.context import JOBS, VERBOSITY
+from click_extra.context import JOBS, VERBOSITY_LEVEL
+from click_extra.logging import LogLevel
 from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
 
 from .capabilities import implements
@@ -211,7 +212,8 @@ def effective_jobs(ctx: Context | None, count: int) -> int:
     - there is no active CLI context (programmatic or test use),
     - a single item leaves nothing to parallelize,
     - the user passed :option:`mpm --jobs` ``1``, or
-    - verbosity is ``DEBUG``, where coherent per-manager log narration matters
+    - the effective verbosity is ``DEBUG`` (whether from ``--verbosity`` or the
+      ``-v``/``-q`` counters), where coherent per-manager log narration matters
       more than the speed-up (interleaved threads would scramble it).
 
     Otherwise the :option:`mpm --jobs` value wins, capped at ``count``: there is
@@ -219,7 +221,7 @@ def effective_jobs(ctx: Context | None, count: int) -> int:
     """
     if ctx is None or count <= 1:
         return 1
-    if ctx.meta.get(VERBOSITY) == "DEBUG":
+    if ctx.meta.get(VERBOSITY_LEVEL) == LogLevel.DEBUG:
         return 1
     jobs = ctx.meta.get(JOBS, 1)
     return min(jobs, count) if jobs > 1 else 1

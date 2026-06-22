@@ -12,7 +12,7 @@ exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for 
 exclude-newer-span = "P1W"
 
 [options.exclude-newer-package]
-click-extra = "2026-06-14T00:00:00Z"
+click-extra = "2026-06-23T00:00:00Z"
 
 [[package]]
 name = "accessible-pygments"
@@ -252,8 +252,8 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "8.0.0.dev0"
-source = { git = "https://github.com/kdeldycke/click-extra.git?branch=main#168b7799c9c466cbabe6412c8d0cb4ad793ef569" }
+version = "8.0.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boltons" },
     { name = "click" },
@@ -264,6 +264,10 @@ dependencies = [
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "wcmatch" },
     { name = "wcwidth" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fe/5e/900bee5cce7716315f886886ddcbb52e27667be7fedd4fd41408d739576d/click_extra-8.0.0.tar.gz", hash = "sha256:37fa4934f8f1ce6db3b578919e29c9c7421fde8daadde4de8d8bb062e280225b", size = 288375, upload-time = "2026-06-22T09:39:25.543Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/82/83/9ad60d2427ce2ee93b7125b5631743bcab11a8afabf467eab6fd67d4ca70/click_extra-8.0.0-py3-none-any.whl", hash = "sha256:fb8321401c852ce1fc401e7a7702b8e9af0762d4f86907790991792cdb5cd7db", size = 313185, upload-time = "2026-06-22T09:39:24.017Z" },
 ]
 
 [package.optional-dependencies]
@@ -1057,13 +1061,13 @@ typing = [
 requires-dist = [
     { name = "backports-strenum", marker = "python_full_version < '3.11'", specifier = ">=1.3" },
     { name = "boltons", specifier = ">=25" },
-    { name = "click-extra", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
-    { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
-    { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
-    { name = "click-extra", extras = ["jsonc"], marker = "extra == 'jsonc'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
-    { name = "click-extra", extras = ["toml"], marker = "extra == 'toml'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
-    { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
-    { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'", git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", specifier = ">=8" },
+    { name = "click-extra", extras = ["hjson"], marker = "extra == 'hjson'" },
+    { name = "click-extra", extras = ["json5"], marker = "extra == 'json5'" },
+    { name = "click-extra", extras = ["jsonc"], marker = "extra == 'jsonc'" },
+    { name = "click-extra", extras = ["toml"], marker = "extra == 'toml'" },
+    { name = "click-extra", extras = ["xml"], marker = "extra == 'xml'" },
+    { name = "click-extra", extras = ["yaml"], marker = "extra == 'yaml'" },
     { name = "cyclonedx-python-lib", marker = "extra == 'sbom'", specifier = ">=11.9" },
     { name = "extra-platforms", specifier = ">=10" },
     { name = "packageurl-python", specifier = ">=0.16" },
@@ -1076,7 +1080,7 @@ provides-extras = ["hjson", "json5", "jsonc", "sbom", "toml", "xml", "yaml"]
 
 [package.metadata.requires-dev]
 docs = [
-    { name = "click-extra", extras = ["sphinx"], git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["sphinx"] },
     { name = "furo", specifier = ">=2025.9.25" },
     { name = "myst-parser", specifier = ">=4" },
     { name = "sphinx" },
@@ -1090,8 +1094,8 @@ docs = [
     { name = "tomlkit", specifier = ">=0.13" },
 ]
 test = [
-    { name = "click-extra", extras = ["pytest"], git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
-    { name = "click-extra", extras = ["toml"], git = "https://github.com/kdeldycke/click-extra.git?branch=main" },
+    { name = "click-extra", extras = ["pytest"] },
+    { name = "click-extra", extras = ["toml"] },
     { name = "coverage", extras = ["toml"], specifier = ">=7.12" },
     { name = "cyclonedx-python-lib", extras = ["validation"] },
     { name = "extra-platforms" },

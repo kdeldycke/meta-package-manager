@@ -54,6 +54,7 @@ from click_extra import (
     ParamType,
     Section,
     UsageError,
+    VersionOption,
     argument,
     echo,
     file_path,
@@ -62,15 +63,17 @@ from click_extra import (
     option,
     option_group,
     pass_context,
+    search_params,
 )
-from click_extra.context import JOBS, PROGRESS, TABLE_FORMAT, VERBOSITY
+from click_extra.context import JOBS, PROGRESS, TABLE_FORMAT, VERBOSITY_LEVEL
 from click_extra.highlight import HelpKeywords, highlight
+from click_extra.logging import LogLevel
 from click_extra.table import (
     SERIALIZATION_FORMATS,
     print_data,
     print_table,
 )
-from click_extra.theme import get_current_theme as theme
+from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
 from extra_platforms import current_platform, reduce
 
 from . import __version__, bar_plugin
@@ -126,23 +129,6 @@ EXPLORE = Section("Explore subcommands")
 MAINTENANCE = Section("Maintenance subcommands")
 SNAPSHOTS = Section("Package snapshots subcommands")
 SBOM_SECTION = Section("SBOM subcommands")
-
-
-OK_GLYPH = "✓"
-"""Check-mark glyph for success indicators.
-
-Kept as a raw, unstyled string so the call site can render it under
-whichever theme is currently active, via the theme's ``success`` slot:
-``theme().success(OK_GLYPH)``.
-"""
-
-KO_GLYPH = "✘"
-"""Heavy-ballot-X glyph for failure indicators.
-
-Styled at the call site with the active theme's ``error`` slot:
-``theme().error(KO_GLYPH)``. See :data:`OK_GLYPH` for why the glyph is
-kept unstyled.
-"""
 
 
 class SortableField(StrEnum):
@@ -799,7 +785,7 @@ def mpm(
     # Silence all log messages for serialization rendering unless in debug mode.
     if (
         ctx.meta[TABLE_FORMAT] in SERIALIZATION_FORMATS
-        and ctx.meta[VERBOSITY] != "DEBUG"
+        and ctx.meta[VERBOSITY_LEVEL] != LogLevel.DEBUG
     ):
         logging.disable()
 
@@ -824,7 +810,7 @@ def mpm(
     show_progress = (
         ctx.meta[PROGRESS]
         and ctx.meta[TABLE_FORMAT] not in SERIALIZATION_FORMATS
-        and ctx.meta[VERBOSITY] != "DEBUG"
+        and ctx.meta[VERBOSITY_LEVEL] != LogLevel.DEBUG
     )
 
     # Apply per-manager attribute overrides from [mpm.managers.<id>] sections of
@@ -964,10 +950,9 @@ def mpm(
 
 
 # Extend --version output with Python and platform metadata.
-for _param in mpm.params:
-    if _param.name == "version" and hasattr(_param, "message"):
-        _param.message = "{prog_name}, version {version}\n{env_info}"
-        break
+version_option = search_params(mpm.params, VersionOption)
+if isinstance(version_option, VersionOption):
+    version_option.message = "{prog_name}, version {version}\n{env_info}"
 
 # Highlight placeholder option names that appear in the help text prose.
 mpm.extra_keywords = HelpKeywords(  # type: ignore[attr-defined]

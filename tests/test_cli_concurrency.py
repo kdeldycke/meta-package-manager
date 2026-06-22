@@ -28,7 +28,8 @@ import threading
 import time
 
 import pytest
-from click_extra.context import JOBS, VERBOSITY
+from click_extra.context import JOBS, VERBOSITY_LEVEL
+from click_extra.logging import LogLevel
 from click_extra.theme import KO_GLYPH, OK_GLYPH
 
 import meta_package_manager.pool
@@ -41,7 +42,7 @@ class FakeContext:
     def __init__(self, jobs: int, verbosity: str = "INFO") -> None:
         self.meta = {
             JOBS: jobs,
-            VERBOSITY: verbosity,
+            VERBOSITY_LEVEL: LogLevel[verbosity],
         }
 
 

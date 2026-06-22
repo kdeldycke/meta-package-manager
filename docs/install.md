@@ -620,7 +620,7 @@ The full command tree is also pre-rendered as static `.1` files:
 Downstream packagers can regenerate them from source as part of their build phase:
 
 ```{code-block} shell-session
-$ click-extra man --output-dir /usr/share/man/man1/ meta_package_manager.cli:mpm
+$ click-extra wrap --man --output-dir /usr/share/man/man1/ meta_package_manager.cli:mpm
 ```
 
 The `module:function` notation skips the `mpm` console-script entry point (which dispatches through `__main__:main` and hides the Click command behind a lazy import). The generator honors `SOURCE_DATE_EPOCH` for reproducible builds. See the [`click-extra` man-page reference](https://kdeldycke.github.io/click-extra/man-page.html#generating-man-pages) for other invocation forms (uvx for build sandboxes, `.py` file paths, and the programmatic API).

@@ -36,6 +36,7 @@ from dataclasses import dataclass, field
 
 import tomli_w
 from click_extra import ConfigValidator, ValidationError, echo
+from click_extra.context import CONF_FULL
 from click_extra.theme import get_current_theme as theme
 
 TYPE_CHECKING = False
@@ -563,16 +564,17 @@ def apply_manager_overrides_from_context(
     """Read the ``[mpm.managers.<id>]`` sections from the loaded config and apply
     them to ``pool``.
 
-    Reads ``ctx.meta["click_extra.conf_full"]`` (the full parsed config exposed by
-    :py:mod:`click_extra` after configuration discovery) and forwards the
-    ``["mpm"]["managers"]`` subtree to :py:func:`apply_manager_overrides`. Returns
-    silently when no configuration file was loaded or when the section is absent.
+    Reads the full parsed config that :py:mod:`click_extra` exposes under
+    :data:`~click_extra.context.CONF_FULL` after configuration discovery and
+    forwards the ``["mpm"]["managers"]`` subtree to
+    :py:func:`apply_manager_overrides`. Returns silently when no configuration
+    file was loaded or when the section is absent.
 
     Any :class:`ContributionHint` returned by :py:func:`apply_manager_overrides` is
     stashed under :data:`CTX_HINTS_KEY` for :py:func:`print_contribution_hints` to
     surface at the end of the run.
     """
-    conf_full = ctx.meta.get("click_extra.conf_full") or {}
+    conf_full = ctx.meta.get(CONF_FULL) or {}
     mpm_section = conf_full.get("mpm") if isinstance(conf_full, dict) else None
     overrides = mpm_section.get("managers") if isinstance(mpm_section, dict) else None
     hints = apply_manager_overrides(pool, overrides)

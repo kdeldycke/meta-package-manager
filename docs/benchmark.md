@@ -50,31 +50,31 @@ but [there might be a greater need for such tools](usecase.md) out there. Here i
 
 ## Operations
 
-| Operation                                      | `mpm` | `topgrade`[^topgrade] | `pacaptr`[^pacaptr] | `pacapt`[^pacapt] | `sysget`[^sysget] | `whohas`[^whohas] | `brew`[^brew] | `mise`[^mise] | `asdf`[^asdf] |
-| ---------------------------------------------- | :---: | :-------------------: | :-----------------: | :---------------: | :---------------: | :---------------: | :-----------: | :-----------: | :-----------: |
-| List available managers                        |   ✓   |                       |                     |                   |                   |                   |               |       ✓       |       ✓       |
-| List installed packages                        |   ✓   |                       |          ✓          |                   |         ✓         |                   |       ✓       |       ✓       |       ✓       |
-| List duplicate packages                        |   ✓   |                       |                     |                   |                   |                   |               |               |               |
-| List outdated packages                         |   ✓   |                       |          ✓          |                   |         ✓         |                   |       ✓       |       ✓       |               |
-| Search packages                                |   ✓   |                       |          ✓          |         ✓         |         ✓         |         ✓         |       ✓       |       ✓       |               |
-| Locate binaries (`which` command)              |   ✓   |                       |                     |                   |                   |                   |       ✓       |       ✓       |       ✓       |
-| Install a package                              |   ✓   |                       |          ✓          |         ✓         |         ✓         |                   |       ✓       |       ✓       |       ✓       |
-| Remove / Uninstall a package                   |   ✓   |                       |          ✓          |         ✓         |         ✓         |                   |       ✓       |       ✓       |       ✓       |
-| Upgrade single package                         |   ✓   |                       |          ✓          |                   |         ✓         |                   |       ✓       |       ✓       |               |
-| Upgrade all packages                           |   ✓   |           ✓           |          ✓          |         ✓         |         ✓         |                   |       ✓       |       ✓       |               |
-| Sync                                           |   ✓   |                       |          ✓          |         ✓         |         ✓         |                   |       ✓       |       ✓       |       ✓       |
-| Cleanup: caches                                |   ✓   |           ✓           |          ✓          |         ✓         |         ✓         |                   |       ✓       |       ✓       |               |
-| Cleanup: orphans                               |   ✓   |           ✓           |          ✓          |         ✓         |         ✓         |                   |       ✓       |               |               |
-| Backup / Lock / Freeze                         |   ✓   |                       |                     |                   |                   |                   |       ✓       |       ✓       |       ✓       |
-| Restore                                        |   ✓   |                       |                     |                   |                   |                   |       ✓       |       ✓       |       ✓       |
-| List leaves (top-level installs)               |       |                       |                     |                   |                   |                   |       ✓       |               |               |
-| Autoremove orphaned dependencies               |       |                       |                     |                   |                   |                   |       ✓       |               |               |
-| Pin / Unpin version                            |       |                       |                     |                   |                   |                   |       ✓       |       ✓       |       ✓       |
-| Latest filter (newest installable)             |       |                       |                     |                   |                   |                   |               |       ✓       |       ✓       |
-| Reshim / rebuild executable index              |       |                       |                     |                   |                   |                   |               |               |       ✓       |
-| Doctor / diagnostics                           |       |                       |                     |                   |                   |                   |       ✓       |       ✓       |               |
-| Import from external tool                      |       |                       |                     |                   |                   |                   |               |       ✓       |       ≈       |
-| Services management                            |       |                       |                     |                   |                   |                   |       ✓       |               |               |
+| Operation                          | `mpm` | `topgrade`[^topgrade] | `pacaptr`[^pacaptr] | `pacapt`[^pacapt] | `sysget`[^sysget] | `whohas`[^whohas] | `brew`[^brew] | `mise`[^mise] | `asdf`[^asdf] |
+| ---------------------------------- | :---: | :-------------------: | :-----------------: | :---------------: | :---------------: | :---------------: | :-----------: | :-----------: | :-----------: |
+| List available managers            |   ✓   |                       |                     |                   |                   |                   |               |       ✓       |       ✓       |
+| List installed packages            |   ✓   |                       |          ✓          |                   |         ✓         |                   |       ✓       |       ✓       |       ✓       |
+| List duplicate packages            |   ✓   |                       |                     |                   |                   |                   |               |               |               |
+| List outdated packages             |   ✓   |                       |          ✓          |                   |         ✓         |                   |       ✓       |       ✓       |               |
+| Search packages                    |   ✓   |                       |          ✓          |         ✓         |         ✓         |         ✓         |       ✓       |       ✓       |               |
+| Locate binaries (`which` command)  |   ✓   |                       |                     |                   |                   |                   |       ✓       |       ✓       |       ✓       |
+| Install a package                  |   ✓   |                       |          ✓          |         ✓         |         ✓         |                   |       ✓       |       ✓       |       ✓       |
+| Remove / Uninstall a package       |   ✓   |                       |          ✓          |         ✓         |         ✓         |                   |       ✓       |       ✓       |       ✓       |
+| Upgrade single package             |   ✓   |                       |          ✓          |                   |         ✓         |                   |       ✓       |       ✓       |               |
+| Upgrade all packages               |   ✓   |           ✓           |          ✓          |         ✓         |         ✓         |                   |       ✓       |       ✓       |               |
+| Sync                               |   ✓   |                       |          ✓          |         ✓         |         ✓         |                   |       ✓       |       ✓       |       ✓       |
+| Cleanup: caches                    |   ✓   |           ✓           |          ✓          |         ✓         |         ✓         |                   |       ✓       |       ✓       |               |
+| Cleanup: orphans                   |   ✓   |           ✓           |          ✓          |         ✓         |         ✓         |                   |       ✓       |               |               |
+| Backup / Lock / Freeze             |   ✓   |                       |                     |                   |                   |                   |       ✓       |       ✓       |       ✓       |
+| Restore                            |   ✓   |                       |                     |                   |                   |                   |       ✓       |       ✓       |       ✓       |
+| List leaves (top-level installs)   |       |                       |                     |                   |                   |                   |       ✓       |               |               |
+| Autoremove orphaned dependencies   |       |                       |                     |                   |                   |                   |       ✓       |               |               |
+| Pin / Unpin version                |       |                       |                     |                   |                   |                   |       ✓       |       ✓       |       ✓       |
+| Latest filter (newest installable) |       |                       |                     |                   |                   |                   |               |       ✓       |       ✓       |
+| Reshim / rebuild executable index  |       |                       |                     |                   |                   |                   |               |               |       ✓       |
+| Doctor / diagnostics               |       |                       |                     |                   |                   |                   |       ✓       |       ✓       |               |
+| Import from external tool          |       |                       |                     |                   |                   |                   |               |       ✓       |       ≈       |
+| Services management                |       |                       |                     |                   |                   |                   |       ✓       |               |               |
 
 `mpm`'s SBOM export sits in a different category from the package-manager front-ends benchmarked here. It is compared against dedicated SBOM and software-composition-analysis tools (Syft, Trivy, cdxgen, component-detection) in [the SBOM documentation](sbom.md).
 

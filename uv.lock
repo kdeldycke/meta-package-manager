@@ -253,7 +253,7 @@ wheels = [
 [[package]]
 name = "click-extra"
 version = "8.0.0.dev0"
-source = { git = "https://github.com/kdeldycke/click-extra.git?branch=main#9369197a2cfa739f2bd1ac19b5e3079cfa80ad6c" }
+source = { git = "https://github.com/kdeldycke/click-extra.git?branch=main#168b7799c9c466cbabe6412c8d0cb4ad793ef569" }
 dependencies = [
     { name = "boltons" },
     { name = "click" },
@@ -1072,7 +1072,7 @@ requires-dist = [
     { name = "tomli-w", specifier = ">=1.1" },
     { name = "xmltodict", specifier = ">=0.12" },
 ]
-provides-extras = ["toml", "yaml", "json5", "jsonc", "hjson", "xml", "sbom"]
+provides-extras = ["hjson", "json5", "jsonc", "sbom", "toml", "xml", "yaml"]
 
 [package.metadata.requires-dev]
 docs = [

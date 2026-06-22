@@ -161,9 +161,7 @@ def _column_row_key(order: Sequence[int], row: Sequence[str | None]) -> tuple:
     Empty or ``None`` cells collate as the empty string. Mirrors the per-cell
     comparison click-extra's own table sorter applies.
     """
-    return tuple(
-        strip_ansi(cell).casefold() if (cell := row[i]) else "" for i in order
-    )
+    return tuple(strip_ansi(cell).casefold() if (cell := row[i]) else "" for i in order)
 
 
 def print_sorted_table(

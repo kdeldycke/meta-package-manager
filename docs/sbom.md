@@ -142,15 +142,15 @@ For the `license` column specifically, [Tern](https://github.com/tern-tools/tern
 
 `mpm` is not the only tool that emits an SBOM. The widely-used ones each occupy a different spot in the supply-chain landscape:
 
-| Tool | By | Language | License | What it reads | SPDX | CycloneDX | purl |
-| :--- | :--- | :--- | :--- | :--- | :--: | :--: | :--- |
-| [`mpm`](https://github.com/kdeldycke/meta-package-manager) | this project | Python | GPL-2.0-or-later | the live package managers on a host, queried directly | ✓ 2.3 | ✓ 1.7 | ✓ |
-| [Syft](https://github.com/anchore/syft) | Anchore | Go | Apache-2.0 | container images and filesystems (package DBs, lockfiles) | ✓ 2.3 | ✓ 1.6 | ✓ |
-| [Trivy](https://github.com/aquasecurity/trivy) | Aqua Security | Go | Apache-2.0 | images, filesystems, repositories, VMs, clusters | ✓ 2.3 | ✓ 1.5 | ✓ |
-| [Tern](https://github.com/tern-tools/tern) | tern-tools | Python | BSD-2-Clause | container image layers (runs package managers in a chroot) | ✓ | ✓ |  |
-| [cdxgen](https://github.com/CycloneDX/cdxgen) | OWASP CycloneDX | JavaScript | Apache-2.0 | project manifests and lockfiles; a live host via `obom` | ✓ 3.0 | ✓ 1.7 | ✓ |
-| [component-detection](https://github.com/microsoft/component-detection) | Microsoft | C# | MIT | source-tree manifests and lockfiles (~30 detectors) | via sbom-tool |  | own schema |
-| [sbom-tool](https://github.com/microsoft/sbom-tool) | Microsoft | C# | MIT | build output and source tree (wraps component-detection) | ✓ 2.2, 3.0 |  |  |
+| Tool                                                                    | By              | Language   | License          | What it reads                                              |     SPDX      | CycloneDX | purl       |
+| :---------------------------------------------------------------------- | :-------------- | :--------- | :--------------- | :--------------------------------------------------------- | :-----------: | :-------: | :--------- |
+| [`mpm`](https://github.com/kdeldycke/meta-package-manager)              | this project    | Python     | GPL-2.0-or-later | the live package managers on a host, queried directly      |     ✓ 2.3     |   ✓ 1.7   | ✓          |
+| [Syft](https://github.com/anchore/syft)                                 | Anchore         | Go         | Apache-2.0       | container images and filesystems (package DBs, lockfiles)  |     ✓ 2.3     |   ✓ 1.6   | ✓          |
+| [Trivy](https://github.com/aquasecurity/trivy)                          | Aqua Security   | Go         | Apache-2.0       | images, filesystems, repositories, VMs, clusters           |     ✓ 2.3     |   ✓ 1.5   | ✓          |
+| [Tern](https://github.com/tern-tools/tern)                              | tern-tools      | Python     | BSD-2-Clause     | container image layers (runs package managers in a chroot) |       ✓       |     ✓     |            |
+| [cdxgen](https://github.com/CycloneDX/cdxgen)                           | OWASP CycloneDX | JavaScript | Apache-2.0       | project manifests and lockfiles; a live host via `obom`    |     ✓ 3.0     |   ✓ 1.7   | ✓          |
+| [component-detection](https://github.com/microsoft/component-detection) | Microsoft       | C#         | MIT              | source-tree manifests and lockfiles (~30 detectors)        | via sbom-tool |           | own schema |
+| [sbom-tool](https://github.com/microsoft/sbom-tool)                     | Microsoft       | C#         | MIT              | build output and source tree (wraps component-detection)   |  ✓ 2.2, 3.0   |           |            |
 
 Versions shown are each tool's current default; Syft and cdxgen can also emit older spec revisions on request. `mpm` is on the newest CycloneDX (1.7), and cdxgen and sbom-tool reach the newest SPDX (3.0). Tern's README states no spec versions or purl support for its output.
 

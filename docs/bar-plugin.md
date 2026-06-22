@@ -114,8 +114,6 @@ xcode-select: note: no developer tools were found at '/Applications/Xcode.app', 
 ```
 ````
 
-[^1]: Source: <https://ihaveahax.net/wiki/Python_version_information#Xcode_(macOS)>
-
 ## Development workflow
 
 Active development of the plugin is happening here, as a side-project of
@@ -193,3 +191,5 @@ under the name `meta_package_manager.7h.py`, to the
    :show-inheritance:
    :undoc-members:
 ```
+
+[^1]: Source: [https://ihaveahax.net/wiki/Python_version_information#Xcode\_(macOS)](https://ihaveahax.net/wiki/Python_version_information#Xcode_(macOS))

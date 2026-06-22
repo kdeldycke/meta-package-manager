@@ -25,7 +25,7 @@ A typical `~/.config/mpm/config.toml`:
 
 ```toml
 [mpm]
-verbosity = "INFO"
+verbosity = "WARNING"
 timeout = 300
 flatpak = true
 pipx = true
@@ -59,7 +59,7 @@ These go under `[mpm]` (or `[tool.mpm]` in `pyproject.toml`):
 
 | Key                        | Type    | Default             | Description                                                                                                         |
 | :------------------------- | :------ | :------------------ | :------------------------------------------------------------------------------------------------------------------ |
-| `verbosity`                | string  | `"INFO"`            | Logging level: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, or `DEBUG`.                                                  |
+| `verbosity`                | string  | `"WARNING"`         | Logging level: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, or `DEBUG`.                                                  |
 | `timeout`                  | integer | per-operation       | Maximum duration in seconds for each manager CLI call. When unset, a per-operation default applies: `120` for read-only queries (`installed`, `outdated`, `search`) and `500` for state-changing operations (`install`, `upgrade`, `remove`, `sync`, `cleanup`). A set value overrides every operation. |
 | `jobs`                     | integer | CPU count − 1       | Number of managers queried in parallel for read-only operations (`installed`, `outdated`, `search`). `1` runs sequentially (as does DEBUG verbosity). State-changing operations always run one manager at a time. |
 | `ignore_auto_updates`      | boolean | `true`              | Exclude auto-updating packages from outdated/upgrade results.                                                       |

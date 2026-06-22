@@ -152,24 +152,19 @@ dependencies = [
   "backports-strenum>=1.3; python_version<'3.11'",
   # boltons 25.0.0 is the first version to support Python 3.13.
   "boltons>=25",
-  # click-extra 7.16.0 introduces the ConfigValidator / ValidationError
-  # public types used by meta_package_manager.config to validate
-  # [mpm.managers.<id>] override sub-trees.
-  # click-extra 7.16.1 fixes ConfigOption.params_template being mutated in place
-  # by merge_default_map, which caused test isolation failures when a config
-  # file was loaded in one test and affected subsequent tests.
-  # click-extra 7.18.0 introduces click_extra.man_page.write_manpages() and
-  # click_extra.wrap.resolve_target_command(), used by repomatic's release
-  # engine to produce the .1 tarball bundled with each GitHub release.
-  # click-extra 7.19.0 adds the `click_extra_manpages` Sphinx config (with
-  # `render_html` HTML siblings via mandoc/groff) and the
-  # `{click-extra-manpages}` directive that powers the live man-page index
-  # in docs/cli-parameters.md, plus the `manpages_url` cross-linking target.
-  # meta_package_manager.execution uses click_extra.Spinner (added on click-extra
-  # main after 7.19.0, shipping in the next release) for the progress spinner
-  # during long CLI calls. Until that release the [tool.uv.sources] git pin below
-  # supplies it; bump this floor to the releasing version and drop the pin then.
-  "click-extra>=7.19",
+  # click-extra 8.0.0 is the major release mpm targets. It bundles the features
+  # earlier floors tracked (the ConfigValidator / ValidationError config types
+  # used by meta_package_manager.config, write_manpages() and the
+  # click_extra_manpages Sphinx machinery driving docs/cli-parameters.md, and the
+  # Spinner widget meta_package_manager.execution shows during long CLI calls),
+  # and reorganizes the API in ways mpm now depends on directly:
+  #   - HelpKeywords and highlight moved to click_extra.highlight when the
+  #     click_extra.colorize module was split.
+  #   - print_table() gained a sort_key parameter, replacing the dropped
+  #     print_sorted_table helper (reimplemented in meta_package_manager.cli).
+  # 8.0.0 is still unreleased, so the [tool.uv.sources] git pin below supplies it;
+  # drop the pin once 8.0.0 ships on PyPI.
+  "click-extra>=8",
   # extra-platforms 10.0.0 drops the distro dependency.
   "extra-platforms>=10",
   # packageurl-python 0.16.0 is the first to support Python 3.13. Required at
@@ -270,8 +265,8 @@ typing = [
 packages.find.include = [ "meta_package_manager*" ]
 
 [tool.uv]
-# Track click-extra main for the unreleased Spinner widget (see the click-extra
-# entry in [project.dependencies]). Drop once a release ships it. This is dev-only
+# Track click-extra main for the unreleased 8.0 API (see the click-extra entry in
+# [project.dependencies]). Drop once 8.0.0 ships on PyPI. This is dev-only
 # metadata: it is stripped from the published sdist/wheel, which keeps the plain
 # `click-extra` version constraint for downstream packagers.
 sources.click-extra = { git = "https://github.com/kdeldycke/click-extra.git", branch = "main" }

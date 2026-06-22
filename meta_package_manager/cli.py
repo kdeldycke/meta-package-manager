@@ -43,6 +43,7 @@ from unittest.mock import patch
 
 import tomli_w
 from boltons.cacheutils import LRI, cached
+from boltons.strutils import strip_ansi
 from click import ParameterSource
 from click_extra import (
     STRING,
@@ -62,12 +63,12 @@ from click_extra import (
     option_group,
     pass_context,
 )
-from click_extra.colorize import HelpKeywords, highlight
 from click_extra.context import JOBS, PROGRESS, TABLE_FORMAT, VERBOSITY
+from click_extra.highlight import HelpKeywords, highlight
 from click_extra.table import (
     SERIALIZATION_FORMATS,
     print_data,
-    print_sorted_table,
+    print_table,
 )
 from click_extra.theme import get_current_theme as theme
 from extra_platforms import current_platform, reduce
@@ -110,10 +111,12 @@ else:
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Iterator, Sequence
     from typing import IO
 
+    from click import Context as ClickContext
     from click_extra import Context, Parameter
+    from click_extra.table import TableFormat
 
     from .package import Package
 
@@ -150,6 +153,52 @@ class SortableField(StrEnum):
     PACKAGE_ID = "package_id"
     PACKAGE_NAME = "package_name"
     VERSION = "version"
+
+
+def _column_row_key(order: Sequence[int], row: Sequence[str | None]) -> tuple:
+    """Build a row's sort key over the ``order`` columns, stripped and casefolded.
+
+    Empty or ``None`` cells collate as the empty string. Mirrors the per-cell
+    comparison click-extra's own table sorter applies.
+    """
+    return tuple(
+        strip_ansi(cell).casefold() if (cell := row[i]) else "" for i in order
+    )
+
+
+def print_sorted_table(
+    headers: Sequence[tuple[str, SortableField | None]],
+    table: Sequence[Sequence[str | None]],
+    sort_by: SortableField | None,
+    *,
+    table_format: TableFormat | None = None,
+) -> None:
+    """Render ``table`` with click-extra, sorting rows by the ``sort_by`` column.
+
+    Each ``headers`` entry pairs a column label with the :class:`SortableField` it
+    carries, or ``None`` for a column that cannot be sorted on. Rows are ordered by
+    the column matching ``sort_by``, with the remaining columns breaking ties in
+    their natural left-to-right order. A ``sort_by`` that no column carries leaves
+    the rows in their original order.
+
+    Reimplements the ``print_sorted_table`` helper click-extra dropped in
+    ``8.0.0``, where :class:`click_extra.table.SortByOption` instead bakes the sort
+    key into ``ctx.print_table``. That option is scoped to a single command's
+    columns, whereas mpm shares one global :option:`mpm --sort-by` across
+    subcommands with heterogeneous tables, so the key is built here.
+    """
+    fields = [field for _, field in headers]
+    sort_key: Callable[[Sequence[str | None]], tuple] | None = None
+    if sort_by in fields:
+        primary = fields.index(sort_by)
+        order = (primary, *(i for i in range(len(fields)) if i != primary))
+        sort_key = partial(_column_row_key, order)
+    print_table(
+        table,
+        [label for label, _ in headers],
+        table_format=table_format,
+        sort_key=sort_key,
+    )
 
 
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
@@ -263,7 +312,7 @@ class Duration(ParamType):
         self,
         value: object,
         param: Parameter | None,
-        ctx: Context | None,
+        ctx: ClickContext | None,
     ) -> timedelta | None:
         """Coerce ``value`` to a :py:class:`datetime.timedelta` (or ``None``)."""
         if value is None or isinstance(value, timedelta):
@@ -285,7 +334,7 @@ class Duration(ParamType):
         text: str,
         value: object,
         param: Parameter | None,
-        ctx: Context | None,
+        ctx: ClickContext | None,
     ) -> timedelta | None:
         normalized = text.upper().replace("Z", "+00:00")
         try:
@@ -312,7 +361,7 @@ class Duration(ParamType):
         text: str,
         value: object,
         param: Parameter | None,
-        ctx: Context | None,
+        ctx: ClickContext | None,
     ) -> timedelta | None:
         match = self._ISO8601_PATTERN.fullmatch(text)
         if not match or not any(match.groups()):
@@ -339,7 +388,7 @@ class Duration(ParamType):
         text: str,
         value: object,
         param: Parameter | None,
-        ctx: Context | None,
+        ctx: ClickContext | None,
     ) -> timedelta | None:
         match = self._FRIENDLY_PATTERN.fullmatch(text)
         if match:
@@ -906,7 +955,8 @@ def mpm(
         ),
     )()
 
-    # Override ctx.print_table with the upstream sorted variant.
+    # Override ctx.print_table with mpm's field-aware sorted variant, so
+    # subcommands keep their (headers, table, sort_by) call contract.
     ctx.print_table = partial(
         print_sorted_table,
         table_format=ctx.meta[TABLE_FORMAT],
@@ -1119,7 +1169,7 @@ def _query_highlighter(query: str | None) -> Callable[[str], str]:
     if not query:
         return lambda value: value
     patterns = {query}.union(PackageManager.query_parts(query))
-    return cached(LRI(max_size=1000))(
+    highlighter: Callable[[str], str] = cached(LRI(max_size=1000))(
         partial(
             highlight,
             patterns=patterns,
@@ -1127,6 +1177,7 @@ def _query_highlighter(query: str | None) -> Callable[[str], str]:
             ignore_case=True,
         ),
     )
+    return highlighter
 
 
 @mpm.command(aliases=["list"], short_help="List installed packages.", section=EXPLORE)

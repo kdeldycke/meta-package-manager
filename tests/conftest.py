@@ -23,7 +23,7 @@ from operator import attrgetter
 import pytest
 
 # Pre-load invocation helpers to be used as pytest's fixture.
-from click_extra.pytest import create_config, extra_runner  # noqa: F401
+from click_extra.pytest import create_config, runner  # noqa: F401
 from extra_platforms.pytest import skip_guix_build
 from pytest import fixture, param
 
@@ -177,14 +177,14 @@ def isolate_user_config(monkeypatch, tmp_path):
     app_dir = tmp_path / "app-dir"
     app_dir.mkdir()
     monkeypatch.setattr(
-        "click_extra.config.get_app_dir",
+        "click_extra.config.option.get_app_dir",
         lambda *args, **kwargs: str(app_dir),
     )
 
 
 @fixture
-def invoke(extra_runner):  # noqa: F811
-    yield partial(extra_runner.invoke, mpm)
+def invoke(runner):  # noqa: F811
+    yield partial(runner.invoke, mpm)
 
 
 def _patch_pool_with(monkeypatch, fake):

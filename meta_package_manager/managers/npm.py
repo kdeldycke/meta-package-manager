@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
     from typing import Any
 
-    from click_extra._types import TArg, TNestedArgs
+    from click_extra.testing import TArg, TNestedArgs
 
     from ..package import Package
 

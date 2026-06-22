@@ -49,7 +49,7 @@ from boltons.iterutils import unique
 from boltons.strutils import strip_ansi
 from click_extra.envvar import env_copy
 from click_extra.spinner import Spinner
-from click_extra.testing import INDENT, args_cleanup, format_cli_prompt
+from click_extra.testing import INDENT, PROMPT, args_cleanup
 from click_extra.theme import get_current_theme as theme
 from extra_platforms import UNIX, current_platform, is_any_windows
 
@@ -61,7 +61,8 @@ if TYPE_CHECKING:
     from contextlib import AbstractContextManager
     from datetime import timedelta
 
-    from click_extra._types import TArg, TEnvVars, TNestedArgs
+    from click_extra.envvar import TEnvVars
+    from click_extra.testing import TArg, TNestedArgs
 
     from .version import TokenizedString
 
@@ -180,6 +181,22 @@ stalled during the first second. Only the quickest calls (cached version probes,
 trivial metadata queries) finish within this delay and stay silent; anything
 slower (a ``guix search``, a source build) shows the spinner right away.
 """
+
+
+def format_cli_prompt(
+    cmd_args: Iterable[str], extra_env: TEnvVars | None = None
+) -> str:
+    """Render the shell prompt simulating a CLI invocation, for logs and dry-runs.
+
+    Prefixes the ``PROMPT`` to any ``extra_env`` assignments and the command line,
+    both styled through the active theme. Reimplements the helper click-extra made
+    private (``_format_cli_prompt``) in ``8.0.0``.
+    """
+    env_string = ""
+    if extra_env:
+        assignments = "".join(f"{k}={v} " for k, v in extra_env.items())
+        env_string = theme().envvar(assignments)
+    return PROMPT + env_string + theme().invoked_command(" ".join(cmd_args))
 
 
 class CLIExecutor:

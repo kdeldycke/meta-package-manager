@@ -81,7 +81,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator
     from typing import Final
 
-    from click_extra import Context
+    from click import Context
 
     from .capabilities import Operations
     from .manager import PackageManager

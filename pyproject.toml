@@ -884,7 +884,6 @@ name = "🖥 platform: Windows"
 color = "bfd4f2"
 description = "Windows"
 
-# File-based PR labeller rules. See repomatic's labels.file-rules schema.
 [[tool.repomatic.labels.file-rules]]
 label = "🔌 bar-plugin"
 any-glob-to-any-file = [ "meta_package_manager/bar_plugin/*", "tests/*bar_plugin*" ]

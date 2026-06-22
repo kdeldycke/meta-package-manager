@@ -252,15 +252,14 @@ wheels = [
 
 [[package]]
 name = "click-extra"
-version = "7.21.0.dev0"
-source = { git = "https://github.com/kdeldycke/click-extra.git?branch=main#90040c0bfffba61aa2234f77359e0b1ebb3add0a" }
+version = "8.0.0.dev0"
+source = { git = "https://github.com/kdeldycke/click-extra.git?branch=main#9369197a2cfa739f2bd1ac19b5e3079cfa80ad6c" }
 dependencies = [
     { name = "boltons" },
     { name = "click" },
     { name = "cloup" },
     { name = "deepmerge" },
     { name = "extra-platforms" },
-    { name = "requests" },
     { name = "tabulate", extra = ["widechars"] },
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "wcmatch" },
@@ -440,7 +439,7 @@ toml = [
 
 [[package]]
 name = "cyclonedx-python-lib"
-version = "11.9.0"
+version = "11.10.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "license-expression" },
@@ -449,9 +448,9 @@ dependencies = [
     { name = "sortedcontainers" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/33/86/3508db3dade17e1f8cfa289b7dd3df7c2f0401d8cf7ee186042bdb3ab003/cyclonedx_python_lib-11.9.0.tar.gz", hash = "sha256:5d3b54834bbdfa2538b0e7eeda243f43c136d0a324d175fd8d6ec8685ee81f3c", size = 1424867, upload-time = "2026-06-08T07:32:26.945Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a7/54/40d741cb605229cddcf9ec689b0fd401e39e2e70c2fe9cc728923b983b8e/cyclonedx_python_lib-11.10.0.tar.gz", hash = "sha256:d03d6ea271e26feaf123b8b1b34468a305f33a338c5763f56e397a8408f9b290", size = 1429036, upload-time = "2026-06-11T10:36:27.633Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/13/cd/8e671a62b18a946ea4923914030a68297cf3a50ac3bb169facc7b6c0d995/cyclonedx_python_lib-11.9.0-py3-none-any.whl", hash = "sha256:80620df4d11628458b7a17523b3f62be4663779babf51c82fe0ca7a32e3d0633", size = 524883, upload-time = "2026-06-08T07:32:25.094Z" },
+    { url = "https://files.pythonhosted.org/packages/a3/21/01c9b957ec3a778de86e010c1b54ea433ebf2fc50b810a3ca0ce8000782f/cyclonedx_python_lib-11.10.0-py3-none-any.whl", hash = "sha256:ffb9510b8d00a0896cfbe0a78b97c545d28f7d2a54e9d9dd5e5dc6e91ca9b375", size = 527798, upload-time = "2026-06-11T10:36:25.985Z" },
 ]
 
 [package.optional-dependencies]
@@ -1025,7 +1024,7 @@ docs = [
     { name = "sphinx", version = "9.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "sphinx-autodoc-typehints", version = "3.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "sphinx-autodoc-typehints", version = "3.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
-    { name = "sphinx-autodoc-typehints", version = "3.10.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "sphinx-autodoc-typehints", version = "3.11.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "sphinx-click" },
     { name = "sphinx-copybutton" },
     { name = "sphinx-design", version = "0.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -1248,7 +1247,7 @@ wheels = [
 
 [[package]]
 name = "pytest"
-version = "9.0.3"
+version = "9.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
@@ -1259,9 +1258,9 @@ dependencies = [
     { name = "pygments" },
     { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7d/0d/549bd94f1a0a402dc8cf64563a117c0f3765662e2e668477624baeec44d5/pytest-9.0.3.tar.gz", hash = "sha256:b86ada508af81d19edeb213c681b1d48246c1a91d304c6c81a427674c17eb91c", size = 1572165, upload-time = "2026-04-07T17:16:18.027Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/84/0e/b5858858d74958632c49b72cb25a3976ff9f632397626715be71c89d3971/pytest-9.1.0.tar.gz", hash = "sha256:41dd9148c08072446394cefd3d79701701335a9f4cae69ba92e39f6c7f5c061c", size = 1634181, upload-time = "2026-06-13T18:52:45.983Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d4/24/a372aaf5c9b7208e7112038812994107bc65a84cd00e0354a88c2c77a617/pytest-9.0.3-py3-none-any.whl", hash = "sha256:2c5efc453d45394fdd706ade797c0a81091eccd1d6e4bccfcd476e2b8e0ab5d9", size = 375249, upload-time = "2026-04-07T17:16:16.13Z" },
+    { url = "https://files.pythonhosted.org/packages/8b/5a/ba30a81239b909821b3153e303e7def45178bf353da4f72380e6c5e8793b/pytest-9.1.0-py3-none-any.whl", hash = "sha256:8ebb0e7888bdf2bdfc602ec51f8f62d50200af37356c74e503c79a94f5c81f32", size = 386453, upload-time = "2026-06-13T18:52:44.045Z" },
 ]
 
 [[package]]
@@ -1937,7 +1936,7 @@ wheels = [
 
 [[package]]
 name = "sphinx-autodoc-typehints"
-version = "3.10.5"
+version = "3.11.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.12'",
@@ -1945,9 +1944,9 @@ resolution-markers = [
 dependencies = [
     { name = "sphinx", version = "9.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e2/88/f4698f838b8cc030f3df73cf529f96d7c9e6dd3e3ff40968b7fe4d86c748/sphinx_autodoc_typehints-3.10.5.tar.gz", hash = "sha256:a54dfab95a6b5e8601543d25474497e98ed59268ac0ab01b3daba9817cf9707e", size = 79721, upload-time = "2026-06-03T15:30:28.181Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d3/ac/99f66f906b15718687525fdf3601ca0b50d19c5e88d57cd4275a89355926/sphinx_autodoc_typehints-3.11.0.tar.gz", hash = "sha256:0112b322e2ebd993c0561af3c9e4615481b42dec199d665d6bacc875f3371e96", size = 82518, upload-time = "2026-06-11T18:48:34.225Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/41/9a/98ba24ca28b4a4afbb5066805838c7e1149b8de1e6f5e02774e0f39f13db/sphinx_autodoc_typehints-3.10.5-py3-none-any.whl", hash = "sha256:7155748080735731c892d09b5128bc4e5303795691ca8515ccf333b1efd8d964", size = 40433, upload-time = "2026-06-03T15:30:26.892Z" },
+    { url = "https://files.pythonhosted.org/packages/1b/55/7aaa2439e77cff66a6f348bb2d9894abf2b7b153595a5b974c5c277e9145/sphinx_autodoc_typehints-3.11.0-py3-none-any.whl", hash = "sha256:4ab73fe735c33168be3f34818034581155416e8e248d32ea1b604e90bea75223", size = 41610, upload-time = "2026-06-11T18:48:33.056Z" },
 ]
 
 [[package]]
@@ -2213,11 +2212,11 @@ wheels = [
 
 [[package]]
 name = "types-boltons"
-version = "25.0.0.20260518"
+version = "25.0.0.20260612"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/08/14/0bb319ee28c0b98042b16029877defe2378d2a82d44f28bee60684647d07/types_boltons-25.0.0.20260518.tar.gz", hash = "sha256:32cb6f76a7b795c89a1007b47e5cbf46e1d165c053df5b15bc2c6a508bb84795", size = 21876, upload-time = "2026-05-18T06:03:04.737Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a3/20/0f1d798ee2a11e59e228e8fea0947042bd80123b00fb4fd44673fb51e7db/types_boltons-25.0.0.20260612.tar.gz", hash = "sha256:85c2c90d17cdabe049037f1614af86bc858b214a5a16cc871230777e7cec39c9", size = 22004, upload-time = "2026-06-12T06:22:30.937Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/03/57/32c268c4d805c20c56ea826b3f50a349004039a48b7feb116715e2049b82/types_boltons-25.0.0.20260518-py3-none-any.whl", hash = "sha256:f1309216d8956c4e7b2ddf049c07d15c3dc5455bce79659815c1958d187fec10", size = 28295, upload-time = "2026-05-18T06:03:03.379Z" },
+    { url = "https://files.pythonhosted.org/packages/fd/31/b8a58cffa7af1ebf6f9116168fcb129b175556794b815176d7a9118bf801/types_boltons-25.0.0.20260612-py3-none-any.whl", hash = "sha256:4ed2f2f3eca268c9b9a1ff4c4bc6c82cc460194d3c0ba6a9113316243f58feca", size = 28378, upload-time = "2026-06-12T06:22:29.816Z" },
 ]
 
 [[package]]

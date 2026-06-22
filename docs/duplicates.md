@@ -21,10 +21,10 @@ Then choose your preferred package manager to install it:
 
 ```shell-session
 $ mpm --brew install broot
-Package manager order: brew
-Install broot package from brew...
 (...)
 🍺  /usr/local/Cellar/broot/1.16.2: 8 files, 3.5MB
+✓ broot installed with brew
+Installed 1/1 packages
 ```
 
 This pattern catches the common "I want the freshest version" decision without having to query each manager by hand.
@@ -53,13 +53,16 @@ Removing every copy at once is a single command:
 
 ```shell-session
 $ mpm remove blah
-Remove blah with cargo, gem, npm
 (...)
 Successfully uninstalled blah-0.0.0
+✓ blah removed from cargo
 (...)
 Successfully uninstalled blah-0.0.2
+✓ blah removed from gem
 (...)
 Successfully uninstalled blah-5.2.1
+✓ blah removed from npm
+Removed 3/3 packages
 ```
 
 Or target a specific duplicate by routing through one manager:
@@ -70,7 +73,7 @@ $ mpm --pip uninstall six
 ```
 
 ```{todo}
-Add arguments to `installed` command, or an `--installed` boolean flag to `search` so we can reduce the searched packages to those installed.
+Add an `--installed` boolean flag to `search` to reduce the searched packages to those already installed. (`installed` itself now accepts a `QUERY` argument to filter its own listing.)
 ```
 
 ## See also

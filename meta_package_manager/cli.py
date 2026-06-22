@@ -689,10 +689,13 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     jobs_option(
         "-j",
         "--jobs",
-        help="Number of managers queried in parallel for read-only operations "
-        "(installed, outdated, search). Defaults to one less than the CPU count; "
-        "set 1 to run sequentially. State-changing operations always run one "
-        "manager at a time.",
+        help="Maximum number of managers to run concurrently. Defaults to one "
+        "less than the CPU count; set 1 to run sequentially. Applies to read-only "
+        "queries (installed, outdated, search), maintenance commands (sync, "
+        "cleanup, upgrade --all), and the state changers (install, remove, "
+        "upgrade, restore), which fan out across managers while running each "
+        "manager's own packages one at a time. Installing a package left untied "
+        "to a manager stays sequential.",
     ),
     option(
         "--cooldown",

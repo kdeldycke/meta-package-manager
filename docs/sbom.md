@@ -22,11 +22,8 @@ For example:
 
 ```shell-session
 $ mpm --brew --gem sbom --spdx --format yaml
-info: User selection of managers by priority: > brew > gem
-info: Managers dropped by user: None
-info: Print SPDX export to <stdout>
-info: Exporting packages from brew...
-info: Exporting packages from gem...
+291 packages total (brew: 229, gem: 62).
+229/291 packages enriched with metadata.
 ```
 
 ```yaml
@@ -95,6 +92,12 @@ relationships:
   spdxElementId: SPDXRef-DOCUMENT
 (...)
 spdxVersion: SPDX-2.3
+```
+
+To export only a subset of the installed packages, filter with `--query`. The match is fuzzy by default (case-insensitive, tokenized), the same semantics as `mpm search`; pass `--exact` for a verbatim match on the package ID or name:
+
+```shell-session
+$ mpm --brew sbom --query openssl > openssl.spdx.json
 ```
 
 ## Scan mode: `--bundled` vs `--minimal`

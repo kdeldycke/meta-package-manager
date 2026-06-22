@@ -61,7 +61,7 @@ These go under `[mpm]` (or `[tool.mpm]` in `pyproject.toml`):
 | :------------------------- | :------ | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `verbosity`                | string  | `"WARNING"`         | Logging level: `CRITICAL`, `ERROR`, `WARNING`, `INFO`, or `DEBUG`.                                                                                                                                                                                                                                      |
 | `timeout`                  | integer | per-operation       | Maximum duration in seconds for each manager CLI call. When unset, a per-operation default applies: `120` for read-only queries (`installed`, `outdated`, `search`) and `500` for state-changing operations (`install`, `upgrade`, `remove`, `sync`, `cleanup`). A set value overrides every operation. |
-| `jobs`                     | integer | CPU count − 1       | Number of managers queried in parallel for read-only operations (`installed`, `outdated`, `search`). `1` runs sequentially (as does DEBUG verbosity). State-changing operations always run one manager at a time.                                                                                       |
+| `jobs`                     | integer | CPU count − 1       | Number of managers run in parallel. Bounds the read-only queries (`installed`, `outdated`, `search`), the maintenance commands (`sync`, `cleanup`, `upgrade --all`), the exporters (`dump`/`backup`, `sbom`), and the state changers (`install`, `remove`, `upgrade <packages>`, `restore`), which fan out across managers while running each manager's own packages one at a time. `1` runs sequentially (as does DEBUG verbosity). Ignored only by an `install` of a package left untied to a manager, which needs a sequential priority search across managers. |
 | `ignore_auto_updates`      | boolean | `true`              | Exclude auto-updating packages from outdated/upgrade results.                                                                                                                                                                                                                                           |
 | `stop_on_error`            | boolean | `false`             | Stop on first manager CLI error instead of continuing.                                                                                                                                                                                                                                                  |
 | `dry_run`                  | boolean | `false`             | Simulate CLI calls without performing any action.                                                                                                                                                                                                                                                       |
@@ -118,15 +118,17 @@ These go under `[mpm.<subcommand>]` (or `[tool.mpm.<subcommand>]`):
 
 **`[mpm.installed]`**
 
-| Key          | Type    | Default | Description                                            |
-| :----------- | :------ | :------ | :----------------------------------------------------- |
-| `duplicates` | boolean | `false` | Only list packages installed by more than one manager. |
+| Key          | Type    | Default | Description                                                                              |
+| :----------- | :------ | :------ | :--------------------------------------------------------------------------------------- |
+| `duplicates` | boolean | `false` | Only list packages installed by more than one manager.                                   |
+| `exact`      | boolean | `false` | With a `QUERY`, require a verbatim match on the package ID or name instead of fuzzy. |
 
 **`[mpm.outdated]`**
 
-| Key             | Type    | Default | Description                                         |
-| :-------------- | :------ | :------ | :-------------------------------------------------- |
-| `plugin_output` | boolean | `false` | Render output for Xbar/SwiftBar plugin consumption. |
+| Key             | Type    | Default | Description                                                                              |
+| :-------------- | :------ | :------ | :--------------------------------------------------------------------------------------- |
+| `exact`         | boolean | `false` | With a `QUERY`, require a verbatim match on the package ID or name instead of fuzzy. |
+| `plugin_output` | boolean | `false` | Render output for Xbar/SwiftBar plugin consumption.                                      |
 
 **`[mpm.upgrade]`**
 
@@ -144,6 +146,8 @@ These go under `[mpm.<subcommand>]` (or `[tool.mpm.<subcommand>]`):
 | `overwrite`      | boolean | `false` | Allow overwriting an existing output file.                                                |
 | `merge`          | boolean | `false` | TOML only. Add each new entry to an existing file.                                        |
 | `update_version` | boolean | `false` | TOML only. Update each existing entry with the version currently installed on the system. |
+| `query`          | string  | `""`    | Only snapshot installed packages whose ID or name matches this query.                     |
+| `exact`          | boolean | `false` | With a `query`, require a verbatim match on the package ID or name instead of fuzzy.  |
 
 **`[mpm.sbom]`**
 
@@ -152,6 +156,8 @@ These go under `[mpm.<subcommand>]` (or `[tool.mpm.<subcommand>]`):
 | `spdx`      | boolean | `true`  | Use SPDX format (`false` for CycloneDX).                                                                                                                                           |
 | `bundled`   | boolean | `true`  | Bundled mode: query each manager for richer metadata and merge per-package upstream SBOMs into the aggregate. Set `false` for fast inventory snapshots (name, version, purl only). |
 | `overwrite` | boolean | `false` | Allow overwriting an existing SBOM file.                                                                                                                                           |
+| `query`     | string  | `""`    | Only export installed packages whose ID or name matches this query.                                                                                                               |
+| `exact`     | boolean | `false` | With a `query`, require a verbatim match on the package ID or name instead of fuzzy.                                                                                          |
 
 ## Full example
 

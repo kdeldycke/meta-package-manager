@@ -4,6 +4,8 @@ The `installed`, `outdated`, and `search` subcommands render their results as a 
 
 `--table-format` is the ad-hoc piping corner of `mpm`'s data exports. For snapshotting the installed inventory in a re-installable shape, see {doc}`dump`; for a supply-chain inventory in SPDX or CycloneDX, see {doc}`sbom`.
 
+`installed` and `outdated` also accept an optional `QUERY` argument to restrict the listing to packages whose ID or name matches it (`mpm installed rich`). The match is fuzzy by default (case-insensitive, tokenized), reusing `mpm search`'s semantics; pass `--exact` for a verbatim match.
+
 ## JSON
 
 ```shell-session

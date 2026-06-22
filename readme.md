@@ -265,6 +265,13 @@ $ mpm installed
 16 packages total (brew: 2, pip: 2, apm: 2, gem: 2, cask: 2, mas: 2, vscode: 2, npm: 2, composer: 0).
 ```
 
+Narrow the listing to packages whose ID or name matches a query by passing it as an argument. The match is fuzzy by default (case-insensitive and tokenized); add `--exact` to require a verbatim match on the package ID or name:
+
+```shell-session
+$ mpm installed sphinx
+$ mpm installed --exact Sphinx
+```
+
 ### List outdated packages
 
 List all packages installed for which an upgrade is available:
@@ -284,6 +291,12 @@ $ mpm outdated
 │ regex        │ regex       │ pip     │ 2021.9.30         │ 2021.10.8      │
 ╰──────────────┴─────────────┴─────────┴───────────────────┴────────────────╯
 8 packages total (brew: 3, pip: 2, gem: 1, mas: 1, npm: 1, apm: 0, cask: 0, composer: 0).
+```
+
+The same query argument restricts the listing to outdated packages whose ID or name matches, again fuzzy by default and exact with `--exact`:
+
+```shell-session
+$ mpm outdated git
 ```
 
 ### List managers

@@ -33,7 +33,6 @@ from __future__ import annotations
 
 import logging
 import platform
-import re
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
@@ -414,10 +413,11 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def query_parts(cls, query: str) -> set[str]:
         """Returns a set of all contiguous alphanumeric string segments.
 
-        Contrary to :py:class:`meta_package_manager.version.TokenizedString`, do no
-        splits on colated number/alphabetic junctions.
+        Thin delegator to
+        :py:meth:`meta_package_manager.package.Package.query_parts`, the canonical
+        tokenizer, kept here as a convenience for manager-side search code.
         """
-        return {p for p in re.split(r"\W+", query) if p}
+        return Package.query_parts(query)
 
     def search(self, query: str, extended: bool, exact: bool) -> Iterator[Package]:
         """Search packages available for install.
@@ -460,30 +460,11 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
             try to produce results as precise as possible using the native filtering
             capabilities of the package manager CLI.
         """
-        # Pre-compute normalized query parts once for all results.
-        normalized_query_parts = {p.lower() for p in self.query_parts(query)}
-
         for match in self.search(query, extended, exact):
-            # Look by default into package ID and name.
-            search_content = {match.id, match.name}
-
-            # Rejects fuzzy results: only keep packages strictly matching on ID or name.
-            if exact and query not in search_content:
-                continue
-
-            # Add description to the list of content to look into.
-            if extended:
-                search_content.add(match.description)
-
-            # Normalize searched content.
-            serialized_content = "".join(s.lower() for s in search_content if s)
-
-            # Exclude packages not matching any part of the query.
-            if not any(part in serialized_content for part in normalized_query_parts):
-                continue
-
-            # Report the package as matching.
-            yield match
+            # The per-package match decision lives on the data model, shared with
+            # the `installed` and `outdated` query filters.
+            if match.matches(query, extended, exact):
+                yield match
 
     def install(self, package_id: str, version: str | None = None) -> str:
         """Install one package and one only.

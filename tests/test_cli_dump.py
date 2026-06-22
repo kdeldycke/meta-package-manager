@@ -358,3 +358,19 @@ def test_brew_bundle_check_parses_generated_brewfile(tmp_path):
         f"stderr: {completed.stderr}"
     )
     assert "Invalid Brewfile" not in completed.stderr
+
+
+def test_dump_query_filter_narrows_to_matches(invoke, fake_pool):
+    """``dump --query`` keeps only installed packages matching the query."""
+    result = invoke("dump", "--query", "alpha")
+    assert result.exit_code == 0
+    assert "fake-pkg-alpha" in result.stdout
+    assert "fake-pkg-beta" not in result.stdout
+
+
+def test_dump_without_query_lists_all(invoke, fake_pool):
+    """Without a query, ``dump`` snapshots the full installed inventory."""
+    result = invoke("dump")
+    assert result.exit_code == 0
+    assert "fake-pkg-alpha" in result.stdout
+    assert "fake-pkg-beta" in result.stdout

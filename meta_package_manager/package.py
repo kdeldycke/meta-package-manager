@@ -41,6 +41,7 @@ manager engine (:py:mod:`meta_package_manager.manager`).
 
 from __future__ import annotations
 
+import re
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from functools import cached_property
@@ -110,6 +111,59 @@ class Package:
             name=self.id,
             version=str(self.installed_version),
             qualifiers=qualifiers,
+        )
+
+    @staticmethod
+    def query_parts(query: str) -> set[str]:
+        """Split ``query`` into its contiguous alphanumeric segments.
+
+        Contrary to :py:class:`meta_package_manager.version.TokenizedString`,
+        does not split on collated number/alphabetic junctions.
+
+        Canonical tokenizer behind :py:meth:`matches` and the
+        ``search``/``installed``/``outdated`` query matching.
+        :py:meth:`meta_package_manager.manager.PackageManager.query_parts`
+        delegates here.
+        """
+        return {p for p in re.split(r"\W+", query) if p}
+
+    def matches(
+        self,
+        query: str,
+        extended: bool = False,
+        exact: bool = False,
+    ) -> bool:
+        """Tell whether this package matches the free-form ``query``.
+
+        Shared predicate behind the ``search``, ``installed`` and ``outdated``
+        subcommands, so all three honor the same matching semantics:
+
+        - **Fuzzy** (default): a case-insensitive, tokenized substring match.
+          Any alphanumeric segment of ``query`` (see :py:meth:`query_parts`)
+          found in the package ID or name counts as a match.
+        - **Exact** (``exact=True``): the raw ``query`` must equal the package
+          ID or name verbatim (case-sensitive, whole-string).
+        - **Extended** (``extended=True``): also look into the package
+          ``description``. Only meaningful when the description is populated,
+          as it is for ``search`` results.
+
+        A query with no alphanumeric segment (empty or punctuation-only) never
+        matches.
+        """
+        # Look by default into package ID and name.
+        content = {self.id, self.name}
+
+        # Reject fuzzy results: only keep packages strictly matching ID or name.
+        if exact and query not in content:
+            return False
+
+        # Add description to the content to look into.
+        if extended:
+            content.add(self.description)
+
+        serialized_content = "".join(s.lower() for s in content if s)
+        return any(
+            part.lower() in serialized_content for part in self.query_parts(query)
         )
 
 

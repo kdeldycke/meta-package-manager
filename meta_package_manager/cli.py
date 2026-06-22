@@ -110,7 +110,7 @@ else:
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
     from typing import IO
 
     from click_extra import Context, Parameter
@@ -1086,7 +1086,57 @@ def _safe_packages(
         return ()
 
 
+def _filter_matches(
+    packages: Iterable[Package],
+    query: str | None,
+    *,
+    exact: bool,
+) -> Iterator[Package]:
+    """Yield only the packages matching ``query`` on their ID or name.
+
+    A transparent pass-through when ``query`` is ``None`` (no positional query was
+    given). Shared by the ``installed`` and ``outdated`` subcommands to post-filter
+    the fully-materialized package list each manager returns: unlike ``search``,
+    these operations already hold the complete inventory, so the query is a local
+    refinement rather than a manager-side lookup. Mirrors the fuzzy/``--exact``
+    semantics of ``search`` through
+    :py:meth:`meta_package_manager.package.Package.matches`.
+    """
+    for package in packages:
+        if query is None or package.matches(query, exact=exact):
+            yield package
+
+
+def _query_highlighter(query: str | None) -> Callable[[str], str]:
+    """Build a highlighter that emphasizes ``query`` matches in table cells.
+
+    Returns a cached, case-insensitive callable that wraps each occurrence of the
+    query (and its alphanumeric parts) in the active theme's ``search`` style, so
+    the matched substring stands out in the rendered table. When no query was
+    given, returns an identity function instead, leaving cells untouched. Shared by
+    the ``search``, ``installed`` and ``outdated`` renderers.
+    """
+    if not query:
+        return lambda value: value
+    patterns = {query}.union(PackageManager.query_parts(query))
+    return cached(LRI(max_size=1000))(
+        partial(
+            highlight,
+            patterns=patterns,
+            styling_func=theme().search,
+            ignore_case=True,
+        ),
+    )
+
+
 @mpm.command(aliases=["list"], short_help="List installed packages.", section=EXPLORE)
+@option(
+    "--exact/--fuzzy",
+    default=False,
+    help="With a QUERY, only keep packages whose ID or name matches it exactly, "
+    "instead of the default case-insensitive, tokenized (fuzzy) match. No effect "
+    "without a QUERY.",
+)
 @option(
     "-d",
     "--duplicates",
@@ -1095,9 +1145,15 @@ def _safe_packages(
     help="Only list installed packages sharing the same ID. Implies "
     "`--sort-by package_id` to make duplicates easier to compare between themselves.",
 )
+@argument("query", type=STRING, required=False)
 @pass_context
-def installed(ctx, duplicates):
-    """List all packages installed on the system by each manager."""
+def installed(ctx, exact, duplicates, query):
+    """List all packages installed on the system by each manager.
+
+    With an optional ``QUERY``, restrict the listing to installed packages whose ID
+    or name matches it. The match is fuzzy by default (case-insensitive, tokenized);
+    ``--exact`` requires a verbatim match on the package ID or name.
+    """
     # Build-up a global dict of installed packages per manager.
     installed_data = {}
     fields = (
@@ -1113,7 +1169,12 @@ def installed(ctx, duplicates):
     def fetch(manager: PackageManager) -> tuple[str, dict]:
         # installed_or_empty() never raises (it swallows errors into an empty
         # result), so no CLIError guard is needed here.
-        packages = tuple(packages_asdict(manager.installed_or_empty(), fields))
+        packages = tuple(
+            packages_asdict(
+                _filter_matches(manager.installed_or_empty(), query, exact=exact),
+                fields,
+            )
+        )
         return _manager_result(manager, packages)
 
     for manager_id, data in collect_from_managers(
@@ -1146,13 +1207,14 @@ def installed(ctx, duplicates):
     # Machine-friendly data rendering.
     print_serialized_and_exit(ctx, installed_data)
 
-    # Human-friendly content rendering.
+    # Human-friendly content rendering, highlighting the query matches (if any).
+    highlight_query = _query_highlighter(query)
     table = []
     for manager_id, installed_pkg in installed_data.items():
         table += [
             (
-                info["id"],
-                info["name"],
+                highlight_query(info["id"]) if info["id"] else "",
+                highlight_query(info["name"]) if info["name"] else "",
                 manager_id,
                 str(info["installed_version"]) if info["installed_version"] else "?",
             )
@@ -1185,6 +1247,13 @@ def installed(ctx, duplicates):
 
 @mpm.command(short_help="List outdated packages.", section=EXPLORE)
 @option(
+    "--exact/--fuzzy",
+    default=False,
+    help="With a QUERY, only keep packages whose ID or name matches it exactly, "
+    "instead of the default case-insensitive, tokenized (fuzzy) match. No effect "
+    "without a QUERY.",
+)
+@option(
     "--plugin-output",
     is_flag=True,
     default=False,
@@ -1192,9 +1261,15 @@ def installed(ctx, duplicates):
     "The layout is dynamic and depends on environment variables set by either Xbar "
     "or SwiftBar.",
 )
+@argument("query", type=STRING, required=False)
 @pass_context
-def outdated(ctx, plugin_output):
-    """List available package upgrades and their versions for each manager."""
+def outdated(ctx, exact, plugin_output, query):
+    """List available package upgrades and their versions for each manager.
+
+    With an optional ``QUERY``, restrict the listing to outdated packages whose ID
+    or name matches it. The match is fuzzy by default (case-insensitive, tokenized);
+    ``--exact`` requires a verbatim match on the package ID or name.
+    """
     # Build-up a global list of outdated packages per manager.
     outdated_data = {}
     fields = (
@@ -1211,7 +1286,7 @@ def outdated(ctx, plugin_output):
     def fetch(manager: PackageManager) -> tuple[str, dict]:
         packages = _safe_packages(
             manager,
-            lambda: manager.refiltered_outdated,
+            lambda: _filter_matches(manager.refiltered_outdated, query, exact=exact),
             fields,
             "list outdated packages",
         )
@@ -1230,7 +1305,8 @@ def outdated(ctx, plugin_output):
         BarPluginRenderer().print(outdated_data)
         ctx.exit()
 
-    # Human-friendly content rendering.
+    # Human-friendly content rendering, highlighting the query matches (if any).
+    highlight_query = _query_highlighter(query)
     table = []
     for manager_id, outdated_pkg in outdated_data.items():
         for info in outdated_pkg["packages"]:
@@ -1240,8 +1316,8 @@ def outdated(ctx, plugin_output):
             )
             table.append(
                 (
-                    info["id"],
-                    info["name"],
+                    highlight_query(info["id"]) if info["id"] else "",
+                    highlight_query(info["name"]) if info["name"] else "",
                     manager_id,
                     installed_version,
                     latest_version,
@@ -1334,18 +1410,8 @@ def search(ctx, extended, exact, refilter, query):
     # Machine-friendly data rendering.
     print_serialized_and_exit(ctx, matches)
 
-    # Prepare highlighting helpers.
-    query_parts = {query}.union(PackageManager.query_parts(query))
-    highlight_query = cached(LRI(max_size=1000))(
-        partial(
-            highlight,
-            patterns=query_parts,
-            styling_func=theme().search,
-            ignore_case=True,
-        ),
-    )
-
-    # Human-friendly content rendering.
+    # Human-friendly content rendering, highlighting the query matches.
+    highlight_query = _query_highlighter(query)
     table = []
     for manager_id, matching_pkg in matches.items():
         for pkg in matching_pkg["packages"]:
@@ -2221,6 +2287,20 @@ def cleanup(ctx):
     "the version currently installed on the system. Requires the [OUTPUT_PATH] "
     "argument.",
 )
+@option(
+    "--query",
+    type=STRING,
+    default=None,
+    metavar="QUERY",
+    help="Only snapshot installed packages whose ID or name matches QUERY. Fuzzy "
+    "by default (case-insensitive, tokenized); see --exact.",
+)
+@option(
+    "--exact/--fuzzy",
+    default=False,
+    help="With --query, require a verbatim match on the package ID or name instead "
+    "of the default fuzzy match. No effect without --query.",
+)
 @argument(
     "output_path",
     type=file_path(writable=True, resolve_path=True, allow_dash=True),
@@ -2228,7 +2308,15 @@ def cleanup(ctx):
 )
 @pass_context
 def dump(
-    ctx, output_format, overwrite, include_header, merge, update_version, output_path
+    ctx,
+    output_format,
+    overwrite,
+    include_header,
+    merge,
+    update_version,
+    query,
+    exact,
+    output_path,
 ):
     """Dump installed packages to a TOML manifest or a Brewfile.
 
@@ -2238,6 +2326,9 @@ def dump(
 
     With no [OUTPUT_PATH] argument, writes to stdout. TOML files are readable by
     ``mpm restore``.
+
+    With ``--query``, restrict the snapshot to installed packages whose ID or name
+    matches it (fuzzy by default, verbatim with ``--exact``).
 
     ``--merge`` and ``--update-version`` operate on an existing TOML file; both
     require the [OUTPUT_PATH] argument and neither is valid with ``--brewfile``.
@@ -2260,7 +2351,9 @@ def dump(
         else:
             logging.info(f"Dump installed packages as a Brewfile into {output_path}")
             guard_existing_output(ctx, output_path, overwrite=overwrite)
-        _dump_brewfile(ctx, output_path, include_header=include_header)
+        _dump_brewfile(
+            ctx, output_path, include_header=include_header, query=query, exact=exact
+        )
         return
 
     # TOML path: preserve the existing `mpm backup` flag-validation flow so that
@@ -2317,6 +2410,8 @@ def dump(
         include_header=include_header,
         merge=merge,
         update_version=update_version,
+        query=query,
+        exact=exact,
     )
 
 
@@ -2327,6 +2422,8 @@ def _dump_toml(
     include_header: bool,
     merge: bool = False,
     update_version: bool = False,
+    query: str | None = None,
+    exact: bool = False,
 ) -> None:
     """Render the installed inventory as a TOML manifest.
 
@@ -2357,7 +2454,12 @@ def _dump_toml(
         logging.info(
             f"Dumping packages from {theme().invoked_command(manager.id)}...",
         )
-        packages = tuple(packages_asdict(manager.installed_or_empty(), fields))
+        packages = tuple(
+            packages_asdict(
+                _filter_matches(manager.installed_or_empty(), query, exact=exact),
+                fields,
+            )
+        )
         return manager.id, {
             "packages": packages,
             "errors": list({e.error for e in manager.cli_errors}),
@@ -2397,7 +2499,14 @@ def _dump_toml(
         print_summary(Counter({k: len(v) for k, v in installed_data.items()}))
 
 
-def _dump_brewfile(ctx, output_path, *, include_header: bool) -> None:
+def _dump_brewfile(
+    ctx,
+    output_path,
+    *,
+    include_header: bool,
+    query: str | None = None,
+    exact: bool = False,
+) -> None:
     """Render the installed inventory as a Brewfile.
 
     Filters selected managers down to those with a configured
@@ -2411,7 +2520,9 @@ def _dump_brewfile(ctx, output_path, *, include_header: bool) -> None:
     )
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
-        packages = manager.installed_or_empty()
+        packages = tuple(
+            _filter_matches(manager.installed_or_empty(), query, exact=exact)
+        )
         return manager.id, {
             "packages": packages,
             "errors": list({e.error for e in manager.cli_errors}),
@@ -2600,14 +2711,32 @@ def restore(ctx, toml_files):
         "pick --minimal for fast inventory snapshots."
     ),
 )
+@option(
+    "--query",
+    type=STRING,
+    default=None,
+    metavar="QUERY",
+    help="Only export installed packages whose ID or name matches QUERY. Fuzzy "
+    "by default (case-insensitive, tokenized); see --exact.",
+)
+@option(
+    "--exact/--fuzzy",
+    default=False,
+    help="With --query, require a verbatim match on the package ID or name instead "
+    "of the default fuzzy match. No effect without --query.",
+)
 @argument(
     "export_path",
     type=file_path(writable=True, resolve_path=True, allow_dash=True),
     default="-",
 )
 @pass_context
-def sbom(ctx, spdx, export_format, overwrite, bundled, export_path):
-    """Export list of installed packages to a SPDX or CycloneDX file."""
+def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path):
+    """Export list of installed packages to a SPDX or CycloneDX file.
+
+    With ``--query``, restrict the export to installed packages whose ID or name
+    matches it (fuzzy by default, verbatim with ``--exact``).
+    """
     standard = "SPDX" if spdx else "CycloneDX"
 
     if is_stdout(export_path):
@@ -2675,7 +2804,9 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, export_path):
 
     def fetch(manager: PackageManager) -> tuple[str, dict]:
         logging.info(f"Export packages from {theme().invoked_command(manager.id)}...")
-        installed_packages = manager.installed_or_empty()
+        installed_packages = tuple(
+            _filter_matches(manager.installed_or_empty(), query, exact=exact)
+        )
         # In --bundled mode, enrich each package with its metadata here too, so the
         # slow per-manager metadata fetch parallelizes alongside the listing.
         enriched = None

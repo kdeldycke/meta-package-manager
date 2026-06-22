@@ -88,3 +88,31 @@ class TestOutdated(CLISubCommandTests, CLITableTests):
 
                 for f in pkg:
                     assert isinstance(pkg[f], str) or pkg[f] is None
+
+    @pytest.mark.parametrize(
+        ("args", "expected_ids"),
+        (
+            # No query: every outdated package is listed.
+            ((), {"fake-pkg-alpha"}),
+            # Fuzzy query narrows the listing to matching IDs.
+            (("alpha",), {"fake-pkg-alpha"}),
+            # fake-pkg-beta is installed but not outdated, so it never surfaces.
+            (("beta",), set()),
+            (("absent",), set()),
+            # Exact query requires a verbatim ID or name match.
+            (("--exact", "fake-pkg-alpha"), {"fake-pkg-alpha"}),
+            (("--exact", "alpha"), set()),
+        ),
+    )
+    def test_query_filter(self, invoke, fake_pool, args, expected_ids):
+        result = invoke("--table-format", "json", "outdated", *args)
+        assert result.exit_code == 0
+        data = json.loads(result.stdout)
+        package_ids = {pkg["id"] for info in data.values() for pkg in info["packages"]}
+        assert package_ids == expected_ids
+
+    def test_query_highlight(self, invoke, fake_pool):
+        """The matched substring is wrapped in the theme's green search style."""
+        result = invoke("--color", "outdated", "alpha")
+        assert result.exit_code == 0
+        assert "\x1b[32malpha\x1b[0m" in result.stdout

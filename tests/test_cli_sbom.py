@@ -339,6 +339,22 @@ def _rich_metadata() -> PackageMetadata:
     )
 
 
+def test_sbom_query_filter_narrows_to_matches(invoke, fake_pool):
+    """``sbom --query`` keeps only installed packages matching the query."""
+    result = invoke("sbom", "--query", "alpha", "--minimal")
+    assert result.exit_code == 0
+    assert "fake-pkg-alpha" in result.stdout
+    assert "fake-pkg-beta" not in result.stdout
+
+
+def test_sbom_without_query_lists_all(invoke, fake_pool):
+    """Without a query, ``sbom`` exports the full installed inventory."""
+    result = invoke("sbom", "--minimal")
+    assert result.exit_code == 0
+    assert "fake-pkg-alpha" in result.stdout
+    assert "fake-pkg-beta" in result.stdout
+
+
 def test_minimal_mode_emits_bare_spdx_payload():
     """Minimal mode must reproduce the legacy bare output: rich
     metadata is ignored, no relationships beyond ``DESCRIBES`` are

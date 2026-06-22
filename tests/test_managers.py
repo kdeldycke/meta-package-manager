@@ -33,6 +33,7 @@ from meta_package_manager import cli
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.cli import XKCD_MANAGER_ORDER
 from meta_package_manager.manager import PackageManager
+from meta_package_manager.package import Package
 from meta_package_manager.pool import pool
 from meta_package_manager.version import TokenizedString
 
@@ -241,7 +242,43 @@ def test_cli_path(manager):
     ),
 )
 def test_query_parts(query, query_parts):
+    # PackageManager.query_parts delegates to the canonical Package.query_parts.
     assert PackageManager.query_parts(query) == query_parts
+    assert Package.query_parts(query) == query_parts
+
+
+@pytest.mark.parametrize(
+    ("pkg_id", "pkg_name", "query", "extended", "exact", "expected"),
+    (
+        # Fuzzy (default): case-insensitive, tokenized substring on ID and name.
+        ("gnu-sed", None, "sed", False, False, True),
+        ("gnu-sed", None, "SED", False, False, True),
+        ("gnu-sed", None, "GnU", False, False, True),
+        ("gnu-sed", None, "gnu sed", False, False, True),
+        ("gnu-sed", None, "perl", False, False, False),
+        # Fuzzy also matches on the display name.
+        ("pkg-1", "GNU Sed", "sed", False, False, True),
+        # Description is ignored unless extended.
+        ("pkg-1", None, "stream", False, False, False),
+        ("pkg-1", None, "stream", True, False, True),
+        # Exact: whole-string, case-sensitive, ID or name only.
+        ("gnu-sed", None, "gnu-sed", False, True, True),
+        ("gnu-sed", None, "sed", False, True, False),
+        ("gnu-sed", None, "GNU-SED", False, True, False),
+        ("pkg-1", "GNU Sed", "GNU Sed", False, True, True),
+        # Empty or punctuation-only queries never match.
+        ("gnu-sed", None, "", False, False, False),
+        ("gnu-sed", None, "@@@", False, False, False),
+    ),
+)
+def test_package_matches(pkg_id, pkg_name, query, extended, exact, expected):
+    package = Package(
+        id=pkg_id,
+        manager_id="fake",
+        name=pkg_name,
+        description="a stream editor",
+    )
+    assert package.matches(query, extended=extended, exact=exact) is expected
 
 
 def collect_props_ref():

@@ -95,10 +95,7 @@ class TestRestore(CLISubCommandTests):
 
         if result.exit_code == 2:
             assert not result.stdout
-            assert (
-                "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
-                in result.stderr
-            )
+            assert "critical: No manager selected.\n" in result.stderr
         else:
             # Accept exit code 1: the bogus "blah" package fails to install.
             assert result.exit_code in (0, 1)

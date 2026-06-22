@@ -73,10 +73,7 @@ class TestBackup(CLISubCommandTests):
         assert "mpm-packages.toml" in result.stderr
         if result.exit_code == 2:
             assert not result.stdout
-            assert (
-                "\x1b[31m\x1b[1mcritical\x1b[0m: No manager selected.\n"
-                in result.stderr
-            )
+            assert "critical: No manager selected.\n" in result.stderr
         else:
             assert result.exit_code == 0
             self.check_manager_selection(result, {manager_id})

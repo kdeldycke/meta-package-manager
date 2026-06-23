@@ -91,7 +91,7 @@ class TestInstallRemove(CLISubCommandTests):
     def test_single_manager_install_and_remove(self, invoke, manager_id, package_id):
         """Test the installation and removal of a package with each manager.
 
-        .. caution.
+        .. caution::
 
             ``strict_selection_match`` is set to ``False`` because the ``install``
             subcommand will not try all managers selected by default. So a strict

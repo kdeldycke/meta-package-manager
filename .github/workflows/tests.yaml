@@ -449,10 +449,12 @@ jobs:
           ./tests/test_bar_plugin.py
 
       # Run destructive tests last, as they alters the system packages.
+      # TEMP DIAGNOSTIC: --exitfirst dropped so this single run enumerates every
+      # CI-unsupported manager at once; restore it in the follow-up guard commit.
       - name: Sequential random destructive tests
         run: >
           uv --no-progress run --frozen --
-          pytest --exitfirst
+          pytest
           --cov
           --cov-report=term
           --cov-report=xml

@@ -448,13 +448,14 @@ jobs:
           --numprocesses=0 --run-non-destructive --run-destructive
           ./tests/test_bar_plugin.py
 
-      # Run destructive tests last, as they alters the system packages.
-      # TEMP DIAGNOSTIC: --exitfirst dropped so this single run enumerates every
-      # CI-unsupported manager at once; restore it in the follow-up guard commit.
+      # Run destructive tests last, as they alter the system packages.
+      # This run omits --exitfirst on purpose: walking every manager surfaces all
+      # newly CI-unsupported managers in a single run instead of one per push cycle.
+      # --maxfail=10 still caps a wholesale breakage. The runs above keep --exitfirst.
       - name: Sequential random destructive tests
         run: >
           uv --no-progress run --frozen --
-          pytest
+          pytest --maxfail=10
           --cov
           --cov-report=term
           --cov-report=xml

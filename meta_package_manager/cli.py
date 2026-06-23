@@ -29,7 +29,6 @@ import platform
 import re
 import sys
 import threading
-import time
 from collections import Counter, namedtuple
 from collections.abc import Iterable
 from configparser import RawConfigParser
@@ -44,7 +43,6 @@ from unittest.mock import patch
 import tomli_w
 from boltons.cacheutils import LRI, cached
 from boltons.strutils import strip_ansi
-from click import ParameterSource
 from click_extra import (
     STRING,
     Choice,
@@ -65,7 +63,7 @@ from click_extra import (
     pass_context,
     search_params,
 )
-from click_extra.context import JOBS, PROGRESS, TABLE_FORMAT, VERBOSITY_LEVEL
+from click_extra.context import PROGRESS, TABLE_FORMAT, VERBOSITY_LEVEL
 from click_extra.highlight import HelpKeywords, highlight
 from click_extra.logging import LogLevel
 from click_extra.table import (
@@ -87,11 +85,18 @@ from .config import (
     dump_manager_overrides,
     print_contribution_hints,
 )
-from .execution import CLIError, highlight_cli_name
+from .execution import (
+    CLIError,
+    OperationTrail,
+    collect_from_managers,
+    collect_per_package,
+    highlight_cli_name,
+    warn_jobs_ignored,
+)
 from .inventory import MAIN_PLATFORMS
 from .manager import PackageManager
 from .package import packages_asdict
-from .pool import collect_from_managers, collect_per_package, pool
+from .pool import pool
 from .sbom import (
     SBOM,
     SPDX,
@@ -255,17 +260,19 @@ class Duration(ParamType):
     }
     """Number of seconds each recognized unit represents (empty unit means days)."""
 
-    _CALENDAR_UNITS = frozenset({
-        "mo",
-        "mon",
-        "month",
-        "months",
-        "y",
-        "yr",
-        "yrs",
-        "year",
-        "years",
-    })
+    _CALENDAR_UNITS = frozenset(
+        {
+            "mo",
+            "mon",
+            "month",
+            "months",
+            "y",
+            "yr",
+            "yrs",
+            "year",
+            "years",
+        }
+    )
     """Calendar units rejected for ambiguity: months span 28-31 days, years 365-366."""
 
     _FRIENDLY_PATTERN = re.compile(r"(?P<value>\d+(?:\.\d+)?)\s*(?P<unit>[a-z]*)")
@@ -875,7 +882,7 @@ def mpm(
 
         The selection summary is logged at ``DEBUG`` on the first call only. The
         ``✓``-trailed spinner from
-        :py:func:`meta_package_manager.pool.collect_from_managers` already names every
+        :py:func:`meta_package_manager.execution.collect_from_managers` already names every
         manager that ran, so this summary is redundant at default verbosity for
         read-only commands; it is kept for troubleshooting, where it also surfaces
         config-driven drops that never appear in the trail. Logging on the first call
@@ -1089,7 +1096,7 @@ def _manager_result(
     output and their table rendering. ``errors`` is collected at the last minute so
     it gathers every distinct CLI error the manager accumulated during the query; a
     non-empty list also marks the manager's ``✗`` in the concurrent spinner trail
-    (see :py:func:`meta_package_manager.pool.collect_from_managers`).
+    (see :py:func:`meta_package_manager.execution.collect_from_managers`).
     """
     return manager.id, {
         "id": manager.id,
@@ -1603,78 +1610,6 @@ def package_label(spec: Specifier) -> str:
     if spec.version:
         return f"{spec.package_id}{VERSION_SEP}{spec.version}"
     return spec.package_id
-
-
-def warn_jobs_ignored(ctx: Context) -> None:
-    """Note that ``--jobs`` does not parallelize this run.
-
-    Only ``install`` with at least one *untied* package reaches this: those packages
-    need a priority search (install with the first manager that has the package, skip
-    the rest), which is cross-manager-sequential, so the whole command runs serially.
-    The other state changers (``remove``, ``upgrade <packages>``, ``restore``, and
-    ``install`` of fully manager-tied specs) now fan out through
-    :func:`meta_package_manager.pool.collect_per_package`. When the user explicitly
-    raised :option:`mpm --jobs` above ``1``, say so once at ``INFO``: the request
-    simply has no effect on this run, which is narration, not a problem.
-    """
-    if ctx.meta.get(JOBS, 1) <= 1:
-        return
-    if ctx.find_root().get_parameter_source("jobs") not in (
-        ParameterSource.COMMANDLINE,
-        ParameterSource.ENVIRONMENT,
-    ):
-        return
-    logging.info(
-        "This command dispatches managers sequentially by priority; "
-        "--jobs does not parallelize it.",
-    )
-
-
-class OperationTrail:
-    """A sequential ``✓``/``✗`` ledger and finisher for an ordering-bound command.
-
-    The ordering-sensitive state changers (``install``/``remove``/``upgrade
-    <packages>``/``restore``) chain managers by priority: a package found in the
-    first manager skips the rest, so they cannot fan out. They run sequentially,
-    keep their per-call spinners, and drive this lighter helper, which prints each
-    outcome between calls (where no spinner animates) and a closing summary.
-
-    Everything else fans out through
-    :func:`meta_package_manager.pool.collect_from_managers`, which runs managers
-    concurrently behind a single aggregate spinner: the read-only commands, and the
-    independent maintenance commands (``sync``/``cleanup``/``upgrade --all``) whose
-    per-manager work has no cross-manager ordering.
-
-    Both surfaces are gated on an interactive stderr, the surface the spinner draws
-    on, so piped, serialized and ``DEBUG`` runs stay clean. Callers build their own
-    command-specific phrasing (``installed with brew``, ``removed from pip``, …) and
-    hand it to :meth:`mark` and :meth:`finish`.
-    """
-
-    def __init__(self, managers: tuple[PackageManager, ...]) -> None:
-        # Mirror the spinner's own gating: progress enabled (--progress, not
-        # serialized, not DEBUG, all folded into each manager's `progress`) plus an
-        # interactive stderr.
-        self.show = (
-            bool(managers)
-            and any(manager.progress for manager in managers)
-            and sys.stderr.isatty()
-        )
-        self.start = time.monotonic()
-
-    def mark(self, ok: bool, message: str) -> None:
-        """Print one ``✓``/``✗`` ledger line for a single attempt."""
-        if not self.show:
-            return
-        glyph = theme().success(OK_GLYPH) if ok else theme().error(KO_GLYPH)
-        echo(f"{glyph} {message}", err=True)
-
-    def finish(self, ok: bool, summary: str) -> None:
-        """Print the persistent ``✓``/``✗`` ``{summary} (Ns)`` finisher."""
-        if not self.show:
-            return
-        glyph = theme().success(OK_GLYPH) if ok else theme().error(KO_GLYPH)
-        echo(f"{glyph} {summary} ({time.monotonic() - self.start:.1f}s)", err=True)
 
 
 @mpm.command(short_help="Install a package.", section=MAINTENANCE)

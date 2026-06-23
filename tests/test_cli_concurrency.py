@@ -16,7 +16,7 @@
 
 """Unit tests for the concurrent read-only operation dispatch helper.
 
-These exercise :func:`meta_package_manager.pool.collect_from_managers` in
+These exercise :func:`meta_package_manager.execution.collect_from_managers` in
 isolation, with lightweight stand-ins for the click context and managers, so
 they need no real package managers and stay hermetic.
 """
@@ -32,8 +32,12 @@ from click_extra.context import JOBS, VERBOSITY_LEVEL
 from click_extra.logging import LogLevel
 from click_extra.theme import KO_GLYPH, OK_GLYPH
 
-import meta_package_manager.pool
-from meta_package_manager.pool import collect_from_managers
+import meta_package_manager.execution
+from meta_package_manager.execution import (
+    OperationTrail,
+    collect_from_managers,
+    collect_per_package,
+)
 
 
 class FakeContext:
@@ -194,7 +198,7 @@ def test_no_finisher_line_off_terminal(capsys):
 def test_finisher_line_when_spinner_shown(monkeypatch):
     """A slow batch on a terminal shows the running count, a ✓ trail and a finisher."""
     # Zero the show-delay so the spinner draws at once, and point it at a fake TTY.
-    monkeypatch.setattr(meta_package_manager.pool, "SPINNER_DELAY", 0.0)
+    monkeypatch.setattr(meta_package_manager.execution, "SPINNER_DELAY", 0.0)
     tty = TTYStringIO()
     monkeypatch.setattr("sys.stderr", tty)
 
@@ -224,7 +228,7 @@ def test_finisher_line_when_spinner_shown(monkeypatch):
 
 def test_failure_trail_marks_errored_managers(monkeypatch):
     """A manager whose result carries errors gets a ✗ trail line; others get ✓."""
-    monkeypatch.setattr(meta_package_manager.pool, "SPINNER_DELAY", 0.0)
+    monkeypatch.setattr(meta_package_manager.execution, "SPINNER_DELAY", 0.0)
     tty = TTYStringIO()
     monkeypatch.setattr("sys.stderr", tty)
 
@@ -260,7 +264,7 @@ def test_trail_includes_managers_that_finish_before_the_spinner_shows(monkeypatc
     """
     # A show delay the fast managers beat but the slow ones outlast (so the spinner
     # still draws and the trail surfaces at all).
-    monkeypatch.setattr(meta_package_manager.pool, "SPINNER_DELAY", 0.2)
+    monkeypatch.setattr(meta_package_manager.execution, "SPINNER_DELAY", 0.2)
     tty = TTYStringIO()
     monkeypatch.setattr("sys.stderr", tty)
 
@@ -283,3 +287,183 @@ def test_trail_includes_managers_that_finish_before_the_spinner_shows(monkeypatc
     # Every manager — fast and slow alike — appears, not just the slow three.
     assert all(f"m{i}" in output for i in range(6))
     assert "Checked 6 managers" in output
+
+
+# ---------------------------------------------------------------------------
+# Per-package fan-out: collect_per_package (and the dispatch engine beneath it).
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("jobs", "verbosity", "manager_count"),
+    (
+        (1, "INFO", 4),  # --jobs 1 forces sequential.
+        (4, "DEBUG", 4),  # DEBUG forces sequential for readable logs.
+        (4, "INFO", 1),  # A single manager has nothing to parallelize.
+    ),
+)
+def test_per_package_runs_sequentially_in_main_thread(jobs, verbosity, manager_count):
+    ctx = FakeContext(jobs=jobs, verbosity=verbosity)
+    threads: list = []
+    lock = threading.Lock()
+
+    def make_task(manager_id):
+        def task():
+            with lock:
+                threads.append(threading.current_thread())
+            return True, f"{manager_id} ok"
+
+        return task
+
+    manager_tasks = [
+        (FakeManager(f"m{i}"), [make_task(f"m{i}")]) for i in range(manager_count)
+    ]
+    collect_per_package(ctx, "Doing", "Done", manager_tasks)  # type: ignore[arg-type]
+    assert threads, "no task was called"
+    assert all(thread is threading.main_thread() for thread in threads)
+
+
+def test_per_package_runs_concurrently_off_the_main_thread():
+    ctx = FakeContext(jobs=4)
+    threads: list = []
+    lock = threading.Lock()
+
+    def make_task(manager_id):
+        def task():
+            with lock:
+                threads.append(threading.current_thread())
+            return True, f"{manager_id} ok"
+
+        return task
+
+    manager_tasks = [(FakeManager(f"m{i}"), [make_task(f"m{i}")]) for i in range(4)]
+    collect_per_package(ctx, "Doing", "Done", manager_tasks)  # type: ignore[arg-type]
+    assert len(threads) == 4
+    assert all(thread is not threading.main_thread() for thread in threads)
+
+
+def test_per_package_tasks_of_one_manager_share_a_thread():
+    """A manager's own tasks run serially on one worker, never overlapping.
+
+    The core safety invariant: a package manager cannot run two of its own
+    invocations at once, so each lane's tasks stay on a single thread.
+    """
+    ctx = FakeContext(jobs=4)
+    threads_by_manager: dict = {}
+    lock = threading.Lock()
+
+    def make_task(manager_id):
+        def task():
+            time.sleep(0.01)
+            with lock:
+                threads_by_manager.setdefault(manager_id, []).append(
+                    threading.current_thread()
+                )
+            return True, f"{manager_id} ok"
+
+        return task
+
+    manager_tasks = [
+        (FakeManager(f"m{i}"), [make_task(f"m{i}") for _ in range(3)]) for i in range(4)
+    ]
+    collect_per_package(ctx, "Doing", "Done", manager_tasks)  # type: ignore[arg-type]
+    assert set(threads_by_manager) == {f"m{i}" for i in range(4)}
+    for manager_id, threads in threads_by_manager.items():
+        assert len(threads) == 3, manager_id
+        assert len(set(threads)) == 1, f"{manager_id} tasks split across threads"
+
+
+def test_per_package_empty_is_a_noop():
+    ctx = FakeContext(jobs=4)
+    assert collect_per_package(ctx, "Doing", "Done", []) is None  # type: ignore[arg-type]
+    # A lane with no tasks contributes nothing either.
+    lane = (FakeManager("m0"), [])
+    assert collect_per_package(ctx, "Doing", "Done", [lane]) is None  # type: ignore[arg-type]
+
+
+def test_per_package_finisher_when_spinner_shown(monkeypatch):
+    """A slow concurrent batch shows the running count, a ✓ trail and a finisher."""
+    monkeypatch.setattr(meta_package_manager.execution, "SPINNER_DELAY", 0.0)
+    tty = TTYStringIO()
+    monkeypatch.setattr("sys.stderr", tty)
+
+    ctx = FakeContext(jobs=4)
+
+    def make_task(manager_id, k):
+        def task():
+            time.sleep(0.1)  # Outlast the zeroed delay so the spinner draws a frame.
+            return True, f"pkg{k} done with {manager_id}"
+
+        return task
+
+    managers = [FakeManager(f"m{i}", progress=True) for i in range(3)]
+    manager_tasks = [(m, [make_task(m.id, k) for k in range(2)]) for m in managers]
+    collect_per_package(ctx, "Removing", "Removed", manager_tasks)  # type: ignore[arg-type]
+    output = tty.getvalue()
+    assert "Removing 0/6 packages" in output  # 3 managers × 2 packages.
+    assert OK_GLYPH in output
+    assert "Removed 6/6 packages" in output
+
+
+def test_per_package_failure_trail_marks_failed_tasks(monkeypatch):
+    """A failed task gets a ✗ line; the finisher reports the success count."""
+    monkeypatch.setattr(meta_package_manager.execution, "SPINNER_DELAY", 0.0)
+    tty = TTYStringIO()
+    monkeypatch.setattr("sys.stderr", tty)
+
+    ctx = FakeContext(jobs=4)
+
+    def make_task(manager_id, ok):
+        def task():
+            time.sleep(0.1)
+            return ok, f"{manager_id} {'removed' if ok else 'failed'}"
+
+        return task
+
+    managers = [FakeManager(f"m{i}", progress=True) for i in range(3)]
+    # m1's single task fails; the other two succeed.
+    manager_tasks = [(m, [make_task(m.id, m.id != "m1")]) for m in managers]
+    collect_per_package(ctx, "Removing", "Removed", manager_tasks)  # type: ignore[arg-type]
+    output = tty.getvalue()
+    assert KO_GLYPH in output  # m1.
+    assert OK_GLYPH in output  # m0 and m2.
+    assert "Removed 2/3 packages" in output
+
+
+def test_per_package_no_finisher_off_terminal(capsys):
+    """Off a terminal nothing leaks (the trail and finisher are spinner-gated)."""
+    ctx = FakeContext(jobs=4)
+    managers = [FakeManager(f"m{i}", progress=True) for i in range(4)]
+    manager_tasks = [(m, [lambda mid=m.id: (True, f"{mid} ok")]) for m in managers]
+    collect_per_package(ctx, "Removing", "Removed", manager_tasks)  # type: ignore[arg-type]
+    assert "Removed" not in capsys.readouterr().err
+
+
+# ---------------------------------------------------------------------------
+# OperationTrail: the sequential ✓/✗ ledger (drives install's priority search
+# and every sequential fallback).
+# ---------------------------------------------------------------------------
+
+
+def test_operation_trail_echoes_marks_and_finisher_on_tty(monkeypatch):
+    """On a TTY the ledger echoes a ✓/✗ line per mark, plus a timed finisher."""
+    tty = TTYStringIO()
+    monkeypatch.setattr("sys.stderr", tty)
+    trail = OperationTrail([FakeManager("brew", progress=True)])
+    trail.mark(True, "foo installed with brew")
+    trail.mark(False, "bar failed with brew")
+    trail.finish(False, "Installed 1/2 packages")
+    output = tty.getvalue()
+    assert "foo installed with brew" in output
+    assert "bar failed with brew" in output
+    assert OK_GLYPH in output
+    assert KO_GLYPH in output
+    assert "Installed 1/2 packages" in output
+
+
+def test_operation_trail_silent_off_terminal(capsys):
+    """Off a terminal the sequential ledger stays silent."""
+    trail = OperationTrail([FakeManager("brew", progress=True)])
+    trail.mark(True, "foo installed with brew")
+    trail.finish(True, "Installed 1/1 packages")
+    assert capsys.readouterr().err == ""

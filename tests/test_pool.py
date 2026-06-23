@@ -28,8 +28,9 @@ from click_extra.logging import LogLevel
 
 import meta_package_manager
 from meta_package_manager.cli import mpm
+from meta_package_manager.execution import warm_availability
 from meta_package_manager.manager import PackageManager
-from meta_package_manager.pool import manager_classes, pool, warm_availability
+from meta_package_manager.pool import manager_classes, pool
 
 from .conftest import (
     default_manager_ids,

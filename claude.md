@@ -374,7 +374,7 @@ When invoking `uv` and `uvx` commands in GitHub Actions workflows:
 
 ### Verbosity tiers
 
-The CLI defaults to `WARNING` (set in the root `@group` `context_settings`, overriding click-extra's default). Classify every `logging` call into one tier:
+The CLI defaults to `WARNING` (inherited from click-extra's `--verbosity` default). Classify every `logging` call into one tier:
 
 - **`WARNING` (default view):** genuine problems only, such as failures with no other on-screen signal, safety notices (cooldown safeguard skipped, a file about to be overwritten), the end-of-run "N managers reported errors" summary, and timeouts. Plus `critical` for fatal conditions. Keep it sparse.
 - **`INFO` (narration):** the operational story, like the selection summary, install/dispatch priority, per-manager announcements, discovery (`X has been installed with Y`), capability skips (`X does not implement Y`), and "ignoring option ..." no-ops.

@@ -24,7 +24,7 @@ import pytest
 
 # Pre-load invocation helpers to be used as pytest's fixture.
 from click_extra.pytest import create_config, runner  # noqa: F401
-from extra_platforms.pytest import skip_guix_build
+from extra_platforms.pytest import skip_github_ci, skip_guix_build, skip_linux
 from pytest import fixture, param
 
 from meta_package_manager.cli import mpm
@@ -368,9 +368,55 @@ manager_classes = pytest.mark.parametrize(  # type: ignore[assignment]
     ids=attrgetter("name"),
 )
 
+# Per-manager skips for the destructive install/remove test, keyed by manager ID and
+# folded into the parametrize below. ``skip_linux`` marks breakage on the unprivileged
+# Linux runner, ``skip_github_ci`` breakage on GitHub Actions only (a configured local
+# box can still run it), and a plain skip a manager no environment can install.
+INSTALL_REMOVE_SKIPS = {
+    # choco installs to an admin-only location the unelevated CI process cannot write to.
+    "choco": skip_github_ci(reason="choco needs elevation the CI process lacks."),
+    # cpan writes to the system Perl tree, unwritable by the unelevated Linux user.
+    "cpan": skip_linux(reason="cpan cannot write the system Perl tree on Linux CI."),
+    # The RPM database under /var/lib/rpm is inaccessible even with sudo on the
+    # Debian-based ubuntu runners, so the RPM front-ends cannot install.
+    "dnf": skip_linux(reason="RPM stack unusable on the Linux CI runners."),
+    "dnf5": skip_linux(reason="RPM stack unusable on the Linux CI runners."),
+    "yum": skip_linux(reason="RPM stack unusable on the Linux CI runners."),
+    "zypper": skip_linux(reason="RPM stack unusable on the Linux CI runners."),
+    # flatpak has no remote configured to resolve apps from on the runners.
+    "flatpak": skip_linux(reason="flatpak has no remote configured on Linux CI."),
+    # fwupd flashes firmware; the CI VMs expose no upgradable hardware to flash.
+    # The package ID is a no-op release, so this never installs anything anywhere.
+    "fwupd": pytest.mark.skip(reason="fwupd has no flashable hardware to target."),
+    # gem writes to the system gem directory, unwritable by the unelevated Linux user.
+    "gem": skip_linux(reason="gem cannot write the system gem directory on Linux CI."),
+    # mas install of a signed App Store app times out (500s) on the macOS runners.
+    "mas": skip_github_ci(reason="mas install times out on the GitHub runners."),
+    # pnpm add --global needs a PNPM_HOME (from `pnpm setup`) the runners do not set up.
+    "pnpm": skip_github_ci(reason="pnpm has no global bin directory on CI."),
+    # PSResourceGet install is unreliable on the runners; on .NET 10 runners PowerShell
+    # 7.x cannot even load the module (System.Collections.Specialized version clash).
+    "pwsh-gallery": skip_github_ci(
+        reason="PSGallery install does not complete on the CI runners."
+    ),
+    # scoop install does not complete on the GitHub Windows runners; sfsu wraps it.
+    "scoop": skip_github_ci(reason="scoop install does not complete on Windows CI."),
+    "sfsu": skip_github_ci(reason="sfsu drives a scoop install failing on CI."),
+    # snap install requires root; mpm does not elevate, so it fails as the test user.
+    "snap": skip_linux(reason="snap install requires root the CI process lacks."),
+    # steamcmd can only install titles an authenticated account owns; the anonymous
+    # login the runners use cannot, so the install fails. No environment satisfies it.
+    "steamcmd": pytest.mark.skip(
+        reason="steamcmd needs an authenticated Steam account that owns the title."
+    ),
+}
+
 # Deprecated managers are excluded: their upstreams are unreliable or gone, so a real
 # install/remove would only contribute flakiness (see PackageManager.deprecated).
 maintained_manager_ids_and_dummy_package = pytest.mark.parametrize(
     "manager_id,package_id",
-    (param(mid, PACKAGE_IDS[mid], id=mid) for mid in pool.maintained_manager_ids),
+    tuple(
+        param(mid, PACKAGE_IDS[mid], id=mid, marks=INSTALL_REMOVE_SKIPS.get(mid, ()))
+        for mid in pool.maintained_manager_ids
+    ),
 )

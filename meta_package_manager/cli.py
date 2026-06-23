@@ -72,7 +72,7 @@ from click_extra.table import (
     print_table,
 )
 from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
-from extra_platforms import current_platform, reduce
+from extra_platforms import current_architecture, current_platform, reduce
 
 from . import __version__, bar_plugin
 from .bar_plugin_renderer import BarPluginRenderer
@@ -596,7 +596,7 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
     version_fields={
         "env_info": (
             f"Python {platform.python_version()}, "
-            f"{platform.system()} {platform.machine()}"
+            f"{current_platform().name} {current_architecture().name}"
         ),
     },
 )

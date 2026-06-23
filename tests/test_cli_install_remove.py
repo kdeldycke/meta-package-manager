@@ -19,7 +19,6 @@ from __future__ import annotations
 import re
 
 import pytest
-from extra_platforms import is_linux
 
 from meta_package_manager.pool import pool
 
@@ -100,101 +99,13 @@ class TestInstallRemove(CLISubCommandTests):
             That's because ``install`` subcommand try each user-selected manager until
             it find one providing the package we seek to install, after which the
             process stop.
+
+        .. note::
+
+            Managers that cannot complete a real install in a given environment are
+            skipped per-parameter via ``INSTALL_REMOVE_SKIPS`` in ``conftest.py``,
+            not inline in this test body.
         """
-        # XXX Skip this test on GitHub Actions as it's too slow:
-        #
-        # $ mpm --mas install 747648890
-        # <output> stream:
-        #   (...)
-        #   info: Installation priority: > mas
-        #
-        # <exit_code>: 1
-        #
-        # Traceback (most recent call last):
-        #   (...)
-        #   File ".../lib/python3.10/subprocess.py", line 1198, in _check_timeout
-        #     raise TimeoutExpired(
-        # subprocess.TimeoutExpired: Command '('/opt/homebrew/bin/mas', 'install',
-        # '747648890')' timed out after 500 seconds
-        if manager_id == "mas":
-            pytest.skip("mas timeout on GitHub Actions.")
-
-        # XXX Skip steamcmd everywhere: installing a Steam app requires an
-        # authenticated account that owns the title, which the CI runners lack.
-        # The anonymous login steamcmd falls back to cannot install arbitrary
-        # apps, so mpm correctly reports the install as failed.
-        if manager_id == "steamcmd":
-            pytest.skip("steamcmd needs an authenticated Steam account on CI.")
-
-        # XXX Skip the RPM-family managers on Linux: the RPM stack has no usable
-        # repositories, and its database at /var/lib/rpm is inaccessible even with
-        # sudo on the Debian-based ubuntu CI runners (both x86_64 and aarch64),
-        # causing errors like:
-        #
-        #   error: Unable to open sqlite database /var/lib/rpm/rpmdb.sqlite:
-        #   unable to open database file
-        #   error: cannot open Packages index using sqlite - Operation not
-        #   permitted (1)
-        #   error: cannot open Packages database in /var/lib/rpm
-        if manager_id in {"dnf", "dnf5", "yum", "zypper"} and is_linux():
-            pytest.skip(f"{manager_id} RPM stack not usable on Linux CI runners.")
-
-        # XXX Skip snap and flatpak on Linux: the unprivileged test process cannot
-        # drive them on CI runners. snap install requires root (mpm does not elevate),
-        # and flatpak has no remote configured to resolve apps from. Both used to
-        # appear to pass only because a failed install historically exited 0.
-        if manager_id in {"snap", "flatpak"} and is_linux():
-            pytest.skip(
-                f"{manager_id} cannot install in the unprivileged CI environment.",
-            )
-
-        # XXX Skip cpan on Linux: it installs modules into the system Perl tree,
-        # which the unelevated test process cannot write to on the Debian-based
-        # runners (mpm does not elevate). The same test passes on the macOS
-        # runners, whose Perl layout differs, so the skip is Linux-scoped.
-        if manager_id == "cpan" and is_linux():
-            pytest.skip("cpan cannot write the system Perl tree on Linux CI.")
-
-        # XXX Skip gem on Linux: `gem install` writes to the system gem directory,
-        # which the unelevated test process cannot write to on the Debian-based
-        # runners (mpm does not elevate). The macOS runners' Ruby has a writable gem
-        # prefix, so the skip is Linux-scoped.
-        if manager_id == "gem" and is_linux():
-            pytest.skip("gem cannot write the system gem directory on Linux CI.")
-
-        # XXX Skip pnpm everywhere: `pnpm add --global` needs a configured global
-        # bin directory (PNPM_HOME, set up by `pnpm setup`), which the CI runners do
-        # not provision, so pnpm aborts before installing. Fails on every Linux,
-        # macOS and Windows runner.
-        if manager_id == "pnpm":
-            pytest.skip("pnpm has no global bin directory configured on CI.")
-
-        # XXX Skip fwupd: it installs device firmware, and the CI VMs expose no
-        # upgradable hardware to flash, so mpm reports the install as failed.
-        if manager_id == "fwupd":
-            pytest.skip("fwupd has no flashable hardware on the CI VMs.")
-
-        # XXX Skip pwsh-gallery everywhere: installing a PSGallery resource does not
-        # complete on the CI runners. On Linux, PSResourceGet's install path is
-        # unreliable; on macOS and Windows the install fails outright (and on .NET 10
-        # runners PowerShell 7.x cannot even load the PSResourceGet module, since the
-        # System.Collections.Specialized binding resolves to an incompatible
-        # Version=10.0.0.0). Failed on every macOS and Windows runner.
-        if manager_id == "pwsh-gallery":
-            pytest.skip("PSGallery install does not complete on CI runners.")
-
-        # XXX Skip choco: it installs to an admin-only location
-        # (C:\ProgramData\chocolatey) that the unelevated CI process cannot
-        # write to. mpm passes --yes but does not elevate, so the install fails.
-        if manager_id == "choco":
-            pytest.skip("choco needs elevation the CI process lacks.")
-
-        # XXX Skip scoop and sfsu everywhere: both drive `scoop install` (sfsu wraps
-        # Scoop and delegates write operations to it), which does not complete on the
-        # GitHub Windows runners. Failed on every windows-2025 runner.
-        if manager_id in {"scoop", "sfsu"}:
-            pytest.skip(f"{manager_id} cannot complete a scoop install on CI.")
-
         for command in ("install", "remove"):
             result = invoke(f"--{manager_id}", command, package_id)
 

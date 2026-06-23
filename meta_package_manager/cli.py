@@ -1222,7 +1222,7 @@ def installed(ctx, exact, duplicates, query):
     installed_data = {
         manager_id: data
         for manager_id, data in collect_from_managers(
-            ctx, "Listing", "Listed", managers, fetch
+            "Listing", "Listed", managers, fetch
         )
     }
 
@@ -1338,7 +1338,7 @@ def outdated(ctx, exact, plugin_output, query):
     outdated_data = {
         manager_id: data
         for manager_id, data in collect_from_managers(
-            ctx, "Checking", "Checked", managers, fetch
+            "Checking", "Checked", managers, fetch
         )
     }
 
@@ -1449,7 +1449,7 @@ def search(ctx, extended, exact, refilter, query):
     matches = {
         manager_id: data
         for manager_id, data in collect_from_managers(
-            ctx, "Searching", "Searched", managers, fetch
+            "Searching", "Searched", managers, fetch
         )
     }
 
@@ -1612,6 +1612,78 @@ def package_label(spec: Specifier) -> str:
     return spec.package_id
 
 
+def _package_task(
+    manager: PackageManager,
+    spec: Specifier,
+    lock: threading.Lock,
+    *,
+    action: Callable[[PackageManager, Specifier], str | None],
+    verb: str,
+    past: str,
+    prep: str,
+    record_failure: Callable[[Specifier], None],
+) -> Callable[[], tuple[bool, str]]:
+    """Build one per-package task for :func:`collect_per_package`.
+
+    Runs ``action(manager, spec)`` with the manager forced to raise on failure (so a
+    botched operation is recorded, not swallowed), narrates the outcome at ``INFO``,
+    and returns ``(ok, message)`` for the ``✓``/``✗`` trail. On failure it appends the
+    spec to a caller-owned list through ``record_failure`` (under ``lock``, since the
+    list is shared across the concurrent lanes) and reports ``✗``. Shared by
+    ``install``, ``remove``, ``upgrade <packages>`` and ``restore``, whose tasks differ
+    only in the action, the verb forms, and which failure list they feed.
+
+    :param action: performs the manager operation, returning its CLI output (or ``None``).
+    :param verb: present-tense operation name ("install"), for the ``INFO`` lines and
+        the "failed to {verb}" trail.
+    :param past: past participle ("installed"), for the success trail.
+    :param prep: preposition joining the package and the manager ("with", "from").
+    :param record_failure: appends the failed spec (or its id) to a caller-owned list.
+    """
+    mgr = theme().invoked_command(manager.id)
+
+    def task() -> tuple[bool, str]:
+        with patch.object(manager, "stop_on_error", True):
+            try:
+                output = action(manager, spec)
+            except NotImplementedError:
+                logging.info(f"{mgr} does not implement {verb} operation.")
+            except CLIError:
+                logging.info(f"Could not {verb} {package_label(spec)} with {mgr}.")
+            else:
+                if output:
+                    logging.info(output)
+                return True, f"{package_label(spec)} {past} {prep} {mgr}"
+        with lock:
+            record_failure(spec)
+        return False, f"{package_label(spec)} failed to {verb} {prep} {mgr}"
+
+    return task
+
+
+def _maintenance_work(
+    announce: int,
+    message: str,
+    operation: Callable[[PackageManager], object],
+) -> Callable[[PackageManager], tuple[str, dict]]:
+    """Build a ``work`` callable for a maintenance command's fan-out.
+
+    Logs ``message`` (with the themed manager name substituted for ``{}``) at the
+    ``announce`` level, runs ``operation(manager)``, and returns
+    ``(id, {"errors": <CLI errors raised during the run>})`` so a manager that grows
+    its error list is marked ``✗`` in the trail. Shared by ``sync`` and ``cleanup``,
+    whose work differs only in the message and the manager method.
+    """
+
+    def work(manager: PackageManager) -> tuple[str, dict]:
+        logging.log(announce, message.format(theme().invoked_command(manager.id)))
+        before = len(manager.cli_errors)
+        operation(manager)
+        return manager.id, {"errors": manager.cli_errors[before:]}
+
+    return work
+
+
 @mpm.command(short_help="Install a package.", section=MAINTENANCE)
 @argument(
     "packages_specs",
@@ -1668,30 +1740,6 @@ def install(ctx, packages_specs):
     if not unmatched_packages:
         failures_lock = threading.Lock()
 
-        def make_install_task(manager, spec):
-            mgr = theme().invoked_command(manager.id)
-
-            def task() -> tuple[bool, str]:
-                # Force the manager to raise so the failure is recorded as unresolved,
-                # not swallowed. The reason is INFO narration; the ✗ trail and the
-                # closing critical name it at the default level.
-                with patch.object(manager, "stop_on_error", True):
-                    try:
-                        output = manager.install(spec.package_id, version=spec.version)
-                    except NotImplementedError:
-                        logging.info(f"{mgr} does not implement install operation.")
-                    except CLIError:
-                        logging.info(f"Could not install {spec} with {mgr}.")
-                    else:
-                        if output:
-                            logging.info(output)
-                        return True, f"{package_label(spec)} installed with {mgr}"
-                with failures_lock:
-                    unresolved_specs.append(spec)
-                return False, f"{package_label(spec)} failed to install with {mgr}"
-
-            return task
-
         def make_cooldown_task(spec, mgr):
             # cooldown_permits() already logged why; a skip is ✗ but not unresolved, so
             # it never forces a non-zero exit.
@@ -1700,23 +1748,29 @@ def install(ctx, packages_specs):
 
             return task
 
-        tasks_by_manager: dict[PackageManager, list] = {}
+        tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
         for manager_id, package_specs in packages_per_managers.items():
             if not manager_id:
                 continue
             manager = pool.get(manager_id)
             mgr = theme().invoked_command(manager_id)
-            if cooldown_permits(manager):
-                tasks_by_manager[manager] = [
-                    make_install_task(manager, spec) for spec in package_specs
-                ]
-            else:
-                tasks_by_manager[manager] = [
-                    make_cooldown_task(spec, mgr) for spec in package_specs
-                ]
-        collect_per_package(
-            ctx, "Installing", "Installed", list(tasks_by_manager.items())
-        )
+            permitted = cooldown_permits(manager)
+            for spec in package_specs:
+                if permitted:
+                    task = _package_task(
+                        manager,
+                        spec,
+                        failures_lock,
+                        action=lambda m, s: m.install(s.package_id, version=s.version),
+                        verb="install",
+                        past="installed",
+                        prep="with",
+                        record_failure=unresolved_specs.append,
+                    )
+                else:
+                    task = make_cooldown_task(spec, mgr)
+                tasks.append((manager, task))
+        collect_per_package("Installing", "Installed", tasks)
 
         if unresolved_specs:
             logging.critical(
@@ -1949,7 +2003,7 @@ def upgrade(ctx, all, packages_specs):
         # Full upgrade is independent per manager, so fan out concurrently with a
         # ✓/✗ trail and a success-count finisher (see collect_from_managers).
         collect_from_managers(
-            ctx, "Upgrading", "Upgraded", managers, upgrade_all_work, report_state=True
+            "Upgrading", "Upgraded", managers, upgrade_all_work, report_state=True
         )
         ctx.exit()
 
@@ -1974,32 +2028,7 @@ def upgrade(ctx, all, packages_specs):
     # Group every (package, manager) upgrade by manager: managers run in parallel while
     # each manager's own packages upgrade one at a time (see collect_per_package).
     failures_lock = threading.Lock()
-
-    def make_upgrade_task(manager, spec):
-        mgr = theme().invoked_command(manager.id)
-
-        def task() -> tuple[bool, str]:
-            # Force the manager to raise on failure so a botched upgrade is reported
-            # and recorded. The reason is INFO narration; the ✗ trail and the closing
-            # critical surface it at the default level.
-            with patch.object(manager, "stop_on_error", True):
-                try:
-                    output = manager.upgrade(spec.package_id, version=spec.version)
-                except NotImplementedError:
-                    logging.info(f"{mgr} does not implement upgrade operation.")
-                except CLIError:
-                    logging.info(f"Could not upgrade {spec.package_id} with {mgr}.")
-                else:
-                    if output:
-                        logging.info(output)
-                    return True, f"{package_label(spec)} upgraded with {mgr}"
-            with failures_lock:
-                upgrade_failures.append(spec.package_id)
-            return False, f"{package_label(spec)} failed to upgrade with {mgr}"
-
-        return task
-
-    tasks_by_manager: dict[PackageManager, list] = {}
+    tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
     solver = Solver(packages_specs, manager_priority=manager_ids)
     for package_id, spec in solver.resolve_package_specs():
         source_manager_ids = set()
@@ -2038,11 +2067,23 @@ def upgrade(ctx, all, packages_specs):
             manager = pool.get(manager_id)
             if not cooldown_permits(manager):
                 continue
-            tasks_by_manager.setdefault(manager, []).append(
-                make_upgrade_task(manager, spec),
+            tasks.append(
+                (
+                    manager,
+                    _package_task(
+                        manager,
+                        spec,
+                        failures_lock,
+                        action=lambda m, s: m.upgrade(s.package_id, version=s.version),
+                        verb="upgrade",
+                        past="upgraded",
+                        prep="with",
+                        record_failure=lambda s: upgrade_failures.append(s.package_id),
+                    ),
+                )
             )
 
-    collect_per_package(ctx, "Upgrading", "Upgraded", list(tasks_by_manager.items()))
+    collect_per_package("Upgrading", "Upgraded", tasks)
 
     if upgrade_failures:
         logging.critical(
@@ -2089,35 +2130,10 @@ def remove(ctx, packages_specs):
         ),
     )
 
-    # Group every (package, manager) removal by manager: managers run in parallel
-    # while each manager's own packages remove one at a time (see collect_per_package).
+    # Group every (package, manager) removal: managers run in parallel while each
+    # manager's own packages remove one at a time (see collect_per_package).
     failures_lock = threading.Lock()
-
-    def make_remove_task(manager, spec):
-        mgr = theme().invoked_command(manager.id)
-
-        def task() -> tuple[bool, str]:
-            # Force the manager to raise on failure so a botched removal is reported
-            # and recorded. The reason is INFO narration; the ✗ trail and the closing
-            # critical surface it at the default level.
-            with patch.object(manager, "stop_on_error", True):
-                try:
-                    output = manager.remove(spec.package_id)
-                except NotImplementedError:
-                    logging.info(f"{mgr} does not implement remove operation.")
-                except CLIError:
-                    logging.info(f"Could not remove {spec.package_id} with {mgr}.")
-                else:
-                    if output:
-                        logging.info(output)
-                    return True, f"{package_label(spec)} removed from {mgr}"
-            with failures_lock:
-                remove_failures.append(spec.package_id)
-            return False, f"{package_label(spec)} failed to remove from {mgr}"
-
-        return task
-
-    tasks_by_manager: dict[PackageManager, list] = {}
+    tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
     solver = Solver(packages_specs, manager_priority=manager_ids)
     for package_id, spec in solver.resolve_package_specs():
         source_manager_ids = set()
@@ -2154,11 +2170,23 @@ def remove(ctx, packages_specs):
         # as two.
         for manager_id in sorted(source_manager_ids):
             manager = pool.get(manager_id)
-            tasks_by_manager.setdefault(manager, []).append(
-                make_remove_task(manager, spec),
+            tasks.append(
+                (
+                    manager,
+                    _package_task(
+                        manager,
+                        spec,
+                        failures_lock,
+                        action=lambda m, s: m.remove(s.package_id),
+                        verb="remove",
+                        past="removed",
+                        prep="from",
+                        record_failure=lambda s: remove_failures.append(s.package_id),
+                    ),
+                )
             )
 
-    collect_per_package(ctx, "Removing", "Removed", list(tasks_by_manager.items()))
+    collect_per_package("Removing", "Removed", tasks)
 
     # Fail with a non-zero exit code if any package could not be removed by a manager
     # that had it installed.
@@ -2176,17 +2204,15 @@ def sync(ctx):
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.sync))
     announce = logging.INFO if ctx.obj.user_selection else logging.DEBUG
 
-    def work(manager: PackageManager) -> tuple[str, dict]:
-        logging.log(
-            announce, f"Sync {theme().invoked_command(manager.id)} package info..."
-        )
-        before = len(manager.cli_errors)
-        manager.sync()
-        return manager.id, {"errors": manager.cli_errors[before:]}
-
     # Sync is independent per manager, so fan out concurrently with a ✓/✗ trail and
     # a success-count finisher (see collect_from_managers).
-    collect_from_managers(ctx, "Syncing", "Synced", managers, work, report_state=True)
+    collect_from_managers(
+        "Syncing",
+        "Synced",
+        managers,
+        _maintenance_work(announce, "Sync {} package info...", lambda m: m.sync()),
+        report_state=True,
+    )
 
 
 @mpm.command(short_help="Cleanup local data.", section=MAINTENANCE)
@@ -2196,16 +2222,14 @@ def cleanup(ctx):
     managers = list(ctx.obj.selected_managers(implements_operation=Operations.cleanup))
     announce = logging.INFO if ctx.obj.user_selection else logging.DEBUG
 
-    def work(manager: PackageManager) -> tuple[str, dict]:
-        logging.log(announce, f"Cleanup {theme().invoked_command(manager.id)}...")
-        before = len(manager.cli_errors)
-        manager.cleanup()
-        return manager.id, {"errors": manager.cli_errors[before:]}
-
     # Cleanup is independent per manager, so fan out concurrently with a ✓/✗ trail
     # and a success-count finisher (see collect_from_managers).
     collect_from_managers(
-        ctx, "Cleaning up", "Cleaned", managers, work, report_state=True
+        "Cleaning up",
+        "Cleaned",
+        managers,
+        _maintenance_work(announce, "Cleanup {}...", lambda m: m.cleanup()),
+        report_state=True,
     )
 
 
@@ -2441,9 +2465,7 @@ def _dump_toml(
 
     # Query each manager's installed packages concurrently, then assemble the
     # manifest in manager order (see collect_from_managers).
-    for manager_id, data in collect_from_managers(
-        ctx, "Dumping", "Dumped", managers, fetch
-    ):
+    for manager_id, data in collect_from_managers("Dumping", "Dumped", managers, fetch):
         for pkg in data["packages"]:
             if update_version:
                 if pkg["id"] in installed_data.get(manager_id, {}):
@@ -2504,7 +2526,7 @@ def _dump_brewfile(
 
     # Query each manager's installed packages concurrently, then build the Brewfile
     # from the gathered data (see collect_from_managers).
-    results = collect_from_managers(ctx, "Reading", "Read", managers, fetch)
+    results = collect_from_managers("Reading", "Read", managers, fetch)
     packages_by_manager = {mid: data["packages"] for mid, data in results}
     errored = {mid for mid, data in results if data["errors"]}
 
@@ -2569,33 +2591,8 @@ def restore(ctx, toml_files):
     restore_failures: list[str] = []
     failures_lock = threading.Lock()
 
-    def make_restore_task(manager, spec):
-        mgr = theme().invoked_command(manager.id)
-
-        def task() -> tuple[bool, str]:
-            # Force the manager to raise on failure so a botched install is reported
-            # and recorded. The reason is INFO narration; the ✗ trail and the closing
-            # critical surface it at the default level.
-            with patch.object(manager, "stop_on_error", True):
-                try:
-                    output = manager.install(spec.package_id, version=spec.version)
-                except NotImplementedError:
-                    logging.info(f"{mgr} does not implement install operation.")
-                except CLIError:
-                    logging.info(f"Could not install {spec} with {mgr}.")
-                else:
-                    if output:
-                        logging.info(output)
-                    return True, f"{package_label(spec)} installed with {mgr}"
-            with failures_lock:
-                restore_failures.append(spec.package_id)
-            return False, f"{package_label(spec)} failed to install with {mgr}"
-
-        return task
-
-    # Gather one task per referenced (package, manager), grouped by manager across all
-    # the input files.
-    tasks_by_manager: dict[PackageManager, list] = {}
+    # Gather one task per referenced (package, manager) across all the input files.
+    tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
     for toml_input in toml_files:
         is_stdin = isinstance(toml_input, TextIOWrapper)
         if is_stdin:
@@ -2632,11 +2629,27 @@ def restore(ctx, toml_files):
                     manager_id=manager.id,
                     version=str(version),
                 )
-                tasks_by_manager.setdefault(manager, []).append(
-                    make_restore_task(manager, spec),
+                tasks.append(
+                    (
+                        manager,
+                        _package_task(
+                            manager,
+                            spec,
+                            failures_lock,
+                            action=lambda m, s: m.install(
+                                s.package_id, version=s.version
+                            ),
+                            verb="install",
+                            past="installed",
+                            prep="with",
+                            record_failure=lambda s: restore_failures.append(
+                                s.package_id
+                            ),
+                        ),
+                    )
                 )
 
-    collect_per_package(ctx, "Restoring", "Restored", list(tasks_by_manager.items()))
+    collect_per_package("Restoring", "Restored", tasks)
 
     # Fail with a non-zero exit code if any referenced package could not be installed.
     if restore_failures:
@@ -2801,7 +2814,7 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
     # Query (and, for --bundled, enrich) each manager concurrently, then add the
     # packages to the document in manager order (see collect_from_managers).
     for manager_id, data in collect_from_managers(
-        ctx, "Exporting", "Exported", managers, fetch
+        "Exporting", "Exported", managers, fetch
     ):
         installed_packages = data["packages"]
         if not installed_packages:

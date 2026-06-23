@@ -14,11 +14,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Unit tests for the concurrent read-only operation dispatch helper.
+"""Unit tests for the concurrent operation dispatch helpers.
 
-These exercise :func:`meta_package_manager.execution.collect_from_managers` in
-isolation, with lightweight stand-ins for the click context and managers, so
-they need no real package managers and stay hermetic.
+These exercise :func:`meta_package_manager.execution.collect_from_managers`,
+:func:`meta_package_manager.execution.collect_per_package` and the
+:class:`meta_package_manager.execution.OperationTrail` they share, in isolation with
+lightweight stand-ins for the click context and managers, so they need no real package
+managers and stay hermetic. The context is passed explicitly as ``ctx=`` (the helpers
+otherwise default to :func:`click_extra.get_current_context`).
 """
 
 from __future__ import annotations
@@ -89,11 +92,11 @@ def test_runs_sequentially_in_main_thread(jobs, verbosity, manager_count):
     managers = [FakeManager(f"m{i}") for i in range(manager_count)]
     threads: list = []
     collect_from_managers(
-        ctx,  # type: ignore[arg-type]
         "Testing",
         "Tested",
         managers,  # type: ignore[arg-type]
         _record_thread(threads, threading.Lock()),
+        ctx=ctx,  # type: ignore[arg-type]
     )
     assert threads, "work was never called"
     assert all(thread is threading.main_thread() for thread in threads)
@@ -104,11 +107,11 @@ def test_runs_concurrently_off_the_main_thread():
     managers = [FakeManager(f"m{i}") for i in range(4)]
     threads: list = []
     collect_from_managers(
-        ctx,  # type: ignore[arg-type]
         "Testing",
         "Tested",
         managers,  # type: ignore[arg-type]
         _record_thread(threads, threading.Lock()),
+        ctx=ctx,  # type: ignore[arg-type]
     )
     assert len(threads) == 4
     assert all(thread is not threading.main_thread() for thread in threads)
@@ -126,11 +129,11 @@ def test_preserves_input_order_despite_completion_order():
         return manager.id, {"index": index}
 
     results = collect_from_managers(
-        ctx,  # type: ignore[arg-type]
         "Testing",
         "Tested",
         managers,  # type: ignore[arg-type]
         work,
+        ctx=ctx,  # type: ignore[arg-type]
     )
     assert [manager_id for manager_id, _ in results] == [f"m{i}" for i in range(8)]
 
@@ -140,11 +143,11 @@ def test_suppresses_per_manager_spinners_when_concurrent():
     ctx = FakeContext(jobs=4)
     managers = [FakeManager(f"m{i}", progress=True) for i in range(4)]
     collect_from_managers(
-        ctx,  # type: ignore[arg-type]
         "Testing",
         "Tested",
         managers,  # type: ignore[arg-type]
         lambda manager: (manager.id, {}),
+        ctx=ctx,  # type: ignore[arg-type]
     )
     assert all(manager.progress is False for manager in managers)
 
@@ -154,11 +157,11 @@ def test_keeps_per_manager_spinners_when_sequential():
     ctx = FakeContext(jobs=1)
     managers = [FakeManager(f"m{i}", progress=True) for i in range(3)]
     collect_from_managers(
-        ctx,  # type: ignore[arg-type]
         "Testing",
         "Tested",
         managers,  # type: ignore[arg-type]
         lambda manager: (manager.id, {}),
+        ctx=ctx,  # type: ignore[arg-type]
     )
     assert all(manager.progress is True for manager in managers)
 
@@ -167,11 +170,11 @@ def test_empty_manager_list_returns_empty():
     ctx = FakeContext(jobs=4)
     assert (
         collect_from_managers(
-            ctx,  # type: ignore[arg-type]
             "Testing",
             "Tested",
             [],
             lambda manager: (manager.id, {}),
+            ctx=ctx,  # type: ignore[arg-type]
         )
         == []
     )
@@ -186,11 +189,11 @@ def test_no_finisher_line_off_terminal(capsys):
     ctx = FakeContext(jobs=4)
     managers = [FakeManager(f"m{i}", progress=True) for i in range(4)]
     collect_from_managers(
-        ctx,  # type: ignore[arg-type]
         "Searching",
         "Searched",
         managers,  # type: ignore[arg-type]
         lambda manager: (manager.id, {}),
+        ctx=ctx,  # type: ignore[arg-type]
     )
     assert "Searched" not in capsys.readouterr().err
 
@@ -210,11 +213,11 @@ def test_finisher_line_when_spinner_shown(monkeypatch):
         return manager.id, {}
 
     collect_from_managers(
-        ctx,  # type: ignore[arg-type]
         "Searching",
         "Searched",
         managers,  # type: ignore[arg-type]
         slow_work,
+        ctx=ctx,  # type: ignore[arg-type]
     )
     output = tty.getvalue()
     # The spinner draws its seeded running count before any manager lands...
@@ -242,11 +245,11 @@ def test_failure_trail_marks_errored_managers(monkeypatch):
         return manager.id, {"errors": errors}
 
     collect_from_managers(
-        ctx,  # type: ignore[arg-type]
         "Searching",
         "Searched",
         managers,  # type: ignore[arg-type]
         work,
+        ctx=ctx,  # type: ignore[arg-type]
     )
     output = tty.getvalue()
     assert KO_GLYPH in output  # The failure glyph, for m2.
@@ -277,11 +280,11 @@ def test_trail_includes_managers_that_finish_before_the_spinner_shows(monkeypatc
         return manager.id, {}
 
     collect_from_managers(
-        ctx,  # type: ignore[arg-type]
         "Checking",
         "Checked",
         managers,  # type: ignore[arg-type]
         work,
+        ctx=ctx,  # type: ignore[arg-type]
     )
     output = tty.getvalue()
     # Every manager — fast and slow alike — appears, not just the slow three.
@@ -291,6 +294,7 @@ def test_trail_includes_managers_that_finish_before_the_spinner_shows(monkeypatc
 
 # ---------------------------------------------------------------------------
 # Per-package fan-out: collect_per_package (and the dispatch engine beneath it).
+# It takes flat (manager, task) pairs and groups them into per-manager lanes.
 # ---------------------------------------------------------------------------
 
 
@@ -315,10 +319,8 @@ def test_per_package_runs_sequentially_in_main_thread(jobs, verbosity, manager_c
 
         return task
 
-    manager_tasks = [
-        (FakeManager(f"m{i}"), [make_task(f"m{i}")]) for i in range(manager_count)
-    ]
-    collect_per_package(ctx, "Doing", "Done", manager_tasks)  # type: ignore[arg-type]
+    tasks = [(FakeManager(f"m{i}"), make_task(f"m{i}")) for i in range(manager_count)]
+    collect_per_package("Doing", "Done", tasks, ctx=ctx)  # type: ignore[arg-type]
     assert threads, "no task was called"
     assert all(thread is threading.main_thread() for thread in threads)
 
@@ -336,8 +338,8 @@ def test_per_package_runs_concurrently_off_the_main_thread():
 
         return task
 
-    manager_tasks = [(FakeManager(f"m{i}"), [make_task(f"m{i}")]) for i in range(4)]
-    collect_per_package(ctx, "Doing", "Done", manager_tasks)  # type: ignore[arg-type]
+    tasks = [(FakeManager(f"m{i}"), make_task(f"m{i}")) for i in range(4)]
+    collect_per_package("Doing", "Done", tasks, ctx=ctx)  # type: ignore[arg-type]
     assert len(threads) == 4
     assert all(thread is not threading.main_thread() for thread in threads)
 
@@ -346,7 +348,8 @@ def test_per_package_tasks_of_one_manager_share_a_thread():
     """A manager's own tasks run serially on one worker, never overlapping.
 
     The core safety invariant: a package manager cannot run two of its own
-    invocations at once, so each lane's tasks stay on a single thread.
+    invocations at once, so each lane's tasks stay on a single thread. Repeating the
+    same manager instance across pairs groups its tasks into one lane.
     """
     ctx = FakeContext(jobs=4)
     threads_by_manager: dict = {}
@@ -363,10 +366,9 @@ def test_per_package_tasks_of_one_manager_share_a_thread():
 
         return task
 
-    manager_tasks = [
-        (FakeManager(f"m{i}"), [make_task(f"m{i}") for _ in range(3)]) for i in range(4)
-    ]
-    collect_per_package(ctx, "Doing", "Done", manager_tasks)  # type: ignore[arg-type]
+    managers = [FakeManager(f"m{i}") for i in range(4)]
+    tasks = [(manager, make_task(manager.id)) for manager in managers for _ in range(3)]
+    collect_per_package("Doing", "Done", tasks, ctx=ctx)  # type: ignore[arg-type]
     assert set(threads_by_manager) == {f"m{i}" for i in range(4)}
     for manager_id, threads in threads_by_manager.items():
         assert len(threads) == 3, manager_id
@@ -375,10 +377,7 @@ def test_per_package_tasks_of_one_manager_share_a_thread():
 
 def test_per_package_empty_is_a_noop():
     ctx = FakeContext(jobs=4)
-    assert collect_per_package(ctx, "Doing", "Done", []) is None  # type: ignore[arg-type]
-    # A lane with no tasks contributes nothing either.
-    lane = (FakeManager("m0"), [])
-    assert collect_per_package(ctx, "Doing", "Done", [lane]) is None  # type: ignore[arg-type]
+    assert collect_per_package("Doing", "Done", [], ctx=ctx) is None  # type: ignore[arg-type]
 
 
 def test_per_package_finisher_when_spinner_shown(monkeypatch):
@@ -397,8 +396,8 @@ def test_per_package_finisher_when_spinner_shown(monkeypatch):
         return task
 
     managers = [FakeManager(f"m{i}", progress=True) for i in range(3)]
-    manager_tasks = [(m, [make_task(m.id, k) for k in range(2)]) for m in managers]
-    collect_per_package(ctx, "Removing", "Removed", manager_tasks)  # type: ignore[arg-type]
+    tasks = [(m, make_task(m.id, k)) for m in managers for k in range(2)]
+    collect_per_package("Removing", "Removed", tasks, ctx=ctx)  # type: ignore[arg-type]
     output = tty.getvalue()
     assert "Removing 0/6 packages" in output  # 3 managers × 2 packages.
     assert OK_GLYPH in output
@@ -422,8 +421,8 @@ def test_per_package_failure_trail_marks_failed_tasks(monkeypatch):
 
     managers = [FakeManager(f"m{i}", progress=True) for i in range(3)]
     # m1's single task fails; the other two succeed.
-    manager_tasks = [(m, [make_task(m.id, m.id != "m1")]) for m in managers]
-    collect_per_package(ctx, "Removing", "Removed", manager_tasks)  # type: ignore[arg-type]
+    tasks = [(m, make_task(m.id, m.id != "m1")) for m in managers]
+    collect_per_package("Removing", "Removed", tasks, ctx=ctx)  # type: ignore[arg-type]
     output = tty.getvalue()
     assert KO_GLYPH in output  # m1.
     assert OK_GLYPH in output  # m0 and m2.
@@ -434,8 +433,8 @@ def test_per_package_no_finisher_off_terminal(capsys):
     """Off a terminal nothing leaks (the trail and finisher are spinner-gated)."""
     ctx = FakeContext(jobs=4)
     managers = [FakeManager(f"m{i}", progress=True) for i in range(4)]
-    manager_tasks = [(m, [lambda mid=m.id: (True, f"{mid} ok")]) for m in managers]
-    collect_per_package(ctx, "Removing", "Removed", manager_tasks)  # type: ignore[arg-type]
+    tasks = [(m, lambda mid=m.id: (True, f"{mid} ok")) for m in managers]
+    collect_per_package("Removing", "Removed", tasks, ctx=ctx)  # type: ignore[arg-type]
     assert "Removed" not in capsys.readouterr().err
 
 

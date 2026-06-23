@@ -1293,13 +1293,13 @@ class OperationTrail:
 
 
 def dispatch(
-    ctx: Context,
     label: str,
     done_label: str,
     unit: str,
     lanes: list[tuple[PackageManager, list[Callable[[], tuple[bool, str]]]]],
     *,
     coverage: bool = False,
+    ctx: Context | None = None,
 ) -> None:
     """Fan a set of work *lanes* out across managers, narrating a ``✓``/``✗`` trail.
 
@@ -1325,10 +1325,15 @@ def dispatch(
         state-changing commands leave it ``False`` (the trail *is* their output, so the
         finisher reports the success count, ``{done_label} N/M {unit}``, ``✗`` on any
         failure).
+    :param ctx: the active click context, read only to size concurrency
+        (:func:`effective_jobs`). Defaults to the current context, so a command need not
+        thread it; tests pass an explicit stand-in.
     """
     total = sum(len(tasks) for _manager, tasks in lanes)
     if not total:
         return
+    if ctx is None:
+        ctx = get_current_context(silent=True)
     jobs = effective_jobs(ctx, len(lanes))
     managers = [manager for manager, _ in lanes]
     with OperationTrail(
@@ -1364,13 +1369,13 @@ def dispatch(
 
 
 def collect_from_managers(
-    ctx: Context,
     label: str,
     done_label: str,
     managers: list[PackageManager],
     work: Callable[[PackageManager], tuple[str, dict]],
     *,
     report_state: bool = False,
+    ctx: Context | None = None,
 ) -> list[tuple[str, dict]]:
     """Run ``work(manager)`` for every manager concurrently, results in input order.
 
@@ -1407,27 +1412,33 @@ def collect_from_managers(
         return unit
 
     lanes = [(manager, [make_unit(i, manager)]) for i, manager in enumerate(managers)]
-    dispatch(ctx, label, done_label, "managers", lanes, coverage=not report_state)
+    dispatch(label, done_label, "managers", lanes, coverage=not report_state, ctx=ctx)
     return results
 
 
 def collect_per_package(
-    ctx: Context,
     label: str,
     done_label: str,
-    manager_tasks: list[tuple[PackageManager, list[Callable[[], tuple[bool, str]]]]],
+    tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]],
+    *,
+    ctx: Context | None = None,
 ) -> None:
     """Run per-package operations across managers concurrently, serial within each.
 
     The fan-out primitive for the ordering-free state changers that act on many
     (package, manager) pairs: ``remove``, ``upgrade <packages>``, ``restore`` and the
-    manager-tied specs of ``install``. A thin :func:`dispatch` over lanes whose units
-    are the per-package tasks, each returning ``(ok, message)`` after doing its CLI call
-    and recording its own outcome. The unmatched-package priority search of ``install``
-    is *not* routed here: it has genuine cross-manager ordering (stop at the first
-    manager that has the package) and stays sequential on its own.
+    manager-tied specs of ``install``. Takes a flat list of ``(manager, task)`` pairs
+    and groups them into per-manager lanes — so a manager's own packages stay serial
+    while managers run in parallel — then drives :func:`dispatch`. Each task returns
+    ``(ok, message)`` after doing its CLI call and recording its own outcome. The
+    unmatched-package priority search of ``install`` is *not* routed here: it has genuine
+    cross-manager ordering (stop at the first manager that has the package) and stays
+    sequential on its own.
     """
-    dispatch(ctx, label, done_label, "packages", manager_tasks)
+    lanes: dict[PackageManager, list[Callable[[], tuple[bool, str]]]] = {}
+    for manager, task in tasks:
+        lanes.setdefault(manager, []).append(task)
+    dispatch(label, done_label, "packages", list(lanes.items()), ctx=ctx)
 
 
 def warn_jobs_ignored(ctx: Context) -> None:

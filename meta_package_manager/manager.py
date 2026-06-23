@@ -32,7 +32,6 @@ availability policy: whether the manager is supported, fresh, and ready to use.
 from __future__ import annotations
 
 import logging
-import platform
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
@@ -42,6 +41,7 @@ from click_extra.theme import get_current_theme as theme
 from extra_platforms import (
     Group,
     Platform,
+    current_platform,
     extract_members,
 )
 
@@ -290,7 +290,7 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
         version requirement.
         """
         if self.supported is False:
-            return f"not supported on {platform.system()!r}"
+            return f"not supported on {current_platform().name}"
         if not self.cli_path:
             cli_names = ", ".join(self.cli_names) or self.id
             return f"no executable named {cli_names!r} found in PATH"

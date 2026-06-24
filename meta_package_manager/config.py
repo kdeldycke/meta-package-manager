@@ -35,7 +35,8 @@ import urllib.parse
 from dataclasses import dataclass, field
 
 import tomli_w
-from click_extra import ConfigValidator, ValidationError, echo
+from click_extra import echo
+from click_extra.config import ConfigValidator, ValidationError
 from click_extra.context import CONF_FULL
 from click_extra.theme import get_current_theme as theme
 

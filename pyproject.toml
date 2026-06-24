@@ -153,9 +153,9 @@ dependencies = [
   "backports-strenum>=1; python_version<'3.11'",
   # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
-  # click-extra 8.0.0 is the major release mpm targets. It bundles the features
-  # earlier floors tracked (the ConfigValidator / ValidationError config types
-  # used by meta_package_manager.config, write_manpages() and the
+  # click-extra 8.1.1 is the floor mpm targets. The 8.x series bundles the
+  # features earlier floors tracked (the ConfigValidator / ValidationError config
+  # types used by meta_package_manager.config, write_manpages() and the
   # click_extra_manpages Sphinx machinery driving docs/cli-parameters.md, and the
   # Spinner widget meta_package_manager.execution shows during long CLI calls),
   # and reorganizes the API in ways mpm now depends on directly:
@@ -163,7 +163,11 @@ dependencies = [
   #     click_extra.colorize module was split.
   #   - print_table() gained a sort_key parameter, replacing the dropped
   #     print_sorted_table helper (reimplemented in meta_package_manager.cli).
-  "click-extra>=8",
+  #   - ConfigValidator / ValidationError import from click_extra.config: 8.1.0
+  #     dropped their top-level re-export.
+  # The floor is 8.1.1, not 8.1.0: 8.1.0 stringified the tuple default of the
+  # EnumChoice-typed --sort-by option and broke every table command.
+  "click-extra>=8.1.1",
   # extra-platforms 10.0.0 drops the distro dependency.
   "extra-platforms>=10",
   # Required at runtime by meta_package_manager.package and
@@ -296,7 +300,7 @@ exclude-newer = "1 week"
 # Per-package overrides for freshly-published dependencies we want to pull in
 # before the global cooldown would normally let them through. Date format
 # uses an ISO 8601 calendar date for ``exclude-newer-package`` entries.
-exclude-newer-package = { click-extra = "2026-06-23T00:00:00Z" }
+exclude-newer-package = { click-extra = "2026-06-25T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
 required-version = ">=0.11.23,<0.12"

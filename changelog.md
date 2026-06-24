@@ -6,11 +6,13 @@
 > This version is **not released yet** and is under active development.
 
 - **Breaking:** [mpm] Rename the `--allow-no-cooldown` flag to the `--require-cooldown-support`/`--allow-unsupported-managers` pair, and its `allow_no_cooldown` config to `require_cooldown_support` (default `true`).
+- **Breaking:** [mpm] The `sort_by` configuration option is now a list of fields, matching the repeatable `--sort-by`. Wrap an existing scalar value in brackets: `sort_by = "package_id"` becomes `sort_by = ["package_id"]`.
 - [pnpm] Add the pnpm package manager (`installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `cleanup`), enforcing `--cooldown` via pnpm's native `minimumReleaseAge` gate.
 - [mpm] Filter the package listing by a query: `installed` and `outdated` take an optional `QUERY` argument and `dump`/`backup`/`sbom` a `--query` option, matched fuzzily by default with `--exact`/`--fuzzy` to control it.
 - [mpm] Run managers in parallel via a new `--jobs`/`-j` option (default: CPU count minus one), covering the read-only queries, the maintenance commands, the inventory exporters, and the state changers. Closes {issue}`529`.
 - [mpm] The standalone binary now reads configuration in all six formats (`toml`, `yaml`, `json5`, `jsonc`, `hjson`, `xml`), matching the source distribution.
 - [mpm] Show a progress spinner with elapsed time on `<stderr>` while manager CLI calls run, toggled with click-extra's `--progress`/`--no-progress`.
+- [mpm] `--sort-by`/`-s` is now repeatable, ordering result tables by several fields in priority order (like `--sort-by package_id --sort-by manager_id`); fields a table does not carry are skipped, and the remaining columns break ties in their natural order.
 - [mpm] Lower the default verbosity from `INFO` to `WARNING`, leaving only the `✓`/`✗` trail, finishers, and genuine warnings on screen; per-operation narration moves to `INFO` and raw technical detail to `DEBUG`.
 - [mpm] At `DEBUG` verbosity, run managers sequentially and hide the spinner so interleaved per-manager logs stay readable.
 - [mpm] `install`, `remove`, `upgrade`, `restore`, `sync`, and `cleanup` now print a per-attempt `✓`/`✗` trail and a finisher on an interactive terminal: per-package for the package commands, per-manager for `sync`/`cleanup`/`upgrade --all`.

@@ -91,8 +91,8 @@ class MpmConfig:
     description: bool = False
     """Show package description in results."""
 
-    sort_by: str = "manager_id"
-    """Default field to sort results by."""
+    sort_by: list[str] = field(default_factory=lambda: ["manager_id"])
+    """Default fields to sort results by, in priority order."""
 
     stats: bool = True
     """Print per-manager package statistics."""

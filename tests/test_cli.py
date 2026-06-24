@@ -28,6 +28,7 @@ from boltons.strutils import strip_ansi
 from click_extra.table import SERIALIZATION_FORMATS, TableFormat
 
 from meta_package_manager import __version__
+from meta_package_manager.cli import SortableField, _sort_column_order
 from meta_package_manager.pool import pool
 
 from .conftest import default_manager_ids
@@ -445,3 +446,35 @@ class CLITableTests:
             pytest.skip(f"{fmt.value} extra not installed")
         assert result.exit_code == 0
         assert "debug" in result.stderr
+
+
+# Short alias keeps the parametrized sort cases readable and within line length.
+SF = SortableField
+
+
+@pytest.mark.parametrize(
+    ("fields", "sort_by", "expected"),
+    (
+        # Single requested field leads; remaining columns keep natural order.
+        ((SF.MANAGER_ID, SF.PACKAGE_ID, SF.VERSION), (SF.PACKAGE_ID,), (1, 0, 2)),
+        # Multiple fields lead in request order, then natural tie-breaking.
+        (
+            (SF.MANAGER_ID, SF.PACKAGE_ID, SF.VERSION),
+            (SF.VERSION, SF.MANAGER_ID),
+            (2, 0, 1),
+        ),
+        # A repeated field collapses to a single leading column.
+        ((SF.MANAGER_ID, SF.PACKAGE_ID), (SF.PACKAGE_ID, SF.PACKAGE_ID), (1, 0)),
+        # Fields the table lacks are skipped; present ones still lead.
+        ((SF.MANAGER_ID, SF.VERSION), (SF.PACKAGE_ID, SF.VERSION), (1, 0)),
+        # Non-sortable columns (None) never lead but tie-break naturally.
+        ((SF.MANAGER_ID, None, SF.VERSION), (SF.VERSION,), (2, 0, 1)),
+        # No requested field present: None signals original row order.
+        ((SF.MANAGER_ID, SF.VERSION), (SF.PACKAGE_ID,), None),
+        # Empty sort_by leaves rows in original order.
+        ((SF.MANAGER_ID, SF.VERSION), (), None),
+    ),
+)
+def test_sort_column_order(fields, sort_by, expected):
+    """``--sort-by`` resolves to a multi-column priority order per table layout."""
+    assert _sort_column_order(fields, sort_by) == expected

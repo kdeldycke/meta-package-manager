@@ -155,33 +155,52 @@ def _column_row_key(order: Sequence[int], row: Sequence[str | None]) -> tuple:
     return tuple(strip_ansi(cell).casefold() if (cell := row[i]) else "" for i in order)
 
 
+def _sort_column_order(
+    fields: Sequence[SortableField | None],
+    sort_by: Sequence[SortableField],
+) -> tuple[int, ...] | None:
+    """Resolve ``sort_by`` fields to a column-index order for a table's ``fields``.
+
+    Returns the order in which columns drive the row sort: the requested fields the
+    table carries come first, in ``sort_by`` priority order and de-duplicated, then
+    the remaining columns provide natural left-to-right tie-breaking. Returns
+    ``None`` when the table carries none of the requested fields, signalling that
+    rows should keep their original order.
+    """
+    primaries = [fields.index(f) for f in dict.fromkeys(sort_by) if f in fields]
+    if not primaries:
+        return None
+    return (*primaries, *(i for i in range(len(fields)) if i not in primaries))
+
+
 def print_sorted_table(
     headers: Sequence[tuple[str, SortableField | None]],
     table: Sequence[Sequence[str | None]],
-    sort_by: SortableField | None,
+    sort_by: Sequence[SortableField],
     *,
     table_format: TableFormat | None = None,
 ) -> None:
-    """Render ``table`` with click-extra, sorting rows by the ``sort_by`` column.
+    """Render ``table`` with click-extra, sorting rows by the ``sort_by`` columns.
 
     Each ``headers`` entry pairs a column label with the :class:`SortableField` it
-    carries, or ``None`` for a column that cannot be sorted on. Rows are ordered by
-    the column matching ``sort_by``, with the remaining columns breaking ties in
-    their natural left-to-right order. A ``sort_by`` that no column carries leaves
-    the rows in their original order.
+    carries, or ``None`` for a column that cannot be sorted on. ``sort_by`` lists the
+    fields to order by, in priority order: rows sort by the first field this table
+    carries, then each subsequent field as a tie-breaker, with any remaining columns
+    breaking further ties in their natural left-to-right order. Fields the table does
+    not carry are skipped; a ``sort_by`` matching no column leaves the rows in their
+    original order.
 
-    Reimplements the ``print_sorted_table`` helper click-extra dropped in
-    ``8.0.0``, where :class:`click_extra.table.SortByOption` instead bakes the sort
-    key into ``ctx.print_table``. That option is scoped to a single command's
-    columns, whereas mpm shares one global :option:`mpm --sort-by` across
-    subcommands with heterogeneous tables, so the key is built here.
+    Reimplements the ``print_sorted_table`` helper click-extra dropped in ``8.0.0``,
+    where :class:`click_extra.table.SortByOption` instead bakes the sort key into
+    ``ctx.print_table``. That option derives its choices from a single command's
+    columns, whereas mpm shares one global :option:`mpm --sort-by` across subcommands
+    with heterogeneous tables, so the key is built here.
     """
     fields = [field for _, field in headers]
-    sort_key: Callable[[Sequence[str | None]], tuple] | None = None
-    if sort_by in fields:
-        primary = fields.index(sort_by)
-        order = (primary, *(i for i in range(len(fields)) if i != primary))
-        sort_key = partial(_column_row_key, order)
+    order = _sort_column_order(fields, sort_by)
+    sort_key: Callable[[Sequence[str | None]], tuple] | None = (
+        partial(_column_row_key, order) if order is not None else None
+    )
     print_table(
         table,
         [label for label, _ in headers],
@@ -736,8 +755,10 @@ def bar_plugin_path(ctx: Context, param: Parameter, value: str | None):
         "-s",
         "--sort-by",
         type=EnumChoice(SortableField),
-        default=SortableField.MANAGER_ID,
-        help="Sort results.",
+        multiple=True,
+        default=(SortableField.MANAGER_ID,),
+        help="Sort results by this field. Repeat to add tie-breakers in priority "
+        "order, like '-s manager_id -s package_id'.",
     ),
     # option('--sort-asc/--sort-desc', default=True)
     option(
@@ -1269,7 +1290,7 @@ def installed(ctx, exact, duplicates, query):
         logging.info(
             "Force table sorting on package ID because of --duplicates option."
         )
-        sort_by = SortableField.PACKAGE_ID
+        sort_by = (SortableField.PACKAGE_ID,)
 
     # Print table.
     ctx.find_root().print_table(

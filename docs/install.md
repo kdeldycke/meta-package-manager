@@ -600,6 +600,14 @@ _MPM_COMPLETE=fish_source mpm > ~/.config/fish/completions/mpm.fish
 
 ``````
 
+For broader shell coverage than Click's Bash, Zsh and Fish support, mpm's command tree can be exported to [Carapace](https://carapace.sh), a multi-shell completion engine that drives identical completions across Bash, Zsh, Fish, Nushell, PowerShell, Elvish and more from a single spec. Generate and install the spec with [click-extra](https://kdeldycke.github.io/click-extra/carapace.html)'s `wrap` command:
+
+```{code-block} shell-session
+$ uvx --from "click-extra[carapace]" --with meta-package-manager click-extra wrap --carapace --install meta_package_manager.cli:mpm
+```
+
+This writes the spec to `~/.config/carapace/specs/mpm.yaml`, which [Carapace](https://carapace.sh) loads once it is installed and hooked into your shell. Re-run the command after upgrading mpm to refresh the spec.
+
 ## Man pages
 
 `mpm` exposes a `--man` option on every (sub)command that prints the corresponding roff page to stdout. Pipe it through `man --local-file -` to render it:

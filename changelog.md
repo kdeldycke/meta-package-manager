@@ -17,6 +17,7 @@
 - [mpm] `--timeout` now defaults per-operation (120s for read-only queries, 500s for state-changing operations) instead of a flat 500s; an explicit `--timeout` still overrides.
 - [mpm] `install`, `remove`, `upgrade <packages>`, and `restore` now exit non-zero when a target fails or no manager can fulfill the request, instead of always reporting `0`.
 - [mpm] Fix `install`/`remove`/`upgrade` dropping all but one target when the same package is given with several explicit managers; `install` now acts on every requested package instead of stopping at the first success.
+- [mpm] Fix `install`, `remove`, and `upgrade` reporting success when a manager's CLI fails with a non-zero exit code but empty error output, like steamcmd's anonymous-login failure on Windows.
 - [mpm] Compare a leading version epoch (`1:2.0`, `1!2.0`) as a dominant component, so epoch bumps order correctly across Debian, RPM, pacman, and PEP 440 schemes.
 - [mpm] Resolve `pkg:apk` purls to the `apk` manager and `pkg:npm` purls to `pnpm`; both were missing from the purl-to-manager map.
 

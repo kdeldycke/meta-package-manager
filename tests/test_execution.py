@@ -20,6 +20,7 @@ import pytest
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.execution import (
+    CLIError,
     DEFAULT_TIMEOUT,
     MUTATING_TIMEOUT,
     OPERATION_TIMEOUTS,
@@ -115,3 +116,54 @@ def test_make_spinner_label_without_operation():
 
 def test_make_spinner_uses_configured_delay():
     assert FakeManager()._make_spinner().delay == SPINNER_DELAY
+
+
+# Tiny cross-platform CLIs that exit non-zero, differing only in which stream
+# carries the diagnostic. ``FakeManager`` runs the Python interpreter as its
+# binary, so ``run_cli("-c", ...)`` executes these directly.
+FAIL_ON_STDOUT = "import sys; sys.stdout.write('boom'); sys.exit(8)"
+"""Fails the steamcmd way: a non-zero exit with its message on ``<stdout>`` and an
+empty ``<stderr>``."""
+FAIL_ON_STDERR = "import sys; sys.stderr.write('boom'); sys.exit(8)"
+"""Fails the conventional way: a non-zero exit with its message on ``<stderr>``."""
+
+
+@pytest.mark.parametrize(
+    ("stop_on_error", "must_succeed", "script", "expectation"),
+    (
+        # The steamcmd-on-Windows regression: in the action context (a patched
+        # stop_on_error, no must_succeed) a non-zero exit with an empty <stderr>
+        # must now be a failure, not a silent success.
+        pytest.param(True, False, FAIL_ON_STDOUT, "raise", id="action-empty-stderr"),
+        # A parsed read (must_succeed) tolerates the same exit as a benign status
+        # code, like npm and pnpm outdated exiting 1 when updates exist.
+        pytest.param(False, True, FAIL_ON_STDOUT, "tolerate", id="read-empty-stderr"),
+        # Neither opt-in: the lenient default tolerates it too.
+        pytest.param(
+            False, False, FAIL_ON_STDOUT, "tolerate", id="default-empty-stderr"
+        ),
+        # A conventional failure (<stderr> populated) still raises when the caller
+        # demanded success, whether via the action context or must_succeed...
+        pytest.param(True, False, FAIL_ON_STDERR, "raise", id="action-stderr"),
+        pytest.param(False, True, FAIL_ON_STDERR, "raise", id="read-stderr"),
+        # ...and is accumulated for the end-of-run summary otherwise.
+        pytest.param(False, False, FAIL_ON_STDERR, "accumulate", id="default-stderr"),
+    ),
+)
+def test_run_failure_gate(stop_on_error, must_succeed, script, expectation):
+    """The failure gate decides raise / accumulate / tolerate from the exit code,
+    the ``<stderr>`` content, and the ``stop_on_error``/``must_succeed`` context."""
+    manager = FakeManager()
+    manager.stop_on_error = stop_on_error
+
+    if expectation == "raise":
+        with pytest.raises(CLIError) as excinfo:
+            manager.run_cli("-c", script, must_succeed=must_succeed)
+        assert excinfo.value.code == 8
+    elif expectation == "accumulate":
+        manager.run_cli("-c", script, must_succeed=must_succeed)
+        assert [error.code for error in manager.cli_errors] == [8]
+    else:  # tolerate
+        output = manager.run_cli("-c", script, must_succeed=must_succeed)
+        assert output == "boom"
+        assert manager.cli_errors == []

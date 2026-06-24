@@ -695,12 +695,16 @@ class CLIExecutor:
             expected effect on execution
 
         :param must_succeed: if ``True``, raise
-            :py:class:`meta_package_manager.manager.CLIError` on non-zero exit code
-            regardless of :py:attr:`stop_on_error`. Use for calls whose output is
-            parsed (JSON, XML, regex) and where a silent failure would be
-            indistinguishable from empty results. Unlike ``stop_on_error`` (a
-            user-facing preference for cross-manager resilience), ``must_succeed``
-            is a developer assertion that the invocation itself is correct.
+            :py:class:`meta_package_manager.manager.CLIError` when the command
+            fails, regardless of the user-facing :py:attr:`stop_on_error`
+            preference, rather than accumulating the error for an end-of-run
+            summary. Use for calls whose output is parsed (JSON, XML, regex),
+            where a swallowed failure would be indistinguishable from empty
+            results. A non-zero exit that leaves ``<stderr>`` empty is tolerated
+            as a benign status code (``npm`` and ``pnpm outdated`` exit ``1``
+            when updates exist); only the per-package state changers, which run
+            under a patched :py:attr:`stop_on_error`, treat every non-zero exit
+            as a failure. See the failure gate below for details.
         """
         # Casting to string helps serialize Path and Version objects.
         clean_args = args_cleanup(*args)
@@ -860,8 +864,25 @@ class CLIExecutor:
         if error:
             logging.debug(indent(error, INDENT))
 
-        # Non-successful run.
-        if code and error:
+        # Detect a failed run.
+        #
+        # By default a non-zero exit code is only treated as a failure when the
+        # command *also* wrote to <stderr>. Many read-only CLIs use a non-zero
+        # code as a status while writing their payload to <stdout> and leaving
+        # <stderr> empty: ``npm`` and ``pnpm outdated`` exit 1 when updates
+        # exist. Flagging those would break the parsing of their output, so a
+        # silent <stderr> earns the benefit of the doubt.
+        #
+        # The per-package state changers (install/remove/upgrade <packages>/
+        # restore) cannot afford that tolerance. They run under a patched
+        # ``stop_on_error`` with ``must_succeed`` left False, and there a
+        # non-zero exit is a genuine failure even when the tool reported it on
+        # <stdout> and left <stderr> empty: steamcmd prints "not logged in to
+        # Steam" this way on Windows, so a failed install was mistaken for a
+        # success. For them the <stderr> condition is dropped.
+        strict = self.stop_on_error and not must_succeed
+        failed = bool(code) if strict else bool(code and error)
+        if failed:
             # Produce an exception and eventually raise it.
             exception = CLIError(code, output, error)
             if must_succeed or self.stop_on_error:

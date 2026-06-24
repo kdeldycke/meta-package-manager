@@ -126,9 +126,10 @@ class PNPM(PackageManager):
         """Fetch outdated packages.
 
         ``pnpm outdated`` exits with code ``1`` when it finds outdated packages, but
-        writes the report to ``<stdout>`` and leaves ``<stderr>`` empty, so the call
-        does not raise (see the ``code and error`` gate in
-        :py:meth:`meta_package_manager.execution.CLIExecutor.run`).
+        writes the report to ``<stdout>`` and leaves ``<stderr>`` empty. Passing
+        ``must_succeed`` keeps the lenient failure gate that tolerates a non-zero
+        exit with an empty ``<stderr>`` as a benign status code, so the call does
+        not raise (see :py:meth:`meta_package_manager.execution.CLIExecutor.run`).
 
         .. code-block:: shell-session
 

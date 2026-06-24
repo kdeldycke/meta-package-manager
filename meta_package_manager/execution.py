@@ -71,6 +71,7 @@ from click_extra.spinner import Spinner
 from click_extra.testing import INDENT, PROMPT, args_cleanup
 from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
 from extra_platforms import UNIX, current_platform, is_any_windows
+from typing_extensions import Self
 
 from .version import parse_version
 
@@ -1248,7 +1249,7 @@ class OperationTrail:
         # Concurrent: a single aggregate spinner stands in for the muted per-call ones.
         self._enabled = None if progress else False
 
-    def __enter__(self) -> OperationTrail:
+    def __enter__(self) -> Self:
         if self.concurrent:
             for manager in self._managers:
                 manager.progress = False

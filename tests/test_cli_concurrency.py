@@ -377,7 +377,8 @@ def test_per_package_tasks_of_one_manager_share_a_thread():
 
 def test_per_package_empty_is_a_noop():
     ctx = FakeContext(jobs=4)
-    assert collect_per_package("Doing", "Done", [], ctx=ctx) is None  # type: ignore[arg-type]
+    # type: ignore[arg-type]
+    assert collect_per_package("Doing", "Done", [], ctx=ctx) is None
 
 
 def test_per_package_finisher_when_spinner_shown(monkeypatch):

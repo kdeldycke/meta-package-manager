@@ -148,9 +148,10 @@ classifiers = [
 # - aligns minimal Python requirements to ours,
 # - adds new explicit support Python version.
 dependencies = [
-  # backports.strenum 1.3.0 is required to support enum.StrEnum in Python 3.10.
-  "backports-strenum>=1.3; python_version<'3.11'",
-  # boltons 25.0.0 is the first version to support Python 3.13.
+  # Backports enum.StrEnum to Python < 3.11 (cli.SortableField, sbom.ExportFormat);
+  # the class ships in every 1.x release.
+  "backports-strenum>=1; python_version<'3.11'",
+  # boltons 25.0.0 dropped Python 3.9, matching our requires-python >= 3.10.
   "boltons>=25",
   # click-extra 8.0.0 is the major release mpm targets. It bundles the features
   # earlier floors tracked (the ConfigValidator / ValidationError config types
@@ -165,14 +166,18 @@ dependencies = [
   "click-extra>=8",
   # extra-platforms 10.0.0 drops the distro dependency.
   "extra-platforms>=10",
-  # packageurl-python 0.16.0 is the first to support Python 3.13. Required at
-  # runtime by meta_package_manager.package and meta_package_manager.specifier
-  # for cross-manager package identification, independent of SBOM features.
-  "packageurl-python>=0.16",
-  # tomllib is not part of the standard library before Python 3.11. Version 2.3.0 is the first to support Python 3.14.
-  "tomli>=2.3; python_version<'3.11'",
-  # tomli_w 1.1.0 is the first to remove Python 3.8 support.
-  "tomli-w>=1.1",
+  # Required at runtime by meta_package_manager.package and
+  # meta_package_manager.specifier (PackageURL, from_string(), to_string()) for
+  # cross-manager package identification, independent of SBOM features. That API
+  # has been stable since 0.11; the resolver selects a newer Python-compatible
+  # release as needed.
+  "packageurl-python>=0.11",
+  # tomllib is stdlib from Python 3.11; on 3.10 we parse TOML via tomli.loads()
+  # (cli.py), an API stable since 2.0. The marker keeps tomli off 3.11+.
+  "tomli>=2; python_version<'3.11'",
+  # config.py and cli.py serialize config and installed-package TOML via
+  # tomli_w.dumps(), an API stable since 1.0.
+  "tomli-w>=1",
   # xmltodict 0.12 stabilized the parse()/unparse() API we rely on in
   # managers/zypper.py. 1.0.0 was a stability bump with no functional change.
   # Keeping the floor low avoids forcing downstream packagers (Guix, Debian
@@ -192,8 +197,10 @@ optional-dependencies.jsonc = [ "click-extra[jsonc]" ]
 # support Python 3.14; 11.9.0 introduced `LicenseExpression.details` for
 # per-identifier license-expression metadata (`LicenseExpressionDetails`),
 # which the renderer uses to attach canonical SPDX URLs to each identifier
-# inside a compound expression.  spdx-tools 0.8.2 is the first version we
-# used to implement SPDX support.
+# inside a compound expression.  spdx-tools 0.8.0 introduced the `spdx_tools`
+# namespace that meta_package_manager.sbom.spdx imports (model,
+# validation.document_validator, common.spdx_licensing, and the
+# json/rdf/tagvalue/xml/yaml writers); 0.8.2 is the floor we build against.
 optional-dependencies.sbom = [ "cyclonedx-python-lib>=11.9", "spdx-tools>=0.8.2" ]
 # Package referenced above and also featured in [project.optional-dependencies] or [dependency-groups]
 # will be set without version specifier as they are already constrained.
@@ -214,17 +221,25 @@ scripts.mpm = "meta_package_manager.__main__:main"
 test = [
   "click-extra[pytest]",
   "click-extra[toml]",
-  "coverage[toml]>=7.12",
+  # coverage 7.11.0 dropped Python 3.9, matching our requires-python >= 3.10.
+  "coverage[toml]>=7.11",
   # The [validation] extra provides the jsonschema-based validators used to assert
   # generated CycloneDX SBOMs are schema-valid. Kept test-only (not a runtime dep) so
   # the heavy validation stack stays out of the install. See tests/test_cli_sbom.py.
   "cyclonedx-python-lib[validation]",
   "extra-platforms",
-  "pytest>=9.0.1",
+  # pytest 9.0.0 reads native TOML config from the [tool.pytest] table used in this file.
+  "pytest>=9",
+  # pytest-cov 7.x is the release series wired to pytest 9's plugin interface.
   "pytest-cov>=7",
+  # CI annotation plugin; auto-registers, so any recent release works.
   "pytest-github-actions-annotate-failures>=0.3",
+  # pytest-randomly 4.x is the series compatible with pytest 9.
   "pytest-randomly>=4.0.1",
-  "pytest-xdist[psutil]>=3.8",
+  # pytest-xdist 3.7 added the requires-python guard that keeps pre-3.14 releases
+  # off Python 3.14; the [psutil] extra backs --numprocesses=auto.
+  "pytest-xdist[psutil]>=3.7",
+  # Imported by tests/test_docs.py to parse workflow YAML; 6.0 is the modern API.
   "pyyaml>=6",
   # SPDX SBOM generation is now gated behind the [sbom] extra (see
   # [project.optional-dependencies]); re-add spdx-tools at test time so the
@@ -233,22 +248,35 @@ test = [
 ]
 docs = [
   "click-extra[sphinx]",
+  # furo 2025.9.25 is a recent CalVer release supporting Sphinx 8.
   "furo>=2025.9.25",
+  # myst-parser 4.0 targets Sphinx 8 / Python 3.10+ and ships the attrs_block,
+  # attrs_inline and colon_fence extensions enabled in docs/conf.py.
   "myst-parser>=4",
-  "sphinx",
+  # Sphinx 8.0.0 is the first version to drop Python 3.9, matching requires-python.
+  "sphinx>=8",
+  # sphinx-autodoc-typehints 2.4.0 is the first release aligned to Python >= 3.10.
   "sphinx-autodoc-typehints>=2.4",
   # sphinx-click 6.1.0 is the first version to drop Python 3.9.
   "sphinx-click>=6.1",
+  # sphinx-copybutton 0.5.2 stabilized the code-block copy button.
   "sphinx-copybutton>=0.5.2",
+  # sphinx-design 0.6 introduced the card/grid/tab directive syntax used in docs.
   "sphinx-design>=0.6",
+  # sphinx-issues 5.0 is the modern major providing the :issue:/:pr: roles.
   "sphinx-issues>=5",
+  # sphinxcontrib-mermaid 1.2.3 fixed mermaid_d3_zoom support, enabled in docs/conf.py.
   "sphinxcontrib-mermaid>=1.2.3",
+  # sphinxext-opengraph 0.13 stabilized OpenGraph metadata generation for Sphinx 8+.
   "sphinxext-opengraph>=0.13",
   # tomlkit round-trips pyproject.toml edits (preserving comments and layout)
   # for the GitHub label sync in docs/docs_update.py.
   "tomlkit>=0.13",
 ]
 typing = [
+  # Stubs for the untyped runtime libraries mpm imports (boltons; PyYAML in
+  # tests/test_docs.py; xmltodict in managers/zypper.py); stub versions track
+  # their target library's API.
   "types-boltons>=25.0.0.20250919",
   "types-pyyaml>=6.0.12.9",
   "types-xmltodict>=1.0.1.20250920",

@@ -24,7 +24,8 @@ import pytest
 
 # Pre-load invocation helpers to be used as pytest's fixture.
 from click_extra.pytest import create_config, runner  # noqa: F401
-from extra_platforms.pytest import skip_github_ci, skip_guix_build, skip_linux
+from extra_platforms import is_github_ci, is_linux
+from extra_platforms.pytest import skip_guix_build
 from pytest import fixture, param
 
 from meta_package_manager.cli import mpm
@@ -34,6 +35,7 @@ from .fake_manager import FakeManager, TimingOutFakeManager
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
     from _pytest.config import Config
@@ -368,55 +370,82 @@ manager_classes = pytest.mark.parametrize(  # type: ignore[assignment]
     ids=attrgetter("name"),
 )
 
-# Per-manager skips for the destructive install/remove test, keyed by manager ID and
-# folded into the parametrize below. ``skip_linux`` marks breakage on the unprivileged
-# Linux runner, ``skip_github_ci`` breakage on GitHub Actions only (a configured local
-# box can still run it), and a plain skip a manager no environment can install.
-INSTALL_REMOVE_SKIPS = {
+SHORT_FAILURE_TIMEOUT = 10
+"""Seconds to cap a destructive install that is *expected* to fail.
+
+The managers in :py:data:`INSTALL_REMOVE_BLOCKERS` cannot complete a real install in the
+test environment. Most fail within a second (a permission or missing-remote error), but a
+few (``mas``, ``scoop``, ``sfsu``) hang with no error until the 500s state-change timeout
+would otherwise elapse. Capping their CLI calls keeps the doomed attempts cheap: long
+enough for the fast failures to surface their real error, short enough that the genuine
+hangs do not dominate the destructive job's wall-clock.
+"""
+
+INSTALL_REMOVE_BLOCKERS: dict[str, tuple[Callable[[], bool], str | None]] = {
     # choco installs to an admin-only location the unelevated CI process cannot write to.
-    "choco": skip_github_ci(reason="choco needs elevation the CI process lacks."),
+    "choco": (is_github_ci, "denied"),
     # cpan writes to the system Perl tree, unwritable by the unelevated Linux user.
-    "cpan": skip_linux(reason="cpan cannot write the system Perl tree on Linux CI."),
-    # The RPM database under /var/lib/rpm is inaccessible even with sudo on the
-    # Debian-based ubuntu runners, so the RPM front-ends cannot install.
-    "dnf": skip_linux(reason="RPM stack unusable on the Linux CI runners."),
-    "dnf5": skip_linux(reason="RPM stack unusable on the Linux CI runners."),
-    "yum": skip_linux(reason="RPM stack unusable on the Linux CI runners."),
-    "zypper": skip_linux(reason="RPM stack unusable on the Linux CI runners."),
+    "cpan": (is_linux, "Permission denied"),
+    # The RPM front-ends cannot reach the database under /var/lib/rpm on the Debian-based
+    # ubuntu runners, and mpm does not elevate, so they fail as the unprivileged user.
+    "dnf": (is_linux, "superuser privileges"),
+    "dnf5": (is_linux, "superuser privileges"),
+    "yum": (is_linux, "superuser privileges"),
+    "zypper": (is_linux, "Root privileges are required"),
     # flatpak has no remote configured to resolve apps from on the runners.
-    "flatpak": skip_linux(reason="flatpak has no remote configured on Linux CI."),
-    # fwupd flashes firmware; the CI VMs expose no upgradable hardware to flash.
-    # The package ID is a no-op release, so this never installs anything anywhere.
-    "fwupd": pytest.mark.skip(reason="fwupd has no flashable hardware to target."),
+    "flatpak": (is_linux, "No remote refs found"),
+    # fwupd flashes firmware; the CI VMs expose no upgradable hardware to flash. The
+    # package ID is a no-op release, so the install never does anything: it exits 0.
+    "fwupd": (lambda: True, None),
     # gem writes to the system gem directory, unwritable by the unelevated Linux user.
-    "gem": skip_linux(reason="gem cannot write the system gem directory on Linux CI."),
-    # mas install of a signed App Store app times out (500s) on the macOS runners.
-    "mas": skip_github_ci(reason="mas install times out on the GitHub runners."),
+    "gem": (is_linux, "You don't have write permissions"),
+    # mas install of a signed App Store app hangs until the timeout on the macOS runners.
+    "mas": (is_github_ci, "Timed out after"),
     # pnpm add --global needs a PNPM_HOME (from `pnpm setup`) the runners do not set up.
-    "pnpm": skip_github_ci(reason="pnpm has no global bin directory on CI."),
+    "pnpm": (is_github_ci, "global bin directory"),
     # PSResourceGet install is unreliable on the runners; on .NET 10 runners PowerShell
     # 7.x cannot even load the module (System.Collections.Specialized version clash).
-    "pwsh-gallery": skip_github_ci(
-        reason="PSGallery install does not complete on the CI runners."
-    ),
-    # scoop install does not complete on the GitHub Windows runners; sfsu wraps it.
-    "scoop": skip_github_ci(reason="scoop install does not complete on Windows CI."),
-    "sfsu": skip_github_ci(reason="sfsu drives a scoop install failing on CI."),
+    "pwsh-gallery": (is_github_ci, "Specialized"),
+    # scoop install hangs until the timeout on the GitHub Windows runners; sfsu wraps it.
+    "scoop": (is_github_ci, "Timed out after"),
+    "sfsu": (is_github_ci, "Timed out after"),
     # snap install requires root; mpm does not elevate, so it fails as the test user.
-    "snap": skip_linux(reason="snap install requires root the CI process lacks."),
+    "snap": (is_linux, "sudo"),
     # steamcmd can only install titles an authenticated account owns; the anonymous
     # login the runners use cannot, so the install fails. No environment satisfies it.
-    "steamcmd": pytest.mark.skip(
-        reason="steamcmd needs an authenticated Steam account that owns the title."
-    ),
+    "steamcmd": (lambda: True, "No subscription"),
 }
+"""Per-manager expectations for the destructive install/remove test where a manager cannot
+complete a real install.
+
+Rather than skip these managers (which would also drop the dispatch coverage and any signal
+that they still fail the *expected* way), the test drives them anyway, caps each doomed CLI
+call with :py:data:`SHORT_FAILURE_TIMEOUT`, and asserts on the failure they surface. Each
+entry maps a manager ID to a ``(blocked_here, install_signal)`` pair:
+
+- ``blocked_here`` is a zero-argument predicate, True in the environment where the manager
+  is known to be uninstallable: ``is_linux`` for the unprivileged Linux runner,
+  ``is_github_ci`` for GitHub Actions only (a configured local box can still install), or
+  ``lambda: True`` for managers no environment can install.
+- ``install_signal`` is the substring the install leg's ``DEBUG``-verbosity stderr must
+  contain. The underlying tool's output is logged at ``DEBUG`` (see
+  :py:meth:`meta_package_manager.execution.PackageManager.run`), so the test raises
+  verbosity to capture it. For managers the timeout kills before they emit a tool error
+  (``mas``, ``scoop``, ``sfsu``), the signal is mpm's own ``Timed out after`` warning.
+  ``fwupd`` ships an inert release that no-ops to exit 0, marked ``None``.
+
+.. caution::
+
+    The raw tool strings are intentionally specific and therefore brittle: they come from
+    the underlying package managers and shift across tool versions, OS images, and locales.
+    They are harvested from the destructive CI matrix and may need refreshing when a runner
+    image updates. A failure here that prints an unexpected stderr is the refresh signal,
+    not necessarily an mpm regression.
+"""
 
 # Deprecated managers are excluded: their upstreams are unreliable or gone, so a real
 # install/remove would only contribute flakiness (see PackageManager.deprecated).
 maintained_manager_ids_and_dummy_package = pytest.mark.parametrize(
     "manager_id,package_id",
-    tuple(
-        param(mid, PACKAGE_IDS[mid], id=mid, marks=INSTALL_REMOVE_SKIPS.get(mid, ()))
-        for mid in pool.maintained_manager_ids
-    ),
+    tuple(param(mid, PACKAGE_IDS[mid], id=mid) for mid in pool.maintained_manager_ids),
 )

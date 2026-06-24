@@ -22,7 +22,11 @@ import pytest
 
 from meta_package_manager.pool import pool
 
-from .conftest import maintained_manager_ids_and_dummy_package
+from .conftest import (
+    INSTALL_REMOVE_BLOCKERS,
+    SHORT_FAILURE_TIMEOUT,
+    maintained_manager_ids_and_dummy_package,
+)
 from .test_cli import CLISubCommandTests
 
 
@@ -102,30 +106,78 @@ class TestInstallRemove(CLISubCommandTests):
 
         .. note::
 
-            Managers that cannot complete a real install in a given environment are
-            skipped per-parameter via ``INSTALL_REMOVE_SKIPS`` in ``conftest.py``,
-            not inline in this test body.
+            Managers that cannot complete a real install in a given environment are not
+            skipped: they are listed in ``INSTALL_REMOVE_BLOCKERS`` (``conftest.py``) and
+            driven anyway, capped at ``SHORT_FAILURE_TIMEOUT`` and asserted to fail the
+            *expected* way. The install runs at ``--verbosity DEBUG`` because the raw
+            tool error mpm surfaces is logged at ``DEBUG``. The follow-up ``remove`` is
+            an idempotent no-op (the failed install left nothing to remove), so it only
+            asserts a clean exit, not a dispatch.
         """
-        for command in ("install", "remove"):
-            result = invoke(f"--{manager_id}", command, package_id)
+        blocker = INSTALL_REMOVE_BLOCKERS.get(manager_id)
+        blocked_here = bool(blocker and blocker[0]())
+        # The substring the blocked install's DEBUG stderr must contain (None for an
+        # inert manager that no-ops to a clean exit). Only consulted when blocked_here.
+        install_signal = blocker[1] if blocker else None
 
+        for command in ("install", "remove"):
+            if blocked_here:
+                result = invoke(
+                    f"--{manager_id}",
+                    "--verbosity",
+                    "DEBUG",
+                    "--timeout",
+                    str(SHORT_FAILURE_TIMEOUT),
+                    command,
+                    package_id,
+                )
+            else:
+                result = invoke(f"--{manager_id}", command, package_id)
+
+            # The manager is not available on this host: mpm selected nothing. This
+            # supersedes any blocker expectation, which only applies once the manager
+            # is present and reaches its (doomed) install.
             if result.exit_code == 2:
                 assert not result.stdout
                 assert "critical: No manager selected.\n" in result.stderr
-            else:
-                # npm and cargo installs are flaky on the CI runners: they depend on
-                # the live npm registry and crates.io plus a healthy toolchain, and
-                # regularly surface transient failures. Accept exit 1 like
-                # test_single_manager_upgrade_all does for the same reason; the
-                # check_manager_selection below still asserts mpm dispatched to the
-                # manager.
-                if manager_id in {"cargo", "npm"}:
-                    assert result.exit_code in (0, 1)
+                continue
+
+            if blocked_here:
+                if command == "install":
+                    if install_signal is None:
+                        # An inert package that no-ops to a clean exit (fwupd).
+                        assert result.exit_code == 0
+                    else:
+                        assert result.exit_code == 1
+                        assert install_signal in result.stderr, (
+                            f"{manager_id} install: expected {install_signal!r} in "
+                            f"stderr, got:\n{result.stderr}"
+                        )
+                    self.check_manager_selection(
+                        result,
+                        {manager_id},
+                        reference_set=pool.all_manager_ids,
+                        strict_selection_match=False,
+                    )
                 else:
+                    # remove after a failed install is a no-op: nothing got installed,
+                    # so mpm removes nothing and exits cleanly without dispatching.
                     assert result.exit_code == 0
-                self.check_manager_selection(
-                    result,
-                    {manager_id},
-                    reference_set=pool.all_manager_ids,
-                    strict_selection_match=False,
-                )
+                continue
+
+            # npm and cargo installs are flaky on the CI runners: they depend on
+            # the live npm registry and crates.io plus a healthy toolchain, and
+            # regularly surface transient failures. Accept exit 1 like
+            # test_single_manager_upgrade_all does for the same reason; the
+            # check_manager_selection below still asserts mpm dispatched to the
+            # manager.
+            if manager_id in {"cargo", "npm"}:
+                assert result.exit_code in (0, 1)
+            else:
+                assert result.exit_code == 0
+            self.check_manager_selection(
+                result,
+                {manager_id},
+                reference_set=pool.all_manager_ids,
+                strict_selection_match=False,
+            )

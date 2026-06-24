@@ -6,10 +6,29 @@ name: 🚀 Build & release
     branches:
       - main
 
+concurrency:
+  # Declared on this push-triggered entry, not the reusable _release-engine.yaml it
+  # calls: GitHub decides run cancellation from the entry workflow's group, and a
+  # block on the engine lane (reached via `needs: build`) joins its group too late
+  # to cancel queued or building runs. Regular commits share a per-branch group and
+  # cancel each other; release commits ([changelog] Release / Post-release) get a
+  # unique SHA-based group so an in-flight release is never cancelled by a later push.
+  group: >-
+    ${{ github.workflow }}-${{
+      github.event.pull_request.number
+      || (
+        (startsWith(github.event.head_commit.message, '[changelog] Release')
+        || startsWith(github.event.head_commit.message, '[changelog] Post-release'))
+        && github.sha
+      )
+      || github.ref
+    }}
+  cancel-in-progress: true
+
 jobs:
 
   build:
-    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@6b9586282b103feae63e773c15f788f7d37848bd # v6.29.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@e8e1f6c651ed0c51dd6622cf316f3f7f591ed3dc # v6.30.0
 
   publish-pypi:
     name: 🐍 Publish to PyPI (${{ matrix.short_sha }})
@@ -33,7 +52,7 @@ jobs:
       # Lets the admonition step below edit the published release notes.
       contents: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@6b9586282b103feae63e773c15f788f7d37848bd # v6.29.0
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@e8e1f6c651ed0c51dd6622cf316f3f7f591ed3dc # v6.30.0
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
       # Backfill the "available on PyPI" admonition onto the release notes after a successful OIDC upload. The engine
@@ -51,7 +70,7 @@ jobs:
           --repo "${{ github.repository }}" <<< "${RELEASE_NOTES}"
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@6b9586282b103feae63e773c15f788f7d37848bd # v6.29.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@e8e1f6c651ed0c51dd6622cf316f3f7f591ed3dc # v6.30.0
     needs: build
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}

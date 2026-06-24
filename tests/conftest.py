@@ -374,73 +374,73 @@ SHORT_FAILURE_TIMEOUT = 10
 """Seconds to cap a destructive install that is *expected* to fail.
 
 The managers in :py:data:`INSTALL_REMOVE_BLOCKERS` cannot complete a real install in the
-test environment. Most fail within a second (a permission or missing-remote error), but a
-few (``mas``, ``scoop``, ``sfsu``) hang with no error until the 500s state-change timeout
-would otherwise elapse. Capping their CLI calls keeps the doomed attempts cheap: long
-enough for the fast failures to surface their real error, short enough that the genuine
-hangs do not dominate the destructive job's wall-clock.
+test environment. Most fail within a second (a permission error, a missing remote, an
+empty search), but a few (``scoop`` and ``sfsu`` on Windows, ``pwsh-gallery`` on macOS)
+hang with no error until the state-change timeout would otherwise elapse. Capping their
+CLI calls keeps the doomed attempts cheap: long enough for the fast failures to surface,
+short enough that the genuine hangs do not dominate the destructive job's wall-clock.
 """
 
-INSTALL_REMOVE_BLOCKERS: dict[str, tuple[Callable[[], bool], str | None]] = {
+INSTALL_REMOVE_BLOCKERS: dict[str, Callable[[], bool]] = {
     # choco installs to an admin-only location the unelevated CI process cannot write to.
-    "choco": (is_github_ci, "denied"),
+    "choco": is_github_ci,
     # cpan writes to the system Perl tree, unwritable by the unelevated Linux user.
-    "cpan": (is_linux, "Permission denied"),
-    # The RPM front-ends cannot reach the database under /var/lib/rpm on the Debian-based
-    # ubuntu runners, and mpm does not elevate, so they fail as the unprivileged user.
-    "dnf": (is_linux, "superuser privileges"),
-    "dnf5": (is_linux, "superuser privileges"),
-    "yum": (is_linux, "superuser privileges"),
-    "zypper": (is_linux, "Root privileges are required"),
+    "cpan": is_linux,
+    # The RPM and zypper front-ends are not backed by a working RPM/SUSE distro on the
+    # Debian-based ubuntu runners (no release version, no repositories), so they cannot
+    # even resolve the package and fail before reaching the privileged install step.
+    "dnf": is_linux,
+    "dnf5": is_linux,
+    "yum": is_linux,
+    "zypper": is_linux,
     # flatpak has no remote configured to resolve apps from on the runners.
-    "flatpak": (is_linux, "No remote refs found"),
-    # fwupd flashes firmware; the CI VMs expose no upgradable hardware to flash. The
-    # package ID is a no-op release, so the install never does anything: it exits 0.
-    "fwupd": (lambda: True, None),
+    "flatpak": is_linux,
+    # fwupd flashes firmware; the CI VMs expose no flashable hardware, so the install
+    # exits non-zero.
+    "fwupd": lambda: True,
     # gem writes to the system gem directory, unwritable by the unelevated Linux user.
-    "gem": (is_linux, "You don't have write permissions"),
-    # mas install of a signed App Store app hangs until the timeout on the macOS runners.
-    "mas": (is_github_ci, "Timed out after"),
+    "gem": is_linux,
+    # mas resolves an install through an App Store search that finds nothing for the
+    # numeric id on the headless runners, so the install fails.
+    "mas": is_github_ci,
     # pnpm add --global needs a PNPM_HOME (from `pnpm setup`) the runners do not set up.
-    "pnpm": (is_github_ci, "global bin directory"),
-    # PSResourceGet install is unreliable on the runners; on .NET 10 runners PowerShell
-    # 7.x cannot even load the module (System.Collections.Specialized version clash).
-    "pwsh-gallery": (is_github_ci, "Specialized"),
+    "pnpm": is_github_ci,
+    # pwsh-gallery's PSResourceGet lookup is unreliable on the runners: Find-PSResource
+    # hangs on the macOS image and returns a case-mismatched name on Linux, so the install
+    # never resolves the package.
+    "pwsh-gallery": is_github_ci,
     # scoop install hangs until the timeout on the GitHub Windows runners; sfsu wraps it.
-    "scoop": (is_github_ci, "Timed out after"),
-    "sfsu": (is_github_ci, "Timed out after"),
+    "scoop": is_github_ci,
+    "sfsu": is_github_ci,
     # snap install requires root; mpm does not elevate, so it fails as the test user.
-    "snap": (is_linux, "sudo"),
-    # steamcmd can only install titles an authenticated account owns; the anonymous
-    # login the runners use cannot, so the install fails. No environment satisfies it.
-    "steamcmd": (lambda: True, "No subscription"),
+    "snap": is_linux,
+    # steamcmd can only install titles owned by an authenticated account; the runners'
+    # anonymous session is not logged in, so the install fails. No environment satisfies it.
+    "steamcmd": lambda: True,
 }
-"""Per-manager expectations for the destructive install/remove test where a manager cannot
-complete a real install.
+"""Managers that cannot complete a real install in a given environment, mapped to the
+predicate that is True where the manager is known to be uninstallable.
 
-Rather than skip these managers (which would also drop the dispatch coverage and any signal
-that they still fail the *expected* way), the test drives them anyway, caps each doomed CLI
-call with :py:data:`SHORT_FAILURE_TIMEOUT`, and asserts on the failure they surface. Each
-entry maps a manager ID to a ``(blocked_here, install_signal)`` pair:
+Rather than skip these managers (which would also drop their dispatch coverage and any
+signal that they still fail the *expected* way), the destructive install/remove test drives
+each one's ``install`` anyway, caps the doomed CLI call with
+:py:data:`SHORT_FAILURE_TIMEOUT`, and asserts that mpm reports the stable failure: exit code
+``1`` and a ``Could not install: {package}`` critical message. The follow-up ``remove`` is
+skipped, since the failed install left nothing to remove and the working managers already
+cover the removal path.
 
-- ``blocked_here`` is a zero-argument predicate, True in the environment where the manager
-  is known to be uninstallable: ``is_linux`` for the unprivileged Linux runner,
-  ``is_github_ci`` for GitHub Actions only (a configured local box can still install), or
-  ``lambda: True`` for managers no environment can install.
-- ``install_signal`` is the substring the install leg's ``DEBUG``-verbosity stderr must
-  contain. The underlying tool's output is logged at ``DEBUG`` (see
-  :py:meth:`meta_package_manager.execution.PackageManager.run`), so the test raises
-  verbosity to capture it. For managers the timeout kills before they emit a tool error
-  (``mas``, ``scoop``, ``sfsu``), the signal is mpm's own ``Timed out after`` warning.
-  ``fwupd`` ships an inert release that no-ops to exit 0, marked ``None``.
+The predicate is a zero-argument callable: ``is_linux`` for the unprivileged Linux runner,
+``is_github_ci`` for GitHub Actions only (a configured local box can still install), or
+``lambda: True`` for managers no environment can install.
 
-.. caution::
+.. note::
 
-    The raw tool strings are intentionally specific and therefore brittle: they come from
-    the underlying package managers and shift across tool versions, OS images, and locales.
-    They are harvested from the destructive CI matrix and may need refreshing when a runner
-    image updates. A failure here that prints an unexpected stderr is the refresh signal,
-    not necessarily an mpm regression.
+    The assertion deliberately targets mpm's own ``Could not install:`` message rather than
+    the underlying tool's error. The raw tool output is not a stable contract: it is
+    platform-specific (``pwsh-gallery`` times out on macOS but hits a name-case mismatch on
+    Linux), stage-specific (``dnf``/``zypper``/``flatpak`` fail at the search step, never
+    reaching their privileged install errors), and drifts across tool versions, OS images,
+    and locales. mpm's failure message is identical everywhere, so the test stays robust.
 """
 
 # Deprecated managers are excluded: their upstreams are unreliable or gone, so a real

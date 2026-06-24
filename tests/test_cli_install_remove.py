@@ -108,61 +108,56 @@ class TestInstallRemove(CLISubCommandTests):
 
             Managers that cannot complete a real install in a given environment are not
             skipped: they are listed in ``INSTALL_REMOVE_BLOCKERS`` (``conftest.py``) and
-            driven anyway, capped at ``SHORT_FAILURE_TIMEOUT`` and asserted to fail the
-            *expected* way. The install runs at ``--verbosity DEBUG`` because the raw
-            tool error mpm surfaces is logged at ``DEBUG``. The follow-up ``remove`` is
-            an idempotent no-op (the failed install left nothing to remove), so it only
-            asserts a clean exit, not a dispatch.
+            driven anyway. The blocked ``install`` is capped at ``SHORT_FAILURE_TIMEOUT``
+            and asserted to fail the stable mpm way (exit ``1`` plus a ``Could not
+            install:`` message). It runs at ``--verbosity INFO``: the minimum level at
+            which the ``Installation priority`` dispatch signal is visible (the default
+            ``WARNING`` would hide it and make :py:meth:`check_manager_selection` pass
+            vacuously). No follow-up ``remove``: the failed install left nothing to
+            remove, and the working managers already cover the removal path.
         """
         blocker = INSTALL_REMOVE_BLOCKERS.get(manager_id)
-        blocked_here = bool(blocker and blocker[0]())
-        # The substring the blocked install's DEBUG stderr must contain (None for an
-        # inert manager that no-ops to a clean exit). Only consulted when blocked_here.
-        install_signal = blocker[1] if blocker else None
-
-        for command in ("install", "remove"):
-            if blocked_here:
-                result = invoke(
-                    f"--{manager_id}",
-                    "--verbosity",
-                    "DEBUG",
-                    "--timeout",
-                    str(SHORT_FAILURE_TIMEOUT),
-                    command,
-                    package_id,
-                )
-            else:
-                result = invoke(f"--{manager_id}", command, package_id)
-
+        if blocker and blocker():
+            # This manager cannot complete a real install here. Drive the doomed install
+            # anyway, capped at SHORT_FAILURE_TIMEOUT, and assert it fails the stable mpm
+            # way. No remove leg: the failed install left nothing to remove, and the
+            # working managers below already cover the removal path.
+            result = invoke(
+                f"--{manager_id}",
+                "--verbosity",
+                "INFO",
+                "--timeout",
+                str(SHORT_FAILURE_TIMEOUT),
+                "install",
+                package_id,
+            )
             # The manager is not available on this host: mpm selected nothing. This
-            # supersedes any blocker expectation, which only applies once the manager
-            # is present and reaches its (doomed) install.
+            # supersedes the blocker expectation, which only applies once the manager is
+            # present and reaches its (doomed) install.
             if result.exit_code == 2:
                 assert not result.stdout
                 assert "critical: No manager selected.\n" in result.stderr
-                continue
+                return
+            assert result.exit_code == 1
+            assert f"Could not install: {package_id}" in result.stderr, (
+                f"{manager_id} install: expected a 'Could not install:' failure in "
+                f"stderr, got:\n{result.stderr}"
+            )
+            self.check_manager_selection(
+                result,
+                {manager_id},
+                reference_set=pool.all_manager_ids,
+                strict_selection_match=False,
+            )
+            return
 
-            if blocked_here:
-                if command == "install":
-                    if install_signal is None:
-                        # An inert package that no-ops to a clean exit (fwupd).
-                        assert result.exit_code == 0
-                    else:
-                        assert result.exit_code == 1
-                        assert install_signal in result.stderr, (
-                            f"{manager_id} install: expected {install_signal!r} in "
-                            f"stderr, got:\n{result.stderr}"
-                        )
-                    self.check_manager_selection(
-                        result,
-                        {manager_id},
-                        reference_set=pool.all_manager_ids,
-                        strict_selection_match=False,
-                    )
-                else:
-                    # remove after a failed install is a no-op: nothing got installed,
-                    # so mpm removes nothing and exits cleanly without dispatching.
-                    assert result.exit_code == 0
+        for command in ("install", "remove"):
+            result = invoke(f"--{manager_id}", command, package_id)
+
+            # The manager is not available on this host: mpm selected nothing.
+            if result.exit_code == 2:
+                assert not result.stdout
+                assert "critical: No manager selected.\n" in result.stderr
                 continue
 
             # npm and cargo installs are flaky on the CI runners: they depend on

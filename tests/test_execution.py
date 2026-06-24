@@ -20,12 +20,12 @@ import pytest
 
 from meta_package_manager.capabilities import Operations
 from meta_package_manager.execution import (
-    CLIError,
     DEFAULT_TIMEOUT,
     MUTATING_TIMEOUT,
     OPERATION_TIMEOUTS,
     READ_ONLY_TIMEOUT,
     SPINNER_DELAY,
+    CLIError,
 )
 
 from .fake_manager import FakeManager

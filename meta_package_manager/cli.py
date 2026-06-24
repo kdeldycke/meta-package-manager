@@ -260,19 +260,17 @@ class Duration(ParamType):
     }
     """Number of seconds each recognized unit represents (empty unit means days)."""
 
-    _CALENDAR_UNITS = frozenset(
-        {
-            "mo",
-            "mon",
-            "month",
-            "months",
-            "y",
-            "yr",
-            "yrs",
-            "year",
-            "years",
-        }
-    )
+    _CALENDAR_UNITS = frozenset({
+        "mo",
+        "mon",
+        "month",
+        "months",
+        "y",
+        "yr",
+        "yrs",
+        "year",
+        "years",
+    })
     """Calendar units rejected for ambiguity: months span 28-31 days, years 365-366."""
 
     _FRIENDLY_PATTERN = re.compile(r"(?P<value>\d+(?:\.\d+)?)\s*(?P<unit>[a-z]*)")
@@ -2067,21 +2065,19 @@ def upgrade(ctx, all, packages_specs):
             manager = pool.get(manager_id)
             if not cooldown_permits(manager):
                 continue
-            tasks.append(
-                (
+            tasks.append((
+                manager,
+                _package_task(
                     manager,
-                    _package_task(
-                        manager,
-                        spec,
-                        failures_lock,
-                        action=lambda m, s: m.upgrade(s.package_id, version=s.version),
-                        verb="upgrade",
-                        past="upgraded",
-                        prep="with",
-                        record_failure=lambda s: upgrade_failures.append(s.package_id),
-                    ),
-                )
-            )
+                    spec,
+                    failures_lock,
+                    action=lambda m, s: m.upgrade(s.package_id, version=s.version),
+                    verb="upgrade",
+                    past="upgraded",
+                    prep="with",
+                    record_failure=lambda s: upgrade_failures.append(s.package_id),
+                ),
+            ))
 
     collect_per_package("Upgrading", "Upgraded", tasks)
 
@@ -2170,21 +2166,19 @@ def remove(ctx, packages_specs):
         # as two.
         for manager_id in sorted(source_manager_ids):
             manager = pool.get(manager_id)
-            tasks.append(
-                (
+            tasks.append((
+                manager,
+                _package_task(
                     manager,
-                    _package_task(
-                        manager,
-                        spec,
-                        failures_lock,
-                        action=lambda m, s: m.remove(s.package_id),
-                        verb="remove",
-                        past="removed",
-                        prep="from",
-                        record_failure=lambda s: remove_failures.append(s.package_id),
-                    ),
-                )
-            )
+                    spec,
+                    failures_lock,
+                    action=lambda m, s: m.remove(s.package_id),
+                    verb="remove",
+                    past="removed",
+                    prep="from",
+                    record_failure=lambda s: remove_failures.append(s.package_id),
+                ),
+            ))
 
     collect_per_package("Removing", "Removed", tasks)
 
@@ -2629,25 +2623,19 @@ def restore(ctx, toml_files):
                     manager_id=manager.id,
                     version=str(version),
                 )
-                tasks.append(
-                    (
+                tasks.append((
+                    manager,
+                    _package_task(
                         manager,
-                        _package_task(
-                            manager,
-                            spec,
-                            failures_lock,
-                            action=lambda m, s: m.install(
-                                s.package_id, version=s.version
-                            ),
-                            verb="install",
-                            past="installed",
-                            prep="with",
-                            record_failure=lambda s: restore_failures.append(
-                                s.package_id
-                            ),
-                        ),
-                    )
-                )
+                        spec,
+                        failures_lock,
+                        action=lambda m, s: m.install(s.package_id, version=s.version),
+                        verb="install",
+                        past="installed",
+                        prep="with",
+                        record_failure=lambda s: restore_failures.append(s.package_id),
+                    ),
+                ))
 
     collect_per_package("Restoring", "Restored", tasks)
 

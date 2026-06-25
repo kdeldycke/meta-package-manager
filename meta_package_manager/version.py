@@ -277,7 +277,7 @@ class Token:
                 return int
         return str
 
-    def _mixed_type_order(self, other):
+    def _mixed_type_order(self, other: object) -> int:
         """Return ordering hint for mixed integer/string ``Token`` pairs.
 
         Returns ``1`` if ``self`` should sort higher (int vs str), ``-1`` if lower
@@ -295,16 +295,16 @@ class Token:
     # Only __eq__ and __lt__ are defined; @total_ordering fills in the rest, and
     # Python derives __ne__ from __eq__.
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if self._mixed_type_order(other):
             return False
-        return operator.eq(*map(self._match_type(other), [self, other]))
+        return bool(operator.eq(*map(self._match_type(other), [self, other])))
 
-    def __lt__(self, other):
+    def __lt__(self, other: object) -> bool:
         order = self._mixed_type_order(other)
         if order:
             return order < 0
-        return operator.lt(*map(self._match_type(other), [self, other]))
+        return bool(operator.lt(*map(self._match_type(other), [self, other])))
 
 
 @total_ordering
@@ -588,7 +588,7 @@ class TokenizedString:
     # operators, and Python derives __ne__ from __eq__. ``None`` sorts below every
     # version (an absent version is older than any present one).
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if other is None:
             return False
         if isinstance(other, TokenizedString):
@@ -597,7 +597,7 @@ class TokenizedString:
             return tuple(self) == tuple(other)
         return super().__eq__(other)
 
-    def __lt__(self, other):
+    def __lt__(self, other: object) -> bool:
         if other is None:
             return False
         if isinstance(other, TokenizedString):

@@ -8,19 +8,18 @@
 - **Breaking:** [mpm] Rename the `--allow-no-cooldown` flag to the `--require-cooldown-support`/`--allow-unsupported-managers` pair, and its `allow_no_cooldown` config to `require_cooldown_support` (default `true`).
 - **Breaking:** [mpm] The `sort_by` configuration option is now a list of fields, matching the repeatable `--sort-by`. Wrap an existing scalar value in brackets: `sort_by = "package_id"` becomes `sort_by = ["package_id"]`.
 - [pnpm] Add the pnpm package manager (`installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `cleanup`), enforcing `--cooldown` via pnpm's native `minimumReleaseAge` gate.
-- [eopkg] Fix `installed`, `outdated`, and `search` returning no packages.
-- [mpm] Filter the package listing by a query: `installed` and `outdated` take an optional `QUERY` argument and `dump`/`backup`/`sbom` a `--query` option, matched fuzzily by default with `--exact`/`--fuzzy` to control it.
-- [mpm] Run managers in parallel via a new `--jobs`/`-j` option (default: CPU count minus one), covering the read-only queries, the maintenance commands, the inventory exporters, and the state changers. Closes {issue}`529`.
-- [mpm] The standalone binary now reads configuration in all six formats (`toml`, `yaml`, `json5`, `jsonc`, `hjson`, `xml`), matching the source distribution.
-- [mpm] Show a progress spinner with elapsed time on `<stderr>` while manager CLI calls run, toggled with click-extra's `--progress`/`--no-progress`.
+- [mpm] Filter the package listing by a query: `installed` and `outdated` take an optional `QUERY` argument and `dump`/`backup`/`sbom` a `--query` option, fuzzy by default with `--exact`/`--fuzzy` to control it.
 - [mpm] `--sort-by`/`-s` is now repeatable, ordering result tables by several fields in priority order (like `--sort-by package_id --sort-by manager_id`).
-- [mpm] Lower the default verbosity from `INFO` to `WARNING`, leaving only the `✓`/`✗` trail, finishers, and genuine warnings on screen; per-operation narration moves to `INFO` and raw technical detail to `DEBUG`.
-- [mpm] At `DEBUG` verbosity, run managers sequentially and hide the spinner so interleaved per-manager logs stay readable.
+- [mpm] Run managers in parallel via a new `--jobs`/`-j` option (default: CPU count minus one), covering the read-only queries, the maintenance commands, the inventory exporters, and the state changers; `DEBUG` verbosity forces sequential runs. Closes {issue}`529`.
+- [mpm] Show a progress spinner with elapsed time on `<stderr>` while manager CLI calls run, toggled with click-extra's `--progress`/`--no-progress`.
 - [mpm] `install`, `remove`, `upgrade`, `restore`, `sync`, and `cleanup` now print a per-attempt `✓`/`✗` trail and a finisher on an interactive terminal: per-package for the package commands, per-manager for `sync`/`cleanup`/`upgrade --all`.
+- [mpm] The standalone binary now reads configuration in all six formats (`toml`, `yaml`, `json5`, `jsonc`, `hjson`, `xml`), matching the source distribution.
+- [mpm] Lower the default verbosity from `INFO` to `WARNING`, leaving only the `✓`/`✗` trail, finishers, and genuine warnings on screen; per-operation narration moves to `INFO` and raw technical detail to `DEBUG`.
 - [mpm] `--timeout` now defaults per-operation (120s for read-only queries, 500s for state-changing operations) instead of a flat 500s; an explicit `--timeout` still overrides.
 - [mpm] `install`, `remove`, `upgrade <packages>`, and `restore` now exit non-zero when a target fails or no manager can fulfill the request, instead of always reporting `0`.
 - [mpm] Fix `install`/`remove`/`upgrade` dropping all but one target when the same package is given with several explicit managers; `install` now acts on every requested package instead of stopping at the first success.
 - [mpm] Fix `install`, `remove`, and `upgrade` reporting success when a manager's CLI fails with a non-zero exit code but empty error output, like steamcmd's anonymous-login failure on Windows.
+- [eopkg] Fix `installed`, `outdated`, and `search` returning no packages.
 - [mpm] Compare a leading version epoch (`1:2.0`, `1!2.0`) as a dominant component, so epoch bumps order correctly across Debian, RPM, pacman, and PEP 440 schemes.
 - [mpm] Resolve `pkg:apk` purls to the `apk` manager and `pkg:npm` purls to `pnpm`; both were missing from the purl-to-manager map.
 

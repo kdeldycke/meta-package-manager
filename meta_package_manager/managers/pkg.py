@@ -70,6 +70,7 @@ class PKG(PackageManager):
     """1.11 is the first version to support ``IGNORE_OSVERSION`` environment variable.
 
     .. code-block:: shell-session
+
         $ pkg --version
         1.20.9
     """

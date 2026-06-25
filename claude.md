@@ -125,7 +125,7 @@ Sequential order is recommended as most package managers don't support concurren
 
 The mpm test suite has two layers:
 
-- A **hermetic unit layer** (`test_cooldown`, `test_docs`, `test_managers`, `test_output`, `test_pool`, `test_specifier`, `test_version`) that needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox; its only extra build dependency is `pyyaml`, imported by `tests/test_docs.py`.
+- A **hermetic unit layer** (`test_cooldown`, `test_docs`, `test_managers`, `test_pool`, `test_specifier`, `test_version`) that needs no network, no package managers and no writable `$HOME`. It runs cleanly inside a build sandbox; its only extra build dependency is `pyyaml`, imported by `tests/test_docs.py`.
 - An **integration layer** (`tests/test_manager_*.py`, `tests/test_cli*.py`) that drives the ~30 real package managers (`apt`, `brew`, `pip`, `npm`, and more) and the `mpm` CLI end-to-end. These cannot run in a hermetic builder.
 
 As of mpm > `6.6.0`, the integration layer **auto-skips when `$HOME` is `/homeless-shelter`** — the build-sandbox convention shared by Guix and Nix — via `extra_platforms.pytest.skip_guix_build` (wired up in `tests/conftest.py`). Those distributors can therefore run the whole `pytest` suite unmodified: just make `pyyaml` available and **do not override `$HOME`** in the package definition, or the auto-skip stops firing and the integration tests fail.

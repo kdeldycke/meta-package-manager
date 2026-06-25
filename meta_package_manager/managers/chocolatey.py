@@ -42,18 +42,17 @@ class Choco(PackageManager):
 
     Source: `choco options and switches
     <https://docs.chocolatey.org/en-us/guides/upgrading-to-chocolatey-v2-v6#the-list-command-now-lists-local-packages-only-and-the-local-only-and-lo-options-have-been-removed>`_.
+
+    .. code-block:: pwsh-session
+
+        > choco --version
+        0.11.0
     """
 
     post_args = ("--no-progress", "--no-color", "--retry-count=3")
 
     _INSTALLED_REGEXP = re.compile(r"(.+)\|(.+)")
     _OUTDATED_REGEXP = re.compile(r"(.+)\|(.+)\|(.+)\|.+")
-    """
-    .. code-block:: pwsh-session
-
-        > choco --version
-        0.11.0
-    """
 
     @property
     def installed(self) -> Iterator[Package]:

@@ -8,6 +8,7 @@
 - **Breaking:** [mpm] Rename the `--allow-no-cooldown` flag to the `--require-cooldown-support`/`--allow-unsupported-managers` pair, and its `allow_no_cooldown` config to `require_cooldown_support` (default `true`).
 - **Breaking:** [mpm] The `sort_by` configuration option is now a list of fields, matching the repeatable `--sort-by`. Wrap an existing scalar value in brackets: `sort_by = "package_id"` becomes `sort_by = ["package_id"]`.
 - [pnpm] Add the pnpm package manager (`installed`, `outdated`, `search`, `install`, `upgrade`, `remove`, `cleanup`), enforcing `--cooldown` via pnpm's native `minimumReleaseAge` gate.
+- [eopkg] Fix `installed`, `outdated`, and `search` returning no packages.
 - [mpm] Filter the package listing by a query: `installed` and `outdated` take an optional `QUERY` argument and `dump`/`backup`/`sbom` a `--query` option, matched fuzzily by default with `--exact`/`--fuzzy` to control it.
 - [mpm] Run managers in parallel via a new `--jobs`/`-j` option (default: CPU count minus one), covering the read-only queries, the maintenance commands, the inventory exporters, and the state changers. Closes {issue}`529`.
 - [mpm] The standalone binary now reads configuration in all six formats (`toml`, `yaml`, `json5`, `jsonc`, `hjson`, `xml`), matching the source distribution.

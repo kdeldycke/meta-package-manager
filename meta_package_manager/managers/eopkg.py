@@ -42,10 +42,11 @@ class EOPKG(PackageManager):
     pre_args = ("--no-color",)
 
     _LIST_REGEXP = re.compile(
-        r"^(?P<package_id>\S+)\s+\|\.+\|\s+(?P<version>\.+)\|\.+\|\.+\|\.+$",
+        r"^(?P<package_id>\S+)\s+\|.+?\|\s*(?P<version>\S+)\s*\|.+?\|.+?\|.+$",
     )
     _SEARCH_REGEXP = re.compile(
-        r"^(?P<package_id>\S+)\s+- (?P<description>\.+)$",
+        r"^(?P<package_id>\S+)\s+- (?P<description>.+)$",
+        re.MULTILINE,
     )
 
     version_regexes = (r"eopkg\s+(?P<version>\S+)",)

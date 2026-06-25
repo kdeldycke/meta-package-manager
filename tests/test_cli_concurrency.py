@@ -377,8 +377,8 @@ def test_per_package_tasks_of_one_manager_share_a_thread():
 
 def test_per_package_empty_is_a_noop():
     ctx = FakeContext(jobs=4)
-    # type: ignore[arg-type]
-    assert collect_per_package("Doing", "Done", [], ctx=ctx) is None
+    # No tasks: returns without dispatching anything (and raises nothing).
+    collect_per_package("Doing", "Done", [], ctx=ctx)  # type: ignore[arg-type]
 
 
 def test_per_package_finisher_when_spinner_shown(monkeypatch):
@@ -449,7 +449,7 @@ def test_operation_trail_echoes_marks_and_finisher_on_tty(monkeypatch):
     """On a TTY the ledger echoes a ✓/✗ line per mark, plus a timed finisher."""
     tty = TTYStringIO()
     monkeypatch.setattr("sys.stderr", tty)
-    trail = OperationTrail([FakeManager("brew", progress=True)])
+    trail = OperationTrail([FakeManager("brew", progress=True)])  # type: ignore[list-item]
     trail.mark(True, "foo installed with brew")
     trail.mark(False, "bar failed with brew")
     trail.finish(False, "Installed 1/2 packages")
@@ -463,7 +463,7 @@ def test_operation_trail_echoes_marks_and_finisher_on_tty(monkeypatch):
 
 def test_operation_trail_silent_off_terminal(capsys):
     """Off a terminal the sequential ledger stays silent."""
-    trail = OperationTrail([FakeManager("brew", progress=True)])
+    trail = OperationTrail([FakeManager("brew", progress=True)])  # type: ignore[list-item]
     trail.mark(True, "foo installed with brew")
     trail.finish(True, "Installed 1/1 packages")
     assert capsys.readouterr().err == ""

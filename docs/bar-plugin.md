@@ -79,7 +79,7 @@ A copy of the latest stable version of the plugin is
 and
 [plugin repository](https://github.com/matryer/xbar-plugins/blob/master/Dev/meta_package_manager.7h.py).
 
-Once `mpm` is installed on your system, it can dynamiccaly be located with the dedicated `--xbar-plugin-path` option:
+Once `mpm` is installed on your system, it can dynamiccaly be located with the dedicated `--bar-plugin-path` option:
 
 ```shell-session
 $ mpm --bar-plugin-path

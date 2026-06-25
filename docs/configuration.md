@@ -206,8 +206,6 @@ This is equivalent to always passing `--flatpak --pipx` on the command line.
 
 ```shell-session
 $ mpm managers
-info: User selection of managers by priority: > flatpak > pipx
-info: Managers dropped by user: None
 ╭────────────┬─────────┬────────────────────┬──────────────────────────┬────────────┬─────────╮
 │ Manager ID │ Name    │ Supported          │ CLI                      │ Executable │ Version │
 ├────────────┼─────────┼────────────────────┼──────────────────────────┼────────────┼─────────┤

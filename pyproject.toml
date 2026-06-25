@@ -497,6 +497,15 @@ exclude = [
   "^https://openclipart\\.org/.*$",
 ]
 
+# Declarative CLI test suite for binary testing. Repomatic's test and release
+# workflows run `click-extra test-suite` against the built binary; that engine
+# (the `test-plan` engine, renamed and moved upstream into click-extra 8.1)
+# resolves its cases from this section. Without it, click-extra looks for its
+# default `./tests/cli-test-suite.toml`, finds nothing, and silently falls back
+# to a trivial built-in suite, so the binary self-test must point here explicitly.
+[tool.click-extra.test-suite]
+file = "./tests/cli-test-plan.yaml"
+
 [tool.repomatic]
 exclude = [ "labels", "skills" ]
 # Source paths for workflow trigger filters.
@@ -523,8 +532,6 @@ test-matrix.exclude = [
   { os = "macos-26-intel", python-version = "3.15" },
   { os = "windows-2025", python-version = "3.15" },
 ]
-# Test plan for binary testing.
-test-plan.file = "./tests/cli-test-plan.yaml"
 # Sync optional-dependencies into the build venv so the Nuitka binary ships
 # every feature gated behind try/except imports in click-extra and mpm:
 #   - sbom: cyclonedx-python-lib + spdx-tools, for `mpm sbom --spdx` and

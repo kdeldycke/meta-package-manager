@@ -71,7 +71,6 @@ from click_extra.spinner import Spinner
 from click_extra.testing import INDENT, PROMPT, args_cleanup
 from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
 from extra_platforms import UNIX, current_platform, is_any_windows
-from typing_extensions import Self
 
 from .version import parse_version
 
@@ -85,6 +84,7 @@ if TYPE_CHECKING:
     from click import Context
     from click_extra.envvar import TEnvVars
     from click_extra.testing import TArg, TNestedArgs
+    from typing_extensions import Self
 
     from .manager import PackageManager
     from .version import TokenizedString

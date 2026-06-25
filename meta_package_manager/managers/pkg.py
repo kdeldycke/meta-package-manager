@@ -67,18 +67,17 @@ class PKG(PackageManager):
     platforms = FREEBSD
 
     requirement = ">=1.11"
-    """1.11 is the first version to support ``IGNORE_OSVERSION`` environment variable."""
+    """1.11 is the first version to support ``IGNORE_OSVERSION`` environment variable.
+
+    .. code-block:: shell-session
+        $ pkg --version
+        1.20.9
+    """
 
     pre_args = ("--quiet",)
 
     _INSTALLED_REGEXP = re.compile(r"(\S+) (\S+) (.+)")
     _OUTDATED_REGEXP = re.compile(r"(\S+): (\S+) -> (\S+) .+")
-
-    """
-    .. code-block:: shell-session
-        $ pkg --version
-        1.20.9
-    """
 
     @property
     def installed(self) -> Iterator[Package]:

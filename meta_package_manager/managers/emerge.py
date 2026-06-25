@@ -130,7 +130,7 @@ class Emerge(PackageManager):
         # Locate qlist.
         qlist_path = self.which("qlist")
         if not qlist_path:
-            raise FileNotFoundError(qlist_path)
+            raise FileNotFoundError("qlist")
 
         output = self.run_cli(
             "--installed",

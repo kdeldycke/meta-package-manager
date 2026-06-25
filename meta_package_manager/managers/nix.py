@@ -55,14 +55,6 @@ class Nix(PackageManager):
         nix-env (Nix) 2.18.1
     """
 
-    _NAME_VERSION_REGEXP = re.compile(
-        r"^(?P<package_id>.+)-(?P<version>\d\S*)$",
-    )
-    """Split a Nix derivation name into package name and version.
-
-    Nix convention: version starts after the last hyphen followed by a digit.
-    """
-
     _OUTDATED_REGEXP = re.compile(
         r"^(?P<name_version>\S+)\s+<\s+(?P<latest_version>\S+)",
         re.MULTILINE,

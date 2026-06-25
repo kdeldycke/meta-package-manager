@@ -20,7 +20,7 @@ from __future__ import annotations
 from boltons.iterutils import flatten
 from extra_platforms import extract_members
 
-from .inventory import MAIN_PLATFORMS
+from .platforms import MAIN_PLATFORMS
 from .pool import pool
 
 TYPE_CHECKING = False
@@ -51,18 +51,24 @@ def generate_labels(
     groups: TLabelGroup,
     prefix: str,
     color: str,
-) -> dict[str, str]:
+) -> tuple[dict[str, str], list[tuple[str, str, str]]]:
     """Generate labels.
 
     A dedicated label is produced for each entry of the ``all_labels`` parameter,
     unless it is part of a ``group``. In which case a dedicated label for that group
     will be created.
+
+    Returns the ``{label_id: label_name}`` map and the list of
+    ``(label_name, color, description)`` rows to register, leaving the caller to fold
+    them into the global :data:`LABELS` registry. Kept pure (no global mutation) so it
+    can be called repeatedly without double-populating the registry.
     """
     # Check all labels to group are referenced in the full label set.
     grouped_labels = set(flatten(groups.values()))
     assert grouped_labels.issubset(all_labels)
 
     label_map = {}
+    rows: list[tuple[str, str, str]] = []
 
     # Create a dedicated label for each non-grouped entry.
     standalone_labels = all_labels - grouped_labels
@@ -71,8 +77,7 @@ def generate_labels(
         # Check the addition of the prefix does not collide with an existing label.
         assert label_name not in all_labels
         label_map[label_id] = label_name
-        # Register label to the global registry.
-        LABELS.append((label_name, color, label_id))
+        rows.append((label_name, color, label_id))
 
     # Create a dedicated label for each group.
     for group_id, label_ids in groups.items():
@@ -91,11 +96,10 @@ def generate_labels(
             else:
                 description += truncation_mark
                 break
-        # Register label to the global registry.
-        LABELS.append((label_name, color, description))
+        rows.append((label_name, color, description))
 
     # Sort label_map by their name.
-    return dict(sorted(label_map.items(), key=lambda i: str.casefold(i[1])))
+    return dict(sorted(label_map.items(), key=lambda i: str.casefold(i[1]))), rows
 
 
 MANAGER_PREFIX = "📦 manager: "
@@ -126,7 +130,7 @@ all_manager_label_ids = frozenset(set(pool.all_manager_ids) | {"mpm"})
 # Check group IDs do not collide with original labels.
 assert all_manager_label_ids.isdisjoint(MANAGER_LABEL_GROUPS.keys())
 
-MANAGER_LABELS = generate_labels(
+MANAGER_LABELS, _manager_label_rows = generate_labels(
     all_manager_label_ids,
     MANAGER_LABEL_GROUPS,
     MANAGER_PREFIX,
@@ -146,7 +150,7 @@ for p_obj in MAIN_PLATFORMS:
 
 all_platform_label_ids = frozenset(flatten(PLATFORM_LABEL_GROUPS.values()))
 
-PLATFORM_LABELS = generate_labels(
+PLATFORM_LABELS, _platform_label_rows = generate_labels(
     all_platform_label_ids,
     PLATFORM_LABEL_GROUPS,
     PLATFORM_PREFIX,
@@ -154,5 +158,8 @@ PLATFORM_LABELS = generate_labels(
 )
 """Maps all platform names to their labels."""
 
-# Force sorting of labels.
-LABELS = sorted(LABELS, key=lambda i: str.casefold(i[0]))
+# Fold the generated manager and platform rows into the registry, then sort it.
+LABELS = sorted(
+    (*LABELS, *_manager_label_rows, *_platform_label_rows),
+    key=lambda i: str.casefold(i[0]),
+)

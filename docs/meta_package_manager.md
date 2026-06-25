@@ -73,19 +73,19 @@
    :undoc-members:
 ```
 
-## meta_package_manager.execution module
+## meta_package_manager.duration module
 
 ```{eval-rst}
-.. automodule:: meta_package_manager.execution
+.. automodule:: meta_package_manager.duration
    :members:
    :show-inheritance:
    :undoc-members:
 ```
 
-## meta_package_manager.inventory module
+## meta_package_manager.execution module
 
 ```{eval-rst}
-.. automodule:: meta_package_manager.inventory
+.. automodule:: meta_package_manager.execution
    :members:
    :show-inheritance:
    :undoc-members:
@@ -118,10 +118,28 @@
    :undoc-members:
 ```
 
+## meta_package_manager.platforms module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.platforms
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
 ## meta_package_manager.pool module
 
 ```{eval-rst}
 .. automodule:: meta_package_manager.pool
+   :members:
+   :show-inheritance:
+   :undoc-members:
+```
+
+## meta_package_manager.sorting module
+
+```{eval-rst}
+.. automodule:: meta_package_manager.sorting
    :members:
    :show-inheritance:
    :undoc-members:

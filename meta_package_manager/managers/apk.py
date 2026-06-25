@@ -53,15 +53,6 @@ class APK(PackageManager):
     Source: ``apk(8)`` global options.
     """
 
-    _NAME_VERSION_REGEXP = re.compile(r"^(?P<package_id>.+)-(?P<version>\d\S*)$")
-    """Split an apk pkgver string into package name and version.
-
-    Alpine convention: ``<name>-<version>-r<release>``. The version starts at
-    the last hyphen followed by a digit, so trailing ``-r<n>`` release suffixes
-    stay with the version while leading ``-<digit>`` segments in the name (like
-    ``python3``) stay with the name.
-    """
-
     _INSTALLED_REGEXP = re.compile(
         r"^(?P<pkgver>\S+)\s.+\[installed\]\s*$",
         re.MULTILINE,

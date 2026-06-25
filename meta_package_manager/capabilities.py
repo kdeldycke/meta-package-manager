@@ -90,11 +90,11 @@ def implements(manager: PackageManager | type[PackageManager], op: Operations) -
     # General case: the operation and the method implementing it shares the same ID.
     method_deps: tuple[set[str], ...] = ({op.name},)
 
-    # Special case for single-package `upgrade`: we depends on `upgrade_one_cli()`.
+    # Special case for single-package `upgrade`: we depend on `upgrade_one_cli()`.
     if op == Operations.upgrade:
         method_deps = ({"installed", "upgrade_one_cli"},)
 
-    # For `upgrade_all`: we depends on eother `upgrade_all_cli()`, or we can
+    # For `upgrade_all`: we depend on either `upgrade_all_cli()`, or we can
     # simulate the latter with a combination of `outdated()` and
     # `upgrade_one_cli()`.
     elif op == Operations.upgrade_all:

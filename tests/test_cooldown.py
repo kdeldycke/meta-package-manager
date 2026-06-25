@@ -22,7 +22,8 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from click.exceptions import BadParameter
 
-from meta_package_manager.cli import Duration, cooldown_permits
+from meta_package_manager.cli import cooldown_permits
+from meta_package_manager.duration import Duration
 from meta_package_manager.managers.cargo import Cargo
 from meta_package_manager.managers.homebrew import Homebrew
 from meta_package_manager.managers.npm import NPM

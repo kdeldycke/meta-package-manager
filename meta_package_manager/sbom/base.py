@@ -34,6 +34,8 @@ TYPE_CHECKING = False
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from ..package import PackageMetadata
+
 
 class ExportFormat(StrEnum):
     """A user-friendly version of ``spdx_tools.spdx.formats.FileFormat``.
@@ -59,18 +61,6 @@ class SBOM:
         lockfiles, whereas ``mpm`` queries the live managers directly.
     """
 
-    bundled_scan: bool = True
-    """Whether the scan was a ``--bundled`` enrichment pass.
-
-    Set by :py:meth:`set_scan_completeness` from the CLI. ``True`` means
-    the metadata extractors ran and upstream per-package SBOMs were
-    merged (the default). ``False`` is the ``--minimal`` mode: bare
-    inventory only, no extractor calls. Subclasses use this flag to
-    populate completeness markers in their respective standards
-    (``incomplete`` vs ``complete`` in CycloneDX, ``EXTRACTED`` license
-    handling in SPDX).
-    """
-
     def __init__(
         self,
         export_format: ExportFormat = ExportFormat.JSON,  # type: ignore[assignment]
@@ -93,7 +83,7 @@ class SBOM:
         self,
         manager_id: str,
         package_id: str,
-        metadata,
+        metadata: PackageMetadata | None,
     ) -> None:
         """Record that one package entered the document.
 
@@ -131,15 +121,6 @@ class SBOM:
             "enriched_per_manager": dict(self.enriched_per_manager),
         }
 
-    def set_scan_completeness(self, bundled: bool) -> None:
-        """Record whether the run was a bundled enrichment pass.
-
-        Called once by the CLI right after ``init_doc()`` and before
-        the first ``add_package()``. The information flows into
-        per-format completeness markers in the rendered document.
-        """
-        self.bundled_scan = bundled
-
     def finalize(self) -> None:
         """Resolve any deferred state before ``export()``.
 
@@ -156,7 +137,7 @@ class SBOM:
         """Better version of ``spdx_tools.spdx.formats.file_name_to_format`` which is
         based on ``Path`` objects and is case-insensitive.
 
-        .. todo:
+        .. todo::
             Contribute generic autodetection method to Click Extra?
         """
         suffixes = tuple(s.lower() for s in file_path.suffixes[-2:])

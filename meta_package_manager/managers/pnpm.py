@@ -17,7 +17,6 @@
 from __future__ import annotations
 
 import json
-import math
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -79,8 +78,7 @@ class PNPM(PackageManager):
         Sub-minute cooldowns round up so the gate over-protects rather than silently
         collapsing to ``0`` (the "no cooldown" sentinel).
         """
-        assert self.cooldown is not None
-        return str(math.ceil(self.cooldown.total_seconds() / 60))
+        return self.cooldown_rounded_up(60)
 
     @property
     def installed(self) -> Iterator[Package]:

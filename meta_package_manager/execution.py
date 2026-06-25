@@ -43,6 +43,7 @@ and sequential paths both report through.
 from __future__ import annotations
 
 import logging
+import math
 import os
 import re
 import shutil
@@ -421,6 +422,19 @@ class CLIExecutor:
         assert self.cooldown is not None
         cutoff = datetime.now(tz=timezone.utc) - self.cooldown
         return cutoff.isoformat()
+
+    def cooldown_rounded_up(self, unit_seconds: int) -> str:
+        """Render :py:attr:`cooldown` as an integer count of ``unit_seconds``-long
+        units, rounded up.
+
+        Helper for the :py:meth:`cooldown_env_value` overrides of managers whose native
+        release-age knob expects a unit count rather than the default RFC 3339 timestamp
+        (npm's day-based ``min-release-age``, pnpm's minute-based ``minimumReleaseAge``).
+        Sub-unit cooldowns round up so the gate over-protects rather than silently
+        collapsing to ``0`` (the "no cooldown" sentinel).
+        """
+        assert self.cooldown is not None
+        return str(math.ceil(self.cooldown.total_seconds() / unit_seconds))
 
     def cooldown_env(self) -> TEnvVars:
         """Environment fragment enforcing the :py:attr:`cooldown`, empty when inactive.

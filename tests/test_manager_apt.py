@@ -39,14 +39,13 @@ def exact_search():
 
 
 @unless_linux
-class TestAPT:
-    def test_nonempty_exact_search_results(self, invoke, exact_search):
-        # Search for a package by the exact name, and check that apt finds it.
-        output = exact_search("snapd")
-        assert "snapd/" in output
+def test_nonempty_exact_search_results(invoke, exact_search):
+    # Search for a package by the exact name, and check that apt finds it.
+    output = exact_search("snapd")
+    assert "snapd/" in output
 
-        # Check that mpm recognizes that package.
-        result = invoke("--apt", "search", "--exact", "snapd")
-        assert result.exit_code == 0
-        assert "snapd" in result.stdout
-        assert "apt" in result.stdout
+    # Check that mpm recognizes that package.
+    result = invoke("--apt", "search", "--exact", "snapd")
+    assert result.exit_code == 0
+    assert "snapd" in result.stdout
+    assert "apt" in result.stdout

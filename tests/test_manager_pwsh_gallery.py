@@ -54,30 +54,28 @@ def test_pwsh_quote(value, expected):
     assert _pwsh_quote(value) == expected
 
 
-def test_parse_json_array_empty_string(manager):
-    assert manager._parse_json_array("") == []
-
-
-def test_parse_json_array_whitespace_only(manager):
-    assert manager._parse_json_array("   \n\n  ") == []
-
-
-def test_parse_json_array_single_entry(manager):
-    # ``ConvertTo-Json -AsArray`` always emits a JSON array, even for one item.
-    output = '[{"Name":"PSReadLine","Version":"2.3.6"}]'
-    assert manager._parse_json_array(output) == [
-        {"Name": "PSReadLine", "Version": "2.3.6"},
-    ]
-
-
-def test_parse_json_array_multiple_entries(manager):
-    output = (
-        '[{"Name":"PSReadLine","Version":"2.3.6"},{"Name":"Pester","Version":"5.5.0"}]'
-    )
-    assert manager._parse_json_array(output) == [
-        {"Name": "PSReadLine", "Version": "2.3.6"},
-        {"Name": "Pester", "Version": "5.5.0"},
-    ]
+@pytest.mark.parametrize(
+    ("output", "expected"),
+    (
+        ("", []),
+        ("   \n\n  ", []),
+        # ``ConvertTo-Json -AsArray`` always emits a JSON array, even for one item.
+        (
+            '[{"Name":"PSReadLine","Version":"2.3.6"}]',
+            [{"Name": "PSReadLine", "Version": "2.3.6"}],
+        ),
+        (
+            '[{"Name":"PSReadLine","Version":"2.3.6"},'
+            '{"Name":"Pester","Version":"5.5.0"}]',
+            [
+                {"Name": "PSReadLine", "Version": "2.3.6"},
+                {"Name": "Pester", "Version": "5.5.0"},
+            ],
+        ),
+    ),
+)
+def test_parse_json_array(manager, output, expected):
+    assert manager._parse_json_array(output) == expected
 
 
 def test_installed_yields_packages(manager, monkeypatch):

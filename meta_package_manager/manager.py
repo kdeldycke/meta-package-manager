@@ -32,6 +32,7 @@ availability policy: whether the manager is supported, fresh, and ready to use.
 from __future__ import annotations
 
 import logging
+import re
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
@@ -52,6 +53,8 @@ from .version import VersionRange
 TYPE_CHECKING = False
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
+
+    from .version import TokenizedString
 
 
 class ManagerScope(Enum):
@@ -212,6 +215,19 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     """Some managers can report or ignore packages which have their own auto-update
     mechanism."""
 
+    _NAME_VERSION_REGEXP: ClassVar[re.Pattern[str]] = re.compile(
+        r"^(?P<package_id>.+)-(?P<version>\d\S*)$",
+    )
+    """Default ``<package_id>-<version>`` splitter for managers whose listings pack the
+    name and version into one dash-joined token (``apk``, ``nix``, ``xbps``).
+
+    The ``.+`` name segment is greedy, so the version starts at the *last* hyphen
+    followed by a digit: dashes inside the name (``python3``) stay with the name, while
+    trailing ecosystem suffixes (Alpine ``-r<release>``, XBPS ``_<revision>``) stay with
+    the version. Managers with a different layout override it (``pkg`` allows a
+    non-numeric version lead).
+    """
+
     def package(self, **kwargs) -> Package:
         """Instantiate a ``Package`` object from the manager.
 
@@ -336,6 +352,19 @@ class PackageManager(CLIExecutor, metaclass=MetaPackageManager):
     def installed_ids(self) -> frozenset[str]:
         """Installed package IDs, materialized once from :py:meth:`installed`."""
         return frozenset(pkg.id for pkg in self.installed)
+
+    @cached_property
+    def installed_version_map(self) -> dict[str, TokenizedString | str | None]:
+        """Installed versions keyed by package ID, materialized once from
+        :py:meth:`installed`.
+
+        Convenience for ``outdated`` parsers that report each package's latest version
+        but not its currently-installed one, and so must look the latter up by ID
+        (``snap``, ``xbps``). The value mirrors
+        :py:attr:`meta_package_manager.package.Package.installed_version`, whose declared
+        type still carries the transient ``str`` it normalizes away in ``__post_init__``.
+        """
+        return {pkg.id: pkg.installed_version for pkg in self.installed}
 
     def package_metadata_batch(
         self,

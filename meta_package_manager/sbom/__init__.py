@@ -23,20 +23,6 @@ their heavy imports with ``try/except`` and expose
 ``spdx_support`` / ``cyclonedx_support`` flags that callers check before
 instantiating the rendering classes.
 
-Modules:
-
-- :py:mod:`meta_package_manager.sbom.base` defines
-  :py:class:`~meta_package_manager.sbom.base.SBOM`, the abstract base each
-  format extends, and :py:class:`~meta_package_manager.sbom.base.ExportFormat`,
-  the user-facing format enum.
-- :py:mod:`meta_package_manager.sbom.spdx` defines
-  :py:class:`~meta_package_manager.sbom.spdx.SPDX`, the SPDX 2.3 writer
-  including the per-package upstream-SBOM merge logic that powers
-  ``--bundled`` mode on Homebrew formulae shipped with ``HOMEBREW_SBOM=1``.
-- :py:mod:`meta_package_manager.sbom.cyclonedx` defines
-  :py:class:`~meta_package_manager.sbom.cyclonedx.CycloneDX`, the
-  CycloneDX 1.7 writer.
-
 The public surface re-exported here is the only API
 :py:mod:`meta_package_manager.cli` and the test suite depend on. Internal
 helpers (license parsing, checksum maps, etc.) stay in their respective

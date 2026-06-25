@@ -250,12 +250,6 @@ class Specifier:
     def parsed_version(self) -> TokenizedString:
         return parse_version(self.version)  # type:ignore[arg-type]
 
-    @cached_property
-    def is_blank(self) -> bool:
-        """Is considered blank a ``Specifier`` without any constraint on ``manager_id``
-        or ``version``."""
-        return not bool(self.manager_id or self.version)
-
     def __str__(self) -> str:
         """Human readable string of the spec.
 

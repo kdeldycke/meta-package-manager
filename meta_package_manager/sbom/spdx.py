@@ -190,9 +190,9 @@ class SPDX(SBOM):
     merged_docs: dict[str, str]
 
     @classmethod
-    def normalize_spdx_id(cls, str: str) -> str:
+    def normalize_spdx_id(cls, value: str) -> str:
         """SPDX IDs must only contain letters, numbers, ``.`` and ``-``."""
-        return "-".join(s for s in re.split(r"[^a-zA-Z0-9\.]", str) if s)
+        return "-".join(s for s in re.split(r"[^a-zA-Z0-9\.]", value) if s)
 
     def init_doc(self) -> None:
         """

@@ -64,13 +64,6 @@ class XBPS(PackageManager):
     <meta_package_manager.manager.PackageManager.cli_path>`.
     """
 
-    _NAME_VERSION_REGEXP = re.compile(r"^(?P<package_id>.+)-(?P<version>\d\S*)$")
-    """Split an XBPS pkgver string into package name and version.
-
-    XBPS convention: ``<name>-<version>_<revision>``. The version starts
-    after the last hyphen followed by a digit.
-    """
-
     _INSTALLED_REGEXP = re.compile(
         r"^ii\s+(?P<pkgver>\S+)\s+(?P<description>.+)$",
         re.MULTILINE,
@@ -144,7 +137,7 @@ class XBPS(PackageManager):
             firefox-120.0_1 update x86_64 https://repo-default.voidlinux.org/current 45MB 12MB
             python3-3.11.6_2 update x86_64 https://repo-default.voidlinux.org/current 30MB 8MB
         """
-        installed_versions = {p.id: p.installed_version for p in self.installed}
+        installed_versions = self.installed_version_map
 
         output = self.run_cli("--update", "--dry-run")
 

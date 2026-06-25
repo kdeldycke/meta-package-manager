@@ -27,7 +27,7 @@ from typing import cast
 
 from extra_platforms import ALL_PLATFORMS
 
-from ..capabilities import search_capabilities, version_not_implemented
+from ..capabilities import version_not_implemented
 from ..manager import PackageManager
 from ..package import (
     EMPTY_METADATA,
@@ -107,19 +107,6 @@ class Pip(PackageManager):
 
     See https://github.com/pypa/pip/issues/13674.
     """
-
-    _SEARCH_REGEXP = re.compile(
-        r"""
-        ^(?P<package_id>\S+)  # A string with a char at least.
-        \                     # A space.
-        \((?P<version>.*?)\)  # Content between parenthesis.
-        [ ]+-                 # A space or more, then a dash.
-        (?P<description>      # Start of the multi-line desc group.
-            (?:[ ]+.*\s)+     # Lines of strings prefixed by spaces.
-        )
-        """,
-        re.MULTILINE | re.VERBOSE,
-    )
 
     # Targets `python3` CLI first to allow for some systems (like macOS) to keep the
     # default `python` CLI tied to the Python 2.x ecosystem.
@@ -549,52 +536,9 @@ class Pip(PackageManager):
                     latest_version=package["latest_version"],
                 )
 
-    @search_capabilities(extended_support=False, exact_support=False)
-    def search_xxx_disabled(
-        self,
-        query: str,
-        extended: bool,
-        exact: bool,
-    ) -> Iterator[Package]:
-        """Fetch matching packages.
-
-        .. warning::
-            That function was previously named ``search`` but has been renamed
-            to make it invisible from the ``mpm`` framework, disabling search
-            feature altogether for ``pip``.
-
-            This had to be done has Pip's maintainers disabled the server-side
-            API because of unmanageable high-load. See:
-            https://github.com/pypa/pip/issues/5216#issuecomment-744605466
-
-        .. caution::
-            Search is extended by default. So we returns the best subset of results and
-            let :py:meth:`meta_package_manager.manager.PackageManager.refiltered_search`
-            refine them
-
-        .. code-block:: shell-session
-
-            $ python -m pip --no-color search abc
-            ABC (0.0.0)                 - UNKNOWN
-            micropython-abc (0.0.1)     - Dummy abc module for MicroPython
-            abc1 (1.2.0)                - a list about my think
-            abcd (0.3.0)                - AeroGear Build Cli for Digger
-            abcyui (1.0.0)              - Sorry ,This is practice!
-            astroabc (1.4.2)            - A Python implementation of an
-                                          Approximate Bayesian Computation
-                                          Sequential Monte Carlo (ABC SMC)
-                                          sampler for parameter estimation.
-            collective.js.abcjs (1.10)  - UNKNOWN
-            cosmo (1.0.5)               - Python ABC sampler
-        """
-        output = self.run_cli("search", query)
-
-        for package_id, version, description in self._SEARCH_REGEXP.findall(output):
-            yield self.package(
-                id=package_id,
-                description=description,
-                latest_version=version,
-            )
+    # No search operation: PyPI disabled its server-side search API in 2020 because of
+    # unmanageable load, so `pip search` no longer works.
+    # See https://github.com/pypa/pip/issues/5216#issuecomment-744605466.
 
     @version_not_implemented
     def install(self, package_id: str, version: str | None = None) -> str:

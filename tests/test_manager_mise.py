@@ -43,13 +43,9 @@ def test_installed_yields_packages(manager, monkeypatch):
     assert str(packages[0].installed_version) == "20.10.0"
 
 
-def test_installed_handles_empty_output(manager, monkeypatch):
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: "")
-    assert list(manager.installed) == []
-
-
-def test_installed_handles_empty_object(manager, monkeypatch):
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: "{}")
+@pytest.mark.parametrize("output", ("", "{}"))
+def test_installed_handles_empty(manager, monkeypatch, output):
+    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
     assert list(manager.installed) == []
 
 
@@ -88,13 +84,9 @@ def test_outdated_yields_upgrades(manager, monkeypatch):
     assert str(packages[0].latest_version) == "20.10.0"
 
 
-def test_outdated_handles_empty_output(manager, monkeypatch):
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: "")
-    assert list(manager.outdated) == []
-
-
-def test_outdated_handles_empty_object(manager, monkeypatch):
-    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: "{}")
+@pytest.mark.parametrize("output", ("", "{}"))
+def test_outdated_handles_empty(manager, monkeypatch, output):
+    monkeypatch.setattr(manager, "run_cli", lambda *a, **kw: output)
     assert list(manager.outdated) == []
 
 

@@ -17,7 +17,6 @@
 from __future__ import annotations
 
 import json
-import math
 
 from extra_platforms import ALL_PLATFORMS
 
@@ -85,8 +84,7 @@ class NPM(PackageManager):
         Sub-day cooldowns round up so the gate over-protects rather than silently
         collapses to ``0`` (the "no cooldown" sentinel).
         """
-        assert self.cooldown is not None
-        return str(math.ceil(self.cooldown.total_seconds() / 86400))
+        return self.cooldown_rounded_up(86400)
 
     pre_args = (
         # Operates in "global" mode, so that packages are installed into the

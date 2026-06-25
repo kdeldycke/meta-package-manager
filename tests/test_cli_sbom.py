@@ -362,7 +362,6 @@ def test_minimal_mode_emits_bare_spdx_payload():
     """
     s = SPDX()
     s.init_doc()
-    s.set_scan_completeness(bundled=False)
     manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
     pkg = _make_package("brew", "curl", "8.9.0")
     s.add_package(manager, pkg)  # No metadata, simulating minimal mode.
@@ -382,7 +381,6 @@ def test_bundled_mode_spdx_populates_rich_fields():
     """
     s = SPDX()
     s.init_doc()
-    s.set_scan_completeness(bundled=True)
     manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
     curl = _make_package("brew", "curl", "8.9.0")
     openssl = _make_package("brew", "openssl", "3.3.1")
@@ -406,7 +404,6 @@ def test_bundled_mode_cyclonedx_populates_rich_fields():
     """
     c = CycloneDX()
     c.init_doc()
-    c.set_scan_completeness(bundled=True)
     manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
     curl = _make_package("brew", "curl", "8.9.0")
     openssl = _make_package("brew", "openssl", "3.3.1")
@@ -454,7 +451,6 @@ def test_cyclonedx_compound_license_expression_details(
     """
     c = CycloneDX()
     c.init_doc()
-    c.set_scan_completeness(bundled=True)
     manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
     pkg = _make_package("brew", "curl", "8.9.0")
     md = PackageMetadata(license_declared=expression, license_concluded=expression)
@@ -496,7 +492,6 @@ def test_spdx_license_normalization(declared, expected_present):
     """
     s = SPDX()
     s.init_doc()
-    s.set_scan_completeness(bundled=True)
     md = PackageMetadata(license_declared=declared)
     s.add_package(
         _as_manager(_StubManager("brew", "Homebrew Formulae")),
@@ -554,7 +549,6 @@ def test_spdx_merges_external_per_package_sbom(tmp_path):
     md = PackageMetadata(external_sbom_path=sbom_file)
     s = SPDX()
     s.init_doc()
-    s.set_scan_completeness(bundled=True)
     s.add_package(
         _as_manager(_StubManager("brew", "Homebrew Formulae")),
         _make_package("brew", "curl", "8.9.0"),
@@ -609,7 +603,6 @@ def test_stats_track_per_manager_and_merge_counts(tmp_path):
 
     s = SPDX()
     s.init_doc()
-    s.set_scan_completeness(bundled=True)
     manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
     s.add_package(
         manager,
@@ -641,7 +634,6 @@ def test_cyclonedx_stats_count_external_bom_refs(tmp_path):
     sbom_file.write_text("{}")
     c = CycloneDX()
     c.init_doc()
-    c.set_scan_completeness(bundled=True)
     manager = _as_manager(_StubManager("brew", "Homebrew Formulae"))
     c.add_package(
         manager,

@@ -86,8 +86,7 @@ class Snap(PackageManager):
         """
         output = self.run_cli("refresh", "--list")
 
-        # Build a lookup of installed versions to avoid one CLI call per package.
-        installed_versions = {p.id: p.installed_version for p in self.installed}
+        installed_versions = self.installed_version_map
 
         for package in output.splitlines()[1:]:
             parts = package.split()

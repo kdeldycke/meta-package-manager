@@ -25,8 +25,8 @@ from pathlib import Path
 from extra_platforms import Group, extract_members
 from yaml import Loader, load, safe_load
 
-from meta_package_manager.inventory import MAIN_PLATFORMS
 from meta_package_manager.labels import LABELS, MANAGER_PREFIX, PLATFORM_PREFIX
+from meta_package_manager.platforms import MAIN_PLATFORMS
 from meta_package_manager.pool import pool
 
 from .conftest import all_managers

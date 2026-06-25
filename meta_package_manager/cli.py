@@ -26,30 +26,26 @@ from __future__ import annotations
 
 import logging
 import platform
-import re
 import sys
 import threading
 from collections import Counter, namedtuple
 from collections.abc import Iterable
 from configparser import RawConfigParser
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from functools import partial
 from io import TextIOWrapper
 from pathlib import Path
 from textwrap import dedent
-from typing import ClassVar
 from unittest.mock import patch
 
 import tomli_w
 from boltons.cacheutils import LRI, cached
-from boltons.strutils import strip_ansi
 from click_extra import (
     STRING,
     Choice,
     EnumChoice,
     File,
     IntRange,
-    ParamType,
     Section,
     UsageError,
     VersionOption,
@@ -69,7 +65,6 @@ from click_extra.logging import LogLevel
 from click_extra.table import (
     SERIALIZATION_FORMATS,
     print_data,
-    print_table,
 )
 from click_extra.theme import KO_GLYPH, OK_GLYPH, get_current_theme as theme
 from extra_platforms import current_architecture, current_platform, reduce
@@ -85,6 +80,7 @@ from .config import (
     dump_manager_overrides,
     print_contribution_hints,
 )
+from .duration import Duration
 from .execution import (
     CLIError,
     OperationTrail,
@@ -93,9 +89,9 @@ from .execution import (
     highlight_cli_name,
     warn_jobs_ignored,
 )
-from .inventory import MAIN_PLATFORMS
 from .manager import PackageManager
 from .package import packages_asdict
+from .platforms import MAIN_PLATFORMS
 from .pool import pool
 from .sbom import (
     SBOM,
@@ -105,26 +101,22 @@ from .sbom import (
     cyclonedx_support,
     spdx_support,
 )
+from .sorting import SortableField, print_sorted_table
 from .specifier import VERSION_SEP, Solver, Specifier
 from .summary import package_counts, print_summary, sbom_summary
 from .version import diff_versions
 
 if sys.version_info >= (3, 11):
-    from enum import StrEnum
-
     import tomllib
 else:
     import tomli as tomllib  # type: ignore[import-not-found]
-    from backports.strenum import StrEnum  # type: ignore[import-not-found]
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator, Sequence
+    from collections.abc import Callable, Iterator
     from typing import IO
 
-    from click import Context as ClickContext
     from click_extra import Context, Parameter
-    from click_extra.table import TableFormat
 
     from .package import Package
 
@@ -134,79 +126,6 @@ EXPLORE = Section("Explore subcommands")
 MAINTENANCE = Section("Maintenance subcommands")
 SNAPSHOTS = Section("Package snapshots subcommands")
 SBOM_SECTION = Section("SBOM subcommands")
-
-
-class SortableField(StrEnum):
-    """Fields IDs allowed to be sorted."""
-
-    MANAGER_ID = "manager_id"
-    MANAGER_NAME = "manager_name"
-    PACKAGE_ID = "package_id"
-    PACKAGE_NAME = "package_name"
-    VERSION = "version"
-
-
-def _column_row_key(order: Sequence[int], row: Sequence[str | None]) -> tuple:
-    """Build a row's sort key over the ``order`` columns, stripped and casefolded.
-
-    Empty or ``None`` cells collate as the empty string. Mirrors the per-cell
-    comparison click-extra's own table sorter applies.
-    """
-    return tuple(strip_ansi(cell).casefold() if (cell := row[i]) else "" for i in order)
-
-
-def _sort_column_order(
-    fields: Sequence[SortableField | None],
-    sort_by: Sequence[SortableField],
-) -> tuple[int, ...] | None:
-    """Resolve ``sort_by`` fields to a column-index order for a table's ``fields``.
-
-    Returns the order in which columns drive the row sort: the requested fields the
-    table carries come first, in ``sort_by`` priority order and de-duplicated, then
-    the remaining columns provide natural left-to-right tie-breaking. Returns
-    ``None`` when the table carries none of the requested fields, signalling that
-    rows should keep their original order.
-    """
-    primaries = [fields.index(f) for f in dict.fromkeys(sort_by) if f in fields]
-    if not primaries:
-        return None
-    return (*primaries, *(i for i in range(len(fields)) if i not in primaries))
-
-
-def print_sorted_table(
-    headers: Sequence[tuple[str, SortableField | None]],
-    table: Sequence[Sequence[str | None]],
-    sort_by: Sequence[SortableField],
-    *,
-    table_format: TableFormat | None = None,
-) -> None:
-    """Render ``table`` with click-extra, sorting rows by the ``sort_by`` columns.
-
-    Each ``headers`` entry pairs a column label with the :class:`SortableField` it
-    carries, or ``None`` for a column that cannot be sorted on. ``sort_by`` lists the
-    fields to order by, in priority order: rows sort by the first field this table
-    carries, then each subsequent field as a tie-breaker, with any remaining columns
-    breaking further ties in their natural left-to-right order. Fields the table does
-    not carry are skipped; a ``sort_by`` matching no column leaves the rows in their
-    original order.
-
-    Reimplements the ``print_sorted_table`` helper click-extra dropped in ``8.0.0``,
-    where :class:`click_extra.table.SortByOption` instead bakes the sort key into
-    ``ctx.print_table``. That option derives its choices from a single command's
-    columns, whereas mpm shares one global :option:`mpm --sort-by` across subcommands
-    with heterogeneous tables, so the key is built here.
-    """
-    fields = [field for _, field in headers]
-    order = _sort_column_order(fields, sort_by)
-    sort_key: Callable[[Sequence[str | None]], tuple] | None = (
-        partial(_column_row_key, order) if order is not None else None
-    )
-    print_table(
-        table,
-        [label for label, _ in headers],
-        table_format=table_format,
-        sort_key=sort_key,
-    )
 
 
 XKCD_MANAGER_ORDER = ("pip", "brew", "npm", "dnf", "apt", "steamcmd")
@@ -226,191 +145,6 @@ managers that actually carry a :py:attr:`cooldown_env_var
 <meta_package_manager.execution.CLIExecutor.cooldown_env_var>`: adding cooldown
 support to a manager surfaces it here automatically.
 """
-
-
-class Duration(ParamType):
-    """Parse a cooldown spec into a :py:class:`datetime.timedelta`.
-
-    Accepts three input shapes:
-
-    - **Friendly duration**: ``7 days``, ``1 week``, ``12h``, ``30m``, ``45s``,
-      or a bare number of days like ``7``.
-    - **ISO 8601 duration**: ``P7D``, ``PT12H``, ``P1WT6H``. Case-insensitive.
-    - **RFC 3339 absolute timestamp**: ``2024-05-01T00:00:00Z`` or with an
-      offset like ``+02:00``. Converted at parse time to ``now - timestamp``;
-      a timestamp in the future disables the cooldown.
-
-    A zero duration or empty input parses to ``None``, which disables the cooldown
-    (handy to override a value set in the configuration file).
-
-    .. note::
-       Durations resolve to a fixed number of seconds, assuming a day is 24
-       hours. The local time zone, DST transitions, and calendar boundaries are
-       ignored. Calendar units (months, years) are rejected for the same
-       reason: 28-31 days and 365-366 days make them unsuitable for a precise
-       release-age cutoff. Use ``days`` or ``weeks`` instead.
-    """
-
-    name = "duration"
-
-    _UNIT_SECONDS: ClassVar[dict[str, int]] = {
-        "": 86400,
-        "s": 1,
-        "sec": 1,
-        "secs": 1,
-        "second": 1,
-        "seconds": 1,
-        "m": 60,
-        "min": 60,
-        "mins": 60,
-        "minute": 60,
-        "minutes": 60,
-        "h": 3600,
-        "hr": 3600,
-        "hrs": 3600,
-        "hour": 3600,
-        "hours": 3600,
-        "d": 86400,
-        "day": 86400,
-        "days": 86400,
-        "w": 604800,
-        "week": 604800,
-        "weeks": 604800,
-    }
-    """Number of seconds each recognized unit represents (empty unit means days)."""
-
-    _CALENDAR_UNITS = frozenset({
-        "mo",
-        "mon",
-        "month",
-        "months",
-        "y",
-        "yr",
-        "yrs",
-        "year",
-        "years",
-    })
-    """Calendar units rejected for ambiguity: months span 28-31 days, years 365-366."""
-
-    _FRIENDLY_PATTERN = re.compile(r"(?P<value>\d+(?:\.\d+)?)\s*(?P<unit>[a-z]*)")
-    _ISO8601_PATTERN = re.compile(
-        r"P"
-        r"(?:(?P<years>\d+(?:\.\d+)?)Y)?"
-        r"(?:(?P<months>\d+(?:\.\d+)?)M)?"
-        r"(?:(?P<weeks>\d+(?:\.\d+)?)W)?"
-        r"(?:(?P<days>\d+(?:\.\d+)?)D)?"
-        r"(?:T"
-        r"(?:(?P<hours>\d+(?:\.\d+)?)H)?"
-        r"(?:(?P<minutes>\d+(?:\.\d+)?)M)?"
-        r"(?:(?P<seconds>\d+(?:\.\d+)?)S)?"
-        r")?",
-    )
-
-    _EXAMPLES = (
-        "'7 days', '1 week', '12h', '30m', 'P7D', 'PT12H', "
-        "or an RFC 3339 timestamp like '2024-05-01T00:00:00Z'"
-    )
-    _CALENDAR_REJECT = (
-        "calendar units (months, years) are rejected because their length is "
-        "ambiguous: months span 28-31 days, years 365-366. Use days or weeks "
-        "instead, like '30 days' or '4 weeks'."
-    )
-
-    def convert(
-        self,
-        value: object,
-        param: Parameter | None,
-        ctx: ClickContext | None,
-    ) -> timedelta | None:
-        """Coerce ``value`` to a :py:class:`datetime.timedelta` (or ``None``)."""
-        if value is None or isinstance(value, timedelta):
-            return value
-        text = str(value).strip()
-        if not text:
-            return None
-        # RFC 3339 absolute timestamp: starts with a 4-digit year and a dash.
-        if len(text) >= 5 and text[:4].isdigit() and text[4] == "-":
-            return self._parse_timestamp(text, value, param, ctx)
-        # ISO 8601 duration: starts with 'P' (case-insensitive).
-        if text[:1] in ("P", "p"):
-            return self._parse_iso8601(text.upper(), value, param, ctx)
-        # Friendly duration.
-        return self._parse_friendly(text.lower(), value, param, ctx)
-
-    def _parse_timestamp(
-        self,
-        text: str,
-        value: object,
-        param: Parameter | None,
-        ctx: ClickContext | None,
-    ) -> timedelta | None:
-        normalized = text.upper().replace("Z", "+00:00")
-        try:
-            ts = datetime.fromisoformat(normalized)
-        except ValueError:
-            self.fail(
-                f"{value!r} looks like an RFC 3339 timestamp but cannot be "
-                f"parsed. Accepted: {self._EXAMPLES}.",
-                param,
-                ctx,
-            )
-        if ts.tzinfo is None:
-            self.fail(
-                f"{value!r} is missing a time zone. Use a fully qualified "
-                "RFC 3339 timestamp with 'Z' or an offset like '+00:00'.",
-                param,
-                ctx,
-            )
-        delta = datetime.now(tz=timezone.utc) - ts.astimezone(timezone.utc)
-        return delta if delta.total_seconds() > 0 else None
-
-    def _parse_iso8601(
-        self,
-        text: str,
-        value: object,
-        param: Parameter | None,
-        ctx: ClickContext | None,
-    ) -> timedelta | None:
-        match = self._ISO8601_PATTERN.fullmatch(text)
-        if not match or not any(match.groups()):
-            self.fail(
-                f"{value!r} is not a valid ISO 8601 duration "
-                f"(examples: 'P7D', 'PT12H', 'P1WT6H'). Accepted: {self._EXAMPLES}.",
-                param,
-                ctx,
-            )
-        groups = match.groupdict()
-        if groups["years"] or groups["months"]:
-            self.fail(f"{value!r}: {self._CALENDAR_REJECT}", param, ctx)
-        seconds = (
-            float(groups["weeks"] or 0) * 604800
-            + float(groups["days"] or 0) * 86400
-            + float(groups["hours"] or 0) * 3600
-            + float(groups["minutes"] or 0) * 60
-            + float(groups["seconds"] or 0)
-        )
-        return timedelta(seconds=seconds) if seconds else None
-
-    def _parse_friendly(
-        self,
-        text: str,
-        value: object,
-        param: Parameter | None,
-        ctx: ClickContext | None,
-    ) -> timedelta | None:
-        match = self._FRIENDLY_PATTERN.fullmatch(text)
-        if match:
-            unit = match["unit"]
-            if unit in self._CALENDAR_UNITS:
-                self.fail(f"{value!r}: {self._CALENDAR_REJECT}", param, ctx)
-            if unit in self._UNIT_SECONDS:
-                seconds = float(match["value"]) * self._UNIT_SECONDS[unit]
-                return timedelta(seconds=seconds) if seconds else None
-        self.fail(
-            f"{value!r} is not a valid duration (examples: {self._EXAMPLES}).",
-            param,
-            ctx,
-        )
 
 
 def is_stdout(filepath: Path) -> bool:
@@ -1703,6 +1437,142 @@ def _maintenance_work(
     return work
 
 
+def _dispatch_sourced_operation(
+    ctx: Context,
+    packages_specs: tuple[str, ...],
+    *,
+    operation: Operations,
+    action: Callable[[PackageManager, Specifier], str | None],
+    verb: str,
+    past: str,
+    prep: str,
+    label: str,
+    done_label: str,
+    apply_cooldown: bool = False,
+) -> None:
+    """Resolve each package spec to its source managers, then fan ``action`` out.
+
+    The shared engine behind ``upgrade <packages>`` and ``remove``. Both resolve every
+    spec to the managers that can act on it — the manager named in the spec, or every
+    selected manager that reports the package installed — then run ``action`` per
+    (package, manager) concurrently across managers and serially within each (see
+    :func:`meta_package_manager.execution.collect_per_package`). A package no manager
+    recognizes is skipped with an error; any genuine failure exits non-zero with a
+    ``critical`` summary, matching ``install``.
+
+    ``apply_cooldown`` gates each manager through :func:`cooldown_permits` first, so a
+    release-introducing ``upgrade`` skips a manager that cannot honor an active cooldown;
+    ``remove`` (which introduces nothing) leaves it ``False``.
+    """
+    selected_managers = tuple(
+        ctx.obj.selected_managers(implements_operation=operation),
+    )
+    manager_ids = tuple(manager.id for manager in selected_managers)
+
+    # Subset of selected managers implementing `installed`, queried to discover which
+    # manager(s) a spec untied to one was installed with.
+    sourcing_managers = tuple(
+        ctx.obj.selected_managers(
+            keep=manager_ids,
+            implements_operation=Operations.installed,
+        ),
+    )
+
+    # Collect every (package, manager) attempt that genuinely failed, to exit non-zero.
+    failures: list[str] = []
+    # Group every (package, manager) pair by manager: managers run in parallel while each
+    # manager's own packages are processed one at a time (see collect_per_package).
+    failures_lock = threading.Lock()
+    tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
+    solver = Solver(packages_specs, manager_priority=manager_ids)
+    for package_id, spec in solver.resolve_package_specs():
+        source_manager_ids = set()
+        # Use the manager from the spec.
+        if spec.manager_id:
+            source_manager_ids.add(spec.manager_id)
+        # Package is not bound to a manager by the user's specifiers.
+        else:
+            logging.info(
+                f"{spec} not tied to a manager. Search all managers recognizing it.",
+            )
+            # Find all the managers that have the package installed.
+            for manager in sourcing_managers:
+                if package_id in manager.installed_ids:
+                    logging.info(
+                        f"{package_id} has been installed "
+                        f"with {theme().invoked_command(manager.id)}.",
+                    )
+                    source_manager_ids.add(manager.id)
+
+        if not source_manager_ids:
+            logging.error(
+                f"{package_id} is not recognized by any of the selected manager. "
+                "Skip it.",
+            )
+            continue
+
+        # Announce the managers we will act with (also the non-TTY signal).
+        logging.info(
+            f"{verb.capitalize()} {package_id} "
+            f"with {', '.join(map(theme().invoked_command, sorted(source_manager_ids)))}",
+        )
+        # One task per (package, manager); a package acted on by two managers tallies as
+        # two. For upgrade, skip a manager that cannot honor an active cooldown.
+        for manager_id in sorted(source_manager_ids):
+            manager = pool.get(manager_id)
+            if apply_cooldown and not cooldown_permits(manager):
+                continue
+            tasks.append((
+                manager,
+                _package_task(
+                    manager,
+                    spec,
+                    failures_lock,
+                    action=action,
+                    verb=verb,
+                    past=past,
+                    prep=prep,
+                    record_failure=lambda s: failures.append(s.package_id),
+                ),
+            ))
+
+    collect_per_package(label, done_label, tasks)
+
+    if failures:
+        logging.critical(f"Could not {verb}: " + ", ".join(sorted(set(failures))) + ".")
+        ctx.exit(1)
+
+
+def _attempt_install(manager: PackageManager, spec: Specifier) -> bool:
+    """Try installing one ``spec`` with one ``manager``, returning success.
+
+    Forces the manager to raise on failure (so a botched install is recorded by the
+    caller rather than silently swallowed), narrates the per-attempt reason at ``INFO``,
+    and logs the CLI output on success. Returns ``True`` only when the install ran
+    cleanly. The caller maps the result onto its ``✓``/``✗`` ledger and decides the
+    retry/stop semantics (the tied loop records every miss; the untied priority search
+    falls through to the next manager). Shared by both sequential install paths.
+    """
+    with patch.object(manager, "stop_on_error", True):
+        try:
+            output = manager.install(spec.package_id, version=spec.version)
+        except NotImplementedError:
+            logging.info(
+                f"{theme().invoked_command(manager.id)} "
+                "does not implement install operation.",
+            )
+            return False
+        except CLIError:
+            logging.info(
+                f"Could not install {spec} "
+                f"with {theme().invoked_command(manager.id)}.",
+            )
+            return False
+    if output:
+        logging.info(output)
+    return True
+
+
 @mpm.command(short_help="Install a package.", section=MAINTENANCE)
 @argument(
     "packages_specs",
@@ -1836,33 +1706,14 @@ def install(ctx, packages_specs):
                 trail(spec, manager_id, "cooldown")
             continue
         for spec in package_specs:
-            # Force the manager to raise on failure so the error is both reported and
-            # recorded as unresolved, instead of being silently swallowed. The reason
-            # is INFO narration (hidden by the WARNING default); the ✗ trail and the
-            # closing critical name the failure at the default level.
-            with patch.object(manager, "stop_on_error", True):
-                try:
-                    output = manager.install(spec.package_id, version=spec.version)
-                except NotImplementedError:
-                    logging.info(
-                        f"{theme().invoked_command(manager_id)} "
-                        "does not implement install operation.",
-                    )
-                    unresolved_specs.append(spec)
-                    trail(spec, manager_id, "failed")
-                    continue
-                except CLIError:
-                    logging.info(
-                        f"Could not install {spec} "
-                        f"with {theme().invoked_command(manager_id)}.",
-                    )
-                    unresolved_specs.append(spec)
-                    trail(spec, manager_id, "failed")
-                    continue
-            if output:
-                logging.info(output)
-            installed_count += 1
-            trail(spec, manager_id, "installed")
+            # A tied package has exactly one candidate manager, so a miss is final:
+            # record it as unresolved (forcing a non-zero exit) and mark the ✗ trail.
+            if _attempt_install(manager, spec):
+                installed_count += 1
+                trail(spec, manager_id, "installed")
+            else:
+                unresolved_specs.append(spec)
+                trail(spec, manager_id, "failed")
 
     # Drop managers that cannot honor an active cooldown (once, not per package).
     eligible_managers = tuple(m for m in selected_managers if cooldown_permits(m))
@@ -1909,28 +1760,10 @@ def install(ctx, packages_specs):
                     msg = "Exact search returned multiple packages."
                     raise ValueError(msg)
 
-            # Allow install subcommand to fail to have the opportunity to catch the
-            # CLIError exception and print a comprehensive message.
-            with patch.object(manager, "stop_on_error", True):
-                try:
-                    output = manager.install(spec.package_id, version=spec.version)
-                except NotImplementedError:
-                    logging.info(
-                        f"{theme().invoked_command(manager.id)} "
-                        "does not implement install operation.",
-                    )
-                    trail(spec, manager.id, "failed")
-                    continue
-                except CLIError:
-                    logging.info(
-                        f"Could not install {spec} "
-                        f"with {theme().invoked_command(manager.id)}.",
-                    )
-                    trail(spec, manager.id, "failed")
-                    continue
-
-            if output:
-                logging.info(output)
+            # On a failed install, fall through to the next manager in priority order.
+            if not _attempt_install(manager, spec):
+                trail(spec, manager.id, "failed")
+                continue
             # Stop at the first (highest-priority) manager that provides the package.
             installed = True
             installed_count += 1
@@ -2026,87 +1859,18 @@ def upgrade(ctx, all, packages_specs):
         )
         ctx.exit()
 
-    # Cast generator to tuple because of reuse.
-    selected_managers = tuple(
-        ctx.obj.selected_managers(implements_operation=Operations.upgrade),
+    _dispatch_sourced_operation(
+        ctx,
+        packages_specs,
+        operation=Operations.upgrade,
+        action=lambda m, s: m.upgrade(s.package_id, version=s.version),
+        verb="upgrade",
+        past="upgraded",
+        prep="with",
+        label="Upgrading",
+        done_label="Upgraded",
+        apply_cooldown=True,
     )
-    manager_ids = tuple(manager.id for manager in selected_managers)
-
-    # Get the subset of selected managers that are implementing the installed operation,
-    # so we can query it and know if a package has been installed with it.
-    sourcing_managers = tuple(
-        ctx.obj.selected_managers(
-            keep=manager_ids,
-            implements_operation=Operations.installed,
-        ),
-    )
-
-    # Collect every package a manager that had it installed failed to upgrade, to raise
-    # a non-zero exit code at the end (matching install and remove).
-    upgrade_failures: list[str] = []
-    # Group every (package, manager) upgrade by manager: managers run in parallel while
-    # each manager's own packages upgrade one at a time (see collect_per_package).
-    failures_lock = threading.Lock()
-    tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
-    solver = Solver(packages_specs, manager_priority=manager_ids)
-    for package_id, spec in solver.resolve_package_specs():
-        source_manager_ids = set()
-        # Use the manager from the spec.
-        if spec.manager_id:
-            source_manager_ids.add(spec.manager_id)
-        # Package is not bound to a manager by the user's specifiers.
-        else:
-            logging.info(
-                f"{spec} not tied to a manager. Search all managers recognizing it.",
-            )
-            # Find all the managers that have the package installed.
-            for manager in sourcing_managers:
-                if package_id in manager.installed_ids:
-                    logging.info(
-                        f"{package_id} has been installed "
-                        f"with {theme().invoked_command(manager.id)}.",
-                    )
-                    source_manager_ids.add(manager.id)
-
-        if not source_manager_ids:
-            logging.error(
-                f"{package_id} is not recognized by any of the selected manager. "
-                "Skip it.",
-            )
-            continue
-
-        # Announce the managers we will upgrade with (also the non-TTY signal).
-        logging.info(
-            f"Upgrade {package_id} "
-            f"with {', '.join(map(theme().invoked_command, sorted(source_manager_ids)))}",
-        )
-        # One task per (package, manager); skip a manager that cannot honor an active
-        # cooldown. A package upgraded with two managers tallies as two.
-        for manager_id in sorted(source_manager_ids):
-            manager = pool.get(manager_id)
-            if not cooldown_permits(manager):
-                continue
-            tasks.append((
-                manager,
-                _package_task(
-                    manager,
-                    spec,
-                    failures_lock,
-                    action=lambda m, s: m.upgrade(s.package_id, version=s.version),
-                    verb="upgrade",
-                    past="upgraded",
-                    prep="with",
-                    record_failure=lambda s: upgrade_failures.append(s.package_id),
-                ),
-            ))
-
-    collect_per_package("Upgrading", "Upgraded", tasks)
-
-    if upgrade_failures:
-        logging.critical(
-            "Could not upgrade: " + ", ".join(sorted(set(upgrade_failures))) + ".",
-        )
-        ctx.exit(1)
 
 
 @mpm.command(aliases=["uninstall"], short_help="Remove a package.", section=MAINTENANCE)
@@ -2128,88 +1892,17 @@ def remove(ctx, packages_specs):
 
     Packages unrecognized by any selected manager will be skipped.
     """
-    # Cast generator to tuple because of reuse.
-    selected_managers = tuple(
-        ctx.obj.selected_managers(implements_operation=Operations.remove),
+    _dispatch_sourced_operation(
+        ctx,
+        packages_specs,
+        operation=Operations.remove,
+        action=lambda m, s: m.remove(s.package_id),
+        verb="remove",
+        past="removed",
+        prep="from",
+        label="Removing",
+        done_label="Removed",
     )
-    manager_ids = tuple(manager.id for manager in selected_managers)
-
-    # Collect every package a selected manager failed to actually remove. Packages that
-    # are already absent are not failures: removal is idempotent.
-    remove_failures: list[str] = []
-
-    # Get the subset of selected managers that are implementing the installed operation,
-    # so we can query it and know if a package has been installed with it.
-    sourcing_managers = tuple(
-        ctx.obj.selected_managers(
-            keep=manager_ids,
-            implements_operation=Operations.installed,
-        ),
-    )
-
-    # Group every (package, manager) removal: managers run in parallel while each
-    # manager's own packages remove one at a time (see collect_per_package).
-    failures_lock = threading.Lock()
-    tasks: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]] = []
-    solver = Solver(packages_specs, manager_priority=manager_ids)
-    for package_id, spec in solver.resolve_package_specs():
-        source_manager_ids = set()
-        # Use the manager from the spec.
-        if spec.manager_id:
-            source_manager_ids.add(spec.manager_id)
-        # Package is not bound to a manager by the user's specifiers.
-        else:
-            logging.info(
-                f"{spec} not tied to a manager. Search all managers recognizing it.",
-            )
-            # Find all the managers that have the package installed.
-            for manager in sourcing_managers:
-                if package_id in manager.installed_ids:
-                    logging.info(
-                        f"{package_id} has been installed "
-                        f"with {theme().invoked_command(manager.id)}.",
-                    )
-                    source_manager_ids.add(manager.id)
-
-        if not source_manager_ids:
-            logging.error(
-                f"{package_id} is not recognized by any of the selected manager. "
-                "Skip it.",
-            )
-            continue
-
-        # Announce the managers we will remove from (also the non-TTY signal).
-        logging.info(
-            f"Remove {package_id} "
-            f"with {', '.join(map(theme().invoked_command, sorted(source_manager_ids)))}",
-        )
-        # One task per (package, manager); a package removed from two managers tallies
-        # as two.
-        for manager_id in sorted(source_manager_ids):
-            manager = pool.get(manager_id)
-            tasks.append((
-                manager,
-                _package_task(
-                    manager,
-                    spec,
-                    failures_lock,
-                    action=lambda m, s: m.remove(s.package_id),
-                    verb="remove",
-                    past="removed",
-                    prep="from",
-                    record_failure=lambda s: remove_failures.append(s.package_id),
-                ),
-            ))
-
-    collect_per_package("Removing", "Removed", tasks)
-
-    # Fail with a non-zero exit code if any package could not be removed by a manager
-    # that had it installed.
-    if remove_failures:
-        logging.critical(
-            "Could not remove: " + ", ".join(sorted(set(remove_failures))) + ".",
-        )
-        ctx.exit(1)
 
 
 @mpm.command(short_help="Sync local package info.", section=MAINTENANCE)
@@ -2639,7 +2332,7 @@ def restore(ctx, toml_files):
             logging.info(f"Restore {theme().invoked_command(manager.id)} packages...")
             for package_id, version in doc[manager.id].items():
                 spec = Specifier(
-                    raw_spec=f"pkg:{manager.id}:/{package_id}{VERSION_SEP}{package_id}",
+                    raw_spec=f"pkg:{manager.id}/{package_id}{VERSION_SEP}{version}",
                     package_id=package_id,
                     manager_id=manager.id,
                     version=str(version),
@@ -2791,7 +2484,6 @@ def sbom(ctx, spdx, export_format, overwrite, bundled, query, exact, export_path
 
     sbom = sbom_class(export_format)
     sbom.init_doc()
-    sbom.set_scan_completeness(bundled=bundled)
 
     managers = list(
         ctx.obj.selected_managers(implements_operation=Operations.installed)

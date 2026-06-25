@@ -112,6 +112,7 @@ from __future__ import annotations
 import operator
 import re
 from copy import deepcopy
+from functools import total_ordering
 
 from boltons import strutils
 from click_extra import style
@@ -180,6 +181,7 @@ release" semantics across multiple ecosystems belong here. Candidates like
 """
 
 
+@total_ordering
 class Token:
     """A normalized word, persisting its lossless integer variant.
 
@@ -290,21 +292,13 @@ class Token:
             return -1
         return 0
 
+    # Only __eq__ and __lt__ are defined; @total_ordering fills in the rest, and
+    # Python derives __ne__ from __eq__.
+
     def __eq__(self, other):
         if self._mixed_type_order(other):
             return False
         return operator.eq(*map(self._match_type(other), [self, other]))
-
-    def __ne__(self, other):
-        if self._mixed_type_order(other):
-            return True
-        return operator.ne(*map(self._match_type(other), [self, other]))
-
-    def __gt__(self, other):
-        order = self._mixed_type_order(other)
-        if order:
-            return order > 0
-        return operator.gt(*map(self._match_type(other), [self, other]))
 
     def __lt__(self, other):
         order = self._mixed_type_order(other)
@@ -312,19 +306,8 @@ class Token:
             return order < 0
         return operator.lt(*map(self._match_type(other), [self, other]))
 
-    def __ge__(self, other):
-        order = self._mixed_type_order(other)
-        if order:
-            return order > 0
-        return operator.ge(*map(self._match_type(other), [self, other]))
 
-    def __le__(self, other):
-        order = self._mixed_type_order(other)
-        if order:
-            return order < 0
-        return operator.le(*map(self._match_type(other), [self, other]))
-
-
+@total_ordering
 class TokenizedString:
     """Tokenize a string for user-friendly sorting.
 
@@ -601,6 +584,10 @@ class TokenizedString:
             return -1 if self.epoch < other.epoch else 1
         return self._compare_tuples(self.release, other.release)
 
+    # Only __eq__ and __lt__ are defined; @total_ordering fills in the ordering
+    # operators, and Python derives __ne__ from __eq__. ``None`` sorts below every
+    # version (an absent version is older than any present one).
+
     def __eq__(self, other):
         if other is None:
             return False
@@ -610,20 +597,6 @@ class TokenizedString:
             return tuple(self) == tuple(other)
         return super().__eq__(other)
 
-    def __ne__(self, other):
-        if other is None:
-            return True
-        if isinstance(other, TokenizedString):
-            return self._cmp(other) != 0
-        return super().__ne__(other)
-
-    def __gt__(self, other):
-        if other is None:
-            return True
-        if isinstance(other, TokenizedString):
-            return self._cmp(other) > 0
-        return NotImplemented
-
     def __lt__(self, other):
         if other is None:
             return False
@@ -631,27 +604,10 @@ class TokenizedString:
             return self._cmp(other) < 0
         return NotImplemented
 
-    def __ge__(self, other):
-        if other is None:
-            return True
-        if isinstance(other, TokenizedString):
-            return self._cmp(other) >= 0
-        return NotImplemented
-
-    def __le__(self, other):
-        if other is None:
-            return False
-        if isinstance(other, TokenizedString):
-            return self._cmp(other) <= 0
-        return NotImplemented
-
 
 parse_version = TokenizedString
 """Alias for ``TokenizedString`` used in version-comparison contexts."""
 
-
-RANGE_OPERATOR = re.compile(r"(?P<op>[><=!]=?|!=)\s*(?P<version>.+)")
-"""Matches a comparison operator prefix followed by a version string."""
 
 OPERATOR_MAP: dict[str, Callable[[TokenizedString, TokenizedString], bool]] = {
     ">=": operator.ge,
@@ -661,6 +617,16 @@ OPERATOR_MAP: dict[str, Callable[[TokenizedString, TokenizedString], bool]] = {
     "==": operator.eq,
     "!=": operator.ne,
 }
+"""Comparison operators recognized in a version range, mapped to their callable."""
+
+# Alternation built longest-first so two-character operators (``>=``) win over their
+# one-character prefixes (``>``). Derived from OPERATOR_MAP so the regex and the lookup
+# table can never drift: a bare ``=`` or ``!`` no longer matches and then KeyErrors.
+_OPERATORS_PATTERN = "|".join(
+    re.escape(op) for op in sorted(OPERATOR_MAP, key=len, reverse=True)
+)
+RANGE_OPERATOR = re.compile(rf"(?P<op>{_OPERATORS_PATTERN})\s*(?P<version>.+)")
+"""Matches a comparison operator prefix followed by a version string."""
 
 
 class VersionRange:

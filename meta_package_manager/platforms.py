@@ -13,7 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-"""Introspection utilities to produce feature inventory of all managers."""
+"""Top-level platform classification shared across ``mpm``.
+
+Defines :py:data:`MAIN_PLATFORMS`, the curated platform groups (BSD, Linux, macOS,
+Unix, Windows) used to label managers in the CLI ``managers`` matrix, in the GitHub
+issue/PR platform labels, and in the documentation tables.
+"""
 
 from __future__ import annotations
 

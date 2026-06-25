@@ -28,8 +28,8 @@ from boltons.strutils import strip_ansi
 from click_extra.table import SERIALIZATION_FORMATS, TableFormat
 
 from meta_package_manager import __version__
-from meta_package_manager.cli import SortableField, _sort_column_order
 from meta_package_manager.pool import pool
+from meta_package_manager.sorting import SortableField, _sort_column_order
 
 from .conftest import default_manager_ids
 

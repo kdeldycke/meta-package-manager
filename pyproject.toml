@@ -503,8 +503,14 @@ exclude = [
 # resolves its cases from this section. Without it, click-extra looks for its
 # default `./tests/cli-test-suite.toml`, finds nothing, and silently falls back
 # to a trivial built-in suite, so the binary self-test must point here explicitly.
+#
+# The plan is TOML, not YAML: the binary self-test runs `click-extra test-suite`
+# through a bare `uv run --frozen` (base dependencies only), and click-extra 8.1
+# reads TOML via the standard-library `tomllib` with no format extra. YAML and the
+# other formats need their `click-extra[<fmt>]` extra, which the bare runner lacks,
+# so a YAML plan raises "YAML support disabled" before any case runs.
 [tool.click-extra.test-suite]
-file = "./tests/cli-test-plan.yaml"
+file = "./tests/cli-test-plan.toml"
 
 [tool.repomatic]
 exclude = [ "labels", "skills" ]

@@ -7,21 +7,21 @@
 # click_extra 7.19+ renders the program name with both bright (97m) and bold (1m)
 # codes. The bold code is optional to stay compatible with older click_extra
 # releases that only emit the bright code.
-- cli_parameters: --version
-  exit_code: 0
-  stdout_contains: "mpm\x1b[0m, version \x1b[32m"
-  stdout_regex_fullmatch: >-
-    \x1b\[97m(\x1b\[1m)?mpm\x1b\[0m, version
-    \x1b\[32m[0-9]+\.[0-9]+\.[0-9]+(\.[a-z]+[0-9]+(\+[a-f0-9]+)?)?\x1b\[0m\n(\x1b\[90mPython
-    [^\n]+\x1b\[0m\n)?
+[[cases]]
+cli_parameters = "--version"
+exit_code = 0
+stdout_contains = "mpm\u001b[0m, version \u001b[32m"
+stdout_regex_fullmatch = "\\x1b\\[97m(\\x1b\\[1m)?mpm\\x1b\\[0m, version \\x1b\\[32m[0-9]+\\.[0-9]+\\.[0-9]+(\\.[a-z]+[0-9]+(\\+[a-f0-9]+)?)?\\x1b\\[0m\\n(\\x1b\\[90mPython [^\\n]+\\x1b\\[0m\\n)?"
 
 # Check mpm is reporting its usage in help screen.
-- cli_parameters: --help
-  exit_code: 0
-  strip_ansi: true
-  stdout_contains:
-    - "Usage: mpm [OPTIONS] COMMAND [ARGS]..."
-    - -h, --help
+[[cases]]
+cli_parameters = "--help"
+exit_code = 0
+strip_ansi = true
+stdout_contains = [
+    "Usage: mpm [OPTIONS] COMMAND [ARGS]...",
+    "-h, --help",
+]
 
 # Check mpm is detecting brew and report it as a manager in a table row.
 # XXX Windows has issues with ANSI colors, so we skip this test on Windows:
@@ -70,13 +70,13 @@
 #   File "C:\…\Python\3.11.9\x64\Lib\encodings\cp1252.py", line 19, in encode
 #     return codecs.charmap_encode(input,self.errors,encoding_table)[0]
 #            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-# UnicodeEncodeError: 'charmap' codec can't encode character '\u25ba' in position 0: character maps to <undefined>
-- cli_parameters: --color --table-format csv --all-managers managers
-  skip_platforms: windows
-  exit_code: 0
-  strip_ansi: true
-  stdout_regex_matches: >-
-    cargo,Rust cargo,✓,✓ \S+,✓,✓ \S+\n
+# UnicodeEncodeError: 'charmap' codec can't encode character '►' in position 0: character maps to <undefined>
+[[cases]]
+cli_parameters = "--color --table-format csv --all-managers managers"
+skip_platforms = "windows"
+exit_code = 0
+strip_ansi = true
+stdout_regex_matches = "cargo,Rust cargo,✓,✓ \\S+,✓,✓ \\S+\\n"
 
 # Same as above, but without colors.
 # XXX Windows has issues with ANSI colors, so we skip this test on Windows:
@@ -125,29 +125,35 @@
 #   File "C:\…\Python\3.11.9\x64\Lib\encodings\cp1252.py", line 19, in encode
 #     return codecs.charmap_encode(input,self.errors,encoding_table)[0]
 #            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-# UnicodeEncodeError: 'charmap' codec can't encode character '\u25ba' in position 0: character maps to <undefined>
-- cli_parameters: --no-color --table-format csv --all-managers managers
-  skip_platforms: windows
-  exit_code: 0
-  # XXX --no-color does not apply to CSV export: https://github.com/kdeldycke/meta-package-manager/issues/1004
-  # So we force the ANSI stripping.
-  strip_ansi: true
-  stdout_regex_matches:
-    - cargo,Rust cargo,✓,✓ \S+,✓,✓ \S+\n
+# UnicodeEncodeError: 'charmap' codec can't encode character '►' in position 0: character maps to <undefined>
+[[cases]]
+cli_parameters = "--no-color --table-format csv --all-managers managers"
+skip_platforms = "windows"
+exit_code = 0
+# XXX --no-color does not apply to CSV export: https://github.com/kdeldycke/meta-package-manager/issues/1004
+# So we force the ANSI stripping.
+strip_ansi = true
+stdout_regex_matches = [
+    "cargo,Rust cargo,✓,✓ \\S+,✓,✓ \\S+\\n",
+]
 
 # Check some common packages are reported as installed in CSV format (Linux).
-- cli_parameters: --table-format csv installed
-  only_platforms: linux
-  exit_code: 0
-  stdout_regex_matches:
-    - tzdata,,(apt|uv),\S+\n
+[[cases]]
+cli_parameters = "--table-format csv installed"
+only_platforms = "linux"
+exit_code = 0
+stdout_regex_matches = [
+    "tzdata,,(apt|uv),\\S+\\n",
+]
 
 # Check some common packages are reported as installed in CSV format (macOS).
-- cli_parameters: --table-format csv installed
-  only_platforms: macos
-  exit_code: 0
-  stdout_regex_matches:
-    - git,,brew,\S+\n
+[[cases]]
+cli_parameters = "--table-format csv installed"
+only_platforms = "macos"
+exit_code = 0
+stdout_regex_matches = [
+    "git,,brew,\\S+\\n",
+]
 
 # Check some common packages are reported as installed in CSV format (Windows).
 # XXX We cannot rely on `chocolatey` self-listing via `choco list` on the
@@ -156,150 +162,181 @@
 # `choco: 0` in the pool summary with no error logged. Until that environment
 # issue is diagnosed, match `click` instead: it is an mpm dependency and is
 # guaranteed to be present in the workflow's `uv` environment.
-- cli_parameters: --table-format csv installed
-  only_platforms: windows
-  exit_code: 0
-  stdout_regex_matches:
-    - click,,uv,\S+\n
+[[cases]]
+cli_parameters = "--table-format csv installed"
+only_platforms = "windows"
+exit_code = 0
+stdout_regex_matches = [
+    "click,,uv,\\S+\\n",
+]
 
-- cli_parameters: managers
-  skip_platforms: windows
-  exit_code: 0
+[[cases]]
+cli_parameters = "managers"
+skip_platforms = "windows"
+exit_code = 0
 
-- cli_parameters: --all-managers managers
-  skip_platforms: windows
-  exit_code: 0
+[[cases]]
+cli_parameters = "--all-managers managers"
+skip_platforms = "windows"
+exit_code = 0
 
-- cli_parameters: installed
-  skip_platforms: windows
-  exit_code: 0
+[[cases]]
+cli_parameters = "installed"
+skip_platforms = "windows"
+exit_code = 0
 
-- cli_parameters: outdated
-  skip_platforms: windows
-  exit_code: 0
+[[cases]]
+cli_parameters = "outdated"
+skip_platforms = "windows"
+exit_code = 0
 
-- cli_parameters: which mpm
-  exit_code: 0
+[[cases]]
+cli_parameters = "which mpm"
+exit_code = 0
 
-- cli_parameters: backup
-  exit_code: 0
+[[cases]]
+cli_parameters = "backup"
+exit_code = 0
 
-- cli_parameters: sbom --spdx
-  exit_code: 0
+[[cases]]
+cli_parameters = "sbom --spdx"
+exit_code = 0
 
-- cli_parameters: sbom --cyclonedx
-  exit_code: 0
+[[cases]]
+cli_parameters = "sbom --cyclonedx"
+exit_code = 0
 
 # Config-format coverage. Each fixture is a minimal valid `[mpm]` config; the
 # matching format reader is gated behind `try/except import <pkg>` in
 # click-extra, so a failing case here means the [pkg]-named extra is missing
 # from the binary (either not synced via [tool.repomatic] nuitka.extras or
 # not bundled via [tool.nuitka] include-package).
-- cli_parameters: --validate-config tests/cli-test-plan-config.toml
-  exit_code: 0
-  stderr_contains: "is valid."
+[[cases]]
+cli_parameters = "--validate-config tests/cli-test-plan-config.toml"
+exit_code = 0
+stderr_contains = "is valid."
 
-- cli_parameters: --validate-config tests/cli-test-plan-config.yaml
-  exit_code: 0
-  stderr_contains: "is valid."
+[[cases]]
+cli_parameters = "--validate-config tests/cli-test-plan-config.yaml"
+exit_code = 0
+stderr_contains = "is valid."
 
-- cli_parameters: --validate-config tests/cli-test-plan-config.json
-  exit_code: 0
-  stderr_contains: "is valid."
+[[cases]]
+cli_parameters = "--validate-config tests/cli-test-plan-config.json"
+exit_code = 0
+stderr_contains = "is valid."
 
-- cli_parameters: --validate-config tests/cli-test-plan-config.json5
-  exit_code: 0
-  stderr_contains: "is valid."
+[[cases]]
+cli_parameters = "--validate-config tests/cli-test-plan-config.json5"
+exit_code = 0
+stderr_contains = "is valid."
 
-- cli_parameters: --validate-config tests/cli-test-plan-config.jsonc
-  exit_code: 0
-  stderr_contains: "is valid."
+[[cases]]
+cli_parameters = "--validate-config tests/cli-test-plan-config.jsonc"
+exit_code = 0
+stderr_contains = "is valid."
 
-- cli_parameters: --validate-config tests/cli-test-plan-config.hjson
-  exit_code: 0
-  stderr_contains: "is valid."
+[[cases]]
+cli_parameters = "--validate-config tests/cli-test-plan-config.hjson"
+exit_code = 0
+stderr_contains = "is valid."
 
-- cli_parameters: --validate-config tests/cli-test-plan-config.xml
-  exit_code: 0
-  stderr_contains: "is valid."
+[[cases]]
+cli_parameters = "--validate-config tests/cli-test-plan-config.xml"
+exit_code = 0
+stderr_contains = "is valid."
 
 # Table-format breadth. Each format is a separate tabulate renderer (toml,
 # yaml, json, xml). A regression here flags a missing tabulate/format
 # package data file in the bundled binary.
-- cli_parameters: --table-format json managers
-  skip_platforms: windows
-  exit_code: 0
-  stdout_contains: '"id": "cargo"'
+[[cases]]
+cli_parameters = "--table-format json managers"
+skip_platforms = "windows"
+exit_code = 0
+stdout_contains = "\"id\": \"cargo\""
 
-- cli_parameters: --table-format yaml managers
-  skip_platforms: windows
-  exit_code: 0
-  stdout_contains: "id: cargo"
+[[cases]]
+cli_parameters = "--table-format yaml managers"
+skip_platforms = "windows"
+exit_code = 0
+stdout_contains = "id: cargo"
 
-- cli_parameters: --table-format toml managers
-  skip_platforms: windows
-  exit_code: 0
-  stdout_contains: 'id = "cargo"'
+[[cases]]
+cli_parameters = "--table-format toml managers"
+skip_platforms = "windows"
+exit_code = 0
+stdout_contains = "id = \"cargo\""
 
-- cli_parameters: --table-format xml managers
-  skip_platforms: windows
-  exit_code: 0
-  stdout_contains: "<cargo>"
+[[cases]]
+cli_parameters = "--table-format xml managers"
+skip_platforms = "windows"
+exit_code = 0
+stdout_contains = "<cargo>"
 
 # Globals introduced this cycle. `--man` exercises the roff renderer click-extra
 # 7.19 ships and its embedded data files; `--summary` replaces the old
 # `--stats`; `--accessible` swaps to the plain renderer; `--cooldown DURATION`
 # parses a duration string. The introspection flags `--show-params` and
 # `--man` print and exit 0 without contacting any package manager.
-- cli_parameters: --man
-  exit_code: 0
-  stdout_contains: ".TH \"MPM\""
+[[cases]]
+cli_parameters = "--man"
+exit_code = 0
+stdout_contains = ".TH \"MPM\""
 
-- cli_parameters: --show-params
-  skip_platforms: windows
-  exit_code: 0
-  strip_ansi: true
-  stdout_contains: mpm.accessible
+[[cases]]
+cli_parameters = "--show-params"
+skip_platforms = "windows"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "mpm.accessible"
 
-- cli_parameters: --accessible managers
-  skip_platforms: windows
-  exit_code: 0
-  stdout_contains: cargo
+[[cases]]
+cli_parameters = "--accessible managers"
+skip_platforms = "windows"
+exit_code = 0
+stdout_contains = "cargo"
 
-- cli_parameters: --summary managers
-  skip_platforms: windows
-  exit_code: 0
-  stdout_contains: cargo
+[[cases]]
+cli_parameters = "--summary managers"
+skip_platforms = "windows"
+exit_code = 0
+stdout_contains = "cargo"
 
-- cli_parameters: --cooldown 30days managers
-  skip_platforms: windows
-  exit_code: 0
-  stdout_contains: cargo
+[[cases]]
+cli_parameters = "--cooldown 30days managers"
+skip_platforms = "windows"
+exit_code = 0
+stdout_contains = "cargo"
 
 # Subcommands not exercised by the other tests. `config-template` prints a
 # per-manager TOML overrides skeleton, `help` dispatches click-extra's
 # command-help renderer, `search` exercises the search highlighting path
 # (click-extra theme).
-- cli_parameters: config-template
-  exit_code: 0
-  stdout_contains: "[mpm.managers.apk]"
+[[cases]]
+cli_parameters = "config-template"
+exit_code = 0
+stdout_contains = "[mpm.managers.apk]"
 
-- cli_parameters: help managers
-  exit_code: 0
-  strip_ansi: true
-  stdout_contains: "Usage: mpm managers"
+[[cases]]
+cli_parameters = "help managers"
+exit_code = 0
+strip_ansi = true
+stdout_contains = "Usage: mpm managers"
 
-- cli_parameters: search click
-  skip_platforms: windows
-  exit_code: 0
+[[cases]]
+cli_parameters = "search click"
+skip_platforms = "windows"
+exit_code = 0
 
 # Negative cases: click-extra must surface usage errors with exit code 2 and
 # a "No such" message, not a Python traceback (which the onefile binary has
 # been known to print when an unexpected exception escapes click).
-- cli_parameters: bogus-subcommand
-  exit_code: 2
-  stderr_contains: "No such command 'bogus-subcommand'"
+[[cases]]
+cli_parameters = "bogus-subcommand"
+exit_code = 2
+stderr_contains = "No such command 'bogus-subcommand'"
 
-- cli_parameters: --bogus-flag
-  exit_code: 2
-  stderr_contains: "No such option '--bogus-flag'"
+[[cases]]
+cli_parameters = "--bogus-flag"
+exit_code = 2
+stderr_contains = "No such option '--bogus-flag'"

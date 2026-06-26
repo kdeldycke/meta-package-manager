@@ -1,9 +1,6 @@
 # Changelog
 
-## [`7.0.0.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v6.6.0...main)
-
-> [!WARNING]
-> This version is **not released yet** and is under active development.
+## [`7.0.0` (2026-06-26)](https://github.com/kdeldycke/meta-package-manager/compare/v6.6.0...v7.0.0)
 
 - **Breaking:** [mpm] Rename the `--allow-no-cooldown` flag to the `--require-cooldown-support`/`--allow-unsupported-managers` pair, and its `allow_no_cooldown` config to `require_cooldown_support` (default `true`).
 - **Breaking:** [mpm] The `sort_by` configuration option is now a list of fields, matching the repeatable `--sort-by`. Wrap an existing scalar value in brackets: `sort_by = "package_id"` becomes `sort_by = ["package_id"]`.

@@ -7,11 +7,12 @@
 # click_extra 7.19+ renders the program name with both bright (97m) and bold (1m)
 # codes. The bold code is optional to stay compatible with older click_extra
 # releases that only emit the bright code.
-# XXX Skipped on Windows: colorama converts ANSI into Win32 console calls, so the
-# raw escape codes these assertions match never reach stdout (the binary prints a
-# plain "mpm, version ..." there and still exits 0).
+# `--color` forces ANSI: the test harness captures stdout (no TTY), so without it
+# the binary emits a plain, uncolored string and these assertions fail on every
+# platform. XXX Skipped on Windows even so: colorama rewrites ANSI into Win32
+# console calls, so the forced escape codes never reach stdout there.
 [[cases]]
-cli_parameters = "--version"
+cli_parameters = "--color --version"
 skip_platforms = "windows"
 exit_code = 0
 stdout_contains = "mpm\u001b[0m, version \u001b[32m"

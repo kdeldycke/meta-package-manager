@@ -1,5 +1,10 @@
 # Changelog
 
+## [`7.0.1.dev0` (unreleased)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.0...main)
+
+> [!WARNING]
+> This version is **not released yet** and is under active development.
+
 ## [`7.0.0` (2026-06-26)](https://github.com/kdeldycke/meta-package-manager/compare/v6.6.0...v7.0.0)
 
 - **Breaking:** [mpm] Rename the `--allow-no-cooldown` flag to the `--require-cooldown-support`/`--allow-unsupported-managers` pair, and its `allow_no_cooldown` config to `require_cooldown_support` (default `true`).

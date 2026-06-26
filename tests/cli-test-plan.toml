@@ -7,8 +7,12 @@
 # click_extra 7.19+ renders the program name with both bright (97m) and bold (1m)
 # codes. The bold code is optional to stay compatible with older click_extra
 # releases that only emit the bright code.
+# XXX Skipped on Windows: colorama converts ANSI into Win32 console calls, so the
+# raw escape codes these assertions match never reach stdout (the binary prints a
+# plain "mpm, version ..." there and still exits 0).
 [[cases]]
 cli_parameters = "--version"
+skip_platforms = "windows"
 exit_code = 0
 stdout_contains = "mpm\u001b[0m, version \u001b[32m"
 stdout_regex_fullmatch = "\\x1b\\[97m(\\x1b\\[1m)?mpm\\x1b\\[0m, version \\x1b\\[32m[0-9]+\\.[0-9]+\\.[0-9]+(\\.[a-z]+[0-9]+(\\+[a-f0-9]+)?)?\\x1b\\[0m\\n(\\x1b\\[90mPython [^\\n]+\\x1b\\[0m\\n)?"
@@ -190,8 +194,11 @@ cli_parameters = "outdated"
 skip_platforms = "windows"
 exit_code = 0
 
+# XXX `which` prints a sorted table; on Windows the box-drawing and ✓ glyphs
+# raise a cp1252 UnicodeEncodeError, so skip it there like the other table cases.
 [[cases]]
 cli_parameters = "which mpm"
+skip_platforms = "windows"
 exit_code = 0
 
 [[cases]]

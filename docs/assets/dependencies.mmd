@@ -12,20 +12,15 @@ flowchart LR
         tomli_w{{"`tomli-w`"}}
     end
 
-    requests(["`requests`"])
     click_0(["`click`"])
     typing_extensions(["`typing-extensions`"])
     cloup(["`cloup`"])
     colorama(["`colorama`"])
-    idna(["`idna`"])
     tabulate(["`tabulate`"])
     wcmatch(["`wcmatch`"])
-    bracex(["`bracex`"])
-    certifi(["`certifi`"])
-    charset_normalizer(["`charset-normalizer`"])
-    deepmerge(["`deepmerge`"])
-    urllib3(["`urllib3`"])
     wcwidth(["`wcwidth`"])
+    bracex(["`bracex`"])
+    deepmerge(["`deepmerge`"])
 
     subgraph ext_hjson [--extra hjson]
         hjson(["`hjson`"])
@@ -40,11 +35,12 @@ flowchart LR
     end
 
     subgraph grp_docs [--group docs]
-        sphinx{{"`sphinx`"}}
+        sphinx{{"`sphinx >=8`"}}
         myst_parser{{"`myst-parser >=4`"}}
         furo{{"`furo >=2025.9.25`"}}
         pygments(["`pygments`"])
         pyyaml{{"`pyyaml`"}}
+        requests(["`requests`"])
         docutils(["`docutils`"])
         jinja2(["`jinja2`"])
         sphinx_click{{"`sphinx-click >=6.1`"}}
@@ -52,6 +48,7 @@ flowchart LR
         beautifulsoup4(["`beautifulsoup4`"])
         markdown_it_py(["`markdown-it-py`"])
         accessible_pygments(["`accessible-pygments`"])
+        idna(["`idna`"])
         mdit_py_plugins(["`mdit-py-plugins`"])
         packaging(["`packaging`"])
         sphinx_autodoc_typehints{{"`sphinx-autodoc-typehints >=2.4`"}}
@@ -60,8 +57,11 @@ flowchart LR
         sphinx_design{{"`sphinx-design >=0.6`"}}
         sphinx_issues{{"`sphinx-issues >=5`"}}
         sphinxext_opengraph{{"`sphinxext-opengraph >=0.13`"}}
+        tomlkit{{"`tomlkit >=0.13`"}}
         alabaster(["`alabaster`"])
         babel(["`babel`"])
+        certifi(["`certifi`"])
+        charset_normalizer(["`charset-normalizer`"])
         imagesize(["`imagesize`"])
         markupsafe(["`markupsafe`"])
         mdurl(["`mdurl`"])
@@ -74,18 +74,19 @@ flowchart LR
         sphinxcontrib_jsmath(["`sphinxcontrib-jsmath`"])
         sphinxcontrib_qthelp(["`sphinxcontrib-qthelp`"])
         sphinxcontrib_serializinghtml(["`sphinxcontrib-serializinghtml`"])
+        urllib3(["`urllib3`"])
     end
 
     subgraph grp_test [--group test]
         jsonschema(["`jsonschema`"])
-        pytest{{"`pytest >=9.0.1`"}}
+        pytest{{"`pytest >=9`"}}
         spdx_tools{{"`spdx-tools`"}}
         cyclonedx_python_lib{{"`cyclonedx-python-lib`"}}
         referencing(["`referencing`"])
         pytest_cov{{"`pytest-cov >=7`"}}
-        pytest_xdist{{"`pytest-xdist >=3.8`"}}
+        pytest_xdist{{"`pytest-xdist >=3.7`"}}
         arrow(["`arrow`"])
-        coverage{{"`coverage >=7.12`"}}
+        coverage{{"`coverage >=7.11`"}}
         license_expression(["`license-expression`"])
         rdflib(["`rdflib`"])
         attrs(["`attrs`"])
@@ -117,7 +118,6 @@ flowchart LR
         rfc3986_validator(["`rfc3986-validator`"])
         semantic_version(["`semantic-version`"])
         sortedcontainers(["`sortedcontainers`"])
-        tomlkit(["`tomlkit`"])
         tzdata(["`tzdata`"])
         uri_template(["`uri-template`"])
         uritools(["`uritools`"])
@@ -130,17 +130,17 @@ flowchart LR
         types_xmltodict{{"`types-xmltodict >=1.0.1.20250920`"}}
     end
 
-    meta_package_manager ==>|" >=7.19 "| click_extra
-    meta_package_manager ==>|" >=2.3 "| tomli
+    meta_package_manager ==>|" >=8.1.1 "| click_extra
+    meta_package_manager ==>|" >=2 "| tomli
     meta_package_manager ==>|" >=0.12 "| xmltodict
     meta_package_manager ==>|" >=25 "| boltons
     meta_package_manager ==>|" >=10 "| extra_platforms
-    meta_package_manager ==>|" >=0.16 "| packageurl_python
-    meta_package_manager ==>|" >=1.3 "| backports_strenum
-    meta_package_manager ==>|" >=1.1 "| tomli_w
-    sphinx --> requests
+    meta_package_manager ==>|" >=0.11 "| packageurl_python
+    meta_package_manager ==>|" >=1 "| backports_strenum
+    meta_package_manager ==>|" >=1 "| tomli_w
     sphinx --> pygments
-    sphinx ==> tomli
+    sphinx --> requests
+    sphinx --> tomli
     sphinx --> docutils
     sphinx --> jinja2
     sphinx --> colorama
@@ -156,37 +156,37 @@ flowchart LR
     sphinx --> sphinxcontrib_jsmath
     sphinx --> sphinxcontrib_qthelp
     sphinx --> sphinxcontrib_serializinghtml
-    click_extra ==> sphinx
-    click_extra ==> pytest
-    click_extra --> requests
+    click_extra --> sphinx
+    click_extra --> pytest
     click_extra --> click_0
     click_extra --> pygments
-    click_extra ==> pyyaml
-    click_extra ==> tomli
+    click_extra --> pyyaml
+    click_extra --> tomli
     click_extra --> docutils
     click_extra --> cloup
-    click_extra ==> xmltodict
-    click_extra ==> boltons
-    click_extra ==> extra_platforms
+    click_extra --> xmltodict
+    click_extra --> boltons
+    click_extra --> extra_platforms
     click_extra --> hjson
     click_extra --> json_with_comments
     click_extra --> json5
     click_extra --> tabulate
-    click_extra --> wcmatch
-    click_extra --> deepmerge
     click_extra --> tomlkit
+    click_extra --> wcmatch
+    click_extra --> wcwidth
+    click_extra --> deepmerge
     pytest --> pygments
-    pytest ==> tomli
+    pytest --> tomli
     pytest --> colorama
     pytest --> exceptiongroup
     pytest --> packaging
     pytest --> pluggy
     pytest --> iniconfig
     spdx_tools --> click_0
-    spdx_tools ==> pyyaml
+    spdx_tools --> pyyaml
     spdx_tools --> license_expression
     spdx_tools --> rdflib
-    spdx_tools ==> xmltodict
+    spdx_tools --> xmltodict
     spdx_tools --> beartype
     spdx_tools --> ply
     spdx_tools --> semantic_version
@@ -195,41 +195,41 @@ flowchart LR
     cyclonedx_python_lib --> referencing
     cyclonedx_python_lib --> typing_extensions
     cyclonedx_python_lib --> license_expression
-    cyclonedx_python_lib ==> packageurl_python
+    cyclonedx_python_lib --> packageurl_python
     cyclonedx_python_lib --> py_serializable
     cyclonedx_python_lib --> lxml
     cyclonedx_python_lib --> sortedcontainers
-    myst_parser ==> sphinx
-    myst_parser ==> pyyaml
+    myst_parser --> sphinx
+    myst_parser --> pyyaml
     myst_parser --> docutils
     myst_parser --> jinja2
     myst_parser --> markdown_it_py
     myst_parser --> mdit_py_plugins
-    furo ==> sphinx
+    furo --> sphinx
     furo --> pygments
     furo --> beautifulsoup4
     furo --> accessible_pygments
     furo --> sphinx_basic_ng
-    pytest_cov ==> pytest
-    pytest_cov ==> coverage
+    pytest_cov --> pytest
+    pytest_cov --> coverage
     pytest_cov --> pluggy
-    pytest_xdist ==> pytest
+    pytest_xdist --> pytest
     pytest_xdist --> execnet
     pytest_xdist --> psutil
-    sphinx_click ==> sphinx
+    sphinx_click --> sphinx
     sphinx_click --> click_0
     sphinx_click --> docutils
-    sphinxcontrib_mermaid ==> sphinx
-    sphinxcontrib_mermaid ==> pyyaml
+    sphinxcontrib_mermaid --> sphinx
+    sphinxcontrib_mermaid --> pyyaml
     sphinxcontrib_mermaid --> jinja2
-    coverage ==> tomli
-    pytest_github_actions_annotate_failures ==> pytest
-    pytest_randomly ==> pytest
-    sphinx_autodoc_typehints ==> sphinx
-    sphinx_copybutton ==> sphinx
-    sphinx_design ==> sphinx
-    sphinx_issues ==> sphinx
-    sphinxext_opengraph ==> sphinx
+    coverage --> tomli
+    pytest_github_actions_annotate_failures --> pytest
+    pytest_randomly --> pytest
+    sphinx_autodoc_typehints --> sphinx
+    sphinx_copybutton --> sphinx
+    sphinx_design --> sphinx
+    sphinx_issues --> sphinx
+    sphinxext_opengraph --> sphinx
     jsonschema --> referencing
     jsonschema --> attrs
     jsonschema --> idna
@@ -246,11 +246,11 @@ flowchart LR
     referencing --> typing_extensions
     referencing --> attrs
     referencing --> rpds_py
+    click_0 --> colorama
     requests --> idna
     requests --> certifi
     requests --> charset_normalizer
     requests --> urllib3
-    click_0 --> colorama
     jinja2 --> markupsafe
     beautifulsoup4 --> typing_extensions
     beautifulsoup4 --> soupsieve
@@ -264,7 +264,7 @@ flowchart LR
     exceptiongroup --> typing_extensions
     mdit_py_plugins --> markdown_it_py
     py_serializable --> defusedxml
-    sphinx_basic_ng ==> sphinx
+    sphinx_basic_ng --> sphinx
     tabulate --> wcwidth
     wcmatch --> bracex
     isoduration --> arrow
@@ -417,6 +417,7 @@ flowchart LR
     style sphinxext_opengraph stroke-width:3px
     style tomli stroke-width:3px
     style tomli_w stroke-width:3px
+    style tomlkit stroke-width:3px
     style types_boltons stroke-width:3px
     style types_pyyaml stroke-width:3px
     style types_xmltodict stroke-width:3px

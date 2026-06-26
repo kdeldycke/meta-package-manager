@@ -1564,8 +1564,7 @@ def _attempt_install(manager: PackageManager, spec: Specifier) -> bool:
             return False
         except CLIError:
             logging.info(
-                f"Could not install {spec} "
-                f"with {theme().invoked_command(manager.id)}.",
+                f"Could not install {spec} with {theme().invoked_command(manager.id)}.",
             )
             return False
     if output:

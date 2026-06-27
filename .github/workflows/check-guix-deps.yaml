@@ -141,9 +141,12 @@ jobs:
           failed=0
           for pkg in "${packages[@]}"; do
             echo "--- Linting ${pkg} ---"
-            lint_output=$(guix lint "${pkg}" 2>&1 \
-              | grep -v -E "^fetching CVE database|Software Heritage" \
-              | grep -v -E "^guix lint: warning: failed to get list of CVE vulnerabilities" \
+            # Drop the cve and archival checkers: they query external services
+            # (the NVD CVE feed and Software Heritage) and intermittently crash
+            # on transient TLS errors, leaving a Guile backtrace none of the
+            # grep filters below can match.  This gate validates packaging, not
+            # security advisories, so excluding them is safe and deterministic.
+            lint_output=$(guix lint --exclude=cve,archival "${pkg}" 2>&1 \
               | grep -v -E "^guix lint: warning: GitHub rate limit exceeded" \
               | grep -v -E "^hint: You can raise the rate limit" \
               | grep -v -E "^variable to a token obtained from" \

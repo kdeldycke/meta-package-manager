@@ -535,8 +535,6 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/certificates,emacs,git,gpg,linux,macos,node,nohup,python,rust,ssh,vim,virtualenv,visualstudiocode,windows
 
-junit.xml
-
 # Claude Code local files.
 .claude/scheduled_tasks.lock
 .claude/settings.local.json

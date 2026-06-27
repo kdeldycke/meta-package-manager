@@ -63,7 +63,7 @@ from unittest.mock import patch
 
 from boltons.iterutils import unique
 from boltons.strutils import strip_ansi
-from click import ParameterSource
+from click.core import ParameterSource
 from click_extra import echo, get_current_context
 from click_extra.context import JOBS, VERBOSITY_LEVEL
 from click_extra.envvar import env_copy

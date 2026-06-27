@@ -21,4 +21,4 @@ point lives in :py:mod:`meta_package_manager.cli`.
 
 from __future__ import annotations
 
-__version__ = "7.0.1"
+__version__ = "7.0.2.dev0"

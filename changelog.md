@@ -7,6 +7,8 @@
 
 ## [`7.0.1` (2026-06-27)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.0...v7.0.1)
 
+- [mpm] Fix `ParameterSource` import from older Click dependency.
+
 ## [`7.0.0` (2026-06-26)](https://github.com/kdeldycke/meta-package-manager/compare/v6.6.0...v7.0.0)
 
 > [!NOTE]

@@ -295,6 +295,7 @@ typing = [
 packages.find.include = [ "meta_package_manager*" ]
 
 [tool.uv]
+required-version = ">=0.11.23,<0.12"
 # Cooldown period.
 exclude-newer = "1 week"
 # Per-package overrides for freshly-published dependencies we want to pull in
@@ -303,7 +304,6 @@ exclude-newer = "1 week"
 exclude-newer-package = { click-extra = "2026-06-25T00:00:00Z" }
 # Package is at root level, not in "./src/".
 build-backend.module-root = ""
-required-version = ">=0.11.23,<0.12"
 
 [tool.nuitka]
 product-name = "Meta Package Manager"
@@ -496,21 +496,6 @@ exclude = [
   # openclipart.org intermittently returns 500 for valid asset detail pages.
   "^https://openclipart\\.org/.*$",
 ]
-
-# Declarative CLI test suite for binary testing. Repomatic's test and release
-# workflows run `click-extra test-suite` against the built binary; that engine
-# (the `test-plan` engine, renamed and moved upstream into click-extra 8.1)
-# resolves its cases from this section. Without it, click-extra looks for its
-# default `./tests/cli-test-suite.toml`, finds nothing, and silently falls back
-# to a trivial built-in suite, so the binary self-test must point here explicitly.
-#
-# The plan is TOML, not YAML: the binary self-test runs `click-extra test-suite`
-# through a bare `uv run --frozen` (base dependencies only), and click-extra 8.1
-# reads TOML via the standard-library `tomllib` with no format extra. YAML and the
-# other formats need their `click-extra[<fmt>]` extra, which the bare runner lacks,
-# so a YAML plan raises "YAML support disabled" before any case runs.
-[tool.click-extra.test-suite]
-file = "./tests/cli-test-plan.toml"
 
 [tool.repomatic]
 exclude = [ "labels", "skills" ]
@@ -1111,3 +1096,18 @@ allowlist.commits = [
   "745247e5c74122de9ec2dd95cbd3b8510fe224d5",
   "e31111be719406940519f52c9d4406e97fb368a3",
 ]
+
+[tool.click-extra]
+# Declarative CLI test suite for binary testing. Repomatic's test and release
+# workflows run `click-extra test-suite` against the built binary; that engine
+# (the `test-plan` engine, renamed and moved upstream into click-extra 8.1)
+# resolves its cases from this section. Without it, click-extra looks for its
+# default `./tests/cli-test-suite.toml`, finds nothing, and silently falls back
+# to a trivial built-in suite, so the binary self-test must point here explicitly.
+#
+# The plan is TOML, not YAML: the binary self-test runs `click-extra test-suite`
+# through a bare `uv run --frozen` (base dependencies only), and click-extra 8.1
+# reads TOML via the standard-library `tomllib` with no format extra. YAML and the
+# other formats need their `click-extra[<fmt>]` extra, which the bare runner lacks,
+# so a YAML plan raises "YAML support disabled" before any case runs.
+test-suite.file = "./tests/cli-test-plan.toml"

@@ -21,7 +21,7 @@ name: 🧹 Lint
 jobs:
 
   lint:
-    uses: kdeldycke/repomatic/.github/workflows/lint.yaml@e8e1f6c651ed0c51dd6622cf316f3f7f591ed3dc # v6.30.0
+    uses: kdeldycke/repomatic/.github/workflows/lint.yaml@3a04e66e0f653c320bf6e93a8d584f4bf9605a50 # v6.31.0
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}
       VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}

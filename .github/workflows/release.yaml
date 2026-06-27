@@ -28,7 +28,7 @@ concurrency:
 jobs:
 
   build:
-    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@e8e1f6c651ed0c51dd6622cf316f3f7f591ed3dc # v6.30.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-build.yaml@3a04e66e0f653c320bf6e93a8d584f4bf9605a50 # v6.31.0
 
   publish-pypi:
     name: 🐍 Publish to PyPI (${{ matrix.short_sha }})
@@ -48,29 +48,17 @@ jobs:
       matrix: ${{ fromJSON(needs.build.outputs.release_commits_matrix || '{"include":[]}') }}
     runs-on: ubuntu-slim
     permissions:
+      # OIDC only: the PyPI Trusted Publishing token. The GitHub release notes
+      # (with their PyPI admonition) are owned end to end by the engine lane's
+      # create-release job, so this lane needs no write access to the repo.
       id-token: write
-      # Lets the admonition step below edit the published release notes.
-      contents: write
     steps:
-      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@e8e1f6c651ed0c51dd6622cf316f3f7f591ed3dc # v6.30.0
+      - uses: kdeldycke/repomatic/.github/actions/publish-pypi@3a04e66e0f653c320bf6e93a8d584f4bf9605a50 # v6.31.0
         with:
           artifact-name: ${{ github.event.repository.name }}-${{ matrix.short_sha }}
-      # Backfill the "available on PyPI" admonition onto the release notes after a successful OIDC upload. The engine
-      # lane publishes the GitHub release without it (it cannot yet know the PyPI outcome). continue-on-error keeps a
-      # notes-edit hiccup from failing an upload that already succeeded.
-      - name: Add PyPI admonition to release notes
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.REPOMATIC_PAT || github.token }}
-          CURRENT_VERSION: ${{ matrix.current_version }}
-          RELEASE_NOTES: ${{ needs.build.outputs.release_notes_with_admonition }}
-        run: >
-          gh release edit "v${CURRENT_VERSION}"
-          --notes-file -
-          --repo "${{ github.repository }}" <<< "${RELEASE_NOTES}"
 
   release:
-    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@e8e1f6c651ed0c51dd6622cf316f3f7f591ed3dc # v6.30.0
+    uses: kdeldycke/repomatic/.github/workflows/_release-engine.yaml@3a04e66e0f653c320bf6e93a8d584f4bf9605a50 # v6.31.0
     needs: build
     secrets:
       REPOMATIC_PAT: ${{ secrets.REPOMATIC_PAT }}

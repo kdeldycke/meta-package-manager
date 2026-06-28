@@ -1,30 +1,31 @@
 ---
-name: "Temp - yay cooldown live test"
+name: 🧊 Test yay cooldown
+"on":
+  workflow_dispatch:
+  schedule:
+    # Weekly: catch regressions from new yay releases or Arch/AUR changes that would
+    # break the --cooldown init.lua overlay. The hermetic unit suite cannot cover this,
+    # as it needs a real yay and the AUR.
+    - cron: "29 7 * * 1"
 
-# TEMPORARY workflow. End-to-end validation of the mpm yay --cooldown overlay against
-# a real Arch Linux + yay >= 13, deliberately exercising the garbage-collection
-# scenario that used to fail: the overlay is built by a throwaway Yay instance that is
-# dropped and collected before yay runs. With the atexit-based cleanup it must survive
-# and gate correctly. Each case is a true cold clone. Manual dispatch only; delete
-# once green.
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Drive a real Arch Linux + yay >= 13 to verify that mpm's --cooldown overlay
+# (meta_package_manager.managers.pacman.Yay.cooldown_env / supports_cooldown) actually
+# gates AUR installs by release age. yay is driven directly with the environment
+# cooldown_env() produces, not through `mpm install`: mpm prefixes yay with sudo
+# (correct for raw pacman) and yay refuses to build as root, so running yay as the
+# unprivileged build user is the faithful way to exercise the AURPreInstall hook.
 #
 # Upstream context: https://github.com/Jguer/yay/issues/2883
 
-"on":
-  workflow_dispatch:
-    inputs:
-      aur-package:
-        description: >
-          A small AUR-only package (absent from the official repos) for the
-          install A/B test. Must build quickly and pull no heavy dependencies.
-        default: downgrade
-        type: string
-
-permissions:
-  contents: read
-
 jobs:
 
+  # https://github.com/Jguer/yay/releases/latest
   yay-cooldown:
     name: "yay --cooldown on Arch Linux"
     runs-on: ubuntu-24.04
@@ -38,10 +39,18 @@ jobs:
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
-      - name: Write the live validator
+      - name: Write the integration test
         run: |
           cat > yay_cooldown_validate.py <<'PY'
-          """Validate mpm's yay cooldown overlay end-to-end, exercising the GC scenario."""
+          """Validate mpm's yay cooldown overlay end-to-end against a live yay.
+
+          Covers two things the hermetic unit suite cannot:
+
+          - the overlay survives garbage collection of the Yay instance (cleanup is
+            registered with atexit, not weakref.finalize, because yay re-reads init.lua
+            mid-run); the throwaway-manager + gc.collect() below guards that regression;
+          - the release-age floor really blocks or admits an AUR install on real yay.
+          """
 
           from __future__ import annotations
 
@@ -107,7 +116,7 @@ jobs:
               env = overlay_env(delta)
               gc.collect()  # drop the throwaway manager; the overlay must survive.
               init_lua = Path(env["XDG_CONFIG_HOME"]) / "yay" / "init.lua"
-              print(f"  overlay init.lua present after GC: {init_lua.exists()}", flush=True)
+              assert init_lua.exists(), "overlay was deleted before yay ran"
               print(f"  injected epoch: {env['MPM_COOLDOWN_EPOCH']}", flush=True)
               subprocess.run(
                   ["yay", "--sync", "--noconfirm", pkg], env=env, text=True
@@ -132,20 +141,27 @@ jobs:
           chmod 0440 /etc/sudoers.d/builder
           chown --recursive builder:builder .
 
-      - name: Install yay from its GitHub release
+      # Track the latest yay release so this guard catches regressions from new yay
+      # versions. Installed from GitHub releases (reliable host; the AUR git endpoint
+      # flakes intermittently).
+      - name: Install the latest yay from GitHub releases
         run: |
+          tag="$(curl --fail --silent --show-error --location \
+            https://api.github.com/repos/Jguer/yay/releases/latest \
+            | python -c 'import json, sys; print(json.load(sys.stdin)["tag_name"])')"
+          version="${tag#v}"
           curl --fail --silent --show-error --location \
-            https://github.com/Jguer/yay/releases/download/v13.0.1/yay_13.0.1_x86_64.tar.gz \
+            "https://github.com/Jguer/yay/releases/download/${tag}/yay_${version}_x86_64.tar.gz" \
             --output /tmp/yay.tar.gz
           tar --extract --gzip --file /tmp/yay.tar.gz --directory /tmp
-          install -Dm755 /tmp/yay_13.0.1_x86_64/yay /usr/bin/yay
+          install -Dm755 "/tmp/yay_${version}_x86_64/yay" /usr/bin/yay
 
       - name: Report yay version
         run: sudo --set-home --user builder yay --version
 
       - name: Validate the cooldown overlay against real yay
         env:
-          AUR_PACKAGE: ${{ inputs.aur-package }}
+          AUR_PACKAGE: downgrade
         run: >
           sudo --set-home --user builder --preserve-env=AUR_PACKAGE
           uv run --frozen python yay_cooldown_validate.py

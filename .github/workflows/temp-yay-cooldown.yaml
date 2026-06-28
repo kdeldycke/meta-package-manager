@@ -94,10 +94,13 @@ jobs:
           )
           END = 'wd("END")\n'
 
+          CORE = WD + REAL_UPSEL + REAL_AUR + END  # = Y3, which blocks first-clone.
+          # Z1 adds config.json, Z2 puts the overlay in /tmp, Z3 adds both (= X7 deltas).
+          import tempfile
           VARIANTS = {
-              "Y1 real UpgradeSelect + simple abort": WD + REAL_UPSEL + ABORT + END,
-              "Y2 real AURPreInstall only": WD + REAL_AUR + END,
-              "Y3 both real (mpm core)": WD + REAL_UPSEL + REAL_AUR + END,
+              "Z1 core + config.json": (CORE, True, False),
+              "Z2 core + /tmp overlay": (CORE, False, True),
+              "Z3 core + config.json + /tmp": (CORE, True, True),
           }
 
 
@@ -115,13 +118,16 @@ jobs:
 
 
           results = {}
-          for name, lua in VARIANTS.items():
+          for name, (lua, with_config, in_tmp) in VARIANTS.items():
               log.unlink(missing_ok=True)
               reset_cold()
-              ov = home / name.split()[0].lower()
-              (ov / "yay").mkdir(parents=True, exist_ok=True)
-              (ov / "yay" / "init.lua").write_text(lua, encoding="UTF-8")
-              env = {**os.environ, "XDG_CONFIG_HOME": str(ov), "MPM_COOLDOWN_EPOCH": cutoff}
+              root = Path(tempfile.mkdtemp(prefix="mpm-yay-cooldown-")) if in_tmp else home / name.split()[0].lower()
+              ov = root / "yay"
+              ov.mkdir(parents=True, exist_ok=True)
+              (ov / "init.lua").write_text(lua, encoding="UTF-8")
+              if with_config:
+                  (ov / "config.json").write_text("{}\n", encoding="UTF-8")
+              env = {**os.environ, "XDG_CONFIG_HOME": str(root), "MPM_COOLDOWN_EPOCH": cutoff}
               print(f"\n=== {name} (true cold; expect BLOCK) ===", flush=True)
               subprocess.run(["yay", "--sync", "--noconfirm", pkg], env=env, text=True)
               results[name] = not installed(pkg)

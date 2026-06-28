@@ -377,6 +377,28 @@ jobs:
         run: |
           choco install steamcmd --no-progress --yes --retry-count=3
 
+      # Conda
+      # Miniconda ships pre-installed on GitHub-hosted runners at $CONDA but is kept off
+      # PATH. Expose its binary so mpm detects conda, guarding on $CONDA so any image that
+      # lacks it (some ARM runners) skips conda instead of failing this step. On Linux and
+      # macOS $CONDA is root-owned, so hand the base environment to the unprivileged runner
+      # user, otherwise the destructive install/remove test cannot mutate it.
+      - name: Conda - Linux & macOS setup
+        if: runner.os != 'Windows'
+        run: |
+          if [ -n "${CONDA:-}" ] && [ -d "$CONDA" ]; then
+            sudo chown -R "$USER" "$CONDA"
+            echo "$CONDA/bin" >> "$GITHUB_PATH"
+          fi
+      - name: Conda - Windows setup
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if ($env:CONDA -and (Test-Path $env:CONDA)) {
+            "$env:CONDA\Scripts" | Out-File -Append -FilePath $env:GITHUB_PATH
+            "$env:CONDA\condabin" | Out-File -Append -FilePath $env:GITHUB_PATH
+          }
+
       - name: Install UV
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
       - name: Force native ARM64 Python on Windows ARM64

@@ -17,6 +17,9 @@
 
 ## [`7.0.1` (2026-06-27)](https://github.com/kdeldycke/meta-package-manager/compare/v7.0.0...v7.0.1)
 
+> [!NOTE]
+> `7.0.1` is available on [🐍 PyPI](https://pypi.org/project/meta-package-manager/7.0.1/) and [🐙 GitHub](https://github.com/kdeldycke/meta-package-manager/releases/tag/v7.0.1).
+
 - [mpm] Fix `ParameterSource` import from older Click dependency.
 
 ## [`7.0.0` (2026-06-26)](https://github.com/kdeldycke/meta-package-manager/compare/v6.6.0...v7.0.0)

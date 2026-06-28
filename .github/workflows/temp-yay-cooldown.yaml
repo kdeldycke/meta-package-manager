@@ -34,7 +34,7 @@ jobs:
       - name: Update system and install tooling
         run: >
           pacman --sync --refresh --sysupgrade --noconfirm --needed
-          base-devel git nodejs python sudo uv
+          base-devel curl git nodejs python sudo uv
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
@@ -155,12 +155,15 @@ jobs:
           chmod 0440 /etc/sudoers.d/builder
           chown --recursive builder:builder .
 
-      - name: Install yay from the AUR
-        run: >
-          sudo --set-home --user builder bash -c
-          'git clone --depth 1 https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
-          && cd /tmp/yay-bin
-          && makepkg --install --syncdeps --noconfirm'
+      # Install yay from its GitHub release rather than building yay-bin from the AUR:
+      # the AUR git endpoint flakes intermittently, GitHub is reliable.
+      - name: Install yay from its GitHub release
+        run: |
+          curl --fail --silent --show-error --location \
+            https://github.com/Jguer/yay/releases/download/v13.0.1/yay_13.0.1_x86_64.tar.gz \
+            --output /tmp/yay.tar.gz
+          tar --extract --gzip --file /tmp/yay.tar.gz --directory /tmp
+          install -Dm755 /tmp/yay_13.0.1_x86_64/yay /usr/bin/yay
 
       - name: Report yay version
         run: sudo --set-home --user builder yay --version

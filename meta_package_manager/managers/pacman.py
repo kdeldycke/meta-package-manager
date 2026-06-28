@@ -449,9 +449,15 @@ class Yay(Pacman):
             if not self.supports_cooldown:
                 return {}
             cutoff = datetime.now(tz=timezone.utc) - self.cooldown
+            # Clamp to the Unix epoch: a cooldown reaching before 1970 yields a
+            # negative timestamp, and yay's Lua (gopher-lua) parses that back to nil,
+            # which silently drops the gate. Epoch 0 keeps the floor effective (every
+            # real release post-dates 1970, so all are held back, as an overlong
+            # cooldown intends).
+            epoch = max(0, int(cutoff.timestamp()))
             env = {
                 "XDG_CONFIG_HOME": str(self._cooldown_overlay_dir),
-                "MPM_COOLDOWN_EPOCH": str(int(cutoff.timestamp())),
+                "MPM_COOLDOWN_EPOCH": str(epoch),
             }
             user_dir = self._user_yay_config_dir()
             if user_dir is not None:

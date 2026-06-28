@@ -1,15 +1,14 @@
 ---
 name: "Temp - yay cooldown live test"
 
-# TEMPORARY workflow. Probes how a real Arch Linux + yay >= 13 surfaces AUR
-# package metadata to init.lua hooks, to validate the mpm yay --cooldown overlay.
-# Manual dispatch only; delete once the behavior is pinned down.
+# TEMPORARY workflow. Validates the mpm yay --cooldown overlay (Yay.cooldown_env /
+# supports_cooldown) against a real Arch Linux + yay >= 13 environment, which the
+# hermetic unit layer cannot cover. Manual dispatch only; delete once confirmed.
 #
-# Currently in DIAGNOSTIC mode: it drives yay directly with hand-written init.lua
-# overlays (no mpm) to answer three questions the source could not settle:
-#   1. Does an AURPreInstall hook fire during a plain `yay -S`?
-#   2. What `last_modified` value does it see for the package?
-#   3. Does `yay.abort()` inside AURPreInstall actually stop the install?
+# It drives yay directly with the environment mpm's cooldown_env() produces, rather
+# than through `mpm install`: mpm prefixes yay with sudo (correct for raw pacman),
+# and yay refuses to build as root. Running yay as the unprivileged build user is
+# the faithful way to exercise the AURPreInstall hook the overlay delivers.
 #
 # Upstream context: https://github.com/Jguer/yay/issues/2883
 
@@ -19,7 +18,7 @@ name: "Temp - yay cooldown live test"
       aur-package:
         description: >
           A small AUR-only package (absent from the official repos) for the
-          probe. Must build quickly and pull no heavy dependencies.
+          install A/B test. Must build quickly and pull no heavy dependencies.
         default: downgrade
         type: string
 
@@ -37,89 +36,89 @@ jobs:
       - name: Update system and install tooling
         run: >
           pacman --sync --refresh --sysupgrade --noconfirm --needed
-          base-devel git nodejs python sudo
+          base-devel git nodejs python sudo uv
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
-      - name: Write the diagnostic probe
+      - name: Write the live validator
         run: |
-          cat > yay_cooldown_probe.py <<'PY'
-          """Probe a real yay's AURPreInstall hook behavior (no mpm involved)."""
+          cat > yay_cooldown_validate.py <<'PY'
+          """Validate mpm's real yay cooldown overlay end-to-end against a live yay."""
 
           from __future__ import annotations
 
           import os
           import subprocess
+          from datetime import timedelta
           from pathlib import Path
+
+          from meta_package_manager.managers.pacman import Yay
 
           pkg = os.environ["AUR_PACKAGE"]
           home = Path(os.environ["HOME"])
-          probe_log = home / "probe.log"
 
-          # Log-only hook: record whether it fires and the last_modified it sees.
-          PROBE_LOG_LUA = r'''
-          local log = os.getenv("HOME") .. "/probe.log"
-          local function w(s)
-            local f = io.open(log, "a")
-            if f then f:write(s .. "\n"); f:close() end
-          end
-          w("init.lua loaded")
-          yay.create_autocmd("AURPreInstall", {
-            desc = "probe-log",
-            callback = function(event)
-              w("AURPreInstall fired: match=" .. tostring(event.match)
-                .. " last_modified=" .. tostring(event.data.last_modified)
-                .. " version=" .. tostring(event.data.version))
-            end,
-          })
-          '''
-
-          # Abort hook: does yay.abort() in AURPreInstall stop a plain -S?
-          PROBE_ABORT_LUA = r'''
-          yay.create_autocmd("AURPreInstall", {
-            desc = "probe-abort",
-            callback = function(event)
-              yay.abort("PROBE ABORT: " .. tostring(event.match))
-            end,
-          })
-          '''
+          # A user config the overlay must preserve: a sentinel-writing init.lua proves
+          # the overlay chains it instead of shadowing it.
+          user_yay = home / ".config" / "yay"
+          user_yay.mkdir(parents=True, exist_ok=True)
+          sentinel = user_yay / "chained.sentinel"
+          (user_yay / "init.lua").write_text(
+              'local f = io.open(os.getenv("HOME") .. "/.config/yay/chained.sentinel", "w")\n'
+              'if f then f:write("loaded"); f:close() end\n',
+              encoding="UTF-8",
+          )
+          (user_yay / "config.json").write_text("{}\n", encoding="UTF-8")
 
 
-          def write_overlay(name: str, lua: str) -> Path:
-              root = home / name
-              (root / "yay").mkdir(parents=True, exist_ok=True)
-              (root / "yay" / "init.lua").write_text(lua, encoding="UTF-8")
-              return root
-
-
-          def run_yay(overlay: Path, *args: str) -> None:
-              env = {**os.environ, "XDG_CONFIG_HOME": str(overlay)}
-              subprocess.run(["yay", *args], env=env, text=True)
+          def cooldown_env(delta: timedelta) -> dict[str, str]:
+              manager = Yay()
+              manager.cooldown = delta
+              print(f"yay version: {manager.version}", flush=True)
+              assert manager.supports_cooldown, "real yay must advertise cooldown support"
+              overlay = manager.cooldown_env()
+              print("injected:", {k: overlay[k] for k in sorted(overlay)}, flush=True)
+              return {**os.environ, **overlay}
 
 
           def installed(name: str) -> bool:
               return subprocess.run(["pacman", "--query", name]).returncode == 0
 
 
-          print(f"=== probe 1: log-only AURPreInstall on `yay -S {pkg}` ===", flush=True)
-          probe_log.unlink(missing_ok=True)
-          run_yay(write_overlay("probe-log", PROBE_LOG_LUA), "--sync", "--noconfirm", pkg)
-          print("--- probe.log ---", flush=True)
-          if probe_log.exists():
-              print(probe_log.read_text(), flush=True)
-          else:
-              print("MISSING: init.lua never wrote (hook never fired / not loaded)", flush=True)
-          print(f"{pkg} installed after probe 1: {installed(pkg)}", flush=True)
-          if installed(pkg):
-              subprocess.run(["sudo", "pacman", "--remove", "--noconfirm", pkg])
+          def cleanup() -> None:
+              if installed(pkg):
+                  subprocess.run(["sudo", "pacman", "--remove", "--noconfirm", pkg])
 
-          print(f"\n=== probe 2: aborting AURPreInstall on `yay -S {pkg}` ===", flush=True)
-          run_yay(write_overlay("probe-abort", PROBE_ABORT_LUA), "--sync", "--noconfirm", pkg)
-          blocked = not installed(pkg)
-          verdict = "WORKED" if blocked else "did NOT work"
-          print(f"{pkg} installed after probe 2: {not blocked}  (abort {verdict})", flush=True)
 
-          print("\nDIAGNOSTIC COMPLETE", flush=True)
+          # downgrade-style leaf packages are last-modified well within a year, so a
+          # 365-day floor holds them back while a 1-second floor lets them through.
+          cases = [
+              ("365-day cooldown (realistic floor)", timedelta(days=365), True),
+              ("40000-day cooldown (epoch clamped to 0)", timedelta(days=40000), True),
+              ("1-second cooldown (no real floor)", timedelta(seconds=1), False),
+          ]
+
+          first = True
+          for label, delta, expect_blocked in cases:
+              want = "BLOCKED" if expect_blocked else "ALLOWED"
+              print(f"\n=== {label}: expect {want} ===", flush=True)
+              cleanup()
+              sentinel.unlink(missing_ok=True)
+              subprocess.run(
+                  ["yay", "--sync", "--noconfirm", pkg],
+                  env=cooldown_env(delta),
+                  text=True,
+              )
+              if first:
+                  assert sentinel.exists(), "overlay did not chain the user's init.lua"
+                  first = False
+              blocked = not installed(pkg)
+              print(f"{pkg} blocked={blocked} (expected {expect_blocked})", flush=True)
+              assert blocked == expect_blocked, (
+                  f"{label}: expected blocked={expect_blocked}, got {blocked}"
+              )
+
+          cleanup()
+          print("\nALL LIVE CHECKS PASSED", flush=True)
           PY
 
       - name: Create an unprivileged build user
@@ -139,9 +138,9 @@ jobs:
       - name: Report yay version
         run: sudo --set-home --user builder yay --version
 
-      - name: Run the diagnostic probe
+      - name: Validate the cooldown overlay against real yay
         env:
           AUR_PACKAGE: ${{ inputs.aur-package }}
         run: >
           sudo --set-home --user builder --preserve-env=AUR_PACKAGE
-          python yay_cooldown_probe.py
+          uv run --frozen python yay_cooldown_validate.py

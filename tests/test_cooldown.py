@@ -362,6 +362,20 @@ def test_yay_cooldown_overlay_without_user_config(tmp_path, monkeypatch):
     assert not (overlay / "config.json").exists()
 
 
+def test_yay_cooldown_epoch_clamped_to_zero(tmp_path, monkeypatch):
+    """A cooldown reaching before 1970 clamps the epoch to 0.
+
+    A negative Unix timestamp parses back to nil in yay's gopher-lua, which silently
+    drops the gate; epoch 0 keeps the floor effective.
+    """
+    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))
+    manager = Yay()
+    manager.__dict__["version"] = parse_version("13.0.2")
+    manager.cooldown = timedelta(days=40000)  # ~109 years: cutoff predates 1970.
+    assert manager.cooldown_env()["MPM_COOLDOWN_EPOCH"] == "0"
+
+
 def test_yay_cooldown_no_recursion_when_version_resolved_lazily(tmp_path, monkeypatch):
     """Resolving the version lazily under an active cooldown must not recurse.
 

@@ -16,6 +16,8 @@
 
 from __future__ import annotations
 
+import logging
+
 import pytest
 
 from meta_package_manager.capabilities import Operations
@@ -167,3 +169,96 @@ def test_run_failure_gate(stop_on_error, must_succeed, script, expectation):
         output = manager.run_cli("-c", script, must_succeed=must_succeed)
         assert output == "boom"
         assert manager.cli_errors == []
+
+
+# CLIExecutor.run_cache: lock-family peers replay a byte-identical command instead of
+# re-running it. Each script appends a byte to a marker file, so its length counts how
+# many subprocesses actually ran.
+
+
+def _append_script(marker, payload="x", tail=""):
+    """A one-liner that appends ``payload`` to ``marker``, then runs ``tail``."""
+    return f"open({str(marker)!r}, 'a').write({payload!r}); {tail}"
+
+
+def test_run_cache_replays_identical_command(tmp_path):
+    """With a shared cache, a byte-identical command runs the subprocess once."""
+    marker = tmp_path / "runs.log"
+    script = _append_script(marker)
+    cache: dict = {}
+    first, second = FakeManager(), FakeManager()
+    first.run_cache = second.run_cache = cache
+
+    out_first = first.run_cli("-c", script)
+    out_second = second.run_cli("-c", script)
+
+    # The subprocess ran exactly once; the peer was served from the shared cache.
+    assert marker.read_text() == "x"
+    assert out_first == out_second == ""
+
+
+def test_run_cache_disabled_by_default(tmp_path):
+    """Without a cache, identical commands each spawn their own subprocess."""
+    marker = tmp_path / "runs.log"
+    script = _append_script(marker)
+    manager = FakeManager()
+    assert manager.run_cache is None
+
+    manager.run_cli("-c", script)
+    manager.run_cli("-c", script)
+
+    assert marker.read_text() == "xx"
+
+
+def test_run_cache_replays_failure_to_every_member(tmp_path):
+    """A cached failure is re-attributed to each peer, though the command runs once."""
+    marker = tmp_path / "runs.log"
+    script = _append_script(
+        marker, tail="import sys; sys.stderr.write('boom'); sys.exit(8)"
+    )
+    cache: dict = {}
+    first, second = FakeManager(), FakeManager()
+    first.stop_on_error = second.stop_on_error = False
+    first.run_cache = second.run_cache = cache
+
+    first.run_cli("-c", script)
+    second.run_cli("-c", script)
+
+    # One real execution, but both managers recorded the failure for the trail.
+    assert marker.read_text() == "x"
+    assert [error.code for error in first.cli_errors] == [8]
+    assert [error.code for error in second.cli_errors] == [8]
+
+
+def test_run_cache_keeps_distinct_commands_apart(tmp_path):
+    """Only byte-identical invocations collapse; different args each run."""
+    marker = tmp_path / "runs.log"
+    manager = FakeManager()
+    manager.run_cache = {}
+
+    manager.run_cli("-c", _append_script(marker, "a"))
+    manager.run_cli("-c", _append_script(marker, "b"))
+
+    assert marker.read_text() == "ab"
+
+
+def test_run_cache_collapses_dry_run(caplog):
+    """Under --dry-run a family's identical command is announced once, not per member."""
+    cache: dict = {}
+    first, second = FakeManager(), FakeManager()
+    first.dry_run = second.dry_run = True
+    first.run_cache = second.run_cache = cache
+
+    with caplog.at_level(logging.WARNING):
+        first.run_cli("-c", "pass")
+        second.run_cli("-c", "pass")
+
+    # The command is announced once; the peer is a silent (DEBUG) cache hit.
+    dry_run_lines = [
+        record
+        for record in caplog.records
+        if record.getMessage().startswith("Dry-run:")
+    ]
+    assert len(dry_run_lines) == 1
+    # The first dry-run still seeded the cache, so the peer had something to reuse.
+    assert len(cache) == 1

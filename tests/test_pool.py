@@ -28,7 +28,7 @@ from click_extra.logging import LogLevel
 
 import meta_package_manager
 from meta_package_manager.cli import mpm
-from meta_package_manager.execution import warm_availability
+from meta_package_manager.execution import SHARED_LOCK_FAMILIES, warm_availability
 from meta_package_manager.manager import PackageManager
 from meta_package_manager.pool import manager_classes, pool
 
@@ -73,6 +73,21 @@ def test_manager_count():
     assert len(pool) == 55
     assert len(pool) == len(pool.all_manager_ids)
     assert pool.all_manager_ids == tuple(sorted(set(pool)))
+
+
+def test_shared_lock_families_are_disjoint():
+    """No manager may belong to two lock families, or its lane grouping is ambiguous."""
+    seen: set[str] = set()
+    for family in SHARED_LOCK_FAMILIES:
+        overlap = seen & family
+        assert not overlap, f"managers in more than one lock family: {overlap}"
+        seen |= family
+
+
+def test_shared_lock_family_members_exist_in_pool():
+    """Every lock-family member must be a real manager id (catches typos)."""
+    for manager_id in set().union(*SHARED_LOCK_FAMILIES):
+        assert manager_id in pool.all_manager_ids
 
 
 def test_cached_pool():

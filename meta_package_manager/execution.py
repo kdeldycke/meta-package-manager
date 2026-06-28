@@ -402,6 +402,20 @@ class CLIExecutor:
     cli_errors: list[CLIError]
     """Accumulate all CLI errors encountered by the package manager."""
 
+    run_cache: dict[tuple, tuple[int, str, str]] | None = None
+    """Optional cache that de-duplicates identical CLI runs within a lock family.
+
+    ``None`` by default, which disables caching: every :py:meth:`run` call spawns its own
+    subprocess. :func:`dispatch` injects one shared dict into all the managers of a
+    multi-manager lock-family lane (see :data:`SHARED_LOCK_FAMILIES`) for the duration of
+    that lane, so members resolving to a byte-identical command (``brew`` and ``cask``
+    both running ``brew update`` for :command:`mpm sync`) run the subprocess once and
+    replay the cached ``(code, output, error)`` for the rest. The replay still walks
+    :py:meth:`run`'s logging and failure gate, so a failed shared command is attributed
+    to every member. Keyed on the resolved command line and its environment, so only
+    genuinely identical invocations collapse.
+    """
+
     def __init__(self) -> None:
         """Initialize ``cli_errors`` list."""
         self.cli_errors = []
@@ -735,7 +749,20 @@ class CLIExecutor:
         output = ""
         error = ""
 
-        if self.dry_run:
+        # Within a lock-family lane, key this run on its resolved command line and
+        # environment so a family peer that already ran the identical command serves it
+        # from cache instead of spawning a redundant (and lock-contending) subprocess.
+        # See SHARED_LOCK_FAMILIES and CLIExecutor.run_cache.
+        cache = self.run_cache
+        cache_key = (tuple(clean_args), tuple(sorted((extra_env or {}).items())))
+        cached = cache.get(cache_key) if cache is not None else None
+
+        if cached is not None:
+            # Replay the peer's result: the subprocess is skipped, but the logging and
+            # failure gate below still run, so this manager is marked like the peer.
+            code, output, error = cached
+            logging.debug(f"Reuse lock-family peer result: {cli_msg}")
+        elif self.dry_run:
             logging.warning(f"Dry-run: {cli_msg}")
         else:
             logging.debug(cli_msg)
@@ -858,6 +885,14 @@ class CLIExecutor:
             code = proc.returncode
             output = stdout or ""
             error = stderr or ""
+
+        # Publish a freshly produced result — real or dry-run — so lock-family peers
+        # replay it instead of re-running, collapsing identical invocations even under
+        # --dry-run (where the first member logs the command and the rest are silent
+        # cache hits). Skipped when this run was itself a hit. Normalization below is
+        # idempotent, so caching the raw result here is equivalent.
+        if cache is not None and cached is None:
+            cache[cache_key] = (code, output, error)
 
         # Normalize messages.
         if error:
@@ -1088,36 +1123,49 @@ class CLIExecutor:
 
 SHARED_LOCK_FAMILIES: Final[tuple[frozenset[str], ...]] = (
     frozenset({"apt", "apt-mint", "deb-get"}),
+    frozenset({"brew", "cask"}),
     frozenset({"dnf", "dnf5", "yum", "zypper"}),
     frozenset({"pacman", "pacstall"}),
 )
-"""Managers that contend for one shared OS-level package lock, grouped by backend.
+"""Managers that contend for one shared backend lock, grouped by backend.
 
-Observed while making operations concurrent (see :func:`collect_from_managers` and
-:func:`collect_per_package`). Different managers are otherwise independent processes
-over disjoint state, so running them in parallel is safe. The exception is a handful
-that drive a *shared* backend and serialize on its lock:
+Different managers are otherwise independent processes over disjoint state, so running
+them in parallel is safe. The exception is a handful that drive a *shared* backend and
+serialize on its lock:
 
 - ``apt``, ``apt-mint`` and ``deb-get`` all reach :command:`dpkg`
   (``/var/lib/dpkg/lock``).
+- ``brew`` and ``cask`` are the *same* :command:`brew` binary and serialize on
+  Homebrew's own update lock: two concurrent ``brew update`` (which :command:`mpm sync`
+  issues identically for both, as the formula/cask split does not apply to it) collide,
+  one failing with *"Another active Homebrew update process is already running"*.
 - ``dnf``, ``dnf5``, ``yum`` and ``zypper`` all reach the RPM database.
 - ``pacman`` and ``pacstall`` all reach the pacman database
   (``/var/lib/pacman/db.lck``).
 
-Conclusion: concurrency is safe *across* families and unsafe *within* one, just as
-it is unsafe within a single manager (which is why :func:`collect_per_package` keeps
-one manager's own packages serial). When two members of a family are co-installed
-and run at once, the OS lock makes them *block or fail*, never corrupt: the read and
-maintenance commands are best-effort and self-heal on re-run, but the action
-commands (``install``/``remove``/``upgrade``) fail loud, so a lost race surfaces as
-an error. :option:`mpm --jobs` ``1`` serializes everything for anyone who hits it.
+Concurrency is safe *across* families and unsafe *within* one, just as it is unsafe
+within a single manager (which is why a manager's own packages stay serial). When two
+members run at once the shared lock makes them *block or fail*, never corrupt.
 
-.. note::
-    Not yet enforced. This is the seed for a future scheduler that would serialize
-    *within* a family while still parallelizing *across* families, instead of
-    leaning on the OS lock plus ``--jobs``. Re-verify membership and the exact lock
-    paths before wiring it in (a host rarely carries two members of the same
-    family, which is why the OS-lock fallback has sufficed so far).
+Enforced for the mutating fan-outs only: :func:`merge_into_lock_lanes` collapses each
+family's members into a single :func:`dispatch` lane, so they run serially while
+distinct families still run in parallel. The read-only queries
+(``installed``/``outdated``/``search``) take no backend lock, so they keep one lane per
+manager and stay fully concurrent. Members of a lane also share a command cache (see
+:py:attr:`CLIExecutor.run_cache`), so two that resolve to a byte-identical invocation
+(``brew`` and ``cask`` for ``sync`` and ``cleanup``) run the subprocess once.
+
+Adding a newly-conflicting set of managers is a one-line edit here: append a
+``frozenset`` of their ids and both the serialization and the cache pick it up.
+"""
+
+
+_LOCK_FAMILY_BY_MANAGER: Final[dict[str, frozenset[str]]] = {
+    manager_id: family for family in SHARED_LOCK_FAMILIES for manager_id in family
+}
+"""Reverse index of :data:`SHARED_LOCK_FAMILIES`: each member maps to its family.
+
+Lets :func:`merge_into_lock_lanes` resolve a manager's mutual-exclusion group in O(1).
 """
 
 
@@ -1332,7 +1380,9 @@ def dispatch(
     label: str,
     done_label: str,
     unit: str,
-    lanes: list[tuple[PackageManager, list[Callable[[], tuple[bool, str]]]]],
+    lanes: list[
+        tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool, str]]]]
+    ],
     *,
     coverage: bool = False,
     ctx: Context | None = None,
@@ -1340,10 +1390,13 @@ def dispatch(
     """Fan a set of work *lanes* out across managers, narrating a ``✓``/``✗`` trail.
 
     The single scheduling primitive behind both :func:`collect_from_managers` and
-    :func:`collect_per_package`. A *lane* is one manager paired with a list of
-    callables; lanes run concurrently (one worker each) while a lane's own callables
-    run serially, because a package manager cannot safely run two of its own
-    invocations at once (they serialize on its lock, see :data:`SHARED_LOCK_FAMILIES`).
+    :func:`collect_per_package`. A *lane* is one or more managers paired with a list of
+    callables; lanes run concurrently (one worker each) while a lane's own callables run
+    serially, because a package manager cannot safely run two of its own invocations at
+    once, nor can two managers sharing a backend lock (see :data:`SHARED_LOCK_FAMILIES`).
+    A lane usually wraps a single manager; :func:`merge_into_lock_lanes` is what bundles
+    a whole lock family into one, and such a lane also gets a shared command cache (see
+    :py:attr:`CLIExecutor.run_cache`) so its members collapse identical invocations.
 
     Each callable does its work, records its own outcome (output to ``INFO``, failures
     into a caller-owned list) and returns ``(ok, message)`` for the trail. The whole
@@ -1365,13 +1418,13 @@ def dispatch(
         (:func:`effective_jobs`). Defaults to the current context, so a command need not
         thread it; tests pass an explicit stand-in.
     """
-    total = sum(len(tasks) for _manager, tasks in lanes)
+    total = sum(len(tasks) for _managers, tasks in lanes)
     if not total:
         return
     if ctx is None:
         ctx = get_current_context(silent=True)
     jobs = effective_jobs(ctx, len(lanes))
-    managers = [manager for manager, _ in lanes]
+    managers = [manager for lane_managers, _ in lanes for manager in lane_managers]
     with OperationTrail(
         managers,
         label=label,
@@ -1383,10 +1436,27 @@ def dispatch(
     ) as trail:
 
         def run_lane(
-            lane: tuple[PackageManager, list[Callable[[], tuple[bool, str]]]],
+            lane: tuple[
+                tuple[PackageManager, ...], list[Callable[[], tuple[bool, str]]]
+            ],
         ) -> None:
-            for task in lane[1]:
-                trail.mark(*task())
+            lane_managers, tasks = lane
+            # A multi-manager lane is a lock family: share one command cache across its
+            # members for the lane's lifetime so byte-identical invocations (brew and
+            # cask both running `brew update`) collapse to a single subprocess.
+            cache: dict[tuple, tuple[int, str, str]] | None = (
+                {} if len(lane_managers) > 1 else None
+            )
+            if cache is not None:
+                for manager in lane_managers:
+                    manager.run_cache = cache
+            try:
+                for task in tasks:
+                    trail.mark(*task())
+            finally:
+                if cache is not None:
+                    for manager in lane_managers:
+                        manager.run_cache = None
 
         if jobs <= 1:
             for lane in lanes:
@@ -1404,6 +1474,36 @@ def dispatch(
             trail.finish(ok == total, f"{done_label} {ok}/{total} {unit}")
 
 
+def merge_into_lock_lanes(
+    pairs: list[tuple[PackageManager, Callable[[], tuple[bool, str]]]],
+) -> list[tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool, str]]]]]:
+    """Group ``(manager, task)`` pairs into :func:`dispatch` lanes, one per lock family.
+
+    Managers sharing a :data:`SHARED_LOCK_FAMILIES` entry collapse into a single lane so
+    their tasks run serially (the lane is :func:`dispatch`'s unit of mutual exclusion),
+    while unrelated managers each keep their own lane and run concurrently. A manager not
+    in any family keys on its own id, so its tasks still group together (a manager's own
+    invocations cannot overlap either). First-seen order is preserved, both across lanes
+    and within a lane's task list.
+
+    Used by the mutating fan-outs only: the state changers through
+    :func:`collect_per_package`, and ``sync``/``cleanup``/``upgrade --all`` through
+    :func:`collect_from_managers`. The read commands take no backend lock and skip this,
+    keeping one lane per manager.
+    """
+    lanes: dict[
+        object, tuple[list[PackageManager], list[Callable[[], tuple[bool, str]]]]
+    ]
+    lanes = {}
+    for manager, task in pairs:
+        key = _LOCK_FAMILY_BY_MANAGER.get(manager.id, manager.id)
+        lane_managers, lane_tasks = lanes.setdefault(key, ([], []))
+        if manager not in lane_managers:
+            lane_managers.append(manager)
+        lane_tasks.append(task)
+    return [(tuple(ms), ts) for ms, ts in lanes.values()]
+
+
 def collect_from_managers(
     label: str,
     done_label: str,
@@ -1417,9 +1517,11 @@ def collect_from_managers(
 
     The fan-out primitive for the read-only commands (``installed``/``outdated``/
     ``search``) and the independent maintenance commands (``sync``/``cleanup``/
-    ``upgrade --all``). It adapts each manager into a single-unit :func:`dispatch` lane
-    whose unit runs ``work`` and stashes the ``(id, data)`` result in input position,
-    so the returned list mirrors ``managers`` regardless of completion order.
+    ``upgrade --all``). It adapts each manager into a :func:`dispatch` unit that runs
+    ``work`` and stashes the ``(id, data)`` result in input position, so the returned
+    list mirrors ``managers`` regardless of completion order. The maintenance commands
+    (``report_state``) then merge lock-family members into shared serial lanes
+    (:func:`merge_into_lock_lanes`); the read commands keep one lane per manager.
 
     ``work`` returns this manager's ``(id, data)``; it must handle its own
     :py:class:`meta_package_manager.execution.CLIError` (each manager owns its
@@ -1429,10 +1531,11 @@ def collect_from_managers(
     cooldown skips).
 
     :param report_state: maintenance commands set it (their only output is the trail).
-        It flips the finisher to a success count and keeps the trail in the sequential
-        fallback. Read commands leave it ``False``: their table is the output, so the
-        sequential fallback is silent and the finisher reports coverage. Passed to
-        :func:`dispatch` as the inverse of ``coverage``.
+        It flips the finisher to a success count, keeps the trail in the sequential
+        fallback, and turns on lock-family serialization. Read commands leave it
+        ``False``: their table is the output, so the sequential fallback is silent and
+        the finisher reports coverage. Passed to :func:`dispatch` as the inverse of
+        ``coverage``.
     """
     results: list[tuple[str, dict]] = [("", {})] * len(managers)
 
@@ -1447,7 +1550,14 @@ def collect_from_managers(
 
         return unit
 
-    lanes = [(manager, [make_unit(i, manager)]) for i, manager in enumerate(managers)]
+    pairs = [(manager, make_unit(i, manager)) for i, manager in enumerate(managers)]
+    # Mutating fan-outs (report_state) serialize lock families into shared lanes; the
+    # read commands take no backend lock and keep one lane per manager.
+    lanes: list[tuple[tuple[PackageManager, ...], list[Callable[[], tuple[bool, str]]]]]
+    if report_state:
+        lanes = merge_into_lock_lanes(pairs)
+    else:
+        lanes = [((manager,), [unit]) for manager, unit in pairs]
     dispatch(label, done_label, "managers", lanes, coverage=not report_state, ctx=ctx)
     return results
 
@@ -1464,17 +1574,15 @@ def collect_per_package(
     The fan-out primitive for the ordering-free state changers that act on many
     (package, manager) pairs: ``remove``, ``upgrade <packages>``, ``restore`` and the
     manager-tied specs of ``install``. Takes a flat list of ``(manager, task)`` pairs
-    and groups them into per-manager lanes — so a manager's own packages stay serial
-    while managers run in parallel — then drives :func:`dispatch`. Each task returns
+    and groups them into lanes by lock family (:func:`merge_into_lock_lanes`) — so a
+    manager's own packages, and any lock-family peers, stay serial while unrelated
+    managers run in parallel — then drives :func:`dispatch`. Each task returns
     ``(ok, message)`` after doing its CLI call and recording its own outcome. The
     unmatched-package priority search of ``install`` is *not* routed here: it has genuine
     cross-manager ordering (stop at the first manager that has the package) and stays
     sequential on its own.
     """
-    lanes: dict[PackageManager, list[Callable[[], tuple[bool, str]]]] = {}
-    for manager, task in tasks:
-        lanes.setdefault(manager, []).append(task)
-    dispatch(label, done_label, "packages", list(lanes.items()), ctx=ctx)
+    dispatch(label, done_label, "packages", merge_into_lock_lanes(tasks), ctx=ctx)
 
 
 def warn_jobs_ignored(ctx: Context) -> None:

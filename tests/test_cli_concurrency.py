@@ -54,7 +54,9 @@ class FakeContext:
 
 
 class FakeManager:
-    """Minimal stand-in exposing only ``id`` and the ``progress`` gate."""
+    """Minimal stand-in exposing only ``id``, ``progress`` and ``run_cache``."""
+
+    run_cache = None
 
     def __init__(self, manager_id: str, progress: bool = False) -> None:
         self.id = manager_id
@@ -437,6 +439,122 @@ def test_per_package_no_finisher_off_terminal(capsys):
     tasks = [(m, lambda mid=m.id: (True, f"{mid} ok")) for m in managers]
     collect_per_package("Removing", "Removed", tasks, ctx=ctx)  # type: ignore[arg-type]
     assert "Removed" not in capsys.readouterr().err
+
+
+# ---------------------------------------------------------------------------
+# Lock-family serialization: SHARED_LOCK_FAMILIES members collapse into one lane,
+# so they never run concurrently and share a command cache (merge_into_lock_lanes
+# and CLIExecutor.run_cache). "brew" and "cask" are one such family.
+# ---------------------------------------------------------------------------
+
+
+def _thread_recorder():
+    """Build a ``(work, threads_by_id)`` pair recording each manager's thread."""
+    threads_by_id: dict = {}
+    lock = threading.Lock()
+
+    def work(manager):
+        time.sleep(0.01)  # Overlap lanes so distinct ones land on distinct threads.
+        with lock:
+            threads_by_id.setdefault(manager.id, []).append(threading.current_thread())
+        return manager.id, {}
+
+    return work, threads_by_id
+
+
+def test_lock_family_members_share_one_lane_when_mutating():
+    """brew and cask (one family) run on a single worker; an outsider gets its own."""
+    ctx = FakeContext(jobs=4)
+    managers = [FakeManager("brew"), FakeManager("cask"), FakeManager("gem")]
+    work, threads_by_id = _thread_recorder()
+    collect_from_managers(
+        "Syncing",
+        "Synced",
+        managers,  # type: ignore[arg-type]
+        work,
+        report_state=True,
+        ctx=ctx,  # type: ignore[arg-type]
+    )
+    # Each manager still ran exactly once.
+    assert {mid: len(threads) for mid, threads in threads_by_id.items()} == {
+        "brew": 1,
+        "cask": 1,
+        "gem": 1,
+    }
+    # brew and cask shared a worker (same lane); gem ran on a different one.
+    assert threads_by_id["brew"] == threads_by_id["cask"]
+    assert threads_by_id["gem"] != threads_by_id["brew"]
+
+
+def test_lock_family_not_serialized_for_reads():
+    """Reads take no backend lock, so family members keep separate lanes and threads."""
+    ctx = FakeContext(jobs=4)
+    managers = [FakeManager("brew"), FakeManager("cask"), FakeManager("gem")]
+    work, threads_by_id = _thread_recorder()
+    # report_state defaults to False: the read path keeps one lane per manager.
+    collect_from_managers(
+        "Listing",
+        "Listed",
+        managers,  # type: ignore[arg-type]
+        work,
+        ctx=ctx,  # type: ignore[arg-type]
+    )
+    threads = [recorded[0] for recorded in threads_by_id.values()]
+    assert len(set(threads)) == 3
+
+
+def test_lock_family_members_share_one_lane_in_collect_per_package():
+    """A family's tasks serialize across its managers in the per-package fan-out too."""
+    ctx = FakeContext(jobs=4)
+    threads_by_id: dict = {}
+    lock = threading.Lock()
+
+    def make_task(manager_id):
+        def task():
+            time.sleep(0.01)
+            with lock:
+                threads_by_id.setdefault(manager_id, []).append(
+                    threading.current_thread()
+                )
+            return True, f"{manager_id} ok"
+
+        return task
+
+    tasks = [
+        (FakeManager("brew"), make_task("brew")),
+        (FakeManager("cask"), make_task("cask")),
+        (FakeManager("gem"), make_task("gem")),
+    ]
+    collect_per_package("Removing", "Removed", tasks, ctx=ctx)  # type: ignore[arg-type]
+    assert threads_by_id["brew"] == threads_by_id["cask"]
+    assert threads_by_id["gem"] != threads_by_id["brew"]
+
+
+def test_lock_family_lane_shares_a_run_cache():
+    """A multi-manager family lane injects one shared run_cache, cleared afterwards."""
+    ctx = FakeContext(jobs=4)
+    brew, cask, gem = FakeManager("brew"), FakeManager("cask"), FakeManager("gem")
+    seen_caches: dict = {}
+
+    def work(manager):
+        seen_caches[manager.id] = manager.run_cache
+        return manager.id, {}
+
+    collect_from_managers(
+        "Syncing",
+        "Synced",
+        [brew, cask, gem],  # type: ignore[arg-type]
+        work,
+        report_state=True,
+        ctx=ctx,  # type: ignore[arg-type]
+    )
+    # brew and cask saw the very same cache; the solo gem lane saw none.
+    assert seen_caches["brew"] is seen_caches["cask"]
+    assert seen_caches["brew"] is not None
+    assert seen_caches["gem"] is None
+    # The cache is torn down once the lane completes.
+    assert brew.run_cache is None
+    assert cask.run_cache is None
 
 
 # ---------------------------------------------------------------------------

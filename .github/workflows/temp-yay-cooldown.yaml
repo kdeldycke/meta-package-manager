@@ -106,6 +106,8 @@ jobs:
                       subprocess.run(
                           ["sudo", "pacman", "--remove", "--nosave", "--noconfirm", p]
                       )
+              # Clear yay's build/clone cache so each case is a true first-ever clone.
+              subprocess.run(["rm", "-rf", str(home / ".cache" / "yay")])
 
 
           def run_case(name: str, env: dict[str, str]) -> None:
@@ -117,32 +119,32 @@ jobs:
               print(f"{name}: blocked={not installed(pkg)} | trace: {trace!r}", flush=True)
 
 
-          # C1: simple overlay, no config.json.
-          ov1 = home / "c1"
-          (ov1 / "yay").mkdir(parents=True, exist_ok=True)
-          (ov1 / "yay" / "init.lua").write_text(SIMPLE, encoding="UTF-8")
-          run_case(
-              "C1 simple, no config.json",
-              {**os.environ, "XDG_CONFIG_HOME": str(ov1), "MPM_COOLDOWN_EPOCH": cutoff},
-          )
+          def mpm_overlay_env() -> dict[str, str]:
+              manager = Yay()
+              manager.cooldown = timedelta(days=365)
+              env = {**os.environ, **manager.cooldown_env()}
+              init = Path(env["XDG_CONFIG_HOME"]) / "yay" / "init.lua"
+              init.write_text(init.read_text() + DIAG, encoding="UTF-8")
+              return env
 
-          # C2: simple overlay + config.json.
-          ov2 = home / "c2"
-          (ov2 / "yay").mkdir(parents=True, exist_ok=True)
-          (ov2 / "yay" / "init.lua").write_text(SIMPLE, encoding="UTF-8")
-          (ov2 / "yay" / "config.json").write_text("{}\n", encoding="UTF-8")
-          run_case(
-              "C2 simple + config.json",
-              {**os.environ, "XDG_CONFIG_HOME": str(ov2), "MPM_COOLDOWN_EPOCH": cutoff},
-          )
+          def simple_env(name: str, with_config: bool) -> dict[str, str]:
+              ov = home / name
+              (ov / "yay").mkdir(parents=True, exist_ok=True)
+              (ov / "yay" / "init.lua").write_text(SIMPLE, encoding="UTF-8")
+              if with_config:
+                  (ov / "yay" / "config.json").write_text("{}\n", encoding="UTF-8")
+              return {
+                  **os.environ,
+                  "XDG_CONFIG_HOME": str(ov),
+                  "MPM_COOLDOWN_EPOCH": cutoff,
+              }
 
-          # C3: mpm's real overlay + appended diag hook.
-          manager = Yay()
-          manager.cooldown = timedelta(days=365)
-          env3 = {**os.environ, **manager.cooldown_env()}
-          init3 = Path(env3["XDG_CONFIG_HOME"]) / "yay" / "init.lua"
-          init3.write_text(init3.read_text() + DIAG, encoding="UTF-8")
-          run_case("C3 mpm real overlay", env3)
+          # A: mpm's real overlay, true first-ever clone (the scenario that failed).
+          run_case("A mpm real overlay (true cold)", mpm_overlay_env())
+          # B: simple overlay, true first-ever clone (control).
+          run_case("B simple overlay (true cold)", simple_env("b", with_config=False))
+          # C: mpm's real overlay again, true cold (reproducibility).
+          run_case("C mpm real overlay (true cold, repeat)", mpm_overlay_env())
 
           reset_cold()
           print("\nCOLD BISECTION COMPLETE", flush=True)
